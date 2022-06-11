@@ -8,8 +8,8 @@ describe("elimination player", () => {
         describe("player has a non-zero number of lives", () => {
             it("should decrement their lives by 1", () => {
                 player = new EliminationPlayer(
-                    "miyeon#7489",
                     "12345",
+                    "guildID",
                     "someurl",
                     5
                 );
@@ -21,8 +21,8 @@ describe("elimination player", () => {
         describe("player has zero lives", () => {
             it("should not change their number of lives", () => {
                 player = new EliminationPlayer(
-                    "miyeon#7489",
                     "12345",
+                    "guildID",
                     "someurl",
                     0
                 );
@@ -36,8 +36,8 @@ describe("elimination player", () => {
         describe("the player has non-zero lives", () => {
             it("should return false", () => {
                 player = new EliminationPlayer(
-                    "miyeon#7489",
                     "12345",
+                    "guildID",
                     "someurl",
                     5
                 );
@@ -48,8 +48,8 @@ describe("elimination player", () => {
         describe("the player has zero lives", () => {
             it("should return true", () => {
                 player = new EliminationPlayer(
-                    "miyeon#7489",
                     "12345",
+                    "guildID",
                     "someurl",
                     0
                 );

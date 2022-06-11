@@ -5,7 +5,7 @@ export default class Team extends Player {
     private players: { [userID: string]: Player };
 
     constructor(name: string, player: Player) {
-        super(name, name, null, 0);
+        super(name, null, null, 0);
         this.players = {};
         this.players[player.id] = player;
     }
@@ -20,7 +20,7 @@ export default class Team extends Player {
 
     /** @returns the name of the team */
     getName(): string {
-        return this.name;
+        return this.id;
     }
 
     /**

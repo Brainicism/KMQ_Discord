@@ -10,7 +10,7 @@ describe("scoreboard", () => {
     let scoreboard: Scoreboard;
     beforeEach(() => {
         scoreboard = new Scoreboard();
-        userIDs.map((x) => scoreboard.addPlayer(new Player("a", x, null, 0)));
+        userIDs.map((x) => scoreboard.addPlayer(new Player(x, null, null, 0)));
     });
 
     let guildPreference: GuildPreference;
@@ -141,9 +141,9 @@ describe("scoreboard", () => {
         describe("position changes", () => {
             it("should return the correct ranking of every player", () => {
                 const players = {
-                    ohmiID: new Player("", "ohmiID", "", 2),
-                    12345: new Player("", "12345", "", 2),
-                    jisooID: new Player("", "jisooID", "", 3),
+                    ohmiID: new Player("ohmiID", "guildID", "", 2),
+                    12345: new Player("12345", "guildID", "", 2),
+                    jisooID: new Player("jisooID", "guildID", "", 3),
                 };
 
                 const sb = new Scoreboard();
@@ -157,7 +157,7 @@ describe("scoreboard", () => {
                     [players["ohmiID"].getScore()]: 1,
                 });
 
-                const newPlayer = new Player("", "1234", "", 1);
+                const newPlayer = new Player("1234", "guildID", "", 1);
                 sb.addPlayer(newPlayer);
                 players["1234"] = newPlayer;
 
@@ -171,9 +171,9 @@ describe("scoreboard", () => {
 
             it("should return the same ranking when all players have the same score", () => {
                 const players = {
-                    ohmiID: new Player("", "ohmiID", "", 2),
-                    12345: new Player("", "12345", "", 2),
-                    jisooID: new Player("", "jisooID", "", 2),
+                    ohmiID: new Player("ohmiID", "guildID", "", 2),
+                    12345: new Player("12345", "guildID", "", 2),
+                    jisooID: new Player("jisooID", "guildID", "", 2),
                 };
 
                 const sb = new Scoreboard();
@@ -186,9 +186,9 @@ describe("scoreboard", () => {
 
             it("should return different rankings when all players have different scores", () => {
                 const players = {
-                    ohmiID: new Player("", "ohmiID", "", 1),
-                    12345: new Player("", "12345", "", 2),
-                    jisooID: new Player("", "jisooID", "", 3),
+                    ohmiID: new Player("ohmiID", "guildID", "", 1),
+                    12345: new Player("12345", "guildID", "", 2),
+                    jisooID: new Player("jisooID", "guildID", "", 3),
                 };
 
                 const sb = new Scoreboard();
@@ -209,8 +209,8 @@ describe("scoreboard", () => {
             describe("player moved ahead in ranking", () => {
                 it("should show the player has gained ranking", () => {
                     const winningPlayer = new Player(
-                        "poggers",
                         "ohmi",
+                        "guildID",
                         null,
                         0
                     );
@@ -232,8 +232,8 @@ describe("scoreboard", () => {
             describe("player was passed in ranking", () => {
                 it("should show the player has lost ranking", () => {
                     const losingPlayer = new Player(
-                        "poggers",
                         "12345",
+                        "guildID",
                         null,
                         0
                     );
@@ -254,7 +254,7 @@ describe("scoreboard", () => {
 
             describe("player didn't change position in ranking", () => {
                 it("should not show any ranking change", () => {
-                    const samePlayer = new Player("poggers", "jisoo", null, 0);
+                    const samePlayer = new Player("jisoo", "guildID", null, 0);
                     samePlayer.setPreviousRanking(
                         previousRanking.indexOf("jisoo")
                     );
@@ -272,8 +272,8 @@ describe("scoreboard", () => {
             describe("the game has ended", () => {
                 it("should not show any ranking change, even if there was one", () => {
                     const winningPlayer = new Player(
-                        "poggers",
                         "ohmi",
+                        "guildID",
                         null,
                         0
                     );

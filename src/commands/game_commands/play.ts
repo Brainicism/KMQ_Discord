@@ -45,18 +45,14 @@ const logger = new IPCLogger("play");
  * @param textChannelName - The name of the text channel to send the message to
  * @param voiceChannelName - The name of the voice channel to join
  * @param messageContext - The original message that triggered the command
- * @param participants - The list of participants
+ * @param participantIDs - The list of participants
  * @param guildPreference - The guild's game preferences
  */
 export async function sendBeginGameSessionMessage(
     textChannelName: string,
     voiceChannelName: string,
     messageContext: MessageContext,
-    participants: Array<{
-        id: string;
-        username: string;
-        discriminator: string;
-    }>,
+    participantIDs: Array<string>,
     guildPreference: GuildPreference
 ): Promise<void> {
     const guildID = messageContext.guildID;
@@ -66,18 +62,20 @@ export async function sendBeginGameSessionMessage(
     );
 
     const bonusUsers = await activeBonusUsers();
-    const bonusUserParticipants = participants.filter((x) =>
-        bonusUsers.has(x.id)
+    const bonusUserParticipantIDs = participantIDs.filter((x) =>
+        bonusUsers.has(x)
     );
 
-    const isBonus = bonusUserParticipants.length > 0;
+    const isBonus = bonusUserParticipantIDs.length > 0;
 
     if (isBonus) {
-        let bonusUserTags = bonusUserParticipants.map((x) => getMention(x.id));
+        let bonusUserMentions = bonusUserParticipantIDs.map((x) =>
+            getMention(x)
+        );
 
-        if (bonusUserTags.length > 10) {
-            bonusUserTags = bonusUserTags.slice(0, 10);
-            bonusUserTags.push(
+        if (bonusUserMentions.length > 10) {
+            bonusUserMentions = bonusUserMentions.slice(0, 10);
+            bonusUserMentions.push(
                 LocalizationManager.localizer.translate(
                     guildID,
                     "misc.andManyOthers"
@@ -85,7 +83,7 @@ export async function sendBeginGameSessionMessage(
             );
         }
 
-        gameInstructions += `\n\n${bonusUserTags.join(", ")}`;
+        gameInstructions += `\n\n${bonusUserMentions.join(", ")} `;
         gameInstructions += LocalizationManager.localizer.translate(
             guildID,
             "command.play.exp.doubleExpForVoting",
@@ -507,7 +505,7 @@ export default class PlayCommand implements BaseCommand {
                 textChannel.name,
                 voiceChannel.name,
                 messageContext,
-                getCurrentVoiceMembers(voiceChannel.id),
+                getCurrentVoiceMembers(voiceChannel.id).map((x) => x.id),
                 guildPreference
             );
 
