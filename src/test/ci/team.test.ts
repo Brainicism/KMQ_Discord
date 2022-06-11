@@ -9,9 +9,14 @@ describe("team", () => {
     let firstOnLeaderboardPlayer: Player;
 
     beforeEach(() => {
-        goodPlayer = new Player("ohmi", "12345", "ohmipic", 0);
-        subparPlayer = new Player("Cool", "12", "url", 0);
-        firstOnLeaderboardPlayer = new Player("kpop", "121212", "kpop_pfp", 0);
+        goodPlayer = new Player("12345", "guildID", "ohmipic", 0);
+        subparPlayer = new Player("12", "guildID", "url", 0);
+        firstOnLeaderboardPlayer = new Player(
+            "121212",
+            "guildID",
+            "kpop_pfp",
+            0
+        );
         team = new Team("kmq", goodPlayer);
     });
 

@@ -373,7 +373,7 @@ export default class GameSession extends Session {
                         .getPlayers()
                         .sort((a, b) => b.getScore() - a.getScore())
                         .map((x) => ({
-                            name: x.name,
+                            name: x.getName(),
                             id: x.id,
                             score: x.getDisplayedScore(),
                         }))
@@ -696,6 +696,7 @@ export default class GameSession extends Session {
                 this.gameType === GameType.ELIMINATION
                     ? EliminationPlayer.fromUserID(
                           userID,
+                          this.guildID,
                           (
                               this.scoreboard as EliminationScoreboard
                           ).getLivesOfWeakestPlayer(),
@@ -704,6 +705,7 @@ export default class GameSession extends Session {
                       )
                     : Player.fromUserID(
                           userID,
+                          this.guildID,
                           0,
                           await isFirstGameOfDay(userID),
                           await isUserPremium(userID)
@@ -746,6 +748,7 @@ export default class GameSession extends Session {
                         this.gameType === GameType.ELIMINATION
                             ? EliminationPlayer.fromUserID(
                                   player,
+                                  this.guildID,
                                   (this.scoreboard as EliminationScoreboard)
                                       .startingLives,
                                   firstGameOfDay,
@@ -753,6 +756,7 @@ export default class GameSession extends Session {
                               )
                             : Player.fromUserID(
                                   player,
+                                  this.guildID,
                                   0,
                                   firstGameOfDay,
                                   premium

@@ -1,11 +1,11 @@
 import { ELIMINATION_DEFAULT_LIVES } from "../constants";
-import { getUserTag } from "../helpers/utils";
 import Player from "./player";
 import State from "../state";
 
 export default class EliminationPlayer extends Player {
     static fromUserID(
         userID: string,
+        guildID: string,
         score = ELIMINATION_DEFAULT_LIVES,
         firstGameOfDay = false,
         premium = false
@@ -13,8 +13,8 @@ export default class EliminationPlayer extends Player {
         const user = State.client.users.get(userID);
 
         return new EliminationPlayer(
-            getUserTag(user),
             user.id,
+            guildID,
             user.avatarURL,
             score,
             firstGameOfDay,

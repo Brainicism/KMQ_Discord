@@ -141,7 +141,7 @@ export default class TeamScoreboard extends Scoreboard {
         team.removePlayer(userID);
         if (team.getNumPlayers() === 0) {
             this.firstPlace = this.firstPlace.filter((t: Team) => t !== team);
-            delete this.players[team.name];
+            delete this.players[team.getName()];
             // If the removed team was the only team in first, first place is now second place
             if (this.firstPlace.length === 0) {
                 const highestScore = Math.max(
@@ -174,7 +174,7 @@ export default class TeamScoreboard extends Scoreboard {
      */
     getPlayerExpGain(userID: string): number {
         if (
-            this.isTeamFirstPlace(this.getTeamOfPlayer(userID).name) &&
+            this.isTeamFirstPlace(this.getTeamOfPlayer(userID).getName()) &&
             Object.keys(this.getTeams()).length > 1 &&
             this.firstPlace.length === 1
         ) {
@@ -202,7 +202,7 @@ export default class TeamScoreboard extends Scoreboard {
      * @returns the player's tag
      */
     getPlayerName(userID: string): string {
-        return this.getPlayer(userID).name;
+        return this.getPlayer(userID).getName();
     }
 
     /**

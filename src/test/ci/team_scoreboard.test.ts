@@ -10,8 +10,8 @@ const SECOND_TEAM_NAME = "not kmqer";
 
 const USER_IDS = ["12345", "23456", "252525", "1000000"];
 
-const USERNAME = null;
 const AVATAR_URL = null;
+const GUILD_ID = null;
 
 describe("team scoreboard", () => {
     let scoreboard: TeamScoreboard;
@@ -21,18 +21,13 @@ describe("team scoreboard", () => {
         scoreboard = new TeamScoreboard();
         firstTeam = scoreboard.addTeam(
             FIRST_TEAM_NAME,
-            new Player("user", USER_IDS[0], AVATAR_URL, 0)
+            new Player(USER_IDS[0], GUILD_ID, AVATAR_URL, 0)
         );
     });
 
     describe("add a team", () => {
         it("should add the team to the scoreboard", () => {
-            const player = new Player(
-                "second_user",
-                USER_IDS[1],
-                AVATAR_URL,
-                0
-            );
+            const player = new Player(USER_IDS[1], GUILD_ID, AVATAR_URL, 0);
 
             assert.strictEqual(scoreboard.hasTeam(SECOND_TEAM_NAME), false);
             const secondTeam = scoreboard.addTeam(SECOND_TEAM_NAME, player);
@@ -56,12 +51,7 @@ describe("team scoreboard", () => {
             );
             assert.strictEqual(scoreboard.getTeamOfPlayer(USER_IDS[1]), null);
 
-            const player = new Player(
-                "second_user",
-                USER_IDS[1],
-                AVATAR_URL,
-                0
-            );
+            const player = new Player(USER_IDS[1], GUILD_ID, AVATAR_URL, 0);
 
             const secondTeam = scoreboard.addTeam(SECOND_TEAM_NAME, player);
             assert.deepStrictEqual(
@@ -73,23 +63,18 @@ describe("team scoreboard", () => {
 
     describe("team deletion", () => {
         it("should delete a team when it has no players in it", () => {
-            const player = new Player(
-                "second_user",
-                USER_IDS[1],
-                AVATAR_URL,
-                0
-            );
+            const player = new Player(USER_IDS[1], GUILD_ID, AVATAR_URL, 0);
 
             const secondTeam = scoreboard.addTeam(SECOND_TEAM_NAME, player);
             const anotherPlayer = new Player(
-                USERNAME,
                 USER_IDS[2],
+                GUILD_ID,
                 AVATAR_URL,
                 0
             );
 
             scoreboard.addTeamPlayer(SECOND_TEAM_NAME, anotherPlayer);
-            const bestPlayer = new Player(USERNAME, USER_IDS[3], AVATAR_URL, 0);
+            const bestPlayer = new Player(USER_IDS[3], GUILD_ID, AVATAR_URL, 0);
             scoreboard.addTeamPlayer(FIRST_TEAM_NAME, bestPlayer);
             scoreboard.removePlayer(bestPlayer.id);
             scoreboard.removePlayer(player.id);
@@ -147,7 +132,7 @@ describe("team scoreboard", () => {
             beforeEach(() => {
                 scoreboard.addTeamPlayer(
                     FIRST_TEAM_NAME,
-                    new Player("second_user", USER_IDS[1], AVATAR_URL, 0)
+                    new Player(USER_IDS[1], GUILD_ID, AVATAR_URL, 0)
                 );
             });
 
@@ -226,17 +211,17 @@ describe("team scoreboard", () => {
             beforeEach(() => {
                 scoreboard.addTeamPlayer(
                     FIRST_TEAM_NAME,
-                    new Player("second_user", USER_IDS[1], AVATAR_URL, 0)
+                    new Player(USER_IDS[1], GUILD_ID, AVATAR_URL, 0)
                 );
 
                 secondTeam = scoreboard.addTeam(
                     SECOND_TEAM_NAME,
-                    new Player("jennie", USER_IDS[2], AVATAR_URL, 0)
+                    new Player(USER_IDS[2], GUILD_ID, AVATAR_URL, 0)
                 );
 
                 scoreboard.addTeamPlayer(
                     SECOND_TEAM_NAME,
-                    new Player("g-dragon", USER_IDS[3], AVATAR_URL, 0)
+                    new Player(USER_IDS[3], GUILD_ID, AVATAR_URL, 0)
                 );
             });
 
@@ -339,17 +324,17 @@ describe("team scoreboard", () => {
             beforeEach(() => {
                 scoreboard.addTeamPlayer(
                     FIRST_TEAM_NAME,
-                    new Player("sakura", USER_IDS[1], AVATAR_URL, 0)
+                    new Player(USER_IDS[1], GUILD_ID, AVATAR_URL, 0)
                 );
 
                 secondTeam = scoreboard.addTeam(
                     SECOND_TEAM_NAME,
-                    new Player("jennie", USER_IDS[2], AVATAR_URL, 0)
+                    new Player(USER_IDS[2], GUILD_ID, AVATAR_URL, 0)
                 );
 
                 scoreboard.addTeamPlayer(
                     SECOND_TEAM_NAME,
-                    new Player("g-dragon", USER_IDS[3], AVATAR_URL, 0)
+                    new Player(USER_IDS[3], GUILD_ID, AVATAR_URL, 0)
                 );
 
                 scoreboard.update([
@@ -388,17 +373,17 @@ describe("team scoreboard", () => {
         beforeEach(() => {
             scoreboard.addTeamPlayer(
                 FIRST_TEAM_NAME,
-                new Player("sakura", USER_IDS[1], AVATAR_URL, 0)
+                new Player(USER_IDS[1], GUILD_ID, AVATAR_URL, 0)
             );
 
             secondTeam = scoreboard.addTeam(
                 SECOND_TEAM_NAME,
-                new Player("jennie", USER_IDS[2], AVATAR_URL, 0)
+                new Player(USER_IDS[2], GUILD_ID, AVATAR_URL, 0)
             );
 
             scoreboard.addTeamPlayer(
                 SECOND_TEAM_NAME,
-                new Player("g-dragon", USER_IDS[3], AVATAR_URL, 0)
+                new Player(USER_IDS[3], GUILD_ID, AVATAR_URL, 0)
             );
         });
 
@@ -415,7 +400,7 @@ describe("team scoreboard", () => {
                 ]);
                 assert.strictEqual(scoreboard.getWinners().length, 1);
                 assert.strictEqual(
-                    scoreboard.getWinners()[0].name,
+                    scoreboard.getWinners()[0].getName(),
                     FIRST_TEAM_NAME
                 );
 
@@ -437,7 +422,7 @@ describe("team scoreboard", () => {
                 ]);
                 assert.strictEqual(scoreboard.getWinners().length, 1);
                 assert.strictEqual(
-                    scoreboard.getWinners()[0].name,
+                    scoreboard.getWinners()[0].getName(),
                     FIRST_TEAM_NAME
                 );
 
@@ -512,12 +497,12 @@ describe("team scoreboard", () => {
             guildPreference.setGoal(5);
             scoreboard.addTeam(
                 FIRST_TEAM_NAME,
-                new Player("user", USER_IDS[0], AVATAR_URL, 0)
+                new Player(USER_IDS[0], GUILD_ID, AVATAR_URL, 0)
             );
 
             scoreboard.addTeam(
                 SECOND_TEAM_NAME,
-                new Player("second_user", USER_IDS[1], AVATAR_URL, 0)
+                new Player(USER_IDS[1], GUILD_ID, AVATAR_URL, 0)
             );
         });
 

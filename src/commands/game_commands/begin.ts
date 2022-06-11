@@ -64,17 +64,15 @@ export default class BeginCommand implements BaseCommand {
 
         if (!gameSession.sessionInitialized) {
             const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
-            const participants = teamScoreboard.getPlayers().map((player) => ({
-                id: player.id,
-                username: player.name.split("#")[0],
-                discriminator: player.name.split("#")[1],
-            }));
+            const participantIDs = teamScoreboard
+                .getPlayers()
+                .map((player) => player.id);
 
             sendBeginGameSessionMessage(
                 channel.name,
                 getUserVoiceChannel(messageContext).name,
                 messageContext,
-                participants,
+                participantIDs,
                 guildPreference
             );
 

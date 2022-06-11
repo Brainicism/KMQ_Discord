@@ -1,5 +1,5 @@
 import { SCOREBOARD_FIELD_CUTOFF } from "../constants";
-import { bold, friendlyFormattedNumber, getMention } from "../helpers/utils";
+import { bold, friendlyFormattedNumber } from "../helpers/utils";
 import LocalizationManager from "../helpers/localization_manager";
 import type GuildPreference from "./guild_preference";
 import type Player from "./player";
@@ -39,12 +39,12 @@ export default class Scoreboard {
             return LocalizationManager.localizer.translate(
                 guildID,
                 "misc.inGame.winMessage",
-                { playerName: this.firstPlace[0].name }
+                { playerName: this.firstPlace[0].getName() }
             );
         }
 
         for (let i = 0; i < this.firstPlace.length; i++) {
-            winnerStr += this.firstPlace[i].name;
+            winnerStr += this.firstPlace[i].getName();
             if (i === this.firstPlace.length - 1) {
                 // Last entry -- append just the username
                 winnerStr += " ";
@@ -246,26 +246,6 @@ export default class Scoreboard {
             this.firstPlace.length > 0 &&
             this.firstPlace[0].getScore() >= guildPreference.gameOptions.goal
         );
-    }
-
-    /** @returns a list of tags of the players participating in the game */
-    getPlayerNames(): Array<string> {
-        return Object.values(this.players).map((player) => player.name);
-    }
-
-    /** @returns a list of clickable mentions of the players participating in the game */
-    getPlayerMentions(): Array<string> {
-        return Object.values(this.players).map((player) =>
-            getMention(player.id)
-        );
-    }
-
-    /**
-     *  @param userID - The Discord user ID of the Player
-     *  @returns the player's tag
-     * */
-    getPlayerName(userID: string): string {
-        return this.players[userID].name;
     }
 
     /**

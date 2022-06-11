@@ -127,6 +127,7 @@ export default class JoinCommand implements BaseCommand {
                 teamName,
                 Player.fromUserID(
                     message.author.id,
+                    message.guildID,
                     0,
                     await isFirstGameOfDay(message.author.id),
                     await isUserPremium(message.author.id)
@@ -193,6 +194,7 @@ export default class JoinCommand implements BaseCommand {
                 team.id,
                 Player.fromUserID(
                     message.author.id,
+                    message.guildID,
                     0,
                     await isFirstGameOfDay(message.author.id),
                     await isUserPremium(message.author.id)
@@ -205,7 +207,7 @@ export default class JoinCommand implements BaseCommand {
                     "command.join.playerJoinedTeam.title",
                     {
                         joiningUser: getUserTag(message.author),
-                        teamName: team.name,
+                        teamName: team.getName(),
                     }
                 ),
                 description: !gameSession.sessionInitialized
@@ -219,16 +221,16 @@ export default class JoinCommand implements BaseCommand {
                           "command.join.playerJoinedTeam.afterGameStart.description",
                           {
                               mentionedUser: getMention(message.author.id),
-                              teamName: bold(team.name),
+                              teamName: bold(team.getName()),
                           }
                       ),
                 thumbnailUrl: KmqImages.LISTENING,
             });
 
             logger.info(
-                `${getDebugLogHeader(message)} | Successfully joined team '${
-                    team.name
-                }'.`
+                `${getDebugLogHeader(
+                    message
+                )} | Successfully joined team '${team.getName()}'.`
             );
         }
     }
