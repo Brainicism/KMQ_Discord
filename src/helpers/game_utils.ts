@@ -103,7 +103,6 @@ export async function userBonusIsActive(userId: string): Promise<boolean> {
 }
 
 /**
- * @param userId - The user ID
  * @returns whether the player has bonus active
  */
 export async function activeBonusUsers(): Promise<Set<string>> {

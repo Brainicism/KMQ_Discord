@@ -61,6 +61,19 @@ export function strikethrough(text: string): string {
 }
 
 /**
+ * @param text - Text to escape
+ * @returns text with formatting-disrupting characters escaped
+ */
+export function escapedFormatting(text: string): string {
+    const SPECIAL_CHARACTERS = ["\\", "*", "`", "_", "~", "|"];
+    for (const char of SPECIAL_CHARACTERS) {
+        text = text.replaceAll(char, `\\${char}`);
+    }
+
+    return text;
+}
+
+/**
  * Chunks in an array in subarrays of specified size
  * @param array - The input array
  * @param chunkSize - The size of each chunked array

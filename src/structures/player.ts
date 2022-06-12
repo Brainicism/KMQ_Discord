@@ -1,5 +1,5 @@
 import { ExpBonusModifierValues } from "../constants";
-import { bold, getMention } from "../helpers/utils";
+import { bold, escapedFormatting, getMention } from "../helpers/utils";
 import ExpBonusModifier from "../enums/exp_bonus_modifier";
 import State from "../state";
 
@@ -82,7 +82,7 @@ export default class Player {
         wonRound: boolean,
         mention: boolean
     ): string {
-        let name = this.getName();
+        let name = escapedFormatting(this.getName());
         if (mention && this.inVC) {
             name = getMention(this.id);
         }
@@ -103,7 +103,6 @@ export default class Player {
     }
 
     /**
-     * @param guildID - The guild ID
      * @returns the player's nickname in the given guild
      */
     getName(): string {

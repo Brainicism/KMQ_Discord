@@ -39,7 +39,13 @@ export default class Scoreboard {
             return LocalizationManager.localizer.translate(
                 guildID,
                 "misc.inGame.winMessage",
-                { playerName: this.firstPlace[0].getName() }
+                {
+                    playerName: this.firstPlace[0].getDisplayedName(
+                        false,
+                        false,
+                        false
+                    ),
+                }
             );
         }
 
