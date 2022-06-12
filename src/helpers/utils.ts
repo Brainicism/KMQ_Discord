@@ -65,7 +65,7 @@ export function strikethrough(text: string): string {
  * @returns text with formatting-disrupting characters escaped
  */
 export function escapedFormatting(text: string): string {
-    const SPECIAL_CHARACTERS = ["\\", "*", "`", "_", "~", "|"];
+    const SPECIAL_CHARACTERS = ["\\", "*", "`", "_", "~", "|", "<", ">"];
     for (const char of SPECIAL_CHARACTERS) {
         text = text.replaceAll(char, `\\${char}`);
     }
