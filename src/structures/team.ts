@@ -1,4 +1,4 @@
-import { bold, chooseRandom } from "../helpers/utils";
+import { bold, chooseRandom, escapedFormatting } from "../helpers/utils";
 import Player from "./player";
 
 export default class Team extends Player {
@@ -34,7 +34,7 @@ export default class Team extends Player {
         _wonRound: boolean,
         _mention: boolean
     ): string {
-        let name = `Team ${this.getName()}`;
+        let name = `Team ${escapedFormatting(this.getName())}`;
         if (first) {
             name = `🎶 ${bold(name)}`;
         }

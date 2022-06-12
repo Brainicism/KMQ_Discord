@@ -11,6 +11,7 @@ import {
     EMBED_SUCCESS_COLOR,
     KmqImages,
     REVIEW_LINK,
+    ROUND_MAX_SCOREBOARD_PLAYERS,
     VOTE_LINK,
 } from "../constants";
 import { IPCLogger } from "../logger";
@@ -76,7 +77,6 @@ const REQUIRED_VOICE_PERMISSIONS = [
     "voiceSpeak" as const,
 ];
 
-const MAX_SCOREBOARD_PLAYERS = 30;
 const MAX_INTERACTION_RESPONSE_TIME = 3 * 1000;
 
 interface GameMessageMultiLocaleContent {
@@ -736,7 +736,7 @@ export async function sendRoundMessage(
     if (!isListeningSession) {
         if (useLargerScoreboard) {
             fields = scoreboard.getScoreboardEmbedThreeFields(
-                MAX_SCOREBOARD_PLAYERS,
+                ROUND_MAX_SCOREBOARD_PLAYERS,
                 false,
                 true,
                 roundResultIDs
@@ -1374,7 +1374,7 @@ export async function sendEndGameMessage(
 
         if (useLargerScoreboard) {
             fields = gameSession.scoreboard.getScoreboardEmbedThreeFields(
-                MAX_SCOREBOARD_PLAYERS,
+                ROUND_MAX_SCOREBOARD_PLAYERS,
                 gameSession.gameType !== GameType.TEAMS,
                 false
             );
