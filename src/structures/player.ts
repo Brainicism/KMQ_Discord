@@ -82,16 +82,14 @@ export default class Player {
         wonRound: boolean,
         mention: boolean
     ): string {
-        let name = escapedFormatting(this.getName());
+        let name: string;
         if (mention && this.inVC) {
             name = getMention(this.id);
+        } else {
+            name = escapedFormatting(this.getName());
         }
 
         if (wonRound) {
-            if (!mention) {
-                name = bold(name);
-            }
-
             if (first) {
                 name = `🎶 ${name}`;
             } else {
