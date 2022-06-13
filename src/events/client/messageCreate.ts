@@ -22,7 +22,8 @@ function isGuildMessage(
 ): message is GuildTextableMessage {
     return (
         message.channel instanceof Eris.TextChannel ||
-        message.channel instanceof Eris.TextVoiceChannel
+        message.channel instanceof Eris.TextVoiceChannel ||
+        message.channel instanceof Eris.ThreadChannel
     );
 }
 
