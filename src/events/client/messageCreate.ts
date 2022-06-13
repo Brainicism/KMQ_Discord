@@ -20,7 +20,10 @@ const logger = new IPCLogger("messageCreate");
 function isGuildMessage(
     message: Eris.Message
 ): message is GuildTextableMessage {
-    return message.channel instanceof Eris.TextChannel;
+    return (
+        message.channel instanceof Eris.TextChannel ||
+        message.channel instanceof Eris.TextVoiceChannel
+    );
 }
 
 const parseMessage = (message: string): ParsedMessage => {
