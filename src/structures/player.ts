@@ -115,12 +115,18 @@ export default class Player {
         return this.score;
     }
 
-    /** @returns what to display as the score in the scoreboard for the player */
-    getDisplayedScore(): string {
-        const rounded = Number(this.getScore().toFixed(1));
-        return bold(
-            Number.isInteger(rounded) ? rounded.toFixed() : rounded.toFixed(1)
-        );
+    /*
+     * @param boldScore - whether to display the score in bold
+     * @returns what to display as the score in the scoreboard for the player
+     */
+
+    getDisplayedScore(boldScore: boolean = true): string {
+        const roundedScore = Number(this.getScore().toFixed(1));
+        const cutoffScore = Number.isInteger(roundedScore)
+            ? roundedScore.toFixed()
+            : roundedScore.toFixed(1);
+
+        return boldScore ? bold(cutoffScore) : cutoffScore;
     }
 
     /** @returns the player's EXP gain */

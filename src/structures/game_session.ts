@@ -7,7 +7,6 @@ import {
     chunkArray,
     codeLine,
     delay,
-    getMention,
     getOrdinalNum,
     setDifference,
 } from "../helpers/utils";
@@ -434,7 +433,9 @@ export default class GameSession extends Session {
                         this.guildID,
                         "misc.levelUp.entry",
                         {
-                            user: getMention(leveledUpPlayer.userID),
+                            user: this.scoreboard.getPlayerDisplayedName(
+                                leveledUpPlayer.userID
+                            ),
                             startLevel: codeLine(
                                 String(leveledUpPlayer.startLevel)
                             ),

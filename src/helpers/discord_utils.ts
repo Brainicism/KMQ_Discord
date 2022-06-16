@@ -1527,7 +1527,8 @@ export async function sendScoreboardMessage(
         {
             score: String(
                 gameSession.scoreboard.getPlayerDisplayedScore(
-                    message.author.id
+                    message.author.id,
+                    false
                 )
             ),
         }
