@@ -1,5 +1,5 @@
 import { SCOREBOARD_FIELD_CUTOFF } from "../constants";
-import { bold, friendlyFormattedNumber } from "../helpers/utils";
+import { bold, friendlyFormattedNumber, getMention } from "../helpers/utils";
 import LocalizationManager from "../helpers/localization_manager";
 import type GuildPreference from "./guild_preference";
 import type Player from "./player";
@@ -211,11 +211,7 @@ export default class Scoreboard {
      * @returns the score of the player
      */
     getPlayerScore(userID: string): number {
-        if (userID in this.players) {
-            return this.players[userID].getScore();
-        }
-
-        return 0;
+        return this.players[userID]?.getScore() ?? 0;
     }
 
     /**
@@ -224,11 +220,18 @@ export default class Scoreboard {
      * @returns the formatted score of the player
      */
     getPlayerDisplayedScore(userID: string, boldScore: boolean): string {
-        if (userID in this.players) {
-            return this.players[userID].getDisplayedScore(boldScore);
-        }
+        return this.players[userID]?.getDisplayedScore(boldScore) ?? "0";
+    }
 
-        return "0";
+    /**
+     * @param userID - The Discord user ID of the player to check
+     * @returns the formatted name of the player
+     */
+    getPlayerDisplayedName(userID: string): string {
+        return (
+            this.players[userID]?.getDisplayedName(false, false, true) ??
+            getMention(userID)
+        );
     }
 
     /**
@@ -236,11 +239,7 @@ export default class Scoreboard {
      * @returns the exp gained by the player
      */
     getPlayerExpGain(userID: string): number {
-        if (userID in this.players) {
-            return this.players[userID].getExpGain();
-        }
-
-        return 0;
+        return this.players[userID]?.getExpGain() ?? 0;
     }
 
     /**
