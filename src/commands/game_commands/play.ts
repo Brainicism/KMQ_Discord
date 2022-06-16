@@ -7,6 +7,7 @@ import { IPCLogger } from "../../logger";
 import {
     activeBonusUsers,
     areUsersPremium,
+    getKmqCurrentVersion,
     isPowerHour,
     isPremiumRequest,
 } from "../../helpers/game_utils";
@@ -161,6 +162,7 @@ export async function sendBeginGameSessionMessage(
             color: isBonus ? EMBED_SUCCESS_BONUS_COLOR : null,
             thumbnailUrl: KmqImages.HAPPY,
             fields,
+            footerText: getKmqCurrentVersion(),
         },
         false,
         true,
