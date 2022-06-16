@@ -220,11 +220,12 @@ export default class Scoreboard {
 
     /**
      * @param userID - The Discord user ID of the player to check
+     * @param boldScore - whether to display the score in bold
      * @returns the formatted score of the player
      */
-    getPlayerDisplayedScore(userID: string): string {
+    getPlayerDisplayedScore(userID: string, boldScore: boolean): string {
         if (userID in this.players) {
-            return this.players[userID].getDisplayedScore();
+            return this.players[userID].getDisplayedScore(boldScore);
         }
 
         return "0";
