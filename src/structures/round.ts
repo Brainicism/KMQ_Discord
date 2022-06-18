@@ -6,15 +6,18 @@ import type MessageContext from "./message_context";
 import type PlayerRoundResult from "../interfaces/player_round_result";
 import type QueriedSong from "../interfaces/queried_song";
 import type UniqueSongCounter from "../interfaces/unique_song_counter";
+import { Exclude } from "class-transformer";
 
 export default abstract class Round {
     /** The song associated with the round */
     public readonly song: QueriedSong;
 
     /** The potential song aliases */
+    @Exclude()
     public readonly songAliases: string[];
 
     /** The potential artist aliases */
+    @Exclude()
     public readonly artistAliases: string[];
 
     /** Timestamp of the creation of the Round in epoch milliseconds */
@@ -42,6 +45,7 @@ export default abstract class Round {
     public interactionMessage: Eris.Message<Eris.TextableChannel>;
 
     constructor(song: QueriedSong) {
+        if (!song) return;
         this.song = song;
         this.songAliases = State.aliases.song[song.youtubeLink] || [];
         const artistNames = song.artistName.split("+").map((x) => x.trim());

@@ -3,6 +3,8 @@ import * as uuid from "uuid";
 import _ from "lodash";
 import type Eris from "eris";
 
+import { Type } from "class-transformer";
+
 import {
     chunkArray,
     codeLine,
@@ -77,9 +79,11 @@ export default class GameSession extends Session {
     public readonly gameType: GameType;
 
     /** The Scoreboard object keeping track of players and scoring */
+    @Type(() => Scoreboard)
     public readonly scoreboard: Scoreboard;
 
     /** The current GameRound */
+    @Type(() => GameRound)
     public round: GameRound;
 
     /** The number of songs correctly guessed */
@@ -141,8 +145,6 @@ export default class GameSession extends Session {
                 this.scoreboard = new Scoreboard();
                 break;
         }
-
-        this.syncAllVoiceMembers();
     }
 
     // eslint-disable-next-line class-methods-use-this

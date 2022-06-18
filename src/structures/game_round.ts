@@ -140,6 +140,7 @@ export default class GameRound extends Round {
 
     constructor(song: QueriedSong) {
         super(song);
+        if (!song) return;
         this.acceptedSongAnswers = [song.songName, ...this.songAliases];
         if (song.hangulSongName) {
             this.acceptedSongAnswers.push(song.hangulSongName);

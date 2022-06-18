@@ -10,6 +10,7 @@ import Session from "../../structures/session";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import State from "../../state";
 
 const logger = new IPCLogger("options");
 
@@ -28,6 +29,7 @@ export default class OptionsCommand implements BaseCommand {
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
+        await State.loadFromCentralStore();
         const guildPreference = await GuildPreference.getGuildPreference(
             message.guildID
         );

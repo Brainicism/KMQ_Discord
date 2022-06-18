@@ -12,7 +12,8 @@
         "resolveJsonModule": true,
         "esModuleInterop": true,
         "sourceMap": true,
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "experimentalDecorators": true
     },
     "include": [
         "./src/**/*"

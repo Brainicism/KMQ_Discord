@@ -36,6 +36,8 @@ export default class StatsCommand implements BaseCommand {
     });
 
     call = async ({ message, channel }: CommandArgs): Promise<void> => {
+        await State.saveToCentralStore();
+        return;
         const fleetStats = await State.ipc.getStats();
         let gameSessionStats;
         try {

@@ -27,6 +27,7 @@ import pointOfView from "point-of-view";
 import schedule from "node-schedule";
 import storeDailyStats from "./scripts/store-daily-stats";
 import type { Options, Stats } from "eris-fleet";
+import "reflect-metadata";
 
 const logger = getInternalLogger();
 

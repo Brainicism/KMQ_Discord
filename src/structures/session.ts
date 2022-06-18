@@ -1,4 +1,5 @@
 import { IPCLogger } from "../logger";
+import { Exclude, Type } from "class-transformer";
 import { KmqImages, specialFfmpegArgs } from "../constants";
 import {
     areUsersPremium,
@@ -54,6 +55,7 @@ export default abstract class Session {
     public owner: KmqMember;
 
     /** The current active Eris.VoiceConnection */
+    @Exclude()
     public connection: Eris.VoiceConnection;
 
     /** The last time of activity in epoch milliseconds, used to track inactive sessions  */
@@ -74,6 +76,8 @@ export default abstract class Session {
     public isPremium: boolean;
 
     /** The guild preference */
+    @Type(() => GuildPreference)
+    @Exclude()
     protected guildPreference: GuildPreference;
 
     /** The number of Rounds played */
@@ -112,16 +116,18 @@ export default abstract class Session {
         this.songSelector = new SongSelector();
         this.isPremium = isPremium;
 
-        this.guildPreference.reloadSongCallback = async () => {
-            logger.info(
-                `gid: ${this.guildID} | Game options modified, songs reloaded`
-            );
+        if (this.guildPreference) {
+            this.guildPreference.reloadSongCallback = async () => {
+                logger.info(
+                    `gid: ${this.guildID} | Game options modified, songs reloaded`
+                );
 
-            await this.songSelector.reloadSongs(
-                this.guildPreference,
-                this.isPremium
-            );
-        };
+                await this.songSelector.reloadSongs(
+                    this.guildPreference,
+                    this.isPremium
+                );
+            };
+        }
     }
 
     abstract sessionName(): string;

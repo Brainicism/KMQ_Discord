@@ -501,7 +501,7 @@ export default class PlayCommand implements BaseCommand {
         }
 
         State.gameSessions[guildID] = gameSession;
-
+        await gameSession.syncAllVoiceMembers();
         if (gameType !== GameType.TEAMS) {
             await sendBeginGameSessionMessage(
                 textChannel.name,
