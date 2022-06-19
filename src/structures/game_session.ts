@@ -18,6 +18,7 @@ import {
     getUserVoiceChannel,
     sendEndGameMessage,
     sendInfoMessage,
+    sendPaginationedEmbed,
     tryCreateInteractionErrorAcknowledgement,
     tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
@@ -32,7 +33,13 @@ import {
 import State from "../state";
 import dbContext from "../database_context";
 
-import { CUM_EXP_TABLE, KmqImages, SONG_START_DELAY } from "../constants";
+import {
+    CUM_EXP_TABLE,
+    EMBED_FIELDS_PER_PAGE,
+    EMBED_SUCCESS_COLOR,
+    KmqImages,
+    SONG_START_DELAY,
+} from "../constants";
 import { IPCLogger } from "../logger";
 import { calculateTotalRoundExp } from "../commands/game_commands/exp";
 import { getRankNameByLevel } from "../commands/game_commands/profile";
@@ -51,6 +58,7 @@ import Player from "./player";
 import Scoreboard from "./scoreboard";
 import Session from "./session";
 import TeamScoreboard from "./team_scoreboard";
+import type { GuildTextableMessage } from "../types";
 import type GuessResult from "../interfaces/guess_result";
 import type QueriedSong from "../interfaces/queried_song";
 import type Round from "./round";
@@ -815,6 +823,87 @@ export default class GameSession extends Session {
                     );
                 })
         );
+    }
+
+    /**
+     * Sends an embed displaying the scoreboard of the GameSession
+     * @param message - The Message object
+     * @returns the message
+     */
+    sendScoreboardMessage(
+        message: GuildTextableMessage
+    ): Promise<Eris.Message> {
+        const winnersFieldSubsets = chunkArray(
+            this.scoreboard.getScoreboardEmbedSingleColumn(true, true),
+            EMBED_FIELDS_PER_PAGE
+        );
+
+        let footerText = LocalizationManager.localizer.translate(
+            message.guildID,
+            "misc.classic.yourScore",
+            {
+                score: String(
+                    this.scoreboard.getPlayerDisplayedScore(
+                        message.author.id,
+                        false
+                    )
+                ),
+            }
+        );
+
+        if (this.gameType === GameType.ELIMINATION) {
+            const eliminationScoreboard = this
+                .scoreboard as EliminationScoreboard;
+
+            footerText = LocalizationManager.localizer.translate(
+                message.guildID,
+                "misc.elimination.yourLives",
+                {
+                    lives: String(
+                        eliminationScoreboard.getPlayerLives(message.author.id)
+                    ),
+                }
+            );
+        } else if (this.gameType === GameType.TEAMS) {
+            const teamScoreboard = this.scoreboard as TeamScoreboard;
+            footerText = LocalizationManager.localizer.translate(
+                message.guildID,
+                "misc.team.yourTeamScore",
+                {
+                    teamScore: String(
+                        teamScoreboard
+                            .getTeamOfPlayer(message.author.id)
+                            .getScore()
+                    ),
+                }
+            );
+            footerText += "\n";
+            footerText += LocalizationManager.localizer.translate(
+                message.guildID,
+                "misc.team.yourScore",
+                {
+                    score: String(
+                        teamScoreboard.getPlayerScore(message.author.id)
+                    ),
+                }
+            );
+        }
+
+        const embeds: Array<Eris.EmbedOptions> = winnersFieldSubsets.map(
+            (winnersFieldSubset) => ({
+                color: EMBED_SUCCESS_COLOR,
+                title: LocalizationManager.localizer.translate(
+                    message.guildID,
+                    "command.score.scoreboardTitle"
+                ),
+                fields: winnersFieldSubset,
+                footer: {
+                    text: footerText,
+                },
+            })
+        );
+
+        return sendPaginationedEmbed(message, embeds);
     }
 
     /**

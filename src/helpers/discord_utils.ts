@@ -45,18 +45,15 @@ import axios from "axios";
 import dbContext from "../database_context";
 import type { EmbedGenerator, GuildTextableMessage } from "../types";
 import type BookmarkedSong from "../interfaces/bookmarked_song";
-import type EliminationScoreboard from "../structures/elimination_scoreboard";
 import type EmbedPayload from "../interfaces/embed_payload";
 import type GameInfoMessage from "../interfaces/game_info_message";
 import type GameOptions from "../interfaces/game_options";
 import type GameSession from "../structures/game_session";
 import type GuildPreference from "../structures/guild_preference";
 import type Session from "../structures/session";
-import type TeamScoreboard from "../structures/team_scoreboard";
 
 const logger = new IPCLogger("discord_utils");
 
-const EMBED_FIELDS_PER_PAGE = 20;
 const REQUIRED_TEXT_PERMISSIONS = [
     "addReactions" as const,
     "embedLinks" as const,
@@ -1248,82 +1245,6 @@ export async function sendPaginationedEmbed(
         null,
         message.author.id
     );
-}
-
-/**
- * Sends an embed displaying the scoreboard of the GameSession
- * @param message - The Message object
- * @param gameSession - The GameSession
- */
-export async function sendScoreboardMessage(
-    message: GuildTextableMessage,
-    gameSession: GameSession
-): Promise<Eris.Message> {
-    const winnersFieldSubsets = chunkArray(
-        gameSession.scoreboard.getScoreboardEmbedSingleColumn(true, true),
-        EMBED_FIELDS_PER_PAGE
-    );
-
-    let footerText = LocalizationManager.localizer.translate(
-        message.guildID,
-        "misc.classic.yourScore",
-        {
-            score: String(
-                gameSession.scoreboard.getPlayerDisplayedScore(
-                    message.author.id,
-                    false
-                )
-            ),
-        }
-    );
-
-    if (gameSession.gameType === GameType.ELIMINATION) {
-        const eliminationScoreboard =
-            gameSession.scoreboard as EliminationScoreboard;
-
-        footerText = LocalizationManager.localizer.translate(
-            message.guildID,
-            "misc.elimination.yourLives",
-            {
-                lives: String(
-                    eliminationScoreboard.getPlayerLives(message.author.id)
-                ),
-            }
-        );
-    } else if (gameSession.gameType === GameType.TEAMS) {
-        const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
-        footerText = LocalizationManager.localizer.translate(
-            message.guildID,
-            "misc.team.yourTeamScore",
-            {
-                teamScore: String(
-                    teamScoreboard.getTeamOfPlayer(message.author.id).getScore()
-                ),
-            }
-        );
-        footerText += "\n";
-        footerText += LocalizationManager.localizer.translate(
-            message.guildID,
-            "misc.team.yourScore",
-            { score: String(teamScoreboard.getPlayerScore(message.author.id)) }
-        );
-    }
-
-    const embeds: Array<Eris.EmbedOptions> = winnersFieldSubsets.map(
-        (winnersFieldSubset) => ({
-            color: EMBED_SUCCESS_COLOR,
-            title: LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.score.scoreboardTitle"
-            ),
-            fields: winnersFieldSubset,
-            footer: {
-                text: footerText,
-            },
-        })
-    );
-
-    return sendPaginationedEmbed(message, embeds);
 }
 
 /**
