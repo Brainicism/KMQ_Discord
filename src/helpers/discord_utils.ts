@@ -9,8 +9,6 @@ import {
     EMBED_SUCCESS_BONUS_COLOR,
     EMBED_SUCCESS_COLOR,
     KmqImages,
-    REVIEW_LINK,
-    VOTE_LINK,
 } from "../constants";
 import { IPCLogger } from "../logger";
 import {
@@ -48,7 +46,6 @@ import type BookmarkedSong from "../interfaces/bookmarked_song";
 import type EmbedPayload from "../interfaces/embed_payload";
 import type GameInfoMessage from "../interfaces/game_info_message";
 import type GameOptions from "../interfaces/game_options";
-import type GameSession from "../structures/game_session";
 import type GuildPreference from "../structures/guild_preference";
 import type Session from "../structures/session";
 
@@ -1088,115 +1085,6 @@ export async function getGameInfoMessage(
     }
 
     return endGameMessage;
-}
-
-/**
- * Sends an embed displaying the winner of the session as well as the scoreboard
- * @param gameSession - The GameSession that has ended
- */
-export async function sendEndGameMessage(
-    gameSession: GameSession
-): Promise<void> {
-    const footerText = LocalizationManager.localizer.translate(
-        gameSession.guildID,
-        "misc.inGame.songsCorrectlyGuessed",
-        {
-            songCount: `${gameSession.getCorrectGuesses()}/${gameSession.getRoundsPlayed()}`,
-        }
-    );
-
-    if (gameSession.scoreboard.getWinners().length === 0) {
-        await sendInfoMessage(new MessageContext(gameSession.textChannelID), {
-            title: LocalizationManager.localizer.translate(
-                gameSession.guildID,
-                "misc.inGame.noWinners"
-            ),
-            footerText,
-            thumbnailUrl: KmqImages.NOT_IMPRESSED,
-        });
-    } else {
-        const winners = gameSession.scoreboard.getWinners();
-        const useLargerScoreboard =
-            gameSession.scoreboard.shouldUseLargerScoreboard();
-
-        const fields = gameSession.scoreboard.getScoreboardEmbedFields(
-            gameSession.gameType !== GameType.TEAMS,
-            false,
-            gameSession.guildID
-        );
-
-        const endGameMessage = await getGameInfoMessage(gameSession.guildID);
-
-        if (endGameMessage) {
-            fields.push({
-                name: LocalizationManager.localizer.translate(
-                    gameSession.guildID,
-                    endGameMessage.title
-                ),
-                value: endGameMessage.message,
-                inline: false,
-            });
-        }
-
-        await sendInfoMessage(new MessageContext(gameSession.textChannelID), {
-            color:
-                gameSession.gameType !== GameType.TEAMS &&
-                (await userBonusIsActive(winners[0].id))
-                    ? EMBED_SUCCESS_BONUS_COLOR
-                    : EMBED_SUCCESS_COLOR,
-            description: !useLargerScoreboard
-                ? bold(
-                      LocalizationManager.localizer.translate(
-                          gameSession.guildID,
-                          "command.score.scoreboardTitle"
-                      )
-                  )
-                : null,
-            thumbnailUrl: winners[0].getAvatarURL(),
-            title: `🎉 ${gameSession.scoreboard.getWinnerMessage(
-                gameSession.guildID
-            )} 🎉`,
-            fields,
-            footerText,
-            components: [
-                {
-                    type: 1,
-                    components: [
-                        {
-                            style: 5,
-                            url: VOTE_LINK,
-                            type: 2 as const,
-                            emoji: { name: "✅" },
-                            label: LocalizationManager.localizer.translate(
-                                gameSession.guildID,
-                                "misc.interaction.vote"
-                            ),
-                        },
-                        {
-                            style: 5,
-                            url: REVIEW_LINK,
-                            type: 2 as const,
-                            emoji: { name: "📖" },
-                            label: LocalizationManager.localizer.translate(
-                                gameSession.guildID,
-                                "misc.interaction.leaveReview"
-                            ),
-                        },
-                        {
-                            style: 5,
-                            url: "https://discord.gg/RCuzwYV",
-                            type: 2,
-                            emoji: { name: "🎵" },
-                            label: LocalizationManager.localizer.translate(
-                                gameSession.guildID,
-                                "misc.interaction.officialKmqServer"
-                            ),
-                        },
-                    ],
-                },
-            ],
-        });
-    }
 }
 
 /**
