@@ -1,11 +1,18 @@
+import * as uuid from "uuid";
 import { IPCLogger } from "../logger";
 import { KmqImages, specialFfmpegArgs } from "../constants";
 import {
     areUsersPremium,
     ensureVoiceConnection,
+    getLocalizedArtistName,
     getLocalizedSongName,
 } from "../helpers/game_utils";
-import { bold, friendlyFormattedNumber, getMention } from "../helpers/utils";
+import {
+    bold,
+    friendlyFormattedNumber,
+    getMention,
+    underline,
+} from "../helpers/utils";
 import {
     getCurrentVoiceMembers,
     getDebugLogHeader,
@@ -16,8 +23,13 @@ import {
     tryCreateInteractionSuccessAcknowledgement,
     tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
+import { getFact } from "../fact_generator";
 import Eris from "eris";
+import GameRound from "./game_round";
+import GuessModeType from "../enums/option_types/guess_mode_type";
 import GuildPreference from "./guild_preference";
+import ListeningRound from "./listening_round";
+import LocaleType from "../enums/locale_type";
 import LocalizationManager from "../helpers/localization_manager";
 import MessageContext from "./message_context";
 import SeekType from "../enums/option_types/seek_type";
@@ -26,6 +38,7 @@ import State from "../state";
 import dbContext from "../database_context";
 import fs from "fs";
 import type BookmarkedSong from "../interfaces/bookmarked_song";
+import type EmbedPayload from "../interfaces/embed_payload";
 import type GameSession from "./game_session";
 import type GuessResult from "../interfaces/guess_result";
 import type KmqMember from "./kmq_member";
@@ -816,6 +829,156 @@ export default abstract class Session {
     }
 
     /**
+     * Sends a message displaying song/game related information
+     * @param messageContext - An object to pass along relevant parts of Eris.Message
+     * @param fields - The embed fields
+     * @param descriptin - The description
+     * @param embedColor - The embed color
+     * @param shouldReply - Whether it should be a reply
+     * @param timeRemaining - The time remaining
+     * @returns the message
+     */
+    // eslint-disable-next-line @typescript-eslint/member-ordering
+    protected async sendRoundMessage(
+        messageContext: MessageContext,
+        fields: Eris.EmbedField[],
+        description: string,
+        embedColor: number,
+        shouldReply: boolean,
+        timeRemaining?: number
+    ): Promise<Eris.Message<Eris.TextableChannel>> {
+        const fact =
+            Math.random() <= 0.05 ? getFact(messageContext.guildID) : null;
+
+        if (fact) {
+            fields.push({
+                name: underline(
+                    LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "fact.didYouKnow"
+                    )
+                ),
+                value: fact,
+                inline: false,
+            });
+        }
+
+        const locale = State.getGuildLocale(messageContext.guildID);
+
+        const songAndArtist = bold(
+            `"${getLocalizedSongName(
+                this.round.song,
+                locale
+            )}" - ${getLocalizedArtistName(this.round.song, locale)}`
+        );
+
+        const embed: EmbedPayload = {
+            color: embedColor,
+            title: `${songAndArtist} (${this.round.song.publishDate.getFullYear()})`,
+            url: `https://youtu.be/${this.round.song.youtubeLink}`,
+            description,
+            fields,
+        };
+
+        const views = `${friendlyFormattedNumber(
+            this.round.song.views
+        )} ${LocalizationManager.localizer.translate(
+            messageContext.guildID,
+            "misc.views"
+        )}\n`;
+
+        const aliases = this.getAliasFooter(
+            this.guildPreference.gameOptions.guessModeType,
+            locale
+        );
+
+        const duration = this.getDurationFooter(
+            locale,
+            timeRemaining,
+            [views, aliases].every((x) => x.length > 0)
+        );
+
+        const footerText = `${views}${aliases}${duration}`;
+        const thumbnailUrl = `https://img.youtube.com/vi/${this.round.song.youtubeLink}/hqdefault.jpg`;
+        if (this.round instanceof GameRound) {
+            if (
+                this.guildPreference.isMultipleChoiceMode() &&
+                this.round.interactionMessage
+            ) {
+                embed["thumbnail"] = { url: thumbnailUrl };
+                embed["footer"] = { text: footerText };
+                await this.round.interactionMessage.edit({
+                    embeds: [embed as Object],
+                });
+                return this.round.interactionMessage;
+            }
+        }
+
+        if (this.round instanceof ListeningRound) {
+            const buttons: Array<Eris.InteractionButton> = [];
+            this.round.interactionSkipUUID = uuid.v4();
+            buttons.push({
+                type: 2,
+                style: 1,
+                label: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "misc.skip"
+                ),
+                custom_id: this.round.interactionSkipUUID,
+            });
+
+            buttons.push({
+                type: 2,
+                style: 1,
+                label: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "misc.bookmark"
+                ),
+                custom_id: "bookmark",
+            });
+
+            this.round.interactionComponents = [
+                { type: 1, components: buttons },
+            ];
+            embed.components = this.round.interactionComponents;
+        }
+
+        embed.thumbnailUrl = thumbnailUrl;
+        embed.footerText = footerText;
+        return sendInfoMessage(messageContext, embed, shouldReply, false);
+    }
+
+    // eslint-disable-next-line class-methods-use-this
+    private getDurationFooter(
+        locale: LocaleType,
+        timeRemaining: number,
+        nonEmptyFooter: boolean
+    ): string {
+        if (!timeRemaining) {
+            return "";
+        }
+
+        let durationText = "";
+        if (nonEmptyFooter) {
+            durationText += "\n";
+        }
+
+        durationText +=
+            timeRemaining > 0
+                ? `⏰ ${LocalizationManager.localizer.translateNByLocale(
+                      locale,
+                      "misc.plural.minuteRemaining",
+                      Math.ceil(timeRemaining)
+                  )}`
+                : `⏰ ${LocalizationManager.localizer.translateByLocale(
+                      locale,
+                      "misc.timeFinished"
+                  )}!`;
+
+        return durationText;
+    }
+
+    /**
      * Attempt to restart game with different song
      */
     private async errorRestartRound(): Promise<void> {
@@ -837,5 +1000,44 @@ export default abstract class Session {
         });
         this.roundsPlayed--;
         this.startRound(messageContext);
+    }
+
+    private getAliasFooter(
+        guessModeType: GuessModeType,
+        locale: LocaleType
+    ): string {
+        const aliases: Array<string> = [];
+        if (guessModeType === GuessModeType.ARTIST) {
+            if (this.round.song.hangulArtistName) {
+                if (locale === LocaleType.KO) {
+                    aliases.push(this.round.song.artistName);
+                } else {
+                    aliases.push(this.round.song.hangulArtistName);
+                }
+            }
+
+            aliases.push(...this.round.artistAliases);
+        } else {
+            if (this.round.song.hangulSongName) {
+                if (locale === LocaleType.KO) {
+                    aliases.push(this.round.song.originalSongName);
+                } else {
+                    aliases.push(this.round.song.originalHangulSongName);
+                }
+            }
+
+            aliases.push(...this.round.songAliases);
+        }
+
+        if (aliases.length === 0) {
+            return "";
+        }
+
+        const aliasesText = LocalizationManager.localizer.translateByLocale(
+            locale,
+            "misc.inGame.aliases"
+        );
+
+        return `${aliasesText}: ${aliases.join(", ")}`;
     }
 }

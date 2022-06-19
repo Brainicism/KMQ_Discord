@@ -4,10 +4,10 @@ import {
     getCurrentVoiceMembers,
     getDebugLogHeader,
     getMajorityCount,
-    sendRoundMessage,
     tryCreateInteractionSuccessAcknowledgement,
 } from "../helpers/discord_utils";
 import { isSkipMajority, skipSong } from "../commands/game_commands/skip";
+import { userBonusIsActive } from "../helpers/game_utils";
 import KmqMember from "./kmq_member";
 import ListeningRound from "./listening_round";
 import LocalizationManager from "../helpers/localization_manager";
@@ -92,14 +92,24 @@ export default class ListeningSession extends Session {
                 this.guildPreference
             );
 
-            const startRoundMessage = await sendRoundMessage(
-                messageContext,
+            const embedColor = this.round.getEndRoundColor(
                 null,
-                this,
-                this.guildPreference.gameOptions.guessModeType,
-                this.guildPreference.isMultipleChoiceMode(),
-                remainingDuration,
-                this.songSelector.getUniqueSongCounter(this.guildPreference)
+                await userBonusIsActive(messageContext.author.id)
+            );
+
+            const description = `${this.round.getEndRoundDescription(
+                messageContext,
+                this.songSelector.getUniqueSongCounter(this.guildPreference),
+                null
+            )}`;
+
+            const startRoundMessage = await this.sendRoundMessage(
+                messageContext,
+                [],
+                description,
+                embedColor,
+                false,
+                remainingDuration
             );
 
             round.interactionMessage = startRoundMessage;

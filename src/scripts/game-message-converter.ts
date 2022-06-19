@@ -1,3 +1,4 @@
+/* eslint-disable node/no-sync */
 /* eslint-disable no-await-in-loop */
 import { IPCLogger } from "../logger";
 import dbContext from "../database_context";

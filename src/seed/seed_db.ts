@@ -1,10 +1,10 @@
 /* eslint-disable no-await-in-loop */
+import * as cp from "child_process";
 import { DATABASE_DOWNLOAD_DIR } from "../constants";
 import { IPCLogger } from "../logger";
 import { config } from "dotenv";
-import { execSync } from "child_process";
 import { getNewConnection } from "../database_context";
-import { parseJsonFile } from "../helpers/utils";
+import { parseJsonFile, pathExists } from "../helpers/utils";
 import { program } from "commander";
 import Axios from "axios";
 import EnvType from "../enums/env_type";
@@ -12,7 +12,10 @@ import _ from "lodash";
 import downloadAndConvertSongs from "../scripts/download-new-songs";
 import fs from "fs";
 import path from "path";
+import util from "util";
 import type { DatabaseContext } from "../database_context";
+
+const exec = util.promisify(cp.exec);
 
 config({ path: path.resolve(__dirname, "../../.env") });
 const SQL_DUMP_EXPIRY = 10;
@@ -24,10 +27,6 @@ const frozenDaisukiColumnNamesPath = path.join(
 );
 
 const logger = new IPCLogger("seed_db");
-
-if (!fs.existsSync(DATABASE_DOWNLOAD_DIR)) {
-    fs.mkdirSync(DATABASE_DOWNLOAD_DIR);
-}
 
 /**
  * @param db - The database context
@@ -124,13 +123,13 @@ export async function generateKmqDataTables(
 /**
  * Reloads all existing stored procedures
  */
-export function loadStoredProcedures(): void {
-    const storedProcedureDefinitions = fs
-        .readdirSync(path.join(__dirname, "../../sql/procedures"))
-        .map((x) => path.join(__dirname, "../../sql/procedures", x));
+export async function loadStoredProcedures(): Promise<void> {
+    const storedProcedureDefinitions = (
+        await fs.promises.readdir(path.join(__dirname, "../../sql/procedures"))
+    ).map((x) => path.join(__dirname, "../../sql/procedures", x));
 
     for (const storedProcedureDefinition of storedProcedureDefinitions) {
-        execSync(
+        await exec(
             `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq < ${storedProcedureDefinition}`
         );
     }
@@ -162,11 +161,11 @@ const downloadDb = async (): Promise<void> => {
 
 async function extractDb(): Promise<void> {
     await fs.promises.mkdir(`${DATABASE_DOWNLOAD_DIR}/`, { recursive: true });
-    execSync(
+    await exec(
         `unzip -oq ${DATABASE_DOWNLOAD_DIR}/mv-download.zip -d ${DATABASE_DOWNLOAD_DIR}/`
     );
 
-    execSync(
+    await exec(
         `unzip -oq ${DATABASE_DOWNLOAD_DIR}/audio-download.zip -d ${DATABASE_DOWNLOAD_DIR}/`
     );
     logger.info("Extracted Daisuki database");
@@ -187,7 +186,7 @@ async function recordDaisukiTableSchema(db: DatabaseContext): Promise<void> {
         })
     );
 
-    fs.writeFileSync(
+    await fs.promises.writeFile(
         frozenDaisukiColumnNamesPath,
         JSON.stringify(frozenTableColumnNames)
     );
@@ -251,11 +250,11 @@ async function validateSqlDump(
             "DROP DATABASE IF EXISTS kpop_videos_validation;"
         );
         await db.agnostic.raw("CREATE DATABASE kpop_videos_validation;");
-        execSync(
+        await exec(
             `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${mvSeedFilePath}`
         );
 
-        execSync(
+        await exec(
             `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${audioSeedFilePath}`
         );
         logger.info("Validating MV song count");
@@ -311,11 +310,11 @@ async function validateSqlDump(
                 "../../sql/create_kmq_data_tables_procedure.validation.sql"
             );
 
-            execSync(
+            await exec(
                 `sed 's/kpop_videos/kpop_videos_validation/g' ${originalCreateKmqTablesProcedureSqlPath} > ${validationCreateKmqTablesProcedureSqlPath}`
             );
 
-            execSync(
+            await exec(
                 `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${validationCreateKmqTablesProcedureSqlPath}`
             );
 
@@ -327,9 +326,9 @@ async function validateSqlDump(
         throw new Error(`SQL dump validation failed. ${e.sqlMessage}`);
     }
 
-    if (fs.existsSync(frozenDaisukiColumnNamesPath)) {
+    if (await pathExists(frozenDaisukiColumnNamesPath)) {
         logger.info("Daisuki schema exists... checking for changes");
-        const frozenSchema = parseJsonFile(frozenDaisukiColumnNamesPath);
+        const frozenSchema = await parseJsonFile(frozenDaisukiColumnNamesPath);
         await validateDaisukiTableSchema(db, frozenSchema);
     }
 
@@ -338,6 +337,13 @@ async function validateSqlDump(
 }
 
 async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
+    try {
+        await fs.promises.mkdir(DATABASE_DOWNLOAD_DIR);
+        logger.info("Creating database download");
+    } catch (e) {
+        logger.info("Database download directory already exists");
+    }
+
     // validating SQL dump
     const sqlFiles = (
         await fs.promises.readdir(`${DATABASE_DOWNLOAD_DIR}`)
@@ -373,11 +379,11 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
     logger.info("Creating K-Pop video temporary database");
     await db.agnostic.raw("CREATE DATABASE kpop_videos_tmp;");
     logger.info("Seeding K-Pop video temporary database");
-    execSync(
+    await exec(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_tmp < ${mvSeedFilePath}`
     );
 
-    execSync(
+    await exec(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_tmp < ${audioSeedFilePath}`
     );
 
@@ -414,7 +420,7 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
     await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_tmp;");
 
     // freeze table schema
-    if (!fs.existsSync(frozenDaisukiColumnNamesPath)) {
+    if (!(await pathExists(frozenDaisukiColumnNamesPath))) {
         logger.info("Frozen Daisuki schema doesn't exist... creating");
         await recordDaisukiTableSchema(db);
     }
@@ -469,9 +475,9 @@ async function hasRecentDump(): Promise<boolean> {
     return daysDiff < 6;
 }
 
-function pruneSqlDumps(): void {
+async function pruneSqlDumps(): Promise<void> {
     try {
-        execSync(
+        await exec(
             `find ${DATABASE_DOWNLOAD_DIR} -mindepth 1 -name "*backup_*" -mtime +${SQL_DUMP_EXPIRY} -delete`
         );
         logger.info("Finished pruning old SQL dumps");
@@ -513,7 +519,7 @@ export async function updateGroupList(db: DatabaseContext): Promise<void> {
         .where("is_collab", "=", "n")
         .orderBy("name", "ASC");
 
-    fs.writeFileSync(
+    await fs.promises.writeFile(
         path.resolve(__dirname, "../../data/group_list.txt"),
         result.map((x) => x.name).join("\n")
     );
@@ -523,7 +529,7 @@ export async function updateGroupList(db: DatabaseContext): Promise<void> {
  * @param db - The database context
  */
 async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
-    pruneSqlDumps();
+    await pruneSqlDumps();
     try {
         await updateKpopDatabase(db);
     } catch (e) {
@@ -550,7 +556,7 @@ async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
     if (require.main === module) {
         const db = getNewConnection();
         try {
-            loadStoredProcedures();
+            await loadStoredProcedures();
             await seedAndDownloadNewSongs(db);
         } catch (e) {
             logger.error(e);

@@ -1,6 +1,7 @@
+/* eslint-disable node/no-sync */
+import * as cp from "child_process";
 import { DATABASE_DOWNLOAD_DIR } from "../constants";
 import { IPCLogger } from "../logger";
-import { execSync } from "child_process";
 import EnvType from "../enums/env_type";
 import dbContext, { getNewConnection } from "../database_context";
 import kmqKnexConfig from "../config/knexfile_kmq";
@@ -33,11 +34,11 @@ before(async function () {
     // import frozen db dump
     const mvSeedFilePath = `${DATABASE_DOWNLOAD_DIR}/bootstrap.sql`;
     const mvAudioSeedFilePath = `${DATABASE_DOWNLOAD_DIR}/bootstrap-audio.sql`;
-    execSync(
+    cp.execSync(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_test < ${mvSeedFilePath}`
     );
 
-    execSync(
+    cp.execSync(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_test < ${mvAudioSeedFilePath}`
     );
 
@@ -61,17 +62,17 @@ before(async function () {
         "../../sql/create_kmq_data_tables_procedure.test.sql"
     );
 
-    execSync(
+    cp.execSync(
         `sed 's/kpop_videos/kpop_videos_test/g;s/kmq/kmq_test/g' ${originalCreateKmqTablesProcedureSqlPath} > ${testCreateKmqTablesProcedureSqlPath}`
     );
 
-    execSync(
+    cp.execSync(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test < ${testCreateKmqTablesProcedureSqlPath}`,
         { stdio: "inherit" }
     );
 
     // create available_songs table
-    execSync(
+    cp.execSync(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test -e "CALL CreateKmqDataTables(1)"`
     );
 

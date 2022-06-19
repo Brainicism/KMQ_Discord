@@ -119,7 +119,7 @@ async function bootstrapDatabases(): Promise<void> {
         await updateKpopDatabase(db, true);
     }
 
-    loadStoredProcedures();
+    await loadStoredProcedures();
 
     if (!(await songThresholdReached(db))) {
         logger.info(
@@ -146,9 +146,12 @@ async function bootstrapDatabases(): Promise<void> {
         }
 
         const dataDir = path.join(__dirname, "../../data");
-        if (!fs.existsSync(dataDir)) {
+
+        try {
+            await fs.promises.mkdir(dataDir);
             logger.info("Data directory doesn't exist, creating...");
-            fs.mkdirSync(dataDir);
+        } catch (error) {
+            logger.info("Data directory already exists");
         }
 
         await bootstrapDatabases();

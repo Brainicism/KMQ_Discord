@@ -1,3 +1,4 @@
+/* eslint-disable node/no-sync */
 import { IPCLogger } from "../logger";
 import { config } from "dotenv";
 import { getNewConnection } from "../database_context";

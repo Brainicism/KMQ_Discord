@@ -1,5 +1,6 @@
+/* eslint-disable node/no-sync */
+import * as cp from "child_process";
 import { IPCLogger } from "../logger";
-import { exec, execSync } from "child_process";
 import { join } from "path";
 import { program } from "commander";
 import { standardDateFormat } from "../helpers/utils";
@@ -23,12 +24,12 @@ async function backupKmqDatabase(): Promise<void> {
         fs.mkdirSync(databaseBackupDir);
     }
 
-    execSync(
+    cp.execSync(
         `find ${databaseBackupDir} -mindepth 1 -name "*kmq_backup_*" -mtime +${BACKUP_TTL} -delete`
     );
 
     return new Promise((resolve, reject) => {
-        exec(
+        cp.exec(
             `mysqldump -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${
                 process.env.DB_HOST
             } --port ${
@@ -56,7 +57,7 @@ function importKmqDatabase(fileWithPath: string): void {
     }
 
     logger.info(`Beginning import of ${fileWithPath}`);
-    execSync(
+    cp.execSync(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT}  kmq < ${fileWithPath}`
     );
     logger.info("Finished import");
