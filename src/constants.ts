@@ -206,6 +206,8 @@ export const ROUND_MAX_RUNNERS_UP = 30;
 export const ROUND_MAX_SCOREBOARD_PLAYERS = 30;
 export const SCOREBOARD_FIELD_CUTOFF = 6;
 
+export const EMBED_FIELDS_PER_PAGE = 20;
+
 export const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
 export const SELECTION_WEIGHT_VALUES_HARD = [1, 2, 4, 8, 16];
 export const SELECTION_WEIGHT_VALUES_EASY = [

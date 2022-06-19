@@ -1,8 +1,5 @@
 import { IPCLogger } from "../../logger";
-import {
-    getDebugLogHeader,
-    sendScoreboardMessage,
-} from "../../helpers/discord_utils";
+import { getDebugLogHeader } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
 import LocalizationManager from "../../helpers/localization_manager";
 import Session from "../../structures/session";
@@ -34,7 +31,7 @@ export default class ScoreCommand implements BaseCommand {
 
     call = async ({ message }: CommandArgs): Promise<void> => {
         const gameSession = Session.getSession(message.guildID) as GameSession;
-        await sendScoreboardMessage(message, gameSession);
+        await gameSession.sendScoreboardMessage(message);
         logger.info(`${getDebugLogHeader(message)} | Score retrieved`);
     };
 }

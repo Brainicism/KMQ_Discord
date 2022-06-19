@@ -4,6 +4,7 @@ import _ from "lodash";
 import type Eris from "eris";
 
 import {
+    bold,
     chunkArray,
     codeLine,
     delay,
@@ -13,11 +14,11 @@ import {
 import {
     getCurrentVoiceMembers,
     getDebugLogHeader,
+    getGameInfoMessage,
     getNumParticipants,
     getUserVoiceChannel,
-    sendEndGameMessage,
     sendInfoMessage,
-    sendRoundMessage,
+    sendPaginationedEmbed,
     tryCreateInteractionErrorAcknowledgement,
     tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
@@ -32,7 +33,16 @@ import {
 import State from "../state";
 import dbContext from "../database_context";
 
-import { CUM_EXP_TABLE, KmqImages, SONG_START_DELAY } from "../constants";
+import {
+    CUM_EXP_TABLE,
+    EMBED_FIELDS_PER_PAGE,
+    EMBED_SUCCESS_BONUS_COLOR,
+    EMBED_SUCCESS_COLOR,
+    KmqImages,
+    REVIEW_LINK,
+    SONG_START_DELAY,
+    VOTE_LINK,
+} from "../constants";
 import { IPCLogger } from "../logger";
 import { calculateTotalRoundExp } from "../commands/game_commands/exp";
 import { getRankNameByLevel } from "../commands/game_commands/profile";
@@ -51,6 +61,7 @@ import Player from "./player";
 import Scoreboard from "./scoreboard";
 import Session from "./session";
 import TeamScoreboard from "./team_scoreboard";
+import type { GuildTextableMessage } from "../types";
 import type GuessResult from "../interfaces/guess_result";
 import type QueriedSong from "../interfaces/queried_song";
 import type Round from "./round";
@@ -333,14 +344,64 @@ export default class GameSession extends Session {
         );
 
         if (messageContext) {
-            const endRoundMessage = await sendRoundMessage(
+            let roundResultIDs: Array<string>;
+            const playerRoundResults =
+                this.round instanceof GameRound
+                    ? this.round.playerRoundResults
+                    : [];
+
+            if (this.scoreboard instanceof TeamScoreboard) {
+                const teamScoreboard = this.scoreboard as TeamScoreboard;
+                roundResultIDs = playerRoundResults.map(
+                    (x) => teamScoreboard.getTeamOfPlayer(x.player.id).id
+                );
+            } else {
+                roundResultIDs = playerRoundResults.map((x) => x.player.id);
+            }
+
+            const useLargerScoreboard =
+                this.scoreboard.shouldUseLargerScoreboard();
+
+            const fields: Eris.EmbedField[] =
+                this.scoreboard.getScoreboardEmbedFields(
+                    false,
+                    true,
+                    messageContext.guildID,
+                    roundResultIDs
+                );
+
+            let scoreboardTitle = "";
+            if (!useLargerScoreboard) {
+                scoreboardTitle = "\n\n";
+                scoreboardTitle += bold(
+                    LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "command.score.scoreboardTitle"
+                    )
+                );
+            }
+
+            const description = `${this.round.getEndRoundDescription(
                 messageContext,
-                this.scoreboard,
-                this,
-                this.guildPreference.gameOptions.guessModeType,
-                this.guildPreference.isMultipleChoiceMode(),
-                remainingDuration,
-                this.songSelector.getUniqueSongCounter(this.guildPreference)
+                this.songSelector.getUniqueSongCounter(this.guildPreference),
+                playerRoundResults
+            )}${scoreboardTitle}`;
+
+            const correctGuess = playerRoundResults.length > 0;
+            const embedColor = this.round.getEndRoundColor(
+                correctGuess,
+                await userBonusIsActive(
+                    playerRoundResults[0]?.player.id ?? messageContext.author.id
+                )
+            );
+
+            const endRoundMessage = await this.sendRoundMessage(
+                messageContext,
+                fields,
+                description,
+                embedColor,
+                correctGuess && !this.guildPreference.isMultipleChoiceMode(),
+                remainingDuration
             );
 
             round.roundMessageID = endRoundMessage?.id;
@@ -497,7 +558,7 @@ export default class GameSession extends Session {
         }
 
         await super.endSession();
-        await sendEndGameMessage(this);
+        await this.sendEndGameMessage();
 
         logger.info(
             `gid: ${this.guildID} | Game session ended. rounds_played = ${this.roundsPlayed}. session_length = ${sessionLength}. gameType = ${this.gameType}`
@@ -765,6 +826,193 @@ export default class GameSession extends Session {
                     );
                 })
         );
+    }
+
+    /**
+     * Sends an embed displaying the scoreboard of the GameSession
+     * @param message - The Message object
+     * @returns the message
+     */
+    sendScoreboardMessage(
+        message: GuildTextableMessage
+    ): Promise<Eris.Message> {
+        const winnersFieldSubsets = chunkArray(
+            this.scoreboard.getScoreboardEmbedSingleColumn(true, true),
+            EMBED_FIELDS_PER_PAGE
+        );
+
+        let footerText = LocalizationManager.localizer.translate(
+            message.guildID,
+            "misc.classic.yourScore",
+            {
+                score: String(
+                    this.scoreboard.getPlayerDisplayedScore(
+                        message.author.id,
+                        false
+                    )
+                ),
+            }
+        );
+
+        if (this.gameType === GameType.ELIMINATION) {
+            const eliminationScoreboard = this
+                .scoreboard as EliminationScoreboard;
+
+            footerText = LocalizationManager.localizer.translate(
+                message.guildID,
+                "misc.elimination.yourLives",
+                {
+                    lives: String(
+                        eliminationScoreboard.getPlayerLives(message.author.id)
+                    ),
+                }
+            );
+        } else if (this.gameType === GameType.TEAMS) {
+            const teamScoreboard = this.scoreboard as TeamScoreboard;
+            footerText = LocalizationManager.localizer.translate(
+                message.guildID,
+                "misc.team.yourTeamScore",
+                {
+                    teamScore: String(
+                        teamScoreboard
+                            .getTeamOfPlayer(message.author.id)
+                            .getScore()
+                    ),
+                }
+            );
+            footerText += "\n";
+            footerText += LocalizationManager.localizer.translate(
+                message.guildID,
+                "misc.team.yourScore",
+                {
+                    score: String(
+                        teamScoreboard.getPlayerScore(message.author.id)
+                    ),
+                }
+            );
+        }
+
+        const embeds: Array<Eris.EmbedOptions> = winnersFieldSubsets.map(
+            (winnersFieldSubset) => ({
+                color: EMBED_SUCCESS_COLOR,
+                title: LocalizationManager.localizer.translate(
+                    message.guildID,
+                    "command.score.scoreboardTitle"
+                ),
+                fields: winnersFieldSubset,
+                footer: {
+                    text: footerText,
+                },
+            })
+        );
+
+        return sendPaginationedEmbed(message, embeds);
+    }
+
+    /**
+     * Sends an embed displaying the winner of the session as well as the scoreboard
+     */
+    async sendEndGameMessage(): Promise<void> {
+        const footerText = LocalizationManager.localizer.translate(
+            this.guildID,
+            "misc.inGame.songsCorrectlyGuessed",
+            {
+                songCount: `${this.getCorrectGuesses()}/${this.getRoundsPlayed()}`,
+            }
+        );
+
+        if (this.scoreboard.getWinners().length === 0) {
+            await sendInfoMessage(new MessageContext(this.textChannelID), {
+                title: LocalizationManager.localizer.translate(
+                    this.guildID,
+                    "misc.inGame.noWinners"
+                ),
+                footerText,
+                thumbnailUrl: KmqImages.NOT_IMPRESSED,
+            });
+        } else {
+            const winners = this.scoreboard.getWinners();
+            const useLargerScoreboard =
+                this.scoreboard.shouldUseLargerScoreboard();
+
+            const fields = this.scoreboard.getScoreboardEmbedFields(
+                this.gameType !== GameType.TEAMS,
+                false,
+                this.guildID
+            );
+
+            const endGameMessage = await getGameInfoMessage(this.guildID);
+
+            if (endGameMessage) {
+                fields.push({
+                    name: LocalizationManager.localizer.translate(
+                        this.guildID,
+                        endGameMessage.title
+                    ),
+                    value: endGameMessage.message,
+                    inline: false,
+                });
+            }
+
+            await sendInfoMessage(new MessageContext(this.textChannelID), {
+                color:
+                    this.gameType !== GameType.TEAMS &&
+                    (await userBonusIsActive(winners[0].id))
+                        ? EMBED_SUCCESS_BONUS_COLOR
+                        : EMBED_SUCCESS_COLOR,
+                description: !useLargerScoreboard
+                    ? bold(
+                          LocalizationManager.localizer.translate(
+                              this.guildID,
+                              "command.score.scoreboardTitle"
+                          )
+                      )
+                    : null,
+                thumbnailUrl: winners[0].getAvatarURL(),
+                title: `🎉 ${this.scoreboard.getWinnerMessage(
+                    this.guildID
+                )} 🎉`,
+                fields,
+                footerText,
+                components: [
+                    {
+                        type: 1,
+                        components: [
+                            {
+                                style: 5,
+                                url: VOTE_LINK,
+                                type: 2 as const,
+                                emoji: { name: "✅" },
+                                label: LocalizationManager.localizer.translate(
+                                    this.guildID,
+                                    "misc.interaction.vote"
+                                ),
+                            },
+                            {
+                                style: 5,
+                                url: REVIEW_LINK,
+                                type: 2 as const,
+                                emoji: { name: "📖" },
+                                label: LocalizationManager.localizer.translate(
+                                    this.guildID,
+                                    "misc.interaction.leaveReview"
+                                ),
+                            },
+                            {
+                                style: 5,
+                                url: "https://discord.gg/RCuzwYV",
+                                type: 2,
+                                emoji: { name: "🎵" },
+                                label: LocalizationManager.localizer.translate(
+                                    this.guildID,
+                                    "misc.interaction.officialKmqServer"
+                                ),
+                            },
+                        ],
+                    },
+                ],
+            });
+        }
     }
 
     /**

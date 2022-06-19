@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import * as uuid from "uuid";
 import {
     ConflictingGameOptions,
     GameOptionCommand,
@@ -10,9 +9,6 @@ import {
     EMBED_SUCCESS_BONUS_COLOR,
     EMBED_SUCCESS_COLOR,
     KmqImages,
-    REVIEW_LINK,
-    ROUND_MAX_SCOREBOARD_PLAYERS,
-    VOTE_LINK,
 } from "../constants";
 import { IPCLogger } from "../logger";
 import {
@@ -35,37 +31,26 @@ import {
     isPremiumRequest,
     userBonusIsActive,
 } from "./game_utils";
-import { getFact } from "../fact_generator";
 import EmbedPaginator from "eris-pagination";
 import Eris from "eris";
 import GameOption from "../enums/game_option_name";
-import GameRound from "../structures/game_round";
 import GameType from "../enums/game_type";
-import GuessModeType from "../enums/option_types/guess_mode_type";
-import ListeningRound from "../structures/listening_round";
 import LocaleType from "../enums/locale_type";
 import LocalizationManager from "./localization_manager";
 import MessageContext from "../structures/message_context";
 import State from "../state";
-import TeamScoreboard from "../structures/team_scoreboard";
 import axios from "axios";
 import dbContext from "../database_context";
 import type { EmbedGenerator, GuildTextableMessage } from "../types";
 import type BookmarkedSong from "../interfaces/bookmarked_song";
-import type EliminationScoreboard from "../structures/elimination_scoreboard";
 import type EmbedPayload from "../interfaces/embed_payload";
 import type GameInfoMessage from "../interfaces/game_info_message";
 import type GameOptions from "../interfaces/game_options";
-import type GameSession from "../structures/game_session";
 import type GuildPreference from "../structures/guild_preference";
-import type Round from "../structures/round";
-import type Scoreboard from "../structures/scoreboard";
 import type Session from "../structures/session";
-import type UniqueSongCounter from "../interfaces/unique_song_counter";
 
 const logger = new IPCLogger("discord_utils");
 
-const EMBED_FIELDS_PER_PAGE = 20;
 const REQUIRED_TEXT_PERMISSIONS = [
     "addReactions" as const,
     "embedLinks" as const,
@@ -609,246 +594,6 @@ export async function sendInfoMessage(
     );
 }
 
-function getAliasFooter(
-    round: Round,
-    guessModeType: GuessModeType,
-    locale: LocaleType
-): string {
-    const aliases: Array<string> = [];
-    if (guessModeType === GuessModeType.ARTIST) {
-        if (round.song.hangulArtistName) {
-            if (locale === LocaleType.KO) {
-                aliases.push(round.song.artistName);
-            } else {
-                aliases.push(round.song.hangulArtistName);
-            }
-        }
-
-        aliases.push(...round.artistAliases);
-    } else {
-        if (round.song.hangulSongName) {
-            if (locale === LocaleType.KO) {
-                aliases.push(round.song.originalSongName);
-            } else {
-                aliases.push(round.song.originalHangulSongName);
-            }
-        }
-
-        aliases.push(...round.songAliases);
-    }
-
-    if (aliases.length === 0) {
-        return "";
-    }
-
-    const aliasesText = LocalizationManager.localizer.translateByLocale(
-        locale,
-        "misc.inGame.aliases"
-    );
-
-    return `${aliasesText}: ${aliases.join(", ")}`;
-}
-
-function getDurationFooter(
-    locale: LocaleType,
-    timeRemaining: number,
-    nonEmptyFooter: boolean
-): string {
-    if (!timeRemaining) {
-        return "";
-    }
-
-    let durationText = "";
-    if (nonEmptyFooter) {
-        durationText += "\n";
-    }
-
-    durationText +=
-        timeRemaining > 0
-            ? `⏰ ${LocalizationManager.localizer.translateNByLocale(
-                  locale,
-                  "misc.plural.minute",
-                  Math.ceil(timeRemaining)
-              )}`
-            : `⏰ ${LocalizationManager.localizer.translateByLocale(
-                  locale,
-                  "misc.timeFinished"
-              )}!`;
-
-    return durationText;
-}
-
-/**
- * Sends a message displaying song/game related information
- * @param messageContext - An object to pass along relevant parts of Eris.Message
- * @param scoreboard - The GameSession's corresponding Scoreboard
- * @param session - The session generating this end round message
- * @param guessModeType - The type of guess mode
- * @param isMultipleChoiceMode  - Whether the game is in multiple choice mode
- * @param timeRemaining - The time remaining for the duration option
- * @param uniqueSongCounter - The unique song counter
- */
-export async function sendRoundMessage(
-    messageContext: MessageContext,
-    scoreboard: Scoreboard,
-    session: Session,
-    guessModeType: GuessModeType,
-    isMultipleChoiceMode: boolean,
-    timeRemaining?: number,
-    uniqueSongCounter?: UniqueSongCounter
-): Promise<Eris.Message<Eris.TextableChannel>> {
-    const isListeningSession = session.isListeningSession();
-    const useLargerScoreboard =
-        !isListeningSession && scoreboard.shouldUseLargerScoreboard();
-
-    let scoreboardTitle = "";
-    if (!isListeningSession && !useLargerScoreboard) {
-        scoreboardTitle = "\n\n";
-        scoreboardTitle += bold(
-            LocalizationManager.localizer.translate(
-                messageContext.guildID,
-                "command.score.scoreboardTitle"
-            )
-        );
-    }
-
-    const round = session.round;
-    const playerRoundResults =
-        round instanceof GameRound ? round.playerRoundResults : [];
-
-    const description = `${round.getEndRoundDescription(
-        messageContext,
-        uniqueSongCounter,
-        playerRoundResults
-    )}${scoreboardTitle}`;
-
-    let fields: Array<{ name: string; value: string; inline: boolean }> = [];
-    let roundResultIDs: Array<string>;
-    if (scoreboard instanceof TeamScoreboard) {
-        const teamScoreboard = scoreboard as TeamScoreboard;
-        roundResultIDs = playerRoundResults.map(
-            (x) => teamScoreboard.getTeamOfPlayer(x.player.id).id
-        );
-    } else {
-        roundResultIDs = playerRoundResults.map((x) => x.player.id);
-    }
-
-    if (!isListeningSession) {
-        if (useLargerScoreboard) {
-            fields = scoreboard.getScoreboardEmbedThreeFields(
-                ROUND_MAX_SCOREBOARD_PLAYERS,
-                false,
-                true,
-                roundResultIDs
-            );
-        } else {
-            fields = scoreboard.getScoreboardEmbedFields(
-                false,
-                true,
-                roundResultIDs
-            );
-        }
-    }
-
-    const fact = Math.random() <= 0.05 ? getFact(messageContext.guildID) : null;
-    if (fact) {
-        fields.push({
-            name: underline(
-                LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "fact.didYouKnow"
-                )
-            ),
-            value: fact,
-            inline: false,
-        });
-    }
-
-    const correctGuess = playerRoundResults.length > 0;
-    const locale = State.getGuildLocale(messageContext.guildID);
-
-    const songAndArtist = bold(
-        `"${getLocalizedSongName(
-            round.song,
-            locale
-        )}" - ${getLocalizedArtistName(round.song, locale)}`
-    );
-
-    const embed: EmbedPayload = {
-        color: round.getEndRoundColor(
-            correctGuess,
-            await userBonusIsActive(
-                playerRoundResults[0]?.player.id ?? messageContext.author.id
-            )
-        ),
-        title: `${songAndArtist} (${round.song.publishDate.getFullYear()})`,
-        url: `https://youtu.be/${round.song.youtubeLink}`,
-        description,
-        fields,
-    };
-
-    const views = `${friendlyFormattedNumber(
-        round.song.views
-    )} ${LocalizationManager.localizer.translate(
-        messageContext.guildID,
-        "misc.views"
-    )}\n`;
-
-    const aliases = getAliasFooter(round, guessModeType, locale);
-    const duration = getDurationFooter(
-        locale,
-        timeRemaining,
-        [views, aliases].every((x) => x.length > 0)
-    );
-
-    const footerText = `${views}${aliases}${duration}`;
-    const thumbnailUrl = `https://img.youtube.com/vi/${round.song.youtubeLink}/hqdefault.jpg`;
-    if (round instanceof GameRound) {
-        if (isMultipleChoiceMode && round.interactionMessage) {
-            embed["thumbnail"] = { url: thumbnailUrl };
-            embed["footer"] = { text: footerText };
-            await round.interactionMessage.edit({ embeds: [embed as Object] });
-            return round.interactionMessage;
-        }
-    }
-
-    if (round instanceof ListeningRound) {
-        const buttons: Array<Eris.InteractionButton> = [];
-        round.interactionSkipUUID = uuid.v4();
-        buttons.push({
-            type: 2,
-            style: 1,
-            label: LocalizationManager.localizer.translate(
-                messageContext.guildID,
-                "misc.skip"
-            ),
-            custom_id: round.interactionSkipUUID,
-        });
-
-        buttons.push({
-            type: 2,
-            style: 1,
-            label: LocalizationManager.localizer.translate(
-                messageContext.guildID,
-                "misc.bookmark"
-            ),
-            custom_id: "bookmark",
-        });
-
-        round.interactionComponents = [{ type: 1, components: buttons }];
-        embed.components = round.interactionComponents;
-    }
-
-    embed.thumbnailUrl = thumbnailUrl;
-    embed.footerText = footerText;
-    return sendInfoMessage(
-        messageContext,
-        embed,
-        correctGuess && !isMultipleChoiceMode,
-        false
-    );
-}
-
 /**
  * Get a sentence describing the current limit
  * @param guildID - The ID of the guild where the limit is sent
@@ -1343,123 +1088,6 @@ export async function getGameInfoMessage(
 }
 
 /**
- * Sends an embed displaying the winner of the session as well as the scoreboard
- * @param gameSession - The GameSession that has ended
- */
-export async function sendEndGameMessage(
-    gameSession: GameSession
-): Promise<void> {
-    const footerText = LocalizationManager.localizer.translate(
-        gameSession.guildID,
-        "misc.inGame.songsCorrectlyGuessed",
-        {
-            songCount: `${gameSession.getCorrectGuesses()}/${gameSession.getRoundsPlayed()}`,
-        }
-    );
-
-    if (gameSession.scoreboard.getWinners().length === 0) {
-        await sendInfoMessage(new MessageContext(gameSession.textChannelID), {
-            title: LocalizationManager.localizer.translate(
-                gameSession.guildID,
-                "misc.inGame.noWinners"
-            ),
-            footerText,
-            thumbnailUrl: KmqImages.NOT_IMPRESSED,
-        });
-    } else {
-        const winners = gameSession.scoreboard.getWinners();
-        let fields: Array<{ name: string; value: string; inline: boolean }>;
-        const useLargerScoreboard =
-            gameSession.scoreboard.shouldUseLargerScoreboard();
-
-        if (useLargerScoreboard) {
-            fields = gameSession.scoreboard.getScoreboardEmbedThreeFields(
-                ROUND_MAX_SCOREBOARD_PLAYERS,
-                gameSession.gameType !== GameType.TEAMS,
-                false
-            );
-        } else {
-            fields = gameSession.scoreboard.getScoreboardEmbedFields(
-                gameSession.gameType !== GameType.TEAMS,
-                false
-            );
-        }
-
-        const endGameMessage = await getGameInfoMessage(gameSession.guildID);
-
-        if (endGameMessage) {
-            fields.push({
-                name: LocalizationManager.localizer.translate(
-                    gameSession.guildID,
-                    endGameMessage.title
-                ),
-                value: endGameMessage.message,
-                inline: false,
-            });
-        }
-
-        await sendInfoMessage(new MessageContext(gameSession.textChannelID), {
-            color:
-                gameSession.gameType !== GameType.TEAMS &&
-                (await userBonusIsActive(winners[0].id))
-                    ? EMBED_SUCCESS_BONUS_COLOR
-                    : EMBED_SUCCESS_COLOR,
-            description: !useLargerScoreboard
-                ? bold(
-                      LocalizationManager.localizer.translate(
-                          gameSession.guildID,
-                          "command.score.scoreboardTitle"
-                      )
-                  )
-                : null,
-            thumbnailUrl: winners[0].getAvatarURL(),
-            title: `🎉 ${gameSession.scoreboard.getWinnerMessage(
-                gameSession.guildID
-            )} 🎉`,
-            fields,
-            footerText,
-            components: [
-                {
-                    type: 1,
-                    components: [
-                        {
-                            style: 5,
-                            url: VOTE_LINK,
-                            type: 2 as const,
-                            emoji: { name: "✅" },
-                            label: LocalizationManager.localizer.translate(
-                                gameSession.guildID,
-                                "misc.interaction.vote"
-                            ),
-                        },
-                        {
-                            style: 5,
-                            url: REVIEW_LINK,
-                            type: 2 as const,
-                            emoji: { name: "📖" },
-                            label: LocalizationManager.localizer.translate(
-                                gameSession.guildID,
-                                "misc.interaction.leaveReview"
-                            ),
-                        },
-                        {
-                            style: 5,
-                            url: "https://discord.gg/RCuzwYV",
-                            type: 2,
-                            emoji: { name: "🎵" },
-                            label: LocalizationManager.localizer.translate(
-                                gameSession.guildID,
-                                "misc.interaction.officialKmqServer"
-                            ),
-                        },
-                    ],
-                },
-            ],
-        });
-    }
-}
-
-/**
  * Sends a paginated embed
  * @param message - The Message object
  * @param embeds - A list of embeds to paginate over
@@ -1505,82 +1133,6 @@ export async function sendPaginationedEmbed(
         null,
         message.author.id
     );
-}
-
-/**
- * Sends an embed displaying the scoreboard of the GameSession
- * @param message - The Message object
- * @param gameSession - The GameSession
- */
-export async function sendScoreboardMessage(
-    message: GuildTextableMessage,
-    gameSession: GameSession
-): Promise<Eris.Message> {
-    const winnersFieldSubsets = chunkArray(
-        gameSession.scoreboard.getScoreboardEmbedFields(true, true),
-        EMBED_FIELDS_PER_PAGE
-    );
-
-    let footerText = LocalizationManager.localizer.translate(
-        message.guildID,
-        "misc.classic.yourScore",
-        {
-            score: String(
-                gameSession.scoreboard.getPlayerDisplayedScore(
-                    message.author.id,
-                    false
-                )
-            ),
-        }
-    );
-
-    if (gameSession.gameType === GameType.ELIMINATION) {
-        const eliminationScoreboard =
-            gameSession.scoreboard as EliminationScoreboard;
-
-        footerText = LocalizationManager.localizer.translate(
-            message.guildID,
-            "misc.elimination.yourLives",
-            {
-                lives: String(
-                    eliminationScoreboard.getPlayerLives(message.author.id)
-                ),
-            }
-        );
-    } else if (gameSession.gameType === GameType.TEAMS) {
-        const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
-        footerText = LocalizationManager.localizer.translate(
-            message.guildID,
-            "misc.team.yourTeamScore",
-            {
-                teamScore: String(
-                    teamScoreboard.getTeamOfPlayer(message.author.id).getScore()
-                ),
-            }
-        );
-        footerText += "\n";
-        footerText += LocalizationManager.localizer.translate(
-            message.guildID,
-            "misc.team.yourScore",
-            { score: String(teamScoreboard.getPlayerScore(message.author.id)) }
-        );
-    }
-
-    const embeds: Array<Eris.EmbedOptions> = winnersFieldSubsets.map(
-        (winnersFieldSubset) => ({
-            color: EMBED_SUCCESS_COLOR,
-            title: LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.score.scoreboardTitle"
-            ),
-            fields: winnersFieldSubset,
-            footer: {
-                text: footerText,
-            },
-        })
-    );
-
-    return sendPaginationedEmbed(message, embeds);
 }
 
 /**

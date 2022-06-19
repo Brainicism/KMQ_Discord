@@ -1,4 +1,7 @@
-import { SCOREBOARD_FIELD_CUTOFF } from "../constants";
+import {
+    ROUND_MAX_SCOREBOARD_PLAYERS,
+    SCOREBOARD_FIELD_CUTOFF,
+} from "../constants";
 import { bold, friendlyFormattedNumber, getMention } from "../helpers/utils";
 import LocalizationManager from "../helpers/localization_manager";
 import type GuildPreference from "./guild_preference";
@@ -67,109 +70,26 @@ export default class Scoreboard {
         return winnerStr;
     }
 
-    /**
-     * @param showExp - Whether to display the EXP gained in the game for each player
-     * @param inProgress - Whether the game is in progress
-     * @param roundWinnerIDs - The IDs of all players that won the current round, if any
-     * @returns An array of DiscordEmbed fields representing each participant's score
-     */
     getScoreboardEmbedFields(
         showExp: boolean,
         inProgress: boolean,
+        guildID: string,
         roundWinnerIDs?: Array<string>
     ): Array<{ name: string; value: string; inline: boolean }> {
-        const currentRanking = this.getScoreToRankingMap();
-        return Object.values(this.players)
-            .sort((a, b) => b.getScore() - a.getScore())
-            .filter((x) => x.shouldIncludeInScoreboard())
-            .map((x) => ({
-                name: `${x.getRankingPrefix(
-                    currentRanking[x.getScore()],
-                    inProgress
-                )} ${x.getDisplayedName(
-                    roundWinnerIDs && roundWinnerIDs[0] === x.id,
-                    roundWinnerIDs?.includes(x.id),
-                    false
-                )}`,
-                value: `${x.getDisplayedScore()}${
-                    showExp
-                        ? ` (+${friendlyFormattedNumber(x.getExpGain())} EXP)`
-                        : ""
-                }`,
-                inline: false,
-            }));
-    }
-
-    /**
-     * Separates scoreboard players into two fields for large games
-     * @param cutoff - How many players to include before truncating the scoreboard
-     * @param showExp - Whether to display the EXP gained in the game for each player
-     * @param inProgress - Whether the game is in progress
-     * @param roundWinnerIDs - The IDs of all players that won the current round, if any
-     * @returns An array of 3 DiscordEmbed fields containing each player and their score, separated by newline
-     */
-    getScoreboardEmbedThreeFields(
-        cutoff: number,
-        showExp: boolean,
-        inProgress: boolean,
-        roundWinnerIDs?: Array<string>
-    ): Array<{ name: string; value: string; inline: boolean }> {
-        const ZERO_WIDTH_SPACE = "​";
-        const currentRanking = this.getScoreToRankingMap();
-        const players = Object.values(this.players)
-            .sort((a, b) => b.getScore() - a.getScore())
-            .filter((x) => x.shouldIncludeInScoreboard())
-            .slice(0, cutoff)
-            .map(
-                (x) =>
-                    `${bold(
-                        x.getRankingPrefix(
-                            currentRanking[x.getScore()],
-                            inProgress
-                        )
-                    )} ${x.getDisplayedName(
-                        roundWinnerIDs && roundWinnerIDs[0] === x.id,
-                        roundWinnerIDs?.includes(x.id),
-                        true
-                    )}: ${x.getDisplayedScore()}${
-                        showExp
-                            ? ` (+${friendlyFormattedNumber(
-                                  x.getExpGain()
-                              )} EXP)`
-                            : ""
-                    }`
+        if (!this.shouldUseLargerScoreboard()) {
+            return this.getScoreboardEmbedSingleColumn(
+                showExp,
+                inProgress,
+                roundWinnerIDs
             );
-
-        if (this.getNumPlayers() > cutoff) {
-            players.push("\nand many others...");
         }
 
-        return [
-            {
-                name: "**Scoreboard**",
-                value: players
-                    .slice(0, Math.ceil(players.length / 3))
-                    .join("\n"),
-                inline: false,
-            },
-            {
-                name: ZERO_WIDTH_SPACE,
-                value: players
-                    .slice(
-                        Math.ceil(players.length / 3),
-                        Math.ceil((2 * players.length) / 3)
-                    )
-                    .join("\n"),
-                inline: true,
-            },
-            {
-                name: ZERO_WIDTH_SPACE,
-                value: players
-                    .slice(Math.ceil((2 * players.length) / 3))
-                    .join("\n"),
-                inline: true,
-            },
-        ];
+        return this.getScoreboardEmbedThreeColumns(
+            guildID,
+            showExp,
+            inProgress,
+            roundWinnerIDs
+        );
     }
 
     /**
@@ -307,5 +227,115 @@ export default class Scoreboard {
             this.getPlayers().filter((x) => x.shouldIncludeInScoreboard())
                 .length > SCOREBOARD_FIELD_CUTOFF
         );
+    }
+
+    /**
+     * @param showExp - Whether to display the EXP gained in the game for each player
+     * @param inProgress - Whether the game is in progress
+     * @param roundWinnerIDs - The IDs of all players that won the current round, if any
+     * @returns An array of DiscordEmbed fields representing each participant's score
+     */
+    getScoreboardEmbedSingleColumn(
+        showExp: boolean,
+        inProgress: boolean,
+        roundWinnerIDs?: Array<string>
+    ): Array<{ name: string; value: string; inline: boolean }> {
+        const currentRanking = this.getScoreToRankingMap();
+        return Object.values(this.players)
+            .sort((a, b) => b.getScore() - a.getScore())
+            .filter((x) => x.shouldIncludeInScoreboard())
+            .map((x) => ({
+                name: `${x.getRankingPrefix(
+                    currentRanking[x.getScore()],
+                    inProgress
+                )} ${x.getDisplayedName(
+                    roundWinnerIDs && roundWinnerIDs[0] === x.id,
+                    roundWinnerIDs?.includes(x.id),
+                    false
+                )}`,
+                value: `${x.getDisplayedScore()}${
+                    showExp
+                        ? ` (+${friendlyFormattedNumber(x.getExpGain())} EXP)`
+                        : ""
+                }`,
+                inline: false,
+            }));
+    }
+
+    /**
+     * Separates scoreboard players into two fields for large games
+     * @param guildID - The guild ID
+     * @param showExp - Whether to display the EXP gained in the game for each player
+     * @param inProgress - Whether the game is in progress
+     * @param roundWinnerIDs - The IDs of all players that won the current round, if any
+     * @returns An array of 3 DiscordEmbed fields containing each player and their score, separated by newline
+     */
+    private getScoreboardEmbedThreeColumns(
+        guildID: string,
+        showExp: boolean,
+        inProgress: boolean,
+        roundWinnerIDs?: Array<string>
+    ): Array<{ name: string; value: string; inline: boolean }> {
+        const ZERO_WIDTH_SPACE = "​";
+        const currentRanking = this.getScoreToRankingMap();
+        const players = Object.values(this.players)
+            .sort((a, b) => b.getScore() - a.getScore())
+            .filter((x) => x.shouldIncludeInScoreboard())
+            .slice(0, ROUND_MAX_SCOREBOARD_PLAYERS)
+            .map(
+                (x) =>
+                    `${bold(
+                        x.getRankingPrefix(
+                            currentRanking[x.getScore()],
+                            inProgress
+                        )
+                    )} ${x.getDisplayedName(
+                        roundWinnerIDs && roundWinnerIDs[0] === x.id,
+                        roundWinnerIDs?.includes(x.id),
+                        true
+                    )}: ${x.getDisplayedScore()}${
+                        showExp
+                            ? ` (+${friendlyFormattedNumber(
+                                  x.getExpGain()
+                              )} EXP)`
+                            : ""
+                    }`
+            );
+
+        if (this.getNumPlayers() > ROUND_MAX_SCOREBOARD_PLAYERS) {
+            players.push("\nand many others...");
+        }
+
+        return [
+            {
+                name: bold(
+                    LocalizationManager.localizer.translate(
+                        guildID,
+                        "command.score.scoreboardTitle"
+                    )
+                ),
+                value: players
+                    .slice(0, Math.ceil(players.length / 3))
+                    .join("\n"),
+                inline: false,
+            },
+            {
+                name: ZERO_WIDTH_SPACE,
+                value: players
+                    .slice(
+                        Math.ceil(players.length / 3),
+                        Math.ceil((2 * players.length) / 3)
+                    )
+                    .join("\n"),
+                inline: true,
+            },
+            {
+                name: ZERO_WIDTH_SPACE,
+                value: players
+                    .slice(Math.ceil((2 * players.length) / 3))
+                    .join("\n"),
+                inline: true,
+            },
+        ];
     }
 }
