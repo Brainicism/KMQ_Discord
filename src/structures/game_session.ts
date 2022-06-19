@@ -32,12 +32,7 @@ import {
 import State from "../state";
 import dbContext from "../database_context";
 
-import {
-    CUM_EXP_TABLE,
-    KmqImages,
-    ROUND_MAX_SCOREBOARD_PLAYERS,
-    SONG_START_DELAY,
-} from "../constants";
+import { CUM_EXP_TABLE, KmqImages, SONG_START_DELAY } from "../constants";
 import { IPCLogger } from "../logger";
 import { calculateTotalRoundExp } from "../commands/game_commands/exp";
 import { getRankNameByLevel } from "../commands/game_commands/profile";
@@ -356,30 +351,22 @@ export default class GameSession extends Session {
             const useLargerScoreboard =
                 this.scoreboard.shouldUseLargerScoreboard();
 
-            let fields: Eris.EmbedField[] = [];
-
-            let scoreboardTitle = "";
-            if (useLargerScoreboard) {
-                fields = this.scoreboard.getScoreboardEmbedThreeFields(
-                    messageContext.guildID,
-                    ROUND_MAX_SCOREBOARD_PLAYERS,
+            const fields: Eris.EmbedField[] =
+                this.scoreboard.getScoreboardEmbedFields(
                     false,
                     true,
+                    messageContext.guildID,
                     roundResultIDs
                 );
-            } else {
+
+            let scoreboardTitle = "";
+            if (!useLargerScoreboard) {
                 scoreboardTitle = "\n\n";
                 scoreboardTitle += bold(
                     LocalizationManager.localizer.translate(
                         messageContext.guildID,
                         "command.score.scoreboardTitle"
                     )
-                );
-
-                fields = this.scoreboard.getScoreboardEmbedFields(
-                    false,
-                    true,
-                    roundResultIDs
                 );
             }
 

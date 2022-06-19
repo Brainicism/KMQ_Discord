@@ -10,7 +10,6 @@ import {
     EMBED_SUCCESS_COLOR,
     KmqImages,
     REVIEW_LINK,
-    ROUND_MAX_SCOREBOARD_PLAYERS,
     VOTE_LINK,
 } from "../constants";
 import { IPCLogger } from "../logger";
@@ -1120,23 +1119,14 @@ export async function sendEndGameMessage(
         });
     } else {
         const winners = gameSession.scoreboard.getWinners();
-        let fields: Array<{ name: string; value: string; inline: boolean }>;
         const useLargerScoreboard =
             gameSession.scoreboard.shouldUseLargerScoreboard();
 
-        if (useLargerScoreboard) {
-            fields = gameSession.scoreboard.getScoreboardEmbedThreeFields(
-                gameSession.guildID,
-                ROUND_MAX_SCOREBOARD_PLAYERS,
-                gameSession.gameType !== GameType.TEAMS,
-                false
-            );
-        } else {
-            fields = gameSession.scoreboard.getScoreboardEmbedFields(
-                gameSession.gameType !== GameType.TEAMS,
-                false
-            );
-        }
+        const fields = gameSession.scoreboard.getScoreboardEmbedFields(
+            gameSession.gameType !== GameType.TEAMS,
+            false,
+            gameSession.guildID
+        );
 
         const endGameMessage = await getGameInfoMessage(gameSession.guildID);
 
@@ -1270,7 +1260,7 @@ export async function sendScoreboardMessage(
     gameSession: GameSession
 ): Promise<Eris.Message> {
     const winnersFieldSubsets = chunkArray(
-        gameSession.scoreboard.getScoreboardEmbedFields(true, true),
+        gameSession.scoreboard.getScoreboardEmbedSingleColumn(true, true),
         EMBED_FIELDS_PER_PAGE
     );
 
