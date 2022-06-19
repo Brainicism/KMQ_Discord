@@ -967,7 +967,7 @@ export default abstract class Session {
             timeRemaining > 0
                 ? `⏰ ${LocalizationManager.localizer.translateNByLocale(
                       locale,
-                      "misc.plural.minute",
+                      "misc.plural.minuteRemaining",
                       Math.ceil(timeRemaining)
                   )}`
                 : `⏰ ${LocalizationManager.localizer.translateByLocale(
