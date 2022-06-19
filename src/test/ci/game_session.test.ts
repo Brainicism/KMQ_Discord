@@ -127,7 +127,7 @@ describe("game session", () => {
 
                 // end session
                 const sendEndGameMessageStub = sandbox.stub(
-                    discord_utils,
+                    gameSession,
                     "sendEndGameMessage"
                 );
 
