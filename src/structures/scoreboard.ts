@@ -102,6 +102,7 @@ export default class Scoreboard {
 
     /**
      * Separates scoreboard players into two fields for large games
+     * @param guildID - The guild ID
      * @param cutoff - How many players to include before truncating the scoreboard
      * @param showExp - Whether to display the EXP gained in the game for each player
      * @param inProgress - Whether the game is in progress
@@ -109,6 +110,7 @@ export default class Scoreboard {
      * @returns An array of 3 DiscordEmbed fields containing each player and their score, separated by newline
      */
     getScoreboardEmbedThreeFields(
+        guildID: string,
         cutoff: number,
         showExp: boolean,
         inProgress: boolean,
@@ -146,7 +148,12 @@ export default class Scoreboard {
 
         return [
             {
-                name: "**Scoreboard**",
+                name: bold(
+                    LocalizationManager.localizer.translate(
+                        guildID,
+                        "command.score.scoreboardTitle"
+                    )
+                ),
                 value: players
                     .slice(0, Math.ceil(players.length / 3))
                     .join("\n"),

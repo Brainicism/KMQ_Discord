@@ -4,6 +4,7 @@ import _ from "lodash";
 import type Eris from "eris";
 
 import {
+    bold,
     chunkArray,
     codeLine,
     delay,
@@ -17,7 +18,6 @@ import {
     getUserVoiceChannel,
     sendEndGameMessage,
     sendInfoMessage,
-    sendRoundMessage,
     tryCreateInteractionErrorAcknowledgement,
     tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
@@ -32,7 +32,12 @@ import {
 import State from "../state";
 import dbContext from "../database_context";
 
-import { CUM_EXP_TABLE, KmqImages, SONG_START_DELAY } from "../constants";
+import {
+    CUM_EXP_TABLE,
+    KmqImages,
+    ROUND_MAX_SCOREBOARD_PLAYERS,
+    SONG_START_DELAY,
+} from "../constants";
 import { IPCLogger } from "../logger";
 import { calculateTotalRoundExp } from "../commands/game_commands/exp";
 import { getRankNameByLevel } from "../commands/game_commands/profile";
@@ -333,14 +338,72 @@ export default class GameSession extends Session {
         );
 
         if (messageContext) {
-            const endRoundMessage = await sendRoundMessage(
+            let roundResultIDs: Array<string>;
+            const playerRoundResults =
+                this.round instanceof GameRound
+                    ? this.round.playerRoundResults
+                    : [];
+
+            if (this.scoreboard instanceof TeamScoreboard) {
+                const teamScoreboard = this.scoreboard as TeamScoreboard;
+                roundResultIDs = playerRoundResults.map(
+                    (x) => teamScoreboard.getTeamOfPlayer(x.player.id).id
+                );
+            } else {
+                roundResultIDs = playerRoundResults.map((x) => x.player.id);
+            }
+
+            const useLargerScoreboard =
+                this.scoreboard.shouldUseLargerScoreboard();
+
+            let fields: Eris.EmbedField[] = [];
+
+            let scoreboardTitle = "";
+            if (useLargerScoreboard) {
+                fields = this.scoreboard.getScoreboardEmbedThreeFields(
+                    messageContext.guildID,
+                    ROUND_MAX_SCOREBOARD_PLAYERS,
+                    false,
+                    true,
+                    roundResultIDs
+                );
+            } else {
+                scoreboardTitle = "\n\n";
+                scoreboardTitle += bold(
+                    LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "command.score.scoreboardTitle"
+                    )
+                );
+
+                fields = this.scoreboard.getScoreboardEmbedFields(
+                    false,
+                    true,
+                    roundResultIDs
+                );
+            }
+
+            const description = `${this.round.getEndRoundDescription(
                 messageContext,
-                this.scoreboard,
-                this,
-                this.guildPreference.gameOptions.guessModeType,
-                this.guildPreference.isMultipleChoiceMode(),
-                remainingDuration,
-                this.songSelector.getUniqueSongCounter(this.guildPreference)
+                this.songSelector.getUniqueSongCounter(this.guildPreference),
+                playerRoundResults
+            )}${scoreboardTitle}`;
+
+            const correctGuess = playerRoundResults.length > 0;
+            const embedColor = this.round.getEndRoundColor(
+                correctGuess,
+                await userBonusIsActive(
+                    playerRoundResults[0]?.player.id ?? messageContext.author.id
+                )
+            );
+
+            const endRoundMessage = await this.sendRoundMessage(
+                messageContext,
+                fields,
+                description,
+                embedColor,
+                correctGuess && !this.guildPreference.isMultipleChoiceMode(),
+                remainingDuration
             );
 
             round.roundMessageID = endRoundMessage?.id;

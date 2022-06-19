@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import * as uuid from "uuid";
 import {
     ConflictingGameOptions,
     GameOptionCommand,
@@ -35,19 +34,14 @@ import {
     isPremiumRequest,
     userBonusIsActive,
 } from "./game_utils";
-import { getFact } from "../fact_generator";
 import EmbedPaginator from "eris-pagination";
 import Eris from "eris";
 import GameOption from "../enums/game_option_name";
-import GameRound from "../structures/game_round";
 import GameType from "../enums/game_type";
-import GuessModeType from "../enums/option_types/guess_mode_type";
-import ListeningRound from "../structures/listening_round";
 import LocaleType from "../enums/locale_type";
 import LocalizationManager from "./localization_manager";
 import MessageContext from "../structures/message_context";
 import State from "../state";
-import TeamScoreboard from "../structures/team_scoreboard";
 import axios from "axios";
 import dbContext from "../database_context";
 import type { EmbedGenerator, GuildTextableMessage } from "../types";
@@ -58,10 +52,8 @@ import type GameInfoMessage from "../interfaces/game_info_message";
 import type GameOptions from "../interfaces/game_options";
 import type GameSession from "../structures/game_session";
 import type GuildPreference from "../structures/guild_preference";
-import type Round from "../structures/round";
-import type Scoreboard from "../structures/scoreboard";
 import type Session from "../structures/session";
-import type UniqueSongCounter from "../interfaces/unique_song_counter";
+import type TeamScoreboard from "../structures/team_scoreboard";
 
 const logger = new IPCLogger("discord_utils");
 
@@ -609,246 +601,6 @@ export async function sendInfoMessage(
     );
 }
 
-function getAliasFooter(
-    round: Round,
-    guessModeType: GuessModeType,
-    locale: LocaleType
-): string {
-    const aliases: Array<string> = [];
-    if (guessModeType === GuessModeType.ARTIST) {
-        if (round.song.hangulArtistName) {
-            if (locale === LocaleType.KO) {
-                aliases.push(round.song.artistName);
-            } else {
-                aliases.push(round.song.hangulArtistName);
-            }
-        }
-
-        aliases.push(...round.artistAliases);
-    } else {
-        if (round.song.hangulSongName) {
-            if (locale === LocaleType.KO) {
-                aliases.push(round.song.originalSongName);
-            } else {
-                aliases.push(round.song.originalHangulSongName);
-            }
-        }
-
-        aliases.push(...round.songAliases);
-    }
-
-    if (aliases.length === 0) {
-        return "";
-    }
-
-    const aliasesText = LocalizationManager.localizer.translateByLocale(
-        locale,
-        "misc.inGame.aliases"
-    );
-
-    return `${aliasesText}: ${aliases.join(", ")}`;
-}
-
-function getDurationFooter(
-    locale: LocaleType,
-    timeRemaining: number,
-    nonEmptyFooter: boolean
-): string {
-    if (!timeRemaining) {
-        return "";
-    }
-
-    let durationText = "";
-    if (nonEmptyFooter) {
-        durationText += "\n";
-    }
-
-    durationText +=
-        timeRemaining > 0
-            ? `⏰ ${LocalizationManager.localizer.translateNByLocale(
-                  locale,
-                  "misc.plural.minute",
-                  Math.ceil(timeRemaining)
-              )}`
-            : `⏰ ${LocalizationManager.localizer.translateByLocale(
-                  locale,
-                  "misc.timeFinished"
-              )}!`;
-
-    return durationText;
-}
-
-/**
- * Sends a message displaying song/game related information
- * @param messageContext - An object to pass along relevant parts of Eris.Message
- * @param scoreboard - The GameSession's corresponding Scoreboard
- * @param session - The session generating this end round message
- * @param guessModeType - The type of guess mode
- * @param isMultipleChoiceMode  - Whether the game is in multiple choice mode
- * @param timeRemaining - The time remaining for the duration option
- * @param uniqueSongCounter - The unique song counter
- */
-export async function sendRoundMessage(
-    messageContext: MessageContext,
-    scoreboard: Scoreboard,
-    session: Session,
-    guessModeType: GuessModeType,
-    isMultipleChoiceMode: boolean,
-    timeRemaining?: number,
-    uniqueSongCounter?: UniqueSongCounter
-): Promise<Eris.Message<Eris.TextableChannel>> {
-    const isListeningSession = session.isListeningSession();
-    const useLargerScoreboard =
-        !isListeningSession && scoreboard.shouldUseLargerScoreboard();
-
-    let scoreboardTitle = "";
-    if (!isListeningSession && !useLargerScoreboard) {
-        scoreboardTitle = "\n\n";
-        scoreboardTitle += bold(
-            LocalizationManager.localizer.translate(
-                messageContext.guildID,
-                "command.score.scoreboardTitle"
-            )
-        );
-    }
-
-    const round = session.round;
-    const playerRoundResults =
-        round instanceof GameRound ? round.playerRoundResults : [];
-
-    const description = `${round.getEndRoundDescription(
-        messageContext,
-        uniqueSongCounter,
-        playerRoundResults
-    )}${scoreboardTitle}`;
-
-    let fields: Array<{ name: string; value: string; inline: boolean }> = [];
-    let roundResultIDs: Array<string>;
-    if (scoreboard instanceof TeamScoreboard) {
-        const teamScoreboard = scoreboard as TeamScoreboard;
-        roundResultIDs = playerRoundResults.map(
-            (x) => teamScoreboard.getTeamOfPlayer(x.player.id).id
-        );
-    } else {
-        roundResultIDs = playerRoundResults.map((x) => x.player.id);
-    }
-
-    if (!isListeningSession) {
-        if (useLargerScoreboard) {
-            fields = scoreboard.getScoreboardEmbedThreeFields(
-                ROUND_MAX_SCOREBOARD_PLAYERS,
-                false,
-                true,
-                roundResultIDs
-            );
-        } else {
-            fields = scoreboard.getScoreboardEmbedFields(
-                false,
-                true,
-                roundResultIDs
-            );
-        }
-    }
-
-    const fact = Math.random() <= 0.05 ? getFact(messageContext.guildID) : null;
-    if (fact) {
-        fields.push({
-            name: underline(
-                LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "fact.didYouKnow"
-                )
-            ),
-            value: fact,
-            inline: false,
-        });
-    }
-
-    const correctGuess = playerRoundResults.length > 0;
-    const locale = State.getGuildLocale(messageContext.guildID);
-
-    const songAndArtist = bold(
-        `"${getLocalizedSongName(
-            round.song,
-            locale
-        )}" - ${getLocalizedArtistName(round.song, locale)}`
-    );
-
-    const embed: EmbedPayload = {
-        color: round.getEndRoundColor(
-            correctGuess,
-            await userBonusIsActive(
-                playerRoundResults[0]?.player.id ?? messageContext.author.id
-            )
-        ),
-        title: `${songAndArtist} (${round.song.publishDate.getFullYear()})`,
-        url: `https://youtu.be/${round.song.youtubeLink}`,
-        description,
-        fields,
-    };
-
-    const views = `${friendlyFormattedNumber(
-        round.song.views
-    )} ${LocalizationManager.localizer.translate(
-        messageContext.guildID,
-        "misc.views"
-    )}\n`;
-
-    const aliases = getAliasFooter(round, guessModeType, locale);
-    const duration = getDurationFooter(
-        locale,
-        timeRemaining,
-        [views, aliases].every((x) => x.length > 0)
-    );
-
-    const footerText = `${views}${aliases}${duration}`;
-    const thumbnailUrl = `https://img.youtube.com/vi/${round.song.youtubeLink}/hqdefault.jpg`;
-    if (round instanceof GameRound) {
-        if (isMultipleChoiceMode && round.interactionMessage) {
-            embed["thumbnail"] = { url: thumbnailUrl };
-            embed["footer"] = { text: footerText };
-            await round.interactionMessage.edit({ embeds: [embed as Object] });
-            return round.interactionMessage;
-        }
-    }
-
-    if (round instanceof ListeningRound) {
-        const buttons: Array<Eris.InteractionButton> = [];
-        round.interactionSkipUUID = uuid.v4();
-        buttons.push({
-            type: 2,
-            style: 1,
-            label: LocalizationManager.localizer.translate(
-                messageContext.guildID,
-                "misc.skip"
-            ),
-            custom_id: round.interactionSkipUUID,
-        });
-
-        buttons.push({
-            type: 2,
-            style: 1,
-            label: LocalizationManager.localizer.translate(
-                messageContext.guildID,
-                "misc.bookmark"
-            ),
-            custom_id: "bookmark",
-        });
-
-        round.interactionComponents = [{ type: 1, components: buttons }];
-        embed.components = round.interactionComponents;
-    }
-
-    embed.thumbnailUrl = thumbnailUrl;
-    embed.footerText = footerText;
-    return sendInfoMessage(
-        messageContext,
-        embed,
-        correctGuess && !isMultipleChoiceMode,
-        false
-    );
-}
-
 /**
  * Get a sentence describing the current limit
  * @param guildID - The ID of the guild where the limit is sent
@@ -1374,6 +1126,7 @@ export async function sendEndGameMessage(
 
         if (useLargerScoreboard) {
             fields = gameSession.scoreboard.getScoreboardEmbedThreeFields(
+                gameSession.guildID,
                 ROUND_MAX_SCOREBOARD_PLAYERS,
                 gameSession.gameType !== GameType.TEAMS,
                 false
