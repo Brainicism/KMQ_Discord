@@ -82,8 +82,8 @@ function registerGlobalIntervals(fleet: Fleet): void {
     });
 
     // everyday at 12am UTC => 7pm EST
-    schedule.scheduleJob("0 0 * * *", () => {
-        if (isPrimaryInstance()) {
+    schedule.scheduleJob("0 0 * * *", async () => {
+        if (await isPrimaryInstance()) {
             logger.info("Saving daily stats");
             storeDailyStats(fleet.stats?.guilds);
         }
@@ -92,7 +92,7 @@ function registerGlobalIntervals(fleet: Fleet): void {
     // every hour
     schedule.scheduleJob("15 * * * *", async () => {
         if (process.env.NODE_ENV !== EnvType.PROD) return;
-        if (!isPrimaryInstance() || shouldSkipSeed()) {
+        if (!(await isPrimaryInstance()) || (await shouldSkipSeed())) {
             logger.info("Skipping scheduled Daisuki database seed");
             return;
         }
@@ -102,7 +102,7 @@ function registerGlobalIntervals(fleet: Fleet): void {
         try {
             await seedAndDownloadNewSongs(dbContext);
         } catch (e) {
-            sendDebugAlertWebhook(
+            await sendDebugAlertWebhook(
                 "Download and seed failure",
                 e.toString(),
                 EMBED_ERROR_COLOR,
@@ -113,7 +113,7 @@ function registerGlobalIntervals(fleet: Fleet): void {
 
     // every minute
     schedule.scheduleJob("* * * * *", async () => {
-        if (isPrimaryInstance()) {
+        if (await isPrimaryInstance()) {
             await dbContext.kmq("system_stats").insert({
                 stat_name: "request_latency",
                 stat_value: fleet.eris.requestHandler.latencyRef.latency,
@@ -320,9 +320,9 @@ async function startWebServer(fleet: Fleet): Promise<void> {
             process.exit(1);
         });
 
-        fleet.on("ready", () => {
+        fleet.on("ready", async () => {
             logger.info("All shards have connected.");
-            sendDebugAlertWebhook(
+            await sendDebugAlertWebhook(
                 "Bot started successfully",
                 "Shards have connected!",
                 EMBED_SUCCESS_COLOR,

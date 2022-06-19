@@ -39,7 +39,7 @@ export default class BotWorker extends BaseClusterWorker {
 
         switch (commandName) {
             case "reload_commands":
-                ReloadCommand.reloadCommands();
+                await ReloadCommand.reloadCommands();
                 return null;
             case "game_session_stats": {
                 const activePlayers = Object.values(State.gameSessions).reduce(

@@ -162,7 +162,7 @@ export async function sendBeginGameSessionMessage(
             color: isBonus ? EMBED_SUCCESS_BONUS_COLOR : null,
             thumbnailUrl: KmqImages.HAPPY,
             fields,
-            footerText: getKmqCurrentVersion(),
+            footerText: await getKmqCurrentVersion(),
         },
         false,
         true,

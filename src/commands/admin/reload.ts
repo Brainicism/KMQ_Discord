@@ -1,11 +1,14 @@
+import * as cp from "child_process";
 import { IPCLogger } from "../../logger";
-import { execSync } from "child_process";
 import { sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
+import util from "util";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
+
+const exec = util.promisify(cp.exec);
 
 const logger = new IPCLogger("reload");
 
@@ -29,9 +32,9 @@ export default class ReloadCommand implements BaseCommand {
         ],
     };
 
-    call = ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         try {
-            execSync("npx tsc");
+            await exec("npx tsc");
         } catch (e) {
             logger.error("Error transpiling KMQ commands");
             sendErrorMessage(MessageContext.fromMessage(message), {
@@ -51,15 +54,15 @@ export default class ReloadCommand implements BaseCommand {
             return;
         }
 
-        ReloadCommand.reloadCommands();
+        await ReloadCommand.reloadCommands();
         sendInfoMessage(MessageContext.fromMessage(message), {
             title: "Cluster Reload Complete",
             description: "All changes should now be applied",
         });
     };
 
-    static reloadCommands(): void {
+    static async reloadCommands(): Promise<void> {
         logger.info("Reloading all commands");
-        State.client.reloadCommands();
+        await State.client.reloadCommands();
     }
 }

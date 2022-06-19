@@ -1,5 +1,6 @@
+/* eslint-disable node/no-sync */
 /* eslint-disable no-console */
-import { execSync } from "child_process";
+import * as cp from "child_process";
 import { program } from "commander";
 import dbContext from "../database_context";
 
@@ -49,7 +50,7 @@ function serverShutdown(
                 command = "pm2 restart kmq";
             }
 
-            execSync(command);
+            cp.execSync(command);
             resolve();
         }, restartMinutes * 1000 * 60);
     });

@@ -369,7 +369,7 @@ export function registerIntervals(clusterID: number): void {
         // Cleanup inactive Discord voice connections
         clearInactiveVoiceConnections();
 
-        if (isPrimaryInstance()) {
+        if (await isPrimaryInstance()) {
             // Store per-cluster stats
             await updateSystemStats(clusterID);
 

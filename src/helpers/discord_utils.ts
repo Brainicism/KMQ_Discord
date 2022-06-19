@@ -1359,12 +1359,12 @@ export function getMajorityCount(guildID: string): number {
  * @param color - The embed color
  * @param avatarUrl - The avatar URl to show on the embed
  */
-export function sendDebugAlertWebhook(
+export async function sendDebugAlertWebhook(
     title: string,
     description: string,
     color: number,
     avatarUrl: string
-): void {
+): Promise<void> {
     if (!process.env.ALERT_WEBHOOK_URL) return;
     axios.post(process.env.ALERT_WEBHOOK_URL, {
         embeds: [
@@ -1376,7 +1376,7 @@ export function sendDebugAlertWebhook(
         ],
         username: "Kimiqo",
         avatar_url: avatarUrl,
-        footerText: getKmqCurrentVersion(),
+        footerText: await getKmqCurrentVersion(),
     });
 }
 

@@ -31,21 +31,23 @@ export default class NewsCommand implements BaseCommand {
 
     call = async ({ message }: CommandArgs): Promise<void> => {
         const newsFilePath = path.resolve(__dirname, "../../../data/news.md");
-        if (!fs.existsSync(newsFilePath)) {
+
+        let newsData: string;
+        try {
+            newsData = (await fs.promises.readFile(newsFilePath)).toString();
+        } catch (e) {
             logger.error("News file does not exist");
             return;
         }
-
-        const news = fs.readFileSync(newsFilePath).toString();
 
         await sendInfoMessage(MessageContext.fromMessage(message), {
             title: LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.news.updates.title"
             ),
-            description: news,
+            description: newsData,
             thumbnailUrl: KmqImages.READING_BOOK,
-            footerText: `${getKmqCurrentVersion()} | ${LocalizationManager.localizer.translate(
+            footerText: `${await getKmqCurrentVersion()} | ${LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.news.updates.footer"
             )}`,

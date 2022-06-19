@@ -83,6 +83,7 @@
         "eslint-plugin-i18n-json": "https://github.com/godaddy/eslint-plugin-i18n-json#13d5f18",
         "eslint-plugin-import": "^2.25.4",
         "eslint-plugin-jsdoc": "^39.2.7",
+        "eslint-plugin-node": "^11.1.0",
         "eslint-plugin-only-warn": "^1.0.3",
         "eslint-plugin-sort-imports-es6-autofix": "^0.6.0",
         "eslint-plugin-tsdoc": "^0.2.14",

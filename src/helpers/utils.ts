@@ -123,8 +123,13 @@ export function getAudioDurationInSeconds(songPath: string): Promise<number> {
  * @param filePath - the file path of the JSON file
  * @returns a Javascript object representation of the file
  */
-export function parseJsonFile(filePath: string): any {
-    return JSON.parse(fs.readFileSync(filePath).toString());
+export async function parseJsonFile(filePath: string): Promise<any> {
+    try {
+        const fileContents = (await fs.promises.readFile(filePath)).toString();
+        return JSON.parse(fileContents);
+    } catch (e) {
+        throw new Error(`Unable to read JSON file at: ${filePath}`);
+    }
 }
 
 /**
@@ -438,17 +443,30 @@ export function getMention(userID: string): string {
 }
 
 /**
+ * @param filePath - The file path
+ * @returns whether the path exists
+ */
+export async function pathExists(filePath: string): Promise<boolean> {
+    try {
+        await fs.promises.access(filePath);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+/**
  * @returns whether this instance should skip metrics posting
  */
-export function isPrimaryInstance(): boolean {
-    return fs.existsSync(path.join(__dirname, "../../data/primary"));
+export async function isPrimaryInstance(): Promise<boolean> {
+    return pathExists(path.join(__dirname, "../../data/primary"));
 }
 
 /**
  * @returns whether this instance should skip seed
  */
-export function shouldSkipSeed(): boolean {
-    return fs.existsSync(path.join(__dirname, "../../data/skip_seed"));
+export async function shouldSkipSeed(): Promise<boolean> {
+    return pathExists(path.join(__dirname, "../../data/skip_seed"));
 }
 
 /**
