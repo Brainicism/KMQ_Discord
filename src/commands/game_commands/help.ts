@@ -30,7 +30,7 @@ const helpMessage = async (
     let embedDesc = "";
     let embedFields = [];
     let embedActionRowComponents: Eris.ActionRowComponents[] = null;
-    const commandFiles = KmqClient.getCommandFiles(false);
+    const commandFiles = await KmqClient.getCommandFiles(false);
     for (const command of excludedCommands) {
         delete commandFiles[command];
     }

@@ -8,12 +8,14 @@
         "only-warn",
         "import",
         "sort-imports-es6-autofix",
-        "deprecation"
+        "deprecation",
+        "eslint-plugin-node"
     ],
     "parserOptions": {
         "project": "./tsconfig.json"
     },
     "rules": {
+        "node/no-sync": ["error"],
         "import/order": ["off"],
         "deprecation/deprecation": "warn",
         "@typescript-eslint/await-thenable": [

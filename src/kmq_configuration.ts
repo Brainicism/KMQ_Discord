@@ -1,5 +1,5 @@
 import { IPCLogger } from "./logger";
-import fs from "fs";
+import { parseJsonFile, pathExists } from "./helpers/utils";
 import path from "path";
 
 const logger = new IPCLogger("kmq_feature_switch");
@@ -25,19 +25,17 @@ export default class KmqConfiguration {
         return this.instance;
     }
 
-    static reload(): void {
+    static async reload(): Promise<void> {
         if (!this.instance) return;
         logger.info("Reloading feature switches...");
-        if (!fs.existsSync(featureSwitchFile)) {
+        if (!(await pathExists(featureSwitchFile))) {
             logger.warn("Feature switch file doesn't exist, ignoring...");
             return;
         }
 
         let featureSwitches: any;
         try {
-            featureSwitches = JSON.parse(
-                fs.readFileSync(featureSwitchFile).toString()
-            );
+            featureSwitches = await parseJsonFile(featureSwitchFile);
         } catch (e) {
             logger.error(`Error reading feature switch file. err = ${e}`);
             return;

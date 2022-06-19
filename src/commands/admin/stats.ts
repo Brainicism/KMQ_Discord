@@ -245,7 +245,7 @@ export default class StatsCommand implements BaseCommand {
                 }
             ),
             fields,
-            footerText: `${getKmqCurrentVersion()} | ${LocalizationManager.localizer.translate(
+            footerText: `${await getKmqCurrentVersion()} | ${LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.stats.footer"
             )}`,
