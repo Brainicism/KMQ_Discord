@@ -911,7 +911,6 @@ export default class GameSession extends Session {
 
     /**
      * Sends an embed displaying the winner of the session as well as the scoreboard
-     * @param gameSession - The GameSession that has ended
      */
     async sendEndGameMessage(): Promise<void> {
         const footerText = LocalizationManager.localizer.translate(
