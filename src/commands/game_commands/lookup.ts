@@ -48,7 +48,7 @@ async function lookupByYoutubeID(
     message: GuildTextableMessage,
     videoID: string,
     locale: LocaleType
-): Promise<void> {
+): Promise<boolean> {
     const messageContext = MessageContext.fromMessage(message);
     const guildID = message.guildID;
     const kmqSongEntry: QueriedSong = await dbContext
@@ -69,24 +69,17 @@ async function lookupByYoutubeID(
 
     const daisukiSongEntry = daisukiMVEntry || daisukiAudioEntry;
     if (!daisukiSongEntry) {
-        await sendErrorMessage(messageContext, {
-            title: LocalizationManager.localizer.translate(
-                guildID,
-                "command.lookup.notFound.title"
-            ),
-            description: LocalizationManager.localizer.translate(
-                guildID,
-                "command.lookup.notFound.description"
-            ),
-            thumbnailUrl: KmqImages.DEAD,
-        });
+        // maybe it was falsely parsed as video ID? fallback to song name lookup
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        const found = await lookupBySongName(videoID, locale, message, guildID);
+        if (found) {
+            logger.info(
+                `Lookup succeded through fallback lookup for: ${videoID}`
+            );
+            return true;
+        }
 
-        logger.info(
-            `${getDebugLogHeader(
-                messageContext
-            )} | Could not find song by videoID. videoID = ${videoID}.`
-        );
-        return;
+        return false;
     }
 
     const daisukiLink = getDaisukiLink(daisukiSongEntry.id, !!daisukiMVEntry);
@@ -261,6 +254,8 @@ async function lookupByYoutubeID(
             inline: true,
         })),
     });
+
+    return true;
 }
 
 async function lookupBySongName(
@@ -268,8 +263,7 @@ async function lookupBySongName(
     locale: LocaleType,
     message: GuildTextableMessage,
     guildID: string
-): Promise<void> {
-    const messageContext = MessageContext.fromMessage(message);
+): Promise<boolean> {
     const kmqSongEntries: QueriedSong[] = await dbContext
         .kmq("available_songs")
         .select(SongSelector.getQueriedSongFields())
@@ -280,23 +274,15 @@ async function lookupBySongName(
         .limit(100);
 
     if (kmqSongEntries.length === 0) {
-        await sendInfoMessage(messageContext, {
-            title: LocalizationManager.localizer.translate(
-                guildID,
-                "command.lookup.songNameSearchResult.title"
-            ),
-            description: LocalizationManager.localizer.translate(
-                guildID,
-                "command.lookup.songNameSearchResult.notFoundDescription"
-            ),
-        });
-        logger.info(`Could not find song by song name. songName = ${songName}`);
-        return;
+        return false;
     }
 
     if (kmqSongEntries.length === 1) {
-        await lookupByYoutubeID(message, kmqSongEntries[0].youtubeLink, locale);
-        return;
+        return lookupByYoutubeID(
+            message,
+            kmqSongEntries[0].youtubeLink,
+            locale
+        );
     }
 
     const songEmbeds = kmqSongEntries.map((entry) => ({
@@ -323,6 +309,7 @@ async function lookupBySongName(
     );
 
     await sendPaginationedEmbed(message, embeds);
+    return true;
 }
 
 export default class LookupCommand implements BaseCommand {
@@ -377,6 +364,9 @@ export default class LookupCommand implements BaseCommand {
             arg = `https://${arg}`;
         }
 
+        const messageContext = MessageContext.fromMessage(message);
+
+        // attempt to look up by video ID
         if (isValidURL(arg) || validateID(arg)) {
             let videoID: string = null;
 
@@ -401,14 +391,51 @@ export default class LookupCommand implements BaseCommand {
                 return;
             }
 
-            await lookupByYoutubeID(message, videoID, locale);
+            if (!(await lookupByYoutubeID(message, videoID, locale))) {
+                await sendErrorMessage(messageContext, {
+                    title: LocalizationManager.localizer.translate(
+                        guildID,
+                        "command.lookup.notFound.title"
+                    ),
+                    description: LocalizationManager.localizer.translate(
+                        guildID,
+                        "command.lookup.notFound.description"
+                    ),
+                    thumbnailUrl: KmqImages.DEAD,
+                });
+
+                logger.info(
+                    `${getDebugLogHeader(
+                        messageContext
+                    )} | Could not find song by videoID. videoID = ${videoID}.`
+                );
+            }
         } else {
-            await lookupBySongName(
-                parsedMessage.argument,
-                locale,
-                message,
-                guildID
-            );
+            // lookup by song name
+            // eslint-disable-next-line no-lonely-if
+            if (
+                !(await lookupBySongName(
+                    parsedMessage.argument,
+                    locale,
+                    message,
+                    guildID
+                ))
+            ) {
+                await sendInfoMessage(messageContext, {
+                    title: LocalizationManager.localizer.translate(
+                        guildID,
+                        "command.lookup.songNameSearchResult.title"
+                    ),
+                    description: LocalizationManager.localizer.translate(
+                        guildID,
+                        "command.lookup.songNameSearchResult.notFoundDescription"
+                    ),
+                });
+
+                logger.info(
+                    `Could not find song by song name. songName = ${parsedMessage.argument}`
+                );
+            }
         }
     };
 }
