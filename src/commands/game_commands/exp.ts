@@ -110,6 +110,17 @@ export async function calculateOptionsExpMultiplierInternal(
             name: ExpBonusModifier.SHUFFLE_POPULARITY,
             isPenalty: true,
         });
+    } else if (
+        guildPreference.gameOptions.shuffleType === ShuffleType.WEIGHTED_EASY
+    ) {
+        modifiers.push({
+            displayName: LocalizationManager.localizer.translate(
+                guildPreference.guildID,
+                "command.exp.shuffleWeightedEasyPenalty"
+            ),
+            name: ExpBonusModifier.SHUFFLE_WEIGHTED_EASY,
+            isPenalty: true,
+        });
     }
 
     if (guildPreference.isMultipleChoiceMode()) {
