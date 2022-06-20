@@ -138,6 +138,27 @@ describe("exp command", () => {
                     });
                 });
 
+                describe("shuffle weighted easy penalty", () => {
+                    it("should return vote bonus modifier", async () => {
+                        await guildPreference.setShuffleType(
+                            ShuffleType.WEIGHTED_EASY
+                        );
+
+                        const modifiers =
+                            await calculateOptionsExpMultiplierInternal(
+                                guildPreference,
+                                false,
+                                null
+                            );
+
+                        assert.strictEqual(modifiers.length, 1);
+                        assert.strictEqual(
+                            modifiers[0].name,
+                            ExpBonusModifier.SHUFFLE_WEIGHTED_EASY
+                        );
+                    });
+                });
+
                 describe("multiple choice penalty", () => {
                     const multipleChoicePenaltyMap = {
                         [AnswerType.MULTIPLE_CHOICE_EASY]:
