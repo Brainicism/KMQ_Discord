@@ -159,6 +159,7 @@
             "multipleChoicePenalty": "Multiple Choice Penalty",
             "powerHourBonus": "Power Hour Bonus",
             "shufflePopularityPenalty": "Shuffle Popularity Penalty",
+            "shuffleWeightedEasyPenalty": "Shuffle Weighted Easy Penalty",
             "title": "EXP Bonuses",
             "totalModifier": "Total Modifier",
             "typosAllowedPenalty": "Typos Allowed Penalty",
