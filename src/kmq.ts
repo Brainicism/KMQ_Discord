@@ -47,7 +47,6 @@ const options: Options = {
     token: process.env.BOT_TOKEN,
     clientOptions: {
         disableEvents: {
-            GUILD_ROLE_DELETE: true,
             CHANNEL_PINS_UPDATE: true,
             MESSAGE_UPDATE: true,
             MESSAGE_DELETE: true,
