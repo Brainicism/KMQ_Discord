@@ -190,7 +190,11 @@ export default class StatsCommand implements BaseCommand {
             [LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.stats.system.apiLatency"
-            )]: `${channel.guild.shard.latency} ms`,
+            )]: `${
+                !Number.isFinite(channel.guild.shard.latency)
+                    ? "?"
+                    : channel.guild.shard.latency
+            } ms`,
             [LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.stats.system.requestLatency"
