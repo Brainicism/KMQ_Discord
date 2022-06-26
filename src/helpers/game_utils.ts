@@ -1,4 +1,3 @@
-import * as cp from "child_process";
 import { IPCLogger } from "../logger";
 import { PATREON_SUPPORTER_BADGE } from "../constants";
 import { cleanArtistName, cleanSongName } from "../structures/game_round";
@@ -10,7 +9,6 @@ import SongSelector from "../structures/song_selector";
 import State from "../state";
 import _ from "lodash";
 import dbContext from "../database_context";
-import util from "util";
 import type Gender from "../enums/option_types/gender";
 import type GuildPreference from "../structures/guild_preference";
 import type MatchedArtist from "../interfaces/matched_artist";
@@ -19,7 +17,6 @@ import type QueriedSong from "../interfaces/queried_song";
 import type Session from "../structures/session";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 10;
-const exec = util.promisify(cp.exec);
 const logger = new IPCLogger("game_utils");
 
 interface GroupMatchResults {
@@ -518,13 +515,6 @@ export async function isFirstGameOfDay(userID: string): Promise<boolean> {
 
     if (!player) return true;
     return player["firstGameOfDay"] === 0;
-}
-
-/**
- * @returns KMQ's current version
- */
-export async function getKmqCurrentVersion(): Promise<string> {
-    return (await exec("git describe --tags")).stdout.trim();
 }
 
 /**

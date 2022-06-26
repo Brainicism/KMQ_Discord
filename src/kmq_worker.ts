@@ -1,3 +1,4 @@
+import * as cp from "child_process";
 import { BaseClusterWorker } from "eris-fleet";
 import { config } from "dotenv";
 import path from "path";
@@ -93,6 +94,10 @@ export default class BotWorker extends BaseClusterWorker {
         super(setup);
         State.ipc = this.ipc;
         State.client = this.bot as KmqClient;
+
+        // eslint-disable-next-line node/no-sync
+        State.version = cp.execSync("git describe --tags").toString().trim();
+
         LocalizationManager.localizer = new LocalizationManager();
         logger.info(
             `Started worker ID: ${this.workerID} on cluster ID: ${this.clusterID}`
