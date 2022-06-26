@@ -1,10 +1,8 @@
+/* eslint-disable node/no-sync */
 import * as cp from "child_process";
 import { BaseClusterWorker } from "eris-fleet";
-import { config } from "dotenv";
-import path from "path";
-import schedule from "node-schedule";
-
 import { IPCLogger } from "./logger";
+import { config } from "dotenv";
 import {
     registerClientEvents,
     registerIntervals,
@@ -20,6 +18,9 @@ import ReloadCommand from "./commands/admin/reload";
 import Session from "./structures/session";
 import State from "./state";
 import dbContext from "./database_context";
+import fs from "fs";
+import path from "path";
+import schedule from "node-schedule";
 import type KmqClient from "./kmq_client";
 
 const logger = new IPCLogger("kmq");
@@ -39,6 +40,8 @@ export default class BotWorker extends BaseClusterWorker {
         }
 
         switch (commandName) {
+            case "worker_version":
+                return State.version;
             case "reload_commands":
                 await ReloadCommand.reloadCommands();
                 return null;
@@ -95,8 +98,20 @@ export default class BotWorker extends BaseClusterWorker {
         State.ipc = this.ipc;
         State.client = this.bot as KmqClient;
 
-        // eslint-disable-next-line node/no-sync
-        State.version = cp.execSync("git describe --tags").toString().trim();
+        try {
+            State.version = cp
+                .execSync("git describe --tags")
+                .toString()
+                .trim();
+        } catch (e) {
+            State.version = `v${
+                JSON.parse(
+                    fs
+                        .readFileSync(path.join(__dirname, "../package.json"))
+                        .toString()
+                ).version
+            }`;
+        }
 
         LocalizationManager.localizer = new LocalizationManager();
         logger.info(
