@@ -5,6 +5,7 @@ import { config } from "dotenv";
 import { getInternalLogger } from "./logger";
 import {
     isPrimaryInstance,
+    measureExecutionTime,
     shouldSkipSeed,
     standardDateFormat,
 } from "./helpers/utils";
@@ -190,11 +191,18 @@ async function startWebServer(fleet: Fleet): Promise<void> {
 
         let gameplayStats: Map<number, any>;
         let fleetStats: Stats;
+        let workerVersions: Map<Number, string>;
         try {
             gameplayStats = (await fleet.ipc.allClustersCommand(
                 "game_session_stats",
                 true
             )) as Map<number, any>;
+
+            workerVersions = (await fleet.ipc.allClustersCommand(
+                "worker_version",
+                true
+            )) as Map<number, any>;
+
             fleetStats = await fleet.collectStats();
         } catch (e) {
             logger.error(`Error fetching stats for status page. err = ${e}`);
@@ -212,7 +220,7 @@ async function startWebServer(fleet: Fleet): Promise<void> {
                     healthIndicator = HealthIndicator.WARNING;
                 else healthIndicator = HealthIndicator.HEALTHY;
                 return {
-                    latency: rawShardData.latency,
+                    latency: rawShardData.latency ?? "?",
                     status: rawShardData.status,
                     members: rawShardData.members.toLocaleString(),
                     id: rawShardData.id,
@@ -230,12 +238,24 @@ async function startWebServer(fleet: Fleet): Promise<void> {
                 uptime: standardDateFormat(
                     new Date(Date.now() - fleetCluster.uptime)
                 ),
+                version: workerVersions.get(i),
                 voiceConnections: fleetCluster.voice,
                 activeGameSessions: gameplayStats.get(i).activeGameSessions,
                 activePlayers: gameplayStats.get(i).activePlayers,
                 shardData,
             });
         }
+
+        const databaseLatency = await measureExecutionTime(
+            dbContext.kmq.raw("SELECT 1;")
+        );
+
+        let databaseLatencyHealthIndicator: HealthIndicator;
+        if (databaseLatency < 10)
+            databaseLatencyHealthIndicator = HealthIndicator.HEALTHY;
+        else if (databaseLatency < 50)
+            databaseLatencyHealthIndicator = HealthIndicator.WARNING;
+        else databaseLatencyHealthIndicator = HealthIndicator.UNHEALTHY;
 
         const requestLatency =
             fleetStats.centralRequestHandlerLatencyRef.latency;
@@ -248,10 +268,11 @@ async function startWebServer(fleet: Fleet): Promise<void> {
         else requestLatencyHealthIndicator = HealthIndicator.UNHEALTHY;
 
         const loadAvg = os.loadavg();
+        const cpuCount = os.cpus().length;
         let loadAvgHealthIndicator: HealthIndicator;
-        if (loadAvg.some((x) => x > 1))
+        if (loadAvg.some((x) => x > cpuCount))
             loadAvgHealthIndicator = HealthIndicator.UNHEALTHY;
-        else if (loadAvg.some((x) => x > 0.5))
+        else if (loadAvg.some((x) => x > cpuCount / 2))
             loadAvgHealthIndicator = HealthIndicator.WARNING;
         else loadAvgHealthIndicator = HealthIndicator.HEALTHY;
 
@@ -259,6 +280,10 @@ async function startWebServer(fleet: Fleet): Promise<void> {
             requestLatency: {
                 latency: requestLatency,
                 healthIndicator: requestLatencyHealthIndicator,
+            },
+            databaseLatency: {
+                latency: databaseLatency.toFixed(0),
+                healthIndicator: databaseLatencyHealthIndicator,
             },
             loadAverage: {
                 loadAverage: loadAvg.map((x) => x.toFixed(2)).join(", "),
