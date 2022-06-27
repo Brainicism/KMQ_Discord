@@ -10,7 +10,6 @@ import {
     sendErrorMessage,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
-import { getKmqCurrentVersion } from "../../helpers/game_utils";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
@@ -245,7 +244,9 @@ export default class StatsCommand implements BaseCommand {
                 }
             ),
             fields,
-            footerText: `${await getKmqCurrentVersion()} | ${LocalizationManager.localizer.translate(
+            footerText: `${
+                State.version
+            } | ${LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.stats.footer"
             )}`,

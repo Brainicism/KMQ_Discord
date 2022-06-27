@@ -7,6 +7,7 @@ import type ListeningSession from "./structures/listening_session";
 import type LocaleType from "./enums/locale_type";
 
 export default class State {
+    static version: string;
     static gameSessions: { [guildID: string]: GameSession } = {};
     static listeningSessions: { [guildID: string]: ListeningSession } = {};
     static client: KmqClient;

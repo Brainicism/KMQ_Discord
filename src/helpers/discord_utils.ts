@@ -25,7 +25,6 @@ import {
 } from "./utils";
 import {
     getAvailableSongCount,
-    getKmqCurrentVersion,
     getLocalizedArtistName,
     getLocalizedSongName,
     isPremiumRequest,
@@ -1366,7 +1365,7 @@ export async function sendDebugAlertWebhook(
     avatarUrl: string
 ): Promise<void> {
     if (!process.env.ALERT_WEBHOOK_URL) return;
-    axios.post(process.env.ALERT_WEBHOOK_URL, {
+    await axios.post(process.env.ALERT_WEBHOOK_URL, {
         embeds: [
             {
                 title,
@@ -1376,7 +1375,7 @@ export async function sendDebugAlertWebhook(
         ],
         username: "Kimiqo",
         avatar_url: avatarUrl,
-        footerText: await getKmqCurrentVersion(),
+        footerText: State.version,
     });
 }
 

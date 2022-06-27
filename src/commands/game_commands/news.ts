@@ -4,9 +4,9 @@ import {
     getDebugLogHeader,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
-import { getKmqCurrentVersion } from "../../helpers/game_utils";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
+import State from "../../state";
 import fs from "fs";
 import path from "path";
 import type BaseCommand from "../interfaces/base_command";
@@ -47,7 +47,9 @@ export default class NewsCommand implements BaseCommand {
             ),
             description: newsData,
             thumbnailUrl: KmqImages.READING_BOOK,
-            footerText: `${await getKmqCurrentVersion()} | ${LocalizationManager.localizer.translate(
+            footerText: `${
+                State.version
+            } | ${LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.news.updates.footer"
             )}`,
