@@ -832,7 +832,8 @@ export default abstract class Session {
      * Sends a message displaying song/game related information
      * @param messageContext - An object to pass along relevant parts of Eris.Message
      * @param fields - The embed fields
-     * @param descriptin - The description
+     * @param round - The round
+     * @param description - The description
      * @param embedColor - The embed color
      * @param shouldReply - Whether it should be a reply
      * @param timeRemaining - The time remaining
@@ -842,6 +843,7 @@ export default abstract class Session {
     protected async sendRoundMessage(
         messageContext: MessageContext,
         fields: Eris.EmbedField[],
+        round: Round,
         description: string,
         embedColor: number,
         shouldReply: boolean,
@@ -867,21 +869,21 @@ export default abstract class Session {
 
         const songAndArtist = bold(
             `"${getLocalizedSongName(
-                this.round.song,
+                round.song,
                 locale
-            )}" - ${getLocalizedArtistName(this.round.song, locale)}`
+            )}" - ${getLocalizedArtistName(round.song, locale)}`
         );
 
         const embed: EmbedPayload = {
             color: embedColor,
-            title: `${songAndArtist} (${this.round.song.publishDate.getFullYear()})`,
-            url: `https://youtu.be/${this.round.song.youtubeLink}`,
+            title: `${songAndArtist} (${round.song.publishDate.getFullYear()})`,
+            url: `https://youtu.be/${round.song.youtubeLink}`,
             description,
             fields,
         };
 
         const views = `${friendlyFormattedNumber(
-            this.round.song.views
+            round.song.views
         )} ${LocalizationManager.localizer.translate(
             messageContext.guildID,
             "misc.views"
@@ -899,24 +901,24 @@ export default abstract class Session {
         );
 
         const footerText = `${views}${aliases}${duration}`;
-        const thumbnailUrl = `https://img.youtube.com/vi/${this.round.song.youtubeLink}/hqdefault.jpg`;
-        if (this.round instanceof GameRound) {
+        const thumbnailUrl = `https://img.youtube.com/vi/${round.song.youtubeLink}/hqdefault.jpg`;
+        if (round instanceof GameRound) {
             if (
                 this.guildPreference.isMultipleChoiceMode() &&
-                this.round.interactionMessage
+                round.interactionMessage
             ) {
                 embed["thumbnail"] = { url: thumbnailUrl };
                 embed["footer"] = { text: footerText };
-                await this.round.interactionMessage.edit({
+                await round.interactionMessage.edit({
                     embeds: [embed as Object],
                 });
-                return this.round.interactionMessage;
+                return round.interactionMessage;
             }
         }
 
-        if (this.round instanceof ListeningRound) {
+        if (round instanceof ListeningRound) {
             const buttons: Array<Eris.InteractionButton> = [];
-            this.round.interactionSkipUUID = uuid.v4();
+            round.interactionSkipUUID = uuid.v4();
             buttons.push({
                 type: 2,
                 style: 1,
@@ -924,7 +926,7 @@ export default abstract class Session {
                     messageContext.guildID,
                     "misc.skip"
                 ),
-                custom_id: this.round.interactionSkipUUID,
+                custom_id: round.interactionSkipUUID,
             });
 
             buttons.push({
@@ -937,10 +939,8 @@ export default abstract class Session {
                 custom_id: "bookmark",
             });
 
-            this.round.interactionComponents = [
-                { type: 1, components: buttons },
-            ];
-            embed.components = this.round.interactionComponents;
+            round.interactionComponents = [{ type: 1, components: buttons }];
+            embed.components = round.interactionComponents;
         }
 
         embed.thumbnailUrl = thumbnailUrl;
