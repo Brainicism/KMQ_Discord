@@ -345,10 +345,7 @@ export default class GameSession extends Session {
 
         if (messageContext) {
             let roundResultIDs: Array<string>;
-            const playerRoundResults =
-                this.round instanceof GameRound
-                    ? this.round.playerRoundResults
-                    : [];
+            const playerRoundResults = round.playerRoundResults;
 
             if (this.scoreboard instanceof TeamScoreboard) {
                 const teamScoreboard = this.scoreboard as TeamScoreboard;
@@ -381,14 +378,14 @@ export default class GameSession extends Session {
                 );
             }
 
-            const description = `${this.round.getEndRoundDescription(
+            const description = `${round.getEndRoundDescription(
                 messageContext,
                 this.songSelector.getUniqueSongCounter(this.guildPreference),
                 playerRoundResults
             )}${scoreboardTitle}`;
 
             const correctGuess = playerRoundResults.length > 0;
-            const embedColor = this.round.getEndRoundColor(
+            const embedColor = round.getEndRoundColor(
                 correctGuess,
                 await userBonusIsActive(
                     playerRoundResults[0]?.player.id ?? messageContext.author.id
@@ -398,6 +395,7 @@ export default class GameSession extends Session {
             const endRoundMessage = await this.sendRoundMessage(
                 messageContext,
                 fields,
+                round,
                 description,
                 embedColor,
                 correctGuess && !this.guildPreference.isMultipleChoiceMode(),

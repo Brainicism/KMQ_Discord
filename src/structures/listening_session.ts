@@ -92,12 +92,12 @@ export default class ListeningSession extends Session {
                 this.guildPreference
             );
 
-            const embedColor = this.round.getEndRoundColor(
+            const embedColor = round.getEndRoundColor(
                 null,
                 await userBonusIsActive(messageContext.author.id)
             );
 
-            const description = `${this.round.getEndRoundDescription(
+            const description = `${round.getEndRoundDescription(
                 messageContext,
                 this.songSelector.getUniqueSongCounter(this.guildPreference),
                 null
@@ -106,6 +106,7 @@ export default class ListeningSession extends Session {
             const startRoundMessage = await this.sendRoundMessage(
                 messageContext,
                 [],
+                round,
                 description,
                 embedColor,
                 false,
