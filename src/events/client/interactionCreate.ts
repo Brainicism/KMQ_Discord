@@ -104,7 +104,6 @@ function processGroupsAutocompleteInteraction(
     }
 
     const matchingGroups = Object.entries(State.artistToEntry)
-        .filter((x) => !x[0].includes("+"))
         .filter((x) => x[0].toLowerCase().startsWith(userInput.toLowerCase()))
         .sort((a, b) => a[0].toLowerCase().localeCompare(b[0].toLowerCase()))
         .slice(0, 25);
