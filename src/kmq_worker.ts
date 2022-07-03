@@ -59,6 +59,24 @@ export default class BotWorker extends BaseClusterWorker {
             return evalResult;
         }
 
+        if (commandName.startsWith("announce_restart")) {
+            const components = commandName.split("|");
+            components.shift();
+
+            State.restartNotification = {
+                soft: parseInt(components[0], 10) === 1,
+                restartTime: new Date(parseInt(components[1], 10)),
+            };
+
+            logger.info(
+                `Received restart notification: ${JSON.stringify(
+                    State.restartNotification
+                )}`
+            );
+
+            return null;
+        }
+
         switch (commandName) {
             case "worker_version":
                 return State.version;
@@ -86,6 +104,10 @@ export default class BotWorker extends BaseClusterWorker {
                 };
             }
 
+            case "clear_restart":
+                logger.info("Cleared pending restart notification");
+                State.restartNotification = null;
+                return null;
             default:
                 return null;
         }

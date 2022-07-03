@@ -427,7 +427,7 @@ describe("command prechecks", () => {
             it("should return false", async () => {
                 sandbox
                     .stub(management_utils, "getTimeUntilRestart")
-                    .callsFake(() => Promise.resolve(5));
+                    .callsFake(() => 5);
 
                 assert.strictEqual(
                     await CommandPrechecks.notRestartingPrecheck({
@@ -443,7 +443,7 @@ describe("command prechecks", () => {
             it("should return true", async () => {
                 sandbox
                     .stub(management_utils, "getTimeUntilRestart")
-                    .callsFake(() => Promise.resolve(null));
+                    .callsFake(() => null);
 
                 assert.strictEqual(
                     await CommandPrechecks.notRestartingPrecheck({

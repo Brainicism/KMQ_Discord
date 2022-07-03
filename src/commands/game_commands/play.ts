@@ -249,7 +249,7 @@ export default class PlayCommand implements BaseCommand {
         const voiceChannel = getUserVoiceChannel(messageContext);
         const gameSessions = State.gameSessions;
 
-        const timeUntilRestart = await getTimeUntilRestart();
+        const timeUntilRestart = getTimeUntilRestart();
         if (timeUntilRestart) {
             await sendErrorMessage(messageContext, {
                 title: LocalizationManager.localizer.translate(

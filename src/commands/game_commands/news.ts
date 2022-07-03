@@ -1,5 +1,5 @@
+import { DataFiles, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
-import { KmqImages } from "../../constants";
 import {
     getDebugLogHeader,
     sendInfoMessage,
@@ -8,7 +8,6 @@ import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
 import fs from "fs";
-import path from "path";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -30,11 +29,9 @@ export default class NewsCommand implements BaseCommand {
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
-        const newsFilePath = path.resolve(__dirname, "../../../data/news.md");
-
         let newsData: string;
         try {
-            newsData = (await fs.promises.readFile(newsFilePath)).toString();
+            newsData = (await fs.promises.readFile(DataFiles.NEWS)).toString();
         } catch (e) {
             logger.error("News file does not exist");
             return;

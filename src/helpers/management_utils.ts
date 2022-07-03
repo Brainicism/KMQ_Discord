@@ -27,16 +27,11 @@ const RESTART_WARNING_INTERVALS = new Set([10, 5, 3, 2, 1]);
  * Gets the remaining time until the next server restart
  * @returns null if no restart is imminent, a date in epoch milliseconds
  */
-export async function getTimeUntilRestart(): Promise<number> {
-    const restartNotificationTime = (
-        await dbContext.kmq("restart_notifications").where("id", 1)
-    )[0].restart_time;
+export function getTimeUntilRestart(): number {
+    if (!State.restartNotification) return null;
+    const restartNotificationTime =
+        State.restartNotification.restartTime.getTime();
 
-    if (
-        !restartNotificationTime ||
-        KmqConfiguration.Instance.restartNotificationDisabled()
-    )
-        return null;
     return Math.floor(
         (restartNotificationTime - new Date().getTime()) / (1000 * 60)
     );
@@ -141,7 +136,7 @@ async function updateSystemStats(clusterID: number): Promise<void> {
 /** Updates the bot's song listening status */
 export async function updateBotStatus(): Promise<void> {
     const { client } = State;
-    const timeUntilRestart = await getTimeUntilRestart();
+    const timeUntilRestart = getTimeUntilRestart();
     if (timeUntilRestart) {
         client.editStatus("dnd", {
             name: `Restarting in ${timeUntilRestart} minutes...`,
@@ -298,11 +293,8 @@ async function reloadLocales(): Promise<void> {
 /**
  * Clears any existing restart timers
  */
-export async function clearRestartNotification(): Promise<void> {
-    await dbContext
-        .kmq("restart_notifications")
-        .where("id", "=", "1")
-        .update({ restart_time: null });
+export function clearRestartNotification(): void {
+    State.restartNotification = null;
 }
 
 /**
@@ -352,7 +344,7 @@ export function registerIntervals(clusterID: number): void {
         KmqConfiguration.reload();
         if (process.env.NODE_ENV !== EnvType.PROD) return;
         // set up check for restart notifications
-        const timeUntilRestart = await getTimeUntilRestart();
+        const timeUntilRestart = getTimeUntilRestart();
         if (timeUntilRestart) {
             updateBotStatus();
             await checkRestartNotification(timeUntilRestart);
