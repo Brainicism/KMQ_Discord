@@ -623,11 +623,6 @@ export default abstract class Session {
             await Promise.allSettled(
                 Object.entries(State.client.commands).map(
                     async ([commandName, command]) => {
-                        if (command.aliases.includes(commandName)) {
-                            // Ignore duplicate calls from aliases
-                            return;
-                        }
-
                         if (command.resetPremium) {
                             logger.info(
                                 `gid: ${this.guildID} | Resetting premium for game option: ${commandName}`
