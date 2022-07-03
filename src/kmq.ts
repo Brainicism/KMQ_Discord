@@ -156,9 +156,36 @@ async function startWebServer(fleet: Fleet): Promise<void> {
 
     httpServer.register(fastifyResponseCaching, { ttl: 5000 });
 
+    httpServer.post("/announce-restart", {}, async (request, reply) => {
+        if (request.ip !== "127.0.0.1") {
+            logger.error("Announce restart attempted by non-allowed IP");
+            reply.code(401).send();
+            return;
+        }
+
+        const isSoftRestart = request.body["soft"] ? 1 : 0;
+        const restartTimeEpoch = request.body["restartTime"];
+        await fleet.ipc.allClustersCommand(
+            `announce_restart|${isSoftRestart}|${restartTimeEpoch}`
+        );
+        reply.code(200).send();
+    });
+
+    httpServer.post("/clear-restart", {}, async (request, reply) => {
+        if (request.ip !== "127.0.0.1") {
+            logger.error("Clear restart attempted by non-allowed IP");
+            reply.code(401).send();
+            return;
+        }
+
+        await fleet.ipc.allClustersCommand("clear_restart");
+        reply.code(200).send();
+    });
+
     httpServer.post("/soft-restart", {}, async (request, reply) => {
         if (request.ip !== "127.0.0.1") {
             logger.error("Soft restart attempted by non-allowed IP");
+            reply.code(401).send();
             return;
         }
 
@@ -166,7 +193,7 @@ async function startWebServer(fleet: Fleet): Promise<void> {
         fleet.restartAllClusters(false);
         reply.code(200).send();
         logger.info("Clearing existing restart notifications...");
-        await clearRestartNotification();
+        clearRestartNotification();
     });
 
     httpServer.post("/voted", {}, async (request, reply) => {
@@ -362,7 +389,7 @@ async function startWebServer(fleet: Fleet): Promise<void> {
         registerProcessEvents(fleet);
 
         logger.info("Clearing existing restart notifications...");
-        await clearRestartNotification();
+        clearRestartNotification();
 
         logger.info("Registering global intervals");
         registerGlobalIntervals(fleet);

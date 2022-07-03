@@ -214,3 +214,18 @@ export const SELECTION_WEIGHT_VALUES_HARD = [1, 2, 4, 8, 16];
 export const SELECTION_WEIGHT_VALUES_EASY = [
     ...SELECTION_WEIGHT_VALUES_HARD,
 ].reverse();
+
+export const DataFiles = {
+    SKIP_SEED_COOKIE: path.join(__dirname, "../data/skip_seed"),
+    PRIMARY_COOKIE: path.join(__dirname, "../data/primary"),
+    NEWS: path.join(__dirname, "../data/news.md"),
+    FROZEN_TABLE_SCHEMA: path.join(
+        __dirname,
+        "../data/frozen_table_schema.json"
+    ),
+    GROUP_LIST: path.join(__dirname, "../data/group_list.txt"),
+    FEATURE_SWITCH_CONFIG: path.join(
+        __dirname,
+        "../data/feature_switch_config.json"
+    ),
+};

@@ -1,4 +1,5 @@
 /* eslint-disable tsdoc/syntax */
+import { DataFiles } from "../constants";
 import { IPCLogger } from "../logger";
 import { exec } from "child_process";
 import LocalizationManager from "./localization_manager";
@@ -6,7 +7,6 @@ import _ from "lodash";
 import crypto from "crypto";
 import fs from "fs";
 import moment from "moment-timezone";
-import path from "path";
 
 const logger = new IPCLogger("utils");
 
@@ -459,14 +459,14 @@ export async function pathExists(filePath: string): Promise<boolean> {
  * @returns whether this instance should skip metrics posting
  */
 export async function isPrimaryInstance(): Promise<boolean> {
-    return pathExists(path.join(__dirname, "../../data/primary"));
+    return pathExists(DataFiles.PRIMARY_COOKIE);
 }
 
 /**
  * @returns whether this instance should skip seed
  */
 export async function shouldSkipSeed(): Promise<boolean> {
-    return pathExists(path.join(__dirname, "../../data/skip_seed"));
+    return pathExists(DataFiles.SKIP_SEED_COOKIE);
 }
 
 /**
