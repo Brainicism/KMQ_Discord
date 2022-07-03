@@ -6,7 +6,7 @@ import assert from "assert";
 describe("player", () => {
     let player: Player;
     beforeEach(() => {
-        player = new Player("12345", "guildID", "someurl", 0);
+        player = new Player("12345", "guildID", "someurl", 0, "ohmi");
     });
 
     describe("increment score", () => {
@@ -38,7 +38,14 @@ describe("player", () => {
 
         describe("first game of the day", () => {
             beforeEach(() => {
-                player = new Player("12345", "guildID", "someurl", 0, true);
+                player = new Player(
+                    "12345",
+                    "guildID",
+                    "someurl",
+                    0,
+                    "ohmi",
+                    true
+                );
             });
 
             describe("player's exp is incremented multiple times", () => {

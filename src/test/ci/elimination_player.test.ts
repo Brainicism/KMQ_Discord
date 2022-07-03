@@ -11,7 +11,8 @@ describe("elimination player", () => {
                     "12345",
                     "guildID",
                     "someurl",
-                    5
+                    5,
+                    "ohmi"
                 );
                 player.decrementLives();
                 assert.strictEqual(player.getLives(), 4);
@@ -24,7 +25,8 @@ describe("elimination player", () => {
                     "12345",
                     "guildID",
                     "someurl",
-                    0
+                    0,
+                    "ohmi"
                 );
                 player.decrementLives();
                 assert.strictEqual(player.getLives(), 0);
@@ -39,7 +41,8 @@ describe("elimination player", () => {
                     "12345",
                     "guildID",
                     "someurl",
-                    5
+                    5,
+                    "ohmi"
                 );
                 assert.strictEqual(player.isEliminated(), false);
             });
@@ -51,7 +54,8 @@ describe("elimination player", () => {
                     "12345",
                     "guildID",
                     "someurl",
-                    0
+                    0,
+                    "ohmi"
                 );
                 assert.strictEqual(player.isEliminated(), true);
             });

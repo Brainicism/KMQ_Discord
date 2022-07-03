@@ -270,7 +270,13 @@ describe("leaderboard command", () => {
 
                     [...Array(INITIAL_TOTAL_ENTRIES).keys()].map((i) =>
                         gameSession.scoreboard.addPlayer(
-                            new Player(i.toString(), null, null, 0)
+                            new Player(
+                                i.toString(),
+                                null,
+                                null,
+                                0,
+                                i.toString()
+                            )
                         )
                     );
 
@@ -625,7 +631,13 @@ describe("leaderboard command", () => {
                         .filter((x) => x !== 0)
                         .map((i) =>
                             gameSession.scoreboard.addPlayer(
-                                new Player(i.toString(), null, null, 0)
+                                new Player(
+                                    i.toString(),
+                                    null,
+                                    null,
+                                    0,
+                                    i.toString()
+                                )
                             )
                         );
                 });
