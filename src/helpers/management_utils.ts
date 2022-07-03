@@ -372,9 +372,6 @@ export function registerIntervals(clusterID: number): void {
         if (await isPrimaryInstance()) {
             // Store per-cluster stats
             await updateSystemStats(clusterID);
-
-            // Sync state with Patreon subscribers
-            updatePremiumUsers();
         }
     });
 
@@ -387,6 +384,11 @@ export function registerIntervals(clusterID: number): void {
         if (timeUntilRestart) {
             updateBotStatus();
             await checkRestartNotification(timeUntilRestart);
+        }
+
+        // Sync state with Patreon subscribers
+        if (await isPrimaryInstance()) {
+            updatePremiumUsers();
         }
     });
 }
