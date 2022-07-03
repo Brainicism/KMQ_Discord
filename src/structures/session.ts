@@ -891,7 +891,8 @@ export default abstract class Session {
 
         const aliases = this.getAliasFooter(
             this.guildPreference.gameOptions.guessModeType,
-            locale
+            locale,
+            round
         );
 
         const duration = this.getDurationFooter(
@@ -1002,31 +1003,33 @@ export default abstract class Session {
         this.startRound(messageContext);
     }
 
+    // eslint-disable-next-line class-methods-use-this
     private getAliasFooter(
         guessModeType: GuessModeType,
-        locale: LocaleType
+        locale: LocaleType,
+        round: Round
     ): string {
         const aliases: Array<string> = [];
         if (guessModeType === GuessModeType.ARTIST) {
-            if (this.round.song.hangulArtistName) {
+            if (round.song.hangulArtistName) {
                 if (locale === LocaleType.KO) {
-                    aliases.push(this.round.song.artistName);
+                    aliases.push(round.song.artistName);
                 } else {
-                    aliases.push(this.round.song.hangulArtistName);
+                    aliases.push(round.song.hangulArtistName);
                 }
             }
 
-            aliases.push(...this.round.artistAliases);
+            aliases.push(...round.artistAliases);
         } else {
-            if (this.round.song.hangulSongName) {
+            if (round.song.hangulSongName) {
                 if (locale === LocaleType.KO) {
-                    aliases.push(this.round.song.originalSongName);
+                    aliases.push(round.song.originalSongName);
                 } else {
-                    aliases.push(this.round.song.originalHangulSongName);
+                    aliases.push(round.song.originalHangulSongName);
                 }
             }
 
-            aliases.push(...this.round.songAliases);
+            aliases.push(...round.songAliases);
         }
 
         if (aliases.length === 0) {
