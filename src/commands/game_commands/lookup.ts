@@ -244,7 +244,7 @@ async function lookupByYoutubeID(
     }
 
     sendInfoMessage(messageContext, {
-        title: `${songName} - ${artistName}`,
+        title: `"${songName}" - ${artistName}`,
         url: `https://youtu.be/${videoID}`,
         description,
         thumbnailUrl: `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`,
