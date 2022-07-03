@@ -316,6 +316,40 @@ export async function reloadBonusGroups(): Promise<void> {
     );
 }
 
+async function reloadArtists(): Promise<void> {
+    const artistAliasMapping = await dbContext
+        .kmq("available_songs")
+        .distinct(["artist_name_en", "artist_aliases"])
+        .select(["artist_name_en", "artist_aliases", "id_artist"])
+        .whereRaw("artist_name_en NOT LIKE ?", ["%+%"]);
+
+    for (const mapping of artistAliasMapping) {
+        const aliases = mapping["artist_aliases"]
+            .split(";")
+            .filter((x: string) => x);
+
+        const artistEntry = {
+            name: mapping["artist_name_en"],
+            id: mapping["id_artist"],
+        };
+
+        State.artistToEntry[mapping["artist_name_en"]] = artistEntry;
+        for (const alias in aliases) {
+            if (alias.length > 0) {
+                State.artistToEntry[alias] = artistEntry;
+            }
+        }
+    }
+
+    State.topArtists = await dbContext
+        .kmq("available_songs")
+        .select(["id_artist AS id", "name"])
+        .join("kpop_groups", "available_songs.id_artist", "kpop_groups.id")
+        .orderByRaw("SUM(views) DESC")
+        .limit(25)
+        .groupBy("id_artist");
+}
+
 async function reloadLocales(): Promise<void> {
     const updatedLocales = await dbContext.kmq("locale").select("*");
     for (const l of updatedLocales) {
@@ -396,6 +430,7 @@ export function registerIntervals(clusterID: number): void {
 /** Reloads caches */
 export function reloadCaches(): void {
     reloadAliases();
+    reloadArtists();
     reloadFactCache();
     reloadBonusGroups();
     reloadLocales();

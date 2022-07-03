@@ -235,6 +235,12 @@
                     "reset": "Resets the groups option",
                     "singleGroup": "Plays songs only from {{group}}"
                 }
+            },
+            "interaction": {
+                "groupsUpdated": {
+                    "description": "The provided groups will be played.",
+                    "title": "Groups Updated"
+                }
             }
         },
         "guessmode": {

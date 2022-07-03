@@ -9,8 +9,9 @@ import {
     getMatchingGroupNames,
     getSimilarGroupNames,
 } from "../../helpers/game_utils";
-import { setIntersection } from "../../helpers/utils";
+import { getOrdinalNum, setIntersection } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocalizationManager from "../../helpers/localization_manager";
@@ -82,6 +83,23 @@ export default class GroupsCommand implements BaseCommand {
         ],
         priority: 135,
     });
+
+    static slashCommands = (): Array<Eris.ApplicationCommandStructure> => [
+        {
+            name: "groups",
+            description: "Play songs from the given groups.",
+            options: [...Array(25).keys()].map((x) => ({
+                name: `group_${x + 1}`,
+                description: `The ${getOrdinalNum(
+                    x + 1
+                )} group to play songs from`,
+                type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
+                autocomplete: true,
+                required: x === 0,
+            })),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+        },
+    ];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await GuildPreference.getGuildPreference(

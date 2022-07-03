@@ -235,6 +235,12 @@
                     "reset": "그룹 옵션을 재설정합니다.",
                     "singleGroup": "{{group}}의 노래만 재생합니다."
                 }
+            },
+            "interaction": {
+                "groupsUpdated": {
+                    "description": "제공된 그룹이 재생됩니다.",
+                    "title": "업데이트된 그룹"
+                }
             }
         },
         "guessmode": {
