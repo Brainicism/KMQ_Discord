@@ -56,10 +56,6 @@ export default class KmqConfiguration {
         return this.config["premiumCommandEnabled"] ?? false;
     }
 
-    restartNotificationDisabled(): boolean {
-        return this.config["restartNotificationDisabled"] ?? false;
-    }
-
     maintenanceModeEnabled(): boolean {
         return this.config["maintenanceModeEnabled"] ?? false;
     }

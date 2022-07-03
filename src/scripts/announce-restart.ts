@@ -1,8 +1,13 @@
 /* eslint-disable node/no-sync */
 /* eslint-disable no-console */
 import * as cp from "child_process";
+import * as path from "path";
+import { config } from "dotenv";
 import { program } from "commander";
+import Axios from "axios";
 import dbContext from "../database_context";
+
+config({ path: path.resolve(__dirname, "../../.env") });
 
 program
     .option(
@@ -58,11 +63,15 @@ function serverShutdown(
 
 process.on("SIGINT", async () => {
     console.log("Aborting restart");
-    await dbContext
-        .kmq("restart_notifications")
-        .where("id", "=", "1")
-        .update({ restart_time: null });
-    await dbContext.destroy();
+    await Axios.post(
+        `http://localhost:${process.env.WEB_SERVER_PORT}/clear-restart`,
+        {},
+        {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }
+    );
     process.exit(0);
 });
 
@@ -74,10 +83,22 @@ process.on("SIGINT", async () => {
 
     console.log(options);
 
-    await dbContext
-        .kmq("restart_notifications")
-        .where("id", "=", "1")
-        .update({ restart_time: restartDate });
+    try {
+        await Axios.post(
+            `http://localhost:${process.env.WEB_SERVER_PORT}/announce-restart`,
+            {
+                soft: options.softRestart,
+                restartTime: restartDate.getTime(),
+            },
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+    } catch (e) {
+        console.log(e);
+    }
 
     console.log(
         `Next ${

@@ -199,7 +199,7 @@ export default class CommandPrechecks {
     static async notRestartingPrecheck(
         precheckArgs: PrecheckArgs
     ): Promise<boolean> {
-        const timeUntilRestart = await getTimeUntilRestart();
+        const timeUntilRestart = getTimeUntilRestart();
         if (timeUntilRestart) {
             const { message } = precheckArgs;
             await sendErrorMessage(MessageContext.fromMessage(message), {
