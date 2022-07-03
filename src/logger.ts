@@ -1,11 +1,9 @@
 /* eslint-disable no-console */
 import { config } from "dotenv";
-import { resolve } from "path";
-import { isMaster } from "cluster";
-import winston from "winston";
-import path from "path";
 import DailyRotateFile from "winston-daily-rotate-file";
-import { EnvType } from "./types";
+import isMaster from "cluster";
+import path, { resolve } from "path";
+import winston from "winston";
 
 config({ path: resolve(__dirname, "../.env") });
 
@@ -35,15 +33,14 @@ export function getInternalLogger(): winston.Logger {
         transports: [
             new winston.transports.Console({
                 format: format.combine(format.timestamp(), consoleFormat),
-                silent: process.env.NODE_ENV === EnvType.TEST,
             }),
             new DailyRotateFile({
-                filename: path.join(__dirname, "../logs/error.log"),
+                filename: path.join(__dirname, "../logs/error-%DATE%.log"),
                 level: "error",
                 maxFiles: "14d",
             }),
             new DailyRotateFile({
-                filename: path.join(__dirname, "../logs/combined.log"),
+                filename: path.join(__dirname, "../logs/combined-%DATE%.log"),
                 maxFiles: "14d",
             }),
         ],
@@ -56,6 +53,7 @@ export function getInternalLogger(): winston.Logger {
 export class IPCLogger {
     private category: string;
     private logger: winston.Logger;
+
     constructor(category: string) {
         this.category = category;
         this.logger = getInternalLogger();

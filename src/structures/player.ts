@@ -1,21 +1,17 @@
-import {
-    ExpBonusModifier,
-    ExpBonusModifierValues,
-} from "../commands/game_commands/exp";
-import { getMention } from "../helpers/discord_utils";
-import { bold } from "../helpers/utils";
-import { state } from "../kmq_worker";
+import { ExpBonusModifierValues } from "../constants";
+import { bold, escapedFormatting, getMention } from "../helpers/utils";
+import ExpBonusModifier from "../enums/exp_bonus_modifier";
+import State from "../state";
 
 export default class Player {
-    /** The Discord username of the player sans discriminator,
-     * i.e. "Player" when the player's user tag is "Player#1234"
-     */
-    public readonly name: string;
-
     /** The Discord user ID of the player */
     public readonly id: string;
 
+    /** Whether the player has premium features */
     public readonly premium: boolean;
+
+    /** The ID of the guild where the player is playing */
+    public readonly guildID: string;
 
     /** Whether the player is still in the game voice channel */
     public inVC: boolean;
@@ -36,15 +32,15 @@ export default class Player {
     private previousRoundRanking: number;
 
     constructor(
-        name: string,
         id: string,
+        guildID: string,
         avatarURL: string,
         points: number,
         firstGameOfTheDay = false,
         premium = false
     ) {
-        this.name = name;
         this.id = id;
+        this.guildID = guildID;
         this.inVC = true;
         this.score = points;
         this.avatarURL = avatarURL;
@@ -56,15 +52,16 @@ export default class Player {
 
     static fromUserID(
         userID: string,
+        guildID: string,
         score = 0,
         firstGameOfDay = false,
         premium = false
     ): Player {
-        const user = state.client.users.get(userID);
+        const user = State.client.users.get(userID);
 
         return new Player(
-            user.username,
-            user.id,
+            userID,
+            guildID,
             user.avatarURL,
             score,
             firstGameOfDay,
@@ -85,16 +82,14 @@ export default class Player {
         wonRound: boolean,
         mention: boolean
     ): string {
-        let name = this.name;
+        let name: string;
         if (mention && this.inVC) {
             name = getMention(this.id);
+        } else {
+            name = escapedFormatting(this.getName());
         }
 
         if (wonRound) {
-            if (!mention) {
-                name = bold(name);
-            }
-
             if (first) {
                 name = `🎶 ${name}`;
             } else {
@@ -105,17 +100,33 @@ export default class Player {
         return name;
     }
 
+    /**
+     * @returns the player's nickname in the given guild
+     */
+    getName(): string {
+        return (
+            State.client.guilds.get(this.guildID).members.get(this.id).nick ??
+            State.client.users.get(this.id).username
+        );
+    }
+
     /** @returns the player's current score */
     getScore(): number {
         return this.score;
     }
 
-    /** @returns what to display as the score in the scoreboard for the player */
-    getDisplayedScore(): string {
-        const rounded = Number(this.getScore().toFixed(1));
-        return bold(
-            Number.isInteger(rounded) ? rounded.toFixed() : rounded.toFixed(1)
-        );
+    /*
+     * @param boldScore - whether to display the score in bold
+     * @returns what to display as the score in the scoreboard for the player
+     */
+
+    getDisplayedScore(boldScore: boolean = true): string {
+        const roundedScore = Number(this.getScore().toFixed(1));
+        const cutoffScore = Number.isInteger(roundedScore)
+            ? roundedScore.toFixed()
+            : roundedScore.toFixed(1);
+
+        return boldScore ? bold(cutoffScore) : cutoffScore;
     }
 
     /** @returns the player's EXP gain */
@@ -176,6 +187,8 @@ export default class Player {
         if (currentRank > previousRank) {
             return `↓ ${displayedRank}`;
         }
+
+        return displayedRank;
     }
 
     /**

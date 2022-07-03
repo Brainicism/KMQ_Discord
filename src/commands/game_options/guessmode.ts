@@ -1,27 +1,27 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import { DEFAULT_GUESS_MODE } from "../../constants";
 import { IPCLogger } from "../../logger";
-import { getGuildPreference } from "../../helpers/game_utils";
 import {
-    sendOptionsMessage,
     getDebugLogHeader,
+    sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { GameOption } from "../../types";
-import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import GameOption from "../../enums/game_option_name";
+import GuessModeType from "../../enums/option_types/guess_mode_type";
+import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("guessmode");
 
-export enum GuessModeType {
-    SONG_NAME = "song",
-    ARTIST = "artist",
-    BOTH = "both",
-}
-
-export const DEFAULT_GUESS_MODE = GuessModeType.SONG_NAME;
-
 export default class GuessModeCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notListeningPrecheck },
+    ];
 
     aliases = ["mode"];
 
@@ -37,9 +37,9 @@ export default class GuessModeCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "guessmode",
-        description: state.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.guessmode.help.description"
         ),
@@ -47,28 +47,28 @@ export default class GuessModeCommand implements BaseCommand {
         examples: [
             {
                 example: "`,guessmode song`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.guessmode.help.example.song"
                 ),
             },
             {
                 example: "`,guessmode artist`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.guessmode.help.example.artist"
                 ),
             },
             {
                 example: "`,guessmode both`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.guessmode.help.example.both"
                 ),
             },
             {
                 example: "`,guessmode`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.guessmode.help.example.reset",
                     {
@@ -81,11 +81,14 @@ export default class GuessModeCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
 
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.GUESS_MODE_TYPE);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.GUESS_MODE_TYPE, reset: true }]
@@ -102,6 +105,7 @@ export default class GuessModeCommand implements BaseCommand {
 
         await guildPreference.setGuessModeType(modeType);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.GUESS_MODE_TYPE, reset: false }]

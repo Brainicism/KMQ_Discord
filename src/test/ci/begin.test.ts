@@ -1,18 +1,25 @@
+import * as discordUtils from "../../helpers/discord_utils";
+import BeginCommand from "../../commands/game_commands/begin";
+import GameSession from "../../structures/game_session";
+import GameType from "../../enums/game_type";
+import GuildPreference from "../../structures/guild_preference";
+import KmqMember from "../../structures/kmq_member";
+import MessageContext from "../../structures/message_context";
+import Player from "../../structures/player";
 import assert from "assert";
 import sinon from "sinon";
-import BeginCommand from "../../commands/game_commands/begin";
-import { GameType } from "../../types";
-import GameSession from "../../structures/game_session";
-import KmqMember from "../../structures/kmq_member";
-import Player from "../../structures/player";
-import TeamScoreboard from "../../structures/team_scoreboard";
-import MessageContext from "../../structures/message_context";
-import * as discordUtils from "../../helpers/discord_utils";
+import type TeamScoreboard from "../../structures/team_scoreboard";
 
-const sandbox = sinon.createSandbox();
-const gameStarter = new KmqMember("jisoo", "jisoo#4747", "url", "123");
+function getMockGuildPreference(): GuildPreference {
+    const guildPreference = new GuildPreference("test");
+    sinon.stub(guildPreference, "updateGuildPreferences");
+    return guildPreference;
+}
 
 describe("begin command", () => {
+    const sandbox = sinon.createSandbox();
+    const gameStarter = new KmqMember("123");
+
     describe("can start", () => {
         describe("game session is null", () => {
             it("should return false", () => {
@@ -24,12 +31,15 @@ describe("begin command", () => {
             sandbox
                 .stub(discordUtils, "getCurrentVoiceMembers")
                 .callsFake((_voiceChannelID) => []);
+
             const gameSession = new GameSession(
+                getMockGuildPreference(),
                 null,
                 null,
                 null,
                 gameStarter,
-                GameType.CLASSIC
+                GameType.CLASSIC,
+                false
             );
 
             sandbox.restore();
@@ -52,11 +62,13 @@ describe("begin command", () => {
                 .stub(discordUtils, "getCurrentVoiceMembers")
                 .callsFake((_voiceChannelID) => []);
             const gameSession = new GameSession(
+                getMockGuildPreference(),
                 null,
                 null,
                 null,
                 gameStarter,
-                GameType.TEAMS
+                GameType.TEAMS,
+                true
             );
 
             sandbox.restore();

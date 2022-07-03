@@ -1,25 +1,21 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import { IPCLogger } from "../../logger";
 import {
-    sendOptionsMessage,
     getDebugLogHeader,
     sendErrorMessage,
+    sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
-import { IPCLogger } from "../../logger";
-import { GameOption } from "../../types";
-import MessageContext from "../../structures/message_context";
+import ArtistType from "../../enums/option_types/artist_type";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import GameOption from "../../enums/game_option_name";
+import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("artisttype");
-
-export enum ArtistType {
-    SOLOIST = "soloists",
-    GROUP = "groups",
-    BOTH = "both",
-}
-
-export const DEFAULT_ARTIST_TYPE = ArtistType.BOTH;
 
 export default class ArtistTypeCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
@@ -36,9 +32,9 @@ export default class ArtistTypeCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "artisttype",
-        description: state.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.artisttype.help.description",
             {
@@ -51,28 +47,28 @@ export default class ArtistTypeCommand implements BaseCommand {
         examples: [
             {
                 example: "`,artisttype soloists`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.artisttype.help.example.soloists"
                 ),
             },
             {
                 example: "`,artisttype groups`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.artisttype.help.example.groups"
                 ),
             },
             {
                 example: "`,artisttype both`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.artisttype.help.example.both"
                 ),
             },
             {
                 example: "`,artisttype`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.artisttype.help.example.reset"
                 ),
@@ -82,10 +78,14 @@ export default class ArtistTypeCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.ARTIST_TYPE);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.ARTIST_TYPE, reset: true }]
@@ -102,11 +102,11 @@ export default class ArtistTypeCommand implements BaseCommand {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     message.guildID,
                     "misc.failure.gameOptionConflict.title"
                 ),
-                description: state.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     message.guildID,
                     "misc.failure.gameOptionConflict.description",
                     {
@@ -122,6 +122,7 @@ export default class ArtistTypeCommand implements BaseCommand {
         const artistType = parsedMessage.components[0] as ArtistType;
         await guildPreference.setArtistType(artistType);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.ARTIST_TYPE, reset: false }]

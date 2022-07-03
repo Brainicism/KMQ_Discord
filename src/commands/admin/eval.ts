@@ -1,10 +1,11 @@
-import Eris from "eris";
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import { sendInfoMessage } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
-import { state } from "../../kmq_worker";
-import MessageContext from "../../structures/message_context";
+import { sendInfoMessage } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import MessageContext from "../../structures/message_context";
+import State from "../../state";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type Eris from "eris";
 
 const logger = new IPCLogger("eval");
 
@@ -14,7 +15,7 @@ export default class EvalCommand implements BaseCommand {
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const evalString = parsedMessage.argument;
         logger.info(`Executing command: ${evalString}`);
-        const results = (await state.ipc.allClustersCommand(
+        const results = (await State.ipc.allClustersCommand(
             `eval|${evalString}`,
             true
         )) as Map<number, any>;
@@ -43,7 +44,7 @@ export default class EvalCommand implements BaseCommand {
                 } catch (e) {
                     resolve(`Error: ${e.message}`);
                 }
-            }.call(state, evalString);
+            }.call(State, evalString);
         });
     }
 }

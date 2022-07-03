@@ -1,7 +1,6 @@
-import Scoreboard, { SuccessfulGuessResult } from "./scoreboard";
-import EliminationPlayer from "./elimination_player";
-
-export const DEFAULT_LIVES = 10;
+import Scoreboard from "./scoreboard";
+import type EliminationPlayer from "./elimination_player";
+import type SuccessfulGuessResult from "../interfaces/success_guess_result";
 
 export default class EliminationScoreboard extends Scoreboard {
     /** The amount of lives each player starts with */

@@ -1,79 +1,42 @@
-import _ from "lodash";
 import * as uuid from "uuid";
 import {
+    DEFAULT_ANSWER_TYPE,
+    DEFAULT_ARTIST_TYPE,
     DEFAULT_BEGINNING_SEARCH_YEAR,
     DEFAULT_ENDING_SEARCH_YEAR,
-} from "../commands/game_options/cutoff";
-import { DEFAULT_LIMIT } from "../commands/game_options/limit";
-import { Gender, DEFAULT_GENDER } from "../commands/game_options/gender";
-import { SeekType, DEFAULT_SEEK } from "../commands/game_options/seek";
-import { ShuffleType, DEFAULT_SHUFFLE } from "../commands/game_options/shuffle";
-import {
-    GuessModeType,
+    DEFAULT_GENDER,
     DEFAULT_GUESS_MODE,
-} from "../commands/game_options/guessmode";
-import { IPCLogger } from "../logger";
-import dbContext from "../database_context";
-import {
-    ArtistType,
-    DEFAULT_ARTIST_TYPE,
-} from "../commands/game_options/artisttype";
-import {
     DEFAULT_LANGUAGE,
-    LanguageType,
-} from "../commands/game_options/language";
-import {
-    DEFAULT_SUBUNIT_PREFERENCE,
-    SubunitsPreference,
-} from "../commands/game_options/subunits";
-import { GameOption, MatchedArtist } from "../types";
-import {
-    DEFAULT_OST_PREFERENCE,
-    OstPreference,
-} from "../commands/game_options/ost";
-import {
-    DEFAULT_RELEASE_TYPE,
-    ReleaseType,
-} from "../commands/game_options/release";
-import {
+    DEFAULT_LIMIT,
     DEFAULT_MULTIGUESS_TYPE,
-    MultiGuessType,
-} from "../commands/game_options/multiguess";
-import { state } from "../kmq_worker";
-import { SpecialType } from "../commands/game_options/special";
-import {
-    AnswerType,
-    DEFAULT_ANSWER_TYPE,
-} from "../commands/game_options/answer";
+    DEFAULT_OST_PREFERENCE,
+    DEFAULT_RELEASE_TYPE,
+    DEFAULT_SEEK,
+    DEFAULT_SHUFFLE,
+    DEFAULT_SUBUNIT_PREFERENCE,
+    GameOptionInternal,
+} from "../constants";
+import { IPCLogger } from "../logger";
+import AnswerType from "../enums/option_types/answer_type";
+import GameOption from "../enums/game_option_name";
+import Gender from "../enums/option_types/gender";
+import _ from "lodash";
+import dbContext from "../database_context";
+import type ArtistType from "../enums/option_types/artist_type";
+import type GameOptions from "../interfaces/game_options";
+import type GuessModeType from "../enums/option_types/guess_mode_type";
+import type LanguageType from "../enums/option_types/language_type";
+import type MatchedArtist from "../interfaces/matched_artist";
+import type MultiGuessType from "../enums/option_types/multiguess_type";
+import type OstPreference from "../enums/option_types/ost_preference";
+import type ReleaseType from "../enums/option_types/release_type";
+import type SeekType from "../enums/option_types/seek_type";
+import type ShuffleType from "../enums/option_types/shuffle_type";
+import type SpecialType from "../enums/option_types/special_type";
+import type SubunitsPreference from "../enums/option_types/subunit_preference";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("guild_preference");
-
-export interface GameOptions {
-    beginningYear: number;
-    endYear: number;
-    gender: Array<Gender>;
-    limitStart: number;
-    limitEnd: number;
-    seekType: SeekType;
-    specialType: SpecialType;
-    guessModeType: GuessModeType;
-    releaseType: ReleaseType;
-    artistType: ArtistType;
-    answerType: AnswerType;
-    shuffleType: ShuffleType;
-    groups: MatchedArtist[];
-    excludes: MatchedArtist[];
-    includes: MatchedArtist[];
-    goal: number;
-    guessTimeout: number;
-    duration: number;
-    languageType: LanguageType;
-    multiGuessType: MultiGuessType;
-    subunitPreference: SubunitsPreference;
-    ostPreference: OstPreference;
-    forcePlaySongID: string;
-}
 
 type GameOptionValue =
     | number
@@ -92,58 +55,6 @@ type GameOptionValue =
     | OstPreference
     | string;
 
-const enum GameOptionInternal {
-    BEGINNING_YEAR = "beginningYear",
-    END_YEAR = "endYear",
-    GENDER = "gender",
-    LIMIT_START = "limitStart",
-    LIMIT_END = "limitEnd",
-    SEEK_TYPE = "seekType",
-    SPECIAL_TYPE = "specialType",
-    GUESS_MODE_TYPE = "guessModeType",
-    RELEASE_TYPE = "releaseType",
-    ARTIST_TYPE = "artistType",
-    ANSWER_TYPE = "answerType",
-    SHUFFLE_TYPE = "shuffleType",
-    GROUPS = "groups",
-    EXCLUDES = "excludes",
-    INCLUDES = "includes",
-    GOAL = "goal",
-    GUESS_TIMEOUT = "guessTimeout",
-    DURATION = "duration",
-    LANGUAGE_TYPE = "languageType",
-    MULTI_GUESS_TYPE = "multiGuessType",
-    SUBUNIT_PREFERENCE = "subunitPreference",
-    OST_PREFERENCE = "ostPreference",
-    FORCE_PLAY_SONG = "forcePlaySongID",
-}
-
-export const GameOptionInternalToGameOption: { [option: string]: string } = {
-    [GameOptionInternal.BEGINNING_YEAR]: GameOption.CUTOFF,
-    [GameOptionInternal.END_YEAR]: GameOption.CUTOFF,
-    [GameOptionInternal.GENDER]: GameOption.GENDER,
-    [GameOptionInternal.LIMIT_START]: GameOption.LIMIT,
-    [GameOptionInternal.LIMIT_END]: GameOption.LIMIT,
-    [GameOptionInternal.SEEK_TYPE]: GameOption.SEEK_TYPE,
-    [GameOptionInternal.SPECIAL_TYPE]: GameOption.SPECIAL_TYPE,
-    [GameOptionInternal.GUESS_MODE_TYPE]: GameOption.GUESS_MODE_TYPE,
-    [GameOptionInternal.RELEASE_TYPE]: GameOption.RELEASE_TYPE,
-    [GameOptionInternal.ARTIST_TYPE]: GameOption.ARTIST_TYPE,
-    [GameOptionInternal.ANSWER_TYPE]: GameOption.ANSWER_TYPE,
-    [GameOptionInternal.SHUFFLE_TYPE]: GameOption.SHUFFLE_TYPE,
-    [GameOptionInternal.GROUPS]: GameOption.GROUPS,
-    [GameOptionInternal.EXCLUDES]: GameOption.EXCLUDE,
-    [GameOptionInternal.INCLUDES]: GameOption.INCLUDE,
-    [GameOptionInternal.GOAL]: GameOption.GOAL,
-    [GameOptionInternal.GUESS_TIMEOUT]: GameOption.TIMER,
-    [GameOptionInternal.DURATION]: GameOption.DURATION,
-    [GameOptionInternal.LANGUAGE_TYPE]: GameOption.LANGUAGE_TYPE,
-    [GameOptionInternal.MULTI_GUESS_TYPE]: GameOption.MULTIGUESS,
-    [GameOptionInternal.SUBUNIT_PREFERENCE]: GameOption.SUBUNIT_PREFERENCE,
-    [GameOptionInternal.OST_PREFERENCE]: GameOption.OST_PREFERENCE,
-    [GameOptionInternal.FORCE_PLAY_SONG]: GameOption.FORCE_PLAY_SONG,
-};
-
 /**
  * @param groups - The artists to combine into a string
  * @param truncate - Whether to truncuate the final result
@@ -161,7 +72,7 @@ function getGroupNamesString(
         .join(spaceDelimiter ? ", " : ",");
 
     if (truncate && displayedGroupNames.length > 200) {
-        displayedGroupNames = `${displayedGroupNames.substr(
+        displayedGroupNames = `${displayedGroupNames.substring(
             0,
             200
         )} and many others...`;
@@ -267,12 +178,17 @@ export default class GuildPreference {
         forcePlaySongID: null,
     };
 
+    /** The GuildPreference's respective GameOptions */
     public gameOptions: GameOptions;
 
     /** The Discord Guild ID */
     public readonly guildID: string;
 
-    /** The GuildPreference's respective GameOptions */
+    /** Callback to reload songs */
+    public reloadSongCallback: () => Promise<void>;
+
+    /** The guild preference cache */
+    private static guildPreferencesCache = {};
 
     constructor(guildID: string, options?: GameOptions) {
         this.guildID = guildID;
@@ -298,6 +214,42 @@ export default class GuildPreference {
         }
 
         return gameOptions;
+    }
+
+    static async getGuildPreference(guildID: string): Promise<GuildPreference> {
+        if (guildID in GuildPreference.guildPreferencesCache) {
+            return GuildPreference.guildPreferencesCache[guildID];
+        }
+
+        const guildPreferences = await dbContext
+            .kmq("guilds")
+            .select("*")
+            .where("guild_id", "=", guildID);
+
+        if (guildPreferences.length === 0) {
+            const guildPreference = GuildPreference.fromGuild(guildID);
+            await dbContext
+                .kmq("guilds")
+                .insert({ guild_id: guildID, join_date: new Date() });
+            return guildPreference;
+        }
+
+        const gameOptionPairs = (
+            await dbContext.kmq("game_options").select("*").where({
+                guild_id: guildID,
+                client_id: process.env.BOT_CLIENT_ID,
+            })
+        )
+            .map((x) => ({ [x["option_name"]]: JSON.parse(x["option_value"]) }))
+            .reduce((total, curr) => Object.assign(total, curr), {});
+
+        const guildPreference = GuildPreference.fromGuild(
+            guildPreferences[0].guild_id,
+            gameOptionPairs
+        );
+
+        GuildPreference.guildPreferencesCache[guildID] = guildPreference;
+        return guildPreference;
     }
 
     /**
@@ -821,8 +773,11 @@ export default class GuildPreference {
      * Sets the shuffle type option value
      * @param shuffleType - The shuffle type
      */
-    setShuffleType(shuffleType: ShuffleType): void {
+    async setShuffleType(shuffleType: ShuffleType): Promise<void> {
         this.gameOptions.shuffleType = shuffleType;
+        await this.updateGuildPreferences([
+            { name: GameOptionInternal.SHUFFLE_TYPE, value: shuffleType },
+        ]);
     }
 
     /**
@@ -888,9 +843,15 @@ export default class GuildPreference {
                 .merge()
                 .transacting(trx);
         });
-        const gameSession = state.gameSessions[this.guildID];
-        if (gameSession) {
-            await gameSession.reloadSongs(this);
+
+        if (this.reloadSongCallback) {
+            try {
+                await this.reloadSongCallback();
+            } catch (e) {
+                logger.error(
+                    `gid: ${this.guildID} | reloadSongCallback unexpectedly failed, session might not exist?`
+                );
+            }
         }
     }
 

@@ -1,41 +1,41 @@
 version: "3.8"
 
 services:
-  kmq:
-    image: kmq
-    build:
-      context: ../
-      dockerfile: docker/kmq/Dockerfile
-      args: 
-        NODE_ENV: ${NODE_ENV}
-    env_file: .env
-    environment:
-      SONG_DOWNLOAD_DIR: /songs
-    volumes:
-      - songs:/songs
-    depends_on:
-      db:
-        condition: service_healthy
-    ports: 
-      - 5858:5858
+    kmq:
+        image: kmq
+        build:
+            context: ../
+            dockerfile: docker/kmq/Dockerfile
+            args:
+                NODE_ENV: ${NODE_ENV}
+        env_file: .env
+        environment:
+            SONG_DOWNLOAD_DIR: /songs
+        volumes:
+            - songs:/songs
+        depends_on:
+            db:
+                condition: service_healthy
+        ports:
+            - 5858:5858
 
-  db:
-    image: mariadb:10.3
-    restart: on-failure
-    env_file: .env
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASS}
-    volumes:
-      - mysql:/var/lib/mysql
-    ports:
-      - 3306:3306
-    command: --max-allowed-packet=32M
-    healthcheck:
-      test: mysql --password=$$MYSQL_ROOT_PASSWORD -e 'SELECT 1;'
-      timeout: 20s
-      interval: 5s
-      retries: 10
+    db:
+        image: mariadb:10.3
+        restart: on-failure
+        env_file: .env
+        environment:
+            MYSQL_ROOT_PASSWORD: ${DB_PASS}
+        volumes:
+            - mysql:/var/lib/mysql
+        ports:
+            - 3307:3306
+        command: --max-allowed-packet=32M
+        healthcheck:
+            test: mysql --password=$$MYSQL_ROOT_PASSWORD -e 'SELECT 1;'
+            timeout: 20s
+            interval: 5s
+            retries: 10
 
 volumes:
-  songs:
-  mysql:
+    songs:
+    mysql:

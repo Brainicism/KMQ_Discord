@@ -1,9 +1,12 @@
 import { KmqImages } from "../../constants";
-import { sendInfoMessage } from "../../helpers/discord_utils";
 import { isUserPremium } from "../../helpers/game_utils";
-import { state } from "../../kmq_worker";
+import { sendInfoMessage } from "../../helpers/discord_utils";
+import KmqConfiguration from "../../kmq_configuration";
+import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 export default class PremiumCommand implements BaseCommand {
     validations = {
@@ -12,15 +15,15 @@ export default class PremiumCommand implements BaseCommand {
         minArgCount: 0,
     };
 
-    help = (guildID: string): Help => ({
-        description: state.localizer.translate(
+    help = (guildID: string): HelpDocumentation => ({
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.premium.help.description"
         ),
         examples: [
             {
                 example: "`,premium`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.premium.help.example"
                 ),
@@ -32,51 +35,52 @@ export default class PremiumCommand implements BaseCommand {
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
+        if (!KmqConfiguration.Instance.premiumCommandEnabled()) return;
         const premiumMember = await isUserPremium(message.author.id);
         sendInfoMessage(MessageContext.fromMessage(message), {
-            description: `${state.localizer.translate(
+            description: `${LocalizationManager.localizer.translate(
                 message.guildID,
                 premiumMember
                     ? "command.premium.status.description.premium"
                     : "command.premium.status.description.nonPremium"
-            )}\n\n${state.localizer.translate(
+            )}\n\n${LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.premium.status.description.connectionReminder"
             )}`,
             fields: [
                 {
-                    name: state.localizer.translate(
+                    name: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.premium.status.perks.moreSongs.title"
                     ),
-                    value: state.localizer.translate(
+                    value: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.premium.status.perks.moreSongs.description"
                     ),
                 },
                 {
-                    name: state.localizer.translate(
+                    name: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.premium.status.perks.special.title"
                     ),
-                    value: state.localizer.translate(
+                    value: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.premium.status.perks.special.description"
                     ),
                 },
                 {
-                    name: state.localizer.translate(
+                    name: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.premium.status.perks.badge.title"
                     ),
-                    value: state.localizer.translate(
+                    value: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.premium.status.perks.badge.description"
                     ),
                 },
             ],
             thumbnailUrl: KmqImages.HAPPY,
-            title: state.localizer.translate(
+            title: LocalizationManager.localizer.translate(
                 message.guildID,
                 premiumMember
                     ? "command.premium.status.title.premium"

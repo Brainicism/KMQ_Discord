@@ -1,31 +1,26 @@
-import fs from "fs";
-import path from "path";
-import { config } from "dotenv";
-import { execSync } from "child_process";
-import { updateKpopDatabase } from "./seed_db";
 import { IPCLogger } from "../logger";
-import { downloadAndConvertSongs } from "../scripts/download-new-songs";
-import { DatabaseContext, getNewConnection } from "../database_context";
-import { EnvType } from "../types";
+import { config } from "dotenv";
+import {
+    databaseExists,
+    generateKmqDataTables,
+    loadStoredProcedures,
+    tableExists,
+    updateKpopDatabase,
+} from "./seed_db";
+import { getNewConnection } from "../database_context";
+import EnvType from "../enums/env_type";
+import KmqConfiguration from "../kmq_configuration";
+import downloadAndConvertSongs from "../scripts/download-new-songs";
+import fs from "fs";
+import kmqKnexConfig from "../config/knexfile_kmq";
+import path from "path";
+import type { DatabaseContext } from "../database_context";
 
 const logger = new IPCLogger("bootstrap");
 
 const SONG_DOWNLOAD_THRESHOLD = 5;
 
 config({ path: path.resolve(__dirname, "../../.env") });
-
-async function tableExists(
-    db: DatabaseContext,
-    tableName: string
-): Promise<boolean> {
-    return (
-        (
-            await db
-                .agnostic("information_schema.schemata")
-                .where("schema_name", "=", tableName)
-        ).length === 1
-    );
-}
 
 function hasRequiredEnvironmentVariables(): boolean {
     const requiredEnvVariables = [
@@ -54,26 +49,22 @@ function hasRequiredEnvironmentVariables(): boolean {
 }
 
 async function kmqDatabaseExists(db: DatabaseContext): Promise<boolean> {
-    const kmqExists = await tableExists(db, "kmq");
-    const kmqTestExists = await tableExists(db, "kmq_test");
+    const kmqExists = await databaseExists(db, "kmq");
+    const kmqTestExists = await databaseExists(db, "kmq_test");
     return kmqExists && kmqTestExists;
 }
 
 async function kpopDataDatabaseExists(db: DatabaseContext): Promise<boolean> {
-    const kpopVideosExists = await tableExists(db, "kpop_videos");
+    const kpopVideosExists = await databaseExists(db, "kpop_videos");
     return kpopVideosExists;
 }
 
 async function songThresholdReached(db: DatabaseContext): Promise<boolean> {
-    const availableSongsTableExists =
-        (
-            await db
-                .agnostic("information_schema.tables")
-                .where("table_schema", "=", "kmq")
-                .where("table_name", "=", "available_songs")
-                .count("* as count")
-                .first()
-        ).count === 1;
+    const availableSongsTableExists = await tableExists(
+        db,
+        "kmq",
+        "available_songs"
+    );
 
     if (!availableSongsTableExists) return false;
 
@@ -83,43 +74,31 @@ async function songThresholdReached(db: DatabaseContext): Promise<boolean> {
     );
 }
 
-/**
- * Reloads all existing stored procedures
- */
-export function loadStoredProcedures(): void {
-    const storedProcedureDefinitions = fs
-        .readdirSync(path.join(__dirname, "../../sql/procedures"))
-        .map((x) => path.join(__dirname, "../../sql/procedures", x));
-
-    for (const storedProcedureDefinition of storedProcedureDefinitions) {
-        execSync(
-            `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq < ${storedProcedureDefinition}`
-        );
-    }
-}
-
-// eslint-disable-next-line import/prefer-default-export
-/**
- * Re-creates the KMQ data tables
- * @param db - The database context
- */
-export async function generateKmqDataTables(
-    db: DatabaseContext
-): Promise<void> {
-    logger.info("Re-creating KMQ data tables view...");
-    await db.kmq.raw(
-        `CALL CreateKmqDataTables(${process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST});`
-    );
-}
-
-function performMigrations(): void {
+async function performMigrations(db: DatabaseContext): Promise<void> {
     logger.info("Performing migrations...");
-    const migrationsPath = path.join(__dirname, "../config/knexfile_kmq.js");
-    try {
-        execSync(`npx knex migrate:latest --knexfile ${migrationsPath}`);
-    } catch (e) {
-        logger.error(`Migration failed: ${e}`);
-        process.exit(1);
+    const knexMigrationConfig = {
+        directory: kmqKnexConfig.migrations.directory,
+    };
+
+    const migrationList = await db.kmq.migrate.list(knexMigrationConfig);
+
+    const pendingMigrations: Array<any> = migrationList[1];
+    logger.info(
+        `Pending migrations: [${pendingMigrations.map((x) => x.file)}]`
+    );
+
+    if (pendingMigrations.length > 0) {
+        if (KmqConfiguration.Instance.disallowMigrations()) {
+            logger.error("Migrations are disallowed.");
+            process.exit(1);
+        }
+
+        try {
+            await db.kmq.migrate.latest(knexMigrationConfig);
+        } catch (e) {
+            logger.error(`Migration failed: ${e}`);
+            process.exit(1);
+        }
     }
 }
 
@@ -133,14 +112,14 @@ async function bootstrapDatabases(): Promise<void> {
         await db.agnostic.raw("CREATE DATABASE IF NOT EXISTS kmq_test");
     }
 
-    performMigrations();
+    await performMigrations(db);
 
     if (!(await kpopDataDatabaseExists(db))) {
         logger.info("Seeding K-pop data database");
         await updateKpopDatabase(db, true);
     }
 
-    loadStoredProcedures();
+    await loadStoredProcedures();
 
     if (!(await songThresholdReached(db))) {
         logger.info(
@@ -167,9 +146,12 @@ async function bootstrapDatabases(): Promise<void> {
         }
 
         const dataDir = path.join(__dirname, "../../data");
-        if (!fs.existsSync(dataDir)) {
+
+        try {
+            await fs.promises.mkdir(dataDir);
             logger.info("Data directory doesn't exist, creating...");
-            fs.mkdirSync(dataDir);
+        } catch (error) {
+            logger.info("Data directory already exists");
         }
 
         await bootstrapDatabases();

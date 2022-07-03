@@ -1,21 +1,26 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
-import {
-    sendInfoMessage,
-    sendScoreboardMessage,
-    getDebugLogHeader,
-} from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
-import MessageContext from "../../structures/message_context";
-import { state } from "../../kmq_worker";
+import { getDebugLogHeader } from "../../helpers/discord_utils";
+import CommandPrechecks from "../../command_prechecks";
+import LocalizationManager from "../../helpers/localization_manager";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type GameSession from "../../structures/game_session";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("score");
 
 export default class ScoreCommand implements BaseCommand {
     aliases = ["scoreboard", "sb"];
 
-    help = (guildID: string): Help => ({
+    preRunChecks = [
+        { checkFn: CommandPrechecks.inSessionCommandPrecheck },
+        { checkFn: CommandPrechecks.notListeningPrecheck },
+    ];
+
+    help = (guildID: string): HelpDocumentation => ({
         name: "score",
-        description: state.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.score.help.description"
         ),
@@ -24,28 +29,9 @@ export default class ScoreCommand implements BaseCommand {
         priority: 50,
     });
 
-    call = async ({ message, gameSessions }: CommandArgs): Promise<void> => {
-        const gameSession = gameSessions[message.guildID];
-        if (!gameSession) {
-            await sendInfoMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "misc.failure.game.noneInProgress.title"
-                ),
-                description: state.localizer.translate(
-                    message.guildID,
-                    "command.score.failure.noneInProgress.description",
-                    { play: `\`${process.env.BOT_PREFIX}play\`` }
-                ),
-            });
-
-            logger.warn(
-                `${getDebugLogHeader(message)} | No active game session.`
-            );
-            return;
-        }
-
-        await sendScoreboardMessage(message, gameSession);
+    call = async ({ message }: CommandArgs): Promise<void> => {
+        const gameSession = Session.getSession(message.guildID) as GameSession;
+        await gameSession.sendScoreboardMessage(message);
         logger.info(`${getDebugLogHeader(message)} | Score retrieved`);
     };
 }

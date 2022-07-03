@@ -1,5 +1,5 @@
-import Eris from "eris";
 import { IPCLogger } from "../../logger";
+import type Eris from "eris";
 
 const logger = new IPCLogger("guildAvailable");
 

@@ -1,22 +1,20 @@
-import Eris from "eris";
-import MessageContext from "../../structures/message_context";
-import KmqMember from "../../structures/kmq_member";
-import {
-    getUserTag,
-    tryInteractionAcknowledge,
-    tryCreateInteractionErrorAcknowledgement,
-} from "../../helpers/discord_utils";
-import { state } from "../../kmq_worker";
+import { BOOKMARK_COMMAND_NAME, PROFILE_COMMAND_NAME } from "../../constants";
 import { handleProfileInteraction } from "../../commands/game_commands/profile";
-
-export const BOOKMARK_COMMAND_NAME = "Bookmark Song";
-export const PROFILE_COMMAND_NAME = "Profile";
+import {
+    tryCreateInteractionErrorAcknowledgement,
+    tryInteractionAcknowledge,
+} from "../../helpers/discord_utils";
+import Eris from "eris";
+import KmqMember from "../../structures/kmq_member";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
 
 /**
  * Handles the 'interactionCreate' event
  * @param interaction - The originating Interaction
  */
-export default function interactionCreateHandler(
+export default async function interactionCreateHandler(
     interaction:
         | Eris.PingInteraction
         | Eris.CommandInteraction
@@ -24,27 +22,22 @@ export default function interactionCreateHandler(
         | Eris.UnknownInteraction
 ): Promise<void> {
     if (interaction instanceof Eris.ComponentInteraction) {
-        const gameSession = state.gameSessions[interaction.guildID];
-        if (!gameSession || !gameSession.round) {
+        const session = Session.getSession(interaction.guildID);
+        if (
+            !session ||
+            (!session.round && interaction.data.custom_id !== "bookmark")
+        ) {
             tryInteractionAcknowledge(interaction);
             return;
         }
 
         const messageContext = new MessageContext(
             interaction.channel.id,
-            new KmqMember(
-                interaction.member.username,
-                getUserTag(interaction.member),
-                interaction.member.avatarURL,
-                interaction.member.id
-            ),
+            new KmqMember(interaction.member.id),
             interaction.guildID
         );
 
-        gameSession.handleMultipleChoiceInteraction(
-            interaction,
-            messageContext
-        );
+        await session.handleComponentInteraction(interaction, messageContext);
     } else if (interaction instanceof Eris.CommandInteraction) {
         if (
             interaction.data.type ===
@@ -61,11 +54,11 @@ export default function interactionCreateHandler(
             Eris.Constants.ApplicationCommandTypes.MESSAGE
         ) {
             if (interaction.data.name === BOOKMARK_COMMAND_NAME) {
-                const gameSession = state.gameSessions[interaction.guildID];
-                if (!gameSession) {
+                const session = Session.getSession(interaction.guildID);
+                if (!session) {
                     tryCreateInteractionErrorAcknowledgement(
                         interaction,
-                        state.localizer.translate(
+                        LocalizationManager.localizer.translate(
                             interaction.guildID,
                             "misc.failure.interaction.bookmarkOutsideGame"
                         )
@@ -73,7 +66,7 @@ export default function interactionCreateHandler(
                     return;
                 }
 
-                gameSession.handleBookmarkInteraction(interaction);
+                session.handleBookmarkInteraction(interaction);
             } else if (interaction.data.name === PROFILE_COMMAND_NAME) {
                 const messageId = interaction.data.target_id;
                 const authorId =

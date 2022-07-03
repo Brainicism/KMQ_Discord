@@ -1,19 +1,21 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import { DEFAULT_LIMIT } from "../../constants";
+import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
-import { IPCLogger } from "../../logger";
-import { GameOption } from "../../types";
-import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import GameOption from "../../enums/game_option_name";
+import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("limit");
-
-export const DEFAULT_LIMIT = 500;
 
 export default class LimitCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
@@ -37,9 +39,9 @@ export default class LimitCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "limit",
-        description: state.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.limit.help.description"
         ),
@@ -47,7 +49,7 @@ export default class LimitCommand implements BaseCommand {
         examples: [
             {
                 example: "`,limit 250`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.limit.help.example.singleLimit",
                     {
@@ -57,7 +59,7 @@ export default class LimitCommand implements BaseCommand {
             },
             {
                 example: "`,limit 250 500`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.limit.help.example.twoLimits",
                     { limitStart: String(250), limitEnd: String(500) }
@@ -65,7 +67,7 @@ export default class LimitCommand implements BaseCommand {
             },
             {
                 example: "`,limit`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.limit.help.example.reset",
                     { defaultLimit: `\`${DEFAULT_LIMIT}\`` }
@@ -76,10 +78,14 @@ export default class LimitCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.LIMIT);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.LIMIT, reset: true }]
@@ -92,14 +98,14 @@ export default class LimitCommand implements BaseCommand {
         let limitEnd: number;
         if (parsedMessage.components.length === 1) {
             limitStart = 0;
-            limitEnd = parseInt(parsedMessage.components[0]);
+            limitEnd = parseInt(parsedMessage.components[0], 10);
             if (limitEnd === 0) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(
+                    title: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.limit.failure.invalidLimit.title"
                     ),
-                    description: state.localizer.translate(
+                    description: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.limit.failure.invalidLimit.greaterThanZero.description"
                     ),
@@ -107,15 +113,15 @@ export default class LimitCommand implements BaseCommand {
                 return;
             }
         } else {
-            limitStart = parseInt(parsedMessage.components[0]);
-            limitEnd = parseInt(parsedMessage.components[1]);
+            limitStart = parseInt(parsedMessage.components[0], 10);
+            limitEnd = parseInt(parsedMessage.components[1], 10);
             if (limitEnd <= limitStart) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(
+                    title: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.limit.failure.invalidLimit.title"
                     ),
-                    description: state.localizer.translate(
+                    description: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.limit.failure.invalidLimit.greaterThanStart.description"
                     ),
@@ -126,6 +132,7 @@ export default class LimitCommand implements BaseCommand {
 
         await guildPreference.setLimit(limitStart, limitEnd);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.LIMIT, reset: false }]

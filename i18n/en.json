@@ -42,11 +42,11 @@
         },
         "answer": {
             "help": {
-                "description": "Choose how to answer: by typing your answer, or via multiple choice. Options are the following: `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}`, and `{{hard}}`. Playing on multiple choice mode reduces EXP by (0.25x, 0.5x, 0.75x) based on difficulty.",
+                "description": "Choose how to answer: by typing your answer, or via multiple choice. Options are the following: `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}`, and `{{hard}}`",
                 "example": {
                     "multipleChoice": "Click on the button from {{optionCount}} multiple choice options to guess. {{penalty}} EXP penalty will be applied",
                     "typing": "Type your answer in the chat to guess",
-                    "typingTypos": "Type your answer in the chat to guess. Small typos will be marked as correct. 0.8x EXP penalty will be applied"
+                    "typingTypos": "Type your answer in the chat to guess. Small typos will be marked as correct. {{penalty}} EXP penalty will be applied"
                 }
             }
         },
@@ -158,6 +158,8 @@
             "lowSongCountPenalty": "Low Song Count Penalty",
             "multipleChoicePenalty": "Multiple Choice Penalty",
             "powerHourBonus": "Power Hour Bonus",
+            "shufflePopularityPenalty": "Shuffle Popularity Penalty",
+            "shuffleWeightedEasyPenalty": "Shuffle Weighted Easy Penalty",
             "title": "EXP Bonuses",
             "totalModifier": "Total Modifier",
             "typosAllowedPenalty": "Typos Allowed Penalty",
@@ -207,7 +209,7 @@
         "goal": {
             "failure": {
                 "gameOptionConflict": {
-                    "title": "An {{elimination}} game is currently in progress. {{goal}} and {{elimination}} are incompatible. Play a {{classic}} or {{teams}} game to use {{goal}}."
+                    "description": "An {{elimination}} game is currently in progress. {{goal}} and {{elimination}} are incompatible. Play a {{classic}} or {{teams}} game to use {{goal}}."
                 },
                 "goalExceeded": {
                     "description": "The given goal exceeds the highest score. Please raise your goal, or start a new game.",
@@ -408,8 +410,6 @@
                 "permanent": "{{level}} {{formattedNumber}} ({{rankName}})",
                 "temporary": "{{formattedNumber}} {{levelPluralized}} gained"
             },
-            "level_one": "level",
-            "level_other": "levels",
             "quote": {
                 "name": "Want your name to show up on the leaderboard? See {{command}}",
                 "nextPage": "Want to see the next page of the leaderboard? See {{command}}"
@@ -483,6 +483,13 @@
                 }
             }
         },
+        "listen": {
+            "help": {
+                "description": "Stream songs from the current options. Only available to KMQ Premium users.",
+                "example": "Music will start playing in the current voice channel."
+            },
+            "musicStarting": "Music Starting in #{{textChannelName}} in 🔊 {{voiceChannelName}}"
+        },
         "locale": {
             "help": {
                 "description": "Change the language of the bot. Options are the following: {{english}}, {{korean}}.",
@@ -511,10 +518,15 @@
             "inCurrentGameOptions": "In Current Game Options?",
             "inKMQ": "This song is included in KMQ! Here's the link to [Daisuki]({{link}}).",
             "notFound": {
-                "description": "The requested song was not found in KMQ's copy of the Daisuki database. It is not included in KMQ.",
+                "description": "The requested song was not found in KMQ's copy of the Daisuki database, therefore it is not included in KMQ.",
                 "title": "Song Not Found"
             },
             "notInKMQ": "This song has an entry on [Daisuki]({{link}}), but it isn't included in KMQ.",
+            "songNameSearchResult": {
+                "notFoundDescription": "Could not find any songs by that name",
+                "successDescription": "The following songs are available in KMQ:",
+                "title": "Lookup Results"
+            },
             "validation": {
                 "invalidYouTubeID": "Expected a valid YouTube ID or link."
             }
@@ -534,6 +546,7 @@
                 "description": "Displays the latest updates to KMQ."
             },
             "updates": {
+                "footer": "Join the official KMQ server for more detailed updates!",
                 "title": "Updates"
             }
         },
@@ -542,8 +555,9 @@
             "help": {
                 "description": "Displays the current game options."
             },
+            "musicSessionNotAvailable": "Some options are not available during a music session",
             "notSet": "Not set",
-            "overview": "Now playing the top {{limit}} out of {{totalSongs}} available songs from the following game options:",
+            "overview": "Now playing the top {{limit}} out of {{totalSongs}} available songs from the following options:",
             "perCommandHelp": "Looking for information on how to use a command? Check out \"{{helpCommand}} [command]\" to learn more.",
             "premiumOptionsNonPremiumGame": "Note: active game is not premium",
             "preset": "Preset",
@@ -580,15 +594,8 @@
                     "description": "You do not have permission to use this command.",
                     "title": "Hidden Game Mode"
                 },
-                "notInVC": {
-                    "description": "Send {{play}} again when you are in a voice channel.",
-                    "title": "Join a Voice Channel"
-                },
-                "overrideTeamsOrElimination": {
+                "overrideTeams": {
                     "description": "If you meant to start a {{oldGameType}} game, {{end}} this game, call {{playOldGameType}}, {{gameSpecificInstructions}}, and then call {{begin}}.",
-                    "elimination": {
-                        "join": "{{join}} the game"
-                    },
                     "teams": {
                         "join": "`{{join}} [team name]` a team"
                     },
@@ -621,6 +628,11 @@
                 "description": "Find out more about KMQ Premium including whether you're currently a member.",
                 "example": "Shows your premium status."
             },
+            "option": {
+                "description": "This option can only be used by premium KMQ supporters.",
+                "description_kmq_server": "This option can only be used by premium KMQ supporters, or in the official KMQ server.",
+                "title": "Premium Option"
+            },
             "status": {
                 "description": {
                     "connectionReminder": "Make sure to connect your Discord account [here](https://www.patreon.com/settings/apps) to receive your perks.",
@@ -633,7 +645,7 @@
                         "title": "Premium Supporter Badge!"
                     },
                     "moreSongs": {
-                        "description": "Gain access to the top 25 b-sides for every artist (up from 10)",
+                        "description": "Gain access to the top 50 b-sides for every artist (up from 10)",
                         "title": "More songs!"
                     },
                     "special": {
@@ -680,7 +692,7 @@
                 "noSuchPreset": {
                     "description": "Preset {{presetName}} doesn't exist.",
                     "identifier": {
-                        "description": "Preset identifer {{presetUUID}} doesn't exist."
+                        "description": "Preset identifier {{presetUUID}} doesn't exist."
                     },
                     "title": "No Such Preset"
                 },
@@ -859,6 +871,7 @@
             "help": {
                 "description": "Choose how songs are shuffled.",
                 "example": {
+                    "popularity": "Songs will play based on descending popularity. {{penalty}} EXP penalty will be applied",
                     "random": "Songs will play randomly",
                     "reset": "Reset to the default shuffle mode of {{defaultShuffle}}"
                 }
@@ -869,8 +882,7 @@
                 "description": "Vote to skip the current song. A song is skipped when majority of participants vote to skip it."
             },
             "success": {
-                "description": "{{skipCounter}} skips achieved, skipping...",
-                "title": "Skip"
+                "description": "{{skipCounter}} skips achieved, skipping..."
             },
             "vote": {
                 "description": "{{skipCounter}} skip requests received.",
@@ -963,6 +975,7 @@
         }
     },
     "fact": {
+        "didYouKnow": "Did you know?",
         "fun": {
             "bigThreeDominance": "Fun Fact: BTS, Blackpink and Twice combined account for {{bigThreeViews}} YouTube views, or {{proportion}}%!",
             "birthday": "Fun Fact: {{name}}'s birthday is this month on {{formattedDate}}!",
@@ -988,7 +1001,7 @@
             "oldMV": "Fun Fact: {{hyperlink}} was released this week back in {{year}}!",
             "recentGaonWeekly": "Fun Fact: {{songName}} is the {{ordinalNum}} highest charting song on the Gaon Weekly charts last week!",
             "recentMusicShowWin": "Fun Fact: {{hyperlink}} recently won on {{musicShow}} on {{winDate}}",
-            "viewsByArtistType": "Fun Fact: There is a combined total of {{totalViews}} views on all K-Pop music videos on YouTube, {{groupViews}} (${{groupProportion}}%) of which are from groups, while {{soloViews}} (${{soloProportion}}%) are from solo artists.",
+            "viewsByArtistType": "Fun Fact: There is a combined total of {{totalViews}} views on all K-Pop music videos on YouTube, {{groupViews}} ({{groupProportion}}%) of which are from groups, while {{soloViews}} ({{soloProportion}}%) are from solo artists.",
             "viewsByGender": "Fun Fact: There is a combined total of {{totalViews}} views on all K-Pop music videos on YouTube, {{maleViews}} ({{maleProportion}}%) of which are from male groups, {{femaleViews}} ({{femaleProportion}}%) from female groups, and the remaining {{coedViews}} ({{coedProportion}}%) from co-ed groups."
         },
         "kmq": {
@@ -1009,6 +1022,7 @@
         "andManyOthers": "and many others...",
         "artist": "artist",
         "artistAliases": "Artist Aliases",
+        "bookmark": "Bookmark",
         "classic": {
             "yourScore": "Your score is {{score}}."
         },
@@ -1053,12 +1067,20 @@
                 "invalidBookmark": "You can only bookmark songs recently played in the last {{BOOKMARK_MESSAGE_SIZE}} rounds. You must bookmark the message sent by the bot containing the song.",
                 "optionFromPreviousRound": "You are attempting to pick an option from an already completed round."
             },
+            "maintenanceMode": {
+                "description": "KMQ is currently under maintance, and new games cannot be started. Check back later!",
+                "title": "Maintenance Mode"
+            },
             "messageTooLong": "Response message was too long, report this error to the KMQ help server",
             "missingPermissions": {
                 "description": "Hi! I'm unable to message in the {{channelName}} channel. Please make sure the bot has permissions to message in this channel.",
                 "title": "Missing Permissions"
             },
             "missingPermissionsText": "Ensure that the bot has the following permissions: {{missingPermissions}}\n\nSee the following link for details: {{permissionsLink}}. If you are still having issues, join the official KMQ server found in {{helpCommand}}",
+            "notInVC": {
+                "description": "Send {{command}} again when you are in a voice channel.",
+                "title": "Join a Voice Channel"
+            },
             "retrievingSongData": {
                 "description": "Try again in a bit, or report this error to the official KMQ server found in {{helpCommand}}.",
                 "title": "Error Retrieving Song Data"
@@ -1074,6 +1096,7 @@
             "unrecognizedGroups": {
                 "added": "added",
                 "description": "One or more of the specified group names was not recognized. Those groups that matched are {{matchedGroupsAction}}. Please ensure that the group name matches exactly with the list provided by {{helpGroups}}.\nThe following groups were **not** recognized:\n {{unmatchedGroups}}\n{{solution}}",
+                "didYouMean": "__Did you mean:__\n {{suggestions}}",
                 "solution": "Use {{command}} to add the unmatched groups.",
                 "title": "Unknown Group Name"
             },
@@ -1107,57 +1130,6 @@
             }
         },
         "formattedLimit": "{{limitStart}} to {{limitEnd}} ({{songCount}} songs)",
-        "gameMessages": {
-            "beepBoop": {
-                "oss": "Did you know KMQ is open source? [Check us out on GitHub and give us a star!](https://github.com/Brainicism/KMQ_Discord/)",
-                "title": "Beep Boop 🤖"
-            },
-            "didYouKnow": {
-                "artistType": "You can pick whether you want to hear from soloists or groups using `,artisttype`. See `,help artisttype` to learn more.",
-                "bonusArtists": "There's a random selection of 10 artists chosen everyday that provide 2x EXP for their songs. See `,exp` to see the current list!",
-                "cutoff": "You can set which years you want to hear songs from using the `cutoff` game option. See `,help cutoff` for more details.",
-                "duration": "KMQ distracting you from studying? Check out `,duration` to limit the length of each game. See `,help duration` to learn more.",
-                "elimination": "Raise the stakes and try `elimination` mode, where you lose a life for not guessing correctly ☠. See `,help play` for more details.",
-                "exclude": "You can set which groups you *don't* want to hear songs from using the `exclude` game option. See `,help exclude` for more details.",
-                "exp": "Curious how your EXP per round is calculated? See `,exp` for a full breakdown!",
-                "firstGameOfDayBonus": "Your first game of the day will have a 1.5x EXP bonus!",
-                "gender": "You can set what gender groups you want to hear songs from using the `gender` game option. See `,help gender` for more details.",
-                "groups": "You can set which groups you want to exclusively hear songs from using the `groups` game option. See `,help groups` for more details.",
-                "guessmode": "Tired of guessing song names? Switch it up by changing the guess mode to `artist` or `both`. See `,help guessmode` for more details.",
-                "language": "Don't like hearing Japanese/English/Chinese songs? Check out `,language`? See `,help language` to learn more.",
-                "leaderboard": "Think you got what it takes to be a top KMQ player? See `,leaderboard` and `,help leaderboard` to see where you stand.",
-                "limit": "You can limit the number of songs you hear from by popularity. See `,help limit` for more details.",
-                "multiguess": "Slow typer? Allow for multiple correct guesses for a given round using `,multiguess`! See `,help multiguess` to learn more.",
-                "multipleChoice": "Song name on the tip of your tongue every time? Slow typer? Playing on mobile? Check out multiple choice mode! See `,help answer` for more details!",
-                "presets": "Have favorite game option presets? Save and load them with presets! See `,help preset` to learn more.",
-                "profile": "You can see how many games you've played and how many songs you've guessed in total using `,profile`.",
-                "profileInteraction": "You can see a player's profile by right clicking their profile picture, and pressing Apps > Profile!",
-                "reset": "You can reset the game options by using `,reset`.",
-                "seek": "You can pick whether each song starts from the `beginning`, `middle`, or `random` position. See `,help seek` for more details.",
-                "special": "Want to hear songs play in reverse, 2x speed, or 0.5x speed? Try `,special` on the official KMQ server found in `,help`.",
-                "teams": "Ever wanted to team up to defeat that insanely good KMQ player? Start playing with custom teams using `,play teams`! See `,help play` for more details.",
-                "tempLeaderboard": "You can see the daily, weekly, and monthly leaderboard with `,leaderboard`. See `,help leaderboard` to learn more.",
-                "timer": "You can set a time limit for guessing each song by using the `timer` game option. See `,help timer` for more details.",
-                "title": "Did you know?",
-                "typingTypos": "Make a lot of typos? Try out `,answer typingtypos` to allow for minor typos in your guesses! See `,help answer` for more details."
-            },
-            "kmqServer": {
-                "fanArt": "Are you an artist? Draw some KMQ fan art to get an exclusive profile badge! Join the [official KMQ server](https://discord.gg/R55g4CRESW) to share!",
-                "newFriends": "Looking for new friends to play KMQ with, or want to play against the best of the best? Feel free to [come by](https://discord.gg/RCuzwYV) and say hi!",
-                "title": {
-                    "discordServer": "Check out our Discord server!",
-                    "likeKmq": "Like KMQ?"
-                }
-            },
-            "likeKmq": {
-                "title": "Like KMQ?",
-                "vote": "Give us a vote (and get 2x exp, see `,vote`) and leave a review on [top.gg!](https://top.gg/bot/508759831755096074)"
-            },
-            "wrongSongName": {
-                "aliases.": "Have a suggestion for an alternate song name? Tell us on the official KMQ server!",
-                "title": "Wrong Song Name?"
-            }
-        },
         "gameOwnerChanged": {
             "description": "The new game owner is {{newGameOwner}}. They are in charge of {{forcehintCommand}} and {{forceskipCommand}}.",
             "title": "Game Owner Changed"
@@ -1217,6 +1189,8 @@
             "hourAgo_other": "{{count}} hours ago",
             "hour_one": "{{count}} hour",
             "hour_other": "{{count}} hours",
+            "level_one": "level",
+            "level_other": "levels",
             "minuteAgo_one": "{{count}} minute ago",
             "minuteAgo_other": "{{count}} minutes ago",
             "minuteRemaining_one": "{{count}} minute remaining",
@@ -1235,6 +1209,9 @@
             "debugChannel": "You can't do that in this channel.",
             "debugServer": "You can't do that in this server.",
             "differentVC": "You must be in the same voice channel as the bot to use this command.",
+            "notMusicSession": "You can't do that while in a music session.",
+            "notPremium": "You need KMQ Premium to use this command (see {{premium}}).",
+            "premiumOrDebugServer": "This command only works in the official KMQ server or for KMQ Premium members (see {{premium}}).",
             "title": "Wait..."
         },
         "releaseDate": "Release Date",
@@ -1242,6 +1219,7 @@
             "description": "Sending {{songs}} to {{players}}.\n\nBookmark songs during the game by right-clicking the song message and selecting `Apps > Bookmark Song`",
             "title": "Sending Bookmarked Songs..."
         },
+        "skip": "Skip",
         "song": "song",
         "songAliases": "Song Aliases",
         "team": {

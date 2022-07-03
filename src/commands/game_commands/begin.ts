@@ -1,23 +1,29 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import { getGuildPreference } from "../../helpers/game_utils";
-import { sendBeginGameMessage } from "./play";
-import { GameType } from "../../types";
-import TeamScoreboard from "../../structures/team_scoreboard";
+import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
-    sendErrorMessage,
     getUserVoiceChannel,
+    sendErrorMessage,
 } from "../../helpers/discord_utils";
-import { IPCLogger } from "../../logger";
-import MessageContext from "../../structures/message_context";
-import GameSession from "../../structures/game_session";
-import { state } from "../../kmq_worker";
+import { sendBeginGameSessionMessage } from "./play";
 import CommandPrechecks from "../../command_prechecks";
+import GameType from "../../enums/game_type";
+import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type GameSession from "../../structures/game_session";
+import type TeamScoreboard from "../../structures/team_scoreboard";
 
 const logger = new IPCLogger("begin");
 
 export default class BeginCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notListeningPrecheck },
+        { checkFn: CommandPrechecks.maintenancePrecheck },
+    ];
 
     static canStart(
         gameSession: GameSession,
@@ -30,11 +36,11 @@ export default class BeginCommand implements BaseCommand {
         const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
         if (teamScoreboard.getNumTeams() === 0) {
             sendErrorMessage(messageContext, {
-                title: state.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     messageContext.guildID,
                     "command.begin.ignored.title"
                 ),
-                description: state.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     messageContext.guildID,
                     "command.begin.ignored.noTeam.description",
                     { join: `${process.env.BOT_PREFIX}join` }
@@ -46,48 +52,31 @@ export default class BeginCommand implements BaseCommand {
         return true;
     }
 
-    call = async ({
-        message,
-        gameSessions,
-        channel,
-    }: CommandArgs): Promise<void> => {
+    call = async ({ message, channel }: CommandArgs): Promise<void> => {
         const { guildID } = message;
-        const gameSession = gameSessions[guildID];
+        const gameSession = Session.getSession(guildID) as GameSession;
+        const messageContext = MessageContext.fromMessage(message);
 
-        if (
-            !BeginCommand.canStart(
-                gameSession,
-                MessageContext.fromMessage(message)
-            )
-        )
-            return;
-        const guildPreference = await getGuildPreference(guildID);
+        if (!BeginCommand.canStart(gameSession, messageContext)) return;
+        const guildPreference = await GuildPreference.getGuildPreference(
+            guildID
+        );
+
         if (!gameSession.sessionInitialized) {
-            let participants: Array<{
-                id: string;
-                username: string;
-                discriminator: string;
-            }>;
-
             const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
-            participants = teamScoreboard.getPlayers().map((player) => ({
-                id: player.id,
-                username: player.name.split("#")[0],
-                discriminator: player.name.split("#")[1],
-            }));
+            const participantIDs = teamScoreboard
+                .getPlayers()
+                .map((player) => player.id);
 
-            sendBeginGameMessage(
+            sendBeginGameSessionMessage(
                 channel.name,
-                getUserVoiceChannel(MessageContext.fromMessage(message)).name,
-                message,
-                participants,
+                getUserVoiceChannel(messageContext).name,
+                messageContext,
+                participantIDs,
                 guildPreference
             );
 
-            gameSession.startRound(
-                guildPreference,
-                MessageContext.fromMessage(message)
-            );
+            gameSession.startRound(messageContext);
 
             logger.info(
                 `${getDebugLogHeader(message)} | Teams game session starting)`

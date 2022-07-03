@@ -1,17 +1,17 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-underscore-dangle */
+import { IPCLogger } from "./logger";
 import { URL } from "url";
-import dbContext from "./database_context";
 import {
     chooseRandom,
+    friendlyFormattedNumber,
     getOrdinalNum,
     weekOfYear,
-    friendlyFormattedNumber,
 } from "./helpers/utils";
-import { LocaleType } from "./helpers/localization_manager";
-import { state } from "./kmq_worker";
-import { getGuildLocale } from "./helpers/discord_utils";
-import { IPCLogger } from "./logger";
+import LocaleType from "./enums/locale_type";
+import LocalizationManager from "./helpers/localization_manager";
+import State from "./state";
+import dbContext from "./database_context";
 
 const logger = new IPCLogger("fact_generator");
 
@@ -91,13 +91,15 @@ interface GaonWeeklyEntry {
 }
 
 /**
- * Reloads the fact fcache
+ * Reloads the fact cache
  */
 export async function reloadFactCache(): Promise<void> {
     logger.info("Regenerating fact cache...");
-    for (const locale of Object.values(LocaleType)) {
-        await generateFacts(locale);
-    }
+    await Promise.allSettled(
+        Object.values(LocaleType).map(async (locale) => {
+            await generateFacts(locale);
+        })
+    );
 }
 
 async function resolveFactPromises(
@@ -155,7 +157,7 @@ function parseGaonWeeklyRankList(
  * @returns a random cached fact
  */
 export function getFact(guildID: string): string {
-    const locale: LocaleType = getGuildLocale(guildID);
+    const locale: LocaleType = State.getGuildLocale(guildID);
     const randomVal = Math.random();
     const factGroup =
         randomVal < 0.85
@@ -194,7 +196,7 @@ async function recentMusicVideos(lng: LocaleType): Promise<string[]> {
     }
 
     return result.map((x) =>
-        state.localizer.internalLocalizer.t("fact.fun.newMV", {
+        LocalizationManager.localizer.internalLocalizer.t("fact.fun.newMV", {
             hyperlink: generateSongArtistHyperlink(
                 lng,
                 x["name"],
@@ -231,16 +233,19 @@ async function recentMilestone(lng: LocaleType): Promise<string[]> {
     }
 
     return result.map((x) =>
-        state.localizer.internalLocalizer.t("fact.fun.mvViewMilestone", {
-            hyperlink: generateSongArtistHyperlink(
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.fun.mvViewMilestone",
+            {
+                hyperlink: generateSongArtistHyperlink(
+                    lng,
+                    x["song_name"],
+                    x["artist_name"],
+                    x["link"]
+                ),
+                views: friendlyFormattedNumber(x["milestone_views"]),
                 lng,
-                x["song_name"],
-                x["artist_name"],
-                x["link"]
-            ),
-            views: friendlyFormattedNumber(x["milestone_views"]),
-            lng,
-        })
+            }
+        )
     );
 }
 
@@ -271,17 +276,20 @@ async function recentMusicShowWin(lng: LocaleType): Promise<string[]> {
     }
 
     return result.map((x) =>
-        state.localizer.internalLocalizer.t("fact.fun.recentMusicShowWin", {
-            hyperlink: generateSongArtistHyperlink(
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.fun.recentMusicShowWin",
+            {
+                hyperlink: generateSongArtistHyperlink(
+                    lng,
+                    x["winning_song"],
+                    x["artist_name"],
+                    x["link"]
+                ),
+                musicShow: musicShows[x["music_show"]],
+                winDate: x["win_date"].toISOString().substring(0, 10),
                 lng,
-                x["winning_song"],
-                x["artist_name"],
-                x["link"]
-            ),
-            musicShow: musicShows[x["music_show"]],
-            winDate: x["win_date"].toISOString().substring(0, 10),
-            lng,
-        })
+            }
+        )
     );
 }
 
@@ -299,15 +307,18 @@ async function musicShowWins(lng: LocaleType): Promise<string[]> {
         .limit(25);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.mostMusicShowWins", {
-            artist: x["artist_name"],
-            ordinalNum: state.localizer.internalLocalizer.t(
-                getOrdinalNum(idx + 1),
-                { lng }
-            ),
-            num: x["count"],
-            lng,
-        })
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.fun.mostMusicShowWins",
+            {
+                artist: x["artist_name"],
+                ordinalNum: LocalizationManager.localizer.internalLocalizer.t(
+                    getOrdinalNum(idx + 1),
+                    { lng }
+                ),
+                num: x["count"],
+                lng,
+            }
+        )
     );
 }
 
@@ -325,15 +336,18 @@ async function mostViewedGroups(lng: LocaleType): Promise<string[]> {
         .limit(25);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.mostViewedGroup", {
-            artist: x["artist_name"],
-            ordinalNum: state.localizer.internalLocalizer.t(
-                getOrdinalNum(idx + 1),
-                { lng }
-            ),
-            views: friendlyFormattedNumber(x["total_views"]),
-            lng,
-        })
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.fun.mostViewedGroup",
+            {
+                artist: x["artist_name"],
+                ordinalNum: LocalizationManager.localizer.internalLocalizer.t(
+                    getOrdinalNum(idx + 1),
+                    { lng }
+                ),
+                views: friendlyFormattedNumber(x["total_views"]),
+                lng,
+            }
+        )
     );
 }
 
@@ -351,15 +365,18 @@ async function mostLikedGroups(lng: LocaleType): Promise<string[]> {
         .orderBy("total_likes", "DESC");
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.mostLikedGroup", {
-            artist: x["artist_name"],
-            ordinalNum: state.localizer.internalLocalizer.t(
-                getOrdinalNum(idx + 1),
-                { lng }
-            ),
-            likes: friendlyFormattedNumber(x["total_likes"]),
-            lng,
-        })
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.fun.mostLikedGroup",
+            {
+                artist: x["artist_name"],
+                ordinalNum: LocalizationManager.localizer.internalLocalizer.t(
+                    getOrdinalNum(idx + 1),
+                    { lng }
+                ),
+                likes: friendlyFormattedNumber(x["total_likes"]),
+                lng,
+            }
+        )
     );
 }
 
@@ -380,20 +397,23 @@ async function mostViewedVideo(lng: LocaleType): Promise<string[]> {
         .limit(25);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.mostViewedVideo", {
-            hyperlink: generateSongArtistHyperlink(
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.fun.mostViewedVideo",
+            {
+                hyperlink: generateSongArtistHyperlink(
+                    lng,
+                    x["song_name"],
+                    x["artist_name"],
+                    x["link"]
+                ),
+                ordinalNum: LocalizationManager.localizer.internalLocalizer.t(
+                    getOrdinalNum(idx + 1),
+                    { lng }
+                ),
+                views: friendlyFormattedNumber(x["views"]),
                 lng,
-                x["song_name"],
-                x["artist_name"],
-                x["link"]
-            ),
-            ordinalNum: state.localizer.internalLocalizer.t(
-                getOrdinalNum(idx + 1),
-                { lng }
-            ),
-            views: friendlyFormattedNumber(x["views"]),
-            lng,
-        })
+            }
+        )
     );
 }
 
@@ -413,20 +433,23 @@ async function mostLikedVideo(lng: LocaleType): Promise<string[]> {
         .limit(25);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.mostLikedVideo", {
-            hyperlink: generateSongArtistHyperlink(
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.fun.mostLikedVideo",
+            {
+                hyperlink: generateSongArtistHyperlink(
+                    lng,
+                    x["song_name"],
+                    x["artist_name"],
+                    x["link"]
+                ),
+                ordinalNum: LocalizationManager.localizer.internalLocalizer.t(
+                    getOrdinalNum(idx + 1),
+                    { lng }
+                ),
+                likes: friendlyFormattedNumber(x["likes"]),
                 lng,
-                x["song_name"],
-                x["artist_name"],
-                x["link"]
-            ),
-            ordinalNum: state.localizer.internalLocalizer.t(
-                getOrdinalNum(idx + 1),
-                { lng }
-            ),
-            likes: friendlyFormattedNumber(x["likes"]),
-            lng,
-        })
+            }
+        )
     );
 }
 
@@ -448,15 +471,18 @@ async function mostViewedEntertainmentCompany(
         .limit(15);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.companyByArtistViews", {
-            name: x["name"],
-            ordinalNum: state.localizer.internalLocalizer.t(
-                getOrdinalNum(idx + 1),
-                { lng }
-            ),
-            views: friendlyFormattedNumber(x["views"]),
-            lng,
-        })
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.fun.companyByArtistViews",
+            {
+                name: x["name"],
+                ordinalNum: LocalizationManager.localizer.internalLocalizer.t(
+                    getOrdinalNum(idx + 1),
+                    { lng }
+                ),
+                views: friendlyFormattedNumber(x["views"]),
+                lng,
+            }
+        )
     );
 }
 
@@ -476,15 +502,18 @@ async function mostArtistsEntertainmentCompany(
         .limit(15);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.companyByArtistCount", {
-            company: x["name"],
-            ordinalNum: state.localizer.internalLocalizer.t(
-                getOrdinalNum(idx + 1),
-                { lng }
-            ),
-            num: friendlyFormattedNumber(x["count"]),
-            lng,
-        })
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.fun.companyByArtistCount",
+            {
+                company: x["name"],
+                ordinalNum: LocalizationManager.localizer.internalLocalizer.t(
+                    getOrdinalNum(idx + 1),
+                    { lng }
+                ),
+                num: friendlyFormattedNumber(x["count"]),
+                lng,
+            }
+        )
     );
 }
 
@@ -502,9 +531,9 @@ async function mostMusicVideos(lng: LocaleType): Promise<string[]> {
         .limit(25);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.mostMVs", {
+        LocalizationManager.localizer.internalLocalizer.t("fact.fun.mostMVs", {
             artist: x["artist_name"],
-            ordinalNum: state.localizer.internalLocalizer.t(
+            ordinalNum: LocalizationManager.localizer.internalLocalizer.t(
                 getOrdinalNum(idx + 1),
                 { lng }
             ),
@@ -525,15 +554,18 @@ async function yearWithMostDebuts(lng: LocaleType): Promise<string[]> {
         .limit(15);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.mostDebuts", {
-            year: x["formation_year"],
-            ordinalNum: state.localizer.internalLocalizer.t(
-                getOrdinalNum(idx + 1),
-                { lng }
-            ),
-            num: x["count"],
-            lng,
-        })
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.fun.mostDebuts",
+            {
+                year: x["formation_year"],
+                ordinalNum: LocalizationManager.localizer.internalLocalizer.t(
+                    getOrdinalNum(idx + 1),
+                    { lng }
+                ),
+                num: x["count"],
+                lng,
+            }
+        )
     );
 }
 
@@ -552,15 +584,18 @@ async function yearWithMostReleases(lng: LocaleType): Promise<string[]> {
         .limit(15);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.mostActiveYear", {
-            year: String(x["release_year"]),
-            ordinalNum: state.localizer.internalLocalizer.t(
-                getOrdinalNum(idx + 1),
-                { lng }
-            ),
-            num: String(x["count"]),
-            lng,
-        })
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.fun.mostActiveYear",
+            {
+                year: String(x["release_year"]),
+                ordinalNum: LocalizationManager.localizer.internalLocalizer.t(
+                    getOrdinalNum(idx + 1),
+                    { lng }
+                ),
+                num: String(x["count"]),
+                lng,
+            }
+        )
     );
 }
 
@@ -590,16 +625,19 @@ async function viewsByGender(lng: LocaleType): Promise<string[]> {
     }
 
     return [
-        state.localizer.internalLocalizer.t("fact.fun.viewsByGender", {
-            totalViews: friendlyFormattedNumber(totalViews),
-            maleViews: data.male.views,
-            maleProportion: data.male.proportion,
-            femaleViews: data.female.views,
-            femaleProportion: data.female.proportion,
-            coedViews: data.coed.views,
-            coedProportion: data.coed.proportion,
-            lng,
-        }),
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.fun.viewsByGender",
+            {
+                totalViews: friendlyFormattedNumber(totalViews),
+                maleViews: data.male.views,
+                maleProportion: data.male.proportion,
+                femaleViews: data.female.views,
+                femaleProportion: data.female.proportion,
+                coedViews: data.coed.views,
+                coedProportion: data.coed.proportion,
+                lng,
+            }
+        ),
     ];
 }
 
@@ -617,15 +655,18 @@ async function mostViewedSoloArtist(lng: LocaleType): Promise<string[]> {
         .limit(25);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.mostViewedSoloist", {
-            artist: x["artist_name"],
-            ordinalNum: state.localizer.internalLocalizer.t(
-                getOrdinalNum(idx + 1),
-                { lng }
-            ),
-            views: friendlyFormattedNumber(x["total_views"]),
-            lng,
-        })
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.fun.mostViewedSoloist",
+            {
+                artist: x["artist_name"],
+                ordinalNum: LocalizationManager.localizer.internalLocalizer.t(
+                    getOrdinalNum(idx + 1),
+                    { lng }
+                ),
+                views: friendlyFormattedNumber(x["total_views"]),
+                lng,
+            }
+        )
     );
 }
 
@@ -654,14 +695,17 @@ async function viewsBySolo(lng: LocaleType): Promise<string[]> {
     };
 
     return [
-        state.localizer.internalLocalizer.t("fact.fun.viewsByArtistType", {
-            totalViews: friendlyFormattedNumber(totalViews),
-            groupViews: data.group.views,
-            groupProportion: data.group.proportion,
-            soloViews: data.solo.views,
-            soloProportion: data.solo.proportion,
-            lng,
-        }),
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.fun.viewsByArtistType",
+            {
+                totalViews: friendlyFormattedNumber(totalViews),
+                groupViews: data.group.views,
+                groupProportion: data.group.proportion,
+                soloViews: data.solo.views,
+                soloProportion: data.solo.proportion,
+                lng,
+            }
+        ),
     ];
 }
 
@@ -679,7 +723,7 @@ async function songReleaseAnniversaries(lng: LocaleType): Promise<string[]> {
         .limit(25);
 
     return result.map((x) =>
-        state.localizer.internalLocalizer.t("fact.fun.oldMV", {
+        LocalizationManager.localizer.internalLocalizer.t("fact.fun.oldMV", {
             hyperlink: generateSongArtistHyperlink(
                 lng,
                 x["song_name_en"],
@@ -708,17 +752,20 @@ async function songGuessRate(lng: LocaleType): Promise<string[]> {
         .limit(100);
 
     return result.map((x) =>
-        state.localizer.internalLocalizer.t("fact.kmq.guessRate", {
-            hyperlink: generateSongArtistHyperlink(
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.kmq.guessRate",
+            {
+                hyperlink: generateSongArtistHyperlink(
+                    lng,
+                    x["song_name_en"],
+                    x["artist_name_en"],
+                    x["link"]
+                ),
+                percentage: x["c"],
+                roundsPlayed: x["rounds_played"],
                 lng,
-                x["song_name_en"],
-                x["artist_name_en"],
-                x["link"]
-            ),
-            percentage: x["c"],
-            roundsPlayed: x["rounds_played"],
-            lng,
-        })
+            }
+        )
     );
 }
 
@@ -745,11 +792,14 @@ async function bigThreeDominance(lng: LocaleType): Promise<string[]> {
 
     const proportion = (100 * bigThreeViews) / totalViewsResult[0].total_views;
     return [
-        state.localizer.internalLocalizer.t("fact.fun.bigThreeDominance", {
-            bigThreeViews: friendlyFormattedNumber(bigThreeViews),
-            proportion: proportion.toFixed(2),
-            lng,
-        }),
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.fun.bigThreeDominance",
+            {
+                bigThreeViews: friendlyFormattedNumber(bigThreeViews),
+                proportion: proportion.toFixed(2),
+                lng,
+            }
+        ),
     ];
 }
 
@@ -762,11 +812,14 @@ async function fanclubName(lng: LocaleType): Promise<Array<string>> {
         .limit(10);
 
     return result.map((x) =>
-        state.localizer.internalLocalizer.t("fact.fun.fanclubName", {
-            name: x["name"],
-            fanclub: x["fanclub"],
-            lng,
-        })
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.fun.fanclubName",
+            {
+                name: x["name"],
+                fanclub: x["fanclub"],
+                lng,
+            }
+        )
     );
 }
 
@@ -783,7 +836,7 @@ async function closeBirthdays(lng: LocaleType): Promise<Array<string>> {
         .limit(10);
 
     return result.map((x) =>
-        state.localizer.internalLocalizer.t("fact.fun.birthday", {
+        LocalizationManager.localizer.internalLocalizer.t("fact.fun.birthday", {
             name: x["name"],
             formattedDate: x["formatted_bday"],
             lng,
@@ -806,19 +859,24 @@ async function longestGame(lng: LocaleType): Promise<string[]> {
     if (result.length === 0) return [];
     const longestKmqGame = result[0];
     return [
-        state.localizer.internalLocalizer.t("fact.kmq.longestGame", {
-            sessionLength: friendlyFormattedNumber(
-                longestKmqGame.session_length
-            ),
-            roundsPlayed: friendlyFormattedNumber(longestKmqGame.rounds_played),
-            avgGuessTime: friendlyFormattedNumber(
-                longestKmqGame.avg_guess_time
-            ),
-            numParticipants: friendlyFormattedNumber(
-                longestKmqGame.num_participants
-            ),
-            lng,
-        }),
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.kmq.longestGame",
+            {
+                sessionLength: friendlyFormattedNumber(
+                    longestKmqGame.session_length
+                ),
+                roundsPlayed: friendlyFormattedNumber(
+                    longestKmqGame.rounds_played
+                ),
+                avgGuessTime: friendlyFormattedNumber(
+                    longestKmqGame.avg_guess_time
+                ),
+                numParticipants: friendlyFormattedNumber(
+                    longestKmqGame.num_participants
+                ),
+                lng,
+            }
+        ),
     ];
 }
 
@@ -832,13 +890,18 @@ async function mostGames(lng: LocaleType): Promise<string[]> {
     if (result.length === 0) return [];
     const mostGamesPlayed = result[0];
     return [
-        state.localizer.internalLocalizer.t("fact.kmq.mostActiveServer", {
-            gamesPlayed: friendlyFormattedNumber(mostGamesPlayed.games_played),
-            songsGuessed: friendlyFormattedNumber(
-                mostGamesPlayed.songs_guessed
-            ),
-            lng,
-        }),
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.kmq.mostActiveServer",
+            {
+                gamesPlayed: friendlyFormattedNumber(
+                    mostGamesPlayed.games_played
+                ),
+                songsGuessed: friendlyFormattedNumber(
+                    mostGamesPlayed.songs_guessed
+                ),
+                lng,
+            }
+        ),
     ];
 }
 
@@ -852,7 +915,7 @@ async function mostCorrectGuessed(lng: LocaleType): Promise<string[]> {
     if (result.length === 0) return [];
     const mostGamesPlayed = result[0];
     return [
-        state.localizer.internalLocalizer.t(
+        LocalizationManager.localizer.internalLocalizer.t(
             "fact.kmq.mostCorrectGuessesServer",
             {
                 gamesPlayed: friendlyFormattedNumber(
@@ -873,10 +936,13 @@ async function globalTotalGames(lng: LocaleType): Promise<string[]> {
     if (result.length === 0) return [];
     const totalGamesPlayed = result[0].count as number;
     return [
-        state.localizer.internalLocalizer.t("fact.kmq.totalGames", {
-            totalGamesPlayed: friendlyFormattedNumber(totalGamesPlayed),
-            lng,
-        }),
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.kmq.totalGames",
+            {
+                totalGamesPlayed: friendlyFormattedNumber(totalGamesPlayed),
+                lng,
+            }
+        ),
     ];
 }
 
@@ -891,10 +957,13 @@ async function recentGameSessions(lng: LocaleType): Promise<string[]> {
     if (result.length === 0) return [];
     const recentSessions = result[0].count as number;
     return [
-        state.localizer.internalLocalizer.t("fact.kmq.recentSessions", {
-            recentSessions: friendlyFormattedNumber(recentSessions),
-            lng,
-        }),
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.kmq.recentSessions",
+            {
+                recentSessions: friendlyFormattedNumber(recentSessions),
+                lng,
+            }
+        ),
     ];
 }
 
@@ -909,40 +978,46 @@ async function recentGames(lng: LocaleType): Promise<string[]> {
     if (result.length === 0) return [];
     const recentGameCount = result[0].count as number;
     return [
-        state.localizer.internalLocalizer.t("fact.kmq.recentGameCount", {
-            recentGameCount: friendlyFormattedNumber(recentGameCount),
-            lng,
-        }),
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.kmq.recentGameCount",
+            {
+                recentGameCount: friendlyFormattedNumber(recentGameCount),
+                lng,
+            }
+        ),
     ];
 }
 
 async function recentUniquePlayers(lng: LocaleType): Promise<string[]> {
     const intervals = [1, 7, 30];
-    const output: Array<string> = [];
-    for (const interval of intervals) {
-        const priorDate = new Date();
-        priorDate.setDate(priorDate.getDate() - interval);
-        const result = await dbContext
-            .kmq("player_stats")
-            .count("* as count")
-            .where("last_active", ">", priorDate);
+    return Promise.all(
+        intervals.map(async (interval): Promise<string> => {
+            const priorDate = new Date();
+            priorDate.setDate(priorDate.getDate() - interval);
+            const result = await dbContext
+                .kmq("player_stats")
+                .count("* as count")
+                .where("last_active", ">", priorDate);
 
-        if (result.length === 0) return [];
-        const recentActivePlayers = result[0].count as number;
-        output.push(
-            state.localizer.internalLocalizer.t("fact.kmq.uniquePlayers", {
-                recentActivePlayers:
-                    friendlyFormattedNumber(recentActivePlayers),
-                xDays: state.localizer.internalLocalizer.t("misc.plural.day", {
-                    count: interval,
+            if (result.length === 0) return null;
+            const recentActivePlayers = result[0].count as number;
+            return LocalizationManager.localizer.internalLocalizer.t(
+                "fact.kmq.uniquePlayers",
+                {
+                    recentActivePlayers:
+                        friendlyFormattedNumber(recentActivePlayers),
+                    xDays: LocalizationManager.localizer.internalLocalizer.t(
+                        "misc.plural.day",
+                        {
+                            count: interval,
+                            lng,
+                        }
+                    ),
                     lng,
-                }),
-                lng,
-            })
-        );
-    }
-
-    return output;
+                }
+            );
+        })
+    );
 }
 
 async function mostSongsGuessedPlayer(lng: LocaleType): Promise<string[]> {
@@ -954,7 +1029,7 @@ async function mostSongsGuessedPlayer(lng: LocaleType): Promise<string[]> {
 
     if (result.length === 0) return [];
     return [
-        state.localizer.internalLocalizer.t(
+        LocalizationManager.localizer.internalLocalizer.t(
             "fact.kmq.mostActivePlayerSongsGuessed",
             {
                 songsGuessed: friendlyFormattedNumber(result[0].songs_guessed),
@@ -973,7 +1048,7 @@ async function mostGamesPlayedPlayer(lng: LocaleType): Promise<string[]> {
 
     if (result.length === 0) return [];
     return [
-        state.localizer.internalLocalizer.t(
+        LocalizationManager.localizer.internalLocalizer.t(
             "fact.kmq.mostActivePlayerGamesPlayed",
             {
                 gamesPlayed: friendlyFormattedNumber(result[0].games_played),
@@ -991,15 +1066,18 @@ async function mostGaonFirsts(lng: LocaleType): Promise<string[]> {
         .limit(25);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.mostGaonFirsts", {
-            artistName: x["artist_name"],
-            ordinalNum: state.localizer.internalLocalizer.t(
-                getOrdinalNum(idx + 1),
-                { lng }
-            ),
-            firstPlaceCount: x["firsts"],
-            lng,
-        })
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.fun.mostGaonFirsts",
+            {
+                artistName: x["artist_name"],
+                ordinalNum: LocalizationManager.localizer.internalLocalizer.t(
+                    getOrdinalNum(idx + 1),
+                    { lng }
+                ),
+                firstPlaceCount: x["firsts"],
+                lng,
+            }
+        )
     );
 }
 
@@ -1011,15 +1089,18 @@ async function mostGaonAppearances(lng: LocaleType): Promise<string[]> {
         .limit(25);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.mostGaonAppearances", {
-            artistName: x["artist_name"],
-            ordinalNum: state.localizer.internalLocalizer.t(
-                getOrdinalNum(idx + 1),
-                { lng }
-            ),
-            appearances: x["appearances"],
-            lng,
-        })
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.fun.mostGaonAppearances",
+            {
+                artistName: x["artist_name"],
+                ordinalNum: LocalizationManager.localizer.internalLocalizer.t(
+                    getOrdinalNum(idx + 1),
+                    { lng }
+                ),
+                appearances: x["appearances"],
+                lng,
+            }
+        )
     );
 }
 
@@ -1031,11 +1112,11 @@ async function mostAnnualAwardShowWins(lng: LocaleType): Promise<string[]> {
         .limit(25);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t(
+        LocalizationManager.localizer.internalLocalizer.t(
             "fact.fun.mostAnnualAwardShowWins",
             {
                 artistName: x["artist_name"],
-                ordinalNum: state.localizer.internalLocalizer.t(
+                ordinalNum: LocalizationManager.localizer.internalLocalizer.t(
                     getOrdinalNum(idx + 1),
                     { lng }
                 ),
@@ -1072,15 +1153,18 @@ async function historicalGaonWeekly(lng: LocaleType): Promise<Array<string>> {
     );
 
     return parsedResults.map((x) =>
-        state.localizer.internalLocalizer.t("fact.fun.historicalGaonWeekly", {
-            year: x[0].year,
-            songName: generateSongArtistHyperlink(
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.fun.historicalGaonWeekly",
+            {
+                year: x[0].year,
+                songName: generateSongArtistHyperlink(
+                    lng,
+                    x[0].songName,
+                    x[0].artistName
+                ),
                 lng,
-                x[0].songName,
-                x[0].artistName
-            ),
-            lng,
-        })
+            }
+        )
     );
 }
 
@@ -1098,18 +1182,21 @@ async function recentGaonWeekly(lng: LocaleType): Promise<Array<string>> {
     );
 
     return parsedResult.slice(0, 10).map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.recentGaonWeekly", {
-            songName: generateSongArtistHyperlink(
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.fun.recentGaonWeekly",
+            {
+                songName: generateSongArtistHyperlink(
+                    lng,
+                    x["songName"],
+                    x["artistName"]
+                ),
+                ordinalNum: LocalizationManager.localizer.internalLocalizer.t(
+                    getOrdinalNum(idx + 1),
+                    { lng }
+                ),
                 lng,
-                x["songName"],
-                x["artistName"]
-            ),
-            ordinalNum: state.localizer.internalLocalizer.t(
-                getOrdinalNum(idx + 1),
-                { lng }
-            ),
-            lng,
-        })
+            }
+        )
     );
 }
 
@@ -1121,10 +1208,10 @@ async function topLeveledPlayers(lng: LocaleType): Promise<Array<string>> {
         .limit(10);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t(
+        LocalizationManager.localizer.internalLocalizer.t(
             "fact.kmq.highestLeveledPlayerStats",
             {
-                ordinalNum: state.localizer.internalLocalizer.t(
+                ordinalNum: LocalizationManager.localizer.internalLocalizer.t(
                     getOrdinalNum(idx + 1),
                     { lng }
                 ),
@@ -1159,10 +1246,13 @@ function generateSongArtistHyperlink(
         url = searchUrl.toString();
     }
 
-    return state.localizer.internalLocalizer.t("fact.fun.hyperlinkGenerator", {
-        songName,
-        artistName,
-        url,
-        lng,
-    });
+    return LocalizationManager.localizer.internalLocalizer.t(
+        "fact.fun.hyperlinkGenerator",
+        {
+            songName,
+            artistName,
+            url,
+            lng,
+        }
+    );
 }

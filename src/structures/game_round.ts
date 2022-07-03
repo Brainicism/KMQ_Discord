@@ -1,24 +1,24 @@
-import _ from "lodash";
-import Eris from "eris";
-import levenshtien from "damerau-levenshtein";
-import { GuessModeType } from "../commands/game_options/guessmode";
-import { state } from "../kmq_worker";
-import KmqMember from "./kmq_member";
-import {
-    ExpBonusModifier,
-    ExpBonusModifierValues,
-} from "../commands/game_commands/exp";
-import { PlayerRoundResult, QueriedSong } from "../types";
-import Round, { MAX_RUNNERS_UP } from "./round";
-import MessageContext from "./message_context";
 import {
     EMBED_ERROR_COLOR,
     EMBED_SUCCESS_BONUS_COLOR,
     EMBED_SUCCESS_COLOR,
-    getMention,
-} from "../helpers/discord_utils";
-import { UniqueSongCounter } from "./song_selector";
-import { friendlyFormattedNumber } from "../helpers/utils";
+    ExpBonusModifierValues,
+    ROUND_MAX_RUNNERS_UP,
+} from "../constants";
+import { friendlyFormattedNumber, getMention } from "../helpers/utils";
+import ExpBonusModifier from "../enums/exp_bonus_modifier";
+import GuessModeType from "../enums/option_types/guess_mode_type";
+import KmqMember from "./kmq_member";
+import LocalizationManager from "../helpers/localization_manager";
+import Round from "./round";
+import State from "../state";
+import _ from "lodash";
+import levenshtien from "damerau-levenshtein";
+import type Eris from "eris";
+import type MessageContext from "./message_context";
+import type PlayerRoundResult from "../interfaces/player_round_result";
+import type QueriedSong from "../interfaces/queried_song";
+import type UniqueSongCounter from "../interfaces/unique_song_counter";
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape
 const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★*´\(\)\+\u200B]/g;
@@ -28,7 +28,7 @@ const CHARACTER_REPLACEMENTS = [
     { pattern: /&/g, replacement: "and" },
 ];
 
-export interface GuessCorrectness {
+interface GuessCorrectness {
     exact: boolean;
     similar: boolean;
 }
@@ -132,12 +132,6 @@ export default class GameRound extends Round {
     /** List of players who incorrectly guessed in the multiple choice */
     public incorrectMCGuessers: Set<string>;
 
-    /** Interactable components attached to this round's message */
-    public interactionComponents: Array<Eris.ActionRow>;
-
-    /** The message containing this round's interactable components */
-    public interactionMessage: Eris.Message<Eris.TextableChannel>;
-
     /** Info about the players that won this GameRound */
     public playerRoundResults: Array<PlayerRoundResult>;
 
@@ -171,7 +165,6 @@ export default class GameRound extends Round {
         this.interactionCorrectAnswerUUID = null;
         this.interactionIncorrectAnswerUUIDs = {};
         this.incorrectMCGuessers = new Set();
-        this.interactionComponents = [];
         this.interactionMessage = null;
         this.playerRoundResults = [];
         this.bonusModifier =
@@ -216,12 +209,7 @@ export default class GameRound extends Round {
      */
     userCorrect(userID: string, pointsAwarded: number): void {
         if (!this.correctGuessers.some((x) => x.id === userID)) {
-            this.correctGuessers.push(
-                KmqMember.fromUser(
-                    state.client.users.get(userID),
-                    pointsAwarded
-                )
-            );
+            this.correctGuessers.push(new KmqMember(userID, pointsAwarded));
         }
     }
 
@@ -327,9 +315,9 @@ export default class GameRound extends Round {
 
     /**
      * @param interactionUUID - the UUID of an interaction
-     * @returns true if the given UUID is one of the guesses of the current game round
+     * @returns true if the given UUID is one of the interactions (i.e. guesses) of the current game round
      */
-    isValidInteractionGuess(interactionUUID: string): boolean {
+    isValidInteraction(interactionUUID: string): boolean {
         return (
             interactionUUID === this.interactionCorrectAnswerUUID ||
             Object.keys(this.interactionIncorrectAnswerUUIDs).includes(
@@ -348,7 +336,7 @@ export default class GameRound extends Round {
     }
 
     isBonusArtist(): boolean {
-        return state.bonusArtists.has(this.song.artistName);
+        return State.bonusArtists.has(this.song.artistName);
     }
 
     getEndRoundDescription(
@@ -360,17 +348,17 @@ export default class GameRound extends Round {
         if (this.bonusModifier > 1 || this.isBonusArtist()) {
             let bonusType: string;
             if (this.isBonusArtist() && this.bonusModifier > 1) {
-                bonusType = state.localizer.translate(
+                bonusType = LocalizationManager.localizer.translate(
                     messageContext.guildID,
                     "misc.inGame.bonusExpArtistRound"
                 );
             } else if (this.bonusModifier > 1) {
-                bonusType = state.localizer.translate(
+                bonusType = LocalizationManager.localizer.translate(
                     messageContext.guildID,
                     "misc.inGame.bonusExpRound"
                 );
             } else {
-                bonusType = state.localizer.translate(
+                bonusType = LocalizationManager.localizer.translate(
                     messageContext.guildID,
                     "misc.inGame.bonusArtistRound"
                 );
@@ -391,7 +379,7 @@ export default class GameRound extends Round {
                     : ""
             }`;
 
-            correctDescription += state.localizer.translate(
+            correctDescription += LocalizationManager.localizer.translate(
                 messageContext.guildID,
                 "misc.inGame.correctGuess",
                 {
@@ -410,17 +398,17 @@ export default class GameRound extends Round {
                                 x.player.id
                             )} (+${friendlyFormattedNumber(x.expGain)} EXP)`
                     )
-                    .slice(0, MAX_RUNNERS_UP)
+                    .slice(0, ROUND_MAX_RUNNERS_UP)
                     .join("\n");
 
-                if (runnersUp.length >= MAX_RUNNERS_UP) {
-                    runnersUpDescription += `\n${state.localizer.translate(
+                if (runnersUp.length >= ROUND_MAX_RUNNERS_UP) {
+                    runnersUpDescription += `\n${LocalizationManager.localizer.translate(
                         messageContext.guildID,
                         "misc.andManyOthers"
                     )}`;
                 }
 
-                correctDescription += `\n\n**${state.localizer.translate(
+                correctDescription += `\n\n**${LocalizationManager.localizer.translate(
                     messageContext.guildID,
                     "misc.inGame.runnersUp"
                 )}**\n${runnersUpDescription}`;
@@ -428,7 +416,7 @@ export default class GameRound extends Round {
         }
 
         if (!correctGuess) {
-            correctDescription = state.localizer.translate(
+            correctDescription = LocalizationManager.localizer.translate(
                 messageContext.guildID,
                 "misc.inGame.noCorrectGuesses"
             );
@@ -442,6 +430,7 @@ export default class GameRound extends Round {
         return `${correctDescription}\n${uniqueSongMessage}`;
     }
 
+    // eslint-disable-next-line class-methods-use-this
     getEndRoundColor(correctGuess: boolean, userBonusActive: boolean): number {
         if (correctGuess) {
             if (userBonusActive) {

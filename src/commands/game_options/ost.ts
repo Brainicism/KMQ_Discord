@@ -1,24 +1,21 @@
+import { DEFAULT_OST_PREFERENCE } from "../../constants";
+import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
-import { IPCLogger } from "../../logger";
-import { GameOption } from "../../types";
-import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import GameOption from "../../enums/game_option_name";
+import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import OstPreference from "../../enums/option_types/ost_preference";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("ost");
-
-export enum OstPreference {
-    INCLUDE = "include",
-    EXCLUDE = "exclude",
-    EXCLUSIVE = "exclusive",
-}
-
-export const DEFAULT_OST_PREFERENCE = OstPreference.EXCLUDE;
 
 export default class OstCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
@@ -37,9 +34,9 @@ export default class OstCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "ost",
-        description: state.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.ost.help.description"
         ),
@@ -47,28 +44,28 @@ export default class OstCommand implements BaseCommand {
         examples: [
             {
                 example: "`,ost include`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.ost.help.example.include"
                 ),
             },
             {
                 example: "`,ost exclude`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.ost.help.example.exclude"
                 ),
             },
             {
                 example: "`,ost exclusive`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.ost.help.example.exclusive"
                 ),
             },
             {
                 example: "`,ost`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.ost.help.example.reset",
                     { defaultOst: `\`${DEFAULT_OST_PREFERENCE}\`` }
@@ -79,11 +76,14 @@ export default class OstCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
 
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.OST_PREFERENCE);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.OST_PREFERENCE, reset: true }]
@@ -100,6 +100,7 @@ export default class OstCommand implements BaseCommand {
 
         await guildPreference.setOstPreference(ostPreference);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.OST_PREFERENCE, reset: false }]

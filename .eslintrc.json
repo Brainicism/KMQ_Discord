@@ -1,25 +1,28 @@
 {
     "extends": [
-        "airbnb-typescript/base", "prettier"
+        "airbnb-base","airbnb-typescript/base", "prettier"
     ],
     "plugins": [
         "eslint-plugin-tsdoc",
         "jsdoc",
         "only-warn",
-        "import"
+        "import",
+        "sort-imports-es6-autofix",
+        "deprecation",
+        "eslint-plugin-node"
     ],
     "parserOptions": {
         "project": "./tsconfig.json"
     },
     "rules": {
+        "node/no-sync": ["error"],
+        "import/order": ["off"],
+        "deprecation/deprecation": "warn",
         "@typescript-eslint/await-thenable": [
             "error"
         ],
         "@typescript-eslint/require-await": [
             "error"
-        ],
-        "@typescript-eslint/indent": [
-            "off"
         ],
         "@typescript-eslint/quotes": [
             "warn",
@@ -35,14 +38,16 @@
             "warn"
         ],
         "import/no-cycle": [
-            "off"
+            "warn"
         ],
+        "@typescript-eslint/consistent-type-imports": ["warn"],
         "jsdoc/require-jsdoc": [
             "warn",
             {
                 "publicOnly": true
             }
         ],
+        "sort-imports-es6-autofix/sort-imports-es6": ["warn"],
         "valid-jsdoc": [
             "warn",
             {
@@ -53,9 +58,6 @@
         ],
         "tsdoc/syntax": [
             "warn"
-        ],
-        "lines-between-class-members": [
-            "off"
         ],
         "max-len": [
             "warn",
@@ -72,9 +74,6 @@
                 "message": "Do not use `forEach()`, use `for/of` instead"
             }
         ],
-        "no-await-in-loop": [
-            "off"
-        ],
         "no-continue": [
             "off"
         ],
@@ -84,13 +83,9 @@
         "no-async-promise-executor": [
             "off"
         ],
-        "@typescript-eslint/lines-between-class-members": [
-            "off"
-        ],
+        "lines-between-class-members": ["error", "always", { "exceptAfterSingleLine": true }],
+        "@typescript-eslint/lines-between-class-members": ["off"],
         "no-param-reassign": [
-            "off"
-        ],
-        "object-curly-newline": [
             "off"
         ],
         "@typescript-eslint/no-unused-vars": [
@@ -118,32 +113,17 @@
         "func-names": [
             "off"
         ],
-        "no-bitwise": [
-            "off"
-        ],
         "@typescript-eslint/dot-notation": [
             "off"
         ],
         "no-multi-str": [
             "off"
         ],
-        "no-multi-spaces": [
+        "no-console": [
             "warn"
         ],
-        "radix": [
-            "off"
-        ],
-        "no-lonely-if": [
-            "off"
-        ],
-        "no-console": [
-            "error"
-        ],
-        "quote-props": [
-            "off"
-        ],
         "padding-line-between-statements": [
-            "error",
+            "warn",
             {
                 "blankLine": "always",
                 "prev": "block-like",
@@ -174,6 +154,8 @@
                 "prev": "*",
                 "next": "function"
             }
-        ]
+        ],
+        "no-bitwise": ["off"],
+        "class-methods-use-this": ["warn", { "exceptMethods": ["call", "help", "resetPremium", "isUsingPremiumOption"] }]
     }
 }

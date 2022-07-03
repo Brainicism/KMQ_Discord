@@ -1,15 +1,18 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import { GameOptionInternalToGameOption } from "../../constants";
 import { IPCLogger } from "../../logger";
-import { getGuildPreference } from "../../helpers/game_utils";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { GameOptionInternalToGameOption } from "../../structures/guild_preference";
-import { GameOption } from "../../types";
-import { state } from "../../kmq_worker";
+import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type GameOption from "../../enums/game_option_name";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("reset");
 
@@ -22,9 +25,9 @@ export default class ResetCommand implements BaseCommand {
         arguments: [],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "reset",
-        description: state.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.reset.help.description"
         ),
@@ -32,7 +35,7 @@ export default class ResetCommand implements BaseCommand {
         examples: [
             {
                 example: "`,reset`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.reset.help.example.reset"
                 ),
@@ -42,13 +45,17 @@ export default class ResetCommand implements BaseCommand {
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         const resetOptions = await guildPreference.resetToDefault();
         logger.info(
             `${getDebugLogHeader(message)} | Reset to default guild preferences`
         );
 
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             resetOptions.map((x) => ({

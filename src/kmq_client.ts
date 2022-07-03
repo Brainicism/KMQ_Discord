@@ -1,9 +1,9 @@
-/* eslint-disable import/no-dynamic-require */
+/* eslint-disable no-await-in-loop */
+import { IPCLogger } from "./logger";
 import Eris from "eris";
 import fs from "fs";
 import path from "path";
-import BaseCommand from "./commands/interfaces/base_command";
-import { IPCLogger } from "./logger";
+import type BaseCommand from "./commands/interfaces/base_command";
 
 const logger = new IPCLogger("kmq_client");
 
@@ -21,20 +21,20 @@ export default class KmqClient extends Eris.Client {
      * @param shouldReload - Whether to reload the commands
      * @returns a mapping of command name to command source file
      * */
-    public static getCommandFiles(shouldReload: boolean): {
+    public static async getCommandFiles(shouldReload: boolean): Promise<{
         [commandName: string]: BaseCommand;
-    } {
+    }> {
         const commandMap = {};
         try {
             let files: Array<string> = [];
             for (const category of ["admin", "game_options", "game_commands"]) {
                 files = files.concat(
-                    fs
-                        .readdirSync(
+                    (
+                        await fs.promises.readdir(
                             path.resolve(__dirname, "./commands", category)
                         )
+                    )
                         .filter((x) => x.endsWith(".js"))
-                        // eslint-disable-next-line @typescript-eslint/no-loop-func
                         .map((x) =>
                             path.resolve(__dirname, "./commands", category, x)
                         )
@@ -54,13 +54,15 @@ export default class KmqClient extends Eris.Client {
                 }
 
                 try {
-                    // eslint-disable-next-line global-require
+                    // eslint-disable-next-line global-require,import/no-dynamic-require
                     const command = require(commandFilePath);
                     const commandName = path.parse(commandFile).name;
                     // eslint-disable-next-line new-cap
                     commandMap[commandName] = new command.default();
                 } catch (e) {
-                    throw new Error(`Failed to load file: ${commandFilePath}`);
+                    throw new Error(
+                        `Failed to load file: ${commandFilePath}. ${e}`
+                    );
                 }
             }
 
@@ -72,9 +74,9 @@ export default class KmqClient extends Eris.Client {
     }
 
     /** Reloads commands */
-    public reloadCommands(): void {
+    public async reloadCommands(): Promise<void> {
         logger.info("Reloading KMQ commands");
-        this.registerCommands(false);
+        await this.registerCommands(false);
         logger.info("Reload KMQ commands complete");
     }
 
@@ -82,10 +84,10 @@ export default class KmqClient extends Eris.Client {
      *  Registers commands
      * @param initialLoad - Whether this is the initial load
      * */
-    private registerCommands(initialLoad: boolean): void {
+    private async registerCommands(initialLoad: boolean): Promise<void> {
         // load commands
         this.commands = {};
-        const commandFiles = KmqClient.getCommandFiles(!initialLoad);
+        const commandFiles = await KmqClient.getCommandFiles(!initialLoad);
         let successfulCommands = 0;
         for (const [commandName, command] of Object.entries(commandFiles)) {
             if (this.registerCommand(command, commandName))

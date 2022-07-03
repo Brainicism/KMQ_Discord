@@ -1,14 +1,18 @@
-import { execSync } from "child_process";
+import * as cp from "child_process";
 import { IPCLogger } from "../../logger";
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
-import MessageContext from "../../structures/message_context";
-import { state } from "../../kmq_worker";
 import CommandPrechecks from "../../command_prechecks";
+import MessageContext from "../../structures/message_context";
+import State from "../../state";
+import util from "util";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+
+const exec = util.promisify(cp.exec);
 
 const logger = new IPCLogger("reload");
 
-export enum ReloadType {
+enum ReloadType {
     CLUSTER = "cluster",
     ALL = "all",
 }
@@ -28,9 +32,9 @@ export default class ReloadCommand implements BaseCommand {
         ],
     };
 
-    call = ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         try {
-            execSync("npx tsc");
+            await exec("npx tsc");
         } catch (e) {
             logger.error("Error transpiling KMQ commands");
             sendErrorMessage(MessageContext.fromMessage(message), {
@@ -42,7 +46,7 @@ export default class ReloadCommand implements BaseCommand {
 
         const reloadType = parsedMessage.components[0] as ReloadType;
         if (reloadType === ReloadType.ALL) {
-            state.ipc.allClustersCommand("reload_commands");
+            State.ipc.allClustersCommand("reload_commands");
             sendInfoMessage(MessageContext.fromMessage(message), {
                 title: "Reloading All Clusters",
                 description: "See logs for completion status",
@@ -50,15 +54,15 @@ export default class ReloadCommand implements BaseCommand {
             return;
         }
 
-        ReloadCommand.reloadCommands();
+        await ReloadCommand.reloadCommands();
         sendInfoMessage(MessageContext.fromMessage(message), {
             title: "Cluster Reload Complete",
             description: "All changes should now be applied",
         });
     };
 
-    static reloadCommands(): void {
+    static async reloadCommands(): Promise<void> {
         logger.info("Reloading all commands");
-        state.client.reloadCommands();
+        await State.client.reloadCommands();
     }
 }

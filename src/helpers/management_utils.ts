@@ -1,43 +1,44 @@
 /* eslint-disable global-require */
 /* eslint-disable import/no-dynamic-require */
-import schedule from "node-schedule";
-import _ from "lodash";
 import { IPCLogger } from "../logger";
-import { state } from "../kmq_worker";
-import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
-import messageCreateHandler from "../events/client/messageCreate";
-import voiceChannelLeaveHandler from "../events/client/voiceChannelLeave";
-import voiceChannelSwitchHandler from "../events/client/voiceChannelSwitch";
-import voiceChannelJoinHandler from "../events/client/voiceChannelJoin";
-import connectHandler from "../events/client/connect";
-import errorHandler from "../events/client/error";
-import warnHandler from "../events/client/warn";
-import shardDisconnectHandler from "../events/client/shardDisconnect";
-import shardReadyHandler from "../events/client/shardReady";
-import shardResumeHandler from "../events/client/shardResume";
-import disconnectHandler from "../events/client/disconnect";
-import unhandledRejectionHandler from "../events/process/unhandledRejection";
-import uncaughtExceptionHandler from "../events/process/uncaughtException";
-import SIGINTHandler from "../events/process/SIGINT";
+import { chooseRandom, delay, isPrimaryInstance, isWeekend } from "./utils";
 import {
     cleanupInactiveGameSessions,
     getMatchingGroupNames,
     isPowerHour,
 } from "./game_utils";
-import { LocaleType } from "./localization_manager";
-import updatePremiumUsers from "./patreon_manager";
+import { reloadFactCache } from "../fact_generator";
+import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
+import EnvType from "../enums/env_type";
+import KmqConfiguration from "../kmq_configuration";
+import MessageContext from "../structures/message_context";
+import SIGINTHandler from "../events/process/SIGINT";
+import State from "../state";
+import _ from "lodash";
+import channelDeleteHandler from "../events/client/channelDelete";
+import connectHandler from "../events/client/connect";
 import dbContext from "../database_context";
 import debugHandler from "../events/client/debug";
+import disconnectHandler from "../events/client/disconnect";
+import errorHandler from "../events/client/error";
+import guildAvailableHandler from "../events/client/guildAvailable";
 import guildCreateHandler from "../events/client/guildCreate";
 import guildDeleteHandler from "../events/client/guildDelete";
-import unavailableGuildCreateHandler from "../events/client/unavailableGuildCreate";
-import guildAvailableHandler from "../events/client/guildAvailable";
 import interactionCreateHandler from "../events/client/interactionCreate";
-import { chooseRandom, isWeekend } from "./utils";
-import { reloadFactCache } from "../fact_generator";
-import MessageContext from "../structures/message_context";
-import { EnvType } from "../types";
-import channelDeleteHandler from "../events/client/channelDelete";
+import messageCreateHandler from "../events/client/messageCreate";
+import schedule from "node-schedule";
+import shardDisconnectHandler from "../events/client/shardDisconnect";
+import shardReadyHandler from "../events/client/shardReady";
+import shardResumeHandler from "../events/client/shardResume";
+import unavailableGuildCreateHandler from "../events/client/unavailableGuildCreate";
+import uncaughtExceptionHandler from "../events/process/uncaughtException";
+import unhandledRejectionHandler from "../events/process/unhandledRejection";
+import updatePremiumUsers from "./patreon_manager";
+import voiceChannelJoinHandler from "../events/client/voiceChannelJoin";
+import voiceChannelLeaveHandler from "../events/client/voiceChannelLeave";
+import voiceChannelSwitchHandler from "../events/client/voiceChannelSwitch";
+import warnHandler from "../events/client/warn";
+import type LocaleType from "../enums/locale_type";
 
 const logger = new IPCLogger("management_utils");
 
@@ -45,7 +46,7 @@ const RESTART_WARNING_INTERVALS = new Set([10, 5, 3, 2, 1]);
 
 /** Registers listeners on client events */
 export function registerClientEvents(): void {
-    const { client } = state;
+    const { client } = State;
     // remove listeners registered by eris-fleet, handle on cluster instead
     client.removeAllListeners("warn");
     client.removeAllListeners("error");
@@ -93,7 +94,11 @@ export async function getTimeUntilRestart(): Promise<number> {
         await dbContext.kmq("restart_notifications").where("id", 1)
     )[0].restart_time;
 
-    if (!restartNotificationTime) return null;
+    if (
+        !restartNotificationTime ||
+        KmqConfiguration.Instance.restartNotificationDisabled()
+    )
+        return null;
     return Math.floor(
         (restartNotificationTime - new Date().getTime()) / (1000 * 60)
     );
@@ -103,13 +108,14 @@ export async function getTimeUntilRestart(): Promise<number> {
  * Sends a warning message to all active GameSessions for impending restarts at predefined intervals
  * @param timeUntilRestart - time until the restart
  */
-export const checkRestartNotification = async (
+export async function checkRestartNotification(
     timeUntilRestart: number
-): Promise<void> => {
+): Promise<void> {
     let serversWarned = 0;
     if (RESTART_WARNING_INTERVALS.has(timeUntilRestart)) {
-        for (const gameSession of Object.values(state.gameSessions)) {
+        for (const gameSession of Object.values(State.gameSessions)) {
             if (gameSession.finished) continue;
+            // eslint-disable-next-line no-await-in-loop
             await sendInfoMessage(
                 new MessageContext(gameSession.textChannelID),
                 {
@@ -118,6 +124,8 @@ export const checkRestartNotification = async (
                         "Downtime will be approximately 2 minutes. Please end the current game to ensure your progress is saved!",
                 }
             );
+            // eslint-disable-next-line no-await-in-loop
+            await delay(200);
             serversWarned++;
         }
 
@@ -125,35 +133,44 @@ export const checkRestartNotification = async (
             `Impending bot restart in ${timeUntilRestart} minutes. ${serversWarned} servers warned.`
         );
     }
-};
+}
 
 /** Clear inactive voice connections */
 function clearInactiveVoiceConnections(): void {
     const existingVoiceChannelGuildIDs = Array.from(
-        state.client.voiceConnections.keys()
+        State.client.voiceConnections.keys()
     ) as Array<string>;
 
-    const activeVoiceChannelGuildIDs = Object.values(state.gameSessions).map(
-        (x) => x.guildID
+    const activeGameVoiceChannelGuildIDs = new Set(
+        Object.values(State.gameSessions).map((x) => x.guildID)
+    );
+
+    const activeListeningVoiceChannelGuildIDs = new Set(
+        Object.values(State.listeningSessions).map((x) => x.guildID)
     );
 
     for (const existingVoiceChannelGuildID of existingVoiceChannelGuildIDs) {
-        if (!activeVoiceChannelGuildIDs.includes(existingVoiceChannelGuildID)) {
-            const voiceChannelID = state.client.voiceConnections.get(
+        if (
+            !activeGameVoiceChannelGuildIDs.has(existingVoiceChannelGuildID) &&
+            !activeListeningVoiceChannelGuildIDs.has(
+                existingVoiceChannelGuildID
+            )
+        ) {
+            const voiceChannelID = State.client.voiceConnections.get(
                 existingVoiceChannelGuildID
             ).channelID;
 
             logger.info(
                 `gid: ${existingVoiceChannelGuildID}, vid: ${voiceChannelID} | Disconnected inactive voice connection`
             );
-            state.client.voiceConnections.leave(existingVoiceChannelGuildID);
+            State.client.voiceConnections.leave(existingVoiceChannelGuildID);
         }
     }
 }
 
 /* Updates system statistics */
 async function updateSystemStats(clusterID: number): Promise<void> {
-    const { client } = state;
+    const { client } = State;
     const latencies = client.shards.map((x) => x.latency);
     const meanLatency = _.mean(latencies);
     const maxLatency = _.max(latencies);
@@ -185,7 +202,7 @@ async function updateSystemStats(clusterID: number): Promise<void> {
 
 /** Updates the bot's song listening status */
 export async function updateBotStatus(): Promise<void> {
-    const { client } = state;
+    const { client } = State;
     const timeUntilRestart = await getTimeUntilRestart();
     if (timeUntilRestart) {
         client.editStatus("dnd", {
@@ -230,9 +247,21 @@ export async function reloadAliases(): Promise<void> {
 
     const artistAliasMapping = await dbContext
         .kmq("available_songs")
-        .distinct(["artist_name_en", "artist_aliases"])
-        .select(["artist_name_en", "artist_aliases"])
-        .where("artist_aliases", "<>", "");
+        .distinct([
+            "artist_name_en",
+            "artist_aliases",
+            "previous_name_en",
+            "previous_name_ko",
+        ])
+        .select([
+            "artist_name_en",
+            "artist_aliases",
+            "previous_name_en",
+            "previous_name_ko",
+        ])
+        .where("artist_aliases", "<>", "")
+        .orWhere("previous_name_en", "<>", "")
+        .orWhere("previous_name_ko", "<>", "");
 
     const songAliases = {};
     for (const mapping of songAliasMapping) {
@@ -243,13 +272,21 @@ export async function reloadAliases(): Promise<void> {
 
     const artistAliases = {};
     for (const mapping of artistAliasMapping) {
-        artistAliases[mapping["artist_name_en"]] = mapping["artist_aliases"]
+        const aliases: Array<string> = mapping["artist_aliases"]
             .split(";")
             .filter((x: string) => x);
+
+        const previousNameEn = mapping["previous_name_en"];
+        const previousNameKo = mapping["previous_name_ko"];
+
+        if (previousNameEn) aliases.push(previousNameEn);
+        if (previousNameKo) aliases.push(previousNameKo);
+
+        artistAliases[mapping["artist_name_en"]] = aliases;
     }
 
-    state.aliases.artist = artistAliases;
-    state.aliases.song = songAliases;
+    State.aliases.artist = artistAliases;
+    State.aliases.song = songAliases;
     logger.info("Reloaded alias data");
 }
 
@@ -272,7 +309,7 @@ export async function reloadBonusGroups(): Promise<void> {
             .limit(bonusGroupCount)
     ).map((x) => x.name);
 
-    state.bonusArtists = new Set(
+    State.bonusArtists = new Set(
         (await getMatchingGroupNames(artistNameQuery)).matchedGroups.map(
             (x) => x.name
         )
@@ -282,7 +319,7 @@ export async function reloadBonusGroups(): Promise<void> {
 async function reloadLocales(): Promise<void> {
     const updatedLocales = await dbContext.kmq("locale").select("*");
     for (const l of updatedLocales) {
-        state.locales[l.guild_id] = l.locale as LocaleType;
+        State.locales[l.guild_id] = l.locale as LocaleType;
     }
 }
 
@@ -312,7 +349,7 @@ export function registerIntervals(clusterID: number): void {
     // Every hour
     schedule.scheduleJob("0 * * * *", () => {
         if (!isPowerHour() || isWeekend()) return;
-        if (!state.client.guilds.has(process.env.DEBUG_SERVER_ID)) return;
+        if (!State.client.guilds.has(process.env.DEBUG_SERVER_ID)) return;
         // Ping a role in KMQ server notifying of power hour
         sendPowerHourNotification();
     });
@@ -331,20 +368,27 @@ export function registerIntervals(clusterID: number): void {
         reloadAliases();
         // Cleanup inactive Discord voice connections
         clearInactiveVoiceConnections();
-        // Store per-cluster stats
-        await updateSystemStats(clusterID);
-        // Sync state with Patreon subscribers
-        updatePremiumUsers();
+
+        if (await isPrimaryInstance()) {
+            // Store per-cluster stats
+            await updateSystemStats(clusterID);
+        }
     });
 
     // Every minute
     schedule.scheduleJob("* * * * *", async () => {
+        KmqConfiguration.reload();
         if (process.env.NODE_ENV !== EnvType.PROD) return;
         // set up check for restart notifications
         const timeUntilRestart = await getTimeUntilRestart();
         if (timeUntilRestart) {
             updateBotStatus();
             await checkRestartNotification(timeUntilRestart);
+        }
+
+        // Sync state with Patreon subscribers
+        if (await isPrimaryInstance()) {
+            updatePremiumUsers();
         }
     });
 }
@@ -355,17 +399,4 @@ export function reloadCaches(): void {
     reloadFactCache();
     reloadBonusGroups();
     reloadLocales();
-}
-
-/**
- * Deletes the GameSession corresponding to a given guild ID
- * @param guildID - The guild ID
- */
-export function deleteGameSession(guildID: string): void {
-    if (!(guildID in state.gameSessions)) {
-        logger.debug(`gid: ${guildID} | GameSession already ended`);
-        return;
-    }
-
-    delete state.gameSessions[guildID];
 }

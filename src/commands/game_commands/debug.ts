@@ -1,22 +1,24 @@
-import Eris from "eris";
 import * as uuid from "uuid";
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import {
-    getDebugChannel,
-    sendInfoMessage,
-    getUserVoiceChannel,
-    getDebugLogHeader,
-    getGuildLocale,
-} from "../../helpers/discord_utils";
-import {
-    getGuildPreference,
-    isPremiumRequest,
-    getAvailableSongCount,
-} from "../../helpers/game_utils";
-import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
+import {
+    getAvailableSongCount,
+    isPremiumRequest,
+} from "../../helpers/game_utils";
+import {
+    getDebugChannel,
+    getDebugLogHeader,
+    getUserVoiceChannel,
+    sendInfoMessage,
+} from "../../helpers/discord_utils";
+import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import State from "../../state";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type Eris from "eris";
 
 const logger = new IPCLogger("debug");
 
@@ -28,11 +30,14 @@ export default class DebugCommand implements BaseCommand {
             return;
         }
 
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
 
+        const session = Session.getSession(message.guildID);
         const songCount = await getAvailableSongCount(
             guildPreference,
-            await isPremiumRequest(message.guildID, message.author.id)
+            await isPremiumRequest(session, message.author.id)
         );
 
         const fields: Array<Eris.EmbedField> = [];
@@ -58,7 +63,7 @@ export default class DebugCommand implements BaseCommand {
 
         fields.push({
             name: "Locale",
-            value: getGuildLocale(message.guildID),
+            value: State.getGuildLocale(message.guildID),
             inline: false,
         });
 
@@ -78,11 +83,11 @@ export default class DebugCommand implements BaseCommand {
 
         const debugID = uuid.v4();
         await sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
+            title: LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.debug.title"
             ),
-            description: state.localizer.translate(
+            description: LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.debug.description",
                 {

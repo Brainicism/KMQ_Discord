@@ -1,36 +1,38 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import GameSession from "../../structures/game_session";
-import TeamScoreboard from "../../structures/team_scoreboard";
-import Player from "../../structures/player";
-import { GuildTextableMessage, ParsedMessage, GameType } from "../../types";
+import { IPCLogger } from "../../logger";
+import { KmqImages } from "../../constants";
+import { bold, getMention, getUserTag } from "../../helpers/utils";
 import {
-    getUserTag,
+    getDebugLogHeader,
     sendErrorMessage,
     sendInfoMessage,
-    getMention,
-    getDebugLogHeader,
 } from "../../helpers/discord_utils";
 import { isFirstGameOfDay, isUserPremium } from "../../helpers/game_utils";
-import { KmqImages } from "../../constants";
-import { bold } from "../../helpers/utils";
-import { state } from "../../kmq_worker";
-import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { IPCLogger } from "../../logger";
+import GameType from "../../enums/game_type";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Player from "../../structures/player";
+import Session from "../../structures/session";
+import State from "../../state";
+import type { GuildTextableMessage } from "../../types";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type GameSession from "../../structures/game_session";
+import type ParsedMessage from "../../interfaces/parsed_message";
+import type TeamScoreboard from "../../structures/team_scoreboard";
 
 const logger = new IPCLogger("join");
 
 export default class JoinCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notListeningPrecheck },
+    ];
 
     aliases = ["j"];
 
-    call = async ({
-        message,
-        gameSessions,
-        parsedMessage,
-    }: CommandArgs): Promise<void> => {
-        const gameSession = gameSessions[message.guildID];
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+        const gameSession = Session.getSession(message.guildID) as GameSession;
         if (!gameSession || gameSession.gameType !== GameType.TEAMS) {
             return;
         }
@@ -46,11 +48,11 @@ export default class JoinCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             logger.warn(`${getDebugLogHeader(message)} | Missing team name.`);
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.join.failure.joinError.title"
                 ),
-                description: state.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.join.failure.joinError.noTeamName.description",
                     { joinCommand: `${process.env.BOT_PREFIX}join` }
@@ -63,7 +65,7 @@ export default class JoinCommand implements BaseCommand {
         // Ignore: \ _ * ~ | `
         const teamName = parsedMessage.argument
             .replace(/\\|_|\*|~|\||`/gm, "")
-            .substr(0, 128);
+            .substring(0, 128);
 
         // Don't allow emojis that aren't in this server
         // Emojis are of the format: <(a if animated):(alphanumeric):(number)>
@@ -74,17 +76,17 @@ export default class JoinCommand implements BaseCommand {
                 .join("");
 
             if (
-                !state.client.guilds
+                !State.client.guilds
                     .get(message.guildID)
                     .emojis.map((e) => e.id)
                     .includes(emojiID)
             ) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(
+                    title: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.join.failure.joinError.invalidTeamName.title"
                     ),
-                    description: state.localizer.translate(
+                    description: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.join.failure.joinError.badEmojis.description"
                     ),
@@ -107,11 +109,11 @@ export default class JoinCommand implements BaseCommand {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.join.failure.joinError.title"
                 ),
-                description: state.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.join.failure.joinError.invalidCharacters.description"
                 ),
@@ -125,6 +127,7 @@ export default class JoinCommand implements BaseCommand {
                 teamName,
                 Player.fromUserID(
                     message.author.id,
+                    message.guildID,
                     0,
                     await isFirstGameOfDay(message.author.id),
                     await isUserPremium(message.author.id)
@@ -136,11 +139,11 @@ export default class JoinCommand implements BaseCommand {
             );
 
             sendInfoMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.join.team.new"
                 ),
-                description: state.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.join.team.join",
                     {
@@ -149,7 +152,7 @@ export default class JoinCommand implements BaseCommand {
                         joinCommand: `${process.env.BOT_PREFIX}join`,
                         teamNameWithCleanEmojis,
                         startGameInstructions: !gameSession.sessionInitialized
-                            ? state.localizer.translate(
+                            ? LocalizationManager.localizer.translate(
                                   message.guildID,
                                   "command.join.team.startGameInstructions",
                                   {
@@ -169,11 +172,11 @@ export default class JoinCommand implements BaseCommand {
             const team = teamScoreboard.getTeam(teamName);
             if (team.hasPlayer(message.author.id)) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(
+                    title: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.join.failure.joinError.title"
                     ),
-                    description: state.localizer.translate(
+                    description: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.join.failure.joinError.alreadyInTeam.description"
                     ),
@@ -191,6 +194,7 @@ export default class JoinCommand implements BaseCommand {
                 team.id,
                 Player.fromUserID(
                     message.author.id,
+                    message.guildID,
                     0,
                     await isFirstGameOfDay(message.author.id),
                     await isUserPremium(message.author.id)
@@ -198,35 +202,35 @@ export default class JoinCommand implements BaseCommand {
             );
 
             sendInfoMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.join.playerJoinedTeam.title",
                     {
                         joiningUser: getUserTag(message.author),
-                        teamName: team.name,
+                        teamName: team.getName(),
                     }
                 ),
                 description: !gameSession.sessionInitialized
-                    ? state.localizer.translate(
+                    ? LocalizationManager.localizer.translate(
                           message.guildID,
                           "command.join.playerJoinedTeam.beforeGameStart.description",
                           { beginCommand: `\`${process.env.BOT_PREFIX}begin\`` }
                       )
-                    : state.localizer.translate(
+                    : LocalizationManager.localizer.translate(
                           message.guildID,
                           "command.join.playerJoinedTeam.afterGameStart.description",
                           {
                               mentionedUser: getMention(message.author.id),
-                              teamName: bold(team.name),
+                              teamName: bold(team.getName()),
                           }
                       ),
                 thumbnailUrl: KmqImages.LISTENING,
             });
 
             logger.info(
-                `${getDebugLogHeader(message)} | Successfully joined team '${
-                    team.name
-                }'.`
+                `${getDebugLogHeader(
+                    message
+                )} | Successfully joined team '${team.getName()}'.`
             );
         }
     }

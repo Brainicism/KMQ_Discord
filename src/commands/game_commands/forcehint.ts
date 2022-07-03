@@ -1,17 +1,21 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
-import {
-    sendErrorMessage,
-    getDebugLogHeader,
-    sendInfoMessage,
-    getMention,
-} from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
-import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
 import { generateHint, validHintCheck } from "./hint";
+import {
+    getDebugLogHeader,
+    sendErrorMessage,
+    sendInfoMessage,
+} from "../../helpers/discord_utils";
+import { getMention } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type GameSession from "src/structures/game_session";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("forcehint");
 
@@ -19,13 +23,14 @@ export default class ForceHintCommand implements BaseCommand {
     aliases = ["fhint", "fh"];
 
     preRunChecks = [
-        { checkFn: CommandPrechecks.inGameCommandPrecheck },
+        { checkFn: CommandPrechecks.inSessionCommandPrecheck },
         { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notListeningPrecheck },
     ];
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "forcehint",
-        description: state.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.forcehint.help.description"
         ),
@@ -34,20 +39,22 @@ export default class ForceHintCommand implements BaseCommand {
         priority: 1009,
     });
 
-    call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
-        const gameSession = gameSessions[message.guildID];
+    call = async ({ message }: CommandArgs): Promise<void> => {
+        const gameSession = Session.getSession(message.guildID) as GameSession;
         const gameRound = gameSession?.round;
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
 
         if (!validHintCheck(gameSession, guildPreference, gameRound, message))
             return;
         if (message.author.id !== gameSession.owner.id) {
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.forcehint.failure.notOwner.title"
                 ),
-                description: state.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.forcehint.failure.notOwner.description",
                     { mentionedUser: getMention(gameSession.owner.id) }
@@ -59,7 +66,7 @@ export default class ForceHintCommand implements BaseCommand {
         gameRound.hintRequested(message.author.id);
         gameRound.hintUsed = true;
         await sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
+            title: LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.hint.title"
             ),

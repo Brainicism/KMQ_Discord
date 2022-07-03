@@ -1,18 +1,19 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import { EMBED_SUCCESS_COLOR, KmqImages } from "../../constants";
+import { IPCLogger } from "../../logger";
 import {
-    sendErrorMessage,
     areUserAndBotInSameVoiceChannel,
     getDebugLogHeader,
-    EMBED_SUCCESS_COLOR,
+    sendErrorMessage,
     sendInfoMessage,
-    getMention,
 } from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
-import { IPCLogger } from "../../logger";
-import MessageContext from "../../structures/message_context";
-import { KmqImages } from "../../constants";
+import { getMention } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("forceskip");
 
@@ -20,13 +21,13 @@ export default class ForceSkipCommand implements BaseCommand {
     aliases = ["fskip", "fs"];
 
     preRunChecks = [
-        { checkFn: CommandPrechecks.inGameCommandPrecheck },
+        { checkFn: CommandPrechecks.inSessionCommandPrecheck },
         { checkFn: CommandPrechecks.competitionPrecheck },
     ];
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "forceskip",
-        description: state.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.forceskip.help.description"
         ),
@@ -35,56 +36,50 @@ export default class ForceSkipCommand implements BaseCommand {
         priority: 1009,
     });
 
-    call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
-        const gameSession = gameSessions[message.guildID];
-        if (
-            !gameSession ||
-            !gameSession.round ||
-            !areUserAndBotInSameVoiceChannel(message)
-        ) {
+    call = async ({ message }: CommandArgs): Promise<void> => {
+        if (!areUserAndBotInSameVoiceChannel(message)) {
             logger.warn(
                 `${getDebugLogHeader(
                     message
-                )} | Invalid force-skip. !gameSession: ${!gameSession}. !gameSession.round: ${
-                    gameSession && !gameSession.round
-                }. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(
-                    message
-                )}`
+                )} | Invalid forceskip. User and bot are not in the same voice channel.`
             );
             return;
         }
 
-        if (gameSession.round.skipAchieved) {
-            // song already being skipped
+        const session = Session.getSession(message.guildID);
+        if (
+            !session.round ||
+            session.round.skipAchieved ||
+            session.round.finished
+        ) {
             return;
         }
 
-        if (message.author.id !== gameSession.owner.id) {
+        if (message.author.id !== session.owner.id) {
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.forceskip.failure.notOwner.title"
                 ),
-                description: state.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.forceskip.failure.notOwner.description",
-                    { mentionedUser: getMention(gameSession.owner.id) }
+                    { mentionedUser: getMention(session.owner.id) }
                 ),
             });
             return;
         }
 
-        gameSession.round.skipAchieved = true;
+        session.round.skipAchieved = true;
         sendInfoMessage(
             MessageContext.fromMessage(message),
             {
                 color: EMBED_SUCCESS_COLOR,
-                title: state.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     message.guildID,
-                    "command.skip.success.title"
+                    "misc.skip"
                 ),
-                description: state.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.forceskip.description"
                 ),
@@ -93,17 +88,12 @@ export default class ForceSkipCommand implements BaseCommand {
             true
         );
 
-        await gameSession.endRound(
-            guildPreference,
-            MessageContext.fromMessage(message),
-            { correct: false }
-        );
+        await session.endRound(MessageContext.fromMessage(message), {
+            correct: false,
+        });
 
-        await gameSession.startRound(
-            guildPreference,
-            MessageContext.fromMessage(message)
-        );
-        gameSession.lastActiveNow();
+        await session.startRound(MessageContext.fromMessage(message));
+        session.lastActiveNow();
         logger.info(`${getDebugLogHeader(message)} | Owner force-skipped.`);
     };
 }

@@ -1,11 +1,11 @@
-import { PlayerRoundResult, QueriedSong } from "../types";
-import { state } from "../kmq_worker";
-import { UniqueSongCounter } from "./song_selector";
-import MessageContext from "./message_context";
 import { codeLine, friendlyFormattedNumber } from "../helpers/utils";
-
-export const MAX_RUNNERS_UP = 30;
-export const MAX_SCOREBOARD_PLAYERS = 30;
+import LocalizationManager from "../helpers/localization_manager";
+import State from "../state";
+import type Eris from "eris";
+import type MessageContext from "./message_context";
+import type PlayerRoundResult from "../interfaces/player_round_result";
+import type QueriedSong from "../interfaces/queried_song";
+import type UniqueSongCounter from "../interfaces/unique_song_counter";
 
 export default abstract class Round {
     /** The song associated with the round */
@@ -27,7 +27,7 @@ export default abstract class Round {
     public finished: boolean;
 
     /**  The Discord ID of the end round message */
-    public endRoundMessageID: string;
+    public roundMessageID: string;
 
     /** List of players who have opted to skip the current Round */
     public skippers: Set<string>;
@@ -35,17 +35,24 @@ export default abstract class Round {
     /** Whether the Round has been skipped */
     public skipAchieved: boolean;
 
+    /** Interactable components attached to this round's message */
+    public interactionComponents: Array<Eris.ActionRow>;
+
+    /** The message containing this round's interactable components */
+    public interactionMessage: Eris.Message<Eris.TextableChannel>;
+
     constructor(song: QueriedSong) {
         this.song = song;
-        this.songAliases = state.aliases.song[song.youtubeLink] || [];
+        this.songAliases = State.aliases.song[song.youtubeLink] || [];
         const artistNames = song.artistName.split("+").map((x) => x.trim());
         this.artistAliases = artistNames.flatMap(
-            (x) => state.aliases.artist[x] || []
+            (x) => State.aliases.artist[x] || []
         );
         this.startedAt = Date.now();
-        this.endRoundMessageID = null;
+        this.roundMessageID = null;
         this.skippers = new Set();
         this.skipAchieved = false;
+        this.interactionComponents = [];
     }
 
     abstract getEndRoundDescription(
@@ -53,10 +60,13 @@ export default abstract class Round {
         uniqueSongCounter: UniqueSongCounter,
         playerRoundResults: Array<PlayerRoundResult>
     ): string;
+
     abstract getEndRoundColor(
         correctGuess: boolean,
         userBonusActive: boolean
     ): number;
+
+    abstract isValidInteraction(interactionUUID: string): boolean;
 
     /**
      * Adds a skip vote for the specified user
@@ -74,6 +84,7 @@ export default abstract class Round {
         return this.skippers.size;
     }
 
+    // eslint-disable-next-line class-methods-use-this
     protected getUniqueSongCounterMessage(
         messageContext: MessageContext,
         uniqueSongCounter: UniqueSongCounter
@@ -82,7 +93,7 @@ export default abstract class Round {
             return "";
         }
 
-        const uniqueSongMessage = state.localizer.translate(
+        const uniqueSongMessage = LocalizationManager.localizer.translate(
             messageContext.guildID,
             "misc.inGame.uniqueSongsPlayed",
             {

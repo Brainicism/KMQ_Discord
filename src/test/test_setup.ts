@@ -1,19 +1,12 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
-import sinon from "sinon";
-import * as discordUtils from "../helpers/discord_utils";
-import kmqKnexConfig from "../config/knexfile_kmq";
-import dbContext from "../database_context";
-import Player from "../structures/player";
-import EliminationPlayer from "../structures/elimination_player";
-import { EnvType } from "../types";
-import { execSync } from "child_process";
+/* eslint-disable node/no-sync */
+import * as cp from "child_process";
+import { DATABASE_DOWNLOAD_DIR } from "../constants";
 import { IPCLogger } from "../logger";
-import { state } from "../kmq_worker";
-import LocalizationManager from "../helpers/localization_manager";
-import { DEFAULT_LIVES } from "../structures/elimination_scoreboard";
-import { databaseDownloadDir } from "../seed/seed_db";
+import EnvType from "../enums/env_type";
+import dbContext, { getNewConnection } from "../database_context";
+import kmqKnexConfig from "../config/knexfile_kmq";
 import path from "path";
-import { getNewConnection } from "../database_context";
+import sinon from "sinon";
 
 const logger = new IPCLogger("test_setup");
 const sandbox = sinon.createSandbox();
@@ -25,20 +18,6 @@ before(async function () {
     }
 
     this.timeout(20000);
-    state.localizer = new LocalizationManager();
-    sandbox.stub(discordUtils, "sendErrorMessage");
-    sandbox.stub(discordUtils, "sendInfoMessage");
-    sandbox
-        .stub(Player, "fromUserID")
-        .callsFake((id) => new Player("", id, "", 0));
-
-    sandbox
-        .stub(EliminationPlayer, "fromUserID")
-        .callsFake(
-            (id, score) =>
-                new EliminationPlayer("", id, "", score ?? DEFAULT_LIVES)
-        );
-
     const db = getNewConnection();
     logger.info("Performing migrations on KMQ database");
     await db.agnostic.raw("DROP DATABASE IF EXISTS kmq_test;");
@@ -53,13 +32,13 @@ before(async function () {
 
     logger.info("Setting up test Daisuki database");
     // import frozen db dump
-    const mvSeedFilePath = `${databaseDownloadDir}/bootstrap.sql`;
-    const mvAudioSeedFilePath = `${databaseDownloadDir}/bootstrap-audio.sql`;
-    execSync(
+    const mvSeedFilePath = `${DATABASE_DOWNLOAD_DIR}/bootstrap.sql`;
+    const mvAudioSeedFilePath = `${DATABASE_DOWNLOAD_DIR}/bootstrap-audio.sql`;
+    cp.execSync(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_test < ${mvSeedFilePath}`
     );
 
-    execSync(
+    cp.execSync(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_test < ${mvAudioSeedFilePath}`
     );
 
@@ -83,17 +62,17 @@ before(async function () {
         "../../sql/create_kmq_data_tables_procedure.test.sql"
     );
 
-    execSync(
+    cp.execSync(
         `sed 's/kpop_videos/kpop_videos_test/g;s/kmq/kmq_test/g' ${originalCreateKmqTablesProcedureSqlPath} > ${testCreateKmqTablesProcedureSqlPath}`
     );
 
-    execSync(
+    cp.execSync(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test < ${testCreateKmqTablesProcedureSqlPath}`,
         { stdio: "inherit" }
     );
 
     // create available_songs table
-    execSync(
+    cp.execSync(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test -e "CALL CreateKmqDataTables(1)"`
     );
 

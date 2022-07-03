@@ -1,19 +1,24 @@
-import ytdl from "ytdl-core";
-import fs from "fs";
-import ffmpeg from "fluent-ffmpeg";
-import path from "path";
-import { exec } from "child_process";
-import { QueriedSong } from "../types";
 import { IPCLogger } from "../logger";
-import { DatabaseContext, getNewConnection } from "../database_context";
-import { retryJob, getAudioDurationInSeconds } from "../helpers/utils";
+import { exec } from "child_process";
+import {
+    getAudioDurationInSeconds,
+    pathExists,
+    retryJob,
+} from "../helpers/utils";
+import { getNewConnection } from "../database_context";
+import ffmpeg from "fluent-ffmpeg";
+import fs from "fs";
+import path from "path";
+import ytdl from "ytdl-core";
+import type { DatabaseContext } from "../database_context";
+import type QueriedSong from "../interfaces/queried_song";
 
 const logger = new IPCLogger("download-new-songs");
 const TARGET_AVERAGE_VOLUME = -30;
 
 async function clearPartiallyCachedSongs(): Promise<void> {
     logger.info("Clearing partially cached songs");
-    if (!fs.existsSync(process.env.SONG_DOWNLOAD_DIR)) {
+    if (!(await pathExists(process.env.SONG_DOWNLOAD_DIR))) {
         logger.error("Song cache directory doesn't exist.");
         return;
     }
@@ -26,17 +31,20 @@ async function clearPartiallyCachedSongs(): Promise<void> {
         return;
     }
 
-    const endingWithPartRegex = new RegExp("\\.part$");
+    const endingWithPartRegex = /\.part$/;
     const partFiles = files.filter((file) => file.match(endingWithPartRegex));
-    for (const partFile of partFiles) {
-        try {
-            await fs.promises.unlink(
-                `${process.env.SONG_DOWNLOAD_DIR}/${partFile}`
-            );
-        } catch (err) {
-            logger.error(err);
-        }
-    }
+
+    await Promise.allSettled(
+        partFiles.map(async (partFile) => {
+            try {
+                await fs.promises.unlink(
+                    `${process.env.SONG_DOWNLOAD_DIR}/${partFile}`
+                );
+            } catch (err) {
+                logger.error(err);
+            }
+        })
+    );
 
     if (partFiles.length) {
         logger.info(`${partFiles.length} stale cached songs deleted.`);
@@ -66,7 +74,7 @@ async function ffmpegOpusJob(id: string): Promise<void> {
     const mp3File = path.join(process.env.SONG_DOWNLOAD_DIR, `${id}.mp3`);
     return new Promise(async (resolve, reject) => {
         const oggFileWithPath = mp3File.replace(".mp3", ".ogg");
-        if (fs.existsSync(oggFileWithPath)) {
+        if (await pathExists(oggFileWithPath)) {
             resolve();
         }
 
@@ -81,10 +89,10 @@ async function ffmpegOpusJob(id: string): Promise<void> {
             .audioCodec("libopus")
             .audioFilters(`volume=${volumeDifferential}dB`)
             .output(oggFfmpegOutputStream)
-            .on("end", () => {
+            .on("end", async () => {
                 try {
-                    fs.renameSync(oggPartWithPath, oggFileWithPath);
-                    fs.unlinkSync(
+                    await fs.promises.rename(oggPartWithPath, oggFileWithPath);
+                    await fs.promises.unlink(
                         path.join(
                             process.env.SONG_DOWNLOAD_DIR,
                             path.basename(mp3File)
@@ -92,7 +100,7 @@ async function ffmpegOpusJob(id: string): Promise<void> {
                     );
                     resolve();
                 } catch (err) {
-                    if (!fs.existsSync(oggFileWithPath)) {
+                    if (!(await pathExists(oggFileWithPath))) {
                         reject(
                             new Error(
                                 `File ${oggFileWithPath} wasn't created. err = ${err}`
@@ -158,18 +166,17 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
                 cacheStream
             );
         } catch (e) {
+            const errorMessage = `Failed to retrieve video metadata for '${id}'. error = ${e}`;
             await db
                 .kmq("dead_links")
                 .insert({
                     vlink: id,
-                    reason: `Failed to retrieve video metadata. error = ${e}`,
+                    reason: errorMessage,
                 })
                 .onConflict("vlink")
                 .ignore();
 
-            reject(
-                new Error(`Failed to retrieve video metadata. error = ${e}`)
-            );
+            reject(new Error(errorMessage));
             return;
         }
 
@@ -242,10 +249,21 @@ async function getSongsFromDb(db: DatabaseContext): Promise<any> {
                     "=",
                     "kpop_videos.app_kpop_group.id"
                 )
+                .whereNotIn("vlink", function () {
+                    this.select("vlink").from("kmq.dead_links");
+                })
                 .where("vtype", "=", "main")
                 .andWhere("tags", "NOT LIKE", "%c%");
         })
         .orderBy("views", "DESC");
+}
+
+async function getCurrentlyDownloadedFiles(): Promise<Set<string>> {
+    return new Set(
+        (await fs.promises.readdir(process.env.SONG_DOWNLOAD_DIR)).filter(
+            (file) => file.endsWith(".ogg")
+        )
+    );
 }
 
 async function updateNotDownloaded(
@@ -253,9 +271,7 @@ async function updateNotDownloaded(
     songs: Array<QueriedSong>
 ): Promise<void> {
     // update list of non-downloaded songs
-    const currentlyDownloadedFiles = new Set(
-        fs.readdirSync(process.env.SONG_DOWNLOAD_DIR)
-    );
+    const currentlyDownloadedFiles = await getCurrentlyDownloadedFiles();
 
     const songIDsNotDownloaded = songs
         .filter((x) => !currentlyDownloadedFiles.has(`${x.youtubeLink}.ogg`))
@@ -263,10 +279,12 @@ async function updateNotDownloaded(
 
     await db.kmq.transaction(async (trx) => {
         await db.kmq("not_downloaded").del().transacting(trx);
-        await db
-            .kmq("not_downloaded")
-            .insert(songIDsNotDownloaded)
-            .transacting(trx);
+        if (songIDsNotDownloaded.length > 0) {
+            await db
+                .kmq("not_downloaded")
+                .insert(songIDsNotDownloaded)
+                .transacting(trx);
+        }
     });
 }
 
@@ -282,9 +300,7 @@ const downloadNewSongs = async (
         (await db.kmq("dead_links").select("vlink")).map((x) => x.vlink)
     );
 
-    const currentlyDownloadedFiles = new Set(
-        fs.readdirSync(process.env.SONG_DOWNLOAD_DIR)
-    );
+    const currentlyDownloadedFiles = await getCurrentlyDownloadedFiles();
 
     logger.info(`Total songs in database: ${allSongs.length}`);
     songsToDownload = songsToDownload.filter(
@@ -306,6 +322,7 @@ const downloadNewSongs = async (
             } (${downloadCount + 1}/${songsToDownload.length})`
         );
         try {
+            // eslint-disable-next-line no-await-in-loop
             await retryJob(downloadSong, [db, song.youtubeLink], 1, true, 5000);
         } catch (err) {
             logger.error(
@@ -313,6 +330,7 @@ const downloadNewSongs = async (
             );
             deadLinksSkipped++;
             try {
+                // eslint-disable-next-line no-await-in-loop
                 await fs.promises.unlink(
                     `${process.env.SONG_DOWNLOAD_DIR}/${song.youtubeLink}.mp3.part`
                 );
@@ -329,6 +347,7 @@ const downloadNewSongs = async (
             `Encoding song: '${song.songName}' by ${song.artistName} | ${song.youtubeLink}`
         );
         try {
+            // eslint-disable-next-line no-await-in-loop
             await retryJob(ffmpegOpusJob, [song.youtubeLink], 1, true, 5000);
         } catch (err) {
             logger.error(
@@ -352,11 +371,12 @@ const downloadNewSongs = async (
  * @param limit - The limit specified for downloading songs
  * @returns - the number of songs downloaded
  */
-// eslint-disable-next-line import/prefer-default-export
-export async function downloadAndConvertSongs(limit?: number): Promise<number> {
+export default async function downloadAndConvertSongs(
+    limit?: number
+): Promise<number> {
     const db = getNewConnection();
     try {
-        if (!fs.existsSync(process.env.SONG_DOWNLOAD_DIR)) {
+        if (!(await pathExists(process.env.SONG_DOWNLOAD_DIR))) {
             logger.error("Song cache directory doesn't exist.");
             return 0;
         }

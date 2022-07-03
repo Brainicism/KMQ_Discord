@@ -1,23 +1,21 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import { DEFAULT_RELEASE_TYPE } from "../../constants";
 import { IPCLogger } from "../../logger";
-import { getGuildPreference } from "../../helpers/game_utils";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { GameOption } from "../../types";
-import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import GameOption from "../../enums/game_option_name";
+import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import ReleaseType from "../../enums/option_types/release_type";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("release");
-
-export enum ReleaseType {
-    OFFICIAL = "official",
-    ALL = "all",
-}
-export const NON_OFFICIAL_VIDEO_TAGS = ["c", "d", "a", "r", "v", "x", "p"];
-export const DEFAULT_RELEASE_TYPE = ReleaseType.OFFICIAL;
 
 export default class ReleaseCommand implements BaseCommand {
     aliases = ["releases", "videotype"];
@@ -36,9 +34,9 @@ export default class ReleaseCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "release",
-        description: state.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.release.help.description"
         ),
@@ -46,7 +44,7 @@ export default class ReleaseCommand implements BaseCommand {
         examples: [
             {
                 example: "`,release official`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.release.help.example.official",
                     { official: `\`${ReleaseType.OFFICIAL}\`` }
@@ -54,14 +52,14 @@ export default class ReleaseCommand implements BaseCommand {
             },
             {
                 example: "`,release all`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.release.help.example.all"
                 ),
             },
             {
                 example: "`,release`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.release.help.example.reset",
                     { defaultRelease: `\`${DEFAULT_RELEASE_TYPE}\`` }
@@ -72,11 +70,14 @@ export default class ReleaseCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
 
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.RELEASE_TYPE);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.RELEASE_TYPE, reset: true }]
@@ -90,6 +91,7 @@ export default class ReleaseCommand implements BaseCommand {
 
         await guildPreference.setReleaseType(releaseType);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.RELEASE_TYPE, reset: false }]

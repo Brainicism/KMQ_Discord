@@ -1,20 +1,25 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import { GROUP_LIST_URL } from "../../constants";
+import { IPCLogger } from "../../logger";
 import {
-    sendOptionsMessage,
     getDebugLogHeader,
     sendErrorMessage,
+    sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import {
-    getGuildPreference,
     getMatchingGroupNames,
+    getSimilarGroupNames,
 } from "../../helpers/game_utils";
-import { IPCLogger } from "../../logger";
-import { GameOption } from "../../types";
-import MessageContext from "../../structures/message_context";
 import { setIntersection } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
-import { GROUP_LIST_URL } from "../../constants";
+import GameOption from "../../enums/game_option_name";
+import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import State from "../../state";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("groups");
 
@@ -23,9 +28,9 @@ export default class GroupsCommand implements BaseCommand {
 
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "groups",
-        description: state.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.groups.help.description",
             {
@@ -36,7 +41,7 @@ export default class GroupsCommand implements BaseCommand {
         examples: [
             {
                 example: "`,groups blackpink`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.groups.help.example.singleGroup",
                     {
@@ -46,7 +51,7 @@ export default class GroupsCommand implements BaseCommand {
             },
             {
                 example: "`,groups blackpink, bts, red velvet`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.groups.help.example.multipleGroups",
                     {
@@ -58,7 +63,7 @@ export default class GroupsCommand implements BaseCommand {
             },
             {
                 example: "`,groups`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.groups.help.example.reset"
                 ),
@@ -69,7 +74,7 @@ export default class GroupsCommand implements BaseCommand {
                 style: 5 as const,
                 url: GROUP_LIST_URL,
                 type: 2 as const,
-                label: state.localizer.translate(
+                label: LocalizationManager.localizer.translate(
                     guildID,
                     "misc.interaction.fullGroupsList"
                 ),
@@ -79,10 +84,14 @@ export default class GroupsCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.GROUPS);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.GROUPS, reset: true }]
@@ -94,7 +103,7 @@ export default class GroupsCommand implements BaseCommand {
         let groupsWarning = "";
         if (parsedMessage.components.length > 1) {
             if (["add", "remove"].includes(parsedMessage.components[0])) {
-                groupsWarning = state.localizer.translate(
+                groupsWarning = LocalizationManager.localizer.translate(
                     message.guildID,
                     "misc.warning.addRemoveOrdering.footer",
                     {
@@ -121,30 +130,51 @@ export default class GroupsCommand implements BaseCommand {
                 )}`
             );
 
-            await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "misc.failure.unrecognizedGroups.title"
-                ),
-                description: state.localizer.translate(
-                    message.guildID,
-                    "misc.failure.unrecognizedGroups.description",
-                    {
-                        matchedGroupsAction: state.localizer.translate(
+            let suggestionsText: string = null;
+            if (unmatchedGroups.length === 1) {
+                const suggestions = await getSimilarGroupNames(
+                    unmatchedGroups[0],
+                    State.getGuildLocale(message.guildID)
+                );
+
+                if (suggestions.length > 0) {
+                    suggestionsText = LocalizationManager.localizer.translate(
+                        message.guildID,
+                        "misc.failure.unrecognizedGroups.didYouMean",
+                        {
+                            suggestions: suggestions.join("\n"),
+                        }
+                    );
+                }
+            }
+
+            const descriptionText = LocalizationManager.localizer.translate(
+                message.guildID,
+                "misc.failure.unrecognizedGroups.description",
+                {
+                    matchedGroupsAction:
+                        LocalizationManager.localizer.translate(
                             message.guildID,
                             "misc.failure.unrecognizedGroups.added"
                         ),
-                        helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
-                        unmatchedGroups: unmatchedGroups.join(", "),
-                        solution: state.localizer.translate(
-                            message.guildID,
-                            "misc.failure.unrecognizedGroups.solution",
-                            {
-                                command: `\`${process.env.BOT_PREFIX}add groups\``,
-                            }
-                        ),
-                    }
+                    helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
+                    unmatchedGroups: unmatchedGroups.join(", "),
+                    solution: LocalizationManager.localizer.translate(
+                        message.guildID,
+                        "misc.failure.unrecognizedGroups.solution",
+                        {
+                            command: `\`${process.env.BOT_PREFIX}add groups\``,
+                        }
+                    ),
+                }
+            );
+
+            await sendErrorMessage(MessageContext.fromMessage(message), {
+                title: LocalizationManager.localizer.translate(
+                    message.guildID,
+                    "misc.failure.unrecognizedGroups.title"
                 ),
+                description: `${descriptionText}\n\n${suggestionsText || ""}`,
                 footerText: groupsWarning,
             });
         }
@@ -160,11 +190,11 @@ export default class GroupsCommand implements BaseCommand {
             );
             if (intersection.size > 0) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(
+                    title: LocalizationManager.localizer.translate(
                         message.guildID,
                         "misc.failure.groupsExcludeConflict.title"
                     ),
-                    description: state.localizer.translate(
+                    description: LocalizationManager.localizer.translate(
                         message.guildID,
                         "misc.failure.groupsExcludeConflict.description",
                         {
@@ -175,10 +205,11 @@ export default class GroupsCommand implements BaseCommand {
                                 .join(", "),
                             solutionStepOne: `\`${process.env.BOT_PREFIX}remove exclude\``,
                             solutionStepTwo: `\`${process.env.BOT_PREFIX}groups\``,
-                            allowOrPrevent: state.localizer.translate(
-                                message.guildID,
-                                "misc.failure.groupsExcludeConflict.allow"
-                            ),
+                            allowOrPrevent:
+                                LocalizationManager.localizer.translate(
+                                    message.guildID,
+                                    "misc.failure.groupsExcludeConflict.allow"
+                                ),
                         }
                     ),
                 });
@@ -192,6 +223,7 @@ export default class GroupsCommand implements BaseCommand {
 
         await guildPreference.setGroups(matchedGroups);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.GROUPS, reset: false }]

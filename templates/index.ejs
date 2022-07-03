@@ -398,6 +398,15 @@
               <h4 class="mdl-cell mdl-cell--12-col">Overall</h4>
               <div class="section__circle-container mdl-cell mdl-cell--2-col mdl-cell--1-col-phone">
                 <div
+                  class="section__circle-container__circle <%= ['color-healthy', 'color-warning', 'color-down'][overallStatsData.databaseLatency.healthIndicator] %>">
+                </div>
+              </div>
+              <div class="section__text mdl-cell mdl-cell--10-col-desktop mdl-cell--6-col-tablet mdl-cell--3-col-phone">
+                <h5> Database Latency </h5>
+                <%= overallStatsData.databaseLatency.latency %> ms
+              </div>
+              <div class="section__circle-container mdl-cell mdl-cell--2-col mdl-cell--1-col-phone">
+                <div
                   class="section__circle-container__circle <%= ['color-healthy', 'color-warning', 'color-down'][overallStatsData.requestLatency.healthIndicator] %>">
                 </div>
               </div>
@@ -418,8 +427,7 @@
             <div class="mdl-card__actions" style="padding-top:10px; padding-bottom: 10px;">
               Total Cached Users: <%= overallStatsData.cachedUsers %>
                 | Total Members: <%= overallStatsData.totalMembers %>
-                  | Total Voice Connections: <%= overallStatsData.totalVoiceConnections %>
-                    | Total Memory Usage: <%= overallStatsData.totalRAM %> MB
+                  | Total Memory Usage: <%= overallStatsData.totalRAM %> MB
             </div>
             <div class="mdl-card__actions" style="padding-top:10px; padding-bottom: 10px;">
               Total Active Game Sessions: <%= overallStatsData.totalActiveGameSessions %>
@@ -463,6 +471,7 @@
             <div class="mdl-card__actions" style="padding-top:10px; padding-bottom: 10px;">
               Active Game Sessions: <%= clusterData[i].activeGameSessions %>
                 | Active Players: <%= clusterData[i].activePlayers %>
+                  | Version: <%= clusterData[i].version %>
             </div>
           </section>
         </div>

@@ -3,7 +3,7 @@ const path = require("path");
 
 exports.up = function (knex) {
     execSync(
-        "ts-node",
+        "npx ts-node",
         [path.join(__dirname, "../scripts/json-presets-to-new-format.ts")],
         { stdio: "inherit" }
     );

@@ -1,29 +1,31 @@
-import Eris from "eris";
-import os from "os";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
-import {
-    getDebugLogHeader,
-    sendErrorMessage,
-    sendInfoMessage,
-} from "../../helpers/discord_utils";
-import dbContext from "../../database_context";
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
-import MessageContext from "../../structures/message_context";
-import { state } from "../../kmq_worker";
 import {
     friendlyFormattedDate,
     friendlyFormattedNumber,
     measureExecutionTime,
 } from "../../helpers/utils";
-import { getKmqCurrentVersion } from "../../helpers/game_utils";
+import {
+    getDebugLogHeader,
+    sendErrorMessage,
+    sendInfoMessage,
+} from "../../helpers/discord_utils";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import State from "../../state";
+import dbContext from "../../database_context";
+import os from "os";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type Eris from "eris";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("stats");
 
 export default class StatsCommand implements BaseCommand {
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "stats",
-        description: state.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.stats.help.description"
         ),
@@ -33,12 +35,12 @@ export default class StatsCommand implements BaseCommand {
     });
 
     call = async ({ message, channel }: CommandArgs): Promise<void> => {
-        const fleetStats = await state.ipc.getStats();
+        const fleetStats = await State.ipc.getStats();
         let gameSessionStats;
         try {
             gameSessionStats = Array.from(
                 (
-                    (await state.ipc.allClustersCommand(
+                    (await State.ipc.allClustersCommand(
                         "game_session_stats",
                         true,
                         5000
@@ -48,11 +50,11 @@ export default class StatsCommand implements BaseCommand {
         } catch (e) {
             logger.error(`Error retrieving stats via IPC. err = ${e}`);
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.stats.failure.title"
                 ),
-                description: state.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.stats.failure.description"
                 ),
@@ -141,66 +143,70 @@ export default class StatsCommand implements BaseCommand {
         )["stat_value"];
 
         const gameStatistics = {
-            [state.localizer.translate(
+            [LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.stats.game.activeGameSessions"
             )]: activeGameSessions,
-            [state.localizer.translate(
+            [LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.stats.game.activePlayers"
             )]: activePlayers,
-            [state.localizer.translate(
+            [LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.stats.game.recentGameSessions"
             )]: `${friendlyFormattedNumber(
                 Number(recentGameSessions)
             )} | ${friendlyFormattedNumber(Number(totalGameSessions))}`,
-            [state.localizer.translate(
+            [LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.stats.game.recentGameRounds"
             )]: `${friendlyFormattedNumber(
                 recentGameRounds
             )} | ${friendlyFormattedNumber(totalGameRounds)}`,
-            [state.localizer.translate(
+            [LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.stats.game.recentPlayers"
             )]: `${friendlyFormattedNumber(
                 Number(recentPlayers)
             )} | ${friendlyFormattedNumber(Number(totalPlayers))}`,
-            [state.localizer.translate(
+            [LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.stats.game.latestSongUpdate"
             )]: friendlyFormattedDate(latestAvailableSong, message.guildID),
         };
 
         const systemStatistics = {
-            [state.localizer.translate(
+            [LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.stats.system.loadAverage"
             )]: os
                 .loadavg()
                 .map((x) => x.toFixed(2))
                 .toString(),
-            [state.localizer.translate(
+            [LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.stats.system.memoryUsage"
             )]: `${fleetStats.totalRam.toFixed(2)} MB`,
-            [state.localizer.translate(
+            [LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.stats.system.apiLatency"
-            )]: `${channel.guild.shard.latency} ms`,
-            [state.localizer.translate(
+            )]: `${
+                !Number.isFinite(channel.guild.shard.latency)
+                    ? "?"
+                    : channel.guild.shard.latency
+            } ms`,
+            [LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.stats.system.requestLatency"
             )]: `${requestLatency} ms`,
-            [state.localizer.translate(
+            [LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.stats.system.databaseLatency"
             )]: `${mysqlLatency.toFixed(2)} ms`,
-            [state.localizer.translate(
+            [LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.stats.system.uptime"
-            )]: state.localizer.translateN(
+            )]: LocalizationManager.localizer.translateN(
                 message.guildID,
                 "misc.plural.hour",
                 Number((process.uptime() / (60 * 60)).toFixed(2))
@@ -209,7 +215,7 @@ export default class StatsCommand implements BaseCommand {
 
         const fields: Array<Eris.EmbedField> = [
             {
-                name: state.localizer.translate(
+                name: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.stats.game.title"
                 ),
@@ -218,7 +224,7 @@ export default class StatsCommand implements BaseCommand {
                     .join("\n")}\`\`\``,
             },
             {
-                name: state.localizer.translate(
+                name: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.stats.system.title"
                 ),
@@ -230,11 +236,11 @@ export default class StatsCommand implements BaseCommand {
 
         logger.info(`${getDebugLogHeader(message)} | Stats retrieved`);
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
+            title: LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.stats.title"
             ),
-            description: state.localizer.translate(
+            description: LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.stats.description",
                 {
@@ -242,7 +248,9 @@ export default class StatsCommand implements BaseCommand {
                 }
             ),
             fields,
-            footerText: `${getKmqCurrentVersion()} | ${state.localizer.translate(
+            footerText: `${
+                State.version
+            } | ${LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.stats.footer"
             )}`,

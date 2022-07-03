@@ -1,19 +1,25 @@
+import { GROUP_LIST_URL } from "../../constants";
+import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
-    getGuildPreference,
     getMatchingGroupNames,
+    getSimilarGroupNames,
 } from "../../helpers/game_utils";
-import { IPCLogger } from "../../logger";
-import { GameOption, MatchedArtist } from "../../types";
-import MessageContext from "../../structures/message_context";
-import { GROUP_LIST_URL } from "../../constants";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import GameOption from "../../enums/game_option_name";
+import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import State from "../../state";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
+import type MatchedArtist from "../../interfaces/matched_artist";
 
 const logger = new IPCLogger("remove");
 
@@ -47,9 +53,9 @@ export default class RemoveCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "remove",
-        description: state.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.remove.help.description",
             {
@@ -58,14 +64,14 @@ export default class RemoveCommand implements BaseCommand {
                 include: `\`${process.env.BOT_PREFIX}include\``,
             }
         ),
-        usage: `,remove [groups | exclude | include] [${state.localizer.translate(
+        usage: `,remove [groups | exclude | include] [${LocalizationManager.localizer.translate(
             guildID,
             "misc.listOfGroups"
         )}]`,
         examples: [
             {
                 example: "`,remove groups twice, red velvet`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.remove.help.example.groups",
                     {
@@ -77,7 +83,7 @@ export default class RemoveCommand implements BaseCommand {
             },
             {
                 example: "`,remove exclude BESTie, Dia, iKON`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.remove.help.example.exclude",
                     {
@@ -90,7 +96,7 @@ export default class RemoveCommand implements BaseCommand {
             },
             {
                 example: "`,remove include exo`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.remove.help.example.include",
                     {
@@ -105,7 +111,7 @@ export default class RemoveCommand implements BaseCommand {
                 style: 5 as const,
                 url: GROUP_LIST_URL,
                 type: 2 as const,
-                label: state.localizer.translate(
+                label: LocalizationManager.localizer.translate(
                     guildID,
                     "misc.interaction.fullGroupsList"
                 ),
@@ -115,7 +121,10 @@ export default class RemoveCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         const optionListed = parsedMessage.components[0] as RemoveType;
         let currentMatchedArtists: MatchedArtist[];
         switch (optionListed) {
@@ -138,11 +147,11 @@ export default class RemoveCommand implements BaseCommand {
 
         if (!currentMatchedArtists) {
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.remove.failure.noGroupsSelected.title"
                 ),
-                description: state.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.remove.failure.noGroupsSelected.description"
                 ),
@@ -174,25 +183,51 @@ export default class RemoveCommand implements BaseCommand {
                 )}`
             );
 
-            await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "misc.failure.unrecognizedGroups.title"
-                ),
-                description: state.localizer.translate(
-                    message.guildID,
-                    "misc.failure.unrecognizedGroups.description",
-                    {
-                        matchedGroupsAction: state.localizer.translate(
+            let suggestionsText: string = null;
+            if (unmatchedGroups.length === 1) {
+                const suggestions = await getSimilarGroupNames(
+                    unmatchedGroups[0],
+                    State.getGuildLocale(message.guildID)
+                );
+
+                if (suggestions.length > 0) {
+                    suggestionsText = LocalizationManager.localizer.translate(
+                        message.guildID,
+                        "misc.failure.unrecognizedGroups.didYouMean",
+                        {
+                            suggestions: suggestions.join("\n"),
+                        }
+                    );
+                }
+            }
+
+            const descriptionText = LocalizationManager.localizer.translate(
+                message.guildID,
+                "misc.failure.unrecognizedGroups.description",
+                {
+                    matchedGroupsAction:
+                        LocalizationManager.localizer.translate(
                             message.guildID,
                             "command.remove.failure.unrecognizedGroups.removed"
                         ),
-                        helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
-                        unmatchedGroups: unmatchedGroups.join(", "),
-                        solution: "",
-                    }
+                    helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
+                    unmatchedGroups: unmatchedGroups.join(", "),
+                    solution: "",
+                }
+            );
+
+            await sendErrorMessage(MessageContext.fromMessage(message), {
+                title: LocalizationManager.localizer.translate(
+                    message.guildID,
+                    "misc.failure.unrecognizedGroups.title"
                 ),
+                description: `${descriptionText}\n\n${suggestionsText || ""}`,
             });
+        }
+
+        // if none of the new groups were matched
+        if (unmatchedGroups.length === rawGroupsToRemove.length) {
+            return;
         }
 
         switch (optionListed) {
@@ -202,6 +237,7 @@ export default class RemoveCommand implements BaseCommand {
             case RemoveType.ARTISTS:
                 await guildPreference.setGroups(remainingGroups);
                 await sendOptionsMessage(
+                    Session.getSession(message.guildID),
                     MessageContext.fromMessage(message),
                     guildPreference,
                     [{ option: GameOption.GROUPS, reset: false }]
@@ -217,6 +253,7 @@ export default class RemoveCommand implements BaseCommand {
             case RemoveType.INCLUDES:
                 await guildPreference.setIncludes(remainingGroups);
                 await sendOptionsMessage(
+                    Session.getSession(message.guildID),
                     MessageContext.fromMessage(message),
                     guildPreference,
                     [{ option: GameOption.INCLUDE, reset: false }]
@@ -232,6 +269,7 @@ export default class RemoveCommand implements BaseCommand {
             case RemoveType.EXCLUDES:
                 await guildPreference.setExcludes(remainingGroups);
                 await sendOptionsMessage(
+                    Session.getSession(message.guildID),
                     MessageContext.fromMessage(message),
                     guildPreference,
                     [{ option: GameOption.EXCLUDE, reset: false }]

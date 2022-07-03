@@ -1,22 +1,20 @@
+import { ELIMINATION_DEFAULT_LIVES } from "../constants";
 import Player from "./player";
-import { getUserTag } from "../helpers/discord_utils";
-import { state } from "../kmq_worker";
-import { DEFAULT_LIVES } from "./elimination_scoreboard";
+import State from "../state";
 
 export default class EliminationPlayer extends Player {
-    // this.score => the player's lives
-
     static fromUserID(
         userID: string,
-        score = DEFAULT_LIVES,
+        guildID: string,
+        score = ELIMINATION_DEFAULT_LIVES,
         firstGameOfDay = false,
         premium = false
     ): EliminationPlayer {
-        const user = state.client.users.get(userID);
+        const user = State.client.users.get(userID);
 
         return new EliminationPlayer(
-            getUserTag(user),
             user.id,
+            guildID,
             user.avatarURL,
             score,
             firstGameOfDay,
@@ -49,6 +47,7 @@ export default class EliminationPlayer extends Player {
     /**
      * @returns whether to include this player in the scoreboard
      */
+    // eslint-disable-next-line class-methods-use-this
     shouldIncludeInScoreboard(): boolean {
         return true;
     }

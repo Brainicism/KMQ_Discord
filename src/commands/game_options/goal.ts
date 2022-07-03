@@ -1,20 +1,28 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
-    sendOptionsMessage,
     sendErrorMessage,
+    sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
-import { IPCLogger } from "../../logger";
-import { GameOption, GameType } from "../../types";
-import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import GameOption from "../../enums/game_option_name";
+import GameType from "../../enums/game_type";
+import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type GameSession from "../../structures/game_session";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("goal");
 
 export default class GoalCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notListeningPrecheck },
+    ];
 
     validations = {
         minArgCount: 0,
@@ -28,20 +36,20 @@ export default class GoalCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "goal",
-        description: state.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.goal.help.description"
         ),
-        usage: `,goal [${state.localizer.translate(
+        usage: `,goal [${LocalizationManager.localizer.translate(
             guildID,
             "command.goal.help.usage.points"
         )}]`,
         examples: [
             {
                 example: "`,goal 30`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.goal.help.example.set",
                     { goal: String(30) }
@@ -49,7 +57,7 @@ export default class GoalCommand implements BaseCommand {
             },
             {
                 example: "`,goal`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.goal.help.example.reset"
                 ),
@@ -58,15 +66,15 @@ export default class GoalCommand implements BaseCommand {
         priority: 120,
     });
 
-    call = async ({
-        message,
-        parsedMessage,
-        gameSessions,
-    }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.GOAL);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.GOAL, reset: true }]
@@ -75,8 +83,8 @@ export default class GoalCommand implements BaseCommand {
             return;
         }
 
-        const gameSession = gameSessions[message.guildID];
-        const userGoal = parseInt(parsedMessage.components[0]);
+        const gameSession = Session.getSession(message.guildID) as GameSession;
+        const userGoal = parseInt(parsedMessage.components[0], 10);
         if (gameSession) {
             if (
                 gameSession.scoreboard.getWinners().length > 0 &&
@@ -87,11 +95,11 @@ export default class GoalCommand implements BaseCommand {
                 );
 
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(
+                    title: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.goal.failure.goalExceeded.title"
                     ),
-                    description: state.localizer.translate(
+                    description: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.goal.failure.goalExceeded.description"
                     ),
@@ -109,11 +117,11 @@ export default class GoalCommand implements BaseCommand {
                 );
 
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(
+                    title: LocalizationManager.localizer.translate(
                         message.guildID,
                         "misc.failure.gameOptionConflict.title"
                     ),
-                    description: state.localizer.translate(
+                    description: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.goal.failure.gameOptionConflict.description",
                         {
@@ -130,6 +138,7 @@ export default class GoalCommand implements BaseCommand {
 
         await guildPreference.setGoal(userGoal);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.GOAL, reset: false }]

@@ -1,7 +1,6 @@
-import Eris from "eris";
-import { getUserTag } from "../helpers/discord_utils";
-import { state } from "../kmq_worker";
 import KmqMember from "./kmq_member";
+import State from "../state";
+import type Eris from "eris";
 
 export default class MessageContext {
     /** The text channel to send the message to */
@@ -25,13 +24,8 @@ export default class MessageContext {
         this.textChannelID = textChannelID;
         this.author = author;
         if (!author) {
-            const clientUser = state.client.user;
-            this.author = new KmqMember(
-                clientUser.username,
-                getUserTag(clientUser),
-                clientUser.avatarURL,
-                clientUser.id
-            );
+            const clientUser = State.client.user;
+            this.author = new KmqMember(clientUser.id);
         }
 
         this.guildID = guildID;
@@ -45,12 +39,7 @@ export default class MessageContext {
     static fromMessage(message: Eris.Message): MessageContext {
         return new MessageContext(
             message.channel.id,
-            new KmqMember(
-                message.author.username,
-                getUserTag(message.author),
-                message.author.avatarURL,
-                message.author.id
-            ),
+            new KmqMember(message.author.id),
             message.guildID,
             message.id
         );

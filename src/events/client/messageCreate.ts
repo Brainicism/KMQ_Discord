@@ -1,4 +1,3 @@
-import Eris from "eris";
 import * as uuid from "uuid";
 import { IPCLogger } from "../../logger";
 import {
@@ -6,18 +5,26 @@ import {
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
-import { state } from "../../kmq_worker";
-import validate from "../../helpers/validate";
-import { EnvType, GuildTextableMessage, ParsedMessage } from "../../types";
+import Eris from "eris";
+import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import State from "../../state";
+import validate from "../../helpers/validate";
+import type { GuildTextableMessage } from "../../types";
+import type ParsedMessage from "../../interfaces/parsed_message";
 
 const logger = new IPCLogger("messageCreate");
 
 function isGuildMessage(
     message: Eris.Message
 ): message is GuildTextableMessage {
-    return message.channel instanceof Eris.TextChannel;
+    return (
+        message.channel instanceof Eris.TextChannel ||
+        message.channel instanceof Eris.TextVoiceChannel ||
+        message.channel instanceof Eris.ThreadChannel
+    );
 }
 
 const parseMessage = (message: string): ParsedMessage => {
@@ -43,21 +50,26 @@ export default async function messageCreateHandler(
     if (message.author.id === process.env.BOT_CLIENT_ID || message.author.bot)
         return;
     if (!isGuildMessage(message)) return;
-    if (state.client.unavailableGuilds.has(message.guildID)) {
+    if (State.client.unavailableGuilds.has(message.guildID)) {
         logger.warn(`Server was unavailable. id = ${message.guildID}`);
         return;
     }
 
     const parsedMessage = parseMessage(message.content) || null;
     const textChannel = message.channel as Eris.TextChannel;
+    const messageContext = MessageContext.fromMessage(message);
     if (
-        message.mentions.includes(state.client.user) &&
+        message.mentions.includes(State.client.user) &&
         message.content.split(" ").length === 1
     ) {
         // Any message that mentions the bot sends the current options
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         sendOptionsMessage(
-            MessageContext.fromMessage(message),
+            Session.getSession(message.guildID),
+            messageContext,
             guildPreference,
             null
         );
@@ -65,15 +77,16 @@ export default async function messageCreateHandler(
     }
 
     const invokedCommand = parsedMessage
-        ? state.client.commands[parsedMessage.action]
+        ? State.client.commands[parsedMessage.action]
         : null;
 
+    const session = Session.getSession(message.guildID);
     if (invokedCommand) {
-        if (!state.rateLimiter.check(message.author.id)) {
+        if (!State.rateLimiter.check(message.author.id)) {
             logger.error(
                 `User ${
                     message.author.id
-                } is being rate limited. ${state.rateLimiter.timeRemaining(
+                } is being rate limited. ${State.rateLimiter.timeRemaining(
                     message.author.id
                 )}ms remaining.`
             );
@@ -90,14 +103,13 @@ export default async function messageCreateHandler(
                     : null
             )
         ) {
-            const { gameSessions } = state;
-            const gameSession = gameSessions[message.guildID];
             if (invokedCommand.preRunChecks) {
                 for (const precheck of invokedCommand.preRunChecks) {
                     if (
+                        // eslint-disable-next-line no-await-in-loop
                         !(await precheck.checkFn({
                             message,
-                            gameSession,
+                            session,
                             errorMessage: precheck.errorMessage,
                         }))
                     ) {
@@ -114,29 +126,29 @@ export default async function messageCreateHandler(
 
             try {
                 await invokedCommand.call({
-                    gameSessions,
                     channel: textChannel,
                     message,
                     parsedMessage,
                 });
-            } catch (e) {
+            } catch (err) {
                 const debugId = uuid.v4();
-                logger.error(
-                    `Error while invoking command (${
-                        parsedMessage.action
-                    }) | ${debugId} | ${JSON.stringify(e)}`
-                );
 
-                if (process.env.NODE_ENV === EnvType.DEV) {
-                    logger.error(e.stack);
+                if (err instanceof Error) {
+                    logger.error(
+                        `Error while invoking command (${parsedMessage.action}) | ${debugId} | Exception Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}}`
+                    );
+                } else {
+                    logger.error(
+                        `Error while invoking command (${parsedMessage.action}) | ${debugId} | Error: ${err}`
+                    );
                 }
 
-                sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(
+                sendErrorMessage(messageContext, {
+                    title: LocalizationManager.localizer.translate(
                         message.guildID,
                         "misc.failure.command.title"
                     ),
-                    description: state.localizer.translate(
+                    description: LocalizationManager.localizer.translate(
                         message.guildID,
                         "misc.failure.command.description",
                         { debugId }
@@ -144,11 +156,7 @@ export default async function messageCreateHandler(
                 });
             }
         }
-    } else if (state.gameSessions[message.guildID]?.round) {
-        const gameSession = state.gameSessions[message.guildID];
-        gameSession.guessSong(
-            MessageContext.fromMessage(message),
-            message.content
-        );
+    } else if (session?.isGameSession() && session.round) {
+        session.guessSong(messageContext, message.content);
     }
 }

@@ -1,21 +1,27 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
-import { IPCLogger } from "../../logger";
-import { GameOption } from "../../types";
-import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import GameOption from "../../enums/game_option_name";
+import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("guessTimeout");
 
 export default class GuessTimeoutCommand implements BaseCommand {
     aliases = ["time", "timeout", "t"];
 
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notListeningPrecheck },
+    ];
 
     validations = {
         minArgCount: 0,
@@ -30,20 +36,20 @@ export default class GuessTimeoutCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "timer",
-        description: state.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.timer.help.description"
         ),
-        usage: `,timer [${state.localizer.translate(
+        usage: `,timer [${LocalizationManager.localizer.translate(
             guildID,
             "command.timer.help.usage.seconds"
         )}]`,
         examples: [
             {
                 example: "`,timer 15`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.timer.help.example.set",
                     { timer: String(15) }
@@ -51,7 +57,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
             },
             {
                 example: "`,timer`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.timer.help.example.reset"
                 ),
@@ -60,20 +66,20 @@ export default class GuessTimeoutCommand implements BaseCommand {
         priority: 110,
     });
 
-    call = async ({
-        message,
-        parsedMessage,
-        gameSessions,
-    }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
-        const gameSession = gameSessions[message.guildID];
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
+        const session = Session.getSession(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.TIMER);
-            if (gameSession) {
-                gameSession.stopGuessTimeout();
+            if (session) {
+                session.stopGuessTimeout();
             }
 
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.TIMER, reset: true }]
@@ -85,23 +91,17 @@ export default class GuessTimeoutCommand implements BaseCommand {
             return;
         }
 
-        const time = parseInt(parsedMessage.components[0]);
+        const time = parseInt(parsedMessage.components[0], 10);
 
         await guildPreference.setGuessTimeout(time);
-        if (
-            gameSession &&
-            gameSession.round &&
-            gameSession.connection.playing
-        ) {
+        if (session && session.round && session.connection.playing) {
             // Timer can start mid-song, starting when the user enters the command
-            gameSession.stopGuessTimeout();
-            gameSession.startGuessTimeout(
-                MessageContext.fromMessage(message),
-                guildPreference
-            );
+            session.stopGuessTimeout();
+            session.startGuessTimeout(MessageContext.fromMessage(message));
         }
 
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.TIMER, reset: false }]

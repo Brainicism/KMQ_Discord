@@ -1,26 +1,26 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
-import { getGuildPreference } from "../../helpers/game_utils";
+import { DEFAULT_MULTIGUESS_TYPE } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { GameOption } from "../../types";
-import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import GameOption from "../../enums/game_option_name";
+import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import MultiGuessType from "../../enums/option_types/multiguess_type";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("multiguess");
-
-export enum MultiGuessType {
-    ON = "on",
-    OFF = "off",
-}
-
-export const DEFAULT_MULTIGUESS_TYPE = MultiGuessType.ON;
-
 export default class MultiGuessCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notListeningPrecheck },
+    ];
 
     validations = {
         minArgCount: 0,
@@ -34,9 +34,9 @@ export default class MultiGuessCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "multiguess",
-        description: state.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.multiguess.help.description",
             { on: `\`${MultiGuessType.ON}\`` }
@@ -45,21 +45,21 @@ export default class MultiGuessCommand implements BaseCommand {
         examples: [
             {
                 example: "`,multiguess on`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.multiguess.help.example.on"
                 ),
             },
             {
                 example: "`,multiguess off`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.multiguess.help.example.off"
                 ),
             },
             {
                 example: "`,multiguess`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.multiguess.help.example.reset",
                     { defaultMultiguess: `\`${DEFAULT_MULTIGUESS_TYPE}\`` }
@@ -70,10 +70,14 @@ export default class MultiGuessCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.MULTIGUESS);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.MULTIGUESS, reset: true }]
@@ -88,6 +92,7 @@ export default class MultiGuessCommand implements BaseCommand {
         const multiGuessType = parsedMessage.components[0] as MultiGuessType;
         await guildPreference.setMultiGuessType(multiGuessType);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.MULTIGUESS, reset: false }]

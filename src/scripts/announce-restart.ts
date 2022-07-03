@@ -1,20 +1,32 @@
+/* eslint-disable node/no-sync */
 /* eslint-disable no-console */
-import { execSync } from "child_process";
+import * as cp from "child_process";
 import { program } from "commander";
 import dbContext from "../database_context";
 
 program
     .option(
+        "--soft-restart",
+        "Initiate soft-restart for minimal downtime",
+        false
+    )
+    .option(
         "--no-restart",
         "Automatically restart pm2 process when countdown is over"
     )
-    .option("--timer <minutes>", "Countdown duration", (x) => parseInt(x), 5);
+    .option(
+        "--timer <minutes>",
+        "Countdown duration",
+        (x) => parseInt(x, 10),
+        5
+    );
 program.parse();
 
 function serverShutdown(
     restartMinutes: number,
     restartDate: Date,
-    restart: boolean
+    restart: boolean,
+    softRestart: boolean
 ): Promise<void> {
     return new Promise((resolve) => {
         setInterval(() => {
@@ -26,8 +38,19 @@ function serverShutdown(
         }, 1000 * 10).unref();
 
         setTimeout(() => {
-            console.log(restart ? "Restarting now..." : "Stopping now");
-            execSync(restart ? "pm2 restart kmq" : "pm2 stop kmq");
+            let command = "";
+            if (!restart) {
+                console.log("Stopping KMQ...");
+                command = "pm2 stop kmq";
+            } else if (softRestart) {
+                console.log("Soft restarting KMQ...");
+                command = "tsc && curl -X POST localhost:5858/soft-restart";
+            } else {
+                console.log("Restarting KMQ...");
+                command = "pm2 restart kmq";
+            }
+
+            cp.execSync(command);
             resolve();
         }, restartMinutes * 1000 * 60);
     });
@@ -49,6 +72,8 @@ process.on("SIGINT", async () => {
     const restartDate = new Date();
     restartDate.setMinutes(restartDate.getMinutes() + restartMinutes);
 
+    console.log(options);
+
     await dbContext
         .kmq("restart_notifications")
         .where("id", "=", "1")
@@ -59,6 +84,12 @@ process.on("SIGINT", async () => {
             options.restart ? "restart" : "shutdown"
         } scheduled at ${restartDate}`
     );
-    await serverShutdown(restartMinutes, restartDate, options.restart);
+
+    await serverShutdown(
+        restartMinutes,
+        restartDate,
+        options.restart,
+        options.softRestart
+    );
     await dbContext.destroy();
 })();

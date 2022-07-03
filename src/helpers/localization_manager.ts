@@ -1,17 +1,15 @@
+import { DEFAULT_LOCALE } from "../constants";
+import Backend from "i18next-fs-backend";
+import LocaleType from "../enums/locale_type";
+import State from "../state";
 import i18next from "i18next";
 import path from "path";
-import Backend from "i18next-fs-backend";
-import { getGuildLocale } from "./discord_utils";
-
-export enum LocaleType {
-    EN = "en",
-    KO = "ko",
-}
-
-export const DEFAULT_LOCALE = LocaleType.EN;
 
 export default class LocalizationManager {
+    static localizer = new LocalizationManager();
+
     internalLocalizer: typeof i18next;
+
     constructor() {
         this.internalLocalizer = i18next.createInstance().use(Backend);
         this.internalLocalizer.init({
@@ -41,7 +39,11 @@ export default class LocalizationManager {
         phrase: string,
         replace: { [key: string]: string } = {}
     ): string {
-        return this.translateByLocale(getGuildLocale(guildID), phrase, replace);
+        return this.translateByLocale(
+            State.getGuildLocale(guildID),
+            phrase,
+            replace
+        );
     }
 
     /**
@@ -70,7 +72,11 @@ export default class LocalizationManager {
      * @returns The translated phrase
      */
     translateN(guildID: string, phrase: string, count: number): string {
-        return this.translateNByLocale(getGuildLocale(guildID), phrase, count);
+        return this.translateNByLocale(
+            State.getGuildLocale(guildID),
+            phrase,
+            count
+        );
     }
 
     /**
@@ -89,5 +95,9 @@ export default class LocalizationManager {
             lng: locale,
             count,
         });
+    }
+
+    hasKey(key: string): boolean {
+        return this.internalLocalizer.exists(key);
     }
 }

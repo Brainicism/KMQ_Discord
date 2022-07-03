@@ -1,11 +1,11 @@
+import { bold, chooseRandom, escapedFormatting } from "../helpers/utils";
 import Player from "./player";
-import { bold, chooseRandom } from "../helpers/utils";
 
 export default class Team extends Player {
     private players: { [userID: string]: Player };
 
     constructor(name: string, player: Player) {
-        super(name, name, null, 0);
+        super(name, null, null, 0);
         this.players = {};
         this.players[player.id] = player;
     }
@@ -20,7 +20,7 @@ export default class Team extends Player {
 
     /** @returns the name of the team */
     getName(): string {
-        return this.name;
+        return this.id;
     }
 
     /**
@@ -34,7 +34,7 @@ export default class Team extends Player {
         _wonRound: boolean,
         _mention: boolean
     ): string {
-        let name = `Team ${this.getName()}`;
+        let name = `Team ${escapedFormatting(this.getName())}`;
         if (first) {
             name = `🎶 ${bold(name)}`;
         }
@@ -108,6 +108,7 @@ export default class Team extends Player {
     /**
      * @returns whether to include this team in the scoreboard
      */
+    // eslint-disable-next-line class-methods-use-this
     shouldIncludeInScoreboard(): boolean {
         return true;
     }

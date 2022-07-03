@@ -1,6 +1,6 @@
-import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
-import { EnvType } from "../../types";
+import EnvType from "../../enums/env_type";
+import State from "../../state";
 
 const logger = new IPCLogger("uncaughtException");
 
@@ -10,9 +10,9 @@ const logger = new IPCLogger("uncaughtException");
  */
 export default function uncaughtExceptionHandler(err: Error): void {
     logger.error(
-        `Cluster Uncaught Exception. Reason: ${err}. Trace: ${err.stack}`
+        `Cluster Uncaught Exception | Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}}`
     );
     if (process.env.NODE_ENV === EnvType.CI) {
-        state.ipc.admiralBroadcast("abort");
+        State.ipc.sendToAdmiral("abort");
     }
 }

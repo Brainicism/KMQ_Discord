@@ -1,24 +1,26 @@
-import fs from "fs";
-import path from "path";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
+import { KmqImages } from "../../constants";
 import {
     getDebugLogHeader,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
-import { KmqImages } from "../../constants";
+import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
-import { state } from "../../kmq_worker";
-import { getKmqCurrentVersion } from "../../helpers/game_utils";
+import State from "../../state";
+import fs from "fs";
+import path from "path";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("news");
 
 export default class NewsCommand implements BaseCommand {
     aliases = ["updates"];
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "news",
-        description: state.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.news.help.description"
         ),
@@ -29,21 +31,45 @@ export default class NewsCommand implements BaseCommand {
 
     call = async ({ message }: CommandArgs): Promise<void> => {
         const newsFilePath = path.resolve(__dirname, "../../../data/news.md");
-        if (!fs.existsSync(newsFilePath)) {
+
+        let newsData: string;
+        try {
+            newsData = (await fs.promises.readFile(newsFilePath)).toString();
+        } catch (e) {
             logger.error("News file does not exist");
             return;
         }
 
-        const news = fs.readFileSync(newsFilePath).toString();
-
         await sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
+            title: LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.news.updates.title"
             ),
-            description: news,
+            description: newsData,
             thumbnailUrl: KmqImages.READING_BOOK,
-            footerText: getKmqCurrentVersion(),
+            footerText: `${
+                State.version
+            } | ${LocalizationManager.localizer.translate(
+                message.guildID,
+                "command.news.updates.footer"
+            )}`,
+            components: [
+                {
+                    type: 1,
+                    components: [
+                        {
+                            style: 5,
+                            url: "https://discord.gg/gDdVXvqVUr",
+                            type: 2,
+                            emoji: { name: "🎵" },
+                            label: LocalizationManager.localizer.translate(
+                                message.guildID,
+                                "misc.interaction.officialKmqServer"
+                            ),
+                        },
+                    ],
+                },
+            ],
         });
 
         logger.info(`${getDebugLogHeader(message)} | News retrieved.`);

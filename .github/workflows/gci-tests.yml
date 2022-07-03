@@ -24,7 +24,7 @@ jobs:
             DB_USER_CI: root
             DB_PORT: 3306
             AUDIO_SONGS_PER_ARTIST: 10
-            PREMIUM_AUDIO_SONGS_PER_ARTIST: 25
+            PREMIUM_AUDIO_SONGS_PER_ARTIST: 50
         steps:
             - name: Checkout KMQ_Discord
               uses: actions/checkout@v2
@@ -51,8 +51,10 @@ jobs:
               run: npm run prettier_ci
             - name: npm run lint
               run: npm run lint_ci
-            - name: Check translations
+            - name: Lint translations
               run: npm run lint_i18n_ci
+            - name: Check for missing translations
+              run: npx ts-node src/ci_checks/missing_i18n.ts $(find src -name '*.ts' -print)
             - name: Copy .env for CI
               run: |
                   echo "DB_USER=$DB_USER_CI" >> .env

@@ -1,22 +1,26 @@
-import Eris, { EmbedOptions } from "eris";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
-import {
-    sendErrorMessage,
-    getDebugLogHeader,
-    sendPaginationedEmbed,
-    sendInfoMessage,
-} from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
-import { chunkArray } from "../../helpers/utils";
-import { GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
-import MessageContext from "../../structures/message_context";
+import { chunkArray } from "../../helpers/utils";
+import {
+    getDebugLogHeader,
+    sendErrorMessage,
+    sendInfoMessage,
+    sendPaginationedEmbed,
+} from "../../helpers/discord_utils";
 import KmqClient from "../../kmq_client";
-import { state } from "../../kmq_worker";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import type { EmbedOptions } from "eris";
+import type { GuildTextableMessage } from "../../types";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type Eris from "eris";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("help");
-export const placeholder = /,/g;
+const placeholder = /,/g;
 const FIELDS_PER_EMBED = 6;
+const excludedCommands = ["premium"];
 
 const helpMessage = async (
     message: GuildTextableMessage,
@@ -26,7 +30,10 @@ const helpMessage = async (
     let embedDesc = "";
     let embedFields = [];
     let embedActionRowComponents: Eris.ActionRowComponents[] = null;
-    const commandFiles = KmqClient.getCommandFiles(false);
+    const commandFiles = await KmqClient.getCommandFiles(false);
+    for (const command of excludedCommands) {
+        delete commandFiles[command];
+    }
 
     const commandFilesWithAliases: { [commandName: string]: BaseCommand } = {};
     Object.assign(commandFilesWithAliases, commandFiles);
@@ -60,14 +67,14 @@ const helpMessage = async (
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.help.title",
                     {
                         kmq: "K-pop Music Quiz",
                     }
                 ),
-                description: state.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.help.failure.noDocs",
                     { action }
@@ -87,7 +94,7 @@ const helpMessage = async (
         embedDesc = helpManual.description;
         embedActionRowComponents = helpManual.actionRowComponents;
         if (helpManual.examples.length > 0) {
-            embedDesc += `\n\n**${state.localizer.translate(
+            embedDesc += `\n\n**${LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.help.examples"
             )}**\n`;
@@ -100,7 +107,7 @@ const helpMessage = async (
 
         if (commandFilesWithAliases[action].aliases) {
             embedFooter = {
-                text: `${state.localizer.translate(
+                text: `${LocalizationManager.localizer.translate(
                     message.guildID,
                     "misc.inGame.aliases"
                 )}: ${commandFilesWithAliases[action].aliases.join(", ")}`,
@@ -118,7 +125,7 @@ const helpMessage = async (
             (x, y) => y.help(null).priority - x.help(null).priority
         );
 
-        embedTitle = state.localizer.translate(
+        embedTitle = LocalizationManager.localizer.translate(
             message.guildID,
             "command.help.title",
             {
@@ -126,14 +133,14 @@ const helpMessage = async (
             }
         );
 
-        embedDesc = state.localizer.translate(
+        embedDesc = LocalizationManager.localizer.translate(
             message.guildID,
             "command.help.description",
             {
                 play: `\`${process.env.BOT_PREFIX}play\``,
                 options: `\`${process.env.BOT_PREFIX}options\``,
                 help: `${process.env.BOT_PREFIX}help`,
-                command: state.localizer.translate(
+                command: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.help.command"
                 ),
@@ -144,7 +151,9 @@ const helpMessage = async (
             const helpManual = command.help(message.guildID);
             return {
                 name: helpManual.name,
-                value: `${helpManual.description}\n${state.localizer.translate(
+                value: `${
+                    helpManual.description
+                }\n${LocalizationManager.localizer.translate(
                     message.guildID,
                     "misc.usage"
                 )}: \`${helpManual.usage.replace(
@@ -159,7 +168,7 @@ const helpMessage = async (
                 style: 5,
                 url: "https://discord.gg/RCuzwYV",
                 type: 2,
-                label: state.localizer.translate(
+                label: LocalizationManager.localizer.translate(
                     message.guildID,
                     "misc.interaction.officialKmqServer"
                 ),
@@ -168,7 +177,7 @@ const helpMessage = async (
                 style: 5,
                 url: "https://brainicism.github.io/KMQ_Discord/GAMEPLAY",
                 type: 2,
-                label: state.localizer.translate(
+                label: LocalizationManager.localizer.translate(
                     message.guildID,
                     "misc.interaction.howToPlay"
                 ),
@@ -177,7 +186,7 @@ const helpMessage = async (
                 style: 5,
                 url: "https://brainicism.github.io/KMQ_Discord/FAQ",
                 type: 2,
-                label: state.localizer.translate(
+                label: LocalizationManager.localizer.translate(
                     message.guildID,
                     "misc.interaction.faq"
                 ),
@@ -220,27 +229,27 @@ const helpMessage = async (
 };
 
 export default class HelpCommand implements BaseCommand {
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "help",
-        description: state.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.help.help.description"
         ),
-        usage: `,help [${state.localizer.translate(
+        usage: `,help [${LocalizationManager.localizer.translate(
             guildID,
             "command.help.command"
         )}]`,
         examples: [
             {
                 example: "`,help`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.help.help.example.allCommands"
                 ),
             },
             {
                 example: "`,help cutoff`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.help.help.example.sampleCommand"
                 ),

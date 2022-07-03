@@ -1,23 +1,21 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import { DEFAULT_SUBUNIT_PREFERENCE } from "../../constants";
 import { IPCLogger } from "../../logger";
-import { getGuildPreference } from "../../helpers/game_utils";
 import {
-    sendOptionsMessage,
     getDebugLogHeader,
+    sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { GameOption } from "../../types";
-import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import GameOption from "../../enums/game_option_name";
+import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import SubunitsPreference from "../../enums/option_types/subunit_preference";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("subunits");
-
-export enum SubunitsPreference {
-    INCLUDE = "include",
-    EXCLUDE = "exclude",
-}
-
-export const DEFAULT_SUBUNIT_PREFERENCE = SubunitsPreference.INCLUDE;
 
 export default class SubunitsCommand implements BaseCommand {
     aliases = ["subunit", "su"];
@@ -36,9 +34,9 @@ export default class SubunitsCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "subunits",
-        description: state.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.subunits.help.description",
             { groups: `\`${process.env.BOT_PREFIX}groups\`` }
@@ -47,7 +45,7 @@ export default class SubunitsCommand implements BaseCommand {
         examples: [
             {
                 example: "`,subunits include`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.subunits.help.example.include",
                     {
@@ -60,14 +58,14 @@ export default class SubunitsCommand implements BaseCommand {
             },
             {
                 example: "`,subunits exclude`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.subunits.help.example.exclude"
                 ),
             },
             {
                 example: "`,subunits`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.subunits.help.example.reset",
                     { defaultSubunit: `\`${DEFAULT_SUBUNIT_PREFERENCE}\`` }
@@ -78,11 +76,14 @@ export default class SubunitsCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
 
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.SUBUNIT_PREFERENCE);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.SUBUNIT_PREFERENCE, reset: true }]
@@ -99,6 +100,7 @@ export default class SubunitsCommand implements BaseCommand {
 
         await guildPreference.setSubunitPreference(subunitPreference);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.SUBUNIT_PREFERENCE, reset: false }]

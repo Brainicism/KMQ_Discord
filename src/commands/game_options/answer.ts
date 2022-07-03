@@ -1,29 +1,28 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
-import {
-    sendOptionsMessage,
-    getDebugLogHeader,
-} from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
+import { ExpBonusModifierValues } from "../../constants";
 import { IPCLogger } from "../../logger";
-import { GameOption } from "../../types";
-import MessageContext from "../../structures/message_context";
+import {
+    getDebugLogHeader,
+    sendOptionsMessage,
+} from "../../helpers/discord_utils";
+import AnswerType from "../../enums/option_types/answer_type";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import ExpBonusModifier from "../../enums/exp_bonus_modifier";
+import GameOption from "../../enums/game_option_name";
+import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("answer");
 
-export enum AnswerType {
-    TYPING = "typing",
-    TYPING_TYPOS = "typingtypos",
-    MULTIPLE_CHOICE_EASY = "easy",
-    MULTIPLE_CHOICE_MED = "medium",
-    MULTIPLE_CHOICE_HARD = "hard",
-}
-
-export const DEFAULT_ANSWER_TYPE = AnswerType.TYPING;
-
 export default class AnswerCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notListeningPrecheck },
+    ];
 
     validations = {
         minArgCount: 0,
@@ -37,9 +36,9 @@ export default class AnswerCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "answer",
-        description: state.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.answer.help.description",
             {
@@ -54,40 +53,66 @@ export default class AnswerCommand implements BaseCommand {
         examples: [
             {
                 example: "`,answer typing`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.answer.help.example.typing"
                 ),
             },
             {
                 example: "`,answer typingtypos`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
-                    "command.answer.help.example.typingTypos"
+                    "command.answer.help.example.typingTypos",
+                    {
+                        penalty: `${
+                            ExpBonusModifierValues[ExpBonusModifier.TYPO]
+                        }x`,
+                    }
                 ),
             },
             {
                 example: "`,answer easy`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",
-                    { optionCount: String(4), penalty: "0.25x" }
+                    {
+                        optionCount: String(4),
+                        penalty: `${
+                            ExpBonusModifierValues[
+                                ExpBonusModifier.MC_GUESS_EASY
+                            ]
+                        }x`,
+                    }
                 ),
             },
             {
                 example: "`,answer medium`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",
-                    { optionCount: String(6), penalty: "0.5x" }
+                    {
+                        optionCount: String(6),
+                        penalty: `${
+                            ExpBonusModifierValues[
+                                ExpBonusModifier.MC_GUESS_MEDIUM
+                            ]
+                        }x`,
+                    }
                 ),
             },
             {
                 example: "`,answer hard`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",
-                    { optionCount: String(8), penalty: "0.75x" }
+                    {
+                        optionCount: String(8),
+                        penalty: `${
+                            ExpBonusModifierValues[
+                                ExpBonusModifier.MC_GUESS_HARD
+                            ]
+                        }`,
+                    }
                 ),
             },
         ],
@@ -95,10 +120,14 @@ export default class AnswerCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.ANSWER_TYPE);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.ANSWER_TYPE, reset: true }]
@@ -110,6 +139,7 @@ export default class AnswerCommand implements BaseCommand {
         const answerType = parsedMessage.components[0] as AnswerType;
         await guildPreference.setAnswerType(answerType);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.ANSWER_TYPE, reset: false }]

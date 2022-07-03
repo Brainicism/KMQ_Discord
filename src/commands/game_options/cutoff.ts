@@ -1,20 +1,24 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
-    sendOptionsMessage,
+    DEFAULT_BEGINNING_SEARCH_YEAR,
+    DEFAULT_ENDING_SEARCH_YEAR,
+} from "../../constants";
+import { IPCLogger } from "../../logger";
+import {
     getDebugLogHeader,
     sendErrorMessage,
+    sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
-import { IPCLogger } from "../../logger";
-import { GameOption } from "../../types";
-import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import GameOption from "../../enums/game_option_name";
+import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("cutoff");
-
-export const DEFAULT_BEGINNING_SEARCH_YEAR = 1990;
-export const DEFAULT_ENDING_SEARCH_YEAR = new Date().getFullYear();
 
 export default class CutoffCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
@@ -38,9 +42,9 @@ export default class CutoffCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "cutoff",
-        description: state.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.cutoff.help.description"
         ),
@@ -48,7 +52,7 @@ export default class CutoffCommand implements BaseCommand {
         examples: [
             {
                 example: "`,cutoff 2015`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.cutoff.help.example.singleCutoff",
                     {
@@ -58,7 +62,7 @@ export default class CutoffCommand implements BaseCommand {
             },
             {
                 example: "`,cutoff 2015 2018`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.cutoff.help.example.twoCutoffs",
                     {
@@ -69,7 +73,7 @@ export default class CutoffCommand implements BaseCommand {
             },
             {
                 example: "`,cutoff`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.cutoff.help.example.reset",
                     {
@@ -87,13 +91,17 @@ export default class CutoffCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         if (parsedMessage.components.length === 0) {
             await guildPreference.setBeginningCutoffYear(
                 DEFAULT_BEGINNING_SEARCH_YEAR
             );
             await guildPreference.setEndCutoffYear(DEFAULT_ENDING_SEARCH_YEAR);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.CUTOFF, reset: true }]
@@ -110,17 +118,19 @@ export default class CutoffCommand implements BaseCommand {
         const yearRange = parsedMessage.components;
         const startYear = yearRange[0];
         if (yearRange.length === 1) {
-            await guildPreference.setBeginningCutoffYear(parseInt(startYear));
+            await guildPreference.setBeginningCutoffYear(
+                parseInt(startYear, 10)
+            );
             await guildPreference.setEndCutoffYear(DEFAULT_ENDING_SEARCH_YEAR);
         } else if (yearRange.length === 2) {
             const endYear = yearRange[1];
             if (endYear < startYear) {
                 await sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(
+                    title: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.cutoff.failure.invalidEndYear.title"
                     ),
-                    description: state.localizer.translate(
+                    description: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.cutoff.failure.invalidEndYear.description"
                     ),
@@ -128,11 +138,14 @@ export default class CutoffCommand implements BaseCommand {
                 return;
             }
 
-            await guildPreference.setBeginningCutoffYear(parseInt(startYear));
-            await guildPreference.setEndCutoffYear(parseInt(endYear));
+            await guildPreference.setBeginningCutoffYear(
+                parseInt(startYear, 10)
+            );
+            await guildPreference.setEndCutoffYear(parseInt(endYear, 10));
         }
 
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.CUTOFF, reset: false }]

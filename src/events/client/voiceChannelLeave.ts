@@ -1,6 +1,6 @@
-import Eris from "eris";
-import { state } from "../../kmq_worker";
 import { checkBotIsAlone } from "../../helpers/discord_utils";
+import Session from "../../structures/session";
+import type Eris from "eris";
 
 /**
  * Handles the 'voiceChannelLeave' event
@@ -12,24 +12,24 @@ export default async function voiceChannelLeaveHandler(
     oldChannel: Eris.VoiceChannel
 ): Promise<void> {
     const guildID = oldChannel.guild.id;
-    const gameSession = state.gameSessions[guildID];
-    if (!gameSession || gameSession.finished) {
+    const session = Session.getSession(guildID);
+    if (!session || session.finished) {
         return;
     }
 
-    if (oldChannel.id !== gameSession.voiceChannelID) {
+    if (oldChannel.id !== session.voiceChannelID) {
         return;
     }
 
     if (checkBotIsAlone(guildID)) {
-        gameSession.endSession();
+        session.endSession();
         return;
     }
 
-    gameSession.updateOwner();
-    const oldPremiumState = gameSession.isPremiumGame();
-    await gameSession.setPlayerInVC(member.id, false);
-    if (oldPremiumState !== gameSession.isPremiumGame()) {
-        await gameSession.updatePremiumStatus();
+    if (session.isGameSession()) {
+        await session.setPlayerInVC(member.id, false);
     }
+
+    await session.updatePremiumStatus();
+    session.updateOwner();
 }

@@ -1,8 +1,11 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
-import { getDebugLogHeader } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
+import { getDebugLogHeader } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import LocalizationManager from "../../helpers/localization_manager";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("end");
 
@@ -10,13 +13,13 @@ export default class EndCommand implements BaseCommand {
     aliases = ["stop", "e"];
 
     preRunChecks = [
-        { checkFn: CommandPrechecks.inGameCommandPrecheck },
+        { checkFn: CommandPrechecks.inSessionCommandPrecheck },
         { checkFn: CommandPrechecks.competitionPrecheck },
     ];
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "end",
-        description: state.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.end.help.description"
         ),
@@ -25,16 +28,14 @@ export default class EndCommand implements BaseCommand {
         priority: 1020,
     });
 
-    call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
-        const gameSession = gameSessions[message.guildID];
-        if (!gameSession) {
-            logger.warn(
-                `${getDebugLogHeader(message)} | No active game session`
-            );
+    call = async ({ message }: CommandArgs): Promise<void> => {
+        const session = Session.getSession(message.guildID);
+        if (!session) {
+            logger.warn(`${getDebugLogHeader(message)} | No active session`);
             return;
         }
 
-        await gameSession.endSession();
-        logger.info(`${getDebugLogHeader(message)} | Game session ended`);
+        await session.endSession();
+        logger.info(`${getDebugLogHeader(message)} | Session ended`);
     };
 }

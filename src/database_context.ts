@@ -1,7 +1,8 @@
-import { Knex, knex } from "knex";
-import { resolve } from "path";
 import { config } from "dotenv";
-import { EnvType } from "./types";
+import { knex } from "knex";
+import { resolve } from "path";
+import EnvType from "./enums/env_type";
+import type { Knex } from "knex";
 
 config({ path: resolve(__dirname, "../.env") });
 
@@ -18,7 +19,7 @@ function generateKnexContext(
             database: databaseName,
             host: process.env.DB_HOST,
             charset: "utf8mb4",
-            port: parseInt(process.env.DB_PORT),
+            port: parseInt(process.env.DB_PORT, 10),
             decimalNumbers: true,
             multipleStatements: true,
         },

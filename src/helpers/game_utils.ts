@@ -1,22 +1,22 @@
-import _ from "lodash";
-import { execSync } from "child_process";
-import dbContext from "../database_context";
-import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
-import GuildPreference from "../structures/guild_preference";
-import { MatchedArtist, QueriedSong } from "../types";
-import { Gender } from "../commands/game_options/gender";
-import { GuessModeType } from "../commands/game_options/guessmode";
+import { PATREON_SUPPORTER_BADGE_ID } from "../constants";
 import { cleanArtistName, cleanSongName } from "../structures/game_round";
-import { AnswerType } from "../commands/game_options/answer";
-import SongSelector from "../structures/song_selector";
-import { LocaleType } from "./localization_manager";
-import { PATREON_SUPPORTER_BADGE, Patron } from "./patreon_manager";
 import { containsHangul, md5Hash } from "./utils";
-import Session from "../structures/session";
+import AnswerType from "../enums/option_types/answer_type";
+import GuessModeType from "../enums/option_types/guess_mode_type";
+import LocaleType from "../enums/locale_type";
+import SongSelector from "../structures/song_selector";
+import State from "../state";
+import _ from "lodash";
+import dbContext from "../database_context";
+import type Gender from "../enums/option_types/gender";
+import type GuildPreference from "../structures/guild_preference";
+import type MatchedArtist from "../interfaces/matched_artist";
+import type Patron from "../interfaces/patron";
+import type QueriedSong from "../interfaces/queried_song";
+import type Session from "../structures/session";
 
-const GAME_SESSION_INACTIVE_THRESHOLD = 30;
-
+const GAME_SESSION_INACTIVE_THRESHOLD = 10;
 const logger = new IPCLogger("game_utils");
 
 interface GroupMatchResults {
@@ -29,7 +29,7 @@ interface GroupMatchResults {
  * @param session - The active Session
  */
 export async function ensureVoiceConnection(session: Session): Promise<void> {
-    const { client } = state;
+    const { client } = State;
     if (session.connection && session.connection.ready) return;
     const connection = await client.joinVoiceChannel(session.voiceChannelID, {
         opusOnly: true,
@@ -64,61 +64,28 @@ export async function getAvailableSongCount(
 
 /** Cleans up inactive GameSessions */
 export async function cleanupInactiveGameSessions(): Promise<void> {
-    const { gameSessions } = state;
+    const { gameSessions } = State;
     const currentDate = Date.now();
     let inactiveSessions = 0;
     const totalSessions = Object.keys(gameSessions).length;
-    for (const guildID of Object.keys(gameSessions)) {
-        const gameSession = gameSessions[guildID];
-        const timeDiffMs = currentDate - gameSession.lastActive;
-        const timeDiffMin = timeDiffMs / (1000 * 60);
-        if (timeDiffMin > GAME_SESSION_INACTIVE_THRESHOLD) {
-            inactiveSessions++;
-            await gameSessions[guildID].endSession();
-        }
-    }
+
+    await Promise.allSettled(
+        Object.keys(gameSessions).map(async (guildID) => {
+            const gameSession = gameSessions[guildID];
+            const timeDiffMs = currentDate - gameSession.lastActive;
+            const timeDiffMin = timeDiffMs / (1000 * 60);
+            if (timeDiffMin > GAME_SESSION_INACTIVE_THRESHOLD) {
+                inactiveSessions++;
+                await gameSessions[guildID].endSession();
+            }
+        })
+    );
 
     if (inactiveSessions > 0) {
         logger.info(
             `Ended ${inactiveSessions} inactive game sessions out of ${totalSessions}`
         );
     }
-}
-
-/**
- * Gets or creates a GuildPreference
- * @param guildID - The Guild ID
- * @returns the correspond guild's GuildPreference
- */
-export async function getGuildPreference(
-    guildID: string
-): Promise<GuildPreference> {
-    const guildPreferences = await dbContext
-        .kmq("guilds")
-        .select("*")
-        .where("guild_id", "=", guildID);
-
-    if (guildPreferences.length === 0) {
-        const guildPreference = GuildPreference.fromGuild(guildID);
-        await dbContext
-            .kmq("guilds")
-            .insert({ guild_id: guildID, join_date: new Date() });
-        return guildPreference;
-    }
-
-    const gameOptionPairs = (
-        await dbContext
-            .kmq("game_options")
-            .select("*")
-            .where({ guild_id: guildID, client_id: process.env.BOT_CLIENT_ID })
-    )
-        .map((x) => ({ [x["option_name"]]: JSON.parse(x["option_value"]) }))
-        .reduce((total, curr) => Object.assign(total, curr), {});
-
-    return GuildPreference.fromGuild(
-        guildPreferences[0].guild_id,
-        gameOptionPairs
-    );
 }
 
 /**
@@ -134,7 +101,6 @@ export async function userBonusIsActive(userId: string): Promise<boolean> {
 }
 
 /**
- * @param userId - The user ID
  * @returns whether the player has bonus active
  */
 export async function activeBonusUsers(): Promise<Set<string>> {
@@ -143,6 +109,30 @@ export async function activeBonusUsers(): Promise<Set<string>> {
         .where("buff_expiry_date", ">", new Date());
 
     return new Set(bonusUsers.map((x) => x.user_id));
+}
+
+/**
+ * Returns a list of similar group names
+ * @param groupName - The group name
+ * @param locale - The locale
+ * @returns - similar group names
+ */
+export async function getSimilarGroupNames(
+    groupName: string,
+    locale: LocaleType
+): Promise<Array<string>> {
+    const similarGroups = await dbContext
+        .kpopVideos("app_kpop_group")
+        .select(["id", "name", "kname"])
+        .whereILike("name", `%${groupName}%`)
+        .orWhereILike("kname", `%${groupName}%`)
+        .orderByRaw("CHAR_LENGTH(name) ASC")
+        .limit(5);
+
+    if (similarGroups.length === 0) return [];
+    return similarGroups.map((x) =>
+        locale === LocaleType.EN ? x["name"] : x["kname"] || x["name"]
+    );
 }
 
 /**
@@ -161,13 +151,24 @@ export async function getMatchingGroupNames(
 
     const matchingGroups = (
         await dbContext
-            .kpopVideos("app_kpop_group")
+            // collab matches
+            .kpopVideos("app_kpop_agrelation")
             .select(["id", "name"])
-            .whereIn("id", [artistIDQuery])
-            .orWhereIn("id_artist1", [artistIDQuery])
-            .orWhereIn("id_artist2", [artistIDQuery])
-            .orWhereIn("id_artist3", [artistIDQuery])
-            .orWhereIn("id_artist4", [artistIDQuery])
+            .join("app_kpop_group", function join() {
+                this.on(
+                    "app_kpop_agrelation.id_subgroup",
+                    "=",
+                    "app_kpop_group.id"
+                );
+            })
+            .whereIn("app_kpop_agrelation.id_artist", [artistIDQuery])
+            .andWhere("app_kpop_group.is_collab", "y")
+            // artist matches
+            .union(function () {
+                this.select(["id", "name"])
+                    .from("app_kpop_group")
+                    .whereIn("app_kpop_group.id", artistIDQuery);
+            })
             .orderBy("name", "ASC")
     ).map((x) => ({ id: x.id, name: x.name }));
 
@@ -186,7 +187,7 @@ export async function getMatchingGroupNames(
         // apply artist aliases for unmatched groups
         for (let i = 0; i < result.unmatchedGroups.length; i++) {
             const groupName = result.unmatchedGroups[i];
-            const matchingAlias = Object.entries(state.aliases.artist).find(
+            const matchingAlias = Object.entries(State.aliases.artist).find(
                 (artistAliasTuple) =>
                     artistAliasTuple[1]
                         .map((x) => cleanArtistName(x))
@@ -412,23 +413,37 @@ export async function getMultipleChoiceOptions(
 }
 
 /**
+ * @param userIDs - A list of user IDs to check
+ * @returns whether at least one player has premium status
+ */
+export async function areUsersPremium(
+    userIDs: Array<string>
+): Promise<boolean> {
+    return !!(await dbContext
+        .kmq("premium_users")
+        .where("active", "=", true)
+        .whereIn("user_id", userIDs)
+        .first());
+}
+
+/**
  * @param userID - The user ID
  * @returns whether the player has premium status
  */
 export async function isUserPremium(userID: string): Promise<boolean> {
-    return !!(await dbContext
-        .kmq("premium_users")
-        .where("user_id", "=", userID)
-        .andWhere("active", "=", true)
-        .first());
+    return areUsersPremium([userID]);
 }
 
 /**
  * @param patrons - The users to grant premium membership
  */
-export function addPremium(patrons: Array<Patron>): void {
-    dbContext.kmq.transaction((trx) => {
-        dbContext
+export async function addPremium(patrons: Array<Patron>): Promise<void> {
+    if (patrons.length === 0) {
+        return;
+    }
+
+    await dbContext.kmq.transaction(async (trx) => {
+        await dbContext
             .kmq("premium_users")
             .insert(
                 patrons.map((x) => ({
@@ -441,12 +456,12 @@ export function addPremium(patrons: Array<Patron>): void {
             .merge()
             .transacting(trx);
 
-        dbContext
-            .kmq("badges")
+        await dbContext
+            .kmq("badges_players")
             .insert(
                 patrons.map((x) => ({
-                    badge_name: PATREON_SUPPORTER_BADGE,
                     user_id: x.discordID,
+                    badge_id: PATREON_SUPPORTER_BADGE_ID,
                 }))
             )
             .onConflict(["user_id", "badge_name"])
@@ -459,35 +474,32 @@ export function addPremium(patrons: Array<Patron>): void {
  * @param userIDs - The users to revoke premium membership from
  */
 export function removePremium(userIDs: string[]): void {
-    dbContext.kmq.transaction((trx) => {
-        dbContext
+    dbContext.kmq.transaction(async (trx) => {
+        await dbContext
             .kmq("premium_users")
             .whereIn("user_id", userIDs)
             .update({ active: false })
             .transacting(trx);
 
-        dbContext
-            .kmq("badges")
+        await dbContext
+            .kmq("badges_players")
             .whereIn("user_id", userIDs)
-            .andWhere("badge_name", "=", PATREON_SUPPORTER_BADGE)
+            .andWhere("badge_id", "=", PATREON_SUPPORTER_BADGE_ID)
             .del()
             .transacting(trx);
     });
 }
 
 /**
- * @param guildID - The guild ID
+ * @param session - The session
  * @param playerID - The player ID
- * @returns whether the current game is a premium game, or the player is premium
+ * @returns whether the current game is a premium game/listening session, or the player is premium
  */
 export async function isPremiumRequest(
-    guildID: string,
+    session: Session,
     playerID: string
 ): Promise<boolean> {
-    return (
-        state.gameSessions[guildID]?.isPremiumGame() ||
-        (await isUserPremium(playerID))
-    );
+    return session?.isPremium || (await isUserPremium(playerID));
 }
 
 /**
@@ -507,13 +519,6 @@ export async function isFirstGameOfDay(userID: string): Promise<boolean> {
 
     if (!player) return true;
     return player["firstGameOfDay"] === 0;
-}
-
-/**
- * @returns KMQ's current version
- */
-export function getKmqCurrentVersion(): string {
-    return execSync("git describe --tags").toString().trim();
 }
 
 /**

@@ -1,12 +1,12 @@
 /* eslint-disable tsdoc/syntax */
-import fs from "fs";
-import { exec } from "child_process";
-import moment from "moment-timezone";
-import crypto from "crypto";
-import _ from "lodash";
-import { state } from "../kmq_worker";
-import LocalizationManager from "./localization_manager";
 import { IPCLogger } from "../logger";
+import { exec } from "child_process";
+import LocalizationManager from "./localization_manager";
+import _ from "lodash";
+import crypto from "crypto";
+import fs from "fs";
+import moment from "moment-timezone";
+import path from "path";
 
 const logger = new IPCLogger("utils");
 
@@ -16,6 +16,7 @@ const logger = new IPCLogger("utils");
  * @returns Promise
  */
 export function delay(delayDuration: number): Promise<void> {
+    // eslint-disable-next-line no-promise-executor-return
     return new Promise((resolve) => setTimeout(resolve, delayDuration));
 }
 
@@ -60,6 +61,19 @@ export function strikethrough(text: string): string {
 }
 
 /**
+ * @param text - Text to escape
+ * @returns text with formatting-disrupting characters escaped
+ */
+export function escapedFormatting(text: string): string {
+    const SPECIAL_CHARACTERS = ["\\", "*", "`", "_", "~", "|", "<", ">"];
+    for (const char of SPECIAL_CHARACTERS) {
+        text = text.replaceAll(char, `\\${char}`);
+    }
+
+    return text;
+}
+
+/**
  * Chunks in an array in subarrays of specified size
  * @param array - The input array
  * @param chunkSize - The size of each chunked array
@@ -99,7 +113,7 @@ export function getAudioDurationInSeconds(songPath: string): Promise<number> {
                     return;
                 }
 
-                resolve(parseInt(stdout));
+                resolve(parseInt(stdout, 10));
             }
         );
     });
@@ -109,8 +123,13 @@ export function getAudioDurationInSeconds(songPath: string): Promise<number> {
  * @param filePath - the file path of the JSON file
  * @returns a Javascript object representation of the file
  */
-export function parseJsonFile(filePath: string): any {
-    return JSON.parse(fs.readFileSync(filePath).toString());
+export async function parseJsonFile(filePath: string): Promise<any> {
+    try {
+        const fileContents = (await fs.promises.readFile(filePath)).toString();
+        return JSON.parse(fileContents);
+    } catch (e) {
+        throw new Error(`Unable to read JSON file at: ${filePath}`);
+    }
 }
 
 /**
@@ -153,7 +172,7 @@ export function weekOfYear(dateObj?: Date): number {
  * @param list - List of arbitrary elements
  * @returns the randomly selected element
  */
-export function chooseRandom(list: Array<any>): any {
+export function chooseRandom<T>(list: Array<T>): T {
     return list[Math.floor(Math.random() * list.length)] || null;
 }
 
@@ -162,16 +181,20 @@ export function chooseRandom(list: Array<any>): any {
  * Requires some list element to have a "weight" property for weighting to function
  * From: https://stackoverflow.com/a/55671924
  * @param list - List of arbitrary elements
+ * @param weightKey - The name of the key to be sorted on
  * @returns the randomly selected element
  */
-export function chooseWeightedRandom(list: Array<any>): any {
+export function chooseWeightedRandom(
+    list: Array<any>,
+    weightKey = "weight"
+): any {
     const weights = [];
     for (let i = 0; i < list.length; i++) {
         const previousWeight = weights[i - 1] || 0;
-        if (!list[i].weight) {
+        if (!list[i][weightKey]) {
             weights[i] = 1 + previousWeight;
         } else {
-            weights[i] = list[i].weight + previousWeight;
+            weights[i] = list[i][weightKey] + previousWeight;
         }
     }
 
@@ -203,7 +226,7 @@ export function friendlyFormattedDate(date: Date, guildID: string): string {
     if (guildID === null) {
         localizer = new LocalizationManager();
     } else {
-        localizer = state.localizer;
+        localizer = LocalizationManager.localizer;
     }
 
     const timeDiffSeconds = (Date.now() - date.getTime()) / 1000;
@@ -398,4 +421,64 @@ export function containsHangul(s: string): boolean {
     return /[\uac00-\ud7af]|[\u1100-\u11ff]|[\u3130-\u318f]|[\ua960-\ua97f]|[\ud7b0-\ud7ff]/giu.test(
         s
     );
+}
+
+/**
+ * @param user - The user (must be some object with username and discriminator fields)
+ * @returns the user's Discord tag
+ */
+export function getUserTag(user: {
+    username: string;
+    discriminator: string;
+}): string {
+    return `${user.username}#${user.discriminator}`;
+}
+
+/**
+ * @param userID - The user ID
+ * @returns a clickable mention to user
+ */
+export function getMention(userID: string): string {
+    return `<@${userID}>`;
+}
+
+/**
+ * @param filePath - The file path
+ * @returns whether the path exists
+ */
+export async function pathExists(filePath: string): Promise<boolean> {
+    try {
+        await fs.promises.access(filePath);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+/**
+ * @returns whether this instance should skip metrics posting
+ */
+export async function isPrimaryInstance(): Promise<boolean> {
+    return pathExists(path.join(__dirname, "../../data/primary"));
+}
+
+/**
+ * @returns whether this instance should skip seed
+ */
+export async function shouldSkipSeed(): Promise<boolean> {
+    return pathExists(path.join(__dirname, "../../data/skip_seed"));
+}
+
+/**
+ * @param url - the URL
+ * @returns whether the URL is valid
+ */
+export function isValidURL(url: string): boolean {
+    try {
+        // eslint-disable-next-line no-new
+        new URL(url);
+        return true;
+    } catch (err) {
+        return false;
+    }
 }

@@ -16,6 +16,8 @@ BEGIN
 		artist_name_en VARCHAR(255) NOT NULL,
 		artist_name_ko VARCHAR(255),
 		artist_aliases VARCHAR(255) NOT NULL,
+		previous_name_en VARCHAR(255),
+		previous_name_ko VARCHAR(255),
 		members ENUM('female','male','coed') NOT NULL,
 		views BIGINT NOT NULL,
 		publishedon DATE NOT NULL,
@@ -41,6 +43,8 @@ BEGIN
 		TRIM(kpop_videos.app_kpop_group.name) AS artist_name_en,
 		TRIM(kpop_videos.app_kpop_group.kname) AS artist_name_ko,
 		kpop_videos.app_kpop_group.alias AS artist_aliases,
+		kpop_videos.app_kpop_group.previous_name AS previous_name_en,
+		kpop_videos.app_kpop_group.previous_kname AS previous_name_ko,
 		kpop_videos.app_kpop_group.members AS members,
 		kpop_videos.app_kpop.views AS views,
 		releasedate as publishedon,
@@ -55,6 +59,7 @@ BEGIN
 	INNER JOIN kmq.cached_song_duration USING (vlink)
 	LEFT JOIN kmq.not_downloaded USING (vlink)
 	WHERE kmq.not_downloaded.vlink IS NULL
+	AND vlink NOT IN (SELECT vlink FROM kmq.dead_links)
 	AND vtype = 'main'
 	AND tags NOT LIKE "%c%"
 	AND vlink IN (SELECT vlink FROM kmq.cached_song_duration);
@@ -73,6 +78,8 @@ BEGIN
 			TRIM(kpop_videos.app_kpop_group.name) AS artist_name_en,
 			TRIM(kpop_videos.app_kpop_group.kname) AS artist_name_ko,
 			kpop_videos.app_kpop_group.alias AS artist_aliases,
+			kpop_videos.app_kpop_group.previous_name AS previous_name_en,
+			kpop_videos.app_kpop_group.previous_kname AS previous_name_ko,
 			kpop_videos.app_kpop_group.members AS members,
 			kpop_videos.app_kpop_audio.views AS views,
 			releasedate as publishedon,
@@ -87,6 +94,7 @@ BEGIN
 		INNER JOIN kmq.cached_song_duration USING (vlink)
 		LEFT JOIN kmq.not_downloaded USING (vlink)
 		WHERE kmq.not_downloaded.vlink IS NULL
+		AND vlink NOT IN (SELECT vlink FROM kmq.dead_links)
 		AND tags NOT LIKE "%c%"
 	) rankedAudioSongs
 	WHERE rank <= maxRank;
@@ -97,6 +105,10 @@ BEGIN
 	DROP TABLE old;
 
 	/* de-duplicate conflicting names */
-	UPDATE kpop_videos.app_kpop_group SET name = concat(name, " (", fname, ")") WHERE name in (SELECT LOWER(name) as name FROM kpop_videos.app_kpop_group GROUP BY LOWER(name) HAVING count(*) > 1);
+	UPDATE kpop_videos.app_kpop_group as a
+	RIGHT JOIN
+	(SELECT LOWER(name) as name, count(*) as c FROM kpop_videos.app_kpop_group GROUP BY LOWER(name) HAVING count(*) > 1 AND name NOT LIKE "%(%)%" ) as b USING (name)
+	SET a.name = concat(a.name, " (", a.fname, ")");
+	
 END //
 DELIMITER ;

@@ -1,25 +1,28 @@
 /* eslint-disable no-return-assign */
-import Eris from "eris";
-import _ from "lodash";
 import * as uuid from "uuid";
+import _ from "lodash";
+import type Eris from "eris";
 
-import { resetSpecial } from "../commands/game_options/special";
-import dbContext from "../database_context";
 import {
+    bold,
+    chunkArray,
+    codeLine,
+    delay,
+    getOrdinalNum,
+    setDifference,
+} from "../helpers/utils";
+import {
+    getCurrentVoiceMembers,
     getDebugLogHeader,
-    sendInfoMessage,
+    getGameInfoMessage,
     getNumParticipants,
     getUserVoiceChannel,
-    sendEndGameMessage,
-    getCurrentVoiceMembers,
-    tryInteractionAcknowledge,
+    sendInfoMessage,
+    sendPaginationedEmbed,
     tryCreateInteractionErrorAcknowledgement,
-    getMention,
-    getGuildLocale,
-    sendEndRoundMessage,
+    tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
 import {
-    getGuildPreference,
     getLocalizedArtistName,
     getLocalizedSongName,
     getMultipleChoiceOptions,
@@ -27,50 +30,46 @@ import {
     isUserPremium,
     userBonusIsActive,
 } from "../helpers/game_utils";
+import State from "../state";
+import dbContext from "../database_context";
+
 import {
-    delay,
-    getOrdinalNum,
-    setDifference,
-    codeLine,
-    chunkArray,
-    chooseRandom,
-} from "../helpers/utils";
-import { state } from "../kmq_worker";
+    CUM_EXP_TABLE,
+    EMBED_FIELDS_PER_PAGE,
+    EMBED_SUCCESS_BONUS_COLOR,
+    EMBED_SUCCESS_COLOR,
+    KmqImages,
+    REVIEW_LINK,
+    SONG_START_DELAY,
+    VOTE_LINK,
+} from "../constants";
 import { IPCLogger } from "../logger";
-import { QueriedSong, GameType } from "../types";
-import GameRound from "./game_round";
-import GuildPreference from "./guild_preference";
-import Scoreboard, { SuccessfulGuessResult } from "./scoreboard";
-import EliminationScoreboard from "./elimination_scoreboard";
-import TeamScoreboard from "./team_scoreboard";
-import { GuessModeType } from "../commands/game_options/guessmode";
-import { getRankNameByLevel } from "../commands/game_commands/profile";
-import EliminationPlayer from "./elimination_player";
-import { KmqImages } from "../constants";
-import MessageContext from "./message_context";
-import KmqMember from "./kmq_member";
-import { MultiGuessType } from "../commands/game_options/multiguess";
-import { AnswerType } from "../commands/game_options/answer";
 import { calculateTotalRoundExp } from "../commands/game_commands/exp";
-import Player from "../structures/player";
-import Session, { SONG_START_DELAY } from "./session";
-import Round from "./round";
+import { getRankNameByLevel } from "../commands/game_commands/profile";
+import AnswerType from "../enums/option_types/answer_type";
+import EliminationPlayer from "./elimination_player";
+import EliminationScoreboard from "./elimination_scoreboard";
+import GameRound from "./game_round";
+import GameType from "../enums/game_type";
+import GuessModeType from "../enums/option_types/guess_mode_type";
+import GuildPreference from "./guild_preference";
+import KmqMember from "./kmq_member";
+import LocalizationManager from "../helpers/localization_manager";
+import MessageContext from "./message_context";
+import MultiGuessType from "../enums/option_types/multiguess_type";
+import Player from "./player";
+import Scoreboard from "./scoreboard";
+import Session from "./session";
+import TeamScoreboard from "./team_scoreboard";
+import type { GuildTextableMessage } from "../types";
+import type GuessResult from "../interfaces/guess_result";
+import type QueriedSong from "../interfaces/queried_song";
+import type Round from "./round";
+import type SuccessfulGuessResult from "../interfaces/success_guess_result";
 
 const MULTIGUESS_DELAY = 1500;
 
 const logger = new IPCLogger("game_session");
-
-const EXP_TABLE = [...Array(1000).keys()].map((level) => {
-    if (level === 0 || level === 1) return 0;
-    return 10 * level ** 2 + 200 * level - 200;
-});
-
-export const CUM_EXP_TABLE = EXP_TABLE.map(
-    (
-        (sum) => (value) =>
-            (sum += value)
-    )(0)
-);
 
 interface LevelUpResult {
     userID: string;
@@ -81,12 +80,6 @@ interface LevelUpResult {
 interface LastGuesser {
     userID: string;
     streak: number;
-}
-
-export interface GuessResult {
-    correct: boolean;
-    error?: boolean;
-    correctGuessers?: Array<KmqMember>;
 }
 
 export default class GameSession extends Session {
@@ -121,14 +114,23 @@ export default class GameSession extends Session {
     private lastGuesser: LastGuesser;
 
     constructor(
+        guildPreference: GuildPreference,
         textChannelID: string,
         voiceChannelID: string,
         guildID: string,
         gameSessionCreator: KmqMember,
         gameType: GameType,
+        isPremium: boolean,
         eliminationLives?: number
     ) {
-        super(textChannelID, voiceChannelID, guildID, gameSessionCreator);
+        super(
+            guildPreference,
+            textChannelID,
+            voiceChannelID,
+            guildID,
+            gameSessionCreator,
+            isPremium
+        );
         this.gameType = gameType;
         this.sessionInitialized = false;
         this.correctGuesses = 0;
@@ -153,37 +155,48 @@ export default class GameSession extends Session {
         this.syncAllVoiceMembers();
     }
 
+    // eslint-disable-next-line class-methods-use-this
+    sessionName(): string {
+        return "Game Session";
+    }
+
     /**
      * Starting a new GameRound
-     * @param guildPreference - The guild's GuildPreference
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
-    async startRound(
-        guildPreference: GuildPreference,
-        messageContext: MessageContext
-    ): Promise<void> {
-        await delay(
-            this.multiguessDelayIsActive(guildPreference)
-                ? SONG_START_DELAY - MULTIGUESS_DELAY
-                : SONG_START_DELAY
-        );
-        if (this.finished || this.round) {
-            return;
+    async startRound(messageContext: MessageContext): Promise<boolean> {
+        if (this.sessionInitialized) {
+            // Only add a delay if the game has already started
+            await delay(
+                this.multiguessDelayIsActive(this.guildPreference)
+                    ? SONG_START_DELAY - MULTIGUESS_DELAY
+                    : SONG_START_DELAY
+            );
         }
 
-        await super.startRound(guildPreference, messageContext);
-        if (guildPreference.isMultipleChoiceMode()) {
-            const locale = getGuildLocale(this.guildID);
-            const randomSong = this.round.song;
+        if (this.finished || this.round) {
+            return false;
+        }
+
+        const startRoundResult = await super.startRound(messageContext);
+
+        if (!startRoundResult) {
+            return false;
+        }
+
+        const round = this.round;
+        if (this.guildPreference.isMultipleChoiceMode()) {
+            const locale = State.getGuildLocale(this.guildID);
+            const randomSong = round.song;
             const correctChoice =
-                guildPreference.gameOptions.guessModeType ===
+                this.guildPreference.gameOptions.guessModeType ===
                 GuessModeType.ARTIST
-                    ? getLocalizedArtistName(this.round.song, locale)
-                    : getLocalizedSongName(this.round.song, locale, false);
+                    ? getLocalizedArtistName(round.song, locale)
+                    : getLocalizedSongName(round.song, locale, false);
 
             const wrongChoices = await getMultipleChoiceOptions(
-                guildPreference.gameOptions.answerType,
-                guildPreference.gameOptions.guessModeType,
+                this.guildPreference.gameOptions.answerType,
+                this.guildPreference.gameOptions.guessModeType,
                 randomSong.members,
                 correctChoice,
                 randomSong.artistID,
@@ -193,7 +206,7 @@ export default class GameSession extends Session {
             let buttons: Array<Eris.InteractionButton> = [];
             for (const choice of wrongChoices) {
                 const id = uuid.v4();
-                this.round.interactionIncorrectAnswerUUIDs[id] = 0;
+                round.interactionIncorrectAnswerUUIDs[id] = 0;
                 buttons.push({
                     type: 2,
                     style: 1,
@@ -202,18 +215,18 @@ export default class GameSession extends Session {
                 });
             }
 
-            this.round.interactionCorrectAnswerUUID = uuid.v4();
+            round.interactionCorrectAnswerUUID = uuid.v4();
             buttons.push({
                 type: 2,
                 style: 1,
                 label: correctChoice.substring(0, 70),
-                custom_id: this.round.interactionCorrectAnswerUUID,
+                custom_id: round.interactionCorrectAnswerUUID,
             });
 
             buttons = _.shuffle(buttons);
 
             let components: Array<Eris.ActionRow>;
-            switch (guildPreference.gameOptions.answerType) {
+            switch (this.guildPreference.gameOptions.answerType) {
                 case AnswerType.MULTIPLE_CHOICE_EASY:
                     components = [
                         {
@@ -238,23 +251,23 @@ export default class GameSession extends Session {
                     break;
             }
 
-            this.round.interactionComponents = components;
+            round.interactionComponents = components;
 
-            this.round.interactionMessage = await sendInfoMessage(
+            round.interactionMessage = await sendInfoMessage(
                 new MessageContext(this.textChannelID),
                 {
-                    title: state.localizer.translate(
+                    title: LocalizationManager.localizer.translate(
                         this.guildID,
                         "misc.interaction.guess.title",
                         {
                             songOrArtist:
-                                guildPreference.gameOptions.guessModeType ===
-                                GuessModeType.ARTIST
-                                    ? state.localizer.translate(
+                                this.guildPreference.gameOptions
+                                    .guessModeType === GuessModeType.ARTIST
+                                    ? LocalizationManager.localizer.translate(
                                           this.guildID,
                                           "misc.artist"
                                       )
-                                    : state.localizer.translate(
+                                    : LocalizationManager.localizer.translate(
                                           this.guildID,
                                           "misc.song"
                                       ),
@@ -265,16 +278,16 @@ export default class GameSession extends Session {
                 }
             );
         }
+
+        return true;
     }
 
     /**
      * Ends an active GameRound
-     * @param guildPreference - The GuildPreference
      * @param messageContext - An object containing relevant parts of Eris.Message
      * @param guessResult - Whether the round ended via a correct guess (includes exp gain), or other (timeout, error, etc)
      */
     async endRound(
-        guildPreference: GuildPreference,
         messageContext?: MessageContext,
         guessResult?: GuessResult
     ): Promise<void> {
@@ -304,19 +317,17 @@ export default class GameSession extends Session {
             this.guessTimes.push(timePlayed);
             await this.updateScoreboard(
                 guessResult,
-                guildPreference,
+                this.guildPreference,
                 timePlayed,
                 messageContext
             );
-        } else {
-            if (!guessResult.error) {
-                this.lastGuesser = null;
-                if (this.gameType === GameType.ELIMINATION) {
-                    const eliminationScoreboard = this
-                        .scoreboard as EliminationScoreboard;
+        } else if (!guessResult.error) {
+            this.lastGuesser = null;
+            if (this.gameType === GameType.ELIMINATION) {
+                const eliminationScoreboard = this
+                    .scoreboard as EliminationScoreboard;
 
-                    eliminationScoreboard.decrementAllLives();
-                }
+                eliminationScoreboard.decrementAllLives();
             }
         }
 
@@ -328,25 +339,76 @@ export default class GameSession extends Session {
             timePlayed
         );
 
-        const remainingDuration = this.getRemainingDuration(guildPreference);
+        const remainingDuration = this.getRemainingDuration(
+            this.guildPreference
+        );
+
         if (messageContext) {
-            const endRoundMessage = await sendEndRoundMessage(
+            let roundResultIDs: Array<string>;
+            const playerRoundResults = round.playerRoundResults;
+
+            if (this.scoreboard instanceof TeamScoreboard) {
+                const teamScoreboard = this.scoreboard as TeamScoreboard;
+                roundResultIDs = playerRoundResults.map(
+                    (x) => teamScoreboard.getTeamOfPlayer(x.player.id).id
+                );
+            } else {
+                roundResultIDs = playerRoundResults.map((x) => x.player.id);
+            }
+
+            const useLargerScoreboard =
+                this.scoreboard.shouldUseLargerScoreboard();
+
+            const fields: Eris.EmbedField[] =
+                this.scoreboard.getScoreboardEmbedFields(
+                    false,
+                    true,
+                    messageContext.guildID,
+                    roundResultIDs
+                );
+
+            let scoreboardTitle = "";
+            if (!useLargerScoreboard) {
+                scoreboardTitle = "\n\n";
+                scoreboardTitle += bold(
+                    LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "command.score.scoreboardTitle"
+                    )
+                );
+            }
+
+            const description = `${round.getEndRoundDescription(
                 messageContext,
-                this.scoreboard,
-                this,
-                guildPreference.gameOptions.guessModeType,
-                guildPreference.isMultipleChoiceMode(),
-                remainingDuration,
-                this.songSelector.getUniqueSongCounter(guildPreference)
+                this.songSelector.getUniqueSongCounter(this.guildPreference),
+                playerRoundResults
+            )}${scoreboardTitle}`;
+
+            const correctGuess = playerRoundResults.length > 0;
+            const embedColor = round.getEndRoundColor(
+                correctGuess,
+                await userBonusIsActive(
+                    playerRoundResults[0]?.player.id ?? messageContext.author.id
+                )
             );
 
-            // if message fails to send, no ID is returned
-            round.endRoundMessageID = endRoundMessage?.id;
+            const endRoundMessage = await this.sendRoundMessage(
+                messageContext,
+                fields,
+                round,
+                description,
+                embedColor,
+                correctGuess && !this.guildPreference.isMultipleChoiceMode(),
+                remainingDuration
+            );
+
+            round.roundMessageID = endRoundMessage?.id;
         }
 
-        await super.endRound(guildPreference, messageContext);
+        this.updateBookmarkSongList();
+        await super.endRound(messageContext);
 
-        if (this.scoreboard.gameFinished(guildPreference)) {
+        if (this.scoreboard.gameFinished(this.guildPreference)) {
             this.endSession();
         }
     }
@@ -369,7 +431,7 @@ export default class GameSession extends Session {
                         .getPlayers()
                         .sort((a, b) => b.getScore() - a.getScore())
                         .map((x) => ({
-                            name: x.name,
+                            name: x.getName(),
                             id: x.id,
                             score: x.getDisplayedScore(),
                         }))
@@ -378,39 +440,44 @@ export default class GameSession extends Session {
         }
 
         const leveledUpPlayers: Array<LevelUpResult> = [];
+
         // commit player stats
-        for (const participant of this.scoreboard.getPlayerIDs()) {
-            await this.ensurePlayerStat(participant);
-            await GameSession.incrementPlayerGamesPlayed(participant);
-            const playerScore = this.scoreboard.getPlayerScore(participant);
-            if (playerScore > 0) {
-                await GameSession.incrementPlayerSongsGuessed(
-                    participant,
-                    playerScore
-                );
-            }
-
-            const playerExpGain = this.scoreboard.getPlayerExpGain(participant);
-            let levelUpResult: LevelUpResult;
-            if (playerExpGain > 0) {
-                levelUpResult = await GameSession.incrementPlayerExp(
-                    participant,
-                    playerExpGain
-                );
-                if (levelUpResult) {
-                    leveledUpPlayers.push(levelUpResult);
+        await Promise.allSettled(
+            this.scoreboard.getPlayerIDs().map(async (participant) => {
+                await this.ensurePlayerStat(participant);
+                await GameSession.incrementPlayerGamesPlayed(participant);
+                const playerScore = this.scoreboard.getPlayerScore(participant);
+                if (playerScore > 0) {
+                    await GameSession.incrementPlayerSongsGuessed(
+                        participant,
+                        playerScore
+                    );
                 }
-            }
 
-            await GameSession.insertPerSessionStats(
-                participant,
-                playerScore,
-                playerExpGain,
-                levelUpResult
-                    ? levelUpResult.endLevel - levelUpResult.startLevel
-                    : 0
-            );
-        }
+                const playerExpGain =
+                    this.scoreboard.getPlayerExpGain(participant);
+
+                let levelUpResult: LevelUpResult;
+                if (playerExpGain > 0) {
+                    levelUpResult = await GameSession.incrementPlayerExp(
+                        participant,
+                        playerExpGain
+                    );
+                    if (levelUpResult) {
+                        leveledUpPlayers.push(levelUpResult);
+                    }
+                }
+
+                await GameSession.insertPerSessionStats(
+                    participant,
+                    playerScore,
+                    playerExpGain,
+                    levelUpResult
+                        ? levelUpResult.endLevel - levelUpResult.startLevel
+                        : 0
+                );
+            })
+        );
 
         // send level up message
         if (leveledUpPlayers.length > 0) {
@@ -421,11 +488,13 @@ export default class GameSession extends Session {
                         b.endLevel - b.startLevel - (a.endLevel - a.startLevel)
                 )
                 .map((leveledUpPlayer) =>
-                    state.localizer.translate(
+                    LocalizationManager.localizer.translate(
                         this.guildID,
                         "misc.levelUp.entry",
                         {
-                            user: getMention(leveledUpPlayer.userID),
+                            user: this.scoreboard.getPlayerDisplayedName(
+                                leveledUpPlayer.userID
+                            ),
                             startLevel: codeLine(
                                 String(leveledUpPlayer.startLevel)
                             ),
@@ -445,7 +514,7 @@ export default class GameSession extends Session {
 
             if (leveledUpPlayers.length > 10) {
                 levelUpMessages.push(
-                    state.localizer.translate(
+                    LocalizationManager.localizer.translate(
                         this.guildID,
                         "misc.andManyOthers"
                     )
@@ -453,7 +522,7 @@ export default class GameSession extends Session {
             }
 
             sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: state.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     this.guildID,
                     "misc.levelUp.title"
                 ),
@@ -482,13 +551,12 @@ export default class GameSession extends Session {
         });
 
         // commit session's song plays and correct guesses
-        const guildPreference = await getGuildPreference(this.guildID);
-        if (!guildPreference.isMultipleChoiceMode()) {
+        if (!this.guildPreference.isMultipleChoiceMode()) {
             await this.storeSongStats();
         }
 
         await super.endSession();
-        await sendEndGameMessage(this);
+        await this.sendEndGameMessage();
 
         logger.info(
             `gid: ${this.guildID} | Game session ended. rounds_played = ${this.roundsPlayed}. session_length = ${sessionLength}. gameType = ${this.gameType}`
@@ -509,33 +577,31 @@ export default class GameSession extends Session {
         if (!this.round) return;
         if (!this.guessEligible(messageContext)) return;
 
-        const guildPreference = await getGuildPreference(this.guildID);
-
+        const round = this.round;
         const pointsEarned = this.checkGuess(
             messageContext.author.id,
             guess,
-            guildPreference.gameOptions.guessModeType,
-            guildPreference.isMultipleChoiceMode(),
-            guildPreference.typosAllowed()
+            this.guildPreference.gameOptions.guessModeType,
+            this.guildPreference.isMultipleChoiceMode(),
+            this.guildPreference.typosAllowed()
         );
 
         if (pointsEarned > 0) {
-            if (this.round.finished) {
+            if (round.finished) {
                 return;
             }
 
-            this.round.finished = true;
+            round.finished = true;
             await delay(
-                this.multiguessDelayIsActive(guildPreference)
+                this.multiguessDelayIsActive(this.guildPreference)
                     ? MULTIGUESS_DELAY
                     : 0
             );
-            if (!this.round) return;
 
             // mark round as complete, so no more guesses can go through
-            await this.endRound(guildPreference, messageContext, {
+            await this.endRound(messageContext, {
                 correct: true,
-                correctGuessers: this.round.correctGuessers,
+                correctGuessers: round.correctGuessers,
             });
             this.correctGuesses++;
 
@@ -550,9 +616,8 @@ export default class GameSession extends Session {
                 .where("guild_id", this.guildID)
                 .increment("songs_guessed", 1);
 
-            this.startRound(guildPreference, messageContext);
-        } else if (guildPreference.isMultipleChoiceMode()) {
-            if (!this.round) return;
+            this.startRound(messageContext);
+        } else if (this.guildPreference.isMultipleChoiceMode()) {
             if (
                 setDifference(
                     [
@@ -562,19 +627,15 @@ export default class GameSession extends Session {
                             )
                         ),
                     ],
-                    [...this.round.incorrectMCGuessers]
+                    [...round.incorrectMCGuessers]
                 ).size === 0
             ) {
                 await this.endRound(
-                    guildPreference,
                     new MessageContext(this.textChannelID, null, this.guildID),
                     { correct: false }
                 );
 
-                this.startRound(
-                    await getGuildPreference(this.guildID),
-                    messageContext
-                );
+                this.startRound(messageContext);
             }
         }
     }
@@ -583,9 +644,21 @@ export default class GameSession extends Session {
         return this.correctGuesses;
     }
 
+    // eslint-disable-next-line class-methods-use-this
+    isGameSession(): this is GameSession {
+        return true;
+    }
+
     /** Updates owner to the first player to join the game that didn't leave VC */
-    updateOwner(): Promise<void> {
-        const voiceMembers = getCurrentVoiceMembers(this.voiceChannelID);
+    updateOwner(): void {
+        if (this.finished) {
+            return;
+        }
+
+        const voiceMembers = getCurrentVoiceMembers(this.voiceChannelID).filter(
+            (x) => x.id !== process.env.BOT_CLIENT_ID
+        );
+
         const voiceMemberIDs = new Set(voiceMembers.map((x) => x.id));
         if (voiceMemberIDs.has(this.owner.id) || voiceMemberIDs.size === 0) {
             return;
@@ -595,58 +668,37 @@ export default class GameSession extends Session {
             .getPlayerIDs()
             .filter((p) => voiceMemberIDs.has(p));
 
-        let newOwnerID: string;
-        if (participantsInVC.length > 0) {
-            // Pick the first participant still in VC
-            newOwnerID = participantsInVC[0];
-        } else {
-            // The VC only contains members who haven't participated yet
-            newOwnerID = chooseRandom(voiceMembers).id;
-        }
+        // Pick the first participant still in VC
+        const newOwnerID = participantsInVC[0];
 
-        this.owner = KmqMember.fromUser(
-            voiceMembers.find((x) => x.id === newOwnerID)
-        );
+        this.owner = new KmqMember(newOwnerID);
 
-        sendInfoMessage(new MessageContext(this.textChannelID), {
-            title: state.localizer.translate(
-                this.guildID,
-                "misc.gameOwnerChanged.title"
-            ),
-            description: state.localizer.translate(
-                this.guildID,
-                "misc.gameOwnerChanged.description",
-                {
-                    newGameOwner: getMention(this.owner.id),
-                    forcehintCommand: `\`${process.env.BOT_PREFIX}forcehint\``,
-                    forceskipCommand: `\`${process.env.BOT_PREFIX}forceskip\``,
-                }
-            ),
-            thumbnailUrl: KmqImages.LISTENING,
-        });
+        super.updateOwner();
     }
 
-    async handleMultipleChoiceInteraction(
-        interaction: Eris.ComponentInteraction,
+    async handleComponentInteraction(
+        interaction: Eris.ComponentInteraction<Eris.TextableChannel>,
         messageContext: MessageContext
     ): Promise<void> {
-        if (!this.round) {
+        if (!this.round) return;
+        if (
+            !this.handleInSessionInteractionFailures(
+                interaction,
+                messageContext
+            )
+        ) {
             return;
         }
+
+        const round = this.round;
 
         if (
-            !getCurrentVoiceMembers(this.voiceChannelID)
-                .map((x) => x.id)
-                .includes(interaction.member.id)
+            round.incorrectMCGuessers.has(interaction.member.id) ||
+            !this.guessEligible(messageContext)
         ) {
-            tryInteractionAcknowledge(interaction);
-            return;
-        }
-
-        if (this.round.incorrectMCGuessers.has(interaction.member.id)) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                state.localizer.translate(
+                LocalizationManager.localizer.translate(
                     this.guildID,
                     "misc.failure.interaction.alreadyEliminated"
                 )
@@ -654,32 +706,17 @@ export default class GameSession extends Session {
             return;
         }
 
-        if (!this.round.isValidInteractionGuess(interaction.data.custom_id)) {
+        if (!round.isCorrectInteractionAnswer(interaction.data.custom_id)) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                state.localizer.translate(
-                    this.guildID,
-                    "misc.failure.interaction.optionFromPreviousRound"
-                )
-            );
-            return;
-        }
-
-        if (
-            !this.round.isCorrectInteractionAnswer(interaction.data.custom_id)
-        ) {
-            tryCreateInteractionErrorAcknowledgement(
-                interaction,
-                state.localizer.translate(
+                LocalizationManager.localizer.translate(
                     this.guildID,
                     "misc.failure.interaction.eliminated"
                 )
             );
 
-            this.round.incorrectMCGuessers.add(interaction.member.id);
-            this.round.interactionIncorrectAnswerUUIDs[
-                interaction.data.custom_id
-            ]++;
+            round.incorrectMCGuessers.add(interaction.member.id);
+            round.interactionIncorrectAnswerUUIDs[interaction.data.custom_id]++;
 
             // Add the user as a participant
             this.guessSong(messageContext, "");
@@ -688,48 +725,16 @@ export default class GameSession extends Session {
 
         tryInteractionAcknowledge(interaction);
 
-        const guildPreference = await getGuildPreference(
+        const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
-        if (!this.round) return;
         this.guessSong(
             messageContext,
             guildPreference.gameOptions.guessModeType !== GuessModeType.ARTIST
-                ? this.round.song.songName
-                : this.round.song.artistName
+                ? round.song.songName
+                : round.song.artistName
         );
-    }
-
-    /**
-     * The game has changed its premium state, so update filtered songs/remove ,special
-     */
-    async updatePremiumStatus(): Promise<void> {
-        await this.reloadSongs(await getGuildPreference(this.guildID));
-
-        const guildPreference = await getGuildPreference(this.guildID);
-        if (
-            !this.isPremiumGame() &&
-            this.guildID !== process.env.DEBUG_SERVER_ID &&
-            guildPreference.gameOptions.specialType
-        ) {
-            await resetSpecial(
-                guildPreference,
-                new MessageContext(this.textChannelID),
-                true
-            );
-        }
-    }
-
-    /**
-     * Whether the current game has premium features
-     * @returns whether the game is premium
-     */
-    isPremiumGame(): boolean {
-        return this.scoreboard
-            .getPlayers()
-            .filter((x) => x.inVC)
-            .some((x) => x.premium);
     }
 
     /**
@@ -751,6 +756,7 @@ export default class GameSession extends Session {
                 this.gameType === GameType.ELIMINATION
                     ? EliminationPlayer.fromUserID(
                           userID,
+                          this.guildID,
                           (
                               this.scoreboard as EliminationScoreboard
                           ).getLivesOfWeakestPlayer(),
@@ -759,6 +765,7 @@ export default class GameSession extends Session {
                       )
                     : Player.fromUserID(
                           userID,
+                          this.guildID,
                           0,
                           await isFirstGameOfDay(userID),
                           await isUserPremium(userID)
@@ -777,33 +784,232 @@ export default class GameSession extends Session {
             this.voiceChannelID
         ).map((x) => x.id);
 
-        for (const player of this.scoreboard
-            .getPlayerIDs()
-            .filter((x) => !currentVoiceMembers.includes(x))) {
-            await this.setPlayerInVC(player, false);
-        }
+        await Promise.allSettled(
+            this.scoreboard
+                .getPlayerIDs()
+                .filter((x) => !currentVoiceMembers.includes(x))
+                .map(async (player) => {
+                    await this.setPlayerInVC(player, false);
+                })
+        );
 
         if (this.gameType === GameType.TEAMS) {
             // Players join teams manually with ,join
             return;
         }
 
-        for (const player of currentVoiceMembers.filter(
-            (x) => x !== process.env.BOT_CLIENT_ID
-        )) {
-            const firstGameOfDay = await isFirstGameOfDay(player);
-            const premium = await isUserPremium(player);
-            this.scoreboard.addPlayer(
-                this.gameType === GameType.ELIMINATION
-                    ? EliminationPlayer.fromUserID(
-                          player,
-                          (this.scoreboard as EliminationScoreboard)
-                              .startingLives,
-                          firstGameOfDay,
-                          premium
-                      )
-                    : Player.fromUserID(player, 0, firstGameOfDay, premium)
+        await Promise.allSettled(
+            currentVoiceMembers
+                .filter((x) => x !== process.env.BOT_CLIENT_ID)
+                .map(async (player) => {
+                    const firstGameOfDay = await isFirstGameOfDay(player);
+                    const premium = await isUserPremium(player);
+                    this.scoreboard.addPlayer(
+                        this.gameType === GameType.ELIMINATION
+                            ? EliminationPlayer.fromUserID(
+                                  player,
+                                  this.guildID,
+                                  (this.scoreboard as EliminationScoreboard)
+                                      .startingLives,
+                                  firstGameOfDay,
+                                  premium
+                              )
+                            : Player.fromUserID(
+                                  player,
+                                  this.guildID,
+                                  0,
+                                  firstGameOfDay,
+                                  premium
+                              )
+                    );
+                })
+        );
+    }
+
+    /**
+     * Sends an embed displaying the scoreboard of the GameSession
+     * @param message - The Message object
+     * @returns the message
+     */
+    sendScoreboardMessage(
+        message: GuildTextableMessage
+    ): Promise<Eris.Message> {
+        const winnersFieldSubsets = chunkArray(
+            this.scoreboard.getScoreboardEmbedSingleColumn(true, true),
+            EMBED_FIELDS_PER_PAGE
+        );
+
+        let footerText = LocalizationManager.localizer.translate(
+            message.guildID,
+            "misc.classic.yourScore",
+            {
+                score: String(
+                    this.scoreboard.getPlayerDisplayedScore(
+                        message.author.id,
+                        false
+                    )
+                ),
+            }
+        );
+
+        if (this.gameType === GameType.ELIMINATION) {
+            const eliminationScoreboard = this
+                .scoreboard as EliminationScoreboard;
+
+            footerText = LocalizationManager.localizer.translate(
+                message.guildID,
+                "misc.elimination.yourLives",
+                {
+                    lives: String(
+                        eliminationScoreboard.getPlayerLives(message.author.id)
+                    ),
+                }
             );
+        } else if (this.gameType === GameType.TEAMS) {
+            const teamScoreboard = this.scoreboard as TeamScoreboard;
+            footerText = LocalizationManager.localizer.translate(
+                message.guildID,
+                "misc.team.yourTeamScore",
+                {
+                    teamScore: String(
+                        teamScoreboard
+                            .getTeamOfPlayer(message.author.id)
+                            .getScore()
+                    ),
+                }
+            );
+            footerText += "\n";
+            footerText += LocalizationManager.localizer.translate(
+                message.guildID,
+                "misc.team.yourScore",
+                {
+                    score: String(
+                        teamScoreboard.getPlayerScore(message.author.id)
+                    ),
+                }
+            );
+        }
+
+        const embeds: Array<Eris.EmbedOptions> = winnersFieldSubsets.map(
+            (winnersFieldSubset) => ({
+                color: EMBED_SUCCESS_COLOR,
+                title: LocalizationManager.localizer.translate(
+                    message.guildID,
+                    "command.score.scoreboardTitle"
+                ),
+                fields: winnersFieldSubset,
+                footer: {
+                    text: footerText,
+                },
+            })
+        );
+
+        return sendPaginationedEmbed(message, embeds);
+    }
+
+    /**
+     * Sends an embed displaying the winner of the session as well as the scoreboard
+     */
+    async sendEndGameMessage(): Promise<void> {
+        const footerText = LocalizationManager.localizer.translate(
+            this.guildID,
+            "misc.inGame.songsCorrectlyGuessed",
+            {
+                songCount: `${this.getCorrectGuesses()}/${this.getRoundsPlayed()}`,
+            }
+        );
+
+        if (this.scoreboard.getWinners().length === 0) {
+            await sendInfoMessage(new MessageContext(this.textChannelID), {
+                title: LocalizationManager.localizer.translate(
+                    this.guildID,
+                    "misc.inGame.noWinners"
+                ),
+                footerText,
+                thumbnailUrl: KmqImages.NOT_IMPRESSED,
+            });
+        } else {
+            const winners = this.scoreboard.getWinners();
+            const useLargerScoreboard =
+                this.scoreboard.shouldUseLargerScoreboard();
+
+            const fields = this.scoreboard.getScoreboardEmbedFields(
+                this.gameType !== GameType.TEAMS,
+                false,
+                this.guildID
+            );
+
+            const endGameMessage = await getGameInfoMessage(this.guildID);
+
+            if (endGameMessage) {
+                fields.push({
+                    name: LocalizationManager.localizer.translate(
+                        this.guildID,
+                        endGameMessage.title
+                    ),
+                    value: endGameMessage.message,
+                    inline: false,
+                });
+            }
+
+            await sendInfoMessage(new MessageContext(this.textChannelID), {
+                color:
+                    this.gameType !== GameType.TEAMS &&
+                    (await userBonusIsActive(winners[0].id))
+                        ? EMBED_SUCCESS_BONUS_COLOR
+                        : EMBED_SUCCESS_COLOR,
+                description: !useLargerScoreboard
+                    ? bold(
+                          LocalizationManager.localizer.translate(
+                              this.guildID,
+                              "command.score.scoreboardTitle"
+                          )
+                      )
+                    : null,
+                thumbnailUrl: winners[0].getAvatarURL(),
+                title: `🎉 ${this.scoreboard.getWinnerMessage(
+                    this.guildID
+                )} 🎉`,
+                fields,
+                footerText,
+                components: [
+                    {
+                        type: 1,
+                        components: [
+                            {
+                                style: 5,
+                                url: VOTE_LINK,
+                                type: 2 as const,
+                                emoji: { name: "✅" },
+                                label: LocalizationManager.localizer.translate(
+                                    this.guildID,
+                                    "misc.interaction.vote"
+                                ),
+                            },
+                            {
+                                style: 5,
+                                url: REVIEW_LINK,
+                                type: 2 as const,
+                                emoji: { name: "📖" },
+                                label: LocalizationManager.localizer.translate(
+                                    this.guildID,
+                                    "misc.interaction.leaveReview"
+                                ),
+                            },
+                            {
+                                style: 5,
+                                url: "https://discord.gg/RCuzwYV",
+                                type: 2,
+                                emoji: { name: "🎵" },
+                                label: LocalizationManager.localizer.translate(
+                                    this.guildID,
+                                    "misc.interaction.officialKmqServer"
+                                ),
+                            },
+                        ],
+                    },
+                ],
+            });
         }
     }
 
@@ -836,17 +1042,18 @@ export default class GameSession extends Session {
         typosAllowed = false
     ): number {
         if (!this.round) return 0;
-        if (multipleChoiceMode && this.round.incorrectMCGuessers.has(userID))
+        const round = this.round;
+        if (multipleChoiceMode && round.incorrectMCGuessers.has(userID))
             return 0;
 
-        const pointsAwarded = this.round.checkGuess(
+        const pointsAwarded = round.checkGuess(
             guess,
             guessModeType,
             typosAllowed
         );
 
         if (pointsAwarded) {
-            this.round.userCorrect(userID, pointsAwarded);
+            round.userCorrect(userID, pointsAwarded);
         }
 
         return pointsAwarded;
@@ -1060,37 +1267,45 @@ export default class GameSession extends Session {
      * Stores song metadata in the database
      */
     private async storeSongStats(): Promise<void> {
-        for (const vlink of Object.keys(this.songStats)) {
-            await dbContext
-                .kmq("song_metadata")
-                .insert({
-                    vlink,
-                    correct_guesses: 0,
-                    rounds_played: 0,
-                    skip_count: 0,
-                    hint_count: 0,
-                    time_to_guess_ms: 0,
-                    time_played_ms: 0,
-                })
-                .onConflict("vlink")
-                .ignore();
+        await Promise.allSettled(
+            Object.keys(this.songStats).map(async (vlink) => {
+                await dbContext
+                    .kmq("song_metadata")
+                    .insert({
+                        vlink,
+                        correct_guesses: 0,
+                        rounds_played: 0,
+                        skip_count: 0,
+                        hint_count: 0,
+                        time_to_guess_ms: 0,
+                        time_played_ms: 0,
+                    })
+                    .onConflict("vlink")
+                    .ignore();
 
-            await dbContext
-                .kmq("song_metadata")
-                .where("vlink", "=", vlink)
-                .increment(
-                    "correct_guesses",
-                    this.songStats[vlink].correctGuesses
-                )
-                .increment("rounds_played", this.songStats[vlink].roundsPlayed)
-                .increment("skip_count", this.songStats[vlink].skipCount)
-                .increment("hint_count", this.songStats[vlink].hintCount)
-                .increment(
-                    "time_to_guess_ms",
-                    this.songStats[vlink].timeToGuess
-                )
-                .increment("time_played_ms", this.songStats[vlink].timePlayed);
-        }
+                await dbContext
+                    .kmq("song_metadata")
+                    .where("vlink", "=", vlink)
+                    .increment(
+                        "correct_guesses",
+                        this.songStats[vlink].correctGuesses
+                    )
+                    .increment(
+                        "rounds_played",
+                        this.songStats[vlink].roundsPlayed
+                    )
+                    .increment("skip_count", this.songStats[vlink].skipCount)
+                    .increment("hint_count", this.songStats[vlink].hintCount)
+                    .increment(
+                        "time_to_guess_ms",
+                        this.songStats[vlink].timeToGuess
+                    )
+                    .increment(
+                        "time_played_ms",
+                        this.songStats[vlink].timePlayed
+                    );
+            })
+        );
     }
 
     /**
@@ -1124,14 +1339,16 @@ export default class GameSession extends Session {
         messageContext: MessageContext
     ): Promise<void> {
         // update scoreboard
+        const round = this.round;
+        const lastGuesserStreak = this.lastGuesser.streak;
         const playerRoundResults = await Promise.all(
             guessResult.correctGuessers.map(async (correctGuesser, idx) => {
                 const guessPosition = idx + 1;
                 const expGain = await calculateTotalRoundExp(
                     guildPreference,
-                    this.round,
+                    round,
                     getNumParticipants(this.voiceChannelID),
-                    this.lastGuesser.streak,
+                    lastGuesserStreak,
                     timePlayed,
                     guessPosition,
                     await userBonusIsActive(correctGuesser.id),
@@ -1140,12 +1357,12 @@ export default class GameSession extends Session {
 
                 let streak = 0;
                 if (idx === 0) {
-                    streak = this.lastGuesser.streak;
+                    streak = lastGuesserStreak;
                     logger.info(
                         `${getDebugLogHeader(messageContext)}, uid: ${
                             correctGuesser.id
                         } | Song correctly guessed. song = ${
-                            this.round.song.songName
+                            round.song.songName
                         }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
                     );
                 } else {
@@ -1156,7 +1373,7 @@ export default class GameSession extends Session {
                         } | Song correctly guessed ${getOrdinalNum(
                             guessPosition
                         )}. song = ${
-                            this.round.song.songName
+                            round.song.songName
                         }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
                     );
                 }
@@ -1173,7 +1390,7 @@ export default class GameSession extends Session {
             })
         );
 
-        this.round.playerRoundResults = playerRoundResults;
+        round.playerRoundResults = playerRoundResults;
         const scoreboardUpdatePayload: SuccessfulGuessResult[] =
             playerRoundResults.map((x) => ({
                 userID: x.player.id,

@@ -1,15 +1,18 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
-import { IPCLogger } from "../../logger";
-import { GameOption } from "../../types";
-import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import GameOption from "../../enums/game_option_name";
+import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("duration");
 
@@ -39,20 +42,20 @@ export default class DurationCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "duration",
-        description: state.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.duration.help.description"
         ),
-        usage: `,duration [${state.localizer.translate(
+        usage: `,duration [${LocalizationManager.localizer.translate(
             guildID,
             "command.duration.help.usage.minutes"
         )}]`,
         examples: [
             {
                 example: "`,duration 15`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.duration.help.example.set",
                     {
@@ -62,7 +65,7 @@ export default class DurationCommand implements BaseCommand {
             },
             {
                 example: "`,duration 5 add`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.duration.help.example.increment",
                     {
@@ -72,7 +75,7 @@ export default class DurationCommand implements BaseCommand {
             },
             {
                 example: "`,duration 5 remove`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.duration.help.example.decrement",
                     {
@@ -82,7 +85,7 @@ export default class DurationCommand implements BaseCommand {
             },
             {
                 example: "`,duration`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.duration.help.example.reset"
                 ),
@@ -92,10 +95,14 @@ export default class DurationCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.DURATION);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.DURATION, reset: true }]
@@ -105,7 +112,7 @@ export default class DurationCommand implements BaseCommand {
         }
 
         let duration: number;
-        const durationDelta = parseInt(parsedMessage.components[0]);
+        const durationDelta = parseInt(parsedMessage.components[0], 10);
         if (parsedMessage.components[1]) {
             const action = parsedMessage.components[1] as DurationAction;
             const currentDuration = guildPreference.gameOptions.duration;
@@ -118,11 +125,11 @@ export default class DurationCommand implements BaseCommand {
             } else if (action === DurationAction.REMOVE) {
                 if (!guildPreference.isDurationSet()) {
                     sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: state.localizer.translate(
+                        title: LocalizationManager.localizer.translate(
                             message.guildID,
                             "command.duration.failure.removingDuration.title"
                         ),
-                        description: state.localizer.translate(
+                        description: LocalizationManager.localizer.translate(
                             message.guildID,
                             "command.duration.failure.removingDuration.notSet.description"
                         ),
@@ -133,11 +140,11 @@ export default class DurationCommand implements BaseCommand {
                 duration = currentDuration - durationDelta;
                 if (duration < 2) {
                     sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: state.localizer.translate(
+                        title: LocalizationManager.localizer.translate(
                             message.guildID,
                             "command.duration.failure.removingDuration.title"
                         ),
-                        description: state.localizer.translate(
+                        description: LocalizationManager.localizer.translate(
                             message.guildID,
                             "command.duration.failure.removingDuration.tooShort.description"
                         ),
@@ -146,11 +153,12 @@ export default class DurationCommand implements BaseCommand {
                 }
             }
         } else {
-            duration = parseInt(parsedMessage.components[0]);
+            duration = parseInt(parsedMessage.components[0], 10);
         }
 
         await guildPreference.setDuration(duration);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.DURATION, reset: false }]

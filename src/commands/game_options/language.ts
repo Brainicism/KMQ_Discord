@@ -1,26 +1,21 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
-import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { GameOption } from "../../types";
-import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import GameOption from "../../enums/game_option_name";
+import GuildPreference from "../../structures/guild_preference";
+import LanguageType from "../../enums/option_types/language_type";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("language");
 
-export enum LanguageType {
-    KOREAN = "korean",
-    ALL = "all",
-}
-
-export const DEFAULT_LANGUAGE = LanguageType.ALL;
-
-// z = chinese, j = japanese, e = english, s = spanish
-export const FOREIGN_LANGUAGE_TAGS = ["z", "j", "e", "s"];
 export default class LanguageCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
@@ -36,9 +31,9 @@ export default class LanguageCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "language",
-        description: state.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.language.help.description"
         ),
@@ -46,21 +41,21 @@ export default class LanguageCommand implements BaseCommand {
         examples: [
             {
                 example: "`,language korean`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.language.help.example.korean"
                 ),
             },
             {
                 example: "`,language all`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.language.help.example.all"
                 ),
             },
             {
                 example: "`,language`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.language.help.example.reset",
                     { defaultLanguage: `\`${LanguageType.ALL}\`` }
@@ -71,10 +66,14 @@ export default class LanguageCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.LANGUAGE_TYPE);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.LANGUAGE_TYPE, reset: true }]
@@ -86,6 +85,7 @@ export default class LanguageCommand implements BaseCommand {
         const languageType = parsedMessage.components[0] as LanguageType;
         await guildPreference.setLanguageType(languageType);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.LANGUAGE_TYPE, reset: false }]

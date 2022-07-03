@@ -1,27 +1,27 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
-import {
-    sendOptionsMessage,
-    getDebugLogHeader,
-} from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
+import { DEFAULT_SEEK } from "../../constants";
 import { IPCLogger } from "../../logger";
-import { GameOption } from "../../types";
-import MessageContext from "../../structures/message_context";
+import {
+    getDebugLogHeader,
+    sendOptionsMessage,
+} from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import GameOption from "../../enums/game_option_name";
+import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import SeekType from "../../enums/option_types/seek_type";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("seek");
 
-export enum SeekType {
-    BEGINNING = "beginning",
-    RANDOM = "random",
-    MIDDLE = "middle",
-}
-
-export const DEFAULT_SEEK = SeekType.RANDOM;
-
 export default class SeekCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notListeningPrecheck },
+    ];
 
     validations = {
         minArgCount: 0,
@@ -35,9 +35,9 @@ export default class SeekCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "seek",
-        description: state.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.seek.help.description"
         ),
@@ -45,28 +45,28 @@ export default class SeekCommand implements BaseCommand {
         examples: [
             {
                 example: "`,seek random`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.seek.help.example.random"
                 ),
             },
             {
                 example: "`,seek middle`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.seek.help.example.middle"
                 ),
             },
             {
                 example: "`,seek beginning`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.seek.help.example.beginning"
                 ),
             },
             {
                 example: "`,seek`",
-                explanation: state.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.seek.help.example.reset",
                     {
@@ -79,10 +79,14 @@ export default class SeekCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.SEEK_TYPE);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.SEEK_TYPE, reset: true }]
@@ -94,6 +98,7 @@ export default class SeekCommand implements BaseCommand {
         const seekType = parsedMessage.components[0] as SeekType;
         await guildPreference.setSeekType(seekType);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.SEEK_TYPE, reset: false }]

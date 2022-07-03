@@ -1,26 +1,24 @@
-import { QueriedSong } from "../types";
-import GuildPreference from "./guild_preference";
-import dbContext from "../database_context";
-import { SubunitsPreference } from "../commands/game_options/subunits";
-import { ArtistType } from "../commands/game_options/artisttype";
-import { Gender } from "../commands/game_options/gender";
 import {
-    LanguageType,
     FOREIGN_LANGUAGE_TAGS,
-} from "../commands/game_options/language";
-import { OstPreference } from "../commands/game_options/ost";
-import {
-    ReleaseType,
     NON_OFFICIAL_VIDEO_TAGS,
-} from "../commands/game_options/release";
-import { setDifference } from "../helpers/utils";
+    SELECTION_WEIGHT_VALUES_EASY,
+    SELECTION_WEIGHT_VALUES_HARD,
+} from "../constants";
+import { IPCLogger } from "../logger";
+import { chooseWeightedRandom, setDifference } from "../helpers/utils";
+import ArtistType from "../enums/option_types/artist_type";
+import Gender from "../enums/option_types/gender";
+import LanguageType from "../enums/option_types/language_type";
+import OstPreference from "../enums/option_types/ost_preference";
+import ReleaseType from "../enums/option_types/release_type";
+import ShuffleType from "../enums/option_types/shuffle_type";
+import SubunitsPreference from "../enums/option_types/subunit_preference";
+import dbContext from "../database_context";
+import type GuildPreference from "./guild_preference";
+import type QueriedSong from "../interfaces/queried_song";
+import type UniqueSongCounter from "../interfaces/unique_song_counter";
 
-export const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
-
-export interface UniqueSongCounter {
-    uniqueSongsPlayed: number;
-    totalSongs: number;
-}
+const logger = new IPCLogger("song_selector");
 
 export default class SongSelector {
     /** List of songs matching the user's game options */
@@ -89,7 +87,7 @@ export default class SongSelector {
         }
     }
 
-    queryRandomSong(): QueriedSong {
+    queryRandomSong(guildPreference: GuildPreference): QueriedSong {
         const selectedSongs = this.getSongs().songs;
         let randomSong: QueriedSong;
         const ignoredSongs = new Set([...this.uniqueSongsPlayed]);
@@ -98,12 +96,15 @@ export default class SongSelector {
             randomSong = SongSelector.selectRandomSong(
                 selectedSongs,
                 ignoredSongs,
-                this.lastAlternatingGender
+                this.lastAlternatingGender,
+                guildPreference.gameOptions.shuffleType
             );
         } else {
             randomSong = SongSelector.selectRandomSong(
                 selectedSongs,
-                ignoredSongs
+                ignoredSongs,
+                null,
+                guildPreference.gameOptions.shuffleType
             );
         }
 
@@ -121,12 +122,14 @@ export default class SongSelector {
      * @param filteredSongs - The filtered songs to select from
      * @param ignoredSongs - The union of last played songs and unique songs to not select from
      * @param alternatingGender - The gender to limit selecting from if ,gender alternating
-     * @returns the Queried Song
+     * @param shuffleType - The shuffle type
+     * @returns the QueriedSong
      */
     static selectRandomSong(
         filteredSongs: Set<QueriedSong>,
         ignoredSongs?: Set<string>,
-        alternatingGender?: Gender
+        alternatingGender?: Gender,
+        shuffleType = ShuffleType.RANDOM
     ): QueriedSong {
         let queriedSongList = [...filteredSongs];
         if (ignoredSongs) {
@@ -153,9 +156,22 @@ export default class SongSelector {
             return null;
         }
 
-        return queriedSongList[
-            Math.floor(Math.random() * queriedSongList.length)
-        ];
+        switch (shuffleType) {
+            case ShuffleType.POPULARITY:
+                return queriedSongList[0];
+            case ShuffleType.WEIGHTED_EASY:
+            case ShuffleType.WEIGHTED_HARD:
+                return chooseWeightedRandom(queriedSongList, "selectionWeight");
+            case ShuffleType.RANDOM:
+                return queriedSongList[
+                    Math.floor(Math.random() * queriedSongList.length)
+                ];
+            default:
+                logger.error(`Unexpected ShuffleType: ${shuffleType}`);
+                return queriedSongList[
+                    Math.floor(Math.random() * queriedSongList.length)
+                ];
+        }
     }
 
     /**
@@ -246,12 +262,19 @@ export default class SongSelector {
 
             collabGroupContainingSubunit = (
                 await dbContext
-                    .kpopVideos("app_kpop_group")
-                    .select("id")
-                    .whereIn("id_artist1", subunits)
-                    .orWhereIn("id_artist2", subunits)
-                    .orWhereIn("id_artist3", subunits)
-                    .orWhereIn("id_artist4", subunits)
+                    // collab matches
+                    .kpopVideos("app_kpop_agrelation")
+                    .select(["id", "name"])
+                    .distinct("id", "name")
+                    .join("app_kpop_group", function join() {
+                        this.on(
+                            "app_kpop_agrelation.id_subgroup",
+                            "=",
+                            "app_kpop_group.id"
+                        );
+                    })
+                    .whereIn("app_kpop_agrelation.id_artist", subunits)
+                    .andWhere("app_kpop_group.is_collab", "y")
             ).map((x) => x["id"]);
         }
 
@@ -300,31 +323,22 @@ export default class SongSelector {
                                 : "n"
                         );
                     }
+                } else if (
+                    gameOptions.subunitPreference === SubunitsPreference.EXCLUDE
+                ) {
+                    this.whereIn("id_artist", guildPreference.getGroupIDs());
                 } else {
-                    if (
-                        gameOptions.subunitPreference ===
-                        SubunitsPreference.EXCLUDE
-                    ) {
-                        this.whereIn(
-                            "id_artist",
-                            guildPreference.getGroupIDs()
-                        );
-                    } else {
-                        this.andWhere(function () {
-                            this.whereIn(
-                                "id_artist",
+                    this.andWhere(function () {
+                        this.whereIn("id_artist", guildPreference.getGroupIDs())
+                            .orWhereIn(
+                                "id_parent_artist",
                                 guildPreference.getGroupIDs()
                             )
-                                .orWhereIn(
-                                    "id_parent_artist",
-                                    guildPreference.getGroupIDs()
-                                )
-                                .orWhereIn(
-                                    "id_artist",
-                                    collabGroupContainingSubunit
-                                );
-                        });
-                    }
+                            .orWhereIn(
+                                "id_artist",
+                                collabGroupContainingSubunit
+                            );
+                    });
                 }
             });
         });
@@ -373,6 +387,31 @@ export default class SongSelector {
 
         const count = result.length;
         result = result.slice(gameOptions.limitStart, gameOptions.limitEnd);
+        const shuffleType = gameOptions.shuffleType;
+        let selectionWeightValues: Array<number>;
+
+        switch (shuffleType) {
+            case ShuffleType.WEIGHTED_EASY:
+                selectionWeightValues = SELECTION_WEIGHT_VALUES_EASY;
+                break;
+            case ShuffleType.WEIGHTED_HARD:
+                selectionWeightValues = SELECTION_WEIGHT_VALUES_HARD;
+                break;
+            default:
+                selectionWeightValues = [1];
+                break;
+        }
+
+        result = result.map((song, index) => ({
+            ...song,
+            selectionWeight:
+                selectionWeightValues[
+                    Math.floor(
+                        (index / result.length) * selectionWeightValues.length
+                    )
+                ],
+        }));
+
         return {
             songs: new Set(result),
             countBeforeLimit: count,
