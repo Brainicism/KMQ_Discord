@@ -1,12 +1,8 @@
+import { DataFiles } from "./constants";
 import { IPCLogger } from "./logger";
 import { parseJsonFile, pathExists } from "./helpers/utils";
-import path from "path";
 
 const logger = new IPCLogger("kmq_feature_switch");
-const featureSwitchFile = path.resolve(
-    __dirname,
-    "../data/feature_switch_config.json"
-);
 
 export default class KmqConfiguration {
     private static instance: KmqConfiguration;
@@ -28,14 +24,16 @@ export default class KmqConfiguration {
     static async reload(): Promise<void> {
         if (!this.instance) return;
         logger.info("Reloading feature switches...");
-        if (!(await pathExists(featureSwitchFile))) {
+        if (!(await pathExists(DataFiles.FEATURE_SWITCH_CONFIG))) {
             logger.warn("Feature switch file doesn't exist, ignoring...");
             return;
         }
 
         let featureSwitches: any;
         try {
-            featureSwitches = await parseJsonFile(featureSwitchFile);
+            featureSwitches = await parseJsonFile(
+                DataFiles.FEATURE_SWITCH_CONFIG
+            );
         } catch (e) {
             logger.error(`Error reading feature switch file. err = ${e}`);
             return;
