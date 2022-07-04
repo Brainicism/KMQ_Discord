@@ -84,7 +84,6 @@ export default abstract class Round {
         return this.skippers.size;
     }
 
-    // eslint-disable-next-line class-methods-use-this
     protected getUniqueSongCounterMessage(
         messageContext: MessageContext,
         uniqueSongCounter: UniqueSongCounter

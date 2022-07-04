@@ -77,7 +77,6 @@ export default class BotListingManager {
         }
     }
 
-    // eslint-disable-next-line class-methods-use-this
     private async postStat(siteConfigKeyName: string): Promise<void> {
         const botListing = BOT_LISTING_SITES[siteConfigKeyName];
         const { ipc } = State;

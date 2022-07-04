@@ -162,12 +162,10 @@ export default abstract class Session {
         }
     }
 
-    // eslint-disable-next-line class-methods-use-this
     isListeningSession(): this is ListeningSession {
         return false;
     }
 
-    // eslint-disable-next-line class-methods-use-this
     isGameSession(): this is GameSession {
         return false;
     }
@@ -623,11 +621,6 @@ export default abstract class Session {
             await Promise.allSettled(
                 Object.entries(State.client.commands).map(
                     async ([commandName, command]) => {
-                        if (command.aliases.includes(commandName)) {
-                            // Ignore duplicate calls from aliases
-                            return;
-                        }
-
                         if (command.resetPremium) {
                             logger.info(
                                 `gid: ${this.guildID} | Resetting premium for game option: ${commandName}`
@@ -949,7 +942,6 @@ export default abstract class Session {
         return sendInfoMessage(messageContext, embed, shouldReply, false);
     }
 
-    // eslint-disable-next-line class-methods-use-this
     private getDurationFooter(
         locale: LocaleType,
         timeRemaining: number,
@@ -1003,7 +995,6 @@ export default abstract class Session {
         this.startRound(messageContext);
     }
 
-    // eslint-disable-next-line class-methods-use-this
     private getAliasFooter(
         guessModeType: GuessModeType,
         locale: LocaleType,

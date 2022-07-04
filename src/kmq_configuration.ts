@@ -22,7 +22,7 @@ export default class KmqConfiguration {
     }
 
     static async reload(): Promise<void> {
-        if (!this.instance) return;
+        if (!this.instance) this.instance = new this();
         logger.info("Reloading feature switches...");
         if (!(await pathExists(DataFiles.FEATURE_SWITCH_CONFIG))) {
             logger.warn("Feature switch file doesn't exist, ignoring...");
