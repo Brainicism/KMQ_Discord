@@ -77,7 +77,8 @@ export default async function messageCreateHandler(
     }
 
     const invokedCommand = parsedMessage
-        ? State.client.commands[parsedMessage.action]
+        ? State.client.commands[parsedMessage.action] ||
+          State.client.aliases[parsedMessage.action]
         : null;
 
     const session = Session.getSession(message.guildID);
