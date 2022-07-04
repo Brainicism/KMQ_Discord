@@ -47,12 +47,12 @@ export default async function interactionCreateHandler(
     switch (interaction.data.name) {
         case "groups": {
             if (interaction instanceof Eris.CommandInteraction) {
-                await GroupsCommand.processGroupsChatInputInteraction(
+                await GroupsCommand.processChatInputInteraction(
                     interaction,
                     messageContext
                 );
             } else if (interaction instanceof Eris.AutocompleteInteraction) {
-                GroupsCommand.processGroupsAutocompleteInteraction(interaction);
+                GroupsCommand.processAutocompleteInteraction(interaction);
             }
 
             break;

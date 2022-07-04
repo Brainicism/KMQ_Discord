@@ -245,27 +245,57 @@ export default class GroupsCommand implements BaseCommand {
             return;
         }
 
-        await guildPreference.setGroups(matchedGroups);
-        await sendOptionsMessage(
-            Session.getSession(message.guildID),
-            MessageContext.fromMessage(message),
+        await GroupsCommand.updateOption(
             guildPreference,
-            [{ option: GameOption.GROUPS, reset: false }]
+            MessageContext.fromMessage(message),
+            matchedGroups
         );
+    };
+
+    static async updateOption(
+        guildPreference: GuildPreference,
+        messageContext: MessageContext,
+        matchedGroups: MatchedArtist[],
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
+        await guildPreference.setGroups(matchedGroups);
+        if (interaction) {
+            const message = await generateOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.GROUPS, reset: false }]
+            );
+
+            const embed = generateEmbed(messageContext, message, true);
+            tryCreateInteractionSuccessAcknowledgement(
+                interaction,
+                null,
+                null,
+                { embeds: [embed] }
+            );
+        } else {
+            await sendOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.GROUPS, reset: false }]
+            );
+        }
 
         logger.info(
             `${getDebugLogHeader(
-                message
+                messageContext
             )} | Groups set to ${guildPreference.getDisplayedGroupNames()}`
         );
-    };
+    }
 
     /**
      * Handles setting the groups for the final groups slash command state
      * @param interaction - The completed groups interaction
      * @param messageContext - The source of the interaction
      */
-    static async processGroupsChatInputInteraction(
+    static async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
@@ -292,21 +322,11 @@ export default class GroupsCommand implements BaseCommand {
                         interaction.guildID
                     );
 
-                await guildPreference.setGroups(groups);
-
-                const message = await generateOptionsMessage(
-                    Session.getSession(messageContext.guildID),
-                    messageContext,
+                await GroupsCommand.updateOption(
                     guildPreference,
-                    [{ option: GameOption.GROUPS, reset: false }]
-                );
-
-                const embed = generateEmbed(messageContext, message, true);
-                tryCreateInteractionSuccessAcknowledgement(
-                    interaction,
-                    null,
-                    null,
-                    { embeds: [embed] }
+                    messageContext,
+                    groups,
+                    interaction
                 );
             }
         }
@@ -316,7 +336,7 @@ export default class GroupsCommand implements BaseCommand {
      * Handles showing suggested artists as the user types for the groups slash command
      * @param interaction - The interaction with intermediate typing state
      */
-    static processGroupsAutocompleteInteraction(
+    static processAutocompleteInteraction(
         interaction: Eris.AutocompleteInteraction
     ): void {
         const userInput = interaction.data.options.filter(
