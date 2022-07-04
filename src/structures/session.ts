@@ -162,12 +162,10 @@ export default abstract class Session {
         }
     }
 
-    // eslint-disable-next-line class-methods-use-this
     isListeningSession(): this is ListeningSession {
         return false;
     }
 
-    // eslint-disable-next-line class-methods-use-this
     isGameSession(): this is GameSession {
         return false;
     }
@@ -944,7 +942,6 @@ export default abstract class Session {
         return sendInfoMessage(messageContext, embed, shouldReply, false);
     }
 
-    // eslint-disable-next-line class-methods-use-this
     private getDurationFooter(
         locale: LocaleType,
         timeRemaining: number,
@@ -998,7 +995,6 @@ export default abstract class Session {
         this.startRound(messageContext);
     }
 
-    // eslint-disable-next-line class-methods-use-this
     private getAliasFooter(
         guessModeType: GuessModeType,
         locale: LocaleType,

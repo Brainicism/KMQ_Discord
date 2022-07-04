@@ -47,7 +47,6 @@ export default class EliminationPlayer extends Player {
     /**
      * @returns whether to include this player in the scoreboard
      */
-    // eslint-disable-next-line class-methods-use-this
     shouldIncludeInScoreboard(): boolean {
         return true;
     }
