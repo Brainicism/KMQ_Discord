@@ -1523,17 +1523,24 @@ export async function tryAutocompleteInteractionAcknowledge(
  * @param interaction - The originating interaction
  * @param title - The embed title
  * @param description - The embed description
+ * @param interactionContent - The interaction message content
  */
 export async function tryCreateInteractionSuccessAcknowledgement(
     interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
     title: string,
-    description: string
+    description: string,
+    interactionContent?: Eris.InteractionContent
 ): Promise<void> {
     if (!withinInteractionInterval(interaction)) {
         return;
     }
 
     try {
+        if (interactionContent) {
+            await interaction.createMessage(interactionContent);
+            return;
+        }
+
         await interaction.createMessage({
             embeds: [
                 {

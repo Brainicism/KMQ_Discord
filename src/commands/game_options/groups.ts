@@ -1,6 +1,8 @@
 import { GROUP_LIST_URL } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
+    generateEmbed,
+    generateOptionsMessage,
     getDebugLogHeader,
     sendErrorMessage,
     sendOptionsMessage,
@@ -88,7 +90,7 @@ export default class GroupsCommand implements BaseCommand {
         priority: 135,
     });
 
-    static slashCommands = (): Array<Eris.ApplicationCommandStructure> => [
+    slashCommands = (): Array<Eris.ApplicationCommandStructure> => [
         {
             name: "groups",
             description: "Play songs from the given groups.",
@@ -291,23 +293,20 @@ export default class GroupsCommand implements BaseCommand {
                     );
 
                 await guildPreference.setGroups(groups);
-                tryCreateInteractionSuccessAcknowledgement(
-                    interaction,
-                    LocalizationManager.localizer.translate(
-                        interaction.guildID,
-                        "command.groups.interaction.groupsUpdated.title"
-                    ),
-                    LocalizationManager.localizer.translate(
-                        interaction.guildID,
-                        "command.groups.interaction.groupsUpdated.description"
-                    )
-                );
 
-                await sendOptionsMessage(
+                const message = await generateOptionsMessage(
                     Session.getSession(messageContext.guildID),
                     messageContext,
                     guildPreference,
                     [{ option: GameOption.GROUPS, reset: false }]
+                );
+
+                const embed = generateEmbed(messageContext, message, true);
+                tryCreateInteractionSuccessAcknowledgement(
+                    interaction,
+                    null,
+                    null,
+                    { embeds: [embed] }
                 );
             }
         }
