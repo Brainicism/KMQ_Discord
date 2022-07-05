@@ -10,6 +10,7 @@ import GroupsCommand from "../../commands/game_options/groups";
 import KmqMember from "../../structures/kmq_member";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
+import ReleaseCommand from "../../commands/game_options/release";
 import Session from "../../structures/session";
 
 const logger = new IPCLogger("interactionCreate");
@@ -57,6 +58,17 @@ export default async function interactionCreateHandler(
                 );
             } else if (interaction instanceof Eris.AutocompleteInteraction) {
                 GroupsCommand.processAutocompleteInteraction(interaction);
+            }
+
+            break;
+        }
+
+        case "release": {
+            if (interaction instanceof Eris.CommandInteraction) {
+                await ReleaseCommand.processChatInputInteraction(
+                    interaction,
+                    messageContext
+                );
             }
 
             break;
