@@ -31,7 +31,7 @@
     "author": "Brian Le",
     "license": "GPL-3.0",
     "dependencies": {
-        "@discordjs/opus": "^0.7.0",
+        "@discordjs/opus": "^0.8.0",
         "@types/damerau-levenshtein": "^1.0.0",
         "@types/i18next-fs-backend": "^1.1.2",
         "@types/lodash": "^4.14.178",
