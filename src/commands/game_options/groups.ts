@@ -101,7 +101,7 @@ export default class GroupsCommand implements BaseCommand {
                 )} group to play songs from`,
                 type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                 autocomplete: true,
-                required: x === 0,
+                required: false,
             })),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
         },
@@ -258,7 +258,19 @@ export default class GroupsCommand implements BaseCommand {
         matchedGroups: MatchedArtist[],
         interaction?: Eris.CommandInteraction
     ): Promise<void> {
-        await guildPreference.setGroups(matchedGroups);
+        const reset = matchedGroups === null;
+        if (reset) {
+            await guildPreference.reset(GameOption.GROUPS);
+            logger.info(`${getDebugLogHeader(messageContext)} | Groups reset.`);
+        } else {
+            await guildPreference.setGroups(matchedGroups);
+            logger.info(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Groups set to ${guildPreference.getDisplayedGroupNames()}`
+            );
+        }
+
         if (interaction) {
             const message = await generateOptionsMessage(
                 Session.getSession(messageContext.guildID),
@@ -282,12 +294,6 @@ export default class GroupsCommand implements BaseCommand {
                 [{ option: GameOption.GROUPS, reset: false }]
             );
         }
-
-        logger.info(
-            `${getDebugLogHeader(
-                messageContext
-            )} | Groups set to ${guildPreference.getDisplayedGroupNames()}`
-        );
     }
 
     /**
@@ -304,18 +310,17 @@ export default class GroupsCommand implements BaseCommand {
                 interaction.data.type ===
                 Eris.Constants.ApplicationCommandTypes.CHAT_INPUT
             ) {
-                logger.info(
-                    `${getDebugLogHeader(interaction)} | ${
-                        interaction.data.name
-                    } slash command received`
-                );
-
-                const groups: Array<MatchedArtist> = _.uniqBy(
-                    interaction.data.options.map(
-                        (x) => JSON.parse(x["value"]) as MatchedArtist
-                    ),
-                    "id"
-                );
+                let groups: Array<MatchedArtist>;
+                if (interaction.data.options == null) {
+                    groups = null;
+                } else {
+                    groups = _.uniqBy(
+                        interaction.data.options.map(
+                            (x) => JSON.parse(x["value"]) as MatchedArtist
+                        ),
+                        "id"
+                    );
+                }
 
                 const guildPreference =
                     await GuildPreference.getGuildPreference(

@@ -1,5 +1,5 @@
 import { BOOKMARK_COMMAND_NAME, PROFILE_COMMAND_NAME } from "../../constants";
-// import { IPCLogger } from "../../logger";
+import { IPCLogger } from "../../logger";
 import { handleProfileInteraction } from "../../commands/game_commands/profile";
 import {
     tryCreateInteractionErrorAcknowledgement,
@@ -12,7 +12,7 @@ import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 
-// const logger = new IPCLogger("interactionCreate");
+const logger = new IPCLogger("interactionCreate");
 
 /**
  * Handles the 'interactionCreate' event
@@ -42,6 +42,10 @@ export default async function interactionCreateHandler(
 
         await session.handleComponentInteraction(interaction, messageContext);
         return;
+    }
+
+    if (interaction instanceof Eris.CommandInteraction) {
+        logger.info(`Interaction received for '${interaction.data.name}'`);
     }
 
     switch (interaction.data.name) {
