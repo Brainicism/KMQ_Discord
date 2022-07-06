@@ -57,16 +57,10 @@ export default class ReleaseCommand implements BaseCommand {
                         ),
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: false,
-                    choices: [
-                        {
-                            name: "all",
-                            value: "all",
-                        },
-                        {
-                            name: "official",
-                            value: "official",
-                        },
-                    ],
+                    choices: Object.values(ReleaseType).map((releaseType) => ({
+                        name: releaseType,
+                        value: releaseType,
+                    })),
                 },
             ],
         },
