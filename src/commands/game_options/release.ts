@@ -102,10 +102,6 @@ export default class ReleaseCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
-        );
-
         let releaseType: ReleaseType;
         if (parsedMessage.components.length === 0) {
             releaseType = null;
@@ -115,18 +111,20 @@ export default class ReleaseCommand implements BaseCommand {
         }
 
         await ReleaseCommand.updateOption(
-            guildPreference,
             MessageContext.fromMessage(message),
             releaseType
         );
     };
 
     static async updateOption(
-        guildPreference: GuildPreference,
         messageContext: MessageContext,
         releaseType: ReleaseType,
         interaction?: Eris.CommandInteraction
     ): Promise<void> {
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID
+        );
+
         const reset = releaseType === null;
         if (reset) {
             await guildPreference.reset(GameOption.RELEASE_TYPE);
@@ -168,9 +166,8 @@ export default class ReleaseCommand implements BaseCommand {
     }
 
     /**
-     * Handles setting the groups for the final groups slash command state
-     * @param interaction - The completed groups interaction
-     * @param messageContext - The source of the interaction
+     * @param interaction - The interaction
+     * @param messageContext - The message context
      */
     static async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
@@ -196,13 +193,7 @@ export default class ReleaseCommand implements BaseCommand {
                     ] as ReleaseType;
                 }
 
-                const guildPreference =
-                    await GuildPreference.getGuildPreference(
-                        interaction.guildID
-                    );
-
                 await ReleaseCommand.updateOption(
-                    guildPreference,
                     messageContext,
                     releaseType,
                     interaction
