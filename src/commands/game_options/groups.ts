@@ -112,15 +112,14 @@ export default class GroupsCommand implements BaseCommand {
             message.guildID
         );
 
+        let matchedGroups: MatchedArtist[];
         if (parsedMessage.components.length === 0) {
-            await guildPreference.reset(GameOption.GROUPS);
-            await sendOptionsMessage(
-                Session.getSession(message.guildID),
-                MessageContext.fromMessage(message),
+            matchedGroups = null;
+            await GroupsCommand.updateOption(
                 guildPreference,
-                [{ option: GameOption.GROUPS, reset: true }]
+                MessageContext.fromMessage(message),
+                matchedGroups
             );
-            logger.info(`${getDebugLogHeader(message)} | Groups reset.`);
             return;
         }
 
@@ -143,7 +142,7 @@ export default class GroupsCommand implements BaseCommand {
             .map((groupName) => groupName.trim());
 
         const groups = await getMatchingGroupNames(groupNames);
-        let { matchedGroups } = groups;
+        matchedGroups = groups.matchedGroups;
         const { unmatchedGroups } = groups;
         if (unmatchedGroups.length) {
             logger.info(
@@ -276,7 +275,7 @@ export default class GroupsCommand implements BaseCommand {
                 Session.getSession(messageContext.guildID),
                 messageContext,
                 guildPreference,
-                [{ option: GameOption.GROUPS, reset: false }]
+                [{ option: GameOption.GROUPS, reset }]
             );
 
             const embed = generateEmbed(messageContext, message, true);
@@ -291,7 +290,7 @@ export default class GroupsCommand implements BaseCommand {
                 Session.getSession(messageContext.guildID),
                 messageContext,
                 guildPreference,
-                [{ option: GameOption.GROUPS, reset: false }]
+                [{ option: GameOption.GROUPS, reset }]
             );
         }
     }
