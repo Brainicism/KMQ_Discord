@@ -116,7 +116,6 @@ export default class GroupsCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             matchedGroups = null;
             await GroupsCommand.updateOption(
-                guildPreference,
                 MessageContext.fromMessage(message),
                 matchedGroups
             );
@@ -245,18 +244,20 @@ export default class GroupsCommand implements BaseCommand {
         }
 
         await GroupsCommand.updateOption(
-            guildPreference,
             MessageContext.fromMessage(message),
             matchedGroups
         );
     };
 
     static async updateOption(
-        guildPreference: GuildPreference,
         messageContext: MessageContext,
         matchedGroups: MatchedArtist[],
         interaction?: Eris.CommandInteraction
     ): Promise<void> {
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID
+        );
+
         const reset = matchedGroups === null;
         if (reset) {
             await guildPreference.reset(GameOption.GROUPS);
@@ -321,13 +322,7 @@ export default class GroupsCommand implements BaseCommand {
                     );
                 }
 
-                const guildPreference =
-                    await GuildPreference.getGuildPreference(
-                        interaction.guildID
-                    );
-
                 await GroupsCommand.updateOption(
-                    guildPreference,
                     messageContext,
                     groups,
                     interaction
