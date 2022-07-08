@@ -297,9 +297,8 @@ export default class GroupsCommand implements BaseCommand {
     }
 
     /**
-     * Handles setting the groups for the final groups slash command state
-     * @param interaction - The completed groups interaction
-     * @param messageContext - The source of the interaction
+     * @param interaction - The interaction
+     * @param messageContext - The message context
      */
     static async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
