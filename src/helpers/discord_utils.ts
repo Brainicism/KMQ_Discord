@@ -1566,10 +1566,12 @@ export async function tryCreateInteractionSuccessAcknowledgement(
 /**
  * Attempts to send a error message to an interaction
  * @param interaction - The originating interaction
+ * @param title - The embed title
  * @param description - The embed description
  */
 export async function tryCreateInteractionErrorAcknowledgement(
     interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
+    title: string,
     description: string
 ): Promise<void> {
     if (!withinInteractionInterval(interaction)) {
@@ -1585,12 +1587,14 @@ export async function tryCreateInteractionErrorAcknowledgement(
                         name: interaction.member?.username,
                         icon_url: interaction.member?.avatarURL,
                     },
-                    title: bold(
-                        LocalizationManager.localizer.translate(
-                            interaction.guildID,
-                            "misc.interaction.title.failure"
-                        )
-                    ),
+                    title:
+                        title ||
+                        bold(
+                            LocalizationManager.localizer.translate(
+                                interaction.guildID,
+                                "misc.interaction.title.failure"
+                            )
+                        ),
                     description,
                     thumbnail: { url: KmqImages.DEAD },
                 },

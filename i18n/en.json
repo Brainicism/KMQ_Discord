@@ -117,6 +117,10 @@
         "end": {
             "help": {
                 "description": "Finishes the current game and decides on a winner."
+            },
+            "interaction": {
+                "title": "Ending game",
+                "description": "Hope you had fun!"
             }
         },
         "exclude": {
@@ -379,9 +383,6 @@
                     "noParticipants": {
                         "description": "Someone needs to score a point before this command works.",
                         "title": "No Participants"
-                    },
-                    "noneInProgress": {
-                        "description": "There is no game in progress."
                     }
                 },
                 "outOfRange": {
@@ -1050,7 +1051,8 @@
             },
             "game": {
                 "noneInProgress": {
-                    "title": "No Active Game"
+                    "title": "No Active Game",
+                    "description": "There is no game in progress."
                 }
             },
             "gameOptionConflict": {

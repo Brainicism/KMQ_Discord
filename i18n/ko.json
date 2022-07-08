@@ -117,6 +117,10 @@
         "end": {
             "help": {
                 "description": "현재 게임을 종료하고 승자를 결정합니다."
+            },
+            "interaction": {
+                "title": "게임 종료",
+                "description": "즐거웠기를 바랍니다!"
             }
         },
         "exclude": {
@@ -379,9 +383,6 @@
                     "noParticipants": {
                         "description": "이 명령어가 작동하려면 누군가가 점수를 매겨야 합니다.",
                         "title": "참가자가 없습니다."
-                    },
-                    "noneInProgress": {
-                        "description": "진행 중인 게임이 없습니다."
                     }
                 },
                 "outOfRange": {
@@ -1050,7 +1051,8 @@
             },
             "game": {
                 "noneInProgress": {
-                    "title": "활성화된 게임 없음"
+                    "title": "활성화된 게임 없음",
+                    "description": "진행 중인 게임이 없습니다."
                 }
             },
             "gameOptionConflict": {

@@ -5,6 +5,7 @@ import {
     tryCreateInteractionErrorAcknowledgement,
     tryInteractionAcknowledge,
 } from "../../helpers/discord_utils";
+import EndCommand from "../../commands/game_commands/end";
 import Eris from "eris";
 import GroupsCommand from "../../commands/game_options/groups";
 import KmqMember from "../../structures/kmq_member";
@@ -25,6 +26,7 @@ const CHAT_INPUT_COMMAND_INTERACTION_HANDLERS: {
     groups: GroupsCommand.processChatInputInteraction,
     release: ReleaseCommand.processChatInputInteraction,
     stats: StatsCommand.processChatInputInteraction,
+    end: EndCommand.processChatInputInteraction,
 };
 
 const AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS: {
@@ -122,6 +124,7 @@ export default async function interactionCreateHandler(
             if (!session) {
                 tryCreateInteractionErrorAcknowledgement(
                     interaction as Eris.CommandInteraction,
+                    null,
                     LocalizationManager.localizer.translate(
                         interaction.guildID,
                         "misc.failure.interaction.bookmarkOutsideGame"
