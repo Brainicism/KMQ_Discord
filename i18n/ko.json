@@ -1174,7 +1174,11 @@
             "title": {
                 "failure": "잠깐만"
             },
-            "vote": "투표"
+            "vote": "투표",
+            "genericProgress": {
+                "title": "작업 중!",
+                "description": "🤖"
+            }
         },
         "level": "레벨",
         "levelUp": {

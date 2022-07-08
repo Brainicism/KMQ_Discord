@@ -7,6 +7,7 @@ import {
 } from "../../helpers/discord_utils";
 import Eris from "eris";
 import GroupsCommand from "../../commands/game_options/groups";
+import HintCommand from "../../commands/game_commands/hint";
 import KmqMember from "../../structures/kmq_member";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
@@ -25,6 +26,7 @@ const CHAT_INPUT_COMMAND_INTERACTION_HANDLERS: {
     groups: GroupsCommand.processChatInputInteraction,
     release: ReleaseCommand.processChatInputInteraction,
     stats: StatsCommand.processChatInputInteraction,
+    hint: HintCommand.processChatInputInteraction,
 };
 
 const AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS: {

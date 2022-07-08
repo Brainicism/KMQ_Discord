@@ -1174,7 +1174,11 @@
             "title": {
                 "failure": "Uh-oh"
             },
-            "vote": "Vote!"
+            "vote": "Vote!",
+            "genericProgress": {
+                "title": "Working on it!",
+                "description": "🤖"
+            }
         },
         "level": "Level",
         "levelUp": {
