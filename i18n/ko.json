@@ -817,7 +817,7 @@
                     "reset": "{{defaultRelease}}의 기본 릴리스 유형으로 재설정합니다."
                 },
                 "interaction": {
-                    "description": "공식 뮤직 비디오만 포함할지 아니면 모든 비디오"
+                    "description": "공식 뮤직 비디오만 포함할지 아니면 모든 비디오를 포함할지 선택합니다."
                 }
             }
         },
