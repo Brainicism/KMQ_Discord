@@ -1,0 +1,24 @@
+reviewers:
+    # The default reviewers
+    defaults:
+        - repository-owners # group
+
+    # Reviewer groups each of which has a list of GitHub usernames
+    groups:
+        repository-owners:
+            - Brainicism
+            - taahamahdi
+
+files:
+    # Keys are glob expressions.
+    # You can assign groups defined above as well as GitHub usernames.
+    "**":
+        - repository-owners
+    "i18n/ko.json":
+        - hoehoetvhss
+
+options:
+    ignore_draft: true
+    ignored_keywords:
+        - DO NOT REVIEW
+    enable_group_assignment: false
