@@ -30,8 +30,7 @@ program.parse();
 function serverShutdown(
     restartMinutes: number,
     restartDate: Date,
-    restart: boolean,
-    softRestart: boolean
+    restart: boolean
 ): Promise<void> {
     return new Promise((resolve) => {
         setInterval(() => {
@@ -47,9 +46,6 @@ function serverShutdown(
             if (!restart) {
                 console.log("Stopping KMQ...");
                 command = "pm2 stop kmq";
-            } else if (softRestart) {
-                console.log("Soft restarting KMQ...");
-                command = "tsc && curl -X POST localhost:5858/soft-restart";
             } else {
                 console.log("Restarting KMQ...");
                 command = "pm2 restart kmq";
@@ -88,7 +84,7 @@ process.on("SIGINT", async () => {
             `http://localhost:${process.env.WEB_SERVER_PORT}/announce-restart`,
             {
                 soft: options.softRestart,
-                restartTime: restartDate.getTime(),
+                restartMinutes,
             },
             {
                 headers: {
@@ -100,17 +96,19 @@ process.on("SIGINT", async () => {
         console.log(e);
     }
 
-    console.log(
-        `Next ${
-            options.restart ? "restart" : "shutdown"
-        } scheduled at ${restartDate}`
-    );
+    if (!options.softRestart) {
+        console.log(
+            `Next ${
+                options.restart ? "restart" : "shutdown"
+            } scheduled at ${restartDate}`
+        );
 
-    await serverShutdown(
-        restartMinutes,
-        restartDate,
-        options.restart,
-        options.softRestart
-    );
+        await serverShutdown(restartMinutes, restartDate, options.restart);
+    } else {
+        console.log(
+            "Soft restart initiated, see application logs for more details"
+        );
+    }
+
     await dbContext.destroy();
 })();

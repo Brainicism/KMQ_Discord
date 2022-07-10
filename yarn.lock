@@ -925,10 +925,9 @@ enabled@2.0.x:
   resolved "https://registry.yarnpkg.com/enabled/-/enabled-2.0.0.tgz#f9dd92ec2d6f4bbc0d5d1e64e21d61cd4665e7c2"
   integrity sha512-AKrN98kuwOzMIdAizXGI86UFBoo26CL21UM763y1h/GMSJ4/OHU9k2YlsmBpyScFo/wbLzWQJBMCW4+IO3/+OQ==
 
-eris-fleet@^1.0.0:
+"eris-fleet@https://github.com/Brainicism/eris-fleet#feature/soft-kill-warning":
   version "1.0.2"
-  resolved "https://registry.yarnpkg.com/eris-fleet/-/eris-fleet-1.0.2.tgz#7c77048e5e5d481f71988d52b79448bca2d93efd"
-  integrity sha512-wcaTGXGVwg4d8KEE1PSBArWF8xDzIssZIOX+/q+HObUyreWoSHaAT6Pqr9c1YbZF2Qu+tSYt4uCWlXJT1CCUiQ==
+  resolved "https://github.com/Brainicism/eris-fleet#a89d48198f6eb88e4ea23588e0c46d139f7dbde5"
 
 "eris-pagination@https://github.com/brainicism/eris-pagination#a30b37b":
   version "0.5.2"
