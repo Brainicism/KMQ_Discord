@@ -1216,8 +1216,8 @@
         },
         "releaseDate": "발매 날짜",
         "restart": {
-            "description_hard": "가동 중지 시간은 약 {{downtimeMinutes}}분입니다. 진행 상황이 저장되었는지 확인하려면 현재 게임을 종료하세요!",
-            "description_soft": "가동 중지 시간은 몇 초이지만 게임은 종료됩니다. 진행 상황이 저장되었는지 확인하려면 현재 게임을 종료하세요!",
+            "description_hard": "작동 중지 시간은 약 {{downtimeMinutes}}분입니다. 진행 상황이 저장되었는지 확인하려면 현재 게임을 종료하세요!",
+            "description_soft": "작동 중지 시간은 몇 초이지만 게임은 종료됩니다. 진행 상황이 저장되었는지 확인하려면 현재 게임을 종료하세요!",
             "title": "{{timeUntilRestart}} 분 후 재시동 예정"
         },
         "sendingBookmarkedSongs": {
