@@ -60,7 +60,7 @@ function serverShutdown(
 process.on("SIGINT", async () => {
     console.log("Aborting restart");
     await Axios.post(
-        `http://localhost:${process.env.WEB_SERVER_PORT}/clear-restart`,
+        `http://127.0.0.1:${process.env.WEB_SERVER_PORT}/clear-restart`,
         {},
         {
             headers: {
@@ -81,7 +81,7 @@ process.on("SIGINT", async () => {
 
     try {
         await Axios.post(
-            `http://localhost:${process.env.WEB_SERVER_PORT}/announce-restart`,
+            `http://127.0.0.1:${process.env.WEB_SERVER_PORT}/announce-restart`,
             {
                 soft: options.softRestart,
                 restartMinutes,
