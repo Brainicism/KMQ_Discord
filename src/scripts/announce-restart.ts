@@ -49,7 +49,7 @@ function serverShutdown(
                 command = "pm2 stop kmq";
             } else if (softRestart) {
                 console.log("Soft restarting KMQ...");
-                command = "tsc && curl -X POST localhost:5858/soft-restart";
+                command = `tsc && curl -X POST 127.0.0.1:${process.env.WEB_SERVER_PORT}/soft-restart`;
             } else {
                 console.log("Restarting KMQ...");
                 command = "pm2 restart kmq";
@@ -64,7 +64,7 @@ function serverShutdown(
 process.on("SIGINT", async () => {
     console.log("Aborting restart");
     await Axios.post(
-        `http://localhost:${process.env.WEB_SERVER_PORT}/clear-restart`,
+        `http://127.0.0.1:${process.env.WEB_SERVER_PORT}/clear-restart`,
         {},
         {
             headers: {
@@ -85,7 +85,7 @@ process.on("SIGINT", async () => {
 
     try {
         await Axios.post(
-            `http://localhost:${process.env.WEB_SERVER_PORT}/announce-restart`,
+            `http://127.0.0.1:${process.env.WEB_SERVER_PORT}/announce-restart`,
             {
                 soft: options.softRestart,
                 restartTime: restartDate.getTime(),
