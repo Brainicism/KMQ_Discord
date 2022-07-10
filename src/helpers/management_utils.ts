@@ -9,8 +9,8 @@ import {
 } from "./game_utils";
 import { reloadFactCache } from "../fact_generator";
 import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
-import EnvType from "../enums/env_type";
 import KmqConfiguration from "../kmq_configuration";
+import LocalizationManager from "./localization_manager";
 import MessageContext from "../structures/message_context";
 import SIGINTHandler from "../events/process/SIGINT";
 import State from "../state";
@@ -90,11 +90,11 @@ export function registerProcessEvents(): void {
  * @returns null if no restart is imminent, a date in epoch milliseconds
  */
 export function getTimeUntilRestart(): number {
-    if (!State.restartNotification) return null;
+    if (!State.restartNotification?.restartDate) return null;
     const restartNotificationTime =
-        State.restartNotification.restartTime.getTime();
+        State.restartNotification.restartDate.getTime();
 
-    return Math.floor(
+    return Math.ceil(
         (restartNotificationTime - new Date().getTime()) / (1000 * 60)
     );
 }
@@ -102,9 +102,11 @@ export function getTimeUntilRestart(): number {
 /**
  * Sends a warning message to all active GameSessions for impending restarts at predefined intervals
  * @param timeUntilRestart - time until the restart
+ * @param soft - whether it is a soft restart
  */
-export async function checkRestartNotification(
-    timeUntilRestart: number
+export async function warnServersImpendingRestart(
+    timeUntilRestart: number,
+    soft: boolean
 ): Promise<void> {
     let serversWarned = 0;
     if (RESTART_WARNING_INTERVALS.has(timeUntilRestart)) {
@@ -114,9 +116,25 @@ export async function checkRestartNotification(
             await sendInfoMessage(
                 new MessageContext(gameSession.textChannelID),
                 {
-                    title: `Upcoming Bot Restart in ${timeUntilRestart} Minutes.`,
-                    description:
-                        "Downtime will be approximately 2 minutes. Please end the current game to ensure your progress is saved!",
+                    title: LocalizationManager.localizer.translate(
+                        gameSession.guildID,
+                        "misc.restart.title",
+                        {
+                            timeUntilRestart: String(timeUntilRestart),
+                        }
+                    ),
+                    description: soft
+                        ? LocalizationManager.localizer.translate(
+                              gameSession.guildID,
+                              "misc.restart.description_soft"
+                          )
+                        : LocalizationManager.localizer.translate(
+                              gameSession.guildID,
+                              "misc.restart.description_hard",
+                              {
+                                  downtimeMinutes: String(5),
+                              }
+                          ),
                 }
             );
             // eslint-disable-next-line no-await-in-loop
@@ -370,12 +388,14 @@ export function registerIntervals(clusterID: number): void {
     // Every minute
     schedule.scheduleJob("* * * * *", async () => {
         KmqConfiguration.reload();
-        if (process.env.NODE_ENV !== EnvType.PROD) return;
         // set up check for restart notifications
         const timeUntilRestart = getTimeUntilRestart();
         if (timeUntilRestart) {
             updateBotStatus();
-            await checkRestartNotification(timeUntilRestart);
+            await warnServersImpendingRestart(
+                timeUntilRestart,
+                State.restartNotification.soft
+            );
         }
 
         // Sync state with Patreon subscribers

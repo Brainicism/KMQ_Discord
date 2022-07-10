@@ -4,5 +4,8 @@
     "i18n-ally.localesPaths": [
         "i18n"
     ],
-    "i18n-ally.enabledParsers": ["json"]
+    "i18n-ally.enabledParsers": [
+        "json"
+    ],
+    "i18n-ally.keystyle": "nested"
 }
