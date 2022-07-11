@@ -1,6 +1,5 @@
 import { BOOKMARK_COMMAND_NAME, PROFILE_COMMAND_NAME } from "../../constants";
 import { IPCLogger } from "../../logger";
-import { handleProfileInteraction } from "../../commands/game_commands/profile";
 import {
     tryCreateInteractionErrorAcknowledgement,
     tryInteractionAcknowledge,
@@ -10,6 +9,7 @@ import GroupsCommand from "../../commands/game_options/groups";
 import KmqMember from "../../structures/kmq_member";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
+import ProfileCommand from "../../commands/game_commands/profile";
 import Session from "../../structures/session";
 
 const logger = new IPCLogger("interactionCreate");
@@ -62,13 +62,24 @@ export default async function interactionCreateHandler(
             break;
         }
 
+        case "profile": {
+            if (interaction instanceof Eris.CommandInteraction) {
+                await ProfileCommand.processChatInputInteraction(
+                    interaction,
+                    messageContext
+                );
+            }
+
+            break;
+        }
+
         case PROFILE_COMMAND_NAME: {
             interaction = interaction as Eris.CommandInteraction;
             if (
                 interaction.data.type ===
                 Eris.Constants.ApplicationCommandTypes.USER
             ) {
-                handleProfileInteraction(
+                ProfileCommand.handleProfileInteraction(
                     interaction as Eris.CommandInteraction,
                     interaction.data.target_id
                 );
@@ -81,7 +92,7 @@ export default async function interactionCreateHandler(
                     interaction as Eris.CommandInteraction
                 ).data.resolved["messages"].get(messageID).author.id;
 
-                handleProfileInteraction(interaction, authorID);
+                ProfileCommand.handleProfileInteraction(interaction, authorID);
             }
 
             break;

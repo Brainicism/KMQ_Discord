@@ -99,6 +99,7 @@ export default class GroupsCommand implements BaseCommand {
         {
             name: "groups",
             description: "Play songs from the given groups.",
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [...Array(25).keys()].map((x) => ({
                 name: `group_${x + 1}`,
                 description: `The ${getOrdinalNum(
@@ -108,7 +109,6 @@ export default class GroupsCommand implements BaseCommand {
                 autocomplete: true,
                 required: false,
             })),
-            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
         },
     ];
 
@@ -325,24 +325,22 @@ export default class GroupsCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        if (interaction instanceof Eris.CommandInteraction) {
-            if (
-                interaction.data.type ===
-                Eris.Constants.ApplicationCommandTypes.CHAT_INPUT
-            ) {
-                let groups: Array<MatchedArtist>;
-                if (interaction.data.options == null) {
-                    groups = null;
-                } else {
-                    groups = this.getMatchedArtists(interaction.data.options);
-                }
-
-                await GroupsCommand.updateOption(
-                    messageContext,
-                    groups,
-                    interaction
-                );
+        if (
+            interaction.data.type ===
+            Eris.Constants.ApplicationCommandTypes.CHAT_INPUT
+        ) {
+            let groups: Array<MatchedArtist>;
+            if (interaction.data.options == null) {
+                groups = null;
+            } else {
+                groups = this.getMatchedArtists(interaction.data.options);
             }
+
+            await GroupsCommand.updateOption(
+                messageContext,
+                groups,
+                interaction
+            );
         }
     }
 
