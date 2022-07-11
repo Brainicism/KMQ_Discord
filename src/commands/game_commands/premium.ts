@@ -1,4 +1,4 @@
-import { KmqImages } from "../../constants";
+import { EMBED_SUCCESS_BONUS_COLOR, KmqImages } from "../../constants";
 import { isUserPremium } from "../../helpers/game_utils";
 import { sendInfoMessage } from "../../helpers/discord_utils";
 import KmqConfiguration from "../../kmq_configuration";
@@ -38,6 +38,7 @@ export default class PremiumCommand implements BaseCommand {
         if (!KmqConfiguration.Instance.premiumCommandEnabled()) return;
         const premiumMember = await isUserPremium(message.author.id);
         sendInfoMessage(MessageContext.fromMessage(message), {
+            color: premiumMember ? EMBED_SUCCESS_BONUS_COLOR : null,
             description: `${LocalizationManager.localizer.translate(
                 message.guildID,
                 premiumMember
