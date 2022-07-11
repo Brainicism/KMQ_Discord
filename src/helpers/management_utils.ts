@@ -253,7 +253,12 @@ async function reloadArtists(): Promise<void> {
     const artistAliasMapping = await dbContext
         .kmq("available_songs")
         .distinct(["artist_name_en", "artist_aliases"])
-        .select(["artist_name_en", "artist_aliases", "id_artist"])
+        .select([
+            "artist_name_en",
+            "artist_name_ko",
+            "artist_aliases",
+            "id_artist",
+        ])
         .whereRaw("artist_name_en NOT LIKE ?", ["%+%"]);
 
     for (const mapping of artistAliasMapping) {
@@ -263,13 +268,16 @@ async function reloadArtists(): Promise<void> {
 
         const artistEntry = {
             name: mapping["artist_name_en"],
+            hangulName: mapping["artist_name_ko"],
             id: mapping["id_artist"],
         };
 
-        State.artistToEntry[mapping["artist_name_en"]] = artistEntry;
+        State.artistToEntry[mapping["artist_name_en"].toLocaleLowerCase()] =
+            artistEntry;
+        State.artistToEntry[mapping["artist_name_ko"]] = artistEntry;
         for (const alias in aliases) {
             if (alias.length > 0) {
-                State.artistToEntry[alias] = artistEntry;
+                State.artistToEntry[alias.toLocaleLowerCase()] = artistEntry;
             }
         }
     }
@@ -308,6 +316,8 @@ export function registerIntervals(clusterID: number): void {
         reloadFactCache();
         // New bonus groups
         reloadBonusGroups();
+        // New groups used for autocomplete
+        reloadArtists();
     });
 
     // Every hour
