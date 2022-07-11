@@ -9,6 +9,7 @@ const FIRST_TEAM_NAME = "kmq team";
 const SECOND_TEAM_NAME = "not kmqer";
 
 const USER_IDS = ["12345", "23456", "252525", "1000000"];
+const USERNAMES = ["ohmi", "cool", "kpopper", "kmq player"];
 
 const AVATAR_URL = null;
 const GUILD_ID = null;
@@ -21,13 +22,19 @@ describe("team scoreboard", () => {
         scoreboard = new TeamScoreboard();
         firstTeam = scoreboard.addTeam(
             FIRST_TEAM_NAME,
-            new Player(USER_IDS[0], GUILD_ID, AVATAR_URL, 0)
+            new Player(USER_IDS[0], GUILD_ID, AVATAR_URL, 0, USERNAMES[0])
         );
     });
 
     describe("add a team", () => {
         it("should add the team to the scoreboard", () => {
-            const player = new Player(USER_IDS[1], GUILD_ID, AVATAR_URL, 0);
+            const player = new Player(
+                USER_IDS[1],
+                GUILD_ID,
+                AVATAR_URL,
+                0,
+                USERNAMES[1]
+            );
 
             assert.strictEqual(scoreboard.hasTeam(SECOND_TEAM_NAME), false);
             const secondTeam = scoreboard.addTeam(SECOND_TEAM_NAME, player);
@@ -51,7 +58,13 @@ describe("team scoreboard", () => {
             );
             assert.strictEqual(scoreboard.getTeamOfPlayer(USER_IDS[1]), null);
 
-            const player = new Player(USER_IDS[1], GUILD_ID, AVATAR_URL, 0);
+            const player = new Player(
+                USER_IDS[1],
+                GUILD_ID,
+                AVATAR_URL,
+                0,
+                USERNAMES[1]
+            );
 
             const secondTeam = scoreboard.addTeam(SECOND_TEAM_NAME, player);
             assert.deepStrictEqual(
@@ -63,18 +76,32 @@ describe("team scoreboard", () => {
 
     describe("team deletion", () => {
         it("should delete a team when it has no players in it", () => {
-            const player = new Player(USER_IDS[1], GUILD_ID, AVATAR_URL, 0);
+            const player = new Player(
+                USER_IDS[1],
+                GUILD_ID,
+                AVATAR_URL,
+                0,
+                USERNAMES[1]
+            );
 
             const secondTeam = scoreboard.addTeam(SECOND_TEAM_NAME, player);
             const anotherPlayer = new Player(
                 USER_IDS[2],
                 GUILD_ID,
                 AVATAR_URL,
-                0
+                0,
+                USERNAMES[2]
             );
 
             scoreboard.addTeamPlayer(SECOND_TEAM_NAME, anotherPlayer);
-            const bestPlayer = new Player(USER_IDS[3], GUILD_ID, AVATAR_URL, 0);
+            const bestPlayer = new Player(
+                USER_IDS[3],
+                GUILD_ID,
+                AVATAR_URL,
+                0,
+                USERNAMES[3]
+            );
+
             scoreboard.addTeamPlayer(FIRST_TEAM_NAME, bestPlayer);
             scoreboard.removePlayer(bestPlayer.id);
             scoreboard.removePlayer(player.id);
@@ -132,7 +159,13 @@ describe("team scoreboard", () => {
             beforeEach(() => {
                 scoreboard.addTeamPlayer(
                     FIRST_TEAM_NAME,
-                    new Player(USER_IDS[1], GUILD_ID, AVATAR_URL, 0)
+                    new Player(
+                        USER_IDS[1],
+                        GUILD_ID,
+                        AVATAR_URL,
+                        0,
+                        USERNAMES[1]
+                    )
                 );
             });
 
@@ -211,17 +244,35 @@ describe("team scoreboard", () => {
             beforeEach(() => {
                 scoreboard.addTeamPlayer(
                     FIRST_TEAM_NAME,
-                    new Player(USER_IDS[1], GUILD_ID, AVATAR_URL, 0)
+                    new Player(
+                        USER_IDS[1],
+                        GUILD_ID,
+                        AVATAR_URL,
+                        0,
+                        USERNAMES[1]
+                    )
                 );
 
                 secondTeam = scoreboard.addTeam(
                     SECOND_TEAM_NAME,
-                    new Player(USER_IDS[2], GUILD_ID, AVATAR_URL, 0)
+                    new Player(
+                        USER_IDS[2],
+                        GUILD_ID,
+                        AVATAR_URL,
+                        0,
+                        USERNAMES[2]
+                    )
                 );
 
                 scoreboard.addTeamPlayer(
                     SECOND_TEAM_NAME,
-                    new Player(USER_IDS[3], GUILD_ID, AVATAR_URL, 0)
+                    new Player(
+                        USER_IDS[3],
+                        GUILD_ID,
+                        AVATAR_URL,
+                        0,
+                        USERNAMES[3]
+                    )
                 );
             });
 
@@ -324,17 +375,35 @@ describe("team scoreboard", () => {
             beforeEach(() => {
                 scoreboard.addTeamPlayer(
                     FIRST_TEAM_NAME,
-                    new Player(USER_IDS[1], GUILD_ID, AVATAR_URL, 0)
+                    new Player(
+                        USER_IDS[1],
+                        GUILD_ID,
+                        AVATAR_URL,
+                        0,
+                        USERNAMES[1]
+                    )
                 );
 
                 secondTeam = scoreboard.addTeam(
                     SECOND_TEAM_NAME,
-                    new Player(USER_IDS[2], GUILD_ID, AVATAR_URL, 0)
+                    new Player(
+                        USER_IDS[2],
+                        GUILD_ID,
+                        AVATAR_URL,
+                        0,
+                        USERNAMES[2]
+                    )
                 );
 
                 scoreboard.addTeamPlayer(
                     SECOND_TEAM_NAME,
-                    new Player(USER_IDS[3], GUILD_ID, AVATAR_URL, 0)
+                    new Player(
+                        USER_IDS[3],
+                        GUILD_ID,
+                        AVATAR_URL,
+                        0,
+                        USERNAMES[3]
+                    )
                 );
 
                 scoreboard.update([
@@ -373,17 +442,17 @@ describe("team scoreboard", () => {
         beforeEach(() => {
             scoreboard.addTeamPlayer(
                 FIRST_TEAM_NAME,
-                new Player(USER_IDS[1], GUILD_ID, AVATAR_URL, 0)
+                new Player(USER_IDS[1], GUILD_ID, AVATAR_URL, 0, USERNAMES[1])
             );
 
             secondTeam = scoreboard.addTeam(
                 SECOND_TEAM_NAME,
-                new Player(USER_IDS[2], GUILD_ID, AVATAR_URL, 0)
+                new Player(USER_IDS[2], GUILD_ID, AVATAR_URL, 0, USERNAMES[2])
             );
 
             scoreboard.addTeamPlayer(
                 SECOND_TEAM_NAME,
-                new Player(USER_IDS[3], GUILD_ID, AVATAR_URL, 0)
+                new Player(USER_IDS[3], GUILD_ID, AVATAR_URL, 0, USERNAMES[3])
             );
         });
 
@@ -497,12 +566,12 @@ describe("team scoreboard", () => {
             guildPreference.setGoal(5);
             scoreboard.addTeam(
                 FIRST_TEAM_NAME,
-                new Player(USER_IDS[0], GUILD_ID, AVATAR_URL, 0)
+                new Player(USER_IDS[0], GUILD_ID, AVATAR_URL, 0, USERNAMES[0])
             );
 
             scoreboard.addTeam(
                 SECOND_TEAM_NAME,
-                new Player(USER_IDS[1], GUILD_ID, AVATAR_URL, 0)
+                new Player(USER_IDS[1], GUILD_ID, AVATAR_URL, 0, USERNAMES[1])
             );
         });
 

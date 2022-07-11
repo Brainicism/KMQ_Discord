@@ -10,7 +10,9 @@ describe("scoreboard", () => {
     let scoreboard: Scoreboard;
     beforeEach(() => {
         scoreboard = new Scoreboard();
-        userIDs.map((x) => scoreboard.addPlayer(new Player(x, null, null, 0)));
+        userIDs.map((x) =>
+            scoreboard.addPlayer(new Player(x, null, null, 0, x))
+        );
     });
 
     let guildPreference: GuildPreference;
@@ -141,9 +143,9 @@ describe("scoreboard", () => {
         describe("position changes", () => {
             it("should return the correct ranking of every player", () => {
                 const players = {
-                    ohmiID: new Player("ohmiID", "guildID", "", 2),
-                    12345: new Player("12345", "guildID", "", 2),
-                    jisooID: new Player("jisooID", "guildID", "", 3),
+                    ohmiID: new Player("ohmiID", "guildID", "", 2, "ohmi"),
+                    12345: new Player("12345", "guildID", "", 2, "cool"),
+                    jisooID: new Player("jisooID", "guildID", "", 3, "jisoo"),
                 };
 
                 const sb = new Scoreboard();
@@ -157,7 +159,7 @@ describe("scoreboard", () => {
                     [players["ohmiID"].getScore()]: 1,
                 });
 
-                const newPlayer = new Player("1234", "guildID", "", 1);
+                const newPlayer = new Player("1234", "guildID", "", 1, "new");
                 sb.addPlayer(newPlayer);
                 players["1234"] = newPlayer;
 
@@ -171,9 +173,9 @@ describe("scoreboard", () => {
 
             it("should return the same ranking when all players have the same score", () => {
                 const players = {
-                    ohmiID: new Player("ohmiID", "guildID", "", 2),
-                    12345: new Player("12345", "guildID", "", 2),
-                    jisooID: new Player("jisooID", "guildID", "", 2),
+                    ohmiID: new Player("ohmiID", "guildID", "", 2, "ohmi"),
+                    12345: new Player("12345", "guildID", "", 2, "cool"),
+                    jisooID: new Player("jisooID", "guildID", "", 2, "jisoo"),
                 };
 
                 const sb = new Scoreboard();
@@ -186,9 +188,9 @@ describe("scoreboard", () => {
 
             it("should return different rankings when all players have different scores", () => {
                 const players = {
-                    ohmiID: new Player("ohmiID", "guildID", "", 1),
-                    12345: new Player("12345", "guildID", "", 2),
-                    jisooID: new Player("jisooID", "guildID", "", 3),
+                    ohmiID: new Player("ohmiID", "guildID", "", 1, "ohmi"),
+                    12345: new Player("12345", "guildID", "", 2, "cool"),
+                    jisooID: new Player("jisooID", "guildID", "", 3, "jisoo"),
                 };
 
                 const sb = new Scoreboard();
@@ -203,25 +205,26 @@ describe("scoreboard", () => {
         });
 
         describe("player's prefix should change based on new ranking", () => {
-            const previousRanking = ["12345", "jisoo", "ohmi"];
-            const newRanking = ["ohmi", "jisoo", "12345"];
+            const previousRanking = ["12345", "jisooID", "ohmiID"];
+            const newRanking = ["ohmiID", "jisooID", "12345"];
 
             describe("player moved ahead in ranking", () => {
                 it("should show the player has gained ranking", () => {
                     const winningPlayer = new Player(
-                        "ohmi",
+                        "ohmiID",
                         "guildID",
                         null,
-                        0
+                        0,
+                        "ohmi"
                     );
 
                     winningPlayer.setPreviousRanking(
-                        previousRanking.indexOf("ohmi")
+                        previousRanking.indexOf("ohmiID")
                     );
 
                     assert.strictEqual(
                         winningPlayer.getRankingPrefix(
-                            newRanking.indexOf("ohmi"),
+                            newRanking.indexOf("ohmiID"),
                             true
                         ),
                         "↑ 1."
@@ -235,7 +238,8 @@ describe("scoreboard", () => {
                         "12345",
                         "guildID",
                         null,
-                        0
+                        0,
+                        "cool"
                     );
 
                     losingPlayer.setPreviousRanking(
@@ -254,14 +258,21 @@ describe("scoreboard", () => {
 
             describe("player didn't change position in ranking", () => {
                 it("should not show any ranking change", () => {
-                    const samePlayer = new Player("jisoo", "guildID", null, 0);
+                    const samePlayer = new Player(
+                        "jisooID",
+                        "guildID",
+                        null,
+                        0,
+                        "jisoo"
+                    );
+
                     samePlayer.setPreviousRanking(
-                        previousRanking.indexOf("jisoo")
+                        previousRanking.indexOf("jisooID")
                     );
 
                     assert.strictEqual(
                         samePlayer.getRankingPrefix(
-                            newRanking.indexOf("jisoo"),
+                            newRanking.indexOf("jisooID"),
                             true
                         ),
                         "2."
@@ -272,19 +283,20 @@ describe("scoreboard", () => {
             describe("the game has ended", () => {
                 it("should not show any ranking change, even if there was one", () => {
                     const winningPlayer = new Player(
-                        "ohmi",
+                        "ohmiID",
                         "guildID",
                         null,
-                        0
+                        0,
+                        "ohmi"
                     );
 
                     winningPlayer.setPreviousRanking(
-                        previousRanking.indexOf("ohmi")
+                        previousRanking.indexOf("ohmiID")
                     );
 
                     assert.strictEqual(
                         winningPlayer.getRankingPrefix(
-                            newRanking.indexOf("ohmi"),
+                            newRanking.indexOf("ohmiID"),
                             false
                         ),
                         "1."
