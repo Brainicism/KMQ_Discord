@@ -8,6 +8,7 @@ import {
     EMBED_ERROR_COLOR,
     EMBED_SUCCESS_BONUS_COLOR,
     EMBED_SUCCESS_COLOR,
+    EPHEMERAL_MESSAGE_FLAG,
     KmqImages,
 } from "../constants";
 import { IPCLogger } from "../logger";
@@ -1521,7 +1522,7 @@ export async function tryCreateInteractionSuccessAcknowledgement(
                     thumbnail: { url: KmqImages.THUMBS_UP },
                 },
             ],
-            flags: 64,
+            flags: EPHEMERAL_MESSAGE_FLAG,
         });
     } catch (err) {
         interactionRejectionHandler(interaction, err);
@@ -1560,7 +1561,7 @@ export async function tryCreateInteractionErrorAcknowledgement(
                     thumbnail: { url: KmqImages.DEAD },
                 },
             ],
-            flags: 64,
+            flags: EPHEMERAL_MESSAGE_FLAG,
         });
     } catch (err) {
         interactionRejectionHandler(interaction, err);

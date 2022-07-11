@@ -215,6 +215,8 @@ export const SELECTION_WEIGHT_VALUES_EASY = [
     ...SELECTION_WEIGHT_VALUES_HARD,
 ].reverse();
 
+export const EPHEMERAL_MESSAGE_FLAG = 64;
+
 export const DataFiles = {
     SKIP_SEED_COOKIE: path.join(__dirname, "../data/skip_seed"),
     PRIMARY_COOKIE: path.join(__dirname, "../data/primary"),
