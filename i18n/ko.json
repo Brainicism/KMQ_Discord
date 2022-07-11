@@ -238,8 +238,8 @@
             },
             "interaction": {
                 "groupsUpdated": {
-                    "description": "제공된 그룹이 재생됩니다.",
-                    "title": "업데이트된 그룹"
+                    "description": "업데이트된 그룹이 재생됩니다.",
+                    "title": "그룹이 업데이트되었습니다."
                 }
             }
         },
