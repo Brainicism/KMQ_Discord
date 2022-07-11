@@ -284,7 +284,11 @@ async function reloadArtists(): Promise<void> {
 
     State.topArtists = await dbContext
         .kmq("available_songs")
-        .select(["id_artist AS id", "name"])
+        .select([
+            "id_artist AS id",
+            "artist_name_en AS name",
+            "artist_name_ko AS hangulName",
+        ])
         .join("kpop_groups", "available_songs.id_artist", "kpop_groups.id")
         .orderByRaw("SUM(views) DESC")
         .limit(25)

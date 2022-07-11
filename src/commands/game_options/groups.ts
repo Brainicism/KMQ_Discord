@@ -309,10 +309,11 @@ export default class GroupsCommand implements BaseCommand {
     static getMatchedArtists(
         interactionOptions: Array<Eris.InteractionDataOptions>
     ): Array<MatchedArtist> {
-        return _.uniq(
+        return _.uniqBy(
             interactionOptions.map(
                 (x) => State.artistToEntry[x["value"].toLocaleLowerCase()]
-            )
+            ),
+            "id"
         );
     }
 
@@ -333,12 +334,6 @@ export default class GroupsCommand implements BaseCommand {
                 if (interaction.data.options == null) {
                     groups = null;
                 } else {
-                    logger.info(
-                        `${getDebugLogHeader(interaction)} | ${
-                            interaction.data.name
-                        } slash command received`
-                    );
-
                     groups = this.getMatchedArtists(interaction.data.options);
                 }
 
