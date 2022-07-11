@@ -142,7 +142,7 @@ export const EMBED_ERROR_COLOR = 0xed4245; // Red
 export const EMBED_SUCCESS_COLOR = 0x57f287; // Green
 export const EMBED_SUCCESS_BONUS_COLOR = 0xfee75c; // Gold
 
-export const PATREON_SUPPORTER_BADGE = "🎧 Premium Supporter";
+export const PATREON_SUPPORTER_BADGE_ID = 23;
 
 export const DATABASE_DOWNLOAD_DIR = path.join(
     __dirname,
@@ -214,3 +214,18 @@ export const SELECTION_WEIGHT_VALUES_HARD = [1, 2, 4, 8, 16];
 export const SELECTION_WEIGHT_VALUES_EASY = [
     ...SELECTION_WEIGHT_VALUES_HARD,
 ].reverse();
+
+export const DataFiles = {
+    SKIP_SEED_COOKIE: path.join(__dirname, "../data/skip_seed"),
+    PRIMARY_COOKIE: path.join(__dirname, "../data/primary"),
+    NEWS: path.join(__dirname, "../data/news.md"),
+    FROZEN_TABLE_SCHEMA: path.join(
+        __dirname,
+        "../data/frozen_table_schema.json"
+    ),
+    GROUP_LIST: path.join(__dirname, "../data/group_list.txt"),
+    FEATURE_SWITCH_CONFIG: path.join(
+        __dirname,
+        "../data/feature_switch_config.json"
+    ),
+};

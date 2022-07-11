@@ -1,5 +1,5 @@
 import { IPCLogger } from "../logger";
-import { PATREON_SUPPORTER_BADGE } from "../constants";
+import { PATREON_SUPPORTER_BADGE_ID } from "../constants";
 import { cleanArtistName, cleanSongName } from "../structures/game_round";
 import { containsHangul, md5Hash } from "./utils";
 import AnswerType from "../enums/option_types/answer_type";
@@ -438,6 +438,10 @@ export async function isUserPremium(userID: string): Promise<boolean> {
  * @param patrons - The users to grant premium membership
  */
 export async function addPremium(patrons: Array<Patron>): Promise<void> {
+    if (patrons.length === 0) {
+        return;
+    }
+
     await dbContext.kmq.transaction(async (trx) => {
         await dbContext
             .kmq("premium_users")
@@ -456,8 +460,8 @@ export async function addPremium(patrons: Array<Patron>): Promise<void> {
             .kmq("badges_players")
             .insert(
                 patrons.map((x) => ({
-                    badge_name: PATREON_SUPPORTER_BADGE,
                     user_id: x.discordID,
+                    badge_id: PATREON_SUPPORTER_BADGE_ID,
                 }))
             )
             .onConflict(["user_id", "badge_name"])
@@ -469,18 +473,18 @@ export async function addPremium(patrons: Array<Patron>): Promise<void> {
 /**
  * @param userIDs - The users to revoke premium membership from
  */
-export function removePremium(userIDs: string[]): void {
-    dbContext.kmq.transaction((trx) => {
-        dbContext
+export async function removePremium(userIDs: string[]): Promise<void> {
+    await dbContext.kmq.transaction(async (trx) => {
+        await dbContext
             .kmq("premium_users")
             .whereIn("user_id", userIDs)
             .update({ active: false })
             .transacting(trx);
 
-        dbContext
-            .kmq("badges")
+        await dbContext
+            .kmq("badges_players")
             .whereIn("user_id", userIDs)
-            .andWhere("badge_name", "=", PATREON_SUPPORTER_BADGE)
+            .andWhere("badge_id", "=", PATREON_SUPPORTER_BADGE_ID)
             .del()
             .transacting(trx);
     });

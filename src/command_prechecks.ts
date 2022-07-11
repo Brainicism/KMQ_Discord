@@ -199,8 +199,8 @@ export default class CommandPrechecks {
     static async notRestartingPrecheck(
         precheckArgs: PrecheckArgs
     ): Promise<boolean> {
-        const timeUntilRestart = await getTimeUntilRestart();
-        if (timeUntilRestart) {
+        const timeUntilRestart = getTimeUntilRestart();
+        if (timeUntilRestart !== null) {
             const { message } = precheckArgs;
             await sendErrorMessage(MessageContext.fromMessage(message), {
                 title: LocalizationManager.localizer.translate(

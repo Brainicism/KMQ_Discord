@@ -1215,6 +1215,11 @@
             "title": "Wait..."
         },
         "releaseDate": "Release Date",
+        "restart": {
+            "description_hard": "Downtime will be approximately {{downtimeMinutes}} minutes. Please end the current game to ensure your progress is saved!",
+            "description_soft": "Downtime will be a few seconds, but your game will end. Please end the current game to ensure your progress is saved!",
+            "title": "Upcoming Restart in {{timeUntilRestart}} Minutes."
+        },
         "sendingBookmarkedSongs": {
             "description": "Sending {{songs}} to {{players}}.\n\nBookmark songs during the game by right-clicking the song message and selecting `Apps > Bookmark Song`",
             "title": "Sending Bookmarked Songs..."

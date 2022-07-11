@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import * as cp from "child_process";
-import { DATABASE_DOWNLOAD_DIR } from "../constants";
+import { DATABASE_DOWNLOAD_DIR, DataFiles } from "../constants";
 import { IPCLogger } from "../logger";
 import { config } from "dotenv";
 import { getNewConnection } from "../database_context";
@@ -21,10 +21,6 @@ config({ path: path.resolve(__dirname, "../../.env") });
 const SQL_DUMP_EXPIRY = 10;
 const mvFileUrl = "http://kpop.daisuki.com.br/download.php?file=full";
 const audioFileUrl = "http://kpop.daisuki.com.br/download.php?file=audio";
-const frozenDaisukiColumnNamesPath = path.join(
-    __dirname,
-    "../../data/frozen_table_schema.json"
-);
 
 const logger = new IPCLogger("seed_db");
 
@@ -187,7 +183,7 @@ async function recordDaisukiTableSchema(db: DatabaseContext): Promise<void> {
     );
 
     await fs.promises.writeFile(
-        frozenDaisukiColumnNamesPath,
+        DataFiles.FROZEN_TABLE_SCHEMA,
         JSON.stringify(frozenTableColumnNames)
     );
 }
@@ -326,9 +322,9 @@ async function validateSqlDump(
         throw new Error(`SQL dump validation failed. ${e.sqlMessage}`);
     }
 
-    if (await pathExists(frozenDaisukiColumnNamesPath)) {
+    if (await pathExists(DataFiles.FROZEN_TABLE_SCHEMA)) {
         logger.info("Daisuki schema exists... checking for changes");
-        const frozenSchema = await parseJsonFile(frozenDaisukiColumnNamesPath);
+        const frozenSchema = await parseJsonFile(DataFiles.FROZEN_TABLE_SCHEMA);
         await validateDaisukiTableSchema(db, frozenSchema);
     }
 
@@ -420,7 +416,7 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
     await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_tmp;");
 
     // freeze table schema
-    if (!(await pathExists(frozenDaisukiColumnNamesPath))) {
+    if (!(await pathExists(DataFiles.FROZEN_TABLE_SCHEMA))) {
         logger.info("Frozen Daisuki schema doesn't exist... creating");
         await recordDaisukiTableSchema(db);
     }
@@ -520,7 +516,7 @@ export async function updateGroupList(db: DatabaseContext): Promise<void> {
         .orderBy("name", "ASC");
 
     await fs.promises.writeFile(
-        path.resolve(__dirname, "../../data/group_list.txt"),
+        DataFiles.GROUP_LIST,
         result.map((x) => x.name).join("\n")
     );
 }

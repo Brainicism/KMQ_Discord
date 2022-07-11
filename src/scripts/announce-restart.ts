@@ -1,8 +1,13 @@
 /* eslint-disable node/no-sync */
 /* eslint-disable no-console */
 import * as cp from "child_process";
+import * as path from "path";
+import { config } from "dotenv";
 import { program } from "commander";
+import Axios from "axios";
 import dbContext from "../database_context";
+
+config({ path: path.resolve(__dirname, "../../.env") });
 
 program
     .option(
@@ -25,8 +30,7 @@ program.parse();
 function serverShutdown(
     restartMinutes: number,
     restartDate: Date,
-    restart: boolean,
-    softRestart: boolean
+    restart: boolean
 ): Promise<void> {
     return new Promise((resolve) => {
         setInterval(() => {
@@ -42,9 +46,6 @@ function serverShutdown(
             if (!restart) {
                 console.log("Stopping KMQ...");
                 command = "pm2 stop kmq";
-            } else if (softRestart) {
-                console.log("Soft restarting KMQ...");
-                command = "tsc && curl -X POST localhost:5858/soft-restart";
             } else {
                 console.log("Restarting KMQ...");
                 command = "pm2 restart kmq";
@@ -58,11 +59,15 @@ function serverShutdown(
 
 process.on("SIGINT", async () => {
     console.log("Aborting restart");
-    await dbContext
-        .kmq("restart_notifications")
-        .where("id", "=", "1")
-        .update({ restart_time: null });
-    await dbContext.destroy();
+    await Axios.post(
+        `http://127.0.0.1:${process.env.WEB_SERVER_PORT}/clear-restart`,
+        {},
+        {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }
+    );
     process.exit(0);
 });
 
@@ -74,22 +79,36 @@ process.on("SIGINT", async () => {
 
     console.log(options);
 
-    await dbContext
-        .kmq("restart_notifications")
-        .where("id", "=", "1")
-        .update({ restart_time: restartDate });
+    try {
+        await Axios.post(
+            `http://127.0.0.1:${process.env.WEB_SERVER_PORT}/announce-restart`,
+            {
+                soft: options.softRestart,
+                restartMinutes,
+            },
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+    } catch (e) {
+        console.log(e);
+    }
 
-    console.log(
-        `Next ${
-            options.restart ? "restart" : "shutdown"
-        } scheduled at ${restartDate}`
-    );
+    if (!options.softRestart) {
+        console.log(
+            `Next ${
+                options.restart ? "restart" : "shutdown"
+            } scheduled at ${restartDate}`
+        );
 
-    await serverShutdown(
-        restartMinutes,
-        restartDate,
-        options.restart,
-        options.softRestart
-    );
+        await serverShutdown(restartMinutes, restartDate, options.restart);
+    } else {
+        console.log(
+            "Soft restart initiated, see application logs for more details"
+        );
+    }
+
     await dbContext.destroy();
 })();

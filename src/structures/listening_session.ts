@@ -62,12 +62,10 @@ export default class ListeningSession extends Session {
         super.updateOwner();
     }
 
-    // eslint-disable-next-line class-methods-use-this
     isListeningSession(): this is ListeningSession {
         return true;
     }
 
-    // eslint-disable-next-line class-methods-use-this
     sessionName(): string {
         return "Listening Session";
     }
@@ -212,7 +210,6 @@ export default class ListeningSession extends Session {
      * @param randomSong - The queried song
      * @returns the new GameRound
      */
-    // eslint-disable-next-line class-methods-use-this
     protected prepareRound(randomSong: QueriedSong): Round {
         return new ListeningRound(randomSong);
     }

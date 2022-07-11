@@ -71,6 +71,7 @@ const options: Options = {
     fetchTimeout: 5000,
     customClient: KmqClient,
     useCentralRequestHandler: true,
+    softKillNotificationPeriod: 3 * 60 * 1000,
 };
 
 function registerGlobalIntervals(fleet: Fleet): void {
@@ -156,17 +157,36 @@ async function startWebServer(fleet: Fleet): Promise<void> {
 
     httpServer.register(fastifyResponseCaching, { ttl: 5000 });
 
-    httpServer.post("/soft-restart", {}, async (request, reply) => {
+    httpServer.post("/announce-restart", {}, async (request, reply) => {
         if (request.ip !== "127.0.0.1") {
-            logger.error("Soft restart attempted by non-allowed IP");
+            logger.error("Announce restart attempted by non-allowed IP");
+            reply.code(401).send();
             return;
         }
 
-        logger.info("Soft restart initiated");
-        fleet.restartAllClusters(false);
+        const isSoftRestart = request.body["soft"] ? 1 : 0;
+
+        if (isSoftRestart) {
+            logger.info("Soft restart initiated");
+            fleet.restartAllClusters(false);
+        }
+
+        const restartMinutes = request.body["restartMinutes"];
+        await fleet.ipc.allClustersCommand(
+            `announce_restart|${isSoftRestart}|${restartMinutes}`
+        );
         reply.code(200).send();
-        logger.info("Clearing existing restart notifications...");
-        await clearRestartNotification();
+    });
+
+    httpServer.post("/clear-restart", {}, async (request, reply) => {
+        if (request.ip !== "127.0.0.1") {
+            logger.error("Clear restart attempted by non-allowed IP");
+            reply.code(401).send();
+            return;
+        }
+
+        await fleet.ipc.allClustersCommand("clear_restart");
+        reply.code(200).send();
     });
 
     httpServer.post("/voted", {}, async (request, reply) => {
@@ -362,7 +382,7 @@ async function startWebServer(fleet: Fleet): Promise<void> {
         registerProcessEvents(fleet);
 
         logger.info("Clearing existing restart notifications...");
-        await clearRestartNotification();
+        clearRestartNotification();
 
         logger.info("Registering global intervals");
         registerGlobalIntervals(fleet);
