@@ -111,7 +111,7 @@ export default class Player {
      */
     getName(): string {
         return (
-            State.client.guilds.get(this.guildID).members.get(this.id).nick ??
+            State.client.guilds.get(this.guildID).members.get(this.id)?.nick ??
             this.username
         );
     }
