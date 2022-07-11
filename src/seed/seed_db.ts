@@ -25,7 +25,7 @@ const audioFileUrl = "http://kpop.daisuki.com.br/download.php?file=audio";
 const logger = new IPCLogger("seed_db");
 
 /**
- * @param db - The database context
+ * @param db - The database contexttest
  * @param databaseName - The database name
  * @returns whether the database exists
  */
