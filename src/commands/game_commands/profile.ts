@@ -512,7 +512,6 @@ export default class ProfileCommand implements BaseCommand {
                         timestamp: new Date(),
                     },
                 ],
-                flags: 64,
             });
 
             logger.info(
