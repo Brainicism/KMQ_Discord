@@ -50,6 +50,15 @@ export default class AppCommandsCommand implements BaseCommand {
                     name: PROFILE_COMMAND_NAME,
                     type: Eris.Constants.ApplicationCommandTypes.USER,
                 });
+
+                for (const command of Object.values(State.client.commands)) {
+                    if (command.slashCommands) {
+                        const commands = command.slashCommands();
+                        for (const cmd of commands) {
+                            State.client.createCommand(cmd);
+                        }
+                    }
+                }
             } else if (process.env.NODE_ENV === EnvType.DEV) {
                 logger.info("Creating guild application commands...");
                 const debugServer = State.client.guilds.get(
@@ -71,6 +80,15 @@ export default class AppCommandsCommand implements BaseCommand {
                     name: PROFILE_COMMAND_NAME,
                     type: Eris.Constants.ApplicationCommandTypes.USER,
                 });
+
+                for (const command of Object.values(State.client.commands)) {
+                    if (command.slashCommands) {
+                        const commands = command.slashCommands();
+                        for (const cmd of commands) {
+                            debugServer.createCommand(cmd);
+                        }
+                    }
+                }
             }
 
             sendInfoMessage(MessageContext.fromMessage(message), {
@@ -83,7 +101,7 @@ export default class AppCommandsCommand implements BaseCommand {
             await Promise.allSettled(
                 commands.map(async (command) => {
                     logger.info(
-                        `Deleting global application command: ${command.id}`
+                        `Deleting global application command: ${command.name} -- ${command.id}`
                     );
                     await State.client.deleteCommand(command.id);
                 })

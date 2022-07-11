@@ -1,14 +1,18 @@
 import { BOOKMARK_COMMAND_NAME, PROFILE_COMMAND_NAME } from "../../constants";
+import { IPCLogger } from "../../logger";
 import { handleProfileInteraction } from "../../commands/game_commands/profile";
 import {
     tryCreateInteractionErrorAcknowledgement,
     tryInteractionAcknowledge,
 } from "../../helpers/discord_utils";
 import Eris from "eris";
+import GroupsCommand from "../../commands/game_options/groups";
 import KmqMember from "../../structures/kmq_member";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+
+const logger = new IPCLogger("interactionCreate");
 
 /**
  * Handles the 'interactionCreate' event
@@ -16,11 +20,16 @@ import Session from "../../structures/session";
  */
 export default async function interactionCreateHandler(
     interaction:
-        | Eris.PingInteraction
         | Eris.CommandInteraction
         | Eris.ComponentInteraction
-        | Eris.UnknownInteraction
+        | Eris.AutocompleteInteraction
 ): Promise<void> {
+    const messageContext = new MessageContext(
+        interaction.channel.id,
+        new KmqMember(interaction.member.id),
+        interaction.guildID
+    );
+
     if (interaction instanceof Eris.ComponentInteraction) {
         const session = Session.getSession(interaction.guildID);
         if (
@@ -31,50 +40,74 @@ export default async function interactionCreateHandler(
             return;
         }
 
-        const messageContext = new MessageContext(
-            interaction.channel.id,
-            new KmqMember(interaction.member.id),
-            interaction.guildID
-        );
-
         await session.handleComponentInteraction(interaction, messageContext);
-    } else if (interaction instanceof Eris.CommandInteraction) {
-        if (
-            interaction.data.type ===
-            Eris.Constants.ApplicationCommandTypes.USER
-        ) {
-            if (interaction.data.name === PROFILE_COMMAND_NAME) {
-                handleProfileInteraction(
+        return;
+    }
+
+    if (interaction instanceof Eris.CommandInteraction) {
+        logger.info(`Interaction received for '${interaction.data.name}'`);
+    }
+
+    switch (interaction.data.name) {
+        case "groups": {
+            if (interaction instanceof Eris.CommandInteraction) {
+                await GroupsCommand.processChatInputInteraction(
                     interaction,
+                    messageContext
+                );
+            } else if (interaction instanceof Eris.AutocompleteInteraction) {
+                GroupsCommand.processAutocompleteInteraction(interaction);
+            }
+
+            break;
+        }
+
+        case PROFILE_COMMAND_NAME: {
+            interaction = interaction as Eris.CommandInteraction;
+            if (
+                interaction.data.type ===
+                Eris.Constants.ApplicationCommandTypes.USER
+            ) {
+                handleProfileInteraction(
+                    interaction as Eris.CommandInteraction,
                     interaction.data.target_id
                 );
-            }
-        } else if (
-            interaction.data.type ===
-            Eris.Constants.ApplicationCommandTypes.MESSAGE
-        ) {
-            if (interaction.data.name === BOOKMARK_COMMAND_NAME) {
-                const session = Session.getSession(interaction.guildID);
-                if (!session) {
-                    tryCreateInteractionErrorAcknowledgement(
-                        interaction,
-                        LocalizationManager.localizer.translate(
-                            interaction.guildID,
-                            "misc.failure.interaction.bookmarkOutsideGame"
-                        )
-                    );
-                    return;
-                }
+            } else if (
+                interaction.data.type ===
+                Eris.Constants.ApplicationCommandTypes.MESSAGE
+            ) {
+                const messageID = interaction.data.target_id;
+                const authorID = (
+                    interaction as Eris.CommandInteraction
+                ).data.resolved["messages"].get(messageID).author.id;
 
-                session.handleBookmarkInteraction(interaction);
-            } else if (interaction.data.name === PROFILE_COMMAND_NAME) {
-                const messageId = interaction.data.target_id;
-                const authorId =
-                    interaction.data.resolved["messages"].get(messageId).author
-                        .id;
-
-                handleProfileInteraction(interaction, authorId);
+                handleProfileInteraction(interaction, authorID);
             }
+
+            break;
+        }
+
+        case BOOKMARK_COMMAND_NAME: {
+            const session = Session.getSession(interaction.guildID);
+            if (!session) {
+                tryCreateInteractionErrorAcknowledgement(
+                    interaction as Eris.CommandInteraction,
+                    LocalizationManager.localizer.translate(
+                        interaction.guildID,
+                        "misc.failure.interaction.bookmarkOutsideGame"
+                    )
+                );
+                return;
+            }
+
+            session.handleBookmarkInteraction(
+                interaction as Eris.CommandInteraction
+            );
+            break;
+        }
+
+        default: {
+            break;
         }
     }
 }

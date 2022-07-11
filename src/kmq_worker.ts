@@ -4,9 +4,7 @@ import { BaseClusterWorker } from "eris-fleet";
 import { IPCLogger } from "./logger";
 import { config } from "dotenv";
 import {
-    registerClientEvents,
     registerIntervals,
-    registerProcessEvents,
     reloadCaches,
     updateBotStatus,
 } from "./helpers/management_utils";
@@ -22,6 +20,28 @@ import fs from "fs";
 import path from "path";
 import schedule from "node-schedule";
 import type KmqClient from "./kmq_client";
+
+import SIGINTHandler from "./events/process/SIGINT";
+import channelDeleteHandler from "./events/client/channelDelete";
+import connectHandler from "./events/client/connect";
+import debugHandler from "./events/client/debug";
+import disconnectHandler from "./events/client/disconnect";
+import errorHandler from "./events/client/error";
+import guildAvailableHandler from "./events/client/guildAvailable";
+import guildCreateHandler from "./events/client/guildCreate";
+import guildDeleteHandler from "./events/client/guildDelete";
+import interactionCreateHandler from "./events/client/interactionCreate";
+import messageCreateHandler from "./events/client/messageCreate";
+import shardDisconnectHandler from "./events/client/shardDisconnect";
+import shardReadyHandler from "./events/client/shardReady";
+import shardResumeHandler from "./events/client/shardResume";
+import unavailableGuildCreateHandler from "./events/client/unavailableGuildCreate";
+import uncaughtExceptionHandler from "./events/process/uncaughtException";
+import unhandledRejectionHandler from "./events/process/unhandledRejection";
+import voiceChannelJoinHandler from "./events/client/voiceChannelJoin";
+import voiceChannelLeaveHandler from "./events/client/voiceChannelLeave";
+import voiceChannelSwitchHandler from "./events/client/voiceChannelSwitch";
+import warnHandler from "./events/client/warn";
 
 const logger = new IPCLogger("kmq");
 config({ path: path.resolve(__dirname, "../.env") });
@@ -92,6 +112,46 @@ export default class BotWorker extends BaseClusterWorker {
         }
     };
 
+    // eslint-disable-next-line class-methods-use-this
+    registerClientEvents(client: KmqClient): void {
+        // remove listeners registered by eris-fleet, handle on cluster instead
+        client.removeAllListeners("warn");
+        client.removeAllListeners("error");
+        // register listeners
+        client
+            .on("messageCreate", messageCreateHandler)
+            .on("voiceChannelLeave", voiceChannelLeaveHandler)
+            .on("voiceChannelSwitch", voiceChannelSwitchHandler)
+            .on("voiceChannelJoin", voiceChannelJoinHandler)
+            .on("channelDelete", channelDeleteHandler)
+            .on("connect", connectHandler)
+            .on("error", errorHandler)
+            .on("warn", warnHandler)
+            .on("shardDisconnect", shardDisconnectHandler)
+            .on("shardReady", shardReadyHandler)
+            .on("shardResume", shardResumeHandler)
+            .on("disconnect", disconnectHandler)
+            .on("debug", debugHandler)
+            .on("guildCreate", guildCreateHandler)
+            .on("guildDelete", guildDeleteHandler)
+            .on("unavailableGuildCreate", unavailableGuildCreateHandler)
+            .on("guildAvailable", guildAvailableHandler)
+            .on("interactionCreate", interactionCreateHandler);
+    }
+
+    // eslint-disable-next-line class-methods-use-this
+    registerProcessEvents(): void {
+        // remove listeners registered by eris-fleet, handle on cluster instead
+        process.removeAllListeners("unhandledRejection");
+        process.removeAllListeners("uncaughtException");
+
+        process
+            .on("unhandledRejection", unhandledRejectionHandler)
+            .on("uncaughtException", uncaughtExceptionHandler)
+            .on("SIGINT", SIGINTHandler);
+    }
+
+    // eslint-disable-next-line class-methods-use-this
     shutdown = async (done): Promise<void> => {
         logger.debug("SHUTDOWN received, cleaning up...");
 
@@ -142,10 +202,10 @@ export default class BotWorker extends BaseClusterWorker {
         registerIntervals(this.clusterID);
 
         logger.info("Registering client event handlers...");
-        registerClientEvents();
+        this.registerClientEvents(State.client);
 
         logger.info("Registering process event handlers...");
-        registerProcessEvents();
+        this.registerProcessEvents();
 
         if (process.env.NODE_ENV === EnvType.PROD && this.clusterID === 0) {
             logger.info("Initializing bot stats poster...");
