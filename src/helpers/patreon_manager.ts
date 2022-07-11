@@ -46,13 +46,15 @@ interface PatreonResponse {
 enum PatronState {
     ACTIVE = "active_patron",
     DECLINED = "declined_patron",
+    FORMER = "former_patron",
 }
 
 function parsePatreonResponse(patreonResponse: PatreonResponse): Array<Patron> {
     const patrons: Array<Patron> = [];
-    for (const data of patreonResponse.data) {
-        if (data.type !== "member") continue;
-        const patreonMemberID = data.relationships.user.data.id;
+    for (const userData of patreonResponse.data) {
+        if (userData.type !== "member") continue;
+
+        const patreonMemberID = userData.relationships.user.data.id;
         const matchedPatreonUser = patreonResponse.included.find(
             (x) => x.type === "user" && x.id === patreonMemberID
         );
@@ -66,11 +68,12 @@ function parsePatreonResponse(patreonResponse: PatreonResponse): Array<Patron> {
 
         patrons.push({
             discordID:
-                matchedPatreonUser.attributes.social_connections.discord
+                matchedPatreonUser.attributes.social_connections?.discord
                     ?.user_id,
-            activePatron: data.attributes.patron_status === PatronState.ACTIVE,
+            activePatron:
+                userData.attributes.patron_status === PatronState.ACTIVE,
             firstSubscribed: new Date(
-                data.attributes.pledge_relationship_start
+                userData.attributes.pledge_relationship_start
             ),
         });
     }
@@ -118,7 +121,7 @@ export default async function updatePremiumUsers(): Promise<void> {
         .filter((x) => x.activePatron)
         .map((x) => x.discordID);
 
-    removePremium(
+    await removePremium(
         (
             await dbContext
                 .kmq("premium_users")
@@ -127,5 +130,5 @@ export default async function updatePremiumUsers(): Promise<void> {
                 .whereNot("source", "=", "loyalty")
         ).map((x) => x.user_id)
     );
-    addPremium(patrons);
+    await addPremium(patrons);
 }

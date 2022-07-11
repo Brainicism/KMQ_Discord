@@ -473,8 +473,8 @@ export async function addPremium(patrons: Array<Patron>): Promise<void> {
 /**
  * @param userIDs - The users to revoke premium membership from
  */
-export function removePremium(userIDs: string[]): void {
-    dbContext.kmq.transaction(async (trx) => {
+export async function removePremium(userIDs: string[]): Promise<void> {
+    await dbContext.kmq.transaction(async (trx) => {
         await dbContext
             .kmq("premium_users")
             .whereIn("user_id", userIDs)
