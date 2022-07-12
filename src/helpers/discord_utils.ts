@@ -8,6 +8,7 @@ import {
     EMBED_ERROR_COLOR,
     EMBED_SUCCESS_BONUS_COLOR,
     EMBED_SUCCESS_COLOR,
+    EPHEMERAL_MESSAGE_FLAG,
     KmqImages,
 } from "../constants";
 import { IPCLogger } from "../logger";
@@ -1524,12 +1525,14 @@ export async function tryAutocompleteInteractionAcknowledge(
  * @param title - The embed title
  * @param description - The embed description
  * @param interactionContent - The interaction message content
+ * @param ephemeral - Whether the embed can only be seen by the triggering user
  */
 export async function tryCreateInteractionSuccessAcknowledgement(
     interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
     title: string,
     description: string,
-    interactionContent?: Eris.InteractionContent
+    interactionContent?: Eris.InteractionContent,
+    ephemeral: boolean = false
 ): Promise<void> {
     if (!withinInteractionInterval(interaction)) {
         return;
@@ -1556,7 +1559,7 @@ export async function tryCreateInteractionSuccessAcknowledgement(
                     thumbnail: { url: KmqImages.THUMBS_UP },
                 },
             ],
-            flags: 64,
+            flags: ephemeral ? EPHEMERAL_MESSAGE_FLAG : null,
         });
     } catch (err) {
         interactionRejectionHandler(interaction, err);
@@ -1595,7 +1598,7 @@ export async function tryCreateInteractionErrorAcknowledgement(
                     thumbnail: { url: KmqImages.DEAD },
                 },
             ],
-            flags: 64,
+            flags: EPHEMERAL_MESSAGE_FLAG,
         });
     } catch (err) {
         interactionRejectionHandler(interaction, err);

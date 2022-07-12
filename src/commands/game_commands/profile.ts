@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/dot-notation */
-import { CUM_EXP_TABLE } from "../../constants";
+import { CUM_EXP_TABLE, EPHEMERAL_MESSAGE_FLAG } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     fetchUser,
@@ -458,7 +458,7 @@ export async function handleProfileInteraction(
                     timestamp: new Date(),
                 },
             ],
-            flags: 64,
+            flags: EPHEMERAL_MESSAGE_FLAG,
         });
 
         logger.info(
