@@ -119,8 +119,8 @@
                 "description": "현재 게임을 종료하고 승자를 결정합니다."
             },
             "interaction": {
-                "title": "게임 종료",
-                "description": "즐거웠기를 바랍니다!"
+                "description": "즐거웠기를 바랍니다!",
+                "title": "게임 종료"
             }
         },
         "exclude": {
@@ -1051,8 +1051,8 @@
             },
             "game": {
                 "noneInProgress": {
-                    "title": "활성화된 게임 없음",
-                    "description": "진행 중인 게임이 없습니다."
+                    "description": "진행 중인 게임이 없습니다.",
+                    "title": "활성화된 게임 없음"
                 }
             },
             "gameOptionConflict": {

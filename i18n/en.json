@@ -119,8 +119,8 @@
                 "description": "Finishes the current game and decides on a winner."
             },
             "interaction": {
-                "title": "Ending game",
-                "description": "Hope you had fun!"
+                "description": "Hope you had fun!",
+                "title": "Ending game"
             }
         },
         "exclude": {
@@ -1051,8 +1051,8 @@
             },
             "game": {
                 "noneInProgress": {
-                    "title": "No Active Game",
-                    "description": "There is no game in progress."
+                    "description": "There is no game in progress.",
+                    "title": "No Active Game"
                 }
             },
             "gameOptionConflict": {
