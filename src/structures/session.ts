@@ -582,7 +582,8 @@ export default abstract class Session {
                         )
                     ),
                 }
-            )
+            ),
+            true
         );
 
         this.addBookmarkedSong(interaction.member?.id, {

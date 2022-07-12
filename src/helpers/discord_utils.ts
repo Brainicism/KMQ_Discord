@@ -1496,11 +1496,13 @@ export async function tryInteractionAcknowledge(
  * @param interaction - The originating interaction
  * @param title - The embed title
  * @param description - The embed description
+ * @param ephemeral - Whether the embed can only be seen by the triggering user
  */
 export async function tryCreateInteractionSuccessAcknowledgement(
     interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
     title: string,
-    description: string
+    description: string,
+    ephemeral: boolean = false
 ): Promise<void> {
     if (!withinInteractionInterval(interaction)) {
         return;
@@ -1522,7 +1524,7 @@ export async function tryCreateInteractionSuccessAcknowledgement(
                     thumbnail: { url: KmqImages.THUMBS_UP },
                 },
             ],
-            flags: EPHEMERAL_MESSAGE_FLAG,
+            flags: ephemeral ? EPHEMERAL_MESSAGE_FLAG : null,
         });
     } catch (err) {
         interactionRejectionHandler(interaction, err);
