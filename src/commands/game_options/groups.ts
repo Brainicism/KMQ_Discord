@@ -325,27 +325,14 @@ export default class GroupsCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        if (interaction instanceof Eris.CommandInteraction) {
-            if (
-                interaction.data.type ===
-                Eris.Constants.ApplicationCommandTypes.CHAT_INPUT
-            ) {
-                let groups: Array<MatchedArtist>;
-                if (interaction.data.options == null) {
-                    groups = null;
-                } else {
-                    groups = GroupsCommand.getMatchedArtists(
-                        interaction.data.options
-                    );
-                }
-
-                await GroupsCommand.updateOption(
-                    messageContext,
-                    groups,
-                    interaction
-                );
-            }
+        let groups: Array<MatchedArtist>;
+        if (interaction.data.options == null) {
+            groups = null;
+        } else {
+            groups = GroupsCommand.getMatchedArtists(interaction.data.options);
         }
+
+        await GroupsCommand.updateOption(messageContext, groups, interaction);
     }
 
     /**
