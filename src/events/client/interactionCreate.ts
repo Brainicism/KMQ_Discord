@@ -5,6 +5,7 @@ import {
     tryCreateInteractionErrorAcknowledgement,
     tryInteractionAcknowledge,
 } from "../../helpers/discord_utils";
+import ArtistTypeCommand from "../../commands/game_options/artisttype";
 import Eris from "eris";
 import GroupsCommand from "../../commands/game_options/groups";
 import KmqMember from "../../structures/kmq_member";
@@ -27,6 +28,7 @@ const CHAT_INPUT_COMMAND_INTERACTION_HANDLERS: {
     release: ReleaseCommand.processChatInputInteraction,
     stats: StatsCommand.processChatInputInteraction,
     options: OptionsCommand.processChatInputInteraction,
+    artisttype: ArtistTypeCommand.processChatInputInteraction,
 };
 
 const AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS: {

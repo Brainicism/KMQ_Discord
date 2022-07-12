@@ -58,6 +58,9 @@
                     "groups": "Play songs only from groups",
                     "reset": "Resets the artist type option",
                     "soloists": "Play songs only from soloists"
+                },
+                "interaction": {
+                    "description": "Choose whether you'd like to hear from soloists, groups, or both"
                 }
             }
         },
