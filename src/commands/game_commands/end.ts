@@ -38,7 +38,7 @@ export default class EndCommand implements BaseCommand {
     slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
         {
             name: "end",
-            description: LocalizationManager.localizer.translate(
+            description: LocalizationManager.localizer.translateByLocale(
                 LocaleType.EN,
                 "command.end.help.description"
             ),
