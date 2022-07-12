@@ -583,6 +583,7 @@ export default abstract class Session {
                     ),
                 }
             ),
+            null,
             true
         );
 

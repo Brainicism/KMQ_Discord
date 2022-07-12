@@ -79,13 +79,15 @@ export function getDebugLogHeader(
         | Eris.Message
         | Eris.ComponentInteraction
         | Eris.CommandInteraction
+        | Eris.AutocompleteInteraction
 ): string {
     let header: string;
     if (context instanceof Eris.Message) {
         header = `gid: ${context.guildID}, uid: ${context.author.id}, tid: ${context.channel.id}`;
     } else if (
         context instanceof Eris.ComponentInteraction ||
-        context instanceof Eris.CommandInteraction
+        context instanceof Eris.CommandInteraction ||
+        context instanceof Eris.AutocompleteInteraction
     ) {
         header = `gid: ${context.guildID}, uid: ${context.member?.id}, tid: ${context.channel.id}`;
     } else {
@@ -1444,7 +1446,10 @@ export async function sendBookmarkedSongs(
 }
 
 function withinInteractionInterval(
-    interaction: Eris.ComponentInteraction | Eris.CommandInteraction
+    interaction:
+        | Eris.ComponentInteraction
+        | Eris.CommandInteraction
+        | Eris.AutocompleteInteraction
 ): boolean {
     return (
         new Date().getTime() - interaction.createdAt <=
@@ -1453,7 +1458,10 @@ function withinInteractionInterval(
 }
 
 function interactionRejectionHandler(
-    interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
+    interaction:
+        | Eris.ComponentInteraction
+        | Eris.CommandInteraction
+        | Eris.AutocompleteInteraction,
     err
 ): void {
     if (err.code === 10062) {
@@ -1492,16 +1500,38 @@ export async function tryInteractionAcknowledge(
 }
 
 /**
+ * Attempts to acknowledge an autocomplete interaction with the given response data
+ * @param interaction - The originating interaction
+ * @param response - The autocomplete data to show the user
+ */
+export async function tryAutocompleteInteractionAcknowledge(
+    interaction: Eris.AutocompleteInteraction,
+    response: Array<{ name: string; value: string }>
+): Promise<void> {
+    if (!withinInteractionInterval(interaction)) {
+        return;
+    }
+
+    try {
+        await interaction.acknowledge(response);
+    } catch (err) {
+        interactionRejectionHandler(interaction, err);
+    }
+}
+
+/**
  * Attempts to send a success response to an interaction
  * @param interaction - The originating interaction
  * @param title - The embed title
  * @param description - The embed description
+ * @param interactionContent - The interaction message content
  * @param ephemeral - Whether the embed can only be seen by the triggering user
  */
 export async function tryCreateInteractionSuccessAcknowledgement(
     interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
     title: string,
     description: string,
+    interactionContent?: Eris.InteractionContent,
     ephemeral: boolean = false
 ): Promise<void> {
     if (!withinInteractionInterval(interaction)) {
@@ -1509,6 +1539,11 @@ export async function tryCreateInteractionSuccessAcknowledgement(
     }
 
     try {
+        if (interactionContent) {
+            await interaction.createMessage(interactionContent);
+            return;
+        }
+
         await interaction.createMessage({
             embeds: [
                 {

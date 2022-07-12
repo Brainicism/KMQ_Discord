@@ -12,78 +12,16 @@ import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
 import KmqConfiguration from "../kmq_configuration";
 import LocalizationManager from "./localization_manager";
 import MessageContext from "../structures/message_context";
-import SIGINTHandler from "../events/process/SIGINT";
+
 import State from "../state";
 import _ from "lodash";
-import channelDeleteHandler from "../events/client/channelDelete";
-import connectHandler from "../events/client/connect";
 import dbContext from "../database_context";
-import debugHandler from "../events/client/debug";
-import disconnectHandler from "../events/client/disconnect";
-import errorHandler from "../events/client/error";
-import guildAvailableHandler from "../events/client/guildAvailable";
-import guildCreateHandler from "../events/client/guildCreate";
-import guildDeleteHandler from "../events/client/guildDelete";
-import interactionCreateHandler from "../events/client/interactionCreate";
-import messageCreateHandler from "../events/client/messageCreate";
 import schedule from "node-schedule";
-import shardDisconnectHandler from "../events/client/shardDisconnect";
-import shardReadyHandler from "../events/client/shardReady";
-import shardResumeHandler from "../events/client/shardResume";
-import unavailableGuildCreateHandler from "../events/client/unavailableGuildCreate";
-import uncaughtExceptionHandler from "../events/process/uncaughtException";
-import unhandledRejectionHandler from "../events/process/unhandledRejection";
 import updatePremiumUsers from "./patreon_manager";
-import voiceChannelJoinHandler from "../events/client/voiceChannelJoin";
-import voiceChannelLeaveHandler from "../events/client/voiceChannelLeave";
-import voiceChannelSwitchHandler from "../events/client/voiceChannelSwitch";
-import warnHandler from "../events/client/warn";
 import type LocaleType from "../enums/locale_type";
 
 const logger = new IPCLogger("management_utils");
-
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 3, 2, 1]);
-
-/** Registers listeners on client events */
-export function registerClientEvents(): void {
-    const { client } = State;
-    // remove listeners registered by eris-fleet, handle on cluster instead
-    client.removeAllListeners("warn");
-    client.removeAllListeners("error");
-
-    // register listeners
-    client
-        .on("messageCreate", messageCreateHandler)
-        .on("voiceChannelLeave", voiceChannelLeaveHandler)
-        .on("voiceChannelSwitch", voiceChannelSwitchHandler)
-        .on("voiceChannelJoin", voiceChannelJoinHandler)
-        .on("channelDelete", channelDeleteHandler)
-        .on("connect", connectHandler)
-        .on("error", errorHandler)
-        .on("warn", warnHandler)
-        .on("shardDisconnect", shardDisconnectHandler)
-        .on("shardReady", shardReadyHandler)
-        .on("shardResume", shardResumeHandler)
-        .on("disconnect", disconnectHandler)
-        .on("debug", debugHandler)
-        .on("guildCreate", guildCreateHandler)
-        .on("guildDelete", guildDeleteHandler)
-        .on("unavailableGuildCreate", unavailableGuildCreateHandler)
-        .on("guildAvailable", guildAvailableHandler)
-        .on("interactionCreate", interactionCreateHandler);
-}
-
-/** Registers listeners on process events */
-export function registerProcessEvents(): void {
-    // remove listeners registered by eris-fleet, handle on cluster instead
-    process.removeAllListeners("unhandledRejection");
-    process.removeAllListeners("uncaughtException");
-
-    process
-        .on("unhandledRejection", unhandledRejectionHandler)
-        .on("uncaughtException", uncaughtExceptionHandler)
-        .on("SIGINT", SIGINTHandler);
-}
 
 /**
  * Gets the remaining time until the next server restart
@@ -329,6 +267,52 @@ export async function reloadBonusGroups(): Promise<void> {
     );
 }
 
+async function reloadArtists(): Promise<void> {
+    const artistAliasMapping = await dbContext
+        .kmq("available_songs")
+        .distinct(["artist_name_en", "artist_aliases"])
+        .select([
+            "artist_name_en",
+            "artist_name_ko",
+            "artist_aliases",
+            "id_artist",
+        ])
+        .whereRaw("artist_name_en NOT LIKE ?", ["%+%"]);
+
+    for (const mapping of artistAliasMapping) {
+        const aliases = mapping["artist_aliases"]
+            .split(";")
+            .filter((x: string) => x);
+
+        const artistEntry = {
+            name: mapping["artist_name_en"],
+            hangulName: mapping["artist_name_ko"],
+            id: mapping["id_artist"],
+        };
+
+        State.artistToEntry[mapping["artist_name_en"].toLocaleLowerCase()] =
+            artistEntry;
+        State.artistToEntry[mapping["artist_name_ko"]] = artistEntry;
+        for (const alias in aliases) {
+            if (alias.length > 0) {
+                State.artistToEntry[alias.toLocaleLowerCase()] = artistEntry;
+            }
+        }
+    }
+
+    State.topArtists = await dbContext
+        .kmq("available_songs")
+        .select([
+            "id_artist AS id",
+            "artist_name_en AS name",
+            "artist_name_ko AS hangulName",
+        ])
+        .join("kpop_groups", "available_songs.id_artist", "kpop_groups.id")
+        .orderByRaw("SUM(views) DESC")
+        .limit(25)
+        .groupBy("id_artist");
+}
+
 async function reloadLocales(): Promise<void> {
     const updatedLocales = await dbContext.kmq("locale").select("*");
     for (const l of updatedLocales) {
@@ -354,6 +338,8 @@ export function registerIntervals(clusterID: number): void {
         reloadFactCache();
         // New bonus groups
         reloadBonusGroups();
+        // New groups used for autocomplete
+        reloadArtists();
     });
 
     // Every hour
@@ -408,6 +394,7 @@ export function registerIntervals(clusterID: number): void {
 /** Reloads caches */
 export function reloadCaches(): void {
     reloadAliases();
+    reloadArtists();
     reloadFactCache();
     reloadBonusGroups();
     reloadLocales();

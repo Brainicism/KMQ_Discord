@@ -5,6 +5,7 @@ import type GameSession from "./structures/game_session";
 import type KmqClient from "./kmq_client";
 import type ListeningSession from "./structures/listening_session";
 import type LocaleType from "./enums/locale_type";
+import type MatchedArtist from "./interfaces/matched_artist";
 import type RestartNotification from "./interfaces/restart_notification";
 
 export default class State {
@@ -25,6 +26,8 @@ export default class State {
     static rateLimiter = new RateLimiter(15, 30);
     static bonusArtists: Set<string> = new Set<string>();
     static locales: { [guildID: string]: LocaleType } = {};
+    static artistToEntry: { [artistNameOrAlias: string]: MatchedArtist } = {};
+    static topArtists: Array<MatchedArtist> = [];
     static restartNotification: RestartNotification;
     static getGuildLocale(guildID: string): LocaleType {
         return State.locales[guildID] ?? DEFAULT_LOCALE;

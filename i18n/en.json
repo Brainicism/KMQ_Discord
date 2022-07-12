@@ -815,6 +815,9 @@
                     "all": "Plays all available videos, including dance practices, acoustic versions, remixes",
                     "official": "Plays only {{official}} music videos",
                     "reset": "Reset to the default release type of {{defaultRelease}}"
+                },
+                "interaction": {
+                    "description": "Choose whether to include only official music videos, or all videos."
                 }
             }
         },

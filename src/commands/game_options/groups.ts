@@ -1,25 +1,37 @@
 import { GROUP_LIST_URL } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
+    containsHangul,
+    getOrdinalNum,
+    setIntersection,
+} from "../../helpers/utils";
+import {
+    generateEmbed,
+    generateOptionsMessage,
     getDebugLogHeader,
     sendErrorMessage,
     sendOptionsMessage,
+    tryAutocompleteInteractionAcknowledge,
+    tryCreateInteractionSuccessAcknowledgement,
 } from "../../helpers/discord_utils";
 import {
     getMatchingGroupNames,
     getSimilarGroupNames,
 } from "../../helpers/game_utils";
-import { setIntersection } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
+import _ from "lodash";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import type MatchedArtist from "../../interfaces/matched_artist";
 
 const logger = new IPCLogger("groups");
 
@@ -83,20 +95,35 @@ export default class GroupsCommand implements BaseCommand {
         priority: 135,
     });
 
+    slashCommands = (): Array<Eris.ApplicationCommandStructure> => [
+        {
+            name: "groups",
+            description: "Play songs from the given groups.",
+            options: [...Array(25).keys()].map((x) => ({
+                name: `group_${x + 1}`,
+                description: `The ${getOrdinalNum(
+                    x + 1
+                )} group to play songs from`,
+                type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
+                autocomplete: true,
+                required: false,
+            })),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+        },
+    ];
+
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await GuildPreference.getGuildPreference(
             message.guildID
         );
 
+        let matchedGroups: MatchedArtist[];
         if (parsedMessage.components.length === 0) {
-            await guildPreference.reset(GameOption.GROUPS);
-            await sendOptionsMessage(
-                Session.getSession(message.guildID),
+            matchedGroups = null;
+            await GroupsCommand.updateOption(
                 MessageContext.fromMessage(message),
-                guildPreference,
-                [{ option: GameOption.GROUPS, reset: true }]
+                matchedGroups
             );
-            logger.info(`${getDebugLogHeader(message)} | Groups reset.`);
             return;
         }
 
@@ -119,7 +146,7 @@ export default class GroupsCommand implements BaseCommand {
             .map((groupName) => groupName.trim());
 
         const groups = await getMatchingGroupNames(groupNames);
-        let { matchedGroups } = groups;
+        matchedGroups = groups.matchedGroups;
         const { unmatchedGroups } = groups;
         if (unmatchedGroups.length) {
             logger.info(
@@ -221,18 +248,145 @@ export default class GroupsCommand implements BaseCommand {
             return;
         }
 
-        await guildPreference.setGroups(matchedGroups);
-        await sendOptionsMessage(
-            Session.getSession(message.guildID),
+        await GroupsCommand.updateOption(
             MessageContext.fromMessage(message),
-            guildPreference,
-            [{ option: GameOption.GROUPS, reset: false }]
-        );
-
-        logger.info(
-            `${getDebugLogHeader(
-                message
-            )} | Groups set to ${guildPreference.getDisplayedGroupNames()}`
+            matchedGroups
         );
     };
+
+    static async updateOption(
+        messageContext: MessageContext,
+        matchedGroups: MatchedArtist[],
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID
+        );
+
+        const reset = matchedGroups === null;
+        if (reset) {
+            await guildPreference.reset(GameOption.GROUPS);
+            logger.info(`${getDebugLogHeader(messageContext)} | Groups reset.`);
+        } else {
+            await guildPreference.setGroups(matchedGroups);
+            logger.info(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Groups set to ${guildPreference.getDisplayedGroupNames()}`
+            );
+        }
+
+        if (interaction) {
+            const message = await generateOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.GROUPS, reset }]
+            );
+
+            const embed = generateEmbed(messageContext, message, true);
+            tryCreateInteractionSuccessAcknowledgement(
+                interaction,
+                null,
+                null,
+                { embeds: [embed] }
+            );
+        } else {
+            await sendOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.GROUPS, reset }]
+            );
+        }
+    }
+
+    /**
+     * Retrieve artist names from the interaction options
+     * @param interactionOptions - The message's interaction options
+     * @returns the matched artists
+     */
+    static getMatchedArtists(
+        interactionOptions: Array<Eris.InteractionDataOptions>
+    ): Array<MatchedArtist> {
+        return _.uniqBy(
+            interactionOptions.map(
+                (x) => State.artistToEntry[x["value"].toLocaleLowerCase()]
+            ),
+            "id"
+        );
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    static async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        let groups: Array<MatchedArtist>;
+        if (interaction.data.options == null) {
+            groups = null;
+        } else {
+            groups = GroupsCommand.getMatchedArtists(interaction.data.options);
+        }
+
+        await GroupsCommand.updateOption(messageContext, groups, interaction);
+    }
+
+    /**
+     * Handles showing suggested artists as the user types for the groups slash command
+     * @param interaction - The interaction with intermediate typing state
+     */
+    static async processAutocompleteInteraction(
+        interaction: Eris.AutocompleteInteraction
+    ): Promise<void> {
+        const lowercaseUserInput = (
+            interaction.data.options.filter((x) => x["focused"])[0][
+                "value"
+            ] as string
+        ).toLocaleLowerCase();
+
+        const artistEntryToInteraction = (
+            x: MatchedArtist,
+            useHangul: boolean
+        ): { name: string; value: string } => ({
+            name: useHangul && x.hangulName ? x.hangulName : x.name,
+            value: useHangul && x.hangulName ? x.hangulName : x.name,
+        });
+
+        const previouslyEnteredArtists = GroupsCommand.getMatchedArtists(
+            interaction.data.options.slice(0, -1)
+        ).map((x) => x?.name);
+
+        const showHangul =
+            containsHangul(lowercaseUserInput) ||
+            State.getGuildLocale(interaction.guildID) === LocaleType.KO;
+
+        if (lowercaseUserInput === "") {
+            // Show top artists when no input so far
+            await tryAutocompleteInteractionAcknowledge(
+                interaction,
+                Object.entries(State.topArtists)
+                    .filter(
+                        (x) => !previouslyEnteredArtists.includes(x[1].name)
+                    )
+                    .map((x) => artistEntryToInteraction(x[1], showHangul))
+            );
+        } else {
+            const matchingGroups = Object.entries(State.artistToEntry)
+                .filter((x) => x[0].startsWith(lowercaseUserInput))
+                .sort((a, b) => a[0].localeCompare(b[0]))
+                .filter((x) => !previouslyEnteredArtists.includes(x[1].name))
+                .slice(0, 25);
+
+            await tryAutocompleteInteractionAcknowledge(
+                interaction,
+                matchingGroups.map((x) =>
+                    artistEntryToInteraction(x[1], showHangul)
+                )
+            );
+        }
+    }
 }
