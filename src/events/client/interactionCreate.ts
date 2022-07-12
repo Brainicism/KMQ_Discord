@@ -11,6 +11,7 @@ import KmqMember from "../../structures/kmq_member";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import StatsCommand from "../../commands/admin/stats";
 
 const logger = new IPCLogger("interactionCreate");
 
@@ -57,6 +58,17 @@ export default async function interactionCreateHandler(
                 );
             } else if (interaction instanceof Eris.AutocompleteInteraction) {
                 GroupsCommand.processAutocompleteInteraction(interaction);
+            }
+
+            break;
+        }
+
+        case "stats": {
+            if (interaction instanceof Eris.CommandInteraction) {
+                await StatsCommand.processChatInputInteraction(
+                    interaction,
+                    messageContext
+                );
             }
 
             break;
