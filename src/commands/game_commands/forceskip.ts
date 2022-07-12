@@ -37,7 +37,9 @@ export default class ForceSkipCommand implements BaseCommand {
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
-        if (!areUserAndBotInSameVoiceChannel(message)) {
+        if (
+            !areUserAndBotInSameVoiceChannel(message.author.id, message.guildID)
+        ) {
             logger.warn(
                 `${getDebugLogHeader(
                     message

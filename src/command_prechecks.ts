@@ -24,11 +24,16 @@ export default class CommandPrechecks {
         }
 
         if (session.isListeningSession()) {
-            return areUserAndBotInSameVoiceChannel(message);
+            return areUserAndBotInSameVoiceChannel(
+                message.author.id,
+                message.guildID
+            );
         }
 
         const gameSession = session as GameSession;
-        if (!areUserAndBotInSameVoiceChannel(message)) {
+        if (
+            !areUserAndBotInSameVoiceChannel(message.author.id, message.guildID)
+        ) {
             if (
                 gameSession.gameType === GameType.ELIMINATION ||
                 gameSession.gameType === GameType.TEAMS
