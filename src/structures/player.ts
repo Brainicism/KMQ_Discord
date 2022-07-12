@@ -7,6 +7,9 @@ export default class Player {
     /** The Discord user ID of the player */
     public readonly id: string;
 
+    /** The Discord username of the player */
+    public readonly username: string;
+
     /** Whether the player has premium features */
     public readonly premium: boolean;
 
@@ -36,17 +39,19 @@ export default class Player {
         guildID: string,
         avatarURL: string,
         points: number,
+        username: string,
         firstGameOfTheDay = false,
         premium = false
     ) {
         this.id = id;
         this.guildID = guildID;
-        this.inVC = true;
-        this.score = points;
         this.avatarURL = avatarURL;
-        this.expGain = 0;
+        this.score = points;
+        this.username = username;
         this.firstGameOfTheDay = firstGameOfTheDay;
         this.premium = premium;
+        this.inVC = true;
+        this.expGain = 0;
         this.previousRoundRanking = null;
     }
 
@@ -64,6 +69,7 @@ export default class Player {
             guildID,
             user.avatarURL,
             score,
+            State.client.users.get(userID).username,
             firstGameOfDay,
             premium
         );
@@ -105,8 +111,8 @@ export default class Player {
      */
     getName(): string {
         return (
-            State.client.guilds.get(this.guildID).members.get(this.id).nick ??
-            State.client.users.get(this.id).username
+            State.client.guilds.get(this.guildID)?.members.get(this.id)?.nick ??
+            this.username
         );
     }
 

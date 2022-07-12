@@ -22,7 +22,6 @@ import {
     voicePermissionsCheck,
 } from "../../helpers/discord_utils";
 import { getMention, isWeekend } from "../../helpers/utils";
-import { getTimeUntilRestart } from "../../helpers/management_utils";
 import CommandPrechecks from "../../command_prechecks";
 import GameSession from "../../structures/game_session";
 import GameType from "../../enums/game_type";
@@ -248,28 +247,6 @@ export default class PlayCommand implements BaseCommand {
 
         const voiceChannel = getUserVoiceChannel(messageContext);
         const gameSessions = State.gameSessions;
-
-        const timeUntilRestart = getTimeUntilRestart();
-        if (timeUntilRestart) {
-            await sendErrorMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
-                    guildID,
-                    "command.play.failure.botRestarting.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    guildID,
-                    "command.play.failure.botRestarting.description",
-                    { timeUntilRestart: `\`${timeUntilRestart}\`` }
-                ),
-            });
-
-            logger.warn(
-                `${getDebugLogHeader(
-                    message
-                )} | Attempted to start game session before restart.`
-            );
-            return;
-        }
 
         if (!voiceChannel) {
             await sendErrorMessage(messageContext, {

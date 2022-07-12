@@ -71,6 +71,7 @@ const options: Options = {
     fetchTimeout: 5000,
     customClient: KmqClient,
     useCentralRequestHandler: true,
+    softKillNotificationPeriod: 3 * 60 * 1000,
 };
 
 function registerGlobalIntervals(fleet: Fleet): void {
@@ -164,9 +165,15 @@ async function startWebServer(fleet: Fleet): Promise<void> {
         }
 
         const isSoftRestart = request.body["soft"] ? 1 : 0;
-        const restartTimeEpoch = request.body["restartTime"];
+
+        if (isSoftRestart) {
+            logger.info("Soft restart initiated");
+            fleet.restartAllClusters(false);
+        }
+
+        const restartMinutes = request.body["restartMinutes"];
         await fleet.ipc.allClustersCommand(
-            `announce_restart|${isSoftRestart}|${restartTimeEpoch}`
+            `announce_restart|${isSoftRestart}|${restartMinutes}`
         );
         reply.code(200).send();
     });
@@ -180,20 +187,6 @@ async function startWebServer(fleet: Fleet): Promise<void> {
 
         await fleet.ipc.allClustersCommand("clear_restart");
         reply.code(200).send();
-    });
-
-    httpServer.post("/soft-restart", {}, async (request, reply) => {
-        if (request.ip !== "127.0.0.1") {
-            logger.error("Soft restart attempted by non-allowed IP");
-            reply.code(401).send();
-            return;
-        }
-
-        logger.info("Soft restart initiated");
-        fleet.restartAllClusters(false);
-        reply.code(200).send();
-        logger.info("Clearing existing restart notifications...");
-        clearRestartNotification();
     });
 
     httpServer.post("/voted", {}, async (request, reply) => {

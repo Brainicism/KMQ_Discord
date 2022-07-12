@@ -90,7 +90,7 @@ describe("begin command", () => {
                     const scoreboard = gameSession.scoreboard as TeamScoreboard;
                     scoreboard.addTeam(
                         "Loona",
-                        new Player(null, null, null, 0)
+                        new Player(null, null, null, 0, null)
                     );
 
                     assert.strictEqual(
@@ -100,7 +100,7 @@ describe("begin command", () => {
 
                     scoreboard.addTeam(
                         "Loona2",
-                        new Player(null, null, null, 0)
+                        new Player(null, null, null, 0, null)
                     );
 
                     assert.strictEqual(
