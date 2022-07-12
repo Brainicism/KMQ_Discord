@@ -219,12 +219,6 @@ export default class ArtistTypeCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        logger.info(
-            `${getDebugLogHeader(interaction)} | ${
-                interaction.data.name
-            } slash command received`
-        );
-
         const artistType = interaction.data.options[0]["value"] as ArtistType;
 
         await ArtistTypeCommand.updateOption(
