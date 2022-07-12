@@ -233,7 +233,7 @@ export default class HintCommand implements BaseCommand {
     slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
         {
             name: "hint",
-            description: LocalizationManager.localizer.translate(
+            description: LocalizationManager.localizer.translateByLocale(
                 LocaleType.EN,
                 "command.hint.help.description"
             ),
@@ -330,8 +330,6 @@ export default class HintCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        if (interaction instanceof Eris.CommandInteraction) {
-            await HintCommand.sendHint(messageContext, interaction);
-        }
+        await HintCommand.sendHint(messageContext, interaction);
     }
 }
