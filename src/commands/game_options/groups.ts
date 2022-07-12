@@ -325,34 +325,23 @@ export default class GroupsCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        if (interaction instanceof Eris.CommandInteraction) {
-            if (
-                interaction.data.type ===
-                Eris.Constants.ApplicationCommandTypes.CHAT_INPUT
-            ) {
-                let groups: Array<MatchedArtist>;
-                if (interaction.data.options == null) {
-                    groups = null;
-                } else {
-                    groups = this.getMatchedArtists(interaction.data.options);
-                }
-
-                await GroupsCommand.updateOption(
-                    messageContext,
-                    groups,
-                    interaction
-                );
-            }
+        let groups: Array<MatchedArtist>;
+        if (interaction.data.options == null) {
+            groups = null;
+        } else {
+            groups = GroupsCommand.getMatchedArtists(interaction.data.options);
         }
+
+        await GroupsCommand.updateOption(messageContext, groups, interaction);
     }
 
     /**
      * Handles showing suggested artists as the user types for the groups slash command
      * @param interaction - The interaction with intermediate typing state
      */
-    static processAutocompleteInteraction(
+    static async processAutocompleteInteraction(
         interaction: Eris.AutocompleteInteraction
-    ): void {
+    ): Promise<void> {
         const lowercaseUserInput = (
             interaction.data.options.filter((x) => x["focused"])[0][
                 "value"
@@ -367,7 +356,7 @@ export default class GroupsCommand implements BaseCommand {
             value: useHangul && x.hangulName ? x.hangulName : x.name,
         });
 
-        const previouslyEnteredArtists = this.getMatchedArtists(
+        const previouslyEnteredArtists = GroupsCommand.getMatchedArtists(
             interaction.data.options.slice(0, -1)
         ).map((x) => x?.name);
 
@@ -377,7 +366,7 @@ export default class GroupsCommand implements BaseCommand {
 
         if (lowercaseUserInput === "") {
             // Show top artists when no input so far
-            tryAutocompleteInteractionAcknowledge(
+            await tryAutocompleteInteractionAcknowledge(
                 interaction,
                 Object.entries(State.topArtists)
                     .filter(
@@ -392,7 +381,7 @@ export default class GroupsCommand implements BaseCommand {
                 .filter((x) => !previouslyEnteredArtists.includes(x[1].name))
                 .slice(0, 25);
 
-            tryAutocompleteInteractionAcknowledge(
+            await tryAutocompleteInteractionAcknowledge(
                 interaction,
                 matchingGroups.map((x) =>
                     artistEntryToInteraction(x[1], showHangul)
