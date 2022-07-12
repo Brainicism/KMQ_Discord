@@ -56,7 +56,7 @@ export default class ReleaseCommand implements BaseCommand {
                             "command.release.help.interaction.description"
                         ),
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
-                    required: false,
+                    required: true,
                     choices: Object.values(ReleaseType).map((releaseType) => ({
                         name: releaseType,
                         value: releaseType,
@@ -173,32 +173,18 @@ export default class ReleaseCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        if (interaction instanceof Eris.CommandInteraction) {
-            if (
-                interaction.data.type ===
-                Eris.Constants.ApplicationCommandTypes.CHAT_INPUT
-            ) {
-                logger.info(
-                    `${getDebugLogHeader(interaction)} | ${
-                        interaction.data.name
-                    } slash command received`
-                );
+        logger.info(
+            `${getDebugLogHeader(interaction)} | ${
+                interaction.data.name
+            } slash command received`
+        );
 
-                let releaseType: ReleaseType;
-                if (interaction.data.options == null) {
-                    releaseType = null;
-                } else {
-                    releaseType = interaction.data.options[0][
-                        "value"
-                    ] as ReleaseType;
-                }
+        const releaseType = interaction.data.options[0]["value"] as ReleaseType;
 
-                await ReleaseCommand.updateOption(
-                    messageContext,
-                    releaseType,
-                    interaction
-                );
-            }
-        }
+        await ReleaseCommand.updateOption(
+            messageContext,
+            releaseType,
+            interaction
+        );
     }
 }
