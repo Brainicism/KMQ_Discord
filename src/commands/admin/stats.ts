@@ -40,7 +40,7 @@ export default class StatsCommand implements BaseCommand {
     slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
         {
             name: "stats",
-            description: LocalizationManager.localizer.translate(
+            description: LocalizationManager.localizer.translateByLocale(
                 LocaleType.EN,
                 "command.stats.help.description"
             ),
