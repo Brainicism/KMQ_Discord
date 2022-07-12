@@ -14,6 +14,7 @@ import OptionsCommand from "../../commands/game_commands/options";
 import ReleaseCommand from "../../commands/game_options/release";
 import Session from "../../structures/session";
 import StatsCommand from "../../commands/admin/stats";
+import VoteCommand from "../../commands/game_commands/vote";
 
 const logger = new IPCLogger("interactionCreate");
 
@@ -27,6 +28,7 @@ const CHAT_INPUT_COMMAND_INTERACTION_HANDLERS: {
     release: ReleaseCommand.processChatInputInteraction,
     stats: StatsCommand.processChatInputInteraction,
     options: OptionsCommand.processChatInputInteraction,
+    vote: VoteCommand.processChatInputInteraction,
 };
 
 const AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS: {
