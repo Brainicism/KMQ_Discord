@@ -1161,6 +1161,10 @@
             },
             "faq": "Frequently Asked Questions",
             "fullGroupsList": "Full List of Groups",
+            "genericProgress": {
+                "description": "🤖",
+                "title": "Working on it!"
+            },
             "guess": {
                 "title": "Guess the {{songOrArtist}}"
             },
@@ -1174,11 +1178,7 @@
             "title": {
                 "failure": "Uh-oh"
             },
-            "vote": "Vote!",
-            "genericProgress": {
-                "title": "Working on it!",
-                "description": "🤖"
-            }
+            "vote": "Vote!"
         },
         "level": "Level",
         "levelUp": {
