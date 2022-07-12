@@ -1,5 +1,6 @@
 import { BOOKMARK_COMMAND_NAME, PROFILE_COMMAND_NAME } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { delay } from "../../helpers/utils";
 import { sendInfoMessage } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
 import EnvType from "../../enums/env_type";
@@ -55,7 +56,18 @@ export default class AppCommandsCommand implements BaseCommand {
                     if (command.slashCommands) {
                         const commands = command.slashCommands();
                         for (const cmd of commands) {
-                            State.client.createCommand(cmd);
+                            logger.info(`Creating global command: ${cmd.name}`);
+                            try {
+                                // eslint-disable-next-line no-await-in-loop
+                                await State.client.createCommand(cmd);
+                                // eslint-disable-next-line no-await-in-loop
+                                await delay(1000);
+                            } catch (e) {
+                                logger.error(
+                                    `Failed to create guild command: ${cmd.name}. err = ${e}`
+                                );
+                                continue;
+                            }
                         }
                     }
                 }
@@ -85,7 +97,18 @@ export default class AppCommandsCommand implements BaseCommand {
                     if (command.slashCommands) {
                         const commands = command.slashCommands();
                         for (const cmd of commands) {
-                            debugServer.createCommand(cmd);
+                            logger.info(`Creating guild command: ${cmd.name}`);
+                            try {
+                                // eslint-disable-next-line no-await-in-loop
+                                await debugServer.createCommand(cmd);
+                                // eslint-disable-next-line no-await-in-loop
+                                await delay(1000);
+                            } catch (e) {
+                                logger.error(
+                                    `Failed to create guild command: ${cmd.name}. err = ${e}`
+                                );
+                                continue;
+                            }
                         }
                     }
                 }
