@@ -10,6 +10,7 @@ import ExpCommand from "../../commands/game_commands/exp";
 import GroupsCommand from "../../commands/game_options/groups";
 import GuessModeCommand from "../../commands/game_options/guessmode";
 import KmqMember from "../../structures/kmq_member";
+import LanguageCommand from "../../commands/game_options/language";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import OptionsCommand from "../../commands/game_commands/options";
@@ -43,6 +44,7 @@ const CHAT_INPUT_COMMAND_INTERACTION_HANDLERS: {
     seek: SeekCommand.processChatInputInteraction,
     subunits: SubunitsCommand.processChatInputInteraction,
     shuffle: ShuffleCommand.processChatInputInteraction,
+    language: LanguageCommand.processChatInputInteraction,
 };
 
 const AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS: {
