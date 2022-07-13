@@ -9,10 +9,34 @@ import GroupsCommand from "../../commands/game_options/groups";
 import KmqMember from "../../structures/kmq_member";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
+import OptionsCommand from "../../commands/game_commands/options";
 import ProfileCommand from "../../commands/game_commands/profile";
+import ReleaseCommand from "../../commands/game_options/release";
 import Session from "../../structures/session";
+import StatsCommand from "../../commands/admin/stats";
 
 const logger = new IPCLogger("interactionCreate");
+
+const CHAT_INPUT_COMMAND_INTERACTION_HANDLERS: {
+    [command: string]: (
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ) => Promise<void>;
+} = {
+    groups: GroupsCommand.processChatInputInteraction,
+    options: OptionsCommand.processChatInputInteraction,
+    profile: ProfileCommand.processChatInputInteraction,
+    release: ReleaseCommand.processChatInputInteraction,
+    stats: StatsCommand.processChatInputInteraction,
+};
+
+const AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS: {
+    [command: string]: (
+        interaction: Eris.AutocompleteInteraction
+    ) => Promise<void>;
+} = {
+    groups: GroupsCommand.processAutocompleteInteraction,
+};
 
 /**
  * Handles the 'interactionCreate' event
@@ -45,34 +69,32 @@ export default async function interactionCreateHandler(
     }
 
     if (interaction instanceof Eris.CommandInteraction) {
-        logger.info(`Interaction received for '${interaction.data.name}'`);
+        if (
+            interaction.data.type ===
+            Eris.Constants.ApplicationCommandTypes.CHAT_INPUT
+        ) {
+            logger.info(
+                `CHAT_INPUT CommandInteraction received for '${interaction.data.name}'`
+            );
+            const chatInputInteractionHandler =
+                CHAT_INPUT_COMMAND_INTERACTION_HANDLERS[interaction.data.name];
+
+            if (chatInputInteractionHandler) {
+                await chatInputInteractionHandler(interaction, messageContext);
+                return;
+            }
+        }
+    } else if (interaction instanceof Eris.AutocompleteInteraction) {
+        const autocompleteInteractionHandler =
+            AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS[interaction.data.name];
+
+        if (autocompleteInteractionHandler) {
+            await autocompleteInteractionHandler(interaction);
+            return;
+        }
     }
 
     switch (interaction.data.name) {
-        case "groups": {
-            if (interaction instanceof Eris.CommandInteraction) {
-                await GroupsCommand.processChatInputInteraction(
-                    interaction,
-                    messageContext
-                );
-            } else if (interaction instanceof Eris.AutocompleteInteraction) {
-                GroupsCommand.processAutocompleteInteraction(interaction);
-            }
-
-            break;
-        }
-
-        case "profile": {
-            if (interaction instanceof Eris.CommandInteraction) {
-                await ProfileCommand.processChatInputInteraction(
-                    interaction,
-                    messageContext
-                );
-            }
-
-            break;
-        }
-
         case PROFILE_COMMAND_NAME: {
             interaction = interaction as Eris.CommandInteraction;
             if (

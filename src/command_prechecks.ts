@@ -200,7 +200,7 @@ export default class CommandPrechecks {
         precheckArgs: PrecheckArgs
     ): Promise<boolean> {
         const timeUntilRestart = getTimeUntilRestart();
-        if (timeUntilRestart) {
+        if (timeUntilRestart !== null) {
             const { message } = precheckArgs;
             await sendErrorMessage(MessageContext.fromMessage(message), {
                 title: LocalizationManager.localizer.translate(

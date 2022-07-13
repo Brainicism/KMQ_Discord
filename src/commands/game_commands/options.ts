@@ -1,9 +1,14 @@
 import { IPCLogger } from "../../logger";
 import {
+    generateEmbed,
+    generateOptionsMessage,
     getDebugLogHeader,
     sendOptionsMessage,
+    tryCreateInteractionSuccessAcknowledgement,
 } from "../../helpers/discord_utils";
+import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
@@ -27,17 +32,66 @@ export default class OptionsCommand implements BaseCommand {
         priority: 50,
     });
 
+    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+        {
+            name: "options",
+            description: LocalizationManager.localizer.translate(
+                LocaleType.EN,
+                "command.options.help.description"
+            ),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+        },
+    ];
+
     call = async ({ message }: CommandArgs): Promise<void> => {
+        await OptionsCommand.sendOptionsMessage(
+            MessageContext.fromMessage(message)
+        );
+    };
+
+    static sendOptionsMessage = async (
+        messageContext: MessageContext,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> => {
         const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
+            messageContext.guildID
         );
 
-        await sendOptionsMessage(
-            Session.getSession(message.guildID),
-            MessageContext.fromMessage(message),
-            guildPreference,
-            null
-        );
-        logger.info(`${getDebugLogHeader(message)} | Options retrieved`);
+        if (interaction) {
+            const embedPayload = await generateOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                null
+            );
+
+            const embed = generateEmbed(messageContext, embedPayload, true);
+            await tryCreateInteractionSuccessAcknowledgement(
+                interaction,
+                null,
+                null,
+                { embeds: [embed] }
+            );
+        } else {
+            await sendOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                null
+            );
+        }
+
+        logger.info(`${getDebugLogHeader(messageContext)} | Options retrieved`);
     };
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    static async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        await OptionsCommand.sendOptionsMessage(messageContext, interaction);
+    }
 }

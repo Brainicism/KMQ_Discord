@@ -17,6 +17,7 @@ export default class EliminationPlayer extends Player {
             guildID,
             user.avatarURL,
             score,
+            State.client.users.get(userID).username,
             firstGameOfDay,
             premium
         );
