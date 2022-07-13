@@ -130,7 +130,7 @@ export default class MultiGuessCommand implements BaseCommand {
 
         const reset = multiguessType === null;
         if (reset) {
-            await guildPreference.reset(GameOption.RELEASE_TYPE);
+            await guildPreference.reset(GameOption.MULTIGUESS);
             logger.info(
                 `${getDebugLogHeader(messageContext)} | Multiguess type reset.`
             );

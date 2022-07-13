@@ -97,7 +97,6 @@ export default class AppCommandsCommand implements BaseCommand {
                     if (command.slashCommands) {
                         const commands = command.slashCommands();
                         for (const cmd of commands) {
-                            if (cmd.name !== "multiguess") continue;
                             logger.info(`Creating guild command: ${cmd.name}`);
                             try {
                                 // eslint-disable-next-line no-await-in-loop
