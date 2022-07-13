@@ -7,21 +7,25 @@ import {
 } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
+    generateEmbed,
+    getDebugLogHeader,
+    sendInfoMessage,
+    tryCreateInteractionSuccessAcknowledgement,
+} from "../../helpers/discord_utils";
+import {
     getAvailableSongCount,
     isFirstGameOfDay,
     isPowerHour,
     isPremiumRequest,
     userBonusIsActive,
 } from "../../helpers/game_utils";
-import {
-    getDebugLogHeader,
-    sendInfoMessage,
-} from "../../helpers/discord_utils";
 import { isWeekend } from "../../helpers/utils";
 import AnswerType from "../../enums/option_types/answer_type";
+import Eris from "eris";
 import ExpBonusModifier from "../../enums/exp_bonus_modifier";
 import GuessModeType from "../../enums/option_types/guess_mode_type";
 import GuildPreference from "../../structures/guild_preference";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
@@ -29,7 +33,6 @@ import ShuffleType from "../../enums/option_types/shuffle_type";
 import State from "../../state";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
-import type Eris from "eris";
 import type GameRound from "../../structures/game_round";
 import type HelpDocumentation from "../../interfaces/help";
 
@@ -313,10 +316,31 @@ export default class ExpCommand implements BaseCommand {
         priority: 50,
     });
 
+    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+        {
+            name: "exp",
+            description: LocalizationManager.localizer.translateByLocale(
+                LocaleType.EN,
+                "command.exp.help.description"
+            ),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+        },
+    ];
+
     call = async ({ message }: CommandArgs): Promise<void> => {
-        const voteBonusActive = await userBonusIsActive(message.author.id);
+        await ExpCommand.sendExpMessage(MessageContext.fromMessage(message));
+    };
+
+    static async sendExpMessage(
+        messageContext: MessageContext,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
+        const voteBonusActive = await userBonusIsActive(
+            messageContext.author.id
+        );
+
         const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
+            messageContext.guildID
         );
 
         const fields: Array<Eris.EmbedField> = [];
@@ -324,13 +348,13 @@ export default class ExpCommand implements BaseCommand {
         const activeModifiers = await calculateOptionsExpMultiplierInternal(
             guildPreference,
             voteBonusActive,
-            message.author.id
+            messageContext.author.id
         );
 
         const totalModifier = await calculateOptionsExpMultiplier(
             guildPreference,
             voteBonusActive,
-            message.author.id
+            messageContext.author.id
         );
 
         const modifierText: Array<string> = activeModifiers.map(
@@ -342,14 +366,14 @@ export default class ExpCommand implements BaseCommand {
 
         modifierText.push(
             `\`${LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "command.exp.totalModifier"
             )}:\` **__${totalModifier.toFixed(2)}x__**`
         );
 
         fields.push({
             name: LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "command.exp.activeModifiers"
             ),
             value: `${modifierText.join("\n")}`,
@@ -358,11 +382,11 @@ export default class ExpCommand implements BaseCommand {
 
         fields.push({
             name: LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "command.exp.bonusArtistsTitle"
             ),
             value: `\`${LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "command.exp.bonusArtists"
             )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.BONUS_ARTIST
@@ -374,46 +398,46 @@ export default class ExpCommand implements BaseCommand {
 
         const bonusExpExplanations = [
             `\`${LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "command.exp.explanation.powerHour"
             )}:\` ${ExpBonusModifierValues[ExpBonusModifier.POWER_HOUR].toFixed(
                 2
             )}x 📈`,
             `\`${LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "command.exp.explanation.firstGameOfDay"
             )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.FIRST_GAME_OF_DAY
             ].toFixed(2)}x 📈`,
             `\`${LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "command.exp.explanation.voting"
             )}!:\` ${ExpBonusModifierValues[ExpBonusModifier.VOTE].toFixed(
                 2
             )}x 📈`,
             `\`${LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "command.exp.explanation.streak"
             )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.GUESS_STREAK
             ].toFixed(2)}x 📈`,
             `\`${LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "command.exp.explanation.quickGuess"
             )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.QUICK_GUESS
             ].toFixed(2)}x 📈 `,
             `\`${LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "command.exp.explanation.bonusArtistGuess"
             )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.BONUS_ARTIST
             ].toFixed(2)}x 📈 `,
             `\`${LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "command.exp.explanation.rareGuess"
             )}:\` ${LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "command.exp.explanation.rareGuessRange",
                 { rareGuessLowerBound: "2.00x", rareGuessUpperBound: "50.00x" }
             )} 📈`,
@@ -421,27 +445,52 @@ export default class ExpCommand implements BaseCommand {
 
         fields.push({
             name: LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "command.exp.bonusTitle"
             ),
             value: `${LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "command.exp.bonusDescription"
             )}:\n ${bonusExpExplanations.map((x) => `- ${x}`).join("\n")}`,
             inline: false,
         });
 
-        await sendInfoMessage(MessageContext.fromMessage(message), {
+        const embedPayload = {
             title: LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "command.exp.title"
             ),
             fields,
             thumbnailUrl: KmqImages.THUMBS_UP,
-        });
+        };
+
+        if (interaction) {
+            const embed = generateEmbed(messageContext, embedPayload, true);
+            await tryCreateInteractionSuccessAcknowledgement(
+                interaction,
+                null,
+                null,
+                { embeds: [embed] }
+            );
+        } else {
+            await sendInfoMessage(messageContext, embedPayload);
+        }
 
         logger.info(
-            `${getDebugLogHeader(message)} | EXP modifier info retrieved.`
+            `${getDebugLogHeader(
+                messageContext
+            )} | EXP modifier info retrieved.`
         );
-    };
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    static async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        await ExpCommand.sendExpMessage(messageContext, interaction);
+    }
 }
