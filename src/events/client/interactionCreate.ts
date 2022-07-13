@@ -16,6 +16,7 @@ import OptionsCommand from "../../commands/game_commands/options";
 import ReleaseCommand from "../../commands/game_options/release";
 import ResetCommand from "../../commands/game_options/reset";
 import Session from "../../structures/session";
+import SkipCommand from "../../commands/game_commands/skip";
 import StatsCommand from "../../commands/admin/stats";
 import VoteCommand from "../../commands/game_commands/vote";
 
@@ -31,6 +32,7 @@ const CHAT_INPUT_COMMAND_INTERACTION_HANDLERS: {
     release: ReleaseCommand.processChatInputInteraction,
     stats: StatsCommand.processChatInputInteraction,
     options: OptionsCommand.processChatInputInteraction,
+    skip: SkipCommand.processChatInputInteraction,
     vote: VoteCommand.processChatInputInteraction,
     exp: ExpCommand.processChatInputInteraction,
     reset: ResetCommand.processChatInputInteraction,

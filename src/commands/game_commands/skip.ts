@@ -2,16 +2,19 @@ import { EMBED_SUCCESS_COLOR, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     areUserAndBotInSameVoiceChannel,
+    generateEmbed,
     getDebugLogHeader,
     getMajorityCount,
     sendInfoMessage,
+    tryCreateInteractionSuccessAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GameType from "../../enums/game_type";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
-import type { GuildTextableMessage } from "../../types";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type EliminationScoreboard from "../../structures/elimination_scoreboard";
@@ -21,51 +24,77 @@ import type Round from "../../structures/round";
 const logger = new IPCLogger("skip");
 
 async function sendSkipNotification(
-    message: GuildTextableMessage,
-    round: Round
+    messageContext: MessageContext,
+    round: Round,
+    interaction?: Eris.CommandInteraction
 ): Promise<void> {
-    await sendInfoMessage(
-        MessageContext.fromMessage(message),
-        {
-            title: LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.skip.vote.title"
-            ),
-            description: LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.skip.vote.description",
-                {
-                    skipCounter: `${round.getSkipCount()}/${getMajorityCount(
-                        message.guildID
-                    )}`,
-                }
-            ),
-        },
-        true
+    const embedPayload = {
+        title: LocalizationManager.localizer.translate(
+            messageContext.guildID,
+            "command.skip.vote.title"
+        ),
+        description: LocalizationManager.localizer.translate(
+            messageContext.guildID,
+            "command.skip.vote.description",
+            {
+                skipCounter: `${round.getSkipCount()}/${getMajorityCount(
+                    messageContext.guildID
+                )}`,
+            }
+        ),
+    };
+
+    if (interaction) {
+        const embed = generateEmbed(messageContext, embedPayload, true);
+        await tryCreateInteractionSuccessAcknowledgement(
+            interaction,
+            null,
+            null,
+            { embeds: [embed] }
+        );
+    } else {
+        sendInfoMessage(messageContext, embedPayload, true);
+    }
+
+    logger.info(
+        `${getDebugLogHeader(messageContext)} | Vote instructions retrieved.`
     );
 }
 
 async function sendSkipMessage(
-    message: GuildTextableMessage,
-    round: Round
+    messageContext: MessageContext,
+    round: Round,
+    interaction?: Eris.CommandInteraction
 ): Promise<void> {
-    await sendInfoMessage(MessageContext.fromMessage(message), {
+    const embedPayload = {
         color: EMBED_SUCCESS_COLOR,
         title: LocalizationManager.localizer.translate(
-            message.guildID,
+            messageContext.guildID,
             "misc.skip"
         ),
         description: LocalizationManager.localizer.translate(
-            message.guildID,
+            messageContext.guildID,
             "command.skip.success.description",
             {
                 skipCounter: `${round.getSkipCount()}/${getMajorityCount(
-                    message.guildID
+                    messageContext.guildID
                 )}`,
             }
         ),
         thumbnailUrl: KmqImages.NOT_IMPRESSED,
-    });
+    };
+
+    if (interaction) {
+        const embed = generateEmbed(messageContext, embedPayload, true);
+        await tryCreateInteractionSuccessAcknowledgement(
+            interaction,
+            null,
+            null,
+            { embeds: [embed] }
+        );
+    } else {
+        await sendInfoMessage(messageContext, embedPayload);
+    }
 }
 
 /**
@@ -128,17 +157,40 @@ export default class SkipCommand implements BaseCommand {
         priority: 1010,
     });
 
+    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+        {
+            name: "skip",
+            description: LocalizationManager.localizer.translateByLocale(
+                LocaleType.EN,
+                "command.skip.help.description"
+            ),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+        },
+    ];
+
     call = async ({ message }: CommandArgs): Promise<void> => {
-        if (!areUserAndBotInSameVoiceChannel(message)) {
+        await SkipCommand.executeSkip(MessageContext.fromMessage(message));
+    };
+
+    static async executeSkip(
+        messageContext: MessageContext,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
+        if (
+            !areUserAndBotInSameVoiceChannel(
+                messageContext.author.id,
+                messageContext.guildID
+            )
+        ) {
             logger.warn(
                 `${getDebugLogHeader(
-                    message
+                    messageContext
                 )} | Invalid skip. User and bot are not in the same voice channel.`
             );
             return;
         }
 
-        const session = Session.getSession(message.guildID);
+        const session = Session.getSession(messageContext.guildID);
         if (
             !session.round ||
             session.round.skipAchieved ||
@@ -152,29 +204,47 @@ export default class SkipCommand implements BaseCommand {
                 if (
                     !(
                         session.scoreboard as EliminationScoreboard
-                    ).isPlayerEliminated(message.author.id)
+                    ).isPlayerEliminated(messageContext.author.id)
                 ) {
                     logger.info(
                         `${getDebugLogHeader(
-                            message
+                            messageContext
                         )} | User skipped, elimination mode`
                     );
-                    session.round.userSkipped(message.author.id);
+                    session.round.userSkipped(messageContext.author.id);
                 }
             }
         }
 
-        session.round.userSkipped(message.author.id);
-        logger.info(`${getDebugLogHeader(message)} | User skipped`);
+        session.round.userSkipped(messageContext.author.id);
+        logger.info(`${getDebugLogHeader(messageContext)} | User skipped`);
 
-        if (isSkipMajority(message.guildID, session)) {
-            sendSkipMessage(message, session.round);
-            skipSong(MessageContext.fromMessage(message), session);
+        if (isSkipMajority(messageContext.guildID, session)) {
+            sendSkipMessage(messageContext, session.round, interaction);
+            skipSong(messageContext, session);
         } else {
-            logger.info(`${getDebugLogHeader(message)} | Skip vote received.`);
-            await sendSkipNotification(message, session.round);
+            logger.info(
+                `${getDebugLogHeader(messageContext)} | Skip vote received.`
+            );
+
+            await sendSkipNotification(
+                messageContext,
+                session.round,
+                interaction
+            );
         }
 
         session.lastActiveNow();
-    };
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    static async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        await SkipCommand.executeSkip(messageContext, interaction);
+    }
 }

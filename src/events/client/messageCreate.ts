@@ -109,7 +109,7 @@ export default async function messageCreateHandler(
                     if (
                         // eslint-disable-next-line no-await-in-loop
                         !(await precheck.checkFn({
-                            message,
+                            messageContext,
                             session,
                             errorMessage: precheck.errorMessage,
                         }))
