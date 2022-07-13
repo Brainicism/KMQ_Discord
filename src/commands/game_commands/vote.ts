@@ -184,9 +184,9 @@ export default class VoteCommand implements BaseCommand {
                     type: 1,
                     components: [
                         {
-                            style: 5,
+                            type: Eris.Constants.ComponentTypes.BUTTON,
+                            style: Eris.Constants.ButtonStyles.LINK,
                             url: VOTE_LINK,
-                            type: 2 as const,
                             emoji: { name: "✅" },
                             label: LocalizationManager.localizer.translate(
                                 messageContext.guildID,
@@ -194,9 +194,9 @@ export default class VoteCommand implements BaseCommand {
                             ),
                         },
                         {
-                            style: 5,
+                            type: Eris.Constants.ComponentTypes.BUTTON,
+                            style: Eris.Constants.ButtonStyles.LINK,
                             url: REVIEW_LINK,
-                            type: 2 as const,
                             emoji: { name: "📖" },
                             label: LocalizationManager.localizer.translate(
                                 messageContext.guildID,
