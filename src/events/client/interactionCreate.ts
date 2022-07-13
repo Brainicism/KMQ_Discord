@@ -16,6 +16,7 @@ import OptionsCommand from "../../commands/game_commands/options";
 import ReleaseCommand from "../../commands/game_options/release";
 import Session from "../../structures/session";
 import StatsCommand from "../../commands/admin/stats";
+import SubunitsCommand from "../../commands/game_options/subunits";
 import VoteCommand from "../../commands/game_commands/vote";
 
 const logger = new IPCLogger("interactionCreate");
@@ -33,6 +34,7 @@ const CHAT_INPUT_COMMAND_INTERACTION_HANDLERS: {
     vote: VoteCommand.processChatInputInteraction,
     exp: ExpCommand.processChatInputInteraction,
     guessmode: GuessModeCommand.processChatInputInteraction,
+    subunits: SubunitsCommand.processChatInputInteraction,
 };
 
 const AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS: {
