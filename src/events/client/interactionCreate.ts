@@ -14,6 +14,7 @@ import LanguageCommand from "../../commands/game_options/language";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import OptionsCommand from "../../commands/game_commands/options";
+import OstCommand from "../../commands/game_options/ost";
 import ReleaseCommand from "../../commands/game_options/release";
 import ResetCommand from "../../commands/game_options/reset";
 import SeekCommand from "../../commands/game_options/seek";
@@ -46,6 +47,7 @@ const CHAT_INPUT_COMMAND_INTERACTION_HANDLERS: {
     subunits: SubunitsCommand.processChatInputInteraction,
     shuffle: ShuffleCommand.processChatInputInteraction,
     language: LanguageCommand.processChatInputInteraction,
+    ost: OstCommand.processChatInputInteraction,
     special: SpecialCommand.processChatInputInteraction,
 };
 
