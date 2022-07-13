@@ -8,6 +8,7 @@ import {
 import Eris from "eris";
 import ExpCommand from "../../commands/game_commands/exp";
 import GroupsCommand from "../../commands/game_options/groups";
+import GuessModeCommand from "../../commands/game_options/guessmode";
 import KmqMember from "../../structures/kmq_member";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
@@ -33,6 +34,7 @@ const CHAT_INPUT_COMMAND_INTERACTION_HANDLERS: {
     vote: VoteCommand.processChatInputInteraction,
     exp: ExpCommand.processChatInputInteraction,
     reset: ResetCommand.processChatInputInteraction,
+    guessmode: GuessModeCommand.processChatInputInteraction,
 };
 
 const AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS: {
