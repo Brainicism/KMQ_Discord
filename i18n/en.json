@@ -47,6 +47,9 @@
                     "multipleChoice": "Click on the button from {{optionCount}} multiple choice options to guess. {{penalty}} EXP penalty will be applied",
                     "typing": "Type your answer in the chat to guess",
                     "typingTypos": "Type your answer in the chat to guess. Small typos will be marked as correct. {{penalty}} EXP penalty will be applied"
+                },
+                "interaction": {
+                    "description": "Choose how to answer: by typing your answer, or via multiple choice"
                 }
             }
         },
