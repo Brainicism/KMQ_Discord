@@ -330,7 +330,7 @@ export default class ProfileCommand implements BaseCommand {
             options: [
                 {
                     name: "user_mention",
-                    description: "Mention the user whose profile to view",
+                    description: "command.profile.interaction.userMention",
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .MENTIONABLE,
                     required: false,
@@ -338,8 +338,7 @@ export default class ProfileCommand implements BaseCommand {
                 },
                 {
                     name: "user_id",
-                    description:
-                        "The user ID of the player whose profile to view",
+                    description: "command.profile.interaction.userID",
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: false,
                 },
@@ -437,21 +436,18 @@ export default class ProfileCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        if (
-            interaction.data.type ===
-            Eris.Constants.ApplicationCommandTypes.CHAT_INPUT
-        ) {
-            if (interaction.data.options == null) {
-                await ProfileCommand.handleProfileInteraction(
-                    interaction,
-                    messageContext.author.id
-                );
-            } else {
-                await ProfileCommand.handleProfileInteraction(
-                    interaction,
-                    interaction.data.options[0]["value"]
-                );
-            }
+        if (interaction.data.options == null) {
+            await ProfileCommand.handleProfileInteraction(
+                interaction,
+                messageContext.author.id,
+                false
+            );
+        } else {
+            await ProfileCommand.handleProfileInteraction(
+                interaction,
+                interaction.data.options[0]["value"],
+                false
+            );
         }
     }
 
@@ -459,10 +455,12 @@ export default class ProfileCommand implements BaseCommand {
      * Responds to the profile interaction
      * @param interaction - The originating interaction
      * @param userId - The ID of the user retrieve profile information from
+     * @param ephemeral - Whether the embed can only be seen by the triggering user
      */
     static async handleProfileInteraction(
         interaction: Eris.CommandInteraction,
-        userId: string
+        userId: string,
+        ephemeral: boolean
     ): Promise<void> {
         const user = await State.ipc.fetchUser(userId);
         if (!user) {
@@ -512,7 +510,7 @@ export default class ProfileCommand implements BaseCommand {
                         timestamp: new Date(),
                     },
                 ],
-                flags: EPHEMERAL_MESSAGE_FLAG,
+                flags: ephemeral ? EPHEMERAL_MESSAGE_FLAG : null,
             });
 
             logger.info(

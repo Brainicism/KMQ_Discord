@@ -767,6 +767,10 @@
                     "mention": "멘션"
                 }
             },
+            "interaction": {
+                "userID": "프로필을 볼 플레이어의 사용자 ID",
+                "userMention": "프로필을 볼 사용자 언급"
+            },
             "lastActive": "마지막 활동",
             "overallRank": "전체 순위",
             "rank": {

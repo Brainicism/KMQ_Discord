@@ -767,6 +767,10 @@
                     "mention": "mention"
                 }
             },
+            "interaction": {
+                "userID": "The user ID of the player whose profile to view",
+                "userMention": "Mention the user whose profile to view"
+            },
             "lastActive": "Last Active",
             "overallRank": "Overall Rank",
             "rank": {

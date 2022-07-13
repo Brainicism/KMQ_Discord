@@ -103,7 +103,8 @@ export default async function interactionCreateHandler(
             ) {
                 ProfileCommand.handleProfileInteraction(
                     interaction as Eris.CommandInteraction,
-                    interaction.data.target_id
+                    interaction.data.target_id,
+                    true
                 );
             } else if (
                 interaction.data.type ===
@@ -114,7 +115,11 @@ export default async function interactionCreateHandler(
                     interaction as Eris.CommandInteraction
                 ).data.resolved["messages"].get(messageID).author.id;
 
-                ProfileCommand.handleProfileInteraction(interaction, authorID);
+                ProfileCommand.handleProfileInteraction(
+                    interaction,
+                    authorID,
+                    true
+                );
             }
 
             break;
