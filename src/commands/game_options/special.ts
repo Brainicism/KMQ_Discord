@@ -128,7 +128,7 @@ export default class SpecialCommand implements BaseCommand {
                             "command.special.help.description"
                         ),
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
-                    required: true,
+                    required: false,
                     choices: Object.values(SpecialType).map((specialType) => ({
                         name: specialType,
                         value: specialType,
