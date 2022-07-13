@@ -83,9 +83,9 @@ export default class GroupsCommand implements BaseCommand {
         ],
         actionRowComponents: [
             {
-                style: 5 as const,
+                type: Eris.Constants.ComponentTypes.BUTTON,
+                style: Eris.Constants.ButtonStyles.LINK,
                 url: GROUP_LIST_URL,
-                type: 2 as const,
                 label: LocalizationManager.localizer.translate(
                     guildID,
                     "misc.interaction.fullGroupsList"
