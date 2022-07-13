@@ -11,6 +11,7 @@ import GroupsCommand from "../../commands/game_options/groups";
 import KmqMember from "../../structures/kmq_member";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
+import MultiGuessCommand from "../../commands/game_options/multiguess";
 import OptionsCommand from "../../commands/game_commands/options";
 import ReleaseCommand from "../../commands/game_options/release";
 import Session from "../../structures/session";
@@ -31,6 +32,7 @@ const CHAT_INPUT_COMMAND_INTERACTION_HANDLERS: {
     options: OptionsCommand.processChatInputInteraction,
     vote: VoteCommand.processChatInputInteraction,
     exp: ExpCommand.processChatInputInteraction,
+    multiguess: MultiGuessCommand.processChatInputInteraction,
 };
 
 const AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS: {

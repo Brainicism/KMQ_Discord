@@ -1,12 +1,17 @@
 import { DEFAULT_MULTIGUESS_TYPE } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
+    generateEmbed,
+    generateOptionsMessage,
     getDebugLogHeader,
     sendOptionsMessage,
+    tryCreateInteractionSuccessAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import MultiGuessType from "../../enums/option_types/multiguess_type";
@@ -69,39 +74,116 @@ export default class MultiGuessCommand implements BaseCommand {
         priority: 150,
     });
 
+    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+        {
+            name: "multiguess",
+            description: LocalizationManager.localizer.translateByLocale(
+                LocaleType.EN,
+                "command.multiguess.help.interaction.description"
+            ),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+            options: [
+                {
+                    name: "multiguess",
+                    description:
+                        LocalizationManager.localizer.translateByLocale(
+                            LocaleType.EN,
+                            "command.multiguess.help.interaction.description"
+                        ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
+                    required: true,
+                    choices: Object.values(MultiGuessType).map(
+                        (multiguessType) => ({
+                            name: multiguessType,
+                            value: multiguessType,
+                        })
+                    ),
+                },
+            ],
+        },
+    ];
+
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
-        );
+        let multiGuessType: MultiGuessType;
 
         if (parsedMessage.components.length === 0) {
-            await guildPreference.reset(GameOption.MULTIGUESS);
-            await sendOptionsMessage(
-                Session.getSession(message.guildID),
-                MessageContext.fromMessage(message),
-                guildPreference,
-                [{ option: GameOption.MULTIGUESS, reset: true }]
-            );
-
-            logger.info(
-                `${getDebugLogHeader(message)} | Multiguess type reset.`
-            );
-            return;
+            multiGuessType = null;
+        } else {
+            multiGuessType =
+                parsedMessage.components[0].toLowerCase() as MultiGuessType;
         }
 
-        const multiGuessType = parsedMessage.components[0] as MultiGuessType;
-        await guildPreference.setMultiGuessType(multiGuessType);
-        await sendOptionsMessage(
-            Session.getSession(message.guildID),
+        await MultiGuessCommand.updateOption(
             MessageContext.fromMessage(message),
-            guildPreference,
-            [{ option: GameOption.MULTIGUESS, reset: false }]
-        );
-
-        logger.info(
-            `${getDebugLogHeader(
-                message
-            )} | Multiguess type set to ${multiGuessType}`
+            multiGuessType
         );
     };
+
+    static async updateOption(
+        messageContext: MessageContext,
+        multiguessType: MultiGuessType,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID
+        );
+
+        const reset = multiguessType === null;
+        if (reset) {
+            await guildPreference.reset(GameOption.RELEASE_TYPE);
+            logger.info(
+                `${getDebugLogHeader(messageContext)} | Multiguess type reset.`
+            );
+        } else {
+            await guildPreference.setMultiGuessType(multiguessType);
+            logger.info(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Multiguess type set to ${multiguessType}`
+            );
+        }
+
+        if (interaction) {
+            const message = await generateOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.MULTIGUESS, reset }]
+            );
+
+            const embed = generateEmbed(messageContext, message, true);
+            tryCreateInteractionSuccessAcknowledgement(
+                interaction,
+                null,
+                null,
+                { embeds: [embed] }
+            );
+        } else {
+            await sendOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.MULTIGUESS, reset }]
+            );
+        }
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    static async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        const multiguessType = interaction.data.options[0][
+            "value"
+        ] as MultiGuessType;
+
+        await MultiGuessCommand.updateOption(
+            messageContext,
+            multiguessType,
+            interaction
+        );
+    }
 }

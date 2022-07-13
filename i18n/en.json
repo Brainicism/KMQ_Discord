@@ -538,6 +538,9 @@
                     "off": "Only the first person who guesses correct is awarded the point",
                     "on": "Allows for a 1.5 second grace period from when the first correct guess occurs. Multiple players are able to guess correctly",
                     "reset": "Reset to the default multiguess type of {{defaultMultiguess}}"
+                },
+                "interaction": {
+                    "description": "Sets whether multiple people can guess a song correctly"
                 }
             }
         },
