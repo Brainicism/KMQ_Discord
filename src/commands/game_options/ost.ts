@@ -1,12 +1,17 @@
 import { DEFAULT_OST_PREFERENCE } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
+    generateEmbed,
+    generateOptionsMessage,
     getDebugLogHeader,
     sendOptionsMessage,
+    tryCreateInteractionSuccessAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import OstPreference from "../../enums/option_types/ost_preference";
@@ -75,41 +80,116 @@ export default class OstCommand implements BaseCommand {
         priority: 130,
     });
 
+    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+        {
+            name: "ost",
+            description: LocalizationManager.localizer.translateByLocale(
+                LocaleType.EN,
+                "command.ost.help.description"
+            ),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+            options: [
+                {
+                    name: "ost",
+                    description:
+                        LocalizationManager.localizer.translateByLocale(
+                            LocaleType.EN,
+                            "command.ost.help.description"
+                        ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
+                    required: true,
+                    choices: Object.values(OstPreference).map(
+                        (ostPreference) => ({
+                            name: ostPreference,
+                            value: ostPreference,
+                        })
+                    ),
+                },
+            ],
+        },
+    ];
+
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
-        );
+        let ostPreference: OstPreference;
 
         if (parsedMessage.components.length === 0) {
-            await guildPreference.reset(GameOption.OST_PREFERENCE);
-            await sendOptionsMessage(
-                Session.getSession(message.guildID),
-                MessageContext.fromMessage(message),
-                guildPreference,
-                [{ option: GameOption.OST_PREFERENCE, reset: true }]
-            );
-
-            logger.info(
-                `${getDebugLogHeader(message)} | OST preference reset.`
-            );
-            return;
+            ostPreference = null;
+        } else {
+            ostPreference =
+                parsedMessage.components[0].toLowerCase() as OstPreference;
         }
 
-        const ostPreference =
-            parsedMessage.components[0].toLowerCase() as OstPreference;
-
-        await guildPreference.setOstPreference(ostPreference);
-        await sendOptionsMessage(
-            Session.getSession(message.guildID),
+        await OstCommand.updateOption(
             MessageContext.fromMessage(message),
-            guildPreference,
-            [{ option: GameOption.OST_PREFERENCE, reset: false }]
-        );
-
-        logger.info(
-            `${getDebugLogHeader(
-                message
-            )} | OST preference set to ${ostPreference}`
+            ostPreference
         );
     };
+
+    static async updateOption(
+        messageContext: MessageContext,
+        ostPreference: OstPreference,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID
+        );
+
+        const reset = ostPreference === null;
+        if (reset) {
+            await guildPreference.reset(GameOption.OST_PREFERENCE);
+            logger.info(
+                `${getDebugLogHeader(messageContext)} | OST preference reset.`
+            );
+        } else {
+            await guildPreference.setOstPreference(ostPreference);
+            logger.info(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | OST preference set to ${ostPreference}`
+            );
+        }
+
+        if (interaction) {
+            const message = await generateOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.OST_PREFERENCE, reset }]
+            );
+
+            const embed = generateEmbed(messageContext, message, true);
+            tryCreateInteractionSuccessAcknowledgement(
+                interaction,
+                null,
+                null,
+                { embeds: [embed] }
+            );
+        } else {
+            await sendOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.OST_PREFERENCE, reset }]
+            );
+        }
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    static async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        const ostPreference = interaction.data.options[0][
+            "value"
+        ] as OstPreference;
+
+        await OstCommand.updateOption(
+            messageContext,
+            ostPreference,
+            interaction
+        );
+    }
 }
