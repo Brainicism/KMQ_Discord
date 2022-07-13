@@ -6,6 +6,7 @@ import {
     tryInteractionAcknowledge,
 } from "../../helpers/discord_utils";
 import Eris from "eris";
+import ExpCommand from "../../commands/game_commands/exp";
 import GroupsCommand from "../../commands/game_options/groups";
 import KmqMember from "../../structures/kmq_member";
 import LocalizationManager from "../../helpers/localization_manager";
@@ -15,6 +16,7 @@ import ReleaseCommand from "../../commands/game_options/release";
 import Session from "../../structures/session";
 import SkipCommand from "../../commands/game_commands/skip";
 import StatsCommand from "../../commands/admin/stats";
+import VoteCommand from "../../commands/game_commands/vote";
 
 const logger = new IPCLogger("interactionCreate");
 
@@ -29,6 +31,8 @@ const CHAT_INPUT_COMMAND_INTERACTION_HANDLERS: {
     stats: StatsCommand.processChatInputInteraction,
     options: OptionsCommand.processChatInputInteraction,
     skip: SkipCommand.processChatInputInteraction,
+    vote: VoteCommand.processChatInputInteraction,
+    exp: ExpCommand.processChatInputInteraction,
 };
 
 const AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS: {
