@@ -173,7 +173,7 @@ export default class ListenCommand implements BaseCommand {
             return;
         }
 
-        if (!voicePermissionsCheck(message)) {
+        if (!voicePermissionsCheck(messageContext)) {
             return;
         }
 

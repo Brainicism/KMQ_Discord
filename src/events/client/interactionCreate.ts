@@ -1,4 +1,8 @@
-import { BOOKMARK_COMMAND_NAME, PROFILE_COMMAND_NAME } from "../../constants";
+import {
+    BOOKMARK_COMMAND_NAME,
+    PROFILE_COMMAND_NAME,
+    PlaySlashCommands,
+} from "../../constants";
 import { IPCLogger } from "../../logger";
 import { handleProfileInteraction } from "../../commands/game_commands/profile";
 import {
@@ -7,6 +11,7 @@ import {
 } from "../../helpers/discord_utils";
 import Eris from "eris";
 import ExpCommand from "../../commands/game_commands/exp";
+import GameType from "../../enums/game_type";
 import GroupsCommand from "../../commands/game_options/groups";
 import GuessModeCommand from "../../commands/game_options/guessmode";
 import KmqMember from "../../structures/kmq_member";
@@ -15,6 +20,7 @@ import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import OptionsCommand from "../../commands/game_commands/options";
 import OstCommand from "../../commands/game_options/ost";
+import PlayCommand from "../../commands/game_commands/play";
 import ReleaseCommand from "../../commands/game_options/release";
 import ResetCommand from "../../commands/game_options/reset";
 import SeekCommand from "../../commands/game_options/seek";
@@ -49,6 +55,12 @@ const CHAT_INPUT_COMMAND_INTERACTION_HANDLERS: {
     language: LanguageCommand.processChatInputInteraction,
     ost: OstCommand.processChatInputInteraction,
     special: SpecialCommand.processChatInputInteraction,
+    [PlaySlashCommands[GameType.CLASSIC]]:
+        PlayCommand.processChatInputInteraction,
+    [PlaySlashCommands[GameType.ELIMINATION]]:
+        PlayCommand.processChatInputInteraction,
+    [PlaySlashCommands[GameType.TEAMS]]:
+        PlayCommand.processChatInputInteraction,
 };
 
 const AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS: {

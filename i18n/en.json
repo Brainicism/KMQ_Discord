@@ -610,6 +610,9 @@
                     "elimination": "Start an elimination game of KMQ where each player starts with {{lives}} lives",
                     "teams": "Split up into as many teams as you want and see who you can depend on to help you win!"
                 },
+                "interaction": {
+                    "lives": "Choose how many lives each player starts with"
+                },
                 "usage": {
                     "lives": "lives"
                 }

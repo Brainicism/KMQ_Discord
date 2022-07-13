@@ -60,8 +60,6 @@ export default class AppCommandsCommand implements BaseCommand {
                             try {
                                 // eslint-disable-next-line no-await-in-loop
                                 await State.client.createCommand(cmd);
-                                // eslint-disable-next-line no-await-in-loop
-                                await delay(1000);
                             } catch (e) {
                                 logger.error(
                                     `Failed to create guild command: ${cmd.name}. err = ${e}`
@@ -142,7 +140,7 @@ export default class AppCommandsCommand implements BaseCommand {
             await Promise.allSettled(
                 guildCommands.map(async (command) => {
                     logger.info(
-                        `Deleting guild application command: ${command.id}`
+                        `Deleting guild application command: ${command.name} -- ${command.id}`
                     );
 
                     await State.client.deleteGuildCommand(
