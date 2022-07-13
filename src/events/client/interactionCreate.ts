@@ -14,6 +14,7 @@ import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import OptionsCommand from "../../commands/game_commands/options";
 import ReleaseCommand from "../../commands/game_options/release";
+import ResetCommand from "../../commands/game_options/reset";
 import Session from "../../structures/session";
 import StatsCommand from "../../commands/admin/stats";
 import VoteCommand from "../../commands/game_commands/vote";
@@ -32,6 +33,7 @@ const CHAT_INPUT_COMMAND_INTERACTION_HANDLERS: {
     options: OptionsCommand.processChatInputInteraction,
     vote: VoteCommand.processChatInputInteraction,
     exp: ExpCommand.processChatInputInteraction,
+    reset: ResetCommand.processChatInputInteraction,
     guessmode: GuessModeCommand.processChatInputInteraction,
 };
 
