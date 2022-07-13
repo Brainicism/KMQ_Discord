@@ -1571,16 +1571,23 @@ export async function tryCreateInteractionSuccessAcknowledgement(
  * Attempts to send a error message to an interaction
  * @param interaction - The originating interaction
  * @param description - The embed description
+ * @param interactionContent - The interaction message content
  */
 export async function tryCreateInteractionErrorAcknowledgement(
     interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
-    description: string
+    description: string,
+    interactionContent?: Eris.InteractionContent
 ): Promise<void> {
     if (!withinInteractionInterval(interaction)) {
         return;
     }
 
     try {
+        if (interactionContent) {
+            await interaction.createMessage(interactionContent);
+            return;
+        }
+
         await interaction.createMessage({
             embeds: [
                 {
