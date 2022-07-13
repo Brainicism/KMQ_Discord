@@ -5,6 +5,7 @@ import {
     tryInteractionAcknowledge,
 } from "../../helpers/discord_utils";
 import Eris from "eris";
+import ExpCommand from "../../commands/game_commands/exp";
 import GroupsCommand from "../../commands/game_options/groups";
 import KmqMember from "../../structures/kmq_member";
 import LocalizationManager from "../../helpers/localization_manager";
@@ -23,6 +24,7 @@ const CHAT_INPUT_COMMAND_INTERACTION_HANDLERS: {
         messageContext: MessageContext
     ) => Promise<void>;
 } = {
+    exp: ExpCommand.processChatInputInteraction,
     groups: GroupsCommand.processChatInputInteraction,
     options: OptionsCommand.processChatInputInteraction,
     profile: ProfileCommand.processChatInputInteraction,
