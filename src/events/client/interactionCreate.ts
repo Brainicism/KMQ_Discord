@@ -20,6 +20,7 @@ import SeekCommand from "../../commands/game_options/seek";
 import Session from "../../structures/session";
 import ShuffleCommand from "../../commands/game_options/shuffle";
 import SkipCommand from "../../commands/game_commands/skip";
+import SpecialCommand from "../../commands/game_options/special";
 import StatsCommand from "../../commands/admin/stats";
 import SubunitsCommand from "../../commands/game_options/subunits";
 import VoteCommand from "../../commands/game_commands/vote";
@@ -45,6 +46,7 @@ const CHAT_INPUT_COMMAND_INTERACTION_HANDLERS: {
     subunits: SubunitsCommand.processChatInputInteraction,
     shuffle: ShuffleCommand.processChatInputInteraction,
     language: LanguageCommand.processChatInputInteraction,
+    special: SpecialCommand.processChatInputInteraction,
 };
 
 const AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS: {
