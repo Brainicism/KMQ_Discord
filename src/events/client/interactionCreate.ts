@@ -18,6 +18,7 @@ import ReleaseCommand from "../../commands/game_options/release";
 import ResetCommand from "../../commands/game_options/reset";
 import SeekCommand from "../../commands/game_options/seek";
 import Session from "../../structures/session";
+import ShuffleCommand from "../../commands/game_options/shuffle";
 import SkipCommand from "../../commands/game_commands/skip";
 import StatsCommand from "../../commands/admin/stats";
 import SubunitsCommand from "../../commands/game_options/subunits";
@@ -42,6 +43,7 @@ const CHAT_INPUT_COMMAND_INTERACTION_HANDLERS: {
     guessmode: GuessModeCommand.processChatInputInteraction,
     seek: SeekCommand.processChatInputInteraction,
     subunits: SubunitsCommand.processChatInputInteraction,
+    shuffle: ShuffleCommand.processChatInputInteraction,
     language: LanguageCommand.processChatInputInteraction,
 };
 
