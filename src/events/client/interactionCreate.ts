@@ -9,6 +9,7 @@ import Eris from "eris";
 import ExpCommand from "../../commands/game_commands/exp";
 import GroupsCommand from "../../commands/game_options/groups";
 import GuessModeCommand from "../../commands/game_options/guessmode";
+import HintCommand from "../../commands/game_commands/hint";
 import KmqMember from "../../structures/kmq_member";
 import LanguageCommand from "../../commands/game_options/language";
 import LocalizationManager from "../../helpers/localization_manager";
@@ -38,6 +39,7 @@ const CHAT_INPUT_COMMAND_INTERACTION_HANDLERS: {
     groups: GroupsCommand.processChatInputInteraction,
     release: ReleaseCommand.processChatInputInteraction,
     stats: StatsCommand.processChatInputInteraction,
+    hint: HintCommand.processChatInputInteraction,
     options: OptionsCommand.processChatInputInteraction,
     skip: SkipCommand.processChatInputInteraction,
     vote: VoteCommand.processChatInputInteraction,

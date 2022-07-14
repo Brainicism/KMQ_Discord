@@ -1164,6 +1164,10 @@
             },
             "faq": "Frequently Asked Questions",
             "fullGroupsList": "Full List of Groups",
+            "genericProgress": {
+                "description": "🤖",
+                "title": "Working on it!"
+            },
             "guess": {
                 "title": "Guess the {{songOrArtist}}"
             },
