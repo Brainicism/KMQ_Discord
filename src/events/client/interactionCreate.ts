@@ -5,6 +5,7 @@ import {
     tryCreateInteractionErrorAcknowledgement,
     tryInteractionAcknowledge,
 } from "../../helpers/discord_utils";
+import ArtistTypeCommand from "../../commands/game_options/artisttype";
 import Eris from "eris";
 import ExpCommand from "../../commands/game_commands/exp";
 import GroupsCommand from "../../commands/game_options/groups";
@@ -41,6 +42,7 @@ const CHAT_INPUT_COMMAND_INTERACTION_HANDLERS: {
     stats: StatsCommand.processChatInputInteraction,
     hint: HintCommand.processChatInputInteraction,
     options: OptionsCommand.processChatInputInteraction,
+    artisttype: ArtistTypeCommand.processChatInputInteraction,
     skip: SkipCommand.processChatInputInteraction,
     vote: VoteCommand.processChatInputInteraction,
     exp: ExpCommand.processChatInputInteraction,

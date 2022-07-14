@@ -173,12 +173,6 @@ export default class ReleaseCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        logger.info(
-            `${getDebugLogHeader(interaction)} | ${
-                interaction.data.name
-            } slash command received`
-        );
-
         const releaseType = interaction.data.options[0]["value"] as ReleaseType;
 
         await ReleaseCommand.updateOption(

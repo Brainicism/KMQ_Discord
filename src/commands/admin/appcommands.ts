@@ -64,7 +64,9 @@ export default class AppCommandsCommand implements BaseCommand {
                                 await delay(1000);
                             } catch (e) {
                                 logger.error(
-                                    `Failed to create guild command: ${cmd.name}. err = ${e}`
+                                    `Failed to create guild command: ${
+                                        cmd.name
+                                    }. err = ${JSON.stringify(e)}`
                                 );
                                 continue;
                             }
@@ -105,7 +107,9 @@ export default class AppCommandsCommand implements BaseCommand {
                                 await delay(1000);
                             } catch (e) {
                                 logger.error(
-                                    `Failed to create guild command: ${cmd.name}. err = ${e}`
+                                    `Failed to create guild command: ${
+                                        cmd.name
+                                    }. err = ${JSON.stringify(e)}`
                                 );
                                 continue;
                             }
