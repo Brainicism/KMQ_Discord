@@ -1,11 +1,16 @@
 import { GameOptionInternalToGameOption } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
+    generateEmbed,
+    generateOptionsMessage,
     getDebugLogHeader,
     sendOptionsMessage,
+    tryCreateInteractionSuccessAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
@@ -44,26 +49,79 @@ export default class ResetCommand implements BaseCommand {
         priority: 130,
     });
 
+    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+        {
+            name: "reset",
+            description: LocalizationManager.localizer.translateByLocale(
+                LocaleType.EN,
+                "command.reset.help.description"
+            ),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+        },
+    ];
+
     call = async ({ message }: CommandArgs): Promise<void> => {
+        await ResetCommand.updateOption(MessageContext.fromMessage(message));
+    };
+
+    static async updateOption(
+        messageContext: MessageContext,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
+            messageContext.guildID
         );
 
         const resetOptions = await guildPreference.resetToDefault();
         logger.info(
-            `${getDebugLogHeader(message)} | Reset to default guild preferences`
+            `${getDebugLogHeader(
+                messageContext
+            )} | Reset to default guild preferences`
         );
 
-        await sendOptionsMessage(
-            Session.getSession(message.guildID),
-            MessageContext.fromMessage(message),
-            guildPreference,
-            resetOptions.map((x) => ({
-                option: GameOptionInternalToGameOption[x] as GameOption,
-                reset: true,
-            })),
-            false,
-            true
-        );
-    };
+        if (interaction) {
+            const message = await generateOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                resetOptions.map((x) => ({
+                    option: GameOptionInternalToGameOption[x] as GameOption,
+                    reset: true,
+                })),
+                false,
+                true
+            );
+
+            const embed = generateEmbed(messageContext, message, true);
+            tryCreateInteractionSuccessAcknowledgement(
+                interaction,
+                null,
+                null,
+                { embeds: [embed] }
+            );
+        } else {
+            await sendOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                resetOptions.map((x) => ({
+                    option: GameOptionInternalToGameOption[x] as GameOption,
+                    reset: true,
+                })),
+                false,
+                true
+            );
+        }
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    static async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        await ResetCommand.updateOption(messageContext, interaction);
+    }
 }
