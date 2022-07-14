@@ -1,12 +1,17 @@
 import { IPCLogger } from "../../logger";
 import {
+    generateEmbed,
+    generateOptionsMessage,
     getDebugLogHeader,
     sendOptionsMessage,
+    tryCreateInteractionSuccessAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LanguageType from "../../enums/option_types/language_type";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
@@ -65,36 +70,114 @@ export default class LanguageCommand implements BaseCommand {
         priority: 150,
     });
 
-    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
-        );
+    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+        {
+            name: "language",
+            description: LocalizationManager.localizer.translateByLocale(
+                LocaleType.EN,
+                "command.language.help.description"
+            ),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+            options: [
+                {
+                    name: "language",
+                    description:
+                        LocalizationManager.localizer.translateByLocale(
+                            LocaleType.EN,
+                            "command.language.help.description"
+                        ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
+                    required: true,
+                    choices: Object.values(LanguageType).map(
+                        (languageType) => ({
+                            name: languageType,
+                            value: languageType,
+                        })
+                    ),
+                },
+            ],
+        },
+    ];
 
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+        let languageType: LanguageType;
         if (parsedMessage.components.length === 0) {
-            await guildPreference.reset(GameOption.LANGUAGE_TYPE);
-            await sendOptionsMessage(
-                Session.getSession(message.guildID),
-                MessageContext.fromMessage(message),
-                guildPreference,
-                [{ option: GameOption.LANGUAGE_TYPE, reset: true }]
-            );
-            logger.info(`${getDebugLogHeader(message)} | Language type reset.`);
-            return;
+            languageType = null;
+        } else {
+            languageType = parsedMessage.components[0] as LanguageType;
         }
 
-        const languageType = parsedMessage.components[0] as LanguageType;
-        await guildPreference.setLanguageType(languageType);
-        await sendOptionsMessage(
-            Session.getSession(message.guildID),
+        await LanguageCommand.updateOption(
             MessageContext.fromMessage(message),
-            guildPreference,
-            [{ option: GameOption.LANGUAGE_TYPE, reset: false }]
-        );
-
-        logger.info(
-            `${getDebugLogHeader(
-                message
-            )} | Language type set to ${languageType}`
+            languageType
         );
     };
+
+    static async updateOption(
+        messageContext: MessageContext,
+        languageType: LanguageType,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID
+        );
+
+        const reset = languageType === null;
+        if (reset) {
+            await guildPreference.reset(GameOption.LANGUAGE_TYPE);
+            logger.info(
+                `${getDebugLogHeader(messageContext)} | Language type reset.`
+            );
+        } else {
+            await guildPreference.setLanguageType(languageType);
+            logger.info(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Language type set to ${languageType}`
+            );
+        }
+
+        if (interaction) {
+            const message = await generateOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.LANGUAGE_TYPE, reset }]
+            );
+
+            const embed = generateEmbed(messageContext, message, true);
+            tryCreateInteractionSuccessAcknowledgement(
+                interaction,
+                null,
+                null,
+                { embeds: [embed] }
+            );
+        } else {
+            await sendOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.LANGUAGE_TYPE, reset }]
+            );
+        }
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    static async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        const languageType = interaction.data.options[0][
+            "value"
+        ] as LanguageType;
+
+        await LanguageCommand.updateOption(
+            messageContext,
+            languageType,
+            interaction
+        );
+    }
 }

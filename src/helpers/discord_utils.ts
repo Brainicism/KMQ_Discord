@@ -8,6 +8,7 @@ import {
     EMBED_ERROR_COLOR,
     EMBED_SUCCESS_BONUS_COLOR,
     EMBED_SUCCESS_COLOR,
+    EPHEMERAL_MESSAGE_FLAG,
     KmqImages,
 } from "../constants";
 import { IPCLogger } from "../logger";
@@ -1156,21 +1157,22 @@ export function getVoiceConnection(
 }
 
 /**
- * @param message - The Message
+ * @param userID - the user's ID
+ * @param guildID - the guild ID
  * @returns whether the message's author and the bot are in the same voice channel
  */
 export function areUserAndBotInSameVoiceChannel(
-    message: Eris.Message
+    userID: string,
+    guildID: string
 ): boolean {
-    const botVoiceConnection = State.client.voiceConnections.get(
-        message.guildID
-    );
+    const member = State.client.guilds.get(guildID)?.members.get(userID);
+    const botVoiceConnection = State.client.voiceConnections.get(guildID);
 
-    if (!message.member.voiceState || !botVoiceConnection) {
+    if (!member || !member.voiceState || !botVoiceConnection) {
         return false;
     }
 
-    return message.member.voiceState.channelID === botVoiceConnection.channelID;
+    return member.voiceState.channelID === botVoiceConnection.channelID;
 }
 
 /**
@@ -1524,12 +1526,14 @@ export async function tryAutocompleteInteractionAcknowledge(
  * @param title - The embed title
  * @param description - The embed description
  * @param interactionContent - The interaction message content
+ * @param ephemeral - Whether the embed can only be seen by the triggering user
  */
 export async function tryCreateInteractionSuccessAcknowledgement(
     interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
     title: string,
     description: string,
-    interactionContent?: Eris.InteractionContent
+    interactionContent?: Eris.InteractionContent,
+    ephemeral: boolean = false
 ): Promise<void> {
     if (!withinInteractionInterval(interaction)) {
         return;
@@ -1556,7 +1560,7 @@ export async function tryCreateInteractionSuccessAcknowledgement(
                     thumbnail: { url: KmqImages.THUMBS_UP },
                 },
             ],
-            flags: 64,
+            flags: ephemeral ? EPHEMERAL_MESSAGE_FLAG : null,
         });
     } catch (err) {
         interactionRejectionHandler(interaction, err);
@@ -1567,16 +1571,23 @@ export async function tryCreateInteractionSuccessAcknowledgement(
  * Attempts to send a error message to an interaction
  * @param interaction - The originating interaction
  * @param description - The embed description
+ * @param interactionContent - The interaction message content
  */
 export async function tryCreateInteractionErrorAcknowledgement(
     interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
-    description: string
+    description: string,
+    interactionContent?: Eris.InteractionContent
 ): Promise<void> {
     if (!withinInteractionInterval(interaction)) {
         return;
     }
 
     try {
+        if (interactionContent) {
+            await interaction.createMessage(interactionContent);
+            return;
+        }
+
         await interaction.createMessage({
             embeds: [
                 {
@@ -1595,7 +1606,7 @@ export async function tryCreateInteractionErrorAcknowledgement(
                     thumbnail: { url: KmqImages.DEAD },
                 },
             ],
-            flags: 64,
+            flags: EPHEMERAL_MESSAGE_FLAG,
         });
     } catch (err) {
         interactionRejectionHandler(interaction, err);

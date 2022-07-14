@@ -538,6 +538,9 @@
                     "off": "Only the first person who guesses correct is awarded the point",
                     "on": "Allows for a 1.5 second grace period from when the first correct guess occurs. Multiple players are able to guess correctly",
                     "reset": "Reset to the default multiguess type of {{defaultMultiguess}}"
+                },
+                "interaction": {
+                    "description": "Sets whether multiple people can guess a song correctly"
                 }
             }
         },
@@ -894,7 +897,7 @@
         },
         "special": {
             "help": {
-                "description": "Modify the song playback speed. Only premium players (see `,premium`) can use this command outside of the official KMQ server.",
+                "description": "Modify the song playback speed.",
                 "example": {
                     "fast": "Plays the song at a fast speed",
                     "faster": "Plays the song at a faster speed",
