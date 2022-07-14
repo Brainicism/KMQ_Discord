@@ -176,9 +176,14 @@ export default class ArtistTypeCommand implements BaseCommand {
 
             if (interaction) {
                 const embed = generateEmbed(messageContext, embedPayload, true);
-                tryCreateInteractionErrorAcknowledgement(interaction, null, {
-                    embeds: [embed],
-                });
+                tryCreateInteractionErrorAcknowledgement(
+                    interaction,
+                    null,
+                    null,
+                    {
+                        embeds: [embed],
+                    }
+                );
             } else {
                 sendErrorMessage(messageContext, embedPayload);
             }

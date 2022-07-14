@@ -187,6 +187,7 @@ export default class SpecialCommand implements BaseCommand {
                 await tryCreateInteractionErrorAcknowledgement(
                     interaction,
                     null,
+                    null,
                     {
                         embeds: [embed],
                     }

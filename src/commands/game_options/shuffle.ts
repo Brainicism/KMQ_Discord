@@ -170,6 +170,7 @@ export default class ShuffleCommand implements BaseCommand {
                     tryCreateInteractionErrorAcknowledgement(
                         interaction,
                         null,
+                        null,
                         { embeds: [embed] }
                     );
                 } else {

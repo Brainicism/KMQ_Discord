@@ -556,6 +556,7 @@ export default abstract class Session {
         if (!song) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
+                null,
                 LocalizationManager.localizer.translate(
                     this.guildID,
                     "misc.failure.interaction.invalidBookmark",
@@ -788,6 +789,7 @@ export default abstract class Session {
         if (!round.isValidInteraction(interaction.data.custom_id)) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
+                null,
                 LocalizationManager.localizer.translate(
                     this.guildID,
                     "misc.failure.interaction.optionFromPreviousRound"

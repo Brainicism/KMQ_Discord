@@ -414,6 +414,7 @@ export async function handleProfileInteraction(
     if (!user) {
         tryCreateInteractionErrorAcknowledgement(
             interaction,
+            null,
             LocalizationManager.localizer.translate(
                 interaction.guildID,
                 "misc.interaction.profile.inaccessible",
@@ -435,6 +436,7 @@ export async function handleProfileInteraction(
     if (fields.length === 0) {
         tryCreateInteractionErrorAcknowledgement(
             interaction,
+            null,
             LocalizationManager.localizer.translate(
                 interaction.guildID,
                 "misc.interaction.profile.noStats"

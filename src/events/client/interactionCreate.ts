@@ -7,6 +7,7 @@ import {
 } from "../../helpers/discord_utils";
 import AnswerCommand from "../../commands/game_options/answer";
 import ArtistTypeCommand from "../../commands/game_options/artisttype";
+import EndCommand from "../../commands/game_commands/end";
 import Eris from "eris";
 import ExpCommand from "../../commands/game_commands/exp";
 import GroupsCommand from "../../commands/game_options/groups";
@@ -41,6 +42,7 @@ const CHAT_INPUT_COMMAND_INTERACTION_HANDLERS: {
     groups: GroupsCommand.processChatInputInteraction,
     release: ReleaseCommand.processChatInputInteraction,
     stats: StatsCommand.processChatInputInteraction,
+    end: EndCommand.processChatInputInteraction,
     hint: HintCommand.processChatInputInteraction,
     options: OptionsCommand.processChatInputInteraction,
     artisttype: ArtistTypeCommand.processChatInputInteraction,
@@ -154,6 +156,7 @@ export default async function interactionCreateHandler(
             if (!session) {
                 tryCreateInteractionErrorAcknowledgement(
                     interaction as Eris.CommandInteraction,
+                    null,
                     LocalizationManager.localizer.translate(
                         interaction.guildID,
                         "misc.failure.interaction.bookmarkOutsideGame"
