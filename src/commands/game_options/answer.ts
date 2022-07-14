@@ -1,14 +1,19 @@
 import { ExpBonusModifierValues } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
+    generateEmbed,
+    generateOptionsMessage,
     getDebugLogHeader,
     sendOptionsMessage,
+    tryCreateInteractionSuccessAcknowledgement,
 } from "../../helpers/discord_utils";
 import AnswerType from "../../enums/option_types/answer_type";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import ExpBonusModifier from "../../enums/exp_bonus_modifier";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
@@ -119,34 +124,113 @@ export default class AnswerCommand implements BaseCommand {
         priority: 150,
     });
 
+    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+        {
+            name: "answer",
+            description: LocalizationManager.localizer.translateByLocale(
+                LocaleType.EN,
+                "command.answer.help.interaction.description"
+            ),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+            options: [
+                {
+                    name: "answer",
+                    description:
+                        LocalizationManager.localizer.translateByLocale(
+                            LocaleType.EN,
+                            "command.answer.help.interaction.description"
+                        ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
+                    required: true,
+                    choices: Object.values(AnswerType).map((answerType) => ({
+                        name: answerType,
+                        value: answerType,
+                    })),
+                },
+            ],
+        },
+    ];
+
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
-        );
+        let answerType: AnswerType;
 
         if (parsedMessage.components.length === 0) {
-            await guildPreference.reset(GameOption.ANSWER_TYPE);
-            await sendOptionsMessage(
-                Session.getSession(message.guildID),
-                MessageContext.fromMessage(message),
-                guildPreference,
-                [{ option: GameOption.ANSWER_TYPE, reset: true }]
-            );
-            logger.info(`${getDebugLogHeader(message)} | Answer type reset.`);
-            return;
+            answerType = null;
+        } else {
+            answerType =
+                parsedMessage.components[0].toLowerCase() as AnswerType;
         }
 
-        const answerType = parsedMessage.components[0] as AnswerType;
-        await guildPreference.setAnswerType(answerType);
-        await sendOptionsMessage(
-            Session.getSession(message.guildID),
+        await AnswerCommand.updateOption(
             MessageContext.fromMessage(message),
-            guildPreference,
-            [{ option: GameOption.ANSWER_TYPE, reset: false }]
-        );
-
-        logger.info(
-            `${getDebugLogHeader(message)} | Answer type set to ${answerType}`
+            answerType
         );
     };
+
+    static async updateOption(
+        messageContext: MessageContext,
+        answerType: AnswerType,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID
+        );
+
+        const reset = answerType === null;
+
+        if (reset) {
+            await guildPreference.reset(GameOption.ANSWER_TYPE);
+            logger.info(
+                `${getDebugLogHeader(messageContext)} | Answer type reset.`
+            );
+        } else {
+            await guildPreference.setAnswerType(answerType);
+            logger.info(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Answer type set to ${answerType}`
+            );
+        }
+
+        if (interaction) {
+            const message = await generateOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.ANSWER_TYPE, reset }]
+            );
+
+            const embed = generateEmbed(messageContext, message, true);
+            tryCreateInteractionSuccessAcknowledgement(
+                interaction,
+                null,
+                null,
+                { embeds: [embed] }
+            );
+        } else {
+            await sendOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.ANSWER_TYPE, reset }]
+            );
+        }
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    static async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        const answerType = interaction.data.options[0]["value"] as AnswerType;
+
+        await AnswerCommand.updateOption(
+            messageContext,
+            answerType,
+            interaction
+        );
+    }
 }
