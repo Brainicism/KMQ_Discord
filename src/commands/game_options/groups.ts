@@ -6,13 +6,12 @@ import {
     setIntersection,
 } from "../../helpers/utils";
 import {
-    generateEmbed,
     generateOptionsMessage,
     getDebugLogHeader,
     sendErrorMessage,
     sendOptionsMessage,
     tryAutocompleteInteractionAcknowledge,
-    tryCreateInteractionSuccessAcknowledgement,
+    tryCreateInteractionCustomPayloadAcknowledgement,
 } from "../../helpers/discord_utils";
 import {
     getMatchingGroupNames,
@@ -277,19 +276,17 @@ export default class GroupsCommand implements BaseCommand {
         }
 
         if (interaction) {
-            const message = await generateOptionsMessage(
+            const embedPayload = await generateOptionsMessage(
                 Session.getSession(messageContext.guildID),
                 messageContext,
                 guildPreference,
                 [{ option: GameOption.GROUPS, reset }]
             );
 
-            const embed = generateEmbed(messageContext, message, true);
-            tryCreateInteractionSuccessAcknowledgement(
+            await tryCreateInteractionCustomPayloadAcknowledgement(
+                messageContext,
                 interaction,
-                null,
-                null,
-                { embeds: [embed] }
+                embedPayload
             );
         } else {
             await sendOptionsMessage(

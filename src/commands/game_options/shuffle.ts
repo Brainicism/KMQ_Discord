@@ -1,13 +1,15 @@
-import { DEFAULT_SHUFFLE, ExpBonusModifierValues } from "../../constants";
+import {
+    DEFAULT_SHUFFLE,
+    EMBED_ERROR_COLOR,
+    ExpBonusModifierValues,
+} from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
-    generateEmbed,
     generateOptionsMessage,
     getDebugLogHeader,
     sendErrorMessage,
     sendOptionsMessage,
-    tryCreateInteractionErrorAcknowledgement,
-    tryCreateInteractionSuccessAcknowledgement,
+    tryCreateInteractionCustomPayloadAcknowledgement,
 } from "../../helpers/discord_utils";
 import { isUserPremium } from "../../helpers/game_utils";
 import CommandPrechecks from "../../command_prechecks";
@@ -22,6 +24,7 @@ import Session from "../../structures/session";
 import ShuffleType from "../../enums/option_types/shuffle_type";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
+import type EmbedPayload from "../../interfaces/embed_payload";
 import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("shuffle");
@@ -149,7 +152,7 @@ export default class ShuffleCommand implements BaseCommand {
                     )} | Non-premium user attempted to use shuffle option = ${shuffleType}`
                 );
 
-                const embedPayload = {
+                const embedPayload: EmbedPayload = {
                     description: LocalizationManager.localizer.translate(
                         messageContext.guildID,
                         "command.premium.option.description"
@@ -158,20 +161,14 @@ export default class ShuffleCommand implements BaseCommand {
                         messageContext.guildID,
                         "command.premium.option.title"
                     ),
+                    color: EMBED_ERROR_COLOR,
                 };
 
                 if (interaction) {
-                    const embed = generateEmbed(
+                    await tryCreateInteractionCustomPayloadAcknowledgement(
                         messageContext,
-                        embedPayload,
-                        true
-                    );
-
-                    tryCreateInteractionErrorAcknowledgement(
                         interaction,
-                        null,
-                        null,
-                        { embeds: [embed] }
+                        embedPayload
                     );
                 } else {
                     sendErrorMessage(messageContext, embedPayload);
@@ -198,19 +195,17 @@ export default class ShuffleCommand implements BaseCommand {
         }
 
         if (interaction) {
-            const message = await generateOptionsMessage(
+            const embedPayload = await generateOptionsMessage(
                 Session.getSession(messageContext.guildID),
                 messageContext,
                 guildPreference,
                 [{ option: GameOption.SHUFFLE_TYPE, reset }]
             );
 
-            const embed = generateEmbed(messageContext, message, true);
-            tryCreateInteractionSuccessAcknowledgement(
+            await tryCreateInteractionCustomPayloadAcknowledgement(
+                messageContext,
                 interaction,
-                null,
-                null,
-                { embeds: [embed] }
+                embedPayload
             );
         } else {
             await sendOptionsMessage(

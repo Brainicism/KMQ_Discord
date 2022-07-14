@@ -2,10 +2,11 @@ import { EMBED_SUCCESS_COLOR, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     areUserAndBotInSameVoiceChannel,
-    generateEmbed,
     getDebugLogHeader,
     getMajorityCount,
     sendInfoMessage,
+    tryCreateInteractionCustomPayloadAcknowledgement,
+    tryCreateInteractionErrorAcknowledgement,
     tryCreateInteractionSuccessAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
@@ -45,12 +46,10 @@ async function sendSkipNotification(
     };
 
     if (interaction) {
-        const embed = generateEmbed(messageContext, embedPayload, true);
-        await tryCreateInteractionSuccessAcknowledgement(
+        await tryCreateInteractionCustomPayloadAcknowledgement(
+            messageContext,
             interaction,
-            null,
-            null,
-            { embeds: [embed] }
+            embedPayload
         );
     } else {
         sendInfoMessage(messageContext, embedPayload, true);
@@ -85,12 +84,10 @@ async function sendSkipMessage(
     };
 
     if (interaction) {
-        const embed = generateEmbed(messageContext, embedPayload, true);
-        await tryCreateInteractionSuccessAcknowledgement(
+        await tryCreateInteractionCustomPayloadAcknowledgement(
+            messageContext,
             interaction,
-            null,
-            null,
-            { embeds: [embed] }
+            embedPayload
         );
     } else {
         await sendInfoMessage(messageContext, embedPayload);
@@ -176,6 +173,48 @@ export default class SkipCommand implements BaseCommand {
         messageContext: MessageContext,
         interaction?: Eris.CommandInteraction
     ): Promise<void> {
+        if (interaction) {
+            await tryCreateInteractionSuccessAcknowledgement(
+                interaction,
+                LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "misc.interaction.genericProgress.title"
+                ),
+                LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "misc.interaction.genericProgress.description"
+                )
+            );
+        }
+
+        const session = Session.getSession(messageContext.guildID);
+
+        if (!session) {
+            if (interaction) {
+                await tryCreateInteractionErrorAcknowledgement(
+                    interaction,
+                    LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "misc.failure.game.noneInProgress.title"
+                    ),
+                    LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "misc.failure.game.noneInProgress.description"
+                    )
+                );
+            }
+
+            return;
+        }
+
+        if (
+            !session.round ||
+            session.round.skipAchieved ||
+            session.round.finished
+        ) {
+            return;
+        }
+
         if (
             !areUserAndBotInSameVoiceChannel(
                 messageContext.author.id,
@@ -187,15 +226,6 @@ export default class SkipCommand implements BaseCommand {
                     messageContext
                 )} | Invalid skip. User and bot are not in the same voice channel.`
             );
-            return;
-        }
-
-        const session = Session.getSession(messageContext.guildID);
-        if (
-            !session.round ||
-            session.round.skipAchieved ||
-            session.round.finished
-        ) {
             return;
         }
 

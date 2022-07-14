@@ -6,11 +6,10 @@ import {
     measureExecutionTime,
 } from "../../helpers/utils";
 import {
-    generateEmbed,
     getDebugLogHeader,
     sendErrorMessage,
     sendInfoMessage,
-    tryCreateInteractionSuccessAcknowledgement,
+    tryCreateInteractionCustomPayloadAcknowledgement,
 } from "../../helpers/discord_utils";
 import Eris from "eris";
 import LocaleType from "../../enums/locale_type";
@@ -283,12 +282,10 @@ export default class StatsCommand implements BaseCommand {
         };
 
         if (interaction) {
-            const embed = generateEmbed(messageContext, embedPayload, true);
-            tryCreateInteractionSuccessAcknowledgement(
+            await tryCreateInteractionCustomPayloadAcknowledgement(
+                messageContext,
                 interaction,
-                null,
-                null,
-                { embeds: [embed] }
+                embedPayload
             );
         } else {
             await sendInfoMessage(messageContext, embedPayload);
