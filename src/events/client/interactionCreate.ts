@@ -13,6 +13,7 @@ import KmqMember from "../../structures/kmq_member";
 import LanguageCommand from "../../commands/game_options/language";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
+import MultiGuessCommand from "../../commands/game_options/multiguess";
 import OptionsCommand from "../../commands/game_commands/options";
 import OstCommand from "../../commands/game_options/ost";
 import ReleaseCommand from "../../commands/game_options/release";
@@ -41,6 +42,7 @@ const CHAT_INPUT_COMMAND_INTERACTION_HANDLERS: {
     skip: SkipCommand.processChatInputInteraction,
     vote: VoteCommand.processChatInputInteraction,
     exp: ExpCommand.processChatInputInteraction,
+    multiguess: MultiGuessCommand.processChatInputInteraction,
     reset: ResetCommand.processChatInputInteraction,
     guessmode: GuessModeCommand.processChatInputInteraction,
     seek: SeekCommand.processChatInputInteraction,
