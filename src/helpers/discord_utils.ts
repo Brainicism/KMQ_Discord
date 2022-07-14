@@ -1538,6 +1538,7 @@ export async function tryCreateInteractionCustomPayloadAcknowledgement(
     try {
         await interaction.createMessage({
             embeds: [embed],
+            components: embedPayload.components,
             flags: ephemeral ? EPHEMERAL_MESSAGE_FLAG : null,
         });
     } catch (err) {
