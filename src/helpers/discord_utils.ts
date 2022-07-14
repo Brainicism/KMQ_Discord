@@ -1582,11 +1582,6 @@ export async function tryCreateInteractionErrorAcknowledgement(
         return;
     }
 
-    if (interactionContent) {
-        await interaction.createMessage(interactionContent);
-        return;
-    }
-
     try {
         if (interactionContent) {
             await interaction.createMessage(interactionContent);
