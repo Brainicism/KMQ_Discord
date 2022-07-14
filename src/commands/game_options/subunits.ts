@@ -1,12 +1,17 @@
 import { DEFAULT_SUBUNIT_PREFERENCE } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
+    generateEmbed,
+    generateOptionsMessage,
     getDebugLogHeader,
     sendOptionsMessage,
+    tryCreateInteractionSuccessAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
@@ -75,41 +80,120 @@ export default class SubunitsCommand implements BaseCommand {
         priority: 130,
     });
 
+    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+        {
+            name: "subunits",
+            description: LocalizationManager.localizer.translateByLocale(
+                LocaleType.EN,
+                "command.subunits.help.description",
+                { groups: `\`${process.env.BOT_PREFIX}groups\`` }
+            ),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+            options: [
+                {
+                    name: "subunits",
+                    description:
+                        LocalizationManager.localizer.translateByLocale(
+                            LocaleType.EN,
+                            "command.subunits.help.description",
+                            { groups: `\`${process.env.BOT_PREFIX}groups\`` }
+                        ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
+                    required: true,
+                    choices: Object.values(SubunitsPreference).map(
+                        (subunitPreference) => ({
+                            name: subunitPreference,
+                            value: subunitPreference,
+                        })
+                    ),
+                },
+            ],
+        },
+    ];
+
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
-        );
+        let subunitsPreference: SubunitsPreference;
 
         if (parsedMessage.components.length === 0) {
-            await guildPreference.reset(GameOption.SUBUNIT_PREFERENCE);
-            await sendOptionsMessage(
-                Session.getSession(message.guildID),
-                MessageContext.fromMessage(message),
-                guildPreference,
-                [{ option: GameOption.SUBUNIT_PREFERENCE, reset: true }]
-            );
-
-            logger.info(
-                `${getDebugLogHeader(message)} | Subunit preference reset.`
-            );
-            return;
+            subunitsPreference = null;
+        } else {
+            subunitsPreference =
+                parsedMessage.components[0].toLowerCase() as SubunitsPreference;
         }
 
-        const subunitPreference =
-            parsedMessage.components[0].toLowerCase() as SubunitsPreference;
-
-        await guildPreference.setSubunitPreference(subunitPreference);
-        await sendOptionsMessage(
-            Session.getSession(message.guildID),
+        await SubunitsCommand.updateOption(
             MessageContext.fromMessage(message),
-            guildPreference,
-            [{ option: GameOption.SUBUNIT_PREFERENCE, reset: false }]
-        );
-
-        logger.info(
-            `${getDebugLogHeader(
-                message
-            )} | Subunit preference set to ${subunitPreference}`
+            subunitsPreference
         );
     };
+
+    static async updateOption(
+        messageContext: MessageContext,
+        subunitsPreference: SubunitsPreference,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID
+        );
+
+        const reset = subunitsPreference === null;
+        if (reset) {
+            await guildPreference.reset(GameOption.SUBUNIT_PREFERENCE);
+            logger.info(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Subunit preference reset.`
+            );
+        } else {
+            await guildPreference.setSubunitPreference(subunitsPreference);
+            logger.info(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Subunit preference set to ${subunitsPreference}`
+            );
+        }
+
+        if (interaction) {
+            const message = await generateOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.SUBUNIT_PREFERENCE, reset }]
+            );
+
+            const embed = generateEmbed(messageContext, message, true);
+            tryCreateInteractionSuccessAcknowledgement(
+                interaction,
+                null,
+                null,
+                { embeds: [embed] }
+            );
+        } else {
+            await sendOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.SUBUNIT_PREFERENCE, reset }]
+            );
+        }
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    static async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        const subunitsPreference = interaction.data.options[0][
+            "value"
+        ] as SubunitsPreference;
+
+        await SubunitsCommand.updateOption(
+            messageContext,
+            subunitsPreference,
+            interaction
+        );
+    }
 }

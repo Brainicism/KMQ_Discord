@@ -5,16 +5,31 @@ import {
     tryCreateInteractionErrorAcknowledgement,
     tryInteractionAcknowledge,
 } from "../../helpers/discord_utils";
+import AnswerCommand from "../../commands/game_options/answer";
+import ArtistTypeCommand from "../../commands/game_options/artisttype";
 import EndCommand from "../../commands/game_commands/end";
 import Eris from "eris";
+import ExpCommand from "../../commands/game_commands/exp";
 import GroupsCommand from "../../commands/game_options/groups";
+import GuessModeCommand from "../../commands/game_options/guessmode";
+import HintCommand from "../../commands/game_commands/hint";
 import KmqMember from "../../structures/kmq_member";
+import LanguageCommand from "../../commands/game_options/language";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
+import MultiGuessCommand from "../../commands/game_options/multiguess";
 import OptionsCommand from "../../commands/game_commands/options";
+import OstCommand from "../../commands/game_options/ost";
 import ReleaseCommand from "../../commands/game_options/release";
+import ResetCommand from "../../commands/game_options/reset";
+import SeekCommand from "../../commands/game_options/seek";
 import Session from "../../structures/session";
+import ShuffleCommand from "../../commands/game_options/shuffle";
+import SkipCommand from "../../commands/game_commands/skip";
+import SpecialCommand from "../../commands/game_options/special";
 import StatsCommand from "../../commands/admin/stats";
+import SubunitsCommand from "../../commands/game_options/subunits";
+import VoteCommand from "../../commands/game_commands/vote";
 
 const logger = new IPCLogger("interactionCreate");
 
@@ -28,7 +43,22 @@ const CHAT_INPUT_COMMAND_INTERACTION_HANDLERS: {
     release: ReleaseCommand.processChatInputInteraction,
     stats: StatsCommand.processChatInputInteraction,
     end: EndCommand.processChatInputInteraction,
+    hint: HintCommand.processChatInputInteraction,
     options: OptionsCommand.processChatInputInteraction,
+    artisttype: ArtistTypeCommand.processChatInputInteraction,
+    skip: SkipCommand.processChatInputInteraction,
+    vote: VoteCommand.processChatInputInteraction,
+    exp: ExpCommand.processChatInputInteraction,
+    answer: AnswerCommand.processChatInputInteraction,
+    multiguess: MultiGuessCommand.processChatInputInteraction,
+    reset: ResetCommand.processChatInputInteraction,
+    guessmode: GuessModeCommand.processChatInputInteraction,
+    seek: SeekCommand.processChatInputInteraction,
+    subunits: SubunitsCommand.processChatInputInteraction,
+    shuffle: ShuffleCommand.processChatInputInteraction,
+    language: LanguageCommand.processChatInputInteraction,
+    ost: OstCommand.processChatInputInteraction,
+    special: SpecialCommand.processChatInputInteraction,
 };
 
 const AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS: {

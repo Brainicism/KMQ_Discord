@@ -1,12 +1,17 @@
 import { DEFAULT_SEEK } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
+    generateEmbed,
+    generateOptionsMessage,
     getDebugLogHeader,
     sendOptionsMessage,
+    tryCreateInteractionSuccessAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import SeekType from "../../enums/option_types/seek_type";
@@ -78,34 +83,107 @@ export default class SeekCommand implements BaseCommand {
         priority: 130,
     });
 
+    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+        {
+            name: "seek",
+            description: LocalizationManager.localizer.translateByLocale(
+                LocaleType.EN,
+                "command.seek.help.description"
+            ),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+            options: [
+                {
+                    name: "seek",
+                    description:
+                        LocalizationManager.localizer.translateByLocale(
+                            LocaleType.EN,
+                            "command.seek.help.description"
+                        ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
+                    required: true,
+                    choices: Object.values(SeekType).map((seekType) => ({
+                        name: seekType,
+                        value: seekType,
+                    })),
+                },
+            ],
+        },
+    ];
+
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
-        );
+        let seekType: SeekType;
 
         if (parsedMessage.components.length === 0) {
-            await guildPreference.reset(GameOption.SEEK_TYPE);
-            await sendOptionsMessage(
-                Session.getSession(message.guildID),
-                MessageContext.fromMessage(message),
-                guildPreference,
-                [{ option: GameOption.SEEK_TYPE, reset: true }]
-            );
-            logger.info(`${getDebugLogHeader(message)} | Seek reset.`);
-            return;
+            seekType = null;
+        } else {
+            seekType = parsedMessage.components[0] as SeekType;
         }
 
-        const seekType = parsedMessage.components[0] as SeekType;
-        await guildPreference.setSeekType(seekType);
-        await sendOptionsMessage(
-            Session.getSession(message.guildID),
+        await SeekCommand.updateOption(
             MessageContext.fromMessage(message),
-            guildPreference,
-            [{ option: GameOption.SEEK_TYPE, reset: false }]
-        );
-
-        logger.info(
-            `${getDebugLogHeader(message)} | Seek type set to ${seekType}`
+            seekType
         );
     };
+
+    static async updateOption(
+        messageContext: MessageContext,
+        seekType: SeekType,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID
+        );
+
+        const reset = seekType === null;
+        if (reset) {
+            await guildPreference.reset(GameOption.SEEK_TYPE);
+            logger.info(
+                `${getDebugLogHeader(messageContext)} | Seek type reset.`
+            );
+        } else {
+            await guildPreference.setSeekType(seekType);
+            logger.info(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Seek type set to ${seekType}`
+            );
+        }
+
+        if (interaction) {
+            const message = await generateOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.SEEK_TYPE, reset }]
+            );
+
+            const embed = generateEmbed(messageContext, message, true);
+            tryCreateInteractionSuccessAcknowledgement(
+                interaction,
+                null,
+                null,
+                { embeds: [embed] }
+            );
+        } else {
+            await sendOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.SEEK_TYPE, reset }]
+            );
+        }
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    static async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        const seekType = interaction.data.options[0]["value"] as SeekType;
+
+        await SeekCommand.updateOption(messageContext, seekType, interaction);
+    }
 }
