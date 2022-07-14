@@ -9,7 +9,6 @@ import { isUserPremium } from "./helpers/game_utils";
 import GameType from "./enums/game_type";
 import KmqConfiguration from "./kmq_configuration";
 import LocalizationManager from "./helpers/localization_manager";
-import MessageContext from "./structures/message_context";
 import dbContext from "./database_context";
 import type GameSession from "./structures/game_session";
 import type PrecheckArgs from "./interfaces/precheck_args";
@@ -18,17 +17,25 @@ const logger = new IPCLogger("command_prechecks");
 
 export default class CommandPrechecks {
     static inSessionCommandPrecheck(precheckArgs: PrecheckArgs): boolean {
-        const { message, session, errorMessage } = precheckArgs;
+        const { messageContext, session, errorMessage } = precheckArgs;
         if (!session) {
             return false;
         }
 
         if (session.isListeningSession()) {
-            return areUserAndBotInSameVoiceChannel(message);
+            return areUserAndBotInSameVoiceChannel(
+                messageContext.author.id,
+                messageContext.guildID
+            );
         }
 
         const gameSession = session as GameSession;
-        if (!areUserAndBotInSameVoiceChannel(message)) {
+        if (
+            !areUserAndBotInSameVoiceChannel(
+                messageContext.author.id,
+                messageContext.guildID
+            )
+        ) {
             if (
                 gameSession.gameType === GameType.ELIMINATION ||
                 gameSession.gameType === GameType.TEAMS
@@ -42,17 +49,17 @@ export default class CommandPrechecks {
 
             logger.warn(
                 `${getDebugLogHeader(
-                    message
+                    messageContext
                 )} | User and bot are not in the same voice connection`
             );
 
-            sendErrorMessage(MessageContext.fromMessage(message), {
+            sendErrorMessage(messageContext, {
                 title: LocalizationManager.localizer.translate(
-                    message.guildID,
+                    messageContext.guildID,
                     "misc.preCheck.title"
                 ),
                 description: LocalizationManager.localizer.translate(
-                    message.guildID,
+                    messageContext.guildID,
                     errorMessage ?? "misc.preCheck.differentVC"
                 ),
             });
@@ -63,15 +70,15 @@ export default class CommandPrechecks {
     }
 
     static notListeningPrecheck(precheckArgs: PrecheckArgs): boolean {
-        const { session, message } = precheckArgs;
+        const { session, messageContext } = precheckArgs;
         if (session && !session.isGameSession()) {
-            sendErrorMessage(MessageContext.fromMessage(message), {
+            sendErrorMessage(messageContext, {
                 title: LocalizationManager.localizer.translate(
-                    message.guildID,
+                    messageContext.guildID,
                     "misc.preCheck.title"
                 ),
                 description: LocalizationManager.localizer.translate(
-                    message.guildID,
+                    messageContext.guildID,
                     "misc.preCheck.notMusicSession"
                 ),
             });
@@ -83,22 +90,24 @@ export default class CommandPrechecks {
     }
 
     static debugServerPrecheck(precheckArgs: PrecheckArgs): boolean {
-        const { message, errorMessage } = precheckArgs;
-        const isDebugServer = process.env.DEBUG_SERVER_ID === message.guildID;
+        const { messageContext, errorMessage } = precheckArgs;
+        const isDebugServer =
+            process.env.DEBUG_SERVER_ID === messageContext.guildID;
+
         if (!isDebugServer) {
             logger.warn(
                 `${getDebugLogHeader(
-                    message
+                    messageContext
                 )} | User attempted to use a command only usable in the debug server`
             );
 
-            sendErrorMessage(MessageContext.fromMessage(message), {
+            sendErrorMessage(messageContext, {
                 title: LocalizationManager.localizer.translate(
-                    message.guildID,
+                    messageContext.guildID,
                     "misc.preCheck.title"
                 ),
                 description: LocalizationManager.localizer.translate(
-                    message.guildID,
+                    messageContext.guildID,
                     errorMessage ?? "misc.preCheck.debugServer"
                 ),
             });
@@ -108,15 +117,15 @@ export default class CommandPrechecks {
     }
 
     static maintenancePrecheck(precheckArgs: PrecheckArgs): boolean {
-        const { message } = precheckArgs;
+        const { messageContext } = precheckArgs;
         if (KmqConfiguration.Instance.maintenanceModeEnabled()) {
-            sendErrorMessage(MessageContext.fromMessage(message), {
+            sendErrorMessage(messageContext, {
                 title: LocalizationManager.localizer.translate(
-                    message.guildID,
+                    messageContext.guildID,
                     "misc.failure.maintenanceMode.title"
                 ),
                 description: LocalizationManager.localizer.translate(
-                    message.guildID,
+                    messageContext.guildID,
                     "misc.failure.maintenanceMode.description"
                 ),
             });
@@ -128,24 +137,24 @@ export default class CommandPrechecks {
     }
 
     static debugChannelPrecheck(precheckArgs: PrecheckArgs): boolean {
-        const { message, errorMessage } = precheckArgs;
+        const { messageContext, errorMessage } = precheckArgs;
         const isDebugChannel =
-            process.env.DEBUG_TEXT_CHANNEL_ID === message.channel.id;
+            process.env.DEBUG_TEXT_CHANNEL_ID === messageContext.textChannelID;
 
         if (!isDebugChannel) {
             logger.warn(
                 `${getDebugLogHeader(
-                    message
+                    messageContext
                 )} | User attempted to use a command only usable in the debug channel`
             );
 
-            sendErrorMessage(MessageContext.fromMessage(message), {
+            sendErrorMessage(messageContext, {
                 title: LocalizationManager.localizer.translate(
-                    message.guildID,
+                    messageContext.guildID,
                     "misc.preCheck.title"
                 ),
                 description: LocalizationManager.localizer.translate(
-                    message.guildID,
+                    messageContext.guildID,
                     errorMessage ?? "misc.preCheck.debugChannel"
                 ),
             });
@@ -157,7 +166,7 @@ export default class CommandPrechecks {
     static async competitionPrecheck(
         precheckArgs: PrecheckArgs
     ): Promise<boolean> {
-        const { message, session, errorMessage } = precheckArgs;
+        const { messageContext, session, errorMessage } = precheckArgs;
         const gameSession = session as GameSession;
         if (
             !session ||
@@ -171,23 +180,23 @@ export default class CommandPrechecks {
             .kmq("competition_moderators")
             .select("user_id")
             .where("guild_id", "=", gameSession.guildID)
-            .andWhere("user_id", "=", message.author.id)
+            .andWhere("user_id", "=", messageContext.author.id)
             .first();
 
         if (!isModerator) {
             logger.warn(
                 `${getDebugLogHeader(
-                    message
+                    messageContext
                 )} | User attempted to use a command only available to moderators in a competition`
             );
 
-            sendErrorMessage(MessageContext.fromMessage(message), {
+            sendErrorMessage(messageContext, {
                 title: LocalizationManager.localizer.translate(
-                    message.guildID,
+                    messageContext.guildID,
                     "misc.preCheck.title"
                 ),
                 description: LocalizationManager.localizer.translate(
-                    message.guildID,
+                    messageContext.guildID,
                     errorMessage ?? "misc.preCheck.competition"
                 ),
             });
@@ -201,14 +210,14 @@ export default class CommandPrechecks {
     ): Promise<boolean> {
         const timeUntilRestart = getTimeUntilRestart();
         if (timeUntilRestart !== null) {
-            const { message } = precheckArgs;
-            await sendErrorMessage(MessageContext.fromMessage(message), {
+            const { messageContext } = precheckArgs;
+            await sendErrorMessage(messageContext, {
                 title: LocalizationManager.localizer.translate(
-                    message.guildID,
+                    messageContext.guildID,
                     "command.play.failure.botRestarting.title"
                 ),
                 description: LocalizationManager.localizer.translate(
-                    message.guildID,
+                    messageContext.guildID,
                     "command.play.failure.botRestarting.description",
                     { timeUntilRestart: `\`${timeUntilRestart}\`` }
                 ),
@@ -221,19 +230,19 @@ export default class CommandPrechecks {
     }
 
     static async premiumPrecheck(precheckArgs: PrecheckArgs): Promise<boolean> {
-        const { message } = precheckArgs;
-        const premium = await isUserPremium(message.author.id);
+        const { messageContext } = precheckArgs;
+        const premium = await isUserPremium(messageContext.author.id);
         if (premium) {
             return true;
         }
 
-        await sendErrorMessage(MessageContext.fromMessage(message), {
+        await sendErrorMessage(messageContext, {
             title: LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "misc.preCheck.title"
             ),
             description: LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "misc.preCheck.notPremium",
                 { premium: `\`${process.env.BOT_PREFIX}premium\`` }
             ),
@@ -245,26 +254,28 @@ export default class CommandPrechecks {
     static async premiumOrDebugServerPrecheck(
         precheckArgs: PrecheckArgs
     ): Promise<boolean> {
-        const { message } = precheckArgs;
-        const premium = await isUserPremium(message.author.id);
-        const isDebugServer = process.env.DEBUG_SERVER_ID === message.guildID;
+        const { messageContext } = precheckArgs;
+        const premium = await isUserPremium(messageContext.author.id);
+        const isDebugServer =
+            process.env.DEBUG_SERVER_ID === messageContext.guildID;
+
         if (premium || isDebugServer) {
             return true;
         }
 
         logger.warn(
             `${getDebugLogHeader(
-                message
+                messageContext
             )} | User attempted to use a command only usable in the debug server/for premium users`
         );
 
-        sendErrorMessage(MessageContext.fromMessage(message), {
+        sendErrorMessage(messageContext, {
             title: LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "misc.preCheck.title"
             ),
             description: LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "misc.preCheck.premiumOrDebugServer",
                 { premium: `\`${process.env.BOT_PREFIX}premium\`` }
             ),

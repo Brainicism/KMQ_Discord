@@ -2,11 +2,11 @@ import * as discord_utils from "../../helpers/discord_utils";
 import * as game_utils from "../../helpers/game_utils";
 import * as management_utils from "../../helpers/management_utils";
 import CommandPrechecks from "../../command_prechecks";
-import Eris from "eris";
 import GameSession from "../../structures/game_session";
 import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";
 import KmqConfiguration from "../../kmq_configuration";
+import KmqMember from "../../structures/kmq_member";
 import ListeningSession from "../../structures/listening_session";
 import MessageContext from "../../structures/message_context";
 import assert from "assert";
@@ -24,7 +24,12 @@ describe("command prechecks", () => {
         sandbox.restore();
     });
 
-    const stubMessage = sandbox.createStubInstance(Eris.Message);
+    const messageContext = new MessageContext(
+        "faketextchannelid",
+        new KmqMember("fakeuserid"),
+        "fakeguilid",
+        null
+    );
 
     describe("inSessionCommandPrecheck", () => {
         describe("session is null", () => {
@@ -32,7 +37,7 @@ describe("command prechecks", () => {
                 assert.equal(
                     CommandPrechecks.inSessionCommandPrecheck({
                         session: null,
-                        message: stubMessage,
+                        messageContext,
                         errorMessage: "error",
                     }),
                     false
@@ -58,7 +63,7 @@ describe("command prechecks", () => {
                     assert.equal(
                         CommandPrechecks.inSessionCommandPrecheck({
                             session: listeningSession,
-                            message: stubMessage,
+                            messageContext,
                             errorMessage: "error",
                         }),
                         true
@@ -75,7 +80,7 @@ describe("command prechecks", () => {
                     assert.equal(
                         CommandPrechecks.inSessionCommandPrecheck({
                             session: listeningSession,
-                            message: stubMessage,
+                            messageContext,
                             errorMessage: "error",
                         }),
                         false
@@ -128,7 +133,7 @@ describe("command prechecks", () => {
                         assert.equal(
                             CommandPrechecks.inSessionCommandPrecheck({
                                 session,
-                                message: stubMessage,
+                                messageContext,
                                 errorMessage: "error",
                             }),
                             true
@@ -152,7 +157,7 @@ describe("command prechecks", () => {
                             assert.equal(
                                 CommandPrechecks.inSessionCommandPrecheck({
                                     session: eliminationGameSession,
-                                    message: stubMessage,
+                                    messageContext,
                                     errorMessage: "error",
                                 }),
                                 false
@@ -161,7 +166,7 @@ describe("command prechecks", () => {
                             assert.equal(
                                 CommandPrechecks.inSessionCommandPrecheck({
                                     session: teamGameSession,
-                                    message: stubMessage,
+                                    messageContext,
                                     errorMessage: "error",
                                 }),
                                 false
@@ -176,7 +181,7 @@ describe("command prechecks", () => {
                             assert.equal(
                                 CommandPrechecks.inSessionCommandPrecheck({
                                     session: eliminationGameSession,
-                                    message: stubMessage,
+                                    messageContext,
                                     errorMessage: "error",
                                 }),
                                 true
@@ -185,7 +190,7 @@ describe("command prechecks", () => {
                             assert.equal(
                                 CommandPrechecks.inSessionCommandPrecheck({
                                     session: teamGameSession,
-                                    message: stubMessage,
+                                    messageContext,
                                     errorMessage: "error",
                                 }),
                                 true
@@ -199,7 +204,7 @@ describe("command prechecks", () => {
                         assert.equal(
                             CommandPrechecks.inSessionCommandPrecheck({
                                 session: classicGameSession,
-                                message: stubMessage,
+                                messageContext,
                                 errorMessage: "error",
                             }),
                             false
@@ -234,7 +239,7 @@ describe("command prechecks", () => {
                 assert.strictEqual(
                     CommandPrechecks.notListeningPrecheck({
                         session: null,
-                        message: stubMessage,
+                        messageContext,
                     }),
                     true
                 );
@@ -246,7 +251,7 @@ describe("command prechecks", () => {
                 assert.strictEqual(
                     CommandPrechecks.notListeningPrecheck({
                         session: listeningSession,
-                        message: stubMessage,
+                        messageContext,
                     }),
                     false
                 );
@@ -258,7 +263,7 @@ describe("command prechecks", () => {
                 assert.strictEqual(
                     CommandPrechecks.notListeningPrecheck({
                         session: gameSession,
-                        message: stubMessage,
+                        messageContext,
                     }),
                     true
                 );
@@ -285,12 +290,14 @@ describe("command prechecks", () => {
         describe("message originates in debug server", () => {
             it("should return true", () => {
                 process.env.DEBUG_SERVER_ID = debugServerId;
-                stubMessage.guildID = debugServerId;
 
                 assert.strictEqual(
                     CommandPrechecks.debugServerPrecheck({
                         session: gameSession,
-                        message: stubMessage,
+                        messageContext: {
+                            ...messageContext,
+                            guildID: debugServerId,
+                        },
                     }),
                     true
                 );
@@ -299,13 +306,11 @@ describe("command prechecks", () => {
 
         describe("message does not originate in debug server", () => {
             it("should return false", () => {
-                stubMessage.guildID = "5";
                 process.env.DEBUG_SERVER_ID = debugServerId;
-                sandbox.stub(stubMessage, "guildID").value("123456");
                 assert.strictEqual(
                     CommandPrechecks.debugServerPrecheck({
                         session: gameSession,
-                        message: stubMessage,
+                        messageContext,
                     }),
                     false
                 );
@@ -329,7 +334,7 @@ describe("command prechecks", () => {
                 assert.strictEqual(
                     CommandPrechecks.maintenancePrecheck({
                         session: null,
-                        message: stubMessage,
+                        messageContext,
                     }),
                     false
                 );
@@ -351,7 +356,7 @@ describe("command prechecks", () => {
                 assert.strictEqual(
                     CommandPrechecks.maintenancePrecheck({
                         session: null,
-                        message: stubMessage,
+                        messageContext,
                     }),
                     true
                 );
@@ -382,10 +387,9 @@ describe("command prechecks", () => {
                 assert.strictEqual(
                     CommandPrechecks.debugChannelPrecheck({
                         session: gameSession,
-                        message: <any>{
-                            channel: {
-                                id: debugChannelId,
-                            },
+                        messageContext: {
+                            ...messageContext,
+                            textChannelID: debugChannelId,
                         },
                     }),
                     true
@@ -400,11 +404,7 @@ describe("command prechecks", () => {
                 assert.strictEqual(
                     CommandPrechecks.debugChannelPrecheck({
                         session: gameSession,
-                        message: <any>{
-                            channel: {
-                                id: "1234",
-                            },
-                        },
+                        messageContext,
                     }),
                     false
                 );
@@ -431,7 +431,7 @@ describe("command prechecks", () => {
 
                 assert.strictEqual(
                     await CommandPrechecks.notRestartingPrecheck({
-                        message: stubMessage,
+                        messageContext,
                         session: gameSession,
                     }),
                     false
@@ -447,7 +447,7 @@ describe("command prechecks", () => {
 
                 assert.strictEqual(
                     await CommandPrechecks.notRestartingPrecheck({
-                        message: stubMessage,
+                        messageContext,
                         session: gameSession,
                     }),
                     true
@@ -475,11 +475,7 @@ describe("command prechecks", () => {
 
                 assert.strictEqual(
                     await CommandPrechecks.premiumPrecheck({
-                        message: <any>{
-                            author: {
-                                id: "1234",
-                            },
-                        },
+                        messageContext,
                         session: gameSession,
                     }),
                     true
@@ -495,11 +491,7 @@ describe("command prechecks", () => {
 
                 assert.strictEqual(
                     await CommandPrechecks.premiumPrecheck({
-                        message: <any>{
-                            author: {
-                                id: "1234",
-                            },
-                        },
+                        messageContext,
                         session: gameSession,
                     }),
                     false
@@ -532,11 +524,7 @@ describe("command prechecks", () => {
 
                 assert.strictEqual(
                     await CommandPrechecks.premiumOrDebugServerPrecheck({
-                        message: <any>{
-                            author: {
-                                id: "1234",
-                            },
-                        },
+                        messageContext,
                         session: gameSession,
                     }),
                     true
@@ -551,10 +539,8 @@ describe("command prechecks", () => {
                 assert.strictEqual(
                     await CommandPrechecks.premiumOrDebugServerPrecheck({
                         session: gameSession,
-                        message: <any>{
-                            author: {
-                                id: "1234",
-                            },
+                        messageContext: {
+                            ...messageContext,
                             guildID: debugServerId,
                         },
                     }),
@@ -573,11 +559,7 @@ describe("command prechecks", () => {
                 assert.strictEqual(
                     await CommandPrechecks.premiumOrDebugServerPrecheck({
                         session: gameSession,
-                        message: <any>{
-                            author: {
-                                id: "1234",
-                            },
-                        },
+                        messageContext,
                     }),
                     false
                 );

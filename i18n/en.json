@@ -897,7 +897,7 @@
         },
         "special": {
             "help": {
-                "description": "Modify the song playback speed. Only premium players (see `,premium`) can use this command outside of the official KMQ server.",
+                "description": "Modify the song playback speed.",
                 "example": {
                     "fast": "Plays the song at a fast speed",
                     "faster": "Plays the song at a faster speed",
