@@ -48,7 +48,7 @@
         "ejs": "^3.1.6",
         "eris": "https://github.com/Brainicism/eris.git#fce3f48",
         "eris-fleet": "https://github.com/Brainicism/eris-fleet#feature/soft-kill-warning",
-        "eris-pagination": "https://github.com/brainicism/eris-pagination#a30b37b",
+        "eris-pagination": "https://github.com/brainicism/eris-pagination#39f0899",
         "erlpack": "https://github.com/abalabahaha/erlpack.git",
         "fastify": "^3.27.1",
         "fastify-response-caching": "https://github.com/TheTimmaeh/fastify-response-caching.git",
