@@ -46,7 +46,14 @@ export default class ForceHintCommand implements BaseCommand {
             message.guildID
         );
 
-        if (!validHintCheck(gameSession, guildPreference, gameRound, message))
+        if (
+            !validHintCheck(
+                gameSession,
+                guildPreference,
+                gameRound,
+                MessageContext.fromMessage(message)
+            )
+        )
             return;
         if (message.author.id !== gameSession.owner.id) {
             await sendErrorMessage(MessageContext.fromMessage(message), {

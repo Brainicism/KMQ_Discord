@@ -468,6 +468,10 @@ export default class ProfileCommand implements BaseCommand {
                 interaction,
                 LocalizationManager.localizer.translate(
                     interaction.guildID,
+                    "command.profile.failure.notFound.title"
+                ),
+                LocalizationManager.localizer.translate(
+                    interaction.guildID,
                     "misc.interaction.profile.inaccessible",
                     {
                         profileUserID: `\`${process.env.BOT_PREFIX}profile ${userId}\``,
@@ -475,11 +479,6 @@ export default class ProfileCommand implements BaseCommand {
                 )
             );
 
-            logger.info(
-                `${getDebugLogHeader(
-                    interaction
-                )} | Failed retrieving profile on inaccessible player via interaction`
-            );
             return;
         }
 
@@ -489,6 +488,10 @@ export default class ProfileCommand implements BaseCommand {
                 interaction,
                 LocalizationManager.localizer.translate(
                     interaction.guildID,
+                    "command.profile.failure.notFound.title"
+                ),
+                LocalizationManager.localizer.translate(
+                    interaction.guildID,
                     "misc.interaction.profile.noStats"
                 )
             );
@@ -496,7 +499,7 @@ export default class ProfileCommand implements BaseCommand {
             logger.info(
                 `${getDebugLogHeader(
                     interaction
-                )} | Empty profile retrieved via interaction`
+                )} | Failed retrieving profile on inaccessible player via interaction`
             );
             return;
         }

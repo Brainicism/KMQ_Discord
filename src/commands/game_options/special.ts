@@ -1,13 +1,19 @@
 import { IPCLogger } from "../../logger";
 import {
+    generateEmbed,
+    generateOptionsMessage,
     getDebugLogHeader,
     sendErrorMessage,
     sendOptionsMessage,
+    tryCreateInteractionErrorAcknowledgement,
+    tryCreateInteractionSuccessAcknowledgement,
 } from "../../helpers/discord_utils";
 import { isUserPremium } from "../../helpers/game_utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
@@ -105,59 +111,150 @@ export default class SpecialCommand implements BaseCommand {
         priority: 130,
     });
 
-    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
-        );
+    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+        {
+            name: "special",
+            description: LocalizationManager.localizer.translateByLocale(
+                LocaleType.EN,
+                "command.special.help.description"
+            ),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+            options: [
+                {
+                    name: "special",
+                    description:
+                        LocalizationManager.localizer.translateByLocale(
+                            LocaleType.EN,
+                            "command.special.help.description"
+                        ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
+                    required: false,
+                    choices: Object.values(SpecialType).map((specialType) => ({
+                        name: specialType,
+                        value: specialType,
+                    })),
+                },
+            ],
+        },
+    ];
 
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+        let specialType: SpecialType;
         if (parsedMessage.components.length === 0) {
-            await guildPreference.reset(GameOption.SPECIAL_TYPE);
-            await sendOptionsMessage(
-                Session.getSession(message.guildID),
-                MessageContext.fromMessage(message),
-                guildPreference,
-                [{ option: GameOption.SPECIAL_TYPE, reset: true }]
-            );
-            logger.info(`${getDebugLogHeader(message)} | Special reset.`);
-            return;
+            specialType = null;
+        } else {
+            specialType = parsedMessage.components[0] as SpecialType;
         }
 
+        await SpecialCommand.updateOption(
+            MessageContext.fromMessage(message),
+            specialType
+        );
+    };
+
+    static async updateOption(
+        messageContext: MessageContext,
+        specialType: SpecialType,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID
+        );
+
         if (
-            process.env.DEBUG_SERVER_ID !== message.guildID &&
-            !(await isUserPremium(message.author.id))
+            process.env.DEBUG_SERVER_ID !== messageContext.guildID &&
+            !(await isUserPremium(messageContext.author.id))
         ) {
             logger.info(
                 `${getDebugLogHeader(
-                    message
+                    messageContext
                 )} | Non-premium user attempted to use premium special option`
             );
 
-            sendErrorMessage(MessageContext.fromMessage(message), {
+            const embedPayload = {
                 description: LocalizationManager.localizer.translate(
-                    message.guildID,
+                    messageContext.guildID,
                     "command.premium.option.description_kmq_server"
                 ),
                 title: LocalizationManager.localizer.translate(
-                    message.guildID,
+                    messageContext.guildID,
                     "command.premium.option.title"
                 ),
-            });
+            };
+
+            if (interaction) {
+                const embed = generateEmbed(messageContext, embedPayload, true);
+                await tryCreateInteractionErrorAcknowledgement(
+                    interaction,
+                    null,
+                    null,
+                    {
+                        embeds: [embed],
+                    }
+                );
+            } else {
+                await sendErrorMessage(messageContext, embedPayload);
+            }
+
             return;
         }
 
-        const specialType = parsedMessage.components[0] as SpecialType;
-        await guildPreference.setSpecialType(specialType);
-        await sendOptionsMessage(
-            Session.getSession(message.guildID),
-            MessageContext.fromMessage(message),
-            guildPreference,
-            [{ option: GameOption.SPECIAL_TYPE, reset: false }]
-        );
+        const reset = specialType === null;
+        if (reset) {
+            await guildPreference.reset(GameOption.SPECIAL_TYPE);
+            logger.info(
+                `${getDebugLogHeader(messageContext)} | Special type reset.`
+            );
+        } else {
+            await guildPreference.setSpecialType(specialType);
+            logger.info(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Special type set to ${specialType}`
+            );
+        }
 
-        logger.info(
-            `${getDebugLogHeader(message)} | Special type set to ${specialType}`
+        if (interaction) {
+            const message = await generateOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.SPECIAL_TYPE, reset }]
+            );
+
+            const embed = generateEmbed(messageContext, message, true);
+            tryCreateInteractionSuccessAcknowledgement(
+                interaction,
+                null,
+                null,
+                { embeds: [embed] }
+            );
+        } else {
+            await sendOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.SPECIAL_TYPE, reset }]
+            );
+        }
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    static async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        const specialType = interaction.data.options[0]["value"] as SpecialType;
+
+        await SpecialCommand.updateOption(
+            messageContext,
+            specialType,
+            interaction
         );
-    };
+    }
 
     resetPremium = async (guildPreference: GuildPreference): Promise<void> => {
         if (guildPreference.guildID !== process.env.DEBUG_SERVER_ID) {

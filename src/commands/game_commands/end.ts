@@ -1,7 +1,14 @@
 import { IPCLogger } from "../../logger";
-import { getDebugLogHeader } from "../../helpers/discord_utils";
+import {
+    getDebugLogHeader,
+    tryCreateInteractionErrorAcknowledgement,
+    tryCreateInteractionSuccessAcknowledgement,
+} from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -28,14 +35,73 @@ export default class EndCommand implements BaseCommand {
         priority: 1020,
     });
 
+    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+        {
+            name: "end",
+            description: LocalizationManager.localizer.translateByLocale(
+                LocaleType.EN,
+                "command.end.help.description"
+            ),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+        },
+    ];
+
     call = async ({ message }: CommandArgs): Promise<void> => {
-        const session = Session.getSession(message.guildID);
+        await EndCommand.endGame(MessageContext.fromMessage(message));
+    };
+
+    static endGame = async (
+        messageContext: MessageContext,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> => {
+        const session = Session.getSession(messageContext.guildID);
         if (!session) {
-            logger.warn(`${getDebugLogHeader(message)} | No active session`);
+            if (interaction) {
+                await tryCreateInteractionErrorAcknowledgement(
+                    interaction,
+                    LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "misc.failure.game.noneInProgress.title"
+                    ),
+                    LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "misc.failure.game.noneInProgress.description"
+                    )
+                );
+            }
+
+            logger.warn(
+                `${getDebugLogHeader(messageContext)} | No active session`
+            );
             return;
         }
 
+        if (interaction) {
+            await tryCreateInteractionSuccessAcknowledgement(
+                interaction,
+                LocalizationManager.localizer.translate(
+                    LocaleType.EN,
+                    "command.end.interaction.title"
+                ),
+                LocalizationManager.localizer.translate(
+                    LocaleType.EN,
+                    "command.end.interaction.description"
+                )
+            );
+        }
+
         await session.endSession();
-        logger.info(`${getDebugLogHeader(message)} | Session ended`);
+        logger.info(`${getDebugLogHeader(messageContext)} | Session ended`);
     };
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    static async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        await EndCommand.endGame(messageContext, interaction);
+    }
 }

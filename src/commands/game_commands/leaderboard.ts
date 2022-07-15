@@ -839,7 +839,7 @@ export default class LeaderboardCommand implements BaseCommand {
                     ),
                     description: LocalizationManager.localizer.translate(
                         message.guildID,
-                        "command.leaderboard.failure.game.noneInProgress.description"
+                        "misc.failure.game.noneInProgress.description"
                     ),
                     thumbnailUrl: KmqImages.NOT_IMPRESSED,
                 });
