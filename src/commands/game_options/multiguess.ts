@@ -76,7 +76,7 @@ export default class MultiGuessCommand implements BaseCommand {
     slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
         {
             name: "multiguess",
-            description: LocalizationManager.localizer.translateByLocale(
+            description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
                 "command.multiguess.help.interaction.description"
             ),
@@ -84,11 +84,10 @@ export default class MultiGuessCommand implements BaseCommand {
             options: [
                 {
                     name: "multiguess",
-                    description:
-                        LocalizationManager.localizer.translateByLocale(
-                            LocaleType.EN,
-                            "command.multiguess.help.interaction.description"
-                        ),
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.multiguess.help.interaction.description"
+                    ),
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: true,
                     choices: Object.values(MultiGuessType).map(

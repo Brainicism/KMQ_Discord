@@ -126,7 +126,7 @@ export default class AnswerCommand implements BaseCommand {
     slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
         {
             name: "answer",
-            description: LocalizationManager.localizer.translateByLocale(
+            description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
                 "command.answer.help.interaction.description"
             ),
@@ -134,11 +134,10 @@ export default class AnswerCommand implements BaseCommand {
             options: [
                 {
                     name: "answer",
-                    description:
-                        LocalizationManager.localizer.translateByLocale(
-                            LocaleType.EN,
-                            "command.answer.help.interaction.description"
-                        ),
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.answer.help.interaction.description"
+                    ),
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: true,
                     choices: Object.values(AnswerType).map((answerType) => ({

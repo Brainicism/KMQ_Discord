@@ -959,12 +959,12 @@ export default abstract class Session {
 
         durationText +=
             timeRemaining > 0
-                ? `⏰ ${LocalizationManager.localizer.translateNByLocale(
+                ? `⏰ ${LocalizationManager.localizer.translateN(
                       locale,
                       "misc.plural.minuteRemaining",
                       Math.ceil(timeRemaining)
                   )}`
-                : `⏰ ${LocalizationManager.localizer.translateByLocale(
+                : `⏰ ${LocalizationManager.localizer.translate(
                       locale,
                       "misc.timeFinished"
                   )}!`;
@@ -1028,7 +1028,7 @@ export default abstract class Session {
             return "";
         }
 
-        const aliasesText = LocalizationManager.localizer.translateByLocale(
+        const aliasesText = LocalizationManager.localizer.translate(
             locale,
             "misc.inGame.aliases"
         );

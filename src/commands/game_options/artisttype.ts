@@ -86,7 +86,7 @@ export default class ArtistTypeCommand implements BaseCommand {
     slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
         {
             name: "artisttype",
-            description: LocalizationManager.localizer.translateByLocale(
+            description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
                 "command.artisttype.help.interaction.description"
             ),
@@ -94,11 +94,10 @@ export default class ArtistTypeCommand implements BaseCommand {
             options: [
                 {
                     name: "artisttype",
-                    description:
-                        LocalizationManager.localizer.translateByLocale(
-                            LocaleType.EN,
-                            "command.artisttype.help.interaction.description"
-                        ),
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.artisttype.help.interaction.description"
+                    ),
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: true,
                     choices: Object.values(ArtistType).map((artistType) => ({
