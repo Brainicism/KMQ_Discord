@@ -1,12 +1,11 @@
+import { EMBED_ERROR_COLOR } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
-    generateEmbed,
     generateOptionsMessage,
     getDebugLogHeader,
     sendErrorMessage,
     sendOptionsMessage,
-    tryCreateInteractionErrorAcknowledgement,
-    tryCreateInteractionSuccessAcknowledgement,
+    tryCreateInteractionCustomPayloadAcknowledgement,
 } from "../../helpers/discord_utils";
 import ArtistType from "../../enums/option_types/artist_type";
 import CommandPrechecks from "../../command_prechecks";
@@ -19,6 +18,7 @@ import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
+import type EmbedPayload from "../../interfaces/embed_payload";
 import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("artisttype");
@@ -158,7 +158,7 @@ export default class ArtistTypeCommand implements BaseCommand {
                 )} | Game option conflict between artist type and groups.`
             );
 
-            const embedPayload = {
+            const embedPayload: EmbedPayload = {
                 title: LocalizationManager.localizer.translate(
                     messageContext.guildID,
                     "misc.failure.gameOptionConflict.title"
@@ -172,17 +172,14 @@ export default class ArtistTypeCommand implements BaseCommand {
                         optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
                     }
                 ),
+                color: EMBED_ERROR_COLOR,
             };
 
             if (interaction) {
-                const embed = generateEmbed(messageContext, embedPayload, true);
-                tryCreateInteractionErrorAcknowledgement(
+                await tryCreateInteractionCustomPayloadAcknowledgement(
+                    messageContext,
                     interaction,
-                    null,
-                    null,
-                    {
-                        embeds: [embed],
-                    }
+                    embedPayload
                 );
             } else {
                 sendErrorMessage(messageContext, embedPayload);
@@ -192,19 +189,17 @@ export default class ArtistTypeCommand implements BaseCommand {
         }
 
         if (interaction) {
-            const message = await generateOptionsMessage(
+            const embedPayload = await generateOptionsMessage(
                 Session.getSession(messageContext.guildID),
                 messageContext,
                 guildPreference,
                 [{ option: GameOption.ARTIST_TYPE, reset }]
             );
 
-            const embed = generateEmbed(messageContext, message, true);
-            tryCreateInteractionSuccessAcknowledgement(
+            await tryCreateInteractionCustomPayloadAcknowledgement(
+                messageContext,
                 interaction,
-                null,
-                null,
-                { embeds: [embed] }
+                embedPayload
             );
         } else {
             await sendOptionsMessage(

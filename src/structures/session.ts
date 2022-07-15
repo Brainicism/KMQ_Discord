@@ -576,15 +576,12 @@ export default abstract class Session {
                 this.guildID,
                 "misc.interaction.bookmarked.description",
                 {
-                    songName: bold(
-                        getLocalizedSongName(
-                            song,
-                            State.getGuildLocale(this.guildID)
-                        )
+                    songName: getLocalizedSongName(
+                        song,
+                        State.getGuildLocale(this.guildID)
                     ),
                 }
             ),
-            null,
             true
         );
 
@@ -943,7 +940,7 @@ export default abstract class Session {
 
         embed.thumbnailUrl = thumbnailUrl;
         embed.footerText = footerText;
-        return sendInfoMessage(messageContext, embed, shouldReply, false);
+        return sendInfoMessage(messageContext, embed, shouldReply);
     }
 
     private getDurationFooter(

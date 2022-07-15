@@ -2,11 +2,11 @@ import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import { codeLine } from "../../helpers/utils";
 import {
-    generateEmbed,
     getDebugLogHeader,
     getMajorityCount,
     sendErrorMessage,
     sendInfoMessage,
+    tryCreateInteractionCustomPayloadAcknowledgement,
     tryCreateInteractionSuccessAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
@@ -300,12 +300,10 @@ export default class HintCommand implements BaseCommand {
             };
 
             if (interaction) {
-                const embed = generateEmbed(messageContext, embedPayload);
-                tryCreateInteractionSuccessAcknowledgement(
+                await tryCreateInteractionCustomPayloadAcknowledgement(
+                    messageContext,
                     interaction,
-                    null,
-                    null,
-                    { embeds: [embed] }
+                    embedPayload
                 );
             } else {
                 await sendInfoMessage(messageContext, embedPayload);
