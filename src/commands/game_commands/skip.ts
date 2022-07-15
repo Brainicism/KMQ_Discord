@@ -193,7 +193,7 @@ export default class SkipCommand implements BaseCommand {
             if (interaction) {
                 await tryCreateInteractionErrorAcknowledgement(
                     interaction,
-                    LocalizationManager.localizer.translate(
+                    LocalizationManager.localizer.translateByLocale(
                         LocaleType.EN,
                         "misc.failure.game.noneInProgress.title"
                     ),
