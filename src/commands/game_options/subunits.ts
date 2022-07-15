@@ -82,7 +82,7 @@ export default class SubunitsCommand implements BaseCommand {
     slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
         {
             name: "subunits",
-            description: LocalizationManager.localizer.translateByLocale(
+            description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
                 "command.subunits.help.description",
                 { groups: `\`${process.env.BOT_PREFIX}groups\`` }
@@ -91,12 +91,11 @@ export default class SubunitsCommand implements BaseCommand {
             options: [
                 {
                     name: "subunits",
-                    description:
-                        LocalizationManager.localizer.translateByLocale(
-                            LocaleType.EN,
-                            "command.subunits.help.description",
-                            { groups: `\`${process.env.BOT_PREFIX}groups\`` }
-                        ),
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.subunits.help.description",
+                        { groups: `\`${process.env.BOT_PREFIX}groups\`` }
+                    ),
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: true,
                     choices: Object.values(SubunitsPreference).map(

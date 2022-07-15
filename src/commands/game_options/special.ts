@@ -114,7 +114,7 @@ export default class SpecialCommand implements BaseCommand {
     slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
         {
             name: "special",
-            description: LocalizationManager.localizer.translateByLocale(
+            description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
                 "command.special.help.description"
             ),
@@ -122,11 +122,10 @@ export default class SpecialCommand implements BaseCommand {
             options: [
                 {
                     name: "special",
-                    description:
-                        LocalizationManager.localizer.translateByLocale(
-                            LocaleType.EN,
-                            "command.special.help.description"
-                        ),
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.special.help.description"
+                    ),
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: false,
                     choices: Object.values(SpecialType).map((specialType) => ({

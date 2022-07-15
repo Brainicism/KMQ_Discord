@@ -96,7 +96,7 @@ export default class ShuffleCommand implements BaseCommand {
     slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
         {
             name: "shuffle",
-            description: LocalizationManager.localizer.translateByLocale(
+            description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
                 "command.shuffle.help.description"
             ),
@@ -104,11 +104,10 @@ export default class ShuffleCommand implements BaseCommand {
             options: [
                 {
                     name: "shuffle",
-                    description:
-                        LocalizationManager.localizer.translateByLocale(
-                            LocaleType.EN,
-                            "command.shuffle.help.description"
-                        ),
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.shuffle.help.description"
+                    ),
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: true,
                     choices: Object.values(ShuffleType).map((shuffleType) => ({

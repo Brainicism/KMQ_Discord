@@ -41,7 +41,7 @@ export default class ReleaseCommand implements BaseCommand {
     slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
         {
             name: "release",
-            description: LocalizationManager.localizer.translateByLocale(
+            description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
                 "command.release.help.interaction.description"
             ),
@@ -49,11 +49,10 @@ export default class ReleaseCommand implements BaseCommand {
             options: [
                 {
                     name: "release",
-                    description:
-                        LocalizationManager.localizer.translateByLocale(
-                            LocaleType.EN,
-                            "command.release.help.interaction.description"
-                        ),
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.release.help.interaction.description"
+                    ),
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: true,
                     choices: Object.values(ReleaseType).map((releaseType) => ({

@@ -157,7 +157,7 @@ export default class SkipCommand implements BaseCommand {
     slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
         {
             name: "skip",
-            description: LocalizationManager.localizer.translateByLocale(
+            description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
                 "command.skip.help.description"
             ),
@@ -193,11 +193,11 @@ export default class SkipCommand implements BaseCommand {
             if (interaction) {
                 await tryCreateInteractionErrorAcknowledgement(
                     interaction,
-                    LocalizationManager.localizer.translateByLocale(
+                    LocalizationManager.localizer.translate(
                         LocaleType.EN,
                         "misc.failure.game.noneInProgress.title"
                     ),
-                    LocalizationManager.localizer.translateByLocale(
+                    LocalizationManager.localizer.translate(
                         LocaleType.EN,
                         "misc.failure.game.noneInProgress.description"
                     )

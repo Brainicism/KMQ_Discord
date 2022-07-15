@@ -322,7 +322,7 @@ export default class ProfileCommand implements BaseCommand {
     slashCommands = (): Array<Eris.ApplicationCommandStructure> => [
         {
             name: "profile",
-            description: LocalizationManager.localizer.translateByLocale(
+            description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
                 "command.profile.help.description"
             ),
