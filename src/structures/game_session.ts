@@ -696,6 +696,7 @@ export default class GameSession extends Session {
         ) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
+                null,
                 LocalizationManager.localizer.translate(
                     this.guildID,
                     "misc.failure.interaction.alreadyEliminated"
@@ -707,6 +708,7 @@ export default class GameSession extends Session {
         if (!round.isCorrectInteractionAnswer(interaction.data.custom_id)) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
+                null,
                 LocalizationManager.localizer.translate(
                     this.guildID,
                     "misc.failure.interaction.eliminated"

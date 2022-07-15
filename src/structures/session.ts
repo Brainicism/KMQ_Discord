@@ -556,6 +556,7 @@ export default abstract class Session {
         if (!song) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
+                null,
                 LocalizationManager.localizer.translate(
                     this.guildID,
                     "misc.failure.interaction.invalidBookmark",
@@ -575,15 +576,12 @@ export default abstract class Session {
                 this.guildID,
                 "misc.interaction.bookmarked.description",
                 {
-                    songName: bold(
-                        getLocalizedSongName(
-                            song,
-                            State.getGuildLocale(this.guildID)
-                        )
+                    songName: getLocalizedSongName(
+                        song,
+                        State.getGuildLocale(this.guildID)
                     ),
                 }
             ),
-            null,
             true
         );
 
@@ -788,6 +786,7 @@ export default abstract class Session {
         if (!round.isValidInteraction(interaction.data.custom_id)) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
+                null,
                 LocalizationManager.localizer.translate(
                     this.guildID,
                     "misc.failure.interaction.optionFromPreviousRound"
@@ -941,7 +940,7 @@ export default abstract class Session {
 
         embed.thumbnailUrl = thumbnailUrl;
         embed.footerText = footerText;
-        return sendInfoMessage(messageContext, embed, shouldReply, false);
+        return sendInfoMessage(messageContext, embed, shouldReply);
     }
 
     private getDurationFooter(
@@ -960,12 +959,12 @@ export default abstract class Session {
 
         durationText +=
             timeRemaining > 0
-                ? `⏰ ${LocalizationManager.localizer.translateNByLocale(
+                ? `⏰ ${LocalizationManager.localizer.translateN(
                       locale,
                       "misc.plural.minuteRemaining",
                       Math.ceil(timeRemaining)
                   )}`
-                : `⏰ ${LocalizationManager.localizer.translateByLocale(
+                : `⏰ ${LocalizationManager.localizer.translate(
                       locale,
                       "misc.timeFinished"
                   )}!`;
@@ -1029,7 +1028,7 @@ export default abstract class Session {
             return "";
         }
 
-        const aliasesText = LocalizationManager.localizer.translateByLocale(
+        const aliasesText = LocalizationManager.localizer.translate(
             locale,
             "misc.inGame.aliases"
         );

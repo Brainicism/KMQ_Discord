@@ -29,21 +29,44 @@ export default class LocalizationManager {
 
     /**
      * Wrapper for translateByLocale
-     * @param guildID - The guild ID associated with the guild receiving the string
+     * @param localeOrGuildID - A locale to translate to, or the guild ID to translate for
      * @param phrase - The phrase to translate
      * @param replace - Replacements to be applied to the phrase
      * @returns The translated phrase
      */
     translate(
-        guildID: string,
+        localeOrGuildID: LocaleType | string,
         phrase: string,
         replace: { [key: string]: string } = {}
     ): string {
         return this.translateByLocale(
-            State.getGuildLocale(guildID),
+            localeOrGuildID in LocaleType
+                ? (localeOrGuildID as LocaleType)
+                : State.getGuildLocale(localeOrGuildID),
             phrase,
             replace
         );
+    }
+
+    /**
+     * Wrapper for translateNByLocale
+     * @param localeOrGuildID - A locale to translate to, or the guild ID to translate for
+     * @param phrase - The phrase to translate
+     * @param count - The number which decides whether to select singular or plural
+     * @returns The translated phrase
+     */
+    translateN(localeOrGuildID: string, phrase: string, count: number): string {
+        return this.translateNByLocale(
+            localeOrGuildID in LocaleType
+                ? (localeOrGuildID as LocaleType)
+                : State.getGuildLocale(localeOrGuildID),
+            phrase,
+            count
+        );
+    }
+
+    hasKey(key: string): boolean {
+        return this.internalLocalizer.exists(key);
     }
 
     /**
@@ -53,7 +76,7 @@ export default class LocalizationManager {
      * @param replace - Replacements to be applied to the phrase
      * @returns The translated phrase
      */
-    translateByLocale(
+    private translateByLocale(
         locale: LocaleType,
         phrase: string,
         replace: { [key: string]: string } = {}
@@ -65,28 +88,13 @@ export default class LocalizationManager {
     }
 
     /**
-     * Wrapper for translateNByLocale
-     * @param guildID - The guild ID associated with the guild receiving the string
-     * @param phrase - The phrase to translate
-     * @param count - The number which decides whether to select singular or plural
-     * @returns The translated phrase
-     */
-    translateN(guildID: string, phrase: string, count: number): string {
-        return this.translateNByLocale(
-            State.getGuildLocale(guildID),
-            phrase,
-            count
-        );
-    }
-
-    /**
      * Translate with plural condition the given phrase and count using locale configuration
      * @param locale - The locale to translate to
      * @param phrase - The phrase to translate
      * @param count - The number which decides whether to select singular or plural
      * @returns The translated phrase
      */
-    translateNByLocale(
+    private translateNByLocale(
         locale: LocaleType,
         phrase: string,
         count: number
@@ -95,9 +103,5 @@ export default class LocalizationManager {
             lng: locale,
             count,
         });
-    }
-
-    hasKey(key: string): boolean {
-        return this.internalLocalizer.exists(key);
     }
 }

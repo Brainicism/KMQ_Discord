@@ -1,11 +1,10 @@
 import { GameOptionInternalToGameOption } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
-    generateEmbed,
     generateOptionsMessage,
     getDebugLogHeader,
     sendOptionsMessage,
-    tryCreateInteractionSuccessAcknowledgement,
+    tryCreateInteractionCustomPayloadAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
@@ -52,7 +51,7 @@ export default class ResetCommand implements BaseCommand {
     slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
         {
             name: "reset",
-            description: LocalizationManager.localizer.translateByLocale(
+            description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
                 "command.reset.help.description"
             ),
@@ -80,7 +79,7 @@ export default class ResetCommand implements BaseCommand {
         );
 
         if (interaction) {
-            const message = await generateOptionsMessage(
+            const embedPayload = await generateOptionsMessage(
                 Session.getSession(messageContext.guildID),
                 messageContext,
                 guildPreference,
@@ -92,12 +91,10 @@ export default class ResetCommand implements BaseCommand {
                 true
             );
 
-            const embed = generateEmbed(messageContext, message, true);
-            tryCreateInteractionSuccessAcknowledgement(
+            await tryCreateInteractionCustomPayloadAcknowledgement(
+                messageContext,
                 interaction,
-                null,
-                null,
-                { embeds: [embed] }
+                embedPayload
             );
         } else {
             await sendOptionsMessage(

@@ -7,18 +7,17 @@ import {
 } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
-    generateEmbed,
-    getDebugLogHeader,
-    sendInfoMessage,
-    tryCreateInteractionSuccessAcknowledgement,
-} from "../../helpers/discord_utils";
-import {
     getAvailableSongCount,
     isFirstGameOfDay,
     isPowerHour,
     isPremiumRequest,
     userBonusIsActive,
 } from "../../helpers/game_utils";
+import {
+    getDebugLogHeader,
+    sendInfoMessage,
+    tryCreateInteractionCustomPayloadAcknowledgement,
+} from "../../helpers/discord_utils";
 import { isWeekend } from "../../helpers/utils";
 import AnswerType from "../../enums/option_types/answer_type";
 import Eris from "eris";
@@ -319,7 +318,7 @@ export default class ExpCommand implements BaseCommand {
     slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
         {
             name: "exp",
-            description: LocalizationManager.localizer.translateByLocale(
+            description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
                 "command.exp.help.description"
             ),
@@ -465,12 +464,10 @@ export default class ExpCommand implements BaseCommand {
         };
 
         if (interaction) {
-            const embed = generateEmbed(messageContext, embedPayload, true);
-            await tryCreateInteractionSuccessAcknowledgement(
+            await tryCreateInteractionCustomPayloadAcknowledgement(
+                messageContext,
                 interaction,
-                null,
-                null,
-                { embeds: [embed] }
+                embedPayload
             );
         } else {
             await sendInfoMessage(messageContext, embedPayload);

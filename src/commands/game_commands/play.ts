@@ -23,6 +23,7 @@ import {
     getUserVoiceChannel,
     sendErrorMessage,
     sendInfoMessage,
+    tryCreateInteractionCustomPayloadAcknowledgement,
     tryCreateInteractionErrorAcknowledgement,
     tryCreateInteractionSuccessAcknowledgement,
     voicePermissionsCheck,
@@ -163,23 +164,20 @@ export async function sendBeginGameSessionMessage(
 
     const color = isBonus ? EMBED_SUCCESS_BONUS_COLOR : null;
     if (interaction) {
-        await tryCreateInteractionSuccessAcknowledgement(
+        await tryCreateInteractionCustomPayloadAcknowledgement(
+            messageContext,
             interaction,
-            null,
-            null,
-            {
-                embeds: [
-                    {
-                        title: startTitle,
-                        description: gameInstructions,
-                        color,
-                        thumbnail: { url: KmqImages.HAPPY },
-                        fields,
-                        footer: { text: State.version },
-                    },
-                    generateEmbed(messageContext, optionsEmbedPayload),
-                ],
-            }
+            [
+                {
+                    title: startTitle,
+                    description: gameInstructions,
+                    color,
+                    thumbnailUrl: KmqImages.HAPPY,
+                    fields,
+                    footerText: State.version,
+                },
+                optionsEmbedPayload,
+            ]
         );
     } else {
         await sendInfoMessage(
@@ -193,7 +191,6 @@ export async function sendBeginGameSessionMessage(
                 footerText: State.version,
             },
             false,
-            true,
             undefined,
             [generateEmbed(messageContext, optionsEmbedPayload)]
         );
@@ -268,7 +265,7 @@ export default class PlayCommand implements BaseCommand {
     slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
         {
             name: "play",
-            description: LocalizationManager.localizer.translateByLocale(
+            description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
                 "command.play.help.example.classic"
             ),
@@ -276,7 +273,7 @@ export default class PlayCommand implements BaseCommand {
         },
         {
             name: "playteams",
-            description: LocalizationManager.localizer.translateByLocale(
+            description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
                 "command.play.help.example.teams"
             ),
@@ -284,7 +281,7 @@ export default class PlayCommand implements BaseCommand {
         },
         {
             name: "playelimination",
-            description: LocalizationManager.localizer.translateByLocale(
+            description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
                 "command.play.help.example.elimination"
             ),
@@ -292,18 +289,14 @@ export default class PlayCommand implements BaseCommand {
             options: [
                 {
                     name: "lives",
-                    description:
-                        LocalizationManager.localizer.translateByLocale(
-                            LocaleType.EN,
-                            "command.play.help.interaction.lives",
-                            {
-                                lives: `\`${ELIMINATION_DEFAULT_LIVES}\``,
-                            }
-                        ),
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.play.help.interaction.lives",
+                        {
+                            lives: `\`${ELIMINATION_DEFAULT_LIVES}\``,
+                        }
+                    ),
                     type: Eris.Constants.ApplicationCommandOptionTypes.INTEGER,
-                    // required: false,
-                    // max_value: ELIMINATION_MAX_LIVES,
-                    // min_value: ELIMINATION_MIN_LIVES,
                 },
             ],
         },
@@ -322,7 +315,7 @@ export default class PlayCommand implements BaseCommand {
         const gameType = SLASH_COMMAND_TO_GAME_TYPE[interaction.data.name];
         let lives: number;
         if (gameType === GameType.ELIMINATION) {
-            if (interaction.data.options == null) {
+            if (!interaction.data.options) {
                 lives = ELIMINATION_DEFAULT_LIVES;
             } else {
                 lives = interaction.data.options[0]["value"] as number;
@@ -399,10 +392,9 @@ export default class PlayCommand implements BaseCommand {
             };
 
             if (interaction) {
-                // TODO ,end
-                // tryCreateInteractionErrorAcknowledgement(interaction, title, description);
                 tryCreateInteractionErrorAcknowledgement(
                     interaction,
+                    title,
                     description
                 );
             } else {
@@ -459,11 +451,10 @@ export default class PlayCommand implements BaseCommand {
                 );
 
                 if (interaction) {
-                    // TODO ,end
-                    // await tryCreateInteractionErrorAcknowledgement(interaction, title, null);
                     await tryCreateInteractionErrorAcknowledgement(
                         interaction,
-                        title
+                        title,
+                        null
                     );
                 } else {
                     await sendErrorMessage(messageContext, {
@@ -534,17 +525,8 @@ export default class PlayCommand implements BaseCommand {
             if (interaction) {
                 await tryCreateInteractionSuccessAcknowledgement(
                     interaction,
-                    null,
-                    null,
-                    {
-                        embeds: [
-                            {
-                                title: startTitle,
-                                description: gameInstructions,
-                                thumbnail: { url: KmqImages.HAPPY },
-                            },
-                        ],
-                    }
+                    startTitle,
+                    gameInstructions
                 );
             } else {
                 await sendInfoMessage(messageContext, {
@@ -594,10 +576,10 @@ export default class PlayCommand implements BaseCommand {
                 );
 
                 if (interaction) {
-                    // await tryCreateInteractionErrorAcknowledgement(interaction, ignoringOldGameTypeTitle, oldGameTypeInstructions);
                     await tryCreateInteractionErrorAcknowledgement(
                         interaction,
-                        ignoringOldGameTypeTitle
+                        ignoringOldGameTypeTitle,
+                        oldGameTypeInstructions
                     );
                 } else {
                     sendErrorMessage(messageContext, {

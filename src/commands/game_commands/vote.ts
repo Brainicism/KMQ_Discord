@@ -9,10 +9,9 @@ import {
 import { IPCLogger } from "../../logger";
 import { bold } from "../../helpers/utils";
 import {
-    generateEmbed,
     getDebugLogHeader,
     sendInfoMessage,
-    tryCreateInteractionSuccessAcknowledgement,
+    tryCreateInteractionCustomPayloadAcknowledgement,
 } from "../../helpers/discord_utils";
 import { userBonusIsActive } from "../../helpers/game_utils";
 import Eris from "eris";
@@ -44,7 +43,7 @@ export default class VoteCommand implements BaseCommand {
     slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
         {
             name: "vote",
-            description: LocalizationManager.localizer.translateByLocale(
+            description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
                 "command.vote.help.description"
             ),
@@ -209,12 +208,10 @@ export default class VoteCommand implements BaseCommand {
         };
 
         if (interaction) {
-            const embed = generateEmbed(messageContext, embedPayload, true);
-            await tryCreateInteractionSuccessAcknowledgement(
+            await tryCreateInteractionCustomPayloadAcknowledgement(
+                messageContext,
                 interaction,
-                null,
-                null,
-                { embeds: [embed] }
+                embedPayload
             );
         } else {
             sendInfoMessage(messageContext, embedPayload, true);

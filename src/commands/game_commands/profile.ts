@@ -14,13 +14,14 @@ import {
     getUserTag,
     romanize,
 } from "../../helpers/utils";
+import Eris from "eris";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
 import dbContext from "../../database_context";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
-import type Eris from "eris";
 import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("profile");
@@ -318,6 +319,33 @@ export default class ProfileCommand implements BaseCommand {
         priority: 50,
     });
 
+    slashCommands = (): Array<Eris.ApplicationCommandStructure> => [
+        {
+            name: "profile",
+            description: LocalizationManager.localizer.translate(
+                LocaleType.EN,
+                "command.profile.help.description"
+            ),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+            options: [
+                {
+                    name: "user_mention",
+                    description: "command.profile.interaction.userMention",
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .MENTIONABLE,
+                    required: false,
+                    channel_types: undefined as never,
+                },
+                {
+                    name: "user_id",
+                    description: "command.profile.interaction.userID",
+                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
+                    required: false,
+                },
+            ],
+        },
+    ];
+
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         let requestedPlayer: Eris.User;
         if (parsedMessage.components.length === 0) {
@@ -399,78 +427,111 @@ export default class ProfileCommand implements BaseCommand {
             timestamp: new Date(),
         });
     };
-}
 
-/**
- * Responds to the profile interaction
- * @param interaction - The originating interaction
- * @param userId - The ID of the user retrieve profile information from
- */
-export async function handleProfileInteraction(
-    interaction: Eris.CommandInteraction,
-    userId: string
-): Promise<void> {
-    const user = await State.ipc.fetchUser(userId);
-    if (!user) {
-        tryCreateInteractionErrorAcknowledgement(
-            interaction,
-            LocalizationManager.localizer.translate(
-                interaction.guildID,
-                "misc.interaction.profile.inaccessible",
-                {
-                    profileUserID: `\`${process.env.BOT_PREFIX}profile ${userId}\``,
-                }
-            )
-        );
-
-        logger.info(
-            `${getDebugLogHeader(
-                interaction
-            )} | Failed retrieving profile on inaccessible player via interaction`
-        );
-        return;
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    static async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        if (interaction.data.options == null) {
+            await ProfileCommand.handleProfileInteraction(
+                interaction,
+                messageContext.author.id,
+                false
+            );
+        } else {
+            await ProfileCommand.handleProfileInteraction(
+                interaction,
+                interaction.data.options[0]["value"],
+                false
+            );
+        }
     }
 
-    const fields = await getProfileFields(user, interaction.guildID);
-    if (fields.length === 0) {
-        tryCreateInteractionErrorAcknowledgement(
-            interaction,
-            LocalizationManager.localizer.translate(
-                interaction.guildID,
-                "misc.interaction.profile.noStats"
-            )
-        );
+    /**
+     * Responds to the profile interaction
+     * @param interaction - The originating interaction
+     * @param userId - The ID of the user retrieve profile information from
+     * @param ephemeral - Whether the embed can only be seen by the triggering user
+     */
+    static async handleProfileInteraction(
+        interaction: Eris.CommandInteraction,
+        userId: string,
+        ephemeral: boolean
+    ): Promise<void> {
+        const user = await State.ipc.fetchUser(userId);
+        if (!user) {
+            tryCreateInteractionErrorAcknowledgement(
+                interaction,
+                LocalizationManager.localizer.translate(
+                    interaction.guildID,
+                    "command.profile.failure.notFound.title"
+                ),
+                LocalizationManager.localizer.translate(
+                    interaction.guildID,
+                    "misc.interaction.profile.inaccessible",
+                    {
+                        profileUserID: `\`${process.env.BOT_PREFIX}profile ${userId}\``,
+                    }
+                )
+            );
 
-        logger.info(
-            `${getDebugLogHeader(
-                interaction
-            )} | Empty profile retrieved via interaction`
-        );
-        return;
-    }
+            logger.info(
+                `${getDebugLogHeader(
+                    interaction
+                )} | Failed retrieving profile on inaccessible player via interaction`
+            );
+            return;
+        }
 
-    try {
-        await interaction.createMessage({
-            embeds: [
-                {
-                    title: getUserTag(user),
-                    fields,
-                    timestamp: new Date(),
-                },
-            ],
-            flags: EPHEMERAL_MESSAGE_FLAG,
-        });
+        const fields = await getProfileFields(user, interaction.guildID);
+        if (fields.length === 0) {
+            tryCreateInteractionErrorAcknowledgement(
+                interaction,
+                LocalizationManager.localizer.translate(
+                    interaction.guildID,
+                    "command.profile.failure.notFound.title"
+                ),
+                LocalizationManager.localizer.translate(
+                    interaction.guildID,
+                    "misc.interaction.profile.noStats"
+                )
+            );
 
-        logger.info(
-            `${getDebugLogHeader(
-                interaction
-            )} | Profile retrieved via interaction`
-        );
-    } catch (err) {
-        logger.error(
-            `${getDebugLogHeader(
-                interaction
-            )} | Interaction acknowledge failed. err = ${err.stack}`
-        );
+            logger.info(
+                `${getDebugLogHeader(
+                    interaction
+                )} | Empty profile retrieved via interaction`
+            );
+            return;
+        }
+
+        try {
+            await interaction.createMessage({
+                embeds: [
+                    {
+                        title: getUserTag(user),
+                        fields,
+                        timestamp: new Date(),
+                    },
+                ],
+                flags: ephemeral ? EPHEMERAL_MESSAGE_FLAG : null,
+            });
+
+            logger.info(
+                `${getDebugLogHeader(
+                    interaction
+                )} | Profile retrieved via interaction`
+            );
+        } catch (err) {
+            logger.error(
+                `${getDebugLogHeader(
+                    interaction
+                )} | Interaction acknowledge failed. err = ${err.stack}`
+            );
+        }
     }
 }

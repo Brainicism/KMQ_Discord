@@ -1,11 +1,10 @@
 import { DEFAULT_SEEK } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
-    generateEmbed,
     generateOptionsMessage,
     getDebugLogHeader,
     sendOptionsMessage,
-    tryCreateInteractionSuccessAcknowledgement,
+    tryCreateInteractionCustomPayloadAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
@@ -86,7 +85,7 @@ export default class SeekCommand implements BaseCommand {
     slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
         {
             name: "seek",
-            description: LocalizationManager.localizer.translateByLocale(
+            description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
                 "command.seek.help.description"
             ),
@@ -94,11 +93,10 @@ export default class SeekCommand implements BaseCommand {
             options: [
                 {
                     name: "seek",
-                    description:
-                        LocalizationManager.localizer.translateByLocale(
-                            LocaleType.EN,
-                            "command.seek.help.description"
-                        ),
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.seek.help.description"
+                    ),
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: true,
                     choices: Object.values(SeekType).map((seekType) => ({
@@ -150,19 +148,17 @@ export default class SeekCommand implements BaseCommand {
         }
 
         if (interaction) {
-            const message = await generateOptionsMessage(
+            const embedPayload = await generateOptionsMessage(
                 Session.getSession(messageContext.guildID),
                 messageContext,
                 guildPreference,
                 [{ option: GameOption.SEEK_TYPE, reset }]
             );
 
-            const embed = generateEmbed(messageContext, message, true);
-            tryCreateInteractionSuccessAcknowledgement(
+            await tryCreateInteractionCustomPayloadAcknowledgement(
+                messageContext,
                 interaction,
-                null,
-                null,
-                { embeds: [embed] }
+                embedPayload
             );
         } else {
             await sendOptionsMessage(

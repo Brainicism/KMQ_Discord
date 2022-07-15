@@ -1,10 +1,9 @@
 import { IPCLogger } from "../../logger";
 import {
-    generateEmbed,
     generateOptionsMessage,
     getDebugLogHeader,
     sendOptionsMessage,
-    tryCreateInteractionSuccessAcknowledgement,
+    tryCreateInteractionCustomPayloadAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
@@ -73,7 +72,7 @@ export default class LanguageCommand implements BaseCommand {
     slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
         {
             name: "language",
-            description: LocalizationManager.localizer.translateByLocale(
+            description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
                 "command.language.help.description"
             ),
@@ -81,11 +80,10 @@ export default class LanguageCommand implements BaseCommand {
             options: [
                 {
                     name: "language",
-                    description:
-                        LocalizationManager.localizer.translateByLocale(
-                            LocaleType.EN,
-                            "command.language.help.description"
-                        ),
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.language.help.description"
+                    ),
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: true,
                     choices: Object.values(LanguageType).map(
@@ -138,19 +136,17 @@ export default class LanguageCommand implements BaseCommand {
         }
 
         if (interaction) {
-            const message = await generateOptionsMessage(
+            const embedPayload = await generateOptionsMessage(
                 Session.getSession(messageContext.guildID),
                 messageContext,
                 guildPreference,
                 [{ option: GameOption.LANGUAGE_TYPE, reset }]
             );
 
-            const embed = generateEmbed(messageContext, message, true);
-            tryCreateInteractionSuccessAcknowledgement(
+            await tryCreateInteractionCustomPayloadAcknowledgement(
+                messageContext,
                 interaction,
-                null,
-                null,
-                { embeds: [embed] }
+                embedPayload
             );
         } else {
             await sendOptionsMessage(

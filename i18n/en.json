@@ -47,6 +47,9 @@
                     "multipleChoice": "Click on the button from {{optionCount}} multiple choice options to guess. {{penalty}} EXP penalty will be applied",
                     "typing": "Type your answer in the chat to guess",
                     "typingTypos": "Type your answer in the chat to guess. Small typos will be marked as correct. {{penalty}} EXP penalty will be applied"
+                },
+                "interaction": {
+                    "description": "Choose how to answer: by typing your answer, or via multiple choice"
                 }
             }
         },
@@ -58,6 +61,9 @@
                     "groups": "Play songs only from groups",
                     "reset": "Resets the artist type option",
                     "soloists": "Play songs only from soloists"
+                },
+                "interaction": {
+                    "description": "Choose whether you'd like to hear from soloists, groups, or both"
                 }
             }
         },
@@ -117,6 +123,10 @@
         "end": {
             "help": {
                 "description": "Finishes the current game and decides on a winner."
+            },
+            "interaction": {
+                "description": "Hope you had fun!",
+                "title": "Ending game"
             }
         },
         "exclude": {
@@ -379,9 +389,6 @@
                     "noParticipants": {
                         "description": "Someone needs to score a point before this command works.",
                         "title": "No Participants"
-                    },
-                    "noneInProgress": {
-                        "description": "There is no game in progress."
                     }
                 },
                 "outOfRange": {
@@ -538,6 +545,9 @@
                     "off": "Only the first person who guesses correct is awarded the point",
                     "on": "Allows for a 1.5 second grace period from when the first correct guess occurs. Multiple players are able to guess correctly",
                     "reset": "Reset to the default multiguess type of {{defaultMultiguess}}"
+                },
+                "interaction": {
+                    "description": "Sets whether multiple people can guess a song correctly"
                 }
             }
         },
@@ -770,6 +780,10 @@
                     "mention": "mention"
                 }
             },
+            "interaction": {
+                "userID": "The user ID of the player whose profile to view",
+                "userMention": "Mention the user whose profile to view"
+            },
             "lastActive": "Last Active",
             "overallRank": "Overall Rank",
             "rank": {
@@ -852,11 +866,6 @@
             }
         },
         "score": {
-            "failure": {
-                "noneInProgress": {
-                    "description": "There is no currently active game of KMQ. Start a new game with {{play}}!"
-                }
-            },
             "help": {
                 "description": "See the scoreboard for the current game."
             },
@@ -1053,6 +1062,7 @@
             },
             "game": {
                 "noneInProgress": {
+                    "description": "There is no game in progress.",
                     "title": "No Active Game"
                 }
             },
@@ -1164,6 +1174,10 @@
             },
             "faq": "Frequently Asked Questions",
             "fullGroupsList": "Full List of Groups",
+            "genericProgress": {
+                "description": "🤖",
+                "title": "Working on it!"
+            },
             "guess": {
                 "title": "Guess the {{songOrArtist}}"
             },

@@ -60,9 +60,13 @@ export default class AppCommandsCommand implements BaseCommand {
                             try {
                                 // eslint-disable-next-line no-await-in-loop
                                 await State.client.createCommand(cmd);
+                                // eslint-disable-next-line no-await-in-loop
+                                await delay(1000);
                             } catch (e) {
                                 logger.error(
-                                    `Failed to create guild command: ${cmd.name}. err = ${e}`
+                                    `Failed to create guild command: ${
+                                        cmd.name
+                                    }. err = ${JSON.stringify(e)}`
                                 );
                                 continue;
                             }
@@ -103,7 +107,9 @@ export default class AppCommandsCommand implements BaseCommand {
                                 await delay(1000);
                             } catch (e) {
                                 logger.error(
-                                    `Failed to create guild command: ${cmd.name}. err = ${e}`
+                                    `Failed to create guild command: ${
+                                        cmd.name
+                                    }. err = ${JSON.stringify(e)}`
                                 );
                                 continue;
                             }

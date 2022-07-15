@@ -1,11 +1,10 @@
 import { DEFAULT_OST_PREFERENCE } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
-    generateEmbed,
     generateOptionsMessage,
     getDebugLogHeader,
     sendOptionsMessage,
-    tryCreateInteractionSuccessAcknowledgement,
+    tryCreateInteractionCustomPayloadAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
@@ -83,7 +82,7 @@ export default class OstCommand implements BaseCommand {
     slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
         {
             name: "ost",
-            description: LocalizationManager.localizer.translateByLocale(
+            description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
                 "command.ost.help.description"
             ),
@@ -91,11 +90,10 @@ export default class OstCommand implements BaseCommand {
             options: [
                 {
                     name: "ost",
-                    description:
-                        LocalizationManager.localizer.translateByLocale(
-                            LocaleType.EN,
-                            "command.ost.help.description"
-                        ),
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.ost.help.description"
+                    ),
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: true,
                     choices: Object.values(OstPreference).map(
@@ -150,19 +148,17 @@ export default class OstCommand implements BaseCommand {
         }
 
         if (interaction) {
-            const message = await generateOptionsMessage(
+            const embedPayload = await generateOptionsMessage(
                 Session.getSession(messageContext.guildID),
                 messageContext,
                 guildPreference,
                 [{ option: GameOption.OST_PREFERENCE, reset }]
             );
 
-            const embed = generateEmbed(messageContext, message, true);
-            tryCreateInteractionSuccessAcknowledgement(
+            await tryCreateInteractionCustomPayloadAcknowledgement(
+                messageContext,
                 interaction,
-                null,
-                null,
-                { embeds: [embed] }
+                embedPayload
             );
         } else {
             await sendOptionsMessage(

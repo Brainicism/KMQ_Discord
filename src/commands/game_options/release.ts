@@ -1,11 +1,10 @@
 import { DEFAULT_RELEASE_TYPE } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
-    generateEmbed,
     generateOptionsMessage,
     getDebugLogHeader,
     sendOptionsMessage,
-    tryCreateInteractionSuccessAcknowledgement,
+    tryCreateInteractionCustomPayloadAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
@@ -42,7 +41,7 @@ export default class ReleaseCommand implements BaseCommand {
     slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
         {
             name: "release",
-            description: LocalizationManager.localizer.translateByLocale(
+            description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
                 "command.release.help.interaction.description"
             ),
@@ -50,11 +49,10 @@ export default class ReleaseCommand implements BaseCommand {
             options: [
                 {
                     name: "release",
-                    description:
-                        LocalizationManager.localizer.translateByLocale(
-                            LocaleType.EN,
-                            "command.release.help.interaction.description"
-                        ),
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.release.help.interaction.description"
+                    ),
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: true,
                     choices: Object.values(ReleaseType).map((releaseType) => ({
@@ -141,19 +139,17 @@ export default class ReleaseCommand implements BaseCommand {
         }
 
         if (interaction) {
-            const message = await generateOptionsMessage(
+            const embedPayload = await generateOptionsMessage(
                 Session.getSession(messageContext.guildID),
                 messageContext,
                 guildPreference,
                 [{ option: GameOption.RELEASE_TYPE, reset }]
             );
 
-            const embed = generateEmbed(messageContext, message, true);
-            tryCreateInteractionSuccessAcknowledgement(
+            await tryCreateInteractionCustomPayloadAcknowledgement(
+                messageContext,
                 interaction,
-                null,
-                null,
-                { embeds: [embed] }
+                embedPayload
             );
         } else {
             await sendOptionsMessage(
@@ -173,12 +169,6 @@ export default class ReleaseCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        logger.info(
-            `${getDebugLogHeader(interaction)} | ${
-                interaction.data.name
-            } slash command received`
-        );
-
         const releaseType = interaction.data.options[0]["value"] as ReleaseType;
 
         await ReleaseCommand.updateOption(

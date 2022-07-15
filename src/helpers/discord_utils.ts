@@ -507,13 +507,11 @@ export async function sendErrorMessage(
  * Create and return a Discord embed with the specified payload
  * @param messageContext - An object containing relevant parts of Eris.Message
  * @param embedPayload - What to include in the message
- * @param boldTitle - Whether to bold the title
  *  @returns a Discord embed
  */
 export function generateEmbed(
     messageContext: MessageContext,
-    embedPayload: EmbedPayload,
-    boldTitle = true
+    embedPayload: EmbedPayload
 ): Eris.EmbedOptions {
     const author =
         embedPayload.author == null || embedPayload.author
@@ -528,7 +526,7 @@ export function generateEmbed(
                   icon_url: author.avatarUrl,
               }
             : null,
-        title: boldTitle ? bold(embedPayload.title) : embedPayload.title,
+        title: bold(embedPayload.title),
         url: embedPayload.url,
         description: embedPayload.description,
         fields: embedPayload.fields,
@@ -549,7 +547,6 @@ export function generateEmbed(
  * @param messageContext - An object containing relevant parts of Eris.Message
  * @param embedPayload - What to include in the message
  * @param reply - Whether to reply to the given message
- * @param boldTitle - Whether to bold the title
  * @param content - Plain text content
  * @param additionalEmbeds - Additional embeds to include in the message
  */
@@ -557,7 +554,6 @@ export async function sendInfoMessage(
     messageContext: MessageContext,
     embedPayload: EmbedPayload,
     reply = false,
-    boldTitle = true,
     content?: string,
     additionalEmbeds: Array<Eris.EmbedOptions> = []
 ): Promise<Eris.Message<Eris.TextableChannel>> {
@@ -577,7 +573,7 @@ export async function sendInfoMessage(
         });
     }
 
-    const embed = generateEmbed(messageContext, embedPayload, boldTitle);
+    const embed = generateEmbed(messageContext, embedPayload);
 
     return sendMessage(
         messageContext.textChannelID,
@@ -1521,17 +1517,52 @@ export async function tryAutocompleteInteractionAcknowledge(
 
 /**
  * Attempts to send a success response to an interaction
+ * @param messageContext - The originating interaction
+ * @param interaction - The originating interaction
+ * @param embedPayload - The embed payloads -- the first payload's components will be used to create the embed
+ * @param ephemeral - Whether the embed can only be seen by the triggering user
+ */
+export async function tryCreateInteractionCustomPayloadAcknowledgement(
+    messageContext: MessageContext,
+    interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
+    embedPayload: EmbedPayload | Array<EmbedPayload>,
+    ephemeral: boolean = false
+): Promise<void> {
+    if (!withinInteractionInterval(interaction)) {
+        return;
+    }
+
+    const embeds = [];
+    if (!Array.isArray(embedPayload)) {
+        embedPayload = [embedPayload];
+    }
+
+    for (const payload of embedPayload) {
+        embeds.push(generateEmbed(messageContext, payload));
+    }
+
+    try {
+        await interaction.createMessage({
+            embeds,
+            components: embedPayload[0].components,
+            flags: ephemeral ? EPHEMERAL_MESSAGE_FLAG : null,
+        });
+    } catch (err) {
+        interactionRejectionHandler(interaction, err);
+    }
+}
+
+/**
+ * Attempts to send a success response to an interaction
  * @param interaction - The originating interaction
  * @param title - The embed title
  * @param description - The embed description
- * @param interactionContent - The interaction message content
  * @param ephemeral - Whether the embed can only be seen by the triggering user
  */
 export async function tryCreateInteractionSuccessAcknowledgement(
     interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
     title: string,
     description: string,
-    interactionContent?: Eris.InteractionContent,
     ephemeral: boolean = false
 ): Promise<void> {
     if (!withinInteractionInterval(interaction)) {
@@ -1539,11 +1570,6 @@ export async function tryCreateInteractionSuccessAcknowledgement(
     }
 
     try {
-        if (interactionContent) {
-            await interaction.createMessage(interactionContent);
-            return;
-        }
-
         await interaction.createMessage({
             embeds: [
                 {
@@ -1569,24 +1595,21 @@ export async function tryCreateInteractionSuccessAcknowledgement(
 /**
  * Attempts to send a error message to an interaction
  * @param interaction - The originating interaction
+ * @param title - The embed title
  * @param description - The embed description
- * @param interactionContent - The interaction message content
+ * @param ephemeral - Whether the embed can only be seen by the triggering user
  */
 export async function tryCreateInteractionErrorAcknowledgement(
     interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
+    title: string,
     description: string,
-    interactionContent?: Eris.InteractionContent
+    ephemeral: boolean = true
 ): Promise<void> {
     if (!withinInteractionInterval(interaction)) {
         return;
     }
 
     try {
-        if (interactionContent) {
-            await interaction.createMessage(interactionContent);
-            return;
-        }
-
         await interaction.createMessage({
             embeds: [
                 {
@@ -1595,17 +1618,19 @@ export async function tryCreateInteractionErrorAcknowledgement(
                         name: interaction.member?.username,
                         icon_url: interaction.member?.avatarURL,
                     },
-                    title: bold(
-                        LocalizationManager.localizer.translate(
-                            interaction.guildID,
-                            "misc.interaction.title.failure"
-                        )
-                    ),
+                    title:
+                        title ||
+                        bold(
+                            LocalizationManager.localizer.translate(
+                                interaction.guildID,
+                                "misc.interaction.title.failure"
+                            )
+                        ),
                     description,
                     thumbnail: { url: KmqImages.DEAD },
                 },
             ],
-            flags: EPHEMERAL_MESSAGE_FLAG,
+            flags: ephemeral ? EPHEMERAL_MESSAGE_FLAG : null,
         });
     } catch (err) {
         interactionRejectionHandler(interaction, err);
@@ -1632,7 +1657,6 @@ export function sendPowerHourNotification(): void {
             thumbnailUrl: KmqImages.LISTENING,
         },
         false,
-        true,
         `<@&${process.env.POWER_HOUR_NOTIFICATION_ROLE_ID}>`
     );
 }

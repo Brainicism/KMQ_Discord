@@ -6,13 +6,12 @@ import {
     setIntersection,
 } from "../../helpers/utils";
 import {
-    generateEmbed,
     generateOptionsMessage,
     getDebugLogHeader,
     sendErrorMessage,
     sendOptionsMessage,
     tryAutocompleteInteractionAcknowledge,
-    tryCreateInteractionSuccessAcknowledgement,
+    tryCreateInteractionCustomPayloadAcknowledgement,
 } from "../../helpers/discord_utils";
 import {
     getMatchingGroupNames,
@@ -99,6 +98,7 @@ export default class GroupsCommand implements BaseCommand {
         {
             name: "groups",
             description: "Play songs from the given groups.",
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [...Array(25).keys()].map((x) => ({
                 name: `group_${x + 1}`,
                 description: `The ${getOrdinalNum(
@@ -108,7 +108,6 @@ export default class GroupsCommand implements BaseCommand {
                 autocomplete: true,
                 required: false,
             })),
-            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
         },
     ];
 
@@ -277,19 +276,17 @@ export default class GroupsCommand implements BaseCommand {
         }
 
         if (interaction) {
-            const message = await generateOptionsMessage(
+            const embedPayload = await generateOptionsMessage(
                 Session.getSession(messageContext.guildID),
                 messageContext,
                 guildPreference,
                 [{ option: GameOption.GROUPS, reset }]
             );
 
-            const embed = generateEmbed(messageContext, message, true);
-            tryCreateInteractionSuccessAcknowledgement(
+            await tryCreateInteractionCustomPayloadAcknowledgement(
+                messageContext,
                 interaction,
-                null,
-                null,
-                { embeds: [embed] }
+                embedPayload
             );
         } else {
             await sendOptionsMessage(

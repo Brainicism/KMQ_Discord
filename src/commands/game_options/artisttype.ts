@@ -1,18 +1,24 @@
+import { EMBED_ERROR_COLOR } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
+    generateOptionsMessage,
     getDebugLogHeader,
     sendErrorMessage,
     sendOptionsMessage,
+    tryCreateInteractionCustomPayloadAcknowledgement,
 } from "../../helpers/discord_utils";
 import ArtistType from "../../enums/option_types/artist_type";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
+import type EmbedPayload from "../../interfaces/embed_payload";
 import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("artisttype");
@@ -77,37 +83,87 @@ export default class ArtistTypeCommand implements BaseCommand {
         priority: 150,
     });
 
+    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+        {
+            name: "artisttype",
+            description: LocalizationManager.localizer.translate(
+                LocaleType.EN,
+                "command.artisttype.help.interaction.description"
+            ),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+            options: [
+                {
+                    name: "artisttype",
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.artisttype.help.interaction.description"
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
+                    required: true,
+                    choices: Object.values(ArtistType).map((artistType) => ({
+                        name: artistType,
+                        value: artistType,
+                    })),
+                },
+            ],
+        },
+    ];
+
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
-        );
+        let artistType: ArtistType;
 
         if (parsedMessage.components.length === 0) {
+            artistType = null;
+        } else {
+            artistType =
+                parsedMessage.components[0].toLowerCase() as ArtistType;
+        }
+
+        await ArtistTypeCommand.updateOption(
+            MessageContext.fromMessage(message),
+            artistType
+        );
+    };
+
+    static async updateOption(
+        messageContext: MessageContext,
+        artistType: ArtistType,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID
+        );
+
+        const reset = artistType === null;
+
+        if (reset) {
             await guildPreference.reset(GameOption.ARTIST_TYPE);
-            await sendOptionsMessage(
-                Session.getSession(message.guildID),
-                MessageContext.fromMessage(message),
-                guildPreference,
-                [{ option: GameOption.ARTIST_TYPE, reset: true }]
+            logger.info(
+                `${getDebugLogHeader(messageContext)} | Artist type reset.`
             );
-            logger.info(`${getDebugLogHeader(message)} | Artist type reset.`);
-            return;
+        } else {
+            await guildPreference.setArtistType(artistType);
+            logger.info(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Artist type set to ${artistType}`
+            );
         }
 
         if (guildPreference.isGroupsMode()) {
             logger.warn(
                 `${getDebugLogHeader(
-                    message
+                    messageContext
                 )} | Game option conflict between artist type and groups.`
             );
 
-            sendErrorMessage(MessageContext.fromMessage(message), {
+            const embedPayload: EmbedPayload = {
                 title: LocalizationManager.localizer.translate(
-                    message.guildID,
+                    messageContext.guildID,
                     "misc.failure.gameOptionConflict.title"
                 ),
                 description: LocalizationManager.localizer.translate(
-                    message.guildID,
+                    messageContext.guildID,
                     "misc.failure.gameOptionConflict.description",
                     {
                         optionOne: "`groups`",
@@ -115,21 +171,59 @@ export default class ArtistTypeCommand implements BaseCommand {
                         optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
                     }
                 ),
-            });
+                color: EMBED_ERROR_COLOR,
+            };
+
+            if (interaction) {
+                await tryCreateInteractionCustomPayloadAcknowledgement(
+                    messageContext,
+                    interaction,
+                    embedPayload
+                );
+            } else {
+                sendErrorMessage(messageContext, embedPayload);
+            }
+
             return;
         }
 
-        const artistType = parsedMessage.components[0] as ArtistType;
-        await guildPreference.setArtistType(artistType);
-        await sendOptionsMessage(
-            Session.getSession(message.guildID),
-            MessageContext.fromMessage(message),
-            guildPreference,
-            [{ option: GameOption.ARTIST_TYPE, reset: false }]
-        );
+        if (interaction) {
+            const embedPayload = await generateOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.ARTIST_TYPE, reset }]
+            );
 
-        logger.info(
-            `${getDebugLogHeader(message)} | Artist type set to ${artistType}`
+            await tryCreateInteractionCustomPayloadAcknowledgement(
+                messageContext,
+                interaction,
+                embedPayload
+            );
+        } else {
+            await sendOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.ARTIST_TYPE, reset }]
+            );
+        }
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    static async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        const artistType = interaction.data.options[0]["value"] as ArtistType;
+
+        await ArtistTypeCommand.updateOption(
+            messageContext,
+            artistType,
+            interaction
         );
-    };
+    }
 }

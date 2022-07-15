@@ -1,11 +1,10 @@
 import { DEFAULT_SUBUNIT_PREFERENCE } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
-    generateEmbed,
     generateOptionsMessage,
     getDebugLogHeader,
     sendOptionsMessage,
-    tryCreateInteractionSuccessAcknowledgement,
+    tryCreateInteractionCustomPayloadAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
@@ -83,7 +82,7 @@ export default class SubunitsCommand implements BaseCommand {
     slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
         {
             name: "subunits",
-            description: LocalizationManager.localizer.translateByLocale(
+            description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
                 "command.subunits.help.description",
                 { groups: `\`${process.env.BOT_PREFIX}groups\`` }
@@ -92,12 +91,11 @@ export default class SubunitsCommand implements BaseCommand {
             options: [
                 {
                     name: "subunits",
-                    description:
-                        LocalizationManager.localizer.translateByLocale(
-                            LocaleType.EN,
-                            "command.subunits.help.description",
-                            { groups: `\`${process.env.BOT_PREFIX}groups\`` }
-                        ),
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.subunits.help.description",
+                        { groups: `\`${process.env.BOT_PREFIX}groups\`` }
+                    ),
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: true,
                     choices: Object.values(SubunitsPreference).map(
@@ -154,19 +152,17 @@ export default class SubunitsCommand implements BaseCommand {
         }
 
         if (interaction) {
-            const message = await generateOptionsMessage(
+            const embedPayload = await generateOptionsMessage(
                 Session.getSession(messageContext.guildID),
                 messageContext,
                 guildPreference,
                 [{ option: GameOption.SUBUNIT_PREFERENCE, reset }]
             );
 
-            const embed = generateEmbed(messageContext, message, true);
-            tryCreateInteractionSuccessAcknowledgement(
+            await tryCreateInteractionCustomPayloadAcknowledgement(
+                messageContext,
                 interaction,
-                null,
-                null,
-                { embeds: [embed] }
+                embedPayload
             );
         } else {
             await sendOptionsMessage(
