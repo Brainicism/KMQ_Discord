@@ -163,7 +163,6 @@ export async function sendBeginGameSessionMessage(
             footerText: State.version,
         },
         false,
-        true,
         undefined,
         [generateEmbed(messageContext, optionsEmbedPayload)]
     );

@@ -1,10 +1,9 @@
 import { IPCLogger } from "../../logger";
 import {
-    generateEmbed,
     generateOptionsMessage,
     getDebugLogHeader,
     sendOptionsMessage,
-    tryCreateInteractionSuccessAcknowledgement,
+    tryCreateInteractionCustomPayloadAcknowledgement,
 } from "../../helpers/discord_utils";
 import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
@@ -65,12 +64,10 @@ export default class OptionsCommand implements BaseCommand {
                 null
             );
 
-            const embed = generateEmbed(messageContext, embedPayload, true);
-            await tryCreateInteractionSuccessAcknowledgement(
+            await tryCreateInteractionCustomPayloadAcknowledgement(
+                messageContext,
                 interaction,
-                null,
-                null,
-                { embeds: [embed] }
+                embedPayload
             );
         } else {
             await sendOptionsMessage(

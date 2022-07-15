@@ -80,7 +80,6 @@ export async function sendBeginListeningSessionMessage(
             fields,
         },
         false,
-        true,
         undefined,
         [generateEmbed(messageContext, optionsEmbedPayload)]
     );

@@ -863,11 +863,6 @@
             }
         },
         "score": {
-            "failure": {
-                "noneInProgress": {
-                    "description": "There is no currently active game of KMQ. Start a new game with {{play}}!"
-                }
-            },
             "help": {
                 "description": "See the scoreboard for the current game."
             },

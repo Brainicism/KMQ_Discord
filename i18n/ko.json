@@ -863,11 +863,6 @@
             }
         },
         "score": {
-            "failure": {
-                "noneInProgress": {
-                    "description": "현재 진행 중인 KMQ 게임이 없습니다. ({{play}}로 새 게임을 시작하세요!)"
-                }
-            },
             "help": {
                 "description": "현재 게임의 점수판를 참조하세요."
             },
