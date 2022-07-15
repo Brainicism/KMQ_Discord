@@ -1,6 +1,5 @@
 import { BOOKMARK_COMMAND_NAME, PROFILE_COMMAND_NAME } from "../../constants";
 import { IPCLogger } from "../../logger";
-import { handleProfileInteraction } from "../../commands/game_commands/profile";
 import {
     tryCreateInteractionErrorAcknowledgement,
     tryInteractionAcknowledge,
@@ -20,6 +19,7 @@ import MessageContext from "../../structures/message_context";
 import MultiGuessCommand from "../../commands/game_options/multiguess";
 import OptionsCommand from "../../commands/game_commands/options";
 import OstCommand from "../../commands/game_options/ost";
+import ProfileCommand from "../../commands/game_commands/profile";
 import ReleaseCommand from "../../commands/game_options/release";
 import ResetCommand from "../../commands/game_options/reset";
 import SeekCommand from "../../commands/game_options/seek";
@@ -39,16 +39,17 @@ const CHAT_INPUT_COMMAND_INTERACTION_HANDLERS: {
         messageContext: MessageContext
     ) => Promise<void>;
 } = {
+    exp: ExpCommand.processChatInputInteraction,
     groups: GroupsCommand.processChatInputInteraction,
+    options: OptionsCommand.processChatInputInteraction,
+    profile: ProfileCommand.processChatInputInteraction,
     release: ReleaseCommand.processChatInputInteraction,
     stats: StatsCommand.processChatInputInteraction,
     end: EndCommand.processChatInputInteraction,
     hint: HintCommand.processChatInputInteraction,
-    options: OptionsCommand.processChatInputInteraction,
     artisttype: ArtistTypeCommand.processChatInputInteraction,
     skip: SkipCommand.processChatInputInteraction,
     vote: VoteCommand.processChatInputInteraction,
-    exp: ExpCommand.processChatInputInteraction,
     answer: AnswerCommand.processChatInputInteraction,
     multiguess: MultiGuessCommand.processChatInputInteraction,
     reset: ResetCommand.processChatInputInteraction,
@@ -132,9 +133,10 @@ export default async function interactionCreateHandler(
                 interaction.data.type ===
                 Eris.Constants.ApplicationCommandTypes.USER
             ) {
-                handleProfileInteraction(
+                ProfileCommand.handleProfileInteraction(
                     interaction as Eris.CommandInteraction,
-                    interaction.data.target_id
+                    interaction.data.target_id,
+                    true
                 );
             } else if (
                 interaction.data.type ===
@@ -145,7 +147,11 @@ export default async function interactionCreateHandler(
                     interaction as Eris.CommandInteraction
                 ).data.resolved["messages"].get(messageID).author.id;
 
-                handleProfileInteraction(interaction, authorID);
+                ProfileCommand.handleProfileInteraction(
+                    interaction,
+                    authorID,
+                    true
+                );
             }
 
             break;
