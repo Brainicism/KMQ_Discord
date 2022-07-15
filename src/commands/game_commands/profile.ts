@@ -479,6 +479,11 @@ export default class ProfileCommand implements BaseCommand {
                 )
             );
 
+            logger.info(
+                `${getDebugLogHeader(
+                    interaction
+                )} | Failed retrieving profile on inaccessible player via interaction`
+            );
             return;
         }
 
@@ -499,7 +504,7 @@ export default class ProfileCommand implements BaseCommand {
             logger.info(
                 `${getDebugLogHeader(
                     interaction
-                )} | Failed retrieving profile on inaccessible player via interaction`
+                )} | Empty profile retrieved via interaction`
             );
             return;
         }
