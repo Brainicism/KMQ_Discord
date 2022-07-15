@@ -98,6 +98,7 @@ export default class GroupsCommand implements BaseCommand {
         {
             name: "groups",
             description: "Play songs from the given groups.",
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [...Array(25).keys()].map((x) => ({
                 name: `group_${x + 1}`,
                 description: `The ${getOrdinalNum(
@@ -107,7 +108,6 @@ export default class GroupsCommand implements BaseCommand {
                 autocomplete: true,
                 required: false,
             })),
-            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
         },
     ];
 
