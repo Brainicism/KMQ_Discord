@@ -197,7 +197,7 @@ export default class SkipCommand implements BaseCommand {
                         LocaleType.EN,
                         "misc.failure.game.noneInProgress.title"
                     ),
-                    LocalizationManager.localizer.translate(
+                    LocalizationManager.localizer.translateByLocale(
                         LocaleType.EN,
                         "misc.failure.game.noneInProgress.description"
                     )
