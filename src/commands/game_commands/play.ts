@@ -386,11 +386,6 @@ export default class PlayCommand implements BaseCommand {
                 { command: `\`${process.env.BOT_PREFIX}play\`` }
             );
 
-            const payload = {
-                title,
-                description,
-            };
-
             if (interaction) {
                 tryCreateInteractionErrorAcknowledgement(
                     interaction,
@@ -398,7 +393,7 @@ export default class PlayCommand implements BaseCommand {
                     description
                 );
             } else {
-                sendErrorMessage(messageContext, payload);
+                sendErrorMessage(messageContext, { title, description });
             }
 
             logger.warn(
