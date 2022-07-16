@@ -264,7 +264,7 @@ export default class PlayCommand implements BaseCommand {
 
     slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
         {
-            name: "play",
+            name: PlaySlashCommands[GameType.CLASSIC],
             description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
                 "command.play.help.example.classic"
@@ -272,7 +272,7 @@ export default class PlayCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
         },
         {
-            name: "playteams",
+            name: PlaySlashCommands[GameType.TEAMS],
             description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
                 "command.play.help.example.teams"
@@ -280,7 +280,7 @@ export default class PlayCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
         },
         {
-            name: "playelimination",
+            name: PlaySlashCommands[GameType.ELIMINATION],
             description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
                 "command.play.help.example.elimination"
