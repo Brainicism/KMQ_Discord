@@ -144,6 +144,15 @@ export async function sendBeginGameSessionMessage(
         });
     }
 
+    const startGamePayload = {
+        title: startTitle,
+        description: gameInstructions,
+        color: isBonus ? EMBED_SUCCESS_BONUS_COLOR : null,
+        thumbnailUrl: KmqImages.HAPPY,
+        fields,
+        footerText: `KMQ v${State.version}`,
+    };
+
     const optionsEmbedPayload = await generateOptionsMessage(
         Session.getSession(guildID),
         messageContext,
@@ -162,34 +171,16 @@ export async function sendBeginGameSessionMessage(
             );
     }
 
-    const color = isBonus ? EMBED_SUCCESS_BONUS_COLOR : null;
     if (interaction) {
         await tryCreateInteractionCustomPayloadAcknowledgement(
             messageContext,
             interaction,
-            [
-                {
-                    title: startTitle,
-                    description: gameInstructions,
-                    color,
-                    thumbnailUrl: KmqImages.HAPPY,
-                    fields,
-                    footerText: State.version,
-                },
-                optionsEmbedPayload,
-            ]
+            [startGamePayload, optionsEmbedPayload]
         );
     } else {
         await sendInfoMessage(
             messageContext,
-            {
-                title: startTitle,
-                description: gameInstructions,
-                color,
-                thumbnailUrl: KmqImages.HAPPY,
-                fields,
-                footerText: State.version,
-            },
+            startGamePayload,
             false,
             undefined,
             [generateEmbed(messageContext, optionsEmbedPayload)]
@@ -318,7 +309,7 @@ export default class PlayCommand implements BaseCommand {
             if (!interaction.data.options) {
                 lives = ELIMINATION_DEFAULT_LIVES;
             } else {
-                lives = interaction.data.options[0]["value"] as number;
+                lives = parseInt(interaction.data.options[0]["value"], 10);
                 if (
                     lives < ELIMINATION_MIN_LIVES ||
                     lives > ELIMINATION_MAX_LIVES
@@ -343,15 +334,17 @@ export default class PlayCommand implements BaseCommand {
 
         let lives: number;
         if (gameType === GameType.ELIMINATION) {
-            lives =
-                parsedMessage.components.length > 1 &&
-                Number.isInteger(parseInt(parsedMessage.components[1], 10)) &&
-                parseInt(parsedMessage.components[1], 10) >=
-                    ELIMINATION_MIN_LIVES &&
-                parseInt(parsedMessage.components[1], 10) <=
-                    ELIMINATION_MAX_LIVES
-                    ? parseInt(parsedMessage.components[1], 10)
-                    : ELIMINATION_DEFAULT_LIVES;
+            if (parsedMessage.components.length === 1) {
+                lives = ELIMINATION_DEFAULT_LIVES;
+            } else {
+                lives = parseInt(parsedMessage.components[1], 10);
+                if (
+                    lives < ELIMINATION_MIN_LIVES ||
+                    lives > ELIMINATION_MAX_LIVES
+                ) {
+                    lives = ELIMINATION_DEFAULT_LIVES;
+                }
+            }
         }
 
         await PlayCommand.startGame(

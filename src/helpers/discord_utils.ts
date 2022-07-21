@@ -1532,18 +1532,13 @@ export async function tryCreateInteractionCustomPayloadAcknowledgement(
         return;
     }
 
-    const embeds = [];
     if (!Array.isArray(embedPayload)) {
         embedPayload = [embedPayload];
     }
 
-    for (const payload of embedPayload) {
-        embeds.push(generateEmbed(messageContext, payload));
-    }
-
     try {
         await interaction.createMessage({
-            embeds,
+            embeds: embedPayload.map((x) => generateEmbed(messageContext, x)),
             components: embedPayload[0].components,
             flags: ephemeral ? EPHEMERAL_MESSAGE_FLAG : null,
         });
