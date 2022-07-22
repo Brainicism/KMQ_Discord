@@ -4,7 +4,6 @@ import {
     ELIMINATION_MIN_LIVES,
     EMBED_SUCCESS_BONUS_COLOR,
     KmqImages,
-    PlaySlashCommands,
 } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
@@ -150,7 +149,7 @@ export async function sendBeginGameSessionMessage(
         color: isBonus ? EMBED_SUCCESS_BONUS_COLOR : null,
         thumbnailUrl: KmqImages.HAPPY,
         fields,
-        footerText: `KMQ v${State.version}`,
+        footerText: `KMQ ${State.version}`,
     };
 
     const optionsEmbedPayload = await generateOptionsMessage(
@@ -255,39 +254,52 @@ export default class PlayCommand implements BaseCommand {
 
     slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
         {
-            name: PlaySlashCommands[GameType.CLASSIC],
+            name: "play",
             description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
-                "command.play.help.example.classic"
-            ),
-            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
-        },
-        {
-            name: PlaySlashCommands[GameType.TEAMS],
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.play.help.example.teams"
-            ),
-            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
-        },
-        {
-            name: PlaySlashCommands[GameType.ELIMINATION],
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.play.help.example.elimination"
+                "command.play.help.description"
             ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "lives",
+                    name: GameType.CLASSIC,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.play.help.interaction.lives",
+                        "command.play.help.example.classic"
+                    ),
+                    type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+                },
+                {
+                    name: GameType.ELIMINATION,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.play.help.example.elimination",
                         {
                             lives: `\`${ELIMINATION_DEFAULT_LIVES}\``,
                         }
                     ),
-                    type: Eris.Constants.ApplicationCommandOptionTypes.INTEGER,
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "lives",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.play.help.interaction.lives"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .INTEGER,
+                        },
+                    ],
+                },
+                {
+                    name: GameType.TEAMS,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.play.help.example.teams"
+                    ),
+                    type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
                 },
             ],
         },
@@ -297,32 +309,17 @@ export default class PlayCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const SLASH_COMMAND_TO_GAME_TYPE = {
-            [PlaySlashCommands[GameType.CLASSIC]]: GameType.CLASSIC,
-            [PlaySlashCommands[GameType.ELIMINATION]]: GameType.ELIMINATION,
-            [PlaySlashCommands[GameType.TEAMS]]: GameType.TEAMS,
-        };
-
-        const gameType = SLASH_COMMAND_TO_GAME_TYPE[interaction.data.name];
-        let lives: number;
-        if (gameType === GameType.ELIMINATION) {
-            if (!interaction.data.options) {
-                lives = ELIMINATION_DEFAULT_LIVES;
-            } else {
-                lives = parseInt(interaction.data.options[0]["value"], 10);
-                if (
-                    lives < ELIMINATION_MIN_LIVES ||
-                    lives > ELIMINATION_MAX_LIVES
-                ) {
-                    lives = ELIMINATION_DEFAULT_LIVES;
-                }
-            }
-        }
+        const gameType =
+            interaction.data.options.length === 0
+                ? GameType.CLASSIC
+                : (interaction.data.options[0].name as GameType);
 
         await PlayCommand.startGame(
             messageContext,
             gameType,
-            lives,
+            interaction.data.options[0]["options"]?.length > 0
+                ? interaction.data.options[0]["options"][0]["value"]
+                : null,
             interaction
         );
     }
@@ -332,32 +329,19 @@ export default class PlayCommand implements BaseCommand {
             (parsedMessage.components[0]?.toLowerCase() as GameType) ??
             GameType.CLASSIC;
 
-        let lives: number;
-        if (gameType === GameType.ELIMINATION) {
-            if (parsedMessage.components.length === 1) {
-                lives = ELIMINATION_DEFAULT_LIVES;
-            } else {
-                lives = parseInt(parsedMessage.components[1], 10);
-                if (
-                    lives < ELIMINATION_MIN_LIVES ||
-                    lives > ELIMINATION_MAX_LIVES
-                ) {
-                    lives = ELIMINATION_DEFAULT_LIVES;
-                }
-            }
-        }
-
         await PlayCommand.startGame(
             MessageContext.fromMessage(message),
             gameType,
-            lives
+            parsedMessage.components.length <= 1
+                ? null
+                : parsedMessage.components[1]
         );
     };
 
     static async startGame(
         messageContext: MessageContext,
         gameType: GameType,
-        lives: number,
+        livesArg: string,
         interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const guildID = messageContext.guildID;
@@ -599,6 +583,19 @@ export default class PlayCommand implements BaseCommand {
                         thumbnailUrl: KmqImages.DEAD,
                     });
                     return;
+                }
+            }
+
+            let lives: number;
+            if (livesArg === null) {
+                lives = ELIMINATION_DEFAULT_LIVES;
+            } else {
+                lives = parseInt(livesArg, 10);
+                if (
+                    lives < ELIMINATION_MIN_LIVES ||
+                    lives > ELIMINATION_MAX_LIVES
+                ) {
+                    lives = ELIMINATION_DEFAULT_LIVES;
                 }
             }
 

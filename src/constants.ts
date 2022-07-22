@@ -3,7 +3,6 @@ import AnswerType from "./enums/option_types/answer_type";
 import ArtistType from "./enums/option_types/artist_type";
 import ExpBonusModifier from "./enums/exp_bonus_modifier";
 import GameOption from "./enums/game_option_name";
-import GameType from "./enums/game_type";
 import Gender from "./enums/option_types/gender";
 import GuessModeType from "./enums/option_types/guess_mode_type";
 import LanguageType from "./enums/option_types/language_type";
@@ -233,10 +232,4 @@ export const DataFiles = {
         __dirname,
         "../data/feature_switch_config.json"
     ),
-};
-
-export const PlaySlashCommands = {
-    [GameType.CLASSIC]: "play",
-    [GameType.ELIMINATION]: "playelimination",
-    [GameType.TEAMS]: "playteams",
 };

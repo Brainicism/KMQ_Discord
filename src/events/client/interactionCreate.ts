@@ -1,8 +1,4 @@
-import {
-    BOOKMARK_COMMAND_NAME,
-    PROFILE_COMMAND_NAME,
-    PlaySlashCommands,
-} from "../../constants";
+import { BOOKMARK_COMMAND_NAME, PROFILE_COMMAND_NAME } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     tryCreateInteractionErrorAcknowledgement,
@@ -13,7 +9,6 @@ import ArtistTypeCommand from "../../commands/game_options/artisttype";
 import EndCommand from "../../commands/game_commands/end";
 import Eris from "eris";
 import ExpCommand from "../../commands/game_commands/exp";
-import GameType from "../../enums/game_type";
 import GroupsCommand from "../../commands/game_options/groups";
 import GuessModeCommand from "../../commands/game_options/guessmode";
 import HintCommand from "../../commands/game_commands/hint";
@@ -66,12 +61,7 @@ const CHAT_INPUT_COMMAND_INTERACTION_HANDLERS: {
     language: LanguageCommand.processChatInputInteraction,
     ost: OstCommand.processChatInputInteraction,
     special: SpecialCommand.processChatInputInteraction,
-    [PlaySlashCommands[GameType.CLASSIC]]:
-        PlayCommand.processChatInputInteraction,
-    [PlaySlashCommands[GameType.ELIMINATION]]:
-        PlayCommand.processChatInputInteraction,
-    [PlaySlashCommands[GameType.TEAMS]]:
-        PlayCommand.processChatInputInteraction,
+    play: PlayCommand.processChatInputInteraction,
 };
 
 const AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS: {
