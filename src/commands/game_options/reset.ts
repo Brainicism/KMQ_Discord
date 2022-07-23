@@ -1,10 +1,8 @@
 import { GameOptionInternalToGameOption } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
-    generateOptionsMessage,
     getDebugLogHeader,
     sendOptionsMessage,
-    tryCreateInteractionCustomPayloadAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
@@ -78,37 +76,19 @@ export default class ResetCommand implements BaseCommand {
             )} | Reset to default guild preferences`
         );
 
-        if (interaction) {
-            const embedPayload = await generateOptionsMessage(
-                Session.getSession(messageContext.guildID),
-                messageContext,
-                guildPreference,
-                resetOptions.map((x) => ({
-                    option: GameOptionInternalToGameOption[x] as GameOption,
-                    reset: true,
-                })),
-                false,
-                true
-            );
-
-            await tryCreateInteractionCustomPayloadAcknowledgement(
-                messageContext,
-                interaction,
-                embedPayload
-            );
-        } else {
-            await sendOptionsMessage(
-                Session.getSession(messageContext.guildID),
-                messageContext,
-                guildPreference,
-                resetOptions.map((x) => ({
-                    option: GameOptionInternalToGameOption[x] as GameOption,
-                    reset: true,
-                })),
-                false,
-                true
-            );
-        }
+        await sendOptionsMessage(
+            Session.getSession(messageContext.guildID),
+            messageContext,
+            guildPreference,
+            resetOptions.map((x) => ({
+                option: GameOptionInternalToGameOption[x] as GameOption,
+                reset: true,
+            })),
+            false,
+            true,
+            null,
+            interaction
+        );
     }
 
     /**

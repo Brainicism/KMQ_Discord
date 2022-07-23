@@ -1,10 +1,8 @@
 import { DEFAULT_MULTIGUESS_TYPE } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
-    generateOptionsMessage,
     getDebugLogHeader,
     sendOptionsMessage,
-    tryCreateInteractionCustomPayloadAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
@@ -141,27 +139,16 @@ export default class MultiGuessCommand implements BaseCommand {
             );
         }
 
-        if (interaction) {
-            const embedPayload = await generateOptionsMessage(
-                Session.getSession(messageContext.guildID),
-                messageContext,
-                guildPreference,
-                [{ option: GameOption.MULTIGUESS, reset }]
-            );
-
-            await tryCreateInteractionCustomPayloadAcknowledgement(
-                messageContext,
-                interaction,
-                embedPayload
-            );
-        } else {
-            await sendOptionsMessage(
-                Session.getSession(messageContext.guildID),
-                messageContext,
-                guildPreference,
-                [{ option: GameOption.MULTIGUESS, reset }]
-            );
-        }
+        await sendOptionsMessage(
+            Session.getSession(messageContext.guildID),
+            messageContext,
+            guildPreference,
+            [{ option: GameOption.MULTIGUESS, reset }],
+            null,
+            null,
+            null,
+            interaction
+        );
     }
 
     /**

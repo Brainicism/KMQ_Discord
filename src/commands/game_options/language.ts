@@ -1,9 +1,7 @@
 import { IPCLogger } from "../../logger";
 import {
-    generateOptionsMessage,
     getDebugLogHeader,
     sendOptionsMessage,
-    tryCreateInteractionCustomPayloadAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
@@ -135,27 +133,16 @@ export default class LanguageCommand implements BaseCommand {
             );
         }
 
-        if (interaction) {
-            const embedPayload = await generateOptionsMessage(
-                Session.getSession(messageContext.guildID),
-                messageContext,
-                guildPreference,
-                [{ option: GameOption.LANGUAGE_TYPE, reset }]
-            );
-
-            await tryCreateInteractionCustomPayloadAcknowledgement(
-                messageContext,
-                interaction,
-                embedPayload
-            );
-        } else {
-            await sendOptionsMessage(
-                Session.getSession(messageContext.guildID),
-                messageContext,
-                guildPreference,
-                [{ option: GameOption.LANGUAGE_TYPE, reset }]
-            );
-        }
+        await sendOptionsMessage(
+            Session.getSession(messageContext.guildID),
+            messageContext,
+            guildPreference,
+            [{ option: GameOption.LANGUAGE_TYPE, reset }],
+            null,
+            null,
+            null,
+            interaction
+        );
     }
 
     /**
