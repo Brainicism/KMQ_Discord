@@ -48,88 +48,64 @@ export default class AppCommandsCommand implements BaseCommand {
             return;
         }
 
+        const isProd = process.env.NODE_ENV === EnvType.PROD;
+        const debugServer = State.client.guilds.get(
+            process.env.DEBUG_SERVER_ID
+        );
+
+        if (!isProd && !debugServer) return;
+
+        const commandCreationScope = isProd ? "global" : "guild";
+
         const commandsReloaded = [];
         if (appCommandType === AppCommandsAction.RELOAD) {
             const commandsToModify = isSingleCommand
                 ? [State.client.commands[parsedMessage.components[1]]]
                 : Object.values(State.client.commands);
 
-            if (process.env.NODE_ENV === EnvType.PROD) {
-                logger.info("Creating global application commands...");
-                await State.client.createCommand({
-                    name: BOOKMARK_COMMAND_NAME,
-                    type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
-                });
+            const createApplicationCommandFunc: (
+                command: Eris.ApplicationCommandStructure
+            ) => Promise<Eris.ApplicationCommand> = isProd
+                ? State.client.createCommand
+                : debugServer.createCommand;
 
-                await State.client.createCommand({
-                    name: PROFILE_COMMAND_NAME,
-                    type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
-                });
+            logger.info(
+                `Creating ${commandCreationScope} application commands...`
+            );
 
-                await State.client.createCommand({
-                    name: PROFILE_COMMAND_NAME,
-                    type: Eris.Constants.ApplicationCommandTypes.USER,
-                });
+            await createApplicationCommandFunc({
+                name: BOOKMARK_COMMAND_NAME,
+                type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
+            });
 
-                for (const command of commandsToModify) {
-                    if (command.slashCommands) {
-                        const commands = command.slashCommands();
-                        for (const cmd of commands) {
-                            logger.info(`Creating global command: ${cmd.name}`);
-                            try {
-                                // eslint-disable-next-line no-await-in-loop
-                                await State.client.createCommand(cmd);
-                                commandsReloaded.push(cmd.name);
-                            } catch (e) {
-                                logger.error(
-                                    `Failed to create guild command: ${
-                                        cmd.name
-                                    }. err = ${JSON.stringify(e)}`
-                                );
-                                continue;
-                            }
-                        }
-                    }
-                }
-            } else if (process.env.NODE_ENV === EnvType.DEV) {
-                logger.info("Creating guild application commands...");
-                const debugServer = State.client.guilds.get(
-                    process.env.DEBUG_SERVER_ID
-                );
+            await createApplicationCommandFunc({
+                name: PROFILE_COMMAND_NAME,
+                type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
+            });
 
-                if (!debugServer) return;
-                await debugServer.createCommand({
-                    name: BOOKMARK_COMMAND_NAME,
-                    type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
-                });
+            await createApplicationCommandFunc({
+                name: PROFILE_COMMAND_NAME,
+                type: Eris.Constants.ApplicationCommandTypes.USER,
+            });
 
-                await debugServer.createCommand({
-                    name: PROFILE_COMMAND_NAME,
-                    type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
-                });
-
-                await debugServer.createCommand({
-                    name: PROFILE_COMMAND_NAME,
-                    type: Eris.Constants.ApplicationCommandTypes.USER,
-                });
-
-                for (const command of commandsToModify) {
-                    if (command.slashCommands) {
-                        const commands = command.slashCommands();
-                        for (const cmd of commands) {
-                            logger.info(`Creating guild command: ${cmd.name}`);
-                            try {
-                                // eslint-disable-next-line no-await-in-loop
-                                await debugServer.createCommand(cmd);
-                                commandsReloaded.push(cmd.name);
-                            } catch (e) {
-                                logger.error(
-                                    `Failed to create guild command: ${
-                                        cmd.name
-                                    }. err = ${JSON.stringify(e)}`
-                                );
-                                continue;
-                            }
+            for (const command of commandsToModify) {
+                if (command.slashCommands) {
+                    const commands = command.slashCommands();
+                    for (const cmd of commands) {
+                        logger.info(
+                            `Creating ${commandCreationScope} command: ${cmd.name}`
+                        );
+                        try {
+                            // eslint-disable-next-line no-await-in-loop
+                            await createApplicationCommandFunc(cmd);
+                            commandsReloaded.push(cmd.name);
+                        } catch (e) {
+                            logger.error(
+                                `Failed to create ${commandCreationScope} command: ${
+                                    cmd.name
+                                }. err = ${JSON.stringify(e)}`
+                            );
+                            continue;
                         }
                     }
                 }
@@ -144,42 +120,39 @@ export default class AppCommandsCommand implements BaseCommand {
                 ? [parsedMessage.components[1]]
                 : Object.keys(State.client.commands);
 
-            const commands = (await State.client.getCommands()).filter((x) =>
-                commandsToModify.includes(x.name)
-            );
+            if (isProd) {
+                const commands = (await State.client.getCommands()).filter(
+                    (x) => commandsToModify.includes(x.name)
+                );
 
-            await Promise.allSettled(
-                commands.map(async (command) => {
-                    logger.info(
-                        `Deleting global application command: ${command.name} -- ${command.id}`
-                    );
-                    await State.client.deleteCommand(command.id);
-                    commandsReloaded.push(command.name);
-                })
-            );
+                await Promise.allSettled(
+                    commands.map(async (command) => {
+                        logger.info(
+                            `Deleting global application command: ${command.name} -- ${command.id}`
+                        );
+                        await State.client.deleteCommand(command.id);
+                        commandsReloaded.push(command.name);
+                    })
+                );
+            } else {
+                const guildCommands = (
+                    await State.client.getGuildCommands(debugServer.id)
+                ).filter((x) => commandsToModify.includes(x.name));
 
-            const debugServer = State.client.guilds.get(
-                process.env.DEBUG_SERVER_ID
-            );
+                await Promise.allSettled(
+                    guildCommands.map(async (command) => {
+                        logger.info(
+                            `Deleting guild application command: ${command.name} -- ${command.id}`
+                        );
 
-            if (!debugServer) return;
-            const guildCommands = (
-                await State.client.getGuildCommands(debugServer.id)
-            ).filter((x) => commandsToModify.includes(x.name));
-
-            await Promise.allSettled(
-                guildCommands.map(async (command) => {
-                    logger.info(
-                        `Deleting guild application command: ${command.name} -- ${command.id}`
-                    );
-
-                    await State.client.deleteGuildCommand(
-                        debugServer.id,
-                        command.id
-                    );
-                    commandsReloaded.push(command.name);
-                })
-            );
+                        await State.client.deleteGuildCommand(
+                            debugServer.id,
+                            command.id
+                        );
+                        commandsReloaded.push(command.name);
+                    })
+                );
+            }
 
             sendInfoMessage(MessageContext.fromMessage(message), {
                 title: "Commands Deleted",
