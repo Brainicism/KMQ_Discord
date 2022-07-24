@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import { BOOKMARK_COMMAND_NAME, PROFILE_COMMAND_NAME } from "../../constants";
 import { IPCLogger } from "../../logger";
 import { sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
@@ -55,9 +56,10 @@ export default class AppCommandsCommand implements BaseCommand {
 
         if (!isProd && !debugServer) return;
 
-        const commandCreationScope = isProd ? "global" : "guild";
+        const commandModificationScope = isProd ? "global" : "guild";
 
-        const commandsReloaded = [];
+        const commandsModifiedSuccess = [];
+        const commandsModifiedFailed = [];
         if (appCommandType === AppCommandsAction.RELOAD) {
             const commandsToModify = isSingleCommand
                 ? [State.client.commands[parsedMessage.components[1]]]
@@ -67,96 +69,113 @@ export default class AppCommandsCommand implements BaseCommand {
                 command: Eris.ApplicationCommandStructure
             ) => Promise<Eris.ApplicationCommand> = isProd
                 ? State.client.createCommand
-                : debugServer.createCommand;
+                : debugServer.createCommand.bind(debugServer);
 
             logger.info(
-                `Creating ${commandCreationScope} application commands...`
+                `Creating ${commandModificationScope} application commands...`
             );
 
-            await createApplicationCommandFunc({
-                name: BOOKMARK_COMMAND_NAME,
-                type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
-            });
-
-            await createApplicationCommandFunc({
-                name: PROFILE_COMMAND_NAME,
-                type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
-            });
-
-            await createApplicationCommandFunc({
-                name: PROFILE_COMMAND_NAME,
-                type: Eris.Constants.ApplicationCommandTypes.USER,
-            });
+            const commandStructures: Array<Eris.ApplicationCommandStructure> =
+                isSingleCommand
+                    ? []
+                    : [
+                          {
+                              name: BOOKMARK_COMMAND_NAME,
+                              type: Eris.Constants.ApplicationCommandTypes
+                                  .MESSAGE,
+                          },
+                          {
+                              name: PROFILE_COMMAND_NAME,
+                              type: Eris.Constants.ApplicationCommandTypes
+                                  .MESSAGE,
+                          },
+                          {
+                              name: PROFILE_COMMAND_NAME,
+                              type: Eris.Constants.ApplicationCommandTypes.USER,
+                          },
+                      ];
 
             for (const command of commandsToModify) {
                 if (command.slashCommands) {
                     const commands = command.slashCommands();
                     for (const cmd of commands) {
-                        logger.info(
-                            `Creating ${commandCreationScope} command: ${cmd.name}`
-                        );
-                        try {
-                            // eslint-disable-next-line no-await-in-loop
-                            await createApplicationCommandFunc(cmd);
-                            commandsReloaded.push(cmd.name);
-                        } catch (e) {
-                            logger.error(
-                                `Failed to create ${commandCreationScope} command: ${
-                                    cmd.name
-                                }. err = ${JSON.stringify(e)}`
-                            );
-                            continue;
-                        }
+                        commandStructures.push(cmd);
                     }
+                }
+            }
+
+            for (const commandStructure of commandStructures) {
+                logger.info(
+                    `Creating ${commandModificationScope} command: ${commandStructure.name}`
+                );
+                try {
+                    await createApplicationCommandFunc(commandStructure);
+                    commandsModifiedSuccess.push(commandStructure.name);
+                } catch (e) {
+                    commandsModifiedFailed.push(commandStructure.name);
+                    logger.error(
+                        `(Potentially) Failed to create ${commandModificationScope} command: ${
+                            commandStructure.name
+                        }. err = ${JSON.stringify(e)}`
+                    );
+                    continue;
                 }
             }
 
             sendInfoMessage(MessageContext.fromMessage(message), {
                 title: "Application Commands Reloaded",
-                description: commandsReloaded.join(", "),
+                description: `**Successfully loaded**: ${commandsModifiedSuccess.join(
+                    ", "
+                )}\n**(Potentially) Failed to load**: ${commandsModifiedFailed.join(
+                    ", "
+                )}`,
             });
         } else {
-            const commandsToModify = isSingleCommand
-                ? [parsedMessage.components[1]]
-                : Object.keys(State.client.commands);
+            let commands = isProd
+                ? await State.client.getCommands()
+                : await State.client.getGuildCommands(debugServer.id);
 
-            if (isProd) {
-                const commands = (await State.client.getCommands()).filter(
-                    (x) => commandsToModify.includes(x.name)
+            if (isSingleCommand) {
+                commands = commands.filter(
+                    (x) => x.name === parsedMessage.components[1]
+                );
+            }
+
+            for (const command of commands) {
+                logger.info(
+                    `Deleting ${commandModificationScope} application command: ${command.name} -- ${command.id}`
                 );
 
-                await Promise.allSettled(
-                    commands.map(async (command) => {
-                        logger.info(
-                            `Deleting global application command: ${command.name} -- ${command.id}`
-                        );
+                try {
+                    if (isProd) {
+                        State.client.getCommands();
                         await State.client.deleteCommand(command.id);
-                        commandsReloaded.push(command.name);
-                    })
-                );
-            } else {
-                const guildCommands = (
-                    await State.client.getGuildCommands(debugServer.id)
-                ).filter((x) => commandsToModify.includes(x.name));
-
-                await Promise.allSettled(
-                    guildCommands.map(async (command) => {
-                        logger.info(
-                            `Deleting guild application command: ${command.name} -- ${command.id}`
-                        );
-
+                    } else {
                         await State.client.deleteGuildCommand(
                             debugServer.id,
                             command.id
                         );
-                        commandsReloaded.push(command.name);
-                    })
-                );
+                    }
+
+                    commandsModifiedSuccess.push(command.name);
+                } catch (e) {
+                    logger.error(
+                        `(Potentially) Failed to delete ${commandModificationScope} command: ${
+                            command.name
+                        }. err = ${JSON.stringify(e)}`
+                    );
+                    commandsModifiedFailed.push(command.name);
+                    continue;
+                }
             }
 
             sendInfoMessage(MessageContext.fromMessage(message), {
                 title: "Commands Deleted",
-                description: commandsReloaded.join(", "),
+                description: `**Successfully deleted**: ${commandsModifiedSuccess.join(
+                    ", "
+                )}\n**(Potentially) Failed to delete**: ${commandsModifiedFailed.join(
+                    ", "
+                )}`,
             });
         }
     };
