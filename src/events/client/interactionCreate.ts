@@ -62,12 +62,12 @@ export default async function interactionCreateHandler(
             logger.info(
                 `CHAT_INPUT CommandInteraction received for '${interaction.data.name}'`
             );
-            const chatInputInteractionHandler =
+            const commandInteractionHandler =
                 State.client.commands[interaction.data.name];
 
-            if (chatInputInteractionHandler.processChatInputInteraction) {
-                if (chatInputInteractionHandler.preRunChecks) {
-                    for (const precheck of chatInputInteractionHandler.preRunChecks) {
+            if (commandInteractionHandler?.processChatInputInteraction) {
+                if (commandInteractionHandler.preRunChecks) {
+                    for (const precheck of commandInteractionHandler.preRunChecks) {
                         if (
                             // eslint-disable-next-line no-await-in-loop
                             !(await precheck.checkFn({
@@ -82,9 +82,13 @@ export default async function interactionCreateHandler(
                     }
                 }
 
-                await chatInputInteractionHandler.processChatInputInteraction(
+                await commandInteractionHandler.processChatInputInteraction(
                     interaction,
                     messageContext
+                );
+            } else {
+                logger.error(
+                    `No handler found for CHAT_INPUT CommandInteraction: ${interaction.data.name}`
                 );
             }
 
