@@ -1073,7 +1073,7 @@
             },
             "messageTooLong": "Response message was too long, report this error to the KMQ help server",
             "missingPermissions": {
-                "description": "Hi! I'm unable to message in the {{channelName}} channel. Please make sure the bot has permissions to message in this channel.",
+                "description": "Hi! I'm unable to message in the {{channelName}} channel. Please make sure the bot has permissions to message in this channel. See the following link for details: {{permissionsLink}}.",
                 "title": "Missing Permissions"
             },
             "missingPermissionsText": "Ensure that the bot has the following permissions: {{missingPermissions}}\n\nSee the following link for details: {{permissionsLink}}. If you are still having issues, join the official KMQ server found in {{helpCommand}}",

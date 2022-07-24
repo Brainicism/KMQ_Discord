@@ -1073,7 +1073,7 @@
             },
             "messageTooLong": "응답 메시지가 너무 깁니다. (이 오류를 KMQ 도움말 서버에 보고하세요.)",
             "missingPermissions": {
-                "description": "{{channelName}} 채널에서 메시지를 보낼 수 없습니다. (봇에 이 채널에서 메시지를 보낼 수 있는 권한이 있는지 확인하세요.)",
+                "description": "{{channelName}} 채널에서 메시지를 보낼 수 없습니다. 봇에 이 채널에서 메시지를 보낼 수 있는 권한이 있는지 확인하세요. 자세한 내용은 {{permissionsLink}} 링크를 참조하세요.",
                 "title": "누락된 권한"
             },
             "missingPermissionsText": "봇에 {{missingPermissions}} 권한이 있는지 확인하세요.\n\n자세한 내용은 {{permissionsLink}} 링크를 참조하세요. (여전히 문제가 발생하면 {{helpCommand}}에 있는 공식 KMQ 서버에 가입하세요.)",
