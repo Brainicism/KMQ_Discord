@@ -383,8 +383,22 @@ export async function sendMessage(
     messageContent: Eris.AdvancedMessageContent,
     file?: Eris.FileContent,
     authorID?: string,
-    interaction?: Eris.CommandInteraction
+    interaction?: Eris.ComponentInteraction | Eris.CommandInteraction
 ): Promise<Eris.Message> {
+    if (interaction) {
+        if (!withinInteractionInterval(interaction)) {
+            return null;
+        }
+
+        try {
+            await interaction.createMessage(messageContent);
+        } catch (err) {
+            interactionRejectionHandler(interaction, err);
+        }
+
+        return null;
+    }
+
     const channel = await fetchChannel(textChannelID);
 
     // only reply to message if has required permissions
@@ -400,20 +414,6 @@ export async function sendMessage(
     }
 
     try {
-        if (interaction) {
-            if (!withinInteractionInterval(interaction)) {
-                return null;
-            }
-
-            try {
-                await interaction.createMessage(messageContent);
-            } catch (err) {
-                interactionRejectionHandler(interaction, err);
-            }
-
-            return null;
-        }
-
         return await State.client.createMessage(
             textChannelID,
             messageContent,
@@ -1560,12 +1560,9 @@ export async function tryCreateInteractionSuccessAcknowledgement(
     description: string,
     ephemeral: boolean = false
 ): Promise<void> {
-    if (!withinInteractionInterval(interaction)) {
-        return;
-    }
-
-    try {
-        await interaction.createMessage({
+    await sendMessage(
+        null,
+        {
             embeds: [
                 {
                     color: (await userBonusIsActive(interaction.member?.id))
@@ -1581,10 +1578,11 @@ export async function tryCreateInteractionSuccessAcknowledgement(
                 },
             ],
             flags: ephemeral ? EPHEMERAL_MESSAGE_FLAG : null,
-        });
-    } catch (err) {
-        interactionRejectionHandler(interaction, err);
-    }
+        },
+        null,
+        null,
+        interaction
+    );
 }
 
 /**
@@ -1600,12 +1598,9 @@ export async function tryCreateInteractionErrorAcknowledgement(
     description: string,
     ephemeral: boolean = true
 ): Promise<void> {
-    if (!withinInteractionInterval(interaction)) {
-        return;
-    }
-
-    try {
-        await interaction.createMessage({
+    await sendMessage(
+        null,
+        {
             embeds: [
                 {
                     color: EMBED_ERROR_COLOR,
@@ -1626,10 +1621,11 @@ export async function tryCreateInteractionErrorAcknowledgement(
                 },
             ],
             flags: ephemeral ? EPHEMERAL_MESSAGE_FLAG : null,
-        });
-    } catch (err) {
-        interactionRejectionHandler(interaction, err);
-    }
+        },
+        null,
+        null,
+        interaction
+    );
 }
 
 /**
