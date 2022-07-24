@@ -242,7 +242,7 @@ export async function textPermissionsCheck(
                 messageContext
             )} | Missing SEND_MESSAGES permissions`
         );
-        const embed = {
+        const embed: Eris.EmbedOptions = {
             title: LocalizationManager.localizer.translate(
                 guildID,
                 "misc.failure.missingPermissions.title"
@@ -255,6 +255,7 @@ export async function textPermissionsCheck(
                     permissionsLink: PERMISSIONS_LINK,
                 }
             ),
+            url: PERMISSIONS_LINK,
         };
 
         await sendDmMessage(authorID, { embeds: [embed] });
@@ -492,6 +493,7 @@ export async function sendErrorMessage(
                     thumbnail: embedPayload.thumbnailUrl
                         ? { url: embedPayload.thumbnailUrl }
                         : { url: KmqImages.DEAD },
+                    url: embedPayload.url,
                 },
             ],
             components: embedPayload.components,
@@ -1261,7 +1263,9 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
                 message.guildID,
                 missingPermissions
             ),
+            url: PERMISSIONS_LINK,
         });
+
         return false;
     }
 
