@@ -3,8 +3,8 @@ import type CommandValidations from "../../interfaces/command_validations";
 import type Eris from "eris";
 import type GuildPreference from "../../structures/guild_preference";
 import type HelpDocumentation from "../../interfaces/help";
+import type MessageContext from "../../structures/message_context";
 import type PrecheckArgs from "../../interfaces/precheck_args";
-import MessageContext from "../../structures/message_context";
 
 export default interface BaseCommand {
     call: CallFunc;

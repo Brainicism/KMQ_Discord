@@ -132,7 +132,6 @@ export default async function interactionCreateHandler(
         }
 
         case BOOKMARK_COMMAND_NAME: {
-            const session = Session.getSession(interaction.guildID);
             if (!session) {
                 tryCreateInteractionErrorAcknowledgement(
                     interaction as Eris.CommandInteraction,
