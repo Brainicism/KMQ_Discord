@@ -171,7 +171,9 @@ export async function fetchUser(
  * @param textChannelID - the text channel's ID
  * @returns an instance of the TextChannel
  */
-async function fetchChannel(textChannelID: string): Promise<Eris.TextChannel> {
+export async function fetchChannel(
+    textChannelID: string
+): Promise<Eris.TextChannel> {
     let channel: Eris.TextChannel = null;
     const { client, ipc } = State;
 
@@ -573,7 +575,7 @@ export async function sendInfoMessage(
     embedPayload: EmbedPayload,
     reply = false,
     content?: string,
-    additionalEmbeds: Array<Eris.EmbedOptions> = [],
+    additionalEmbeds: Array<EmbedPayload> = [],
     interaction?: Eris.CommandInteraction
 ): Promise<Eris.Message<Eris.TextableChannel>> {
     if (embedPayload.description && embedPayload.description.length > 2048) {
@@ -597,7 +599,12 @@ export async function sendInfoMessage(
     return sendMessage(
         messageContext.textChannelID,
         {
-            embeds: [embed, ...additionalEmbeds],
+            embeds: [
+                embed,
+                ...additionalEmbeds.map((x) =>
+                    generateEmbed(messageContext, x)
+                ),
+            ],
             messageReference:
                 reply && messageContext.referencedMessageID
                     ? {
@@ -1255,15 +1262,12 @@ export function getNumParticipants(voiceChannelID: string): number {
 }
 
 /**
- * @param message - The Message object
+ * @param messageContext - An object containing relevant parts of Eris.Message
  * @returns whether the bot has permissions to join the message author's currently active voice channel
  */
-export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
-    const voiceChannel = getUserVoiceChannel(
-        MessageContext.fromMessage(message)
-    );
+export function voicePermissionsCheck(messageContext: MessageContext): boolean {
+    const voiceChannel = getUserVoiceChannel(messageContext);
 
-    const messageContext = MessageContext.fromMessage(message);
     const missingPermissions = REQUIRED_VOICE_PERMISSIONS.filter(
         (permission) =>
             !voiceChannel
@@ -1280,13 +1284,13 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
             )}] permissions`
         );
 
-        sendErrorMessage(MessageContext.fromMessage(message), {
+        sendErrorMessage(messageContext, {
             title: LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "misc.failure.missingPermissions.title"
             ),
             description: missingPermissionsText(
-                message.guildID,
+                messageContext.guildID,
                 missingPermissions
             ),
         });
@@ -1299,13 +1303,13 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
 
     if (channelFull) {
         logger.warn(`${getDebugLogHeader(messageContext)} | Channel full`);
-        sendInfoMessage(MessageContext.fromMessage(message), {
+        sendInfoMessage(messageContext, {
             title: LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "misc.failure.vcFull.title"
             ),
             description: LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "misc.failure.vcFull.description"
             ),
         });
@@ -1320,13 +1324,13 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
             )} | Attempted to start game in AFK voice channel`
         );
 
-        sendInfoMessage(MessageContext.fromMessage(message), {
+        sendInfoMessage(messageContext, {
             title: LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "misc.failure.afkChannel.title"
             ),
             description: LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "misc.failure.afkChannel.description"
             ),
         });

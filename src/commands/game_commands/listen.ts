@@ -1,7 +1,6 @@
 import { EMBED_SUCCESS_BONUS_COLOR, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
-    generateEmbed,
     generateOptionsMessage,
     getDebugLogHeader,
     getGameInfoMessage,
@@ -81,7 +80,7 @@ export async function sendBeginListeningSessionMessage(
         },
         false,
         undefined,
-        [generateEmbed(messageContext, optionsEmbedPayload)]
+        [optionsEmbedPayload]
     );
 }
 
@@ -172,7 +171,7 @@ export default class ListenCommand implements BaseCommand {
             return;
         }
 
-        if (!voicePermissionsCheck(message)) {
+        if (!voicePermissionsCheck(messageContext)) {
             return;
         }
 

@@ -1,5 +1,7 @@
 import {
     ELIMINATION_DEFAULT_LIVES,
+    ELIMINATION_MAX_LIVES,
+    ELIMINATION_MIN_LIVES,
     EMBED_SUCCESS_BONUS_COLOR,
     KmqImages,
 } from "../../constants";
@@ -11,7 +13,7 @@ import {
     isPremiumRequest,
 } from "../../helpers/game_utils";
 import {
-    generateEmbed,
+    fetchChannel,
     generateOptionsMessage,
     getCurrentVoiceMembers,
     getDebugLogHeader,
@@ -19,14 +21,17 @@ import {
     getUserVoiceChannel,
     sendErrorMessage,
     sendInfoMessage,
+    tryCreateInteractionSuccessAcknowledgement,
     voicePermissionsCheck,
 } from "../../helpers/discord_utils";
 import { getMention, isWeekend } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GameSession from "../../structures/game_session";
 import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";
 import KmqMember from "../../structures/kmq_member";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
@@ -34,7 +39,6 @@ import State from "../../state";
 import dbContext from "../../database_context";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
-import type Eris from "eris";
 import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("play");
@@ -46,13 +50,15 @@ const logger = new IPCLogger("play");
  * @param messageContext - The original message that triggered the command
  * @param participantIDs - The list of participants
  * @param guildPreference - The guild's game preferences
+ * @param interaction - The interaction that started the game
  */
 export async function sendBeginGameSessionMessage(
     textChannelName: string,
     voiceChannelName: string,
     messageContext: MessageContext,
     participantIDs: Array<string>,
-    guildPreference: GuildPreference
+    guildPreference: GuildPreference,
+    interaction?: Eris.CommandInteraction
 ): Promise<void> {
     const guildID = messageContext.guildID;
     let gameInstructions = LocalizationManager.localizer.translate(
@@ -134,6 +140,15 @@ export async function sendBeginGameSessionMessage(
         });
     }
 
+    const startGamePayload = {
+        title: startTitle,
+        description: gameInstructions,
+        color: isBonus ? EMBED_SUCCESS_BONUS_COLOR : null,
+        thumbnailUrl: KmqImages.HAPPY,
+        fields,
+        footerText: `KMQ ${State.version}`,
+    };
+
     const optionsEmbedPayload = await generateOptionsMessage(
         Session.getSession(guildID),
         messageContext,
@@ -154,17 +169,11 @@ export async function sendBeginGameSessionMessage(
 
     await sendInfoMessage(
         messageContext,
-        {
-            title: startTitle,
-            description: gameInstructions,
-            color: isBonus ? EMBED_SUCCESS_BONUS_COLOR : null,
-            thumbnailUrl: KmqImages.HAPPY,
-            fields,
-            footerText: State.version,
-        },
+        startGamePayload,
         false,
         undefined,
-        [generateEmbed(messageContext, optionsEmbedPayload)]
+        [optionsEmbedPayload],
+        interaction
     );
 }
 
@@ -233,47 +242,142 @@ export default class PlayCommand implements BaseCommand {
         ],
     });
 
-    call = async ({
-        message,
-        parsedMessage,
-        channel,
-    }: CommandArgs): Promise<void> => {
-        const messageContext = MessageContext.fromMessage(message);
-        const guildID = message.guildID;
+    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+        {
+            name: "play",
+            description: LocalizationManager.localizer.translate(
+                LocaleType.EN,
+                "command.play.help.description"
+            ),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+            options: [
+                {
+                    name: GameType.CLASSIC,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.play.help.example.classic"
+                    ),
+                    type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+                },
+                {
+                    name: GameType.ELIMINATION,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.play.help.example.elimination",
+                        {
+                            lives: `${ELIMINATION_DEFAULT_LIVES}`,
+                        }
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "lives",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.play.help.interaction.lives"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .INTEGER,
+                        },
+                    ],
+                },
+                {
+                    name: GameType.TEAMS,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.play.help.example.teams"
+                    ),
+                    type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+                },
+            ],
+        },
+    ];
+
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        const gameType =
+            interaction.data.options.length === 0
+                ? GameType.CLASSIC
+                : (interaction.data.options[0].name as GameType);
+
+        await PlayCommand.startGame(
+            messageContext,
+            gameType,
+            interaction.data.options[0]["options"] &&
+                interaction.data.options[0]["options"].length > 0
+                ? interaction.data.options[0]["options"][0]["value"]
+                : null,
+            interaction
+        );
+    }
+
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+        const gameType =
+            (parsedMessage.components[0]?.toLowerCase() as GameType) ??
+            GameType.CLASSIC;
+
+        await PlayCommand.startGame(
+            MessageContext.fromMessage(message),
+            gameType,
+            parsedMessage.components.length <= 1
+                ? null
+                : parsedMessage.components[1]
+        );
+    };
+
+    static async startGame(
+        messageContext: MessageContext,
+        gameType: GameType,
+        livesArg: string,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
+        const guildID = messageContext.guildID;
         const guildPreference = await GuildPreference.getGuildPreference(
             guildID
         );
 
         const voiceChannel = getUserVoiceChannel(messageContext);
-        const gameSessions = State.gameSessions;
 
         if (!voiceChannel) {
-            await sendErrorMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
-                    guildID,
-                    "misc.failure.notInVC.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    guildID,
-                    "misc.failure.notInVC.description",
-                    { command: `\`${process.env.BOT_PREFIX}play\`` }
-                ),
-            });
+            const title = LocalizationManager.localizer.translate(
+                guildID,
+                "misc.failure.notInVC.title"
+            );
+
+            const description = LocalizationManager.localizer.translate(
+                guildID,
+                "misc.failure.notInVC.description",
+                { command: `\`${process.env.BOT_PREFIX}play\`` }
+            );
+
+            await sendErrorMessage(
+                messageContext,
+                { title, description },
+                interaction
+            );
 
             logger.warn(
-                `${getDebugLogHeader(message)} | User not in voice channel`
+                `${getDebugLogHeader(
+                    messageContext
+                )} | User not in voice channel`
             );
             return;
         }
 
-        if (!voicePermissionsCheck(message)) {
+        if (!voicePermissionsCheck(messageContext)) {
             return;
         }
+
+        const gameSessions = State.gameSessions;
 
         // check for invalid premium game options
         const premiumRequest = await isPremiumRequest(
             gameSessions[guildID],
-            message.author.id
+            messageContext.author.id
         );
 
         if (!premiumRequest) {
@@ -292,25 +396,20 @@ export default class PlayCommand implements BaseCommand {
             }
         }
 
-        const gameType =
-            (parsedMessage.components[0]?.toLowerCase() as GameType) ??
-            GameType.CLASSIC;
-
         if (gameSessions[guildID]) {
             if (gameSessions[guildID]?.sessionInitialized) {
                 logger.warn(
                     `${getDebugLogHeader(
-                        message
+                        messageContext
                     )} | Attempted to start a game while one is already in progress.`
                 );
 
-                await sendErrorMessage(messageContext, {
-                    title: LocalizationManager.localizer.translate(
-                        guildID,
-                        "command.play.failure.alreadyInSession"
-                    ),
-                });
+                const title = LocalizationManager.localizer.translate(
+                    guildID,
+                    "command.play.failure.alreadyInSession"
+                );
 
+                await sendErrorMessage(messageContext, { title }, interaction);
                 return;
             }
 
@@ -322,7 +421,7 @@ export default class PlayCommand implements BaseCommand {
                 Session.deleteSession(guildID);
                 logger.info(
                     `${getDebugLogHeader(
-                        message
+                        messageContext
                     )} | Teams game session was in progress, has been reset.`
                 );
             }
@@ -332,8 +431,8 @@ export default class PlayCommand implements BaseCommand {
 
         // (1) No game session exists yet (create ELIMINATION, TEAMS, CLASSIC, or COMPETITION game), or
         // (2) User attempting to ,play after a ,play teams that didn't start, start CLASSIC game
-        const textChannel = channel;
-        const gameOwner = new KmqMember(message.author.id);
+        const textChannel = await fetchChannel(messageContext.textChannelID);
+        const gameOwner = new KmqMember(messageContext.author.id);
         let gameSession: GameSession;
         const isPremium = await areUsersPremium(
             getCurrentVoiceMembers(voiceChannel.id).map((x) => x.id)
@@ -366,14 +465,24 @@ export default class PlayCommand implements BaseCommand {
             );
 
             logger.info(
-                `${getDebugLogHeader(message)} | Team game session created.`
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Team game session created.`
             );
 
-            await sendInfoMessage(messageContext, {
-                title: startTitle,
-                description: gameInstructions,
-                thumbnailUrl: KmqImages.HAPPY,
-            });
+            if (interaction) {
+                await tryCreateInteractionSuccessAcknowledgement(
+                    interaction,
+                    startTitle,
+                    gameInstructions
+                );
+            } else {
+                await sendInfoMessage(messageContext, {
+                    title: startTitle,
+                    description: gameInstructions,
+                    thumbnailUrl: KmqImages.HAPPY,
+                });
+            }
         } else {
             // (1 and 2) CLASSIC, ELIMINATION, and COMPETITION game creation
             if (gameSessions[guildID]) {
@@ -410,15 +519,19 @@ export default class PlayCommand implements BaseCommand {
 
                 logger.warn(
                     `${getDebugLogHeader(
-                        message
+                        messageContext
                     )} | User attempted ,play on a mode that requires player joins.`
                 );
 
-                sendErrorMessage(messageContext, {
-                    title: ignoringOldGameTypeTitle,
-                    description: oldGameTypeInstructions,
-                    thumbnailUrl: KmqImages.DEAD,
-                });
+                await sendErrorMessage(
+                    messageContext,
+                    {
+                        title: ignoringOldGameTypeTitle,
+                        description: oldGameTypeInstructions,
+                        thumbnailUrl: KmqImages.DEAD,
+                    },
+                    interaction
+                );
             }
 
             if (gameType === GameType.COMPETITION) {
@@ -426,7 +539,7 @@ export default class PlayCommand implements BaseCommand {
                     .kmq("competition_moderators")
                     .select("user_id")
                     .where("guild_id", "=", guildID)
-                    .andWhere("user_id", "=", message.author.id)
+                    .andWhere("user_id", "=", messageContext.author.id)
                     .first();
 
                 if (!isModerator) {
@@ -446,16 +559,16 @@ export default class PlayCommand implements BaseCommand {
             }
 
             let lives: number;
-            if (gameType === GameType.ELIMINATION) {
-                lives =
-                    parsedMessage.components.length > 1 &&
-                    Number.isInteger(
-                        parseInt(parsedMessage.components[1], 10)
-                    ) &&
-                    parseInt(parsedMessage.components[1], 10) > 0 &&
-                    parseInt(parsedMessage.components[1], 10) <= 10000
-                        ? parseInt(parsedMessage.components[1], 10)
-                        : ELIMINATION_DEFAULT_LIVES;
+            if (livesArg === null) {
+                lives = ELIMINATION_DEFAULT_LIVES;
+            } else {
+                lives = parseInt(livesArg, 10);
+                if (
+                    lives < ELIMINATION_MIN_LIVES ||
+                    lives > ELIMINATION_MAX_LIVES
+                ) {
+                    lives = ELIMINATION_DEFAULT_LIVES;
+                }
             }
 
             gameSession = new GameSession(
@@ -483,10 +596,11 @@ export default class PlayCommand implements BaseCommand {
                 voiceChannel.name,
                 messageContext,
                 getCurrentVoiceMembers(voiceChannel.id).map((x) => x.id),
-                guildPreference
+                guildPreference,
+                interaction
             );
 
             await gameSession.startRound(messageContext);
         }
-    };
+    }
 }

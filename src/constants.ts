@@ -151,6 +151,8 @@ export const DATABASE_DOWNLOAD_DIR = path.join(
 );
 
 export const ELIMINATION_DEFAULT_LIVES = 10;
+export const ELIMINATION_MAX_LIVES = 10000;
+export const ELIMINATION_MIN_LIVES = 1;
 
 export const enum GameOptionInternal {
     BEGINNING_YEAR = "beginningYear",
