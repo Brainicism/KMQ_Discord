@@ -401,7 +401,16 @@ export async function sendMessage(
 
     try {
         if (interaction) {
-            await interaction.createMessage(messageContent);
+            if (!withinInteractionInterval(interaction)) {
+                return null;
+            }
+
+            try {
+                await interaction.createMessage(messageContent);
+            } catch (err) {
+                interactionRejectionHandler(interaction, err);
+            }
+
             return null;
         }
 
