@@ -6,7 +6,6 @@ import {
     getMajorityCount,
     sendInfoMessage,
     tryCreateInteractionCustomPayloadAcknowledgement,
-    tryCreateInteractionErrorAcknowledgement,
     tryCreateInteractionSuccessAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
@@ -189,24 +188,6 @@ export default class SkipCommand implements BaseCommand {
 
         const session = Session.getSession(messageContext.guildID);
 
-        if (!session) {
-            if (interaction) {
-                await tryCreateInteractionErrorAcknowledgement(
-                    interaction,
-                    LocalizationManager.localizer.translate(
-                        LocaleType.EN,
-                        "misc.failure.game.noneInProgress.title"
-                    ),
-                    LocalizationManager.localizer.translate(
-                        LocaleType.EN,
-                        "misc.failure.game.noneInProgress.description"
-                    )
-                );
-            }
-
-            return;
-        }
-
         if (
             !session.round ||
             session.round.skipAchieved ||
@@ -271,7 +252,7 @@ export default class SkipCommand implements BaseCommand {
      * @param interaction - The interaction
      * @param messageContext - The message context
      */
-    static async processChatInputInteraction(
+    async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
