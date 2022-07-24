@@ -1,7 +1,6 @@
 import { EMBED_ERROR_COLOR } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
-    generateOptionsMessage,
     getDebugLogHeader,
     sendErrorMessage,
     sendOptionsMessage,
@@ -210,27 +209,16 @@ export default class SpecialCommand implements BaseCommand {
             );
         }
 
-        if (interaction) {
-            const embedPayload = await generateOptionsMessage(
-                Session.getSession(messageContext.guildID),
-                messageContext,
-                guildPreference,
-                [{ option: GameOption.SPECIAL_TYPE, reset }]
-            );
-
-            await tryCreateInteractionCustomPayloadAcknowledgement(
-                messageContext,
-                interaction,
-                embedPayload
-            );
-        } else {
-            await sendOptionsMessage(
-                Session.getSession(messageContext.guildID),
-                messageContext,
-                guildPreference,
-                [{ option: GameOption.SPECIAL_TYPE, reset }]
-            );
-        }
+        await sendOptionsMessage(
+            Session.getSession(messageContext.guildID),
+            messageContext,
+            guildPreference,
+            [{ option: GameOption.SPECIAL_TYPE, reset }],
+            null,
+            null,
+            null,
+            interaction
+        );
     }
 
     /**
