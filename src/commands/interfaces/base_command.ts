@@ -3,6 +3,7 @@ import type CommandValidations from "../../interfaces/command_validations";
 import type Eris from "eris";
 import type GuildPreference from "../../structures/guild_preference";
 import type HelpDocumentation from "../../interfaces/help";
+import type MessageContext from "../../structures/message_context";
 import type PrecheckArgs from "../../interfaces/precheck_args";
 
 export default interface BaseCommand {
@@ -17,4 +18,8 @@ export default interface BaseCommand {
     resetPremium?: (guildPreference: GuildPreference) => Promise<void>;
     isUsingPremiumOption?: (guildPreference: GuildPreference) => boolean;
     slashCommands?: () => Array<Eris.ApplicationCommandStructure>;
+    processChatInputInteraction?: (
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ) => Promise<void>;
 }

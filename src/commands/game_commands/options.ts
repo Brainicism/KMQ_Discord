@@ -1,9 +1,7 @@
 import { IPCLogger } from "../../logger";
 import {
-    generateOptionsMessage,
     getDebugLogHeader,
     sendOptionsMessage,
-    tryCreateInteractionCustomPayloadAcknowledgement,
 } from "../../helpers/discord_utils";
 import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
@@ -56,27 +54,16 @@ export default class OptionsCommand implements BaseCommand {
             messageContext.guildID
         );
 
-        if (interaction) {
-            const embedPayload = await generateOptionsMessage(
-                Session.getSession(messageContext.guildID),
-                messageContext,
-                guildPreference,
-                null
-            );
-
-            await tryCreateInteractionCustomPayloadAcknowledgement(
-                messageContext,
-                interaction,
-                embedPayload
-            );
-        } else {
-            await sendOptionsMessage(
-                Session.getSession(messageContext.guildID),
-                messageContext,
-                guildPreference,
-                null
-            );
-        }
+        await sendOptionsMessage(
+            Session.getSession(messageContext.guildID),
+            messageContext,
+            guildPreference,
+            null,
+            null,
+            null,
+            null,
+            interaction
+        );
 
         logger.info(`${getDebugLogHeader(messageContext)} | Options retrieved`);
     };
@@ -85,7 +72,7 @@ export default class OptionsCommand implements BaseCommand {
      * @param interaction - The interaction
      * @param messageContext - The message context
      */
-    static async processChatInputInteraction(
+    async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {

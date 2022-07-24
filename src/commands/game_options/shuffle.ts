@@ -8,7 +8,6 @@ import {
     getDebugLogHeader,
     sendErrorMessage,
     sendOptionsMessage,
-    tryCreateInteractionCustomPayloadAcknowledgement,
 } from "../../helpers/discord_utils";
 import { isUserPremium } from "../../helpers/game_utils";
 import CommandPrechecks from "../../command_prechecks";
@@ -162,15 +161,11 @@ export default class ShuffleCommand implements BaseCommand {
                     color: EMBED_ERROR_COLOR,
                 };
 
-                if (interaction) {
-                    await tryCreateInteractionCustomPayloadAcknowledgement(
-                        messageContext,
-                        interaction,
-                        embedPayload
-                    );
-                } else {
-                    sendErrorMessage(messageContext, embedPayload);
-                }
+                await sendErrorMessage(
+                    messageContext,
+                    embedPayload,
+                    interaction
+                );
 
                 return;
             }
@@ -208,7 +203,7 @@ export default class ShuffleCommand implements BaseCommand {
      * @param interaction - The interaction
      * @param messageContext - The message context
      */
-    static async processChatInputInteraction(
+    async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {

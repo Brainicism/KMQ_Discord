@@ -5,8 +5,6 @@ import {
     getDebugLogHeader,
     getMajorityCount,
     sendInfoMessage,
-    tryCreateInteractionCustomPayloadAcknowledgement,
-    tryCreateInteractionErrorAcknowledgement,
     tryCreateInteractionSuccessAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
@@ -45,15 +43,14 @@ async function sendSkipNotification(
         ),
     };
 
-    if (interaction) {
-        await tryCreateInteractionCustomPayloadAcknowledgement(
-            messageContext,
-            interaction,
-            embedPayload
-        );
-    } else {
-        sendInfoMessage(messageContext, embedPayload, true);
-    }
+    await sendInfoMessage(
+        messageContext,
+        embedPayload,
+        true,
+        null,
+        [],
+        interaction
+    );
 
     logger.info(
         `${getDebugLogHeader(messageContext)} | Vote instructions retrieved.`
@@ -83,15 +80,14 @@ async function sendSkipMessage(
         thumbnailUrl: KmqImages.NOT_IMPRESSED,
     };
 
-    if (interaction) {
-        await tryCreateInteractionCustomPayloadAcknowledgement(
-            messageContext,
-            interaction,
-            embedPayload
-        );
-    } else {
-        await sendInfoMessage(messageContext, embedPayload);
-    }
+    await sendInfoMessage(
+        messageContext,
+        embedPayload,
+        null,
+        null,
+        [],
+        interaction
+    );
 }
 
 /**
@@ -189,24 +185,6 @@ export default class SkipCommand implements BaseCommand {
 
         const session = Session.getSession(messageContext.guildID);
 
-        if (!session) {
-            if (interaction) {
-                await tryCreateInteractionErrorAcknowledgement(
-                    interaction,
-                    LocalizationManager.localizer.translate(
-                        LocaleType.EN,
-                        "misc.failure.game.noneInProgress.title"
-                    ),
-                    LocalizationManager.localizer.translate(
-                        LocaleType.EN,
-                        "misc.failure.game.noneInProgress.description"
-                    )
-                );
-            }
-
-            return;
-        }
-
         if (
             !session.round ||
             session.round.skipAchieved ||
@@ -271,7 +249,7 @@ export default class SkipCommand implements BaseCommand {
      * @param interaction - The interaction
      * @param messageContext - The message context
      */
-    static async processChatInputInteraction(
+    async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {

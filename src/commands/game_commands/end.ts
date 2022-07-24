@@ -1,7 +1,6 @@
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
-    tryCreateInteractionErrorAcknowledgement,
     tryCreateInteractionSuccessAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
@@ -55,27 +54,6 @@ export default class EndCommand implements BaseCommand {
         interaction?: Eris.CommandInteraction
     ): Promise<void> => {
         const session = Session.getSession(messageContext.guildID);
-        if (!session) {
-            if (interaction) {
-                await tryCreateInteractionErrorAcknowledgement(
-                    interaction,
-                    LocalizationManager.localizer.translate(
-                        LocaleType.EN,
-                        "misc.failure.game.noneInProgress.title"
-                    ),
-                    LocalizationManager.localizer.translate(
-                        LocaleType.EN,
-                        "misc.failure.game.noneInProgress.description"
-                    )
-                );
-            }
-
-            logger.warn(
-                `${getDebugLogHeader(messageContext)} | No active session`
-            );
-            return;
-        }
-
         if (interaction) {
             await tryCreateInteractionSuccessAcknowledgement(
                 interaction,
@@ -98,7 +76,7 @@ export default class EndCommand implements BaseCommand {
      * @param interaction - The interaction
      * @param messageContext - The message context
      */
-    static async processChatInputInteraction(
+    async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {

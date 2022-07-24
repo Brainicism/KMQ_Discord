@@ -378,13 +378,29 @@ async function sendMessageExceptionHandler(
  * @param messageContent - The MessageContent to send
  * @param file - The file to send
  * @param authorID - The author's ID
+ * @param interaction - The interaction
  */
 export async function sendMessage(
     textChannelID: string,
     messageContent: Eris.AdvancedMessageContent,
     file?: Eris.FileContent,
-    authorID?: string
+    authorID?: string,
+    interaction?: Eris.ComponentInteraction | Eris.CommandInteraction
 ): Promise<Eris.Message> {
+    if (interaction) {
+        if (!withinInteractionInterval(interaction)) {
+            return null;
+        }
+
+        try {
+            await interaction.createMessage(messageContent);
+        } catch (err) {
+            interactionRejectionHandler(interaction, err);
+        }
+
+        return null;
+    }
+
     const channel = await fetchChannel(textChannelID);
 
     // only reply to message if has required permissions
@@ -462,10 +478,12 @@ async function sendDmMessage(
  * Sends an error embed with the specified title/description
  * @param messageContext - An object containing relevant parts of Eris.Message
  * @param embedPayload - The embed payload
+ * @param interaction - The interaction
  */
 export async function sendErrorMessage(
     messageContext: MessageContext,
-    embedPayload: EmbedPayload
+    embedPayload: EmbedPayload,
+    interaction?: Eris.CommandInteraction
 ): Promise<Eris.Message<Eris.TextableChannel>> {
     const author =
         embedPayload.author == null || embedPayload.author
@@ -499,7 +517,8 @@ export async function sendErrorMessage(
             components: embedPayload.components,
         },
         null,
-        messageContext.author.id
+        messageContext.author.id,
+        interaction
     );
 }
 
@@ -549,13 +568,15 @@ export function generateEmbed(
  * @param reply - Whether to reply to the given message
  * @param content - Plain text content
  * @param additionalEmbeds - Additional embeds to include in the message
+ * @param interaction - The interaction
  */
 export async function sendInfoMessage(
     messageContext: MessageContext,
     embedPayload: EmbedPayload,
     reply = false,
     content?: string,
-    additionalEmbeds: Array<Eris.EmbedOptions> = []
+    additionalEmbeds: Array<Eris.EmbedOptions> = [],
+    interaction?: Eris.CommandInteraction
 ): Promise<Eris.Message<Eris.TextableChannel>> {
     if (embedPayload.description && embedPayload.description.length > 2048) {
         logger.error(
@@ -587,10 +608,11 @@ export async function sendInfoMessage(
                       }
                     : null,
             components: embedPayload.components,
-            content,
+            content: content || undefined,
         },
         null,
-        messageContext.author.id
+        messageContext.author.id,
+        interaction
     );
 }
 
@@ -1010,15 +1032,14 @@ export async function sendOptionsMessage(
         footerText
     );
 
-    if (interaction) {
-        await tryCreateInteractionCustomPayloadAcknowledgement(
-            messageContext,
-            interaction,
-            optionsEmbed
-        );
-    } else {
-        await sendInfoMessage(messageContext, optionsEmbed, true);
-    }
+    await sendInfoMessage(
+        messageContext,
+        optionsEmbed,
+        true,
+        null,
+        [],
+        interaction
+    );
 }
 
 /**
@@ -1527,38 +1548,6 @@ export async function tryAutocompleteInteractionAcknowledge(
 
 /**
  * Attempts to send a success response to an interaction
- * @param messageContext - The originating interaction
- * @param interaction - The originating interaction
- * @param embedPayload - The embed payloads -- the first payload's components will be used to create the embed
- * @param ephemeral - Whether the embed can only be seen by the triggering user
- */
-export async function tryCreateInteractionCustomPayloadAcknowledgement(
-    messageContext: MessageContext,
-    interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
-    embedPayload: EmbedPayload | Array<EmbedPayload>,
-    ephemeral: boolean = false
-): Promise<void> {
-    if (!withinInteractionInterval(interaction)) {
-        return;
-    }
-
-    if (!Array.isArray(embedPayload)) {
-        embedPayload = [embedPayload];
-    }
-
-    try {
-        await interaction.createMessage({
-            embeds: embedPayload.map((x) => generateEmbed(messageContext, x)),
-            components: embedPayload[0].components,
-            flags: ephemeral ? EPHEMERAL_MESSAGE_FLAG : null,
-        });
-    } catch (err) {
-        interactionRejectionHandler(interaction, err);
-    }
-}
-
-/**
- * Attempts to send a success response to an interaction
  * @param interaction - The originating interaction
  * @param title - The embed title
  * @param description - The embed description
@@ -1570,12 +1559,9 @@ export async function tryCreateInteractionSuccessAcknowledgement(
     description: string,
     ephemeral: boolean = false
 ): Promise<void> {
-    if (!withinInteractionInterval(interaction)) {
-        return;
-    }
-
-    try {
-        await interaction.createMessage({
+    await sendMessage(
+        null,
+        {
             embeds: [
                 {
                     color: (await userBonusIsActive(interaction.member?.id))
@@ -1591,10 +1577,11 @@ export async function tryCreateInteractionSuccessAcknowledgement(
                 },
             ],
             flags: ephemeral ? EPHEMERAL_MESSAGE_FLAG : null,
-        });
-    } catch (err) {
-        interactionRejectionHandler(interaction, err);
-    }
+        },
+        null,
+        null,
+        interaction
+    );
 }
 
 /**
@@ -1610,12 +1597,9 @@ export async function tryCreateInteractionErrorAcknowledgement(
     description: string,
     ephemeral: boolean = true
 ): Promise<void> {
-    if (!withinInteractionInterval(interaction)) {
-        return;
-    }
-
-    try {
-        await interaction.createMessage({
+    await sendMessage(
+        null,
+        {
             embeds: [
                 {
                     color: EMBED_ERROR_COLOR,
@@ -1636,10 +1620,11 @@ export async function tryCreateInteractionErrorAcknowledgement(
                 },
             ],
             flags: ephemeral ? EPHEMERAL_MESSAGE_FLAG : null,
-        });
-    } catch (err) {
-        interactionRejectionHandler(interaction, err);
-    }
+        },
+        null,
+        null,
+        interaction
+    );
 }
 
 /**

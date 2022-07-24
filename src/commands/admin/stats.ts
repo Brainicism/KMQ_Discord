@@ -9,7 +9,6 @@ import {
     getDebugLogHeader,
     sendErrorMessage,
     sendInfoMessage,
-    tryCreateInteractionCustomPayloadAcknowledgement,
 } from "../../helpers/discord_utils";
 import Eris from "eris";
 import LocaleType from "../../enums/locale_type";
@@ -281,15 +280,14 @@ export default class StatsCommand implements BaseCommand {
             thumbnailUrl: KmqImages.READING_BOOK,
         };
 
-        if (interaction) {
-            await tryCreateInteractionCustomPayloadAcknowledgement(
-                messageContext,
-                interaction,
-                embedPayload
-            );
-        } else {
-            await sendInfoMessage(messageContext, embedPayload);
-        }
+        await sendInfoMessage(
+            messageContext,
+            embedPayload,
+            null,
+            null,
+            undefined,
+            interaction
+        );
     };
 
     call = async ({ message }: CommandArgs): Promise<void> => {
@@ -303,7 +301,7 @@ export default class StatsCommand implements BaseCommand {
      * @param interaction - The interaction
      * @param messageContext - The message context
      */
-    static async processChatInputInteraction(
+    async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
