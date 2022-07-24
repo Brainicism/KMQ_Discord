@@ -575,7 +575,7 @@ export async function sendInfoMessage(
     embedPayload: EmbedPayload,
     reply = false,
     content?: string,
-    additionalEmbeds: Array<Eris.EmbedOptions> = [],
+    additionalEmbeds: Array<EmbedPayload> = [],
     interaction?: Eris.CommandInteraction
 ): Promise<Eris.Message<Eris.TextableChannel>> {
     if (embedPayload.description && embedPayload.description.length > 2048) {
@@ -599,7 +599,12 @@ export async function sendInfoMessage(
     return sendMessage(
         messageContext.textChannelID,
         {
-            embeds: [embed, ...additionalEmbeds],
+            embeds: [
+                embed,
+                ...additionalEmbeds.map((x) =>
+                    generateEmbed(messageContext, x)
+                ),
+            ],
             messageReference:
                 reply && messageContext.referencedMessageID
                     ? {

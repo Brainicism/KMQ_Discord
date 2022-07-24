@@ -14,7 +14,6 @@ import {
 } from "../../helpers/game_utils";
 import {
     fetchChannel,
-    generateEmbed,
     generateOptionsMessage,
     getCurrentVoiceMembers,
     getDebugLogHeader,
@@ -22,8 +21,6 @@ import {
     getUserVoiceChannel,
     sendErrorMessage,
     sendInfoMessage,
-    tryCreateInteractionCustomPayloadAcknowledgement,
-    tryCreateInteractionErrorAcknowledgement,
     tryCreateInteractionSuccessAcknowledgement,
     voicePermissionsCheck,
 } from "../../helpers/discord_utils";
@@ -170,21 +167,14 @@ export async function sendBeginGameSessionMessage(
             );
     }
 
-    if (interaction) {
-        await tryCreateInteractionCustomPayloadAcknowledgement(
-            messageContext,
-            interaction,
-            [startGamePayload, optionsEmbedPayload]
-        );
-    } else {
-        await sendInfoMessage(
-            messageContext,
-            startGamePayload,
-            false,
-            undefined,
-            [generateEmbed(messageContext, optionsEmbedPayload)]
-        );
-    }
+    await sendInfoMessage(
+        messageContext,
+        startGamePayload,
+        false,
+        undefined,
+        [optionsEmbedPayload],
+        interaction
+    );
 }
 
 export default class PlayCommand implements BaseCommand {
@@ -275,7 +265,7 @@ export default class PlayCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.play.help.example.elimination",
                         {
-                            lives: `\`${ELIMINATION_DEFAULT_LIVES}\``,
+                            lives: `${ELIMINATION_DEFAULT_LIVES}`,
                         }
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -305,7 +295,7 @@ export default class PlayCommand implements BaseCommand {
         },
     ];
 
-    static async processChatInputInteraction(
+    async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
@@ -364,15 +354,11 @@ export default class PlayCommand implements BaseCommand {
                 { command: `\`${process.env.BOT_PREFIX}play\`` }
             );
 
-            if (interaction) {
-                tryCreateInteractionErrorAcknowledgement(
-                    interaction,
-                    title,
-                    description
-                );
-            } else {
-                sendErrorMessage(messageContext, { title, description });
-            }
+            await sendErrorMessage(
+                messageContext,
+                { title, description },
+                interaction
+            );
 
             logger.warn(
                 `${getDebugLogHeader(
@@ -423,18 +409,7 @@ export default class PlayCommand implements BaseCommand {
                     "command.play.failure.alreadyInSession"
                 );
 
-                if (interaction) {
-                    await tryCreateInteractionErrorAcknowledgement(
-                        interaction,
-                        title,
-                        null
-                    );
-                } else {
-                    await sendErrorMessage(messageContext, {
-                        title,
-                    });
-                }
-
+                await sendErrorMessage(messageContext, { title }, interaction);
                 return;
             }
 
@@ -548,19 +523,15 @@ export default class PlayCommand implements BaseCommand {
                     )} | User attempted ,play on a mode that requires player joins.`
                 );
 
-                if (interaction) {
-                    await tryCreateInteractionErrorAcknowledgement(
-                        interaction,
-                        ignoringOldGameTypeTitle,
-                        oldGameTypeInstructions
-                    );
-                } else {
-                    sendErrorMessage(messageContext, {
+                await sendErrorMessage(
+                    messageContext,
+                    {
                         title: ignoringOldGameTypeTitle,
                         description: oldGameTypeInstructions,
                         thumbnailUrl: KmqImages.DEAD,
-                    });
-                }
+                    },
+                    interaction
+                );
             }
 
             if (gameType === GameType.COMPETITION) {
