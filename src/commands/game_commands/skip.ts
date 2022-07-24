@@ -6,7 +6,6 @@ import {
     getMajorityCount,
     sendInfoMessage,
     tryCreateInteractionCustomPayloadAcknowledgement,
-    tryCreateInteractionErrorAcknowledgement,
     tryCreateInteractionSuccessAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
@@ -188,24 +187,6 @@ export default class SkipCommand implements BaseCommand {
         }
 
         const session = Session.getSession(messageContext.guildID);
-
-        if (!session) {
-            if (interaction) {
-                await tryCreateInteractionErrorAcknowledgement(
-                    interaction,
-                    LocalizationManager.localizer.translate(
-                        LocaleType.EN,
-                        "misc.failure.game.noneInProgress.title"
-                    ),
-                    LocalizationManager.localizer.translate(
-                        LocaleType.EN,
-                        "misc.failure.game.noneInProgress.description"
-                    )
-                );
-            }
-
-            return;
-        }
 
         if (
             !session.round ||
