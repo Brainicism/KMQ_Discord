@@ -6,7 +6,6 @@ import {
     getMajorityCount,
     sendErrorMessage,
     sendInfoMessage,
-    tryCreateInteractionCustomPayloadAcknowledgement,
     tryCreateInteractionSuccessAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
@@ -299,15 +298,14 @@ export default class HintCommand implements BaseCommand {
                 thumbnailUrl: KmqImages.READING_BOOK,
             };
 
-            if (interaction) {
-                await tryCreateInteractionCustomPayloadAcknowledgement(
-                    messageContext,
-                    interaction,
-                    embedPayload
-                );
-            } else {
-                await sendInfoMessage(messageContext, embedPayload);
-            }
+            await sendInfoMessage(
+                messageContext,
+                embedPayload,
+                null,
+                null,
+                undefined,
+                interaction
+            );
 
             logger.info(
                 `${getDebugLogHeader(messageContext)} | Hint majority received.`

@@ -5,7 +5,6 @@ import {
     getDebugLogHeader,
     getMajorityCount,
     sendInfoMessage,
-    tryCreateInteractionCustomPayloadAcknowledgement,
     tryCreateInteractionSuccessAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
@@ -44,15 +43,14 @@ async function sendSkipNotification(
         ),
     };
 
-    if (interaction) {
-        await tryCreateInteractionCustomPayloadAcknowledgement(
-            messageContext,
-            interaction,
-            embedPayload
-        );
-    } else {
-        sendInfoMessage(messageContext, embedPayload, true);
-    }
+    await sendInfoMessage(
+        messageContext,
+        embedPayload,
+        true,
+        null,
+        [],
+        interaction
+    );
 
     logger.info(
         `${getDebugLogHeader(messageContext)} | Vote instructions retrieved.`
@@ -82,15 +80,14 @@ async function sendSkipMessage(
         thumbnailUrl: KmqImages.NOT_IMPRESSED,
     };
 
-    if (interaction) {
-        await tryCreateInteractionCustomPayloadAcknowledgement(
-            messageContext,
-            interaction,
-            embedPayload
-        );
-    } else {
-        await sendInfoMessage(messageContext, embedPayload);
-    }
+    await sendInfoMessage(
+        messageContext,
+        embedPayload,
+        null,
+        null,
+        [],
+        interaction
+    );
 }
 
 /**

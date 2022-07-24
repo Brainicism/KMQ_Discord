@@ -4,7 +4,6 @@ import {
     getDebugLogHeader,
     sendErrorMessage,
     sendOptionsMessage,
-    tryCreateInteractionCustomPayloadAcknowledgement,
 } from "../../helpers/discord_utils";
 import ArtistType from "../../enums/option_types/artist_type";
 import CommandPrechecks from "../../command_prechecks";
@@ -173,15 +172,7 @@ export default class ArtistTypeCommand implements BaseCommand {
                 color: EMBED_ERROR_COLOR,
             };
 
-            if (interaction) {
-                await tryCreateInteractionCustomPayloadAcknowledgement(
-                    messageContext,
-                    interaction,
-                    embedPayload
-                );
-            } else {
-                sendErrorMessage(messageContext, embedPayload);
-            }
+            await sendErrorMessage(messageContext, embedPayload, interaction);
 
             return;
         }

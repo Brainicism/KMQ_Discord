@@ -11,7 +11,6 @@ import { bold } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     sendInfoMessage,
-    tryCreateInteractionCustomPayloadAcknowledgement,
 } from "../../helpers/discord_utils";
 import { userBonusIsActive } from "../../helpers/game_utils";
 import Eris from "eris";
@@ -207,15 +206,14 @@ export default class VoteCommand implements BaseCommand {
             ],
         };
 
-        if (interaction) {
-            await tryCreateInteractionCustomPayloadAcknowledgement(
-                messageContext,
-                interaction,
-                embedPayload
-            );
-        } else {
-            sendInfoMessage(messageContext, embedPayload, true);
-        }
+        await sendInfoMessage(
+            messageContext,
+            embedPayload,
+            true,
+            null,
+            [],
+            interaction
+        );
 
         logger.info(
             `${getDebugLogHeader(

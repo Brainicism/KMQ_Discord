@@ -3,7 +3,6 @@ import {
     areUserAndBotInSameVoiceChannel,
     getDebugLogHeader,
     sendErrorMessage,
-    tryCreateInteractionCustomPayloadAcknowledgement,
     tryCreateInteractionErrorAcknowledgement,
 } from "./helpers/discord_utils";
 import { getTimeUntilRestart } from "./helpers/management_utils";
@@ -97,15 +96,7 @@ export default class CommandPrechecks {
                 ),
             };
 
-            if (interaction) {
-                tryCreateInteractionCustomPayloadAcknowledgement(
-                    messageContext,
-                    interaction,
-                    embedPayload
-                );
-            } else {
-                sendErrorMessage(messageContext, embedPayload);
-            }
+            sendErrorMessage(messageContext, embedPayload, interaction);
 
             return false;
         }
@@ -127,15 +118,7 @@ export default class CommandPrechecks {
                 ),
             };
 
-            if (interaction) {
-                tryCreateInteractionCustomPayloadAcknowledgement(
-                    messageContext,
-                    interaction,
-                    embedPayload
-                );
-            } else {
-                sendErrorMessage(messageContext, embedPayload);
-            }
+            sendErrorMessage(messageContext, embedPayload, interaction);
 
             return false;
         }
@@ -166,15 +149,7 @@ export default class CommandPrechecks {
                 ),
             };
 
-            if (interaction) {
-                tryCreateInteractionCustomPayloadAcknowledgement(
-                    messageContext,
-                    interaction,
-                    embedPayload
-                );
-            } else {
-                sendErrorMessage(messageContext, embedPayload);
-            }
+            sendErrorMessage(messageContext, embedPayload, interaction);
 
             return false;
         }
@@ -196,15 +171,7 @@ export default class CommandPrechecks {
                 ),
             };
 
-            if (interaction) {
-                tryCreateInteractionCustomPayloadAcknowledgement(
-                    messageContext,
-                    interaction,
-                    embedPayload
-                );
-            } else {
-                sendErrorMessage(messageContext, embedPayload);
-            }
+            sendErrorMessage(messageContext, embedPayload, interaction);
 
             return false;
         }
@@ -235,15 +202,7 @@ export default class CommandPrechecks {
                 ),
             };
 
-            if (interaction) {
-                tryCreateInteractionCustomPayloadAcknowledgement(
-                    messageContext,
-                    interaction,
-                    embedPayload
-                );
-            } else {
-                sendErrorMessage(messageContext, embedPayload);
-            }
+            sendErrorMessage(messageContext, embedPayload, interaction);
 
             return false;
         }
@@ -291,15 +250,7 @@ export default class CommandPrechecks {
                 ),
             };
 
-            if (interaction) {
-                tryCreateInteractionCustomPayloadAcknowledgement(
-                    messageContext,
-                    interaction,
-                    embedPayload
-                );
-            } else {
-                sendErrorMessage(messageContext, embedPayload);
-            }
+            sendErrorMessage(messageContext, embedPayload, interaction);
 
             return false;
         }
@@ -325,15 +276,7 @@ export default class CommandPrechecks {
                 ),
             };
 
-            if (interaction) {
-                tryCreateInteractionCustomPayloadAcknowledgement(
-                    messageContext,
-                    interaction,
-                    embedPayload
-                );
-            } else {
-                await sendErrorMessage(messageContext, embedPayload);
-            }
+            await sendErrorMessage(messageContext, embedPayload, interaction);
 
             return false;
         }
@@ -360,15 +303,7 @@ export default class CommandPrechecks {
             ),
         };
 
-        if (interaction) {
-            tryCreateInteractionCustomPayloadAcknowledgement(
-                messageContext,
-                interaction,
-                embedPayload
-            );
-        } else {
-            await sendErrorMessage(messageContext, embedPayload);
-        }
+        await sendErrorMessage(messageContext, embedPayload, interaction);
 
         return false;
     }
@@ -403,15 +338,7 @@ export default class CommandPrechecks {
             ),
         };
 
-        if (interaction) {
-            tryCreateInteractionCustomPayloadAcknowledgement(
-                messageContext,
-                interaction,
-                embedPayload
-            );
-        } else {
-            sendErrorMessage(messageContext, embedPayload);
-        }
+        sendErrorMessage(messageContext, embedPayload, interaction);
 
         return false;
     }

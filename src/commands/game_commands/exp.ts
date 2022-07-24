@@ -16,7 +16,6 @@ import {
 import {
     getDebugLogHeader,
     sendInfoMessage,
-    tryCreateInteractionCustomPayloadAcknowledgement,
 } from "../../helpers/discord_utils";
 import { isWeekend } from "../../helpers/utils";
 import AnswerType from "../../enums/option_types/answer_type";
@@ -463,15 +462,14 @@ export default class ExpCommand implements BaseCommand {
             thumbnailUrl: KmqImages.THUMBS_UP,
         };
 
-        if (interaction) {
-            await tryCreateInteractionCustomPayloadAcknowledgement(
-                messageContext,
-                interaction,
-                embedPayload
-            );
-        } else {
-            await sendInfoMessage(messageContext, embedPayload);
-        }
+        await sendInfoMessage(
+            messageContext,
+            embedPayload,
+            null,
+            null,
+            undefined,
+            interaction
+        );
 
         logger.info(
             `${getDebugLogHeader(
