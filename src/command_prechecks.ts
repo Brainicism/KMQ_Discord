@@ -60,9 +60,11 @@ export default class CommandPrechecks {
                         errorMessage ?? "misc.preCheck.differentVC"
                     )
                 );
+
+                return false;
             }
 
-            return false;
+            return true;
         }
 
         const gameSession = session as GameSession;
