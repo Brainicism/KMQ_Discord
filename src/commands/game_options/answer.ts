@@ -1,10 +1,8 @@
 import { ExpBonusModifierValues } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
-    generateOptionsMessage,
     getDebugLogHeader,
     sendOptionsMessage,
-    tryCreateInteractionCustomPayloadAcknowledgement,
 } from "../../helpers/discord_utils";
 import AnswerType from "../../enums/option_types/answer_type";
 import CommandPrechecks from "../../command_prechecks";
@@ -190,27 +188,16 @@ export default class AnswerCommand implements BaseCommand {
             );
         }
 
-        if (interaction) {
-            const embedPayload = await generateOptionsMessage(
-                Session.getSession(messageContext.guildID),
-                messageContext,
-                guildPreference,
-                [{ option: GameOption.ANSWER_TYPE, reset }]
-            );
-
-            await tryCreateInteractionCustomPayloadAcknowledgement(
-                messageContext,
-                interaction,
-                embedPayload
-            );
-        } else {
-            await sendOptionsMessage(
-                Session.getSession(messageContext.guildID),
-                messageContext,
-                guildPreference,
-                [{ option: GameOption.ANSWER_TYPE, reset }]
-            );
-        }
+        await sendOptionsMessage(
+            Session.getSession(messageContext.guildID),
+            messageContext,
+            guildPreference,
+            [{ option: GameOption.ANSWER_TYPE, reset }],
+            null,
+            null,
+            null,
+            interaction
+        );
     }
 
     /**

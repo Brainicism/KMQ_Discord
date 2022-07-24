@@ -104,7 +104,8 @@ export const CUM_EXP_TABLE = EXP_TABLE.map(
 
 export const VOTE_BONUS_DURATION = 1;
 export const VOTE_LINK = "https://top.gg/bot/508759831755096074/vote";
-export const REVIEW_LINK = "https://top.gg/bot/508759831755096074#reviews";
+export const REVIEW_LINK =
+    "https://top.gg/bot/508759831755096074#:~:text=118%2C151-,Ratings%20%26%20Reviews,-4.59";
 export const VOTE_RESET_DURATION = 12;
 
 export const PARTICIPANT_MODIFIER_MAX_PARTICIPANTS = 6;

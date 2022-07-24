@@ -988,6 +988,7 @@ export async function generateOptionsMessage(
  * @param preset - Specifies whether the GameOptions were modified by a preset
  * @param allReset - Specifies whether all GameOptions were reset
  * @param footerText - The footer text
+ * @param interaction - The interaction
  */
 export async function sendOptionsMessage(
     session: Session,
@@ -996,9 +997,10 @@ export async function sendOptionsMessage(
     updatedOptions?: { option: GameOption; reset: boolean }[],
     preset = false,
     allReset = false,
-    footerText?: string
+    footerText?: string,
+    interaction?: Eris.CommandInteraction
 ): Promise<void> {
-    const optionsEmbed = generateOptionsMessage(
+    const optionsEmbed = await generateOptionsMessage(
         session,
         messageContext,
         guildPreference,
@@ -1008,7 +1010,15 @@ export async function sendOptionsMessage(
         footerText
     );
 
-    await sendInfoMessage(messageContext, await optionsEmbed, true);
+    if (interaction) {
+        await tryCreateInteractionCustomPayloadAcknowledgement(
+            messageContext,
+            interaction,
+            optionsEmbed
+        );
+    } else {
+        await sendInfoMessage(messageContext, optionsEmbed, true);
+    }
 }
 
 /**
