@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import { BOOKMARK_COMMAND_NAME, PROFILE_COMMAND_NAME } from "../../constants";
 import { IPCLogger } from "../../logger";
 import { sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
@@ -48,142 +49,133 @@ export default class AppCommandsCommand implements BaseCommand {
             return;
         }
 
-        const commandsReloaded = [];
+        const isProd = process.env.NODE_ENV === EnvType.PROD;
+        const debugServer = State.client.guilds.get(
+            process.env.DEBUG_SERVER_ID
+        );
+
+        if (!isProd && !debugServer) return;
+
+        const commandModificationScope = isProd ? "global" : "guild";
+
+        const commandsModifiedSuccess = [];
+        const commandsModifiedFailed = [];
         if (appCommandType === AppCommandsAction.RELOAD) {
             const commandsToModify = isSingleCommand
                 ? [State.client.commands[parsedMessage.components[1]]]
                 : Object.values(State.client.commands);
 
-            if (process.env.NODE_ENV === EnvType.PROD) {
-                logger.info("Creating global application commands...");
-                await State.client.createCommand({
-                    name: BOOKMARK_COMMAND_NAME,
-                    type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
-                });
+            const createApplicationCommandFunc: (
+                command: Eris.ApplicationCommandStructure
+            ) => Promise<Eris.ApplicationCommand> = isProd
+                ? State.client.createCommand
+                : debugServer.createCommand.bind(debugServer);
 
-                await State.client.createCommand({
-                    name: PROFILE_COMMAND_NAME,
-                    type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
-                });
+            logger.info(
+                `Creating ${commandModificationScope} application commands...`
+            );
 
-                await State.client.createCommand({
-                    name: PROFILE_COMMAND_NAME,
-                    type: Eris.Constants.ApplicationCommandTypes.USER,
-                });
+            const commandStructures: Array<Eris.ApplicationCommandStructure> =
+                isSingleCommand
+                    ? []
+                    : [
+                          {
+                              name: BOOKMARK_COMMAND_NAME,
+                              type: Eris.Constants.ApplicationCommandTypes
+                                  .MESSAGE,
+                          },
+                          {
+                              name: PROFILE_COMMAND_NAME,
+                              type: Eris.Constants.ApplicationCommandTypes
+                                  .MESSAGE,
+                          },
+                          {
+                              name: PROFILE_COMMAND_NAME,
+                              type: Eris.Constants.ApplicationCommandTypes.USER,
+                          },
+                      ];
 
-                for (const command of commandsToModify) {
-                    if (command.slashCommands) {
-                        const commands = command.slashCommands();
-                        for (const cmd of commands) {
-                            logger.info(`Creating global command: ${cmd.name}`);
-                            try {
-                                // eslint-disable-next-line no-await-in-loop
-                                await State.client.createCommand(cmd);
-                                commandsReloaded.push(cmd.name);
-                            } catch (e) {
-                                logger.error(
-                                    `Failed to create guild command: ${
-                                        cmd.name
-                                    }. err = ${JSON.stringify(e)}`
-                                );
-                                continue;
-                            }
-                        }
+            for (const command of commandsToModify) {
+                if (command.slashCommands) {
+                    const commands = command.slashCommands();
+                    for (const cmd of commands) {
+                        commandStructures.push(cmd);
                     }
                 }
-            } else if (process.env.NODE_ENV === EnvType.DEV) {
-                logger.info("Creating guild application commands...");
-                const debugServer = State.client.guilds.get(
-                    process.env.DEBUG_SERVER_ID
+            }
+
+            for (const commandStructure of commandStructures) {
+                logger.info(
+                    `Creating ${commandModificationScope} command: ${commandStructure.name}`
                 );
-
-                if (!debugServer) return;
-                await debugServer.createCommand({
-                    name: BOOKMARK_COMMAND_NAME,
-                    type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
-                });
-
-                await debugServer.createCommand({
-                    name: PROFILE_COMMAND_NAME,
-                    type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
-                });
-
-                await debugServer.createCommand({
-                    name: PROFILE_COMMAND_NAME,
-                    type: Eris.Constants.ApplicationCommandTypes.USER,
-                });
-
-                for (const command of commandsToModify) {
-                    if (command.slashCommands) {
-                        const commands = command.slashCommands();
-                        for (const cmd of commands) {
-                            logger.info(`Creating guild command: ${cmd.name}`);
-                            try {
-                                // eslint-disable-next-line no-await-in-loop
-                                await debugServer.createCommand(cmd);
-                                commandsReloaded.push(cmd.name);
-                            } catch (e) {
-                                logger.error(
-                                    `Failed to create guild command: ${
-                                        cmd.name
-                                    }. err = ${JSON.stringify(e)}`
-                                );
-                                continue;
-                            }
-                        }
-                    }
+                try {
+                    await createApplicationCommandFunc(commandStructure);
+                    commandsModifiedSuccess.push(commandStructure.name);
+                } catch (e) {
+                    commandsModifiedFailed.push(commandStructure.name);
+                    logger.error(
+                        `(Potentially) Failed to create ${commandModificationScope} command: ${
+                            commandStructure.name
+                        }. err = ${JSON.stringify(e)}`
+                    );
+                    continue;
                 }
             }
 
             sendInfoMessage(MessageContext.fromMessage(message), {
                 title: "Application Commands Reloaded",
-                description: commandsReloaded.join(", "),
+                description: `**Successfully loaded**: ${commandsModifiedSuccess.join(
+                    ", "
+                )}\n**(Potentially) Failed to load**: ${commandsModifiedFailed.join(
+                    ", "
+                )}`,
             });
         } else {
-            const commandsToModify = isSingleCommand
-                ? [parsedMessage.components[1]]
-                : Object.keys(State.client.commands);
+            let commands = isProd
+                ? await State.client.getCommands()
+                : await State.client.getGuildCommands(debugServer.id);
 
-            const commands = (await State.client.getCommands()).filter((x) =>
-                commandsToModify.includes(x.name)
-            );
+            if (isSingleCommand) {
+                commands = commands.filter(
+                    (x) => x.name === parsedMessage.components[1]
+                );
+            }
 
-            await Promise.allSettled(
-                commands.map(async (command) => {
-                    logger.info(
-                        `Deleting global application command: ${command.name} -- ${command.id}`
+            for (const command of commands) {
+                logger.info(
+                    `Deleting ${commandModificationScope} application command: ${command.name} -- ${command.id}`
+                );
+
+                try {
+                    if (isProd) {
+                        State.client.getCommands();
+                        await State.client.deleteCommand(command.id);
+                    } else {
+                        await State.client.deleteGuildCommand(
+                            debugServer.id,
+                            command.id
+                        );
+                    }
+
+                    commandsModifiedSuccess.push(command.name);
+                } catch (e) {
+                    logger.error(
+                        `(Potentially) Failed to delete ${commandModificationScope} command: ${
+                            command.name
+                        }. err = ${JSON.stringify(e)}`
                     );
-                    await State.client.deleteCommand(command.id);
-                    commandsReloaded.push(command.name);
-                })
-            );
-
-            const debugServer = State.client.guilds.get(
-                process.env.DEBUG_SERVER_ID
-            );
-
-            if (!debugServer) return;
-            const guildCommands = (
-                await State.client.getGuildCommands(debugServer.id)
-            ).filter((x) => commandsToModify.includes(x.name));
-
-            await Promise.allSettled(
-                guildCommands.map(async (command) => {
-                    logger.info(
-                        `Deleting guild application command: ${command.name} -- ${command.id}`
-                    );
-
-                    await State.client.deleteGuildCommand(
-                        debugServer.id,
-                        command.id
-                    );
-                    commandsReloaded.push(command.name);
-                })
-            );
+                    commandsModifiedFailed.push(command.name);
+                    continue;
+                }
+            }
 
             sendInfoMessage(MessageContext.fromMessage(message), {
                 title: "Commands Deleted",
-                description: commandsReloaded.join(", "),
+                description: `**Successfully deleted**: ${commandsModifiedSuccess.join(
+                    ", "
+                )}\n**(Potentially) Failed to delete**: ${commandsModifiedFailed.join(
+                    ", "
+                )}`,
             });
         }
     };
