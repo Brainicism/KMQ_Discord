@@ -317,7 +317,8 @@ export default class PlayCommand implements BaseCommand {
         await PlayCommand.startGame(
             messageContext,
             gameType,
-            interaction.data.options[0]["options"]?.length > 0
+            interaction.data.options[0]["options"] &&
+                interaction.data.options[0]["options"].length > 0
                 ? interaction.data.options[0]["options"][0]["value"]
                 : null,
             interaction
