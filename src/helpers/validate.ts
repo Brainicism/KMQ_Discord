@@ -181,6 +181,10 @@ export default (
                 break;
             }
 
+            case "string": {
+                return true;
+            }
+
             default: {
                 logger.error(`Undefined argument type. ${validation}`);
             }

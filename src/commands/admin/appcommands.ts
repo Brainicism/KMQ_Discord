@@ -1,7 +1,6 @@
 import { BOOKMARK_COMMAND_NAME, PROFILE_COMMAND_NAME } from "../../constants";
 import { IPCLogger } from "../../logger";
-import { delay } from "../../helpers/utils";
-import { sendInfoMessage } from "../../helpers/discord_utils";
+import { sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
 import EnvType from "../../enums/env_type";
 import Eris from "eris";
@@ -20,12 +19,16 @@ enum AppCommandsAction {
 export default class AppCommandsCommand implements BaseCommand {
     validations = {
         minArgCount: 1,
-        maxArgCount: 1,
+        maxArgCount: 2,
         arguments: [
             {
                 name: "action",
                 type: "enum" as const,
                 enums: Object.values(AppCommandsAction),
+            },
+            {
+                name: "command",
+                type: "string" as const,
             },
         ],
     };
@@ -33,8 +36,24 @@ export default class AppCommandsCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.debugChannelPrecheck }];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const artistType = parsedMessage.components[0] as AppCommandsAction;
-        if (artistType === AppCommandsAction.RELOAD) {
+        const appCommandType = parsedMessage.components[0] as AppCommandsAction;
+        const isSingleCommand = parsedMessage.components.length === 2;
+        if (
+            isSingleCommand &&
+            !State.client.commands[parsedMessage.components[1]]
+        ) {
+            sendErrorMessage(MessageContext.fromMessage(message), {
+                title: "Invalid Command Name",
+            });
+            return;
+        }
+
+        const commandsReloaded = [];
+        if (appCommandType === AppCommandsAction.RELOAD) {
+            const commandsToModify = isSingleCommand
+                ? [State.client.commands[parsedMessage.components[1]]]
+                : Object.values(State.client.commands);
+
             if (process.env.NODE_ENV === EnvType.PROD) {
                 logger.info("Creating global application commands...");
                 await State.client.createCommand({
@@ -52,7 +71,7 @@ export default class AppCommandsCommand implements BaseCommand {
                     type: Eris.Constants.ApplicationCommandTypes.USER,
                 });
 
-                for (const command of Object.values(State.client.commands)) {
+                for (const command of commandsToModify) {
                     if (command.slashCommands) {
                         const commands = command.slashCommands();
                         for (const cmd of commands) {
@@ -60,8 +79,7 @@ export default class AppCommandsCommand implements BaseCommand {
                             try {
                                 // eslint-disable-next-line no-await-in-loop
                                 await State.client.createCommand(cmd);
-                                // eslint-disable-next-line no-await-in-loop
-                                await delay(1000);
+                                commandsReloaded.push(cmd.name);
                             } catch (e) {
                                 logger.error(
                                     `Failed to create guild command: ${
@@ -95,7 +113,7 @@ export default class AppCommandsCommand implements BaseCommand {
                     type: Eris.Constants.ApplicationCommandTypes.USER,
                 });
 
-                for (const command of Object.values(State.client.commands)) {
+                for (const command of commandsToModify) {
                     if (command.slashCommands) {
                         const commands = command.slashCommands();
                         for (const cmd of commands) {
@@ -103,8 +121,7 @@ export default class AppCommandsCommand implements BaseCommand {
                             try {
                                 // eslint-disable-next-line no-await-in-loop
                                 await debugServer.createCommand(cmd);
-                                // eslint-disable-next-line no-await-in-loop
-                                await delay(1000);
+                                commandsReloaded.push(cmd.name);
                             } catch (e) {
                                 logger.error(
                                     `Failed to create guild command: ${
@@ -120,10 +137,16 @@ export default class AppCommandsCommand implements BaseCommand {
 
             sendInfoMessage(MessageContext.fromMessage(message), {
                 title: "Application Commands Reloaded",
-                description: "Yay.",
+                description: commandsReloaded.join(", "),
             });
         } else {
-            const commands = await State.client.getCommands();
+            const commandsToModify = isSingleCommand
+                ? [parsedMessage.components[1]]
+                : Object.keys(State.client.commands);
+
+            const commands = (await State.client.getCommands()).filter((x) =>
+                commandsToModify.includes(x.name)
+            );
 
             await Promise.allSettled(
                 commands.map(async (command) => {
@@ -131,6 +154,7 @@ export default class AppCommandsCommand implements BaseCommand {
                         `Deleting global application command: ${command.name} -- ${command.id}`
                     );
                     await State.client.deleteCommand(command.id);
+                    commandsReloaded.push(command.name);
                 })
             );
 
@@ -139,9 +163,9 @@ export default class AppCommandsCommand implements BaseCommand {
             );
 
             if (!debugServer) return;
-            const guildCommands = await State.client.getGuildCommands(
-                debugServer.id
-            );
+            const guildCommands = (
+                await State.client.getGuildCommands(debugServer.id)
+            ).filter((x) => commandsToModify.includes(x.name));
 
             await Promise.allSettled(
                 guildCommands.map(async (command) => {
@@ -153,12 +177,13 @@ export default class AppCommandsCommand implements BaseCommand {
                         debugServer.id,
                         command.id
                     );
+                    commandsReloaded.push(command.name);
                 })
             );
 
             sendInfoMessage(MessageContext.fromMessage(message), {
                 title: "Commands Deleted",
-                description: "No!!",
+                description: commandsReloaded.join(", "),
             });
         }
     };
