@@ -243,7 +243,7 @@ export default class LimitCommand implements BaseCommand {
             Session.getSession(messageContext.guildID),
             messageContext,
             guildPreference,
-            [{ option: GameOption.LIMIT, reset: false }],
+            [{ option: GameOption.LIMIT, reset }],
             null,
             null,
             null,
