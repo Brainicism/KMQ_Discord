@@ -509,6 +509,9 @@
                     "language": "language"
                 }
             },
+            "interaction": {
+                "description": "Change the language of the bot."
+            },
             "language": {
                 "en": "English",
                 "ko": "Korean"
