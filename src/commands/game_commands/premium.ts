@@ -1,7 +1,9 @@
 import { EMBED_SUCCESS_BONUS_COLOR, KmqImages } from "../../constants";
 import { isUserPremium } from "../../helpers/game_utils";
 import { sendInfoMessage } from "../../helpers/discord_utils";
+import Eris from "eris";
 import KmqConfiguration from "../../kmq_configuration";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import type BaseCommand from "../interfaces/base_command";
@@ -34,59 +36,97 @@ export default class PremiumCommand implements BaseCommand {
         usage: ",premium",
     });
 
-    call = async ({ message }: CommandArgs): Promise<void> => {
-        if (!KmqConfiguration.Instance.premiumCommandEnabled()) return;
-        const premiumMember = await isUserPremium(message.author.id);
-        sendInfoMessage(MessageContext.fromMessage(message), {
-            color: premiumMember ? EMBED_SUCCESS_BONUS_COLOR : null,
-            description: `${LocalizationManager.localizer.translate(
-                message.guildID,
-                premiumMember
-                    ? "command.premium.status.description.premium"
-                    : "command.premium.status.description.nonPremium"
-            )}\n\n${LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.premium.status.description.connectionReminder"
-            )}`,
-            fields: [
-                {
-                    name: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "command.premium.status.perks.moreSongs.title"
-                    ),
-                    value: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "command.premium.status.perks.moreSongs.description"
-                    ),
-                },
-                {
-                    name: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "command.premium.status.perks.special.title"
-                    ),
-                    value: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "command.premium.status.perks.special.description"
-                    ),
-                },
-                {
-                    name: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "command.premium.status.perks.badge.title"
-                    ),
-                    value: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "command.premium.status.perks.badge.description"
-                    ),
-                },
-            ],
-            thumbnailUrl: KmqImages.HAPPY,
-            title: LocalizationManager.localizer.translate(
-                message.guildID,
-                premiumMember
-                    ? "command.premium.status.title.premium"
-                    : "command.premium.status.title.nonPremium"
+    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+        {
+            name: "premium",
+            description: LocalizationManager.localizer.translate(
+                LocaleType.EN,
+                "command.premium.help.description"
             ),
-        });
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+        },
+    ];
+
+    call = async ({ message }: CommandArgs): Promise<void> => {
+        await PremiumCommand.sendPremiumMessage(
+            MessageContext.fromMessage(message)
+        );
     };
+
+    static sendPremiumMessage = async (
+        messageContext: MessageContext,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> => {
+        if (!KmqConfiguration.Instance.premiumCommandEnabled()) return;
+        const premiumMember = await isUserPremium(messageContext.author.id);
+        sendInfoMessage(
+            messageContext,
+            {
+                color: premiumMember ? EMBED_SUCCESS_BONUS_COLOR : null,
+                description: `${LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    premiumMember
+                        ? "command.premium.status.description.premium"
+                        : "command.premium.status.description.nonPremium"
+                )}\n\n${LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "command.premium.status.description.connectionReminder"
+                )}`,
+                fields: [
+                    {
+                        name: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "command.premium.status.perks.moreSongs.title"
+                        ),
+                        value: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "command.premium.status.perks.moreSongs.description"
+                        ),
+                    },
+                    {
+                        name: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "command.premium.status.perks.special.title"
+                        ),
+                        value: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "command.premium.status.perks.special.description"
+                        ),
+                    },
+                    {
+                        name: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "command.premium.status.perks.badge.title"
+                        ),
+                        value: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "command.premium.status.perks.badge.description"
+                        ),
+                    },
+                ],
+                thumbnailUrl: KmqImages.HAPPY,
+                title: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    premiumMember
+                        ? "command.premium.status.title.premium"
+                        : "command.premium.status.title.nonPremium"
+                ),
+            },
+            null,
+            null,
+            [],
+            interaction
+        );
+    };
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        await PremiumCommand.sendPremiumMessage(messageContext, interaction);
+    }
 }
