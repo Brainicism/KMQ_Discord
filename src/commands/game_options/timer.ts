@@ -1,11 +1,14 @@
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
+    getInteractionOptionValueInteger,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
@@ -14,7 +17,8 @@ import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("guessTimeout");
-
+const TIMER_MIN_VALUE = 2;
+const TIMER_MAX_VALUE = 180;
 export default class GuessTimeoutCommand implements BaseCommand {
     aliases = ["time", "timeout", "t"];
 
@@ -30,8 +34,8 @@ export default class GuessTimeoutCommand implements BaseCommand {
             {
                 name: "timer",
                 type: "number" as const,
-                minValue: 2,
-                maxValue: 180,
+                minValue: TIMER_MIN_VALUE,
+                maxValue: TIMER_MAX_VALUE,
             },
         ],
     };
@@ -66,51 +70,110 @@ export default class GuessTimeoutCommand implements BaseCommand {
         priority: 110,
     });
 
+    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+        {
+            name: "timer",
+            description: LocalizationManager.localizer.translate(
+                LocaleType.EN,
+                "command.timer.interaction.description"
+            ),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+            options: [
+                {
+                    name: "timer",
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.timer.interaction.description"
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes.INTEGER,
+                    required: false,
+                    min_value: TIMER_MIN_VALUE,
+                    max_value: TIMER_MAX_VALUE,
+                } as any,
+            ],
+        },
+    ];
+
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+        let timer: number;
+        if (parsedMessage.components.length === 0) {
+            timer = null;
+        } else {
+            timer = parseInt(parsedMessage.components[0], 10);
+        }
+
+        await GuessTimeoutCommand.updateOption(
+            MessageContext.fromMessage(message),
+            timer
+        );
+    };
+
+    static async updateOption(
+        messageContext: MessageContext,
+        timer: number,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
+            messageContext.guildID
         );
 
-        const session = Session.getSession(message.guildID);
-        if (parsedMessage.components.length === 0) {
+        const reset = timer === null;
+        const session = Session.getSession(messageContext.guildID);
+
+        if (reset) {
             await guildPreference.reset(GameOption.TIMER);
             if (session) {
                 session.stopGuessTimeout();
             }
 
-            await sendOptionsMessage(
-                Session.getSession(message.guildID),
-                MessageContext.fromMessage(message),
-                guildPreference,
-                [{ option: GameOption.TIMER, reset: true }]
+            logger.info(
+                `${getDebugLogHeader(messageContext)} | Guess timeout disabled.`
             );
+        } else {
+            await guildPreference.setGuessTimeout(timer);
 
             logger.info(
-                `${getDebugLogHeader(message)} | Guess timeout disabled.`
+                `${getDebugLogHeader(messageContext)} | Guess timeout set to ${
+                    guildPreference.gameOptions.guessTimeout
+                }`
             );
-            return;
         }
 
-        const time = parseInt(parsedMessage.components[0], 10);
-
-        await guildPreference.setGuessTimeout(time);
         if (session && session.round && session.connection.playing) {
             // Timer can start mid-song, starting when the user enters the command
             session.stopGuessTimeout();
-            session.startGuessTimeout(MessageContext.fromMessage(message));
+            session.startGuessTimeout(messageContext);
         }
 
         await sendOptionsMessage(
-            Session.getSession(message.guildID),
-            MessageContext.fromMessage(message),
+            Session.getSession(messageContext.guildID),
+            messageContext,
             guildPreference,
-            [{ option: GameOption.TIMER, reset: false }]
+            [{ option: GameOption.TIMER, reset }],
+            null,
+            null,
+            null,
+            interaction
+        );
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        const timer = getInteractionOptionValueInteger(
+            interaction.data.options,
+            "timer"
         );
 
-        logger.info(
-            `${getDebugLogHeader(message)} | Guess timeout set to ${
-                guildPreference.gameOptions.guessTimeout
-            }`
+        await GuessTimeoutCommand.updateOption(
+            messageContext,
+            timer,
+            interaction
         );
-    };
+    }
 }

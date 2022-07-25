@@ -969,6 +969,9 @@
                 "usage": {
                     "seconds": "seconds"
                 }
+            },
+            "interaction": {
+                "description": "Try your best to guess correctly before the timer runs out!"
             }
         },
         "vote": {
