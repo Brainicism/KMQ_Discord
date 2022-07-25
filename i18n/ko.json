@@ -510,7 +510,7 @@
                 }
             },
             "interaction": {
-                "description": "현재 옵션에서 음악을 재생합니다"
+                "description": "봇의 언어를 변경합니다."
             },
             "language": {
                 "en": "영어",
