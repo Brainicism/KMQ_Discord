@@ -9,6 +9,7 @@ import {
     EMBED_SUCCESS_BONUS_COLOR,
     EMBED_SUCCESS_COLOR,
     KmqImages,
+    PERMISSIONS_LINK,
 } from "../constants";
 import { IPCLogger } from "../logger";
 import {
@@ -108,8 +109,7 @@ function missingPermissionsText(
         "misc.failure.missingPermissionsText",
         {
             missingPermissions: missingPermissions.join(", "),
-            permissionsLink:
-                "https://support.discord.com/hc/en-us/articles/206029707-How-do-I-set-up-Permissions-",
+            permissionsLink: PERMISSIONS_LINK,
             helpCommand: `\`${process.env.BOT_PREFIX}help\``,
         }
     );
@@ -242,7 +242,7 @@ export async function textPermissionsCheck(
                 messageContext
             )} | Missing SEND_MESSAGES permissions`
         );
-        const embed = {
+        const embed: Eris.EmbedOptions = {
             title: LocalizationManager.localizer.translate(
                 guildID,
                 "misc.failure.missingPermissions.title"
@@ -250,8 +250,12 @@ export async function textPermissionsCheck(
             description: LocalizationManager.localizer.translate(
                 guildID,
                 "misc.failure.missingPermissions.description",
-                { channelName: `#${channel.name}` }
+                {
+                    channelName: `#${channel.name}`,
+                    permissionsLink: PERMISSIONS_LINK,
+                }
             ),
+            url: PERMISSIONS_LINK,
         };
 
         await sendDmMessage(authorID, { embeds: [embed] });
@@ -489,6 +493,7 @@ export async function sendErrorMessage(
                     thumbnail: embedPayload.thumbnailUrl
                         ? { url: embedPayload.thumbnailUrl }
                         : { url: KmqImages.DEAD },
+                    url: embedPayload.url,
                 },
             ],
             components: embedPayload.components,
@@ -1258,7 +1263,9 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
                 message.guildID,
                 missingPermissions
             ),
+            url: PERMISSIONS_LINK,
         });
+
         return false;
     }
 
