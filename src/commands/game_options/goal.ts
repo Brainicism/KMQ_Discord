@@ -1,13 +1,16 @@
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
+    getInteractionOptionValueInteger,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
@@ -66,88 +69,166 @@ export default class GoalCommand implements BaseCommand {
         priority: 120,
     });
 
-    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
-        );
+    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+        {
+            name: "goal",
+            description: LocalizationManager.localizer.translate(
+                LocaleType.EN,
+                "command.goal.interaction.description"
+            ),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+            options: [
+                {
+                    name: "goal",
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.goal.interaction.description"
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes.INTEGER,
+                    required: true,
+                    min_value: 1,
+                } as any,
+            ],
+        },
+    ];
 
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+        let userGoal: number;
         if (parsedMessage.components.length === 0) {
-            await guildPreference.reset(GameOption.GOAL);
-            await sendOptionsMessage(
-                Session.getSession(message.guildID),
-                MessageContext.fromMessage(message),
-                guildPreference,
-                [{ option: GameOption.GOAL, reset: true }]
-            );
-            logger.info(`${getDebugLogHeader(message)} | Goal disabled.`);
-            return;
+            userGoal = null;
+        } else {
+            userGoal = parseInt(parsedMessage.components[0], 10);
         }
 
-        const gameSession = Session.getSession(message.guildID) as GameSession;
-        const userGoal = parseInt(parsedMessage.components[0], 10);
+        await GoalCommand.updateOption(
+            MessageContext.fromMessage(message),
+            userGoal
+        );
+    };
+
+    static async updateOption(
+        messageContext: MessageContext,
+        userGoal: number,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID
+        );
+
+        const gameSession = Session.getSession(
+            messageContext.guildID
+        ) as GameSession;
+
         if (gameSession) {
             if (
                 gameSession.scoreboard.getWinners().length > 0 &&
                 userGoal <= gameSession.scoreboard.getWinners()[0].getScore()
             ) {
                 logger.info(
-                    `${getDebugLogHeader(message)} | Goal update ignored.`
+                    `${getDebugLogHeader(
+                        messageContext
+                    )} | Goal update ignored.`
                 );
 
-                sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "command.goal.failure.goalExceeded.title"
-                    ),
-                    description: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "command.goal.failure.goalExceeded.description"
-                    ),
-                });
+                sendErrorMessage(
+                    messageContext,
+                    {
+                        title: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "command.goal.failure.goalExceeded.title"
+                        ),
+                        description: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "command.goal.failure.goalExceeded.description"
+                        ),
+                    },
+                    interaction
+                );
                 return;
             }
 
             if (gameSession.gameType === GameType.ELIMINATION) {
                 logger.warn(
                     `${getDebugLogHeader(
-                        message
+                        messageContext
                     )} | Game option conflict between goal and ${
                         gameSession.gameType
                     } gameType.`
                 );
 
-                sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "misc.failure.gameOptionConflict.title"
-                    ),
-                    description: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "command.goal.failure.gameOptionConflict.description",
-                        {
-                            elimination: `\`${GameType.ELIMINATION}\``,
-                            goal: "`goal`",
-                            classic: `\`${GameType.CLASSIC}\``,
-                            teams: `\`${GameType.TEAMS}\``,
-                        }
-                    ),
-                });
+                sendErrorMessage(
+                    messageContext,
+                    {
+                        title: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "misc.failure.gameOptionConflict.title"
+                        ),
+                        description: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "command.goal.failure.gameOptionConflict.description",
+                            {
+                                elimination: `\`${GameType.ELIMINATION}\``,
+                                goal: "`goal`",
+                                classic: `\`${GameType.CLASSIC}\``,
+                                teams: `\`${GameType.TEAMS}\``,
+                            }
+                        ),
+                    },
+                    interaction
+                );
+
                 return;
             }
         }
 
-        await guildPreference.setGoal(userGoal);
+        const reset = userGoal === null;
+
+        if (reset) {
+            await guildPreference.reset(GameOption.GOAL);
+            await sendOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.GOAL, reset: true }]
+            );
+
+            logger.info(
+                `${getDebugLogHeader(messageContext)} | Goal disabled.`
+            );
+        } else {
+            await guildPreference.setGoal(userGoal);
+            logger.info(
+                `${getDebugLogHeader(messageContext)} | Goal set to ${
+                    guildPreference.gameOptions.goal
+                }`
+            );
+        }
+
         await sendOptionsMessage(
-            Session.getSession(message.guildID),
-            MessageContext.fromMessage(message),
+            Session.getSession(messageContext.guildID),
+            messageContext,
             guildPreference,
-            [{ option: GameOption.GOAL, reset: false }]
+            [{ option: GameOption.GOAL, reset }],
+            null,
+            null,
+            null,
+            interaction
+        );
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        const userGoal = getInteractionOptionValueInteger(
+            interaction.data.options,
+            "goal"
         );
 
-        logger.info(
-            `${getDebugLogHeader(message)} | Goal set to ${
-                guildPreference.gameOptions.goal
-            }`
-        );
-    };
+        await GoalCommand.updateOption(messageContext, userGoal, interaction);
+    }
 }
