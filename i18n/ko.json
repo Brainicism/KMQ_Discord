@@ -467,6 +467,7 @@
                 }
             },
             "interaction": {
+                "description": "노래 결과에서 최대 결과 수를 설정합니다",
                 "description_range": "선택한 필터에 따라 상위 [limit_start] 및 [limit_end] 곡 사이에서 재생됩니다.",
                 "description_top": "선택한 필터를 기반으로 상위 [limit] 곡을 재생합니다."
             }

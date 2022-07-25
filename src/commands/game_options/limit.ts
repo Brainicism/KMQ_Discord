@@ -88,7 +88,10 @@ export default class LimitCommand implements BaseCommand {
     slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
         {
             name: "limit",
-            description: "boop",
+            description: LocalizationManager.localizer.translate(
+                LocaleType.EN,
+                "command.limit.interaction.description"
+            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
