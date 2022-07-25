@@ -465,6 +465,10 @@
                     "singleLimit": "현재 선택한 옵션에서 가장 많이 듣는 노래 상위 {{limit}}개를 재생합니다.",
                     "twoLimits": "현재 선택한 옵션에서 {{limitStart}}에서 {{limitEnd}}까지 가장 많이 듣는 노래 사이에서 재생합니다."
                 }
+            },
+            "interaction": {
+                "description_range": "선택한 필터에 따라 상위 [limit_start] 및 [limit_end] 곡 사이에서 재생됩니다.",
+                "description_top": "선택한 필터를 기반으로 상위 [limit] 곡을 재생합니다."
             }
         },
         "list": {
