@@ -114,7 +114,7 @@ export default class CommandPrechecks {
                 ),
                 description: LocalizationManager.localizer.translate(
                     messageContext.guildID,
-                    "misc.preCheck.notMusicSession"
+                    "misc.preCheck.notListeningSession"
                 ),
             };
 
