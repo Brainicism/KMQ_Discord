@@ -54,6 +54,7 @@ const logger = new IPCLogger("discord_utils");
 const REQUIRED_TEXT_PERMISSIONS = [
     "addReactions" as const,
     "embedLinks" as const,
+    "attachFiles" as const,
 ];
 
 const REQUIRED_VOICE_PERMISSIONS = [
@@ -393,7 +394,7 @@ export async function sendMessage(
         }
 
         try {
-            await interaction.createMessage(messageContent);
+            await interaction.createMessage(messageContent, file);
         } catch (err) {
             interactionRejectionHandler(interaction, err);
         }
