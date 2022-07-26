@@ -85,7 +85,7 @@ export default class GoalCommand implements BaseCommand {
                         "command.goal.interaction.description"
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes.INTEGER,
-                    required: true,
+                    required: false,
                     min_value: 1,
                 } as any,
             ],
@@ -185,13 +185,6 @@ export default class GoalCommand implements BaseCommand {
 
         if (reset) {
             await guildPreference.reset(GameOption.GOAL);
-            await sendOptionsMessage(
-                Session.getSession(messageContext.guildID),
-                messageContext,
-                guildPreference,
-                [{ option: GameOption.GOAL, reset: true }]
-            );
-
             logger.info(
                 `${getDebugLogHeader(messageContext)} | Goal disabled.`
             );
