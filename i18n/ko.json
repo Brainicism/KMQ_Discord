@@ -509,6 +509,9 @@
                     "language": "언어"
                 }
             },
+            "interaction": {
+                "description": "봇의 언어를 변경합니다."
+            },
             "language": {
                 "en": "영어",
                 "ko": "한국어"
