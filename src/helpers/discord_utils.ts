@@ -1665,6 +1665,7 @@ export function getInteractionOptionValueInteger(
     options: Eris.InteractionDataOptions[],
     optionName: string
 ): number {
+    if (!options) return null;
     const option = options.find((x) => x.name === optionName);
     if (option) {
         return parseInt(option["value"], 10);

@@ -514,6 +514,9 @@
                     "language": "언어"
                 }
             },
+            "interaction": {
+                "description": "봇의 언어를 변경합니다."
+            },
             "language": {
                 "en": "영어",
                 "ko": "한국어"
@@ -974,6 +977,9 @@
                 "usage": {
                     "seconds": "초"
                 }
+            },
+            "interaction": {
+                "description": "타이머가 다 끝나기 전에 올바르게 추측하기 위해 최선을 다하십시오"
             }
         },
         "vote": {

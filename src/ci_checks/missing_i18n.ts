@@ -16,7 +16,7 @@ const logger = new IPCLogger("missing_i18n");
 
 const dynamicTranslationKeyAllowlist = [
     "`command.locale.language.${DEFAULT_LOCALE}`",
-    "`command.locale.language.${language}`",
+    "`command.locale.language.${localeType}`",
     "highestRankTitle.title",
     "rankTitle.title",
     "RANK_TITLES[0].title",
