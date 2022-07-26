@@ -896,6 +896,9 @@
             }
         },
         "skip": {
+            "failure": {
+                "skipIgnored": "Skip Ignored"
+            },
             "help": {
                 "description": "Vote to skip the current song. A song is skipped when majority of participants vote to skip it."
             },
