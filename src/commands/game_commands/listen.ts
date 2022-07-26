@@ -93,6 +93,8 @@ export default class ListenCommand implements BaseCommand {
         { checkFn: CommandPrechecks.notRestartingPrecheck },
         { checkFn: CommandPrechecks.premiumPrecheck },
         { checkFn: CommandPrechecks.maintenancePrecheck },
+        { checkFn: CommandPrechecks.notListeningPrecheck },
+        { checkFn: CommandPrechecks.notInGamePrecheck },
     ];
 
     validations = {
@@ -157,20 +159,6 @@ export default class ListenCommand implements BaseCommand {
         interaction?: Eris.CommandInteraction
     ): Promise<void> => {
         const guildID = messageContext.guildID;
-        const session = Session.getSession(guildID);
-        if (session?.isGameSession()) {
-            sendErrorMessage(
-                messageContext,
-                {
-                    title: "command.listen.failure.existingGameSession.title",
-                    description:
-                        "command.listen.failure.existingGameSession.title",
-                },
-                interaction
-            );
-            return;
-        }
-
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );

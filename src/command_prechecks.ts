@@ -126,6 +126,28 @@ export default class CommandPrechecks {
         return true;
     }
 
+    static notInGamePrecheck(precheckArgs: PrecheckArgs): boolean {
+        const { session, messageContext, interaction } = precheckArgs;
+        if (session && session.isGameSession()) {
+            const embedPayload: EmbedPayload = {
+                title: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "misc.preCheck.title"
+                ),
+                description: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "misc.preCheck.notGameSession"
+                ),
+            };
+
+            sendErrorMessage(messageContext, embedPayload, interaction);
+
+            return false;
+        }
+
+        return true;
+    }
+
     static debugServerPrecheck(precheckArgs: PrecheckArgs): boolean {
         const { messageContext, errorMessage, interaction } = precheckArgs;
         const isDebugServer =
