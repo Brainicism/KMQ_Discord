@@ -512,6 +512,9 @@
                     "language": "language"
                 }
             },
+            "interaction": {
+                "description": "Change the language of the bot."
+            },
             "language": {
                 "en": "English",
                 "ko": "Korean"
@@ -972,6 +975,9 @@
                 "usage": {
                     "seconds": "seconds"
                 }
+            },
+            "interaction": {
+                "description": "Try your best to guess correctly before the timer runs out!"
             }
         },
         "vote": {
