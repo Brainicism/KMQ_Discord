@@ -89,7 +89,7 @@ export default class ForceHintCommand implements BaseCommand {
                 {
                     title: LocalizationManager.localizer.translate(
                         messageContext.guildID,
-                        "command.forcehint.failure.notOwner.title"
+                        "command.forcehint.hintIgnored"
                     ),
                     description: LocalizationManager.localizer.translate(
                         messageContext.guildID,

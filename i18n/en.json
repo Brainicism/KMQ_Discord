@@ -178,13 +178,13 @@
         "forcehint": {
             "failure": {
                 "notOwner": {
-                    "description": "Only the game owner ({{mentionedUser}}) can use force-hint.",
-                    "title": "Force Hint Ignored"
+                    "description": "Only the game owner ({{mentionedUser}}) can use force-hint."
                 }
             },
             "help": {
                 "description": "The person that started the game can force-hint the current song, no majority necessary."
-            }
+            },
+            "hintIgnored": "Force Hint Ignored"
         },
         "forceskip": {
             "description": "Owner has forceskipped the round...",
