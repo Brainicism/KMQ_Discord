@@ -70,7 +70,7 @@ export default class ForceSkipCommand implements BaseCommand {
                 {
                     title: LocalizationManager.localizer.translate(
                         messageContext.guildID,
-                        "command.forceskip.failure.notOwner.title"
+                        "command.forceskip.skipIgnored"
                     ),
                     description: LocalizationManager.localizer.translate(
                         messageContext.guildID,
@@ -99,11 +99,11 @@ export default class ForceSkipCommand implements BaseCommand {
                 {
                     title: LocalizationManager.localizer.translate(
                         messageContext.guildID,
-                        "misc.failure.game.noneInProgress.title"
+                        "misc.failure.round.noneInProgress.title"
                     ),
                     description: LocalizationManager.localizer.translate(
                         messageContext.guildID,
-                        "misc.failure.game.noneInProgress.description"
+                        "misc.failure.round.noneInProgress.description"
                     ),
                     thumbnailUrl: KmqImages.NOT_IMPRESSED,
                 },
@@ -118,7 +118,7 @@ export default class ForceSkipCommand implements BaseCommand {
                 {
                     title: LocalizationManager.localizer.translate(
                         messageContext.guildID,
-                        "command.forceskip.failure.notOwner.title"
+                        "command.forceskip.skipIgnored"
                     ),
                     description: LocalizationManager.localizer.translate(
                         messageContext.guildID,

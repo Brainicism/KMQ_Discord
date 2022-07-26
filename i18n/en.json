@@ -190,13 +190,13 @@
             "description": "Owner has forceskipped the round...",
             "failure": {
                 "notOwner": {
-                    "description": "Only the game owner ({{mentionedUser}}) can force-skip the current song.",
-                    "title": "Force Skip Ignored"
+                    "description": "Only the game owner ({{mentionedUser}}) can force-skip the current song."
                 }
             },
             "help": {
                 "description": "The person that started the game can force-skip the current song, no majority necessary."
-            }
+            },
+            "skipIgnored": "Force Skip Ignored"
         },
         "gender": {
             "help": {
@@ -1109,6 +1109,12 @@
             "retrievingSongData": {
                 "description": "Try again in a bit, or report this error to the official KMQ server found in {{helpCommand}}.",
                 "title": "Error Retrieving Song Data"
+            },
+            "round": {
+                "noneInProgress": {
+                    "description": "Current round has ended! Wait for the next round to begin.",
+                    "title": "Round Finished"
+                }
             },
             "songPlaying": {
                 "description": "Starting new round in 3 seconds...",
