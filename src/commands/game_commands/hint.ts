@@ -6,7 +6,6 @@ import {
     getMajorityCount,
     sendErrorMessage,
     sendInfoMessage,
-    tryCreateInteractionSuccessAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
@@ -60,7 +59,8 @@ function isHintAvailable(
 
 async function sendHintNotification(
     messageContext: MessageContext,
-    gameSession: GameSession
+    gameSession: GameSession,
+    interaction?: Eris.CommandInteraction
 ): Promise<void> {
     if (!gameSession.round) return;
     if (gameSession.gameType === GameType.ELIMINATION) {
@@ -87,7 +87,10 @@ async function sendHintNotification(
                     }
                 ),
             },
-            true
+            true,
+            null,
+            [],
+            interaction
         );
     } else {
         await sendInfoMessage(
@@ -107,7 +110,10 @@ async function sendHintNotification(
                     }
                 ),
             },
-            true
+            true,
+            null,
+            [],
+            interaction
         );
     }
 }
@@ -117,30 +123,36 @@ async function sendHintNotification(
  * @param guildPreference - The guild preference
  * @param gameRound - The game round
  * @param messageContext - The message context
+ * @param interaction - The interaction
  * @returns whether the hint request was valid
  */
 export function validHintCheck(
     gameSession: GameSession,
     guildPreference: GuildPreference,
     gameRound: GameRound,
-    messageContext: MessageContext
+    messageContext: MessageContext,
+    interaction?: Eris.CommandInteraction
 ): boolean {
     if (!gameSession || !gameRound) {
         logger.warn(
             `${getDebugLogHeader(messageContext)} | No active game session`
         );
 
-        sendErrorMessage(messageContext, {
-            title: LocalizationManager.localizer.translate(
-                messageContext.guildID,
-                "command.hint.failure.invalidHintRequest.title"
-            ),
-            description: LocalizationManager.localizer.translate(
-                messageContext.guildID,
-                "command.hint.failure.invalidHintRequest.noSongPlaying.description"
-            ),
-            thumbnailUrl: KmqImages.NOT_IMPRESSED,
-        });
+        sendErrorMessage(
+            messageContext,
+            {
+                title: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "command.hint.failure.invalidHintRequest.title"
+                ),
+                description: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "command.hint.failure.invalidHintRequest.noSongPlaying.description"
+                ),
+                thumbnailUrl: KmqImages.NOT_IMPRESSED,
+            },
+            interaction
+        );
         return false;
     }
 
@@ -151,31 +163,39 @@ export function validHintCheck(
         if (
             eliminationScoreboard.isPlayerEliminated(messageContext.author.id)
         ) {
-            sendErrorMessage(messageContext, {
+            sendErrorMessage(
+                messageContext,
+                {
+                    title: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "command.hint.failure.invalidHintRequest.title"
+                    ),
+                    description: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "command.hint.failure.invalidHintRequest.eliminated.description"
+                    ),
+                    thumbnailUrl: KmqImages.NOT_IMPRESSED,
+                },
+                interaction
+            );
+            return false;
+        }
+    } else if (guildPreference.isMultipleChoiceMode()) {
+        sendErrorMessage(
+            messageContext,
+            {
                 title: LocalizationManager.localizer.translate(
                     messageContext.guildID,
                     "command.hint.failure.invalidHintRequest.title"
                 ),
                 description: LocalizationManager.localizer.translate(
                     messageContext.guildID,
-                    "command.hint.failure.invalidHintRequest.eliminated.description"
+                    "command.hint.failure.invalidHintRequest.multipleChoice.description"
                 ),
                 thumbnailUrl: KmqImages.NOT_IMPRESSED,
-            });
-            return false;
-        }
-    } else if (guildPreference.isMultipleChoiceMode()) {
-        sendErrorMessage(messageContext, {
-            title: LocalizationManager.localizer.translate(
-                messageContext.guildID,
-                "command.hint.failure.invalidHintRequest.title"
-            ),
-            description: LocalizationManager.localizer.translate(
-                messageContext.guildID,
-                "command.hint.failure.invalidHintRequest.multipleChoice.description"
-            ),
-            thumbnailUrl: KmqImages.NOT_IMPRESSED,
-        });
+            },
+            interaction
+        );
         return false;
     }
 
@@ -248,20 +268,6 @@ export default class HintCommand implements BaseCommand {
         messageContext: MessageContext,
         interaction?: Eris.CommandInteraction
     ): Promise<void> => {
-        if (interaction) {
-            await tryCreateInteractionSuccessAcknowledgement(
-                interaction,
-                LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "misc.interaction.genericProgress.title"
-                ),
-                LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "misc.interaction.genericProgress.description"
-                )
-            );
-        }
-
         const gameSession = Session.getSession(
             messageContext.guildID
         ) as GameSession;
@@ -276,7 +282,8 @@ export default class HintCommand implements BaseCommand {
                 gameSession,
                 guildPreference,
                 gameRound,
-                messageContext
+                messageContext,
+                interaction
             )
         )
             return;
@@ -311,7 +318,12 @@ export default class HintCommand implements BaseCommand {
                 `${getDebugLogHeader(messageContext)} | Hint majority received.`
             );
         } else {
-            await sendHintNotification(messageContext, gameSession);
+            await sendHintNotification(
+                messageContext,
+                gameSession,
+                interaction
+            );
+
             logger.info(
                 `${getDebugLogHeader(messageContext)} | Hint request received.`
             );
