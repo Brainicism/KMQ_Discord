@@ -7,7 +7,6 @@ import {
     getUserVoiceChannel,
     sendErrorMessage,
     sendInfoMessage,
-    tryCreateInteractionSuccessAcknowledgement,
     voicePermissionsCheck,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
@@ -32,12 +31,14 @@ const logger = new IPCLogger("listen");
  * @param voiceChannelName - The name of the voice channel to join
  * @param messageContext - The original message that triggered the command
  * @param guildPreference - The guild's preferences
+ * @param interaction - The interaction
  */
 export async function sendBeginListeningSessionMessage(
     textChannelName: string,
     voiceChannelName: string,
     messageContext: MessageContext,
-    guildPreference: GuildPreference
+    guildPreference: GuildPreference,
+    interaction?: Eris.CommandInteraction
 ): Promise<void> {
     const startTitle = LocalizationManager.localizer.translate(
         messageContext.guildID,
@@ -82,7 +83,8 @@ export async function sendBeginListeningSessionMessage(
         },
         false,
         undefined,
-        [optionsEmbedPayload]
+        [optionsEmbedPayload],
+        interaction
     );
 }
 
@@ -154,27 +156,18 @@ export default class ListenCommand implements BaseCommand {
         messageContext: MessageContext,
         interaction?: Eris.CommandInteraction
     ): Promise<void> => {
-        if (interaction) {
-            await tryCreateInteractionSuccessAcknowledgement(
-                interaction,
-                LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "misc.interaction.genericProgress.title"
-                ),
-                LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "misc.interaction.genericProgress.description"
-                )
-            );
-        }
-
         const guildID = messageContext.guildID;
         const session = Session.getSession(guildID);
         if (session?.isGameSession()) {
-            sendErrorMessage(messageContext, {
-                title: "command.listen.failure.existingGameSession.title",
-                description: "command.listen.failure.existingGameSession.title",
-            });
+            sendErrorMessage(
+                messageContext,
+                {
+                    title: "command.listen.failure.existingGameSession.title",
+                    description:
+                        "command.listen.failure.existingGameSession.title",
+                },
+                interaction
+            );
             return;
         }
 
@@ -213,7 +206,7 @@ export default class ListenCommand implements BaseCommand {
             return;
         }
 
-        if (!voicePermissionsCheck(messageContext)) {
+        if (!voicePermissionsCheck(messageContext, interaction)) {
             return;
         }
 
@@ -230,7 +223,8 @@ export default class ListenCommand implements BaseCommand {
             textChannel.name,
             voiceChannel.name,
             messageContext,
-            guildPreference
+            guildPreference,
+            interaction
         );
 
         listeningSession.startRound(messageContext);

@@ -1263,9 +1263,13 @@ export function getNumParticipants(voiceChannelID: string): number {
 
 /**
  * @param messageContext - An object containing relevant parts of Eris.Message
+ * @param interaction - The interaction
  * @returns whether the bot has permissions to join the message author's currently active voice channel
  */
-export function voicePermissionsCheck(messageContext: MessageContext): boolean {
+export function voicePermissionsCheck(
+    messageContext: MessageContext,
+    interaction?: Eris.CommandInteraction
+): boolean {
     const voiceChannel = getUserVoiceChannel(messageContext);
 
     const missingPermissions = REQUIRED_VOICE_PERMISSIONS.filter(
@@ -1284,16 +1288,20 @@ export function voicePermissionsCheck(messageContext: MessageContext): boolean {
             )}] permissions`
         );
 
-        sendErrorMessage(messageContext, {
-            title: LocalizationManager.localizer.translate(
-                messageContext.guildID,
-                "misc.failure.missingPermissions.title"
-            ),
-            description: missingPermissionsText(
-                messageContext.guildID,
-                missingPermissions
-            ),
-        });
+        sendErrorMessage(
+            messageContext,
+            {
+                title: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "misc.failure.missingPermissions.title"
+                ),
+                description: missingPermissionsText(
+                    messageContext.guildID,
+                    missingPermissions
+                ),
+            },
+            interaction
+        );
         return false;
     }
 
