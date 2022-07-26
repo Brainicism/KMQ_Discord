@@ -235,6 +235,9 @@
                 "usage": {
                     "points": "points"
                 }
+            },
+            "interaction": {
+                "description": "Once the player with the most points reaches the goal score, the game ends."
             }
         },
         "groups": {
