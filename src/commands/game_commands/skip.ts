@@ -4,8 +4,8 @@ import {
     areUserAndBotInSameVoiceChannel,
     getDebugLogHeader,
     getMajorityCount,
+    sendErrorMessage,
     sendInfoMessage,
-    tryCreateInteractionSuccessAcknowledgement,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
@@ -169,20 +169,6 @@ export default class SkipCommand implements BaseCommand {
         messageContext: MessageContext,
         interaction?: Eris.CommandInteraction
     ): Promise<void> {
-        if (interaction) {
-            await tryCreateInteractionSuccessAcknowledgement(
-                interaction,
-                LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "misc.interaction.genericProgress.title"
-                ),
-                LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "misc.interaction.genericProgress.description"
-                )
-            );
-        }
-
         const session = Session.getSession(messageContext.guildID);
 
         if (
@@ -190,6 +176,21 @@ export default class SkipCommand implements BaseCommand {
             session.round.skipAchieved ||
             session.round.finished
         ) {
+            sendErrorMessage(
+                messageContext,
+                {
+                    title: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "misc.failure.round.noneInProgress.title"
+                    ),
+                    description: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "misc.failure.round.noneInProgress.description"
+                    ),
+                    thumbnailUrl: KmqImages.NOT_IMPRESSED,
+                },
+                interaction
+            );
             return;
         }
 
@@ -199,6 +200,21 @@ export default class SkipCommand implements BaseCommand {
                 messageContext.guildID
             )
         ) {
+            await sendErrorMessage(
+                messageContext,
+                {
+                    title: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "command.skip.failure.skipIgnored"
+                    ),
+                    description: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "misc.preCheck.differentVC"
+                    ),
+                },
+                interaction
+            );
+
             logger.warn(
                 `${getDebugLogHeader(
                     messageContext
