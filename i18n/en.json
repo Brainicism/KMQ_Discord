@@ -468,6 +468,11 @@
                     "singleLimit": "Plays the top {{limit}} most listened songs from the currently selected options",
                     "twoLimits": "Plays between the {{limitStart}} to {{limitEnd}} most listened songs from the currently selected options"
                 }
+            },
+            "interaction": {
+                "description": "Set a maximum number of results in the song query",
+                "description_range": "This plays between the top [limit_start] and [limit_end] songs based on the selected filters.",
+                "description_top": "This plays the top [limit] songs based on the selected filters."
             }
         },
         "list": {
