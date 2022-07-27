@@ -576,7 +576,7 @@
             "help": {
                 "description": "Displays the current game options."
             },
-            "musicSessionNotAvailable": "Some options are not available during a music session",
+            "listeningSessionNotAvailable": "Some options are not available during a listening session",
             "notSet": "Not set",
             "overview": "Now playing the top {{limit}} out of {{totalSongs}} available songs from the following options:",
             "perCommandHelp": "Looking for information on how to use a command? Check out \"{{helpCommand}} [command]\" to learn more.",
@@ -1243,7 +1243,8 @@
             "debugChannel": "You can't do that in this channel.",
             "debugServer": "You can't do that in this server.",
             "differentVC": "You must be in the same voice channel as the bot to use this command.",
-            "notMusicSession": "You can't do that while in a music session.",
+            "notGameSession": "You can't do that while in a game session.",
+            "notListeningSession": "You can't do that while in a listening session.",
             "notPremium": "You need KMQ Premium to use this command (see {{premium}}).",
             "premiumOrDebugServer": "This command only works in the official KMQ server or for KMQ Premium members (see {{premium}}).",
             "title": "Wait..."

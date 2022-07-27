@@ -114,7 +114,29 @@ export default class CommandPrechecks {
                 ),
                 description: LocalizationManager.localizer.translate(
                     messageContext.guildID,
-                    "misc.preCheck.notMusicSession"
+                    "misc.preCheck.notListeningSession"
+                ),
+            };
+
+            sendErrorMessage(messageContext, embedPayload, interaction);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    static notInGamePrecheck(precheckArgs: PrecheckArgs): boolean {
+        const { session, messageContext, interaction } = precheckArgs;
+        if (session && session.isGameSession()) {
+            const embedPayload: EmbedPayload = {
+                title: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "misc.preCheck.title"
+                ),
+                description: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "misc.preCheck.notGameSession"
                 ),
             };
 
