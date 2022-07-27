@@ -1113,7 +1113,7 @@
             "round": {
                 "noneInProgress": {
                     "description": "현재 라운드가 종료되었습니다! 다음 라운드가 시작될 때까지 기다리십시오.",
-                    "title": "라운드 완료"
+                    "title": "라운드 종료"
                 }
             },
             "songPlaying": {
