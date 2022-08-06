@@ -162,7 +162,7 @@ async function lookupByYoutubeID(
                 ? artistNameQuery.kname
                 : artistNameQuery.name;
 
-        songAliases = [...daisukiSongEntry.name_aka.split(";")].join(", ");
+        songAliases = [...daisukiSongEntry.alias.split(";")].join(", ");
         songAliases += songAliases
             ? `, ${daisukiSongEntry.kname}`
             : daisukiSongEntry.kname;
