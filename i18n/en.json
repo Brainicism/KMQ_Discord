@@ -89,6 +89,11 @@
                     "singleCutoff": "Play songs released after the year {{year}}",
                     "twoCutoffs": "Play songs released between the years {{beginningYear}}-{{endYear}}"
                 }
+            },
+            "interaction": {
+                "description": "Set a cutoff year range for songs",
+                "earliestOption": "Pick songs for every year starting from [beginningYear]",
+                "rangeOption": "Pick songs for every year between [beginningYear] and [endingYear]"
             }
         },
         "debug": {
