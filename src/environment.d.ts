@@ -25,5 +25,6 @@ declare namespace NodeJS {
         POWER_HOUR_NOTIFICATION_ROLE_ID?: string;
         PATREON_CREATOR_ACCESS_TOKEN?: string;
         PATREON_CAMPAIGN_ID?: string;
+        DAISUKI_SEED_CRON_JOB?: string;
     }
 }
