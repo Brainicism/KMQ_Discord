@@ -7,6 +7,7 @@ import {
     sendErrorMessage,
     sendInfoMessage,
     sendOptionsMessage,
+    tryAutocompleteInteractionAcknowledge,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
@@ -180,6 +181,7 @@ export default class PresetCommand implements BaseCommand {
                             required: true,
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
+                            autocomplete: true,
                         },
                     ],
                 },
@@ -202,6 +204,7 @@ export default class PresetCommand implements BaseCommand {
                             required: true,
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
+                            autocomplete: true,
                         },
                     ],
                 },
@@ -224,6 +227,7 @@ export default class PresetCommand implements BaseCommand {
                             required: true,
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
+                            autocomplete: true,
                         },
                     ],
                 },
@@ -246,6 +250,7 @@ export default class PresetCommand implements BaseCommand {
                             required: true,
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
+                            autocomplete: true,
                         },
                     ],
                 },
@@ -1064,6 +1069,39 @@ export default class PresetCommand implements BaseCommand {
             presetName,
             presetUUID,
             interaction
+        );
+    }
+
+    /**
+     * Handles showing suggested presets as the user types
+     * @param interaction - The interaction with intermediate typing state
+     */
+    static async processAutocompleteInteraction(
+        interaction: Eris.AutocompleteInteraction
+    ): Promise<void> {
+        const guildPreference = await GuildPreference.getGuildPreference(
+            interaction.guildID
+        );
+
+        const presets = await guildPreference.listPresets();
+        const lowercaseUserInput = (
+            (
+                interaction.data
+                    .options[0] as Eris.InteractionDataOptionsSubCommand
+            ).options.filter(
+                (x) => x["focused"]
+            )[0] as Eris.InteractionDataOptionsString
+        ).value.toLocaleLowerCase();
+
+        await tryAutocompleteInteractionAcknowledge(
+            interaction,
+            presets
+                .filter((x) =>
+                    lowercaseUserInput.length === 0
+                        ? true
+                        : x.toLocaleLowerCase().startsWith(lowercaseUserInput)
+                )
+                .map((x) => ({ name: x, value: x }))
         );
     }
 }
