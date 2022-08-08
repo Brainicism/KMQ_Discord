@@ -36,6 +36,99 @@ enum PresetAction {
     IMPORT = "import",
 }
 
+const isValidPresetName = async (
+    presetName: string,
+    messageContext: MessageContext,
+    interaction: Eris.CommandInteraction
+): Promise<boolean> => {
+    if (presetName.length > PRESET_NAME_MAX_LENGTH) {
+        logger.warn(
+            `${getDebugLogHeader(
+                messageContext
+            )} | Can't add preset, character limit reached.`
+        );
+
+        await sendErrorMessage(
+            messageContext,
+            {
+                title: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "command.preset.failure.lengthyName.title"
+                ),
+                description: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "command.preset.failure.lengthyName.description",
+                    { presetNameMaxLength: String(PRESET_NAME_MAX_LENGTH) }
+                ),
+            },
+            interaction
+        );
+        return false;
+    }
+
+    if (presetName.startsWith("KMQ-")) {
+        logger.warn(
+            `${getDebugLogHeader(
+                messageContext
+            )} | Can't add preset, illegal prefix.`
+        );
+
+        await sendErrorMessage(
+            messageContext,
+            {
+                title: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "command.preset.failure.illegalPrefix.title"
+                ),
+                description: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "command.preset.failure.illegalPrefix.description",
+                    { importPrefix: "`KMQ-`" }
+                ),
+            },
+            interaction
+        );
+        return false;
+    }
+
+    return true;
+};
+
+const canSavePreset = async (
+    presetName: string,
+    guildPreference: GuildPreference,
+    messageContext: MessageContext,
+    interaction: Eris.CommandInteraction
+): Promise<boolean> => {
+    const presets = await guildPreference.listPresets();
+    if (presets.length >= MAX_NUM_PRESETS) {
+        logger.warn(
+            `${getDebugLogHeader(
+                messageContext
+            )} | Can't add preset, maximum reached.`
+        );
+
+        await sendErrorMessage(
+            messageContext,
+            {
+                title: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "command.preset.failure.tooMany.title"
+                ),
+                description: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "command.preset.failure.tooMany.description",
+                    { maxNumPresets: String(MAX_NUM_PRESETS) }
+                ),
+            },
+            interaction
+        );
+        return false;
+    }
+
+    return isValidPresetName(presetName, messageContext, interaction);
+};
+
 export default class PresetCommand implements BaseCommand {
     aliases = ["presets"];
 
@@ -474,79 +567,14 @@ export default class PresetCommand implements BaseCommand {
         messageContext: MessageContext,
         interaction: Eris.CommandInteraction
     ): Promise<void> {
-        const presets = await guildPreference.listPresets();
-        if (presets.length >= MAX_NUM_PRESETS) {
-            logger.warn(
-                `${getDebugLogHeader(
-                    messageContext
-                )} | Can't add preset, maximum reached.`
-            );
-
-            await sendErrorMessage(
+        if (
+            !(await canSavePreset(
+                presetName,
+                guildPreference,
                 messageContext,
-                {
-                    title: LocalizationManager.localizer.translate(
-                        messageContext.guildID,
-                        "command.preset.failure.tooMany.title"
-                    ),
-                    description: LocalizationManager.localizer.translate(
-                        messageContext.guildID,
-                        "command.preset.failure.tooMany.description",
-                        { maxNumPresets: String(MAX_NUM_PRESETS) }
-                    ),
-                },
                 interaction
-            );
-            return;
-        }
-
-        if (presetName.length > PRESET_NAME_MAX_LENGTH) {
-            logger.warn(
-                `${getDebugLogHeader(
-                    messageContext
-                )} | Can't add preset, character limit reached.`
-            );
-
-            await sendErrorMessage(
-                messageContext,
-                {
-                    title: LocalizationManager.localizer.translate(
-                        messageContext.guildID,
-                        "command.preset.failure.lengthyName.title"
-                    ),
-                    description: LocalizationManager.localizer.translate(
-                        messageContext.guildID,
-                        "command.preset.failure.lengthyName.description",
-                        { presetNameMaxLength: String(PRESET_NAME_MAX_LENGTH) }
-                    ),
-                },
-                interaction
-            );
-            return;
-        }
-
-        if (presetName.startsWith("KMQ-")) {
-            logger.warn(
-                `${getDebugLogHeader(
-                    messageContext
-                )} | Can't add preset, illegal prefix.`
-            );
-
-            await sendErrorMessage(
-                messageContext,
-                {
-                    title: LocalizationManager.localizer.translate(
-                        messageContext.guildID,
-                        "command.preset.failure.illegalPrefix.title"
-                    ),
-                    description: LocalizationManager.localizer.translate(
-                        messageContext.guildID,
-                        "command.preset.failure.illegalPrefix.description",
-                        { importPrefix: "`KMQ-`" }
-                    ),
-                },
-                interaction
-            );
+            ))
+        ) {
             return;
         }
 
@@ -622,6 +650,12 @@ export default class PresetCommand implements BaseCommand {
                     messageContext
                 )} | Preset '${presetName}' replace, preset did not exist`
             );
+        }
+
+        if (
+            !(await isValidPresetName(presetName, messageContext, interaction))
+        ) {
+            return;
         }
 
         await guildPreference.savePreset(presetName, oldUUID);
