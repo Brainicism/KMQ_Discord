@@ -313,6 +313,34 @@ async function reloadArtists(): Promise<void> {
         .groupBy("id_artist");
 }
 
+async function reloadSongs(): Promise<void> {
+    const songMapping = await dbContext
+        .kmq("available_songs")
+        .select(["link", "song_name_en", "song_name_ko", "id_artist"]);
+
+    for (const mapping of songMapping) {
+        const songEntry = {
+            name: mapping["song_name_en"],
+            hangulName: mapping["song_name_ko"],
+            artistID: mapping["id_artist"],
+            songLink: mapping["link"],
+        };
+
+        State.songLinkToEntry[songEntry.songLink] = songEntry;
+    }
+
+    State.newSongs = await dbContext
+        .kmq("available_songs")
+        .select([
+            "link AS songLink",
+            "song_name_en AS name",
+            "song_name_ko AS hangulName",
+            "id_artist AS artistID",
+        ])
+        .orderBy("publishedon", "DESC")
+        .limit(25);
+}
+
 async function reloadLocales(): Promise<void> {
     const updatedLocales = await dbContext.kmq("locale").select("*");
     for (const l of updatedLocales) {
@@ -338,8 +366,10 @@ export function registerIntervals(clusterID: number): void {
         reloadFactCache();
         // New bonus groups
         reloadBonusGroups();
-        // New groups used for autocomplete
+        // Groups used for autocomplete
         reloadArtists();
+        // Songs used for autocomplete
+        reloadSongs();
     });
 
     // Every hour
@@ -398,4 +428,5 @@ export function reloadCaches(): void {
     reloadFactCache();
     reloadBonusGroups();
     reloadLocales();
+    reloadSongs();
 }

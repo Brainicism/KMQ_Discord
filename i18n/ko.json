@@ -531,6 +531,19 @@
                 "description": "주어진 유튜브 동영상이 KMQ의 데이터베이스와 현재 게임 옵션에 포함되어 있는지 확인합니다.",
                 "example": {
                     "song": "{{artist}} - {{song}}에 대한 정보를 제공합니다."
+                },
+                "interaction": {
+                    "byLink": {
+                        "description": "YouTube 링크에서 노래를 찾습니다.",
+                        "field": "그 노래의 YouTube 링크입니다."
+                    },
+                    "byName": {
+                        "description": "이름 및/또는 아티스트별로 노래를 필터링합니다.",
+                        "field": {
+                            "artist": "그 노래를 만든 아티스트는요.",
+                            "song": "노래의 이름입니다."
+                        }
+                    }
                 }
             },
             "inCurrentGameOptions": "현재 게임 옵션",

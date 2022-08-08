@@ -16,6 +16,7 @@ import {
     bold,
     chooseWeightedRandom,
     chunkArray,
+    containsHangul,
     delay,
     friendlyFormattedNumber,
     getOrdinalNum,
@@ -39,14 +40,17 @@ import LocaleType from "../enums/locale_type";
 import LocalizationManager from "./localization_manager";
 import MessageContext from "../structures/message_context";
 import State from "../state";
+import _ from "lodash";
 import axios from "axios";
 import dbContext from "../database_context";
 import type { EmbedGenerator, GuildTextableMessage } from "../types";
+import type AutocompleteEntry from "../interfaces/autocomplete_entry";
 import type BookmarkedSong from "../interfaces/bookmarked_song";
 import type EmbedPayload from "../interfaces/embed_payload";
 import type GameInfoMessage from "../interfaces/game_info_message";
 import type GameOptions from "../interfaces/game_options";
 import type GuildPreference from "../structures/guild_preference";
+import type MatchedArtist from "../interfaces/matched_artist";
 import type Session from "../structures/session";
 
 const logger = new IPCLogger("discord_utils");
@@ -1681,4 +1685,61 @@ export function getInteractionOptionValueInteger(
     }
 
     return null;
+}
+
+/**
+ * Retrieve artist names from the interaction options
+ * @param interactionOptions - The message's interaction options
+ * @returns the matched artists
+ */
+export function getMatchedArtists(
+    interactionOptions: Array<Eris.InteractionDataOptions>
+): Array<MatchedArtist> {
+    return _.uniqBy(
+        interactionOptions.map(
+            (x) => State.artistToEntry[x["value"].toLocaleLowerCase()]
+        ),
+        "id"
+    );
+}
+
+/**
+ * List matching groups for slash command autocomplete
+ * @param lowercaseUserInput - The user's input so far
+ * @param previouslyEnteredArtistNames - Artists to not include in the result
+ * @param guildID - Use hangul if Korean locale
+ * @returns a list of suggested group names
+ */
+export function getAutocompleteArtists(
+    lowercaseUserInput: string,
+    previouslyEnteredArtistNames: Array<string>,
+    guildID: string
+): Array<AutocompleteEntry> {
+    const artistEntryToInteraction = (
+        x: MatchedArtist,
+        useHangul: boolean
+    ): AutocompleteEntry => ({
+        name: useHangul && x.hangulName ? x.hangulName : x.name,
+        value: useHangul && x.hangulName ? x.hangulName : x.name,
+    });
+
+    const showHangul =
+        containsHangul(lowercaseUserInput) ||
+        State.getGuildLocale(guildID) === LocaleType.KO;
+
+    if (lowercaseUserInput === "") {
+        return Object.entries(State.topArtists)
+            .filter((x) => !previouslyEnteredArtistNames.includes(x[1].name))
+            .map((x) => artistEntryToInteraction(x[1], showHangul));
+    }
+
+    const matchingGroups = Object.entries(State.artistToEntry)
+        .filter((x) => x[0].startsWith(lowercaseUserInput))
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .filter((x) => !previouslyEnteredArtistNames.includes(x[1].name))
+        .slice(0, 25);
+
+    return matchingGroups.map((x) =>
+        artistEntryToInteraction(x[1], showHangul)
+    );
 }

@@ -2,15 +2,18 @@ import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import {
     chunkArray,
+    containsHangul,
     friendlyFormattedDate,
     friendlyFormattedNumber,
     isValidURL,
 } from "../../helpers/utils";
 import {
+    getAutocompleteArtists,
     getDebugLogHeader,
     sendErrorMessage,
     sendInfoMessage,
     sendPaginationedEmbed,
+    tryAutocompleteInteractionAcknowledge,
 } from "../../helpers/discord_utils";
 import {
     getLocalizedArtistName,
@@ -19,6 +22,7 @@ import {
 } from "../../helpers/game_utils";
 import { getVideoID, validateID } from "ytdl-core";
 import { sendValidationErrorMessage } from "../../helpers/validate";
+import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
@@ -29,6 +33,7 @@ import State from "../../state";
 import dbContext from "../../database_context";
 import type { EmbedOptions } from "eris";
 import type { GuildTextableMessage } from "../../types";
+import type AutocompleteEntry from "../../interfaces/autocomplete_entry";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -49,7 +54,6 @@ async function lookupByYoutubeID(
     videoID: string,
     locale: LocaleType
 ): Promise<boolean> {
-    const messageContext = MessageContext.fromMessage(message);
     const guildID = message.guildID;
     const kmqSongEntry: QueriedSong = await dbContext
         .kmq("available_songs")
@@ -71,10 +75,10 @@ async function lookupByYoutubeID(
     if (!daisukiSongEntry) {
         // maybe it was falsely parsed as video ID? fallback to song name lookup
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        const found = await lookupBySongName(videoID, locale, message, guildID);
+        const found = await lookupBySongName(videoID, locale, message);
         if (found) {
             logger.info(
-                `Lookup succeded through fallback lookup for: ${videoID}`
+                `Lookup succeeded through fallback lookup for: ${videoID}`
             );
             return true;
         }
@@ -243,7 +247,7 @@ async function lookupByYoutubeID(
         );
     }
 
-    sendInfoMessage(messageContext, {
+    sendInfoMessage(MessageContext.fromMessage(message), {
         title: `"${songName}" - ${artistName}`,
         url: `https://youtu.be/${videoID}`,
         description,
@@ -262,17 +266,33 @@ async function lookupBySongName(
     songName: string,
     locale: LocaleType,
     message: GuildTextableMessage,
-    guildID: string
+    artistID?: number
 ): Promise<boolean> {
-    const kmqSongEntries: QueriedSong[] = await dbContext
+    let kmqSongEntriesQuery = dbContext
         .kmq("available_songs")
         .select(SongSelector.getQueriedSongFields())
-        .whereILike("song_name_en", `%${songName}%`)
-        .orWhereILike("song_name_ko", `%${songName}%`)
-        .orderByRaw("CHAR_LENGTH(song_name_en) ASC")
-        .orderBy("views", "DESC")
         .limit(100);
 
+    if (songName !== "") {
+        kmqSongEntriesQuery = kmqSongEntriesQuery
+            .whereILike("song_name_en", `%${songName}%`)
+            .orWhereILike("song_name_ko", `%${songName}%`)
+            .orderByRaw("CHAR_LENGTH(song_name_en) ASC")
+            .orderBy("views", "DESC");
+    }
+
+    if (artistID) {
+        kmqSongEntriesQuery = kmqSongEntriesQuery.where("id_artist", artistID);
+
+        if (songName === "") {
+            kmqSongEntriesQuery = kmqSongEntriesQuery.orderBy(
+                "publishedon",
+                "DESC"
+            );
+        }
+    }
+
+    const kmqSongEntries = await kmqSongEntriesQuery;
     if (kmqSongEntries.length === 0) {
         return false;
     }
@@ -297,11 +317,11 @@ async function lookupBySongName(
     const embeds: Array<EmbedOptions> = embedFieldSubsets.map(
         (embedFieldsSubset) => ({
             title: LocalizationManager.localizer.translate(
-                guildID,
+                message.guildID,
                 "command.lookup.songNameSearchResult.title"
             ),
             description: LocalizationManager.localizer.translate(
-                guildID,
+                message.guildID,
                 "command.lookup.songNameSearchResult.successDescription"
             ),
             fields: embedFieldsSubset,
@@ -348,45 +368,122 @@ export default class LookupCommand implements BaseCommand {
         priority: 40,
     });
 
-    call = async ({ parsedMessage, message }: CommandArgs): Promise<void> => {
-        const guildID = message.guildID;
-        let arg = parsedMessage.components[0];
+    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+        {
+            name: "lookup",
+            description: LocalizationManager.localizer.translate(
+                LocaleType.EN,
+                "command.lookup.help.description"
+            ),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+            options: [
+                {
+                    name: "song_name",
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.lookup.help.interaction.byName.description"
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "song_name",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.lookup.help.interaction.byName.field.song"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            autocomplete: true,
+                        },
+                        {
+                            name: "artist_name",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.lookup.help.interaction.byName.field.artist"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            autocomplete: true,
+                        },
+                    ],
+                },
+                {
+                    name: "song_link",
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.lookup.help.interaction.byLink.description"
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "song_link",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.lookup.help.interaction.byLink.field"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            required: true,
+                        },
+                    ],
+                },
+            ],
+        },
+    ];
 
+    call = async ({ parsedMessage, message }: CommandArgs): Promise<void> => {
+        await this.lookupSong(message, parsedMessage.components[0]);
+    };
+
+    async lookupSong(
+        message: GuildTextableMessage,
+        arg: string,
+        artistID?: number
+    ): Promise<void> {
+        let linkOrName = arg;
+        if (linkOrName.startsWith("<") && linkOrName.endsWith(">")) {
+            // Trim <> if user didn't want to show YouTube embed
+            linkOrName = linkOrName.slice(1, -1);
+        }
+
+        if (
+            linkOrName.startsWith("youtube.com") ||
+            linkOrName.startsWith("youtu.be")
+        ) {
+            // ytdl::getVideoID() requires URLs start with "https://"
+            linkOrName = `https://${linkOrName}`;
+        }
+
+        const guildID = message.guildID;
+        const messageContext = MessageContext.fromMessage(message);
         const locale = State.getGuildLocale(guildID);
 
-        if (arg.startsWith("<") && arg.endsWith(">")) {
-            // Trim <> if user didn't want to show YouTube embed
-            arg = arg.slice(1, -1);
-        }
-
-        if (arg.startsWith("youtube.com") || arg.startsWith("youtu.be")) {
-            // ytdl::getVideoID() requires URLs start with "https://"
-            arg = `https://${arg}`;
-        }
-
-        const messageContext = MessageContext.fromMessage(message);
-
         // attempt to look up by video ID
-        if (isValidURL(arg) || validateID(arg)) {
+        if (isValidURL(linkOrName) || validateID(linkOrName)) {
             let videoID: string = null;
 
             try {
-                videoID = getVideoID(arg);
+                videoID = getVideoID(linkOrName);
             } catch {
                 await sendValidationErrorMessage(
-                    message,
+                    messageContext,
                     LocalizationManager.localizer.translate(
                         guildID,
                         "command.lookup.validation.invalidYouTubeID"
                     ),
-                    parsedMessage.components[0],
+                    arg,
                     this.help(guildID).usage
                 );
 
                 logger.info(
                     `${getDebugLogHeader(
-                        message
-                    )} | Invalid YouTube ID passed. arg = ${arg}.`
+                        messageContext
+                    )} | Invalid YouTube ID passed. arg = ${linkOrName}.`
                 );
                 return;
             }
@@ -410,32 +507,159 @@ export default class LookupCommand implements BaseCommand {
                     )} | Could not find song by videoID. videoID = ${videoID}.`
                 );
             }
-        } else {
+        } else if (
             // lookup by song name
-            // eslint-disable-next-line no-lonely-if
-            if (
-                !(await lookupBySongName(
-                    parsedMessage.argument,
-                    locale,
-                    message,
-                    guildID
-                ))
-            ) {
-                await sendInfoMessage(messageContext, {
-                    title: LocalizationManager.localizer.translate(
-                        guildID,
-                        "command.lookup.songNameSearchResult.title"
-                    ),
-                    description: LocalizationManager.localizer.translate(
-                        guildID,
-                        "command.lookup.songNameSearchResult.notFoundDescription"
-                    ),
-                });
+            !(await lookupBySongName(linkOrName, locale, message, artistID))
+        ) {
+            await sendInfoMessage(messageContext, {
+                title: LocalizationManager.localizer.translate(
+                    guildID,
+                    "command.lookup.songNameSearchResult.title"
+                ),
+                description: LocalizationManager.localizer.translate(
+                    guildID,
+                    "command.lookup.songNameSearchResult.notFoundDescription"
+                ),
+            });
 
-                logger.info(
-                    `Could not find song by song name. songName = ${parsedMessage.argument}`
+            logger.info(
+                `Could not find song by song name. songName = ${linkOrName}`
+            );
+        }
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param _messageContext - The message context
+     */
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        _messageContext: MessageContext
+    ): Promise<void> {
+        await interaction.defer();
+        const initiatingMessage =
+            (await interaction.getOriginalMessage()) as GuildTextableMessage;
+
+        const argument = interaction.data.options[0];
+
+        if (argument.name === "song_link") {
+            await this.lookupSong(
+                initiatingMessage,
+                (
+                    (argument as Eris.InteractionDataOptionsSubCommand)
+                        .options[0] as Eris.InteractionDataOptionsString
+                ).value
+            );
+        } else if (argument.name === "song_name") {
+            let songName: string = "";
+            let artistName: string;
+            for (const option of (
+                argument as Eris.InteractionDataOptionsSubCommand
+            ).options as Array<Eris.InteractionDataOptionsString>) {
+                if (option.name === "song_name") {
+                    songName = option.value;
+                } else if (option.name === "artist_name") {
+                    artistName = option.value.toLocaleLowerCase();
+                }
+            }
+
+            let artistID: number;
+            if (artistName) {
+                const matchingArtist = State.artistToEntry[artistName];
+
+                if (matchingArtist) {
+                    artistID = matchingArtist.id;
+                }
+            }
+
+            await this.lookupSong(initiatingMessage, songName, artistID);
+        }
+
+        await interaction.deleteOriginalMessage();
+    }
+
+    /**
+     * Handles showing suggested song names as the user types for the lookup slash command
+     * @param interaction - The interaction with intermediate typing state
+     */
+    static async processAutocompleteInteraction(
+        interaction: Eris.AutocompleteInteraction
+    ): Promise<void> {
+        const autocompleteField = (
+            interaction.data.options[0] as Eris.InteractionDataOptionsSubCommand
+        ).options.filter((x) => x["focused"])[0] as AutocompleteEntry;
+
+        const lowercaseUserInput = autocompleteField.value.toLocaleLowerCase();
+
+        if (autocompleteField.name === "song_name") {
+            const artistNameField = (
+                interaction.data
+                    .options[0] as Eris.InteractionDataOptionsSubCommand
+            ).options.find((x) => x.name === "artist_name");
+
+            let artistID: number;
+            if (artistNameField) {
+                const artistName = (
+                    artistNameField as Eris.InteractionDataOptionsString
+                ).value.toLocaleLowerCase();
+
+                artistID = State.artistToEntry[artistName]?.id;
+            }
+
+            const songEntryToInteraction = (
+                x: { name: string; hangulName?: string; songLink: string },
+                useHangul: boolean
+            ): AutocompleteEntry => ({
+                name: useHangul && x.hangulName ? x.hangulName : x.name,
+                value: x.songLink,
+            });
+
+            const showHangul =
+                containsHangul(lowercaseUserInput) ||
+                State.getGuildLocale(interaction.guildID) === LocaleType.KO;
+
+            if (lowercaseUserInput === "") {
+                // Show new songs when no input so far
+                await tryAutocompleteInteractionAcknowledge(
+                    interaction,
+                    Object.entries(State.newSongs)
+                        .filter((x) =>
+                            artistID ? artistID === x[1].artistID : true
+                        )
+                        .map((x) => songEntryToInteraction(x[1], showHangul))
+                        .slice(0, 25)
+                );
+            } else {
+                await tryAutocompleteInteractionAcknowledge(
+                    interaction,
+                    Object.entries(State.songLinkToEntry)
+                        .filter(
+                            (x) =>
+                                (artistID
+                                    ? artistID === x[1].artistID
+                                    : true) &&
+                                x[1].name
+                                    .toLocaleLowerCase()
+                                    .startsWith(lowercaseUserInput)
+                        )
+                        .map((x) =>
+                            songEntryToInteraction(
+                                { songLink: x[0], ...x[1] },
+                                showHangul
+                            )
+                        )
+                        .slice(0, 25)
                 );
             }
+        } else if (autocompleteField.name === "artist_name") {
+            await tryAutocompleteInteractionAcknowledge(
+                interaction,
+                getAutocompleteArtists(
+                    lowercaseUserInput,
+                    [],
+                    interaction.guildID
+                )
+            );
         }
-    };
+    }
 }

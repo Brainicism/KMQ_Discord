@@ -15,7 +15,7 @@ export default class State {
     static client: KmqClient;
     static aliases: {
         artist: { [artistName: string]: Array<string> };
-        song: { [songName: string]: Array<string> };
+        song: { [songLink: string]: Array<string> };
     } = {
         artist: {},
         song: {},
@@ -28,6 +28,21 @@ export default class State {
     static locales: { [guildID: string]: LocaleType } = {};
     static artistToEntry: { [artistNameOrAlias: string]: MatchedArtist } = {};
     static topArtists: Array<MatchedArtist> = [];
+    static songLinkToEntry: {
+        [songLink: string]: {
+            name: string;
+            hangulName?: string;
+            artistID: number;
+        };
+    } = {};
+
+    static newSongs: Array<{
+        songLink: string;
+        name: string;
+        hangulName?: string;
+        artistID: number;
+    }> = [];
+
     static restartNotification: RestartNotification;
     static getGuildLocale(guildID: string): LocaleType {
         return State.locales[guildID] ?? DEFAULT_LOCALE;
