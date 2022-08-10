@@ -1691,3 +1691,21 @@ export function getInteractionOptionValueInteger(
 
     return null;
 }
+
+/**
+ * @param options - The interaction options response
+ * @param optionName - The option to retrieve value from
+ * @returns the option value
+ */
+export function getInteractionOptionValueString(
+    options: Eris.InteractionDataOptions[],
+    optionName: string
+): string {
+    if (!options) return null;
+    const option = options.find((x) => x.name === optionName);
+    if (option) {
+        return option["value"];
+    }
+
+    return null;
+}
