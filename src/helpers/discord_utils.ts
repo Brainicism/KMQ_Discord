@@ -45,6 +45,7 @@ import _ from "lodash";
 import axios from "axios";
 import dbContext from "../database_context";
 import type { EmbedGenerator, GuildTextableMessage } from "../types";
+import type { GuildTextableChannel } from "eris";
 import type AutocompleteEntry from "../interfaces/autocomplete_entry";
 import type BookmarkedSong from "../interfaces/bookmarked_song";
 import type EmbedPayload from "../interfaces/embed_payload";
@@ -1135,13 +1136,13 @@ export async function getGameInfoMessage(
 
 /**
  * Sends a paginated embed
- * @param message - The Message object
+ * @param messageOrInteraction - The Message object
  * @param embeds - A list of embeds to paginate over
  * @param components - A list of components to add to the embed
  * @param startPage - The page to start on
  */
 export async function sendPaginationedEmbed(
-    message: GuildTextableMessage,
+    messageOrInteraction: GuildTextableMessage | Eris.CommandInteraction,
     embeds: Array<Eris.EmbedOptions> | Array<EmbedGenerator>,
     components?: Array<Eris.ActionRow>,
     startPage = 1
@@ -1149,20 +1150,21 @@ export async function sendPaginationedEmbed(
     if (embeds.length > 1) {
         if (
             await textPermissionsCheck(
-                message.channel.id,
-                message.guildID,
-                message.author.id,
+                messageOrInteraction.channel.id,
+                messageOrInteraction.guildID,
+                messageOrInteraction.member.id,
                 [...REQUIRED_TEXT_PERMISSIONS, "readMessageHistory"]
             )
         ) {
             return EmbedPaginator.createPaginationEmbed(
-                message.channel,
-                message.interaction
-                    ? message.interaction.member.id
-                    : message.author.id,
+                messageOrInteraction.channel as GuildTextableChannel,
+                messageOrInteraction.member.id,
                 embeds,
                 { timeout: 60000, startPage, cycling: true },
-                components
+                components,
+                messageOrInteraction instanceof Eris.CommandInteraction
+                    ? messageOrInteraction
+                    : null
             );
         }
 
@@ -1177,10 +1179,13 @@ export async function sendPaginationedEmbed(
     }
 
     return sendMessage(
-        message.channel.id,
+        messageOrInteraction.channel.id,
         { embeds: [embed], components },
         null,
-        message.author.id
+        messageOrInteraction.member.id,
+        messageOrInteraction instanceof Eris.CommandInteraction
+            ? messageOrInteraction
+            : null
     );
 }
 

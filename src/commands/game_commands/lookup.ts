@@ -24,6 +24,7 @@ import { getVideoID, validateID } from "ytdl-core";
 import { sendValidationErrorMessage } from "../../helpers/validate";
 import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
+import KmqMember from "../../structures/kmq_member";
 import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
@@ -31,7 +32,7 @@ import Session from "../../structures/session";
 import SongSelector from "../../structures/song_selector";
 import State from "../../state";
 import dbContext from "../../database_context";
-import type { EmbedOptions } from "eris";
+import type { CommandInteraction, EmbedOptions } from "eris";
 import type { GuildTextableMessage } from "../../types";
 import type AutocompleteEntry from "../../interfaces/autocomplete_entry";
 import type BaseCommand from "../interfaces/base_command";
@@ -50,11 +51,11 @@ const getDaisukiLink = (id: string, isMV: boolean): string => {
 };
 
 async function lookupByYoutubeID(
-    message: GuildTextableMessage,
+    messageOrInteraction: GuildTextableMessage | CommandInteraction,
     videoID: string,
     locale: LocaleType
 ): Promise<boolean> {
-    const guildID = message.guildID;
+    const guildID = messageOrInteraction.guildID;
     const kmqSongEntry: QueriedSong = await dbContext
         .kmq("available_songs")
         .select(SongSelector.getQueriedSongFields())
@@ -75,7 +76,12 @@ async function lookupByYoutubeID(
     if (!daisukiSongEntry) {
         // maybe it was falsely parsed as video ID? fallback to song name lookup
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        const found = await lookupBySongName(videoID, locale, message);
+        const found = await lookupBySongName(
+            messageOrInteraction,
+            videoID,
+            locale
+        );
+
         if (found) {
             logger.info(
                 `Lookup succeeded through fallback lookup for: ${videoID}`
@@ -131,7 +137,10 @@ async function lookupByYoutubeID(
             ...(
                 await SongSelector.getFilteredSongList(
                     await GuildPreference.getGuildPreference(guildID),
-                    await isPremiumRequest(session, message.author.id)
+                    await isPremiumRequest(
+                        session,
+                        messageOrInteraction.member.id
+                    )
                 )
             ).songs,
         ]
@@ -140,7 +149,7 @@ async function lookupByYoutubeID(
 
         logger.info(
             `${getDebugLogHeader(
-                message
+                messageOrInteraction
             )} | KMQ song lookup. videoID = ${videoID}. Included in options = ${includedInOptions}.`
         );
     } else {
@@ -166,7 +175,7 @@ async function lookupByYoutubeID(
                 ? artistNameQuery.kname
                 : artistNameQuery.name;
 
-        songAliases = [...daisukiSongEntry.alias.split(";")].join(", ");
+        songAliases = daisukiSongEntry.alias.replace(";", ", ");
         songAliases += songAliases
             ? `, ${daisukiSongEntry.kname}`
             : daisukiSongEntry.kname;
@@ -178,7 +187,7 @@ async function lookupByYoutubeID(
 
         logger.info(
             `${getDebugLogHeader(
-                message
+                messageOrInteraction
             )} | Non-KMQ song lookup. videoID = ${videoID}.`
         );
     }
@@ -247,7 +256,13 @@ async function lookupByYoutubeID(
         );
     }
 
-    sendInfoMessage(MessageContext.fromMessage(message), {
+    const messageContext = new MessageContext(
+        messageOrInteraction.channel.id,
+        new KmqMember(messageOrInteraction.member.id),
+        messageOrInteraction.guildID
+    );
+
+    sendInfoMessage(messageContext, {
         title: `"${songName}" - ${artistName}`,
         url: `https://youtu.be/${videoID}`,
         description,
@@ -263,9 +278,9 @@ async function lookupByYoutubeID(
 }
 
 async function lookupBySongName(
+    messageOrInteraction: GuildTextableMessage | CommandInteraction,
     songName: string,
     locale: LocaleType,
-    message: GuildTextableMessage,
     artistID?: number
 ): Promise<boolean> {
     let kmqSongEntriesQuery = dbContext
@@ -279,17 +294,15 @@ async function lookupBySongName(
             .orWhereILike("song_name_ko", `%${songName}%`)
             .orderByRaw("CHAR_LENGTH(song_name_en) ASC")
             .orderBy("views", "DESC");
+    } else {
+        kmqSongEntriesQuery = kmqSongEntriesQuery.orderBy(
+            "publishedon",
+            "DESC"
+        );
     }
 
     if (artistID) {
         kmqSongEntriesQuery = kmqSongEntriesQuery.where("id_artist", artistID);
-
-        if (songName === "") {
-            kmqSongEntriesQuery = kmqSongEntriesQuery.orderBy(
-                "publishedon",
-                "DESC"
-            );
-        }
     }
 
     const kmqSongEntries = await kmqSongEntriesQuery;
@@ -299,7 +312,7 @@ async function lookupBySongName(
 
     if (kmqSongEntries.length === 1) {
         return lookupByYoutubeID(
-            message,
+            messageOrInteraction,
             kmqSongEntries[0].youtubeLink,
             locale
         );
@@ -317,18 +330,18 @@ async function lookupBySongName(
     const embeds: Array<EmbedOptions> = embedFieldSubsets.map(
         (embedFieldsSubset) => ({
             title: LocalizationManager.localizer.translate(
-                message.guildID,
+                messageOrInteraction.guildID,
                 "command.lookup.songNameSearchResult.title"
             ),
             description: LocalizationManager.localizer.translate(
-                message.guildID,
+                messageOrInteraction.guildID,
                 "command.lookup.songNameSearchResult.successDescription"
             ),
             fields: embedFieldsSubset,
         })
     );
 
-    await sendPaginationedEmbed(message, embeds);
+    await sendPaginationedEmbed(messageOrInteraction, embeds);
     return true;
 }
 
@@ -441,7 +454,7 @@ export default class LookupCommand implements BaseCommand {
     };
 
     async lookupSong(
-        message: GuildTextableMessage,
+        messageOrInteraction: GuildTextableMessage | CommandInteraction,
         arg: string,
         artistID?: number
     ): Promise<void> {
@@ -459,8 +472,13 @@ export default class LookupCommand implements BaseCommand {
             linkOrName = `https://${linkOrName}`;
         }
 
-        const guildID = message.guildID;
-        const messageContext = MessageContext.fromMessage(message);
+        const guildID = messageOrInteraction.guildID;
+        const messageContext = new MessageContext(
+            messageOrInteraction.channel.id,
+            new KmqMember(messageOrInteraction.member.id),
+            messageOrInteraction.guildID
+        );
+
         const locale = State.getGuildLocale(guildID);
 
         // attempt to look up by video ID
@@ -488,7 +506,13 @@ export default class LookupCommand implements BaseCommand {
                 return;
             }
 
-            if (!(await lookupByYoutubeID(message, videoID, locale))) {
+            if (
+                !(await lookupByYoutubeID(
+                    messageOrInteraction,
+                    videoID,
+                    locale
+                ))
+            ) {
                 await sendErrorMessage(messageContext, {
                     title: LocalizationManager.localizer.translate(
                         guildID,
@@ -509,7 +533,12 @@ export default class LookupCommand implements BaseCommand {
             }
         } else if (
             // lookup by song name
-            !(await lookupBySongName(linkOrName, locale, message, artistID))
+            !(await lookupBySongName(
+                messageOrInteraction,
+                linkOrName,
+                locale,
+                artistID
+            ))
         ) {
             await sendInfoMessage(messageContext, {
                 title: LocalizationManager.localizer.translate(
@@ -533,18 +562,14 @@ export default class LookupCommand implements BaseCommand {
      * @param _messageContext - The message context
      */
     async processChatInputInteraction(
-        interaction: Eris.CommandInteraction,
+        interaction: CommandInteraction,
         _messageContext: MessageContext
     ): Promise<void> {
-        await interaction.defer();
-        const initiatingMessage =
-            (await interaction.getOriginalMessage()) as GuildTextableMessage;
-
         const argument = interaction.data.options[0];
 
         if (argument.name === "song_link") {
             await this.lookupSong(
-                initiatingMessage,
+                interaction,
                 (
                     (argument as Eris.InteractionDataOptionsSubCommand)
                         .options[0] as Eris.InteractionDataOptionsString
@@ -572,10 +597,8 @@ export default class LookupCommand implements BaseCommand {
                 }
             }
 
-            await this.lookupSong(initiatingMessage, songName, artistID);
+            await this.lookupSong(interaction, songName, artistID);
         }
-
-        await interaction.deleteOriginalMessage();
     }
 
     /**
