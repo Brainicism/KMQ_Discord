@@ -629,8 +629,8 @@
                 "example": "귀하의 프리미엄 상태를 보여줍니다."
             },
             "option": {
-                "description": "이 옵션은 프리미엄 KMQ 서포터에게만 제공됩니다.",
-                "description_kmq_server": "이 옵션은 프리미엄 KMQ 서포터 또는 공식 KMQ 서버에서만 사용할 수 있습니다.",
+                "description": "이 옵션은 프리미엄 KMQ 지원자에게만 제공됩니다.",
+                "description_kmq_server": "이 옵션은 프리미엄 KMQ 지원자 또는 공식 KMQ 서버에서만 사용할 수 있습니다.",
                 "title": "프리미엄 옵션"
             },
             "status": {
@@ -642,7 +642,7 @@
                 "perks": {
                     "badge": {
                         "description": "프로필에 전용 배지를 사용하여 KMQ에 대한 도움을 과시하세요.",
-                        "title": "프리미엄 서포터 배지!"
+                        "title": "프리미엄 지원자 배지!"
                     },
                     "moreSongs": {
                         "description": "모든 아티스트의 상위 50개 b-side에 액세스 (최대 10개)하세요.",
@@ -1140,7 +1140,7 @@
             "bonusExpArtistRound": "보너스 경험치 및 아티스트 라운드",
             "bonusExpRound": "보너스 경험치 라운드",
             "correctGuess": "{{correctGuesser}}(이)가 올바르게 추측하였습니다. (+{{expGain}} 경험치)",
-            "noCorrectGuesses": "아무도 얻지 못했습니다.",
+            "noCorrectGuesses": "아무도 그것을 얻지 못했습니다.",
             "noWinners": "아무도 우승하지 못했습니다.",
             "runnersUp": "준우승",
             "songsCorrectlyGuessed": "{{songCount}}곡을 정확히 추측을 하였습니다!",
