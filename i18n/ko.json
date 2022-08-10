@@ -144,11 +144,11 @@
             "explanation": {
                 "bonusArtistGuess": "보너스 아티스트의 정확한 추측",
                 "firstGameOfDay": "오늘의 첫 게임",
-                "powerHour": "KMQ 슈퍼 시간 또는 주말 동안 재생합니다",
+                "powerHour": "KMQ 슈퍼 시간 또는 주말 동안 플레이",
                 "quickGuess": "빠른 추측",
                 "rareGuess": "희귀한 정확 추측 보너스",
                 "rareGuessRange": "{{rareGuessLowerBound}} 최대 {{rareGuessUpperBound}}",
-                "streak": "추측 연속 행진이 5번 이상인 경우",
+                "streak": "추측 정답이 연속 5번 이상인 경우",
                 "voting": "투표"
             },
             "firstGameOfDayBonus": "오늘의 첫 게임 보너스",
