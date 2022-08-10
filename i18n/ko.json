@@ -535,12 +535,12 @@
                 "interaction": {
                     "byLink": {
                         "description": "YouTube 링크에서 노래를 찾습니다.",
-                        "field": "그 노래의 YouTube 링크입니다."
+                        "field": "해당 노래의 YouTube 링크입니다."
                     },
                     "byName": {
-                        "description": "이름 및/또는 아티스트별로 노래를 필터링합니다.",
+                        "description": "이름 또는 아티스트별로 노래를 필터링합니다.",
                         "field": {
-                            "artist": "그 노래를 만든 아티스트는요.",
+                            "artist": "노래를 만든 아티스트입니다.",
                             "song": "노래의 이름입니다."
                         }
                     }
