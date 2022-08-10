@@ -929,9 +929,9 @@ enabled@2.0.x:
   version "1.0.2"
   resolved "https://github.com/Brainicism/eris-fleet#a89d48198f6eb88e4ea23588e0c46d139f7dbde5"
 
-"eris-pagination@https://github.com/brainicism/eris-pagination#39f0899":
+"eris-pagination@https://github.com/Brainicism/eris-pagination#69d7c0f":
   version "0.5.2"
-  resolved "https://github.com/brainicism/eris-pagination#39f0899916db2584ff5c54f6742adc0a926140d5"
+  resolved "https://github.com/Brainicism/eris-pagination#69d7c0f9c073ca2c39e2e1b647ad4bfed22f7dfa"
   dependencies:
     eris-reactions "^0.1.4"
 
