@@ -1152,7 +1152,10 @@ export async function sendPaginationedEmbed(
             )
         ) {
             return EmbedPaginator.createPaginationEmbed(
-                message,
+                message.channel,
+                message.interaction
+                    ? message.interaction.member.id
+                    : message.author.id,
                 embeds,
                 { timeout: 60000, startPage, cycling: true },
                 components
