@@ -206,8 +206,8 @@ export default class SongSelector {
         return [
             "clean_song_name_en as songName",
             "song_name_en as originalSongName",
-            "song_name_ko as hangulSongName",
-            "clean_song_name_ko as originalHangulSongName",
+            "clean_song_name_ko as hangulSongName",
+            "song_name_ko as originalHangulSongName",
             "artist_name_en as artistName",
             "artist_name_ko as hangulArtistName",
             "link as youtubeLink",

@@ -33,6 +33,8 @@ export default class State {
             name: string;
             hangulName?: string;
             artistID: number;
+            cleanName: string;
+            hangulCleanName?: string;
         };
     } = {};
 

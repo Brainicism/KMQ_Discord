@@ -17,7 +17,6 @@ import {
     bold,
     chooseWeightedRandom,
     chunkArray,
-    containsHangul,
     delay,
     friendlyFormattedNumber,
     getOrdinalNum,
@@ -1736,42 +1735,42 @@ export function getMatchedArtists(
 }
 
 /**
- * List matching groups for slash command autocomplete
- * @param lowercaseUserInput - The user's input so far
- * @param previouslyEnteredArtistNames - Artists to not include in the result
- * @param guildID - Use hangul if Korean locale
- * @returns a list of suggested group names
+ * Get artists that match the given query, or top artists if no query is provided
+ * @param lowercaseUserInput - The user's input, in lowercase
+ * @param excludedArtistNames - Artists to exclude in the result
+ * @returns a list of group names
  */
-export function getAutocompleteArtists(
+export function searchArtists(
     lowercaseUserInput: string,
-    previouslyEnteredArtistNames: Array<string>,
-    guildID: string
-): Array<AutocompleteEntry> {
-    const artistEntryToInteraction = (
-        x: MatchedArtist,
-        useHangul: boolean
-    ): AutocompleteEntry => ({
-        name: useHangul && x.hangulName ? x.hangulName : x.name,
-        value: useHangul && x.hangulName ? x.hangulName : x.name,
-    });
-
-    const showHangul =
-        containsHangul(lowercaseUserInput) ||
-        State.getGuildLocale(guildID) === LocaleType.KO;
-
+    excludedArtistNames: Array<string>
+): Array<MatchedArtist> {
     if (lowercaseUserInput === "") {
-        return Object.entries(State.topArtists)
-            .filter((x) => !previouslyEnteredArtistNames.includes(x[1].name))
-            .map((x) => artistEntryToInteraction(x[1], showHangul));
+        return Object.values(State.topArtists).filter(
+            (x) => !excludedArtistNames.includes(x.name)
+        );
     }
 
-    const matchingGroups = Object.entries(State.artistToEntry)
+    return Object.entries(State.artistToEntry)
         .filter((x) => x[0].startsWith(lowercaseUserInput))
         .sort((a, b) => a[0].localeCompare(b[0]))
-        .filter((x) => !previouslyEnteredArtistNames.includes(x[1].name))
-        .slice(0, 25);
+        .filter((x) => !excludedArtistNames.includes(x[1].name))
+        .map((x) => x[1]);
+}
 
-    return matchingGroups.map((x) =>
-        artistEntryToInteraction(x[1], showHangul)
-    );
+/**
+ * Transform the given artists into autocomplete format
+ * @param artists - Artists to include in the result
+ * @param showHangul - Whether to use hangul
+ * @returns a list of group names
+ */
+export function artistAutocompleteFormat(
+    artists: Array<MatchedArtist>,
+    showHangul: boolean
+): Array<AutocompleteEntry> {
+    return artists
+        .map((x) => ({
+            name: showHangul && x.hangulName ? x.hangulName : x.name,
+            value: showHangul && x.hangulName ? x.hangulName : x.name,
+        }))
+        .slice(0, 25);
 }

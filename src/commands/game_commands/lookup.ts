@@ -1,20 +1,22 @@
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import {
+    artistAutocompleteFormat,
+    getDebugLogHeader,
+    searchArtists,
+    sendErrorMessage,
+    sendInfoMessage,
+    sendPaginationedEmbed,
+    tryAutocompleteInteractionAcknowledge,
+} from "../../helpers/discord_utils";
+import {
     chunkArray,
     containsHangul,
     friendlyFormattedDate,
     friendlyFormattedNumber,
     isValidURL,
 } from "../../helpers/utils";
-import {
-    getAutocompleteArtists,
-    getDebugLogHeader,
-    sendErrorMessage,
-    sendInfoMessage,
-    sendPaginationedEmbed,
-    tryAutocompleteInteractionAcknowledge,
-} from "../../helpers/discord_utils";
+import { cleanSongName } from "../../structures/game_round";
 import {
     getLocalizedArtistName,
     getLocalizedSongName,
@@ -31,6 +33,7 @@ import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import SongSelector from "../../structures/song_selector";
 import State from "../../state";
+import _ from "lodash";
 import dbContext from "../../database_context";
 import type { CommandInteraction, EmbedOptions } from "eris";
 import type { GuildTextableMessage } from "../../types";
@@ -38,6 +41,7 @@ import type AutocompleteEntry from "../../interfaces/autocomplete_entry";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import type MatchedArtist from "src/interfaces/matched_artist";
 import type QueriedSong from "../../interfaces/queried_song";
 
 const logger = new IPCLogger("lookup");
@@ -175,7 +179,7 @@ async function lookupByYoutubeID(
                 ? artistNameQuery.kname
                 : artistNameQuery.name;
 
-        songAliases = daisukiSongEntry.alias.replace(";", ", ");
+        songAliases = daisukiSongEntry.alias.replaceAll(";", ", ");
         songAliases += songAliases
             ? `, ${daisukiSongEntry.kname}`
             : daisukiSongEntry.kname;
@@ -262,17 +266,26 @@ async function lookupByYoutubeID(
         messageOrInteraction.guildID
     );
 
-    sendInfoMessage(messageContext, {
-        title: `"${songName}" - ${artistName}`,
-        url: `https://youtu.be/${videoID}`,
-        description,
-        thumbnailUrl: `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`,
-        fields: fields.map((x) => ({
-            name: x.name,
-            value: x.value,
-            inline: true,
-        })),
-    });
+    sendInfoMessage(
+        messageContext,
+        {
+            title: `"${songName}" - ${artistName}`,
+            url: `https://youtu.be/${videoID}`,
+            description,
+            thumbnailUrl: `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`,
+            fields: fields.map((x) => ({
+                name: x.name,
+                value: x.value,
+                inline: true,
+            })),
+        },
+        false,
+        null,
+        [],
+        messageOrInteraction instanceof Eris.CommandInteraction
+            ? messageOrInteraction
+            : null
+    );
 
     return true;
 }
@@ -513,17 +526,23 @@ export default class LookupCommand implements BaseCommand {
                     locale
                 ))
             ) {
-                await sendErrorMessage(messageContext, {
-                    title: LocalizationManager.localizer.translate(
-                        guildID,
-                        "command.lookup.notFound.title"
-                    ),
-                    description: LocalizationManager.localizer.translate(
-                        guildID,
-                        "command.lookup.notFound.description"
-                    ),
-                    thumbnailUrl: KmqImages.DEAD,
-                });
+                await sendErrorMessage(
+                    messageContext,
+                    {
+                        title: LocalizationManager.localizer.translate(
+                            guildID,
+                            "command.lookup.notFound.title"
+                        ),
+                        description: LocalizationManager.localizer.translate(
+                            guildID,
+                            "command.lookup.notFound.description"
+                        ),
+                        thumbnailUrl: KmqImages.DEAD,
+                    },
+                    messageOrInteraction instanceof Eris.CommandInteraction
+                        ? messageOrInteraction
+                        : null
+                );
 
                 logger.info(
                     `${getDebugLogHeader(
@@ -540,16 +559,25 @@ export default class LookupCommand implements BaseCommand {
                 artistID
             ))
         ) {
-            await sendInfoMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
-                    guildID,
-                    "command.lookup.songNameSearchResult.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    guildID,
-                    "command.lookup.songNameSearchResult.notFoundDescription"
-                ),
-            });
+            await sendInfoMessage(
+                messageContext,
+                {
+                    title: LocalizationManager.localizer.translate(
+                        guildID,
+                        "command.lookup.songNameSearchResult.title"
+                    ),
+                    description: LocalizationManager.localizer.translate(
+                        guildID,
+                        "command.lookup.songNameSearchResult.notFoundDescription"
+                    ),
+                },
+                false,
+                null,
+                [],
+                messageOrInteraction instanceof Eris.CommandInteraction
+                    ? messageOrInteraction
+                    : null
+            );
 
             logger.info(
                 `Could not find song by song name. songName = ${linkOrName}`
@@ -582,7 +610,7 @@ export default class LookupCommand implements BaseCommand {
                 argument as Eris.InteractionDataOptionsSubCommand
             ).options as Array<Eris.InteractionDataOptionsString>) {
                 if (option.name === "song_name") {
-                    songName = option.value;
+                    songName = option.value.toLocaleLowerCase();
                 } else if (option.name === "artist_name") {
                     artistName = option.value.toLocaleLowerCase();
                 }
@@ -613,18 +641,17 @@ export default class LookupCommand implements BaseCommand {
         ).options.filter((x) => x["focused"])[0] as AutocompleteEntry;
 
         const lowercaseUserInput = autocompleteField.value.toLocaleLowerCase();
-
         if (autocompleteField.name === "song_name") {
             const artistNameField = (
                 interaction.data
                     .options[0] as Eris.InteractionDataOptionsSubCommand
-            ).options.find((x) => x.name === "artist_name");
+            ).options.find(
+                (x) => x.name === "artist_name"
+            ) as Eris.InteractionDataOptionsString;
 
             let artistID: number;
             if (artistNameField) {
-                const artistName = (
-                    artistNameField as Eris.InteractionDataOptionsString
-                ).value.toLocaleLowerCase();
+                const artistName = artistNameField.value.toLocaleLowerCase();
 
                 artistID = State.artistToEntry[artistName]?.id;
             }
@@ -641,8 +668,8 @@ export default class LookupCommand implements BaseCommand {
                 containsHangul(lowercaseUserInput) ||
                 State.getGuildLocale(interaction.guildID) === LocaleType.KO;
 
-            if (lowercaseUserInput === "") {
-                // Show new songs when no input so far
+            if (lowercaseUserInput.length < 2) {
+                // Show new songs when minimal input
                 await tryAutocompleteInteractionAcknowledge(
                     interaction,
                     Object.entries(State.newSongs)
@@ -675,13 +702,50 @@ export default class LookupCommand implements BaseCommand {
                 );
             }
         } else if (autocompleteField.name === "artist_name") {
+            const enteredSongName = (
+                (
+                    interaction.data
+                        .options[0] as Eris.InteractionDataOptionsSubCommand
+                ).options.find(
+                    (x) => x.name === "song_name"
+                ) as Eris.InteractionDataOptionsString
+            )?.value;
+
+            let matchingArtists: Array<MatchedArtist> = [];
+            if (lowercaseUserInput === "" && enteredSongName === "") {
+                matchingArtists = searchArtists(lowercaseUserInput, []);
+            } else if (enteredSongName) {
+                // only return artists that have a song that matches the entered one
+                matchingArtists = Object.values(State.artistToEntry);
+                const cleanEnteredSongName =
+                    cleanSongName(enteredSongName).toLocaleLowerCase();
+
+                const matchingSongs = Object.values(
+                    State.songLinkToEntry
+                ).filter(
+                    (x) =>
+                        x.cleanName.startsWith(cleanEnteredSongName) ||
+                        x.hangulCleanName.startsWith(cleanEnteredSongName)
+                );
+
+                const matchingSongArtistIDs = matchingSongs.map(
+                    (x) => x.artistID
+                );
+
+                matchingArtists = _.uniq(
+                    matchingArtists.filter((x) =>
+                        matchingSongArtistIDs.includes(x.id)
+                    )
+                );
+            }
+
+            const showHangul =
+                containsHangul(lowercaseUserInput) ||
+                State.getGuildLocale(interaction.guildID) === LocaleType.KO;
+
             await tryAutocompleteInteractionAcknowledge(
                 interaction,
-                getAutocompleteArtists(
-                    lowercaseUserInput,
-                    [],
-                    interaction.guildID
-                )
+                artistAutocompleteFormat(matchingArtists, showHangul)
             );
         }
     }

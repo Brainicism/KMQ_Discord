@@ -1,22 +1,28 @@
 import { GROUP_LIST_URL } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
-    getAutocompleteArtists,
+    artistAutocompleteFormat,
     getDebugLogHeader,
     getMatchedArtists,
+    searchArtists,
     sendErrorMessage,
     sendOptionsMessage,
     tryAutocompleteInteractionAcknowledge,
 } from "../../helpers/discord_utils";
 import {
+    containsHangul,
+    getOrdinalNum,
+    setIntersection,
+} from "../../helpers/utils";
+import {
     getMatchingGroupNames,
     getSimilarGroupNames,
 } from "../../helpers/game_utils";
-import { getOrdinalNum, setIntersection } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
@@ -313,15 +319,18 @@ export default class GroupsCommand implements BaseCommand {
         ).toLocaleLowerCase();
 
         const previouslyEnteredArtists = getMatchedArtists(
-            interaction.data.options.slice(0, -1)
+            interaction.data.options.filter((x) => !x["focused"])
         ).map((x) => x?.name);
+
+        const showHangul =
+            containsHangul(lowercaseUserInput) ||
+            State.getGuildLocale(interaction.guildID) === LocaleType.KO;
 
         await tryAutocompleteInteractionAcknowledge(
             interaction,
-            getAutocompleteArtists(
-                lowercaseUserInput,
-                previouslyEnteredArtists,
-                interaction.guildID
+            artistAutocompleteFormat(
+                searchArtists(lowercaseUserInput, previouslyEnteredArtists),
+                showHangul
             )
         );
     }

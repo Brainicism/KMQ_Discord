@@ -316,7 +316,14 @@ async function reloadArtists(): Promise<void> {
 async function reloadSongs(): Promise<void> {
     const songMapping = await dbContext
         .kmq("available_songs")
-        .select(["link", "song_name_en", "song_name_ko", "id_artist"]);
+        .select([
+            "link",
+            "song_name_en",
+            "song_name_ko",
+            "id_artist",
+            "clean_song_name_en",
+            "clean_song_name_ko",
+        ]);
 
     for (const mapping of songMapping) {
         const songEntry = {
@@ -324,6 +331,8 @@ async function reloadSongs(): Promise<void> {
             hangulName: mapping["song_name_ko"],
             artistID: mapping["id_artist"],
             songLink: mapping["link"],
+            cleanName: mapping["clean_song_name_en"].toLocaleLowerCase(),
+            hangulCleanName: mapping["clean_song_name_ko"].toLocaleLowerCase(),
         };
 
         State.songLinkToEntry[songEntry.songLink] = songEntry;
