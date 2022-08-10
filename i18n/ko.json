@@ -91,7 +91,7 @@
                 }
             },
             "interaction": {
-                "description": "노래의 년도 범위를 설정합니다",
+                "description": "노래의 연도 범위를 설정합니다.",
                 "earliestOption": "[beginning_year]부터 매년 노래 선택",
                 "rangeOption": "[beginningYear]와 [endingYear] 사이의 매년 노래 선택"
             }
