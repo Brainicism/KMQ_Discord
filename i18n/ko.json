@@ -89,6 +89,11 @@
                     "singleCutoff": "{{year}}년 이후에 발매된 노래 재생합니다.",
                     "twoCutoffs": "{{beginningYear}}~{{endYear}}년 사이에 발매된 노래 재생합니다."
                 }
+            },
+            "interaction": {
+                "description": "노래의 연도 범위를 설정합니다.",
+                "earliestOption": "[beginning_year]부터 매년 노래 선택",
+                "rangeOption": "[beginningYear]와 [endingYear] 사이의 매년 노래 선택"
             }
         },
         "debug": {
