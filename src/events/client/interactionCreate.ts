@@ -10,6 +10,7 @@ import KmqMember from "../../structures/kmq_member";
 import LocalizationManager from "../../helpers/localization_manager";
 import LookupCommand from "../../commands/game_commands/lookup";
 import MessageContext from "../../structures/message_context";
+import PresetCommand from "../../commands/game_commands/preset";
 import ProfileCommand from "../../commands/game_commands/profile";
 import Session from "../../structures/session";
 import State from "../../state";
@@ -23,6 +24,7 @@ const AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS: {
 } = {
     groups: GroupsCommand.processAutocompleteInteraction,
     lookup: LookupCommand.processAutocompleteInteraction,
+    preset: PresetCommand.processAutocompleteInteraction,
 };
 
 /**

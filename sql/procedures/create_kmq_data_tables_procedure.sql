@@ -38,7 +38,7 @@ BEGIN
 		TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1)) AS clean_song_name_en,
 		TRIM(kpop_videos.app_kpop.kname) AS song_name_ko,
 		TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop.kname, '(', 1)) AS clean_song_name_ko,
-		name_aka AS song_aliases,
+		kpop_videos.app_kpop.alias AS song_aliases,
 		vlink AS link,
 		TRIM(kpop_videos.app_kpop_group.name) AS artist_name_en,
 		TRIM(kpop_videos.app_kpop_group.kname) AS artist_name_ko,
@@ -73,7 +73,7 @@ BEGIN
 			TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop_audio.name, '(', 1)) AS clean_song_name_en,
 			TRIM(kpop_videos.app_kpop_audio.kname) AS song_name_ko,
 			TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop_audio.kname, '(', 1)) AS clean_song_name_ko,
-			name_aka AS song_aliases,
+			kpop_videos.app_kpop_audio.alias AS song_aliases,
 			vlink AS link,
 			TRIM(kpop_videos.app_kpop_group.name) AS artist_name_en,
 			TRIM(kpop_videos.app_kpop_group.kname) AS artist_name_ko,
@@ -109,6 +109,6 @@ BEGIN
 	RIGHT JOIN
 	(SELECT LOWER(name) as name, count(*) as c FROM kpop_videos.app_kpop_group GROUP BY LOWER(name) HAVING count(*) > 1 AND name NOT LIKE "%(%)%" ) as b USING (name)
 	SET a.name = concat(a.name, " (", a.fname, ")");
-	
+
 END //
 DELIMITER ;

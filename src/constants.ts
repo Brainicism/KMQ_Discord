@@ -234,3 +234,5 @@ export const DataFiles = {
         "../data/feature_switch_config.json"
     ),
 };
+
+export const PERMISSIONS_LINK = "https://www.youtube.com/watch?v=87GW0SmF5LI";

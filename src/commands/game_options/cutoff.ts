@@ -5,12 +5,15 @@ import {
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
+    getInteractionOptionValueInteger,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
@@ -90,71 +93,212 @@ export default class CutoffCommand implements BaseCommand {
         priority: 140,
     });
 
+    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+        {
+            name: "cutoff",
+            description: LocalizationManager.localizer.translate(
+                LocaleType.EN,
+                "command.cutoff.interaction.description"
+            ),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+            options: [
+                {
+                    name: "earliest",
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.cutoff.interaction.earliestOption"
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "beginning_year",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.cutoff.interaction.earliestOption"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .INTEGER,
+                            required: true,
+                            max_value: DEFAULT_ENDING_SEARCH_YEAR,
+                            min_value: DEFAULT_BEGINNING_SEARCH_YEAR,
+                        } as any,
+                    ],
+                },
+                {
+                    name: "range",
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.cutoff.interaction.rangeOption"
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "beginning_year",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.cutoff.interaction.rangeOption"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .INTEGER,
+                            required: true,
+                            max_value: DEFAULT_ENDING_SEARCH_YEAR,
+                            min_value: DEFAULT_BEGINNING_SEARCH_YEAR,
+                        } as any,
+                        {
+                            name: "ending_year",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.cutoff.interaction.rangeOption"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .INTEGER,
+                            required: true,
+                            max_value: DEFAULT_ENDING_SEARCH_YEAR,
+                            min_value: DEFAULT_BEGINNING_SEARCH_YEAR,
+                        } as any,
+                    ],
+                },
+            ],
+        },
+    ];
+
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+        let beginningYear: number = null;
+        let endingYear: number = null;
+        const yearRange = parsedMessage.components;
+
+        if (yearRange.length === 0) {
+            beginningYear = null;
+            endingYear = null;
+        } else if (yearRange.length === 1) {
+            beginningYear = parseInt(yearRange[0], 10);
+        } else {
+            beginningYear = parseInt(yearRange[0], 10);
+            endingYear = parseInt(yearRange[1], 10);
+        }
+
+        await CutoffCommand.updateOption(
+            MessageContext.fromMessage(message),
+            beginningYear,
+            endingYear
+        );
+    };
+
+    static async updateOption(
+        messageContext: MessageContext,
+        beginningYear: number,
+        endingYear: number,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
+            messageContext.guildID
         );
 
-        if (parsedMessage.components.length === 0) {
+        const reset = beginningYear === null && endingYear === null;
+
+        if (reset) {
             await guildPreference.setBeginningCutoffYear(
                 DEFAULT_BEGINNING_SEARCH_YEAR
             );
             await guildPreference.setEndCutoffYear(DEFAULT_ENDING_SEARCH_YEAR);
             await sendOptionsMessage(
-                Session.getSession(message.guildID),
-                MessageContext.fromMessage(message),
+                Session.getSession(messageContext.guildID),
+                messageContext,
                 guildPreference,
                 [{ option: GameOption.CUTOFF, reset: true }]
             );
 
             logger.info(
-                `${getDebugLogHeader(message)} | Cutoff set to ${
+                `${getDebugLogHeader(messageContext)} | Cutoff set to ${
                     guildPreference.gameOptions.beginningYear
                 } - ${guildPreference.gameOptions.endYear}`
             );
-            return;
         }
 
-        const yearRange = parsedMessage.components;
-        const startYear = yearRange[0];
-        if (yearRange.length === 1) {
-            await guildPreference.setBeginningCutoffYear(
-                parseInt(startYear, 10)
-            );
+        if (beginningYear && !endingYear) {
+            await guildPreference.setBeginningCutoffYear(beginningYear);
             await guildPreference.setEndCutoffYear(DEFAULT_ENDING_SEARCH_YEAR);
-        } else if (yearRange.length === 2) {
-            const endYear = yearRange[1];
-            if (endYear < startYear) {
-                await sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "command.cutoff.failure.invalidEndYear.title"
-                    ),
-                    description: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "command.cutoff.failure.invalidEndYear.description"
-                    ),
-                });
+        } else {
+            if (endingYear < beginningYear) {
+                await sendErrorMessage(
+                    messageContext,
+                    {
+                        title: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "command.cutoff.failure.invalidEndYear.title"
+                        ),
+                        description: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "command.cutoff.failure.invalidEndYear.description"
+                        ),
+                    },
+                    interaction
+                );
                 return;
             }
 
-            await guildPreference.setBeginningCutoffYear(
-                parseInt(startYear, 10)
-            );
-            await guildPreference.setEndCutoffYear(parseInt(endYear, 10));
+            await guildPreference.setBeginningCutoffYear(beginningYear);
+            await guildPreference.setEndCutoffYear(endingYear);
         }
 
         await sendOptionsMessage(
-            Session.getSession(message.guildID),
-            MessageContext.fromMessage(message),
+            Session.getSession(messageContext.guildID),
+            messageContext,
             guildPreference,
-            [{ option: GameOption.CUTOFF, reset: false }]
+            [{ option: GameOption.CUTOFF, reset: false }],
+            null,
+            null,
+            null,
+            interaction
         );
 
         logger.info(
-            `${getDebugLogHeader(message)} | Cutoff set to ${
+            `${getDebugLogHeader(messageContext)} | Cutoff set to ${
                 guildPreference.gameOptions.beginningYear
             } - ${guildPreference.gameOptions.endYear}`
         );
-    };
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        const limitDataOption = interaction.data
+            .options[0] as Eris.InteractionDataOptionsSubCommand;
+
+        let beginningYear: number;
+        let endingYear: number;
+        if (limitDataOption.name === "range") {
+            beginningYear = getInteractionOptionValueInteger(
+                limitDataOption.options,
+                "beginning_year"
+            );
+
+            endingYear = getInteractionOptionValueInteger(
+                limitDataOption.options,
+                "ending_year"
+            );
+        } else {
+            beginningYear = getInteractionOptionValueInteger(
+                limitDataOption.options,
+                "beginning_year"
+            );
+        }
+
+        await CutoffCommand.updateOption(
+            messageContext,
+            beginningYear,
+            endingYear,
+            interaction
+        );
+    }
 }

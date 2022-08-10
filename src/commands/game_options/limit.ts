@@ -187,42 +187,6 @@ export default class LimitCommand implements BaseCommand {
         limitEnd: number,
         interaction?: Eris.CommandInteraction
     ): Promise<void> {
-        if (limitEnd === 0) {
-            sendErrorMessage(
-                messageContext,
-                {
-                    title: LocalizationManager.localizer.translate(
-                        messageContext.guildID,
-                        "command.limit.failure.invalidLimit.title"
-                    ),
-                    description: LocalizationManager.localizer.translate(
-                        messageContext.guildID,
-                        "command.limit.failure.invalidLimit.greaterThanZero.description"
-                    ),
-                },
-                interaction
-            );
-            return;
-        }
-
-        if (limitEnd <= limitStart) {
-            sendErrorMessage(
-                messageContext,
-                {
-                    title: LocalizationManager.localizer.translate(
-                        messageContext.guildID,
-                        "command.limit.failure.invalidLimit.title"
-                    ),
-                    description: LocalizationManager.localizer.translate(
-                        messageContext.guildID,
-                        "command.limit.failure.invalidLimit.greaterThanStart.description"
-                    ),
-                },
-                interaction
-            );
-            return;
-        }
-
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
@@ -233,6 +197,42 @@ export default class LimitCommand implements BaseCommand {
             await guildPreference.reset(GameOption.LIMIT);
             logger.info(`${getDebugLogHeader(messageContext)} | Limit reset.`);
         } else {
+            if (limitEnd === 0) {
+                sendErrorMessage(
+                    messageContext,
+                    {
+                        title: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "command.limit.failure.invalidLimit.title"
+                        ),
+                        description: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "command.limit.failure.invalidLimit.greaterThanZero.description"
+                        ),
+                    },
+                    interaction
+                );
+                return;
+            }
+
+            if (limitEnd <= limitStart) {
+                sendErrorMessage(
+                    messageContext,
+                    {
+                        title: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "command.limit.failure.invalidLimit.title"
+                        ),
+                        description: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "command.limit.failure.invalidLimit.greaterThanStart.description"
+                        ),
+                    },
+                    interaction
+                );
+                return;
+            }
+
             await guildPreference.setLimit(limitStart, limitEnd);
 
             logger.info(

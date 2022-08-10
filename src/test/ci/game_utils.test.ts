@@ -199,7 +199,7 @@ describe("game utils", () => {
                     describe("one alias match, one non-alias match", () => {
                         it("should not try to alias the non-alias match", async () => {
                             // Artist 'Hyuk' matches with alias, Artist 'REDSQUARE' matches with non-alias
-                            const artistNameAliasMatch = "Hyuk";
+                            const artistNameAliasMatch = "Hyuk (Han Sanghyuk)";
                             const artistNameAlias = "Hyuk ALIAS";
                             const artistNameExactMatch = "REDSQUARE";
                             State.aliases.artist[artistNameAliasMatch] = [
@@ -269,7 +269,7 @@ describe("game utils", () => {
 
                     describe("one alias match, one non-match", () => {
                         it("should have one match, and one non-match", async () => {
-                            const artistName = "Eunbi";
+                            const artistName = "Eunbi (Kwon Eunbi)";
                             const artistAlias = "Eunbi alias";
                             State.aliases.artist[artistName] = [artistAlias];
                             const nonMatchArtist = "Weee";
