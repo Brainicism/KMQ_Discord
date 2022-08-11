@@ -121,7 +121,8 @@ export default class GameSession extends Session {
         gameSessionCreator: KmqMember,
         gameType: GameType,
         isPremium: boolean,
-        eliminationLives?: number
+        eliminationLives?: number,
+        spotifySongs?: Array<QueriedSong>
     ) {
         super(
             guildPreference,
@@ -129,7 +130,8 @@ export default class GameSession extends Session {
             voiceChannelID,
             guildID,
             gameSessionCreator,
-            isPremium
+            isPremium,
+            spotifySongs
         );
         this.gameType = gameType;
         this.sessionInitialized = false;

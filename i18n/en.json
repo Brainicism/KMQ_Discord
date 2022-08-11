@@ -637,7 +637,8 @@
                     "teams": "Split up into as many teams as you want and see who you can depend on to help you win!"
                 },
                 "interaction": {
-                    "lives": "Choose how many lives each player starts with"
+                    "lives": "Choose how many lives each player starts with",
+                    "spotifyPlaylist": "A link to a Spotify playlist to exclusively play songs from"
                 },
                 "usage": {
                     "lives": "lives"

@@ -8,7 +8,6 @@ import {
     reloadCaches,
     updateBotStatus,
 } from "./helpers/management_utils";
-import BotListingManager from "./helpers/bot_listing_manager";
 import EnvType from "./enums/env_type";
 import EvalCommand from "./commands/admin/eval";
 import LocalizationManager from "./helpers/localization_manager";
@@ -22,6 +21,7 @@ import schedule from "node-schedule";
 import type KmqClient from "./kmq_client";
 
 import SIGINTHandler from "./events/process/SIGINT";
+import SpotifyManager from "./helpers/spotify_manager";
 import channelDeleteHandler from "./events/client/channelDelete";
 import connectHandler from "./events/client/connect";
 import debugHandler from "./events/client/debug";
@@ -248,10 +248,15 @@ export default class BotWorker extends BaseClusterWorker {
         logger.info("Registering process event handlers...");
         this.registerProcessEvents();
 
-        if (process.env.NODE_ENV === EnvType.PROD && this.clusterID === 0) {
-            logger.info("Initializing bot stats poster...");
-            const botListingManager = new BotListingManager();
-            botListingManager.start();
+        if (this.clusterID === 0) {
+            // if (process.env.NODE_ENV === EnvType.PROD && this.clusterID === 0) {
+            // logger.info("Initializing bot stats poster...");
+            // const botListingManager = new BotListingManager();
+            // botListingManager.start();
+
+            logger.info("Initializing Spotify manager...");
+            State.spotifyManager = new SpotifyManager();
+            State.spotifyManager.start();
         }
 
         if (

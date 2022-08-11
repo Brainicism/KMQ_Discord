@@ -42,15 +42,21 @@ export async function ensureVoiceConnection(session: Session): Promise<void> {
 /**
  * @param guildPreference - The GuildPreference
  * @param isPremium - Whether to include premium songs
+ * @param spotifySongs - Override filtered song list with Spotify songs from playlist
  * @returns an object containing the total number of available songs before and after limit based on the GameOptions
  */
 export async function getAvailableSongCount(
     guildPreference: GuildPreference,
-    isPremium: boolean
+    isPremium: boolean,
+    spotifySongs: Array<QueriedSong>
 ): Promise<{ count: number; countBeforeLimit: number }> {
     try {
         const { songs, countBeforeLimit } =
-            await SongSelector.getFilteredSongList(guildPreference, isPremium);
+            await SongSelector.getFilteredSongList(
+                guildPreference,
+                isPremium,
+                spotifySongs
+            );
 
         return {
             count: songs.size,
@@ -568,7 +574,7 @@ export function isPowerHour(): boolean {
     const dateSeed =
         (date.getDate() * 31 + date.getMonth()) * 31 + date.getFullYear();
 
-    // distribute between each third of the day to accomodate timezone differences
+    // distribute between each third of the day to accommodate timezone differences
     const powerHours = [
         md5Hash(dateSeed, 8) % 7,
         (md5Hash(dateSeed + 1, 8) % 7) + 8,

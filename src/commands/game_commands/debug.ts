@@ -37,7 +37,8 @@ export default class DebugCommand implements BaseCommand {
         const session = Session.getSession(message.guildID);
         const songCount = await getAvailableSongCount(
             guildPreference,
-            await isPremiumRequest(session, message.author.id)
+            await isPremiumRequest(session, message.author.id),
+            session?.spotifySongs
         );
 
         const fields: Array<Eris.EmbedField> = [];

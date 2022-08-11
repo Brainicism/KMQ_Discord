@@ -127,7 +127,8 @@ async function lookupByYoutubeID(
             ...(
                 await SongSelector.getFilteredSongList(
                     await GuildPreference.getGuildPreference(guildID),
-                    await isPremiumRequest(session, message.author.id)
+                    await isPremiumRequest(session, message.author.id),
+                    session?.spotifySongs
                 )
             ).songs,
         ]

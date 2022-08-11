@@ -7,6 +7,7 @@ import type ListeningSession from "./structures/listening_session";
 import type LocaleType from "./enums/locale_type";
 import type MatchedArtist from "./interfaces/matched_artist";
 import type RestartNotification from "./interfaces/restart_notification";
+import type SpotifyManager from "./helpers/spotify_manager";
 
 export default class State {
     static version: string;
@@ -29,6 +30,7 @@ export default class State {
     static artistToEntry: { [artistNameOrAlias: string]: MatchedArtist } = {};
     static topArtists: Array<MatchedArtist> = [];
     static restartNotification: RestartNotification;
+    static spotifyManager: SpotifyManager;
     static getGuildLocale(guildID: string): LocaleType {
         return State.locales[guildID] ?? DEFAULT_LOCALE;
     }

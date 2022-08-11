@@ -155,7 +155,8 @@ export async function calculateOptionsExpMultiplierInternal(
     const totalSongs = (
         await getAvailableSongCount(
             guildPreference,
-            await isPremiumRequest(session, playerID)
+            await isPremiumRequest(session, playerID),
+            session?.spotifySongs
         )
     ).count;
 

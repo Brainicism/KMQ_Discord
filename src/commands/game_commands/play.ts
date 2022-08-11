@@ -18,6 +18,7 @@ import {
     getCurrentVoiceMembers,
     getDebugLogHeader,
     getGameInfoMessage,
+    getInteractionOptionValueString,
     getUserVoiceChannel,
     sendErrorMessage,
     sendInfoMessage,
@@ -40,6 +41,7 @@ import dbContext from "../../database_context";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import type QueriedSong from "src/interfaces/queried_song";
 
 const logger = new IPCLogger("play");
 
@@ -187,7 +189,7 @@ export default class PlayCommand implements BaseCommand {
 
     validations = {
         minArgCount: 0,
-        maxArgCount: 2,
+        maxArgCount: 3,
         arguments: [],
     };
 
@@ -258,6 +260,18 @@ export default class PlayCommand implements BaseCommand {
                         "command.play.help.example.classic"
                     ),
                     type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+                    options: [
+                        {
+                            name: "spotify_playlist",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.play.help.interaction.spotifyPlaylist"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                        },
+                    ],
                 },
                 {
                     name: GameType.ELIMINATION,
@@ -281,6 +295,16 @@ export default class PlayCommand implements BaseCommand {
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .INTEGER,
                         },
+                        {
+                            name: "spotify_playlist",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.play.help.interaction.spotifyPlaylist"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                        },
                     ],
                 },
                 {
@@ -290,6 +314,18 @@ export default class PlayCommand implements BaseCommand {
                         "command.play.help.example.teams"
                     ),
                     type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+                    options: [
+                        {
+                            name: "spotify_playlist",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.play.help.interaction.spotifyPlaylist"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                        },
+                    ],
                 },
             ],
         },
@@ -304,13 +340,17 @@ export default class PlayCommand implements BaseCommand {
                 ? GameType.CLASSIC
                 : (interaction.data.options[0].name as GameType);
 
+        const dataOptions = interaction.data
+            .options[0] as Eris.InteractionDataOptionsSubCommand;
+
         await PlayCommand.startGame(
             messageContext,
             gameType,
-            interaction.data.options[0]["options"] &&
-                interaction.data.options[0]["options"].length > 0
-                ? interaction.data.options[0]["options"][0]["value"]
-                : null,
+            getInteractionOptionValueString(dataOptions.options, "lives"),
+            getInteractionOptionValueString(
+                dataOptions.options,
+                "spotify_playlist"
+            ),
             interaction
         );
     }
@@ -320,12 +360,29 @@ export default class PlayCommand implements BaseCommand {
             (parsedMessage.components[0]?.toLowerCase() as GameType) ??
             GameType.CLASSIC;
 
+        let livesArg: string = null;
+        let spotifyPlaylist: string;
+        if (gameType === GameType.ELIMINATION) {
+            for (const component of parsedMessage.components.slice(1, 3)) {
+                try {
+                    const url = new URL(component);
+                    spotifyPlaylist = component;
+                } catch (e) {
+                    livesArg = component;
+                }
+            }
+        } else {
+            try {
+                const url = new URL(parsedMessage.components.slice(-1)[0]);
+                spotifyPlaylist = parsedMessage.components.slice(-1)[0];
+            } catch (e) {}
+        }
+
         await PlayCommand.startGame(
             MessageContext.fromMessage(message),
             gameType,
-            parsedMessage.components.length <= 1
-                ? null
-                : parsedMessage.components[1]
+            livesArg,
+            spotifyPlaylist
         );
     };
 
@@ -333,6 +390,7 @@ export default class PlayCommand implements BaseCommand {
         messageContext: MessageContext,
         gameType: GameType,
         livesArg: string,
+        spotifyPlaylist: string,
         interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const guildID = messageContext.guildID;
@@ -427,6 +485,38 @@ export default class PlayCommand implements BaseCommand {
             }
         }
 
+        const isPremium = await areUsersPremium(
+            getCurrentVoiceMembers(voiceChannel.id).map((x) => x.id)
+        );
+
+        let spotifySongs: Array<QueriedSong>;
+        if (spotifyPlaylist?.startsWith("https://open.spotify.com/playlist/")) {
+            spotifyPlaylist = spotifyPlaylist.split(
+                "https://open.spotify.com/playlist/"
+            )[1];
+            if (spotifyPlaylist.includes("?si=")) {
+                spotifyPlaylist = spotifyPlaylist.split("?si=")[0];
+            }
+        } else {
+            spotifyPlaylist = null;
+        }
+
+        if (spotifyPlaylist) {
+            spotifySongs = await State.spotifyManager.getMatchedSpotifySongs(
+                spotifyPlaylist,
+                isPremium
+            );
+
+            if (spotifySongs.length === 0) {
+                sendErrorMessage(messageContext, {
+                    title: "Failed to fetch songs from Spotify",
+                    description: "No songs were matched.",
+                });
+
+                return;
+            }
+        }
+
         const prefix = process.env.BOT_PREFIX;
 
         // (1) No game session exists yet (create ELIMINATION, TEAMS, CLASSIC, or COMPETITION game), or
@@ -434,10 +524,6 @@ export default class PlayCommand implements BaseCommand {
         const textChannel = await fetchChannel(messageContext.textChannelID);
         const gameOwner = new KmqMember(messageContext.author.id);
         let gameSession: GameSession;
-        const isPremium = await areUsersPremium(
-            getCurrentVoiceMembers(voiceChannel.id).map((x) => x.id)
-        );
-
         if (gameType === GameType.TEAMS) {
             // (1) TEAMS game creation
             const startTitle = LocalizationManager.localizer.translate(
@@ -461,7 +547,9 @@ export default class PlayCommand implements BaseCommand {
                 textChannel.guild.id,
                 gameOwner,
                 gameType,
-                isPremium
+                isPremium,
+                null,
+                spotifySongs
             );
 
             logger.info(
@@ -579,7 +667,8 @@ export default class PlayCommand implements BaseCommand {
                 gameOwner,
                 gameType,
                 isPremium,
-                lives
+                lives,
+                spotifySongs
             );
         }
 

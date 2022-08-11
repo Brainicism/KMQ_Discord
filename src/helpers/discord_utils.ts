@@ -701,7 +701,8 @@ export async function generateOptionsMessage(
 
     const totalSongs = await getAvailableSongCount(
         guildPreference,
-        premiumRequest
+        premiumRequest,
+        session?.spotifySongs
     );
 
     if (totalSongs === null) {

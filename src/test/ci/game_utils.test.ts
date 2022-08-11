@@ -299,7 +299,8 @@ describe("game utils", () => {
                 await guildPreference.setLimit(0, limit);
                 const songCount = await getAvailableSongCount(
                     guildPreference,
-                    true
+                    true,
+                    []
                 );
 
                 assert.strictEqual(songCount.count, limit);
