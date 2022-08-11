@@ -22,6 +22,7 @@ import {
     getUserVoiceChannel,
     sendErrorMessage,
     sendInfoMessage,
+    tryCreateInteractionSuccessAcknowledgement,
     voicePermissionsCheck,
 } from "../../helpers/discord_utils";
 import { getMention, isValidURL, isWeekend } from "../../helpers/utils";
@@ -497,7 +498,13 @@ export default class PlayCommand implements BaseCommand {
 
         if (spotifyPlaylistID) {
             if (interaction) {
-                interaction.acknowledge();
+                await tryCreateInteractionSuccessAcknowledgement(
+                    interaction,
+                    LocalizationManager.localizer.translate(
+                        guildID,
+                        "command.play.spotify.parsing"
+                    )
+                );
 
                 // Send following messages directly instead of through interaction
                 interaction = null;
@@ -725,7 +732,7 @@ export default class PlayCommand implements BaseCommand {
             await gameSessions[guildID].endSession();
         }
 
-        State.gameSessions[guildID] = gameSession;
+        gameSessions[guildID] = gameSession;
 
         if (gameType !== GameType.TEAMS) {
             await sendBeginGameSessionMessage(

@@ -654,7 +654,8 @@
                 "noMatches": {
                     "description": "일치하는 노래가 없습니다.",
                     "title": "Spotify에서 노래를 가져오지 못했습니다"
-                }
+                },
+                "parsing": "Spotify 재생 목록을 구문 분석하는 중입니다..."
             },
             "team": {
                 "joinTeam": {

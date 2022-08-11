@@ -907,7 +907,8 @@ export async function generateOptionsMessage(
     }
 
     // Options excluded from embed fields since they are of higher importance (shown above them as part of the embed description)
-    const priorityOptions = PriorityGameOption.filter(
+    let priorityOptions: string;
+    priorityOptions = PriorityGameOption.filter(
         (option) => optionStrings[option]
     )
         .map(
@@ -931,6 +932,12 @@ export async function generateOptionsMessage(
     const fieldOptions = Object.keys(GameOptionCommand)
         .filter((option) => optionStrings[option as GameOption])
         .filter((option) => !PriorityGameOption.includes(option as GameOption));
+
+    // Move answer out from the priority options
+    if (isSpotify) {
+        priorityOptions = "";
+        fieldOptions.unshift(GameOption.ANSWER_TYPE);
+    }
 
     const ZERO_WIDTH_SPACE = "​";
 
@@ -1613,7 +1620,7 @@ export async function tryAutocompleteInteractionAcknowledge(
 export async function tryCreateInteractionSuccessAcknowledgement(
     interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
     title: string,
-    description: string,
+    description?: string,
     ephemeral: boolean = false
 ): Promise<void> {
     await sendMessage(

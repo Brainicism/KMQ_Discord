@@ -654,7 +654,8 @@
                 "noMatches": {
                     "description": "No songs were matched.",
                     "title": "Failed to fetch songs from Spotify"
-                }
+                },
+                "parsing": "Parsing Spotify playlist..."
             },
             "team": {
                 "joinTeam": {
