@@ -3,15 +3,25 @@ import { IPCLogger } from "../logger";
 import { cleanArtistName, cleanSongName } from "../structures/game_round";
 import Axios from "axios";
 import SongSelector from "../structures/song_selector";
+import State from "../state";
 import _ from "lodash";
 import dbContext from "../database_context";
 import type QueriedSong from "../interfaces/queried_song";
 
 const logger = new IPCLogger("spotify_manager");
 
+const BASE_URL = "https://api.spotify.com/v1";
+
 interface SpotifyTrack {
     name: string;
     artists: Array<string>;
+}
+
+interface MatchedPlaylist {
+    matchedSongs: Array<QueriedSong>;
+    playlistLength: number;
+    playlistName: string;
+    thumbnailUrl?: string;
 }
 
 export default class SpotifyManager {
@@ -35,16 +45,16 @@ export default class SpotifyManager {
     getMatchedSpotifySongs = async (
         playlistID: string,
         isPremium: boolean
-    ): Promise<Array<QueriedSong>> => {
+    ): Promise<MatchedPlaylist> => {
         if (
             !process.env.SPOTIFY_CLIENT_ID ||
             !process.env.SPOTIFY_CLIENT_SECRET
         ) {
-            return [];
+            return { playlistLength: 0, matchedSongs: [], playlistName: "" };
         }
 
         const spotifySongs: Array<SpotifyTrack> = [];
-        let requestURL = `https://api.spotify.com/v1/playlists/${playlistID}/tracks?${encodeURI(
+        let requestURL = `${BASE_URL}/playlists/${playlistID}/tracks?${encodeURI(
             "market=US&fields=items(track(name,artists(name))),next&limit=50"
         )}`;
 
@@ -70,7 +80,7 @@ export default class SpotifyManager {
 
                 requestURL = response.next;
             } catch (err) {
-                logger.error(`Failed fetching patrons. err = ${err}`);
+                logger.error(`Failed fetching Spotify playlist. err = ${err}`);
 
                 if (err.response) {
                     logger.info(err.response.data);
@@ -83,6 +93,22 @@ export default class SpotifyManager {
 
         const matchedSongs: Array<QueriedSong> = [];
         for (const song of spotifySongs) {
+            const aliasIDs = [];
+            for (const artist of song.artists) {
+                const lowercaseArtist = artist.toLocaleLowerCase();
+                const artistMapping = State.artistToEntry[lowercaseArtist];
+                if (artistMapping) {
+                    aliasIDs.push(artistMapping.id);
+                    if (State.aliases.artist[lowercaseArtist]) {
+                        for (const alias of State.aliases.artist[
+                            lowercaseArtist
+                        ]) {
+                            aliasIDs.push(State.artistToEntry[alias].id);
+                        }
+                    }
+                }
+            }
+
             const result = (await dbContext
                 .kmq("available_songs")
                 .join(
@@ -100,11 +126,15 @@ export default class SpotifyManager {
                     "=",
                     cleanSongName(song.name)
                 )
-                .andWhere(
-                    "alphanumeric_artist_name_en",
-                    "=",
-                    cleanArtistName(song.artists[0])
-                )
+                .andWhere((qb) => {
+                    qb.where(
+                        "alphanumeric_artist_name_en",
+                        "=",
+                        cleanArtistName(song.artists[0])
+                    )
+                        .orWhereIn("id_artist", aliasIDs)
+                        .orWhereIn("id_parentgroup", aliasIDs);
+                })
                 .andWhere(
                     "rank",
                     "<=",
@@ -116,12 +146,15 @@ export default class SpotifyManager {
 
             if (result) {
                 matchedSongs.push(result);
-            } else {
-                logger.info(`${song.name} - ${song.artists[0]}`);
             }
         }
 
-        return _.uniq(matchedSongs);
+        const metadata = await this.getPlaylistMetadata(playlistID);
+        return {
+            matchedSongs: _.uniq(matchedSongs),
+            playlistLength: spotifySongs.length,
+            ...metadata,
+        };
     };
 
     private refreshToken = async (): Promise<void> => {
@@ -132,6 +165,7 @@ export default class SpotifyManager {
             return;
         }
 
+        logger.info("Refreshing Spotify token...");
         const tokenURL = "https://accounts.spotify.com/api/token";
         const grantType = new URLSearchParams({
             grant_type: "client_credentials",
@@ -152,4 +186,38 @@ export default class SpotifyManager {
             logger.error(`Failed to refresh Spotify token. err = ${err}`);
         }
     };
+
+    private async getPlaylistMetadata(
+        playlistID: string
+    ): Promise<{ playlistName: string; thumbnailUrl: string }> {
+        const requestURL = `${BASE_URL}/playlists/${playlistID}`;
+        let thumbnailUrl: string;
+        let playlistName: string;
+        try {
+            const response = (
+                await Axios.get(requestURL, {
+                    headers: {
+                        Authorization: `Bearer ${this.accessToken}`,
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                })
+            ).data;
+
+            playlistName = response.name;
+            if (response.images.length > 0) {
+                thumbnailUrl = response.images[0].url;
+            }
+        } catch (err) {
+            logger.error(
+                `Failed fetching Spotify playlist metadata. err = ${err}`
+            );
+
+            if (err.response) {
+                logger.info(err.response.data);
+                logger.info(err.response.status);
+            }
+        }
+
+        return { playlistName, thumbnailUrl };
+    }
 }

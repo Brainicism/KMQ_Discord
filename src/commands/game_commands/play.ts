@@ -22,16 +22,16 @@ import {
     getUserVoiceChannel,
     sendErrorMessage,
     sendInfoMessage,
-    tryCreateInteractionSuccessAcknowledgement,
     voicePermissionsCheck,
 } from "../../helpers/discord_utils";
-import { getMention, isWeekend } from "../../helpers/utils";
+import { getMention, isValidURL, isWeekend } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameSession from "../../structures/game_session";
 import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";
 import KmqMember from "../../structures/kmq_member";
+import LimitCommand from "../game_options/limit";
 import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
@@ -225,20 +225,17 @@ export default class PlayCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,play elimination`",
-                explanation: LocalizationManager.localizer.translate(
-                    guildID,
-                    "command.play.help.example.elimination",
-                    {
-                        lives: `\`${ELIMINATION_DEFAULT_LIVES}\``,
-                    }
-                ),
-            },
-            {
                 example: "`,play teams`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.play.help.example.teams"
+                ),
+            },
+            {
+                example: "`,play https://open.spotify.com/playlist/...`",
+                explanation: LocalizationManager.localizer.translate(
+                    guildID,
+                    "command.play.help.example.spotify"
                 ),
             },
         ],
@@ -364,18 +361,14 @@ export default class PlayCommand implements BaseCommand {
         let spotifyPlaylist: string;
         if (gameType === GameType.ELIMINATION) {
             for (const component of parsedMessage.components.slice(1, 3)) {
-                try {
-                    const url = new URL(component);
+                if (isValidURL(component)) {
                     spotifyPlaylist = component;
-                } catch (e) {
+                } else {
                     livesArg = component;
                 }
             }
-        } else {
-            try {
-                const url = new URL(parsedMessage.components.slice(-1)[0]);
-                spotifyPlaylist = parsedMessage.components.slice(-1)[0];
-            } catch (e) {}
+        } else if (isValidURL(parsedMessage.components.slice(-1)[0])) {
+            spotifyPlaylist = parsedMessage.components.slice(-1)[0];
         }
 
         await PlayCommand.startGame(
@@ -489,32 +482,88 @@ export default class PlayCommand implements BaseCommand {
             getCurrentVoiceMembers(voiceChannel.id).map((x) => x.id)
         );
 
-        let spotifySongs: Array<QueriedSong>;
+        let matchedSpotifySongs: Array<QueriedSong>;
+        let spotifyPlaylistID: string;
         if (spotifyPlaylist?.startsWith("https://open.spotify.com/playlist/")) {
-            spotifyPlaylist = spotifyPlaylist.split(
+            spotifyPlaylistID = spotifyPlaylist.split(
                 "https://open.spotify.com/playlist/"
             )[1];
-            if (spotifyPlaylist.includes("?si=")) {
-                spotifyPlaylist = spotifyPlaylist.split("?si=")[0];
+            if (spotifyPlaylistID.includes("?si=")) {
+                spotifyPlaylistID = spotifyPlaylistID.split("?si=")[0];
             }
         } else {
-            spotifyPlaylist = null;
+            spotifyPlaylistID = null;
         }
 
-        if (spotifyPlaylist) {
-            spotifySongs = await State.spotifyManager.getMatchedSpotifySongs(
-                spotifyPlaylist,
+        if (spotifyPlaylistID) {
+            if (interaction) {
+                interaction.acknowledge();
+
+                // Send following messages directly instead of through interaction
+                interaction = null;
+            }
+
+            let playlistName: string;
+            let thumbnailUrl: string;
+            let playlistLength: number;
+            ({
+                matchedSongs: matchedSpotifySongs,
+                playlistLength,
+                playlistName,
+                thumbnailUrl,
+            } = await State.spotifyManager.getMatchedSpotifySongs(
+                spotifyPlaylistID,
                 isPremium
+            ));
+
+            logger.info(
+                `${getDebugLogHeader(messageContext)} | Matched ${
+                    matchedSpotifySongs.length
+                }/${playlistLength} Spotify songs`
             );
 
-            if (spotifySongs.length === 0) {
+            if (matchedSpotifySongs.length === 0) {
                 sendErrorMessage(messageContext, {
-                    title: "Failed to fetch songs from Spotify",
-                    description: "No songs were matched.",
+                    title: LocalizationManager.localizer.translate(
+                        guildID,
+                        "command.play.spotify.noMatches.title"
+                    ),
+                    description: LocalizationManager.localizer.translate(
+                        guildID,
+                        "command.play.spotify.noMatches.description"
+                    ),
                 });
 
                 return;
             }
+
+            await LimitCommand.updateOption(
+                messageContext,
+                0,
+                matchedSpotifySongs.length,
+                null,
+                false
+            );
+
+            await sendInfoMessage(messageContext, {
+                title: LocalizationManager.localizer.translate(
+                    guildID,
+                    "command.play.spotify.gameStarting.title",
+                    {
+                        playlistName,
+                    }
+                ),
+                description: LocalizationManager.localizer.translate(
+                    guildID,
+                    "command.play.spotify.gameStarting.description",
+                    {
+                        matchedCount: String(matchedSpotifySongs.length),
+                        totalCount: String(playlistLength),
+                    }
+                ),
+                url: spotifyPlaylist,
+                thumbnailUrl,
+            });
         }
 
         const prefix = process.env.BOT_PREFIX;
@@ -549,7 +598,7 @@ export default class PlayCommand implements BaseCommand {
                 gameType,
                 isPremium,
                 null,
-                spotifySongs
+                matchedSpotifySongs
             );
 
             logger.info(
@@ -558,19 +607,18 @@ export default class PlayCommand implements BaseCommand {
                 )} | Team game session created.`
             );
 
-            if (interaction) {
-                await tryCreateInteractionSuccessAcknowledgement(
-                    interaction,
-                    startTitle,
-                    gameInstructions
-                );
-            } else {
-                await sendInfoMessage(messageContext, {
+            await sendInfoMessage(
+                messageContext,
+                {
                     title: startTitle,
                     description: gameInstructions,
                     thumbnailUrl: KmqImages.HAPPY,
-                });
-            }
+                },
+                false,
+                null,
+                [],
+                interaction
+            );
         } else {
             // (1 and 2) CLASSIC, ELIMINATION, and COMPETITION game creation
             if (gameSessions[guildID]) {
@@ -668,7 +716,7 @@ export default class PlayCommand implements BaseCommand {
                 gameType,
                 isPremium,
                 lives,
-                spotifySongs
+                matchedSpotifySongs
             );
         }
 

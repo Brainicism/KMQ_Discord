@@ -22,7 +22,10 @@ const logger = new IPCLogger("release");
 export default class ReleaseCommand implements BaseCommand {
     aliases = ["releases", "videotype"];
 
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notSpotifyPrecheck },
+    ];
 
     validations = {
         minArgCount: 0,

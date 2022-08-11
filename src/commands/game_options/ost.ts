@@ -20,7 +20,10 @@ import type HelpDocumentation from "../../interfaces/help";
 const logger = new IPCLogger("ost");
 
 export default class OstCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notSpotifyPrecheck },
+    ];
 
     aliases = ["osts"];
 

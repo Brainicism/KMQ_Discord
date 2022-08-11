@@ -48,7 +48,7 @@ export async function ensureVoiceConnection(session: Session): Promise<void> {
 export async function getAvailableSongCount(
     guildPreference: GuildPreference,
     isPremium: boolean,
-    spotifySongs: Array<QueriedSong>
+    spotifySongs?: Array<QueriedSong>
 ): Promise<{ count: number; countBeforeLimit: number }> {
     try {
         const { songs, countBeforeLimit } =

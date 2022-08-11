@@ -862,16 +862,49 @@ export async function generateOptionsMessage(
         }
     }
 
-    const optionsOverview = LocalizationManager.localizer.translate(
-        messageContext.guildID,
-        "command.options.overview",
-        {
-            limit: bold(limit),
-            totalSongs: bold(
-                friendlyFormattedNumber(totalSongs.countBeforeLimit)
-            ),
+    // Special case: Options that rely on modifying queried songs are disabled when playing from Spotify
+    const isSpotify = session?.spotifySongs?.length > 0;
+    if (isSpotify) {
+        const disabledOptions = [
+            GameOption.LIMIT,
+            GameOption.GROUPS,
+            GameOption.GENDER,
+            GameOption.CUTOFF,
+            GameOption.ARTIST_TYPE,
+            GameOption.RELEASE_TYPE,
+            GameOption.LANGUAGE_TYPE,
+            GameOption.SUBUNIT_PREFERENCE,
+            GameOption.OST_PREFERENCE,
+            GameOption.EXCLUDE,
+            GameOption.INCLUDE,
+        ];
+
+        for (const option of disabledOptions) {
+            optionStrings[option] = null;
         }
-    );
+    }
+
+    let optionsOverview: string;
+    if (!isSpotify) {
+        optionsOverview = LocalizationManager.localizer.translate(
+            messageContext.guildID,
+            "command.options.overview",
+            {
+                limit: bold(limit),
+                totalSongs: bold(
+                    friendlyFormattedNumber(totalSongs.countBeforeLimit)
+                ),
+            }
+        );
+    } else {
+        optionsOverview = LocalizationManager.localizer.translate(
+            messageContext.guildID,
+            "command.options.spotify",
+            {
+                songCount: bold(limit),
+            }
+        );
+    }
 
     // Options excluded from embed fields since they are of higher importance (shown above them as part of the embed description)
     const priorityOptions = PriorityGameOption.filter(

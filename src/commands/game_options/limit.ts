@@ -185,7 +185,8 @@ export default class LimitCommand implements BaseCommand {
         messageContext: MessageContext,
         limitStart: number,
         limitEnd: number,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        sendOptions = true
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
@@ -242,16 +243,18 @@ export default class LimitCommand implements BaseCommand {
             );
         }
 
-        await sendOptionsMessage(
-            Session.getSession(messageContext.guildID),
-            messageContext,
-            guildPreference,
-            [{ option: GameOption.LIMIT, reset }],
-            null,
-            null,
-            null,
-            interaction
-        );
+        if (sendOptions) {
+            await sendOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.LIMIT, reset }],
+                null,
+                null,
+                null,
+                interaction
+            );
+        }
     }
 
     /**

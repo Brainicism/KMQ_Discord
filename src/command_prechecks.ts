@@ -364,4 +364,26 @@ export default class CommandPrechecks {
 
         return false;
     }
+
+    static notSpotifyPrecheck(precheckArgs: PrecheckArgs): boolean {
+        const { session, messageContext, interaction } = precheckArgs;
+        if (session && session.spotifySongs) {
+            const embedPayload: EmbedPayload = {
+                title: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "misc.preCheck.title"
+                ),
+                description: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "misc.preCheck.notSpotify"
+                ),
+            };
+
+            sendErrorMessage(messageContext, embedPayload, interaction);
+
+            return false;
+        }
+
+        return true;
+    }
 }

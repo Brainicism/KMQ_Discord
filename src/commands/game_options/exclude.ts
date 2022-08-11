@@ -23,7 +23,10 @@ const logger = new IPCLogger("excludes");
 export default class ExcludeCommand implements BaseCommand {
     aliases = ["excludes", "ignore", "ignores"];
 
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notSpotifyPrecheck },
+    ];
 
     help = (guildID: string): HelpDocumentation => ({
         name: "exclude",

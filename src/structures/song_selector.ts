@@ -405,7 +405,15 @@ export default class SongSelector {
 
             result = await queryBuilder;
         } else {
-            result = spotifySongs;
+            result = spotifySongs.filter(
+                (x) =>
+                    x.rank <=
+                    Number(
+                        premium
+                            ? process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST
+                            : process.env.AUDIO_SONGS_PER_ARTIST
+                    )
+            );
         }
 
         const count = result.length;
