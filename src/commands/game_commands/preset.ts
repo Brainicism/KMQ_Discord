@@ -144,7 +144,10 @@ export default class PresetCommand implements BaseCommand {
         ],
     };
 
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notSpotifyPrecheck },
+    ];
 
     help = (guildID: string): HelpDocumentation => ({
         name: "preset",
