@@ -330,7 +330,10 @@ export default class ProfileCommand implements BaseCommand {
             options: [
                 {
                     name: "user_mention",
-                    description: "command.profile.interaction.userMention",
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.profile.interaction.userMention"
+                    ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .MENTIONABLE,
                     required: false,
@@ -338,7 +341,10 @@ export default class ProfileCommand implements BaseCommand {
                 },
                 {
                     name: "user_id",
-                    description: "command.profile.interaction.userID",
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.profile.interaction.userID"
+                    ),
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: false,
                 },
