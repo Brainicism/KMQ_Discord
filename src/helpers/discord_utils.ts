@@ -1675,42 +1675,6 @@ export function sendPowerHourNotification(): void {
 }
 
 /**
- * @param options - The interaction options response
- * @param optionName - The option to retrieve value from
- * @returns the option value
- */
-export function getInteractionOptionValueInteger(
-    options: Eris.InteractionDataOptions[],
-    optionName: string
-): number {
-    if (!options) return null;
-    const option = options.find((x) => x.name === optionName);
-    if (option) {
-        return parseInt(option["value"], 10);
-    }
-
-    return null;
-}
-
-/**
- * @param options - The interaction options response
- * @param optionName - The option to retrieve value from
- * @returns the option value
- */
-export function getInteractionOptionValueString(
-    options: Eris.InteractionDataOptions[],
-    optionName: string
-): string {
-    if (!options) return null;
-    const option = options.find((x) => x.name === optionName);
-    if (option) {
-        return option["value"];
-    }
-
-    return null;
-}
-
-/**
  * @param interaction - The interaction
  * @returns the interaction key and value
  */
