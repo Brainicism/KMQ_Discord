@@ -643,6 +643,10 @@
                     "lives": "lives"
                 }
             },
+            "interaction": {
+                "teams_begin": "Starts a 'teams' game mode of KMQ. Can only be used after '/play teams create'",
+                "teams_create": "Prepares a 'teams' game mode of KMQ for team creation."
+            },
             "team": {
                 "joinTeam": {
                     "description": "Team leaders, type `{{join}} [team name]` to form a new team. Remember, switching teams mid-game will forfeit all your current score and EXP.",

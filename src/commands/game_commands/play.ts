@@ -18,6 +18,7 @@ import {
     getCurrentVoiceMembers,
     getDebugLogHeader,
     getGameInfoMessage,
+    getInteractionValue,
     getUserVoiceChannel,
     sendErrorMessage,
     sendInfoMessage,
@@ -40,6 +41,7 @@ import dbContext from "../../database_context";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import type TeamScoreboard from "../../structures/team_scoreboard";
 
 const logger = new IPCLogger("play");
 
@@ -289,7 +291,30 @@ export default class PlayCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.play.help.example.teams"
                     ),
-                    type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND_GROUP,
+                    options: [
+                        {
+                            name: "create",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.play.interaction.teams_create"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .SUB_COMMAND,
+                        },
+                        {
+                            name: "begin",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.play.interaction.teams_begin"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .SUB_COMMAND,
+                        },
+                    ],
                 },
             ],
         },
@@ -299,20 +324,22 @@ export default class PlayCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const gameType =
-            interaction.data.options.length === 0
-                ? GameType.CLASSIC
-                : (interaction.data.options[0].name as GameType);
-
-        await PlayCommand.startGame(
-            messageContext,
-            gameType,
-            interaction.data.options[0]["options"] &&
-                interaction.data.options[0]["options"].length > 0
-                ? interaction.data.options[0]["options"][0]["value"]
-                : null,
-            interaction
+        const { interactionKey, interactionValue } = getInteractionValue(
+            interaction.data.options
         );
+
+        const gameType = interactionKey.split(".")[0] as GameType;
+
+        if (interactionKey === "teams.begin") {
+            await PlayCommand.beginTeamsGame(messageContext);
+        } else {
+            await PlayCommand.startGame(
+                messageContext,
+                gameType,
+                interactionValue,
+                interaction
+            );
+        }
     }
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
@@ -328,6 +355,71 @@ export default class PlayCommand implements BaseCommand {
                 : parsedMessage.components[1]
         );
     };
+
+    static canStartTeamsGame(
+        gameSession: GameSession,
+        messageContext: MessageContext
+    ): boolean {
+        if (!gameSession || gameSession.gameType !== GameType.TEAMS) {
+            return false;
+        }
+
+        const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
+        if (teamScoreboard.getNumTeams() === 0) {
+            sendErrorMessage(messageContext, {
+                title: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "command.begin.ignored.title"
+                ),
+                description: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "command.begin.ignored.noTeam.description",
+                    { join: `${process.env.BOT_PREFIX}join` }
+                ),
+            });
+            return false;
+        }
+
+        return true;
+    }
+
+    static async beginTeamsGame(messageContext: MessageContext): Promise<void> {
+        const gameSession = Session.getSession(
+            messageContext.guildID
+        ) as GameSession;
+
+        if (!PlayCommand.canStartTeamsGame(gameSession, messageContext)) return;
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID
+        );
+
+        if (!gameSession.sessionInitialized) {
+            const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
+            const participantIDs = teamScoreboard
+                .getPlayers()
+                .map((player) => player.id);
+
+            const channel = State.client.getChannel(
+                messageContext.textChannelID
+            ) as Eris.TextChannel;
+
+            sendBeginGameSessionMessage(
+                channel.name,
+                getUserVoiceChannel(messageContext).name,
+                messageContext,
+                participantIDs,
+                guildPreference
+            );
+
+            gameSession.startRound(messageContext);
+
+            logger.info(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Teams game session starting)`
+            );
+        }
+    }
 
     static async startGame(
         messageContext: MessageContext,

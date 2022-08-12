@@ -1709,3 +1709,34 @@ export function getInteractionOptionValueString(
 
     return null;
 }
+
+/**
+ * @param options - The interaction options
+ * @returns the interaction key and value
+ */
+export function getInteractionValue(options: Eris.InteractionDataOptions[]): {
+    interactionKey: string;
+    interactionValue: any;
+} {
+    const keys = [];
+    let value = null;
+    while (options.length > 0) {
+        keys.push(options[0].name);
+        if (
+            options[0].type ===
+                Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND ||
+            options[0].type ===
+                Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND_GROUP
+        ) {
+            options = options[0].options;
+        } else {
+            value = options[0].value;
+            options = [];
+        }
+    }
+
+    return {
+        interactionKey: keys.join("."),
+        interactionValue: value,
+    };
+}
