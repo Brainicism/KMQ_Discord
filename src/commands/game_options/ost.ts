@@ -2,6 +2,7 @@ import { DEFAULT_OST_PREFERENCE } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
+    getInteractionValue,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
@@ -130,7 +131,7 @@ export default class OstCommand implements BaseCommand {
             messageContext.guildID
         );
 
-        const reset = ostPreference === null;
+        const reset = ostPreference == null;
         if (reset) {
             await guildPreference.reset(GameOption.OST_PREFERENCE);
             logger.info(
@@ -165,9 +166,8 @@ export default class OstCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const ostPreference = interaction.data.options[0][
-            "value"
-        ] as OstPreference;
+        const { interactionOptions } = getInteractionValue(interaction);
+        const ostPreference = interactionOptions["ost"] as OstPreference;
 
         await OstCommand.updateOption(
             messageContext,

@@ -2,6 +2,7 @@ import { DEFAULT_SEEK } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
+    getInteractionValue,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
@@ -130,7 +131,7 @@ export default class SeekCommand implements BaseCommand {
             messageContext.guildID
         );
 
-        const reset = seekType === null;
+        const reset = seekType == null;
         if (reset) {
             await guildPreference.reset(GameOption.SEEK_TYPE);
             logger.info(
@@ -165,7 +166,9 @@ export default class SeekCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const seekType = interaction.data.options[0]["value"] as SeekType;
+        const { interactionOptions } = getInteractionValue(interaction);
+
+        const seekType = interactionOptions["seek"] as SeekType;
 
         await SeekCommand.updateOption(messageContext, seekType, interaction);
     }

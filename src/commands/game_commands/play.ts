@@ -324,9 +324,8 @@ export default class PlayCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const { interactionKey, interactionValue } = getInteractionValue(
-            interaction.data.options
-        );
+        const { interactionKey, interactionOptions } =
+            getInteractionValue(interaction);
 
         const gameType = interactionKey.split(".")[0] as GameType;
 
@@ -336,7 +335,7 @@ export default class PlayCommand implements BaseCommand {
             await PlayCommand.startGame(
                 messageContext,
                 gameType,
-                interactionValue,
+                interactionOptions["lives"],
                 interaction
             );
         }

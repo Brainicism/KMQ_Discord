@@ -1,7 +1,7 @@
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
-    getInteractionOptionValueInteger,
+    getInteractionValue,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
@@ -117,7 +117,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
             messageContext.guildID
         );
 
-        const reset = timer === null;
+        const reset = timer == null;
         const session = Session.getSession(messageContext.guildID);
 
         if (reset) {
@@ -165,10 +165,8 @@ export default class GuessTimeoutCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const timer = getInteractionOptionValueInteger(
-            interaction.data.options,
-            "timer"
-        );
+        const { interactionOptions } = getInteractionValue(interaction);
+        const timer: number = interactionOptions["timer"];
 
         await GuessTimeoutCommand.updateOption(
             messageContext,

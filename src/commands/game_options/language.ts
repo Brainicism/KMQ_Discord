@@ -1,6 +1,7 @@
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
+    getInteractionValue,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
@@ -118,7 +119,7 @@ export default class LanguageCommand implements BaseCommand {
             messageContext.guildID
         );
 
-        const reset = languageType === null;
+        const reset = languageType == null;
         if (reset) {
             await guildPreference.reset(GameOption.LANGUAGE_TYPE);
             logger.info(
@@ -153,9 +154,9 @@ export default class LanguageCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const languageType = interaction.data.options[0][
-            "value"
-        ] as LanguageType;
+        const { interactionOptions } = getInteractionValue(interaction);
+
+        const languageType = interactionOptions["language"] as LanguageType;
 
         await LanguageCommand.updateOption(
             messageContext,

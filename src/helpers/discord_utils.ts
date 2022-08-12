@@ -1711,15 +1711,28 @@ export function getInteractionOptionValueString(
 }
 
 /**
- * @param options - The interaction options
+ * @param interaction - The interaction
  * @returns the interaction key and value
  */
-export function getInteractionValue(options: Eris.InteractionDataOptions[]): {
+export function getInteractionValue(interaction: Eris.CommandInteraction): {
     interactionKey: string;
-    interactionValue: any;
+    interactionOptions: {
+        [optionName: string]: any;
+    };
+    interactionName: string;
 } {
+    let options = interaction.data.options;
+
+    if (options == null) {
+        return {
+            interactionKey: null,
+            interactionOptions: {},
+            interactionName: null,
+        };
+    }
+
+    let parentInteractionDataName = null;
     const keys = [];
-    let value = null;
     while (options.length > 0) {
         keys.push(options[0].name);
         if (
@@ -1728,15 +1741,22 @@ export function getInteractionValue(options: Eris.InteractionDataOptions[]): {
             options[0].type ===
                 Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND_GROUP
         ) {
+            parentInteractionDataName = options[0].name;
             options = options[0].options;
         } else {
-            value = options[0].value;
-            options = [];
+            break;
         }
     }
 
     return {
         interactionKey: keys.join("."),
-        interactionValue: value,
+        interactionOptions: options.reduce(
+            (result, filter: Eris.InteractionDataOptionsWithValue) => {
+                result[filter.name] = filter.value;
+                return result;
+            },
+            {}
+        ),
+        interactionName: parentInteractionDataName,
     };
 }

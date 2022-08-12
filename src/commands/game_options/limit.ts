@@ -2,7 +2,7 @@ import { DEFAULT_LIMIT } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
-    getInteractionOptionValueInteger,
+    getInteractionValue,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
@@ -191,7 +191,7 @@ export default class LimitCommand implements BaseCommand {
             messageContext.guildID
         );
 
-        const reset = limitStart === null && limitEnd === null;
+        const reset = limitStart == null && limitEnd == null;
 
         if (reset) {
             await guildPreference.reset(GameOption.LIMIT);
@@ -262,27 +262,18 @@ export default class LimitCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const limitDataOption = interaction.data
-            .options[0] as Eris.InteractionDataOptionsSubCommand;
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
 
         let limitStart: number;
         let limitEnd: number;
-        if (limitDataOption.name === "range") {
-            limitStart = getInteractionOptionValueInteger(
-                limitDataOption.options,
-                "limit_start"
-            );
+        if (interactionName === "range") {
+            limitStart = interactionOptions["limit_start"];
 
-            limitEnd = getInteractionOptionValueInteger(
-                limitDataOption.options,
-                "limit_end"
-            );
+            limitEnd = interactionOptions["limit_end"];
         } else {
             limitStart = 0;
-            limitEnd = getInteractionOptionValueInteger(
-                limitDataOption.options,
-                "limit"
-            );
+            limitEnd = interactionOptions["limit"];
         }
 
         await LimitCommand.updateOption(
