@@ -1,7 +1,7 @@
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
-    getInteractionOptionValueInteger,
+    getInteractionValue,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
@@ -311,16 +311,12 @@ export default class DurationCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const action = interaction.data.options[0]
-            .name as DurationActionInternal;
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
 
-        const durationDataOption = interaction.data
-            .options[0] as Eris.InteractionDataOptionsSubCommand;
+        const action = interactionName as DurationActionInternal;
 
-        const durationValue = getInteractionOptionValueInteger(
-            durationDataOption.options,
-            "duration"
-        );
+        const durationValue = interactionOptions["duration"];
 
         await DurationCommand.updateOption(
             messageContext,

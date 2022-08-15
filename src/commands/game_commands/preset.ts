@@ -3,7 +3,7 @@ import { GameOptionInternalToGameOption, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
-    getInteractionOptionValueString,
+    getInteractionValue,
     sendErrorMessage,
     sendInfoMessage,
     sendOptionsMessage,
@@ -1072,29 +1072,20 @@ export default class PresetCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const presetAction = interaction.data.options[0].name as PresetAction;
+        const { interactionOptions, interactionName } =
+            getInteractionValue(interaction);
 
-        const dataOptions = interaction.data
-            .options[0] as Eris.InteractionDataOptionsSubCommand;
+        const presetAction = interactionName as PresetAction;
 
         let presetName: string = null;
         let presetUUID: string = null;
 
         if (presetAction === PresetAction.IMPORT) {
-            presetName = getInteractionOptionValueString(
-                dataOptions.options,
-                "new_preset_name"
-            );
+            presetName = interactionOptions["new_preset_name"];
 
-            presetUUID = getInteractionOptionValueString(
-                dataOptions.options,
-                "exported_preset"
-            );
+            presetUUID = interactionOptions["exported_preset"];
         } else {
-            presetName = getInteractionOptionValueString(
-                dataOptions.options,
-                "preset_name"
-            );
+            presetName = interactionOptions["preset_name"];
         }
 
         await PresetCommand.processPresetAction(

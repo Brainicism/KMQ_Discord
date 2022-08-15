@@ -2,6 +2,7 @@ import { DEFAULT_MULTIGUESS_TYPE } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
+    getInteractionValue,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
@@ -159,8 +160,10 @@ export default class MultiGuessCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const multiguessType = interaction.data.options[0][
-            "value"
+        const { interactionOptions } = getInteractionValue(interaction);
+
+        const multiguessType = interactionOptions[
+            "multiguess"
         ] as MultiGuessType;
 
         await MultiGuessCommand.updateOption(

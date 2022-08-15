@@ -2,6 +2,7 @@ import { DEFAULT_SUBUNIT_PREFERENCE } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
+    getInteractionValue,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
@@ -132,7 +133,7 @@ export default class SubunitsCommand implements BaseCommand {
             messageContext.guildID
         );
 
-        const reset = subunitsPreference === null;
+        const reset = subunitsPreference == null;
         if (reset) {
             await guildPreference.reset(GameOption.SUBUNIT_PREFERENCE);
             logger.info(
@@ -169,8 +170,10 @@ export default class SubunitsCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const subunitsPreference = interaction.data.options[0][
-            "value"
+        const { interactionOptions } = getInteractionValue(interaction);
+
+        const subunitsPreference = interactionOptions[
+            "subunits"
         ] as SubunitsPreference;
 
         await SubunitsCommand.updateOption(

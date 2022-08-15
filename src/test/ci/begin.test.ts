@@ -1,10 +1,10 @@
 import * as discordUtils from "../../helpers/discord_utils";
-import BeginCommand from "../../commands/game_commands/begin";
 import GameSession from "../../structures/game_session";
 import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";
 import KmqMember from "../../structures/kmq_member";
 import MessageContext from "../../structures/message_context";
+import PlayCommand from "../../commands/game_commands/play";
 import Player from "../../structures/player";
 import assert from "assert";
 import sinon from "sinon";
@@ -23,7 +23,10 @@ describe("begin command", () => {
     describe("can start", () => {
         describe("game session is null", () => {
             it("should return false", () => {
-                assert.strictEqual(BeginCommand.canStart(null, null), false);
+                assert.strictEqual(
+                    PlayCommand.canStartTeamsGame(null, null),
+                    false
+                );
             });
         });
 
@@ -46,12 +49,12 @@ describe("begin command", () => {
 
             it("should return false (classic games are not started using ,begin)", () => {
                 assert.strictEqual(
-                    BeginCommand.canStart(gameSession, null),
+                    PlayCommand.canStartTeamsGame(gameSession, null),
                     false
                 );
 
                 assert.strictEqual(
-                    BeginCommand.canStart(gameSession, null),
+                    PlayCommand.canStartTeamsGame(gameSession, null),
                     false
                 );
             });
@@ -76,7 +79,7 @@ describe("begin command", () => {
             describe("no teams have been added yet", () => {
                 it("should return false", () => {
                     assert.strictEqual(
-                        BeginCommand.canStart(
+                        PlayCommand.canStartTeamsGame(
                             gameSession,
                             new MessageContext("", gameStarter)
                         ),
@@ -94,7 +97,7 @@ describe("begin command", () => {
                     );
 
                     assert.strictEqual(
-                        BeginCommand.canStart(gameSession, null),
+                        PlayCommand.canStartTeamsGame(gameSession, null),
                         true
                     );
 
@@ -104,7 +107,7 @@ describe("begin command", () => {
                     );
 
                     assert.strictEqual(
-                        BeginCommand.canStart(gameSession, null),
+                        PlayCommand.canStartTeamsGame(gameSession, null),
                         true
                     );
                 });

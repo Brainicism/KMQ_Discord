@@ -2,6 +2,7 @@ import { EMBED_ERROR_COLOR } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
+    getInteractionValue,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
@@ -132,7 +133,7 @@ export default class ArtistTypeCommand implements BaseCommand {
             messageContext.guildID
         );
 
-        const reset = artistType === null;
+        const reset = artistType == null;
 
         if (reset) {
             await guildPreference.reset(GameOption.ARTIST_TYPE);
@@ -197,7 +198,8 @@ export default class ArtistTypeCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const artistType = interaction.data.options[0]["value"] as ArtistType;
+        const { interactionOptions } = getInteractionValue(interaction);
+        const artistType = interactionOptions["artisttype"] as ArtistType;
 
         await ArtistTypeCommand.updateOption(
             messageContext,

@@ -2,6 +2,7 @@ import { DEFAULT_LOCALE, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
+    getInteractionValue,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
 import Eris from "eris";
@@ -220,7 +221,8 @@ export default class LocaleTypeCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const localType = interaction.data.options[0]["value"] as LocaleType;
+        const { interactionOptions } = getInteractionValue(interaction);
+        const localType = interactionOptions["locale"] as LocaleType;
 
         await LocaleTypeCommand.updateLocaleMessage(
             messageContext,

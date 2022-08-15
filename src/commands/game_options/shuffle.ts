@@ -6,6 +6,7 @@ import {
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
+    getInteractionValue,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
@@ -171,7 +172,7 @@ export default class ShuffleCommand implements BaseCommand {
             }
         }
 
-        const reset = shuffleType === null;
+        const reset = shuffleType == null;
 
         if (reset) {
             await guildPreference.reset(GameOption.SHUFFLE_TYPE);
@@ -207,7 +208,8 @@ export default class ShuffleCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const shuffleType = interaction.data.options[0]["value"] as ShuffleType;
+        const { interactionOptions } = getInteractionValue(interaction);
+        const shuffleType = interactionOptions["shuffle"] as ShuffleType;
 
         await ShuffleCommand.updateOption(
             messageContext,

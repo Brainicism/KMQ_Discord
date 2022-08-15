@@ -643,6 +643,10 @@
                     "lives": "목슴"
                 }
             },
+            "interaction": {
+                "teams_begin": "KMQ의 '팀' 게임 모드를 시작합니다. '/play teams create' 이후에만 사용할 수 있습니다.",
+                "teams_create": "팀 생성을 위해 KMQ의 '팀' 게임 모드를 준비합니다"
+            },
             "team": {
                 "joinTeam": {
                     "description": "팀 리더는 `{{join}} [팀 이름]`을 입력하여 새 팀을 구성하세요. (게임 중간에 팀을 바꾸면 현재 점수와 경험치를 모두 잃게 됩니다.)",
