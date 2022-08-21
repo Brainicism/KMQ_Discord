@@ -635,12 +635,10 @@
                 "example": {
                     "classic": "Start a classic game of KMQ (type in your guess first to get a point)",
                     "elimination": "Start an elimination game of KMQ where each player starts with {{lives}} lives",
-                    "spotify": "Start a classic game of KMQ with songs exclusively from the given Spotify playlist",
                     "teams": "Split up into as many teams as you want and see who you can depend on to help you win!"
                 },
                 "interaction": {
-                    "lives": "Choose how many lives each player starts with",
-                    "spotifyPlaylist": "A link to a Spotify playlist to exclusively play songs from"
+                    "lives": "Choose how many lives each player starts with"
                 },
                 "usage": {
                     "lives": "lives"
@@ -649,17 +647,6 @@
             "interaction": {
                 "teams_begin": "Starts a 'teams' game mode of KMQ. Can only be used after '/play teams create'",
                 "teams_create": "Prepares a 'teams' game mode of KMQ for team creation."
-            },
-            "spotify": {
-                "gameStarting": {
-                    "description": "Matched `{{matchedCount}}/{{totalCount}}` songs.",
-                    "title": "Playing \"{{playlistName}}\" on Spotify"
-                },
-                "noMatches": {
-                    "description": "No songs were matched.",
-                    "title": "Failed to fetch songs from Spotify"
-                },
-                "parsing": "Parsing Spotify playlist..."
             },
             "team": {
                 "joinTeam": {
@@ -955,6 +942,17 @@
                     "slow": "Plays the song at a slow speed"
                 }
             }
+        },
+        "spotify": {
+            "matched": {
+                "description": "Matched `{{matchedCount}}/{{totalCount}}` songs.",
+                "title": "Playing \"{{playlistName}}\" on Spotify"
+            },
+            "noMatches": {
+                "description": "No songs were matched.",
+                "title": "Failed to fetch songs from Spotify"
+            },
+            "parsing": "Parsing Spotify playlist..."
         },
         "stats": {
             "description": "Detailed bot status: {{link}}",
