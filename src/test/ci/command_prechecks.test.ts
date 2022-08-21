@@ -568,9 +568,16 @@ describe("command prechecks", () => {
     });
 
     describe("notSpotifyPrecheck", () => {
-        const GUILD_ID = "abc";
+        const GUILD_ID = "123";
+
+        const guildPreference = new GuildPreference(GUILD_ID);
+        sinon.stub(guildPreference, "updateGuildPreferences");
+        sinon
+            .stub(GuildPreference, "getGuildPreference")
+            .returns(Promise.resolve(guildPreference));
+
         const session = new GameSession(
-            new GuildPreference(GUILD_ID),
+            guildPreference,
             "123",
             "1234",
             GUILD_ID,
@@ -581,9 +588,7 @@ describe("command prechecks", () => {
 
         describe("spotify playlist set", () => {
             it("should return false", async () => {
-                const guildPreference =
-                    await GuildPreference.getGuildPreference(GUILD_ID);
-                guildPreference.setSpotifyPlaylistMetadata({
+                await guildPreference.setSpotifyPlaylistMetadata({
                     playlistID: "id",
                     playlistName: "playlist",
                     playlistLength: 4,
@@ -602,9 +607,7 @@ describe("command prechecks", () => {
 
         describe("spotify playlist not set", () => {
             it("should return true", async () => {
-                const guildPreference =
-                    await GuildPreference.getGuildPreference(GUILD_ID);
-                guildPreference.setSpotifyPlaylistMetadata(null);
+                await guildPreference.setSpotifyPlaylistMetadata(null);
 
                 assert.strictEqual(
                     await CommandPrechecks.notSpotifyPrecheck({
