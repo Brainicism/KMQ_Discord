@@ -2,6 +2,7 @@ import { ExpBonusModifierValues } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
+    getInteractionValue,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import AnswerType from "../../enums/option_types/answer_type";
@@ -172,7 +173,7 @@ export default class AnswerCommand implements BaseCommand {
             messageContext.guildID
         );
 
-        const reset = answerType === null;
+        const reset = answerType == null;
 
         if (reset) {
             await guildPreference.reset(GameOption.ANSWER_TYPE);
@@ -208,7 +209,8 @@ export default class AnswerCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const answerType = interaction.data.options[0]["value"] as AnswerType;
+        const { interactionOptions } = getInteractionValue(interaction);
+        const answerType = interactionOptions["answer"] as AnswerType;
 
         await AnswerCommand.updateOption(
             messageContext,

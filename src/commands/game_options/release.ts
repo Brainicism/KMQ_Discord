@@ -2,6 +2,7 @@ import { DEFAULT_RELEASE_TYPE } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
+    getInteractionValue,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
@@ -124,7 +125,7 @@ export default class ReleaseCommand implements BaseCommand {
             messageContext.guildID
         );
 
-        const reset = releaseType === null;
+        const reset = releaseType == null;
         if (reset) {
             await guildPreference.reset(GameOption.RELEASE_TYPE);
             logger.info(
@@ -159,7 +160,9 @@ export default class ReleaseCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const releaseType = interaction.data.options[0]["value"] as ReleaseType;
+        const { interactionOptions } = getInteractionValue(interaction);
+
+        const releaseType = interactionOptions["release"] as ReleaseType;
 
         await ReleaseCommand.updateOption(
             messageContext,

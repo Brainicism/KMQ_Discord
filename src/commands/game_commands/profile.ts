@@ -4,6 +4,7 @@ import { IPCLogger } from "../../logger";
 import {
     fetchUser,
     getDebugLogHeader,
+    getInteractionValue,
     sendErrorMessage,
     sendInfoMessage,
     tryCreateInteractionErrorAcknowledgement,
@@ -330,7 +331,10 @@ export default class ProfileCommand implements BaseCommand {
             options: [
                 {
                     name: "user_mention",
-                    description: "command.profile.interaction.userMention",
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.profile.interaction.userMention"
+                    ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .MENTIONABLE,
                     required: false,
@@ -338,7 +342,10 @@ export default class ProfileCommand implements BaseCommand {
                 },
                 {
                     name: "user_id",
-                    description: "command.profile.interaction.userID",
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.profile.interaction.userID"
+                    ),
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: false,
                 },
@@ -436,7 +443,12 @@ export default class ProfileCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        if (interaction.data.options == null) {
+        const { interactionOptions } = getInteractionValue(interaction);
+
+        const userOverride =
+            interactionOptions["user_mention"] || interactionOptions["user_id"];
+
+        if (userOverride) {
             await ProfileCommand.handleProfileInteraction(
                 interaction,
                 messageContext.author.id,
@@ -445,7 +457,7 @@ export default class ProfileCommand implements BaseCommand {
         } else {
             await ProfileCommand.handleProfileInteraction(
                 interaction,
-                interaction.data.options[0]["value"],
+                userOverride,
                 false
             );
         }

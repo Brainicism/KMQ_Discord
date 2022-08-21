@@ -646,6 +646,10 @@
                     "lives": "lives"
                 }
             },
+            "interaction": {
+                "teams_begin": "Starts a 'teams' game mode of KMQ. Can only be used after '/play teams create'",
+                "teams_create": "Prepares a 'teams' game mode of KMQ for team creation."
+            },
             "spotify": {
                 "gameStarting": {
                     "description": "Matched `{{matchedCount}}/{{totalCount}}` songs.",
