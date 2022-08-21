@@ -1,6 +1,5 @@
 /* eslint-disable no-await-in-loop */
 import { IPCLogger } from "../logger";
-import { cleanArtistName, cleanSongName } from "../structures/game_round";
 import Axios from "axios";
 import SongSelector from "../structures/song_selector";
 import State from "../state";
@@ -130,21 +129,16 @@ export default class SpotifyManager {
                     "available_songs.id_artist",
                     "kpop_groups.id"
                 )
-                .select([
-                    ...SongSelector.getQueriedSongFields(),
-                    "alphanumeric_song_name_en",
-                    "alphanumeric_artist_name_en",
-                ])
-                .where(
-                    "alphanumeric_song_name_en",
-                    "=",
-                    cleanSongName(song.name)
-                )
+                .select(SongSelector.getQueriedSongFields())
+                .where((qb) => {
+                    qb.whereRaw("available_songs.song_name_en SOUNDS LIKE ?", [
+                        song.name,
+                    ]);
+                })
                 .andWhere((qb) => {
-                    qb.where(
-                        "alphanumeric_artist_name_en",
-                        "=",
-                        cleanArtistName(song.artists[0])
+                    qb.whereRaw(
+                        "available_songs.artist_name_en SOUNDS LIKE ?",
+                        [song.artists[0]]
                     )
                         .orWhereIn("id_artist", aliasIDs)
                         .orWhereIn("id_parentgroup", aliasIDs);
