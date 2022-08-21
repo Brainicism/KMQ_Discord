@@ -944,6 +944,20 @@
             }
         },
         "spotify": {
+            "help": {
+                "description": "Play songs exclusively from a given Spotify playlist",
+                "example": {
+                    "playlistURL": "Start playing songs from the playlist",
+                    "reset": "Stop playing from the playlist"
+                },
+                "interaction": {
+                    "playlistURL": "The playlist to retrieve songs from"
+                }
+            },
+            "invalidURL": {
+                "description": "The link to the playlist is invalid. Use `Share > Copy Link to Playlist` in Spotify to retrieve a valid link.",
+                "title": "Invalid Spotify Playlist URL"
+            },
             "matched": {
                 "description": "Matched `{{matchedCount}}/{{totalCount}}` songs.",
                 "title": "Playing \"{{playlistName}}\" on Spotify"

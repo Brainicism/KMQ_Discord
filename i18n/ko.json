@@ -944,6 +944,20 @@
             }
         },
         "spotify": {
+            "help": {
+                "description": "지정된 Spotify 재생 목록의 노래만 재생합니다.",
+                "example": {
+                    "playlistURL": "재생 목록의 노래 재생을 시작합니다.",
+                    "reset": "재생 목록에서 재생을 중지합니다."
+                },
+                "interaction": {
+                    "playlistURL": "노래를 검색할 재생 목록입니다."
+                }
+            },
+            "invalidURL": {
+                "description": "재생 목록에 대한 링크가 잘못되었습니다. Spotify에서 `공유하기 > 플레이리스트 링크 복사`를 사용하여 올바른 링크를 검색하십시오.",
+                "title": "Spotify 재생 목록 URL이 잘못되었습니다"
+            },
             "matched": {
                 "description": "`{{matchedCount}}/{{totalCount}}` 곡과 일치합니다.",
                 "title": "Spotify에서 \"{{playlistName}}\"을 재생하고 있습니다"
