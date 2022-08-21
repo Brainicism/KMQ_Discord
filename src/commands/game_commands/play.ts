@@ -18,21 +18,20 @@ import {
     getCurrentVoiceMembers,
     getDebugLogHeader,
     getGameInfoMessage,
-    getInteractionOptionValueString,
+    getInteractionValue,
     getUserVoiceChannel,
     sendErrorMessage,
     sendInfoMessage,
     tryCreateInteractionSuccessAcknowledgement,
     voicePermissionsCheck,
 } from "../../helpers/discord_utils";
-import { getMention, isValidURL, isWeekend } from "../../helpers/utils";
+import { getMention, isWeekend } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameSession from "../../structures/game_session";
 import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";
 import KmqMember from "../../structures/kmq_member";
-import LimitCommand from "../game_options/limit";
 import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
@@ -42,7 +41,7 @@ import dbContext from "../../database_context";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
-import type QueriedSong from "src/interfaces/queried_song";
+import type TeamScoreboard from "../../structures/team_scoreboard";
 
 const logger = new IPCLogger("play");
 
@@ -190,7 +189,7 @@ export default class PlayCommand implements BaseCommand {
 
     validations = {
         minArgCount: 0,
-        maxArgCount: 3,
+        maxArgCount: 2,
         arguments: [],
     };
 
@@ -226,17 +225,20 @@ export default class PlayCommand implements BaseCommand {
                 ),
             },
             {
+                example: "`,play elimination`",
+                explanation: LocalizationManager.localizer.translate(
+                    guildID,
+                    "command.play.help.example.elimination",
+                    {
+                        lives: `\`${ELIMINATION_DEFAULT_LIVES}\``,
+                    }
+                ),
+            },
+            {
                 example: "`,play teams`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.play.help.example.teams"
-                ),
-            },
-            {
-                example: "`,play https://open.spotify.com/playlist/...`",
-                explanation: LocalizationManager.localizer.translate(
-                    guildID,
-                    "command.play.help.example.spotify"
                 ),
             },
         ],
@@ -258,18 +260,6 @@ export default class PlayCommand implements BaseCommand {
                         "command.play.help.example.classic"
                     ),
                     type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
-                    options: [
-                        {
-                            name: "spotify_playlist",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.play.help.interaction.spotifyPlaylist"
-                                ),
-                            type: Eris.Constants.ApplicationCommandOptionTypes
-                                .STRING,
-                        },
-                    ],
                 },
                 {
                     name: GameType.ELIMINATION,
@@ -293,16 +283,6 @@ export default class PlayCommand implements BaseCommand {
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .INTEGER,
                         },
-                        {
-                            name: "spotify_playlist",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.play.help.interaction.spotifyPlaylist"
-                                ),
-                            type: Eris.Constants.ApplicationCommandOptionTypes
-                                .STRING,
-                        },
                     ],
                 },
                 {
@@ -311,17 +291,28 @@ export default class PlayCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.play.help.example.teams"
                     ),
-                    type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND_GROUP,
                     options: [
                         {
-                            name: "spotify_playlist",
+                            name: "create",
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.play.help.interaction.spotifyPlaylist"
+                                    "command.play.interaction.teams_create"
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
-                                .STRING,
+                                .SUB_COMMAND,
+                        },
+                        {
+                            name: "begin",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.play.interaction.teams_begin"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .SUB_COMMAND,
                         },
                     ],
                 },
@@ -333,24 +324,21 @@ export default class PlayCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const gameType =
-            interaction.data.options.length === 0
-                ? GameType.CLASSIC
-                : (interaction.data.options[0].name as GameType);
+        const { interactionKey, interactionOptions } =
+            getInteractionValue(interaction);
 
-        const dataOptions = interaction.data
-            .options[0] as Eris.InteractionDataOptionsSubCommand;
+        const gameType = interactionKey.split(".")[0] as GameType;
 
-        await PlayCommand.startGame(
-            messageContext,
-            gameType,
-            getInteractionOptionValueString(dataOptions.options, "lives"),
-            getInteractionOptionValueString(
-                dataOptions.options,
-                "spotify_playlist"
-            ),
-            interaction
-        );
+        if (interactionKey === "teams.begin") {
+            await PlayCommand.beginTeamsGame(messageContext);
+        } else {
+            await PlayCommand.startGame(
+                messageContext,
+                gameType,
+                interactionOptions["lives"],
+                interaction
+            );
+        }
     }
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
@@ -358,33 +346,84 @@ export default class PlayCommand implements BaseCommand {
             (parsedMessage.components[0]?.toLowerCase() as GameType) ??
             GameType.CLASSIC;
 
-        let livesArg: string = null;
-        let spotifyPlaylist: string;
-        if (gameType === GameType.ELIMINATION) {
-            for (const component of parsedMessage.components.slice(1, 3)) {
-                if (isValidURL(component)) {
-                    spotifyPlaylist = component;
-                } else {
-                    livesArg = component;
-                }
-            }
-        } else if (isValidURL(parsedMessage.components.slice(-1)[0])) {
-            spotifyPlaylist = parsedMessage.components.slice(-1)[0];
-        }
-
         await PlayCommand.startGame(
             MessageContext.fromMessage(message),
             gameType,
-            livesArg,
-            spotifyPlaylist
+            parsedMessage.components.length <= 1
+                ? null
+                : parsedMessage.components[1]
         );
     };
+
+    static canStartTeamsGame(
+        gameSession: GameSession,
+        messageContext: MessageContext
+    ): boolean {
+        if (!gameSession || gameSession.gameType !== GameType.TEAMS) {
+            return false;
+        }
+
+        const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
+        if (teamScoreboard.getNumTeams() === 0) {
+            sendErrorMessage(messageContext, {
+                title: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "command.begin.ignored.title"
+                ),
+                description: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "command.begin.ignored.noTeam.description",
+                    { join: `${process.env.BOT_PREFIX}join` }
+                ),
+            });
+            return false;
+        }
+
+        return true;
+    }
+
+    static async beginTeamsGame(messageContext: MessageContext): Promise<void> {
+        const gameSession = Session.getSession(
+            messageContext.guildID
+        ) as GameSession;
+
+        if (!PlayCommand.canStartTeamsGame(gameSession, messageContext)) return;
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID
+        );
+
+        if (!gameSession.sessionInitialized) {
+            const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
+            const participantIDs = teamScoreboard
+                .getPlayers()
+                .map((player) => player.id);
+
+            const channel = State.client.getChannel(
+                messageContext.textChannelID
+            ) as Eris.TextChannel;
+
+            sendBeginGameSessionMessage(
+                channel.name,
+                getUserVoiceChannel(messageContext).name,
+                messageContext,
+                participantIDs,
+                guildPreference
+            );
+
+            gameSession.startRound(messageContext);
+
+            logger.info(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Teams game session starting)`
+            );
+        }
+    }
 
     static async startGame(
         messageContext: MessageContext,
         gameType: GameType,
         livesArg: string,
-        spotifyPlaylist: string,
         interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const guildID = messageContext.guildID;
@@ -479,100 +518,6 @@ export default class PlayCommand implements BaseCommand {
             }
         }
 
-        const isPremium = await areUsersPremium(
-            getCurrentVoiceMembers(voiceChannel.id).map((x) => x.id)
-        );
-
-        let matchedSpotifySongs: Array<QueriedSong>;
-        let spotifyPlaylistID: string;
-        if (spotifyPlaylist?.startsWith("https://open.spotify.com/playlist/")) {
-            spotifyPlaylistID = spotifyPlaylist.split(
-                "https://open.spotify.com/playlist/"
-            )[1];
-            if (spotifyPlaylistID.includes("?si=")) {
-                spotifyPlaylistID = spotifyPlaylistID.split("?si=")[0];
-            }
-        } else {
-            spotifyPlaylistID = null;
-        }
-
-        if (spotifyPlaylistID) {
-            if (interaction) {
-                await tryCreateInteractionSuccessAcknowledgement(
-                    interaction,
-                    LocalizationManager.localizer.translate(
-                        guildID,
-                        "command.play.spotify.parsing"
-                    )
-                );
-
-                // Send following messages directly instead of through interaction
-                interaction = null;
-            }
-
-            let playlistName: string;
-            let thumbnailUrl: string;
-            let playlistLength: number;
-            ({
-                matchedSongs: matchedSpotifySongs,
-                playlistLength,
-                playlistName,
-                thumbnailUrl,
-            } = await State.spotifyManager.getMatchedSpotifySongs(
-                spotifyPlaylistID,
-                isPremium
-            ));
-
-            logger.info(
-                `${getDebugLogHeader(messageContext)} | Matched ${
-                    matchedSpotifySongs.length
-                }/${playlistLength} Spotify songs`
-            );
-
-            if (matchedSpotifySongs.length === 0) {
-                sendErrorMessage(messageContext, {
-                    title: LocalizationManager.localizer.translate(
-                        guildID,
-                        "command.play.spotify.noMatches.title"
-                    ),
-                    description: LocalizationManager.localizer.translate(
-                        guildID,
-                        "command.play.spotify.noMatches.description"
-                    ),
-                });
-
-                return;
-            }
-
-            await LimitCommand.updateOption(
-                messageContext,
-                0,
-                matchedSpotifySongs.length,
-                null,
-                false
-            );
-
-            await sendInfoMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
-                    guildID,
-                    "command.play.spotify.gameStarting.title",
-                    {
-                        playlistName,
-                    }
-                ),
-                description: LocalizationManager.localizer.translate(
-                    guildID,
-                    "command.play.spotify.gameStarting.description",
-                    {
-                        matchedCount: String(matchedSpotifySongs.length),
-                        totalCount: String(playlistLength),
-                    }
-                ),
-                url: spotifyPlaylist,
-                thumbnailUrl,
-            });
-        }
-
         const prefix = process.env.BOT_PREFIX;
 
         // (1) No game session exists yet (create ELIMINATION, TEAMS, CLASSIC, or COMPETITION game), or
@@ -580,6 +525,10 @@ export default class PlayCommand implements BaseCommand {
         const textChannel = await fetchChannel(messageContext.textChannelID);
         const gameOwner = new KmqMember(messageContext.author.id);
         let gameSession: GameSession;
+        const isPremium = await areUsersPremium(
+            getCurrentVoiceMembers(voiceChannel.id).map((x) => x.id)
+        );
+
         if (gameType === GameType.TEAMS) {
             // (1) TEAMS game creation
             const startTitle = LocalizationManager.localizer.translate(
@@ -603,9 +552,7 @@ export default class PlayCommand implements BaseCommand {
                 textChannel.guild.id,
                 gameOwner,
                 gameType,
-                isPremium,
-                null,
-                matchedSpotifySongs
+                isPremium
             );
 
             logger.info(
@@ -614,18 +561,19 @@ export default class PlayCommand implements BaseCommand {
                 )} | Team game session created.`
             );
 
-            await sendInfoMessage(
-                messageContext,
-                {
+            if (interaction) {
+                await tryCreateInteractionSuccessAcknowledgement(
+                    interaction,
+                    startTitle,
+                    gameInstructions
+                );
+            } else {
+                await sendInfoMessage(messageContext, {
                     title: startTitle,
                     description: gameInstructions,
                     thumbnailUrl: KmqImages.HAPPY,
-                },
-                false,
-                null,
-                [],
-                interaction
-            );
+                });
+            }
         } else {
             // (1 and 2) CLASSIC, ELIMINATION, and COMPETITION game creation
             if (gameSessions[guildID]) {
@@ -722,8 +670,7 @@ export default class PlayCommand implements BaseCommand {
                 gameOwner,
                 gameType,
                 isPremium,
-                lives,
-                matchedSpotifySongs
+                lives
             );
         }
 
@@ -732,7 +679,7 @@ export default class PlayCommand implements BaseCommand {
             await gameSessions[guildID].endSession();
         }
 
-        gameSessions[guildID] = gameSession;
+        State.gameSessions[guildID] = gameSession;
 
         if (gameType !== GameType.TEAMS) {
             await sendBeginGameSessionMessage(

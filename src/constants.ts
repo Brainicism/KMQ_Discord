@@ -178,6 +178,7 @@ export const enum GameOptionInternal {
     SUBUNIT_PREFERENCE = "subunitPreference",
     OST_PREFERENCE = "ostPreference",
     FORCE_PLAY_SONG = "forcePlaySongID",
+    SPOTIFY_PLAYLIST_METADATA = "spotifyPlaylistMetadata",
 }
 
 export const GameOptionInternalToGameOption: { [option: string]: string } = {
@@ -204,6 +205,8 @@ export const GameOptionInternalToGameOption: { [option: string]: string } = {
     [GameOptionInternal.SUBUNIT_PREFERENCE]: GameOption.SUBUNIT_PREFERENCE,
     [GameOptionInternal.OST_PREFERENCE]: GameOption.OST_PREFERENCE,
     [GameOptionInternal.FORCE_PLAY_SONG]: GameOption.FORCE_PLAY_SONG,
+    [GameOptionInternal.SPOTIFY_PLAYLIST_METADATA]:
+        GameOption.SPOTIFY_PLAYLIST_METADATA,
 };
 
 export const ROUND_MAX_RUNNERS_UP = 30;
@@ -236,3 +239,4 @@ export const DataFiles = {
 };
 
 export const PERMISSIONS_LINK = "https://www.youtube.com/watch?v=87GW0SmF5LI";
+export const SPOTIFY_BASE_URL = "https://open.spotify.com/playlist/";

@@ -42,21 +42,25 @@ export async function ensureVoiceConnection(session: Session): Promise<void> {
 /**
  * @param guildPreference - The GuildPreference
  * @param isPremium - Whether to include premium songs
- * @param spotifySongs - Override filtered song list with Spotify songs from playlist
  * @returns an object containing the total number of available songs before and after limit based on the GameOptions
  */
 export async function getAvailableSongCount(
     guildPreference: GuildPreference,
-    isPremium: boolean,
-    spotifySongs?: Array<QueriedSong>
+    isPremium: boolean
 ): Promise<{ count: number; countBeforeLimit: number }> {
     try {
+        if (guildPreference.isSpotifyPlaylist()) {
+            const spotifyMetadata =
+                guildPreference.getSpotifyPlaylistMetadata();
+
+            return {
+                count: spotifyMetadata.matchedSongsLength,
+                countBeforeLimit: spotifyMetadata.matchedSongsLength,
+            };
+        }
+
         const { songs, countBeforeLimit } =
-            await SongSelector.getFilteredSongList(
-                guildPreference,
-                isPremium,
-                spotifySongs
-            );
+            await SongSelector.getFilteredSongList(guildPreference, isPremium);
 
         return {
             count: songs.size,

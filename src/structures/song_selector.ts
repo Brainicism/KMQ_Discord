@@ -12,13 +12,20 @@ import LanguageType from "../enums/option_types/language_type";
 import OstPreference from "../enums/option_types/ost_preference";
 import ReleaseType from "../enums/option_types/release_type";
 import ShuffleType from "../enums/option_types/shuffle_type";
+import State from "../state";
 import SubunitsPreference from "../enums/option_types/subunit_preference";
 import dbContext from "../database_context";
+import type { MatchedPlaylist } from "../helpers/spotify_manager";
 import type GuildPreference from "./guild_preference";
 import type QueriedSong from "../interfaces/queried_song";
 import type UniqueSongCounter from "../interfaces/unique_song_counter";
 
 const logger = new IPCLogger("song_selector");
+
+interface QueriedSongList {
+    songs: Set<QueriedSong>;
+    countBeforeLimit: number;
+}
 
 export default class SongSelector {
     /** List of songs matching the user's game options */
@@ -192,13 +199,22 @@ export default class SongSelector {
     async reloadSongs(
         guildPreference: GuildPreference,
         isPremium: boolean,
-        spotifySongs?: Array<QueriedSong>
+        songList?: MatchedPlaylist
     ): Promise<void> {
-        this.filteredSongs = await SongSelector.getFilteredSongList(
-            guildPreference,
-            isPremium,
-            spotifySongs
-        );
+        if (guildPreference.isSpotifyPlaylist()) {
+            const playlist = await SongSelector.getSpotifySongList(
+                guildPreference,
+                isPremium,
+                songList
+            );
+
+            this.filteredSongs = playlist as QueriedSongList;
+        } else {
+            this.filteredSongs = await SongSelector.getFilteredSongList(
+                guildPreference,
+                isPremium
+            );
+        }
     }
 
     /**
@@ -229,192 +245,164 @@ export default class SongSelector {
      * Returns a list of songs from the data store, narrowed down by the specified game options
      * @param guildPreference - The GuildPreference
      * @param premium - Whether the game is premium
-     * @param spotifySongs - Override filtered song list with Spotify songs from playlist
      * @returns a list of songs, as well as the number of songs before the filter option was applied
      */
     static async getFilteredSongList(
         guildPreference: GuildPreference,
-        premium: boolean = false,
-        spotifySongs?: Array<QueriedSong>
+        premium: boolean = false
     ): Promise<{ songs: Set<QueriedSong>; countBeforeLimit: number }> {
         const gameOptions = guildPreference.gameOptions;
         let result: Array<QueriedSong> = [];
-        if (!spotifySongs) {
-            let queryBuilder = dbContext
-                .kmq("available_songs")
-                .select(SongSelector.getQueriedSongFields());
+        let queryBuilder = dbContext
+            .kmq("available_songs")
+            .select(SongSelector.getQueriedSongFields());
 
-            if (gameOptions.forcePlaySongID) {
-                queryBuilder = queryBuilder.where(
-                    "link",
-                    "=",
-                    gameOptions.forcePlaySongID
-                );
-                return {
-                    songs: new Set(await queryBuilder),
-                    countBeforeLimit: 1,
-                };
-            }
+        if (gameOptions.forcePlaySongID) {
+            queryBuilder = queryBuilder.where(
+                "link",
+                "=",
+                gameOptions.forcePlaySongID
+            );
+            return {
+                songs: new Set(await queryBuilder),
+                countBeforeLimit: 1,
+            };
+        }
 
-            let subunits = [];
-            let collabGroupContainingSubunit = [];
-            if (gameOptions.subunitPreference === SubunitsPreference.INCLUDE) {
-                subunits = (
-                    await dbContext
-                        .kpopVideos("app_kpop_group")
-                        .select("id")
-                        .whereIn(
-                            "id_parentgroup",
-                            guildPreference.getGroupIDs()
-                        )
-                ).map((x) => x["id"]);
+        let subunits = [];
+        let collabGroupContainingSubunit = [];
+        if (gameOptions.subunitPreference === SubunitsPreference.INCLUDE) {
+            subunits = (
+                await dbContext
+                    .kpopVideos("app_kpop_group")
+                    .select("id")
+                    .whereIn("id_parentgroup", guildPreference.getGroupIDs())
+            ).map((x) => x["id"]);
 
-                collabGroupContainingSubunit = (
-                    await dbContext
-                        // collab matches
-                        .kpopVideos("app_kpop_agrelation")
-                        .select(["id", "name"])
-                        .distinct("id", "name")
-                        .join("app_kpop_group", function join() {
-                            this.on(
-                                "app_kpop_agrelation.id_subgroup",
-                                "=",
-                                "app_kpop_group.id"
-                            );
-                        })
-                        .whereIn("app_kpop_agrelation.id_artist", subunits)
-                        .andWhere("app_kpop_group.is_collab", "y")
-                ).map((x) => x["id"]);
-            }
+            collabGroupContainingSubunit = (
+                await dbContext
+                    // collab matches
+                    .kpopVideos("app_kpop_agrelation")
+                    .select(["id", "name"])
+                    .distinct("id", "name")
+                    .join("app_kpop_group", function join() {
+                        this.on(
+                            "app_kpop_agrelation.id_subgroup",
+                            "=",
+                            "app_kpop_group.id"
+                        );
+                    })
+                    .whereIn("app_kpop_agrelation.id_artist", subunits)
+                    .andWhere("app_kpop_group.is_collab", "y")
+            ).map((x) => x["id"]);
+        }
 
-            queryBuilder = queryBuilder.where(function artistFilter() {
-                this.where(function includesInnerArtistFilter() {
-                    if (!guildPreference.isGroupsMode()) {
-                        if (
-                            gameOptions.subunitPreference ===
-                            SubunitsPreference.EXCLUDE
-                        ) {
-                            this.whereIn(
-                                "id_artist",
-                                guildPreference.getIncludesGroupIDs()
-                            );
-                        } else {
-                            this.andWhere(function () {
-                                this.whereIn(
-                                    "id_artist",
-                                    guildPreference.getIncludesGroupIDs()
-                                ).orWhereIn(
-                                    "id_parent_artist",
-                                    guildPreference.getIncludesGroupIDs()
-                                );
-                            });
-                        }
-                    }
-                }).orWhere(function mainInnerArtistFilter() {
-                    this.whereNotIn(
-                        "id_artist",
-                        guildPreference.getExcludesGroupIDs()
-                    );
-                    if (!guildPreference.isGroupsMode()) {
-                        const gender = guildPreference.isGenderAlternating()
-                            ? [Gender.MALE, Gender.FEMALE, Gender.COED]
-                            : gameOptions.gender;
-
-                        this.whereIn("members", gender);
-
-                        // filter by artist type only in non-groups
-                        if (gameOptions.artistType !== ArtistType.BOTH) {
-                            this.andWhere(
-                                "issolo",
-                                "=",
-                                gameOptions.artistType === ArtistType.SOLOIST
-                                    ? "y"
-                                    : "n"
-                            );
-                        }
-                    } else if (
+        queryBuilder = queryBuilder.where(function artistFilter() {
+            this.where(function includesInnerArtistFilter() {
+                if (!guildPreference.isGroupsMode()) {
+                    if (
                         gameOptions.subunitPreference ===
                         SubunitsPreference.EXCLUDE
                     ) {
                         this.whereIn(
                             "id_artist",
-                            guildPreference.getGroupIDs()
+                            guildPreference.getIncludesGroupIDs()
                         );
                     } else {
                         this.andWhere(function () {
                             this.whereIn(
                                 "id_artist",
-                                guildPreference.getGroupIDs()
-                            )
-                                .orWhereIn(
-                                    "id_parent_artist",
-                                    guildPreference.getGroupIDs()
-                                )
-                                .orWhereIn(
-                                    "id_artist",
-                                    collabGroupContainingSubunit
-                                );
+                                guildPreference.getIncludesGroupIDs()
+                            ).orWhereIn(
+                                "id_parent_artist",
+                                guildPreference.getIncludesGroupIDs()
+                            );
                         });
                     }
-                });
+                }
+            }).orWhere(function mainInnerArtistFilter() {
+                this.whereNotIn(
+                    "id_artist",
+                    guildPreference.getExcludesGroupIDs()
+                );
+                if (!guildPreference.isGroupsMode()) {
+                    const gender = guildPreference.isGenderAlternating()
+                        ? [Gender.MALE, Gender.FEMALE, Gender.COED]
+                        : gameOptions.gender;
+
+                    this.whereIn("members", gender);
+
+                    // filter by artist type only in non-groups
+                    if (gameOptions.artistType !== ArtistType.BOTH) {
+                        this.andWhere(
+                            "issolo",
+                            "=",
+                            gameOptions.artistType === ArtistType.SOLOIST
+                                ? "y"
+                                : "n"
+                        );
+                    }
+                } else if (
+                    gameOptions.subunitPreference === SubunitsPreference.EXCLUDE
+                ) {
+                    this.whereIn("id_artist", guildPreference.getGroupIDs());
+                } else {
+                    this.andWhere(function () {
+                        this.whereIn("id_artist", guildPreference.getGroupIDs())
+                            .orWhereIn(
+                                "id_parent_artist",
+                                guildPreference.getGroupIDs()
+                            )
+                            .orWhereIn(
+                                "id_artist",
+                                collabGroupContainingSubunit
+                            );
+                    });
+                }
             });
+        });
 
-            if (gameOptions.languageType === LanguageType.KOREAN) {
-                for (const tag of FOREIGN_LANGUAGE_TAGS) {
-                    queryBuilder = queryBuilder.where(
-                        "tags",
-                        "NOT LIKE",
-                        `%${tag}%`
-                    );
-                }
+        if (gameOptions.languageType === LanguageType.KOREAN) {
+            for (const tag of FOREIGN_LANGUAGE_TAGS) {
+                queryBuilder = queryBuilder.where(
+                    "tags",
+                    "NOT LIKE",
+                    `%${tag}%`
+                );
             }
-
-            if (gameOptions.ostPreference === OstPreference.EXCLUDE) {
-                queryBuilder = queryBuilder.where("tags", "NOT LIKE", "%o%");
-            } else if (gameOptions.ostPreference === OstPreference.EXCLUSIVE) {
-                queryBuilder = queryBuilder.where("tags", "LIKE", "%o%");
-            }
-
-            if (gameOptions.releaseType === ReleaseType.OFFICIAL) {
-                queryBuilder = queryBuilder.where("vtype", "=", "main");
-                for (const tag of NON_OFFICIAL_VIDEO_TAGS) {
-                    queryBuilder = queryBuilder.where(
-                        "tags",
-                        "NOT LIKE",
-                        `%${tag}%`
-                    );
-                }
-            }
-
-            queryBuilder = queryBuilder
-                .andWhere(
-                    "publishedon",
-                    ">=",
-                    `${gameOptions.beginningYear}-01-01`
-                )
-                .andWhere("publishedon", "<=", `${gameOptions.endYear}-12-31`)
-                .orderBy("views", "DESC");
-
-            queryBuilder = queryBuilder.andWhere(
-                "rank",
-                "<=",
-                premium
-                    ? process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST
-                    : process.env.AUDIO_SONGS_PER_ARTIST
-            );
-
-            result = await queryBuilder;
-        } else {
-            result = spotifySongs.filter(
-                (x) =>
-                    x.rank <=
-                    Number(
-                        premium
-                            ? process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST
-                            : process.env.AUDIO_SONGS_PER_ARTIST
-                    )
-            );
         }
+
+        if (gameOptions.ostPreference === OstPreference.EXCLUDE) {
+            queryBuilder = queryBuilder.where("tags", "NOT LIKE", "%o%");
+        } else if (gameOptions.ostPreference === OstPreference.EXCLUSIVE) {
+            queryBuilder = queryBuilder.where("tags", "LIKE", "%o%");
+        }
+
+        if (gameOptions.releaseType === ReleaseType.OFFICIAL) {
+            queryBuilder = queryBuilder.where("vtype", "=", "main");
+            for (const tag of NON_OFFICIAL_VIDEO_TAGS) {
+                queryBuilder = queryBuilder.where(
+                    "tags",
+                    "NOT LIKE",
+                    `%${tag}%`
+                );
+            }
+        }
+
+        queryBuilder = queryBuilder
+            .andWhere("publishedon", ">=", `${gameOptions.beginningYear}-01-01`)
+            .andWhere("publishedon", "<=", `${gameOptions.endYear}-12-31`)
+            .orderBy("views", "DESC");
+
+        queryBuilder = queryBuilder.andWhere(
+            "rank",
+            "<=",
+            premium
+                ? process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST
+                : process.env.AUDIO_SONGS_PER_ARTIST
+        );
+
+        result = await queryBuilder;
 
         const count = result.length;
         result = result.slice(gameOptions.limitStart, gameOptions.limitEnd);
@@ -446,6 +434,38 @@ export default class SongSelector {
         return {
             songs: new Set(result),
             countBeforeLimit: count,
+        };
+    }
+
+    static async getSpotifySongList(
+        guildPreference: GuildPreference,
+        isPremium: boolean,
+        songList?: MatchedPlaylist
+    ): Promise<QueriedSongList & MatchedPlaylist> {
+        const { matchedSongs, metadata } = !songList
+            ? await State.spotifyManager.getMatchedSpotifySongs(
+                  guildPreference.getSpotifyPlaylistMetadata()?.playlistID,
+                  isPremium
+              )
+            : songList;
+
+        const result = new Set(
+            matchedSongs.filter(
+                (x) =>
+                    x.rank <=
+                    Number(
+                        isPremium
+                            ? process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST
+                            : process.env.AUDIO_SONGS_PER_ARTIST
+                    )
+            )
+        );
+
+        return {
+            songs: result,
+            countBeforeLimit: result.size,
+            matchedSongs,
+            metadata,
         };
     }
 }

@@ -11,6 +11,7 @@ import {
     EPHEMERAL_MESSAGE_FLAG,
     KmqImages,
     PERMISSIONS_LINK,
+    SPOTIFY_BASE_URL,
 } from "../constants";
 import { IPCLogger } from "../logger";
 import {
@@ -701,8 +702,7 @@ export async function generateOptionsMessage(
 
     const totalSongs = await getAvailableSongCount(
         guildPreference,
-        premiumRequest,
-        session?.spotifySongs
+        premiumRequest
     );
 
     if (totalSongs === null) {
@@ -749,6 +749,11 @@ export async function generateOptionsMessage(
     optionStrings[GameOption.SEEK_TYPE] = gameOptions.seekType;
     optionStrings[GameOption.GUESS_MODE_TYPE] = gameOptions.guessModeType;
     optionStrings[GameOption.SPECIAL_TYPE] = gameOptions.specialType;
+    optionStrings[GameOption.SPOTIFY_PLAYLIST_METADATA] =
+        gameOptions.spotifyPlaylistMetadata
+            ? `[${gameOptions.spotifyPlaylistMetadata.playlistName}](${SPOTIFY_BASE_URL}${gameOptions.spotifyPlaylistMetadata.playlistID})`
+            : null;
+
     optionStrings[GameOption.TIMER] = guildPreference.isGuessTimeoutSet()
         ? LocalizationManager.localizer.translate(
               guildID,
@@ -777,15 +782,18 @@ export async function generateOptionsMessage(
         ? guildPreference.getDisplayedIncludesGroupNames()
         : null;
 
+    const conflictString = LocalizationManager.localizer.translate(
+        guildID,
+        "misc.conflict"
+    );
+
     const generateConflictingCommandEntry = (
         commandValue: string,
         conflictingOption: string
     ): string =>
         `${strikethrough(commandValue)} (\`${
             process.env.BOT_PREFIX
-        }${conflictingOption}\` ${italicize(
-            LocalizationManager.localizer.translate(guildID, "misc.conflict")
-        )})`;
+        }${conflictingOption}\` ${italicize(conflictString)})`;
 
     const isEliminationMode =
         session?.isGameSession() && session.gameType === GameType.ELIMINATION;
@@ -815,7 +823,10 @@ export async function generateOptionsMessage(
             for (const option of ConflictingGameOptions[
                 gameOptionConflictCheck.gameOption
             ]) {
-                if (optionStrings[option]) {
+                if (
+                    optionStrings[option] &&
+                    !optionStrings[option].includes(conflictString)
+                ) {
                     optionStrings[option] = generateConflictingCommandEntry(
                         optionStrings[option],
                         GameOptionCommand[gameOptionConflictCheck.gameOption]
@@ -863,7 +874,7 @@ export async function generateOptionsMessage(
     }
 
     // Special case: Options that rely on modifying queried songs are disabled when playing from Spotify
-    const isSpotify = session?.spotifySongs?.length > 0;
+    const isSpotify = guildPreference.isSpotifyPlaylist();
     if (isSpotify) {
         const disabledOptions = [
             GameOption.LIMIT,
@@ -937,6 +948,7 @@ export async function generateOptionsMessage(
     if (isSpotify) {
         priorityOptions = "";
         fieldOptions.unshift(GameOption.ANSWER_TYPE);
+        fieldOptions.unshift(GameOption.SPOTIFY_PLAYLIST_METADATA);
     }
 
     const ZERO_WIDTH_SPACE = "​";
@@ -1620,7 +1632,7 @@ export async function tryAutocompleteInteractionAcknowledge(
 export async function tryCreateInteractionSuccessAcknowledgement(
     interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
     title: string,
-    description?: string,
+    description: string,
     ephemeral: boolean = false
 ): Promise<void> {
     await sendMessage(
@@ -1716,37 +1728,52 @@ export function sendPowerHourNotification(): void {
 }
 
 /**
- * @param options - The interaction options response
- * @param optionName - The option to retrieve value from
- * @returns the option value
+ * @param interaction - The interaction
+ * @returns the interaction key and value
  */
-export function getInteractionOptionValueInteger(
-    options: Eris.InteractionDataOptions[],
-    optionName: string
-): number {
-    if (!options) return null;
-    const option = options.find((x) => x.name === optionName);
-    if (option) {
-        return parseInt(option["value"], 10);
+export function getInteractionValue(interaction: Eris.CommandInteraction): {
+    interactionKey: string;
+    interactionOptions: {
+        [optionName: string]: any;
+    };
+    interactionName: string;
+} {
+    let options = interaction.data.options;
+
+    if (options == null) {
+        return {
+            interactionKey: null,
+            interactionOptions: {},
+            interactionName: null,
+        };
     }
 
-    return null;
-}
-
-/**
- * @param options - The interaction options response
- * @param optionName - The option to retrieve value from
- * @returns the option value
- */
-export function getInteractionOptionValueString(
-    options: Eris.InteractionDataOptions[],
-    optionName: string
-): string {
-    if (!options) return null;
-    const option = options.find((x) => x.name === optionName);
-    if (option) {
-        return option["value"];
+    let parentInteractionDataName = null;
+    const keys = [];
+    while (options.length > 0) {
+        keys.push(options[0].name);
+        if (
+            options[0].type ===
+                Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND ||
+            options[0].type ===
+                Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND_GROUP
+        ) {
+            parentInteractionDataName = options[0].name;
+            options = options[0].options;
+        } else {
+            break;
+        }
     }
 
-    return null;
+    return {
+        interactionKey: keys.join("."),
+        interactionOptions: options.reduce(
+            (result, filter: Eris.InteractionDataOptionsWithValue) => {
+                result[filter.name] = filter.value;
+                return result;
+            },
+            {}
+        ),
+        interactionName: parentInteractionDataName,
+    };
 }

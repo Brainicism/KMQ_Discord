@@ -8,6 +8,7 @@ import {
 import { getTimeUntilRestart } from "./helpers/management_utils";
 import { isUserPremium } from "./helpers/game_utils";
 import GameType from "./enums/game_type";
+import GuildPreference from "./structures/guild_preference";
 import KmqConfiguration from "./kmq_configuration";
 import LocaleType from "./enums/locale_type";
 import LocalizationManager from "./helpers/localization_manager";
@@ -365,9 +366,15 @@ export default class CommandPrechecks {
         return false;
     }
 
-    static notSpotifyPrecheck(precheckArgs: PrecheckArgs): boolean {
-        const { session, messageContext, interaction } = precheckArgs;
-        if (session && session.spotifySongs) {
+    static async notSpotifyPrecheck(
+        precheckArgs: PrecheckArgs
+    ): Promise<boolean> {
+        const { messageContext, interaction } = precheckArgs;
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID
+        );
+
+        if (guildPreference.isSpotifyPlaylist()) {
             const embedPayload: EmbedPayload = {
                 title: LocalizationManager.localizer.translate(
                     messageContext.guildID,
@@ -380,7 +387,6 @@ export default class CommandPrechecks {
             };
 
             sendErrorMessage(messageContext, embedPayload, interaction);
-
             return false;
         }
 

@@ -2,7 +2,7 @@ import { DEFAULT_LIMIT } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
-    getInteractionOptionValueInteger,
+    getInteractionValue,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
@@ -26,7 +26,10 @@ const LIMIT_END_MIN = 1;
 const LIMIT_END_MAX = 100000;
 
 export default class LimitCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notSpotifyPrecheck },
+    ];
 
     validations = {
         minArgCount: 0,
@@ -186,13 +189,13 @@ export default class LimitCommand implements BaseCommand {
         limitStart: number,
         limitEnd: number,
         interaction?: Eris.CommandInteraction,
-        sendOptions = true
+        optionsOnUpdate = true
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
-        const reset = limitStart === null && limitEnd === null;
+        const reset = limitStart == null && limitEnd == null;
 
         if (reset) {
             await guildPreference.reset(GameOption.LIMIT);
@@ -243,7 +246,7 @@ export default class LimitCommand implements BaseCommand {
             );
         }
 
-        if (sendOptions) {
+        if (optionsOnUpdate) {
             await sendOptionsMessage(
                 Session.getSession(messageContext.guildID),
                 messageContext,
@@ -265,27 +268,18 @@ export default class LimitCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const limitDataOption = interaction.data
-            .options[0] as Eris.InteractionDataOptionsSubCommand;
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
 
         let limitStart: number;
         let limitEnd: number;
-        if (limitDataOption.name === "range") {
-            limitStart = getInteractionOptionValueInteger(
-                limitDataOption.options,
-                "limit_start"
-            );
+        if (interactionName === "range") {
+            limitStart = interactionOptions["limit_start"];
 
-            limitEnd = getInteractionOptionValueInteger(
-                limitDataOption.options,
-                "limit_end"
-            );
+            limitEnd = interactionOptions["limit_end"];
         } else {
             limitStart = 0;
-            limitEnd = getInteractionOptionValueInteger(
-                limitDataOption.options,
-                "limit"
-            );
+            limitEnd = interactionOptions["limit"];
         }
 
         await LimitCommand.updateOption(

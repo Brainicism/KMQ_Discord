@@ -86,9 +86,6 @@ export default abstract class Session {
     /** Whether the session has premium members */
     public isPremium: boolean;
 
-    /** Songs the initiating player has passed in from Spotify. Overrides random song selection */
-    public readonly spotifySongs: Array<QueriedSong>;
-
     /** The guild preference */
     protected guildPreference: GuildPreference;
 
@@ -112,8 +109,7 @@ export default abstract class Session {
         voiceChannelID: string,
         guildID: string,
         gameSessionCreator: KmqMember,
-        isPremium: boolean,
-        spotifySongs?: Array<QueriedSong>
+        isPremium: boolean
     ) {
         this.guildPreference = guildPreference;
         this.textChannelID = textChannelID;
@@ -128,7 +124,6 @@ export default abstract class Session {
         this.bookmarkedSongs = {};
         this.songSelector = new SongSelector();
         this.isPremium = isPremium;
-        this.spotifySongs = spotifySongs;
 
         this.guildPreference.reloadSongCallback = async () => {
             logger.info(
@@ -137,8 +132,7 @@ export default abstract class Session {
 
             await this.songSelector.reloadSongs(
                 this.guildPreference,
-                this.isPremium,
-                this.spotifySongs
+                this.isPremium
             );
         };
     }
@@ -194,8 +188,7 @@ export default abstract class Session {
             try {
                 await this.songSelector.reloadSongs(
                     this.guildPreference,
-                    this.isPremium,
-                    this.spotifySongs
+                    this.isPremium
                 );
             } catch (err) {
                 await sendErrorMessage(messageContext, {
@@ -622,11 +615,7 @@ export default abstract class Session {
             this.guildID
         );
 
-        await this.songSelector.reloadSongs(
-            guildPreference,
-            isPremium,
-            this.spotifySongs
-        );
+        await this.songSelector.reloadSongs(guildPreference, isPremium);
 
         if (!isPremium) {
             await Promise.allSettled(

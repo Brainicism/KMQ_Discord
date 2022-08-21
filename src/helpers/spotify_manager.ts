@@ -17,11 +17,17 @@ interface SpotifyTrack {
     artists: Array<string>;
 }
 
-interface MatchedPlaylist {
-    matchedSongs: Array<QueriedSong>;
-    playlistLength: number;
+export interface PlaylistMetadata {
+    playlistID: string;
     playlistName: string;
+    playlistLength: number;
+    matchedSongsLength: number;
     thumbnailUrl?: string;
+}
+
+export interface MatchedPlaylist {
+    matchedSongs: Array<QueriedSong>;
+    metadata: PlaylistMetadata;
 }
 
 export default class SpotifyManager {
@@ -50,7 +56,15 @@ export default class SpotifyManager {
             !process.env.SPOTIFY_CLIENT_ID ||
             !process.env.SPOTIFY_CLIENT_SECRET
         ) {
-            return { playlistLength: 0, matchedSongs: [], playlistName: "" };
+            return {
+                metadata: {
+                    playlistID,
+                    playlistName: "",
+                    playlistLength: 0,
+                    matchedSongsLength: 0,
+                },
+                matchedSongs: [],
+            };
         }
 
         const spotifySongs: Array<SpotifyTrack> = [];
@@ -91,7 +105,7 @@ export default class SpotifyManager {
             }
         } while (requestURL);
 
-        const matchedSongs: Array<QueriedSong> = [];
+        let matchedSongs: Array<QueriedSong> = [];
         for (const song of spotifySongs) {
             const aliasIDs = [];
             for (const artist of song.artists) {
@@ -149,11 +163,17 @@ export default class SpotifyManager {
             }
         }
 
-        const metadata = await this.getPlaylistMetadata(playlistID);
+        const spotifyMetadata = await this.getPlaylistMetadata(playlistID);
+        matchedSongs = _.uniq(matchedSongs);
         return {
-            matchedSongs: _.uniq(matchedSongs),
-            playlistLength: spotifySongs.length,
-            ...metadata,
+            matchedSongs,
+            metadata: {
+                playlistID,
+                playlistLength: spotifySongs.length,
+                playlistName: spotifyMetadata.playlistName,
+                matchedSongsLength: matchedSongs.length,
+                thumbnailUrl: spotifyMetadata.thumbnailUrl,
+            },
         };
     };
 

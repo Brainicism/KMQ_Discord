@@ -5,7 +5,7 @@ import {
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
-    getInteractionOptionValueInteger,
+    getInteractionValue,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
@@ -24,10 +24,7 @@ import type HelpDocumentation from "../../interfaces/help";
 const logger = new IPCLogger("cutoff");
 
 export default class CutoffCommand implements BaseCommand {
-    preRunChecks = [
-        { checkFn: CommandPrechecks.competitionPrecheck },
-        { checkFn: CommandPrechecks.notSpotifyPrecheck },
-    ];
+    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
         minArgCount: 0,
@@ -202,7 +199,7 @@ export default class CutoffCommand implements BaseCommand {
             messageContext.guildID
         );
 
-        const reset = beginningYear === null && endingYear === null;
+        const reset = beginningYear == null && endingYear == null;
 
         if (reset) {
             await guildPreference.setBeginningCutoffYear(
@@ -275,26 +272,16 @@ export default class CutoffCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const limitDataOption = interaction.data
-            .options[0] as Eris.InteractionDataOptionsSubCommand;
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
 
         let beginningYear: number;
         let endingYear: number;
-        if (limitDataOption.name === "range") {
-            beginningYear = getInteractionOptionValueInteger(
-                limitDataOption.options,
-                "beginning_year"
-            );
-
-            endingYear = getInteractionOptionValueInteger(
-                limitDataOption.options,
-                "ending_year"
-            );
+        if (interactionName === "range") {
+            beginningYear = interactionOptions["beginning_year"];
+            endingYear = interactionOptions["ending_year"];
         } else {
-            beginningYear = getInteractionOptionValueInteger(
-                limitDataOption.options,
-                "beginning_year"
-            );
+            beginningYear = interactionOptions["beginning_year"];
         }
 
         await CutoffCommand.updateOption(
