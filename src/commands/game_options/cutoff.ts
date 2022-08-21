@@ -24,7 +24,10 @@ import type HelpDocumentation from "../../interfaces/help";
 const logger = new IPCLogger("cutoff");
 
 export default class CutoffCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notSpotifyPrecheck },
+    ];
 
     validations = {
         minArgCount: 0,
