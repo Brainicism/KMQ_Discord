@@ -1,7 +1,7 @@
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
-    getInteractionOptionValueInteger,
+    getInteractionValue,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
@@ -181,7 +181,7 @@ export default class GoalCommand implements BaseCommand {
             }
         }
 
-        const reset = userGoal === null;
+        const reset = userGoal == null;
 
         if (reset) {
             await guildPreference.reset(GameOption.GOAL);
@@ -217,10 +217,8 @@ export default class GoalCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const userGoal = getInteractionOptionValueInteger(
-            interaction.data.options,
-            "goal"
-        );
+        const { interactionOptions } = getInteractionValue(interaction);
+        const userGoal = interactionOptions["goal"];
 
         await GoalCommand.updateOption(messageContext, userGoal, interaction);
     }

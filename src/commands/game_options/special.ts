@@ -2,6 +2,7 @@ import { EMBED_ERROR_COLOR } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
+    getInteractionValue,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
@@ -185,7 +186,7 @@ export default class SpecialCommand implements BaseCommand {
             return;
         }
 
-        const reset = specialType === null;
+        const reset = specialType == null;
         if (reset) {
             await guildPreference.reset(GameOption.SPECIAL_TYPE);
             logger.info(
@@ -220,12 +221,8 @@ export default class SpecialCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        let specialType: SpecialType;
-        if (!interaction.data.options) {
-            specialType = null;
-        } else {
-            specialType = interaction.data.options[0]["value"] as SpecialType;
-        }
+        const { interactionOptions } = getInteractionValue(interaction);
+        const specialType = interactionOptions["special"] as SpecialType;
 
         await SpecialCommand.updateOption(
             messageContext,

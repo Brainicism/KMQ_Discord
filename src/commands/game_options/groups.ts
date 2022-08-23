@@ -262,7 +262,7 @@ export default class GroupsCommand implements BaseCommand {
             messageContext.guildID
         );
 
-        const reset = matchedGroups === null;
+        const reset = matchedGroups == null;
         if (reset) {
             await guildPreference.reset(GameOption.GROUPS);
             logger.info(`${getDebugLogHeader(messageContext)} | Groups reset.`);

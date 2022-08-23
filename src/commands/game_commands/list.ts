@@ -1,6 +1,7 @@
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
+    getInteractionValue,
     sendErrorMessage,
     sendInfoMessage,
     sendMessage,
@@ -233,7 +234,8 @@ export default class ListCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const artistType = interaction.data.options[0]["value"] as ListType;
+        const { interactionOptions } = getInteractionValue(interaction);
+        const artistType = interactionOptions["type"] as ListType;
 
         await ListCommand.listGroups(messageContext, artistType, interaction);
     }

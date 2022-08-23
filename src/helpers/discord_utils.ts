@@ -1683,39 +1683,54 @@ export function sendPowerHourNotification(): void {
 }
 
 /**
- * @param options - The interaction options response
- * @param optionName - The option to retrieve value from
- * @returns the option value
+ * @param interaction - The interaction
+ * @returns the interaction key and value
  */
-export function getInteractionOptionValueInteger(
-    options: Eris.InteractionDataOptions[],
-    optionName: string
-): number {
-    if (!options) return null;
-    const option = options.find((x) => x.name === optionName);
-    if (option) {
-        return parseInt(option["value"], 10);
+export function getInteractionValue(interaction: Eris.CommandInteraction): {
+    interactionKey: string;
+    interactionOptions: {
+        [optionName: string]: any;
+    };
+    interactionName: string;
+} {
+    let options = interaction.data.options;
+
+    if (options == null) {
+        return {
+            interactionKey: null,
+            interactionOptions: {},
+            interactionName: null,
+        };
     }
 
-    return null;
-}
-
-/**
- * @param options - The interaction options response
- * @param optionName - The option to retrieve value from
- * @returns the option value
- */
-export function getInteractionOptionValueString(
-    options: Eris.InteractionDataOptions[],
-    optionName: string
-): string {
-    if (!options) return null;
-    const option = options.find((x) => x.name === optionName);
-    if (option) {
-        return option["value"];
+    let parentInteractionDataName = null;
+    const keys = [];
+    while (options.length > 0) {
+        keys.push(options[0].name);
+        if (
+            options[0].type ===
+                Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND ||
+            options[0].type ===
+                Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND_GROUP
+        ) {
+            parentInteractionDataName = options[0].name;
+            options = options[0].options;
+        } else {
+            break;
+        }
     }
 
-    return null;
+    return {
+        interactionKey: keys.join("."),
+        interactionOptions: options.reduce(
+            (result, filter: Eris.InteractionDataOptionsWithValue) => {
+                result[filter.name] = filter.value;
+                return result;
+            },
+            {}
+        ),
+        interactionName: parentInteractionDataName,
+    };
 }
 
 /**
