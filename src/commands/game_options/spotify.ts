@@ -137,8 +137,7 @@ export default class SpotifyCommand implements BaseCommand {
             );
         } else if (
             isValidURL(playlistURL) &&
-            playlistURL.toLocaleLowerCase().startsWith(SPOTIFY_BASE_URL) &&
-            playlistURL.toLocaleLowerCase().split(SPOTIFY_BASE_URL).length === 2
+            new RegExp(`^${SPOTIFY_BASE_URL}.+`).test(playlistURL)
         ) {
             let playlistID = playlistURL.split(SPOTIFY_BASE_URL)[1];
             if (playlistID.includes("?si=")) {
