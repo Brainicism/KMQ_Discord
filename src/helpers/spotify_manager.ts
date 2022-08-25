@@ -68,6 +68,18 @@ export default class SpotifyManager {
         }
 
         const spotifyMetadata = await this.getPlaylistMetadata(playlistID);
+        if (!spotifyMetadata) {
+            return {
+                metadata: {
+                    playlistID,
+                    playlistName: "",
+                    playlistLength: 0,
+                    matchedSongsLength: 0,
+                },
+                matchedSongs: [],
+            };
+        }
+
         let spotifySongs: Array<SpotifyTrack> = [];
         let requestURL = `${BASE_URL}/playlists/${playlistID}/tracks?${encodeURI(
             "market=US&fields=items(track(name,artists(name))),next&limit=50"
@@ -201,9 +213,9 @@ export default class SpotifyManager {
             metadata: {
                 playlistID,
                 playlistLength: spotifySongs.length,
-                playlistName: spotifyMetadata?.playlistName,
+                playlistName: spotifyMetadata.playlistName,
                 matchedSongsLength: matchedSongs.length,
-                thumbnailUrl: spotifyMetadata?.thumbnailUrl,
+                thumbnailUrl: spotifyMetadata.thumbnailUrl,
             },
         };
     };
@@ -238,9 +250,7 @@ export default class SpotifyManager {
         }
     };
 
-    private async getPlaylistMetadata(
-        playlistID: string
-    ): Promise<{
+    private async getPlaylistMetadata(playlistID: string): Promise<{
         playlistName: string;
         thumbnailUrl: string;
         snapshotID: string;
