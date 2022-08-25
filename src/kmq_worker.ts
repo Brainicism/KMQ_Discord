@@ -249,7 +249,8 @@ export default class BotWorker extends BaseClusterWorker {
         logger.info("Registering process event handlers...");
         this.registerProcessEvents();
 
-        if (process.env.NODE_ENV === EnvType.PROD && this.clusterID === 0) {
+        // if (process.env.NODE_ENV === EnvType.PROD && this.clusterID === 0) {
+        if (this.clusterID === 0) {
             logger.info("Initializing bot stats poster...");
             const botListingManager = new BotListingManager();
             botListingManager.start();

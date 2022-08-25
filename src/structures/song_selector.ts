@@ -199,22 +199,25 @@ export default class SongSelector {
     async reloadSongs(
         guildPreference: GuildPreference,
         isPremium: boolean,
-        songList?: MatchedPlaylist
-    ): Promise<void> {
-        if (guildPreference.isSpotifyPlaylist()) {
-            const playlist = await SongSelector.getSpotifySongList(
-                guildPreference,
-                isPremium,
-                songList
-            );
-
-            this.filteredSongs = playlist as QueriedSongList;
-        } else {
+        playlistID?: string
+    ): Promise<MatchedPlaylist> {
+        if (!playlistID) {
             this.filteredSongs = await SongSelector.getFilteredSongList(
                 guildPreference,
                 isPremium
             );
+
+            return null;
         }
+
+        const playlist = await SongSelector.getSpotifySongList(
+            guildPreference,
+            isPremium,
+            playlistID
+        );
+
+        this.filteredSongs = playlist as QueriedSongList;
+        return playlist;
     }
 
     /**
@@ -440,14 +443,13 @@ export default class SongSelector {
     static async getSpotifySongList(
         guildPreference: GuildPreference,
         isPremium: boolean,
-        songList?: MatchedPlaylist
+        playlistID: string
     ): Promise<QueriedSongList & MatchedPlaylist> {
-        const { matchedSongs, metadata } = !songList
-            ? await State.spotifyManager.getMatchedSpotifySongs(
-                  guildPreference.getSpotifyPlaylistMetadata()?.playlistID,
-                  isPremium
-              )
-            : songList;
+        const { matchedSongs, metadata } =
+            await State.spotifyManager.getMatchedSpotifySongs(
+                playlistID,
+                isPremium
+            );
 
         const result = new Set(
             matchedSongs.filter(

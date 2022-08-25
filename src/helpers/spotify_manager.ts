@@ -1,20 +1,18 @@
 /* eslint-disable no-await-in-loop */
 import { IPCLogger } from "../logger";
+import { retryJob } from "./utils";
 import Axios from "axios";
 import SongSelector from "../structures/song_selector";
 import State from "../state";
 import _ from "lodash";
 import dbContext from "../database_context";
+import type { AxiosResponse } from "axios";
 import type QueriedSong from "../interfaces/queried_song";
+import type SpotifyTrack from "../interfaces/spotify_track";
 
 const logger = new IPCLogger("spotify_manager");
 
 const BASE_URL = "https://api.spotify.com/v1";
-
-interface SpotifyTrack {
-    name: string;
-    artists: Array<string>;
-}
 
 export interface PlaylistMetadata {
     playlistID: string;
@@ -55,6 +53,9 @@ export default class SpotifyManager {
             !process.env.SPOTIFY_CLIENT_ID ||
             !process.env.SPOTIFY_CLIENT_SECRET
         ) {
+            logger.warn(
+                "No songs matched due to missing Spotify client ID or secret"
+            );
             return {
                 metadata: {
                     playlistID,
@@ -66,43 +67,80 @@ export default class SpotifyManager {
             };
         }
 
-        const spotifySongs: Array<SpotifyTrack> = [];
+        const spotifyMetadata = await this.getPlaylistMetadata(playlistID);
+        let spotifySongs: Array<SpotifyTrack> = [];
         let requestURL = `${BASE_URL}/playlists/${playlistID}/tracks?${encodeURI(
             "market=US&fields=items(track(name,artists(name))),next&limit=50"
         )}`;
 
-        do {
-            try {
-                const response = (
-                    await Axios.get(requestURL, {
-                        headers: {
-                            Authorization: `Bearer ${this.accessToken}`,
-                            "Content-Type": "application/x-www-form-urlencoded",
-                        },
-                    })
-                ).data;
+        if (State.cachedPlaylists[spotifyMetadata.snapshotID]) {
+            logger.info(`Using cached playlist for ${playlistID}`);
+            spotifySongs = State.cachedPlaylists[spotifyMetadata.snapshotID];
+        } else {
+            logger.info(`Using Spotify API for playlist ${playlistID}`);
+            do {
+                try {
+                    const spotifyRequest = async (
+                        url: string
+                    ): Promise<AxiosResponse> =>
+                        Axios.get(url, {
+                            headers: {
+                                Authorization: `Bearer ${this.accessToken}`,
+                                "Content-Type":
+                                    "application/x-www-form-urlencoded",
+                            },
+                        });
 
-                for (const item of response.items) {
-                    spotifySongs.push({
-                        name: item.track.name,
-                        artists: item.track.artists.map(
-                            (x: { name: string }) => x.name
-                        ),
-                    });
+                    let response = await spotifyRequest(requestURL);
+
+                    const rateLimit = Number(response.headers["retry-after"]);
+                    if (rateLimit) {
+                        logger.warn(
+                            `Spotify rate limit exceeded, waiting ${rateLimit} seconds...`
+                        );
+
+                        response = await retryJob(
+                            spotifyRequest,
+                            [requestURL],
+                            1,
+                            false,
+                            rateLimit
+                        );
+                    }
+
+                    spotifySongs.push(
+                        ...response.data.items.map(
+                            (song: {
+                                track: {
+                                    name: string;
+                                    artists: Array<{ name: string }>;
+                                };
+                            }) => ({
+                                name: song.track.name,
+                                artists: song.track.artists.map(
+                                    (artist: { name: string }) => artist.name
+                                ),
+                            })
+                        )
+                    );
+
+                    requestURL = response.data.next;
+                } catch (err) {
+                    logger.error(
+                        `Failed fetching Spotify playlist. err = ${err}`
+                    );
+
+                    if (err.response) {
+                        logger.info(err.response.data);
+                        logger.info(err.response.status);
+                    }
+
+                    break;
                 }
+            } while (requestURL);
 
-                requestURL = response.next;
-            } catch (err) {
-                logger.error(`Failed fetching Spotify playlist. err = ${err}`);
-
-                if (err.response) {
-                    logger.info(err.response.data);
-                    logger.info(err.response.status);
-                }
-
-                break;
-            }
-        } while (requestURL);
+            State.cachedPlaylists[spotifyMetadata.snapshotID] = spotifySongs;
+        }
 
         let matchedSongs: Array<QueriedSong> = [];
         for (const song of spotifySongs) {
@@ -157,16 +195,15 @@ export default class SpotifyManager {
             }
         }
 
-        const spotifyMetadata = await this.getPlaylistMetadata(playlistID);
         matchedSongs = _.uniq(matchedSongs);
         return {
             matchedSongs,
             metadata: {
                 playlistID,
                 playlistLength: spotifySongs.length,
-                playlistName: spotifyMetadata.playlistName,
+                playlistName: spotifyMetadata?.playlistName,
                 matchedSongsLength: matchedSongs.length,
-                thumbnailUrl: spotifyMetadata.thumbnailUrl,
+                thumbnailUrl: spotifyMetadata?.thumbnailUrl,
             },
         };
     };
@@ -203,10 +240,15 @@ export default class SpotifyManager {
 
     private async getPlaylistMetadata(
         playlistID: string
-    ): Promise<{ playlistName: string; thumbnailUrl: string }> {
+    ): Promise<{
+        playlistName: string;
+        thumbnailUrl: string;
+        snapshotID: string;
+    }> {
         const requestURL = `${BASE_URL}/playlists/${playlistID}`;
         let thumbnailUrl: string;
         let playlistName: string;
+        let snapshotID: string;
         try {
             const response = (
                 await Axios.get(requestURL, {
@@ -218,6 +260,7 @@ export default class SpotifyManager {
             ).data;
 
             playlistName = response.name;
+            snapshotID = response.snapshot_id;
             if (response.images.length > 0) {
                 thumbnailUrl = response.images[0].url;
             }
@@ -230,8 +273,10 @@ export default class SpotifyManager {
                 logger.info(err.response.data);
                 logger.info(err.response.status);
             }
+
+            return undefined;
         }
 
-        return { playlistName, thumbnailUrl };
+        return { playlistName, thumbnailUrl, snapshotID };
     }
 }

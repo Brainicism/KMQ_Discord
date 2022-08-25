@@ -17,7 +17,9 @@ import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import SongSelector from "../../structures/song_selector";
 import State from "../../state";
+import type { MatchedPlaylist } from "../../helpers/spotify_manager";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -89,17 +91,18 @@ export default class SpotifyCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        let playlistURL: string;
-        if (parsedMessage.components.length === 0) {
-            playlistURL = null;
+        let playlistURL: string = null;
+        if (
+            parsedMessage.components.length > 0 &&
+            isValidURL(parsedMessage.components[0])
+        ) {
+            playlistURL = parsedMessage.components[0];
+        }
+
+        if (playlistURL || parsedMessage.components.length === 0) {
             await SpotifyCommand.updateOption(
                 MessageContext.fromMessage(message),
                 playlistURL
-            );
-        } else if (isValidURL(parsedMessage.components[0])) {
-            await SpotifyCommand.updateOption(
-                MessageContext.fromMessage(message),
-                parsedMessage.components[0]
             );
         } else {
             sendErrorMessage(MessageContext.fromMessage(message), {
@@ -165,11 +168,20 @@ export default class SpotifyCommand implements BaseCommand {
                 interaction = null;
             }
 
-            const matchedPlaylist =
-                await State.spotifyManager.getMatchedSpotifySongs(
-                    playlistID,
-                    premiumRequest
+            let matchedPlaylist: MatchedPlaylist;
+            if (gameSession) {
+                matchedPlaylist = await gameSession.songSelector.reloadSongs(
+                    guildPreference,
+                    premiumRequest,
+                    playlistID
                 );
+            } else {
+                matchedPlaylist = await new SongSelector().reloadSongs(
+                    guildPreference,
+                    premiumRequest,
+                    playlistID
+                );
+            }
 
             logger.info(
                 `${getDebugLogHeader(messageContext)} | Matched ${
@@ -207,16 +219,8 @@ export default class SpotifyCommand implements BaseCommand {
             logger.info(
                 `${getDebugLogHeader(
                     messageContext
-                )} | Spotify playlist set to ${playlistURL}`
+                )} | Spotify playlist set to ${playlistID}`
             );
-
-            if (gameSession) {
-                await gameSession.songSelector.reloadSongs(
-                    guildPreference,
-                    premiumRequest,
-                    matchedPlaylist
-                );
-            }
 
             await sendInfoMessage(messageContext, {
                 title: LocalizationManager.localizer.translate(
