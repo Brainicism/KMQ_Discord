@@ -3,6 +3,7 @@ import { KmqImages } from "../../constants";
 import {
     artistAutocompleteFormat,
     getDebugLogHeader,
+    getInteractionValue,
     searchArtists,
     sendErrorMessage,
     sendInfoMessage,
@@ -593,26 +594,22 @@ export default class LookupCommand implements BaseCommand {
         interaction: CommandInteraction,
         _messageContext: MessageContext
     ): Promise<void> {
-        const argument = interaction.data.options[0];
-
-        if (argument.name === "song_link") {
+        const interactionData = getInteractionValue(interaction);
+        if (interactionData.interactionName === "song_link") {
             await this.lookupSong(
                 interaction,
-                (
-                    (argument as Eris.InteractionDataOptionsSubCommand)
-                        .options[0] as Eris.InteractionDataOptionsString
-                ).value
+                interactionData.interactionOptions["song_link"]
             );
-        } else if (argument.name === "song_name") {
+        } else if (interactionData.interactionName === "song_name") {
             let songName: string = "";
             let artistName: string;
-            for (const option of (
-                argument as Eris.InteractionDataOptionsSubCommand
-            ).options as Array<Eris.InteractionDataOptionsString>) {
-                if (option.name === "song_name") {
-                    songName = option.value.toLocaleLowerCase();
-                } else if (option.name === "artist_name") {
-                    artistName = option.value.toLocaleLowerCase();
+            for (const option of Object.entries(
+                interactionData.interactionOptions
+            )) {
+                if (option[0] === "song_name") {
+                    songName = option[1].toLocaleLowerCase();
+                } else if (option[0] === "artist_name") {
+                    artistName = option[1].toLocaleLowerCase();
                 }
             }
 
@@ -636,24 +633,20 @@ export default class LookupCommand implements BaseCommand {
     static async processAutocompleteInteraction(
         interaction: Eris.AutocompleteInteraction
     ): Promise<void> {
-        const autocompleteField = (
-            interaction.data.options[0] as Eris.InteractionDataOptionsSubCommand
-        ).options.filter((x) => x["focused"])[0] as AutocompleteEntry;
+        const interactionData = getInteractionValue(interaction);
+        const focusedKey = interactionData.focusedKey;
+        const focusedVal = interactionData.interactionOptions[focusedKey];
 
-        const lowercaseUserInput = autocompleteField.value.toLocaleLowerCase();
-        if (autocompleteField.name === "song_name") {
-            const artistNameField = (
-                interaction.data
-                    .options[0] as Eris.InteractionDataOptionsSubCommand
-            ).options.find(
-                (x) => x.name === "artist_name"
-            ) as Eris.InteractionDataOptionsString;
+        const lowercaseUserInput = focusedVal.toLocaleLowerCase();
+        if (focusedKey === "song_name") {
+            const artistName = Object.entries(
+                interactionData.interactionOptions
+            ).find((x) => x[0] === "artist_name")?.[1];
 
             let artistID: number;
-            if (artistNameField) {
-                const artistName = artistNameField.value.toLocaleLowerCase();
-
-                artistID = State.artistToEntry[artistName]?.id;
+            if (artistName) {
+                artistID =
+                    State.artistToEntry[artistName.toLocaleLowerCase()]?.id;
             }
 
             const songEntryToInteraction = (
@@ -669,10 +662,11 @@ export default class LookupCommand implements BaseCommand {
                 State.getGuildLocale(interaction.guildID) === LocaleType.KO;
 
             if (lowercaseUserInput.length < 2) {
-                // Show new songs when minimal input
                 await tryAutocompleteInteractionAcknowledge(
                     interaction,
-                    Object.entries(State.newSongs)
+                    Object.entries(
+                        artistID ? State.songLinkToEntry : State.newSongs
+                    )
                         .filter((x) =>
                             artistID ? artistID === x[1].artistID : true
                         )
@@ -701,32 +695,29 @@ export default class LookupCommand implements BaseCommand {
                         .slice(0, 25)
                 );
             }
-        } else if (autocompleteField.name === "artist_name") {
-            const enteredSongName = (
-                (
-                    interaction.data
-                        .options[0] as Eris.InteractionDataOptionsSubCommand
-                ).options.find(
-                    (x) => x.name === "song_name"
-                ) as Eris.InteractionDataOptionsString
-            )?.value;
+        } else if (focusedKey === "artist_name") {
+            const enteredSongName = Object.entries(
+                interactionData.interactionOptions
+            ).find((x) => x[0] === "song_name")?.[1];
 
             let matchingArtists: Array<MatchedArtist> = [];
-            if (lowercaseUserInput === "" && enteredSongName === "") {
+            if (!enteredSongName) {
                 matchingArtists = searchArtists(lowercaseUserInput, []);
-            } else if (enteredSongName) {
+            } else {
                 // only return artists that have a song that matches the entered one
                 matchingArtists = Object.values(State.artistToEntry);
-                const cleanEnteredSongName =
-                    cleanSongName(enteredSongName).toLocaleLowerCase();
+                const cleanEnteredSongName = cleanSongName(enteredSongName);
 
-                const matchingSongs = Object.values(
-                    State.songLinkToEntry
-                ).filter(
-                    (x) =>
-                        x.cleanName.startsWith(cleanEnteredSongName) ||
-                        x.hangulCleanName.startsWith(cleanEnteredSongName)
-                );
+                const matchingSongs = Object.entries(State.songLinkToEntry)
+                    .filter(
+                        (x) =>
+                            x[1].cleanName.startsWith(cleanEnteredSongName) ||
+                            x[1].hangulCleanName.startsWith(
+                                cleanEnteredSongName
+                            ) ||
+                            enteredSongName === x[0]
+                    )
+                    .map((x) => x[1]);
 
                 const matchingSongArtistIDs = matchingSongs.map(
                     (x) => x.artistID

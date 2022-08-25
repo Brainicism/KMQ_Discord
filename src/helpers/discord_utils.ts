@@ -1686,12 +1686,15 @@ export function sendPowerHourNotification(): void {
  * @param interaction - The interaction
  * @returns the interaction key and value
  */
-export function getInteractionValue(interaction: Eris.CommandInteraction): {
+export function getInteractionValue(
+    interaction: Eris.CommandInteraction | Eris.AutocompleteInteraction
+): {
     interactionKey: string;
     interactionOptions: {
         [optionName: string]: any;
     };
     interactionName: string;
+    focusedKey: string;
 } {
     let options = interaction.data.options;
 
@@ -1700,6 +1703,7 @@ export function getInteractionValue(interaction: Eris.CommandInteraction): {
             interactionKey: null,
             interactionOptions: {},
             interactionName: null,
+            focusedKey: null,
         };
     }
 
@@ -1730,6 +1734,7 @@ export function getInteractionValue(interaction: Eris.CommandInteraction): {
             {}
         ),
         interactionName: parentInteractionDataName,
+        focusedKey: options.find((x) => x["focused"])?.name,
     };
 }
 
