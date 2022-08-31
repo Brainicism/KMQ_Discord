@@ -259,13 +259,13 @@ export function friendlyFormattedDate(date: Date, guildID: string): string {
  * @param delayDuration - time (in ms) before attempting job retry
  * @returns the result of job
  */
-export async function retryJob(
-    job: (...args: any) => Promise<void>,
+export async function retryJob<Type>(
+    job: (...args: any) => Promise<Type>,
     jobArgs: Array<any>,
     maxRetries: number,
     firstTry: boolean,
     delayDuration?: number
-): Promise<void> {
+): Promise<Type> {
     if (!firstTry && delayDuration) {
         await delay(delayDuration);
     }

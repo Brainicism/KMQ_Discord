@@ -27,7 +27,6 @@ import { getFact } from "../fact_generator";
 import Eris from "eris";
 import GameRound from "./game_round";
 import GuessModeType from "../enums/option_types/guess_mode_type";
-import GuildPreference from "./guild_preference";
 import ListeningRound from "./listening_round";
 import LocaleType from "../enums/locale_type";
 import LocalizationManager from "../helpers/localization_manager";
@@ -41,6 +40,7 @@ import type BookmarkedSong from "../interfaces/bookmarked_song";
 import type EmbedPayload from "../interfaces/embed_payload";
 import type GameSession from "./game_session";
 import type GuessResult from "../interfaces/guess_result";
+import type GuildPreference from "./guild_preference";
 import type KmqMember from "./kmq_member";
 import type ListeningSession from "./listening_session";
 import type QueriedSong from "../interfaces/queried_song";
@@ -132,7 +132,8 @@ export default abstract class Session {
 
             await this.songSelector.reloadSongs(
                 this.guildPreference,
-                this.isPremium
+                this.isPremium,
+                this.guildPreference.getSpotifyPlaylistMetadata()?.playlistID
             );
         };
     }
@@ -188,7 +189,9 @@ export default abstract class Session {
             try {
                 await this.songSelector.reloadSongs(
                     this.guildPreference,
-                    this.isPremium
+                    this.isPremium,
+                    this.guildPreference.getSpotifyPlaylistMetadata()
+                        ?.playlistID
                 );
             } catch (err) {
                 await sendErrorMessage(messageContext, {
@@ -611,11 +614,11 @@ export default abstract class Session {
 
         this.isPremium = isPremium;
 
-        const guildPreference = await GuildPreference.getGuildPreference(
-            this.guildID
+        await this.songSelector.reloadSongs(
+            this.guildPreference,
+            isPremium,
+            this.guildPreference.getSpotifyPlaylistMetadata()?.playlistID
         );
-
-        await this.songSelector.reloadSongs(guildPreference, isPremium);
 
         if (!isPremium) {
             await Promise.allSettled(
@@ -625,7 +628,7 @@ export default abstract class Session {
                             logger.info(
                                 `gid: ${this.guildID} | Resetting premium for game option: ${commandName}`
                             );
-                            await command.resetPremium(guildPreference);
+                            await command.resetPremium(this.guildPreference);
                         }
                     }
                 )

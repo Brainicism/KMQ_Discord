@@ -320,6 +320,10 @@ async function reloadLocales(): Promise<void> {
     }
 }
 
+function clearCachedPlaylists(): void {
+    State.cachedPlaylists = {};
+}
+
 /**
  * Clears any existing restart timers
  */
@@ -340,6 +344,8 @@ export function registerIntervals(clusterID: number): void {
         reloadBonusGroups();
         // New groups used for autocomplete
         reloadArtists();
+        // Removed cached Spotify playlists
+        clearCachedPlaylists();
     });
 
     // Every hour

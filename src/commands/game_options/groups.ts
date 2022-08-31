@@ -35,7 +35,10 @@ const logger = new IPCLogger("groups");
 export default class GroupsCommand implements BaseCommand {
     aliases = ["group", "artist", "artists"];
 
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notSpotifyPrecheck },
+    ];
 
     help = (guildID: string): HelpDocumentation => ({
         name: "groups",

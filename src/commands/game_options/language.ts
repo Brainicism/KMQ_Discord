@@ -20,7 +20,10 @@ import type HelpDocumentation from "../../interfaces/help";
 const logger = new IPCLogger("language");
 
 export default class LanguageCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notSpotifyPrecheck },
+    ];
 
     validations = {
         minArgCount: 0,

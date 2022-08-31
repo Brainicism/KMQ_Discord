@@ -18,7 +18,10 @@ import type HelpDocumentation from "../../interfaces/help";
 const logger = new IPCLogger("gender");
 
 export default class GenderCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notSpotifyPrecheck },
+    ];
 
     validations = {
         minArgCount: 0,

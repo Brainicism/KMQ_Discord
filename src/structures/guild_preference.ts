@@ -22,6 +22,7 @@ import GameOption from "../enums/game_option_name";
 import Gender from "../enums/option_types/gender";
 import _ from "lodash";
 import dbContext from "../database_context";
+import type { PlaylistMetadata } from "src/helpers/spotify_manager";
 import type ArtistType from "../enums/option_types/artist_type";
 import type GameOptions from "../interfaces/game_options";
 import type GuessModeType from "../enums/option_types/guess_mode_type";
@@ -53,6 +54,7 @@ type GameOptionValue =
     | MultiGuessType
     | SubunitsPreference
     | OstPreference
+    | PlaylistMetadata
     | string;
 
 /**
@@ -150,6 +152,10 @@ export default class GuildPreference {
             default: [null],
             setter: this.setForcePlaySong,
         },
+        [GameOption.SPOTIFY_PLAYLIST_METADATA]: {
+            default: [null],
+            setter: this.setSpotifyPlaylistMetadata,
+        },
     };
 
     static DEFAULT_OPTIONS = {
@@ -176,6 +182,7 @@ export default class GuildPreference {
         subunitPreference: DEFAULT_SUBUNIT_PREFERENCE,
         ostPreference: DEFAULT_OST_PREFERENCE,
         forcePlaySongID: null,
+        spotifyPlaylistMetadata: null,
     };
 
     /** The GuildPreference's respective GameOptions */
@@ -817,6 +824,34 @@ export default class GuildPreference {
                 value: forcePlaySongID,
             },
         ]);
+    }
+
+    /**
+     * Sets the Spotify playlist option value
+     * @param playlistMetadata - Spotify playlist ID, length, name
+     */
+    async setSpotifyPlaylistMetadata(
+        playlistMetadata: PlaylistMetadata
+    ): Promise<void> {
+        this.gameOptions.spotifyPlaylistMetadata = playlistMetadata;
+        await this.updateGuildPreferences([
+            {
+                name: GameOptionInternal.SPOTIFY_PLAYLIST_METADATA,
+                value: playlistMetadata,
+            },
+        ]);
+    }
+
+    /** @returns the ID of the playlist to retrieve songs from */
+    getSpotifyPlaylistMetadata(): PlaylistMetadata {
+        return this.gameOptions.spotifyPlaylistMetadata;
+    }
+
+    /**
+     * @returns whether the spotify playing option is set
+     */
+    isSpotifyPlaylist(): boolean {
+        return this.gameOptions.spotifyPlaylistMetadata !== null;
     }
 
     /**

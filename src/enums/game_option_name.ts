@@ -20,6 +20,7 @@ enum GameOption {
     EXCLUDE = "Exclude",
     INCLUDE = "Include",
     FORCE_PLAY_SONG = "Force Play Song",
+    SPOTIFY_PLAYLIST_METADATA = "Spotify Playlist",
 }
 
 export default GameOption;
