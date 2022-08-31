@@ -861,12 +861,10 @@ export default abstract class Session {
 
         const locale = State.getGuildLocale(messageContext.guildID);
 
-        const songAndArtist = bold(
-            `"${getLocalizedSongName(
-                round.song,
-                locale
-            )}" - ${getLocalizedArtistName(round.song, locale)}`
-        );
+        const songAndArtist = `"${getLocalizedSongName(
+            round.song,
+            locale
+        )}" - ${getLocalizedArtistName(round.song, locale)}`;
 
         const embed: EmbedPayload = {
             color: embedColor,
@@ -904,6 +902,7 @@ export default abstract class Session {
             ) {
                 embed["thumbnail"] = { url: thumbnailUrl };
                 embed["footer"] = { text: footerText };
+                embed.title = bold(embed.title);
                 await round.interactionMessage.edit({
                     embeds: [embed as Object],
                 });
