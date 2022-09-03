@@ -44,6 +44,12 @@ const options: Options = {
     whatToLog: {
         blacklist: ["stats_update"],
     },
+    services: [
+        {
+            name: "kmq_service",
+            path: path.join(__dirname, "./kmq_service.js"),
+        },
+    ],
     path: path.join(__dirname, "./kmq_worker.js"),
     token: process.env.BOT_TOKEN,
     clientOptions: {

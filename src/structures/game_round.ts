@@ -9,6 +9,7 @@ import { friendlyFormattedNumber, getMention } from "../helpers/utils";
 import ExpBonusModifier from "../enums/exp_bonus_modifier";
 import GuessModeType from "../enums/option_types/guess_mode_type";
 import KmqMember from "./kmq_member";
+import LocaleType from "../enums/locale_type";
 import LocalizationManager from "../helpers/localization_manager";
 import Round from "./round";
 import State from "../state";
@@ -121,7 +122,16 @@ export default class GameRound extends Round {
     public readonly acceptedArtistAnswers: Array<string>;
 
     /** Song/artist name hints */
-    public readonly hints: { songHint: string; artistHint: string };
+    public readonly hints: {
+        songHint: {
+            [LocaleType.EN]: string;
+            [LocaleType.KO]: string;
+        };
+        artistHint: {
+            [LocaleType.EN]: string;
+            [LocaleType.KO]: string;
+        };
+    };
 
     /** UUID associated with right guess interaction custom_id */
     public interactionCorrectAnswerUUID: string;
@@ -159,8 +169,18 @@ export default class GameRound extends Round {
         this.correctGuessers = [];
         this.finished = false;
         this.hints = {
-            songHint: generateHint(song.songName),
-            artistHint: generateHint(song.artistName),
+            songHint: {
+                [LocaleType.EN]: generateHint(song.songName),
+                [LocaleType.KO]: generateHint(
+                    song.hangulSongName || song.songName
+                ),
+            },
+            artistHint: {
+                [LocaleType.EN]: generateHint(song.artistName),
+                [LocaleType.KO]: generateHint(
+                    song.hangulArtistName || song.artistName
+                ),
+            },
         };
         this.interactionCorrectAnswerUUID = null;
         this.interactionIncorrectAnswerUUIDs = {};

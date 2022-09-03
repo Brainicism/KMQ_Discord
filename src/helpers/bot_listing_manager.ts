@@ -1,9 +1,8 @@
 import { IPCLogger } from "../logger";
 import { VOTE_BONUS_DURATION } from "../constants";
 import Axios from "axios";
-import EnvType from "../enums/env_type";
-import State from "../state";
 import dbContext from "../database_context";
+import type { IPC } from "eris-fleet";
 
 const logger = new IPCLogger("bot_stats_poster");
 interface BotListing {
@@ -61,12 +60,16 @@ export async function userVoted(userID: string): Promise<void> {
 }
 
 export default class BotListingManager {
+    private ipc: IPC;
+
+    constructor(ipc: IPC) {
+        this.ipc = ipc;
+    }
+
     start(): void {
-        if (process.env.NODE_ENV === EnvType.PROD) {
-            setInterval(() => {
-                this.postStats();
-            }, 1800000);
-        }
+        setInterval(() => {
+            this.postStats();
+        }, 1800000);
     }
 
     private postStats(): void {
@@ -79,12 +82,13 @@ export default class BotListingManager {
 
     private async postStat(siteConfigKeyName: string): Promise<void> {
         const botListing = BOT_LISTING_SITES[siteConfigKeyName];
-        const { ipc } = State;
         try {
             await Axios.post(
                 botListing.endpoint.replace("%d", process.env.BOT_CLIENT_ID),
                 {
-                    [botListing.payloadKeyName]: (await ipc.getStats()).guilds,
+                    [botListing.payloadKeyName]: (
+                        await this.ipc.getStats()
+                    ).guilds,
                 },
                 {
                     headers: {
