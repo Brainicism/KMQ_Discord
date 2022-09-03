@@ -671,28 +671,36 @@ export default class LookupCommand implements BaseCommand {
             if (lowercaseUserInput.length < 2) {
                 await tryAutocompleteInteractionAcknowledge(
                     interaction,
-                    Object.values(
-                        artistID ? State.songLinkToEntry : State.newSongs
-                    )
-                        .filter((x) =>
-                            artistID ? artistID === x.artistID : true
+                    _.uniqBy(
+                        Object.values(
+                            artistID ? State.songLinkToEntry : State.newSongs
                         )
-                        .map((x) => songEntryToInteraction(x, showHangul))
-                        .slice(0, 25)
+                            .filter((x) =>
+                                artistID ? artistID === x.artistID : true
+                            )
+                            .map((x) => songEntryToInteraction(x, showHangul))
+                            .slice(0, 25),
+                        "name"
+                    )
                 );
             } else {
                 await tryAutocompleteInteractionAcknowledge(
                     interaction,
-                    Object.values(State.songLinkToEntry)
-                        .filter(
-                            (x) =>
-                                (artistID ? artistID === x.artistID : true) &&
-                                x.name
-                                    .toLocaleLowerCase()
-                                    .startsWith(lowercaseUserInput)
-                        )
-                        .map((x) => songEntryToInteraction(x, showHangul))
-                        .slice(0, 25)
+                    _.uniqBy(
+                        Object.values(State.songLinkToEntry)
+                            .filter(
+                                (x) =>
+                                    (artistID
+                                        ? artistID === x.artistID
+                                        : true) &&
+                                    x.name
+                                        .toLocaleLowerCase()
+                                        .startsWith(lowercaseUserInput)
+                            )
+                            .map((x) => songEntryToInteraction(x, showHangul))
+                            .slice(0, 25),
+                        "name"
+                    )
                 );
             }
         } else if (focusedKey === "artist_name") {
