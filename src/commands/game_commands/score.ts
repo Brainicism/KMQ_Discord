@@ -5,6 +5,8 @@ import Eris from "eris";
 import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import Session from "../../structures/session";
+import type { CommandInteraction } from "eris";
+import type { GuildTextableMessage } from "src/types";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type GameSession from "../../structures/game_session";
@@ -44,24 +46,30 @@ export default class ScoreCommand implements BaseCommand {
     ];
 
     call = async ({ message }: CommandArgs): Promise<void> => {
-        const gameSession = Session.getSession(message.guildID) as GameSession;
-        await gameSession.sendScoreboardMessage(message);
-        logger.info(`${getDebugLogHeader(message)} | Score retrieved`);
+        await ScoreCommand.showScore(message);
     };
+
+    static async showScore(
+        messageOrInteraction: GuildTextableMessage | CommandInteraction
+    ): Promise<void> {
+        const gameSession = Session.getSession(
+            messageOrInteraction.guildID
+        ) as GameSession;
+
+        await gameSession.sendScoreboardMessage(messageOrInteraction);
+        logger.info(
+            `${getDebugLogHeader(messageOrInteraction)} | Score retrieved`
+        );
+    }
 
     /**
      * @param interaction - The interaction
-     * @param messageContext - The message context
+     * @param _messageContext - Unused
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        _messageContext: MessageContext
     ): Promise<void> {
-        const gameSession = Session.getSession(
-            interaction.guildID
-        ) as GameSession;
-
-        await gameSession.sendScoreboardMessage(interaction);
-        logger.info(`${getDebugLogHeader(messageContext)} | Score retrieved`);
+        await ScoreCommand.showScore(interaction);
     }
 }
