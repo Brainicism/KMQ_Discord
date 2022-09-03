@@ -1,12 +1,15 @@
 import { IPCLogger } from "../../logger";
 import { getDebugLogHeader } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import Session from "../../structures/session";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type GameSession from "../../structures/game_session";
 import type HelpDocumentation from "../../interfaces/help";
+import type MessageContext from "../../structures/message_context";
 
 const logger = new IPCLogger("score");
 
@@ -29,9 +32,36 @@ export default class ScoreCommand implements BaseCommand {
         priority: 50,
     });
 
+    slashCommands = (): Array<Eris.ApplicationCommandStructure> => [
+        {
+            name: "score",
+            description: LocalizationManager.localizer.translate(
+                LocaleType.EN,
+                "command.score.help.description"
+            ),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+        },
+    ];
+
     call = async ({ message }: CommandArgs): Promise<void> => {
         const gameSession = Session.getSession(message.guildID) as GameSession;
         await gameSession.sendScoreboardMessage(message);
         logger.info(`${getDebugLogHeader(message)} | Score retrieved`);
     };
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        const gameSession = Session.getSession(
+            interaction.guildID
+        ) as GameSession;
+
+        await gameSession.sendScoreboardMessage(interaction);
+        logger.info(`${getDebugLogHeader(messageContext)} | Score retrieved`);
+    }
 }

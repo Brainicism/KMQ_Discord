@@ -61,6 +61,7 @@ import Player from "./player";
 import Scoreboard from "./scoreboard";
 import Session from "./session";
 import TeamScoreboard from "./team_scoreboard";
+import type { CommandInteraction } from "eris";
 import type { GuildTextableMessage } from "../types";
 import type GuessResult from "../interfaces/guess_result";
 import type QueriedSong from "../interfaces/queried_song";
@@ -828,11 +829,11 @@ export default class GameSession extends Session {
 
     /**
      * Sends an embed displaying the scoreboard of the GameSession
-     * @param message - The Message object
+     * @param messageOrInteraction - Message/interaction to get user/server info from
      * @returns the message
      */
     sendScoreboardMessage(
-        message: GuildTextableMessage
+        messageOrInteraction: GuildTextableMessage | CommandInteraction
     ): Promise<Eris.Message> {
         const winnersFieldSubsets = chunkArray(
             this.scoreboard.getScoreboardEmbedSingleColumn(true, true),
@@ -840,12 +841,12 @@ export default class GameSession extends Session {
         );
 
         let footerText = LocalizationManager.localizer.translate(
-            message.guildID,
+            messageOrInteraction.guildID,
             "misc.classic.yourScore",
             {
                 score: String(
                     this.scoreboard.getPlayerDisplayedScore(
-                        message.author.id,
+                        messageOrInteraction.member.id,
                         false
                     )
                 ),
@@ -857,34 +858,38 @@ export default class GameSession extends Session {
                 .scoreboard as EliminationScoreboard;
 
             footerText = LocalizationManager.localizer.translate(
-                message.guildID,
+                messageOrInteraction.guildID,
                 "misc.elimination.yourLives",
                 {
                     lives: String(
-                        eliminationScoreboard.getPlayerLives(message.author.id)
+                        eliminationScoreboard.getPlayerLives(
+                            messageOrInteraction.member.id
+                        )
                     ),
                 }
             );
         } else if (this.gameType === GameType.TEAMS) {
             const teamScoreboard = this.scoreboard as TeamScoreboard;
             footerText = LocalizationManager.localizer.translate(
-                message.guildID,
+                messageOrInteraction.guildID,
                 "misc.team.yourTeamScore",
                 {
                     teamScore: String(
                         teamScoreboard
-                            .getTeamOfPlayer(message.author.id)
+                            .getTeamOfPlayer(messageOrInteraction.member.id)
                             .getScore()
                     ),
                 }
             );
             footerText += "\n";
             footerText += LocalizationManager.localizer.translate(
-                message.guildID,
+                messageOrInteraction.guildID,
                 "misc.team.yourScore",
                 {
                     score: String(
-                        teamScoreboard.getPlayerScore(message.author.id)
+                        teamScoreboard.getPlayerScore(
+                            messageOrInteraction.member.id
+                        )
                     ),
                 }
             );
@@ -894,7 +899,7 @@ export default class GameSession extends Session {
             (winnersFieldSubset) => ({
                 color: EMBED_SUCCESS_COLOR,
                 title: LocalizationManager.localizer.translate(
-                    message.guildID,
+                    messageOrInteraction.guildID,
                     "command.score.scoreboardTitle"
                 ),
                 fields: winnersFieldSubset,
@@ -904,7 +909,7 @@ export default class GameSession extends Session {
             })
         );
 
-        return sendPaginationedEmbed(message, embeds);
+        return sendPaginationedEmbed(messageOrInteraction, embeds);
     }
 
     /**
