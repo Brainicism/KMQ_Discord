@@ -25,5 +25,7 @@ declare namespace NodeJS {
         POWER_HOUR_NOTIFICATION_ROLE_ID?: string;
         PATREON_CREATOR_ACCESS_TOKEN?: string;
         PATREON_CAMPAIGN_ID?: string;
+        SPOTIFY_CLIENT_ID?: string;
+        SPOTIFY_CLIENT_SECRET?: string;
     }
 }

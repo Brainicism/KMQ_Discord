@@ -601,6 +601,7 @@
             "premiumOptionsNonPremiumGame": "Note: active game is not premium",
             "preset": "Preset",
             "reset": "{{presetOrOption}} Reset",
+            "spotify": "Now playing {{songCount}} songs from Spotify with the following options:",
             "timer": "{{timerInSeconds}} sec",
             "title": "Options",
             "updated": "{{presetOrOption}} Updated"
@@ -955,6 +956,31 @@
                 }
             }
         },
+        "spotify": {
+            "help": {
+                "description": "Play songs exclusively from a given Spotify playlist",
+                "example": {
+                    "playlistURL": "Start playing songs from the playlist",
+                    "reset": "Stop playing from the playlist"
+                },
+                "interaction": {
+                    "playlistURL": "The playlist to retrieve songs from"
+                }
+            },
+            "invalidURL": {
+                "description": "The link to the playlist is invalid. Use `Share > Copy Link to Playlist` in Spotify to retrieve a valid link.",
+                "title": "Invalid Spotify Playlist URL"
+            },
+            "matched": {
+                "description": "Matched `{{matchedCount}}/{{totalCount}}` songs.",
+                "title": "Playing \"{{playlistName}}\" on Spotify"
+            },
+            "noMatches": {
+                "description": "No songs were matched.",
+                "title": "Failed to fetch songs from Spotify"
+            },
+            "parsing": "Parsing Spotify playlist..."
+        },
         "stats": {
             "description": "Detailed bot status: {{link}}",
             "failure": {
@@ -1123,7 +1149,7 @@
                 "optionFromPreviousRound": "You are attempting to pick an option from an already completed round."
             },
             "maintenanceMode": {
-                "description": "KMQ is currently under maintance, and new games cannot be started. Check back later!",
+                "description": "KMQ is currently under maintenance, and new games cannot be started. Check back later!",
                 "title": "Maintenance Mode"
             },
             "messageTooLong": "Response message was too long, report this error to the KMQ help server",
@@ -1277,6 +1303,7 @@
             "notGameSession": "You can't do that while in a game session.",
             "notListeningSession": "You can't do that while in a listening session.",
             "notPremium": "You need KMQ Premium to use this command (see {{premium}}).",
+            "notSpotify": "You can't change that option when playing from Spotify.",
             "premiumOrDebugServer": "This command only works in the official KMQ server or for KMQ Premium members (see {{premium}}).",
             "title": "Wait..."
         },

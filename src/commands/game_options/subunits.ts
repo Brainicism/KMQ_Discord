@@ -23,7 +23,10 @@ const logger = new IPCLogger("subunits");
 export default class SubunitsCommand implements BaseCommand {
     aliases = ["subunit", "su"];
 
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notSpotifyPrecheck },
+    ];
 
     validations = {
         minArgCount: 0,

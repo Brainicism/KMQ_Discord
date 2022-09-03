@@ -1,3 +1,4 @@
+import type { PlaylistMetadata } from "src/helpers/spotify_manager";
 import type AnswerType from "../enums/option_types/answer_type";
 import type ArtistType from "../enums/option_types/artist_type";
 import type Gender from "../enums/option_types/gender";
@@ -36,4 +37,5 @@ export default interface GameOptions {
     subunitPreference: SubunitsPreference;
     ostPreference: OstPreference;
     forcePlaySongID: string;
+    spotifyPlaylistMetadata: PlaylistMetadata;
 }

@@ -26,7 +26,10 @@ const LIMIT_END_MIN = 1;
 const LIMIT_END_MAX = 100000;
 
 export default class LimitCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notSpotifyPrecheck },
+    ];
 
     validations = {
         minArgCount: 0,
@@ -185,7 +188,8 @@ export default class LimitCommand implements BaseCommand {
         messageContext: MessageContext,
         limitStart: number,
         limitEnd: number,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        optionsOnUpdate = true
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
@@ -242,16 +246,18 @@ export default class LimitCommand implements BaseCommand {
             );
         }
 
-        await sendOptionsMessage(
-            Session.getSession(messageContext.guildID),
-            messageContext,
-            guildPreference,
-            [{ option: GameOption.LIMIT, reset }],
-            null,
-            null,
-            null,
-            interaction
-        );
+        if (optionsOnUpdate) {
+            await sendOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.LIMIT, reset }],
+                null,
+                null,
+                null,
+                interaction
+            );
+        }
     }
 
     /**

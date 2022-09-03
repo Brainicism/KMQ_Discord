@@ -372,108 +372,115 @@ describe("song selector", () => {
                 });
             });
         });
-    });
 
-    describe("subunits", () => {
-        const artists = [{ id: 16, name: "AOA" }];
+        describe("subunits", () => {
+            const artists = [{ id: 16, name: "AOA" }];
 
-        describe("exclude subunits", () => {
-            it("should only return the songs by the specified group, excluding subunits", async () => {
-                await guildPreference.setGroups(artists);
-                await guildPreference.setSubunitPreference(
-                    SubunitsPreference.EXCLUDE
-                );
-                const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference,
-                    true
-                );
+            describe("exclude subunits", () => {
+                it("should only return the songs by the specified group, excluding subunits", async () => {
+                    await guildPreference.setGroups(artists);
+                    await guildPreference.setSubunitPreference(
+                        SubunitsPreference.EXCLUDE
+                    );
+                    const { songs } = await SongSelector.getFilteredSongList(
+                        guildPreference,
+                        true
+                    );
 
-                assert.strictEqual(
-                    Array.from(songs).every(
-                        (song) => song.artistID === artists[0].id
-                    ),
-                    true
-                );
+                    assert.strictEqual(
+                        Array.from(songs).every(
+                            (song) => song.artistID === artists[0].id
+                        ),
+                        true
+                    );
+                });
             });
-        });
 
-        describe("include subunits", () => {
-            it("should only return the songs by the specified group, including subunits", async () => {
-                await guildPreference.setGroups(artists);
-                await guildPreference.setSubunitPreference(
-                    SubunitsPreference.INCLUDE
-                );
+            describe("include subunits", () => {
+                it("should only return the songs by the specified group, including subunits", async () => {
+                    await guildPreference.setGroups(artists);
+                    await guildPreference.setSubunitPreference(
+                        SubunitsPreference.INCLUDE
+                    );
 
-                const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference,
-                    true
-                );
+                    const { songs } = await SongSelector.getFilteredSongList(
+                        guildPreference,
+                        true
+                    );
 
-                const expectedSubunitIds = [17, 43, 105, 248];
+                    const expectedSubunitIds = [17, 43, 105, 248];
 
-                // all songs must be one of the artist, or the subunit's
-                assert.strictEqual(
-                    Array.from(songs).every((song) =>
-                        [...expectedSubunitIds, artists[0].id].includes(
-                            song.artistID
-                        )
-                    ),
-                    true
-                );
+                    // all songs must be one of the artist, or the subunit's
+                    assert.strictEqual(
+                        Array.from(songs).every((song) =>
+                            [...expectedSubunitIds, artists[0].id].includes(
+                                song.artistID
+                            )
+                        ),
+                        true
+                    );
 
-                // should have song from each one of the expected artists/subunits
-                assert.strictEqual(
-                    new Set(Array.from(songs).map((song) => song.artistID))
-                        .size ===
-                        expectedSubunitIds.length + 1,
-                    true
-                );
+                    // should have song from each one of the expected artists/subunits
+                    assert.strictEqual(
+                        new Set(Array.from(songs).map((song) => song.artistID))
+                            .size ===
+                            expectedSubunitIds.length + 1,
+                        true
+                    );
+                });
             });
-        });
 
-        describe("include subunits (and the subunit has a collab)", () => {
-            it("should match the songs from the group, collabs of that group, and collabs of any subunits of that group", async () => {
-                const artistWithCollabingSubunit = { name: "BIGBANG", id: 28 };
-                const subunitWithCollab = { name: "G-DRAGON", id: 68 };
-                const subunitCollabArtist = {
-                    name: "G-DRAGON + TAEYANG",
-                    id: 73,
-                };
+            describe("include subunits (and the subunit has a collab)", () => {
+                it("should match the songs from the group, collabs of that group, and collabs of any subunits of that group", async () => {
+                    const artistWithCollabingSubunit = {
+                        name: "BIGBANG",
+                        id: 28,
+                    };
 
-                const parentCollabArtist = { name: "BIGBANG + 2NE1", id: 29 };
+                    const subunitWithCollab = { name: "G-DRAGON", id: 68 };
+                    const subunitCollabArtist = {
+                        name: "G-DRAGON + TAEYANG",
+                        id: 73,
+                    };
 
-                const expectedIds = [
-                    artistWithCollabingSubunit.id,
-                    subunitWithCollab.id,
-                    subunitCollabArtist.id,
-                    parentCollabArtist.id,
-                ];
+                    const parentCollabArtist = {
+                        name: "BIGBANG + 2NE1",
+                        id: 29,
+                    };
 
-                const { matchedGroups, unmatchedGroups } =
-                    await getMatchingGroupNames([
-                        artistWithCollabingSubunit.name,
-                    ]);
+                    const expectedIds = [
+                        artistWithCollabingSubunit.id,
+                        subunitWithCollab.id,
+                        subunitCollabArtist.id,
+                        parentCollabArtist.id,
+                    ];
 
-                await guildPreference.setGroups(matchedGroups);
-                await guildPreference.setSubunitPreference(
-                    SubunitsPreference.INCLUDE
-                );
+                    const { matchedGroups, unmatchedGroups } =
+                        await getMatchingGroupNames([
+                            artistWithCollabingSubunit.name,
+                        ]);
 
-                const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference,
-                    true
-                );
+                    await guildPreference.setGroups(matchedGroups);
+                    await guildPreference.setSubunitPreference(
+                        SubunitsPreference.INCLUDE
+                    );
 
-                assert.strictEqual(unmatchedGroups.length, 0);
+                    const { songs } = await SongSelector.getFilteredSongList(
+                        guildPreference,
+                        true
+                    );
 
-                assert.strictEqual(
-                    expectedIds.every((artistId) =>
-                        Array.from(songs).some(
-                            (song) => song.artistID === artistId
-                        )
-                    ),
-                    true
-                );
+                    assert.strictEqual(unmatchedGroups.length, 0);
+
+                    assert.strictEqual(
+                        expectedIds.every((artistId) =>
+                            Array.from(songs).some(
+                                (song) => song.artistID === artistId
+                            )
+                        ),
+                        true
+                    );
+                });
             });
         });
 
@@ -591,7 +598,7 @@ describe("song selector", () => {
                         true
                     );
 
-                    // there is atleast one song of each language
+                    // there is at least one song of each language
                     assert.strictEqual(
                         FOREIGN_LANGUAGE_TAGS.every((languageTag) =>
                             Array.from(songs).some((song) =>

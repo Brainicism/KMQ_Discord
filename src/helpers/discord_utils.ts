@@ -11,6 +11,7 @@ import {
     EPHEMERAL_MESSAGE_FLAG,
     KmqImages,
     PERMISSIONS_LINK,
+    SPOTIFY_BASE_URL,
 } from "../constants";
 import { IPCLogger } from "../logger";
 import {
@@ -752,6 +753,11 @@ export async function generateOptionsMessage(
     optionStrings[GameOption.SEEK_TYPE] = gameOptions.seekType;
     optionStrings[GameOption.GUESS_MODE_TYPE] = gameOptions.guessModeType;
     optionStrings[GameOption.SPECIAL_TYPE] = gameOptions.specialType;
+    optionStrings[GameOption.SPOTIFY_PLAYLIST_METADATA] =
+        gameOptions.spotifyPlaylistMetadata
+            ? `[${gameOptions.spotifyPlaylistMetadata.playlistName}](${SPOTIFY_BASE_URL}${gameOptions.spotifyPlaylistMetadata.playlistID})`
+            : null;
+
     optionStrings[GameOption.TIMER] = guildPreference.isGuessTimeoutSet()
         ? LocalizationManager.localizer.translate(
               guildID,
@@ -780,15 +786,18 @@ export async function generateOptionsMessage(
         ? guildPreference.getDisplayedIncludesGroupNames()
         : null;
 
+    const conflictString = LocalizationManager.localizer.translate(
+        guildID,
+        "misc.conflict"
+    );
+
     const generateConflictingCommandEntry = (
         commandValue: string,
         conflictingOption: string
     ): string =>
         `${strikethrough(commandValue)} (\`${
             process.env.BOT_PREFIX
-        }${conflictingOption}\` ${italicize(
-            LocalizationManager.localizer.translate(guildID, "misc.conflict")
-        )})`;
+        }${conflictingOption}\` ${italicize(conflictString)})`;
 
     const isEliminationMode =
         session?.isGameSession() && session.gameType === GameType.ELIMINATION;
@@ -818,7 +827,10 @@ export async function generateOptionsMessage(
             for (const option of ConflictingGameOptions[
                 gameOptionConflictCheck.gameOption
             ]) {
-                if (optionStrings[option]) {
+                if (
+                    optionStrings[option] &&
+                    !optionStrings[option].includes(conflictString)
+                ) {
                     optionStrings[option] = generateConflictingCommandEntry(
                         optionStrings[option],
                         GameOptionCommand[gameOptionConflictCheck.gameOption]
@@ -865,19 +877,53 @@ export async function generateOptionsMessage(
         }
     }
 
-    const optionsOverview = LocalizationManager.localizer.translate(
-        messageContext.guildID,
-        "command.options.overview",
-        {
-            limit: bold(limit),
-            totalSongs: bold(
-                friendlyFormattedNumber(totalSongs.countBeforeLimit)
-            ),
+    // Special case: Options that rely on modifying queried songs are disabled when playing from Spotify
+    const isSpotify = guildPreference.isSpotifyPlaylist();
+    if (isSpotify) {
+        const disabledOptions = [
+            GameOption.LIMIT,
+            GameOption.GROUPS,
+            GameOption.GENDER,
+            GameOption.CUTOFF,
+            GameOption.ARTIST_TYPE,
+            GameOption.RELEASE_TYPE,
+            GameOption.LANGUAGE_TYPE,
+            GameOption.SUBUNIT_PREFERENCE,
+            GameOption.OST_PREFERENCE,
+            GameOption.EXCLUDE,
+            GameOption.INCLUDE,
+        ];
+
+        for (const option of disabledOptions) {
+            optionStrings[option] = null;
         }
-    );
+    }
+
+    let optionsOverview: string;
+    if (!isSpotify) {
+        optionsOverview = LocalizationManager.localizer.translate(
+            messageContext.guildID,
+            "command.options.overview",
+            {
+                limit: bold(limit),
+                totalSongs: bold(
+                    friendlyFormattedNumber(totalSongs.countBeforeLimit)
+                ),
+            }
+        );
+    } else {
+        optionsOverview = LocalizationManager.localizer.translate(
+            messageContext.guildID,
+            "command.options.spotify",
+            {
+                songCount: bold(limit),
+            }
+        );
+    }
 
     // Options excluded from embed fields since they are of higher importance (shown above them as part of the embed description)
-    const priorityOptions = PriorityGameOption.filter(
+    let priorityOptions: string;
+    priorityOptions = PriorityGameOption.filter(
         (option) => optionStrings[option]
     )
         .map(
@@ -901,6 +947,13 @@ export async function generateOptionsMessage(
     const fieldOptions = Object.keys(GameOptionCommand)
         .filter((option) => optionStrings[option as GameOption])
         .filter((option) => !PriorityGameOption.includes(option as GameOption));
+
+    // Remove priority options; emplace ,spotify/,answer at the start of options
+    if (isSpotify) {
+        priorityOptions = "";
+        fieldOptions.unshift(GameOption.ANSWER_TYPE);
+        fieldOptions.unshift(GameOption.SPOTIFY_PLAYLIST_METADATA);
+    }
 
     const ZERO_WIDTH_SPACE = "​";
 

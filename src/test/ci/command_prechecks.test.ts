@@ -549,7 +549,7 @@ describe("command prechecks", () => {
             });
         });
 
-        describe("user is not premiun, nor does message originate in debug server", () => {
+        describe("user is not premium, nor does message originate in debug server", () => {
             it("should return false", async () => {
                 process.env.DEBUG_SERVER_ID = "abc";
                 sandbox
@@ -562,6 +562,59 @@ describe("command prechecks", () => {
                         messageContext,
                     }),
                     false
+                );
+            });
+        });
+    });
+
+    describe("notSpotifyPrecheck", () => {
+        const GUILD_ID = "123";
+
+        const guildPreference = new GuildPreference(GUILD_ID);
+        sinon.stub(guildPreference, "updateGuildPreferences");
+        sinon
+            .stub(GuildPreference, "getGuildPreference")
+            .returns(Promise.resolve(guildPreference));
+
+        const session = new GameSession(
+            guildPreference,
+            "123",
+            "1234",
+            GUILD_ID,
+            null,
+            GameType.CLASSIC,
+            false
+        );
+
+        describe("spotify playlist set", () => {
+            it("should return false", async () => {
+                await guildPreference.setSpotifyPlaylistMetadata({
+                    playlistID: "id",
+                    playlistName: "playlist",
+                    playlistLength: 4,
+                    matchedSongsLength: 2,
+                });
+
+                assert.strictEqual(
+                    await CommandPrechecks.notSpotifyPrecheck({
+                        messageContext,
+                        session,
+                    }),
+                    false
+                );
+            });
+        });
+
+        describe("spotify playlist not set", () => {
+            it("should return true", async () => {
+                await guildPreference.setSpotifyPlaylistMetadata(null);
+
+                assert.strictEqual(
+                    await CommandPrechecks.notSpotifyPrecheck({
+                        session,
+                        messageContext,
+                    }),
+                    true
                 );
             });
         });

@@ -22,7 +22,10 @@ const logger = new IPCLogger("includes");
 export default class IncludeCommand implements BaseCommand {
     aliases = ["includes"];
 
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notSpotifyPrecheck },
+    ];
 
     help = (guildID: string): HelpDocumentation => ({
         name: "include",
