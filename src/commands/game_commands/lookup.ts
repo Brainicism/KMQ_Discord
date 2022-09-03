@@ -607,21 +607,16 @@ export default class LookupCommand implements BaseCommand {
                 interactionData.interactionOptions["song_link"]
             );
         } else if (interactionData.interactionName === "song_name") {
-            let songName: string = "";
-            let artistName: string;
-            for (const option of Object.entries(
-                interactionData.interactionOptions
-            )) {
-                if (option[0] === "song_name") {
-                    songName = option[1].toLocaleLowerCase();
-                } else if (option[0] === "artist_name") {
-                    artistName = option[1].toLocaleLowerCase();
-                }
-            }
+            const songName =
+                interactionData.interactionOptions["song_name"] ?? "";
+
+            const artistName =
+                interactionData.interactionOptions["artist_name"];
 
             let artistID: number;
             if (artistName) {
-                const matchingArtist = State.artistToEntry[artistName];
+                const matchingArtist =
+                    State.artistToEntry[artistName.toLocaleLowerCase()];
 
                 if (matchingArtist) {
                     artistID = matchingArtist.id;
@@ -649,9 +644,8 @@ export default class LookupCommand implements BaseCommand {
             State.getGuildLocale(interaction.guildID) === LocaleType.KO;
 
         if (focusedKey === "song_name") {
-            const artistName = Object.entries(
-                interactionData.interactionOptions
-            ).find((x) => x[0] === "artist_name")?.[1];
+            const artistName =
+                interactionData.interactionOptions["artist_name"];
 
             let artistID: number;
             if (artistName) {
