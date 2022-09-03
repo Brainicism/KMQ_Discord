@@ -14,6 +14,7 @@ import GuildPreference from "../../structures/guild_preference";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import State from "../../state";
 import type { GuildTextableMessage } from "../../types";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -21,6 +22,7 @@ import type EliminationScoreboard from "../../structures/elimination_scoreboard"
 import type GameRound from "../../structures/game_round";
 import type GameSession from "../../structures/game_session";
 import type HelpDocumentation from "../../interfaces/help";
+import type LocaleType from "../../enums/locale_type";
 
 const logger = new IPCLogger("hint");
 
@@ -174,26 +176,28 @@ export function validHintCheck(
  * @param guildID - The guild ID
  * @param guessMode - The guess mode
  * @param gameRound - The game round
+ * @param locale - The locale
  * @returns the hint corresponding to the current game round
  */
 export function generateHint(
     guildID: string,
     guessMode: GuessModeType,
-    gameRound: GameRound
+    gameRound: GameRound,
+    locale: LocaleType
 ): string {
     switch (guessMode) {
         case GuessModeType.ARTIST:
             return `${LocalizationManager.localizer.translate(
                 guildID,
                 "command.hint.artistName"
-            )}: ${codeLine(gameRound.hints.artistHint)}`;
+            )}: ${codeLine(gameRound.hints.artistHint[locale])}`;
         case GuessModeType.SONG_NAME:
         case GuessModeType.BOTH:
         default:
             return `${LocalizationManager.localizer.translate(
                 guildID,
                 "command.hint.songName"
-            )}: ${codeLine(gameRound.hints.songHint)}`;
+            )}: ${codeLine(gameRound.hints.songHint[locale])}`;
     }
 }
 
@@ -239,7 +243,8 @@ export default class HintCommand implements BaseCommand {
                 description: generateHint(
                     message.guildID,
                     guildPreference.gameOptions.guessModeType,
-                    gameRound
+                    gameRound,
+                    State.getGuildLocale(message.guildID)
                 ),
                 thumbnailUrl: KmqImages.READING_BOOK,
             });
