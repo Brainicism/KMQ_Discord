@@ -24,8 +24,9 @@ describe("exp command", () => {
     let guildPreference: GuildPreference;
     const sandbox = sinon.createSandbox();
     describe("calculateOptionsMultiplier", () => {
-        beforeEach(() => {
+        beforeEach(async () => {
             guildPreference = GuildPreference.fromGuild("123");
+            await guildPreference.setAnswerType(AnswerType.TYPING);
             sandbox.stub(guildPreference, "updateGuildPreferences");
         });
 

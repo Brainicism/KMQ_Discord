@@ -859,6 +859,10 @@ export default class GuildPreference {
     async resetToDefault(): Promise<Array<GameOption>> {
         const oldOptions = this.gameOptions;
         this.gameOptions = { ...GuildPreference.DEFAULT_OPTIONS };
+
+        // do not reset answerType
+        this.gameOptions["answerType"] = oldOptions.answerType;
+
         const options = Object.entries(this.gameOptions).map((x) => {
             const optionName = x[0];
             const optionValue = x[1];

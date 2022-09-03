@@ -2,6 +2,7 @@
 import * as discord_utils from "../../helpers/discord_utils";
 import * as game_utils from "../../helpers/game_utils";
 import * as utils from "../../helpers/utils";
+import AnswerType from "../../enums/option_types/answer_type";
 import Eris, { Collection } from "eris";
 import GameSession from "../../structures/game_session";
 import GameType from "../../enums/game_type";
@@ -32,9 +33,10 @@ describe("game session", () => {
         let endRoundStub: sinon.SinonSpy;
         let voiceConnection: sinon.SinonStubbedInstance<Eris.VoiceConnection>;
         const sandbox = sinon.createSandbox();
-        beforeEach(() => {
+        beforeEach(async () => {
             sandbox.stub(utils, "delay");
             guildPreference = getMockGuildPreference();
+            await guildPreference.setAnswerType(AnswerType.TYPING);
             voiceChannelStub = sandbox.createStubInstance(Eris.VoiceChannel);
             voiceChannelStub.voiceMembers = new Collection(Eris.Member);
             const x = sandbox.createStubInstance(KmqClient);
