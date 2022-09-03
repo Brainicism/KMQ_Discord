@@ -10,7 +10,6 @@ import {
     reloadCaches,
     updateBotStatus,
 } from "./helpers/management_utils";
-import BotListingManager from "./helpers/bot_listing_manager";
 import EnvType from "./enums/env_type";
 import EvalCommand from "./commands/admin/eval";
 import LocalizationManager from "./helpers/localization_manager";
@@ -187,12 +186,6 @@ export default class BotWorker extends BaseClusterWorker {
 
         logger.info("Registering process event handlers...");
         registerProcessEvents();
-
-        if (process.env.NODE_ENV === EnvType.PROD && this.clusterID === 0) {
-            logger.info("Initializing bot stats poster...");
-            const botListingManager = new BotListingManager();
-            botListingManager.start();
-        }
 
         if (
             [EnvType.CI, EnvType.DRY_RUN].includes(
