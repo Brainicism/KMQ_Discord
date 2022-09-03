@@ -304,8 +304,12 @@ async function lookupBySongName(
 
     if (songName !== "") {
         kmqSongEntriesQuery = kmqSongEntriesQuery
-            .whereILike("song_name_en", `%${songName}%`)
-            .orWhereILike("song_name_ko", `%${songName}%`)
+            .where((qb) => {
+                qb.whereILike("song_name_en", `%${songName}%`).orWhereILike(
+                    "song_name_ko",
+                    `%${songName}%`
+                );
+            })
             .orderByRaw("CHAR_LENGTH(song_name_en) ASC")
             .orderBy("views", "DESC");
     } else {
@@ -316,7 +320,10 @@ async function lookupBySongName(
     }
 
     if (artistID) {
-        kmqSongEntriesQuery = kmqSongEntriesQuery.where("id_artist", artistID);
+        kmqSongEntriesQuery = kmqSongEntriesQuery.andWhere(
+            "id_artist",
+            artistID
+        );
     }
 
     const kmqSongEntries = await kmqSongEntriesQuery;
@@ -650,11 +657,11 @@ export default class LookupCommand implements BaseCommand {
             }
 
             const songEntryToInteraction = (
-                x: { name: string; hangulName?: string; songLink: string },
+                x: { name: string; hangulName?: string },
                 useHangul: boolean
             ): AutocompleteEntry => ({
                 name: useHangul && x.hangulName ? x.hangulName : x.name,
-                value: x.songLink,
+                value: useHangul && x.hangulName ? x.hangulName : x.name,
             });
 
             const showHangul =
@@ -664,34 +671,27 @@ export default class LookupCommand implements BaseCommand {
             if (lowercaseUserInput.length < 2) {
                 await tryAutocompleteInteractionAcknowledge(
                     interaction,
-                    Object.entries(
+                    Object.values(
                         artistID ? State.songLinkToEntry : State.newSongs
                     )
                         .filter((x) =>
-                            artistID ? artistID === x[1].artistID : true
+                            artistID ? artistID === x.artistID : true
                         )
-                        .map((x) => songEntryToInteraction(x[1], showHangul))
+                        .map((x) => songEntryToInteraction(x, showHangul))
                         .slice(0, 25)
                 );
             } else {
                 await tryAutocompleteInteractionAcknowledge(
                     interaction,
-                    Object.entries(State.songLinkToEntry)
+                    Object.values(State.songLinkToEntry)
                         .filter(
                             (x) =>
-                                (artistID
-                                    ? artistID === x[1].artistID
-                                    : true) &&
-                                x[1].name
+                                (artistID ? artistID === x.artistID : true) &&
+                                x.name
                                     .toLocaleLowerCase()
                                     .startsWith(lowercaseUserInput)
                         )
-                        .map((x) =>
-                            songEntryToInteraction(
-                                { songLink: x[0], ...x[1] },
-                                showHangul
-                            )
-                        )
+                        .map((x) => songEntryToInteraction(x, showHangul))
                         .slice(0, 25)
                 );
             }
