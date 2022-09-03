@@ -10,6 +10,7 @@ import {
     EMBED_SUCCESS_COLOR,
     EPHEMERAL_MESSAGE_FLAG,
     KmqImages,
+    MAX_AUTOCOMPLETE_FIELDS,
     PERMISSIONS_LINK,
     SPOTIFY_BASE_URL,
 } from "../constants";
@@ -1831,19 +1832,19 @@ export function searchArtists(
 }
 
 /**
- * Transform the given artists into autocomplete format
- * @param artists - Artists to include in the result
+ * Transform the given data into autocomplete format
+ * @param data - Data to include in the result
  * @param showHangul - Whether to use hangul
  * @returns a list of group names
  */
-export function artistAutocompleteFormat(
-    artists: Array<MatchedArtist>,
+export function localizedAutocompleteFormat(
+    data: Array<{ name: string; hangulName?: string }>,
     showHangul: boolean
 ): Array<AutocompleteEntry> {
-    return artists
+    return data
         .map((x) => ({
             name: showHangul && x.hangulName ? x.hangulName : x.name,
             value: showHangul && x.hangulName ? x.hangulName : x.name,
         }))
-        .slice(0, 25);
+        .slice(0, MAX_AUTOCOMPLETE_FIELDS);
 }

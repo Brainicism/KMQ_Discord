@@ -39,7 +39,7 @@ interface GuessCorrectness {
  * @returns The cleaned song name
  */
 export function cleanSongName(name: string): string {
-    let cleanName = name.toLowerCase();
+    let cleanName = name.toLocaleLowerCase();
     for (const characterReplacement of CHARACTER_REPLACEMENTS) {
         cleanName = cleanName.replace(
             characterReplacement.pattern,

@@ -1,19 +1,19 @@
 import { GROUP_LIST_URL } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
-    artistAutocompleteFormat,
+    containsHangul,
+    getOrdinalNum,
+    setIntersection,
+} from "../../helpers/utils";
+import {
     getDebugLogHeader,
     getMatchedArtists,
+    localizedAutocompleteFormat,
     searchArtists,
     sendErrorMessage,
     sendOptionsMessage,
     tryAutocompleteInteractionAcknowledge,
 } from "../../helpers/discord_utils";
-import {
-    containsHangul,
-    getOrdinalNum,
-    setIntersection,
-} from "../../helpers/utils";
 import {
     getMatchingGroupNames,
     getSimilarGroupNames,
@@ -331,7 +331,7 @@ export default class GroupsCommand implements BaseCommand {
 
         await tryAutocompleteInteractionAcknowledge(
             interaction,
-            artistAutocompleteFormat(
+            localizedAutocompleteFormat(
                 searchArtists(lowercaseUserInput, previouslyEnteredArtists),
                 showHangul
             )

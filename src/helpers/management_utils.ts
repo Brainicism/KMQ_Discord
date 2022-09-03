@@ -13,6 +13,7 @@ import KmqConfiguration from "../kmq_configuration";
 import LocalizationManager from "./localization_manager";
 import MessageContext from "../structures/message_context";
 
+import { cleanSongName } from "../structures/game_round";
 import State from "../state";
 import _ from "lodash";
 import dbContext from "../database_context";
@@ -331,8 +332,8 @@ async function reloadSongs(): Promise<void> {
             hangulName: mapping["song_name_ko"],
             artistID: mapping["id_artist"],
             songLink: mapping["link"],
-            cleanName: mapping["clean_song_name_en"].toLocaleLowerCase(),
-            hangulCleanName: mapping["clean_song_name_ko"].toLocaleLowerCase(),
+            cleanName: cleanSongName(mapping["clean_song_name_en"]),
+            hangulCleanName: cleanSongName(mapping["clean_song_name_ko"]),
         };
 
         State.songLinkToEntry[songEntry.songLink] = songEntry;

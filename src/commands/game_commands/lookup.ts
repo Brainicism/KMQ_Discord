@@ -1,16 +1,6 @@
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import {
-    artistAutocompleteFormat,
-    getDebugLogHeader,
-    getInteractionValue,
-    searchArtists,
-    sendErrorMessage,
-    sendInfoMessage,
-    sendPaginationedEmbed,
-    tryAutocompleteInteractionAcknowledge,
-} from "../../helpers/discord_utils";
-import {
     chunkArray,
     containsHangul,
     friendlyFormattedDate,
@@ -18,6 +8,16 @@ import {
     isValidURL,
 } from "../../helpers/utils";
 import { cleanSongName } from "../../structures/game_round";
+import {
+    getDebugLogHeader,
+    getInteractionValue,
+    localizedAutocompleteFormat,
+    searchArtists,
+    sendErrorMessage,
+    sendInfoMessage,
+    sendPaginationedEmbed,
+    tryAutocompleteInteractionAcknowledge,
+} from "../../helpers/discord_utils";
 import {
     getLocalizedArtistName,
     getLocalizedSongName,
@@ -38,7 +38,6 @@ import _ from "lodash";
 import dbContext from "../../database_context";
 import type { CommandInteraction, EmbedOptions } from "eris";
 import type { GuildTextableMessage } from "../../types";
-import type AutocompleteEntry from "../../interfaces/autocomplete_entry";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -645,6 +644,10 @@ export default class LookupCommand implements BaseCommand {
         const focusedVal = interactionData.interactionOptions[focusedKey];
 
         const lowercaseUserInput = focusedVal.toLocaleLowerCase();
+        const showHangul =
+            containsHangul(lowercaseUserInput) ||
+            State.getGuildLocale(interaction.guildID) === LocaleType.KO;
+
         if (focusedKey === "song_name") {
             const artistName = Object.entries(
                 interactionData.interactionOptions
@@ -656,95 +659,83 @@ export default class LookupCommand implements BaseCommand {
                     State.artistToEntry[artistName.toLocaleLowerCase()]?.id;
             }
 
-            const songEntryToInteraction = (
-                x: { name: string; hangulName?: string },
-                useHangul: boolean
-            ): AutocompleteEntry => ({
-                name: useHangul && x.hangulName ? x.hangulName : x.name,
-                value: useHangul && x.hangulName ? x.hangulName : x.name,
-            });
-
-            const showHangul =
-                containsHangul(lowercaseUserInput) ||
-                State.getGuildLocale(interaction.guildID) === LocaleType.KO;
-
             if (lowercaseUserInput.length < 2) {
                 await tryAutocompleteInteractionAcknowledge(
                     interaction,
-                    _.uniqBy(
-                        Object.values(
-                            artistID ? State.songLinkToEntry : State.newSongs
-                        )
-                            .filter((x) =>
+                    localizedAutocompleteFormat(
+                        _.uniqBy(
+                            Object.values(
+                                artistID
+                                    ? State.songLinkToEntry
+                                    : State.newSongs
+                            ).filter((x) =>
                                 artistID ? artistID === x.artistID : true
-                            )
-                            .map((x) => songEntryToInteraction(x, showHangul))
-                            .slice(0, 25),
-                        "name"
+                            ),
+                            "name"
+                        ),
+                        showHangul
                     )
                 );
             } else {
                 await tryAutocompleteInteractionAcknowledge(
                     interaction,
-                    _.uniqBy(
-                        Object.values(State.songLinkToEntry)
-                            .filter(
+                    localizedAutocompleteFormat(
+                        _.uniqBy(
+                            Object.values(State.songLinkToEntry).filter(
                                 (x) =>
                                     (artistID
                                         ? artistID === x.artistID
                                         : true) &&
-                                    x.name
+                                    (showHangul && x.hangulName
+                                        ? x.hangulName
+                                        : x.name
+                                    )
                                         .toLocaleLowerCase()
                                         .startsWith(lowercaseUserInput)
-                            )
-                            .map((x) => songEntryToInteraction(x, showHangul))
-                            .slice(0, 25),
-                        "name"
+                            ),
+                            "name"
+                        ),
+                        showHangul
                     )
                 );
             }
         } else if (focusedKey === "artist_name") {
-            const enteredSongName = Object.entries(
-                interactionData.interactionOptions
-            ).find((x) => x[0] === "song_name")?.[1];
+            const enteredSongName =
+                interactionData.interactionOptions["song_name"];
 
             let matchingArtists: Array<MatchedArtist> = [];
             if (!enteredSongName) {
                 matchingArtists = searchArtists(lowercaseUserInput, []);
             } else {
                 // only return artists that have a song that matches the entered one
-                matchingArtists = Object.values(State.artistToEntry);
                 const cleanEnteredSongName = cleanSongName(enteredSongName);
 
-                const matchingSongs = Object.entries(State.songLinkToEntry)
-                    .filter(
-                        (x) =>
-                            x[1].cleanName.startsWith(cleanEnteredSongName) ||
-                            x[1].hangulCleanName.startsWith(
-                                cleanEnteredSongName
-                            ) ||
-                            enteredSongName === x[0]
-                    )
-                    .map((x) => x[1]);
+                const matchingSongs = Object.values(
+                    State.songLinkToEntry
+                ).filter(
+                    (x) =>
+                        x.cleanName.startsWith(cleanEnteredSongName) ||
+                        x.hangulCleanName.startsWith(cleanEnteredSongName)
+                );
 
                 const matchingSongArtistIDs = matchingSongs.map(
                     (x) => x.artistID
                 );
 
                 matchingArtists = _.uniq(
-                    matchingArtists.filter((x) =>
-                        matchingSongArtistIDs.includes(x.id)
-                    )
+                    Object.values(State.artistToEntry)
+                        .filter((x) => matchingSongArtistIDs.includes(x.id))
+                        .filter((x) =>
+                            (showHangul && x.hangulName ? x.hangulName : x.name)
+                                .toLocaleLowerCase()
+                                .startsWith(lowercaseUserInput)
+                        )
                 );
             }
 
-            const showHangul =
-                containsHangul(lowercaseUserInput) ||
-                State.getGuildLocale(interaction.guildID) === LocaleType.KO;
-
             await tryAutocompleteInteractionAcknowledge(
                 interaction,
-                artistAutocompleteFormat(matchingArtists, showHangul)
+                localizedAutocompleteFormat(matchingArtists, showHangul)
             );
         }
     }
