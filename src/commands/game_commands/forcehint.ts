@@ -12,6 +12,7 @@ import GuildPreference from "../../structures/guild_preference";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import State from "../../state";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type GameSession from "src/structures/game_session";
@@ -73,7 +74,8 @@ export default class ForceHintCommand implements BaseCommand {
             description: generateHint(
                 message.guildID,
                 guildPreference.gameOptions.guessModeType,
-                gameRound
+                gameRound,
+                State.getGuildLocale(message.guildID)
             ),
             thumbnailUrl: KmqImages.READING_BOOK,
         });
