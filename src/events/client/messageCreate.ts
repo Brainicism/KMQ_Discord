@@ -140,7 +140,9 @@ export default async function messageCreateHandler(
                     );
                 } else {
                     logger.error(
-                        `Error while invoking command (${parsedMessage.action}) | ${debugId} | Error: ${err}`
+                        `Error while invoking command (${
+                            parsedMessage.action
+                        }) | ${debugId} | Error: ${JSON.stringify(err)}`
                     );
                 }
 
