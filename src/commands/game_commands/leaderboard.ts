@@ -5,7 +5,6 @@ import {
     bold,
     chooseRandom,
     friendlyFormattedNumber,
-    getUserTag,
 } from "../../helpers/utils";
 import {
     getDebugLogHeader,
@@ -240,17 +239,24 @@ export default class LeaderboardCommand implements BaseCommand {
 
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        _messageContext: MessageContext
+        messageContext: MessageContext
     ): Promise<void> {
-        const { interactionOptions } = getInteractionValue(interaction);
+        const { interactionOptions, interactionName } =
+            getInteractionValue(interaction);
 
-        await LeaderboardCommand.showLeaderboard(
-            interaction,
-            interactionOptions["type"],
-            interactionOptions["scope"],
-            interactionOptions["duration"],
-            interactionOptions["page"]
-        );
+        if (interactionName === LeaderboardAction.ENROLL) {
+            LeaderboardCommand.enrollLeaderboard(messageContext, interaction);
+        } else if (interactionName === LeaderboardAction.UNENROLL) {
+            LeaderboardCommand.unenrollLeaderboard(messageContext, interaction);
+        } else {
+            await LeaderboardCommand.showLeaderboard(
+                interaction,
+                interactionOptions["type"],
+                interactionOptions["scope"],
+                interactionOptions["duration"],
+                interactionOptions["page"]
+            );
+        }
     }
 
     call = ({ message, parsedMessage }: CommandArgs): Promise<void> => {
@@ -271,9 +277,9 @@ export default class LeaderboardCommand implements BaseCommand {
         ) {
             const action = arg as LeaderboardAction;
             if (action === LeaderboardAction.ENROLL) {
-                LeaderboardCommand.enrollLeaderboard(message);
+                LeaderboardCommand.enrollLeaderboard(messageContext);
             } else if (action === LeaderboardAction.UNENROLL) {
-                LeaderboardCommand.unenrollLeaderboard(message);
+                LeaderboardCommand.unenrollLeaderboard(messageContext);
             }
 
             return;
@@ -889,62 +895,82 @@ export default class LeaderboardCommand implements BaseCommand {
     }
 
     private static async enrollLeaderboard(
-        message: GuildTextableMessage
+        messageContext: MessageContext,
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const alreadyEnrolled = !!(await dbContext
             .kmq("leaderboard_enrollment")
-            .where("player_id", "=", message.author.id)
+            .where("player_id", "=", messageContext.author.id)
             .first());
 
         if (alreadyEnrolled) {
-            sendErrorMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "command.leaderboard.failure.alreadyEnrolled.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "command.leaderboard.failure.alreadyEnrolled.description"
-                ),
-            });
+            sendErrorMessage(
+                messageContext,
+                {
+                    title: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "command.leaderboard.failure.alreadyEnrolled.title"
+                    ),
+                    description: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "command.leaderboard.failure.alreadyEnrolled.description"
+                    ),
+                },
+                interaction
+            );
             return;
         }
 
         await dbContext.kmq("leaderboard_enrollment").insert({
-            player_id: message.author.id,
-            display_name: getUserTag(message.author),
+            player_id: messageContext.author.id,
+            display_name: messageContext.author.tag,
         });
 
-        sendInfoMessage(MessageContext.fromMessage(message), {
-            title: LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.leaderboard.enrolled.title"
-            ),
-            description: LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.leaderboard.enrolled.description"
-            ),
-        });
+        sendInfoMessage(
+            messageContext,
+            {
+                title: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "command.leaderboard.enrolled.title"
+                ),
+                description: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "command.leaderboard.enrolled.description"
+                ),
+            },
+            false,
+            null,
+            [],
+            interaction
+        );
     }
 
     private static async unenrollLeaderboard(
-        message: GuildTextableMessage
+        messageContext: MessageContext,
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         await dbContext
             .kmq("leaderboard_enrollment")
-            .where("player_id", "=", message.author.id)
+            .where("player_id", "=", messageContext.author.id)
             .del();
 
-        sendInfoMessage(MessageContext.fromMessage(message), {
-            title: LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.leaderboard.unenrolled.title"
-            ),
-            description: LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.leaderboard.unenrolled.description"
-            ),
-        });
+        sendInfoMessage(
+            messageContext,
+            {
+                title: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "command.leaderboard.unenrolled.title"
+                ),
+                description: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "command.leaderboard.unenrolled.description"
+                ),
+            },
+            false,
+            null,
+            [],
+            interaction
+        );
     }
 
     private static async showLeaderboard(

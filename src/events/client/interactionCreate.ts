@@ -1,5 +1,6 @@
 import { BOOKMARK_COMMAND_NAME, PROFILE_COMMAND_NAME } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { getUserTag } from "../../helpers/utils";
 import {
     getInteractionValue,
     tryCreateInteractionErrorAcknowledgement,
@@ -39,9 +40,11 @@ export default async function interactionCreateHandler(
         | Eris.ComponentInteraction
         | Eris.AutocompleteInteraction
 ): Promise<void> {
+    const member = new KmqMember(interaction.member.id);
+    member.tag = getUserTag(interaction.member);
     const messageContext = new MessageContext(
         interaction.channel.id,
-        new KmqMember(interaction.member.id),
+        member,
         interaction.guildID
     );
 
