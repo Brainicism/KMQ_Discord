@@ -1802,7 +1802,7 @@ export function getMatchedArtists(
 ): Array<MatchedArtist> {
     return _.uniqBy(
         interactionOptions.map(
-            (x) => State.artistToEntry[x["value"].toLocaleLowerCase()]
+            (x) => State.artistToEntry[x["value"].toLowerCase()]
         ),
         "id"
     );

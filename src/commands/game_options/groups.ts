@@ -319,7 +319,7 @@ export default class GroupsCommand implements BaseCommand {
             interaction.data.options.filter((x) => x["focused"])[0][
                 "value"
             ] as string
-        ).toLocaleLowerCase();
+        ).toLowerCase();
 
         const previouslyEnteredArtists = getMatchedArtists(
             interaction.data.options.filter((x) => !x["focused"])

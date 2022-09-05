@@ -616,7 +616,7 @@ export default class LookupCommand implements BaseCommand {
             let artistID: number;
             if (artistName) {
                 const matchingArtist =
-                    State.artistToEntry[artistName.toLocaleLowerCase()];
+                    State.artistToEntry[artistName.toLowerCase()];
 
                 if (matchingArtist) {
                     artistID = matchingArtist.id;
@@ -638,7 +638,7 @@ export default class LookupCommand implements BaseCommand {
         const focusedKey = interactionData.focusedKey;
         const focusedVal = interactionData.interactionOptions[focusedKey];
 
-        const lowercaseUserInput = focusedVal.toLocaleLowerCase();
+        const lowercaseUserInput = focusedVal.toLowerCase();
         const showHangul =
             containsHangul(lowercaseUserInput) ||
             State.getGuildLocale(interaction.guildID) === LocaleType.KO;
@@ -650,7 +650,7 @@ export default class LookupCommand implements BaseCommand {
             let artistID: number;
             if (artistName) {
                 artistID =
-                    State.artistToEntry[artistName.toLocaleLowerCase()]?.id;
+                    State.artistToEntry[artistName.toLowerCase()]?.id;
             }
 
             if (lowercaseUserInput.length < 2) {
@@ -665,7 +665,7 @@ export default class LookupCommand implements BaseCommand {
                             ).filter(
                                 (x) => !artistID || artistID === x.artistID
                             ),
-                            (x) => x.name.trim().toLocaleLowerCase()
+                            (x) => x.name.trim().toLowerCase()
                         ),
                         showHangul
                     )
@@ -679,10 +679,10 @@ export default class LookupCommand implements BaseCommand {
                                 (x) =>
                                     (!artistID || artistID === x.artistID) &&
                                     ((showHangul && x.hangulName) || x.name)
-                                        .toLocaleLowerCase()
+                                        .toLowerCase()
                                         .startsWith(lowercaseUserInput)
                             ),
-                            (x) => x.name.trim().toLocaleLowerCase()
+                            (x) => x.name.trim().toLowerCase()
                         ),
                         showHangul
                     )
@@ -716,7 +716,7 @@ export default class LookupCommand implements BaseCommand {
                         .filter((x) => matchingSongArtistIDs.includes(x.id))
                         .filter((x) =>
                             (showHangul && x.hangulName ? x.hangulName : x.name)
-                                .toLocaleLowerCase()
+                                .toLowerCase()
                                 .startsWith(lowercaseUserInput)
                         )
                 );

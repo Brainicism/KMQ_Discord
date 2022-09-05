@@ -291,12 +291,12 @@ async function reloadArtists(): Promise<void> {
             id: mapping["id_artist"],
         };
 
-        State.artistToEntry[mapping["artist_name_en"].toLocaleLowerCase()] =
+        State.artistToEntry[mapping["artist_name_en"].toLowerCase()] =
             artistEntry;
         State.artistToEntry[mapping["artist_name_ko"]] = artistEntry;
         for (const alias in aliases) {
             if (alias.length > 0) {
-                State.artistToEntry[alias.toLocaleLowerCase()] = artistEntry;
+                State.artistToEntry[alias.toLowerCase()] = artistEntry;
             }
         }
     }
