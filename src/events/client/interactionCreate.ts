@@ -1,12 +1,11 @@
 import { BOOKMARK_COMMAND_NAME, PROFILE_COMMAND_NAME } from "../../constants";
 import { IPCLogger } from "../../logger";
-import { getUserTag } from "../../helpers/utils";
 import {
     getInteractionValue,
     tryCreateInteractionErrorAcknowledgement,
     tryInteractionAcknowledge,
 } from "../../helpers/discord_utils";
-import { measureExecutionTime } from "../../helpers/utils";
+import { getUserTag, measureExecutionTime } from "../../helpers/utils";
 import Eris from "eris";
 import GroupsCommand from "../../commands/game_options/groups";
 import KmqMember from "../../structures/kmq_member";
