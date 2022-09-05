@@ -167,11 +167,10 @@ export default class LeaderboardCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.leaderboard.help.interaction.type"
+                                    "command.leaderboard.interaction.type"
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
-                            required: true,
                             choices: Object.values(LeaderboardType).map(
                                 (type) => ({
                                     name: type,
@@ -185,11 +184,10 @@ export default class LeaderboardCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.leaderboard.help.interaction.duration"
+                                    "command.leaderboard.interaction.duration"
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
-                            required: true,
                             choices: [
                                 LeaderboardDuration.ALL_TIME,
                                 LeaderboardDuration.MONTHLY,
@@ -207,11 +205,10 @@ export default class LeaderboardCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.leaderboard.help.interaction.scope"
+                                    "command.leaderboard.interaction.scope"
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
-                            required: true,
                             choices: Object.values(LeaderboardScope).map(
                                 (scope) => ({
                                     name: scope,
@@ -225,11 +222,10 @@ export default class LeaderboardCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.leaderboard.help.interaction.page"
+                                    "command.leaderboard.interaction.page"
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .INTEGER,
-                            required: false,
                         },
                     ],
                 },
