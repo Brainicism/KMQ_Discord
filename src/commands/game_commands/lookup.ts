@@ -478,7 +478,7 @@ export default class LookupCommand implements BaseCommand {
         arg: string,
         artistID?: number
     ): Promise<void> {
-        let linkOrName = arg;
+        let linkOrName = arg ?? "";
         if (linkOrName.startsWith("<") && linkOrName.endsWith(">")) {
             // Trim <> if user didn't want to show YouTube embed
             linkOrName = linkOrName.slice(1, -1);
@@ -607,8 +607,7 @@ export default class LookupCommand implements BaseCommand {
                 interactionData.interactionOptions["song_link"]
             );
         } else if (interactionData.interactionName === "song_name") {
-            const songName =
-                interactionData.interactionOptions["song_name"] ?? "";
+            const songName = interactionData.interactionOptions["song_name"];
 
             const artistName =
                 interactionData.interactionOptions["artist_name"];
@@ -649,8 +648,7 @@ export default class LookupCommand implements BaseCommand {
 
             let artistID: number;
             if (artistName) {
-                artistID =
-                    State.artistToEntry[artistName.toLowerCase()]?.id;
+                artistID = State.artistToEntry[artistName.toLowerCase()]?.id;
             }
 
             if (lowercaseUserInput.length < 2) {
