@@ -1,10 +1,11 @@
 import { BOOKMARK_COMMAND_NAME, PROFILE_COMMAND_NAME } from "../../constants";
 import { IPCLogger } from "../../logger";
-import { measureExecutionTime } from "../../helpers/utils";
 import {
+    getInteractionValue,
     tryCreateInteractionErrorAcknowledgement,
     tryInteractionAcknowledge,
 } from "../../helpers/discord_utils";
+import { measureExecutionTime } from "../../helpers/utils";
 import Eris from "eris";
 import GroupsCommand from "../../commands/game_options/groups";
 import KmqMember from "../../structures/kmq_member";
@@ -165,13 +166,9 @@ export default async function interactionCreateHandler(
         const autocompleteInteractionHandler =
             AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS[interaction.data.name];
 
+        const parsedInteraction = getInteractionValue(interaction);
         if (autocompleteInteractionHandler) {
-            interactionName = `Autocomplete interaction for '${
-                interaction.data.name
-            }' for value '${
-                interaction.data.options.find((x) => x["focused"]).name
-            }'`;
-
+            interactionName = `Autocomplete interaction for '${interaction.data.name}' for value '${parsedInteraction.focusedKey}'`;
             interactionPromise = autocompleteInteractionHandler(interaction);
         }
     }
