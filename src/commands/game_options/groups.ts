@@ -7,6 +7,9 @@ import {
 } from "../../helpers/utils";
 import {
     getDebugLogHeader,
+    getMatchedArtists,
+    localizedAutocompleteFormat,
+    searchArtists,
     sendErrorMessage,
     sendOptionsMessage,
     tryAutocompleteInteractionAcknowledge,
@@ -24,7 +27,6 @@ import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
-import _ from "lodash";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -289,22 +291,6 @@ export default class GroupsCommand implements BaseCommand {
     }
 
     /**
-     * Retrieve artist names from the interaction options
-     * @param interactionOptions - The message's interaction options
-     * @returns the matched artists
-     */
-    static getMatchedArtists(
-        interactionOptions: Array<Eris.InteractionDataOptions>
-    ): Array<MatchedArtist> {
-        return _.uniqBy(
-            interactionOptions.map(
-                (x) => State.artistToEntry[x["value"].toLocaleLowerCase()]
-            ),
-            "id"
-        );
-    }
-
-    /**
      * @param interaction - The interaction
      * @param messageContext - The message context
      */
@@ -316,7 +302,7 @@ export default class GroupsCommand implements BaseCommand {
         if (interaction.data.options == null) {
             groups = null;
         } else {
-            groups = GroupsCommand.getMatchedArtists(interaction.data.options);
+            groups = getMatchedArtists(interaction.data.options);
         }
 
         await GroupsCommand.updateOption(messageContext, groups, interaction);
@@ -333,47 +319,22 @@ export default class GroupsCommand implements BaseCommand {
             interaction.data.options.filter((x) => x["focused"])[0][
                 "value"
             ] as string
-        ).toLocaleLowerCase();
+        ).toLowerCase();
 
-        const artistEntryToInteraction = (
-            x: MatchedArtist,
-            useHangul: boolean
-        ): { name: string; value: string } => ({
-            name: useHangul && x.hangulName ? x.hangulName : x.name,
-            value: useHangul && x.hangulName ? x.hangulName : x.name,
-        });
-
-        const previouslyEnteredArtists = GroupsCommand.getMatchedArtists(
-            interaction.data.options.slice(0, -1)
+        const previouslyEnteredArtists = getMatchedArtists(
+            interaction.data.options.filter((x) => !x["focused"])
         ).map((x) => x?.name);
 
         const showHangul =
             containsHangul(lowercaseUserInput) ||
             State.getGuildLocale(interaction.guildID) === LocaleType.KO;
 
-        if (lowercaseUserInput === "") {
-            // Show top artists when no input so far
-            await tryAutocompleteInteractionAcknowledge(
-                interaction,
-                Object.entries(State.topArtists)
-                    .filter(
-                        (x) => !previouslyEnteredArtists.includes(x[1].name)
-                    )
-                    .map((x) => artistEntryToInteraction(x[1], showHangul))
-            );
-        } else {
-            const matchingGroups = Object.entries(State.artistToEntry)
-                .filter((x) => x[0].startsWith(lowercaseUserInput))
-                .sort((a, b) => a[0].localeCompare(b[0]))
-                .filter((x) => !previouslyEnteredArtists.includes(x[1].name))
-                .slice(0, 25);
-
-            await tryAutocompleteInteractionAcknowledge(
-                interaction,
-                matchingGroups.map((x) =>
-                    artistEntryToInteraction(x[1], showHangul)
-                )
-            );
-        }
+        await tryAutocompleteInteractionAcknowledge(
+            interaction,
+            localizedAutocompleteFormat(
+                searchArtists(lowercaseUserInput, previouslyEnteredArtists),
+                showHangul
+            )
+        );
     }
 }

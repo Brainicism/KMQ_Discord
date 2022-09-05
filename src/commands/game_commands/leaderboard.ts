@@ -137,6 +137,7 @@ export default class LeaderboardCommand implements BaseCommand {
         }
 
         let arg = parsedMessage.components[0];
+        const messageContext = MessageContext.fromMessage(message);
         if (
             Object.values(LeaderboardAction).includes(arg as LeaderboardAction)
         ) {
@@ -179,7 +180,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
         if (pageOffset === 0 && !type && !scope && !duration) {
             sendValidationErrorMessage(
-                message,
+                messageContext,
                 LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.leaderboard.validation.firstArg",
@@ -219,7 +220,7 @@ export default class LeaderboardCommand implements BaseCommand {
             duration = arg as LeaderboardDuration;
         } else if (pageOffset === 0) {
             sendValidationErrorMessage(
-                message,
+                messageContext,
                 LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.leaderboard.validation.secondArg",
@@ -256,7 +257,7 @@ export default class LeaderboardCommand implements BaseCommand {
             duration = arg as LeaderboardDuration;
         } else if (pageOffset === 0) {
             sendValidationErrorMessage(
-                message,
+                messageContext,
                 LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.leaderboard.validation.secondArg",
@@ -274,7 +275,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
         if (pageOffset === 0 && parsedMessage.components.length > 3) {
             sendValidationErrorMessage(
-                message,
+                messageContext,
                 LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.leaderboard.validation.thirdArg"

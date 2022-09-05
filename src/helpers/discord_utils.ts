@@ -10,6 +10,7 @@ import {
     EMBED_SUCCESS_COLOR,
     EPHEMERAL_MESSAGE_FLAG,
     KmqImages,
+    MAX_AUTOCOMPLETE_FIELDS,
     PERMISSIONS_LINK,
     SPOTIFY_BASE_URL,
 } from "../constants";
@@ -41,14 +42,18 @@ import LocaleType from "../enums/locale_type";
 import LocalizationManager from "./localization_manager";
 import MessageContext from "../structures/message_context";
 import State from "../state";
+import _ from "lodash";
 import axios from "axios";
 import dbContext from "../database_context";
 import type { EmbedGenerator, GuildTextableMessage } from "../types";
+import type { GuildTextableChannel } from "eris";
+import type AutocompleteEntry from "../interfaces/autocomplete_entry";
 import type BookmarkedSong from "../interfaces/bookmarked_song";
 import type EmbedPayload from "../interfaces/embed_payload";
 import type GameInfoMessage from "../interfaces/game_info_message";
 import type GameOptions from "../interfaces/game_options";
 import type GuildPreference from "../structures/guild_preference";
+import type MatchedArtist from "../interfaces/matched_artist";
 import type Session from "../structures/session";
 
 const logger = new IPCLogger("discord_utils");
@@ -1184,13 +1189,13 @@ export async function getGameInfoMessage(
 
 /**
  * Sends a paginated embed
- * @param message - The Message object
+ * @param messageOrInteraction - The Message object
  * @param embeds - A list of embeds to paginate over
  * @param components - A list of components to add to the embed
  * @param startPage - The page to start on
  */
 export async function sendPaginationedEmbed(
-    message: GuildTextableMessage,
+    messageOrInteraction: GuildTextableMessage | Eris.CommandInteraction,
     embeds: Array<Eris.EmbedOptions> | Array<EmbedGenerator>,
     components?: Array<Eris.ActionRow>,
     startPage = 1
@@ -1198,20 +1203,21 @@ export async function sendPaginationedEmbed(
     if (embeds.length > 1) {
         if (
             await textPermissionsCheck(
-                message.channel.id,
-                message.guildID,
-                message.author.id,
+                messageOrInteraction.channel.id,
+                messageOrInteraction.guildID,
+                messageOrInteraction.member.id,
                 [...REQUIRED_TEXT_PERMISSIONS, "readMessageHistory"]
             )
         ) {
             return EmbedPaginator.createPaginationEmbed(
-                message.channel,
-                message.interaction
-                    ? message.interaction.member.id
-                    : message.author.id,
+                messageOrInteraction.channel as GuildTextableChannel,
+                messageOrInteraction.member.id,
                 embeds,
                 { timeout: 60000, startPage, cycling: true },
-                components
+                components,
+                messageOrInteraction instanceof Eris.CommandInteraction
+                    ? messageOrInteraction
+                    : null
             );
         }
 
@@ -1226,10 +1232,13 @@ export async function sendPaginationedEmbed(
     }
 
     return sendMessage(
-        message.channel.id,
+        messageOrInteraction.channel.id,
         { embeds: [embed], components },
         null,
-        message.author.id
+        messageOrInteraction.member.id,
+        messageOrInteraction instanceof Eris.CommandInteraction
+            ? messageOrInteraction
+            : null
     );
 }
 
@@ -1731,12 +1740,15 @@ export function sendPowerHourNotification(): void {
  * @param interaction - The interaction
  * @returns the interaction key and value
  */
-export function getInteractionValue(interaction: Eris.CommandInteraction): {
+export function getInteractionValue(
+    interaction: Eris.CommandInteraction | Eris.AutocompleteInteraction
+): {
     interactionKey: string;
     interactionOptions: {
         [optionName: string]: any;
     };
     interactionName: string;
+    focusedKey: string;
 } {
     let options = interaction.data.options;
 
@@ -1745,6 +1757,7 @@ export function getInteractionValue(interaction: Eris.CommandInteraction): {
             interactionKey: null,
             interactionOptions: {},
             interactionName: null,
+            focusedKey: null,
         };
     }
 
@@ -1775,5 +1788,63 @@ export function getInteractionValue(interaction: Eris.CommandInteraction): {
             {}
         ),
         interactionName: parentInteractionDataName,
+        focusedKey: options.find((x) => x["focused"])?.name,
     };
+}
+
+/**
+ * Retrieve artist names from the interaction options
+ * @param interactionOptions - The message's interaction options
+ * @returns the matched artists
+ */
+export function getMatchedArtists(
+    interactionOptions: Array<Eris.InteractionDataOptions>
+): Array<MatchedArtist> {
+    return _.uniqBy(
+        interactionOptions.map(
+            (x) => State.artistToEntry[x["value"].toLowerCase()]
+        ),
+        "id"
+    );
+}
+
+/**
+ * Get artists that match the given query, or top artists if no query is provided
+ * @param lowercaseUserInput - The user's input, in lowercase
+ * @param excludedArtistNames - Artists to exclude in the result
+ * @returns a list of group names
+ */
+export function searchArtists(
+    lowercaseUserInput: string,
+    excludedArtistNames: Array<string>
+): Array<MatchedArtist> {
+    if (lowercaseUserInput === "") {
+        return Object.values(State.topArtists).filter(
+            (x) => !excludedArtistNames.includes(x.name)
+        );
+    }
+
+    return Object.entries(State.artistToEntry)
+        .filter((x) => x[0].startsWith(lowercaseUserInput))
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .filter((x) => !excludedArtistNames.includes(x[1].name))
+        .map((x) => x[1]);
+}
+
+/**
+ * Transform the given data into autocomplete format
+ * @param data - Data to include in the result
+ * @param showHangul - Whether to use hangul
+ * @returns a list of group names
+ */
+export function localizedAutocompleteFormat(
+    data: Array<{ name: string; hangulName?: string }>,
+    showHangul: boolean
+): Array<AutocompleteEntry> {
+    return data
+        .map((x) => ({
+            name: showHangul && x.hangulName ? x.hangulName : x.name,
+            value: showHangul && x.hangulName ? x.hangulName : x.name,
+        }))
+        .slice(0, MAX_AUTOCOMPLETE_FIELDS);
 }
