@@ -13,6 +13,7 @@ import KmqConfiguration from "../kmq_configuration";
 import LocalizationManager from "./localization_manager";
 import MessageContext from "../structures/message_context";
 
+import { cleanSongName } from "../structures/game_round";
 import State from "../state";
 import _ from "lodash";
 import dbContext from "../database_context";
@@ -290,12 +291,12 @@ async function reloadArtists(): Promise<void> {
             id: mapping["id_artist"],
         };
 
-        State.artistToEntry[mapping["artist_name_en"].toLocaleLowerCase()] =
+        State.artistToEntry[mapping["artist_name_en"].toLowerCase()] =
             artistEntry;
         State.artistToEntry[mapping["artist_name_ko"]] = artistEntry;
         for (const alias in aliases) {
             if (alias.length > 0) {
-                State.artistToEntry[alias.toLocaleLowerCase()] = artistEntry;
+                State.artistToEntry[alias.toLowerCase()] = artistEntry;
             }
         }
     }
@@ -311,6 +312,43 @@ async function reloadArtists(): Promise<void> {
         .orderByRaw("SUM(views) DESC")
         .limit(25)
         .groupBy("id_artist");
+}
+
+async function reloadSongs(): Promise<void> {
+    const songMapping = await dbContext
+        .kmq("available_songs")
+        .select([
+            "link",
+            "song_name_en",
+            "song_name_ko",
+            "id_artist",
+            "clean_song_name_en",
+            "clean_song_name_ko",
+        ]);
+
+    for (const mapping of songMapping) {
+        const songEntry = {
+            name: mapping["song_name_en"],
+            hangulName: mapping["song_name_ko"],
+            artistID: mapping["id_artist"],
+            songLink: mapping["link"],
+            cleanName: cleanSongName(mapping["clean_song_name_en"]),
+            hangulCleanName: cleanSongName(mapping["clean_song_name_ko"]),
+        };
+
+        State.songLinkToEntry[songEntry.songLink] = songEntry;
+    }
+
+    State.newSongs = await dbContext
+        .kmq("available_songs")
+        .select([
+            "link AS songLink",
+            "song_name_en AS name",
+            "song_name_ko AS hangulName",
+            "id_artist AS artistID",
+        ])
+        .orderBy("publishedon", "DESC")
+        .limit(25);
 }
 
 async function reloadLocales(): Promise<void> {
@@ -342,8 +380,10 @@ export function registerIntervals(clusterID: number): void {
         reloadFactCache();
         // New bonus groups
         reloadBonusGroups();
-        // New groups used for autocomplete
+        // Groups used for autocomplete
         reloadArtists();
+        // Songs used for autocomplete
+        reloadSongs();
         // Removed cached Spotify playlists
         clearCachedPlaylists();
     });
@@ -404,4 +444,5 @@ export function reloadCaches(): void {
     reloadFactCache();
     reloadBonusGroups();
     reloadLocales();
+    reloadSongs();
 }

@@ -1116,7 +1116,7 @@ export default class PresetCommand implements BaseCommand {
             ).options.filter(
                 (x) => x["focused"]
             )[0] as Eris.InteractionDataOptionsString
-        ).value.toLocaleLowerCase();
+        ).value.toLowerCase();
 
         await tryAutocompleteInteractionAcknowledge(
             interaction,
@@ -1124,7 +1124,7 @@ export default class PresetCommand implements BaseCommand {
                 .filter((x) =>
                     lowercaseUserInput.length === 0
                         ? true
-                        : x.toLocaleLowerCase().startsWith(lowercaseUserInput)
+                        : x.toLowerCase().startsWith(lowercaseUserInput)
                 )
                 .map((x) => ({ name: x, value: x }))
         );
