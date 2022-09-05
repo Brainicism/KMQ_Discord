@@ -2,15 +2,21 @@ import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import {
     chunkArray,
+    containsHangul,
     friendlyFormattedDate,
     friendlyFormattedNumber,
     isValidURL,
 } from "../../helpers/utils";
+import { cleanSongName } from "../../structures/game_round";
 import {
     getDebugLogHeader,
+    getInteractionValue,
+    localizedAutocompleteFormat,
+    searchArtists,
     sendErrorMessage,
     sendInfoMessage,
     sendPaginationedEmbed,
+    tryAutocompleteInteractionAcknowledge,
 } from "../../helpers/discord_utils";
 import {
     getLocalizedArtistName,
@@ -19,19 +25,23 @@ import {
 } from "../../helpers/game_utils";
 import { getVideoID, validateID } from "ytdl-core";
 import { sendValidationErrorMessage } from "../../helpers/validate";
+import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
+import KmqMember from "../../structures/kmq_member";
 import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import SongSelector from "../../structures/song_selector";
 import State from "../../state";
+import _ from "lodash";
 import dbContext from "../../database_context";
-import type { EmbedOptions } from "eris";
+import type { CommandInteraction, EmbedOptions } from "eris";
 import type { GuildTextableMessage } from "../../types";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import type MatchedArtist from "src/interfaces/matched_artist";
 import type QueriedSong from "../../interfaces/queried_song";
 
 const logger = new IPCLogger("lookup");
@@ -45,12 +55,11 @@ const getDaisukiLink = (id: string, isMV: boolean): string => {
 };
 
 async function lookupByYoutubeID(
-    message: GuildTextableMessage,
+    messageOrInteraction: GuildTextableMessage | CommandInteraction,
     videoID: string,
     locale: LocaleType
 ): Promise<boolean> {
-    const messageContext = MessageContext.fromMessage(message);
-    const guildID = message.guildID;
+    const guildID = messageOrInteraction.guildID;
     const kmqSongEntry: QueriedSong = await dbContext
         .kmq("available_songs")
         .select(SongSelector.getQueriedSongFields())
@@ -71,10 +80,15 @@ async function lookupByYoutubeID(
     if (!daisukiSongEntry) {
         // maybe it was falsely parsed as video ID? fallback to song name lookup
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        const found = await lookupBySongName(videoID, locale, message, guildID);
+        const found = await lookupBySongName(
+            messageOrInteraction,
+            videoID,
+            locale
+        );
+
         if (found) {
             logger.info(
-                `Lookup succeded through fallback lookup for: ${videoID}`
+                `Lookup succeeded through fallback lookup for: ${videoID}`
             );
             return true;
         }
@@ -127,7 +141,10 @@ async function lookupByYoutubeID(
             ...(
                 await SongSelector.getFilteredSongList(
                     await GuildPreference.getGuildPreference(guildID),
-                    await isPremiumRequest(session, message.author.id)
+                    await isPremiumRequest(
+                        session,
+                        messageOrInteraction.member.id
+                    )
                 )
             ).songs,
         ]
@@ -136,7 +153,7 @@ async function lookupByYoutubeID(
 
         logger.info(
             `${getDebugLogHeader(
-                message
+                messageOrInteraction
             )} | KMQ song lookup. videoID = ${videoID}. Included in options = ${includedInOptions}.`
         );
     } else {
@@ -162,7 +179,7 @@ async function lookupByYoutubeID(
                 ? artistNameQuery.kname
                 : artistNameQuery.name;
 
-        songAliases = [...daisukiSongEntry.alias.split(";")].join(", ");
+        songAliases = daisukiSongEntry.alias.replaceAll(";", ", ");
         songAliases += songAliases
             ? `, ${daisukiSongEntry.kname}`
             : daisukiSongEntry.kname;
@@ -174,7 +191,7 @@ async function lookupByYoutubeID(
 
         logger.info(
             `${getDebugLogHeader(
-                message
+                messageOrInteraction
             )} | Non-KMQ song lookup. videoID = ${videoID}.`
         );
     }
@@ -243,43 +260,79 @@ async function lookupByYoutubeID(
         );
     }
 
-    sendInfoMessage(messageContext, {
-        title: `"${songName}" - ${artistName}`,
-        url: `https://youtu.be/${videoID}`,
-        description,
-        thumbnailUrl: `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`,
-        fields: fields.map((x) => ({
-            name: x.name,
-            value: x.value,
-            inline: true,
-        })),
-    });
+    const messageContext = new MessageContext(
+        messageOrInteraction.channel.id,
+        new KmqMember(messageOrInteraction.member.id),
+        messageOrInteraction.guildID
+    );
+
+    sendInfoMessage(
+        messageContext,
+        {
+            title: `"${songName}" - ${artistName}`,
+            url: `https://youtu.be/${videoID}`,
+            description,
+            thumbnailUrl: `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`,
+            fields: fields.map((x) => ({
+                name: x.name,
+                value: x.value,
+                inline: true,
+            })),
+        },
+        false,
+        null,
+        [],
+        messageOrInteraction instanceof Eris.CommandInteraction
+            ? messageOrInteraction
+            : null
+    );
 
     return true;
 }
 
 async function lookupBySongName(
+    messageOrInteraction: GuildTextableMessage | CommandInteraction,
     songName: string,
     locale: LocaleType,
-    message: GuildTextableMessage,
-    guildID: string
+    artistID?: number
 ): Promise<boolean> {
-    const kmqSongEntries: QueriedSong[] = await dbContext
+    let kmqSongEntriesQuery = dbContext
         .kmq("available_songs")
         .select(SongSelector.getQueriedSongFields())
-        .whereILike("song_name_en", `%${songName}%`)
-        .orWhereILike("song_name_ko", `%${songName}%`)
-        .orderByRaw("CHAR_LENGTH(song_name_en) ASC")
-        .orderBy("views", "DESC")
         .limit(100);
 
+    if (songName !== "") {
+        kmqSongEntriesQuery = kmqSongEntriesQuery
+            .where((qb) => {
+                qb.whereILike("song_name_en", `%${songName}%`).orWhereILike(
+                    "song_name_ko",
+                    `%${songName}%`
+                );
+            })
+            .orderByRaw("CHAR_LENGTH(song_name_en) ASC")
+            .orderBy("views", "DESC");
+    } else {
+        kmqSongEntriesQuery = kmqSongEntriesQuery.orderBy(
+            "publishedon",
+            "DESC"
+        );
+    }
+
+    if (artistID) {
+        kmqSongEntriesQuery = kmqSongEntriesQuery.andWhere(
+            "id_artist",
+            artistID
+        );
+    }
+
+    const kmqSongEntries = await kmqSongEntriesQuery;
     if (kmqSongEntries.length === 0) {
         return false;
     }
 
     if (kmqSongEntries.length === 1) {
         return lookupByYoutubeID(
-            message,
+            messageOrInteraction,
             kmqSongEntries[0].youtubeLink,
             locale
         );
@@ -297,18 +350,18 @@ async function lookupBySongName(
     const embeds: Array<EmbedOptions> = embedFieldSubsets.map(
         (embedFieldsSubset) => ({
             title: LocalizationManager.localizer.translate(
-                guildID,
+                messageOrInteraction.guildID,
                 "command.lookup.songNameSearchResult.title"
             ),
             description: LocalizationManager.localizer.translate(
-                guildID,
+                messageOrInteraction.guildID,
                 "command.lookup.songNameSearchResult.successDescription"
             ),
             fields: embedFieldsSubset,
         })
     );
 
-    await sendPaginationedEmbed(message, embeds);
+    await sendPaginationedEmbed(messageOrInteraction, embeds);
     return true;
 }
 
@@ -348,61 +401,155 @@ export default class LookupCommand implements BaseCommand {
         priority: 40,
     });
 
+    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+        {
+            name: "lookup",
+            description: LocalizationManager.localizer.translate(
+                LocaleType.EN,
+                "command.lookup.help.description"
+            ),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+            options: [
+                {
+                    name: "song_name",
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.lookup.help.interaction.byName.description"
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "song_name",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.lookup.help.interaction.byName.field.song"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            autocomplete: true,
+                        },
+                        {
+                            name: "artist_name",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.lookup.help.interaction.byName.field.artist"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            autocomplete: true,
+                        },
+                    ],
+                },
+                {
+                    name: "song_link",
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.lookup.help.interaction.byLink.description"
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "song_link",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.lookup.help.interaction.byLink.field"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            required: true,
+                        },
+                    ],
+                },
+            ],
+        },
+    ];
+
     call = async ({ parsedMessage, message }: CommandArgs): Promise<void> => {
-        const guildID = message.guildID;
-        let arg = parsedMessage.components[0];
+        await this.lookupSong(message, parsedMessage.components[0]);
+    };
+
+    async lookupSong(
+        messageOrInteraction: GuildTextableMessage | CommandInteraction,
+        arg: string,
+        artistID?: number
+    ): Promise<void> {
+        let linkOrName = arg ?? "";
+        if (linkOrName.startsWith("<") && linkOrName.endsWith(">")) {
+            // Trim <> if user didn't want to show YouTube embed
+            linkOrName = linkOrName.slice(1, -1);
+        }
+
+        if (
+            linkOrName.startsWith("youtube.com") ||
+            linkOrName.startsWith("youtu.be")
+        ) {
+            // ytdl::getVideoID() requires URLs start with "https://"
+            linkOrName = `https://${linkOrName}`;
+        }
+
+        const guildID = messageOrInteraction.guildID;
+        const messageContext = new MessageContext(
+            messageOrInteraction.channel.id,
+            new KmqMember(messageOrInteraction.member.id),
+            messageOrInteraction.guildID
+        );
 
         const locale = State.getGuildLocale(guildID);
 
-        if (arg.startsWith("<") && arg.endsWith(">")) {
-            // Trim <> if user didn't want to show YouTube embed
-            arg = arg.slice(1, -1);
-        }
-
-        if (arg.startsWith("youtube.com") || arg.startsWith("youtu.be")) {
-            // ytdl::getVideoID() requires URLs start with "https://"
-            arg = `https://${arg}`;
-        }
-
-        const messageContext = MessageContext.fromMessage(message);
-
         // attempt to look up by video ID
-        if (isValidURL(arg) || validateID(arg)) {
+        if (isValidURL(linkOrName) || validateID(linkOrName)) {
             let videoID: string = null;
 
             try {
-                videoID = getVideoID(arg);
+                videoID = getVideoID(linkOrName);
             } catch {
                 await sendValidationErrorMessage(
-                    message,
+                    messageContext,
                     LocalizationManager.localizer.translate(
                         guildID,
                         "command.lookup.validation.invalidYouTubeID"
                     ),
-                    parsedMessage.components[0],
+                    arg,
                     this.help(guildID).usage
                 );
 
                 logger.info(
                     `${getDebugLogHeader(
-                        message
-                    )} | Invalid YouTube ID passed. arg = ${arg}.`
+                        messageContext
+                    )} | Invalid YouTube ID passed. arg = ${linkOrName}.`
                 );
                 return;
             }
 
-            if (!(await lookupByYoutubeID(message, videoID, locale))) {
-                await sendErrorMessage(messageContext, {
-                    title: LocalizationManager.localizer.translate(
-                        guildID,
-                        "command.lookup.notFound.title"
-                    ),
-                    description: LocalizationManager.localizer.translate(
-                        guildID,
-                        "command.lookup.notFound.description"
-                    ),
-                    thumbnailUrl: KmqImages.DEAD,
-                });
+            if (
+                !(await lookupByYoutubeID(
+                    messageOrInteraction,
+                    videoID,
+                    locale
+                ))
+            ) {
+                await sendErrorMessage(
+                    messageContext,
+                    {
+                        title: LocalizationManager.localizer.translate(
+                            guildID,
+                            "command.lookup.notFound.title"
+                        ),
+                        description: LocalizationManager.localizer.translate(
+                            guildID,
+                            "command.lookup.notFound.description"
+                        ),
+                        thumbnailUrl: KmqImages.DEAD,
+                    },
+                    messageOrInteraction instanceof Eris.CommandInteraction
+                        ? messageOrInteraction
+                        : null
+                );
 
                 logger.info(
                     `${getDebugLogHeader(
@@ -410,18 +557,18 @@ export default class LookupCommand implements BaseCommand {
                     )} | Could not find song by videoID. videoID = ${videoID}.`
                 );
             }
-        } else {
+        } else if (
             // lookup by song name
-            // eslint-disable-next-line no-lonely-if
-            if (
-                !(await lookupBySongName(
-                    parsedMessage.argument,
-                    locale,
-                    message,
-                    guildID
-                ))
-            ) {
-                await sendInfoMessage(messageContext, {
+            !(await lookupBySongName(
+                messageOrInteraction,
+                linkOrName,
+                locale,
+                artistID
+            ))
+        ) {
+            await sendInfoMessage(
+                messageContext,
+                {
                     title: LocalizationManager.localizer.translate(
                         guildID,
                         "command.lookup.songNameSearchResult.title"
@@ -430,12 +577,153 @@ export default class LookupCommand implements BaseCommand {
                         guildID,
                         "command.lookup.songNameSearchResult.notFoundDescription"
                     ),
-                });
+                },
+                false,
+                null,
+                [],
+                messageOrInteraction instanceof Eris.CommandInteraction
+                    ? messageOrInteraction
+                    : null
+            );
 
-                logger.info(
-                    `Could not find song by song name. songName = ${parsedMessage.argument}`
+            logger.info(
+                `Could not find song by song name. songName = ${linkOrName}`
+            );
+        }
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param _messageContext - The message context
+     */
+    async processChatInputInteraction(
+        interaction: CommandInteraction,
+        _messageContext: MessageContext
+    ): Promise<void> {
+        const interactionData = getInteractionValue(interaction);
+        if (interactionData.interactionName === "song_link") {
+            await this.lookupSong(
+                interaction,
+                interactionData.interactionOptions["song_link"]
+            );
+        } else if (interactionData.interactionName === "song_name") {
+            const songName = interactionData.interactionOptions["song_name"];
+
+            const artistName =
+                interactionData.interactionOptions["artist_name"];
+
+            let artistID: number;
+            if (artistName) {
+                const matchingArtist =
+                    State.artistToEntry[artistName.toLowerCase()];
+
+                if (matchingArtist) {
+                    artistID = matchingArtist.id;
+                }
+            }
+
+            await this.lookupSong(interaction, songName, artistID);
+        }
+    }
+
+    /**
+     * Handles showing suggested song names as the user types for the lookup slash command
+     * @param interaction - The interaction with intermediate typing state
+     */
+    static async processAutocompleteInteraction(
+        interaction: Eris.AutocompleteInteraction
+    ): Promise<void> {
+        const interactionData = getInteractionValue(interaction);
+        const focusedKey = interactionData.focusedKey;
+        const focusedVal = interactionData.interactionOptions[focusedKey];
+
+        const lowercaseUserInput = focusedVal.toLowerCase();
+        const showHangul =
+            containsHangul(lowercaseUserInput) ||
+            State.getGuildLocale(interaction.guildID) === LocaleType.KO;
+
+        if (focusedKey === "song_name") {
+            const artistName =
+                interactionData.interactionOptions["artist_name"];
+
+            let artistID: number;
+            if (artistName) {
+                artistID = State.artistToEntry[artistName.toLowerCase()]?.id;
+            }
+
+            if (lowercaseUserInput.length < 2) {
+                await tryAutocompleteInteractionAcknowledge(
+                    interaction,
+                    localizedAutocompleteFormat(
+                        _.uniqBy(
+                            Object.values(
+                                artistID
+                                    ? State.songLinkToEntry
+                                    : State.newSongs
+                            ).filter(
+                                (x) => !artistID || artistID === x.artistID
+                            ),
+                            (x) => x.name.trim().toLowerCase()
+                        ),
+                        showHangul
+                    )
+                );
+            } else {
+                await tryAutocompleteInteractionAcknowledge(
+                    interaction,
+                    localizedAutocompleteFormat(
+                        _.uniqBy(
+                            Object.values(State.songLinkToEntry).filter(
+                                (x) =>
+                                    (!artistID || artistID === x.artistID) &&
+                                    ((showHangul && x.hangulName) || x.name)
+                                        .toLowerCase()
+                                        .startsWith(lowercaseUserInput)
+                            ),
+                            (x) => x.name.trim().toLowerCase()
+                        ),
+                        showHangul
+                    )
                 );
             }
+        } else if (focusedKey === "artist_name") {
+            const enteredSongName =
+                interactionData.interactionOptions["song_name"];
+
+            let matchingArtists: Array<MatchedArtist> = [];
+            if (!enteredSongName) {
+                matchingArtists = searchArtists(lowercaseUserInput, []);
+            } else {
+                // only return artists that have a song that matches the entered one
+                const cleanEnteredSongName = cleanSongName(enteredSongName);
+
+                const matchingSongs = Object.values(
+                    State.songLinkToEntry
+                ).filter(
+                    (x) =>
+                        x.cleanName.startsWith(cleanEnteredSongName) ||
+                        x.hangulCleanName.startsWith(cleanEnteredSongName)
+                );
+
+                const matchingSongArtistIDs = matchingSongs.map(
+                    (x) => x.artistID
+                );
+
+                matchingArtists = _.uniq(
+                    Object.values(State.artistToEntry)
+                        .filter((x) => matchingSongArtistIDs.includes(x.id))
+                        .filter((x) =>
+                            (showHangul && x.hangulName ? x.hangulName : x.name)
+                                .toLowerCase()
+                                .startsWith(lowercaseUserInput)
+                        )
+                );
+            }
+
+            await tryAutocompleteInteractionAcknowledge(
+                interaction,
+                localizedAutocompleteFormat(matchingArtists, showHangul)
+            );
         }
-    };
+    }
 }

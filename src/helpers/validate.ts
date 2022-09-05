@@ -5,31 +5,41 @@ import LocalizationManager from "./localization_manager";
 import MessageContext from "../structures/message_context";
 import type { GuildTextableMessage } from "../types";
 import type CommandValidations from "../interfaces/command_validations";
+import type Eris from "eris";
 import type ParsedMessage from "../interfaces/parsed_message";
 
 const logger = new IPCLogger("validate");
 
 /**
- * @param message - the Message object
+ * @param messageContext - the message context
  * @param warning - the warning text
  * @param arg - The incorrect argument
  * @param usage - The usage instructions
+ * @param interaction - The interaction that failed validation
  */
 export async function sendValidationErrorMessage(
-    message: GuildTextableMessage,
+    messageContext: MessageContext,
     warning: string,
     arg: string | Array<string>,
-    usage?: string
+    usage?: string,
+    interaction?: Eris.CommandInteraction
 ): Promise<void> {
-    await sendErrorMessage(MessageContext.fromMessage(message), {
-        title: LocalizationManager.localizer.translate(
-            message.guildID,
-            "misc.failure.validation.title"
-        ),
-        description: warning,
-        footerText: usage,
-    });
-    logger.warn(`${getDebugLogHeader(message)} | ${warning}. val = ${arg}`);
+    await sendErrorMessage(
+        messageContext,
+        {
+            title: LocalizationManager.localizer.translate(
+                messageContext.guildID,
+                "misc.failure.validation.title"
+            ),
+            description: warning,
+            footerText: usage,
+        },
+        interaction
+    );
+
+    logger.warn(
+        `${getDebugLogHeader(messageContext)} | ${warning}. val = ${arg}`
+    );
 }
 
 export default (
@@ -40,12 +50,13 @@ export default (
 ): boolean => {
     if (!validations) return true;
     const args = parsedMessage.components;
+    const messageContext = MessageContext.fromMessage(message);
     if (
         args.length > validations.maxArgCount ||
         args.length < validations.minArgCount
     ) {
         sendValidationErrorMessage(
-            message,
+            messageContext,
             LocalizationManager.localizer.translate(
                 message.guildID,
                 "misc.failure.validation.numArguments.incorrect",
@@ -69,7 +80,7 @@ export default (
             case "number": {
                 if (Number.isNaN(Number(arg))) {
                     sendValidationErrorMessage(
-                        message,
+                        messageContext,
                         LocalizationManager.localizer.translate(
                             message.guildID,
                             "misc.failure.validation.number.notNumber",
@@ -85,7 +96,7 @@ export default (
                 const intArg = parseInt(arg, 10);
                 if ("minValue" in validation && intArg < validation.minValue) {
                     sendValidationErrorMessage(
-                        message,
+                        messageContext,
                         LocalizationManager.localizer.translate(
                             message.guildID,
                             "misc.failure.validation.number.min",
@@ -102,7 +113,7 @@ export default (
 
                 if ("maxValue" in validation && intArg > validation.maxValue) {
                     sendValidationErrorMessage(
-                        message,
+                        messageContext,
                         LocalizationManager.localizer.translate(
                             message.guildID,
                             "misc.failure.validation.number.max",
@@ -124,7 +135,7 @@ export default (
                 arg = arg.toLowerCase();
                 if (!(arg === "false" || arg === "true")) {
                     sendValidationErrorMessage(
-                        message,
+                        messageContext,
                         LocalizationManager.localizer.translate(
                             message.guildID,
                             "misc.failure.validation.boolean.notBoolean",
@@ -144,7 +155,7 @@ export default (
                 arg = arg.toLowerCase();
                 if (!enums.includes(arg)) {
                     sendValidationErrorMessage(
-                        message,
+                        messageContext,
                         LocalizationManager.localizer.translate(
                             message.guildID,
                             "misc.failure.validation.enum.notInEnum",
@@ -166,7 +177,7 @@ export default (
             case "char": {
                 if (arg.length !== 1) {
                     sendValidationErrorMessage(
-                        message,
+                        messageContext,
                         LocalizationManager.localizer.translate(
                             message.guildID,
                             "misc.failure.validation.char.notChar",

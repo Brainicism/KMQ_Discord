@@ -8,6 +8,7 @@ import Eris from "eris";
 import GroupsCommand from "../../commands/game_options/groups";
 import KmqMember from "../../structures/kmq_member";
 import LocalizationManager from "../../helpers/localization_manager";
+import LookupCommand from "../../commands/game_commands/lookup";
 import MessageContext from "../../structures/message_context";
 import PresetCommand from "../../commands/game_commands/preset";
 import ProfileCommand from "../../commands/game_commands/profile";
@@ -22,6 +23,7 @@ const AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS: {
     ) => Promise<void>;
 } = {
     groups: GroupsCommand.processAutocompleteInteraction,
+    lookup: LookupCommand.processAutocompleteInteraction,
     preset: PresetCommand.processAutocompleteInteraction,
 };
 

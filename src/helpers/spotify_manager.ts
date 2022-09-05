@@ -158,7 +158,7 @@ export default class SpotifyManager {
         for (const song of spotifySongs) {
             const aliasIDs = [];
             for (const artist of song.artists) {
-                const lowercaseArtist = artist.toLocaleLowerCase();
+                const lowercaseArtist = artist.toLowerCase();
                 const artistMapping = State.artistToEntry[lowercaseArtist];
                 if (artistMapping) {
                     aliasIDs.push(artistMapping.id);

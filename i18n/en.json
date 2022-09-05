@@ -536,6 +536,19 @@
                 "description": "Check whether a given YouTube video is included KMQ's database and the current game options.",
                 "example": {
                     "song": "Provides information about {{song}} by {{artist}}."
+                },
+                "interaction": {
+                    "byLink": {
+                        "description": "Find a song by its YouTube link",
+                        "field": "The YouTube link of the song"
+                    },
+                    "byName": {
+                        "description": "Filter songs by their name and/or artist",
+                        "field": {
+                            "artist": "The artist that made the song",
+                            "song": "The name of the song"
+                        }
+                    }
                 }
             },
             "inCurrentGameOptions": "In Current Game Options?",
