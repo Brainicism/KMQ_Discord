@@ -253,8 +253,25 @@
                     "reset": "그룹 옵션을 재설정합니다.",
                     "singleGroup": "{{group}}의 노래만 재생합니다."
                 }
-            }
-        },
+            },
+            "interaction": {
+                "add": {
+                    "description": "지정된 그룹을 게임 옵션에 추가합니다",
+                    "perGroupDescription": "추가할 {{ordinalNum}} 그룹입니다"
+                },
+                "remove": {
+                    "description": "게임 옵션에서 지정된 그룹을 제거합니다",
+                    "perGroupDescription": "제거할 {{ordinalNum}} 그룹입니다"
+                },
+                "reset": {
+                    "description": "그룹 옵션을 재설정합니다"
+                },
+                "set": {
+                    "description": "지정된 그룹의 노래를 재생합니다",
+                    "perGroupDescription": "{{ordinalNum}} 그룹의 노래를 재생할 수 있습니다"
+                }
+
+        }},
         "guessmode": {
             "help": {
                 "description": "노래 제목, 아티스트 이름 또는 둘 다로 추측할지 선택합니다.",

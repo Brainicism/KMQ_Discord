@@ -24,7 +24,7 @@ import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("add");
 
-enum AddType {
+export enum AddType {
     // Groups with aliases
     GROUPS = "groups",
     GROUP = "group",
@@ -122,13 +122,33 @@ export default class AddCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+        const newGroupNames = parsedMessage.argument
+            .split(" ")
+            .slice(1)
+            .join(" ")
+            .split(",")
+            .map((groupName) => groupName.trim());
+
+        const addType = parsedMessage.components[0] as AddType;
+        await AddCommand.updateOption(
+            MessageContext.fromMessage(message),
+            addType,
+            newGroupNames
+        );
+    };
+
+    static async updateOption(
+        messageContext: MessageContext,
+        addType: AddType,
+        newGroupNames: Array<string>,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
+            messageContext.guildID
         );
 
-        const optionListed = parsedMessage.components[0] as AddType;
         let groupNamesString: string;
-        switch (optionListed) {
+        switch (addType) {
             case AddType.GROUPS:
             case AddType.GROUP:
             case AddType.ARTIST:
@@ -152,13 +172,6 @@ export default class AddCommand implements BaseCommand {
             ? []
             : groupNamesString.split(",");
 
-        const newGroupNames = parsedMessage.argument
-            .split(" ")
-            .slice(1)
-            .join(" ")
-            .split(",")
-            .map((groupName) => groupName.trim());
-
         const groups = await getMatchingGroupNames(
             currentGroupNames.concat(newGroupNames)
         );
@@ -168,7 +181,7 @@ export default class AddCommand implements BaseCommand {
         if (unmatchedGroups.length) {
             logger.info(
                 `${getDebugLogHeader(
-                    message
+                    messageContext
                 )} | Attempted to set unknown groups. groups =  ${unmatchedGroups.join(
                     ", "
                 )}`
@@ -178,12 +191,12 @@ export default class AddCommand implements BaseCommand {
             if (unmatchedGroups.length === 1) {
                 const suggestions = await getSimilarGroupNames(
                     unmatchedGroups[0],
-                    State.getGuildLocale(message.guildID)
+                    State.getGuildLocale(messageContext.guildID)
                 );
 
                 if (suggestions.length > 0) {
                     suggestionsText = LocalizationManager.localizer.translate(
-                        message.guildID,
+                        messageContext.guildID,
                         "misc.failure.unrecognizedGroups.didYouMean",
                         {
                             suggestions: suggestions.join("\n"),
@@ -193,12 +206,12 @@ export default class AddCommand implements BaseCommand {
             }
 
             const descriptionText = LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "misc.failure.unrecognizedGroups.description",
                 {
                     matchedGroupsAction:
                         LocalizationManager.localizer.translate(
-                            message.guildID,
+                            messageContext.guildID,
                             "misc.failure.unrecognizedGroups.added"
                         ),
                     helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
@@ -207,13 +220,19 @@ export default class AddCommand implements BaseCommand {
                 }
             );
 
-            await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "misc.failure.unrecognizedGroups.title"
-                ),
-                description: `${descriptionText}\n\n${suggestionsText || ""}`,
-            });
+            await sendErrorMessage(
+                messageContext,
+                {
+                    title: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "misc.failure.unrecognizedGroups.title"
+                    ),
+                    description: `${descriptionText}\n\n${
+                        suggestionsText || ""
+                    }`,
+                },
+                interaction
+            );
         }
 
         // if none of the new groups were matched
@@ -221,7 +240,7 @@ export default class AddCommand implements BaseCommand {
             return;
         }
 
-        switch (optionListed) {
+        switch (addType) {
             case AddType.GROUPS:
             case AddType.GROUP:
             case AddType.ARTIST:
@@ -235,30 +254,35 @@ export default class AddCommand implements BaseCommand {
                     (x) => !intersection.has(x.name)
                 );
                 if (intersection.size > 0) {
-                    sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: LocalizationManager.localizer.translate(
-                            message.guildID,
-                            "misc.failure.groupsExcludeConflict.title"
-                        ),
-                        description: LocalizationManager.localizer.translate(
-                            message.guildID,
-                            "misc.failure.groupsExcludeConflict.description",
-                            {
-                                conflictingOptionOne: `\`${process.env.BOT_PREFIX}groups\``,
-                                conflictingOptionTwo: `\`${process.env.BOT_PREFIX}exclude\``,
-                                groupsList: [...intersection]
-                                    .filter((x) => !x.includes("+"))
-                                    .join(", "),
-                                solutionStepOne: `\`${process.env.BOT_PREFIX}remove exclude\``,
-                                solutionStepTwo: `\`${process.env.BOT_PREFIX}groups\``,
-                                allowOrPrevent:
-                                    LocalizationManager.localizer.translate(
-                                        message.guildID,
-                                        "misc.failure.groupsExcludeConflict.allow"
-                                    ),
-                            }
-                        ),
-                    });
+                    sendErrorMessage(
+                        messageContext,
+                        {
+                            title: LocalizationManager.localizer.translate(
+                                messageContext.guildID,
+                                "misc.failure.groupsExcludeConflict.title"
+                            ),
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    messageContext.guildID,
+                                    "misc.failure.groupsExcludeConflict.description",
+                                    {
+                                        conflictingOptionOne: `\`${process.env.BOT_PREFIX}groups\``,
+                                        conflictingOptionTwo: `\`${process.env.BOT_PREFIX}exclude\``,
+                                        groupsList: [...intersection]
+                                            .filter((x) => !x.includes("+"))
+                                            .join(", "),
+                                        solutionStepOne: `\`${process.env.BOT_PREFIX}remove exclude\``,
+                                        solutionStepTwo: `\`${process.env.BOT_PREFIX}groups\``,
+                                        allowOrPrevent:
+                                            LocalizationManager.localizer.translate(
+                                                messageContext.guildID,
+                                                "misc.failure.groupsExcludeConflict.allow"
+                                            ),
+                                    }
+                                ),
+                        },
+                        interaction
+                    );
                 }
 
                 if (matchedGroups.length === 0) {
@@ -267,15 +291,19 @@ export default class AddCommand implements BaseCommand {
 
                 await guildPreference.setGroups(matchedGroups);
                 await sendOptionsMessage(
-                    Session.getSession(message.guildID),
-                    MessageContext.fromMessage(message),
+                    Session.getSession(messageContext.guildID),
+                    messageContext,
                     guildPreference,
-                    [{ option: GameOption.GROUPS, reset: false }]
+                    [{ option: GameOption.GROUPS, reset: false }],
+                    null,
+                    null,
+                    null,
+                    interaction
                 );
 
                 logger.info(
                     `${getDebugLogHeader(
-                        message
+                        messageContext
                     )} | Group added: ${guildPreference.getDisplayedGroupNames()}`
                 );
                 break;
@@ -285,15 +313,19 @@ export default class AddCommand implements BaseCommand {
             case AddType.INCLUDES:
                 await guildPreference.setIncludes(matchedGroups);
                 await sendOptionsMessage(
-                    Session.getSession(message.guildID),
-                    MessageContext.fromMessage(message),
+                    Session.getSession(messageContext.guildID),
+                    messageContext,
                     guildPreference,
-                    [{ option: GameOption.INCLUDE, reset: false }]
+                    [{ option: GameOption.INCLUDE, reset: false }],
+                    null,
+                    null,
+                    null,
+                    interaction
                 );
 
                 logger.info(
                     `${getDebugLogHeader(
-                        message
+                        messageContext
                     )} | Include added: ${guildPreference.getDisplayedIncludesGroupNames()}`
                 );
                 break;
@@ -308,25 +340,30 @@ export default class AddCommand implements BaseCommand {
                     (x) => !intersection.has(x.name)
                 );
                 if (intersection.size > 0) {
-                    sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: LocalizationManager.localizer.translate(
-                            message.guildID,
-                            "misc.failure.groupsExcludeConflict.title"
-                        ),
-                        description: LocalizationManager.localizer.translate(
-                            message.guildID,
-                            "misc.failure.groupsExcludeConflict.description",
-                            {
-                                conflictingOptionOne: `\`${process.env.BOT_PREFIX}exclude\``,
-                                conflictingOptionTwo: `\`${process.env.BOT_PREFIX}groups\``,
-                                groupsList: [...intersection]
-                                    .filter((x) => !x.includes("+"))
-                                    .join(", "),
-                                solutionPartOne: `\`${process.env.BOT_PREFIX}remove groups\``,
-                                solutionPartTwo: `\`${process.env.BOT_PREFIX}add exclude\``,
-                            }
-                        ),
-                    });
+                    sendErrorMessage(
+                        messageContext,
+                        {
+                            title: LocalizationManager.localizer.translate(
+                                messageContext.guildID,
+                                "misc.failure.groupsExcludeConflict.title"
+                            ),
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    messageContext.guildID,
+                                    "misc.failure.groupsExcludeConflict.description",
+                                    {
+                                        conflictingOptionOne: `\`${process.env.BOT_PREFIX}exclude\``,
+                                        conflictingOptionTwo: `\`${process.env.BOT_PREFIX}groups\``,
+                                        groupsList: [...intersection]
+                                            .filter((x) => !x.includes("+"))
+                                            .join(", "),
+                                        solutionPartOne: `\`${process.env.BOT_PREFIX}remove groups\``,
+                                        solutionPartTwo: `\`${process.env.BOT_PREFIX}add exclude\``,
+                                    }
+                                ),
+                        },
+                        interaction
+                    );
                 }
 
                 if (matchedGroups.length === 0) {
@@ -335,15 +372,19 @@ export default class AddCommand implements BaseCommand {
 
                 await guildPreference.setExcludes(matchedGroups);
                 await sendOptionsMessage(
-                    Session.getSession(message.guildID),
-                    MessageContext.fromMessage(message),
+                    Session.getSession(messageContext.guildID),
+                    messageContext,
                     guildPreference,
-                    [{ option: GameOption.EXCLUDE, reset: false }]
+                    [{ option: GameOption.EXCLUDE, reset: false }],
+                    null,
+                    null,
+                    null,
+                    interaction
                 );
 
                 logger.info(
                     `${getDebugLogHeader(
-                        message
+                        messageContext
                     )} | Exclude added: ${guildPreference.getDisplayedExcludesGroupNames()}`
                 );
                 break;
@@ -351,5 +392,5 @@ export default class AddCommand implements BaseCommand {
 
             default:
         }
-    };
+    }
 }

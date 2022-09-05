@@ -7,6 +7,7 @@ import {
 } from "../../helpers/utils";
 import {
     getDebugLogHeader,
+    getInteractionValue,
     getMatchedArtists,
     localizedAutocompleteFormat,
     searchArtists,
@@ -18,6 +19,7 @@ import {
     getMatchingGroupNames,
     getSimilarGroupNames,
 } from "../../helpers/game_utils";
+import AddCommand, { AddType } from "./add";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
@@ -25,6 +27,7 @@ import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
+import RemoveCommand, { RemoveType } from "./remove";
 import Session from "../../structures/session";
 import State from "../../state";
 import type BaseCommand from "../interfaces/base_command";
@@ -33,6 +36,13 @@ import type HelpDocumentation from "../../interfaces/help";
 import type MatchedArtist from "../../interfaces/matched_artist";
 
 const logger = new IPCLogger("groups");
+
+enum GroupAction {
+    ADD = "add",
+    REMOVE = "remove",
+    SET = "set",
+    RESET = "reset",
+}
 
 export default class GroupsCommand implements BaseCommand {
     aliases = ["group", "artist", "artists"];
@@ -100,16 +110,34 @@ export default class GroupsCommand implements BaseCommand {
     slashCommands = (): Array<Eris.ApplicationCommandStructure> => [
         {
             name: "groups",
-            description: "Play songs from the given groups.",
+            description: LocalizationManager.localizer.translate(
+                LocaleType.EN,
+                "command.groups.interaction.description"
+            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
-            options: [...Array(25).keys()].map((x) => ({
-                name: `group_${x + 1}`,
-                description: `The ${getOrdinalNum(
-                    x + 1
-                )} group to play songs from`,
-                type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
-                autocomplete: true,
-                required: false,
+            options: Object.values(GroupAction).map((action) => ({
+                name: action,
+                description: LocalizationManager.localizer.translate(
+                    LocaleType.EN,
+                    `command.groups.interaction.${action}.description`
+                ),
+                type: Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
+                options:
+                    action === GroupAction.RESET
+                        ? []
+                        : [...Array(25).keys()].map((x) => ({
+                              name: `group_${x + 1}`,
+                              description:
+                                  LocalizationManager.localizer.translate(
+                                      LocaleType.EN,
+                                      `command.groups.interaction.${action}.perGroupDescription`,
+                                      { ordinalNum: getOrdinalNum(x + 1) }
+                                  ),
+                              type: Eris.Constants.ApplicationCommandOptionTypes
+                                  .STRING,
+                              autocomplete: true,
+                              required: false,
+                          })),
             })),
         },
     ];
@@ -124,7 +152,7 @@ export default class GroupsCommand implements BaseCommand {
             matchedGroups = null;
             await GroupsCommand.updateOption(
                 MessageContext.fromMessage(message),
-                matchedGroups
+                GroupAction.RESET
             );
             return;
         }
@@ -252,20 +280,22 @@ export default class GroupsCommand implements BaseCommand {
 
         await GroupsCommand.updateOption(
             MessageContext.fromMessage(message),
+            GroupAction.SET,
             matchedGroups
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
-        matchedGroups: MatchedArtist[],
+        action: GroupAction,
+        matchedGroups?: MatchedArtist[],
         interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
-        const reset = matchedGroups == null;
+        const reset = action === GroupAction.RESET;
         if (reset) {
             await guildPreference.reset(GameOption.GROUPS);
             logger.info(`${getDebugLogHeader(messageContext)} | Groups reset.`);
@@ -299,13 +329,40 @@ export default class GroupsCommand implements BaseCommand {
         messageContext: MessageContext
     ): Promise<void> {
         let groups: Array<MatchedArtist>;
-        if (interaction.data.options == null) {
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
+
+        const action = interactionName as GroupAction;
+        const enteredGroupNames = Object.values(interactionOptions);
+
+        if (enteredGroupNames.length === 0) {
             groups = null;
         } else {
-            groups = getMatchedArtists(interaction.data.options);
+            groups = getMatchedArtists(enteredGroupNames);
         }
 
-        await GroupsCommand.updateOption(messageContext, groups, interaction);
+        if (action === GroupAction.ADD) {
+            await AddCommand.updateOption(
+                messageContext,
+                AddType.GROUPS,
+                enteredGroupNames,
+                interaction
+            );
+        } else if (action === GroupAction.REMOVE) {
+            await RemoveCommand.updateOption(
+                messageContext,
+                RemoveType.GROUPS,
+                enteredGroupNames,
+                interaction
+            );
+        } else {
+            await GroupsCommand.updateOption(
+                messageContext,
+                action,
+                groups,
+                interaction
+            );
+        }
     }
 
     /**
@@ -315,14 +372,15 @@ export default class GroupsCommand implements BaseCommand {
     static async processAutocompleteInteraction(
         interaction: Eris.AutocompleteInteraction
     ): Promise<void> {
-        const lowercaseUserInput = (
-            interaction.data.options.filter((x) => x["focused"])[0][
-                "value"
-            ] as string
-        ).toLowerCase();
+        const interactionData = getInteractionValue(interaction);
+        const focusedKey = interactionData.focusedKey;
+        const focusedVal = interactionData.interactionOptions[focusedKey];
+        const lowercaseUserInput = focusedVal.toLowerCase();
 
         const previouslyEnteredArtists = getMatchedArtists(
-            interaction.data.options.filter((x) => !x["focused"])
+            Object.entries(interactionData.interactionOptions)
+                .filter((x) => x[0] !== focusedKey)
+                .map((x) => x[1])
         ).map((x) => x?.name);
 
         const showHangul =
