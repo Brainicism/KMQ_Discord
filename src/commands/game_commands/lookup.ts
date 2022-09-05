@@ -662,10 +662,10 @@ export default class LookupCommand implements BaseCommand {
                                 artistID
                                     ? State.songLinkToEntry
                                     : State.newSongs
-                            ).filter((x) =>
-                                artistID ? artistID === x.artistID : true
+                            ).filter(
+                                (x) => !artistID || artistID === x.artistID
                             ),
-                            "name"
+                            (x) => x.name.trim().toLocaleLowerCase()
                         ),
                         showHangul
                     )
@@ -677,17 +677,12 @@ export default class LookupCommand implements BaseCommand {
                         _.uniqBy(
                             Object.values(State.songLinkToEntry).filter(
                                 (x) =>
-                                    (artistID
-                                        ? artistID === x.artistID
-                                        : true) &&
-                                    (showHangul && x.hangulName
-                                        ? x.hangulName
-                                        : x.name
-                                    )
+                                    (!artistID || artistID === x.artistID) &&
+                                    ((showHangul && x.hangulName) || x.name)
                                         .toLocaleLowerCase()
                                         .startsWith(lowercaseUserInput)
                             ),
-                            "name"
+                            (x) => x.name.trim().toLocaleLowerCase()
                         ),
                         showHangul
                     )
