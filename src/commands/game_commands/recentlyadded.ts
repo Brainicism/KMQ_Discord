@@ -14,11 +14,15 @@ import {
     getLocalizedArtistName,
     getLocalizedSongName,
 } from "../../helpers/game_utils";
+import Eris from "eris";
+import KmqMember from "../../structures/kmq_member";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
 import dbContext from "../../database_context";
-import type { EmbedOptions } from "eris";
+import type { CommandInteraction, EmbedOptions } from "eris";
+import type { GuildTextableMessage } from "../../types";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -50,7 +54,30 @@ export default class RecentlyAddedCommand implements BaseCommand {
         priority: 30,
     });
 
+    slashCommands = (): Array<Eris.ApplicationCommandStructure> => [
+        {
+            name: "recentlyadded",
+            description: LocalizationManager.localizer.translate(
+                LocaleType.EN,
+                "command.recentlyadded.help.description"
+            ),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+        },
+    ];
+
     call = async ({ message }: CommandArgs): Promise<void> => {
+        await RecentlyAddedCommand.showRecentlyAddedSongs(message);
+    };
+
+    static async showRecentlyAddedSongs(
+        messageOrInteraction: GuildTextableMessage | CommandInteraction
+    ): Promise<void> {
+        const messageContext = new MessageContext(
+            messageOrInteraction.channel.id,
+            new KmqMember(messageOrInteraction.member.id),
+            messageOrInteraction.guildID
+        );
+
         const newSongs: Array<QueriedSong> = await dbContext
             .kmq("available_songs")
             .select([
@@ -72,35 +99,44 @@ export default class RecentlyAddedCommand implements BaseCommand {
             );
 
         if (newSongs.length === 0) {
-            sendInfoMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "command.recentlyadded.failure.noSongs.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "command.recentlyadded.failure.noSongs.description"
-                ),
-                thumbnailUrl: KmqImages.NOT_IMPRESSED,
-            });
+            sendInfoMessage(
+                messageContext,
+                {
+                    title: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "command.recentlyadded.failure.noSongs.title"
+                    ),
+                    description: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "command.recentlyadded.failure.noSongs.description"
+                    ),
+                    thumbnailUrl: KmqImages.NOT_IMPRESSED,
+                },
+                false,
+                null,
+                [],
+                messageOrInteraction instanceof Eris.CommandInteraction
+                    ? messageOrInteraction
+                    : null
+            );
             return;
         }
 
-        const locale = State.getGuildLocale(message.guildID);
+        const locale = State.getGuildLocale(messageContext.guildID);
         const fields = newSongs.map((song) => ({
             name: `"${getLocalizedSongName(
                 song,
                 locale
             )}" - ${getLocalizedArtistName(song, locale)}`,
             value: `${LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "command.recentlyadded.released"
             )} ${standardDateFormat(
                 song.publishDate
             )}\n[${friendlyFormattedNumber(
                 song.views
             )} ${LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "misc.views"
             )}](https://youtu.be/${song.youtubeLink})`,
             inline: true,
@@ -110,20 +146,33 @@ export default class RecentlyAddedCommand implements BaseCommand {
         const embeds: Array<EmbedOptions> = embedFieldSubsets.map(
             (embedFieldsSubset) => ({
                 title: LocalizationManager.localizer.translate(
-                    message.guildID,
+                    messageContext.guildID,
                     "command.recentlyadded.title"
                 ),
                 description: LocalizationManager.localizer.translate(
-                    message.guildID,
+                    messageContext.guildID,
                     "command.recentlyadded.description"
                 ),
                 fields: embedFieldsSubset,
             })
         );
 
-        await sendPaginationedEmbed(message, embeds, null);
+        await sendPaginationedEmbed(messageOrInteraction, embeds, null);
         logger.info(
-            `${getDebugLogHeader(message)} | Recently added songs retrieved.`
+            `${getDebugLogHeader(
+                messageContext
+            )} | Recently added songs retrieved.`
         );
-    };
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param _messageContext - Unused
+     */
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        _messageContext: MessageContext
+    ): Promise<void> {
+        await RecentlyAddedCommand.showRecentlyAddedSongs(interaction);
+    }
 }
