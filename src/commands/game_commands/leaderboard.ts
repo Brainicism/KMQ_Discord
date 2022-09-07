@@ -5,21 +5,23 @@ import {
     bold,
     chooseRandom,
     friendlyFormattedNumber,
-    getUserTag,
 } from "../../helpers/utils";
 import {
     getDebugLogHeader,
+    getInteractionValue,
     sendErrorMessage,
     sendInfoMessage,
-    sendMessage,
     sendPaginationedEmbed,
 } from "../../helpers/discord_utils";
 import { getRankNameByLevel } from "./profile";
 import { sendValidationErrorMessage } from "../../helpers/validate";
 import EnvType from "../../enums/env_type";
+import Eris from "eris";
+import KmqMember from "../../structures/kmq_member";
 import LeaderboardDuration from "../../enums/option_types/leaderboard_duration";
 import LeaderboardScope from "../../enums/option_types/leaderboard_scope";
 import LeaderboardType from "../../enums/option_types/leaderboard_type";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
@@ -27,7 +29,6 @@ import dbContext from "../../database_context";
 import type { EmbedGenerator, GuildTextableMessage } from "../../types";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
-import type Eris from "eris";
 import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("leaderboard");
@@ -125,6 +126,135 @@ export default class LeaderboardCommand implements BaseCommand {
         priority: 50,
     });
 
+    slashCommands = (): Array<Eris.ApplicationCommandStructure> => [
+        {
+            name: "leaderboard",
+            description: LocalizationManager.localizer.translate(
+                LocaleType.EN,
+                "command.leaderboard.help.description"
+            ),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+            options: [
+                {
+                    name: LeaderboardAction.ENROLL,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.leaderboard.help.example.enroll"
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                },
+                {
+                    name: LeaderboardAction.UNENROLL,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.leaderboard.help.example.unenroll"
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                },
+                {
+                    name: "show",
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.leaderboard.help.description"
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "type",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.leaderboard.interaction.type"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            choices: Object.values(LeaderboardType).map(
+                                (type) => ({
+                                    name: type,
+                                    value: type,
+                                    default: type === LeaderboardType.EXP,
+                                })
+                            ),
+                        },
+                        {
+                            name: "duration",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.leaderboard.interaction.duration"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            choices: [
+                                LeaderboardDuration.ALL_TIME,
+                                LeaderboardDuration.MONTHLY,
+                                LeaderboardDuration.WEEKLY,
+                                LeaderboardDuration.DAILY,
+                            ].map((duration) => ({
+                                name: duration,
+                                value: duration,
+                                default:
+                                    duration === LeaderboardDuration.ALL_TIME,
+                            })),
+                        },
+                        {
+                            name: "scope",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.leaderboard.interaction.scope"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            choices: Object.values(LeaderboardScope).map(
+                                (scope) => ({
+                                    name: scope,
+                                    value: scope,
+                                    default: scope === LeaderboardScope.GLOBAL,
+                                })
+                            ),
+                        },
+                        {
+                            name: "page",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.leaderboard.interaction.page"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .INTEGER,
+                        },
+                    ],
+                },
+            ],
+        },
+    ];
+
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        const { interactionOptions, interactionName } =
+            getInteractionValue(interaction);
+
+        if (interactionName === LeaderboardAction.ENROLL) {
+            LeaderboardCommand.enrollLeaderboard(messageContext, interaction);
+        } else if (interactionName === LeaderboardAction.UNENROLL) {
+            LeaderboardCommand.unenrollLeaderboard(messageContext, interaction);
+        } else {
+            await LeaderboardCommand.showLeaderboard(
+                interaction,
+                interactionOptions["type"],
+                interactionOptions["scope"],
+                interactionOptions["duration"],
+                interactionOptions["page"]
+            );
+        }
+    }
+
     call = ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         if (parsedMessage.components.length === 0) {
             LeaderboardCommand.showLeaderboard(
@@ -143,9 +273,9 @@ export default class LeaderboardCommand implements BaseCommand {
         ) {
             const action = arg as LeaderboardAction;
             if (action === LeaderboardAction.ENROLL) {
-                LeaderboardCommand.enrollLeaderboard(message);
+                LeaderboardCommand.enrollLeaderboard(messageContext);
             } else if (action === LeaderboardAction.UNENROLL) {
-                LeaderboardCommand.unenrollLeaderboard(message);
+                LeaderboardCommand.unenrollLeaderboard(messageContext);
             }
 
             return;
@@ -761,89 +891,116 @@ export default class LeaderboardCommand implements BaseCommand {
     }
 
     private static async enrollLeaderboard(
-        message: GuildTextableMessage
+        messageContext: MessageContext,
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const alreadyEnrolled = !!(await dbContext
             .kmq("leaderboard_enrollment")
-            .where("player_id", "=", message.author.id)
+            .where("player_id", "=", messageContext.author.id)
             .first());
 
         if (alreadyEnrolled) {
-            sendErrorMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "command.leaderboard.failure.alreadyEnrolled.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "command.leaderboard.failure.alreadyEnrolled.description"
-                ),
-            });
+            sendErrorMessage(
+                messageContext,
+                {
+                    title: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "command.leaderboard.failure.alreadyEnrolled.title"
+                    ),
+                    description: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "command.leaderboard.failure.alreadyEnrolled.description"
+                    ),
+                },
+                interaction
+            );
             return;
         }
 
         await dbContext.kmq("leaderboard_enrollment").insert({
-            player_id: message.author.id,
-            display_name: getUserTag(message.author),
+            player_id: messageContext.author.id,
+            display_name: messageContext.author.tag,
         });
 
-        sendInfoMessage(MessageContext.fromMessage(message), {
-            title: LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.leaderboard.enrolled.title"
-            ),
-            description: LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.leaderboard.enrolled.description"
-            ),
-        });
+        sendInfoMessage(
+            messageContext,
+            {
+                title: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "command.leaderboard.enrolled.title"
+                ),
+                description: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "command.leaderboard.enrolled.description"
+                ),
+            },
+            false,
+            null,
+            [],
+            interaction
+        );
     }
 
     private static async unenrollLeaderboard(
-        message: GuildTextableMessage
+        messageContext: MessageContext,
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         await dbContext
             .kmq("leaderboard_enrollment")
-            .where("player_id", "=", message.author.id)
+            .where("player_id", "=", messageContext.author.id)
             .del();
 
-        sendInfoMessage(MessageContext.fromMessage(message), {
-            title: LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.leaderboard.unenrolled.title"
-            ),
-            description: LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.leaderboard.unenrolled.description"
-            ),
-        });
+        sendInfoMessage(
+            messageContext,
+            {
+                title: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "command.leaderboard.unenrolled.title"
+                ),
+                description: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "command.leaderboard.unenrolled.description"
+                ),
+            },
+            false,
+            null,
+            [],
+            interaction
+        );
     }
 
     private static async showLeaderboard(
-        message: GuildTextableMessage | MessageContext,
+        messageOrInteraction: GuildTextableMessage | Eris.CommandInteraction,
         type: LeaderboardType = LeaderboardType.EXP,
         scope: LeaderboardScope = LeaderboardScope.GLOBAL,
         duration: LeaderboardDuration = LeaderboardDuration.ALL_TIME,
         pageOffset: number = 0
     ): Promise<void> {
-        const messageContext: MessageContext =
-            message instanceof MessageContext
-                ? message
-                : MessageContext.fromMessage(message);
+        const messageContext = new MessageContext(
+            messageOrInteraction.channel.id,
+            new KmqMember(messageOrInteraction.member.id),
+            messageOrInteraction.guildID
+        );
 
         if (scope === LeaderboardScope.GAME) {
-            if (!State.gameSessions[message.guildID]) {
-                sendErrorMessage(messageContext, {
-                    title: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "misc.failure.game.noneInProgress.title"
-                    ),
-                    description: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "misc.failure.game.noneInProgress.description"
-                    ),
-                    thumbnailUrl: KmqImages.NOT_IMPRESSED,
-                });
+            if (!State.gameSessions[messageContext.guildID]) {
+                sendErrorMessage(
+                    messageContext,
+                    {
+                        title: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "misc.failure.game.noneInProgress.title"
+                        ),
+                        description: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "misc.failure.game.noneInProgress.description"
+                        ),
+                        thumbnailUrl: KmqImages.NOT_IMPRESSED,
+                    },
+                    messageOrInteraction instanceof Eris.CommandInteraction
+                        ? messageOrInteraction
+                        : null
+                );
                 return;
             }
 
@@ -853,17 +1010,23 @@ export default class LeaderboardCommand implements BaseCommand {
                 ].scoreboard.getPlayerIDs();
 
             if (participantIDs.length === 0) {
-                sendErrorMessage(messageContext, {
-                    title: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "command.leaderboard.failure.game.noParticipants.title"
-                    ),
-                    description: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "command.leaderboard.failure.game.noParticipants.description"
-                    ),
-                    thumbnailUrl: KmqImages.NOT_IMPRESSED,
-                });
+                sendErrorMessage(
+                    messageContext,
+                    {
+                        title: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "command.leaderboard.failure.game.noParticipants.title"
+                        ),
+                        description: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "command.leaderboard.failure.game.noParticipants.description"
+                        ),
+                        thumbnailUrl: KmqImages.NOT_IMPRESSED,
+                    },
+                    messageOrInteraction instanceof Eris.CommandInteraction
+                        ? messageOrInteraction
+                        : null
+                );
                 return;
             }
         }
@@ -877,52 +1040,58 @@ export default class LeaderboardCommand implements BaseCommand {
             );
 
         if (pageCount === 0) {
-            sendErrorMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "command.leaderboard.failure.empty.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "command.leaderboard.failure.empty.description"
-                ),
-                thumbnailUrl: KmqImages.DEAD,
-            });
+            sendErrorMessage(
+                messageContext,
+                {
+                    title: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "command.leaderboard.failure.empty.title"
+                    ),
+                    description: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "command.leaderboard.failure.empty.description"
+                    ),
+                    thumbnailUrl: KmqImages.DEAD,
+                },
+                messageOrInteraction instanceof Eris.CommandInteraction
+                    ? messageOrInteraction
+                    : null
+            );
             return;
         }
 
         if (pageOffset > pageCount) {
-            sendErrorMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "command.leaderboard.failure.outOfRange.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "command.leaderboard.failure.outOfRange.description"
-                ),
-                thumbnailUrl: KmqImages.NOT_IMPRESSED,
-            });
+            sendErrorMessage(
+                messageContext,
+                {
+                    title: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "command.leaderboard.failure.outOfRange.title"
+                    ),
+                    description: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "command.leaderboard.failure.outOfRange.description"
+                    ),
+                    thumbnailUrl: KmqImages.NOT_IMPRESSED,
+                },
+                messageOrInteraction instanceof Eris.CommandInteraction
+                    ? messageOrInteraction
+                    : null
+            );
             return;
         }
 
-        logger.info(
-            `${getDebugLogHeader(message)} | Leaderboard retrieved (${scope})`
+        await sendPaginationedEmbed(
+            messageOrInteraction,
+            embeds,
+            null,
+            pageOffset
         );
-        if (!(message instanceof MessageContext)) {
-            await sendPaginationedEmbed(message, embeds, null, pageOffset);
-            logger.info(
-                `${getDebugLogHeader(message)} | Leaderboard retrieved.`
-            );
-        } else {
-            // Used only in sending leaderboard in debug channel before reset
-            await sendMessage(process.env.DEBUG_TEXT_CHANNEL_ID, {
-                embeds: [await embeds[pageOffset]()],
-            });
 
-            logger.info(
-                `${getDebugLogHeader(message)} | Debug leaderboard retrieved..`
-            );
-        }
+        logger.info(
+            `${getDebugLogHeader(
+                messageOrInteraction
+            )} | Leaderboard retrieved (${scope})`
+        );
     }
 }

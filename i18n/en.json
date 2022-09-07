@@ -421,6 +421,12 @@
                     "pageNumber": "page_number"
                 }
             },
+            "interaction": {
+                "duration": "Choose how far back the leaderboard should look",
+                "page": "Choose which page to start showing the leaderboard from",
+                "scope": "Choose which players to include in the leaderboard",
+                "type": "Choose what defines the order of the leaderboard"
+            },
             "levelEntry": {
                 "permanent": "{{level}} {{formattedNumber}} ({{rankName}})",
                 "temporary": "{{formattedNumber}} {{levelPluralized}} gained"

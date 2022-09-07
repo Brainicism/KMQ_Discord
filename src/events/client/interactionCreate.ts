@@ -5,7 +5,7 @@ import {
     tryCreateInteractionErrorAcknowledgement,
     tryInteractionAcknowledge,
 } from "../../helpers/discord_utils";
-import { measureExecutionTime } from "../../helpers/utils";
+import { getUserTag, measureExecutionTime } from "../../helpers/utils";
 import Eris from "eris";
 import GroupsCommand from "../../commands/game_options/groups";
 import KmqMember from "../../structures/kmq_member";
@@ -39,9 +39,11 @@ export default async function interactionCreateHandler(
         | Eris.ComponentInteraction
         | Eris.AutocompleteInteraction
 ): Promise<void> {
+    const member = new KmqMember(interaction.member.id);
+    member.tag = getUserTag(interaction.member);
     const messageContext = new MessageContext(
         interaction.channel.id,
-        new KmqMember(interaction.member.id),
+        member,
         interaction.guildID
     );
 

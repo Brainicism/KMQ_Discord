@@ -421,6 +421,12 @@
                     "pageNumber": "페이지 수"
                 }
             },
+            "interaction": {
+                "duration": "리더 보드가 뒤로 볼 거리를 선택합니다",
+                "page": "리더보드 표시를 시작할 페이지를 선택합니다",
+                "scope": "리더보드에 포함할 플레이어를 선택합니다",
+                "type": "리더보드의 순서를 정의할 항목을 선택합니다"
+            },
             "levelEntry": {
                 "permanent": "{{level}} {{formattedNumber}} ({{rankName}})",
                 "temporary": "{{formattedNumber}} {{levelPluralized}}를 획득하셨습니다!"
