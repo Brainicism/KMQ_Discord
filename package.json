@@ -1,6 +1,6 @@
 {
     "name": "kmq",
-    "version": "5.6.4",
+    "version": "5.7.0",
     "main": "src/kmq.js",
     "scripts": {
         "seed": "ts-node src/seed/seed_db",
@@ -68,7 +68,7 @@
         "uuid": "^8.3.2",
         "winston": "^3.5.1",
         "winston-daily-rotate-file": "^4.6.0",
-        "ytdl-core": "^4.11.1",
+        "ytdl-core": "^4.11.2",
         "zlib-sync": "^0.1.7"
     },
     "devDependencies": {
