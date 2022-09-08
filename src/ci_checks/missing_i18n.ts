@@ -27,6 +27,8 @@ const dynamicTranslationKeyAllowlist = [
     "gameInfoMessage.message",
     "gameInfoMessage.title",
     "getOrdinalNum(idx + 1)",
+    "`command.groups.interaction.${action}.perGroupDescription`",
+    "`command.groups.interaction.${action}.description`",
 ];
 
 const translationInterfaceFunctions = [

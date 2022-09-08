@@ -1794,16 +1794,14 @@ export function getInteractionValue(
 
 /**
  * Retrieve artist names from the interaction options
- * @param interactionOptions - The message's interaction options
+ * @param enteredNames - Artist names the user has entered
  * @returns the matched artists
  */
 export function getMatchedArtists(
-    interactionOptions: Array<Eris.InteractionDataOptions>
+    enteredNames: Array<string>
 ): Array<MatchedArtist> {
     return _.uniqBy(
-        interactionOptions.map(
-            (x) => State.artistToEntry[x["value"].toLowerCase()]
-        ),
+        enteredNames.map((x) => State.artistToEntry[x.toLowerCase()]),
         "id"
     );
 }

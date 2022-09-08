@@ -253,6 +253,24 @@
                     "reset": "Resets the groups option",
                     "singleGroup": "Plays songs only from {{group}}"
                 }
+            },
+            "interaction": {
+                "add": {
+                    "description": "Add the given groups to the game options",
+                    "perGroupDescription": "The {{ordinalNum}} group to add"
+                },
+                "description": "Select artists to exclusively play from",
+                "remove": {
+                    "description": "Remove the given groups from the game options",
+                    "perGroupDescription": "The {{ordinalNum}} group to remove"
+                },
+                "reset": {
+                    "description": "Reset the groups option"
+                },
+                "set": {
+                    "description": "Play songs from the given groups",
+                    "perGroupDescription": "The {{ordinalNum}} group to play songs from"
+                }
             }
         },
         "guessmode": {
