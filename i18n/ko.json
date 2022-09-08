@@ -144,11 +144,11 @@
             "explanation": {
                 "bonusArtistGuess": "보너스 아티스트의 정확한 추측",
                 "firstGameOfDay": "오늘의 첫 게임",
-                "powerHour": "KMQ 슈퍼 시간 또는 주말 동안 재생합니다",
+                "powerHour": "KMQ 슈퍼 시간 또는 주말 동안 플레이",
                 "quickGuess": "빠른 추측",
                 "rareGuess": "희귀한 정확 추측 보너스",
                 "rareGuessRange": "{{rareGuessLowerBound}} 최대 {{rareGuessUpperBound}}",
-                "streak": "추측 연속 행진이 5번 이상인 경우",
+                "streak": "추측 정답이 연속 5번 이상인 경우",
                 "voting": "투표"
             },
             "firstGameOfDayBonus": "오늘의 첫 게임 보너스",
@@ -496,7 +496,7 @@
                 "example": {
                     "reset": "봇의 언어를 {{defaultLocale}}로 재설정합니다.",
                     "toEnglish": "봇의 언어를 {{english}}로 변경합니다.",
-                    "toKorean": "봇의 언어를 {{korean}}로 변경"
+                    "toKorean": "봇의 언어를 {{korean}}로 변경합니다."
                 },
                 "usage": {
                     "language": "언어"
@@ -629,8 +629,8 @@
                 "example": "귀하의 프리미엄 상태를 보여줍니다."
             },
             "option": {
-                "description": "이 옵션은 프리미엄 KMQ 서포터에게만 제공됩니다.",
-                "description_kmq_server": "이 옵션은 프리미엄 KMQ 서포터 또는 공식 KMQ 서버에서만 사용할 수 있습니다.",
+                "description": "이 옵션은 프리미엄 KMQ 지원자에게만 제공됩니다.",
+                "description_kmq_server": "이 옵션은 프리미엄 KMQ 지원자 또는 공식 KMQ 서버에서만 사용할 수 있습니다.",
                 "title": "프리미엄 옵션"
             },
             "status": {
@@ -642,7 +642,7 @@
                 "perks": {
                     "badge": {
                         "description": "프로필에 전용 배지를 사용하여 KMQ에 대한 도움을 과시하세요.",
-                        "title": "프리미엄 서포터 배지!"
+                        "title": "프리미엄 지원자 배지!"
                     },
                     "moreSongs": {
                         "description": "모든 아티스트의 상위 50개 b-side에 액세스 (최대 10개)하세요.",
@@ -1096,7 +1096,7 @@
             "unrecognizedGroups": {
                 "added": "추가",
                 "description": "지정된 그룹 이름 중 하나 이상이 인식되지 않습니다. (일치하는 그룹은 {{matchedGroupsAction}}이며 그룹 이름이 {{helpGroups}}에서 제공한 목록과 정확히 일치하는지 확인하세요.)\n\n다음 그룹은 **인식되지 않습니다**.\n\n{{unmatchedGroups}}\n{{solution}}",
-                "didYouMean": "__그런 뜻 이었습니까:__\n {{suggestions}}",
+                "didYouMean": "__그런 뜻 이었나요?:__\n {{suggestions}}",
                 "solution": "{{command}}를 사용하여 일치하지 않는 그룹을 추가합니다.",
                 "title": "알 수 없는 그룹 이름"
             },
@@ -1140,7 +1140,7 @@
             "bonusExpArtistRound": "보너스 경험치 및 아티스트 라운드",
             "bonusExpRound": "보너스 경험치 라운드",
             "correctGuess": "{{correctGuesser}}(이)가 올바르게 추측하였습니다. (+{{expGain}} 경험치)",
-            "noCorrectGuesses": "아무도 얻지 못했습니다.",
+            "noCorrectGuesses": "아무도 그것을 얻지 못했습니다.",
             "noWinners": "아무도 우승하지 못했습니다.",
             "runnersUp": "준우승",
             "songsCorrectlyGuessed": "{{songCount}}곡을 정확히 추측을 하였습니다!",
@@ -1169,7 +1169,7 @@
                 "noStats": "이 사용자는 통계를 추적하기 전에 첫 게임을 플레이해야 합니다."
             },
             "title": {
-                "failure": "잠깐만"
+                "failure": "이런!"
             },
             "vote": "투표"
         },
@@ -1210,8 +1210,8 @@
             "debugServer": "이 서버에서는 할 수 없습니다.",
             "differentVC": "이 명령어를 사용하려면 봇과 동일한 음성 채널에 있어야 합니다.",
             "notMusicSession": "이 명령어는 음악 세션에서 사용할 수 없습니다.",
-            "notPremium": "이 명령을 사용하려면 KMQ Premium이 필요합니다 ({{premium}} 참조).",
-            "premiumOrDebugServer": "이 명령은 공식 KMQ 서버 또는 KMQ Premium 멤버에 대해서만 작동합니다({{premium}} 참조).",
+            "notPremium": "이 명령을 사용하려면 KMQ Premium이 필요합니다. ({{premium}} 참조)",
+            "premiumOrDebugServer": "이 명령은 공식 KMQ 서버 또는 KMQ Premium 멤버에 대해서만 작동합니다. ({{premium}} 참조)",
             "title": "잠시만 기다려주십시오..."
         },
         "releaseDate": "발매 날짜",
