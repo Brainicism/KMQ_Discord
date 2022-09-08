@@ -12,27 +12,24 @@ import EnvType from "./enums/env_type";
 import EvalCommand from "./commands/admin/eval";
 import LocalizationManager from "./helpers/localization_manager";
 import ReloadCommand from "./commands/admin/reload";
-import Session from "./structures/session";
-import State from "./state";
-import dbContext from "./database_context";
-import fs from "fs";
-import path from "path";
-import schedule from "node-schedule";
-import type KmqClient from "./kmq_client";
-
-import BotListingManager from "./helpers/bot_listing_manager";
 import SIGINTHandler from "./events/process/SIGINT";
+import Session from "./structures/session";
 import SpotifyManager from "./helpers/spotify_manager";
+import State from "./state";
 import channelDeleteHandler from "./events/client/channelDelete";
 import connectHandler from "./events/client/connect";
+import dbContext from "./database_context";
 import debugHandler from "./events/client/debug";
 import disconnectHandler from "./events/client/disconnect";
 import errorHandler from "./events/client/error";
+import fs from "fs";
 import guildAvailableHandler from "./events/client/guildAvailable";
 import guildCreateHandler from "./events/client/guildCreate";
 import guildDeleteHandler from "./events/client/guildDelete";
 import interactionCreateHandler from "./events/client/interactionCreate";
 import messageCreateHandler from "./events/client/messageCreate";
+import path from "path";
+import schedule from "node-schedule";
 import shardDisconnectHandler from "./events/client/shardDisconnect";
 import shardReadyHandler from "./events/client/shardReady";
 import shardResumeHandler from "./events/client/shardResume";
@@ -43,6 +40,7 @@ import voiceChannelJoinHandler from "./events/client/voiceChannelJoin";
 import voiceChannelLeaveHandler from "./events/client/voiceChannelLeave";
 import voiceChannelSwitchHandler from "./events/client/voiceChannelSwitch";
 import warnHandler from "./events/client/warn";
+import type KmqClient from "./kmq_client";
 
 const logger = new IPCLogger("kmq");
 config({ path: path.resolve(__dirname, "../.env") });
@@ -249,11 +247,7 @@ export default class BotWorker extends BaseClusterWorker {
         logger.info("Registering process event handlers...");
         this.registerProcessEvents();
 
-        if (process.env.NODE_ENV === EnvType.PROD && this.clusterID === 0) {
-            logger.info("Initializing bot stats poster...");
-            const botListingManager = new BotListingManager();
-            botListingManager.start();
-
+        if (process.env.NODE_ENV === EnvType.PROD) {
             logger.info("Initializing Spotify manager...");
             State.spotifyManager = new SpotifyManager();
             State.spotifyManager.start();

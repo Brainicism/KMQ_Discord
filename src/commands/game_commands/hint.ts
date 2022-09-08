@@ -16,6 +16,7 @@ import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import State from "../../state";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type EliminationScoreboard from "../../structures/elimination_scoreboard";
@@ -206,26 +207,28 @@ export function validHintCheck(
  * @param guildID - The guild ID
  * @param guessMode - The guess mode
  * @param gameRound - The game round
+ * @param locale - The locale
  * @returns the hint corresponding to the current game round
  */
 export function generateHint(
     guildID: string,
     guessMode: GuessModeType,
-    gameRound: GameRound
+    gameRound: GameRound,
+    locale: LocaleType
 ): string {
     switch (guessMode) {
         case GuessModeType.ARTIST:
             return `${LocalizationManager.localizer.translate(
                 guildID,
                 "command.hint.artistName"
-            )}: ${codeLine(gameRound.hints.artistHint)}`;
+            )}: ${codeLine(gameRound.hints.artistHint[locale])}`;
         case GuessModeType.SONG_NAME:
         case GuessModeType.BOTH:
         default:
             return `${LocalizationManager.localizer.translate(
                 guildID,
                 "command.hint.songName"
-            )}: ${codeLine(gameRound.hints.songHint)}`;
+            )}: ${codeLine(gameRound.hints.songHint[locale])}`;
     }
 }
 
@@ -300,7 +303,8 @@ export default class HintCommand implements BaseCommand {
                 description: generateHint(
                     messageContext.guildID,
                     guildPreference.gameOptions.guessModeType,
-                    gameRound
+                    gameRound,
+                    State.getGuildLocale(messageContext.guildID)
                 ),
                 thumbnailUrl: KmqImages.READING_BOOK,
             };

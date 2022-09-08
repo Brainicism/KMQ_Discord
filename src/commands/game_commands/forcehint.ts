@@ -14,6 +14,7 @@ import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import State from "../../state";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type GameSession from "src/structures/game_session";
@@ -114,7 +115,8 @@ export default class ForceHintCommand implements BaseCommand {
                 description: generateHint(
                     messageContext.guildID,
                     guildPreference.gameOptions.guessModeType,
-                    gameRound
+                    gameRound,
+                    State.getGuildLocale(messageContext.guildID)
                 ),
                 thumbnailUrl: KmqImages.READING_BOOK,
             },

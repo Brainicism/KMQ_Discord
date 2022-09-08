@@ -1,6 +1,6 @@
 {
     "name": "kmq",
-    "version": "5.6.3",
+    "version": "5.7.0",
     "main": "src/kmq.js",
     "scripts": {
         "seed": "ts-node src/seed/seed_db",
@@ -58,7 +58,7 @@
         "knex": "^2.0.0",
         "lodash": "^4.17.21",
         "mocha": "^9.2.0",
-        "moment-timezone": "^0.5.34",
+        "moment-timezone": "^0.5.35",
         "mysql2": "^2.3.3",
         "node-schedule": "^2.1.0",
         "point-of-view": "^5.1.0",
@@ -68,7 +68,7 @@
         "uuid": "^8.3.2",
         "winston": "^3.5.1",
         "winston-daily-rotate-file": "^4.6.0",
-        "ytdl-core": "^4.10.1",
+        "ytdl-core": "^4.11.2",
         "zlib-sync": "^0.1.7"
     },
     "devDependencies": {
