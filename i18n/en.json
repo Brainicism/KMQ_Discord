@@ -259,6 +259,7 @@
                     "description": "Add the given groups to the game options",
                     "perGroupDescription": "The {{ordinalNum}} group to add"
                 },
+                "description": "Select artists to exclusively play from",
                 "remove": {
                     "description": "Remove the given groups from the game options",
                     "perGroupDescription": "The {{ordinalNum}} group to remove"
