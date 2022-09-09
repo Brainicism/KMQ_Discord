@@ -271,8 +271,8 @@
                     "description": "지정된 그룹의 노래를 재생합니다",
                     "perGroupDescription": "노래를 재생할 {{ordinalNum}} 그룹"
                 }
-
-        }},
+            }
+        },
         "guessmode": {
             "help": {
                 "description": "노래 제목, 아티스트 이름 또는 둘 다로 추측할지 선택합니다.",
@@ -683,7 +683,8 @@
             },
             "interaction": {
                 "teams_begin": "KMQ의 '팀' 게임 모드를 시작합니다. '/play teams create' 이후에만 사용할 수 있습니다.",
-                "teams_create": "팀 생성을 위해 KMQ의 '팀' 게임 모드를 준비합니다"
+                "teams_create": "팀 생성을 위해 KMQ의 '팀' 게임 모드를 준비합니다",
+                "teams_join": "팀에 합류. '/play teams create' 이후에만 사용할 수 있습니다."
             },
             "team": {
                 "joinTeam": {
