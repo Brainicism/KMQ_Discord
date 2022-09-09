@@ -214,6 +214,9 @@
                     "reset": "Reset to the default genders of male, female, and coed"
                 }
             },
+            "interaction": {
+                "description": "Choose the gender of the artists you'd like to hear from."
+            },
             "warning": {
                 "gameOption": {
                     "description": "With only one group chosen, {{alternatingGenderCommand}} may not behave as expected. Consider including more groups to correctly alternate genders.",
