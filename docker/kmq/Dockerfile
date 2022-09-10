@@ -18,7 +18,6 @@ COPY src/ src/
 RUN npx tsc
 
 COPY sql_dumps/daisuki/bootstrap.sql sql_dumps/daisuki/bootstrap.sql
-COPY sql_dumps/daisuki/bootstrap-audio.sql sql_dumps/daisuki/bootstrap-audio.sql
 COPY sql/ sql/
 
 # ================================================================= #

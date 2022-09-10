@@ -32,23 +32,14 @@ before(async function () {
 
     logger.info("Setting up test Daisuki database");
     // import frozen db dump
-    const mvSeedFilePath = `${DATABASE_DOWNLOAD_DIR}/bootstrap.sql`;
-    const mvAudioSeedFilePath = `${DATABASE_DOWNLOAD_DIR}/bootstrap-audio.sql`;
+    const dbSeedFilePath = `${DATABASE_DOWNLOAD_DIR}/bootstrap.sql`;
     cp.execSync(
-        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_test < ${mvSeedFilePath}`
-    );
-
-    cp.execSync(
-        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_test < ${mvAudioSeedFilePath}`
+        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_test < ${dbSeedFilePath}`
     );
 
     // simulate cached song duration table, so that available_songs table can be created
     await db.agnostic.raw(
         "INSERT IGNORE INTO kmq_test.cached_song_duration SELECT vlink, 1 FROM kpop_videos_test.app_kpop;"
-    );
-
-    await db.agnostic.raw(
-        "INSERT IGNORE INTO kmq_test.cached_song_duration SELECT vlink, 1 FROM kpop_videos_test.app_kpop_audio;"
     );
 
     // create kmq data generation procedure
