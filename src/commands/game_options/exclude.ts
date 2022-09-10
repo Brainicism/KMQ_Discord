@@ -1,12 +1,15 @@
-import { GROUP_LIST_URL } from "../../constants";
+import { GroupAction, GROUP_LIST_URL } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
+    getInteractionValue,
+    getMatchedArtists,
+    processGroupAutocompleteInteraction,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import { getMatchingGroupNames } from "../../helpers/game_utils";
-import { setIntersection } from "../../helpers/utils";
+import { getOrdinalNum, setIntersection } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
@@ -17,6 +20,11 @@ import Session from "../../structures/session";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import LocaleType from "../../enums/locale_type";
+import MatchedArtist from "../../interfaces/matched_artist";
+import AddCommand, { AddType } from "./add";
+import RemoveCommand, { RemoveType } from "./remove";
+import GroupsCommand from "./groups";
 
 const logger = new IPCLogger("excludes");
 
@@ -82,6 +90,41 @@ export default class ExcludeCommand implements BaseCommand {
         ],
         priority: 130,
     });
+
+    slashCommands = (): Array<Eris.ApplicationCommandStructure> => [
+        {
+            name: "groups",
+            description: LocalizationManager.localizer.translate(
+                LocaleType.EN,
+                "command.groups.interaction.description"
+            ),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+            options: Object.values(GroupAction).map((action) => ({
+                name: action,
+                description: LocalizationManager.localizer.translate(
+                    LocaleType.EN,
+                    `command.groups.interaction.${action}.description`
+                ),
+                type: Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
+                options:
+                    action === GroupAction.RESET
+                        ? []
+                        : [...Array(25).keys()].map((x) => ({
+                              name: `group_${x + 1}`,
+                              description:
+                                  LocalizationManager.localizer.translate(
+                                      LocaleType.EN,
+                                      `command.groups.interaction.${action}.perGroupDescription`,
+                                      { ordinalNum: getOrdinalNum(x + 1) }
+                                  ),
+                              type: Eris.Constants.ApplicationCommandOptionTypes
+                                  .STRING,
+                              autocomplete: true,
+                              required: false,
+                          })),
+            })),
+        },
+    ];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await GuildPreference.getGuildPreference(
@@ -214,4 +257,59 @@ export default class ExcludeCommand implements BaseCommand {
             )} | Excludes set to ${guildPreference.getDisplayedExcludesGroupNames()}`
         );
     };
-}
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        let groups: Array<MatchedArtist>;
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
+
+        const action = interactionName as GroupAction;
+        const enteredGroupNames = Object.values(interactionOptions);
+
+        if (enteredGroupNames.length === 0) {
+            groups = null;
+        } else {
+            groups = getMatchedArtists(enteredGroupNames);
+        }
+
+        if (action === GroupAction.ADD) {
+            await AddCommand.updateOption(
+                messageContext,
+                AddType.GROUPS,
+                enteredGroupNames,
+                interaction
+            );
+        } else if (action === GroupAction.REMOVE) {
+            await RemoveCommand.updateOption(
+                messageContext,
+                RemoveType.GROUPS,
+                enteredGroupNames,
+                interaction
+            );
+        } else {
+            await ExcludeCommand.updateOption(
+                messageContext,
+                action,
+                groups,
+                interaction
+            );
+        }
+    }
+
+    /**
+     * Handles showing suggested artists as the user types for the exclude slash command
+     * @param interaction - The interaction with intermediate typing state
+     */
+    static async processAutocompleteInteraction(
+        interaction: Eris.AutocompleteInteraction
+    ): Promise<void> {
+        return processGroupAutocompleteInteraction(interaction);
+
+}}

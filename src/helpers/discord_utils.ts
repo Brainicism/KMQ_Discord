@@ -19,6 +19,7 @@ import {
     bold,
     chooseWeightedRandom,
     chunkArray,
+    containsHangul,
     delay,
     friendlyFormattedNumber,
     getOrdinalNum,
@@ -1846,3 +1847,34 @@ export function localizedAutocompleteFormat(
         }))
         .slice(0, MAX_AUTOCOMPLETE_FIELDS);
 }
+
+    /**
+     * Handles showing suggested artists as the user types for the groups/include/exclude slash commands
+     * @param interaction - The interaction with intermediate typing state
+     */
+    export async function processGroupAutocompleteInteraction(
+        interaction: Eris.AutocompleteInteraction
+    ): Promise<void> {
+        const interactionData = getInteractionValue(interaction);
+        const focusedKey = interactionData.focusedKey;
+        const focusedVal = interactionData.interactionOptions[focusedKey];
+        const lowercaseUserInput = focusedVal.toLowerCase();
+
+        const previouslyEnteredArtists = getMatchedArtists(
+            Object.entries(interactionData.interactionOptions)
+                .filter((x) => x[0] !== focusedKey)
+                .map((x) => x[1])
+        ).map((x) => x?.name);
+
+        const showHangul =
+            containsHangul(lowercaseUserInput) ||
+            State.getGuildLocale(interaction.guildID) === LocaleType.KO;
+
+        await tryAutocompleteInteractionAcknowledge(
+            interaction,
+            localizedAutocompleteFormat(
+                searchArtists(lowercaseUserInput, previouslyEnteredArtists),
+                showHangul
+            )
+        );
+    }

@@ -1,4 +1,4 @@
-import { GROUP_LIST_URL } from "../../constants";
+import { GroupAction, GROUP_LIST_URL } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     containsHangul,
@@ -10,6 +10,7 @@ import {
     getInteractionValue,
     getMatchedArtists,
     localizedAutocompleteFormat,
+    processGroupAutocompleteInteraction,
     searchArtists,
     sendErrorMessage,
     sendOptionsMessage,
@@ -36,13 +37,6 @@ import type HelpDocumentation from "../../interfaces/help";
 import type MatchedArtist from "../../interfaces/matched_artist";
 
 const logger = new IPCLogger("groups");
-
-enum GroupAction {
-    ADD = "add",
-    REMOVE = "remove",
-    SET = "set",
-    RESET = "reset",
-}
 
 export default class GroupsCommand implements BaseCommand {
     aliases = ["group", "artist", "artists"];
@@ -372,27 +366,6 @@ export default class GroupsCommand implements BaseCommand {
     static async processAutocompleteInteraction(
         interaction: Eris.AutocompleteInteraction
     ): Promise<void> {
-        const interactionData = getInteractionValue(interaction);
-        const focusedKey = interactionData.focusedKey;
-        const focusedVal = interactionData.interactionOptions[focusedKey];
-        const lowercaseUserInput = focusedVal.toLowerCase();
+        return processGroupAutocompleteInteraction(interaction);
 
-        const previouslyEnteredArtists = getMatchedArtists(
-            Object.entries(interactionData.interactionOptions)
-                .filter((x) => x[0] !== focusedKey)
-                .map((x) => x[1])
-        ).map((x) => x?.name);
-
-        const showHangul =
-            containsHangul(lowercaseUserInput) ||
-            State.getGuildLocale(interaction.guildID) === LocaleType.KO;
-
-        await tryAutocompleteInteractionAcknowledge(
-            interaction,
-            localizedAutocompleteFormat(
-                searchArtists(lowercaseUserInput, previouslyEnteredArtists),
-                showHangul
-            )
-        );
-    }
-}
+}}
