@@ -137,13 +137,7 @@ export default class GroupsCommand implements BaseCommand {
     ];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
-        );
-
-        let matchedGroups: MatchedArtist[];
         if (parsedMessage.components.length === 0) {
-            matchedGroups = null;
             await GroupsCommand.updateOption(
                 MessageContext.fromMessage(message),
                 GroupAction.RESET
@@ -151,46 +145,59 @@ export default class GroupsCommand implements BaseCommand {
             return;
         }
 
-        let groupsWarning = "";
-        if (parsedMessage.components.length > 1) {
-            if (["add", "remove"].includes(parsedMessage.components[0])) {
-                groupsWarning = LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "misc.warning.addRemoveOrdering.footer",
-                    {
-                        addOrRemove: `${process.env.BOT_PREFIX}${parsedMessage.components[0]}`,
-                        command: "groups",
-                    }
-                );
-            }
-        }
-
         const groupNames = parsedMessage.argument
             .split(",")
             .map((groupName) => groupName.trim());
 
         const groups = await getMatchingGroupNames(groupNames);
-        matchedGroups = groups.matchedGroups;
-        const { unmatchedGroups } = groups;
+        const { matchedGroups, unmatchedGroups } = groups;
+
+        await GroupsCommand.updateOption(
+            MessageContext.fromMessage(message),
+            GroupAction.SET,
+            matchedGroups,
+            unmatchedGroups
+        );
+    };
+
+    static async updateOption(
+        messageContext: MessageContext,
+        action: GroupAction,
+        matchedGroups?: MatchedArtist[],
+        unmatchedGroups?: string[],
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
+        let groupsWarning = "";
         if (unmatchedGroups.length) {
             logger.info(
                 `${getDebugLogHeader(
-                    message
-                )} | Attempted to set unknown groups. groups =  ${unmatchedGroups.join(
+                    messageContext
+                )} | Attempted to set unknown groups. groups = ${unmatchedGroups.join(
                     ", "
                 )}`
             );
+
+            if (["add", "remove"].includes(unmatchedGroups[0])) {
+                groupsWarning = LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "misc.warning.addRemoveOrdering.footer",
+                    {
+                        addOrRemove: `${process.env.BOT_PREFIX}${unmatchedGroups[0]}`,
+                        command: "groups",
+                    }
+                );
+            }
 
             let suggestionsText: string = null;
             if (unmatchedGroups.length === 1) {
                 const suggestions = await getSimilarGroupNames(
                     unmatchedGroups[0],
-                    State.getGuildLocale(message.guildID)
+                    State.getGuildLocale(messageContext.guildID)
                 );
 
                 if (suggestions.length > 0) {
                     suggestionsText = LocalizationManager.localizer.translate(
-                        message.guildID,
+                        messageContext.guildID,
                         "misc.failure.unrecognizedGroups.didYouMean",
                         {
                             suggestions: suggestions.join("\n"),
@@ -200,18 +207,18 @@ export default class GroupsCommand implements BaseCommand {
             }
 
             const descriptionText = LocalizationManager.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 "misc.failure.unrecognizedGroups.description",
                 {
                     matchedGroupsAction:
                         LocalizationManager.localizer.translate(
-                            message.guildID,
+                            messageContext.guildID,
                             "misc.failure.unrecognizedGroups.added"
                         ),
                     helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                     unmatchedGroups: unmatchedGroups.join(", "),
                     solution: LocalizationManager.localizer.translate(
-                        message.guildID,
+                        messageContext.guildID,
                         "misc.failure.unrecognizedGroups.solution",
                         {
                             command: `\`${process.env.BOT_PREFIX}add groups\``,
@@ -220,15 +227,19 @@ export default class GroupsCommand implements BaseCommand {
                 }
             );
 
-            await sendErrorMessage(MessageContext.fromMessage(message), {
+            await sendErrorMessage(messageContext, {
                 title: LocalizationManager.localizer.translate(
-                    message.guildID,
+                    messageContext.guildID,
                     "misc.failure.unrecognizedGroups.title"
                 ),
                 description: `${descriptionText}\n\n${suggestionsText || ""}`,
                 footerText: groupsWarning,
             });
         }
+
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID
+        );
 
         if (guildPreference.isExcludesMode()) {
             const intersection = setIntersection(
@@ -240,13 +251,13 @@ export default class GroupsCommand implements BaseCommand {
                 (x) => !intersection.has(x.name)
             );
             if (intersection.size > 0) {
-                sendErrorMessage(MessageContext.fromMessage(message), {
+                sendErrorMessage(messageContext, {
                     title: LocalizationManager.localizer.translate(
-                        message.guildID,
+                        messageContext.guildID,
                         "misc.failure.groupsExcludeConflict.title"
                     ),
                     description: LocalizationManager.localizer.translate(
-                        message.guildID,
+                        messageContext.guildID,
                         "misc.failure.groupsExcludeConflict.description",
                         {
                             conflictingOptionOne: "`exclude`",
@@ -258,12 +269,13 @@ export default class GroupsCommand implements BaseCommand {
                             solutionStepTwo: `\`${process.env.BOT_PREFIX}groups\``,
                             allowOrPrevent:
                                 LocalizationManager.localizer.translate(
-                                    message.guildID,
+                                    messageContext.guildID,
                                     "misc.failure.groupsExcludeConflict.allow"
                                 ),
                         }
                     ),
                 });
+
                 return;
             }
         }
@@ -271,23 +283,6 @@ export default class GroupsCommand implements BaseCommand {
         if (matchedGroups.length === 0) {
             return;
         }
-
-        await GroupsCommand.updateOption(
-            MessageContext.fromMessage(message),
-            GroupAction.SET,
-            matchedGroups
-        );
-    };
-
-    static async updateOption(
-        messageContext: MessageContext,
-        action: GroupAction,
-        matchedGroups?: MatchedArtist[],
-        interaction?: Eris.CommandInteraction
-    ): Promise<void> {
-        const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
-        );
 
         const reset = action === GroupAction.RESET;
         if (reset) {
@@ -322,17 +317,20 @@ export default class GroupsCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        let groups: Array<MatchedArtist>;
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
         const action = interactionName as GroupAction;
         const enteredGroupNames = Object.values(interactionOptions);
 
+        let matchedGroups: Array<MatchedArtist>;
+        let unmatchedGroups: Array<string>;
         if (enteredGroupNames.length === 0) {
-            groups = null;
+            matchedGroups = null;
         } else {
-            groups = getMatchedArtists(enteredGroupNames);
+            matchedGroups = getMatchedArtists(enteredGroupNames);
+            const matchedGroupNames = matchedGroups.map((x) => x.name);
+            unmatchedGroups = enteredGroupNames.filter((x) => !matchedGroupNames.includes(x));
         }
 
         if (action === GroupAction.ADD) {
@@ -353,7 +351,8 @@ export default class GroupsCommand implements BaseCommand {
             await GroupsCommand.updateOption(
                 messageContext,
                 action,
-                groups,
+                matchedGroups,
+                unmatchedGroups,
                 interaction
             );
         }
