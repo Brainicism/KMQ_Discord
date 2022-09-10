@@ -211,22 +211,23 @@ async function getSongsFromDb(db: DatabaseContext): Promise<any> {
             "rankedAudioSongs",
             db.kpopVideos
                 .select([
-                    "app_kpop_audio.name AS songName",
+                    "app_kpop.name AS songName",
                     "app_kpop_group.name AS artistName",
                     "vlink AS youtubeLink",
-                    "app_kpop_audio.views AS views",
-                    "app_kpop_audio.tags AS tags",
+                    "app_kpop.views AS views",
+                    "app_kpop.tags AS tags",
                     db.kpopVideos.raw(
-                        "RANK() OVER(PARTITION BY app_kpop_audio.id_artist ORDER BY views DESC) AS rank"
+                        "RANK() OVER(PARTITION BY app_kpop.id_artist ORDER BY views DESC) AS rank"
                     ),
                 ])
-                .from("app_kpop_audio")
+                .from("app_kpop")
                 .join(
                     "app_kpop_group",
-                    "kpop_videos.app_kpop_audio.id_artist",
+                    "kpop_videos.app_kpop.id_artist",
                     "=",
                     "kpop_videos.app_kpop_group.id"
                 )
+                .where("is_audio", "=", "y")
                 .whereNotIn("vlink", function () {
                     this.select("vlink").from("kmq.dead_links");
                 })
@@ -253,6 +254,7 @@ async function getSongsFromDb(db: DatabaseContext): Promise<any> {
                     this.select("vlink").from("kmq.dead_links");
                 })
                 .where("vtype", "=", "main")
+                .where("is_audio", "=", "n")
                 .andWhere("tags", "NOT LIKE", "%c%");
         })
         .orderBy("views", "DESC");

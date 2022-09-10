@@ -57,18 +57,12 @@ async function lookupByYoutubeID(
         .where("link", videoID)
         .first();
 
-    const daisukiMVEntry = await dbContext
+    const daisukiEntry = await dbContext
         .kpopVideos("app_kpop")
         .where("vlink", videoID)
         .first();
 
-    const daisukiAudioEntry = await dbContext
-        .kpopVideos("app_kpop_audio")
-        .where("vlink", videoID)
-        .first();
-
-    const daisukiSongEntry = daisukiMVEntry || daisukiAudioEntry;
-    if (!daisukiSongEntry) {
+    if (!daisukiEntry) {
         // maybe it was falsely parsed as video ID? fallback to song name lookup
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         const found = await lookupBySongName(videoID, locale, message, guildID);
@@ -82,7 +76,7 @@ async function lookupByYoutubeID(
         return false;
     }
 
-    const daisukiLink = getDaisukiLink(daisukiSongEntry.id, !!daisukiMVEntry);
+    const daisukiLink = getDaisukiLink(daisukiEntry.id, !!daisukiEntry);
 
     let description: string;
     let songName: string;
@@ -147,14 +141,14 @@ async function lookupByYoutubeID(
         );
         const isKorean = locale === LocaleType.KO;
         songName =
-            daisukiSongEntry.kname && isKorean
-                ? daisukiSongEntry.kname
-                : daisukiSongEntry.name;
+            daisukiEntry.kname && isKorean
+                ? daisukiEntry.kname
+                : daisukiEntry.name;
 
         const artistNameQuery = await dbContext
             .kpopVideos("app_kpop_group")
             .select("name", "kname")
-            .where("id", daisukiSongEntry.id_artist)
+            .where("id", daisukiEntry.id_artist)
             .first();
 
         artistName =
@@ -162,15 +156,15 @@ async function lookupByYoutubeID(
                 ? artistNameQuery.kname
                 : artistNameQuery.name;
 
-        songAliases = [...daisukiSongEntry.alias.split(";")].join(", ");
+        songAliases = [...daisukiEntry.alias.split(";")].join(", ");
         songAliases += songAliases
-            ? `, ${daisukiSongEntry.kname}`
-            : daisukiSongEntry.kname;
+            ? `, ${daisukiEntry.kname}`
+            : daisukiEntry.kname;
 
         artistAliases = State.aliases.artist[artistNameQuery.name]?.join(", ");
 
-        views = daisukiSongEntry.views;
-        publishDate = new Date(daisukiSongEntry.publishedon);
+        views = daisukiEntry.views;
+        publishDate = new Date(daisukiEntry.publishedon);
 
         logger.info(
             `${getDebugLogHeader(

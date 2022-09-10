@@ -59,6 +59,7 @@ BEGIN
 	INNER JOIN kmq.cached_song_duration USING (vlink)
 	LEFT JOIN kmq.not_downloaded USING (vlink)
 	WHERE kmq.not_downloaded.vlink IS NULL
+	AND kpop_videos.app_kpop.is_audio = 'n'
 	AND vlink NOT IN (SELECT vlink FROM kmq.dead_links)
 	AND vtype = 'main'
 	AND tags NOT LIKE "%c%"
@@ -69,11 +70,11 @@ BEGIN
 	SELECT *
 	FROM (
 		SELECT
-			TRIM(kpop_videos.app_kpop_audio.name) AS song_name_en,
-			TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop_audio.name, '(', 1)) AS clean_song_name_en,
-			TRIM(kpop_videos.app_kpop_audio.kname) AS song_name_ko,
-			TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop_audio.kname, '(', 1)) AS clean_song_name_ko,
-			kpop_videos.app_kpop_audio.alias AS song_aliases,
+			TRIM(kpop_videos.app_kpop.name) AS song_name_en,
+			TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1)) AS clean_song_name_en,
+			TRIM(kpop_videos.app_kpop.kname) AS song_name_ko,
+			TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop.kname, '(', 1)) AS clean_song_name_ko,
+			kpop_videos.app_kpop.alias AS song_aliases,
 			vlink AS link,
 			TRIM(kpop_videos.app_kpop_group.name) AS artist_name_en,
 			TRIM(kpop_videos.app_kpop_group.kname) AS artist_name_ko,
@@ -81,19 +82,20 @@ BEGIN
 			kpop_videos.app_kpop_group.previous_name AS previous_name_en,
 			kpop_videos.app_kpop_group.previous_kname AS previous_name_ko,
 			kpop_videos.app_kpop_group.members AS members,
-			kpop_videos.app_kpop_audio.views AS views,
+			kpop_videos.app_kpop.views AS views,
 			releasedate as publishedon,
 			kpop_videos.app_kpop_group.id AS id_artist,
 			issolo,
 			id_parentgroup,
 			'audio' AS vtype,
 			tags,
-			RANK() OVER(PARTITION BY app_kpop_audio.id_artist ORDER BY views DESC) AS rank
-		FROM kpop_videos.app_kpop_audio
-		JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop_audio.id_artist = kpop_videos.app_kpop_group.id
+			RANK() OVER(PARTITION BY app_kpop.id_artist ORDER BY views DESC) AS rank
+		FROM kpop_videos.app_kpop
+		JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
 		INNER JOIN kmq.cached_song_duration USING (vlink)
 		LEFT JOIN kmq.not_downloaded USING (vlink)
 		WHERE kmq.not_downloaded.vlink IS NULL
+		AND kpop_videos.app_kpop.is_audio = 'y'
 		AND vlink NOT IN (SELECT vlink FROM kmq.dead_links)
 		AND tags NOT LIKE "%c%"
 	) rankedAudioSongs
