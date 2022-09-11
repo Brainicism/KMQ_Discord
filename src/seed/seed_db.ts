@@ -152,9 +152,6 @@ async function extractDb(): Promise<void> {
         `unzip -oq ${DATABASE_DOWNLOAD_DIR}/mv-download.zip -d ${DATABASE_DOWNLOAD_DIR}/`
     );
 
-    await exec(
-        `unzip -oq ${DATABASE_DOWNLOAD_DIR}/audio-download.zip -d ${DATABASE_DOWNLOAD_DIR}/`
-    );
     logger.info("Extracted Daisuki database");
 }
 
