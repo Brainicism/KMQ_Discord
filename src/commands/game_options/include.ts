@@ -186,6 +186,38 @@ export default class IncludeCommand implements BaseCommand {
             return;
         }
 
+        if (guildPreference.isGroupsMode()) {
+            logger.warn(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Game option conflict between include and groups.`
+            );
+
+            sendErrorMessage(
+                messageContext,
+                {
+                    title: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "misc.failure.gameOptionConflict.title"
+                    ),
+                    description: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "misc.failure.gameOptionConflict.description",
+                        {
+                            optionOne: "`groups`",
+                            optionTwo: "`include`",
+                            optionOneCommand: interaction
+                                ? "`/groups`"
+                                : `\`${process.env.BOT_PREFIX}groups\``,
+                        }
+                    ),
+                },
+                interaction
+            );
+
+            return;
+        }
+
         let includeWarning = "";
         if (unmatchedGroups.length) {
             logger.info(
@@ -263,46 +295,20 @@ export default class IncludeCommand implements BaseCommand {
                 }
             );
 
-            await sendErrorMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "misc.failure.unrecognizedGroups.title"
-                ),
-                description: `${descriptionText}\n\n${suggestionsText || ""}`,
-                footerText: includeWarning,
-            });
-        }
-
-        if (guildPreference.isGroupsMode()) {
-            logger.warn(
-                `${getDebugLogHeader(
-                    messageContext
-                )} | Game option conflict between include and groups.`
-            );
-
-            sendErrorMessage(
+            await sendErrorMessage(
                 messageContext,
                 {
                     title: LocalizationManager.localizer.translate(
                         messageContext.guildID,
-                        "misc.failure.gameOptionConflict.title"
+                        "misc.failure.unrecognizedGroups.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
-                        messageContext.guildID,
-                        "misc.failure.gameOptionConflict.description",
-                        {
-                            optionOne: "`groups`",
-                            optionTwo: "`include`",
-                            optionOneCommand: interaction
-                                ? "`/groups`"
-                                : `\`${process.env.BOT_PREFIX}groups\``,
-                        }
-                    ),
+                    description: `${descriptionText}\n\n${
+                        suggestionsText || ""
+                    }`,
+                    footerText: includeWarning,
                 },
-                interaction
+                matchedGroups.length === 0 ? interaction : undefined
             );
-
-            return;
         }
 
         if (matchedGroups.length === 0) {

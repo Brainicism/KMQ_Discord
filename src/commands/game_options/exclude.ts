@@ -228,6 +228,54 @@ export default class ExcludeCommand implements BaseCommand {
             return;
         }
 
+        if (guildPreference.isGroupsMode()) {
+            const intersection = setIntersection(
+                matchedGroups.map((x) => x.name),
+                guildPreference.getGroupNames()
+            );
+
+            matchedGroups = matchedGroups.filter(
+                (x) => !intersection.has(x.name)
+            );
+
+            if (intersection.size > 0) {
+                await sendErrorMessage(
+                    messageContext,
+                    {
+                        title: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "misc.failure.groupsExcludeConflict.title"
+                        ),
+                        description: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "misc.failure.groupsExcludeConflict.description",
+                            {
+                                conflictingOptionOne: "`exclude`",
+                                conflictingOptionTwo: "`groups`",
+                                groupsList: [...intersection]
+                                    .filter((x) => !x.includes("+"))
+                                    .join(", "),
+                                solutionStepOne: interaction
+                                    ? "`/groups remove`"
+                                    : `\`${process.env.BOT_PREFIX}remove groups\``,
+                                solutionStepTwo: interaction
+                                    ? "`/exclude`"
+                                    : `\`${process.env.BOT_PREFIX}exclude\``,
+                                allowOrPrevent:
+                                    LocalizationManager.localizer.translate(
+                                        messageContext.guildID,
+                                        "misc.failure.groupsExcludeConflict.prevent"
+                                    ),
+                            }
+                        ),
+                    },
+                    interaction
+                );
+
+                return;
+            }
+        }
+
         let excludeWarning = "";
         if (unmatchedGroups.length) {
             logger.info(
@@ -307,60 +355,20 @@ export default class ExcludeCommand implements BaseCommand {
                 }
             );
 
-            await sendErrorMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "misc.failure.unrecognizedGroups.title"
-                ),
-                description: `${descriptionText}\n\n${suggestionsText || ""}`,
-                footerText: excludeWarning,
-            });
-        }
-
-        if (guildPreference.isGroupsMode()) {
-            const intersection = setIntersection(
-                matchedGroups.map((x) => x.name),
-                guildPreference.getGroupNames()
+            await sendErrorMessage(
+                messageContext,
+                {
+                    title: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "misc.failure.unrecognizedGroups.title"
+                    ),
+                    description: `${descriptionText}\n\n${
+                        suggestionsText || ""
+                    }`,
+                    footerText: excludeWarning,
+                },
+                matchedGroups.length === 0 ? interaction : undefined
             );
-
-            matchedGroups = matchedGroups.filter(
-                (x) => !intersection.has(x.name)
-            );
-
-            if (intersection.size > 0) {
-                await sendErrorMessage(
-                    messageContext,
-                    {
-                        title: LocalizationManager.localizer.translate(
-                            messageContext.guildID,
-                            "misc.failure.groupsExcludeConflict.title"
-                        ),
-                        description: LocalizationManager.localizer.translate(
-                            messageContext.guildID,
-                            "misc.failure.groupsExcludeConflict.description",
-                            {
-                                conflictingOptionOne: "`exclude`",
-                                conflictingOptionTwo: "`groups`",
-                                groupsList: [...intersection]
-                                    .filter((x) => !x.includes("+"))
-                                    .join(", "),
-                                solutionStepOne: interaction
-                                    ? "`/groups remove`"
-                                    : `\`${process.env.BOT_PREFIX}remove groups\``,
-                                solutionStepTwo: interaction
-                                    ? "`/exclude`"
-                                    : `\`${process.env.BOT_PREFIX}exclude\``,
-                                allowOrPrevent:
-                                    LocalizationManager.localizer.translate(
-                                        messageContext.guildID,
-                                        "misc.failure.groupsExcludeConflict.prevent"
-                                    ),
-                            }
-                        ),
-                    },
-                    interaction
-                );
-            }
         }
 
         if (matchedGroups.length === 0) {
