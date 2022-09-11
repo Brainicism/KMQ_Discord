@@ -29,6 +29,10 @@ const dynamicTranslationKeyAllowlist = [
     "getOrdinalNum(idx + 1)",
     "`command.groups.interaction.${action}.perGroupDescription`",
     "`command.groups.interaction.${action}.description`",
+    "`command.exclude.interaction.${action}.perGroupDescription`",
+    "`command.exclude.interaction.${action}.description`",
+    "`command.include.interaction.${action}.perGroupDescription`",
+    "`command.include.interaction.${action}.description`",
 ];
 
 const translationInterfaceFunctions = [

@@ -328,7 +328,7 @@ export default class ExcludeCommand implements BaseCommand {
             );
 
             if (intersection.size > 0) {
-                sendErrorMessage(
+                await sendErrorMessage(
                     messageContext,
                     {
                         title: LocalizationManager.localizer.translate(
