@@ -1,4 +1,4 @@
-import { GroupAction, GROUP_LIST_URL } from "../../constants";
+import { GROUP_LIST_URL, GroupAction } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -8,23 +8,26 @@ import {
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { getMatchingGroupNames, getSimilarGroupNames } from "../../helpers/game_utils";
+import {
+    getMatchingGroupNames,
+    getSimilarGroupNames,
+} from "../../helpers/game_utils";
+import { getOrdinalNum } from "../../helpers/utils";
+import AddCommand, { AddType } from "./add";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
+import RemoveCommand, { RemoveType } from "./remove";
 import Session from "../../structures/session";
+import State from "../../state";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
-import LocaleType from "../../enums/locale_type";
-import { getOrdinalNum } from "../../helpers/utils";
-import MatchedArtist from "../../interfaces/matched_artist";
-import AddCommand, { AddType } from "./add";
-import RemoveCommand, { RemoveType } from "./remove";
-import State from "../../state";
+import type MatchedArtist from "../../interfaces/matched_artist";
 
 const logger = new IPCLogger("includes");
 
@@ -126,7 +129,6 @@ export default class IncludeCommand implements BaseCommand {
         },
     ];
 
-
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         if (parsedMessage.components.length === 0) {
             await IncludeCommand.updateOption(
@@ -166,7 +168,10 @@ export default class IncludeCommand implements BaseCommand {
         const reset = action === GroupAction.RESET;
         if (reset) {
             await guildPreference.reset(GameOption.INCLUDE);
-            logger.info(`${getDebugLogHeader(messageContext)} | Include reset.`);
+            logger.info(
+                `${getDebugLogHeader(messageContext)} | Include reset.`
+            );
+
             await sendOptionsMessage(
                 Session.getSession(messageContext.guildID),
                 messageContext,
@@ -229,25 +234,25 @@ export default class IncludeCommand implements BaseCommand {
             );
 
             const descriptionText = LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "misc.failure.unrecognizedGroups.description",
-                    {
-                        matchedGroupsAction:
-                            LocalizationManager.localizer.translate(
-                                messageContext.guildID,
-                                "command.include.failure.unrecognizedGroups.included"
-                            ),
-                        helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
-                        unmatchedGroups: unmatchedGroups.join(", "),
-                        solution: LocalizationManager.localizer.translate(
+                messageContext.guildID,
+                "misc.failure.unrecognizedGroups.description",
+                {
+                    matchedGroupsAction:
+                        LocalizationManager.localizer.translate(
                             messageContext.guildID,
-                            "misc.failure.unrecognizedGroups.solution",
-                            {
-                                command: `\`${process.env.BOT_PREFIX}add include\``,
-                            }
+                            "command.include.failure.unrecognizedGroups.included"
                         ),
-                    }
-                );
+                    helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
+                    unmatchedGroups: unmatchedGroups.join(", "),
+                    solution: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "misc.failure.unrecognizedGroups.solution",
+                        {
+                            command: `\`${process.env.BOT_PREFIX}add include\``,
+                        }
+                    ),
+                }
+            );
 
             await sendErrorMessage(messageContext, {
                 title: LocalizationManager.localizer.translate(
@@ -266,25 +271,28 @@ export default class IncludeCommand implements BaseCommand {
                 )} | Game option conflict between include and groups.`
             );
 
-            sendErrorMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "misc.failure.gameOptionConflict.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "misc.failure.gameOptionConflict.description",
-                    {
-                        optionOne: "`groups`",
-                        optionTwo: "`include`",
-                        optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
-                    }
-                ),
-            }, interaction);
+            sendErrorMessage(
+                messageContext,
+                {
+                    title: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "misc.failure.gameOptionConflict.title"
+                    ),
+                    description: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "misc.failure.gameOptionConflict.description",
+                        {
+                            optionOne: "`groups`",
+                            optionTwo: "`include`",
+                            optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
+                        }
+                    ),
+                },
+                interaction
+            );
 
             return;
         }
-
 
         if (matchedGroups.length === 0) {
             return;
@@ -328,7 +336,9 @@ export default class IncludeCommand implements BaseCommand {
         if (enteredGroupNames.length > 0) {
             matchedGroups = getMatchedArtists(enteredGroupNames);
             const matchedGroupNames = matchedGroups.map((x) => x.name);
-            unmatchedGroups = enteredGroupNames.filter((x) => !matchedGroupNames.includes(x));
+            unmatchedGroups = enteredGroupNames.filter(
+                (x) => !matchedGroupNames.includes(x)
+            );
         }
 
         if (action === GroupAction.ADD) {
@@ -364,5 +374,5 @@ export default class IncludeCommand implements BaseCommand {
         interaction: Eris.AutocompleteInteraction
     ): Promise<void> {
         return processGroupAutocompleteInteraction(interaction);
-
-}}
+    }
+}

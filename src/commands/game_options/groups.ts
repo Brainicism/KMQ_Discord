@@ -1,25 +1,18 @@
-import { GroupAction, GROUP_LIST_URL } from "../../constants";
+import { GROUP_LIST_URL, GroupAction } from "../../constants";
 import { IPCLogger } from "../../logger";
-import {
-    containsHangul,
-    getOrdinalNum,
-    setIntersection,
-} from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
     getMatchedArtists,
-    localizedAutocompleteFormat,
     processGroupAutocompleteInteraction,
-    searchArtists,
     sendErrorMessage,
     sendOptionsMessage,
-    tryAutocompleteInteractionAcknowledge,
 } from "../../helpers/discord_utils";
 import {
     getMatchingGroupNames,
     getSimilarGroupNames,
 } from "../../helpers/game_utils";
+import { getOrdinalNum, setIntersection } from "../../helpers/utils";
 import AddCommand, { AddType } from "./add";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
@@ -269,30 +262,34 @@ export default class GroupsCommand implements BaseCommand {
                 (x) => !intersection.has(x.name)
             );
             if (intersection.size > 0) {
-                sendErrorMessage(messageContext, {
-                    title: LocalizationManager.localizer.translate(
-                        messageContext.guildID,
-                        "misc.failure.groupsExcludeConflict.title"
-                    ),
-                    description: LocalizationManager.localizer.translate(
-                        messageContext.guildID,
-                        "misc.failure.groupsExcludeConflict.description",
-                        {
-                            conflictingOptionOne: "`exclude`",
-                            conflictingOptionTwo: "`groups`",
-                            groupsList: [...intersection]
-                                .filter((x) => !x.includes("+"))
-                                .join(", "),
-                            solutionStepOne: `\`${process.env.BOT_PREFIX}remove exclude\``,
-                            solutionStepTwo: `\`${process.env.BOT_PREFIX}groups\``,
-                            allowOrPrevent:
-                                LocalizationManager.localizer.translate(
-                                    messageContext.guildID,
-                                    "misc.failure.groupsExcludeConflict.allow"
-                                ),
-                        }
-                    ),
-                }, interaction);
+                sendErrorMessage(
+                    messageContext,
+                    {
+                        title: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "misc.failure.groupsExcludeConflict.title"
+                        ),
+                        description: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "misc.failure.groupsExcludeConflict.description",
+                            {
+                                conflictingOptionOne: "`exclude`",
+                                conflictingOptionTwo: "`groups`",
+                                groupsList: [...intersection]
+                                    .filter((x) => !x.includes("+"))
+                                    .join(", "),
+                                solutionStepOne: `\`${process.env.BOT_PREFIX}remove exclude\``,
+                                solutionStepTwo: `\`${process.env.BOT_PREFIX}groups\``,
+                                allowOrPrevent:
+                                    LocalizationManager.localizer.translate(
+                                        messageContext.guildID,
+                                        "misc.failure.groupsExcludeConflict.allow"
+                                    ),
+                            }
+                        ),
+                    },
+                    interaction
+                );
 
                 return;
             }
@@ -340,7 +337,9 @@ export default class GroupsCommand implements BaseCommand {
         if (enteredGroupNames.length > 0) {
             matchedGroups = getMatchedArtists(enteredGroupNames);
             const matchedGroupNames = matchedGroups.map((x) => x.name);
-            unmatchedGroups = enteredGroupNames.filter((x) => !matchedGroupNames.includes(x));
+            unmatchedGroups = enteredGroupNames.filter(
+                (x) => !matchedGroupNames.includes(x)
+            );
         }
 
         if (action === GroupAction.ADD) {
@@ -376,5 +375,5 @@ export default class GroupsCommand implements BaseCommand {
         interaction: Eris.AutocompleteInteraction
     ): Promise<void> {
         return processGroupAutocompleteInteraction(interaction);
-
-}}
+    }
+}

@@ -7,7 +7,9 @@ import {
 } from "../../helpers/discord_utils";
 import { getUserTag, measureExecutionTime } from "../../helpers/utils";
 import Eris from "eris";
+import ExcludeCommand from "../../commands/game_options/exclude";
 import GroupsCommand from "../../commands/game_options/groups";
+import IncludeCommand from "../../commands/game_options/include";
 import KmqMember from "../../structures/kmq_member";
 import LocalizationManager from "../../helpers/localization_manager";
 import LookupCommand from "../../commands/game_commands/lookup";
@@ -16,8 +18,6 @@ import PresetCommand from "../../commands/game_commands/preset";
 import ProfileCommand from "../../commands/game_commands/profile";
 import Session from "../../structures/session";
 import State from "../../state";
-import IncludeCommand from "../../commands/game_options/include";
-import ExcludeCommand from "../../commands/game_options/exclude";
 
 const logger = new IPCLogger("interactionCreate");
 

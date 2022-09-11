@@ -318,21 +318,26 @@ export default class AddCommand implements BaseCommand {
                         )} | Game option conflict between include and groups.`
                     );
 
-                    sendErrorMessage(messageContext, {
-                        title: LocalizationManager.localizer.translate(
-                            messageContext.guildID,
-                            "misc.failure.gameOptionConflict.title"
-                        ),
-                        description: LocalizationManager.localizer.translate(
-                            messageContext.guildID,
-                            "misc.failure.gameOptionConflict.description",
-                            {
-                                optionOne: "`groups`",
-                                optionTwo: "`include`",
-                                optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
-                            }
-                        ),
-                    }, interaction);
+                    sendErrorMessage(
+                        messageContext,
+                        {
+                            title: LocalizationManager.localizer.translate(
+                                messageContext.guildID,
+                                "misc.failure.gameOptionConflict.title"
+                            ),
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    messageContext.guildID,
+                                    "misc.failure.gameOptionConflict.description",
+                                    {
+                                        optionOne: "`groups`",
+                                        optionTwo: "`include`",
+                                        optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
+                                    }
+                                ),
+                        },
+                        interaction
+                    );
 
                     return;
                 }

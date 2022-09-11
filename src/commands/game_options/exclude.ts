@@ -1,4 +1,4 @@
-import { GroupAction, GROUP_LIST_URL } from "../../constants";
+import { GROUP_LIST_URL, GroupAction } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -8,24 +8,26 @@ import {
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { getMatchingGroupNames, getSimilarGroupNames } from "../../helpers/game_utils";
+import {
+    getMatchingGroupNames,
+    getSimilarGroupNames,
+} from "../../helpers/game_utils";
 import { getOrdinalNum, setIntersection } from "../../helpers/utils";
+import AddCommand, { AddType } from "./add";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
+import RemoveCommand, { RemoveType } from "./remove";
 import Session from "../../structures/session";
+import State from "../../state";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
-import LocaleType from "../../enums/locale_type";
-import MatchedArtist from "../../interfaces/matched_artist";
-import AddCommand, { AddType } from "./add";
-import RemoveCommand, { RemoveType } from "./remove";
-import GroupsCommand from "./groups";
-import State from "../../state";
+import type MatchedArtist from "../../interfaces/matched_artist";
 
 const logger = new IPCLogger("excludes");
 
@@ -171,7 +173,9 @@ export default class ExcludeCommand implements BaseCommand {
         if (enteredGroupNames.length > 0) {
             matchedGroups = getMatchedArtists(enteredGroupNames);
             const matchedGroupNames = matchedGroups.map((x) => x.name);
-            unmatchedGroups = enteredGroupNames.filter((x) => !matchedGroupNames.includes(x));
+            unmatchedGroups = enteredGroupNames.filter(
+                (x) => !matchedGroupNames.includes(x)
+            );
         }
 
         if (action === GroupAction.ADD) {
@@ -213,7 +217,10 @@ export default class ExcludeCommand implements BaseCommand {
         const reset = action === GroupAction.RESET;
         if (reset) {
             await guildPreference.reset(GameOption.EXCLUDE);
-            logger.info(`${getDebugLogHeader(messageContext)} | Exclude reset.`);
+            logger.info(
+                `${getDebugLogHeader(messageContext)} | Exclude reset.`
+            );
+
             await sendOptionsMessage(
                 Session.getSession(messageContext.guildID),
                 messageContext,
@@ -317,34 +324,36 @@ export default class ExcludeCommand implements BaseCommand {
             );
 
             if (intersection.size > 0) {
-                sendErrorMessage(messageContext, {
-                    title: LocalizationManager.localizer.translate(
-                        messageContext.guildID,
-                        "misc.failure.groupsExcludeConflict.title"
-                    ),
-                    description: LocalizationManager.localizer.translate(
-                        messageContext.guildID,
-                        "misc.failure.groupsExcludeConflict.description",
-                        {
-                            conflictingOptionOne: "`exclude`",
-                            conflictingOptionTwo: "`groups`",
-                            groupsList: [...intersection]
-                                .filter((x) => !x.includes("+"))
-                                .join(", "),
-                            solutionStepOne: `\`${process.env.BOT_PREFIX}remove groups\``,
-                            solutionStepTwo: `\`${process.env.BOT_PREFIX}exclude\``,
-                            allowOrPrevent:
-                                LocalizationManager.localizer.translate(
-                                    messageContext.guildID,
-                                    "misc.failure.groupsExcludeConflict.prevent"
-                                ),
-                        }
-                    ),
-                }, interaction);
+                sendErrorMessage(
+                    messageContext,
+                    {
+                        title: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "misc.failure.groupsExcludeConflict.title"
+                        ),
+                        description: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "misc.failure.groupsExcludeConflict.description",
+                            {
+                                conflictingOptionOne: "`exclude`",
+                                conflictingOptionTwo: "`groups`",
+                                groupsList: [...intersection]
+                                    .filter((x) => !x.includes("+"))
+                                    .join(", "),
+                                solutionStepOne: `\`${process.env.BOT_PREFIX}remove groups\``,
+                                solutionStepTwo: `\`${process.env.BOT_PREFIX}exclude\``,
+                                allowOrPrevent:
+                                    LocalizationManager.localizer.translate(
+                                        messageContext.guildID,
+                                        "misc.failure.groupsExcludeConflict.prevent"
+                                    ),
+                            }
+                        ),
+                    },
+                    interaction
+                );
             }
         }
-
-
 
         if (matchedGroups.length === 0) {
             return;
@@ -377,5 +386,5 @@ export default class ExcludeCommand implements BaseCommand {
         interaction: Eris.AutocompleteInteraction
     ): Promise<void> {
         return processGroupAutocompleteInteraction(interaction);
-
-}}
+    }
+}
