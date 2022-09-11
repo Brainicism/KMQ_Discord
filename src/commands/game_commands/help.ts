@@ -10,11 +10,11 @@ import {
     tryAutocompleteInteractionAcknowledge,
 } from "../../helpers/discord_utils";
 import Eris from "eris";
-import KmqClient from "../../kmq_client";
 import KmqMember from "../../structures/kmq_member";
 import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
+import State from "../../state";
 import type { EmbedOptions } from "eris";
 import type { GuildTextableMessage } from "../../types";
 import type BaseCommand from "../interfaces/base_command";
@@ -87,7 +87,7 @@ export default class HelpCommand implements BaseCommand {
         let embedDesc = "";
         let embedFields = [];
         let embedActionRowComponents: Eris.ActionRowComponents[] = null;
-        const commandFiles = await KmqClient.getCommandFiles(false);
+        const commandFiles = State.client.commands;
         for (const command of excludedCommands) {
             delete commandFiles[command];
         }
@@ -324,7 +324,6 @@ export default class HelpCommand implements BaseCommand {
 
     /**
      * @param interaction - The interaction
-     * @param messageContext - The message context
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction
@@ -348,7 +347,7 @@ export default class HelpCommand implements BaseCommand {
         const focusedKey = interactionData.focusedKey;
         const focusedVal = interactionData.interactionOptions[focusedKey];
         const lowercaseUserInput = focusedVal.toLowerCase();
-        const commands = Object.values(await KmqClient.getCommandFiles(false))
+        const commands = Object.values(State.client.commands)
             .filter((x) => x.help)
             .map((x) => x.help(interaction.guildID))
             .filter((x) => !excludedCommands.includes(x.name))
