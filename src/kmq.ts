@@ -44,6 +44,12 @@ const options: Options = {
     whatToLog: {
         blacklist: ["stats_update"],
     },
+    services: [
+        {
+            name: "kmq_service",
+            path: path.join(__dirname, "./kmq_service.js"),
+        },
+    ],
     path: path.join(__dirname, "./kmq_worker.js"),
     token: process.env.BOT_TOKEN,
     clientOptions: {
@@ -90,28 +96,6 @@ function registerGlobalIntervals(fleet: Fleet): void {
         }
     });
 
-    // every hour
-    schedule.scheduleJob("15 * * * *", async () => {
-        if (process.env.NODE_ENV !== EnvType.PROD) return;
-        if (!(await isPrimaryInstance()) || (await shouldSkipSeed())) {
-            logger.info("Skipping scheduled Daisuki database seed");
-            return;
-        }
-
-        logger.info("Performing regularly scheduled Daisuki database seed");
-
-        try {
-            await seedAndDownloadNewSongs(dbContext);
-        } catch (e) {
-            await sendDebugAlertWebhook(
-                "Download and seed failure",
-                e.toString(),
-                EMBED_ERROR_COLOR,
-                KmqImages.NOT_IMPRESSED
-            );
-        }
-    });
-
     // every minute
     schedule.scheduleJob("* * * * *", async () => {
         if (await isPrimaryInstance()) {
@@ -122,6 +106,31 @@ function registerGlobalIntervals(fleet: Fleet): void {
             });
         }
     });
+
+    // as defined in DAISUKI_SEED_CRON_JOB
+    schedule.scheduleJob(
+        process.env.DAISUKI_SEED_CRON_JOB ?? "15 3,15 * * *",
+        async () => {
+            if (process.env.NODE_ENV !== EnvType.PROD) return;
+            if (!(await isPrimaryInstance()) || (await shouldSkipSeed())) {
+                logger.info("Skipping scheduled Daisuki database seed");
+                return;
+            }
+
+            logger.info("Performing regularly scheduled Daisuki database seed");
+
+            try {
+                await seedAndDownloadNewSongs(dbContext);
+            } catch (e) {
+                await sendDebugAlertWebhook(
+                    "Download and seed failure",
+                    e.toString(),
+                    EMBED_ERROR_COLOR,
+                    KmqImages.NOT_IMPRESSED
+                );
+            }
+        }
+    );
 }
 
 function registerProcessEvents(fleet: Fleet): void {
