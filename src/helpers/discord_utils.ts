@@ -1798,15 +1798,25 @@ export function getInteractionValue(
  * @param enteredNames - Artist names the user has entered
  * @returns the matched artists
  */
-export function getMatchedArtists(
-    enteredNames: Array<string>
-): Array<MatchedArtist> {
-    return _.uniqBy(
-        enteredNames
-            .map((x) => State.artistToEntry[x.toLowerCase()])
-            .filter((x) => x),
-        "id"
-    );
+export function getMatchedArtists(enteredNames: Array<string>): {
+    matchedGroups: Array<MatchedArtist>;
+    unmatchedGroups: Array<string>;
+} {
+    const matchedGroups: Array<MatchedArtist> = [];
+    const unmatchedGroups: Array<string> = [];
+    for (const artistName of enteredNames) {
+        const match = State.artistToEntry[artistName.toLowerCase()];
+        if (match) {
+            matchedGroups.push(match);
+        } else {
+            unmatchedGroups.push(artistName);
+        }
+    }
+
+    return {
+        matchedGroups: _.uniqBy(matchedGroups, "id"),
+        unmatchedGroups,
+    };
 }
 
 /**
@@ -1866,7 +1876,7 @@ export async function processGroupAutocompleteInteraction(
         Object.entries(interactionData.interactionOptions)
             .filter((x) => x[0] !== focusedKey)
             .map((x) => x[1])
-    ).map((x) => x?.name);
+    ).matchedGroups.map((x) => x.name);
 
     const showHangul =
         containsHangul(lowercaseUserInput) ||

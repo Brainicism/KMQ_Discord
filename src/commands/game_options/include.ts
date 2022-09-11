@@ -341,16 +341,8 @@ export default class IncludeCommand implements BaseCommand {
 
         const action = interactionName as GroupAction;
         const enteredGroupNames = Object.values(interactionOptions);
-
-        let matchedGroups: Array<MatchedArtist>;
-        let unmatchedGroups: Array<string>;
-        if (enteredGroupNames.length > 0) {
-            matchedGroups = getMatchedArtists(enteredGroupNames);
-            const matchedGroupNames = matchedGroups.map((x) => x.name);
-            unmatchedGroups = enteredGroupNames.filter(
-                (x) => !matchedGroupNames.includes(x)
-            );
-        }
+        const { unmatchedGroups, matchedGroups } =
+            getMatchedArtists(enteredGroupNames);
 
         if (action === GroupAction.ADD) {
             await AddCommand.updateOption(

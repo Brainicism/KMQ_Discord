@@ -168,15 +168,8 @@ export default class ExcludeCommand implements BaseCommand {
         const action = interactionName as GroupAction;
         const enteredGroupNames = Object.values(interactionOptions);
 
-        let matchedGroups: Array<MatchedArtist>;
-        let unmatchedGroups: Array<string>;
-        if (enteredGroupNames.length > 0) {
-            matchedGroups = getMatchedArtists(enteredGroupNames);
-            const matchedGroupNames = matchedGroups.map((x) => x.name);
-            unmatchedGroups = enteredGroupNames.filter(
-                (x) => !matchedGroupNames.includes(x)
-            );
-        }
+        const { matchedGroups, unmatchedGroups } =
+            getMatchedArtists(enteredGroupNames);
 
         if (action === GroupAction.ADD) {
             await AddCommand.updateOption(
