@@ -8,7 +8,7 @@ import {
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { getMatchingGroupNames } from "../../helpers/game_utils";
+import { getMatchingGroupNames, getSimilarGroupNames } from "../../helpers/game_utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
@@ -19,11 +19,12 @@ import Session from "../../structures/session";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
-import LocaleType from "src/enums/locale_type";
-import { getOrdinalNum } from "src/helpers/utils";
-import MatchedArtist from "src/interfaces/matched_artist";
+import LocaleType from "../../enums/locale_type";
+import { getOrdinalNum } from "../../helpers/utils";
+import MatchedArtist from "../../interfaces/matched_artist";
 import AddCommand, { AddType } from "./add";
 import RemoveCommand, { RemoveType } from "./remove";
+import State from "../../state";
 
 const logger = new IPCLogger("includes");
 
@@ -127,58 +128,11 @@ export default class IncludeCommand implements BaseCommand {
 
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
-        );
-
         if (parsedMessage.components.length === 0) {
-            await guildPreference.reset(GameOption.INCLUDE);
-            await sendOptionsMessage(
-                Session.getSession(message.guildID),
+            await IncludeCommand.updateOption(
                 MessageContext.fromMessage(message),
-                guildPreference,
-                [{ option: GameOption.INCLUDE, reset: true }]
+                GroupAction.RESET
             );
-            logger.info(`${getDebugLogHeader(message)} | Includes reset.`);
-            return;
-        }
-
-        let includeWarning = "";
-        if (parsedMessage.components.length > 1) {
-            if (["add", "remove"].includes(parsedMessage.components[0])) {
-                includeWarning = LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "misc.warning.addRemoveOrdering.footer",
-                    {
-                        addOrRemove: `${process.env.BOT_PREFIX}${parsedMessage.components[0]}`,
-                        command: "include",
-                    }
-                );
-            }
-        }
-
-        if (guildPreference.isGroupsMode()) {
-            logger.warn(
-                `${getDebugLogHeader(
-                    message
-                )} | Game option conflict between include and groups.`
-            );
-
-            sendErrorMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "misc.failure.gameOptionConflict.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "misc.failure.gameOptionConflict.description",
-                    {
-                        optionOne: "`groups`",
-                        optionTwo: "`include`",
-                        optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
-                    }
-                ),
-            });
             return;
         }
 
@@ -190,62 +144,170 @@ export default class IncludeCommand implements BaseCommand {
             groupNames
         );
 
+        await IncludeCommand.updateOption(
+            MessageContext.fromMessage(message),
+            GroupAction.SET,
+            matchedGroups,
+            unmatchedGroups
+        );
+    };
+
+    static async updateOption(
+        messageContext: MessageContext,
+        action: GroupAction,
+        matchedGroups?: MatchedArtist[],
+        unmatchedGroups?: string[],
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID
+        );
+
+        const reset = action === GroupAction.RESET;
+        if (reset) {
+            await guildPreference.reset(GameOption.INCLUDE);
+            logger.info(`${getDebugLogHeader(messageContext)} | Include reset.`);
+            await sendOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.INCLUDE, reset: true }],
+                null,
+                null,
+                null,
+                interaction
+            );
+
+            return;
+        }
+
+        let includeWarning = "";
         if (unmatchedGroups.length) {
             logger.info(
                 `${getDebugLogHeader(
-                    message
-                )} | Attempted to set unknown includes. includes =  ${unmatchedGroups.join(
+                    messageContext
+                )} | Attempted to set unknown include. include = ${unmatchedGroups.join(
                     ", "
                 )}`
             );
 
-            await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "misc.failure.unrecognizedGroups.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
+            if (["add", "remove"].includes(unmatchedGroups[0])) {
+                includeWarning = LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "misc.warning.addRemoveOrdering.footer",
+                    {
+                        addOrRemove: `${process.env.BOT_PREFIX}${unmatchedGroups[0]}`,
+                        command: "include",
+                    }
+                );
+            }
+
+            let suggestionsText: string = null;
+            if (unmatchedGroups.length === 1) {
+                const suggestions = await getSimilarGroupNames(
+                    unmatchedGroups[0],
+                    State.getGuildLocale(messageContext.guildID)
+                );
+
+                if (suggestions.length > 0) {
+                    suggestionsText = LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "misc.failure.unrecognizedGroups.didYouMean",
+                        {
+                            suggestions: suggestions.join("\n"),
+                        }
+                    );
+                }
+            }
+
+            logger.info(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Attempted to set unknown include. include = ${unmatchedGroups.join(
+                    ", "
+                )}`
+            );
+
+            const descriptionText = LocalizationManager.localizer.translate(
+                    messageContext.guildID,
                     "misc.failure.unrecognizedGroups.description",
                     {
                         matchedGroupsAction:
                             LocalizationManager.localizer.translate(
-                                message.guildID,
+                                messageContext.guildID,
                                 "command.include.failure.unrecognizedGroups.included"
                             ),
                         helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         unmatchedGroups: unmatchedGroups.join(", "),
                         solution: LocalizationManager.localizer.translate(
-                            message.guildID,
+                            messageContext.guildID,
                             "misc.failure.unrecognizedGroups.solution",
                             {
                                 command: `\`${process.env.BOT_PREFIX}add include\``,
                             }
                         ),
                     }
+                );
+
+            await sendErrorMessage(messageContext, {
+                title: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "misc.failure.unrecognizedGroups.title"
                 ),
+                description: `${descriptionText}\n\n${suggestionsText || ""}`,
                 footerText: includeWarning,
             });
         }
+
+        if (guildPreference.isGroupsMode()) {
+            logger.warn(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Game option conflict between include and groups.`
+            );
+
+            sendErrorMessage(messageContext, {
+                title: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "misc.failure.gameOptionConflict.title"
+                ),
+                description: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "misc.failure.gameOptionConflict.description",
+                    {
+                        optionOne: "`groups`",
+                        optionTwo: "`include`",
+                        optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
+                    }
+                ),
+            }, interaction);
+
+            return;
+        }
+
 
         if (matchedGroups.length === 0) {
             return;
         }
 
         await guildPreference.setIncludes(matchedGroups);
-        await sendOptionsMessage(
-            Session.getSession(message.guildID),
-            MessageContext.fromMessage(message),
-            guildPreference,
-            [{ option: GameOption.INCLUDE, reset: false }]
-        );
-
         logger.info(
             `${getDebugLogHeader(
-                message
-            )} | Includes set to ${guildPreference.getDisplayedIncludesGroupNames()}`
+                messageContext
+            )} | Include set to ${guildPreference.getDisplayedIncludesGroupNames()}`
         );
-    };
+
+        await sendOptionsMessage(
+            Session.getSession(messageContext.guildID),
+            messageContext,
+            guildPreference,
+            [{ option: GameOption.INCLUDE, reset: false }],
+            null,
+            null,
+            null,
+            interaction
+        );
+    }
 
     /**
      * @param interaction - The interaction
@@ -255,17 +317,18 @@ export default class IncludeCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        let groups: Array<MatchedArtist>;
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
         const action = interactionName as GroupAction;
         const enteredGroupNames = Object.values(interactionOptions);
 
-        if (enteredGroupNames.length === 0) {
-            groups = null;
-        } else {
-            groups = getMatchedArtists(enteredGroupNames);
+        let matchedGroups: Array<MatchedArtist>;
+        let unmatchedGroups: Array<string>;
+        if (enteredGroupNames.length > 0) {
+            matchedGroups = getMatchedArtists(enteredGroupNames);
+            const matchedGroupNames = matchedGroups.map((x) => x.name);
+            unmatchedGroups = enteredGroupNames.filter((x) => !matchedGroupNames.includes(x));
         }
 
         if (action === GroupAction.ADD) {
@@ -286,7 +349,8 @@ export default class IncludeCommand implements BaseCommand {
             await IncludeCommand.updateOption(
                 messageContext,
                 action,
-                groups,
+                matchedGroups,
+                unmatchedGroups,
                 interaction
             );
         }

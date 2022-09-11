@@ -254,7 +254,7 @@ export default class AddCommand implements BaseCommand {
                     (x) => !intersection.has(x.name)
                 );
                 if (intersection.size > 0) {
-                    sendErrorMessage(
+                    await sendErrorMessage(
                         messageContext,
                         {
                             title: LocalizationManager.localizer.translate(
@@ -281,7 +281,7 @@ export default class AddCommand implements BaseCommand {
                                     }
                                 ),
                         },
-                        interaction
+                        matchedGroups.length === 0 ? interaction : undefined
                     );
                 }
 
@@ -311,6 +311,32 @@ export default class AddCommand implements BaseCommand {
 
             case AddType.INCLUDE:
             case AddType.INCLUDES:
+                if (guildPreference.isGroupsMode()) {
+                    logger.warn(
+                        `${getDebugLogHeader(
+                            messageContext
+                        )} | Game option conflict between include and groups.`
+                    );
+
+                    sendErrorMessage(messageContext, {
+                        title: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "misc.failure.gameOptionConflict.title"
+                        ),
+                        description: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "misc.failure.gameOptionConflict.description",
+                            {
+                                optionOne: "`groups`",
+                                optionTwo: "`include`",
+                                optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
+                            }
+                        ),
+                    }, interaction);
+
+                    return;
+                }
+
                 await guildPreference.setIncludes(matchedGroups);
                 await sendOptionsMessage(
                     Session.getSession(messageContext.guildID),
@@ -340,7 +366,7 @@ export default class AddCommand implements BaseCommand {
                     (x) => !intersection.has(x.name)
                 );
                 if (intersection.size > 0) {
-                    sendErrorMessage(
+                    await sendErrorMessage(
                         messageContext,
                         {
                             title: LocalizationManager.localizer.translate(
@@ -357,12 +383,17 @@ export default class AddCommand implements BaseCommand {
                                         groupsList: [...intersection]
                                             .filter((x) => !x.includes("+"))
                                             .join(", "),
-                                        solutionPartOne: `\`${process.env.BOT_PREFIX}remove groups\``,
-                                        solutionPartTwo: `\`${process.env.BOT_PREFIX}add exclude\``,
+                                        solutionStepOne: `\`${process.env.BOT_PREFIX}remove groups\``,
+                                        solutionStepTwo: `\`${process.env.BOT_PREFIX}add exclude\``,
+                                        allowOrPrevent:
+                                            LocalizationManager.localizer.translate(
+                                                messageContext.guildID,
+                                                "misc.failure.groupsExcludeConflict.prevent"
+                                            ),
                                     }
                                 ),
                         },
-                        interaction
+                        matchedGroups.length === 0 ? interaction : undefined
                     );
                 }
 

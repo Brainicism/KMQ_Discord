@@ -167,6 +167,28 @@ export default class GroupsCommand implements BaseCommand {
         unmatchedGroups?: string[],
         interaction?: Eris.CommandInteraction
     ): Promise<void> {
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID
+        );
+
+        const reset = action === GroupAction.RESET;
+        if (reset) {
+            await guildPreference.reset(GameOption.GROUPS);
+            logger.info(`${getDebugLogHeader(messageContext)} | Groups reset.`);
+            await sendOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.GROUPS, reset: true }],
+                null,
+                null,
+                null,
+                interaction
+            );
+
+            return;
+        }
+
         let groupsWarning = "";
         if (unmatchedGroups.length) {
             logger.info(
@@ -237,10 +259,6 @@ export default class GroupsCommand implements BaseCommand {
             });
         }
 
-        const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
-        );
-
         if (guildPreference.isExcludesMode()) {
             const intersection = setIntersection(
                 matchedGroups.map((x) => x.name),
@@ -274,7 +292,7 @@ export default class GroupsCommand implements BaseCommand {
                                 ),
                         }
                     ),
-                });
+                }, interaction);
 
                 return;
             }
@@ -284,24 +302,18 @@ export default class GroupsCommand implements BaseCommand {
             return;
         }
 
-        const reset = action === GroupAction.RESET;
-        if (reset) {
-            await guildPreference.reset(GameOption.GROUPS);
-            logger.info(`${getDebugLogHeader(messageContext)} | Groups reset.`);
-        } else {
-            await guildPreference.setGroups(matchedGroups);
-            logger.info(
-                `${getDebugLogHeader(
-                    messageContext
-                )} | Groups set to ${guildPreference.getDisplayedGroupNames()}`
-            );
-        }
+        await guildPreference.setGroups(matchedGroups);
+        logger.info(
+            `${getDebugLogHeader(
+                messageContext
+            )} | Groups set to ${guildPreference.getDisplayedGroupNames()}`
+        );
 
         await sendOptionsMessage(
             Session.getSession(messageContext.guildID),
             messageContext,
             guildPreference,
-            [{ option: GameOption.GROUPS, reset }],
+            [{ option: GameOption.GROUPS, reset: false }],
             null,
             null,
             null,
@@ -325,9 +337,7 @@ export default class GroupsCommand implements BaseCommand {
 
         let matchedGroups: Array<MatchedArtist>;
         let unmatchedGroups: Array<string>;
-        if (enteredGroupNames.length === 0) {
-            matchedGroups = null;
-        } else {
+        if (enteredGroupNames.length > 0) {
             matchedGroups = getMatchedArtists(enteredGroupNames);
             const matchedGroupNames = matchedGroups.map((x) => x.name);
             unmatchedGroups = enteredGroupNames.filter((x) => !matchedGroupNames.includes(x));

@@ -8,7 +8,7 @@ import {
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { getMatchingGroupNames } from "../../helpers/game_utils";
+import { getMatchingGroupNames, getSimilarGroupNames } from "../../helpers/game_utils";
 import { getOrdinalNum, setIntersection } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
@@ -25,6 +25,7 @@ import MatchedArtist from "../../interfaces/matched_artist";
 import AddCommand, { AddType } from "./add";
 import RemoveCommand, { RemoveType } from "./remove";
 import GroupsCommand from "./groups";
+import State from "../../state";
 
 const logger = new IPCLogger("excludes");
 
@@ -127,77 +128,180 @@ export default class ExcludeCommand implements BaseCommand {
     ];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
-        );
-
         if (parsedMessage.components.length === 0) {
-            await guildPreference.reset(GameOption.EXCLUDE);
-            await sendOptionsMessage(
-                Session.getSession(message.guildID),
+            await ExcludeCommand.updateOption(
                 MessageContext.fromMessage(message),
-                guildPreference,
-                [{ option: GameOption.EXCLUDE, reset: true }]
+                GroupAction.RESET
             );
-            logger.info(`${getDebugLogHeader(message)} | Excludes reset.`);
             return;
-        }
-
-        let excludeWarning = "";
-        if (parsedMessage.components.length > 1) {
-            if (["add", "remove"].includes(parsedMessage.components[0])) {
-                excludeWarning = LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "misc.warning.addRemoveOrdering.footer",
-                    {
-                        addOrRemove: `${process.env.BOT_PREFIX}${parsedMessage.components[0]}`,
-                        command: "exclude",
-                    }
-                );
-            }
         }
 
         const groupNames = parsedMessage.argument
             .split(",")
             .map((groupName) => groupName.trim());
 
-        const groups = await getMatchingGroupNames(groupNames);
-        let { matchedGroups } = groups;
-        const { unmatchedGroups } = groups;
+        const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames(
+            groupNames
+        );
+
+        await ExcludeCommand.updateOption(
+            MessageContext.fromMessage(message),
+            GroupAction.SET,
+            matchedGroups,
+            unmatchedGroups
+        );
+    };
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
+
+        const action = interactionName as GroupAction;
+        const enteredGroupNames = Object.values(interactionOptions);
+
+        let matchedGroups: Array<MatchedArtist>;
+        let unmatchedGroups: Array<string>;
+        if (enteredGroupNames.length > 0) {
+            matchedGroups = getMatchedArtists(enteredGroupNames);
+            const matchedGroupNames = matchedGroups.map((x) => x.name);
+            unmatchedGroups = enteredGroupNames.filter((x) => !matchedGroupNames.includes(x));
+        }
+
+        if (action === GroupAction.ADD) {
+            await AddCommand.updateOption(
+                messageContext,
+                AddType.EXCLUDE,
+                enteredGroupNames,
+                interaction
+            );
+        } else if (action === GroupAction.REMOVE) {
+            await RemoveCommand.updateOption(
+                messageContext,
+                RemoveType.EXCLUDE,
+                enteredGroupNames,
+                interaction
+            );
+        } else {
+            await ExcludeCommand.updateOption(
+                messageContext,
+                action,
+                matchedGroups,
+                unmatchedGroups,
+                interaction
+            );
+        }
+    }
+
+    static async updateOption(
+        messageContext: MessageContext,
+        action: GroupAction,
+        matchedGroups?: MatchedArtist[],
+        unmatchedGroups?: string[],
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID
+        );
+
+        const reset = action === GroupAction.RESET;
+        if (reset) {
+            await guildPreference.reset(GameOption.EXCLUDE);
+            logger.info(`${getDebugLogHeader(messageContext)} | Exclude reset.`);
+            await sendOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.EXCLUDE, reset: true }],
+                null,
+                null,
+                null,
+                interaction
+            );
+
+            return;
+        }
+
+        let excludeWarning = "";
         if (unmatchedGroups.length) {
             logger.info(
                 `${getDebugLogHeader(
-                    message
-                )} | Attempted to set unknown excludes. excludes =  ${unmatchedGroups.join(
+                    messageContext
+                )} | Attempted to set unknown exclude. exclude = ${unmatchedGroups.join(
                     ", "
                 )}`
             );
 
-            await sendErrorMessage(MessageContext.fromMessage(message), {
+            if (["add", "remove"].includes(unmatchedGroups[0])) {
+                excludeWarning = LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "misc.warning.addRemoveOrdering.footer",
+                    {
+                        addOrRemove: `${process.env.BOT_PREFIX}${unmatchedGroups[0]}`,
+                        command: "exclude",
+                    }
+                );
+            }
+
+            let suggestionsText: string = null;
+            if (unmatchedGroups.length === 1) {
+                const suggestions = await getSimilarGroupNames(
+                    unmatchedGroups[0],
+                    State.getGuildLocale(messageContext.guildID)
+                );
+
+                if (suggestions.length > 0) {
+                    suggestionsText = LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "misc.failure.unrecognizedGroups.didYouMean",
+                        {
+                            suggestions: suggestions.join("\n"),
+                        }
+                    );
+                }
+            }
+
+            logger.info(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Attempted to set unknown exclude. exclude = ${unmatchedGroups.join(
+                    ", "
+                )}`
+            );
+
+            const descriptionText = LocalizationManager.localizer.translate(
+                messageContext.guildID,
+                "misc.failure.unrecognizedGroups.description",
+                {
+                    matchedGroupsAction:
+                        LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "command.exclude.failure.unrecognizedGroups.excluded"
+                        ),
+                    helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
+                    unmatchedGroups: `${unmatchedGroups.join(", ")}`,
+                    solution: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "misc.failure.unrecognizedGroups.solution",
+                        {
+                            command: `\`${process.env.BOT_PREFIX}add exclude\``,
+                        }
+                    ),
+                }
+            );
+
+            await sendErrorMessage(messageContext, {
                 title: LocalizationManager.localizer.translate(
-                    message.guildID,
+                    messageContext.guildID,
                     "misc.failure.unrecognizedGroups.title"
                 ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "misc.failure.unrecognizedGroups.description",
-                    {
-                        matchedGroupsAction:
-                            LocalizationManager.localizer.translate(
-                                message.guildID,
-                                "command.exclude.failure.unrecognizedGroups.excluded"
-                            ),
-                        helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
-                        unmatchedGroups: `${unmatchedGroups.join(", ")}`,
-                        solution: LocalizationManager.localizer.translate(
-                            message.guildID,
-                            "misc.failure.unrecognizedGroups.solution",
-                            {
-                                command: `\`${process.env.BOT_PREFIX}add exclude\``,
-                            }
-                        ),
-                    }
-                ),
+                description: `${descriptionText}\n\n${suggestionsText || ""}`,
                 footerText: excludeWarning,
             });
         }
@@ -211,14 +315,15 @@ export default class ExcludeCommand implements BaseCommand {
             matchedGroups = matchedGroups.filter(
                 (x) => !intersection.has(x.name)
             );
+
             if (intersection.size > 0) {
-                sendErrorMessage(MessageContext.fromMessage(message), {
+                sendErrorMessage(messageContext, {
                     title: LocalizationManager.localizer.translate(
-                        message.guildID,
+                        messageContext.guildID,
                         "misc.failure.groupsExcludeConflict.title"
                     ),
                     description: LocalizationManager.localizer.translate(
-                        message.guildID,
+                        messageContext.guildID,
                         "misc.failure.groupsExcludeConflict.description",
                         {
                             conflictingOptionOne: "`exclude`",
@@ -230,77 +335,38 @@ export default class ExcludeCommand implements BaseCommand {
                             solutionStepTwo: `\`${process.env.BOT_PREFIX}exclude\``,
                             allowOrPrevent:
                                 LocalizationManager.localizer.translate(
-                                    message.guildID,
+                                    messageContext.guildID,
                                     "misc.failure.groupsExcludeConflict.prevent"
                                 ),
                         }
                     ),
-                });
+                }, interaction);
             }
         }
+
+
 
         if (matchedGroups.length === 0) {
             return;
         }
 
         await guildPreference.setExcludes(matchedGroups);
-        await sendOptionsMessage(
-            Session.getSession(message.guildID),
-            MessageContext.fromMessage(message),
-            guildPreference,
-            [{ option: GameOption.EXCLUDE, reset: false }]
-        );
-
         logger.info(
             `${getDebugLogHeader(
-                message
-            )} | Excludes set to ${guildPreference.getDisplayedExcludesGroupNames()}`
+                messageContext
+            )} | Exclude set to ${guildPreference.getDisplayedExcludesGroupNames()}`
         );
-    };
 
-    /**
-     * @param interaction - The interaction
-     * @param messageContext - The message context
-     */
-    async processChatInputInteraction(
-        interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
-    ): Promise<void> {
-        let groups: Array<MatchedArtist>;
-        const { interactionName, interactionOptions } =
-            getInteractionValue(interaction);
-
-        const action = interactionName as GroupAction;
-        const enteredGroupNames = Object.values(interactionOptions);
-
-        if (enteredGroupNames.length === 0) {
-            groups = null;
-        } else {
-            groups = getMatchedArtists(enteredGroupNames);
-        }
-
-        if (action === GroupAction.ADD) {
-            await AddCommand.updateOption(
-                messageContext,
-                AddType.GROUPS,
-                enteredGroupNames,
-                interaction
-            );
-        } else if (action === GroupAction.REMOVE) {
-            await RemoveCommand.updateOption(
-                messageContext,
-                RemoveType.GROUPS,
-                enteredGroupNames,
-                interaction
-            );
-        } else {
-            await ExcludeCommand.updateOption(
-                messageContext,
-                action,
-                groups,
-                interaction
-            );
-        }
+        await sendOptionsMessage(
+            Session.getSession(messageContext.guildID),
+            messageContext,
+            guildPreference,
+            [{ option: GameOption.EXCLUDE, reset: false }],
+            null,
+            null,
+            null,
+            interaction
+        );
     }
 
     /**

@@ -16,6 +16,8 @@ import PresetCommand from "../../commands/game_commands/preset";
 import ProfileCommand from "../../commands/game_commands/profile";
 import Session from "../../structures/session";
 import State from "../../state";
+import IncludeCommand from "../../commands/game_options/include";
+import ExcludeCommand from "../../commands/game_options/exclude";
 
 const logger = new IPCLogger("interactionCreate");
 
@@ -25,6 +27,8 @@ const AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS: {
     ) => Promise<void>;
 } = {
     groups: GroupsCommand.processAutocompleteInteraction,
+    include: IncludeCommand.processAutocompleteInteraction,
+    exclude: ExcludeCommand.processAutocompleteInteraction,
     lookup: LookupCommand.processAutocompleteInteraction,
     preset: PresetCommand.processAutocompleteInteraction,
 };
