@@ -1,5 +1,5 @@
 import { IPCLogger } from "../../logger";
-import { KmqImages } from "../../constants";
+import { KmqImages, MAX_AUTOCOMPLETE_FIELDS } from "../../constants";
 import { chunkArray } from "../../helpers/utils";
 import {
     getDebugLogHeader,
@@ -7,6 +7,7 @@ import {
     sendErrorMessage,
     sendInfoMessage,
     sendPaginationedEmbed,
+    tryAutocompleteInteractionAcknowledge,
 } from "../../helpers/discord_utils";
 import Eris from "eris";
 import KmqClient from "../../kmq_client";
@@ -72,6 +73,7 @@ export default class HelpCommand implements BaseCommand {
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: false,
+                    autocomplete: true,
                 },
             ],
         },
@@ -333,5 +335,40 @@ export default class HelpCommand implements BaseCommand {
             interaction,
             interactionOptions["action"]
         );
+    }
+
+    /**
+     * Handles showing suggested command names
+     * @param interaction - The interaction with intermediate typing state
+     */
+    static async processAutocompleteInteraction(
+        interaction: Eris.AutocompleteInteraction
+    ): Promise<void> {
+        const interactionData = getInteractionValue(interaction);
+        const focusedKey = interactionData.focusedKey;
+        const focusedVal = interactionData.interactionOptions[focusedKey];
+        const lowercaseUserInput = focusedVal.toLowerCase();
+        const commands = Object.values(await KmqClient.getCommandFiles(false))
+            .filter((x) => x.help)
+            .map((x) => x.help(interaction.guildID))
+            .filter((x) => !excludedCommands.includes(x.name))
+            .sort((a, b) => b.priority - a.priority);
+
+        if (!lowercaseUserInput) {
+            await tryAutocompleteInteractionAcknowledge(
+                interaction,
+                commands
+                    .map((x) => ({ name: x.name, value: x.name }))
+                    .slice(0, MAX_AUTOCOMPLETE_FIELDS)
+            );
+        } else {
+            await tryAutocompleteInteractionAcknowledge(
+                interaction,
+                commands
+                    .filter((x) => x.name.startsWith(lowercaseUserInput))
+                    .map((x) => ({ name: x.name, value: x.name }))
+                    .slice(0, MAX_AUTOCOMPLETE_FIELDS)
+            );
+        }
     }
 }
