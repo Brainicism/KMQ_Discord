@@ -8,6 +8,7 @@ import {
 import { getUserTag, measureExecutionTime } from "../../helpers/utils";
 import Eris from "eris";
 import GroupsCommand from "../../commands/game_options/groups";
+import HelpCommand from "../../commands/game_commands/help";
 import KmqMember from "../../structures/kmq_member";
 import LocalizationManager from "../../helpers/localization_manager";
 import LookupCommand from "../../commands/game_commands/lookup";
@@ -27,6 +28,7 @@ const AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS: {
     groups: GroupsCommand.processAutocompleteInteraction,
     lookup: LookupCommand.processAutocompleteInteraction,
     preset: PresetCommand.processAutocompleteInteraction,
+    help: HelpCommand.processAutocompleteInteraction,
 };
 
 /**
