@@ -123,7 +123,7 @@ export default class GroupsCommand implements BaseCommand {
                               type: Eris.Constants.ApplicationCommandOptionTypes
                                   .STRING,
                               autocomplete: true,
-                              required: false,
+                              required: x === 0,
                           })),
             })),
         },
@@ -192,12 +192,19 @@ export default class GroupsCommand implements BaseCommand {
                 )}`
             );
 
-            if (["add", "remove"].includes(unmatchedGroups[0])) {
+            if (
+                unmatchedGroups[0].startsWith("add") ||
+                unmatchedGroups[0].startsWith("remove")
+            ) {
+                const misplacedPrefix = unmatchedGroups[0].startsWith("add")
+                    ? "add"
+                    : "remove";
+
                 groupsWarning = LocalizationManager.localizer.translate(
                     messageContext.guildID,
                     "misc.warning.addRemoveOrdering.footer",
                     {
-                        addOrRemove: `${process.env.BOT_PREFIX}${unmatchedGroups[0]}`,
+                        addOrRemove: `${process.env.BOT_PREFIX}${misplacedPrefix}`,
                         command: "groups",
                     }
                 );
@@ -230,13 +237,17 @@ export default class GroupsCommand implements BaseCommand {
                             messageContext.guildID,
                             "misc.failure.unrecognizedGroups.added"
                         ),
-                    helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
+                    helpGroups: interaction
+                        ? "`/help groups`"
+                        : `\`${process.env.BOT_PREFIX}help groups\``,
                     unmatchedGroups: unmatchedGroups.join(", "),
                     solution: LocalizationManager.localizer.translate(
                         messageContext.guildID,
                         "misc.failure.unrecognizedGroups.solution",
                         {
-                            command: `\`${process.env.BOT_PREFIX}add groups\``,
+                            command: interaction
+                                ? "`/groups add`"
+                                : `\`${process.env.BOT_PREFIX}add groups\``,
                         }
                     ),
                 }
@@ -278,8 +289,12 @@ export default class GroupsCommand implements BaseCommand {
                                 groupsList: [...intersection]
                                     .filter((x) => !x.includes("+"))
                                     .join(", "),
-                                solutionStepOne: `\`${process.env.BOT_PREFIX}remove exclude\``,
-                                solutionStepTwo: `\`${process.env.BOT_PREFIX}groups\``,
+                                solutionStepOne: interaction
+                                    ? "`/exclude remove`"
+                                    : `\`${process.env.BOT_PREFIX}remove exclude\``,
+                                solutionStepTwo: interaction
+                                    ? "`/groups`"
+                                    : `\`${process.env.BOT_PREFIX}groups\``,
                                 allowOrPrevent:
                                     LocalizationManager.localizer.translate(
                                         messageContext.guildID,

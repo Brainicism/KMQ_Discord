@@ -96,17 +96,17 @@ export default class IncludeCommand implements BaseCommand {
 
     slashCommands = (): Array<Eris.ApplicationCommandStructure> => [
         {
-            name: "groups",
+            name: "include",
             description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
-                "command.groups.interaction.description"
+                "command.include.interaction.description"
             ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: Object.values(GroupAction).map((action) => ({
                 name: action,
                 description: LocalizationManager.localizer.translate(
                     LocaleType.EN,
-                    `command.groups.interaction.${action}.description`
+                    `command.include.interaction.${action}.description`
                 ),
                 type: Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
                 options:
@@ -117,13 +117,13 @@ export default class IncludeCommand implements BaseCommand {
                               description:
                                   LocalizationManager.localizer.translate(
                                       LocaleType.EN,
-                                      `command.groups.interaction.${action}.perGroupDescription`,
+                                      `command.include.interaction.${action}.perGroupDescription`,
                                       { ordinalNum: getOrdinalNum(x + 1) }
                                   ),
                               type: Eris.Constants.ApplicationCommandOptionTypes
                                   .STRING,
                               autocomplete: true,
-                              required: false,
+                              required: x === 0,
                           })),
             })),
         },
@@ -196,12 +196,19 @@ export default class IncludeCommand implements BaseCommand {
                 )}`
             );
 
-            if (["add", "remove"].includes(unmatchedGroups[0])) {
+            if (
+                unmatchedGroups[0].startsWith("add") ||
+                unmatchedGroups[0].startsWith("remove")
+            ) {
+                const misplacedPrefix = unmatchedGroups[0].startsWith("add")
+                    ? "add"
+                    : "remove";
+
                 includeWarning = LocalizationManager.localizer.translate(
                     messageContext.guildID,
                     "misc.warning.addRemoveOrdering.footer",
                     {
-                        addOrRemove: `${process.env.BOT_PREFIX}${unmatchedGroups[0]}`,
+                        addOrRemove: `${process.env.BOT_PREFIX}${misplacedPrefix}`,
                         command: "include",
                     }
                 );
@@ -248,7 +255,9 @@ export default class IncludeCommand implements BaseCommand {
                         messageContext.guildID,
                         "misc.failure.unrecognizedGroups.solution",
                         {
-                            command: `\`${process.env.BOT_PREFIX}add include\``,
+                            command: interaction
+                                ? "`/include add`"
+                                : `\`${process.env.BOT_PREFIX}add include\``,
                         }
                     ),
                 }
@@ -284,7 +293,9 @@ export default class IncludeCommand implements BaseCommand {
                         {
                             optionOne: "`groups`",
                             optionTwo: "`include`",
-                            optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
+                            optionOneCommand: interaction
+                                ? "`/groups`"
+                                : `\`${process.env.BOT_PREFIX}groups\``,
                         }
                     ),
                 },

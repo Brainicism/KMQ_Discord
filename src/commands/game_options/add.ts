@@ -182,7 +182,7 @@ export default class AddCommand implements BaseCommand {
             logger.info(
                 `${getDebugLogHeader(
                     messageContext
-                )} | Attempted to set unknown groups. groups =  ${unmatchedGroups.join(
+                )} | Attempted to set unknown groups. groups = ${unmatchedGroups.join(
                     ", "
                 )}`
             );
@@ -214,7 +214,9 @@ export default class AddCommand implements BaseCommand {
                             messageContext.guildID,
                             "misc.failure.unrecognizedGroups.added"
                         ),
-                    helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
+                    helpGroups: interaction
+                        ? "`/help groups`"
+                        : `\`${process.env.BOT_PREFIX}help groups\``,
                     unmatchedGroups: unmatchedGroups.join(", "),
                     solution: "",
                 }
@@ -266,13 +268,21 @@ export default class AddCommand implements BaseCommand {
                                     messageContext.guildID,
                                     "misc.failure.groupsExcludeConflict.description",
                                     {
-                                        conflictingOptionOne: `\`${process.env.BOT_PREFIX}groups\``,
-                                        conflictingOptionTwo: `\`${process.env.BOT_PREFIX}exclude\``,
+                                        conflictingOptionOne: interaction
+                                            ? "`/groups`"
+                                            : `\`${process.env.BOT_PREFIX}groups\``,
+                                        conflictingOptionTwo: interaction
+                                            ? "`/exclude`"
+                                            : `\`${process.env.BOT_PREFIX}exclude\``,
                                         groupsList: [...intersection]
                                             .filter((x) => !x.includes("+"))
                                             .join(", "),
-                                        solutionStepOne: `\`${process.env.BOT_PREFIX}remove exclude\``,
-                                        solutionStepTwo: `\`${process.env.BOT_PREFIX}groups\``,
+                                        solutionStepOne: interaction
+                                            ? "`/exclude remove`"
+                                            : `\`${process.env.BOT_PREFIX}remove exclude\``,
+                                        solutionStepTwo: interaction
+                                            ? "`/groups add`"
+                                            : `\`${process.env.BOT_PREFIX}add groups\``,
                                         allowOrPrevent:
                                             LocalizationManager.localizer.translate(
                                                 messageContext.guildID,
@@ -332,7 +342,9 @@ export default class AddCommand implements BaseCommand {
                                     {
                                         optionOne: "`groups`",
                                         optionTwo: "`include`",
-                                        optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
+                                        optionOneCommand: interaction
+                                            ? "`/groups`"
+                                            : `\`${process.env.BOT_PREFIX}groups\``,
                                     }
                                 ),
                         },
@@ -383,13 +395,21 @@ export default class AddCommand implements BaseCommand {
                                     messageContext.guildID,
                                     "misc.failure.groupsExcludeConflict.description",
                                     {
-                                        conflictingOptionOne: `\`${process.env.BOT_PREFIX}exclude\``,
-                                        conflictingOptionTwo: `\`${process.env.BOT_PREFIX}groups\``,
+                                        conflictingOptionOne: interaction
+                                            ? "`/exclude`"
+                                            : `\`${process.env.BOT_PREFIX}exclude\``,
+                                        conflictingOptionTwo: interaction
+                                            ? "`/groups`"
+                                            : `\`${process.env.BOT_PREFIX}groups\``,
                                         groupsList: [...intersection]
                                             .filter((x) => !x.includes("+"))
                                             .join(", "),
-                                        solutionStepOne: `\`${process.env.BOT_PREFIX}remove groups\``,
-                                        solutionStepTwo: `\`${process.env.BOT_PREFIX}add exclude\``,
+                                        solutionStepOne: interaction
+                                            ? "`/groups remove`"
+                                            : `\`${process.env.BOT_PREFIX}remove groups\``,
+                                        solutionStepTwo: interaction
+                                            ? "`/exclude add`"
+                                            : `\`${process.env.BOT_PREFIX}add exclude\``,
                                         allowOrPrevent:
                                             LocalizationManager.localizer.translate(
                                                 messageContext.guildID,

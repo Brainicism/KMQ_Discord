@@ -197,7 +197,7 @@ export default class RemoveCommand implements BaseCommand {
             logger.info(
                 `${getDebugLogHeader(
                     messageContext
-                )} | Attempted to set unknown groups. groups =  ${unmatchedGroups.join(
+                )} | Attempted to set unknown groups. groups = ${unmatchedGroups.join(
                     ", "
                 )}`
             );
@@ -229,7 +229,9 @@ export default class RemoveCommand implements BaseCommand {
                             messageContext.guildID,
                             "command.remove.failure.unrecognizedGroups.removed"
                         ),
-                    helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
+                    helpGroups: interaction
+                        ? "/help groups"
+                        : `\`${process.env.BOT_PREFIX}help groups\``,
                     unmatchedGroups: unmatchedGroups.join(", "),
                     solution: "",
                 }

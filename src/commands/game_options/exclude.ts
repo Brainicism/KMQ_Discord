@@ -96,17 +96,17 @@ export default class ExcludeCommand implements BaseCommand {
 
     slashCommands = (): Array<Eris.ApplicationCommandStructure> => [
         {
-            name: "groups",
+            name: "exclude",
             description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
-                "command.groups.interaction.description"
+                "command.exclude.interaction.description"
             ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: Object.values(GroupAction).map((action) => ({
                 name: action,
                 description: LocalizationManager.localizer.translate(
                     LocaleType.EN,
-                    `command.groups.interaction.${action}.description`
+                    `command.exclude.interaction.${action}.description`
                 ),
                 type: Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
                 options:
@@ -117,13 +117,13 @@ export default class ExcludeCommand implements BaseCommand {
                               description:
                                   LocalizationManager.localizer.translate(
                                       LocaleType.EN,
-                                      `command.groups.interaction.${action}.perGroupDescription`,
+                                      `command.exclude.interaction.${action}.perGroupDescription`,
                                       { ordinalNum: getOrdinalNum(x + 1) }
                                   ),
                               type: Eris.Constants.ApplicationCommandOptionTypes
                                   .STRING,
                               autocomplete: true,
-                              required: false,
+                              required: x === 0,
                           })),
             })),
         },
@@ -245,12 +245,19 @@ export default class ExcludeCommand implements BaseCommand {
                 )}`
             );
 
-            if (["add", "remove"].includes(unmatchedGroups[0])) {
+            if (
+                unmatchedGroups[0].startsWith("add") ||
+                unmatchedGroups[0].startsWith("remove")
+            ) {
+                const misplacedPrefix = unmatchedGroups[0].startsWith("add")
+                    ? "add"
+                    : "remove";
+
                 excludeWarning = LocalizationManager.localizer.translate(
                     messageContext.guildID,
                     "misc.warning.addRemoveOrdering.footer",
                     {
-                        addOrRemove: `${process.env.BOT_PREFIX}${unmatchedGroups[0]}`,
+                        addOrRemove: `${process.env.BOT_PREFIX}${misplacedPrefix}`,
                         command: "exclude",
                     }
                 );
@@ -291,13 +298,17 @@ export default class ExcludeCommand implements BaseCommand {
                             messageContext.guildID,
                             "command.exclude.failure.unrecognizedGroups.excluded"
                         ),
-                    helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
+                    helpGroups: interaction
+                        ? "`/help groups`"
+                        : `\`${process.env.BOT_PREFIX}help groups\``,
                     unmatchedGroups: `${unmatchedGroups.join(", ")}`,
                     solution: LocalizationManager.localizer.translate(
                         messageContext.guildID,
                         "misc.failure.unrecognizedGroups.solution",
                         {
-                            command: `\`${process.env.BOT_PREFIX}add exclude\``,
+                            command: interaction
+                                ? "`/exclude add`"
+                                : `\`${process.env.BOT_PREFIX}add exclude\``,
                         }
                     ),
                 }
@@ -340,8 +351,12 @@ export default class ExcludeCommand implements BaseCommand {
                                 groupsList: [...intersection]
                                     .filter((x) => !x.includes("+"))
                                     .join(", "),
-                                solutionStepOne: `\`${process.env.BOT_PREFIX}remove groups\``,
-                                solutionStepTwo: `\`${process.env.BOT_PREFIX}exclude\``,
+                                solutionStepOne: interaction
+                                    ? "`/groups remove`"
+                                    : `\`${process.env.BOT_PREFIX}remove groups\``,
+                                solutionStepTwo: interaction
+                                    ? "`/exclude`"
+                                    : `\`${process.env.BOT_PREFIX}exclude\``,
                                 allowOrPrevent:
                                     LocalizationManager.localizer.translate(
                                         messageContext.guildID,
