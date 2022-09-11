@@ -9,9 +9,12 @@ import { IPCLogger } from "../../logger";
 import {
     activeBonusUsers,
     areUsersPremium,
+    isFirstGameOfDay,
     isPowerHour,
     isPremiumRequest,
+    isUserPremium,
 } from "../../helpers/game_utils";
+import { bold, getMention, isWeekend } from "../../helpers/utils";
 import {
     fetchChannel,
     generateOptionsMessage,
@@ -25,7 +28,6 @@ import {
     tryCreateInteractionSuccessAcknowledgement,
     voicePermissionsCheck,
 } from "../../helpers/discord_utils";
-import { getMention, isWeekend } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameSession from "../../structures/game_session";
@@ -35,6 +37,7 @@ import KmqMember from "../../structures/kmq_member";
 import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
+import Player from "../../structures/player";
 import Session from "../../structures/session";
 import State from "../../state";
 import dbContext from "../../database_context";
@@ -316,6 +319,29 @@ export default class PlayCommand implements BaseCommand {
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .SUB_COMMAND,
                         },
+                        {
+                            name: "join",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.play.interaction.teams_join"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .SUB_COMMAND,
+                            options: [
+                                {
+                                    name: "team_name",
+                                    description:
+                                        LocalizationManager.localizer.translate(
+                                            LocaleType.EN,
+                                            "command.play.interaction.teams_join"
+                                        ),
+                                    type: Eris.Constants
+                                        .ApplicationCommandOptionTypes.STRING,
+                                    required: true,
+                                },
+                            ],
+                        },
                     ],
                 },
             ],
@@ -330,9 +356,14 @@ export default class PlayCommand implements BaseCommand {
             getInteractionValue(interaction);
 
         const gameType = interactionKey.split(".")[0] as GameType;
-
         if (interactionKey === "teams.begin") {
             await PlayCommand.beginTeamsGame(messageContext);
+        } else if (interactionKey.startsWith("teams.join")) {
+            await PlayCommand.joinTeamsGame(
+                messageContext,
+                interactionOptions["team_name"],
+                interaction
+            );
         } else {
             await PlayCommand.startGame(
                 messageContext,
@@ -418,6 +449,235 @@ export default class PlayCommand implements BaseCommand {
                 `${getDebugLogHeader(
                     messageContext
                 )} | Teams game session starting)`
+            );
+        }
+    }
+
+    static async joinTeamsGame(
+        messageContext: MessageContext,
+        teamName: string,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
+        const gameSession = Session.getSession(
+            messageContext.guildID
+        ) as GameSession;
+
+        if (!gameSession || gameSession.gameType !== GameType.TEAMS) {
+            sendErrorMessage(
+                messageContext,
+                {
+                    title: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "misc.failure.game.noneInProgress.title"
+                    ),
+                    description: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "misc.failure.game.noneInProgress.description"
+                    ),
+                    thumbnailUrl: KmqImages.NOT_IMPRESSED,
+                },
+                interaction
+            );
+            return;
+        }
+
+        // Don't allow emojis that aren't in this server
+        // Emojis are of the format: <(a if animated):(alphanumeric):(number)>
+        const emojis = teamName.match(/<a?:[a-zA-Z0-9]+:[0-9]+>/gm) || [];
+        for (const emoji of emojis) {
+            const emojiID = emoji
+                .match(/(?<=<a?:[a-zA-Z0-9]+:)[0-9]+(?=>)/gm)
+                .join("");
+
+            if (
+                !State.client.guilds
+                    .get(messageContext.guildID)
+                    .emojis.map((e) => e.id)
+                    .includes(emojiID)
+            ) {
+                sendErrorMessage(
+                    messageContext,
+                    {
+                        title: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "command.join.failure.joinError.invalidTeamName.title"
+                        ),
+                        description: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "command.join.failure.joinError.badEmojis.description"
+                        ),
+                    },
+                    interaction
+                );
+
+                logger.warn(
+                    `${getDebugLogHeader(
+                        messageContext
+                    )} | Team name contains unsupported characters.`
+                );
+                return;
+            }
+        }
+
+        if (teamName.length === 0) {
+            logger.info(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Team name contains unsupported characters.`
+            );
+
+            sendErrorMessage(
+                messageContext,
+                {
+                    title: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "command.join.failure.joinError.title"
+                    ),
+                    description: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "command.join.failure.joinError.invalidCharacters.description"
+                    ),
+                },
+                null
+            );
+            return;
+        }
+
+        const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
+        if (!teamScoreboard.hasTeam(teamName)) {
+            teamScoreboard.addTeam(
+                teamName,
+                Player.fromUserID(
+                    messageContext.author.id,
+                    messageContext.guildID,
+                    0,
+                    await isFirstGameOfDay(messageContext.author.id),
+                    await isUserPremium(messageContext.author.id)
+                )
+            );
+            const teamNameWithCleanEmojis = teamName.replace(
+                /(<a?)(:[a-zA-Z0-9]+:)([0-9]+>)/gm,
+                (_p1, _p2, p3) => p3
+            );
+
+            sendInfoMessage(
+                messageContext,
+                {
+                    title: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "command.join.team.new"
+                    ),
+                    description: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "command.join.team.join",
+                        {
+                            teamName: bold(teamName),
+                            mentionedUser: getMention(messageContext.author.id),
+                            joinCommand: `${process.env.BOT_PREFIX}join`,
+                            teamNameWithCleanEmojis,
+                            startGameInstructions:
+                                !gameSession.sessionInitialized
+                                    ? LocalizationManager.localizer.translate(
+                                          messageContext.guildID,
+                                          "command.join.team.startGameInstructions",
+                                          {
+                                              beginCommand: `\`${process.env.BOT_PREFIX}begin\``,
+                                          }
+                                      )
+                                    : "",
+                        }
+                    ),
+                    thumbnailUrl: KmqImages.READING_BOOK,
+                },
+                false,
+                null,
+                [],
+                interaction
+            );
+
+            logger.info(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Team '${teamName}' created.`
+            );
+        } else {
+            const team = teamScoreboard.getTeam(teamName);
+            if (team.hasPlayer(messageContext.author.id)) {
+                sendErrorMessage(
+                    messageContext,
+                    {
+                        title: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "command.join.failure.joinError.title"
+                        ),
+                        description: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "command.join.failure.joinError.alreadyInTeam.description"
+                        ),
+                    },
+                    interaction
+                );
+
+                logger.info(
+                    `${getDebugLogHeader(
+                        messageContext
+                    )} | Already joined team '${teamName}'.`
+                );
+                return;
+            }
+
+            teamScoreboard.addTeamPlayer(
+                team.id,
+                Player.fromUserID(
+                    messageContext.author.id,
+                    messageContext.guildID,
+                    0,
+                    await isFirstGameOfDay(messageContext.author.id),
+                    await isUserPremium(messageContext.author.id)
+                )
+            );
+
+            sendInfoMessage(
+                messageContext,
+                {
+                    title: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "command.join.playerJoinedTeam.title",
+                        {
+                            joiningUser: messageContext.author.tag,
+                            teamName: team.getName(),
+                        }
+                    ),
+                    description: !gameSession.sessionInitialized
+                        ? LocalizationManager.localizer.translate(
+                              messageContext.guildID,
+                              "command.join.playerJoinedTeam.beforeGameStart.description",
+                              {
+                                  beginCommand: `\`${process.env.BOT_PREFIX}begin\``,
+                              }
+                          )
+                        : LocalizationManager.localizer.translate(
+                              messageContext.guildID,
+                              "command.join.playerJoinedTeam.afterGameStart.description",
+                              {
+                                  mentionedUser: getMention(
+                                      messageContext.author.id
+                                  ),
+                                  teamName: bold(team.getName()),
+                              }
+                          ),
+                    thumbnailUrl: KmqImages.LISTENING,
+                },
+                false,
+                null,
+                [],
+                interaction
+            );
+
+            logger.info(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Successfully joined team '${team.getName()}'.`
             );
         }
     }

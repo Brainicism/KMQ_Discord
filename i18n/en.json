@@ -686,7 +686,8 @@
             },
             "interaction": {
                 "teams_begin": "Starts a 'teams' game mode of KMQ. Can only be used after '/play teams create'",
-                "teams_create": "Prepares a 'teams' game mode of KMQ for team creation."
+                "teams_create": "Prepares a 'teams' game mode of KMQ for team creation.",
+                "teams_join": "Joins a team. Can only be used after '/play teams create'"
             },
             "team": {
                 "joinTeam": {
