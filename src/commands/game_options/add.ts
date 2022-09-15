@@ -1,9 +1,10 @@
-import { GROUP_LIST_URL } from "../../constants";
+import { EMBED_ERROR_COLOR, GROUP_LIST_URL, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
+    generateOptionsMessage,
     getDebugLogHeader,
     sendErrorMessage,
-    sendOptionsMessage,
+    sendInfoMessage,
 } from "../../helpers/discord_utils";
 import {
     getMatchingGroupNames,
@@ -20,6 +21,7 @@ import Session from "../../structures/session";
 import State from "../../state";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
+import type EmbedPayload from "../../interfaces/embed_payload";
 import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("add");
@@ -147,6 +149,8 @@ export default class AddCommand implements BaseCommand {
             messageContext.guildID
         );
 
+        const embeds: Array<EmbedPayload> = [];
+
         let groupNamesString: string;
         switch (addType) {
             case AddType.GROUPS:
@@ -222,31 +226,41 @@ export default class AddCommand implements BaseCommand {
                 }
             );
 
-            await sendErrorMessage(
-                messageContext,
-                {
-                    title: LocalizationManager.localizer.translate(
-                        messageContext.guildID,
-                        "misc.failure.unrecognizedGroups.title"
-                    ),
-                    description: `${descriptionText}\n\n${
-                        suggestionsText || ""
-                    }`,
-                },
-                interaction
-            );
+            embeds.push({
+                color: EMBED_ERROR_COLOR,
+                author: messageContext.author,
+                title: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "misc.failure.unrecognizedGroups.title"
+                ),
+                description: `${descriptionText}\n\n${suggestionsText || ""}`,
+                thumbnailUrl: KmqImages.DEAD,
+            });
         }
 
         // if none of the new groups were matched
         if (unmatchedGroups.length === newGroupNames.length) {
+            if (embeds.length > 0) {
+                await sendInfoMessage(
+                    messageContext,
+                    embeds[0],
+                    false,
+                    null,
+                    embeds.slice(1),
+                    interaction
+                );
+            }
+
             return;
         }
 
+        let gameOption: GameOption;
         switch (addType) {
             case AddType.GROUPS:
             case AddType.GROUP:
             case AddType.ARTIST:
             case AddType.ARTISTS: {
+                gameOption = GameOption.GROUPS;
                 const intersection = setIntersection(
                     matchedGroups.map((x) => x.name),
                     guildPreference.getExcludesGroupNames()
@@ -256,71 +270,65 @@ export default class AddCommand implements BaseCommand {
                     (x) => !intersection.has(x.name)
                 );
                 if (intersection.size > 0) {
-                    await sendErrorMessage(
-                        messageContext,
-                        {
-                            title: LocalizationManager.localizer.translate(
-                                messageContext.guildID,
-                                "misc.failure.groupsExcludeConflict.title"
-                            ),
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    messageContext.guildID,
-                                    "misc.failure.groupsExcludeConflict.description",
-                                    {
-                                        conflictingOptionOne: interaction
-                                            ? "`/groups`"
-                                            : `\`${process.env.BOT_PREFIX}groups\``,
-                                        conflictingOptionTwo: interaction
-                                            ? "`/exclude`"
-                                            : `\`${process.env.BOT_PREFIX}exclude\``,
-                                        groupsList: [...intersection]
-                                            .filter((x) => !x.includes("+"))
-                                            .join(", "),
-                                        solutionStepOne: interaction
-                                            ? "`/exclude remove`"
-                                            : `\`${process.env.BOT_PREFIX}remove exclude\``,
-                                        solutionStepTwo: interaction
-                                            ? "`/groups add`"
-                                            : `\`${process.env.BOT_PREFIX}add groups\``,
-                                        allowOrPrevent:
-                                            LocalizationManager.localizer.translate(
-                                                messageContext.guildID,
-                                                "misc.failure.groupsExcludeConflict.allow"
-                                            ),
-                                    }
-                                ),
-                        },
-                        matchedGroups.length === 0 ? interaction : undefined
-                    );
+                    embeds.push({
+                        color: EMBED_ERROR_COLOR,
+                        author: messageContext.author,
+                        title: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "misc.failure.groupsExcludeConflict.title"
+                        ),
+                        description: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "misc.failure.groupsExcludeConflict.description",
+                            {
+                                conflictingOptionOne: interaction
+                                    ? "`/groups`"
+                                    : `\`${process.env.BOT_PREFIX}groups\``,
+                                conflictingOptionTwo: interaction
+                                    ? "`/exclude`"
+                                    : `\`${process.env.BOT_PREFIX}exclude\``,
+                                groupsList: [...intersection]
+                                    .filter((x) => !x.includes("+"))
+                                    .join(", "),
+                                solutionStepOne: interaction
+                                    ? "`/exclude remove`"
+                                    : `\`${process.env.BOT_PREFIX}remove exclude\``,
+                                solutionStepTwo: interaction
+                                    ? "`/groups add`"
+                                    : `\`${process.env.BOT_PREFIX}add groups\``,
+                                allowOrPrevent:
+                                    LocalizationManager.localizer.translate(
+                                        messageContext.guildID,
+                                        "misc.failure.groupsExcludeConflict.allow"
+                                    ),
+                            }
+                        ),
+                        thumbnailUrl: KmqImages.DEAD,
+                    });
                 }
 
                 if (matchedGroups.length === 0) {
+                    if (embeds.length > 0) {
+                        await sendInfoMessage(
+                            messageContext,
+                            embeds[0],
+                            false,
+                            null,
+                            embeds.slice(1),
+                            interaction
+                        );
+                    }
+
                     return;
                 }
 
                 await guildPreference.setGroups(matchedGroups);
-                await sendOptionsMessage(
-                    Session.getSession(messageContext.guildID),
-                    messageContext,
-                    guildPreference,
-                    [{ option: GameOption.GROUPS, reset: false }],
-                    null,
-                    null,
-                    null,
-                    interaction
-                );
-
-                logger.info(
-                    `${getDebugLogHeader(
-                        messageContext
-                    )} | Group added: ${guildPreference.getDisplayedGroupNames()}`
-                );
                 break;
             }
 
             case AddType.INCLUDE:
             case AddType.INCLUDES:
+                gameOption = GameOption.INCLUDE;
                 if (guildPreference.isGroupsMode()) {
                     logger.warn(
                         `${getDebugLogHeader(
@@ -355,25 +363,10 @@ export default class AddCommand implements BaseCommand {
                 }
 
                 await guildPreference.setIncludes(matchedGroups);
-                await sendOptionsMessage(
-                    Session.getSession(messageContext.guildID),
-                    messageContext,
-                    guildPreference,
-                    [{ option: GameOption.INCLUDE, reset: false }],
-                    null,
-                    null,
-                    null,
-                    interaction
-                );
-
-                logger.info(
-                    `${getDebugLogHeader(
-                        messageContext
-                    )} | Include added: ${guildPreference.getDisplayedIncludesGroupNames()}`
-                );
                 break;
             case AddType.EXCLUDE:
             case AddType.EXCLUDES: {
+                gameOption = GameOption.EXCLUDE;
                 const intersection = setIntersection(
                     matchedGroups.map((x) => x.name),
                     guildPreference.getGroupNames()
@@ -383,70 +376,88 @@ export default class AddCommand implements BaseCommand {
                     (x) => !intersection.has(x.name)
                 );
                 if (intersection.size > 0) {
-                    await sendErrorMessage(
-                        messageContext,
-                        {
-                            title: LocalizationManager.localizer.translate(
-                                messageContext.guildID,
-                                "misc.failure.groupsExcludeConflict.title"
-                            ),
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    messageContext.guildID,
-                                    "misc.failure.groupsExcludeConflict.description",
-                                    {
-                                        conflictingOptionOne: interaction
-                                            ? "`/exclude`"
-                                            : `\`${process.env.BOT_PREFIX}exclude\``,
-                                        conflictingOptionTwo: interaction
-                                            ? "`/groups`"
-                                            : `\`${process.env.BOT_PREFIX}groups\``,
-                                        groupsList: [...intersection]
-                                            .filter((x) => !x.includes("+"))
-                                            .join(", "),
-                                        solutionStepOne: interaction
-                                            ? "`/groups remove`"
-                                            : `\`${process.env.BOT_PREFIX}remove groups\``,
-                                        solutionStepTwo: interaction
-                                            ? "`/exclude add`"
-                                            : `\`${process.env.BOT_PREFIX}add exclude\``,
-                                        allowOrPrevent:
-                                            LocalizationManager.localizer.translate(
-                                                messageContext.guildID,
-                                                "misc.failure.groupsExcludeConflict.prevent"
-                                            ),
-                                    }
-                                ),
-                        },
-                        matchedGroups.length === 0 ? interaction : undefined
-                    );
+                    embeds.push({
+                        color: EMBED_ERROR_COLOR,
+                        author: messageContext.author,
+                        title: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "misc.failure.groupsExcludeConflict.title"
+                        ),
+                        description: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "misc.failure.groupsExcludeConflict.description",
+                            {
+                                conflictingOptionOne: interaction
+                                    ? "`/exclude`"
+                                    : `\`${process.env.BOT_PREFIX}exclude\``,
+                                conflictingOptionTwo: interaction
+                                    ? "`/groups`"
+                                    : `\`${process.env.BOT_PREFIX}groups\``,
+                                groupsList: [...intersection]
+                                    .filter((x) => !x.includes("+"))
+                                    .join(", "),
+                                solutionStepOne: interaction
+                                    ? "`/groups remove`"
+                                    : `\`${process.env.BOT_PREFIX}remove groups\``,
+                                solutionStepTwo: interaction
+                                    ? "`/exclude add`"
+                                    : `\`${process.env.BOT_PREFIX}add exclude\``,
+                                allowOrPrevent:
+                                    LocalizationManager.localizer.translate(
+                                        messageContext.guildID,
+                                        "misc.failure.groupsExcludeConflict.prevent"
+                                    ),
+                            }
+                        ),
+                        thumbnailUrl: KmqImages.DEAD,
+                    });
                 }
 
                 if (matchedGroups.length === 0) {
+                    if (embeds.length > 0) {
+                        await sendInfoMessage(
+                            messageContext,
+                            embeds[0],
+                            false,
+                            null,
+                            embeds.slice(1),
+                            interaction
+                        );
+                    }
+
                     return;
                 }
 
                 await guildPreference.setExcludes(matchedGroups);
-                await sendOptionsMessage(
-                    Session.getSession(messageContext.guildID),
-                    messageContext,
-                    guildPreference,
-                    [{ option: GameOption.EXCLUDE, reset: false }],
-                    null,
-                    null,
-                    null,
-                    interaction
-                );
-
-                logger.info(
-                    `${getDebugLogHeader(
-                        messageContext
-                    )} | Exclude added: ${guildPreference.getDisplayedExcludesGroupNames()}`
-                );
                 break;
             }
 
             default:
         }
+
+        logger.info(
+            `${getDebugLogHeader(
+                messageContext
+            )} | ${gameOption} added: ${guildPreference.getDisplayedGroupNames()}`
+        );
+
+        const optionsMessage = await generateOptionsMessage(
+            Session.getSession(messageContext.guildID),
+            messageContext,
+            guildPreference,
+            [{ option: gameOption, reset: false }],
+            null,
+            null,
+            null
+        );
+
+        await sendInfoMessage(
+            messageContext,
+            optionsMessage,
+            true,
+            null,
+            embeds,
+            interaction
+        );
     }
 }

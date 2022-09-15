@@ -1,11 +1,13 @@
 import { GROUP_LIST_URL, GroupAction } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
+    generateOptionsMessage,
     getDebugLogHeader,
     getInteractionValue,
     getMatchedArtists,
     processGroupAutocompleteInteraction,
     sendErrorMessage,
+    sendInfoMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import {
@@ -26,6 +28,7 @@ import Session from "../../structures/session";
 import State from "../../state";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
+import type EmbedPayload from "../../interfaces/embed_payload";
 import type HelpDocumentation from "../../interfaces/help";
 import type MatchedArtist from "../../interfaces/matched_artist";
 
@@ -203,8 +206,8 @@ export default class GroupsCommand implements BaseCommand {
                             messageContext.guildID,
                             "misc.failure.groupsExcludeConflict.description",
                             {
-                                conflictingOptionOne: "`exclude`",
-                                conflictingOptionTwo: "`groups`",
+                                conflictingOptionOne: "`groups`",
+                                conflictingOptionTwo: "`exclude`",
                                 groupsList: [...intersection]
                                     .filter((x) => !x.includes("+"))
                                     .join(", "),
@@ -228,6 +231,8 @@ export default class GroupsCommand implements BaseCommand {
                 return;
             }
         }
+
+        const embeds: Array<EmbedPayload> = [];
 
         let groupsWarning = "";
         if (unmatchedGroups.length) {
@@ -300,23 +305,28 @@ export default class GroupsCommand implements BaseCommand {
                 }
             );
 
-            await sendErrorMessage(
-                messageContext,
-                {
-                    title: LocalizationManager.localizer.translate(
-                        messageContext.guildID,
-                        "misc.failure.unrecognizedGroups.title"
-                    ),
-                    description: `${descriptionText}\n\n${
-                        suggestionsText || ""
-                    }`,
-                    footerText: groupsWarning,
-                },
-                matchedGroups.length === 0 ? interaction : undefined
-            );
+            embeds.push({
+                title: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "misc.failure.unrecognizedGroups.title"
+                ),
+                description: `${descriptionText}\n\n${suggestionsText || ""}`,
+                footerText: groupsWarning,
+            });
         }
 
         if (matchedGroups.length === 0) {
+            if (embeds.length > 0) {
+                await sendInfoMessage(
+                    messageContext,
+                    embeds[0],
+                    false,
+                    null,
+                    embeds.slice(1),
+                    interaction
+                );
+            }
+
             return;
         }
 
@@ -327,14 +337,22 @@ export default class GroupsCommand implements BaseCommand {
             )} | Groups set to ${guildPreference.getDisplayedGroupNames()}`
         );
 
-        await sendOptionsMessage(
+        const optionsMessage = await generateOptionsMessage(
             Session.getSession(messageContext.guildID),
             messageContext,
             guildPreference,
             [{ option: GameOption.GROUPS, reset: false }],
             null,
             null,
+            null
+        );
+
+        await sendInfoMessage(
+            messageContext,
+            optionsMessage,
+            true,
             null,
+            embeds,
             interaction
         );
     }

@@ -1,11 +1,18 @@
-import { GROUP_LIST_URL, GroupAction } from "../../constants";
+import {
+    EMBED_ERROR_COLOR,
+    GROUP_LIST_URL,
+    GroupAction,
+    KmqImages,
+} from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
+    generateOptionsMessage,
     getDebugLogHeader,
     getInteractionValue,
     getMatchedArtists,
     processGroupAutocompleteInteraction,
     sendErrorMessage,
+    sendInfoMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import {
@@ -26,6 +33,7 @@ import Session from "../../structures/session";
 import State from "../../state";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
+import type EmbedPayload from "../../interfaces/embed_payload";
 import type HelpDocumentation from "../../interfaces/help";
 import type MatchedArtist from "../../interfaces/matched_artist";
 
@@ -218,6 +226,8 @@ export default class IncludeCommand implements BaseCommand {
             return;
         }
 
+        const embeds: Array<EmbedPayload> = [];
+
         let includeWarning = "";
         if (unmatchedGroups.length) {
             logger.info(
@@ -295,23 +305,31 @@ export default class IncludeCommand implements BaseCommand {
                 }
             );
 
-            await sendErrorMessage(
-                messageContext,
-                {
-                    title: LocalizationManager.localizer.translate(
-                        messageContext.guildID,
-                        "misc.failure.unrecognizedGroups.title"
-                    ),
-                    description: `${descriptionText}\n\n${
-                        suggestionsText || ""
-                    }`,
-                    footerText: includeWarning,
-                },
-                matchedGroups.length === 0 ? interaction : undefined
-            );
+            embeds.push({
+                color: EMBED_ERROR_COLOR,
+                author: messageContext.author,
+                title: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "misc.failure.unrecognizedGroups.title"
+                ),
+                description: `${descriptionText}\n\n${suggestionsText || ""}`,
+                footerText: includeWarning,
+                thumbnailUrl: KmqImages.DEAD,
+            });
         }
 
         if (matchedGroups.length === 0) {
+            if (embeds.length > 0) {
+                await sendInfoMessage(
+                    messageContext,
+                    embeds[0],
+                    false,
+                    null,
+                    embeds.slice(1),
+                    interaction
+                );
+            }
+
             return;
         }
 
@@ -322,14 +340,22 @@ export default class IncludeCommand implements BaseCommand {
             )} | Include set to ${guildPreference.getDisplayedIncludesGroupNames()}`
         );
 
-        await sendOptionsMessage(
+        const optionsMessage = await generateOptionsMessage(
             Session.getSession(messageContext.guildID),
             messageContext,
             guildPreference,
             [{ option: GameOption.INCLUDE, reset: false }],
             null,
             null,
+            null
+        );
+
+        await sendInfoMessage(
+            messageContext,
+            optionsMessage,
+            true,
             null,
+            embeds,
             interaction
         );
     }

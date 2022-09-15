@@ -1,9 +1,10 @@
-import { GROUP_LIST_URL } from "../../constants";
+import { EMBED_ERROR_COLOR, GROUP_LIST_URL, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
+    generateOptionsMessage,
     getDebugLogHeader,
     sendErrorMessage,
-    sendOptionsMessage,
+    sendInfoMessage,
 } from "../../helpers/discord_utils";
 import {
     getMatchingGroupNames,
@@ -19,6 +20,7 @@ import Session from "../../structures/session";
 import State from "../../state";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
+import type EmbedPayload from "../../interfaces/embed_payload";
 import type HelpDocumentation from "../../interfaces/help";
 import type MatchedArtist from "../../interfaces/matched_artist";
 
@@ -193,6 +195,8 @@ export default class RemoveCommand implements BaseCommand {
             (group) => !matchedGroups.some((x) => x.id === group.id)
         );
 
+        const embeds: Array<EmbedPayload> = [];
+
         if (unmatchedGroups.length) {
             logger.info(
                 `${getDebugLogHeader(
@@ -237,90 +241,79 @@ export default class RemoveCommand implements BaseCommand {
                 }
             );
 
-            await sendErrorMessage(
-                messageContext,
-                {
-                    title: LocalizationManager.localizer.translate(
-                        messageContext.guildID,
-                        "misc.failure.unrecognizedGroups.title"
-                    ),
-                    description: `${descriptionText}\n\n${
-                        suggestionsText || ""
-                    }`,
-                },
-                interaction
-            );
+            embeds.push({
+                color: EMBED_ERROR_COLOR,
+                author: messageContext.author,
+                title: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "misc.failure.unrecognizedGroups.title"
+                ),
+                description: `${descriptionText}\n\n${suggestionsText || ""}`,
+                thumbnailUrl: KmqImages.DEAD,
+            });
         }
 
         // if none of the new groups were matched
         if (unmatchedGroups.length === rawGroupsToRemove.length) {
+            if (embeds.length > 0) {
+                await sendInfoMessage(
+                    messageContext,
+                    embeds[0],
+                    false,
+                    null,
+                    embeds.slice(1),
+                    interaction
+                );
+            }
+
             return;
         }
 
+        let gameOption: GameOption;
         switch (removeType) {
             case RemoveType.GROUPS:
             case RemoveType.GROUP:
             case RemoveType.ARTIST:
             case RemoveType.ARTISTS:
+                gameOption = GameOption.GROUPS;
                 await guildPreference.setGroups(remainingGroups);
-                await sendOptionsMessage(
-                    Session.getSession(messageContext.guildID),
-                    messageContext,
-                    guildPreference,
-                    [{ option: GameOption.GROUPS, reset: false }],
-                    null,
-                    null,
-                    null,
-                    interaction
-                );
-
-                logger.info(
-                    `${getDebugLogHeader(
-                        messageContext
-                    )} | Group removed: ${rawGroupsToRemove}`
-                );
                 break;
             case RemoveType.INCLUDE:
             case RemoveType.INCLUDES:
+                gameOption = GameOption.INCLUDE;
                 await guildPreference.setIncludes(remainingGroups);
-                await sendOptionsMessage(
-                    Session.getSession(messageContext.guildID),
-                    messageContext,
-                    guildPreference,
-                    [{ option: GameOption.INCLUDE, reset: false }],
-                    null,
-                    null,
-                    null,
-                    interaction
-                );
-
-                logger.info(
-                    `${getDebugLogHeader(
-                        messageContext
-                    )} | Include removed: ${rawGroupsToRemove}`
-                );
                 break;
             case RemoveType.EXCLUDE:
             case RemoveType.EXCLUDES:
+                gameOption = GameOption.EXCLUDE;
                 await guildPreference.setExcludes(remainingGroups);
-                await sendOptionsMessage(
-                    Session.getSession(messageContext.guildID),
-                    messageContext,
-                    guildPreference,
-                    [{ option: GameOption.EXCLUDE, reset: false }],
-                    null,
-                    null,
-                    null,
-                    interaction
-                );
-
-                logger.info(
-                    `${getDebugLogHeader(
-                        messageContext
-                    )} | Exclude removed: ${rawGroupsToRemove}`
-                );
                 break;
             default:
         }
+
+        logger.info(
+            `${getDebugLogHeader(
+                messageContext
+            )} | ${gameOption} removed: ${rawGroupsToRemove}`
+        );
+
+        const optionsMessage = await generateOptionsMessage(
+            Session.getSession(messageContext.guildID),
+            messageContext,
+            guildPreference,
+            [{ option: gameOption, reset: false }],
+            null,
+            null,
+            null
+        );
+
+        await sendInfoMessage(
+            messageContext,
+            optionsMessage,
+            true,
+            null,
+            embeds,
+            interaction
+        );
     }
 }
