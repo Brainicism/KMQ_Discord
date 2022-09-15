@@ -9,6 +9,7 @@ import { getUserTag, measureExecutionTime } from "../../helpers/utils";
 import Eris from "eris";
 import ExcludeCommand from "../../commands/game_options/exclude";
 import GroupsCommand from "../../commands/game_options/groups";
+import HelpCommand from "../../commands/game_commands/help";
 import IncludeCommand from "../../commands/game_options/include";
 import KmqMember from "../../structures/kmq_member";
 import LocalizationManager from "../../helpers/localization_manager";
@@ -31,6 +32,7 @@ const AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS: {
     exclude: ExcludeCommand.processAutocompleteInteraction,
     lookup: LookupCommand.processAutocompleteInteraction,
     preset: PresetCommand.processAutocompleteInteraction,
+    help: HelpCommand.processAutocompleteInteraction,
 };
 
 /**

@@ -1,13 +1,16 @@
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
+    getInteractionValue,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import Gender from "../../enums/option_types/gender";
 import GuildPreference from "../../structures/guild_preference";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
@@ -98,23 +101,66 @@ export default class GenderCommand implements BaseCommand {
         priority: 150,
     });
 
-    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
-        );
+    slashCommands = (): Array<Eris.ApplicationCommandStructure> => [
+        {
+            name: "gender",
+            description: LocalizationManager.localizer.translate(
+                LocaleType.EN,
+                "command.gender.interaction.description"
+            ),
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+            options: [...Array(4).keys()].map((x) => ({
+                name: `gender_${x + 1}`,
+                description: LocalizationManager.localizer.translate(
+                    LocaleType.EN,
+                    "command.gender.interaction.description"
+                ),
+                type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
+                choices: Object.values(Gender).map((gender) => ({
+                    name: gender,
+                    value: gender,
+                })),
+            })),
+        },
+    ];
 
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const selectedGenders = parsedMessage.components as Array<Gender>;
+        await GenderCommand.updateOption(
+            MessageContext.fromMessage(message),
+            selectedGenders
+        );
+    };
+
+    static async updateOption(
+        messageContext: MessageContext,
+        selectedGenders: Array<Gender>,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID
+        );
 
         if (selectedGenders.length === 0) {
             await guildPreference.reset(GameOption.GENDER);
             await sendOptionsMessage(
-                Session.getSession(message.guildID),
-                MessageContext.fromMessage(message),
+                Session.getSession(messageContext.guildID),
+                messageContext,
                 guildPreference,
-                [{ option: GameOption.GENDER, reset: true }]
+                [{ option: GameOption.GENDER, reset: true }],
+                null,
+                null,
+                null,
+                interaction
             );
-            logger.info(`${getDebugLogHeader(message)} | Gender reset.`);
+
+            logger.info(`${getDebugLogHeader(messageContext)} | Gender reset.`);
             return;
+        }
+
+        // ALTERNATING is mutually exclusive
+        if (selectedGenders.includes(Gender.ALTERNATING)) {
+            selectedGenders = [Gender.ALTERNATING];
         }
 
         if (guildPreference.isGroupsMode() && selectedGenders.length >= 1) {
@@ -122,25 +168,29 @@ export default class GenderCommand implements BaseCommand {
             if (selectedGenders[0] !== Gender.ALTERNATING) {
                 logger.warn(
                     `${getDebugLogHeader(
-                        message
+                        messageContext
                     )} | Game option conflict between gender and groups.`
                 );
 
-                sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "misc.failure.gameOptionConflict.title"
-                    ),
-                    description: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "misc.failure.gameOptionConflict.description",
-                        {
-                            optionOne: "`groups`",
-                            optionTwo: "`gender`",
-                            optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
-                        }
-                    ),
-                });
+                sendErrorMessage(
+                    messageContext,
+                    {
+                        title: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "misc.failure.gameOptionConflict.title"
+                        ),
+                        description: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "misc.failure.gameOptionConflict.description",
+                            {
+                                optionOne: "`groups`",
+                                optionTwo: "`gender`",
+                                optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
+                            }
+                        ),
+                    },
+                    interaction
+                );
                 return;
             }
         }
@@ -150,19 +200,23 @@ export default class GenderCommand implements BaseCommand {
                 guildPreference.isGroupsMode() &&
                 guildPreference.getGroupIDs().length === 1
             ) {
-                sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "command.gender.warning.gameOption.title"
-                    ),
-                    description: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "command.gender.warning.gameOption.description",
-                        {
-                            alternatingGenderCommand: `\`${process.env.BOT_PREFIX}gender alternating\``,
-                        }
-                    ),
-                });
+                sendErrorMessage(
+                    messageContext,
+                    {
+                        title: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "command.gender.warning.gameOption.title"
+                        ),
+                        description: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "command.gender.warning.gameOption.description",
+                            {
+                                alternatingGenderCommand: `\`${process.env.BOT_PREFIX}gender alternating\``,
+                            }
+                        ),
+                    },
+                    interaction
+                );
             }
 
             await guildPreference.setGender([selectedGenders[0]]);
@@ -171,18 +225,41 @@ export default class GenderCommand implements BaseCommand {
         }
 
         await sendOptionsMessage(
-            Session.getSession(message.guildID),
-            MessageContext.fromMessage(message),
+            Session.getSession(messageContext.guildID),
+            messageContext,
             guildPreference,
-            [{ option: GameOption.GENDER, reset: false }]
+            [{ option: GameOption.GENDER, reset: false }],
+            null,
+            null,
+            null,
+            interaction
         );
 
         logger.info(
             `${getDebugLogHeader(
-                message
+                messageContext
             )} | Genders set to ${guildPreference.gameOptions.gender.join(
                 ", "
             )}`
         );
-    };
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        const { interactionOptions } = getInteractionValue(interaction);
+        const selectedGenders: Array<Gender> =
+            Object.values(interactionOptions);
+
+        await GenderCommand.updateOption(
+            messageContext,
+            selectedGenders,
+            interaction
+        );
+    }
 }

@@ -232,6 +232,9 @@
                     "reset": "남성, 여성, 남녀 혼성 그룹의 기본 성별로 재설정합니다."
                 }
             },
+            "interaction": {
+                "description": "듣고 싶은 아티스트의 성별을 선택하세요."
+            },
             "warning": {
                 "gameOption": {
                     "description": "하나의 그룹만 선택하면 {{alternatingGenderCommand}}가 예상대로 작동하지 않을 수 있습니다. (성별을 올바르게 바꾸려면 더 많은 그룹을 포함하는 것이 좋습니다.)",
@@ -289,8 +292,8 @@
                     "description": "지정된 그룹의 노래를 재생합니다",
                     "perGroupDescription": "노래를 재생할 {{ordinalNum}} 그룹"
                 }
-
-        }},
+            }
+        },
         "guessmode": {
             "help": {
                 "description": "노래 제목, 아티스트 이름 또는 둘 다로 추측할지 선택합니다.",
@@ -719,7 +722,8 @@
             },
             "interaction": {
                 "teams_begin": "KMQ의 '팀' 게임 모드를 시작합니다. '/play teams create' 이후에만 사용할 수 있습니다.",
-                "teams_create": "팀 생성을 위해 KMQ의 '팀' 게임 모드를 준비합니다"
+                "teams_create": "팀 생성을 위해 KMQ의 '팀' 게임 모드를 준비합니다",
+                "teams_join": "팀에 합류. '/play teams create' 이후에만 사용할 수 있습니다."
             },
             "team": {
                 "joinTeam": {
