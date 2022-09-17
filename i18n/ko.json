@@ -1236,6 +1236,10 @@
                     "title": "라운드 종료"
                 }
             },
+            "slashCommandReminder": {
+                "description": "Slash commands have new features that make them easier to use such as command name and option auto-complete! Commands have also been re-organized to be easier to use. Start by using / instead of , [to be translated]",
+                "title": "Text commands will soon be disabled. [to be translated]"
+            },
             "songPlaying": {
                 "description": "3초 후에 새 라운드 시작됩니다...",
                 "title": "노래를 재생하는 동안 오류가 발생했습니다"
@@ -1247,10 +1251,6 @@
             "textCommandsDisabled": {
                 "description": "Text commands have been disabled. Please use the new and improved slash commands! Start by using / instead of , [to be translated]",
                 "title": "Text Commands Disabled [to be translated]"
-            },
-            "slashCommandReminder": {
-                "description": "Slash commands have new features that make them easier to use such as command name and option auto-complete! Commands have also been re-organized to be easier to use. Start by using / instead of , [to be translated]",
-                "title": "Text commands will soon be disabled. [to be translated]"
             },
             "unrecognizedGroups": {
                 "added": "추가",
