@@ -1244,6 +1244,14 @@
                 "description": "Failed to find songs matching this criteria. Try to broaden your search.",
                 "title": "Song Query Error"
             },
+            "textCommandsDisabled": {
+                "description": "Text commands have been disabled. Please use the new and improved slash commands! Start by using / instead of ,",
+                "title": "Text Commands Disabled"
+            },
+            "slashCommandReminder": {
+                "description": "Slash commands have new features that make them easier to use such as command name and option auto-complete! Commands have also been re-organized to be easier to use. Start by using / instead of ,",
+                "title": "Text commands will soon be disabled."
+            },
             "unrecognizedGroups": {
                 "added": "added",
                 "description": "One or more of the specified group names was not recognized. Those groups that matched are {{matchedGroupsAction}}. Please ensure that the group name matches exactly with the list provided by {{helpGroups}}.\nThe following groups were **not** recognized:\n {{unmatchedGroups}}\n{{solution}}",

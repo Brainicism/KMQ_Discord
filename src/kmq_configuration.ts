@@ -63,4 +63,12 @@ export default class KmqConfiguration {
     disallowMigrations(): boolean {
         return this.config["disallowMigrations"] ?? false;
     }
+
+    textCommandsDisabled(): boolean {
+        return this.config["textCommandsDisabled"] ?? false;
+    }
+
+    slashCommandRemindersEnabled(): boolean {
+        return this.config["slashCommandRemindersEnabled"] ?? false;
+    }
 }

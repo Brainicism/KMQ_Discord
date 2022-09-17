@@ -1244,6 +1244,14 @@
                 "description": "이 기준과 일치하는 노래를 찾지 못했습니다. 검색 범위를 넓히십시오.",
                 "title": "노래 검색 오류"
             },
+            "textCommandsDisabled": {
+                "description": "Text commands have been disabled. Please use the new and improved slash commands! Start by using / instead of , [to be translated]",
+                "title": "Text Commands Disabled [to be translated]"
+            },
+            "slashCommandReminder": {
+                "description": "Slash commands have new features that make them easier to use such as command name and option auto-complete! Commands have also been re-organized to be easier to use. Start by using / instead of , [to be translated]",
+                "title": "Text commands will soon be disabled. [to be translated]"
+            },
             "unrecognizedGroups": {
                 "added": "추가",
                 "description": "지정된 그룹 이름 중 하나 이상이 인식되지 않습니다. (일치하는 그룹은 {{matchedGroupsAction}}이며 그룹 이름이 {{helpGroups}}에서 제공한 목록과 정확히 일치하는지 확인하세요.)\n\n다음 그룹은 **인식되지 않습니다**.\n\n{{unmatchedGroups}}\n{{solution}}",

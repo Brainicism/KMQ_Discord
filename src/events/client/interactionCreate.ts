@@ -182,5 +182,5 @@ export default async function interactionCreateHandler(
     }
 
     const executionTime = await measureExecutionTime(interactionPromise);
-    logger.info(` ${interactionName} took ${executionTime}ms`);
+    logger.info(`${interactionName} took ${executionTime}ms`);
 }

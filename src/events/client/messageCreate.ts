@@ -1,12 +1,15 @@
 import * as uuid from "uuid";
 import { IPCLogger } from "../../logger";
+import { delay } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     sendErrorMessage,
+    sendInfoMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
+import KmqConfiguration from "../../kmq_configuration";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
@@ -92,6 +95,43 @@ export default async function messageCreateHandler(
                 )}ms remaining.`
             );
             return;
+        }
+
+        // disable text commands if command is user facing (i.e has help documentation)
+        if (
+            invokedCommand.help &&
+            KmqConfiguration.Instance.textCommandsDisabled()
+        ) {
+            sendErrorMessage(messageContext, {
+                title: LocalizationManager.localizer.translate(
+                    message.guildID,
+                    "misc.failure.textCommandsDisabled.title"
+                ),
+                description: LocalizationManager.localizer.translate(
+                    message.guildID,
+                    "misc.failure.textCommandsDisabled.description"
+                ),
+            });
+            return;
+        }
+
+        // periodically encourage user to use slash commands instead
+        if (
+            Math.random() < 0.1 &&
+            KmqConfiguration.Instance.slashCommandRemindersEnabled()
+        ) {
+            sendInfoMessage(messageContext, {
+                title: LocalizationManager.localizer.translate(
+                    message.guildID,
+                    "misc.failure.slashCommandReminder.title"
+                ),
+                description: LocalizationManager.localizer.translate(
+                    message.guildID,
+                    "misc.failure.slashCommandReminder.description"
+                ),
+            });
+
+            await delay(1500);
         }
 
         if (
