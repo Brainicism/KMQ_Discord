@@ -1,24 +1,20 @@
-import { GROUP_LIST_URL } from "../../constants";
+import { GROUP_LIST_URL, GroupAction } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
-    containsHangul,
-    getOrdinalNum,
-    setIntersection,
-} from "../../helpers/utils";
-import {
+    generateOptionsMessage,
     getDebugLogHeader,
     getInteractionValue,
     getMatchedArtists,
-    localizedAutocompleteFormat,
-    searchArtists,
+    processGroupAutocompleteInteraction,
     sendErrorMessage,
+    sendInfoMessage,
     sendOptionsMessage,
-    tryAutocompleteInteractionAcknowledge,
 } from "../../helpers/discord_utils";
 import {
     getMatchingGroupNames,
     getSimilarGroupNames,
 } from "../../helpers/game_utils";
+import { getOrdinalNum, setIntersection } from "../../helpers/utils";
 import AddCommand, { AddType } from "./add";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
@@ -32,17 +28,11 @@ import Session from "../../structures/session";
 import State from "../../state";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
+import type EmbedPayload from "../../interfaces/embed_payload";
 import type HelpDocumentation from "../../interfaces/help";
 import type MatchedArtist from "../../interfaces/matched_artist";
 
 const logger = new IPCLogger("groups");
-
-enum GroupAction {
-    ADD = "add",
-    REMOVE = "remove",
-    SET = "set",
-    RESET = "reset",
-}
 
 export default class GroupsCommand implements BaseCommand {
     aliases = ["group", "artist", "artists"];
@@ -136,20 +126,14 @@ export default class GroupsCommand implements BaseCommand {
                               type: Eris.Constants.ApplicationCommandOptionTypes
                                   .STRING,
                               autocomplete: true,
-                              required: false,
+                              required: x === 0,
                           })),
             })),
         },
     ];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
-        );
-
-        let matchedGroups: MatchedArtist[];
         if (parsedMessage.components.length === 0) {
-            matchedGroups = null;
             await GroupsCommand.updateOption(
                 MessageContext.fromMessage(message),
                 GroupAction.RESET
@@ -157,83 +141,48 @@ export default class GroupsCommand implements BaseCommand {
             return;
         }
 
-        let groupsWarning = "";
-        if (parsedMessage.components.length > 1) {
-            if (["add", "remove"].includes(parsedMessage.components[0])) {
-                groupsWarning = LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "misc.warning.addRemoveOrdering.footer",
-                    {
-                        addOrRemove: `${process.env.BOT_PREFIX}${parsedMessage.components[0]}`,
-                        command: "groups",
-                    }
-                );
-            }
-        }
-
         const groupNames = parsedMessage.argument
             .split(",")
             .map((groupName) => groupName.trim());
 
         const groups = await getMatchingGroupNames(groupNames);
-        matchedGroups = groups.matchedGroups;
-        const { unmatchedGroups } = groups;
-        if (unmatchedGroups.length) {
-            logger.info(
-                `${getDebugLogHeader(
-                    message
-                )} | Attempted to set unknown groups. groups =  ${unmatchedGroups.join(
-                    ", "
-                )}`
+        const { matchedGroups, unmatchedGroups } = groups;
+
+        await GroupsCommand.updateOption(
+            MessageContext.fromMessage(message),
+            GroupAction.SET,
+            matchedGroups,
+            unmatchedGroups
+        );
+    };
+
+    static async updateOption(
+        messageContext: MessageContext,
+        action: GroupAction,
+        matchedGroups?: MatchedArtist[],
+        unmatchedGroups?: string[],
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID
+        );
+
+        const reset = action === GroupAction.RESET;
+        if (reset) {
+            await guildPreference.reset(GameOption.GROUPS);
+            logger.info(`${getDebugLogHeader(messageContext)} | Groups reset.`);
+            await sendOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.GROUPS, reset: true }],
+                null,
+                null,
+                null,
+                interaction
             );
 
-            let suggestionsText: string = null;
-            if (unmatchedGroups.length === 1) {
-                const suggestions = await getSimilarGroupNames(
-                    unmatchedGroups[0],
-                    State.getGuildLocale(message.guildID)
-                );
-
-                if (suggestions.length > 0) {
-                    suggestionsText = LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "misc.failure.unrecognizedGroups.didYouMean",
-                        {
-                            suggestions: suggestions.join("\n"),
-                        }
-                    );
-                }
-            }
-
-            const descriptionText = LocalizationManager.localizer.translate(
-                message.guildID,
-                "misc.failure.unrecognizedGroups.description",
-                {
-                    matchedGroupsAction:
-                        LocalizationManager.localizer.translate(
-                            message.guildID,
-                            "misc.failure.unrecognizedGroups.added"
-                        ),
-                    helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
-                    unmatchedGroups: unmatchedGroups.join(", "),
-                    solution: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "misc.failure.unrecognizedGroups.solution",
-                        {
-                            command: `\`${process.env.BOT_PREFIX}add groups\``,
-                        }
-                    ),
-                }
-            );
-
-            await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "misc.failure.unrecognizedGroups.title"
-                ),
-                description: `${descriptionText}\n\n${suggestionsText || ""}`,
-                footerText: groupsWarning,
-            });
+            return;
         }
 
         if (guildPreference.isExcludesMode()) {
@@ -246,76 +195,164 @@ export default class GroupsCommand implements BaseCommand {
                 (x) => !intersection.has(x.name)
             );
             if (intersection.size > 0) {
-                sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "misc.failure.groupsExcludeConflict.title"
-                    ),
-                    description: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "misc.failure.groupsExcludeConflict.description",
-                        {
-                            conflictingOptionOne: "`exclude`",
-                            conflictingOptionTwo: "`groups`",
-                            groupsList: [...intersection]
-                                .filter((x) => !x.includes("+"))
-                                .join(", "),
-                            solutionStepOne: `\`${process.env.BOT_PREFIX}remove exclude\``,
-                            solutionStepTwo: `\`${process.env.BOT_PREFIX}groups\``,
-                            allowOrPrevent:
-                                LocalizationManager.localizer.translate(
-                                    message.guildID,
-                                    "misc.failure.groupsExcludeConflict.allow"
-                                ),
-                        }
-                    ),
-                });
+                sendErrorMessage(
+                    messageContext,
+                    {
+                        title: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "misc.failure.groupsExcludeConflict.title"
+                        ),
+                        description: LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "misc.failure.groupsExcludeConflict.description",
+                            {
+                                conflictingOptionOne: "`groups`",
+                                conflictingOptionTwo: "`exclude`",
+                                groupsList: [...intersection]
+                                    .filter((x) => !x.includes("+"))
+                                    .join(", "),
+                                solutionStepOne: interaction
+                                    ? "`/exclude remove`"
+                                    : `\`${process.env.BOT_PREFIX}remove exclude\``,
+                                solutionStepTwo: interaction
+                                    ? "`/groups`"
+                                    : `\`${process.env.BOT_PREFIX}groups\``,
+                                allowOrPrevent:
+                                    LocalizationManager.localizer.translate(
+                                        messageContext.guildID,
+                                        "misc.failure.groupsExcludeConflict.allow"
+                                    ),
+                            }
+                        ),
+                    },
+                    interaction
+                );
+
                 return;
             }
         }
 
-        if (matchedGroups.length === 0) {
-            return;
-        }
+        const embeds: Array<EmbedPayload> = [];
 
-        await GroupsCommand.updateOption(
-            MessageContext.fromMessage(message),
-            GroupAction.SET,
-            matchedGroups
-        );
-    };
-
-    static async updateOption(
-        messageContext: MessageContext,
-        action: GroupAction,
-        matchedGroups?: MatchedArtist[],
-        interaction?: Eris.CommandInteraction
-    ): Promise<void> {
-        const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
-        );
-
-        const reset = action === GroupAction.RESET;
-        if (reset) {
-            await guildPreference.reset(GameOption.GROUPS);
-            logger.info(`${getDebugLogHeader(messageContext)} | Groups reset.`);
-        } else {
-            await guildPreference.setGroups(matchedGroups);
+        let groupsWarning = "";
+        if (unmatchedGroups.length) {
             logger.info(
                 `${getDebugLogHeader(
                     messageContext
-                )} | Groups set to ${guildPreference.getDisplayedGroupNames()}`
+                )} | Attempted to set unknown groups. groups = ${unmatchedGroups.join(
+                    ", "
+                )}`
             );
+
+            if (
+                unmatchedGroups[0].startsWith("add") ||
+                unmatchedGroups[0].startsWith("remove")
+            ) {
+                const misplacedPrefix = unmatchedGroups[0].startsWith("add")
+                    ? "add"
+                    : "remove";
+
+                groupsWarning = LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "misc.warning.addRemoveOrdering.footer",
+                    {
+                        addOrRemove: `${process.env.BOT_PREFIX}${misplacedPrefix}`,
+                        command: "groups",
+                    }
+                );
+            }
+
+            let suggestionsText: string = null;
+            if (unmatchedGroups.length === 1) {
+                const suggestions = await getSimilarGroupNames(
+                    unmatchedGroups[0],
+                    State.getGuildLocale(messageContext.guildID)
+                );
+
+                if (suggestions.length > 0) {
+                    suggestionsText = LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "misc.failure.unrecognizedGroups.didYouMean",
+                        {
+                            suggestions: suggestions.join("\n"),
+                        }
+                    );
+                }
+            }
+
+            const descriptionText = LocalizationManager.localizer.translate(
+                messageContext.guildID,
+                "misc.failure.unrecognizedGroups.description",
+                {
+                    matchedGroupsAction:
+                        LocalizationManager.localizer.translate(
+                            messageContext.guildID,
+                            "misc.failure.unrecognizedGroups.added"
+                        ),
+                    helpGroups: interaction
+                        ? "`/help groups`"
+                        : `\`${process.env.BOT_PREFIX}help groups\``,
+                    unmatchedGroups: unmatchedGroups.join(", "),
+                    solution: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "misc.failure.unrecognizedGroups.solution",
+                        {
+                            command: interaction
+                                ? "`/groups add`"
+                                : `\`${process.env.BOT_PREFIX}add groups\``,
+                        }
+                    ),
+                }
+            );
+
+            embeds.push({
+                title: LocalizationManager.localizer.translate(
+                    messageContext.guildID,
+                    "misc.failure.unrecognizedGroups.title"
+                ),
+                description: `${descriptionText}\n\n${suggestionsText || ""}`,
+                footerText: groupsWarning,
+            });
         }
 
-        await sendOptionsMessage(
+        if (matchedGroups.length === 0) {
+            if (embeds.length > 0) {
+                await sendInfoMessage(
+                    messageContext,
+                    embeds[0],
+                    false,
+                    null,
+                    embeds.slice(1),
+                    interaction
+                );
+            }
+
+            return;
+        }
+
+        await guildPreference.setGroups(matchedGroups);
+        logger.info(
+            `${getDebugLogHeader(
+                messageContext
+            )} | Groups set to ${guildPreference.getDisplayedGroupNames()}`
+        );
+
+        const optionsMessage = await generateOptionsMessage(
             Session.getSession(messageContext.guildID),
             messageContext,
             guildPreference,
-            [{ option: GameOption.GROUPS, reset }],
+            [{ option: GameOption.GROUPS, reset: false }],
             null,
             null,
+            null
+        );
+
+        await sendInfoMessage(
+            messageContext,
+            optionsMessage,
+            true,
             null,
+            embeds,
             interaction
         );
     }
@@ -328,18 +365,13 @@ export default class GroupsCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        let groups: Array<MatchedArtist>;
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
         const action = interactionName as GroupAction;
         const enteredGroupNames = Object.values(interactionOptions);
-
-        if (enteredGroupNames.length === 0) {
-            groups = null;
-        } else {
-            groups = getMatchedArtists(enteredGroupNames);
-        }
+        const { matchedGroups, unmatchedGroups } =
+            getMatchedArtists(enteredGroupNames);
 
         if (action === GroupAction.ADD) {
             await AddCommand.updateOption(
@@ -359,7 +391,8 @@ export default class GroupsCommand implements BaseCommand {
             await GroupsCommand.updateOption(
                 messageContext,
                 action,
-                groups,
+                matchedGroups,
+                unmatchedGroups,
                 interaction
             );
         }
@@ -372,27 +405,6 @@ export default class GroupsCommand implements BaseCommand {
     static async processAutocompleteInteraction(
         interaction: Eris.AutocompleteInteraction
     ): Promise<void> {
-        const interactionData = getInteractionValue(interaction);
-        const focusedKey = interactionData.focusedKey;
-        const focusedVal = interactionData.interactionOptions[focusedKey];
-        const lowercaseUserInput = focusedVal.toLowerCase();
-
-        const previouslyEnteredArtists = getMatchedArtists(
-            Object.entries(interactionData.interactionOptions)
-                .filter((x) => x[0] !== focusedKey)
-                .map((x) => x[1])
-        ).map((x) => x?.name);
-
-        const showHangul =
-            containsHangul(lowercaseUserInput) ||
-            State.getGuildLocale(interaction.guildID) === LocaleType.KO;
-
-        await tryAutocompleteInteractionAcknowledge(
-            interaction,
-            localizedAutocompleteFormat(
-                searchArtists(lowercaseUserInput, previouslyEnteredArtists),
-                showHangul
-            )
-        );
+        return processGroupAutocompleteInteraction(interaction);
     }
 }

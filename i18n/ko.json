@@ -147,6 +147,24 @@
                     "reset": "제외 옵션을 재설정합니다.",
                     "singleGroup": "{{group}}의 노래를 제외합니다."
                 }
+            },
+            "interaction": {
+                "add": {
+                    "description": "게임 제외 옵션에 지정된 그룹을 추가합니다.",
+                    "perGroupDescription": "{{ordinalNum}} 그룹 추가"
+                },
+                "description": "지정된 그룹의 노래 재생을 방지합니다.",
+                "remove": {
+                    "description": "게임 제외 옵션에서 지정된 그룹을 제거합니다.",
+                    "perGroupDescription": "{{ordinalNum}} 그룹 제거"
+                },
+                "reset": {
+                    "description": "제외 옵션을 재설정합니다."
+                },
+                "set": {
+                    "description": "게임 옵션에서 지정된 그룹의 노래를 제외합니다.",
+                    "perGroupDescription": "{{ordinalNum}} 그룹 제외"
+                }
             }
         },
         "exp": {
@@ -341,6 +359,24 @@
                     "multipleGroups": "{{groupOne}}, {{groupTwo}}, {{groupThree}}의 노래를 강제로 포함합니다.",
                     "reset": "포함 옵션을 재설정합니다.",
                     "singleGroup": "{{group}}의 노래를 강제로 포함합니다."
+                }
+            },
+            "interaction": {
+                "add": {
+                    "description": "게임 포함 옵션에 지정된 그룹을 추가합니다.",
+                    "perGroupDescription": "{{ordinalNum}} 그룹 추가"
+                },
+                "description": "강제로 포함할 아티스트를 선택합니다.",
+                "remove": {
+                    "description": "게임 포함 옵션에서 지정된 그룹을 제거합니다.",
+                    "perGroupDescription": "{{ordinalNum}} 그룹 제거"
+                },
+                "reset": {
+                    "description": "포함 옵션을 재설정합니다."
+                },
+                "set": {
+                    "description": "게임 옵션에 지정된 그룹의 노래를 설정합니다.",
+                    "perGroupDescription": "{{ordinalNum}} 그룹 설정"
                 }
             }
         },

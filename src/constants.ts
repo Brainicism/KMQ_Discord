@@ -241,3 +241,10 @@ export const DataFiles = {
 
 export const PERMISSIONS_LINK = "https://www.youtube.com/watch?v=87GW0SmF5LI";
 export const SPOTIFY_BASE_URL = "https://open.spotify.com/playlist/";
+
+export enum GroupAction {
+    ADD = "add",
+    REMOVE = "remove",
+    SET = "set",
+    RESET = "reset",
+}

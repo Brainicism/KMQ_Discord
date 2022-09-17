@@ -19,6 +19,7 @@ import {
     bold,
     chooseWeightedRandom,
     chunkArray,
+    containsHangul,
     delay,
     friendlyFormattedNumber,
     getOrdinalNum,
@@ -1797,13 +1798,25 @@ export function getInteractionValue(
  * @param enteredNames - Artist names the user has entered
  * @returns the matched artists
  */
-export function getMatchedArtists(
-    enteredNames: Array<string>
-): Array<MatchedArtist> {
-    return _.uniqBy(
-        enteredNames.map((x) => State.artistToEntry[x.toLowerCase()]),
-        "id"
-    );
+export function getMatchedArtists(enteredNames: Array<string>): {
+    matchedGroups: Array<MatchedArtist>;
+    unmatchedGroups: Array<string>;
+} {
+    const matchedGroups: Array<MatchedArtist> = [];
+    const unmatchedGroups: Array<string> = [];
+    for (const artistName of enteredNames) {
+        const match = State.artistToEntry[artistName.toLowerCase()];
+        if (match) {
+            matchedGroups.push(match);
+        } else {
+            unmatchedGroups.push(artistName);
+        }
+    }
+
+    return {
+        matchedGroups: _.uniqBy(matchedGroups, "id"),
+        unmatchedGroups,
+    };
 }
 
 /**
@@ -1845,4 +1858,35 @@ export function localizedAutocompleteFormat(
             value: showHangul && x.hangulName ? x.hangulName : x.name,
         }))
         .slice(0, MAX_AUTOCOMPLETE_FIELDS);
+}
+
+/**
+ * Handles showing suggested artists as the user types for the groups/include/exclude slash commands
+ * @param interaction - The interaction with intermediate typing state
+ */
+export async function processGroupAutocompleteInteraction(
+    interaction: Eris.AutocompleteInteraction
+): Promise<void> {
+    const interactionData = getInteractionValue(interaction);
+    const focusedKey = interactionData.focusedKey;
+    const focusedVal = interactionData.interactionOptions[focusedKey];
+    const lowercaseUserInput = focusedVal.toLowerCase();
+
+    const previouslyEnteredArtists = getMatchedArtists(
+        Object.entries(interactionData.interactionOptions)
+            .filter((x) => x[0] !== focusedKey)
+            .map((x) => x[1])
+    ).matchedGroups.map((x) => x.name);
+
+    const showHangul =
+        containsHangul(lowercaseUserInput) ||
+        State.getGuildLocale(interaction.guildID) === LocaleType.KO;
+
+    await tryAutocompleteInteractionAcknowledge(
+        interaction,
+        localizedAutocompleteFormat(
+            searchArtists(lowercaseUserInput, previouslyEnteredArtists),
+            showHangul
+        )
+    );
 }

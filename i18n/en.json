@@ -147,6 +147,24 @@
                     "reset": "Resets the exclude option",
                     "singleGroup": "Ignore songs from {{group}}"
                 }
+            },
+            "interaction": {
+                "add": {
+                    "description": "Add the given groups to the exclude game option",
+                    "perGroupDescription": "The {{ordinalNum}} group to add"
+                },
+                "description": "Prevent playing songs from the given groups",
+                "remove": {
+                    "description": "Remove the given groups from the exclude game option",
+                    "perGroupDescription": "The {{ordinalNum}} group to remove"
+                },
+                "reset": {
+                    "description": "Reset the exclude option"
+                },
+                "set": {
+                    "description": "Exclude songs from the given groups in the game options",
+                    "perGroupDescription": "The {{ordinalNum}} group to exclude"
+                }
             }
         },
         "exp": {
@@ -341,6 +359,24 @@
                     "multipleGroups": "Forcefully include songs from {{groupOne}}, {{groupTwo}}, and {{groupThree}}",
                     "reset": "Resets the include option",
                     "singleGroup": "Forcefully include songs from {{group}}"
+                }
+            },
+            "interaction": {
+                "add": {
+                    "description": "Add the given groups to the include game option",
+                    "perGroupDescription": "The {{ordinalNum}} group to add"
+                },
+                "description": "Select artists to forcefully include",
+                "remove": {
+                    "description": "Remove the given groups from the include game option",
+                    "perGroupDescription": "The {{ordinalNum}} group to remove"
+                },
+                "reset": {
+                    "description": "Reset the include option"
+                },
+                "set": {
+                    "description": "Include songs from the given groups in the game options",
+                    "perGroupDescription": "The {{ordinalNum}} group to include"
                 }
             }
         },
