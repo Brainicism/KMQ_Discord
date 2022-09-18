@@ -229,6 +229,23 @@ async function validateSqlDump(
     bootstrap = false
 ): Promise<void> {
     try {
+        const seedFileContents = (
+            await fs.promises.readFile(mvSeedFilePath, "utf-8")
+        ).split("\n");
+
+        const removedLine = seedFileContents.shift();
+
+        if (!removedLine.startsWith("REMOVE THIS LINE TO USE")) {
+            throw new Error(
+                "Unexpected first line of Daisuki backup. Expected 'REMOVE THIS LINE TO USE'"
+            );
+        }
+
+        await fs.promises.writeFile(
+            mvSeedFilePath,
+            seedFileContents.join("\n")
+        );
+
         await db.agnostic.raw(
             "DROP DATABASE IF EXISTS kpop_videos_validation;"
         );
@@ -311,7 +328,9 @@ async function validateSqlDump(
             );
         }
     } catch (e) {
-        throw new Error(`SQL dump validation failed. ${e.sqlMessage}`);
+        throw new Error(
+            `SQL dump validation failed. ${e.sqlMessage || e.stderr || e}`
+        );
     }
 
     if (await pathExists(DataFiles.FROZEN_TABLE_SCHEMA)) {
@@ -345,7 +364,7 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
         ? `${DATABASE_DOWNLOAD_DIR}/bootstrap.sql`
         : `${DATABASE_DOWNLOAD_DIR}/${dbSeedFile}`;
 
-    logger.info(`Validating SQL dump (${path.basename(dbSeedFilePath)}`);
+    logger.info(`Validating SQL dump (${path.basename(dbSeedFilePath)})`);
 
     await validateSqlDump(db, dbSeedFilePath, bootstrap);
 
