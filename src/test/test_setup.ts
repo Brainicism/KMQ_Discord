@@ -2,6 +2,7 @@
 import * as cp from "child_process";
 import { DATABASE_DOWNLOAD_DIR } from "../constants";
 import { IPCLogger } from "../logger";
+import { acknowledgeDaisukiExport } from "../seed/seed_db";
 import EnvType from "../enums/env_type";
 import dbContext, { getNewConnection } from "../database_context";
 import kmqKnexConfig from "../config/knexfile_kmq";
@@ -32,7 +33,10 @@ before(async function () {
 
     logger.info("Setting up test Daisuki database");
     // import frozen db dump
-    const dbSeedFilePath = `${DATABASE_DOWNLOAD_DIR}/bootstrap.sql`;
+    const dbSeedFilePath = await acknowledgeDaisukiExport(
+        `${DATABASE_DOWNLOAD_DIR}/bootstrap.sql`
+    );
+
     cp.execSync(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_test < ${dbSeedFilePath}`
     );
