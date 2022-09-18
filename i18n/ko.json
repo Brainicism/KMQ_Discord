@@ -1237,8 +1237,8 @@
                 }
             },
             "slashCommandReminder": {
-                "description": "Slash commands have new features that make them easier to use such as command name and option auto-complete! Commands have also been re-organized to be easier to use. Start by using / instead of , [to be translated]",
-                "title": "Text commands will soon be disabled. [to be translated]"
+                "description": "슬래시 명령어에는 명령어 및 옵션 자동 완성과 같이 사용하기 쉽게 하는 새로운 기능이 있습니다! 명령어도 사용하기 쉽도록 재구성되었습니다. 대신 /를 사용하여 시작하십시오.",
+                "title": "텍스트 명령어는 곧 비활성화됩니다."
             },
             "songPlaying": {
                 "description": "3초 후에 새 라운드 시작됩니다...",
@@ -1249,8 +1249,8 @@
                 "title": "노래 검색 오류"
             },
             "textCommandsDisabled": {
-                "description": "Text commands have been disabled. Please use the new and improved slash commands! Start by using / instead of , [to be translated]",
-                "title": "Text Commands Disabled [to be translated]"
+                "description": "텍스트 명령어가 비활성화되었습니다. 새롭게 개선된 슬래시 명령을 사용하세요!, 대신 /를 사용하여 시작합니다.",
+                "title": "텍스트 명령어 비활성화"
             },
             "unrecognizedGroups": {
                 "added": "추가",
