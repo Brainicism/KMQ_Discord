@@ -6,11 +6,11 @@ const logger = new IPCLogger("unhandledRejection");
 
 /**
  * Handles the 'unhandledRejection' event
- * @param reason - Error object
+ * @param err - Error object
  */
-export default function unhandledRejectionHandler(reason: Error): void {
+export default function unhandledRejectionHandler(err: Error): void {
     logger.error(
-        `Cluster Unhandled Rejection at: Reason: ${reason}. Trace: ${reason.stack}`
+        `Cluster Unhandled Rejection | Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}}`
     );
     if (process.env.NODE_ENV === EnvType.CI) {
         State.ipc.sendToAdmiral("abort");
