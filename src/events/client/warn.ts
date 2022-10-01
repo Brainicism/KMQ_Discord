@@ -1,6 +1,10 @@
 import { IPCLogger } from "../../logger";
 
 const logger = new IPCLogger("warn");
+const IGNORED_WARNING_SUBSTRINGS = [
+    "Unhandled MESSAGE_CREATE type",
+    "Unknown guild text channel type",
+];
 
 /**
  * Handles the 'warn' event
@@ -8,5 +12,14 @@ const logger = new IPCLogger("warn");
  * @param shardID - The shard ID
  */
 export default function warnHandler(message: string, shardID: number): void {
+    // ignore warnings meant for the library developers
+    if (
+        IGNORED_WARNING_SUBSTRINGS.some((warningSubstring) =>
+            message.includes(warningSubstring)
+        )
+    ) {
+        return;
+    }
+
     logger.warn(`Shard #${shardID} encountered warning: ${message}`);
 }
