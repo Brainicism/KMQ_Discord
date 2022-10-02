@@ -232,3 +232,8 @@ export const DataFiles = {
 };
 
 export const PERMISSIONS_LINK = "https://www.youtube.com/watch?v=87GW0SmF5LI";
+
+export const TEST_DB_CACHED_EXPORT = path.join(
+    __dirname,
+    "../sql_dumps/kmq-test-cached.sql"
+);
