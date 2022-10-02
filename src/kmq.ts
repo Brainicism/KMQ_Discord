@@ -21,10 +21,9 @@ import cluster from "cluster";
 import dbContext from "./database_context";
 import ejs from "ejs";
 import fastify from "fastify";
-import fastifyResponseCaching from "fastify-response-caching";
+import fastifyView from "@fastify/view";
 import os from "os";
 import path from "path";
-import pointOfView from "point-of-view";
 import schedule from "node-schedule";
 import storeDailyStats from "./scripts/store-daily-stats";
 import type { Options, Stats } from "eris-fleet";
@@ -158,13 +157,11 @@ function registerProcessEvents(fleet: Fleet): void {
  * */
 async function startWebServer(fleet: Fleet): Promise<void> {
     const httpServer = fastify({});
-    httpServer.register(pointOfView, {
+    httpServer.register(fastifyView, {
         engine: {
             ejs,
         },
     });
-
-    httpServer.register(fastifyResponseCaching, { ttl: 5000 });
 
     httpServer.post("/announce-restart", {}, async (request, reply) => {
         if (request.ip !== "127.0.0.1") {
@@ -346,7 +343,10 @@ async function startWebServer(fleet: Fleet): Promise<void> {
                 "WEB_SERVER_PORT not specified, not starting web server"
             );
         } else {
-            await httpServer.listen(process.env.WEB_SERVER_PORT, "0.0.0.0");
+            await httpServer.listen({
+                host: "0.0.0.0",
+                port: parseInt(process.env.WEB_SERVER_PORT, 10),
+            });
         }
     } catch (err) {
         logger.error(`Erroring starting HTTP server: ${err}`);
