@@ -1,4 +1,8 @@
-import { ExpBonusModifierValues } from "../../constants";
+import {
+    DEFAULT_ANSWER_TYPE,
+    ExpBonusModifierValues,
+    OptionAction,
+} from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -132,17 +136,43 @@ export default class AnswerCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "answer",
+                    name: OptionAction.SET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
                         "command.answer.help.interaction.description"
                     ),
-                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
-                    required: true,
-                    choices: Object.values(AnswerType).map((answerType) => ({
-                        name: answerType,
-                        value: answerType,
-                    })),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "answer",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.answer.help.interaction.description"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            required: true,
+                            choices: Object.values(AnswerType).map(
+                                (answerType) => ({
+                                    name: answerType,
+                                    value: answerType,
+                                })
+                            ),
+                        },
+                    ],
+                },
+                {
+                    name: OptionAction.RESET,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "misc.interaction.resetOption",
+                        { optionName: "answer" }
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [],
                 },
             ],
         },
@@ -209,13 +239,22 @@ export default class AnswerCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const { interactionOptions } = getInteractionValue(interaction);
-        const answerType = interactionOptions["answer"] as AnswerType;
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
 
-        await AnswerCommand.updateOption(
-            messageContext,
-            answerType,
-            interaction
-        );
+        const action = interactionName as OptionAction;
+        if (action === OptionAction.SET) {
+            await AnswerCommand.updateOption(
+                messageContext,
+                interactionOptions["answer"] as AnswerType,
+                interaction
+            );
+        } else if (action === OptionAction.RESET) {
+            await AnswerCommand.updateOption(
+                messageContext,
+                DEFAULT_ANSWER_TYPE,
+                interaction
+            );
+        }
     }
 }

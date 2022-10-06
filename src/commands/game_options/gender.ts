@@ -1,3 +1,4 @@
+import { DEFAULT_GENDER, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -109,18 +110,42 @@ export default class GenderCommand implements BaseCommand {
                 "command.gender.interaction.description"
             ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
-            options: [...Array(4).keys()].map((x) => ({
-                name: `gender_${x + 1}`,
-                description: LocalizationManager.localizer.translate(
-                    LocaleType.EN,
-                    "command.gender.interaction.description"
-                ),
-                type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
-                choices: Object.values(Gender).map((gender) => ({
-                    name: gender,
-                    value: gender,
-                })),
-            })),
+            options: [
+                {
+                    name: OptionAction.SET,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.gender.interaction.description"
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [...Array(4).keys()].map((x) => ({
+                        name: `gender_${x + 1}`,
+                        description: LocalizationManager.localizer.translate(
+                            LocaleType.EN,
+                            "command.gender.interaction.description"
+                        ),
+                        type: Eris.Constants.ApplicationCommandOptionTypes
+                            .STRING,
+                        choices: Object.values(Gender).map((gender) => ({
+                            name: gender,
+                            value: gender,
+                        })),
+                        required: x === 0,
+                    })),
+                },
+                {
+                    name: OptionAction.RESET,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "misc.interaction.resetOption",
+                        { optionName: "gender" }
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [],
+                },
+            ],
         },
     ];
 
@@ -252,14 +277,25 @@ export default class GenderCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const { interactionOptions } = getInteractionValue(interaction);
-        const selectedGenders: Array<Gender> =
-            Object.values(interactionOptions);
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
 
-        await GenderCommand.updateOption(
-            messageContext,
-            selectedGenders,
-            interaction
-        );
+        const action = interactionName as OptionAction;
+        if (action === OptionAction.SET) {
+            const selectedGenders: Array<Gender> =
+                Object.values(interactionOptions);
+
+            await GenderCommand.updateOption(
+                messageContext,
+                selectedGenders,
+                interaction
+            );
+        } else if (action === OptionAction.RESET) {
+            await GenderCommand.updateOption(
+                messageContext,
+                DEFAULT_GENDER,
+                interaction
+            );
+        }
     }
 }

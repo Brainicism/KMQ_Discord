@@ -166,6 +166,16 @@ export default class CutoffCommand implements BaseCommand {
                         } as any,
                     ],
                 },
+                {
+                    name: "reset",
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "misc.interaction.resetOption",
+                        { optionName: "cutoff" }
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                },
             ],
         },
     ];
@@ -213,7 +223,11 @@ export default class CutoffCommand implements BaseCommand {
                 Session.getSession(messageContext.guildID),
                 messageContext,
                 guildPreference,
-                [{ option: GameOption.CUTOFF, reset: true }]
+                [{ option: GameOption.CUTOFF, reset: true }],
+                null,
+                null,
+                null,
+                interaction
             );
 
             logger.info(
@@ -221,6 +235,8 @@ export default class CutoffCommand implements BaseCommand {
                     guildPreference.gameOptions.beginningYear
                 } - ${guildPreference.gameOptions.endYear}`
             );
+
+            return;
         }
 
         if (beginningYear && !endingYear) {
@@ -283,7 +299,7 @@ export default class CutoffCommand implements BaseCommand {
         if (interactionName === "range") {
             beginningYear = interactionOptions["beginning_year"];
             endingYear = interactionOptions["ending_year"];
-        } else {
+        } else if (interactionName === "earliest") {
             beginningYear = interactionOptions["beginning_year"];
         }
 

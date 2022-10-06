@@ -1,4 +1,4 @@
-import { DEFAULT_SUBUNIT_PREFERENCE } from "../../constants";
+import { DEFAULT_SUBUNIT_PREFERENCE, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -92,20 +92,45 @@ export default class SubunitsCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "subunits",
+                    name: OptionAction.SET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.subunits.help.description",
-                        { groups: `\`${process.env.BOT_PREFIX}groups\`` }
+                        "command.subunits.help.description"
                     ),
-                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
-                    required: true,
-                    choices: Object.values(SubunitsPreference).map(
-                        (subunitPreference) => ({
-                            name: subunitPreference,
-                            value: subunitPreference,
-                        })
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "subunits",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.subunits.help.description",
+                                    {
+                                        groups: `\`${process.env.BOT_PREFIX}groups\``,
+                                    }
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            required: true,
+                            choices: Object.values(SubunitsPreference).map(
+                                (subunitPreference) => ({
+                                    name: subunitPreference,
+                                    value: subunitPreference,
+                                })
+                            ),
+                        },
+                    ],
+                },
+                {
+                    name: OptionAction.RESET,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.subunits.help.description"
                     ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [],
                 },
             ],
         },
@@ -173,16 +198,22 @@ export default class SubunitsCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const { interactionOptions } = getInteractionValue(interaction);
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
 
-        const subunitsPreference = interactionOptions[
-            "subunits"
-        ] as SubunitsPreference;
-
-        await SubunitsCommand.updateOption(
-            messageContext,
-            subunitsPreference,
-            interaction
-        );
+        const action = interactionName as OptionAction;
+        if (action === OptionAction.SET) {
+            await SubunitsCommand.updateOption(
+                messageContext,
+                interactionOptions["subunits"] as SubunitsPreference,
+                interaction
+            );
+        } else if (action === OptionAction.RESET) {
+            await SubunitsCommand.updateOption(
+                messageContext,
+                null,
+                interaction
+            );
+        }
     }
 }

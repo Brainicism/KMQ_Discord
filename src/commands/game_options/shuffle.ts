@@ -2,6 +2,7 @@ import {
     DEFAULT_SHUFFLE,
     EMBED_ERROR_COLOR,
     ExpBonusModifierValues,
+    OptionAction,
 } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
@@ -102,17 +103,42 @@ export default class ShuffleCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "shuffle",
+                    name: OptionAction.SET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
                         "command.shuffle.help.description"
                     ),
-                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
-                    required: true,
-                    choices: Object.values(ShuffleType).map((shuffleType) => ({
-                        name: shuffleType,
-                        value: shuffleType,
-                    })),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "shuffle",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.shuffle.help.description"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            required: true,
+                            choices: Object.values(ShuffleType).map(
+                                (shuffleType) => ({
+                                    name: shuffleType,
+                                    value: shuffleType,
+                                })
+                            ),
+                        },
+                    ],
+                },
+                {
+                    name: OptionAction.RESET,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.shuffle.help.description"
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [],
                 },
             ],
         },
@@ -208,14 +234,23 @@ export default class ShuffleCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const { interactionOptions } = getInteractionValue(interaction);
-        const shuffleType = interactionOptions["shuffle"] as ShuffleType;
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
 
-        await ShuffleCommand.updateOption(
-            messageContext,
-            shuffleType,
-            interaction
-        );
+        const action = interactionName as OptionAction;
+        if (action === OptionAction.SET) {
+            await ShuffleCommand.updateOption(
+                messageContext,
+                interactionOptions["shuffle"] as ShuffleType,
+                interaction
+            );
+        } else if (action === OptionAction.RESET) {
+            await ShuffleCommand.updateOption(
+                messageContext,
+                DEFAULT_SHUFFLE,
+                interaction
+            );
+        }
     }
 
     resetPremium = async (guildPreference: GuildPreference): Promise<void> => {

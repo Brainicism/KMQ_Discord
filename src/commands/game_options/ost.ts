@@ -1,4 +1,4 @@
-import { DEFAULT_OST_PREFERENCE } from "../../constants";
+import { DEFAULT_OST_PREFERENCE, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -91,19 +91,42 @@ export default class OstCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "ost",
+                    name: OptionAction.SET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
                         "command.ost.help.description"
                     ),
-                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
-                    required: true,
-                    choices: Object.values(OstPreference).map(
-                        (ostPreference) => ({
-                            name: ostPreference,
-                            value: ostPreference,
-                        })
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "ost",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.ost.help.description"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            required: true,
+                            choices: Object.values(OstPreference).map(
+                                (ostPreference) => ({
+                                    name: ostPreference,
+                                    value: ostPreference,
+                                })
+                            ),
+                        },
+                    ],
+                },
+                {
+                    name: OptionAction.RESET,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.ost.help.description"
                     ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [],
                 },
             ],
         },
@@ -169,13 +192,22 @@ export default class OstCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const { interactionOptions } = getInteractionValue(interaction);
-        const ostPreference = interactionOptions["ost"] as OstPreference;
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
 
-        await OstCommand.updateOption(
-            messageContext,
-            ostPreference,
-            interaction
-        );
+        const action = interactionName as OptionAction;
+        if (action === OptionAction.SET) {
+            await OstCommand.updateOption(
+                messageContext,
+                interactionOptions["ost"] as OstPreference,
+                interaction
+            );
+        } else if (action === OptionAction.RESET) {
+            await OstCommand.updateOption(
+                messageContext,
+                DEFAULT_OST_PREFERENCE,
+                interaction
+            );
+        }
     }
 }

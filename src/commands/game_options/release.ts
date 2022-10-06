@@ -1,4 +1,4 @@
-import { DEFAULT_RELEASE_TYPE } from "../../constants";
+import { DEFAULT_RELEASE_TYPE, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -50,17 +50,42 @@ export default class ReleaseCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "release",
+                    name: OptionAction.SET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
                         "command.release.help.interaction.description"
                     ),
-                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
-                    required: true,
-                    choices: Object.values(ReleaseType).map((releaseType) => ({
-                        name: releaseType,
-                        value: releaseType,
-                    })),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "release",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.release.help.interaction.description"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            required: true,
+                            choices: Object.values(ReleaseType).map(
+                                (releaseType) => ({
+                                    name: releaseType,
+                                    value: releaseType,
+                                })
+                            ),
+                        },
+                    ],
+                },
+                {
+                    name: OptionAction.RESET,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.release.help.interaction.description"
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [],
                 },
             ],
         },
@@ -160,14 +185,22 @@ export default class ReleaseCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const { interactionOptions } = getInteractionValue(interaction);
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
 
-        const releaseType = interactionOptions["release"] as ReleaseType;
-
-        await ReleaseCommand.updateOption(
-            messageContext,
-            releaseType,
-            interaction
-        );
+        const action = interactionName as OptionAction;
+        if (action === OptionAction.SET) {
+            await ReleaseCommand.updateOption(
+                messageContext,
+                interactionOptions["release"] as ReleaseType,
+                interaction
+            );
+        } else if (action === OptionAction.RESET) {
+            await ReleaseCommand.updateOption(
+                messageContext,
+                DEFAULT_RELEASE_TYPE,
+                interaction
+            );
+        }
     }
 }

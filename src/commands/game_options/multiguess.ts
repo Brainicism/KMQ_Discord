@@ -1,4 +1,4 @@
-import { DEFAULT_MULTIGUESS_TYPE } from "../../constants";
+import { DEFAULT_MULTIGUESS_TYPE, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -82,19 +82,42 @@ export default class MultiGuessCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "multiguess",
+                    name: OptionAction.SET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
                         "command.multiguess.help.interaction.description"
                     ),
-                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
-                    required: true,
-                    choices: Object.values(MultiGuessType).map(
-                        (multiguessType) => ({
-                            name: multiguessType,
-                            value: multiguessType,
-                        })
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "multiguess",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.multiguess.help.interaction.description"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            required: true,
+                            choices: Object.values(MultiGuessType).map(
+                                (multiguessType) => ({
+                                    name: multiguessType,
+                                    value: multiguessType,
+                                })
+                            ),
+                        },
+                    ],
+                },
+                {
+                    name: OptionAction.RESET,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.multiguess.help.interaction.description"
                     ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [],
                 },
             ],
         },
@@ -160,16 +183,22 @@ export default class MultiGuessCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const { interactionOptions } = getInteractionValue(interaction);
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
 
-        const multiguessType = interactionOptions[
-            "multiguess"
-        ] as MultiGuessType;
-
-        await MultiGuessCommand.updateOption(
-            messageContext,
-            multiguessType,
-            interaction
-        );
+        const action = interactionName as OptionAction;
+        if (action === OptionAction.SET) {
+            await MultiGuessCommand.updateOption(
+                messageContext,
+                interactionOptions["multiguess"] as MultiGuessType,
+                interaction
+            );
+        } else if (action === OptionAction.RESET) {
+            await MultiGuessCommand.updateOption(
+                messageContext,
+                DEFAULT_MULTIGUESS_TYPE,
+                interaction
+            );
+        }
     }
 }

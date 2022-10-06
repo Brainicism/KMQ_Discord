@@ -1,4 +1,4 @@
-import { EMBED_ERROR_COLOR } from "../../constants";
+import { EMBED_ERROR_COLOR, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -120,17 +120,42 @@ export default class SpecialCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "special",
+                    name: OptionAction.SET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
                         "command.special.help.description"
                     ),
-                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
-                    required: false,
-                    choices: Object.values(SpecialType).map((specialType) => ({
-                        name: specialType,
-                        value: specialType,
-                    })),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "special",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.special.help.description"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            required: true,
+                            choices: Object.values(SpecialType).map(
+                                (specialType) => ({
+                                    name: specialType,
+                                    value: specialType,
+                                })
+                            ),
+                        },
+                    ],
+                },
+                {
+                    name: OptionAction.RESET,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.special.help.description"
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [],
                 },
             ],
         },
@@ -221,14 +246,23 @@ export default class SpecialCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const { interactionOptions } = getInteractionValue(interaction);
-        const specialType = interactionOptions["special"] as SpecialType;
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
 
-        await SpecialCommand.updateOption(
-            messageContext,
-            specialType,
-            interaction
-        );
+        const action = interactionName as OptionAction;
+        if (action === OptionAction.SET) {
+            await SpecialCommand.updateOption(
+                messageContext,
+                interactionOptions["special"] as SpecialType,
+                interaction
+            );
+        } else if (action === OptionAction.RESET) {
+            await SpecialCommand.updateOption(
+                messageContext,
+                null,
+                interaction
+            );
+        }
     }
 
     resetPremium = async (guildPreference: GuildPreference): Promise<void> => {
