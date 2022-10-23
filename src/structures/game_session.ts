@@ -405,7 +405,7 @@ export default class GameSession extends Session {
             round.roundMessageID = endRoundMessage?.id;
         }
 
-        this.updateBookmarkSongList();
+        this.updateBookmarkSongList(round);
         await super.endRound(messageContext);
 
         if (this.scoreboard.gameFinished(this.guildPreference)) {
