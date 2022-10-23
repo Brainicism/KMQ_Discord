@@ -797,10 +797,7 @@ export default abstract class Session {
         return true;
     }
 
-    protected updateBookmarkSongList(): void {
-        const round = this.round;
-        if (!round) return;
-
+    protected updateBookmarkSongList(round: Round): void {
         if (Object.keys(this.songMessageIDs).length === BOOKMARK_MESSAGE_SIZE) {
             this.songMessageIDs.shift();
         }
