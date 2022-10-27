@@ -223,50 +223,18 @@ async function validateDaisukiTableSchema(
     }
 }
 
-/**
- * Removes Daisuki export acknowledgement line
- * @param seedFilePath - the file path
- */
-export async function acknowledgeDaisukiExport(
-    seedFilePath: string
-): Promise<string> {
-    const seedFileContents = (
-        await fs.promises.readFile(seedFilePath, "utf-8")
-    ).split("\n");
-
-    const removedLine = seedFileContents.shift();
-
-    if (!removedLine.startsWith("REMOVE THIS LINE TO USE")) {
-        throw new Error(
-            "Unexpected first line of Daisuki backup. Expected 'REMOVE THIS LINE TO USE'"
-        );
-    }
-
-    const validatedSeedFilePath = `${seedFilePath}.validated`;
-    await fs.promises.writeFile(
-        validatedSeedFilePath,
-        seedFileContents.join("\n")
-    );
-
-    return validatedSeedFilePath;
-}
-
 async function validateSqlDump(
     db: DatabaseContext,
     mvSeedFilePath: string,
     bootstrap = false
-): Promise<string> {
-    const validatedSeedFilePath = await acknowledgeDaisukiExport(
-        mvSeedFilePath
-    );
-
+): Promise<void> {
     try {
         await db.agnostic.raw(
             "DROP DATABASE IF EXISTS kpop_videos_validation;"
         );
         await db.agnostic.raw("CREATE DATABASE kpop_videos_validation;");
         await exec(
-            `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${validatedSeedFilePath}`
+            `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${mvSeedFilePath}`
         );
 
         logger.info("Validating MV song count");
@@ -356,7 +324,6 @@ async function validateSqlDump(
 
     await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_validation;");
     logger.info("SQL dump validated successfully");
-    return validatedSeedFilePath;
 }
 
 async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
@@ -382,11 +349,7 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
 
     logger.info(`Validating SQL dump (${path.basename(dbSeedFilePath)})`);
 
-    const validatedSeedFilePath = await validateSqlDump(
-        db,
-        dbSeedFilePath,
-        bootstrap
-    );
+    await validateSqlDump(db, dbSeedFilePath, bootstrap);
 
     // importing dump into temporary database
     logger.info("Dropping K-Pop video temporary database");
@@ -395,7 +358,7 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
     await db.agnostic.raw("CREATE DATABASE kpop_videos_tmp;");
     logger.info("Seeding K-Pop video temporary database");
     await exec(
-        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_tmp < ${validatedSeedFilePath}`
+        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_tmp < ${dbSeedFilePath}`
     );
 
     // update table using data from temporary database, without downtime
