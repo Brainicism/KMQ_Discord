@@ -190,20 +190,20 @@ export default class ReleaseCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
+        let releaseValue: ReleaseType;
+
         const action = interactionName as OptionAction;
-        if (action === OptionAction.SET) {
-            await ReleaseCommand.updateOption(
-                messageContext,
-                interactionOptions["release"] as ReleaseType,
-                interaction
-            );
-        } else if (action === OptionAction.RESET) {
-            await ReleaseCommand.updateOption(
-                messageContext,
-                null,
-                interaction,
-                true
-            );
+        if (action === OptionAction.RESET) {
+            releaseValue = null;
+        } else if (action === OptionAction.SET) {
+            releaseValue = interactionOptions["release"] as ReleaseType;
         }
+
+        await ReleaseCommand.updateOption(
+            messageContext,
+            releaseValue,
+            interaction,
+            releaseValue == null
+        );
     }
 }

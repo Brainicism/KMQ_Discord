@@ -238,21 +238,21 @@ export default class ShuffleCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
+        let shuffleValue: ShuffleType;
+
         const action = interactionName as OptionAction;
-        if (action === OptionAction.SET) {
-            await ShuffleCommand.updateOption(
-                messageContext,
-                interactionOptions["shuffle"] as ShuffleType,
-                interaction
-            );
-        } else if (action === OptionAction.RESET) {
-            await ShuffleCommand.updateOption(
-                messageContext,
-                null,
-                interaction,
-                true
-            );
+        if (action === OptionAction.RESET) {
+            shuffleValue = null;
+        } else if (action === OptionAction.SET) {
+            shuffleValue = interactionOptions["shuffle"] as ShuffleType;
         }
+
+        await ShuffleCommand.updateOption(
+            messageContext,
+            shuffleValue,
+            interaction,
+            shuffleValue == null
+        );
     }
 
     resetPremium = async (guildPreference: GuildPreference): Promise<void> => {

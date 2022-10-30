@@ -231,20 +231,20 @@ export default class ArtistTypeCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
+        let artistTypeValue: ArtistType;
+
         const action = interactionName as OptionAction;
-        if (action === OptionAction.SET) {
-            await ArtistTypeCommand.updateOption(
-                messageContext,
-                interactionOptions["artisttype"] as ArtistType,
-                interaction
-            );
-        } else if (action === OptionAction.RESET) {
-            await ArtistTypeCommand.updateOption(
-                messageContext,
-                null,
-                interaction,
-                true
-            );
+        if (action === OptionAction.RESET) {
+            artistTypeValue = null;
+        } else if (action === OptionAction.SET) {
+            artistTypeValue = interactionOptions["artisttype"] as ArtistType;
         }
+
+        await ArtistTypeCommand.updateOption(
+            messageContext,
+            artistTypeValue,
+            interaction,
+            artistTypeValue == null
+        );
     }
 }

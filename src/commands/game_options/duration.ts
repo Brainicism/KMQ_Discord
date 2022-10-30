@@ -321,8 +321,13 @@ export default class DurationCommand implements BaseCommand {
             getInteractionValue(interaction);
 
         const action = interactionName as DurationActionInternal;
+        let durationValue: number;
 
-        const durationValue = interactionOptions["duration"];
+        if (action === DurationActionInternal.RESET) {
+            durationValue = null;
+        } else {
+            durationValue = interactionOptions["duration"];
+        }
 
         await DurationCommand.updateOption(
             messageContext,

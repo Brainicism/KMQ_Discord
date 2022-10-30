@@ -197,20 +197,20 @@ export default class OstCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
+        let ostValue: OstPreference;
+
         const action = interactionName as OptionAction;
-        if (action === OptionAction.SET) {
-            await OstCommand.updateOption(
-                messageContext,
-                interactionOptions["ost"] as OstPreference,
-                interaction
-            );
-        } else if (action === OptionAction.RESET) {
-            await OstCommand.updateOption(
-                messageContext,
-                null,
-                interaction,
-                true
-            );
+        if (action === OptionAction.RESET) {
+            ostValue = null;
+        } else if (action === OptionAction.SET) {
+            ostValue = interactionOptions["ost"] as OstPreference;
         }
+
+        await OstCommand.updateOption(
+            messageContext,
+            ostValue,
+            interaction,
+            ostValue == null
+        );
     }
 }

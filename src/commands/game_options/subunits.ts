@@ -203,20 +203,22 @@ export default class SubunitsCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
+        let subunitsValue: SubunitsPreference;
+
         const action = interactionName as OptionAction;
-        if (action === OptionAction.SET) {
-            await SubunitsCommand.updateOption(
-                messageContext,
-                interactionOptions["subunits"] as SubunitsPreference,
-                interaction
-            );
-        } else if (action === OptionAction.RESET) {
-            await SubunitsCommand.updateOption(
-                messageContext,
-                null,
-                interaction,
-                true
-            );
+        if (action === OptionAction.RESET) {
+            subunitsValue = null;
+        } else if (action === OptionAction.SET) {
+            subunitsValue = interactionOptions[
+                "subunits"
+            ] as SubunitsPreference;
         }
+
+        await SubunitsCommand.updateOption(
+            messageContext,
+            subunitsValue,
+            interaction,
+            subunitsValue == null
+        );
     }
 }

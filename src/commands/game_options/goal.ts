@@ -246,21 +246,20 @@ export default class GoalCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
+        let goalValue: number;
+
         const action = interactionName as OptionAction;
-        if (action === OptionAction.SET) {
-            await GoalCommand.updateOption(
-                messageContext,
-                interactionOptions["goal"] as number,
-                interaction,
-                false
-            );
-        } else if (action === OptionAction.RESET) {
-            await GoalCommand.updateOption(
-                messageContext,
-                null,
-                interaction,
-                true
-            );
+        if (action === OptionAction.RESET) {
+            goalValue = null;
+        } else if (action === OptionAction.SET) {
+            goalValue = interactionOptions["goal"] as number;
         }
+
+        await GoalCommand.updateOption(
+            messageContext,
+            goalValue,
+            interaction,
+            goalValue == null
+        );
     }
 }

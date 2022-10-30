@@ -1,5 +1,5 @@
-import { DEFAULT_GENDER, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { OptionAction } from "../../constants";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -283,23 +283,20 @@ export default class GenderCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
-        const action = interactionName as OptionAction;
-        if (action === OptionAction.SET) {
-            const selectedGenders: Array<Gender> =
-                Object.values(interactionOptions);
+        let selectedGenders: Array<Gender>;
 
-            await GenderCommand.updateOption(
-                messageContext,
-                selectedGenders,
-                interaction
-            );
-        } else if (action === OptionAction.RESET) {
-            await GenderCommand.updateOption(
-                messageContext,
-                null,
-                interaction,
-                true
-            );
+        const action = interactionName as OptionAction;
+        if (action === OptionAction.RESET) {
+            selectedGenders = null;
+        } else if (action === OptionAction.SET) {
+            selectedGenders = Object.values(interactionOptions);
         }
+
+        await GenderCommand.updateOption(
+            messageContext,
+            selectedGenders,
+            interaction,
+            selectedGenders == null
+        );
     }
 }

@@ -239,20 +239,19 @@ export default class AnswerCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
+        let answerType: AnswerType;
         const action = interactionName as OptionAction;
-        if (action === OptionAction.SET) {
-            await AnswerCommand.updateOption(
-                messageContext,
-                interactionOptions["answer"] as AnswerType,
-                interaction
-            );
-        } else if (action === OptionAction.RESET) {
-            await AnswerCommand.updateOption(
-                messageContext,
-                null,
-                interaction,
-                true
-            );
+        if (action === OptionAction.RESET) {
+            answerType = null;
+        } else if (action === OptionAction.SET) {
+            answerType = interactionOptions["answer"] as AnswerType;
         }
+
+        await AnswerCommand.updateOption(
+            messageContext,
+            answerType,
+            interaction,
+            answerType == null
+        );
     }
 }

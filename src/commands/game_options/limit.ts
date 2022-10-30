@@ -304,6 +304,9 @@ export default class LimitCommand implements BaseCommand {
         } else if (interactionName === "earliest") {
             limitStart = 0;
             limitEnd = interactionOptions["limit"];
+        } else {
+            limitStart = null;
+            limitEnd = null;
         }
 
         await LimitCommand.updateOption(

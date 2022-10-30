@@ -188,20 +188,22 @@ export default class MultiGuessCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
+        let multiguessValue: MultiGuessType;
+
         const action = interactionName as OptionAction;
-        if (action === OptionAction.SET) {
-            await MultiGuessCommand.updateOption(
-                messageContext,
-                interactionOptions["multiguess"] as MultiGuessType,
-                interaction
-            );
-        } else if (action === OptionAction.RESET) {
-            await MultiGuessCommand.updateOption(
-                messageContext,
-                null,
-                interaction,
-                true
-            );
+        if (action === OptionAction.RESET) {
+            multiguessValue = null;
+        } else if (action === OptionAction.SET) {
+            multiguessValue = interactionOptions[
+                "multiguess"
+            ] as MultiGuessType;
         }
+
+        await MultiGuessCommand.updateOption(
+            messageContext,
+            multiguessValue,
+            interaction,
+            multiguessValue == null
+        );
     }
 }

@@ -200,20 +200,20 @@ export default class GuessModeCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
+        let guessModeValue: GuessModeType;
+
         const action = interactionName as OptionAction;
-        if (action === OptionAction.SET) {
-            await GuessModeCommand.updateOption(
-                messageContext,
-                interactionOptions["guessmode"] as GuessModeType,
-                interaction
-            );
-        } else if (action === OptionAction.RESET) {
-            await GuessModeCommand.updateOption(
-                messageContext,
-                null,
-                interaction,
-                true
-            );
+        if (action === OptionAction.RESET) {
+            guessModeValue = null;
+        } else if (action === OptionAction.SET) {
+            guessModeValue = interactionOptions["guessmode"] as GuessModeType;
         }
+
+        await GuessModeCommand.updateOption(
+            messageContext,
+            guessModeValue,
+            interaction,
+            guessModeValue == null
+        );
     }
 }

@@ -180,8 +180,17 @@ export default class ExcludeCommand implements BaseCommand {
         const action = interactionName as GroupAction;
         const enteredGroupNames = Object.values(interactionOptions);
 
-        const { matchedGroups, unmatchedGroups } =
-            getMatchedArtists(enteredGroupNames);
+        let matchedGroups: Array<MatchedArtist>;
+        let unmatchedGroups: Array<string>;
+        if (action === GroupAction.RESET) {
+            matchedGroups = null;
+            unmatchedGroups = null;
+        } else {
+            const groups = getMatchedArtists(enteredGroupNames);
+
+            matchedGroups = groups.matchedGroups;
+            unmatchedGroups = groups.unmatchedGroups;
+        }
 
         if (action === GroupAction.ADD) {
             await AddCommand.updateOption(
@@ -197,13 +206,13 @@ export default class ExcludeCommand implements BaseCommand {
                 enteredGroupNames,
                 interaction
             );
-        } else {
+        } else if (action === GroupAction.RESET) {
             await ExcludeCommand.updateOption(
                 messageContext,
                 matchedGroups,
                 unmatchedGroups,
                 interaction,
-                action === GroupAction.RESET
+                true
             );
         }
     }

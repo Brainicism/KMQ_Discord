@@ -196,20 +196,20 @@ export default class SeekCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
+        let seekValue: SeekType;
+
         const action = interactionName as OptionAction;
-        if (action === OptionAction.SET) {
-            await SeekCommand.updateOption(
-                messageContext,
-                interactionOptions["seek"] as SeekType,
-                interaction
-            );
-        } else if (action === OptionAction.RESET) {
-            await SeekCommand.updateOption(
-                messageContext,
-                null,
-                interaction,
-                true
-            );
+        if (action === OptionAction.RESET) {
+            seekValue = null;
+        } else if (action === OptionAction.SET) {
+            seekValue = interactionOptions["seek"] as SeekType;
         }
+
+        await SeekCommand.updateOption(
+            messageContext,
+            seekValue,
+            interaction,
+            seekValue == null
+        );
     }
 }

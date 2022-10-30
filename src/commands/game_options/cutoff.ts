@@ -1,6 +1,7 @@
 import {
     DEFAULT_BEGINNING_SEARCH_YEAR,
     DEFAULT_ENDING_SEARCH_YEAR,
+    OptionAction,
 } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
@@ -310,7 +311,10 @@ export default class CutoffCommand implements BaseCommand {
 
         let beginningYear: number;
         let endingYear: number;
-        if (interactionName === "range") {
+        if (interactionName === OptionAction.RESET) {
+            beginningYear = null;
+            endingYear = null;
+        } else if (interactionName === "range") {
             beginningYear = interactionOptions["beginning_year"];
             endingYear = interactionOptions["ending_year"];
         } else if (interactionName === "earliest") {

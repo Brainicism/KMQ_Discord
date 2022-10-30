@@ -1,5 +1,5 @@
-import { DEFAULT_LANGUAGE, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { OptionAction } from "../../constants";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -187,20 +187,20 @@ export default class LanguageCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
+        let languageValue: LanguageType;
+
         const action = interactionName as OptionAction;
-        if (action === OptionAction.SET) {
-            await LanguageCommand.updateOption(
-                messageContext,
-                interactionOptions["language"] as LanguageType,
-                interaction
-            );
-        } else if (action === OptionAction.RESET) {
-            await LanguageCommand.updateOption(
-                messageContext,
-                null,
-                interaction,
-                true
-            );
+        if (action === OptionAction.RESET) {
+            languageValue = null;
+        } else if (action === OptionAction.SET) {
+            languageValue = interactionOptions["language"] as LanguageType;
         }
+
+        await LanguageCommand.updateOption(
+            messageContext,
+            languageValue,
+            interaction,
+            languageValue == null
+        );
     }
 }

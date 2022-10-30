@@ -251,21 +251,21 @@ export default class SpecialCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
+        let specialValue: SpecialType;
+
         const action = interactionName as OptionAction;
-        if (action === OptionAction.SET) {
-            await SpecialCommand.updateOption(
-                messageContext,
-                interactionOptions["special"] as SpecialType,
-                interaction
-            );
-        } else if (action === OptionAction.RESET) {
-            await SpecialCommand.updateOption(
-                messageContext,
-                null,
-                interaction,
-                true
-            );
+        if (action === OptionAction.RESET) {
+            specialValue = null;
+        } else if (action === OptionAction.SET) {
+            specialValue = interactionOptions["special"] as SpecialType;
         }
+
+        await SpecialCommand.updateOption(
+            messageContext,
+            specialValue,
+            interaction,
+            specialValue == null
+        );
     }
 
     resetPremium = async (guildPreference: GuildPreference): Promise<void> => {

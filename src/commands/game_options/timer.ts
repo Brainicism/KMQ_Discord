@@ -194,20 +194,20 @@ export default class GuessTimeoutCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
+        let timerValue: number;
+
         const action = interactionName as OptionAction;
-        if (action === OptionAction.SET) {
-            await GuessTimeoutCommand.updateOption(
-                messageContext,
-                interactionOptions["timer"] as number,
-                interaction
-            );
-        } else if (action === OptionAction.RESET) {
-            await GuessTimeoutCommand.updateOption(
-                messageContext,
-                null,
-                interaction,
-                true
-            );
+        if (action === OptionAction.RESET) {
+            timerValue = null;
+        } else if (action === OptionAction.SET) {
+            timerValue = interactionOptions["timer"] as number;
         }
+
+        await GuessTimeoutCommand.updateOption(
+            messageContext,
+            timerValue,
+            interaction,
+            timerValue == null
+        );
     }
 }
