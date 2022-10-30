@@ -296,6 +296,7 @@ export default class GameSession extends Session {
         }
 
         const round = this.round;
+        await super.endRound(messageContext);
 
         round.interactionMarkAnswers(guessResult.correctGuessers?.length);
 
@@ -316,6 +317,7 @@ export default class GameSession extends Session {
 
             this.guessTimes.push(timePlayed);
             await this.updateScoreboard(
+                round,
                 guessResult,
                 this.guildPreference,
                 timePlayed,
@@ -405,8 +407,7 @@ export default class GameSession extends Session {
             round.roundMessageID = endRoundMessage?.id;
         }
 
-        this.updateBookmarkSongList();
-        await super.endRound(messageContext);
+        this.updateBookmarkSongList(round);
 
         if (this.scoreboard.gameFinished(this.guildPreference)) {
             this.endSession();
@@ -1338,13 +1339,13 @@ export default class GameSession extends Session {
     }
 
     private async updateScoreboard(
+        round: GameRound,
         guessResult: GuessResult,
         guildPreference: GuildPreference,
         timePlayed: number,
         messageContext: MessageContext
     ): Promise<void> {
         // update scoreboard
-        const round = this.round;
         const lastGuesserStreak = this.lastGuesser.streak;
         const playerRoundResults = await Promise.all(
             guessResult.correctGuessers.map(async (correctGuesser, idx) => {

@@ -19,8 +19,8 @@ const exec = util.promisify(cp.exec);
 
 config({ path: path.resolve(__dirname, "../../.env") });
 const SQL_DUMP_EXPIRY = 10;
-const mvFileUrl = "http://kpop.daisuki.com.br/download.php?file=full";
-const audioFileUrl = "http://kpop.daisuki.com.br/download.php?file=audio";
+const daisukiDbDownloadUrl =
+    "http://kpop.daisuki.com.br/download.php?file=full";
 
 const logger = new IPCLogger("seed_db");
 
@@ -133,23 +133,14 @@ export async function loadStoredProcedures(): Promise<void> {
 
 const downloadDb = async (): Promise<void> => {
     const mvOutput = `${DATABASE_DOWNLOAD_DIR}/mv-download.zip`;
-    const audioOutput = `${DATABASE_DOWNLOAD_DIR}/audio-download.zip`;
-    const mvResp = await Axios.get(mvFileUrl, {
+    const daisukiDownloadResp = await Axios.get(daisukiDbDownloadUrl, {
         responseType: "arraybuffer",
         headers: {
             "User-Agent": "KMQ (K-pop Music Quiz)",
         },
     });
 
-    const audioResp = await Axios.get(audioFileUrl, {
-        responseType: "arraybuffer",
-        headers: {
-            "User-Agent": "KMQ (K-pop Music Quiz)",
-        },
-    });
-
-    await fs.promises.writeFile(mvOutput, mvResp.data, { encoding: null });
-    await fs.promises.writeFile(audioOutput, audioResp.data, {
+    await fs.promises.writeFile(mvOutput, daisukiDownloadResp.data, {
         encoding: null,
     });
     logger.info("Downloaded Daisuki database archive");
@@ -161,16 +152,13 @@ async function extractDb(): Promise<void> {
         `unzip -oq ${DATABASE_DOWNLOAD_DIR}/mv-download.zip -d ${DATABASE_DOWNLOAD_DIR}/`
     );
 
-    await exec(
-        `unzip -oq ${DATABASE_DOWNLOAD_DIR}/audio-download.zip -d ${DATABASE_DOWNLOAD_DIR}/`
-    );
     logger.info("Extracted Daisuki database");
 }
 
 async function recordDaisukiTableSchema(db: DatabaseContext): Promise<void> {
     const frozenTableColumnNames = {};
     await Promise.allSettled(
-        ["app_kpop", "app_kpop_audio", "app_kpop_group"].map(async (table) => {
+        ["app_kpop", "app_kpop_group"].map(async (table) => {
             const commaSeparatedColumnNames = (
                 await db.agnostic.raw(
                     `SELECT group_concat(COLUMN_NAME) as x FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'kpop_videos' AND TABLE_NAME = '${table}';`
@@ -194,7 +182,7 @@ async function validateDaisukiTableSchema(
 ): Promise<void> {
     const outputMessages = [];
     await Promise.allSettled(
-        ["app_kpop", "app_kpop_audio", "app_kpop_group"].map(async (table) => {
+        ["app_kpop", "app_kpop_group"].map(async (table) => {
             const commaSeparatedColumnNames = (
                 await db.agnostic.raw(
                     `SELECT group_concat(COLUMN_NAME) as x FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'kpop_videos_validation' AND TABLE_NAME = '${table}';`
@@ -238,7 +226,6 @@ async function validateDaisukiTableSchema(
 async function validateSqlDump(
     db: DatabaseContext,
     mvSeedFilePath: string,
-    audioSeedFilePath: string,
     bootstrap = false
 ): Promise<void> {
     try {
@@ -250,24 +237,27 @@ async function validateSqlDump(
             `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${mvSeedFilePath}`
         );
 
-        await exec(
-            `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${audioSeedFilePath}`
-        );
         logger.info("Validating MV song count");
         const mvSongCount = (
             await db
                 .kpopVideosValidation("app_kpop")
                 .count("* as count")
+                .where("is_audio", "=", "n")
                 .first()
         ).count;
+
+        logger.info(`Found ${mvSongCount} music videos`);
 
         logger.info("Validating audio-only song count");
         const audioSongCount = (
             await db
-                .kpopVideosValidation("app_kpop_audio")
+                .kpopVideosValidation("app_kpop")
                 .count("* as count")
+                .where("is_audio", "=", "y")
                 .first()
         ).count;
+
+        logger.info(`Found ${audioSongCount} audio-only videos`);
 
         logger.info("Validating group count");
         const artistCount = (
@@ -276,6 +266,8 @@ async function validateSqlDump(
                 .count("* as count")
                 .first()
         ).count;
+
+        logger.info(`Found ${artistCount} artists`);
 
         if (
             mvSongCount < 10000 ||
@@ -319,7 +311,9 @@ async function validateSqlDump(
             );
         }
     } catch (e) {
-        throw new Error(`SQL dump validation failed. ${e.sqlMessage}`);
+        throw new Error(
+            `SQL dump validation failed. ${e.sqlMessage || e.stderr || e}`
+        );
     }
 
     if (await pathExists(DataFiles.FROZEN_TABLE_SCHEMA)) {
@@ -345,29 +339,17 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
         await fs.promises.readdir(`${DATABASE_DOWNLOAD_DIR}`)
     ).filter((x) => x.endsWith(".sql"));
 
-    const mvSeedFile = sqlFiles
+    const dbSeedFile = sqlFiles
         .filter((x) => x.endsWith(".sql") && x.startsWith("mainbackup_"))
         .slice(-1)[0];
 
-    const audioSeedFile = sqlFiles
-        .filter((x) => x.endsWith(".sql") && x.startsWith("audiobackup_"))
-        .slice(-1)[0];
-
-    const mvSeedFilePath = bootstrap
+    const dbSeedFilePath = bootstrap
         ? `${DATABASE_DOWNLOAD_DIR}/bootstrap.sql`
-        : `${DATABASE_DOWNLOAD_DIR}/${mvSeedFile}`;
+        : `${DATABASE_DOWNLOAD_DIR}/${dbSeedFile}`;
 
-    const audioSeedFilePath = bootstrap
-        ? `${DATABASE_DOWNLOAD_DIR}/bootstrap-audio.sql`
-        : `${DATABASE_DOWNLOAD_DIR}/${audioSeedFile}`;
+    logger.info(`Validating SQL dump (${path.basename(dbSeedFilePath)})`);
 
-    logger.info(
-        `Validating SQL dump (${path.basename(
-            mvSeedFilePath
-        )} and ${path.basename(audioSeedFilePath)})`
-    );
-
-    await validateSqlDump(db, mvSeedFilePath, audioSeedFilePath, bootstrap);
+    await validateSqlDump(db, dbSeedFilePath, bootstrap);
 
     // importing dump into temporary database
     logger.info("Dropping K-Pop video temporary database");
@@ -376,11 +358,7 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
     await db.agnostic.raw("CREATE DATABASE kpop_videos_tmp;");
     logger.info("Seeding K-Pop video temporary database");
     await exec(
-        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_tmp < ${mvSeedFilePath}`
-    );
-
-    await exec(
-        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_tmp < ${audioSeedFilePath}`
+        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_tmp < ${dbSeedFilePath}`
     );
 
     // update table using data from temporary database, without downtime

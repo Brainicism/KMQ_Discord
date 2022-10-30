@@ -159,7 +159,7 @@ export default async function messageCreateHandler(
                 });
             }
         }
-    } else if (session?.isGameSession() && session.round) {
+    } else if (session?.isGameSession()) {
         session.guessSong(messageContext, message.content);
     }
 }

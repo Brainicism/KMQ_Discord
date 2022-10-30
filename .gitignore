@@ -4,7 +4,8 @@ main.db
 src/config/debug_settings.json
 logs/
 build/
-sql_dumps/
+sql_dumps/backups
+sql_dumps/daisuki
 news.md
 tmp/
 tsconfig.tsbuildinfo

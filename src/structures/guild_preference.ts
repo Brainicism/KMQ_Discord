@@ -17,11 +17,13 @@ import {
     GameOptionInternal,
 } from "../constants";
 import { IPCLogger } from "../logger";
+import { Mutex } from "async-mutex";
 import AnswerType from "../enums/option_types/answer_type";
 import GameOption from "../enums/game_option_name";
 import Gender from "../enums/option_types/gender";
 import _ from "lodash";
 import dbContext from "../database_context";
+import type { MutexInterface } from "async-mutex";
 import type { PlaylistMetadata } from "src/helpers/spotify_manager";
 import type ArtistType from "../enums/option_types/artist_type";
 import type GameOptions from "../interfaces/game_options";
@@ -197,6 +199,9 @@ export default class GuildPreference {
     /** The guild preference cache */
     private static guildPreferencesCache = {};
 
+    /** Locks for generating GuildPreference */
+    private static locks: Map<string, MutexInterface> = new Map();
+
     constructor(guildID: string, options?: GameOptions) {
         this.guildID = guildID;
         this.gameOptions = options || { ...GuildPreference.DEFAULT_OPTIONS };
@@ -224,39 +229,47 @@ export default class GuildPreference {
     }
 
     static async getGuildPreference(guildID: string): Promise<GuildPreference> {
-        if (guildID in GuildPreference.guildPreferencesCache) {
-            return GuildPreference.guildPreferencesCache[guildID];
+        if (!this.locks.has(guildID)) {
+            this.locks.set(guildID, new Mutex());
         }
 
-        const guildPreferences = await dbContext
-            .kmq("guilds")
-            .select("*")
-            .where("guild_id", "=", guildID);
+        return this.locks.get(guildID).runExclusive(async () => {
+            if (guildID in GuildPreference.guildPreferencesCache) {
+                return GuildPreference.guildPreferencesCache[guildID];
+            }
 
-        if (guildPreferences.length === 0) {
-            const guildPreference = GuildPreference.fromGuild(guildID);
-            await dbContext
+            const guildPreferences = await dbContext
                 .kmq("guilds")
-                .insert({ guild_id: guildID, join_date: new Date() });
+                .select("*")
+                .where("guild_id", "=", guildID);
+
+            if (guildPreferences.length === 0) {
+                const guildPreference = GuildPreference.fromGuild(guildID);
+                await dbContext
+                    .kmq("guilds")
+                    .insert({ guild_id: guildID, join_date: new Date() });
+                return guildPreference;
+            }
+
+            const gameOptionPairs = (
+                await dbContext.kmq("game_options").select("*").where({
+                    guild_id: guildID,
+                    client_id: process.env.BOT_CLIENT_ID,
+                })
+            )
+                .map((x) => ({
+                    [x["option_name"]]: JSON.parse(x["option_value"]),
+                }))
+                .reduce((total, curr) => Object.assign(total, curr), {});
+
+            const guildPreference = GuildPreference.fromGuild(
+                guildPreferences[0].guild_id,
+                gameOptionPairs
+            );
+
+            GuildPreference.guildPreferencesCache[guildID] = guildPreference;
             return guildPreference;
-        }
-
-        const gameOptionPairs = (
-            await dbContext.kmq("game_options").select("*").where({
-                guild_id: guildID,
-                client_id: process.env.BOT_CLIENT_ID,
-            })
-        )
-            .map((x) => ({ [x["option_name"]]: JSON.parse(x["option_value"]) }))
-            .reduce((total, curr) => Object.assign(total, curr), {});
-
-        const guildPreference = GuildPreference.fromGuild(
-            guildPreferences[0].guild_id,
-            gameOptionPairs
-        );
-
-        GuildPreference.guildPreferencesCache[guildID] = guildPreference;
-        return guildPreference;
+        });
     }
 
     /**

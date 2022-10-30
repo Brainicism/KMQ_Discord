@@ -253,3 +253,8 @@ export enum OptionAction {
     SET = "set",
     RESET = "reset",
 }
+
+export const TEST_DB_CACHED_EXPORT = path.join(
+    __dirname,
+    "../sql_dumps/kmq-test-cached.sql"
+);
