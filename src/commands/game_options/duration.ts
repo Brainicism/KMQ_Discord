@@ -219,7 +219,9 @@ export default class DurationCommand implements BaseCommand {
         await DurationCommand.updateOption(
             MessageContext.fromMessage(message),
             durationActionInternal,
-            durationValue
+            durationValue,
+            null,
+            durationActionInternal === DurationActionInternal.RESET
         );
     };
 
@@ -227,14 +229,15 @@ export default class DurationCommand implements BaseCommand {
         messageContext: MessageContext,
         action: DurationActionInternal,
         durationValue?: number,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
         let finalDuration: number = null;
-        if (action === DurationActionInternal.RESET) {
+        if (reset) {
             await guildPreference.reset(GameOption.DURATION);
             logger.info(
                 `${getDebugLogHeader(messageContext)} | Duration disabled.`
@@ -325,7 +328,8 @@ export default class DurationCommand implements BaseCommand {
             messageContext,
             action,
             durationValue,
-            interaction
+            interaction,
+            action === DurationActionInternal.RESET
         );
     }
 }

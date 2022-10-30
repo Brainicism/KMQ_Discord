@@ -137,20 +137,22 @@ export default class ReleaseCommand implements BaseCommand {
 
         await ReleaseCommand.updateOption(
             MessageContext.fromMessage(message),
-            releaseType
+            releaseType,
+            null,
+            releaseType == null
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         releaseType: ReleaseType,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
-        const reset = releaseType == null;
         if (reset) {
             await guildPreference.reset(GameOption.RELEASE_TYPE);
             logger.info(
@@ -198,8 +200,9 @@ export default class ReleaseCommand implements BaseCommand {
         } else if (action === OptionAction.RESET) {
             await ReleaseCommand.updateOption(
                 messageContext,
-                DEFAULT_RELEASE_TYPE,
-                interaction
+                null,
+                interaction,
+                true
             );
         }
     }

@@ -144,20 +144,22 @@ export default class OstCommand implements BaseCommand {
 
         await OstCommand.updateOption(
             MessageContext.fromMessage(message),
-            ostPreference
+            ostPreference,
+            null,
+            ostPreference == null
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         ostPreference: OstPreference,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
-        const reset = ostPreference == null;
         if (reset) {
             await guildPreference.reset(GameOption.OST_PREFERENCE);
             logger.info(
@@ -205,8 +207,9 @@ export default class OstCommand implements BaseCommand {
         } else if (action === OptionAction.RESET) {
             await OstCommand.updateOption(
                 messageContext,
-                DEFAULT_OST_PREFERENCE,
-                interaction
+                null,
+                interaction,
+                true
             );
         }
     }

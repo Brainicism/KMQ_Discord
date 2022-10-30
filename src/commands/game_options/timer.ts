@@ -128,20 +128,22 @@ export default class GuessTimeoutCommand implements BaseCommand {
 
         await GuessTimeoutCommand.updateOption(
             MessageContext.fromMessage(message),
-            timer
+            timer,
+            null,
+            timer == null
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         timer: number,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
-        const reset = timer == null;
         const session = Session.getSession(messageContext.guildID);
 
         if (reset) {
@@ -203,7 +205,8 @@ export default class GuessTimeoutCommand implements BaseCommand {
             await GuessTimeoutCommand.updateOption(
                 messageContext,
                 null,
-                interaction
+                interaction,
+                true
             );
         }
     }

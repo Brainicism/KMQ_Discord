@@ -135,20 +135,22 @@ export default class MultiGuessCommand implements BaseCommand {
 
         await MultiGuessCommand.updateOption(
             MessageContext.fromMessage(message),
-            multiGuessType
+            multiGuessType,
+            null,
+            multiGuessType == null
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         multiguessType: MultiGuessType,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
-        const reset = multiguessType === null;
         if (reset) {
             await guildPreference.reset(GameOption.MULTIGUESS);
             logger.info(
@@ -196,8 +198,9 @@ export default class MultiGuessCommand implements BaseCommand {
         } else if (action === OptionAction.RESET) {
             await MultiGuessCommand.updateOption(
                 messageContext,
-                DEFAULT_MULTIGUESS_TYPE,
-                interaction
+                null,
+                interaction,
+                true
             );
         }
     }

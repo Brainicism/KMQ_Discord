@@ -301,7 +301,7 @@ export default class LimitCommand implements BaseCommand {
             limitStart = interactionOptions["limit_start"];
 
             limitEnd = interactionOptions["limit_end"];
-        } else {
+        } else if (interactionName === "earliest") {
             limitStart = 0;
             limitEnd = interactionOptions["limit"];
         }

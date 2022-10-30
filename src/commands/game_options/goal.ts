@@ -127,14 +127,17 @@ export default class GoalCommand implements BaseCommand {
 
         await GoalCommand.updateOption(
             MessageContext.fromMessage(message),
-            userGoal
+            userGoal,
+            null,
+            userGoal == null
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         userGoal: number,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
@@ -206,8 +209,6 @@ export default class GoalCommand implements BaseCommand {
             }
         }
 
-        const reset = userGoal == null;
-
         if (reset) {
             await guildPreference.reset(GameOption.GOAL);
             logger.info(
@@ -250,10 +251,16 @@ export default class GoalCommand implements BaseCommand {
             await GoalCommand.updateOption(
                 messageContext,
                 interactionOptions["goal"] as number,
-                interaction
+                interaction,
+                false
             );
         } else if (action === OptionAction.RESET) {
-            await GoalCommand.updateOption(messageContext, null, interaction);
+            await GoalCommand.updateOption(
+                messageContext,
+                null,
+                interaction,
+                true
+            );
         }
     }
 }

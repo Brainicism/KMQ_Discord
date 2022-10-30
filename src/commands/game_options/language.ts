@@ -134,20 +134,22 @@ export default class LanguageCommand implements BaseCommand {
 
         await LanguageCommand.updateOption(
             MessageContext.fromMessage(message),
-            languageType
+            languageType,
+            null,
+            languageType == null
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         languageType: LanguageType,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
-        const reset = languageType == null;
         if (reset) {
             await guildPreference.reset(GameOption.LANGUAGE_TYPE);
             logger.info(
@@ -195,8 +197,9 @@ export default class LanguageCommand implements BaseCommand {
         } else if (action === OptionAction.RESET) {
             await LanguageCommand.updateOption(
                 messageContext,
-                DEFAULT_LANGUAGE,
-                interaction
+                null,
+                interaction,
+                true
             );
         }
     }

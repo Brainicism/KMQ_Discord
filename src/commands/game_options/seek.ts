@@ -143,20 +143,22 @@ export default class SeekCommand implements BaseCommand {
 
         await SeekCommand.updateOption(
             MessageContext.fromMessage(message),
-            seekType
+            seekType,
+            null,
+            seekType == null
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         seekType: SeekType,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
-        const reset = seekType == null;
         if (reset) {
             await guildPreference.reset(GameOption.SEEK_TYPE);
             logger.info(
@@ -204,8 +206,9 @@ export default class SeekCommand implements BaseCommand {
         } else if (action === OptionAction.RESET) {
             await SeekCommand.updateOption(
                 messageContext,
-                DEFAULT_SEEK,
-                interaction
+                null,
+                interaction,
+                true
             );
         }
     }

@@ -141,7 +141,10 @@ export default class IncludeCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             await IncludeCommand.updateOption(
                 MessageContext.fromMessage(message),
-                GroupAction.RESET
+                null,
+                null,
+                null,
+                true
             );
             return;
         }
@@ -156,7 +159,6 @@ export default class IncludeCommand implements BaseCommand {
 
         await IncludeCommand.updateOption(
             MessageContext.fromMessage(message),
-            GroupAction.SET,
             matchedGroups,
             unmatchedGroups
         );
@@ -164,16 +166,15 @@ export default class IncludeCommand implements BaseCommand {
 
     static async updateOption(
         messageContext: MessageContext,
-        action: GroupAction,
         matchedGroups?: MatchedArtist[],
         unmatchedGroups?: string[],
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
-        const reset = action === GroupAction.RESET;
         if (reset) {
             await guildPreference.reset(GameOption.INCLUDE);
             logger.info(
@@ -393,10 +394,10 @@ export default class IncludeCommand implements BaseCommand {
         } else {
             await IncludeCommand.updateOption(
                 messageContext,
-                action,
                 matchedGroups,
                 unmatchedGroups,
-                interaction
+                interaction,
+                action === GroupAction.RESET
             );
         }
     }

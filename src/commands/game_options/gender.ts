@@ -153,20 +153,23 @@ export default class GenderCommand implements BaseCommand {
         const selectedGenders = parsedMessage.components as Array<Gender>;
         await GenderCommand.updateOption(
             MessageContext.fromMessage(message),
-            selectedGenders
+            selectedGenders,
+            null,
+            selectedGenders.length === 0
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         selectedGenders: Array<Gender>,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
-        if (selectedGenders.length === 0) {
+        if (reset) {
             await guildPreference.reset(GameOption.GENDER);
             await sendOptionsMessage(
                 Session.getSession(messageContext.guildID),
@@ -293,8 +296,9 @@ export default class GenderCommand implements BaseCommand {
         } else if (action === OptionAction.RESET) {
             await GenderCommand.updateOption(
                 messageContext,
-                DEFAULT_GENDER,
-                interaction
+                null,
+                interaction,
+                true
             );
         }
     }

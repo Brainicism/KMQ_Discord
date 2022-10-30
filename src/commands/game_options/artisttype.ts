@@ -1,8 +1,4 @@
-import {
-    DEFAULT_ARTIST_TYPE,
-    EMBED_ERROR_COLOR,
-    OptionAction,
-} from "../../constants";
+import { EMBED_ERROR_COLOR, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -153,20 +149,21 @@ export default class ArtistTypeCommand implements BaseCommand {
 
         await ArtistTypeCommand.updateOption(
             MessageContext.fromMessage(message),
-            artistType
+            artistType,
+            null,
+            artistType == null
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         artistType: ArtistType,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
-
-        const reset = artistType == null;
 
         if (reset) {
             await guildPreference.reset(GameOption.ARTIST_TYPE);
@@ -244,8 +241,9 @@ export default class ArtistTypeCommand implements BaseCommand {
         } else if (action === OptionAction.RESET) {
             await ArtistTypeCommand.updateOption(
                 messageContext,
-                DEFAULT_ARTIST_TYPE,
-                interaction
+                null,
+                interaction,
+                true
             );
         }
     }

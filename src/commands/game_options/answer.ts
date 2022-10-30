@@ -1,8 +1,4 @@
-import {
-    DEFAULT_ANSWER_TYPE,
-    ExpBonusModifierValues,
-    OptionAction,
-} from "../../constants";
+import { ExpBonusModifierValues, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -190,20 +186,21 @@ export default class AnswerCommand implements BaseCommand {
 
         await AnswerCommand.updateOption(
             MessageContext.fromMessage(message),
-            answerType
+            answerType,
+            null,
+            answerType == null
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         answerType: AnswerType,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
-
-        const reset = answerType == null;
 
         if (reset) {
             await guildPreference.reset(GameOption.ANSWER_TYPE);
@@ -252,8 +249,9 @@ export default class AnswerCommand implements BaseCommand {
         } else if (action === OptionAction.RESET) {
             await AnswerCommand.updateOption(
                 messageContext,
-                DEFAULT_ANSWER_TYPE,
-                interaction
+                null,
+                interaction,
+                true
             );
         }
     }

@@ -148,20 +148,22 @@ export default class SubunitsCommand implements BaseCommand {
 
         await SubunitsCommand.updateOption(
             MessageContext.fromMessage(message),
-            subunitsPreference
+            subunitsPreference,
+            null,
+            subunitsPreference == null
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         subunitsPreference: SubunitsPreference,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
-        const reset = subunitsPreference == null;
         if (reset) {
             await guildPreference.reset(GameOption.SUBUNIT_PREFERENCE);
             logger.info(
@@ -212,7 +214,8 @@ export default class SubunitsCommand implements BaseCommand {
             await SubunitsCommand.updateOption(
                 messageContext,
                 null,
-                interaction
+                interaction,
+                true
             );
         }
     }

@@ -155,14 +155,17 @@ export default class ShuffleCommand implements BaseCommand {
 
         await ShuffleCommand.updateOption(
             MessageContext.fromMessage(message),
-            shuffleType
+            shuffleType,
+            null,
+            shuffleType == null
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         shuffleType: ShuffleType,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
@@ -197,8 +200,6 @@ export default class ShuffleCommand implements BaseCommand {
                 return;
             }
         }
-
-        const reset = shuffleType == null;
 
         if (reset) {
             await guildPreference.reset(GameOption.SHUFFLE_TYPE);
@@ -247,8 +248,9 @@ export default class ShuffleCommand implements BaseCommand {
         } else if (action === OptionAction.RESET) {
             await ShuffleCommand.updateOption(
                 messageContext,
-                DEFAULT_SHUFFLE,
-                interaction
+                null,
+                interaction,
+                true
             );
         }
     }

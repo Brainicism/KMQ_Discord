@@ -147,20 +147,22 @@ export default class GuessModeCommand implements BaseCommand {
 
         await GuessModeCommand.updateOption(
             MessageContext.fromMessage(message),
-            guessModeType
+            guessModeType,
+            null,
+            guessModeType == null
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         guessModeType: GuessModeType,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
-        const reset = guessModeType == null;
         if (reset) {
             await guildPreference.reset(GameOption.GUESS_MODE_TYPE);
             logger.info(
@@ -209,7 +211,8 @@ export default class GuessModeCommand implements BaseCommand {
             await GuessModeCommand.updateOption(
                 messageContext,
                 null,
-                interaction
+                interaction,
+                true
             );
         }
     }

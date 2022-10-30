@@ -171,14 +171,17 @@ export default class SpecialCommand implements BaseCommand {
 
         await SpecialCommand.updateOption(
             MessageContext.fromMessage(message),
-            specialType
+            specialType,
+            null,
+            specialType == null
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         specialType: SpecialType,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
@@ -211,7 +214,6 @@ export default class SpecialCommand implements BaseCommand {
             return;
         }
 
-        const reset = specialType == null;
         if (reset) {
             await guildPreference.reset(GameOption.SPECIAL_TYPE);
             logger.info(
@@ -260,7 +262,8 @@ export default class SpecialCommand implements BaseCommand {
             await SpecialCommand.updateOption(
                 messageContext,
                 null,
-                interaction
+                interaction,
+                true
             );
         }
     }
