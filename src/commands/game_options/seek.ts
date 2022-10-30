@@ -204,6 +204,9 @@ export default class SeekCommand implements BaseCommand {
             seekValue = null;
         } else if (action === OptionAction.SET) {
             seekValue = interactionOptions["seek"] as SeekType;
+        } else {
+            logger.error(`Unexpected interaction name: ${interactionName}`);
+            seekValue = null;
         }
 
         await SeekCommand.updateOption(

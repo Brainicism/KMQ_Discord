@@ -238,6 +238,9 @@ export default class ArtistTypeCommand implements BaseCommand {
             artistTypeValue = null;
         } else if (action === OptionAction.SET) {
             artistTypeValue = interactionOptions["artisttype"] as ArtistType;
+        } else {
+            logger.error(`Unexpected interaction name: ${action}`);
+            artistTypeValue = null;
         }
 
         await ArtistTypeCommand.updateOption(

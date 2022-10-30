@@ -202,6 +202,9 @@ export default class GuessTimeoutCommand implements BaseCommand {
             timerValue = null;
         } else if (action === OptionAction.SET) {
             timerValue = interactionOptions["timer"] as number;
+        } else {
+            logger.error(`Unexpected interaction name: ${interactionName}`);
+            timerValue = null;
         }
 
         await GuessTimeoutCommand.updateOption(

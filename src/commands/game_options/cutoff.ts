@@ -24,6 +24,11 @@ import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("cutoff");
 
+enum CutoffAppCommandAction {
+    EARLIEST = "earliest",
+    RANGE = "range",
+}
+
 export default class CutoffCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
@@ -116,7 +121,7 @@ export default class CutoffCommand implements BaseCommand {
                         .SUB_COMMAND_GROUP,
                     options: [
                         {
-                            name: "earliest",
+                            name: CutoffAppCommandAction.EARLIEST,
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
@@ -141,7 +146,7 @@ export default class CutoffCommand implements BaseCommand {
                             ],
                         },
                         {
-                            name: "range",
+                            name: CutoffAppCommandAction.RANGE,
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
@@ -314,11 +319,15 @@ export default class CutoffCommand implements BaseCommand {
         if (interactionName === OptionAction.RESET) {
             beginningYear = null;
             endingYear = null;
-        } else if (interactionName === "range") {
+        } else if (interactionName === CutoffAppCommandAction.RANGE) {
             beginningYear = interactionOptions["beginning_year"];
             endingYear = interactionOptions["ending_year"];
-        } else if (interactionName === "earliest") {
+        } else if (interactionName === CutoffAppCommandAction.EARLIEST) {
             beginningYear = interactionOptions["beginning_year"];
+        } else {
+            logger.error(`Unexpected interaction name: ${interactionName}`);
+            beginningYear = null;
+            endingYear = null;
         }
 
         await CutoffCommand.updateOption(

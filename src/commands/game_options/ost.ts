@@ -205,6 +205,9 @@ export default class OstCommand implements BaseCommand {
             ostValue = null;
         } else if (action === OptionAction.SET) {
             ostValue = interactionOptions["ost"] as OstPreference;
+        } else {
+            logger.error(`Unexpected interaction name: ${interactionName}`);
+            ostValue = null;
         }
 
         await OstCommand.updateOption(

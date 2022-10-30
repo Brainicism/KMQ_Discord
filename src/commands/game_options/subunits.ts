@@ -213,6 +213,9 @@ export default class SubunitsCommand implements BaseCommand {
             subunitsValue = interactionOptions[
                 "subunits"
             ] as SubunitsPreference;
+        } else {
+            logger.error(`Unexpected interaction name: ${interactionName}`);
+            subunitsValue = null;
         }
 
         await SubunitsCommand.updateOption(

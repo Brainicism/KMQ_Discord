@@ -198,6 +198,9 @@ export default class MultiGuessCommand implements BaseCommand {
             multiguessValue = interactionOptions[
                 "multiguess"
             ] as MultiGuessType;
+        } else {
+            logger.error(`Unexpected interaction name: ${interactionName}`);
+            multiguessValue = null;
         }
 
         await MultiGuessCommand.updateOption(

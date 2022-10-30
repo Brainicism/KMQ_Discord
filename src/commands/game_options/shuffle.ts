@@ -246,6 +246,9 @@ export default class ShuffleCommand implements BaseCommand {
             shuffleValue = null;
         } else if (action === OptionAction.SET) {
             shuffleValue = interactionOptions["shuffle"] as ShuffleType;
+        } else {
+            logger.error(`Unexpected interaction name: ${interactionName}`);
+            shuffleValue = null;
         }
 
         await ShuffleCommand.updateOption(

@@ -245,6 +245,9 @@ export default class AnswerCommand implements BaseCommand {
             answerType = null;
         } else if (action === OptionAction.SET) {
             answerType = interactionOptions["answer"] as AnswerType;
+        } else {
+            logger.error(`Unexpected interaction name: ${action}`);
+            answerType = null;
         }
 
         await AnswerCommand.updateOption(
