@@ -211,7 +211,9 @@ export default class CutoffCommand implements BaseCommand {
         await CutoffCommand.updateOption(
             MessageContext.fromMessage(message),
             beginningYear,
-            endingYear
+            endingYear,
+            null,
+            beginningYear == null && endingYear == null
         );
     };
 
@@ -219,13 +221,12 @@ export default class CutoffCommand implements BaseCommand {
         messageContext: MessageContext,
         beginningYear: number,
         endingYear: number,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
-
-        const reset = beginningYear == null && endingYear == null;
 
         if (reset) {
             await guildPreference.setBeginningCutoffYear(
@@ -320,7 +321,8 @@ export default class CutoffCommand implements BaseCommand {
             messageContext,
             beginningYear,
             endingYear,
-            interaction
+            interaction,
+            beginningYear == null && endingYear == null
         );
     }
 }

@@ -202,7 +202,10 @@ export default class LimitCommand implements BaseCommand {
         await LimitCommand.updateOption(
             MessageContext.fromMessage(message),
             limitStart,
-            limitEnd
+            limitEnd,
+            null,
+            true,
+            limitStart == null && limitEnd == null
         );
     };
 
@@ -211,13 +214,12 @@ export default class LimitCommand implements BaseCommand {
         limitStart: number,
         limitEnd: number,
         interaction?: Eris.CommandInteraction,
-        optionsOnUpdate = true
+        optionsOnUpdate = true,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
-
-        const reset = limitStart == null && limitEnd == null;
 
         if (reset) {
             await guildPreference.reset(GameOption.LIMIT);
@@ -308,7 +310,9 @@ export default class LimitCommand implements BaseCommand {
             messageContext,
             limitStart,
             limitEnd,
-            interaction
+            interaction,
+            true,
+            limitStart == null && limitEnd == null
         );
     }
 }
