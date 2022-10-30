@@ -248,3 +248,8 @@ export enum GroupAction {
     SET = "set",
     RESET = "reset",
 }
+
+export enum OptionAction {
+    SET = "set",
+    RESET = "reset",
+}

@@ -27,7 +27,7 @@ enum DurationAction {
 enum DurationActionInternal {
     ADD = "add",
     REMOVE = "remove",
-    DISABLE = "disable",
+    RESET = "reset",
     SET = "set",
 }
 
@@ -144,7 +144,8 @@ export default class DurationCommand implements BaseCommand {
                     name: DurationActionInternal.ADD,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.duration.help.example.increment"
+                        "command.duration.help.example.increment",
+                        { duration: "[duration]" }
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
@@ -154,7 +155,8 @@ export default class DurationCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.duration.help.example.increment"
+                                    "command.duration.help.example.increment",
+                                    { duration: "[duration]" }
                                 ),
                             required: true,
                             min_value: DURATION_DELTA_MIN,
@@ -189,10 +191,11 @@ export default class DurationCommand implements BaseCommand {
                     ],
                 },
                 {
-                    name: DurationActionInternal.DISABLE,
+                    name: DurationActionInternal.RESET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.duration.help.example.reset"
+                        "misc.interaction.resetOption",
+                        { optionName: "duration" }
                     ),
                     type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
                 },
@@ -205,7 +208,7 @@ export default class DurationCommand implements BaseCommand {
         let durationValue: number = null;
 
         if (parsedMessage.components.length === 0) {
-            durationActionInternal = DurationActionInternal.DISABLE;
+            durationActionInternal = DurationActionInternal.RESET;
         } else {
             durationActionInternal =
                 (parsedMessage.components[1] as DurationActionInternal) ??
@@ -216,7 +219,9 @@ export default class DurationCommand implements BaseCommand {
         await DurationCommand.updateOption(
             MessageContext.fromMessage(message),
             durationActionInternal,
-            durationValue
+            durationValue,
+            null,
+            durationActionInternal === DurationActionInternal.RESET
         );
     };
 
@@ -224,14 +229,15 @@ export default class DurationCommand implements BaseCommand {
         messageContext: MessageContext,
         action: DurationActionInternal,
         durationValue?: number,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
         let finalDuration: number = null;
-        if (action === DurationActionInternal.DISABLE) {
+        if (reset) {
             await guildPreference.reset(GameOption.DURATION);
             logger.info(
                 `${getDebugLogHeader(messageContext)} | Duration disabled.`
@@ -315,14 +321,20 @@ export default class DurationCommand implements BaseCommand {
             getInteractionValue(interaction);
 
         const action = interactionName as DurationActionInternal;
+        let durationValue: number;
 
-        const durationValue = interactionOptions["duration"];
+        if (action === DurationActionInternal.RESET) {
+            durationValue = null;
+        } else {
+            durationValue = interactionOptions["duration"];
+        }
 
         await DurationCommand.updateOption(
             messageContext,
             action,
             durationValue,
-            interaction
+            interaction,
+            action === DurationActionInternal.RESET
         );
     }
 }

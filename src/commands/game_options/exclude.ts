@@ -141,7 +141,10 @@ export default class ExcludeCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             await ExcludeCommand.updateOption(
                 MessageContext.fromMessage(message),
-                GroupAction.RESET
+                null,
+                null,
+                null,
+                true
             );
             return;
         }
@@ -156,9 +159,10 @@ export default class ExcludeCommand implements BaseCommand {
 
         await ExcludeCommand.updateOption(
             MessageContext.fromMessage(message),
-            GroupAction.SET,
             matchedGroups,
-            unmatchedGroups
+            unmatchedGroups,
+            null,
+            false
         );
     };
 
@@ -176,8 +180,17 @@ export default class ExcludeCommand implements BaseCommand {
         const action = interactionName as GroupAction;
         const enteredGroupNames = Object.values(interactionOptions);
 
-        const { matchedGroups, unmatchedGroups } =
-            getMatchedArtists(enteredGroupNames);
+        let matchedGroups: Array<MatchedArtist>;
+        let unmatchedGroups: Array<string>;
+        if (action === GroupAction.RESET) {
+            matchedGroups = null;
+            unmatchedGroups = null;
+        } else {
+            const groups = getMatchedArtists(enteredGroupNames);
+
+            matchedGroups = groups.matchedGroups;
+            unmatchedGroups = groups.unmatchedGroups;
+        }
 
         if (action === GroupAction.ADD) {
             await AddCommand.updateOption(
@@ -193,29 +206,28 @@ export default class ExcludeCommand implements BaseCommand {
                 enteredGroupNames,
                 interaction
             );
-        } else {
+        } else if (action === GroupAction.RESET) {
             await ExcludeCommand.updateOption(
                 messageContext,
-                action,
                 matchedGroups,
                 unmatchedGroups,
-                interaction
+                interaction,
+                true
             );
         }
     }
 
     static async updateOption(
         messageContext: MessageContext,
-        action: GroupAction,
         matchedGroups?: MatchedArtist[],
         unmatchedGroups?: string[],
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
-        const reset = action === GroupAction.RESET;
         if (reset) {
             await guildPreference.reset(GameOption.EXCLUDE);
             logger.info(

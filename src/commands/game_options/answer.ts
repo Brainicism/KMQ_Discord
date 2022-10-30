@@ -1,4 +1,4 @@
-import { ExpBonusModifierValues } from "../../constants";
+import { ExpBonusModifierValues, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -132,17 +132,43 @@ export default class AnswerCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "answer",
+                    name: OptionAction.SET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
                         "command.answer.help.interaction.description"
                     ),
-                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
-                    required: true,
-                    choices: Object.values(AnswerType).map((answerType) => ({
-                        name: answerType,
-                        value: answerType,
-                    })),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "answer",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.answer.help.interaction.description"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            required: true,
+                            choices: Object.values(AnswerType).map(
+                                (answerType) => ({
+                                    name: answerType,
+                                    value: answerType,
+                                })
+                            ),
+                        },
+                    ],
+                },
+                {
+                    name: OptionAction.RESET,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "misc.interaction.resetOption",
+                        { optionName: "answer" }
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [],
                 },
             ],
         },
@@ -160,20 +186,21 @@ export default class AnswerCommand implements BaseCommand {
 
         await AnswerCommand.updateOption(
             MessageContext.fromMessage(message),
-            answerType
+            answerType,
+            null,
+            answerType == null
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         answerType: AnswerType,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
-
-        const reset = answerType == null;
 
         if (reset) {
             await guildPreference.reset(GameOption.ANSWER_TYPE);
@@ -209,13 +236,22 @@ export default class AnswerCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const { interactionOptions } = getInteractionValue(interaction);
-        const answerType = interactionOptions["answer"] as AnswerType;
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
+
+        let answerType: AnswerType;
+        const action = interactionName as OptionAction;
+        if (action === OptionAction.RESET) {
+            answerType = null;
+        } else if (action === OptionAction.SET) {
+            answerType = interactionOptions["answer"] as AnswerType;
+        }
 
         await AnswerCommand.updateOption(
             messageContext,
             answerType,
-            interaction
+            interaction,
+            answerType == null
         );
     }
 }

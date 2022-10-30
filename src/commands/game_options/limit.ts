@@ -98,65 +98,87 @@ export default class LimitCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "top",
+                    name: "set",
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.limit.interaction.description_top"
+                        "command.cutoff.interaction.description"
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
-                        .SUB_COMMAND,
+                        .SUB_COMMAND_GROUP,
                     options: [
                         {
-                            name: "limit",
+                            name: "top",
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
                                     "command.limit.interaction.description_top"
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
-                                .INTEGER,
-                            required: true,
-                            max_value: LIMIT_END_MAX,
-                            min_value: LIMIT_END_MIN,
-                        } as any,
+                                .SUB_COMMAND,
+                            options: [
+                                {
+                                    name: "limit",
+                                    description:
+                                        LocalizationManager.localizer.translate(
+                                            LocaleType.EN,
+                                            "command.limit.interaction.description_top"
+                                        ),
+                                    type: Eris.Constants
+                                        .ApplicationCommandOptionTypes.INTEGER,
+                                    required: true,
+                                    max_value: LIMIT_END_MAX,
+                                    min_value: LIMIT_END_MIN,
+                                } as any,
+                            ],
+                        },
+                        {
+                            name: "range",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.limit.interaction.description_range"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .SUB_COMMAND,
+                            options: [
+                                {
+                                    name: "limit_start",
+                                    description:
+                                        LocalizationManager.localizer.translate(
+                                            LocaleType.EN,
+                                            "command.limit.interaction.description_range"
+                                        ),
+                                    type: Eris.Constants
+                                        .ApplicationCommandOptionTypes.INTEGER,
+                                    required: true,
+                                    max_value: LIMIT_START_MAX,
+                                    min_value: LIMIT_START_MIN,
+                                } as any,
+                                {
+                                    name: "limit_end",
+                                    description:
+                                        LocalizationManager.localizer.translate(
+                                            LocaleType.EN,
+                                            "command.limit.interaction.description_range"
+                                        ),
+                                    type: Eris.Constants
+                                        .ApplicationCommandOptionTypes.INTEGER,
+                                    required: true,
+                                    max_value: LIMIT_END_MAX,
+                                    min_value: LIMIT_END_MIN,
+                                } as any,
+                            ],
+                        },
                     ],
                 },
                 {
-                    name: "range",
+                    name: "reset",
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.limit.interaction.description_range"
+                        "command.limit.help.example.reset",
+                        { defaultLimit: `\`${DEFAULT_LIMIT}\`` }
                     ),
-                    type: Eris.Constants.ApplicationCommandOptionTypes
-                        .SUB_COMMAND,
-                    options: [
-                        {
-                            name: "limit_start",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.limit.interaction.description_range"
-                                ),
-                            type: Eris.Constants.ApplicationCommandOptionTypes
-                                .INTEGER,
-                            required: true,
-                            max_value: LIMIT_START_MAX,
-                            min_value: LIMIT_START_MIN,
-                        } as any,
-                        {
-                            name: "limit_end",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.limit.interaction.description_range"
-                                ),
-                            type: Eris.Constants.ApplicationCommandOptionTypes
-                                .INTEGER,
-                            required: true,
-                            max_value: LIMIT_END_MAX,
-                            min_value: LIMIT_END_MIN,
-                        } as any,
-                    ],
+                    type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
                 },
             ],
         },
@@ -180,7 +202,10 @@ export default class LimitCommand implements BaseCommand {
         await LimitCommand.updateOption(
             MessageContext.fromMessage(message),
             limitStart,
-            limitEnd
+            limitEnd,
+            null,
+            true,
+            limitStart == null && limitEnd == null
         );
     };
 
@@ -189,13 +214,12 @@ export default class LimitCommand implements BaseCommand {
         limitStart: number,
         limitEnd: number,
         interaction?: Eris.CommandInteraction,
-        optionsOnUpdate = true
+        optionsOnUpdate = true,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
-
-        const reset = limitStart == null && limitEnd == null;
 
         if (reset) {
             await guildPreference.reset(GameOption.LIMIT);
@@ -277,16 +301,21 @@ export default class LimitCommand implements BaseCommand {
             limitStart = interactionOptions["limit_start"];
 
             limitEnd = interactionOptions["limit_end"];
-        } else {
+        } else if (interactionName === "earliest") {
             limitStart = 0;
             limitEnd = interactionOptions["limit"];
+        } else {
+            limitStart = null;
+            limitEnd = null;
         }
 
         await LimitCommand.updateOption(
             messageContext,
             limitStart,
             limitEnd,
-            interaction
+            interaction,
+            true,
+            limitStart == null && limitEnd == null
         );
     }
 }

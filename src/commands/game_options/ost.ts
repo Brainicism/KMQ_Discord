@@ -1,4 +1,4 @@
-import { DEFAULT_OST_PREFERENCE } from "../../constants";
+import { DEFAULT_OST_PREFERENCE, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -91,19 +91,43 @@ export default class OstCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "ost",
+                    name: OptionAction.SET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
                         "command.ost.help.description"
                     ),
-                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
-                    required: true,
-                    choices: Object.values(OstPreference).map(
-                        (ostPreference) => ({
-                            name: ostPreference,
-                            value: ostPreference,
-                        })
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "ost",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.ost.help.description"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            required: true,
+                            choices: Object.values(OstPreference).map(
+                                (ostPreference) => ({
+                                    name: ostPreference,
+                                    value: ostPreference,
+                                })
+                            ),
+                        },
+                    ],
+                },
+                {
+                    name: OptionAction.RESET,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "misc.interaction.resetOption",
+                        { optionName: "ost" }
                     ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [],
                 },
             ],
         },
@@ -121,20 +145,22 @@ export default class OstCommand implements BaseCommand {
 
         await OstCommand.updateOption(
             MessageContext.fromMessage(message),
-            ostPreference
+            ostPreference,
+            null,
+            ostPreference == null
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         ostPreference: OstPreference,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
-        const reset = ostPreference == null;
         if (reset) {
             await guildPreference.reset(GameOption.OST_PREFERENCE);
             logger.info(
@@ -169,13 +195,23 @@ export default class OstCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const { interactionOptions } = getInteractionValue(interaction);
-        const ostPreference = interactionOptions["ost"] as OstPreference;
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
+
+        let ostValue: OstPreference;
+
+        const action = interactionName as OptionAction;
+        if (action === OptionAction.RESET) {
+            ostValue = null;
+        } else if (action === OptionAction.SET) {
+            ostValue = interactionOptions["ost"] as OstPreference;
+        }
 
         await OstCommand.updateOption(
             messageContext,
-            ostPreference,
-            interaction
+            ostValue,
+            interaction,
+            ostValue == null
         );
     }
 }

@@ -1,4 +1,4 @@
-import { DEFAULT_SEEK } from "../../constants";
+import { DEFAULT_SEEK, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -91,17 +91,43 @@ export default class SeekCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "seek",
+                    name: OptionAction.SET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
                         "command.seek.help.description"
                     ),
-                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
-                    required: true,
-                    choices: Object.values(SeekType).map((seekType) => ({
-                        name: seekType,
-                        value: seekType,
-                    })),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "seek",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.seek.help.description"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            required: true,
+                            choices: Object.values(SeekType).map(
+                                (seekType) => ({
+                                    name: seekType,
+                                    value: seekType,
+                                })
+                            ),
+                        },
+                    ],
+                },
+                {
+                    name: OptionAction.RESET,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "misc.interaction.resetOption",
+                        { optionName: "seek" }
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [],
                 },
             ],
         },
@@ -118,20 +144,22 @@ export default class SeekCommand implements BaseCommand {
 
         await SeekCommand.updateOption(
             MessageContext.fromMessage(message),
-            seekType
+            seekType,
+            null,
+            seekType == null
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         seekType: SeekType,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
-        const reset = seekType == null;
         if (reset) {
             await guildPreference.reset(GameOption.SEEK_TYPE);
             logger.info(
@@ -166,10 +194,23 @@ export default class SeekCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const { interactionOptions } = getInteractionValue(interaction);
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
 
-        const seekType = interactionOptions["seek"] as SeekType;
+        let seekValue: SeekType;
 
-        await SeekCommand.updateOption(messageContext, seekType, interaction);
+        const action = interactionName as OptionAction;
+        if (action === OptionAction.RESET) {
+            seekValue = null;
+        } else if (action === OptionAction.SET) {
+            seekValue = interactionOptions["seek"] as SeekType;
+        }
+
+        await SeekCommand.updateOption(
+            messageContext,
+            seekValue,
+            interaction,
+            seekValue == null
+        );
     }
 }

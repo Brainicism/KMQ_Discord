@@ -1,6 +1,7 @@
 import {
     DEFAULT_BEGINNING_SEARCH_YEAR,
     DEFAULT_ENDING_SEARCH_YEAR,
+    OptionAction,
 } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
@@ -106,65 +107,88 @@ export default class CutoffCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "earliest",
+                    name: OptionAction.SET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.cutoff.interaction.earliestOption"
+                        "command.cutoff.interaction.description"
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
-                        .SUB_COMMAND,
+                        .SUB_COMMAND_GROUP,
                     options: [
                         {
-                            name: "beginning_year",
+                            name: "earliest",
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
                                     "command.cutoff.interaction.earliestOption"
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
-                                .INTEGER,
-                            required: true,
-                            max_value: DEFAULT_ENDING_SEARCH_YEAR,
-                            min_value: DEFAULT_BEGINNING_SEARCH_YEAR,
-                        } as any,
+                                .SUB_COMMAND,
+                            options: [
+                                {
+                                    name: "beginning_year",
+                                    description:
+                                        LocalizationManager.localizer.translate(
+                                            LocaleType.EN,
+                                            "command.cutoff.interaction.earliestOption"
+                                        ),
+                                    type: Eris.Constants
+                                        .ApplicationCommandOptionTypes.INTEGER,
+                                    required: true,
+                                    max_value: DEFAULT_ENDING_SEARCH_YEAR,
+                                    min_value: DEFAULT_BEGINNING_SEARCH_YEAR,
+                                } as any,
+                            ],
+                        },
+                        {
+                            name: "range",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.cutoff.interaction.rangeOption"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .SUB_COMMAND,
+                            options: [
+                                {
+                                    name: "beginning_year",
+                                    description:
+                                        LocalizationManager.localizer.translate(
+                                            LocaleType.EN,
+                                            "command.cutoff.interaction.rangeOption"
+                                        ),
+                                    type: Eris.Constants
+                                        .ApplicationCommandOptionTypes.INTEGER,
+                                    required: true,
+                                    max_value: DEFAULT_ENDING_SEARCH_YEAR,
+                                    min_value: DEFAULT_BEGINNING_SEARCH_YEAR,
+                                } as any,
+                                {
+                                    name: "ending_year",
+                                    description:
+                                        LocalizationManager.localizer.translate(
+                                            LocaleType.EN,
+                                            "command.cutoff.interaction.rangeOption"
+                                        ),
+                                    type: Eris.Constants
+                                        .ApplicationCommandOptionTypes.INTEGER,
+                                    required: true,
+                                    max_value: DEFAULT_ENDING_SEARCH_YEAR,
+                                    min_value: DEFAULT_BEGINNING_SEARCH_YEAR,
+                                } as any,
+                            ],
+                        },
                     ],
                 },
                 {
-                    name: "range",
+                    name: OptionAction.RESET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.cutoff.interaction.rangeOption"
+                        "misc.interaction.resetOption",
+                        { optionName: "cutoff" }
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
-                    options: [
-                        {
-                            name: "beginning_year",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.cutoff.interaction.rangeOption"
-                                ),
-                            type: Eris.Constants.ApplicationCommandOptionTypes
-                                .INTEGER,
-                            required: true,
-                            max_value: DEFAULT_ENDING_SEARCH_YEAR,
-                            min_value: DEFAULT_BEGINNING_SEARCH_YEAR,
-                        } as any,
-                        {
-                            name: "ending_year",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.cutoff.interaction.rangeOption"
-                                ),
-                            type: Eris.Constants.ApplicationCommandOptionTypes
-                                .INTEGER,
-                            required: true,
-                            max_value: DEFAULT_ENDING_SEARCH_YEAR,
-                            min_value: DEFAULT_BEGINNING_SEARCH_YEAR,
-                        } as any,
-                    ],
                 },
             ],
         },
@@ -188,7 +212,9 @@ export default class CutoffCommand implements BaseCommand {
         await CutoffCommand.updateOption(
             MessageContext.fromMessage(message),
             beginningYear,
-            endingYear
+            endingYear,
+            null,
+            beginningYear == null && endingYear == null
         );
     };
 
@@ -196,13 +222,12 @@ export default class CutoffCommand implements BaseCommand {
         messageContext: MessageContext,
         beginningYear: number,
         endingYear: number,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
-
-        const reset = beginningYear == null && endingYear == null;
 
         if (reset) {
             await guildPreference.setBeginningCutoffYear(
@@ -213,7 +238,11 @@ export default class CutoffCommand implements BaseCommand {
                 Session.getSession(messageContext.guildID),
                 messageContext,
                 guildPreference,
-                [{ option: GameOption.CUTOFF, reset: true }]
+                [{ option: GameOption.CUTOFF, reset: true }],
+                null,
+                null,
+                null,
+                interaction
             );
 
             logger.info(
@@ -221,6 +250,8 @@ export default class CutoffCommand implements BaseCommand {
                     guildPreference.gameOptions.beginningYear
                 } - ${guildPreference.gameOptions.endYear}`
             );
+
+            return;
         }
 
         if (beginningYear && !endingYear) {
@@ -280,10 +311,13 @@ export default class CutoffCommand implements BaseCommand {
 
         let beginningYear: number;
         let endingYear: number;
-        if (interactionName === "range") {
+        if (interactionName === OptionAction.RESET) {
+            beginningYear = null;
+            endingYear = null;
+        } else if (interactionName === "range") {
             beginningYear = interactionOptions["beginning_year"];
             endingYear = interactionOptions["ending_year"];
-        } else {
+        } else if (interactionName === "earliest") {
             beginningYear = interactionOptions["beginning_year"];
         }
 
@@ -291,7 +325,8 @@ export default class CutoffCommand implements BaseCommand {
             messageContext,
             beginningYear,
             endingYear,
-            interaction
+            interaction,
+            beginningYear == null && endingYear == null
         );
     }
 }

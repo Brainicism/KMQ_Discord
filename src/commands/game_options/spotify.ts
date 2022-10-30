@@ -102,7 +102,9 @@ export default class SpotifyCommand implements BaseCommand {
         if (playlistURL || parsedMessage.components.length === 0) {
             await SpotifyCommand.updateOption(
                 MessageContext.fromMessage(message),
-                playlistURL
+                playlistURL,
+                null,
+                playlistURL == null
             );
         } else {
             sendErrorMessage(MessageContext.fromMessage(message), {
@@ -121,7 +123,8 @@ export default class SpotifyCommand implements BaseCommand {
     static async updateOption(
         messageContext: MessageContext,
         playlistURL: string,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildID = messageContext.guildID;
         const guildPreference = await GuildPreference.getGuildPreference(
@@ -129,7 +132,6 @@ export default class SpotifyCommand implements BaseCommand {
         );
 
         const gameSession = State.gameSessions[guildID];
-        const reset = playlistURL === null;
         if (reset) {
             await guildPreference.reset(GameOption.SPOTIFY_PLAYLIST_METADATA);
             logger.info(
@@ -287,7 +289,8 @@ export default class SpotifyCommand implements BaseCommand {
         await SpotifyCommand.updateOption(
             messageContext,
             playlistURL,
-            interaction
+            interaction,
+            playlistURL == null
         );
     }
 }

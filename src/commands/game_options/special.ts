@@ -1,4 +1,4 @@
-import { EMBED_ERROR_COLOR } from "../../constants";
+import { EMBED_ERROR_COLOR, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -120,17 +120,43 @@ export default class SpecialCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "special",
+                    name: OptionAction.SET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
                         "command.special.help.description"
                     ),
-                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
-                    required: false,
-                    choices: Object.values(SpecialType).map((specialType) => ({
-                        name: specialType,
-                        value: specialType,
-                    })),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "special",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.special.help.description"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            required: true,
+                            choices: Object.values(SpecialType).map(
+                                (specialType) => ({
+                                    name: specialType,
+                                    value: specialType,
+                                })
+                            ),
+                        },
+                    ],
+                },
+                {
+                    name: OptionAction.RESET,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "misc.interaction.resetOption",
+                        { optionName: "special" }
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [],
                 },
             ],
         },
@@ -146,14 +172,17 @@ export default class SpecialCommand implements BaseCommand {
 
         await SpecialCommand.updateOption(
             MessageContext.fromMessage(message),
-            specialType
+            specialType,
+            null,
+            specialType == null
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         specialType: SpecialType,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
@@ -186,7 +215,6 @@ export default class SpecialCommand implements BaseCommand {
             return;
         }
 
-        const reset = specialType == null;
         if (reset) {
             await guildPreference.reset(GameOption.SPECIAL_TYPE);
             logger.info(
@@ -221,13 +249,23 @@ export default class SpecialCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const { interactionOptions } = getInteractionValue(interaction);
-        const specialType = interactionOptions["special"] as SpecialType;
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
+
+        let specialValue: SpecialType;
+
+        const action = interactionName as OptionAction;
+        if (action === OptionAction.RESET) {
+            specialValue = null;
+        } else if (action === OptionAction.SET) {
+            specialValue = interactionOptions["special"] as SpecialType;
+        }
 
         await SpecialCommand.updateOption(
             messageContext,
-            specialType,
-            interaction
+            specialValue,
+            interaction,
+            specialValue == null
         );
     }
 

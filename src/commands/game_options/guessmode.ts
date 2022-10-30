@@ -1,4 +1,4 @@
-import { DEFAULT_GUESS_MODE } from "../../constants";
+import { DEFAULT_GUESS_MODE, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -93,19 +93,43 @@ export default class GuessModeCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "guessmode",
+                    name: OptionAction.SET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
                         "command.guessmode.help.description"
                     ),
-                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
-                    required: true,
-                    choices: Object.values(GuessModeType).map(
-                        (guessModeType) => ({
-                            name: guessModeType,
-                            value: guessModeType,
-                        })
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "guessmode",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.guessmode.help.description"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            required: true,
+                            choices: Object.values(GuessModeType).map(
+                                (guessModeType) => ({
+                                    name: guessModeType,
+                                    value: guessModeType,
+                                })
+                            ),
+                        },
+                    ],
+                },
+                {
+                    name: OptionAction.RESET,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "misc.interaction.resetOption",
+                        { optionName: "guess mode" }
                     ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [],
                 },
             ],
         },
@@ -123,20 +147,22 @@ export default class GuessModeCommand implements BaseCommand {
 
         await GuessModeCommand.updateOption(
             MessageContext.fromMessage(message),
-            guessModeType
+            guessModeType,
+            null,
+            guessModeType == null
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         guessModeType: GuessModeType,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
-        const reset = guessModeType == null;
         if (reset) {
             await guildPreference.reset(GameOption.GUESS_MODE_TYPE);
             logger.info(
@@ -171,14 +197,23 @@ export default class GuessModeCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const { interactionOptions } = getInteractionValue(interaction);
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
 
-        const guessModeType = interactionOptions["guessmode"] as GuessModeType;
+        let guessModeValue: GuessModeType;
+
+        const action = interactionName as OptionAction;
+        if (action === OptionAction.RESET) {
+            guessModeValue = null;
+        } else if (action === OptionAction.SET) {
+            guessModeValue = interactionOptions["guessmode"] as GuessModeType;
+        }
 
         await GuessModeCommand.updateOption(
             messageContext,
-            guessModeType,
-            interaction
+            guessModeValue,
+            interaction,
+            guessModeValue == null
         );
     }
 }

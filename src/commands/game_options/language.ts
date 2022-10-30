@@ -1,4 +1,5 @@
 import { IPCLogger } from "../../logger";
+import { OptionAction } from "../../constants";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -81,19 +82,43 @@ export default class LanguageCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "language",
+                    name: OptionAction.SET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
                         "command.language.help.description"
                     ),
-                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
-                    required: true,
-                    choices: Object.values(LanguageType).map(
-                        (languageType) => ({
-                            name: languageType,
-                            value: languageType,
-                        })
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "language",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.language.help.description"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            required: true,
+                            choices: Object.values(LanguageType).map(
+                                (languageType) => ({
+                                    name: languageType,
+                                    value: languageType,
+                                })
+                            ),
+                        },
+                    ],
+                },
+                {
+                    name: OptionAction.RESET,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "misc.interaction.resetOption",
+                        { optionName: "language" }
                     ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [],
                 },
             ],
         },
@@ -109,20 +134,22 @@ export default class LanguageCommand implements BaseCommand {
 
         await LanguageCommand.updateOption(
             MessageContext.fromMessage(message),
-            languageType
+            languageType,
+            null,
+            languageType == null
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         languageType: LanguageType,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
-        const reset = languageType == null;
         if (reset) {
             await guildPreference.reset(GameOption.LANGUAGE_TYPE);
             logger.info(
@@ -157,14 +184,23 @@ export default class LanguageCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const { interactionOptions } = getInteractionValue(interaction);
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
 
-        const languageType = interactionOptions["language"] as LanguageType;
+        let languageValue: LanguageType;
+
+        const action = interactionName as OptionAction;
+        if (action === OptionAction.RESET) {
+            languageValue = null;
+        } else if (action === OptionAction.SET) {
+            languageValue = interactionOptions["language"] as LanguageType;
+        }
 
         await LanguageCommand.updateOption(
             messageContext,
-            languageType,
-            interaction
+            languageValue,
+            interaction,
+            languageValue == null
         );
     }
 }

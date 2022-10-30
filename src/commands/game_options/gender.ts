@@ -1,4 +1,5 @@
 import { IPCLogger } from "../../logger";
+import { OptionAction } from "../../constants";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -109,18 +110,42 @@ export default class GenderCommand implements BaseCommand {
                 "command.gender.interaction.description"
             ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
-            options: [...Array(4).keys()].map((x) => ({
-                name: `gender_${x + 1}`,
-                description: LocalizationManager.localizer.translate(
-                    LocaleType.EN,
-                    "command.gender.interaction.description"
-                ),
-                type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
-                choices: Object.values(Gender).map((gender) => ({
-                    name: gender,
-                    value: gender,
-                })),
-            })),
+            options: [
+                {
+                    name: OptionAction.SET,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "command.gender.interaction.description"
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [...Array(4).keys()].map((x) => ({
+                        name: `gender_${x + 1}`,
+                        description: LocalizationManager.localizer.translate(
+                            LocaleType.EN,
+                            "command.gender.interaction.description"
+                        ),
+                        type: Eris.Constants.ApplicationCommandOptionTypes
+                            .STRING,
+                        choices: Object.values(Gender).map((gender) => ({
+                            name: gender,
+                            value: gender,
+                        })),
+                        required: x === 0,
+                    })),
+                },
+                {
+                    name: OptionAction.RESET,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "misc.interaction.resetOption",
+                        { optionName: "gender" }
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [],
+                },
+            ],
         },
     ];
 
@@ -128,20 +153,23 @@ export default class GenderCommand implements BaseCommand {
         const selectedGenders = parsedMessage.components as Array<Gender>;
         await GenderCommand.updateOption(
             MessageContext.fromMessage(message),
-            selectedGenders
+            selectedGenders,
+            null,
+            selectedGenders.length === 0
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         selectedGenders: Array<Gender>,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
-        if (selectedGenders.length === 0) {
+        if (reset) {
             await guildPreference.reset(GameOption.GENDER);
             await sendOptionsMessage(
                 Session.getSession(messageContext.guildID),
@@ -252,14 +280,23 @@ export default class GenderCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const { interactionOptions } = getInteractionValue(interaction);
-        const selectedGenders: Array<Gender> =
-            Object.values(interactionOptions);
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
+
+        let selectedGenders: Array<Gender>;
+
+        const action = interactionName as OptionAction;
+        if (action === OptionAction.RESET) {
+            selectedGenders = null;
+        } else if (action === OptionAction.SET) {
+            selectedGenders = Object.values(interactionOptions);
+        }
 
         await GenderCommand.updateOption(
             messageContext,
             selectedGenders,
-            interaction
+            interaction,
+            selectedGenders == null
         );
     }
 }

@@ -1,4 +1,4 @@
-import { DEFAULT_RELEASE_TYPE } from "../../constants";
+import { DEFAULT_RELEASE_TYPE, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -50,17 +50,43 @@ export default class ReleaseCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "release",
+                    name: OptionAction.SET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
                         "command.release.help.interaction.description"
                     ),
-                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
-                    required: true,
-                    choices: Object.values(ReleaseType).map((releaseType) => ({
-                        name: releaseType,
-                        value: releaseType,
-                    })),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "release",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.release.help.interaction.description"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            required: true,
+                            choices: Object.values(ReleaseType).map(
+                                (releaseType) => ({
+                                    name: releaseType,
+                                    value: releaseType,
+                                })
+                            ),
+                        },
+                    ],
+                },
+                {
+                    name: OptionAction.RESET,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "misc.interaction.resetOption",
+                        { optionName: "release" }
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [],
                 },
             ],
         },
@@ -112,20 +138,22 @@ export default class ReleaseCommand implements BaseCommand {
 
         await ReleaseCommand.updateOption(
             MessageContext.fromMessage(message),
-            releaseType
+            releaseType,
+            null,
+            releaseType == null
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         releaseType: ReleaseType,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
-        const reset = releaseType == null;
         if (reset) {
             await guildPreference.reset(GameOption.RELEASE_TYPE);
             logger.info(
@@ -160,14 +188,23 @@ export default class ReleaseCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const { interactionOptions } = getInteractionValue(interaction);
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
 
-        const releaseType = interactionOptions["release"] as ReleaseType;
+        let releaseValue: ReleaseType;
+
+        const action = interactionName as OptionAction;
+        if (action === OptionAction.RESET) {
+            releaseValue = null;
+        } else if (action === OptionAction.SET) {
+            releaseValue = interactionOptions["release"] as ReleaseType;
+        }
 
         await ReleaseCommand.updateOption(
             messageContext,
-            releaseType,
-            interaction
+            releaseValue,
+            interaction,
+            releaseValue == null
         );
     }
 }

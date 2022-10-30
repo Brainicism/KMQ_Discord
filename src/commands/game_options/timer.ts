@@ -1,4 +1,5 @@
 import { IPCLogger } from "../../logger";
+import { OptionAction } from "../../constants";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -80,16 +81,40 @@ export default class GuessTimeoutCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "timer",
+                    name: OptionAction.SET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
                         "command.timer.interaction.description"
                     ),
-                    type: Eris.Constants.ApplicationCommandOptionTypes.INTEGER,
-                    required: false,
-                    min_value: TIMER_MIN_VALUE,
-                    max_value: TIMER_MAX_VALUE,
-                } as any,
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "timer",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.timer.interaction.description"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .INTEGER,
+                            required: true,
+                            min_value: TIMER_MIN_VALUE,
+                            max_value: TIMER_MAX_VALUE,
+                        } as any,
+                    ],
+                },
+                {
+                    name: OptionAction.RESET,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "misc.interaction.resetOption",
+                        { optionName: "timer" }
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [],
+                },
             ],
         },
     ];
@@ -104,20 +129,22 @@ export default class GuessTimeoutCommand implements BaseCommand {
 
         await GuessTimeoutCommand.updateOption(
             MessageContext.fromMessage(message),
-            timer
+            timer,
+            null,
+            timer == null
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         timer: number,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
-        const reset = timer == null;
         const session = Session.getSession(messageContext.guildID);
 
         if (reset) {
@@ -165,13 +192,23 @@ export default class GuessTimeoutCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const { interactionOptions } = getInteractionValue(interaction);
-        const timer: number = interactionOptions["timer"];
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
+
+        let timerValue: number;
+
+        const action = interactionName as OptionAction;
+        if (action === OptionAction.RESET) {
+            timerValue = null;
+        } else if (action === OptionAction.SET) {
+            timerValue = interactionOptions["timer"] as number;
+        }
 
         await GuessTimeoutCommand.updateOption(
             messageContext,
-            timer,
-            interaction
+            timerValue,
+            interaction,
+            timerValue == null
         );
     }
 }

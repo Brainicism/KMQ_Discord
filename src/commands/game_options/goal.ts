@@ -1,4 +1,5 @@
 import { IPCLogger } from "../../logger";
+import { OptionAction } from "../../constants";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -79,15 +80,39 @@ export default class GoalCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "goal",
+                    name: OptionAction.SET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
                         "command.goal.interaction.description"
                     ),
-                    type: Eris.Constants.ApplicationCommandOptionTypes.INTEGER,
-                    required: false,
-                    min_value: 1,
-                } as any,
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "goal",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.goal.interaction.description"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .INTEGER,
+                            required: true,
+                            min_value: 1,
+                        } as any,
+                    ],
+                },
+                {
+                    name: OptionAction.RESET,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "misc.interaction.resetOption",
+                        { optionName: "goal" }
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [],
+                },
             ],
         },
     ];
@@ -102,14 +127,17 @@ export default class GoalCommand implements BaseCommand {
 
         await GoalCommand.updateOption(
             MessageContext.fromMessage(message),
-            userGoal
+            userGoal,
+            null,
+            userGoal == null
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         userGoal: number,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
@@ -181,8 +209,6 @@ export default class GoalCommand implements BaseCommand {
             }
         }
 
-        const reset = userGoal == null;
-
         if (reset) {
             await guildPreference.reset(GameOption.GOAL);
             logger.info(
@@ -217,9 +243,23 @@ export default class GoalCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const { interactionOptions } = getInteractionValue(interaction);
-        const userGoal = interactionOptions["goal"];
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
 
-        await GoalCommand.updateOption(messageContext, userGoal, interaction);
+        let goalValue: number;
+
+        const action = interactionName as OptionAction;
+        if (action === OptionAction.RESET) {
+            goalValue = null;
+        } else if (action === OptionAction.SET) {
+            goalValue = interactionOptions["goal"] as number;
+        }
+
+        await GoalCommand.updateOption(
+            messageContext,
+            goalValue,
+            interaction,
+            goalValue == null
+        );
     }
 }

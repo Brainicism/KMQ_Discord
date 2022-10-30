@@ -1323,6 +1323,7 @@
                 "inaccessible": "I can't access that user right now. Try using {{profileUserID}} instead.",
                 "noStats": "This user needs to play their first game before their stats are tracked."
             },
+            "resetOption": "Resets the {{optionName}} option.",
             "title": {
                 "failure": "Uh-oh"
             },

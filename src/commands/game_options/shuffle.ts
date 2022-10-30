@@ -2,6 +2,7 @@ import {
     DEFAULT_SHUFFLE,
     EMBED_ERROR_COLOR,
     ExpBonusModifierValues,
+    OptionAction,
 } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
@@ -102,17 +103,43 @@ export default class ShuffleCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "shuffle",
+                    name: OptionAction.SET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
                         "command.shuffle.help.description"
                     ),
-                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
-                    required: true,
-                    choices: Object.values(ShuffleType).map((shuffleType) => ({
-                        name: shuffleType,
-                        value: shuffleType,
-                    })),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "shuffle",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.shuffle.help.description"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            required: true,
+                            choices: Object.values(ShuffleType).map(
+                                (shuffleType) => ({
+                                    name: shuffleType,
+                                    value: shuffleType,
+                                })
+                            ),
+                        },
+                    ],
+                },
+                {
+                    name: OptionAction.RESET,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "misc.interaction.resetOption",
+                        { optionName: "shuffle" }
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [],
                 },
             ],
         },
@@ -129,14 +156,17 @@ export default class ShuffleCommand implements BaseCommand {
 
         await ShuffleCommand.updateOption(
             MessageContext.fromMessage(message),
-            shuffleType
+            shuffleType,
+            null,
+            shuffleType == null
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         shuffleType: ShuffleType,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
+        reset = false
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
@@ -172,8 +202,6 @@ export default class ShuffleCommand implements BaseCommand {
             }
         }
 
-        const reset = shuffleType == null;
-
         if (reset) {
             await guildPreference.reset(GameOption.SHUFFLE_TYPE);
             logger.info(
@@ -208,13 +236,23 @@ export default class ShuffleCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const { interactionOptions } = getInteractionValue(interaction);
-        const shuffleType = interactionOptions["shuffle"] as ShuffleType;
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
+
+        let shuffleValue: ShuffleType;
+
+        const action = interactionName as OptionAction;
+        if (action === OptionAction.RESET) {
+            shuffleValue = null;
+        } else if (action === OptionAction.SET) {
+            shuffleValue = interactionOptions["shuffle"] as ShuffleType;
+        }
 
         await ShuffleCommand.updateOption(
             messageContext,
-            shuffleType,
-            interaction
+            shuffleValue,
+            interaction,
+            shuffleValue == null
         );
     }
 
