@@ -98,64 +98,77 @@ export default class LimitCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "top",
+                    name: "set",
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.limit.interaction.description_top"
+                        "command.cutoff.interaction.description"
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
-                        .SUB_COMMAND,
+                        .SUB_COMMAND_GROUP,
                     options: [
                         {
-                            name: "limit",
+                            name: "top",
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
                                     "command.limit.interaction.description_top"
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
-                                .INTEGER,
-                            required: true,
-                            max_value: LIMIT_END_MAX,
-                            min_value: LIMIT_END_MIN,
-                        } as any,
-                    ],
-                },
-                {
-                    name: "range",
-                    description: LocalizationManager.localizer.translate(
-                        LocaleType.EN,
-                        "command.limit.interaction.description_range"
-                    ),
-                    type: Eris.Constants.ApplicationCommandOptionTypes
-                        .SUB_COMMAND,
-                    options: [
+                                .SUB_COMMAND,
+                            options: [
+                                {
+                                    name: "limit",
+                                    description:
+                                        LocalizationManager.localizer.translate(
+                                            LocaleType.EN,
+                                            "command.limit.interaction.description_top"
+                                        ),
+                                    type: Eris.Constants
+                                        .ApplicationCommandOptionTypes.INTEGER,
+                                    required: true,
+                                    max_value: LIMIT_END_MAX,
+                                    min_value: LIMIT_END_MIN,
+                                } as any,
+                            ],
+                        },
                         {
-                            name: "limit_start",
+                            name: "range",
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
                                     "command.limit.interaction.description_range"
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
-                                .INTEGER,
-                            required: true,
-                            max_value: LIMIT_START_MAX,
-                            min_value: LIMIT_START_MIN,
-                        } as any,
-                        {
-                            name: "limit_end",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.limit.interaction.description_range"
-                                ),
-                            type: Eris.Constants.ApplicationCommandOptionTypes
-                                .INTEGER,
-                            required: true,
-                            max_value: LIMIT_END_MAX,
-                            min_value: LIMIT_END_MIN,
-                        } as any,
+                                .SUB_COMMAND,
+                            options: [
+                                {
+                                    name: "limit_start",
+                                    description:
+                                        LocalizationManager.localizer.translate(
+                                            LocaleType.EN,
+                                            "command.limit.interaction.description_range"
+                                        ),
+                                    type: Eris.Constants
+                                        .ApplicationCommandOptionTypes.INTEGER,
+                                    required: true,
+                                    max_value: LIMIT_START_MAX,
+                                    min_value: LIMIT_START_MIN,
+                                } as any,
+                                {
+                                    name: "limit_end",
+                                    description:
+                                        LocalizationManager.localizer.translate(
+                                            LocaleType.EN,
+                                            "command.limit.interaction.description_range"
+                                        ),
+                                    type: Eris.Constants
+                                        .ApplicationCommandOptionTypes.INTEGER,
+                                    required: true,
+                                    max_value: LIMIT_END_MAX,
+                                    min_value: LIMIT_END_MIN,
+                                } as any,
+                            ],
+                        },
                     ],
                 },
                 {

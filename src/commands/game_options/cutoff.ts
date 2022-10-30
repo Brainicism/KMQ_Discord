@@ -106,64 +106,77 @@ export default class CutoffCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "earliest",
+                    name: "set",
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.cutoff.interaction.earliestOption"
+                        "command.cutoff.interaction.description"
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
-                        .SUB_COMMAND,
+                        .SUB_COMMAND_GROUP,
                     options: [
                         {
-                            name: "beginning_year",
+                            name: "earliest",
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
                                     "command.cutoff.interaction.earliestOption"
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
-                                .INTEGER,
-                            required: true,
-                            max_value: DEFAULT_ENDING_SEARCH_YEAR,
-                            min_value: DEFAULT_BEGINNING_SEARCH_YEAR,
-                        } as any,
-                    ],
-                },
-                {
-                    name: "range",
-                    description: LocalizationManager.localizer.translate(
-                        LocaleType.EN,
-                        "command.cutoff.interaction.rangeOption"
-                    ),
-                    type: Eris.Constants.ApplicationCommandOptionTypes
-                        .SUB_COMMAND,
-                    options: [
+                                .SUB_COMMAND,
+                            options: [
+                                {
+                                    name: "beginning_year",
+                                    description:
+                                        LocalizationManager.localizer.translate(
+                                            LocaleType.EN,
+                                            "command.cutoff.interaction.earliestOption"
+                                        ),
+                                    type: Eris.Constants
+                                        .ApplicationCommandOptionTypes.INTEGER,
+                                    required: true,
+                                    max_value: DEFAULT_ENDING_SEARCH_YEAR,
+                                    min_value: DEFAULT_BEGINNING_SEARCH_YEAR,
+                                } as any,
+                            ],
+                        },
                         {
-                            name: "beginning_year",
+                            name: "range",
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
                                     "command.cutoff.interaction.rangeOption"
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
-                                .INTEGER,
-                            required: true,
-                            max_value: DEFAULT_ENDING_SEARCH_YEAR,
-                            min_value: DEFAULT_BEGINNING_SEARCH_YEAR,
-                        } as any,
-                        {
-                            name: "ending_year",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.cutoff.interaction.rangeOption"
-                                ),
-                            type: Eris.Constants.ApplicationCommandOptionTypes
-                                .INTEGER,
-                            required: true,
-                            max_value: DEFAULT_ENDING_SEARCH_YEAR,
-                            min_value: DEFAULT_BEGINNING_SEARCH_YEAR,
-                        } as any,
+                                .SUB_COMMAND,
+                            options: [
+                                {
+                                    name: "beginning_year",
+                                    description:
+                                        LocalizationManager.localizer.translate(
+                                            LocaleType.EN,
+                                            "command.cutoff.interaction.rangeOption"
+                                        ),
+                                    type: Eris.Constants
+                                        .ApplicationCommandOptionTypes.INTEGER,
+                                    required: true,
+                                    max_value: DEFAULT_ENDING_SEARCH_YEAR,
+                                    min_value: DEFAULT_BEGINNING_SEARCH_YEAR,
+                                } as any,
+                                {
+                                    name: "ending_year",
+                                    description:
+                                        LocalizationManager.localizer.translate(
+                                            LocaleType.EN,
+                                            "command.cutoff.interaction.rangeOption"
+                                        ),
+                                    type: Eris.Constants
+                                        .ApplicationCommandOptionTypes.INTEGER,
+                                    required: true,
+                                    max_value: DEFAULT_ENDING_SEARCH_YEAR,
+                                    min_value: DEFAULT_BEGINNING_SEARCH_YEAR,
+                                } as any,
+                            ],
+                        },
                     ],
                 },
                 {
