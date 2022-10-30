@@ -113,7 +113,8 @@ export default class MultiGuessCommand implements BaseCommand {
                     name: OptionAction.RESET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.multiguess.help.interaction.description"
+                        "misc.interaction.resetOption",
+                        { optionName: "multiguess" }
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,

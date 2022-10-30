@@ -107,7 +107,7 @@ export default class CutoffCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "set",
+                    name: OptionAction.SET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
                         "command.cutoff.interaction.description"
@@ -181,7 +181,7 @@ export default class CutoffCommand implements BaseCommand {
                     ],
                 },
                 {
-                    name: "reset",
+                    name: OptionAction.RESET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",

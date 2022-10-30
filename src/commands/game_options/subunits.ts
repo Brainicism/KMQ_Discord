@@ -126,7 +126,8 @@ export default class SubunitsCommand implements BaseCommand {
                     name: OptionAction.RESET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.subunits.help.description"
+                        "misc.interaction.resetOption",
+                        { optionName: "subunits" }
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,

@@ -108,7 +108,8 @@ export default class GuessTimeoutCommand implements BaseCommand {
                     name: OptionAction.RESET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.timer.interaction.description"
+                        "misc.interaction.resetOption",
+                        { optionName: "timer" }
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,

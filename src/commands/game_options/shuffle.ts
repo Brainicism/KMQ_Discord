@@ -134,7 +134,8 @@ export default class ShuffleCommand implements BaseCommand {
                     name: OptionAction.RESET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.shuffle.help.description"
+                        "misc.interaction.resetOption",
+                        { optionName: "shuffle" }
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,

@@ -122,7 +122,8 @@ export default class OstCommand implements BaseCommand {
                     name: OptionAction.RESET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.ost.help.description"
+                        "misc.interaction.resetOption",
+                        { optionName: "ost" }
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,

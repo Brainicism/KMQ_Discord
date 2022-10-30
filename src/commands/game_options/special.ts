@@ -151,7 +151,8 @@ export default class SpecialCommand implements BaseCommand {
                     name: OptionAction.RESET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.special.help.description"
+                        "misc.interaction.resetOption",
+                        { optionName: "special" }
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
