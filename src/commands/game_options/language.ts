@@ -194,6 +194,9 @@ export default class LanguageCommand implements BaseCommand {
             languageValue = null;
         } else if (action === OptionAction.SET) {
             languageValue = interactionOptions["language"] as LanguageType;
+        } else {
+            logger.error(`Unexpected interaction name: ${interactionName}`);
+            languageValue = null;
         }
 
         await LanguageCommand.updateOption(

@@ -253,6 +253,9 @@ export default class GoalCommand implements BaseCommand {
             goalValue = null;
         } else if (action === OptionAction.SET) {
             goalValue = interactionOptions["goal"] as number;
+        } else {
+            logger.error(`Unexpected interaction name: ${interactionName}`);
+            goalValue = null;
         }
 
         await GoalCommand.updateOption(

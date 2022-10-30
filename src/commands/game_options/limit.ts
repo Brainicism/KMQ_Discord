@@ -1,4 +1,4 @@
-import { DEFAULT_LIMIT } from "../../constants";
+import { DEFAULT_LIMIT, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -24,6 +24,11 @@ const LIMIT_START_MIN = 0;
 const LIMIT_START_MAX = 100000;
 const LIMIT_END_MIN = 1;
 const LIMIT_END_MAX = 100000;
+
+enum LimitAppCommandAction {
+    RANGE = "RANGE",
+    TOP = "top",
+}
 
 export default class LimitCommand implements BaseCommand {
     preRunChecks = [
@@ -107,7 +112,7 @@ export default class LimitCommand implements BaseCommand {
                         .SUB_COMMAND_GROUP,
                     options: [
                         {
-                            name: "top",
+                            name: LimitAppCommandAction.TOP,
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
@@ -132,7 +137,7 @@ export default class LimitCommand implements BaseCommand {
                             ],
                         },
                         {
-                            name: "range",
+                            name: LimitAppCommandAction.RANGE,
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
@@ -297,14 +302,18 @@ export default class LimitCommand implements BaseCommand {
 
         let limitStart: number;
         let limitEnd: number;
-        if (interactionName === "range") {
-            limitStart = interactionOptions["limit_start"];
 
+        if (interactionName === OptionAction.RESET) {
+            limitStart = null;
+            limitEnd = null;
+        } else if (interactionName === LimitAppCommandAction.RANGE) {
+            limitStart = interactionOptions["limit_start"];
             limitEnd = interactionOptions["limit_end"];
-        } else if (interactionName === "top") {
+        } else if (interactionName === LimitAppCommandAction.TOP) {
             limitStart = 0;
             limitEnd = interactionOptions["limit"];
         } else {
+            logger.error(`Unexpected interaction name: ${interactionName}`);
             limitStart = null;
             limitEnd = null;
         }

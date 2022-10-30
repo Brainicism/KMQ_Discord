@@ -290,6 +290,9 @@ export default class GenderCommand implements BaseCommand {
             selectedGenders = null;
         } else if (action === OptionAction.SET) {
             selectedGenders = Object.values(interactionOptions);
+        } else {
+            logger.error(`Unexpected interaction name: ${interactionName}`);
+            selectedGenders = null;
         }
 
         await GenderCommand.updateOption(

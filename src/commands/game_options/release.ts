@@ -198,6 +198,9 @@ export default class ReleaseCommand implements BaseCommand {
             releaseValue = null;
         } else if (action === OptionAction.SET) {
             releaseValue = interactionOptions["release"] as ReleaseType;
+        } else {
+            logger.error(`Unexpected interaction name: ${interactionName}`);
+            releaseValue = null;
         }
 
         await ReleaseCommand.updateOption(

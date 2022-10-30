@@ -207,6 +207,9 @@ export default class GuessModeCommand implements BaseCommand {
             guessModeValue = null;
         } else if (action === OptionAction.SET) {
             guessModeValue = interactionOptions["guessmode"] as GuessModeType;
+        } else {
+            logger.error(`Unexpected interaction name: ${interactionName}`);
+            guessModeValue = null;
         }
 
         await GuessModeCommand.updateOption(

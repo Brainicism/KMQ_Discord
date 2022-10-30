@@ -325,8 +325,17 @@ export default class DurationCommand implements BaseCommand {
 
         if (action === DurationActionInternal.RESET) {
             durationValue = null;
-        } else {
+        } else if (
+            [
+                DurationActionInternal.ADD,
+                DurationActionInternal.REMOVE,
+                DurationActionInternal.SET,
+            ].includes(action)
+        ) {
             durationValue = interactionOptions["duration"];
+        } else {
+            logger.error(`Unexpected interaction name: ${interactionName}`);
+            durationValue = null;
         }
 
         await DurationCommand.updateOption(
