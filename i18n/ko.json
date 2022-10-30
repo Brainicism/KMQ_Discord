@@ -1323,7 +1323,7 @@
                 "inaccessible": "지금은 해당 사용자에 액세스할 수 없습니다. ({{profileUserID}}를 사용해 보세요.)",
                 "noStats": "이 사용자는 통계를 추적하기 전에 첫 게임을 플레이해야 합니다."
             },
-            "resetOption": "{{optionName}} 옵션을 재설정합니다.",
+            "resetOption": "{{optionName}}의 옵션을 재설정합니다.",
             "title": {
                 "failure": "잠깐만"
             },
