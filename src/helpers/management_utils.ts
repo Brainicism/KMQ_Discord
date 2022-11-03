@@ -70,6 +70,7 @@ export function registerClientEvents(): void {
         .on("guildDelete", guildDeleteHandler)
         .on("unavailableGuildCreate", unavailableGuildCreateHandler)
         .on("guildAvailable", guildAvailableHandler)
+        .on("guildUnavailable", unavailableGuildCreateHandler)
         .on("interactionCreate", interactionCreateHandler);
 }
 
