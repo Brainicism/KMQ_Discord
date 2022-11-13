@@ -26,5 +26,6 @@ declare namespace NodeJS {
         PATREON_CREATOR_ACCESS_TOKEN?: string;
         PATREON_CAMPAIGN_ID?: string;
         DAISUKI_SEED_CRON_JOB?: string;
+        GUILDS_PER_SHARD?: number;
     }
 }
