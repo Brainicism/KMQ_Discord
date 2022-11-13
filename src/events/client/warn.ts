@@ -1,10 +1,7 @@
+import { IGNORED_WARNING_SUBSTRINGS } from "../../constants";
 import { IPCLogger } from "../../logger";
 
 const logger = new IPCLogger("warn");
-const IGNORED_WARNING_SUBSTRINGS = [
-    "Unhandled MESSAGE_CREATE type",
-    "Unknown guild text channel type",
-];
 
 /**
  * Handles the 'warn' event
