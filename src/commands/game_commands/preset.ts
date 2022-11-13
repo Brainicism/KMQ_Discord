@@ -247,7 +247,7 @@ export default class PresetCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.preset.help.example.save"
+                                    "command.preset.interaction.save.presetName"
                                 ),
                             required: true,
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -269,7 +269,7 @@ export default class PresetCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.preset.help.example.load"
+                                    "command.preset.interaction.load.presetName"
                                 ),
                             required: true,
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -292,7 +292,7 @@ export default class PresetCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.preset.help.example.delete"
+                                    "command.preset.interaction.delete.presetName"
                                 ),
                             required: true,
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -315,7 +315,7 @@ export default class PresetCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.preset.help.example.replace"
+                                    "command.preset.interaction.replace.presetName"
                                 ),
                             required: true,
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -338,7 +338,7 @@ export default class PresetCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.preset.help.example.export"
+                                    "command.preset.interaction.export.presetName"
                                 ),
                             required: true,
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -361,7 +361,7 @@ export default class PresetCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.preset.help.example.import"
+                                    "command.preset.interaction.import.exportedPresetID"
                                 ),
                             required: true,
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -372,7 +372,7 @@ export default class PresetCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.preset.help.example.import"
+                                    "command.preset.interaction.import.presetName"
                                 ),
                             required: true,
                             type: Eris.Constants.ApplicationCommandOptionTypes

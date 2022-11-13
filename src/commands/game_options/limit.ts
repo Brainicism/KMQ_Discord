@@ -106,7 +106,7 @@ export default class LimitCommand implements BaseCommand {
                     name: "set",
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.cutoff.interaction.description"
+                        "command.limit.interaction.description"
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND_GROUP,
@@ -126,7 +126,7 @@ export default class LimitCommand implements BaseCommand {
                                     description:
                                         LocalizationManager.localizer.translate(
                                             LocaleType.EN,
-                                            "command.limit.interaction.description_top"
+                                            "command.limit.interaction.limit"
                                         ),
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,
@@ -151,7 +151,7 @@ export default class LimitCommand implements BaseCommand {
                                     description:
                                         LocalizationManager.localizer.translate(
                                             LocaleType.EN,
-                                            "command.limit.interaction.description_range"
+                                            "command.limit.interaction.limit_start"
                                         ),
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,
@@ -164,7 +164,7 @@ export default class LimitCommand implements BaseCommand {
                                     description:
                                         LocalizationManager.localizer.translate(
                                             LocaleType.EN,
-                                            "command.limit.interaction.description_range"
+                                            "command.limit.interaction.limit_end"
                                         ),
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,

@@ -145,7 +145,7 @@ export default class AnswerCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.answer.help.interaction.description"
+                                    "command.answer.help.interaction.answerOption"
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,

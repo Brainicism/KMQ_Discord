@@ -106,7 +106,7 @@ export default class GuessModeCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.guessmode.help.description"
+                                    "command.guessmode.interaction.guessMode"
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,

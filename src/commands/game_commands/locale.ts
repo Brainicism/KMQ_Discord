@@ -26,6 +26,11 @@ enum LocaleArgument {
     KOREAN = "korean",
 }
 
+const LanguageNameToLocaleType = {
+    English: LocaleType.EN,
+    Korean: LocaleType.KO,
+};
+
 export default class LocaleTypeCommand implements BaseCommand {
     aliases = ["botlanguage"];
 
@@ -109,17 +114,19 @@ export default class LocaleTypeCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "locale",
+                    name: "language",
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.locale.interaction.description"
+                        "command.locale.interaction.language"
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: true,
-                    choices: Object.values(LocaleType).map((localeType) => ({
-                        name: localeType,
-                        value: localeType,
-                    })),
+                    choices: Object.keys(LanguageNameToLocaleType).map(
+                        (languageName) => ({
+                            name: languageName,
+                            value: languageName,
+                        })
+                    ),
                 },
             ],
         },
@@ -222,11 +229,12 @@ export default class LocaleTypeCommand implements BaseCommand {
         messageContext: MessageContext
     ): Promise<void> {
         const { interactionOptions } = getInteractionValue(interaction);
-        const localType = interactionOptions["locale"] as LocaleType;
+        const localeType =
+            LanguageNameToLocaleType[interactionOptions["language"]];
 
         await LocaleTypeCommand.updateLocaleMessage(
             messageContext,
-            localType,
+            localeType,
             interaction
         );
     }

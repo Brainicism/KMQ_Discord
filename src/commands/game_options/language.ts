@@ -95,7 +95,7 @@ export default class LanguageCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.language.help.description"
+                                    "command.language.interaction.language"
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,

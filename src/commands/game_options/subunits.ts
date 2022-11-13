@@ -95,7 +95,10 @@ export default class SubunitsCommand implements BaseCommand {
                     name: OptionAction.SET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.subunits.help.description"
+                        "command.subunits.help.description",
+                        {
+                            groups: `\`${process.env.BOT_PREFIX}groups\``,
+                        }
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
@@ -105,10 +108,7 @@ export default class SubunitsCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.subunits.help.description",
-                                    {
-                                        groups: `\`${process.env.BOT_PREFIX}groups\``,
-                                    }
+                                    "command.subunits.interaction.subunits"
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,

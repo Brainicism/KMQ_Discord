@@ -133,7 +133,7 @@ export default class SpecialCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.special.help.description"
+                                    "command.special.interaction.special"
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,

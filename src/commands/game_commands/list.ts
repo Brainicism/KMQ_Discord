@@ -95,7 +95,7 @@ export default class ListCommand implements BaseCommand {
                     name: "type",
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.artisttype.help.interaction.description"
+                        "command.list.interaction.listType"
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: true,

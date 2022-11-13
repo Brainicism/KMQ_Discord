@@ -45,7 +45,7 @@ export default class ReleaseCommand implements BaseCommand {
             name: "release",
             description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
-                "command.release.help.interaction.description"
+                "command.release.interaction.description"
             ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
@@ -53,7 +53,7 @@ export default class ReleaseCommand implements BaseCommand {
                     name: OptionAction.SET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.release.help.interaction.description"
+                        "command.release.interaction.description"
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
@@ -63,7 +63,7 @@ export default class ReleaseCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.release.help.interaction.description"
+                                    "command.release.interaction.release"
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
