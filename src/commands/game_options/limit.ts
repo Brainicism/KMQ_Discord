@@ -181,7 +181,7 @@ export default class LimitCommand implements BaseCommand {
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
                         "command.limit.help.example.reset",
-                        { defaultLimit: `\`${DEFAULT_LIMIT}\`` }
+                        { defaultLimit: String(DEFAULT_LIMIT) }
                     ),
                     type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
                 },

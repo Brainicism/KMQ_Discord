@@ -49,7 +49,7 @@
                     "typingTypos": "추측을 할려면 채팅에 입력하세요. (사소한 오타는 올바른 것으로 표시되며 {{penalty}} 경험치 패널티가 적용됩니다.)"
                 },
                 "interaction": {
-                    "answerOption": "답을 추측하는 방법입니다",
+                    "answerOption": "게임 내 답변 방법",
                     "description": "정답 입력 방법 선택: 객관식 혹은 서술형 (정답 직접 입력)"
                 }
             }
@@ -274,7 +274,7 @@
             },
             "interaction": {
                 "description": "가장 많은 점수를 얻은 플레이어가 목표 점수에 도달하면 게임이 종료됩니다",
-                "goal": "이기기 위해 도달해야 할 포인트 수입니다"
+                "goal": "이기는 데 필요한 포인트 수입니다"
             }
         },
         "groups": {
@@ -559,8 +559,8 @@
             },
             "interaction": {
                 "description": "노래 결과에서 최대 결과 수를 설정합니다",
-                "description_range": "선택한 필터에 따라 상위 [limit_start] 및 [limit_end] 곡 사이에서 재생됩니다.",
-                "description_top": "선택한 필터를 기반으로 상위 [limit] 곡을 재생합니다.",
+                "description_range": "상위 [limit_start] 곡과 [limit_end] 곡 사이에서 재생합니다",
+                "description_top": "상위 [limit]곡을 재생합니다",
                 "limit": "이렇게 많은 상위 곡을 재생하십시오",
                 "limit_end": "시작 제한과 이 값 사이의 노래를 재생합니다",
                 "limit_start": "가장 많이 들은 노래에서 [limit_start]부터 재생하십시오"
@@ -850,7 +850,7 @@
                 "example": {
                     "delete": "언급된 사전 설정을 삭제합니다.",
                     "export": "언급된 사전 설정을 로드/가져오기하는 데 사용할 수 있는 고유 식별자를 반환합니다.",
-                    "import": "내보낸 사전 설정 식별자를 사용하여 이름이 `preset_name`인 새 사전 설정을 만듭니다.",
+                    "import": "내보낸 사전 설정 식별자를 사용하여 새 사전 설정을 만듭니다",
                     "list": "서버의 모든 사전 설정을 나열합니다.",
                     "load": "언급된 사전 설정 또는 사전 설정 식별자 ({{exampleIdentifier}})를 게임 옵션에 로드합니다.",
                     "replace": "언급된 사전 설정의 옵션을 현재 게임 옵션으로 교체합니다.",
@@ -874,7 +874,7 @@
                 },
                 "import": {
                     "exportedPresetID": "가져올 사전 설정의 ID입니다",
-                    "presetName": "가져올 사전 설정입니다"
+                    "presetName": "가져온 사전 설정을 지정할 이름입니다"
                 },
                 "load": {
                     "presetName": "로드할 사전 설정입니다"
