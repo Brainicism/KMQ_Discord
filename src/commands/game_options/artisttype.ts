@@ -108,7 +108,7 @@ export default class ArtistTypeCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.artisttype.help.interaction.description"
+                                    "command.artisttype.help.interaction.artistTypeOption"
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,

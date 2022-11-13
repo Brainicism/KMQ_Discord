@@ -49,6 +49,7 @@
                     "typingTypos": "Type your answer in the chat to guess. Small typos will be marked as correct. {{penalty}} EXP penalty will be applied"
                 },
                 "interaction": {
+                    "answerOption": "How to answer in-game",
                     "description": "Choose how to answer: by typing your answer, or via multiple choice"
                 }
             }
@@ -63,6 +64,7 @@
                     "soloists": "Play songs only from soloists"
                 },
                 "interaction": {
+                    "artistTypeOption": "The type of artist to play from",
                     "description": "Choose whether you'd like to hear from soloists, groups, or both"
                 }
             }
@@ -91,8 +93,10 @@
                 }
             },
             "interaction": {
+                "beginningYear": "The earliest year to include",
                 "description": "Set a cutoff year range for songs",
                 "earliestOption": "Pick songs for every year starting from [beginningYear]",
+                "endingYear": "The last year to include",
                 "rangeOption": "Pick songs for every year between [beginningYear] and [endingYear]"
             }
         },
@@ -123,6 +127,11 @@
                 "usage": {
                     "minutes": "minutes"
                 }
+            },
+            "interaction": {
+                "durationAdd": "How many minutes to add to the duration",
+                "durationRemove": "How many minutes to remove from the duration",
+                "durationSet": "How many minutes to play KMQ before ending the game"
             }
         },
         "end": {
@@ -205,7 +214,7 @@
                 }
             },
             "help": {
-                "description": "The person that started the game can force-hint the current song, no majority necessary."
+                "description": "Directly receive a hint to the current song without requiring voting."
             },
             "hintIgnored": "Force Hint Ignored"
         },
@@ -217,7 +226,7 @@
                 }
             },
             "help": {
-                "description": "The person that started the game can force-skip the current song, no majority necessary."
+                "description": "Directly skip the current song without requiring voting."
             },
             "skipIgnored": "Force Skip Ignored"
         },
@@ -233,7 +242,8 @@
                 }
             },
             "interaction": {
-                "description": "Choose the gender of the artists you'd like to hear from."
+                "description": "Choose the gender of the artists you'd like to hear from.",
+                "gender": "The gender of the group members or soloist"
             },
             "warning": {
                 "gameOption": {
@@ -263,7 +273,8 @@
                 }
             },
             "interaction": {
-                "description": "Once the player with the most points reaches the goal score, the game ends."
+                "description": "Once the player with the most points reaches the goal score, the game ends.",
+                "goal": "The number of points needed to win"
             }
         },
         "groups": {
@@ -303,6 +314,9 @@
                     "reset": "Reset to the default guess mode of {{defaultGuessMode}}",
                     "song": "Type the correct song name to win a game round"
                 }
+            },
+            "interaction": {
+                "guessMode": "What is considered a valid guess"
             }
         },
         "help": {
@@ -313,11 +327,14 @@
                 "noDocs": "Sorry, there is no documentation on {{action}}."
             },
             "help": {
-                "description": "Get help about the game's commands. Add a command to get information about the specific command.",
+                "description": "Get help with the bot's functionality.",
                 "example": {
                     "allCommands": "Shows all available commands and a short description",
                     "sampleCommand": "Shows a detailed description for the cutoff command"
                 }
+            },
+            "interaction": {
+                "action": "The name of a command to get documentation of."
             },
             "title": "{{kmq}} Command Help"
         },
@@ -427,6 +444,9 @@
                     "korean": "Plays only Korean songs. Ignores songs that are in foreign languages: English, Japanese, Chinese",
                     "reset": "Reset to the default language of {{defaultLanguage}}"
                 }
+            },
+            "interaction": {
+                "language": "The language of music to play"
             }
         },
         "leaderboard": {
@@ -539,8 +559,11 @@
             },
             "interaction": {
                 "description": "Set a maximum number of results in the song query",
-                "description_range": "This plays between the top [limit_start] and [limit_end] songs based on the selected filters.",
-                "description_top": "This plays the top [limit] songs based on the selected filters."
+                "description_range": "Play between the top [limit_start] and [limit_end] songs.",
+                "description_top": "Play the top [limit] songs",
+                "limit": "Play this many of the top songs",
+                "limit_end": "Play songs between the starting limit and this value",
+                "limit_start": "From the most listened songs, start playing from [limit_start]"
             }
         },
         "list": {
@@ -564,6 +587,9 @@
                     "groups": "Lists the current {{groups}} options",
                     "include": "Lists the current {{include}} options"
                 }
+            },
+            "interaction": {
+                "listType": "Whether to print the currently set groups, groups included, or groups excluded"
             }
         },
         "listen": {
@@ -586,7 +612,8 @@
                 }
             },
             "interaction": {
-                "description": "Change the language of the bot."
+                "description": "Change the language of the bot.",
+                "language": "The language to change to"
             },
             "language": {
                 "en": "English",
@@ -637,10 +664,11 @@
                     "off": "Only the first person who guesses correct is awarded the point",
                     "on": "Allows for a 1.5 second grace period from when the first correct guess occurs. Multiple players are able to guess correctly",
                     "reset": "Reset to the default multiguess type of {{defaultMultiguess}}"
-                },
-                "interaction": {
-                    "description": "Sets whether multiple people can guess a song correctly"
                 }
+            },
+            "interaction": {
+                "description": "Sets whether multiple people can guess a song correctly",
+                "multiguess": "Whether to allow multiple people to guess correctly"
             }
         },
         "news": {
@@ -678,6 +706,9 @@
                     "include": "Include OST songs",
                     "reset": "Reset to the default option of {{defaultOst}}"
                 }
+            },
+            "interaction": {
+                "ost": "Whether to include, exclusively play, or exclude OST songs"
             }
         },
         "play": {
@@ -817,7 +848,7 @@
                 "example": {
                     "delete": "Deletes the mentioned preset",
                     "export": "Returns a unique identifier that can be used to load/import the mentioned preset",
-                    "import": "Creates a new preset with name `preset_name` using an exported preset identifier",
+                    "import": "Creates a new preset using an exported preset identifier",
                     "list": "Lists all of the server's presets",
                     "load": "Loads the mentioned preset or preset identifier ({{exampleIdentifier}}) into the game options",
                     "replace": "Replace the mentioned preset's options with the current game options",
@@ -831,6 +862,27 @@
             "imported": {
                 "description": "Load the newly imported preset using `{{presetLoad}} {{presetName}}`.",
                 "title": "Preset Imported"
+            },
+            "interaction": {
+                "delete": {
+                    "presetName": "The preset to delete"
+                },
+                "export": {
+                    "presetName": "The preset to export"
+                },
+                "import": {
+                    "exportedPresetID": "The ID of the preset to import",
+                    "presetName": "The name to give the imported preset"
+                },
+                "load": {
+                    "presetName": "The preset to load"
+                },
+                "replace": {
+                    "presetName": "The preset to replace"
+                },
+                "save": {
+                    "presetName": "What to call this preset"
+                }
             },
             "list": {
                 "failure": {
@@ -930,10 +982,11 @@
                     "all": "Plays all available videos, including dance practices, acoustic versions, remixes",
                     "official": "Plays only {{official}} music videos",
                     "reset": "Reset to the default release type of {{defaultRelease}}"
-                },
-                "interaction": {
-                    "description": "Choose whether to include only official music videos, or all videos."
                 }
+            },
+            "interaction": {
+                "description": "Choose whether to include only official music videos, or all videos.",
+                "release": "The type of releases to play from"
             }
         },
         "remove": {
@@ -978,6 +1031,9 @@
                     "random": "Songs will be played starting from a random point in the middle",
                     "reset": "Reset to the default seek of {{defaultSeek}}"
                 }
+            },
+            "interaction": {
+                "seek": "Where to start playing each song from"
             }
         },
         "shuffle": {
@@ -988,6 +1044,9 @@
                     "random": "Songs will play randomly",
                     "reset": "Reset to the default shuffle mode of {{defaultShuffle}}"
                 }
+            },
+            "interaction": {
+                "shuffle": "The type of music shuffling to use in-game"
             }
         },
         "skip": {
@@ -1018,6 +1077,9 @@
                     "reverse": "Plays the song in reverse",
                     "slow": "Plays the song at a slow speed"
                 }
+            },
+            "interaction": {
+                "special": "The type of modification to make on each song"
             }
         },
         "spotify": {
@@ -1083,6 +1145,9 @@
                     "include": "Automatically include subunits. For example, `{{groupCommand}} {{parentGroup}}` would include songs by {{parentGroup}}, {{subunitOne}}, {{subunitTwo}}, etc.",
                     "reset": "Reset to the default option of {{defaultSubunit}}"
                 }
+            },
+            "interaction": {
+                "subunits": "Whether to include subunits"
             }
         },
         "timer": {
@@ -1097,7 +1162,8 @@
                 }
             },
             "interaction": {
-                "description": "Try your best to guess correctly before the timer runs out!"
+                "description": "Try your best to guess correctly before the timer runs out!",
+                "timer": "How many seconds to play each song before skipping"
             }
         },
         "vote": {

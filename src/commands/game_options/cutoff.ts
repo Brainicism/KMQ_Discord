@@ -135,7 +135,7 @@ export default class CutoffCommand implements BaseCommand {
                                     description:
                                         LocalizationManager.localizer.translate(
                                             LocaleType.EN,
-                                            "command.cutoff.interaction.earliestOption"
+                                            "command.cutoff.interaction.beginningYear"
                                         ),
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,
@@ -160,7 +160,7 @@ export default class CutoffCommand implements BaseCommand {
                                     description:
                                         LocalizationManager.localizer.translate(
                                             LocaleType.EN,
-                                            "command.cutoff.interaction.rangeOption"
+                                            "command.cutoff.interaction.beginningYear"
                                         ),
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,
@@ -173,7 +173,7 @@ export default class CutoffCommand implements BaseCommand {
                                     description:
                                         LocalizationManager.localizer.translate(
                                             LocaleType.EN,
-                                            "command.cutoff.interaction.rangeOption"
+                                            "command.cutoff.interaction.endingYear"
                                         ),
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,

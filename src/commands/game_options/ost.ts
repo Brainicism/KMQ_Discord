@@ -104,7 +104,7 @@ export default class OstCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.ost.help.description"
+                                    "command.ost.interaction.ost"
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,

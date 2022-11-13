@@ -123,7 +123,7 @@ export default class GenderCommand implements BaseCommand {
                         name: `gender_${x + 1}`,
                         description: LocalizationManager.localizer.translate(
                             LocaleType.EN,
-                            "command.gender.interaction.description"
+                            "command.gender.interaction.gender"
                         ),
                         type: Eris.Constants.ApplicationCommandOptionTypes
                             .STRING,

@@ -116,7 +116,7 @@ export default class ShuffleCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.shuffle.help.description"
+                                    "command.shuffle.interaction.shuffle"
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,

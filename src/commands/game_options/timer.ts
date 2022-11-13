@@ -94,7 +94,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.timer.interaction.description"
+                                    "command.timer.interaction.timer"
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .INTEGER,

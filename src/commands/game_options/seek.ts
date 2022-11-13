@@ -104,7 +104,7 @@ export default class SeekCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.seek.help.description"
+                                    "command.seek.interaction.seek"
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,

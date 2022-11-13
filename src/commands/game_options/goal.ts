@@ -93,7 +93,7 @@ export default class GoalCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.goal.interaction.description"
+                                    "command.goal.interaction.goal"
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .INTEGER,

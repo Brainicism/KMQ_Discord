@@ -69,7 +69,7 @@ export default class HelpCommand implements BaseCommand {
                     name: "action",
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.help.help.description"
+                        "command.help.interaction.action"
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: false,

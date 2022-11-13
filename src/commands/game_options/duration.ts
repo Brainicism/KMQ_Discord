@@ -120,7 +120,8 @@ export default class DurationCommand implements BaseCommand {
                     name: DurationActionInternal.SET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.duration.help.example.set"
+                        "command.duration.help.example.set",
+                        { duration: "[duration]" }
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
@@ -130,7 +131,7 @@ export default class DurationCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.duration.help.example.set"
+                                    "command.duration.interaction.durationSet"
                                 ),
                             required: true,
                             min_value: DURATION_DELTA_MIN,
@@ -155,8 +156,7 @@ export default class DurationCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.duration.help.example.increment",
-                                    { duration: "[duration]" }
+                                    "command.duration.interaction.durationAdd"
                                 ),
                             required: true,
                             min_value: DURATION_DELTA_MIN,
@@ -170,7 +170,8 @@ export default class DurationCommand implements BaseCommand {
                     name: DurationActionInternal.REMOVE,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.duration.help.example.decrement"
+                        "command.duration.help.example.decrement",
+                        { duration: "[duration]" }
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
@@ -180,7 +181,7 @@ export default class DurationCommand implements BaseCommand {
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.duration.help.example.decrement"
+                                    "command.duration.interaction.durationRemove"
                                 ),
                             required: true,
                             min_value: DURATION_DELTA_MIN,
