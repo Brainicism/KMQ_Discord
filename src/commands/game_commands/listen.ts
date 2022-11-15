@@ -180,7 +180,7 @@ export default class ListenCommand implements BaseCommand {
                     description: LocalizationManager.localizer.translate(
                         messageContext.guildID,
                         "misc.failure.notInVC.description",
-                        { command: `\`${process.env.BOT_PREFIX}listen\`` }
+                        { command: "`/listen`" }
                     ),
                 },
                 interaction

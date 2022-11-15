@@ -58,7 +58,7 @@ export default class GenderCommand implements BaseCommand {
                 male: `\`${Gender.MALE}\``,
                 female: `\`${Gender.FEMALE}\``,
                 coed: `\`${Gender.COED}\``,
-                genderAlternating: `\`${process.env.BOT_PREFIX}gender alternating\``,
+                genderAlternating: "`/gender alternating`",
             }
         ),
         usage: ",gender [gender_1 | alternating] {gender_2} {gender_3}",
@@ -239,7 +239,8 @@ export default class GenderCommand implements BaseCommand {
                             messageContext.guildID,
                             "command.gender.warning.gameOption.description",
                             {
-                                alternatingGenderCommand: `\`${process.env.BOT_PREFIX}gender alternating\``,
+                                alternatingGenderCommand:
+                                    "`/gender alternating`",
                             }
                         ),
                     },

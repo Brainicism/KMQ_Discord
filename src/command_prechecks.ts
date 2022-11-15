@@ -322,7 +322,7 @@ export default class CommandPrechecks {
             description: LocalizationManager.localizer.translate(
                 messageContext.guildID,
                 "misc.preCheck.notPremium",
-                { premium: `\`${process.env.BOT_PREFIX}premium\`` }
+                { premium: "`/premium`" }
             ),
         };
 
@@ -357,7 +357,7 @@ export default class CommandPrechecks {
             description: LocalizationManager.localizer.translate(
                 messageContext.guildID,
                 "misc.preCheck.premiumOrDebugServer",
-                { premium: `\`${process.env.BOT_PREFIX}premium\`` }
+                { premium: "`/premium`" }
             ),
         };
 

@@ -380,7 +380,7 @@ export default class ProfileCommand implements BaseCommand {
                             message.guildID,
                             "command.profile.failure.notFound.description",
                             {
-                                profileHelp: `\`${process.env.BOT_PREFIX}help profile\``,
+                                profileHelp: "`/help profile`",
                             }
                         ),
                     });
@@ -396,7 +396,7 @@ export default class ProfileCommand implements BaseCommand {
                 description: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.profile.failure.notFound.badUsage.description",
-                    { profileHelp: `\`${process.env.BOT_PREFIX}help profile\`` }
+                    { profileHelp: "`/help profile`" }
                 ),
             });
             return;
@@ -486,7 +486,7 @@ export default class ProfileCommand implements BaseCommand {
                     interaction.guildID,
                     "misc.interaction.profile.inaccessible",
                     {
-                        profileUserID: `\`${process.env.BOT_PREFIX}profile ${userId}\``,
+                        profileUserID: `\`/profile ${userId}\``,
                     }
                 )
             );

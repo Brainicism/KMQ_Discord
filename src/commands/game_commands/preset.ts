@@ -597,7 +597,7 @@ export default class PresetCommand implements BaseCommand {
                         messageContext.guildID,
                         "command.preset.savedOrReplaced.description",
                         {
-                            presetLoad: `\`${process.env.BOT_PREFIX}preset load ${presetName}\``,
+                            presetLoad: `\`/preset load ${presetName}\``,
                         }
                     ),
                     thumbnailUrl: KmqImages.HAPPY,
@@ -626,7 +626,7 @@ export default class PresetCommand implements BaseCommand {
                         "command.preset.failure.alreadyExists.description",
                         {
                             presetNameFormatted: `\`${presetName}\``,
-                            presetDelete: `${process.env.BOT_PREFIX}preset delete`,
+                            presetDelete: "/preset delete",
                             presetName,
                         }
                     ),
@@ -676,7 +676,7 @@ export default class PresetCommand implements BaseCommand {
                     messageContext.guildID,
                     "command.preset.savedOrReplaced.description",
                     {
-                        presetLoad: `\`${process.env.BOT_PREFIX}preset load ${presetName}\``,
+                        presetLoad: `\`/preset load ${presetName}\``,
                     }
                 ),
                 thumbnailUrl: KmqImages.HAPPY,
@@ -739,9 +739,9 @@ export default class PresetCommand implements BaseCommand {
                     "command.preset.exported.description",
                     {
                         presetName: `\`${presetName}\``,
-                        presetImport: `${process.env.BOT_PREFIX}preset import`,
+                        presetImport: "/preset import",
                         presetUUID,
-                        presetLoad: `${process.env.BOT_PREFIX}preset load`,
+                        presetLoad: "/preset load",
                     }
                 ),
                 thumbnailUrl: KmqImages.THUMBS_UP,
@@ -779,7 +779,7 @@ export default class PresetCommand implements BaseCommand {
                         "command.preset.failure.alreadyExists.description",
                         {
                             presetNameFormatted: `\`${presetName}\``,
-                            presetDelete: `${process.env.BOT_PREFIX}preset delete`,
+                            presetDelete: "/preset delete",
                             presetName,
                         }
                     ),
@@ -870,7 +870,7 @@ export default class PresetCommand implements BaseCommand {
                     messageContext.guildID,
                     "command.preset.imported.description",
                     {
-                        presetLoad: `${process.env.BOT_PREFIX}preset load`,
+                        presetLoad: "/preset load",
                         presetName,
                     }
                 ),
@@ -903,7 +903,7 @@ export default class PresetCommand implements BaseCommand {
                               messageContext.guildID,
                               "command.preset.list.failure.noPresets.description",
                               {
-                                  presetHelp: `\`${process.env.BOT_PREFIX}help preset\``,
+                                  presetHelp: "`/help preset`",
                               }
                           ),
                 footerText:
@@ -912,7 +912,7 @@ export default class PresetCommand implements BaseCommand {
                               messageContext.guildID,
                               "command.preset.list.loadInstructions.footer",
                               {
-                                  presetLoad: `${process.env.BOT_PREFIX}preset load`,
+                                  presetLoad: "/preset load",
                               }
                           )
                         : null,
@@ -1033,7 +1033,7 @@ export default class PresetCommand implements BaseCommand {
                                     messageContext.guildID,
                                     "command.preset.failure.missingIdentifier.description",
                                     {
-                                        presetExport: `${process.env.BOT_PREFIX}preset export`,
+                                        presetExport: "/preset export",
                                     }
                                 ),
                             thumbnailUrl: KmqImages.NOT_IMPRESSED,

@@ -106,7 +106,7 @@ export async function sendBeginGameSessionMessage(
         gameInstructions += LocalizationManager.localizer.translate(
             guildID,
             "command.play.exp.howToVote",
-            { vote: `\`${process.env.BOT_PREFIX}vote\`` }
+            { vote: "`/vote`" }
         );
     }
 
@@ -167,7 +167,7 @@ export async function sendBeginGameSessionMessage(
                 messageContext.guildID,
                 "command.play.voteReminder",
                 {
-                    vote: `${process.env.BOT_PREFIX}vote`,
+                    vote: "/vote",
                 }
             );
     }
@@ -424,7 +424,7 @@ export default class PlayCommand implements BaseCommand {
                     description: LocalizationManager.localizer.translate(
                         messageContext.guildID,
                         "command.begin.ignored.noTeam.description",
-                        { join: `${process.env.BOT_PREFIX}join` }
+                        { join: "/join" }
                     ),
                 },
                 interaction
@@ -605,7 +605,7 @@ export default class PlayCommand implements BaseCommand {
                         {
                             teamName: bold(teamName),
                             mentionedUser: getMention(messageContext.author.id),
-                            joinCommand: `${process.env.BOT_PREFIX}join`,
+                            joinCommand: "/join",
                             teamNameWithCleanEmojis,
                             startGameInstructions:
                                 !gameSession.sessionInitialized
@@ -613,7 +613,7 @@ export default class PlayCommand implements BaseCommand {
                                           messageContext.guildID,
                                           "command.join.team.startGameInstructions",
                                           {
-                                              beginCommand: `\`${process.env.BOT_PREFIX}begin\``,
+                                              beginCommand: "`/begin`",
                                           }
                                       )
                                     : "",
@@ -685,7 +685,7 @@ export default class PlayCommand implements BaseCommand {
                               messageContext.guildID,
                               "command.join.playerJoinedTeam.beforeGameStart.description",
                               {
-                                  beginCommand: `\`${process.env.BOT_PREFIX}begin\``,
+                                  beginCommand: "`/begin`",
                               }
                           )
                         : LocalizationManager.localizer.translate(
@@ -736,7 +736,7 @@ export default class PlayCommand implements BaseCommand {
             const description = LocalizationManager.localizer.translate(
                 guildID,
                 "misc.failure.notInVC.description",
-                { command: `\`${process.env.BOT_PREFIX}play\`` }
+                { command: "`/play`" }
             );
 
             await sendErrorMessage(
@@ -812,7 +812,7 @@ export default class PlayCommand implements BaseCommand {
             }
         }
 
-        const prefix = process.env.BOT_PREFIX;
+        const prefix = "/";
 
         // (1) No game session exists yet (create ELIMINATION, TEAMS, CLASSIC, or COMPETITION game), or
         // (2) User attempting to ,play after a ,play teams that didn't start, start CLASSIC game

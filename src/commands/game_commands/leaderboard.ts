@@ -878,7 +878,7 @@ export default class LeaderboardCommand implements BaseCommand {
                                     messageContext.guildID,
                                     chooseRandom(leaderboardQuotes),
                                     {
-                                        command: `${process.env.BOT_PREFIX}help leaderboard`,
+                                        command: "/help leaderboard",
                                     }
                                 ),
                             },

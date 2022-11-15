@@ -62,9 +62,9 @@ export default class AddCommand implements BaseCommand {
             guildID,
             "command.add.help.description",
             {
-                groups: `\`${process.env.BOT_PREFIX}groups\``,
-                exclude: `\`${process.env.BOT_PREFIX}exclude\``,
-                include: `\`${process.env.BOT_PREFIX}include\``,
+                groups: "`/groups`",
+                exclude: "`/exclude`",
+                include: "`/include`",
             }
         ),
         usage: `,add [groups | exclude | include] [${LocalizationManager.localizer.translate(
@@ -80,7 +80,7 @@ export default class AddCommand implements BaseCommand {
                     {
                         groupOne: "Twice",
                         groupTwo: "Red Velvet",
-                        groups: `\`${process.env.BOT_PREFIX}groups\``,
+                        groups: "`/groups`",
                     }
                 ),
             },
@@ -93,7 +93,7 @@ export default class AddCommand implements BaseCommand {
                         groupOne: "BESTie",
                         groupTwo: "Dia",
                         groupThree: "IKON",
-                        exclude: `\`${process.env.BOT_PREFIX}exclude\``,
+                        exclude: "`/exclude`",
                     }
                 ),
             },
@@ -104,7 +104,7 @@ export default class AddCommand implements BaseCommand {
                     "command.add.help.example.include",
                     {
                         groupOne: "EXO",
-                        include: `\`${process.env.BOT_PREFIX}include\``,
+                        include: "`/include`",
                     }
                 ),
             },
@@ -218,9 +218,7 @@ export default class AddCommand implements BaseCommand {
                             messageContext.guildID,
                             "misc.failure.unrecognizedGroups.added"
                         ),
-                    helpGroups: interaction
-                        ? "`/help groups`"
-                        : `\`${process.env.BOT_PREFIX}help groups\``,
+                    helpGroups: "`/help groups`",
                     unmatchedGroups: unmatchedGroups.join(", "),
                     solution: "",
                 }
@@ -281,21 +279,13 @@ export default class AddCommand implements BaseCommand {
                             messageContext.guildID,
                             "misc.failure.groupsExcludeConflict.description",
                             {
-                                conflictingOptionOne: interaction
-                                    ? "`/groups`"
-                                    : `\`${process.env.BOT_PREFIX}groups\``,
-                                conflictingOptionTwo: interaction
-                                    ? "`/exclude`"
-                                    : `\`${process.env.BOT_PREFIX}exclude\``,
+                                conflictingOptionOne: "`/groups`",
+                                conflictingOptionTwo: "`/exclude`",
                                 groupsList: [...intersection]
                                     .filter((x) => !x.includes("+"))
                                     .join(", "),
-                                solutionStepOne: interaction
-                                    ? "`/exclude remove`"
-                                    : `\`${process.env.BOT_PREFIX}remove exclude\``,
-                                solutionStepTwo: interaction
-                                    ? "`/groups add`"
-                                    : `\`${process.env.BOT_PREFIX}add groups\``,
+                                solutionStepOne: "`/exclude remove`",
+                                solutionStepTwo: "`/groups add`",
                                 allowOrPrevent:
                                     LocalizationManager.localizer.translate(
                                         messageContext.guildID,
@@ -385,21 +375,13 @@ export default class AddCommand implements BaseCommand {
                             messageContext.guildID,
                             "misc.failure.groupsExcludeConflict.description",
                             {
-                                conflictingOptionOne: interaction
-                                    ? "`/exclude`"
-                                    : `\`${process.env.BOT_PREFIX}exclude\``,
-                                conflictingOptionTwo: interaction
-                                    ? "`/groups`"
-                                    : `\`${process.env.BOT_PREFIX}groups\``,
+                                conflictingOptionOne: "`/exclude`",
+                                conflictingOptionTwo: "`/groups`",
                                 groupsList: [...intersection]
                                     .filter((x) => !x.includes("+"))
                                     .join(", "),
-                                solutionStepOne: interaction
-                                    ? "`/groups remove`"
-                                    : `\`${process.env.BOT_PREFIX}remove groups\``,
-                                solutionStepTwo: interaction
-                                    ? "`/exclude add`"
-                                    : `\`${process.env.BOT_PREFIX}add exclude\``,
+                                solutionStepOne: "`/groups remove`",
+                                solutionStepTwo: "`/exclude add`",
                                 allowOrPrevent:
                                     LocalizationManager.localizer.translate(
                                         messageContext.guildID,

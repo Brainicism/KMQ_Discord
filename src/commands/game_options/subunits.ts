@@ -45,7 +45,7 @@ export default class SubunitsCommand implements BaseCommand {
         description: LocalizationManager.localizer.translate(
             guildID,
             "command.subunits.help.description",
-            { groups: `\`${process.env.BOT_PREFIX}groups\`` }
+            { groups: "`/groups`" }
         ),
         usage: ",subunits [include | exclude]",
         examples: [
@@ -55,7 +55,7 @@ export default class SubunitsCommand implements BaseCommand {
                     guildID,
                     "command.subunits.help.example.include",
                     {
-                        groupCommand: `${process.env.BOT_PREFIX}groups`,
+                        groupCommand: "/groups",
                         parentGroup: "BTS",
                         subunitOne: "J-Hope",
                         subunitTwo: "RM",
@@ -87,7 +87,7 @@ export default class SubunitsCommand implements BaseCommand {
             description: LocalizationManager.localizer.translate(
                 LocaleType.EN,
                 "command.subunits.help.description",
-                { groups: `\`${process.env.BOT_PREFIX}groups\`` }
+                { groups: "`/groups`" }
             ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
@@ -97,7 +97,7 @@ export default class SubunitsCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.subunits.help.description",
                         {
-                            groups: `\`${process.env.BOT_PREFIX}groups\``,
+                            groups: "`/groups`",
                         }
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes

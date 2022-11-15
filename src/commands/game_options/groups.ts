@@ -212,12 +212,8 @@ export default class GroupsCommand implements BaseCommand {
                                 groupsList: [...intersection]
                                     .filter((x) => !x.includes("+"))
                                     .join(", "),
-                                solutionStepOne: interaction
-                                    ? "`/exclude remove`"
-                                    : `\`${process.env.BOT_PREFIX}remove exclude\``,
-                                solutionStepTwo: interaction
-                                    ? "`/groups`"
-                                    : `\`${process.env.BOT_PREFIX}groups\``,
+                                solutionStepOne: "`/exclude remove`",
+                                solutionStepTwo: "`/groups`",
                                 allowOrPrevent:
                                     LocalizationManager.localizer.translate(
                                         messageContext.guildID,
@@ -290,17 +286,13 @@ export default class GroupsCommand implements BaseCommand {
                             messageContext.guildID,
                             "misc.failure.unrecognizedGroups.added"
                         ),
-                    helpGroups: interaction
-                        ? "`/help groups`"
-                        : `\`${process.env.BOT_PREFIX}help groups\``,
+                    helpGroups: "`/help groups`",
                     unmatchedGroups: unmatchedGroups.join(", "),
                     solution: LocalizationManager.localizer.translate(
                         messageContext.guildID,
                         "misc.failure.unrecognizedGroups.solution",
                         {
-                            command: interaction
-                                ? "`/groups add`"
-                                : `\`${process.env.BOT_PREFIX}add groups\``,
+                            command: "`/groups add`",
                         }
                     ),
                 }

@@ -61,7 +61,7 @@ export default (
                 message.guildID,
                 "misc.failure.validation.numArguments.incorrect",
                 {
-                    help: `${process.env.BOT_PREFIX}help`,
+                    help: "/help",
                     command: parsedMessage.action,
                 }
             ),

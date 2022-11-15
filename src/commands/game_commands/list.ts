@@ -59,7 +59,7 @@ export default class ListCommand implements BaseCommand {
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.list.help.example.groups",
-                    { groups: `\`${process.env.BOT_PREFIX}groups\`` }
+                    { groups: "`/groups`" }
                 ),
             },
             {
@@ -67,7 +67,7 @@ export default class ListCommand implements BaseCommand {
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.list.help.example.exclude",
-                    { exclude: `\`${process.env.BOT_PREFIX}exclude\`` }
+                    { exclude: "`/exclude`" }
                 ),
             },
             {
@@ -75,7 +75,7 @@ export default class ListCommand implements BaseCommand {
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.list.help.example.include",
-                    { include: `\`${process.env.BOT_PREFIX}include\`` }
+                    { include: "`/include`" }
                 ),
             },
         ],

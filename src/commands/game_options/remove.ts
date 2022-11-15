@@ -62,9 +62,9 @@ export default class RemoveCommand implements BaseCommand {
             guildID,
             "command.remove.help.description",
             {
-                groups: `\`${process.env.BOT_PREFIX}groups\``,
-                exclude: `\`${process.env.BOT_PREFIX}exclude\``,
-                include: `\`${process.env.BOT_PREFIX}include\``,
+                groups: "`/groups`",
+                exclude: "`/exclude`",
+                include: "`/include`",
             }
         ),
         usage: `,remove [groups | exclude | include] [${LocalizationManager.localizer.translate(
@@ -80,7 +80,7 @@ export default class RemoveCommand implements BaseCommand {
                     {
                         groupOne: "Twice",
                         groupTwo: "Red Velvet",
-                        groups: `\`${process.env.BOT_PREFIX}groups\``,
+                        groups: "`/groups`",
                     }
                 ),
             },
@@ -93,7 +93,7 @@ export default class RemoveCommand implements BaseCommand {
                         groupOne: "BESTie",
                         groupTwo: "Dia",
                         groupThree: "iKON",
-                        exclude: `\`${process.env.BOT_PREFIX}exclude\``,
+                        exclude: "`/exclude`",
                     }
                 ),
             },
@@ -104,7 +104,7 @@ export default class RemoveCommand implements BaseCommand {
                     "command.remove.help.example.include",
                     {
                         group: "exo",
-                        include: `\`${process.env.BOT_PREFIX}include\``,
+                        include: "`/include`",
                     }
                 ),
             },
@@ -233,9 +233,7 @@ export default class RemoveCommand implements BaseCommand {
                             messageContext.guildID,
                             "command.remove.failure.unrecognizedGroups.removed"
                         ),
-                    helpGroups: interaction
-                        ? "/help groups"
-                        : `\`${process.env.BOT_PREFIX}help groups\``,
+                    helpGroups: "/help groups",
                     unmatchedGroups: unmatchedGroups.join(", "),
                     solution: "",
                 }

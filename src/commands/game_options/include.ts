@@ -290,15 +290,13 @@ export default class IncludeCommand implements BaseCommand {
                             messageContext.guildID,
                             "command.include.failure.unrecognizedGroups.included"
                         ),
-                    helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
+                    helpGroups: "`/help groups`",
                     unmatchedGroups: unmatchedGroups.join(", "),
                     solution: LocalizationManager.localizer.translate(
                         messageContext.guildID,
                         "misc.failure.unrecognizedGroups.solution",
                         {
-                            command: interaction
-                                ? "`/include add`"
-                                : `\`${process.env.BOT_PREFIX}add include\``,
+                            command: "`/include add`",
                         }
                     ),
                 }

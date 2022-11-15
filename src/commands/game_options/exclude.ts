@@ -275,12 +275,8 @@ export default class ExcludeCommand implements BaseCommand {
                                 groupsList: [...intersection]
                                     .filter((x) => !x.includes("+"))
                                     .join(", "),
-                                solutionStepOne: interaction
-                                    ? "`/groups remove`"
-                                    : `\`${process.env.BOT_PREFIX}remove groups\``,
-                                solutionStepTwo: interaction
-                                    ? "`/exclude`"
-                                    : `\`${process.env.BOT_PREFIX}exclude\``,
+                                solutionStepOne: "`/groups remove`",
+                                solutionStepTwo: "`/exclude`",
                                 allowOrPrevent:
                                     LocalizationManager.localizer.translate(
                                         messageContext.guildID,
@@ -361,17 +357,13 @@ export default class ExcludeCommand implements BaseCommand {
                             messageContext.guildID,
                             "command.exclude.failure.unrecognizedGroups.excluded"
                         ),
-                    helpGroups: interaction
-                        ? "`/help groups`"
-                        : `\`${process.env.BOT_PREFIX}help groups\``,
+                    helpGroups: "`/help groups`",
                     unmatchedGroups: `${unmatchedGroups.join(", ")}`,
                     solution: LocalizationManager.localizer.translate(
                         messageContext.guildID,
                         "misc.failure.unrecognizedGroups.solution",
                         {
-                            command: interaction
-                                ? "`/exclude add`"
-                                : `\`${process.env.BOT_PREFIX}add exclude\``,
+                            command: "`/exclude add`",
                         }
                     ),
                 }
