@@ -451,13 +451,13 @@ export default class ProfileCommand implements BaseCommand {
         if (userOverride) {
             await ProfileCommand.handleProfileInteraction(
                 interaction,
-                messageContext.author.id,
+                userOverride,
                 false
             );
         } else {
             await ProfileCommand.handleProfileInteraction(
                 interaction,
-                userOverride,
+                messageContext.author.id,
                 false
             );
         }
