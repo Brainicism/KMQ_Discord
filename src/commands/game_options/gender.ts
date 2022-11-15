@@ -213,7 +213,7 @@ export default class GenderCommand implements BaseCommand {
                             {
                                 optionOne: "`groups`",
                                 optionTwo: "`gender`",
-                                optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
+                                optionOneCommand: "`/groups reset`",
                             }
                         ),
                     },

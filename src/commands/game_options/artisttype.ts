@@ -197,7 +197,7 @@ export default class ArtistTypeCommand implements BaseCommand {
                     {
                         optionOne: "`groups`",
                         optionTwo: "`artisttype`",
-                        optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
+                        optionOneCommand: "`/groups reset`",
                     }
                 ),
                 color: EMBED_ERROR_COLOR,

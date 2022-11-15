@@ -350,9 +350,7 @@ export default class AddCommand implements BaseCommand {
                                     {
                                         optionOne: "`groups`",
                                         optionTwo: "`include`",
-                                        optionOneCommand: interaction
-                                            ? "`/groups`"
-                                            : `\`${process.env.BOT_PREFIX}groups\``,
+                                        optionOneCommand: "`/groups reset`",
                                     }
                                 ),
                         },
