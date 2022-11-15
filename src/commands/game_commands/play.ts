@@ -944,7 +944,7 @@ export default class PlayCommand implements BaseCommand {
             }
 
             let lives: number;
-            if (livesArg === null) {
+            if (livesArg == null) {
                 lives = ELIMINATION_DEFAULT_LIVES;
             } else {
                 lives = parseInt(livesArg, 10);
