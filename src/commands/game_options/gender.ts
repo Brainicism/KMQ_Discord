@@ -245,6 +245,7 @@ export default class GenderCommand implements BaseCommand {
                     },
                     interaction
                 );
+                return;
             }
 
             await guildPreference.setGender([selectedGenders[0]]);

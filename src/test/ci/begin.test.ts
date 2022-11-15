@@ -24,7 +24,10 @@ describe("begin command", () => {
         describe("game session is null", () => {
             it("should return false", () => {
                 assert.strictEqual(
-                    PlayCommand.canStartTeamsGame(null, null),
+                    PlayCommand.canStartTeamsGame(
+                        null,
+                        new MessageContext("", gameStarter)
+                    ),
                     false
                 );
             });
@@ -49,12 +52,18 @@ describe("begin command", () => {
 
             it("should return false (classic games are not started using ,begin)", () => {
                 assert.strictEqual(
-                    PlayCommand.canStartTeamsGame(gameSession, null),
+                    PlayCommand.canStartTeamsGame(
+                        gameSession,
+                        new MessageContext("", gameStarter)
+                    ),
                     false
                 );
 
                 assert.strictEqual(
-                    PlayCommand.canStartTeamsGame(gameSession, null),
+                    PlayCommand.canStartTeamsGame(
+                        gameSession,
+                        new MessageContext("", gameStarter)
+                    ),
                     false
                 );
             });

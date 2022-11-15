@@ -357,7 +357,7 @@ export default class PlayCommand implements BaseCommand {
 
         const gameType = interactionKey.split(".")[0] as GameType;
         if (interactionKey === "teams.begin") {
-            await PlayCommand.beginTeamsGame(messageContext);
+            await PlayCommand.beginTeamsGame(messageContext, interaction);
         } else if (interactionKey.startsWith("teams.join")) {
             await PlayCommand.joinTeamsGame(
                 messageContext,
@@ -390,37 +390,69 @@ export default class PlayCommand implements BaseCommand {
 
     static canStartTeamsGame(
         gameSession: GameSession,
-        messageContext: MessageContext
+        messageContext: MessageContext,
+        interaction?: Eris.CommandInteraction
     ): boolean {
         if (!gameSession || gameSession.gameType !== GameType.TEAMS) {
+            sendErrorMessage(
+                messageContext,
+                {
+                    title: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "misc.failure.game.noneInProgress.title"
+                    ),
+                    description: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "misc.failure.game.noneInProgress.description"
+                    ),
+                    thumbnailUrl: KmqImages.NOT_IMPRESSED,
+                },
+                interaction
+            );
             return false;
         }
 
         const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
         if (teamScoreboard.getNumTeams() === 0) {
-            sendErrorMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "command.begin.ignored.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "command.begin.ignored.noTeam.description",
-                    { join: `${process.env.BOT_PREFIX}join` }
-                ),
-            });
+            sendErrorMessage(
+                messageContext,
+                {
+                    title: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "command.begin.ignored.title"
+                    ),
+                    description: LocalizationManager.localizer.translate(
+                        messageContext.guildID,
+                        "command.begin.ignored.noTeam.description",
+                        { join: `${process.env.BOT_PREFIX}join` }
+                    ),
+                },
+                interaction
+            );
             return false;
         }
 
         return true;
     }
 
-    static async beginTeamsGame(messageContext: MessageContext): Promise<void> {
+    static async beginTeamsGame(
+        messageContext: MessageContext,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
         const gameSession = Session.getSession(
             messageContext.guildID
         ) as GameSession;
 
-        if (!PlayCommand.canStartTeamsGame(gameSession, messageContext)) return;
+        if (
+            !PlayCommand.canStartTeamsGame(
+                gameSession,
+                messageContext,
+                interaction
+            )
+        ) {
+            return;
+        }
+
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
@@ -448,7 +480,7 @@ export default class PlayCommand implements BaseCommand {
             logger.info(
                 `${getDebugLogHeader(
                     messageContext
-                )} | Teams game session starting)`
+                )} | Teams game session starting`
             );
         }
     }
@@ -538,7 +570,7 @@ export default class PlayCommand implements BaseCommand {
                         "command.join.failure.joinError.invalidCharacters.description"
                     ),
                 },
-                null
+                interaction
             );
             return;
         }
