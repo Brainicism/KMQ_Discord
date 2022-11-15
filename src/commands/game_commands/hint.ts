@@ -181,7 +181,9 @@ export function validHintCheck(
             );
             return false;
         }
-    } else if (guildPreference.isMultipleChoiceMode()) {
+    }
+
+    if (guildPreference.isMultipleChoiceMode()) {
         sendErrorMessage(
             messageContext,
             {
