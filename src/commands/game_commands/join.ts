@@ -31,7 +31,7 @@ export default class JoinCommand implements BaseCommand {
                 description: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.join.failure.joinError.noTeamName.description",
-                    { joinCommand: "/join" }
+                    { joinCommand: "/play teams join" }
                 ),
             });
             return;

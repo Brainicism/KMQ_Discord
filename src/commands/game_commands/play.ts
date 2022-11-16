@@ -424,7 +424,7 @@ export default class PlayCommand implements BaseCommand {
                     description: LocalizationManager.localizer.translate(
                         messageContext.guildID,
                         "command.begin.ignored.noTeam.description",
-                        { join: "/join" }
+                        { join: "/play teams join" }
                     ),
                 },
                 interaction
@@ -605,7 +605,7 @@ export default class PlayCommand implements BaseCommand {
                         {
                             teamName: bold(teamName),
                             mentionedUser: getMention(messageContext.author.id),
-                            joinCommand: "/join",
+                            joinCommand: "/play teams join",
                             teamNameWithCleanEmojis,
                             startGameInstructions:
                                 !gameSession.sessionInitialized
@@ -613,7 +613,8 @@ export default class PlayCommand implements BaseCommand {
                                           messageContext.guildID,
                                           "command.join.team.startGameInstructions",
                                           {
-                                              beginCommand: "`/begin`",
+                                              beginCommand:
+                                                  "`/play teams begin`",
                                           }
                                       )
                                     : "",
@@ -685,7 +686,7 @@ export default class PlayCommand implements BaseCommand {
                               messageContext.guildID,
                               "command.join.playerJoinedTeam.beforeGameStart.description",
                               {
-                                  beginCommand: "`/begin`",
+                                  beginCommand: "`/play teams begin`",
                               }
                           )
                         : LocalizationManager.localizer.translate(
@@ -829,14 +830,14 @@ export default class PlayCommand implements BaseCommand {
                 guildID,
                 "command.play.team.joinTeam.title",
                 {
-                    join: `\`${prefix}join\``,
+                    join: `\`${prefix}play teams join\``,
                 }
             );
 
             const gameInstructions = LocalizationManager.localizer.translate(
                 guildID,
                 "command.play.team.joinTeam.description",
-                { join: `${prefix}join` }
+                { join: `${prefix}play teams join` }
             );
 
             gameSession = new GameSession(
@@ -885,7 +886,7 @@ export default class PlayCommand implements BaseCommand {
                         guildID,
                         "command.play.failure.overrideTeams.teams.join",
                         {
-                            join: `${prefix}join`,
+                            join: `${prefix}play teams join`,
                         }
                     );
 
