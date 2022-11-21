@@ -53,7 +53,7 @@
         "eris-fleet": "https://github.com/Brainicism/eris-fleet#feature/soft-kill-warning",
         "eris-pagination": "https://github.com/brainicism/eris-pagination#39f0899",
         "erlpack": "https://github.com/abalabahaha/erlpack.git",
-        "fastify": "^4.8.1",
+        "fastify": "^4.10.2",
         "fluent-ffmpeg": "^2.1.2",
         "i18next": "^21.9.2",
         "i18next-fs-backend": "^1.1.5",
