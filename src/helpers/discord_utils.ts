@@ -1472,9 +1472,9 @@ function interactionRejectionHandler(
         logger.error(
             `${getDebugLogHeader(
                 interaction
-            )} | Interaction acknowledge (failure message) failed. err = ${
-                err.stack
-            }`
+            )} | Interaction acknowledge (failure message) failed. err.code = ${
+                err.code
+            } err = ${JSON.stringify(err)}`
         );
     }
 }
