@@ -1,4 +1,9 @@
-import { EMBED_ERROR_COLOR, EMBED_SUCCESS_COLOR, KmqImages } from "./constants";
+import {
+    EMBED_ERROR_COLOR,
+    EMBED_SUCCESS_COLOR,
+    IGNORED_WARNING_SUBSTRINGS,
+    KmqImages,
+} from "./constants";
 import { Fleet } from "eris-fleet";
 import { clearRestartNotification } from "./helpers/management_utils";
 import { config } from "dotenv";
@@ -75,6 +80,7 @@ const options: Options = {
     },
     fetchTimeout: 5000,
     customClient: KmqClient,
+    guildsPerShard: process.env.GUILDS_PER_SHARD ?? 2000,
     useCentralRequestHandler: true,
     softKillNotificationPeriod: 3 * 60 * 1000,
 };
@@ -366,7 +372,21 @@ async function startWebServer(fleet: Fleet): Promise<void> {
         fleet.on("log", (m) => logger.info(m));
         fleet.on("debug", (m) => logger.debug(m));
         fleet.eris.on("debug", (m) => logger.debug(m));
-        fleet.on("warn", (m) => logger.warn(m));
+        fleet.on("warn", (m) => {
+            if (
+                IGNORED_WARNING_SUBSTRINGS.some((warningSubstring) => {
+                    if (m instanceof Error) {
+                        return m.message.includes(warningSubstring);
+                    }
+
+                    return m.includes(warningSubstring);
+                })
+            ) {
+                return;
+            }
+
+            logger.warn(m);
+        });
         fleet.on("error", (m) => logger.error(m));
         fleet.on("abort", () => {
             logger.error("Cluster manager received abort...");

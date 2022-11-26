@@ -1,6 +1,6 @@
 {
     "name": "kmq",
-    "version": "5.9.0",
+    "version": "5.9.3",
     "main": "src/kmq.js",
     "scripts": {
         "seed": "ts-node src/seed/seed_db",
@@ -53,7 +53,7 @@
         "eris-fleet": "https://github.com/Brainicism/eris-fleet#feature/soft-kill-warning",
         "eris-pagination": "https://github.com/Brainicism/eris-pagination#9a112cb",
         "erlpack": "https://github.com/abalabahaha/erlpack.git",
-        "fastify": "^4.8.1",
+        "fastify": "^4.10.2",
         "fluent-ffmpeg": "^2.1.2",
         "i18next": "^21.9.2",
         "i18next-fs-backend": "^1.1.5",
