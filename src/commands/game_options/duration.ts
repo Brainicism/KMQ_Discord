@@ -61,13 +61,19 @@ export default class DurationCommand implements BaseCommand {
             guildID,
             "command.duration.help.description"
         ),
-        usage: `,duration [${LocalizationManager.localizer.translate(
+        usage: `,duration set duration:[${LocalizationManager.localizer.translate(
             guildID,
             "command.duration.help.usage.minutes"
-        )}]`,
+        )}]\n\n,duration add duration:[${LocalizationManager.localizer.translate(
+            guildID,
+            "command.duration.help.usage.minutes"
+        )}]\n\n,duration remove duration:[${LocalizationManager.localizer.translate(
+            guildID,
+            "command.duration.help.usage.minutes"
+        )}]\n\n,duration reset`,
         examples: [
             {
-                example: "`,duration 15`",
+                example: "`,duration set duration:15`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.duration.help.example.set",
@@ -77,7 +83,7 @@ export default class DurationCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,duration 5 add`",
+                example: "`,duration add duration:5`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.duration.help.example.increment",
@@ -87,7 +93,7 @@ export default class DurationCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,duration 5 remove`",
+                example: "`,duration remove duration:5`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.duration.help.example.decrement",
@@ -97,7 +103,7 @@ export default class DurationCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,duration`",
+                example: "`,duration reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.duration.help.example.reset"

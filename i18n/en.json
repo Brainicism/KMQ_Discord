@@ -89,15 +89,15 @@
                 "example": {
                     "reset": "Reset to the default cutoff of {{defaultBeginningSearchYear}} to {{defaultEndSearchYear}}",
                     "singleCutoff": "Play songs released after the year {{year}}",
-                    "twoCutoffs": "Play songs released between the years {{beginningYear}}-{{endYear}}"
+                    "twoCutoffs": "Play songs released between the years {{beginningYear}}-{{endingYear}}"
                 }
             },
             "interaction": {
                 "beginningYear": "The earliest year to include",
                 "description": "Set a cutoff year range for songs",
-                "earliestOption": "Pick songs for every year starting from [beginningYear]",
+                "earliestOption": "Pick songs for every year starting from [beginning_year]",
                 "endingYear": "The last year to include",
-                "rangeOption": "Pick songs for every year between [beginningYear] and [endingYear]"
+                "rangeOption": "Pick songs for every year between [beginning_year] and [ending_year]"
             }
         },
         "debug": {
@@ -752,9 +752,10 @@
                 }
             },
             "interaction": {
-                "teams_begin": "Starts a 'teams' game mode of KMQ. Can only be used after '/play teams create'",
+                "teams_begin": "Starts a 'teams' game mode of KMQ. Can only be used after `/play teams create`",
                 "teams_create": "Prepares a 'teams' game mode of KMQ for team creation.",
-                "teams_join": "Joins a team. Can only be used after '/play teams create'"
+                "teams_join": "Joins a team. Can only be used after `/play teams create`",
+                "teams_join_team_name": "The name of the team to join"
             },
             "team": {
                 "joinTeam": {

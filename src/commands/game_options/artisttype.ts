@@ -51,31 +51,31 @@ export default class ArtistTypeCommand implements BaseCommand {
                 both: `\`${ArtistType.BOTH}\``,
             }
         ),
-        usage: ",artisttype [soloists | groups | both]",
+        usage: ",artisttype set [soloists | groups | both]\n\n,artisttype reset",
         examples: [
             {
-                example: "`,artisttype soloists`",
+                example: "`,artisttype set artisttype:soloists`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.artisttype.help.example.soloists"
                 ),
             },
             {
-                example: "`,artisttype groups`",
+                example: "`,artisttype set artisttype:groups`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.artisttype.help.example.groups"
                 ),
             },
             {
-                example: "`,artisttype both`",
+                example: "`,artisttype set artisttype:both`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.artisttype.help.example.both"
                 ),
             },
             {
-                example: "`,artisttype`",
+                example: "`,artisttype reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.artisttype.help.example.reset"

@@ -152,10 +152,13 @@ export default class PresetCommand implements BaseCommand {
             guildID,
             "command.preset.help.description"
         ),
-        usage: `,preset [list | save | load | delete | export] {preset_name}\n,preset import [${LocalizationManager.localizer.translate(
+        usage: `,preset list\n\n,preset [save | load | delete | export] preset_name:{${LocalizationManager.localizer.translate(
+            guildID,
+            "command.preset.help.usage.presetName"
+        )}}\n\n,preset import exported_preset:[${LocalizationManager.localizer.translate(
             guildID,
             "command.preset.help.usage.presetIdentifier"
-        )}] [${LocalizationManager.localizer.translate(
+        )}] new_preset_name:[${LocalizationManager.localizer.translate(
             guildID,
             "command.preset.help.usage.presetName"
         )}]`,
@@ -168,14 +171,23 @@ export default class PresetCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,preset save [preset_name]`",
+                example: `\`,preset save preset_name:[${LocalizationManager.localizer.translate(
+                    guildID,
+                    "command.preset.help.usage.presetName"
+                )}]\``,
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.preset.help.example.save"
                 ),
             },
             {
-                example: "`,preset load [preset_name | preset_identifier]`",
+                example: `\`,preset load preset_name:[${LocalizationManager.localizer.translate(
+                    guildID,
+                    "command.preset.help.usage.presetName"
+                )}]\n,preset load preset_identifier:[${LocalizationManager.localizer.translate(
+                    guildID,
+                    "command.preset.help.usage.presetIdentifier"
+                )}]\``,
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.preset.help.example.load",
@@ -183,28 +195,43 @@ export default class PresetCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,preset replace [preset_name]`",
+                example: `\`,preset replace preset_name:[${LocalizationManager.localizer.translate(
+                    guildID,
+                    "command.preset.help.usage.presetName"
+                )}]\``,
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.preset.help.example.replace"
                 ),
             },
             {
-                example: "`,preset delete [preset_name]`",
+                example: `\`,preset delete preset_name:[${LocalizationManager.localizer.translate(
+                    guildID,
+                    "command.preset.help.usage.presetName"
+                )}]\``,
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.preset.help.example.delete"
                 ),
             },
             {
-                example: "`,preset export [preset_name]`",
+                example: `\`,preset export preset_name:[${LocalizationManager.localizer.translate(
+                    guildID,
+                    "command.preset.help.usage.presetName"
+                )}]\``,
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.preset.help.example.export"
                 ),
             },
             {
-                example: "`,preset import [preset_identifier] [preset_name]`",
+                example: `\`,preset import preset_identifier:[${LocalizationManager.localizer.translate(
+                    guildID,
+                    "command.preset.help.usage.presetIdentifier"
+                )}] preset_name:[${LocalizationManager.localizer.translate(
+                    guildID,
+                    "command.preset.help.usage.presetName"
+                )}]\``,
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.preset.help.example.import",
@@ -259,7 +286,8 @@ export default class PresetCommand implements BaseCommand {
                     name: PresetAction.LOAD,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.preset.help.example.load"
+                        "command.preset.help.example.load",
+                        { exampleIdentifier: "KMQ-XXXXX-..." }
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
@@ -351,7 +379,8 @@ export default class PresetCommand implements BaseCommand {
                     name: PresetAction.IMPORT,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.preset.help.example.import"
+                        "command.preset.help.example.import",
+                        { exampleIdentifier: "KMQ-XXXXX-..." }
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,

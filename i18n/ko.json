@@ -89,7 +89,7 @@
                 "example": {
                     "reset": "{{defaultBeginningSearchYear}}의 기본 년도 범위를 {{defaultEndSearchYear}}로 재설정합니다.",
                     "singleCutoff": "{{year}}년 이후에 발매된 노래 재생합니다.",
-                    "twoCutoffs": "{{beginningYear}}~{{endYear}}년 사이에 발매된 노래 재생합니다."
+                    "twoCutoffs": "{{beginningYear}}~{{endingYear}}년 사이에 발매된 노래 재생합니다."
                 }
             },
             "interaction": {
@@ -97,7 +97,7 @@
                 "description": "노래의 연도 범위를 설정합니다.",
                 "earliestOption": "[beginning_year]부터 매년 노래 선택",
                 "endingYear": "포함 마지막 연도입니다",
-                "rangeOption": "[beginningYear]와 [endingYear] 사이의 매년 노래 선택"
+                "rangeOption": "[beginning_year]와 [ending_year] 사이의 매년 노래 선택"
             }
         },
         "debug": {
@@ -754,9 +754,10 @@
                 }
             },
             "interaction": {
-                "teams_begin": "KMQ의 '팀' 게임 모드를 시작합니다. '/play teams create' 이후에만 사용할 수 있습니다.",
+                "teams_begin": "KMQ의 '팀' 게임 모드를 시작합니다. `/play teams create` 이후에만 사용할 수 있습니다.",
                 "teams_create": "팀 생성을 위해 KMQ의 '팀' 게임 모드를 준비합니다",
-                "teams_join": "팀에 합류. '/play teams create' 이후에만 사용할 수 있습니다."
+                "teams_join": "팀에 합류. `/play teams create` 이후에만 사용할 수 있습니다.",
+                "teams_join_team_name": "참여할 팀 이름"
             },
             "team": {
                 "joinTeam": {

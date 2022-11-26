@@ -56,13 +56,13 @@ export default class LocaleTypeCommand implements BaseCommand {
                 korean: `\`${LocaleArgument.KOREAN}\``,
             }
         ),
-        usage: `,locale [${LocalizationManager.localizer.translate(
+        usage: `,locale language:[${LocalizationManager.localizer.translate(
             guildID,
             "command.locale.help.usage.language"
         )}]`,
         examples: [
             {
-                example: "`,locale english`",
+                example: "`,locale language:English`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.locale.help.example.toEnglish",
@@ -75,7 +75,7 @@ export default class LocaleTypeCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,locale korean`",
+                example: "`,locale language:Korean`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.locale.help.example.toKorean",
@@ -83,19 +83,6 @@ export default class LocaleTypeCommand implements BaseCommand {
                         korean: LocalizationManager.localizer.translate(
                             guildID,
                             "command.locale.language.ko"
-                        ),
-                    }
-                ),
-            },
-            {
-                example: "`,locale`",
-                explanation: LocalizationManager.localizer.translate(
-                    guildID,
-                    "command.locale.help.example.reset",
-                    {
-                        defaultLocale: LocalizationManager.localizer.translate(
-                            guildID,
-                            `command.locale.language.${DEFAULT_LOCALE}`
                         ),
                     }
                 ),

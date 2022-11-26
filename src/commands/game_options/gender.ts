@@ -61,41 +61,41 @@ export default class GenderCommand implements BaseCommand {
                 genderAlternating: "`/gender alternating`",
             }
         ),
-        usage: ",gender [gender_1 | alternating] {gender_2} {gender_3}",
+        usage: ",gender set gender_1:[gender] gender_2:{gender} gender_3:{gender}\n\n,gender reset",
         examples: [
             {
-                example: "`,gender female`",
+                example: "`,gender set female`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.gender.help.example.female"
                 ),
             },
             {
-                example: "`,gender male female`",
+                example: "`,gender set gender_1:male gender_2:female`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.gender.help.example.maleFemale"
                 ),
             },
             {
-                example: "`,gender coed`",
+                example: "`,gender set gender_1:coed`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.gender.help.example.coed"
                 ),
             },
             {
-                example: "`,gender`",
-                explanation: LocalizationManager.localizer.translate(
-                    guildID,
-                    "command.gender.help.example.reset"
-                ),
-            },
-            {
-                example: "`,gender alternating`",
+                example: "`,gender set gender_1:alternating`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.gender.help.example.alternating"
+                ),
+            },
+            {
+                example: "`,gender reset`",
+                explanation: LocalizationManager.localizer.translate(
+                    guildID,
+                    "command.gender.help.example.reset"
                 ),
             },
         ],
@@ -119,7 +119,7 @@ export default class GenderCommand implements BaseCommand {
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
-                    options: [...Array(4).keys()].map((x) => ({
+                    options: [...Array(3).keys()].map((x) => ({
                         name: `gender_${x + 1}`,
                         description: LocalizationManager.localizer.translate(
                             LocaleType.EN,
@@ -127,10 +127,15 @@ export default class GenderCommand implements BaseCommand {
                         ),
                         type: Eris.Constants.ApplicationCommandOptionTypes
                             .STRING,
-                        choices: Object.values(Gender).map((gender) => ({
-                            name: gender,
-                            value: gender,
-                        })),
+                        choices: Object.values(Gender)
+                            .filter(
+                                (gender) =>
+                                    x === 0 || gender !== Gender.ALTERNATING
+                            )
+                            .map((gender) => ({
+                                name: gender,
+                                value: gender,
+                            })),
                         required: x === 0,
                     })),
                 },

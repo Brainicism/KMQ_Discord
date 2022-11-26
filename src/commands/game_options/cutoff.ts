@@ -60,10 +60,10 @@ export default class CutoffCommand implements BaseCommand {
             guildID,
             "command.cutoff.help.description"
         ),
-        usage: ",cutoff [year_start] {year_end}",
+        usage: ",cutoff set earliest beginning_year:[year_start]\n\n,cutoff set range beginning_year:[year_start] ending_year:[year_end]\n\n,cutoff reset",
         examples: [
             {
-                example: "`,cutoff 2015`",
+                example: "`,cutoff set earliest beginning_year:2015`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.cutoff.help.example.singleCutoff",
@@ -73,18 +73,19 @@ export default class CutoffCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,cutoff 2015 2018`",
+                example:
+                    "`,cutoff set range beginning_year:2015 ending_year:2018`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.cutoff.help.example.twoCutoffs",
                     {
                         beginningYear: String(2015),
-                        endYear: String(2018),
+                        endingYear: String(2018),
                     }
                 ),
             },
             {
-                example: "`,cutoff`",
+                example: "`,cutoff reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.cutoff.help.example.reset",

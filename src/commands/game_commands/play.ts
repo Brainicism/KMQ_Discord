@@ -204,21 +204,21 @@ export default class PlayCommand implements BaseCommand {
             guildID,
             "command.play.help.description"
         ),
-        usage: `,play {classic | elimination | teams}\n,play elimination {${LocalizationManager.localizer.translate(
+        usage: `,play classic\n\n,play elimination lives:{${LocalizationManager.localizer.translate(
             guildID,
             "command.play.help.usage.lives"
-        )}}`,
+        )}}\n\n,play teams create\n\n,play teams join`,
         priority: 1050,
         examples: [
             {
-                example: "`,play`",
+                example: "`,play classic`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.play.help.example.classic"
                 ),
             },
             {
-                example: "`,play elimination 5`",
+                example: "`,play elimination lives:5`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.play.help.example.elimination",
@@ -238,7 +238,7 @@ export default class PlayCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,play teams`",
+                example: "`,play teams create`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.play.help.example.teams"
@@ -334,7 +334,7 @@ export default class PlayCommand implements BaseCommand {
                                     description:
                                         LocalizationManager.localizer.translate(
                                             LocaleType.EN,
-                                            "command.play.interaction.teams_join"
+                                            "command.play.interaction.teams_join_team_name"
                                         ),
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.STRING,

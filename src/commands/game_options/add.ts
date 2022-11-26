@@ -67,13 +67,19 @@ export default class AddCommand implements BaseCommand {
                 include: "`/include`",
             }
         ),
-        usage: `,add [groups | exclude | include] [${LocalizationManager.localizer.translate(
+        usage: `,groups add [${LocalizationManager.localizer.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n,include add [${LocalizationManager.localizer.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n,exclude add [${LocalizationManager.localizer.translate(
             guildID,
             "misc.listOfGroups"
         )}]`,
         examples: [
             {
-                example: "`,add groups twice, red velvet`",
+                example: "`,groups add group_1:twice group_2:red velvet`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.add.help.example.groups",
@@ -85,7 +91,8 @@ export default class AddCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,add exclude BESTie, Dia, iKON`",
+                example:
+                    "`,exclude add group_1:BESTie group_2:Dia group_3:iKON`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.add.help.example.exclude",
@@ -98,7 +105,7 @@ export default class AddCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,add include exo`",
+                example: "`,include add group_1:exo`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.add.help.example.include",

@@ -58,10 +58,19 @@ export default class IncludeCommand implements BaseCommand {
                 groupList: GROUP_LIST_URL,
             }
         ),
-        usage: ",include [group1],{group2}",
+        usage: `,include set [${LocalizationManager.localizer.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n,include add [${LocalizationManager.localizer.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n,include remove [${LocalizationManager.localizer.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n,include reset`,
         examples: [
             {
-                example: "`,include blackpink`",
+                example: "`,include set group_1:blackpink`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.include.help.example.singleGroup",
@@ -69,7 +78,8 @@ export default class IncludeCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,include blackpink, bts, red velvet`",
+                example:
+                    "`,include set group_1:blackpink group_2:bts group_3:red velvet`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.include.help.example.multipleGroups",
@@ -81,7 +91,7 @@ export default class IncludeCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,include`",
+                example: "`,include reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.include.help.example.reset"

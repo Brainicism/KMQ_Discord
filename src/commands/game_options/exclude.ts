@@ -56,10 +56,19 @@ export default class ExcludeCommand implements BaseCommand {
                 groupList: GROUP_LIST_URL,
             }
         ),
-        usage: ",exclude [group1],{group2}",
+        usage: `,exclude set [${LocalizationManager.localizer.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n,exclude add [${LocalizationManager.localizer.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n,exclude remove [${LocalizationManager.localizer.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n,exclude reset`,
         examples: [
             {
-                example: "`,exclude blackpink`",
+                example: "`,exclude set group_1:blackpink`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.exclude.help.example.singleGroup",
@@ -69,7 +78,8 @@ export default class ExcludeCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,exclude blackpink, bts, red velvet`",
+                example:
+                    "`,exclude set group_1:blackpink group_2:bts group_3:red velvet`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.exclude.help.example.multipleGroups",
@@ -81,7 +91,7 @@ export default class ExcludeCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,exclude`",
+                example: "`,exclude reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.exclude.help.example.reset"

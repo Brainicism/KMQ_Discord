@@ -44,24 +44,24 @@ export default class MultiGuessCommand implements BaseCommand {
             "command.multiguess.help.description",
             { on: `\`${MultiGuessType.ON}\`` }
         ),
-        usage: ",multiguess [on | off]",
+        usage: ",multiguess set multiguess:[on | off]\n\n,multiguess reset",
         examples: [
             {
-                example: "`,multiguess on`",
+                example: "`,multiguess set multiguess:on`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.multiguess.help.example.on"
                 ),
             },
             {
-                example: "`,multiguess off`",
+                example: "`,multiguess set multiguess:off`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.multiguess.help.example.off"
                 ),
             },
             {
-                example: "`,multiguess`",
+                example: "`,multiguess reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.multiguess.help.example.reset",

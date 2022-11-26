@@ -287,10 +287,10 @@ export default class ProfileCommand implements BaseCommand {
             guildID,
             "command.profile.help.description"
         ),
-        usage: `,profile { @${LocalizationManager.localizer.translate(
+        usage: `,profile user_mention:{@${LocalizationManager.localizer.translate(
             guildID,
             "command.profile.help.usage.mention"
-        )} }`,
+        )}}\n\n,profile user_id:{user_id}`,
         examples: [
             {
                 example: "`,profile`",
@@ -300,7 +300,7 @@ export default class ProfileCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,profile @FortnitePlayer`",
+                example: "`,profile user_mention:@FortnitePlayer`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.profile.help.example.otherPlayerMention",
@@ -310,7 +310,7 @@ export default class ProfileCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,profile 141734249702096896`",
+                example: "`,profile user_id:141734249702096896`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.profile.help.example.otherPlayerID"

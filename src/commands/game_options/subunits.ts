@@ -47,10 +47,10 @@ export default class SubunitsCommand implements BaseCommand {
             "command.subunits.help.description",
             { groups: "`/groups`" }
         ),
-        usage: ",subunits [include | exclude]",
+        usage: ",subunits set subunits:[include | exclude]\n\n,subunits reset",
         examples: [
             {
-                example: "`,subunits include`",
+                example: "`,subunits set subunits:include`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.subunits.help.example.include",
@@ -63,14 +63,14 @@ export default class SubunitsCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,subunits exclude`",
+                example: "`,subunits set subunits:exclude`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.subunits.help.example.exclude"
                 ),
             },
             {
-                example: "`,subunits`",
+                example: "`,subunits reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.subunits.help.example.reset",

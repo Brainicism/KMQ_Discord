@@ -58,37 +58,36 @@ export default class LeaderboardCommand implements BaseCommand {
             guildID,
             "command.leaderboard.help.description"
         ),
-        usage: `,leaderboard {${LocalizationManager.localizer.translate(
+        usage: `,leaderboard show type:{gamesplayed | songsguessed | exp} scope:{server | game | global} duration:{daily | weekly | monthly | yearly} page:{${LocalizationManager.localizer.translate(
             guildID,
             "command.leaderboard.help.usage.pageNumber"
-        )}}\n,leaderboard {gamesplayed | songsguessed} {server | game} {daily | weekly | monthly | yearly} {${LocalizationManager.localizer.translate(
-            guildID,
-            "command.leaderboard.help.usage.pageNumber"
-        )}}\n,leaderboard [enroll | unenroll]`,
+        )}}\n\n,leaderboard enroll\n\n,leaderboard unenroll`,
         examples: [
             {
-                example: "`,leaderboard`",
+                example: "`,leaderboard show`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.leaderboard.help.example.global"
                 ),
             },
             {
-                example: "`,leaderboard 3`",
+                example: "`,leaderboard show page:3`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.leaderboard.help.example.globalPage"
                 ),
             },
             {
-                example: "`,leaderboard game monthly 2`",
+                example:
+                    "`,leaderboard show scope:game duration:monthly page:2`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.leaderboard.help.example.gameMonthlyPage"
                 ),
             },
             {
-                example: "`,leaderboard songsguessed server 3`",
+                example:
+                    "`,leaderboard show type:songsguessed scope:server page:3`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.leaderboard.help.example.serverSongsGuessedPage"
@@ -109,14 +108,14 @@ export default class LeaderboardCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,leaderboard server`",
+                example: "`,leaderboard scope:server`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.leaderboard.help.example.server"
                 ),
             },
             {
-                example: "`,leaderboard weekly 4`",
+                example: "`,leaderboard duration:weekly page:4`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.leaderboard.help.example.globalWeeklyPage"

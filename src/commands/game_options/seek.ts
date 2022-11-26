@@ -44,31 +44,31 @@ export default class SeekCommand implements BaseCommand {
             guildID,
             "command.seek.help.description"
         ),
-        usage: ",seek [beginning | middle | random]",
+        usage: ",seek set seek:[beginning | middle | random]\n\n,seek reset",
         examples: [
             {
-                example: "`,seek random`",
+                example: "`,seek set seek:random`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.seek.help.example.random"
                 ),
             },
             {
-                example: "`,seek middle`",
+                example: "`,seek set seek:middle`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.seek.help.example.middle"
                 ),
             },
             {
-                example: "`,seek beginning`",
+                example: "`,seek set seek:beginning`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.seek.help.example.beginning"
                 ),
             },
             {
-                example: "`,seek`",
+                example: "`,seek reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.seek.help.example.reset",

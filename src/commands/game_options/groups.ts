@@ -51,10 +51,19 @@ export default class GroupsCommand implements BaseCommand {
                 groupList: GROUP_LIST_URL,
             }
         ),
-        usage: ",groups [group1],{group2}",
+        usage: `,groups set [${LocalizationManager.localizer.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n,groups add [${LocalizationManager.localizer.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n,groups remove [${LocalizationManager.localizer.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n,groups reset`,
         examples: [
             {
-                example: "`,groups blackpink`",
+                example: "`,groups set group_1:blackpink`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.groups.help.example.singleGroup",
@@ -64,7 +73,8 @@ export default class GroupsCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,groups blackpink, bts, red velvet`",
+                example:
+                    "`,groups set group_1:blackpink group_2:bts group_3:red velvet`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.groups.help.example.multipleGroups",
@@ -76,7 +86,7 @@ export default class GroupsCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,groups`",
+                example: "`,groups reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.groups.help.example.reset"

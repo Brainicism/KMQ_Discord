@@ -44,24 +44,24 @@ export default class LanguageCommand implements BaseCommand {
             guildID,
             "command.language.help.description"
         ),
-        usage: ",language [korean | all]",
+        usage: ",language set language:[korean | all]\n\n,language reset",
         examples: [
             {
-                example: "`,language korean`",
+                example: "`,language set language:korean`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.language.help.example.korean"
                 ),
             },
             {
-                example: "`,language all`",
+                example: "`,language set language:all`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.language.help.example.all"
                 ),
             },
             {
-                example: "`,language`",
+                example: "`,language reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.language.help.example.reset",

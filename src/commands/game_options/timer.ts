@@ -47,13 +47,13 @@ export default class GuessTimeoutCommand implements BaseCommand {
             guildID,
             "command.timer.help.description"
         ),
-        usage: `,timer [${LocalizationManager.localizer.translate(
+        usage: `,timer set timer:[${LocalizationManager.localizer.translate(
             guildID,
             "command.timer.help.usage.seconds"
-        )}]`,
+        )}]\n\n,timer reset`,
         examples: [
             {
-                example: "`,timer 15`",
+                example: "`,timer set timer:15`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.timer.help.example.set",
@@ -61,7 +61,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,timer`",
+                example: "`,timer reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.timer.help.example.reset"

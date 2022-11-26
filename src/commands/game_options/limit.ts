@@ -26,7 +26,7 @@ const LIMIT_END_MIN = 1;
 const LIMIT_END_MAX = 100000;
 
 enum LimitAppCommandAction {
-    RANGE = "RANGE",
+    RANGE = "range",
     TOP = "top",
 }
 
@@ -61,10 +61,10 @@ export default class LimitCommand implements BaseCommand {
             guildID,
             "command.limit.help.description"
         ),
-        usage: ",limit [limit_1] {limit_2}",
+        usage: ",limit set top limit:{limit}\n\n,limit set range limit_start:{limit_start} limit_end:{limit_end}\n\n,limit reset",
         examples: [
             {
-                example: "`,limit 250`",
+                example: "`,limit set top limit:250`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.limit.help.example.singleLimit",
@@ -74,7 +74,7 @@ export default class LimitCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,limit 250 500`",
+                example: "`,limit set range limit_start:250 limit_end:500`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.limit.help.example.twoLimits",
@@ -82,7 +82,7 @@ export default class LimitCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,limit`",
+                example: "`,limit reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.limit.help.example.reset",
