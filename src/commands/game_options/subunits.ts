@@ -47,7 +47,7 @@ export default class SubunitsCommand implements BaseCommand {
             "command.subunits.help.description",
             { groups: "`/groups`" }
         ),
-        usage: ",subunits set subunits:[include | exclude]\n\n,subunits reset",
+        usage: ",subunits set\nsubunits:[include | exclude]\n\n,subunits reset",
         examples: [
             {
                 example: "`,subunits set subunits:include`",

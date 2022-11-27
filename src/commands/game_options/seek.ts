@@ -44,7 +44,7 @@ export default class SeekCommand implements BaseCommand {
             guildID,
             "command.seek.help.description"
         ),
-        usage: ",seek set seek:[beginning | middle | random]\n\n,seek reset",
+        usage: ",seek set\nseek:[beginning | middle | random]\n\n,seek reset",
         examples: [
             {
                 example: "`,seek set seek:random`",

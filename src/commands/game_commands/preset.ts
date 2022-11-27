@@ -152,13 +152,13 @@ export default class PresetCommand implements BaseCommand {
             guildID,
             "command.preset.help.description"
         ),
-        usage: `,preset list\n\n,preset [save | load | delete | export] preset_name:{${LocalizationManager.localizer.translate(
+        usage: `,preset list\n\n,preset [save | load | delete | export]\npreset_name:{${LocalizationManager.localizer.translate(
             guildID,
             "command.preset.help.usage.presetName"
-        )}}\n\n,preset import exported_preset:[${LocalizationManager.localizer.translate(
+        )}}\n\n,preset import\nexported_preset:[${LocalizationManager.localizer.translate(
             guildID,
             "command.preset.help.usage.presetIdentifier"
-        )}] new_preset_name:[${LocalizationManager.localizer.translate(
+        )}]\nnew_preset_name:[${LocalizationManager.localizer.translate(
             guildID,
             "command.preset.help.usage.presetName"
         )}]`,

@@ -44,7 +44,7 @@ export default class LanguageCommand implements BaseCommand {
             guildID,
             "command.language.help.description"
         ),
-        usage: ",language set language:[korean | all]\n\n,language reset",
+        usage: ",language set\nlanguage:[korean | all]\n\n,language reset",
         examples: [
             {
                 example: "`,language set language:korean`",

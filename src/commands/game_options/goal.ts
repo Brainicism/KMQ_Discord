@@ -46,7 +46,7 @@ export default class GoalCommand implements BaseCommand {
             guildID,
             "command.goal.help.description"
         ),
-        usage: `,goal set goal:[${LocalizationManager.localizer.translate(
+        usage: `,goal set\ngoal:[${LocalizationManager.localizer.translate(
             guildID,
             "command.goal.help.usage.points"
         )}]\n\n,goal reset`,

@@ -204,7 +204,7 @@ export default class PlayCommand implements BaseCommand {
             guildID,
             "command.play.help.description"
         ),
-        usage: `,play classic\n\n,play elimination lives:{${LocalizationManager.localizer.translate(
+        usage: `,play classic\n\n,play elimination\nlives:{${LocalizationManager.localizer.translate(
             guildID,
             "command.play.help.usage.lives"
         )}}\n\n,play teams create\n\n,play teams join`,

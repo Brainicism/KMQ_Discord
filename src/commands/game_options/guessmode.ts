@@ -46,7 +46,7 @@ export default class GuessModeCommand implements BaseCommand {
             guildID,
             "command.guessmode.help.description"
         ),
-        usage: ",guessmode set guessmode:[song | artist | both]\n\n,guessmode reset",
+        usage: ",guessmode set\nguessmode:[song | artist | both]\n\n,guessmode reset",
         examples: [
             {
                 example: "`,guessmode set guessmode:song`",

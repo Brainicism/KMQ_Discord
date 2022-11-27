@@ -44,7 +44,7 @@ export default class MultiGuessCommand implements BaseCommand {
             "command.multiguess.help.description",
             { on: `\`${MultiGuessType.ON}\`` }
         ),
-        usage: ",multiguess set multiguess:[on | off]\n\n,multiguess reset",
+        usage: ",multiguess set\nmultiguess:[on | off]\n\n,multiguess reset",
         examples: [
             {
                 example: "`,multiguess set multiguess:on`",

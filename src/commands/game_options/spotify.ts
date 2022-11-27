@@ -70,7 +70,7 @@ export default class SpotifyCommand implements BaseCommand {
             guildID,
             "command.spotify.help.description"
         ),
-        usage: ",spotify {playlist_url}",
+        usage: ",spotify playlist_url:{playlist_url}",
         examples: [
             {
                 example: `\`,spotify ${SPOTIFY_BASE_URL}...\``,

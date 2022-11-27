@@ -61,7 +61,7 @@ export default class GenderCommand implements BaseCommand {
                 genderAlternating: "`/gender alternating`",
             }
         ),
-        usage: ",gender set gender_1:[gender] gender_2:{gender} gender_3:{gender}\n\n,gender reset",
+        usage: ",gender set\ngender_1:[gender]\ngender_2:{gender}\ngender_3:{gender}\n\n,gender reset",
         examples: [
             {
                 example: "`,gender set female`",

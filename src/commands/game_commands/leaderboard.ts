@@ -58,7 +58,7 @@ export default class LeaderboardCommand implements BaseCommand {
             guildID,
             "command.leaderboard.help.description"
         ),
-        usage: `,leaderboard show type:{gamesplayed | songsguessed | exp} scope:{server | game | global} duration:{daily | weekly | monthly | yearly} page:{${LocalizationManager.localizer.translate(
+        usage: `,leaderboard show\ntype:{gamesplayed | songsguessed | exp}\nscope:{server | game | global}\nduration:{daily | weekly | monthly | yearly}\npage:{${LocalizationManager.localizer.translate(
             guildID,
             "command.leaderboard.help.usage.pageNumber"
         )}}\n\n,leaderboard enroll\n\n,leaderboard unenroll`,

@@ -33,7 +33,7 @@ export default class HelpCommand implements BaseCommand {
             guildID,
             "command.help.help.description"
         ),
-        usage: `,help action:[${LocalizationManager.localizer.translate(
+        usage: `,help\naction:[${LocalizationManager.localizer.translate(
             guildID,
             "command.help.command"
         )}]`,
