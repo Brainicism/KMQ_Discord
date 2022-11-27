@@ -312,8 +312,7 @@ export default class SpotifyCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
-        let playlistURL = interactionOptions["playlist_url"];
-
+        let playlistURL: string;
         const action = interactionName as OptionAction;
         if (action === OptionAction.RESET) {
             playlistURL = null;
