@@ -211,7 +211,6 @@ export default class SongSelector {
         }
 
         const playlist = await SongSelector.getSpotifySongList(
-            guildPreference,
             isPremium,
             playlistID
         );
@@ -441,7 +440,6 @@ export default class SongSelector {
     }
 
     static async getSpotifySongList(
-        guildPreference: GuildPreference,
         isPremium: boolean,
         playlistID: string
     ): Promise<QueriedSongList & MatchedPlaylist> {

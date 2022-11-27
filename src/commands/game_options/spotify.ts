@@ -1,7 +1,8 @@
 import { IPCLogger } from "../../logger";
-import { SPOTIFY_BASE_URL } from "../../constants";
+import { OptionAction, SPOTIFY_BASE_URL } from "../../constants";
 import {
     getDebugLogHeader,
+    getInteractionValue,
     sendErrorMessage,
     sendInfoMessage,
     sendOptionsMessage,
@@ -52,13 +53,37 @@ export default class SpotifyCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "playlist_url",
+                    name: OptionAction.SET,
                     description: LocalizationManager.localizer.translate(
                         LocaleType.EN,
-                        "command.spotify.help.interaction.playlistURL"
+                        "command.spotify.help.description"
                     ),
-                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
-                    required: true,
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "playlist_url",
+                            description:
+                                LocalizationManager.localizer.translate(
+                                    LocaleType.EN,
+                                    "command.spotify.help.interaction.playlistURL"
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            required: true,
+                        },
+                    ],
+                },
+                {
+                    name: OptionAction.RESET,
+                    description: LocalizationManager.localizer.translate(
+                        LocaleType.EN,
+                        "misc.interaction.resetOption",
+                        { optionName: "spotify" }
+                    ),
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [],
                 },
             ],
         },
@@ -70,7 +95,7 @@ export default class SpotifyCommand implements BaseCommand {
             guildID,
             "command.spotify.help.description"
         ),
-        usage: ",spotify playlist_url:{playlist_url}",
+        usage: ",spotify set\nplaylist_url:{playlist_url}\n\n,spotify reset",
         examples: [
             {
                 example: `\`,spotify ${SPOTIFY_BASE_URL}...\``,
@@ -284,7 +309,17 @@ export default class SpotifyCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        const playlistURL = interaction.data.options[0]["value"];
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
+
+        let playlistURL = interactionOptions["playlist_url"];
+
+        const action = interactionName as OptionAction;
+        if (action === OptionAction.RESET) {
+            playlistURL = null;
+        } else if (action === OptionAction.SET) {
+            playlistURL = interactionOptions["playlist_url"];
+        }
 
         await SpotifyCommand.updateOption(
             messageContext,
