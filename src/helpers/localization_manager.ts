@@ -38,7 +38,7 @@ export class LocalizationManager {
         replace: { [key: string]: string } = {}
     ): string {
         return this.translateByLocale(
-            localeOrGuildID in LocaleType
+            Object.values(LocaleType).includes(localeOrGuildID as LocaleType)
                 ? (localeOrGuildID as LocaleType)
                 : State.getGuildLocale(localeOrGuildID),
             phrase,
