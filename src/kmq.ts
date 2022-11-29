@@ -216,6 +216,32 @@ async function startWebServer(fleet: Fleet): Promise<void> {
         reply.code(200).send();
     });
 
+    // example: curl -X POST 127.0.0.1:5858/eval-central-request-handler  -H "Content-Type: text/plain" -d 'this.ratelimits
+    httpServer.post(
+        "/eval-central-request-handler",
+        {},
+        async (request, reply) => {
+            if (request.ip !== "127.0.0.1") {
+                logger.error("Clear restart attempted by non-allowed IP");
+                reply.code(401).send();
+                return;
+            }
+
+            const query = request.body as string;
+
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const evalFunc = function executeEval(command: string) {
+                try {
+                    // eslint-disable-next-line no-eval
+                    const result = eval(command);
+                    reply.code(200).send({ result });
+                } catch (e) {
+                    reply.code(400).send(`Error: ${e.message}`);
+                }
+            }.call(fleet.eris.requestHandler, query);
+        }
+    );
+
     httpServer.get("/status", async (request, reply) => {
         if (fleet.stats.guilds === 0) {
             return "KMQ is still starting up. Check back in a few minutes!";
