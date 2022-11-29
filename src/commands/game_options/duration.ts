@@ -13,6 +13,7 @@ import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -57,18 +58,18 @@ export default class DurationCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "duration",
-        description: LocalizationManager.localizer.translate(
+        description: LocalizationManager.translate(
             guildID,
             "command.duration.help.description"
         ),
-        usage: `,duration [${LocalizationManager.localizer.translate(
+        usage: `,duration [${LocalizationManager.translate(
             guildID,
             "command.duration.help.usage.minutes"
         )}]`,
         examples: [
             {
                 example: "`,duration 15`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.duration.help.example.set",
                     {
@@ -78,7 +79,7 @@ export default class DurationCommand implements BaseCommand {
             },
             {
                 example: "`,duration 5 add`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.duration.help.example.increment",
                     {
@@ -88,7 +89,7 @@ export default class DurationCommand implements BaseCommand {
             },
             {
                 example: "`,duration 5 remove`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.duration.help.example.decrement",
                     {
@@ -98,7 +99,7 @@ export default class DurationCommand implements BaseCommand {
             },
             {
                 example: "`,duration`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.duration.help.example.reset"
                 ),
@@ -107,18 +108,15 @@ export default class DurationCommand implements BaseCommand {
         priority: 110,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "duration",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.duration.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
                     name: DurationActionInternal.SET,
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         LocaleType.EN,
                         "command.duration.help.example.set",
                         { duration: "[duration]" }
@@ -128,11 +126,10 @@ export default class DurationCommand implements BaseCommand {
                     options: [
                         {
                             name: "duration",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.duration.interaction.durationSet"
-                                ),
+                            description: LocalizationManager.translate(
+                                LocaleType.EN,
+                                "command.duration.interaction.durationSet"
+                            ),
                             required: true,
                             min_value: DURATION_DELTA_MIN,
                             max_value: DURATION_DELTA_MAX,
@@ -143,7 +140,7 @@ export default class DurationCommand implements BaseCommand {
                 },
                 {
                     name: DurationActionInternal.ADD,
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         LocaleType.EN,
                         "command.duration.help.example.increment",
                         { duration: "[duration]" }
@@ -153,11 +150,10 @@ export default class DurationCommand implements BaseCommand {
                     options: [
                         {
                             name: "duration",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.duration.interaction.durationAdd"
-                                ),
+                            description: LocalizationManager.translate(
+                                LocaleType.EN,
+                                "command.duration.interaction.durationAdd"
+                            ),
                             required: true,
                             min_value: DURATION_DELTA_MIN,
                             max_value: DURATION_DELTA_MAX,
@@ -168,7 +164,7 @@ export default class DurationCommand implements BaseCommand {
                 },
                 {
                     name: DurationActionInternal.REMOVE,
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         LocaleType.EN,
                         "command.duration.help.example.decrement",
                         { duration: "[duration]" }
@@ -178,11 +174,10 @@ export default class DurationCommand implements BaseCommand {
                     options: [
                         {
                             name: "duration",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.duration.interaction.durationRemove"
-                                ),
+                            description: LocalizationManager.translate(
+                                LocaleType.EN,
+                                "command.duration.interaction.durationRemove"
+                            ),
                             required: true,
                             min_value: DURATION_DELTA_MIN,
                             max_value: DURATION_DELTA_MAX,
@@ -193,7 +188,7 @@ export default class DurationCommand implements BaseCommand {
                 },
                 {
                     name: DurationActionInternal.RESET,
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "duration" }
@@ -256,15 +251,14 @@ export default class DurationCommand implements BaseCommand {
                     sendErrorMessage(
                         messageContext,
                         {
-                            title: LocalizationManager.localizer.translate(
+                            title: LocalizationManager.translate(
                                 messageContext.guildID,
                                 "command.duration.failure.removingDuration.title"
                             ),
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    messageContext.guildID,
-                                    "command.duration.failure.removingDuration.notSet.description"
-                                ),
+                            description: LocalizationManager.translate(
+                                messageContext.guildID,
+                                "command.duration.failure.removingDuration.notSet.description"
+                            ),
                         },
                         interaction
                     );
@@ -276,15 +270,14 @@ export default class DurationCommand implements BaseCommand {
                     sendErrorMessage(
                         messageContext,
                         {
-                            title: LocalizationManager.localizer.translate(
+                            title: LocalizationManager.translate(
                                 messageContext.guildID,
                                 "command.duration.failure.removingDuration.title"
                             ),
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    messageContext.guildID,
-                                    "command.duration.failure.removingDuration.tooShort.description"
-                                ),
+                            description: LocalizationManager.translate(
+                                messageContext.guildID,
+                                "command.duration.failure.removingDuration.tooShort.description"
+                            ),
                         },
                         interaction
                     );

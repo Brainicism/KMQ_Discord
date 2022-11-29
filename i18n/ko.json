@@ -37,7 +37,8 @@
                     "exclude": "현재 {{exclude}} 옵션에 {{groupOne}}, {{groupTwo}}, {{groupThree}}를 추가합니다.",
                     "groups": "현재 {{groups}} 옵션에 {{groupOne}}, {{groupTwo}}을 추가합니다.",
                     "include": "현재 {{include}} 옵션에 {{groupOne}}을 추가합니다."
-                }
+                },
+                "name": "더해요"
             }
         },
         "answer": {
@@ -51,7 +52,8 @@
                 "interaction": {
                     "answerOption": "게임 내 답변 방법",
                     "description": "정답 입력 방법 선택: 객관식 혹은 서술형 (정답 직접 입력)"
-                }
+                },
+                "name": "정답"
             }
         },
         "artisttype": {
@@ -66,7 +68,8 @@
                 "interaction": {
                     "artistTypeOption": "재생할 아티스트 유형입니다",
                     "description": "솔로 아티스트, 그룹 또는 모든 아티스트의 음악을 듣고 싶은지 선택하세요"
-                }
+                },
+                "name": "예술가타입입니다"
             }
         },
         "begin": {
@@ -90,7 +93,8 @@
                     "reset": "{{defaultBeginningSearchYear}}의 기본 년도 범위를 {{defaultEndSearchYear}}로 재설정합니다.",
                     "singleCutoff": "{{year}}년 이후에 발매된 노래 재생합니다.",
                     "twoCutoffs": "{{beginningYear}}~{{endYear}}년 사이에 발매된 노래 재생합니다."
-                }
+                },
+                "name": "잘라버리다"
             },
             "interaction": {
                 "beginningYear": "포함할 가장 빠른 연도입니다",
@@ -124,6 +128,7 @@
                     "reset": "게임 지속 시간을 비활성화합니다.",
                     "set": "{{duration}}분 후에 게임이 자동으로 종료됩니다."
                 },
+                "name": "지속",
                 "usage": {
                     "minutes": "분"
                 }
@@ -136,7 +141,8 @@
         },
         "end": {
             "help": {
-                "description": "현재 게임을 종료하고 승자를 결정합니다."
+                "description": "현재 게임을 종료하고 승자를 결정합니다.",
+                "name": "끝"
             },
             "interaction": {
                 "description": "즐거웠기를 바랍니다!",
@@ -155,7 +161,8 @@
                     "multipleGroups": "{{groupOne}}, {{groupTwo}}, {{groupThree}}의 노래를 무시합니다.",
                     "reset": "제외 옵션을 재설정합니다.",
                     "singleGroup": "{{group}}의 노래를 제외합니다."
-                }
+                },
+                "name": "제외하다"
             },
             "interaction": {
                 "add": {
@@ -195,7 +202,8 @@
             },
             "firstGameOfDayBonus": "오늘의 첫 게임 보너스",
             "help": {
-                "description": "현재 경험치 수정 및 현재 보너스 경험치 아티스트 목록을 표시합니다."
+                "description": "현재 경험치 수정 및 현재 보너스 경험치 아티스트 목록을 표시합니다.",
+                "name": "경험해요"
             },
             "lowSongCountPenalty": "낮은 노래 수 패널티",
             "multipleChoicePenalty": "객관식 패널티",
@@ -214,7 +222,8 @@
                 }
             },
             "help": {
-                "description": "투표 없이 현재 곡에 대한 힌트를 직접 받을 수 있습니다"
+                "description": "투표 없이 현재 곡에 대한 힌트를 직접 받을 수 있습니다",
+                "name": "암시를강요합니다"
             },
             "hintIgnored": "강제 힌트 무시"
         },
@@ -226,7 +235,8 @@
                 }
             },
             "help": {
-                "description": "투표 없이 현재 노래를 직접 건너뜁니다."
+                "description": "투표 없이 현재 노래를 직접 건너뜁니다.",
+                "name": "강제로건너뜁니다"
             },
             "skipIgnored": "강제 건너뛰기가 무시되었습니다."
         },
@@ -239,7 +249,8 @@
                     "female": "여성 아티스트의 노래만 재생합니다.",
                     "maleFemale": "남성 및 여성 아티스트의 노래를 모두 재생합니다.",
                     "reset": "남성, 여성, 남녀 혼성 그룹의 기본 성별로 재설정합니다."
-                }
+                },
+                "name": "성"
             },
             "interaction": {
                 "description": "듣고 싶은 아티스트의 성별을 선택하세요.",
@@ -268,6 +279,7 @@
                     "reset": "목표를 비활성화합니다.",
                     "set": "{{goal}}을(를) 먼저 달성한 플레이어가 게임에서 승리합니다."
                 },
+                "name": "골문",
                 "usage": {
                     "points": "점수"
                 }
@@ -284,7 +296,8 @@
                     "multipleGroups": "{{groupOne}}, {{groupTwo}}, {{groupThree}}의 노래만 재생합니다.",
                     "reset": "그룹 옵션을 재설정합니다.",
                     "singleGroup": "{{group}}의 노래만 재생합니다."
-                }
+                },
+                "name": "무리"
             },
             "interaction": {
                 "add": {
@@ -313,7 +326,8 @@
                     "both": "게임 라운드에서 승리하려면 아티스트의 정확한 이름 (0.2점) 또는 노래 이름 (1점)을 입력하십시오.",
                     "reset": "{{defaultGuessMode}}의 기본 추측 모드로 재설정합니다.",
                     "song": "게임 라운드에서 승리하려면 올바른 노래 이름을 입력하세요."
-                }
+                },
+                "name": "추측모드입니다"
             },
             "interaction": {
                 "guessMode": "그것은 타당한 추측으로 여겨집니다"
@@ -331,7 +345,8 @@
                 "example": {
                     "allCommands": "사용 가능한 모든 명령어와 간단한 설명을 표시합니다.",
                     "sampleCommand": "년도 범위 명령어에 대한 자세한 설명을 표시합니다."
-                }
+                },
+                "name": "도와주세요"
             },
             "interaction": {
                 "action": "설명서를 가져올 명령의 이름입니다"
@@ -355,7 +370,8 @@
                 }
             },
             "help": {
-                "description": "현재 재생 중인 노래에 대한 힌트를 제공합니다."
+                "description": "현재 재생 중인 노래에 대한 힌트를 제공합니다.",
+                "name": "힌트"
             },
             "request": {
                 "description": "{{hintCounter}} 힌트 요청이 전송되었습니다.",
@@ -376,7 +392,8 @@
                     "multipleGroups": "{{groupOne}}, {{groupTwo}}, {{groupThree}}의 노래를 강제로 포함합니다.",
                     "reset": "포함 옵션을 재설정합니다.",
                     "singleGroup": "{{group}}의 노래를 강제로 포함합니다."
-                }
+                },
+                "name": "포함해요"
             },
             "interaction": {
                 "add": {
@@ -443,7 +460,8 @@
                     "all": "사용 가능한 모든 노래가 재생되었습니다!",
                     "korean": "한국어로된 노래만 재생합니다. (외국어로 된 노래 무시: 영어, 일본어, 중국어)",
                     "reset": "{{defaultLanguage}}의 기본 언어로 재설정합니다."
-                }
+                },
+                "name": "언어"
             },
             "interaction": {
                 "language": "재생할 음악의 언어입니다"
@@ -494,6 +512,7 @@
                     "serverSongsGuessedPage": "추측한 총 노래로 서버 전체 순위표의 세 번째 페이지를 표시합니다.",
                     "unenroll": "리더보드에서 이름을 숨깁니다."
                 },
+                "name": "리더보드입니다",
                 "usage": {
                     "pageNumber": "페이지 수"
                 }
@@ -555,7 +574,8 @@
                     "reset": "{{defaultLimit}}의 기본 제한으로 재설정합니다.",
                     "singleLimit": "현재 선택한 옵션에서 가장 많이 듣는 노래 상위 {{limit}}개를 재생합니다.",
                     "twoLimits": "현재 선택한 옵션에서 {{limitStart}}에서 {{limitEnd}}까지 가장 많이 듣는 노래 사이에서 재생합니다."
-                }
+                },
+                "name": "제한"
             },
             "interaction": {
                 "description": "노래 결과에서 최대 결과 수를 설정합니다",
@@ -564,7 +584,6 @@
                 "limit": "이렇게 많은 상위 곡을 재생하십시오",
                 "limit_end": "시작 제한과 이 값 사이의 노래를 재생합니다",
                 "limit_start": "가장 많이 들은 노래에서 [limit_start]부터 재생하십시오"
-
             }
         },
         "list": {
@@ -587,7 +606,8 @@
                     "exclude": "현재 {{exclude}} 옵션을 나열합니다.",
                     "groups": "현재 {{groups}} 옵션을 나열합니다.",
                     "include": "현재 {{include}} 옵션을 나열합니다."
-                }
+                },
+                "name": "목록"
             },
             "interaction": {
                 "listType": "현재 설정된 그룹, 포함된 그룹 또는 제외된 그룹을 인쇄할지 여부를 지정합니다"
@@ -596,7 +616,8 @@
         "listen": {
             "help": {
                 "description": "현재 옵션에서 음악을 재생합니다. (KMQ 프리미엄 사용자만 사용할 수 있습니다.)",
-                "example": "현재 음성 채널에서 음악 재생을 시작합니다."
+                "example": "현재 음성 채널에서 음악 재생을 시작합니다.",
+                "name": "들어봐요"
             },
             "musicStarting": "🔊 {{voiceChannelName}}의 {{textChannelName}}에서 시작하는 음악"
         },
@@ -608,14 +629,14 @@
                     "toEnglish": "봇의 언어를 {{english}}로 변경합니다.",
                     "toKorean": "봇의 언어를 {{korean}}로 변경합니다."
                 },
+                "name": "로캘",
                 "usage": {
                     "language": "언어"
                 }
             },
             "interaction": {
                 "description": "봇의 언어를 변경합니다.",
-                                "language": "변경할 언어입니다"
-
+                "language": "변경할 언어입니다"
             },
             "language": {
                 "en": "영어",
@@ -641,7 +662,8 @@
                             "song": "노래의 이름입니다."
                         }
                     }
-                }
+                },
+                "name": "찾아요"
             },
             "inCurrentGameOptions": "현재 게임 옵션",
             "inKMQ": "KMQ에 수록된 곡이며 [여기]({{link}})에 링크가 있습니다.",
@@ -666,7 +688,8 @@
                     "off": "먼저 정답을 맞춘 사람에게만 점수가 부여됩니다.",
                     "on": "첫 번째 정확한 추측이 발생한 후 1.5초의 유예 기간을 허용합니다. (여러 플레이어가 정확하게 추측할 수 있습니다.)",
                     "reset": "{{defaultMultiguess}}의 기본 다중 추측 유형으로 재설정합니다."
-                }
+                },
+                "name": "여러가지추측입니다."
             },
             "interaction": {
                 "description": "여러 사람이 노래를 정확하게 추측할 수 있는지 여부를 설정합니다",
@@ -675,7 +698,8 @@
         },
         "news": {
             "help": {
-                "description": "KMQ에 대한 최신 업데이트를 표시합니다."
+                "description": "KMQ에 대한 최신 업데이트를 표시합니다.",
+                "name": "뉴스"
             },
             "updates": {
                 "footer": "더 자세한 업데이트를 위해 공식 KMQ 서버에 가입하세요!",
@@ -685,7 +709,8 @@
         "options": {
             "duration": "{{durationInMinutes}}분",
             "help": {
-                "description": "현재 게임 옵션을 표시합니다."
+                "description": "현재 게임 옵션을 표시합니다.",
+                "name": "옵션들"
             },
             "listeningSessionNotAvailable": "청취 세션 중에는 일부 옵션을 사용할 수 없습니다.",
             "notSet": "설정되지 않음",
@@ -707,7 +732,8 @@
                     "exclusive": "OST 노래를 단독으로 재생합니다.",
                     "include": "OST 노래를 포함합니다.",
                     "reset": "{{defaultOst}}의 기본 옵션으로 재설정합니다."
-                }
+                },
+                "name": "ost"
             },
             "interaction": {
                 "ost": "OST 노래를 포함, 독점 재생 또는 제외할지 여부를 지정합니다"
@@ -749,6 +775,7 @@
                 "interaction": {
                     "lives": "각 플레이어가 시작하는 목숨의 개수를 선택하세요."
                 },
+                "name": "놀고요",
                 "usage": {
                     "lives": "목슴"
                 }
@@ -770,7 +797,8 @@
         "premium": {
             "help": {
                 "description": "현재 회원인지 여부를 포함하여 KMQ 프리미엄에 대해 자세히 알아보십시오.",
-                "example": "귀하의 프리미엄 상태를 보여줍니다."
+                "example": "귀하의 프리미엄 상태를 보여줍니다.",
+                "name": "보험료"
             },
             "option": {
                 "description": "이 옵션은 프리미엄 KMQ 지원자에게만 제공됩니다.",
@@ -856,6 +884,7 @@
                     "replace": "언급된 사전 설정의 옵션을 현재 게임 옵션으로 교체합니다.",
                     "save": "현재 게임 옵션을 사전 설정으로 저장합니다."
                 },
+                "name": "미리조정하다",
                 "usage": {
                     "presetIdentifier": "사전 설정 식별자",
                     "presetName": "사전 설정 이름"
@@ -928,6 +957,7 @@
                     "otherPlayerMention": "{{playerName}}의 플레이어 프로필 보기",
                     "self": "자신의 프로필 보기"
                 },
+                "name": "개요",
                 "usage": {
                     "mention": "멘션"
                 }
@@ -972,7 +1002,8 @@
             },
             "help": {
                 "description": "지난 2주 동안 KMQ에 추가된 노래를 봅니다.",
-                "example": "최근에 추가한 노래 표시"
+                "example": "최근에 추가한 노래 표시",
+                "name": "최근에추가되었습니다"
             },
             "released": "발매 된",
             "title": "최근 추가된 노래"
@@ -984,7 +1015,8 @@
                     "all": "댄스 연습, 어쿠스틱 버전, 리믹스를 포함하여 사용 가능한 모든 비디오를 재생합니다.",
                     "official": "{{official}} 뮤직 비디오만 재생",
                     "reset": "{{defaultRelease}}의 기본 릴리스 유형으로 재설정합니다."
-                }
+                },
+                "name": "풀어줘요"
             },
             "interaction": {
                 "description": "공식 뮤직 비디오만 포함할지 아니면 모든 비디오를 포함할지 선택합니다.",
@@ -1007,7 +1039,8 @@
                     "exclude": "현재 {{exclude}} 옵션에서 {{groupOne}}, {{groupTwo}}, {{groupThree}}를 제거합니다.",
                     "groups": "현재 {{groups}} 옵션에서 {{groupOne}}, {{groupTwo}} 제거합니다.",
                     "include": "현재 {{include}} 옵션에서 {{group}} 제거합니다."
-                }
+                },
+                "name": "제거해요"
             }
         },
         "reset": {
@@ -1015,12 +1048,14 @@
                 "description": "기본 게임 옵션으로 재설정합니다.",
                 "example": {
                     "reset": "기본 게임 옵션으로 재설정"
-                }
+                },
+                "name": "다시맞추다"
             }
         },
         "score": {
             "help": {
-                "description": "현재 게임의 점수판를 참조하세요."
+                "description": "현재 게임의 점수판를 참조하세요.",
+                "name": "득점"
             },
             "scoreboardTitle": "점수판"
         },
@@ -1032,7 +1067,8 @@
                     "middle": "중간 지점부터 노래가 재생됩니다.",
                     "random": "중간에 임의의 지점에서 시작하여 노래가 재생됩니다.",
                     "reset": "{{defaultSeek}}의 기본 탐색으로 재설정합니다."
-                }
+                },
+                "name": "추구해요"
             },
             "interaction": {
                 "seek": "각 곡의 재생을 시작하는 위치입니다"
@@ -1045,7 +1081,8 @@
                     "popularity": "조회수 순으로 재생되는 곡. {{penalty}} 경험치 패널티가 적용됩니다",
                     "random": "노래는 무작위로 재생됩니다.",
                     "reset": "{{defaultShuffle}}의 기본 셔플 모드로 재설정합니다."
-                }
+                },
+                "name": "섞기"
             },
             "interaction": {
                 "shuffle": "게임에서 사용하기 위해 셔플링하는 음악 유형입니다"
@@ -1056,7 +1093,8 @@
                 "skipIgnored": "건너뛰기가 무시되었습니다"
             },
             "help": {
-                "description": "현재 노래를 건너뛰려면 투표하세요. (대다수의 참가자가 건너뛰기로 투표하면 노래를 건너뜁니다.)"
+                "description": "현재 노래를 건너뛰려면 투표하세요. (대다수의 참가자가 건너뛰기로 투표하면 노래를 건너뜁니다.)",
+                "name": "건너뛰어요"
             },
             "success": {
                 "description": "{{skipCounter}} 건너뛰기 요청이 수락되었습니다!"
@@ -1078,7 +1116,8 @@
                     "reset": "특수 옵션을 재설정합니다.",
                     "reverse": "노래를 거꾸로 재생합니다.",
                     "slow": "느린 속도로 노래를 재생합니다."
-                }
+                },
+                "name": "스페셜"
             },
             "interaction": {
                 "special": "각 곡에 대해 수정할 유형입니다"
@@ -1093,7 +1132,8 @@
                 },
                 "interaction": {
                     "playlistURL": "노래를 검색할 재생 목록입니다."
-                }
+                },
+                "name": "스포티파이"
             },
             "invalidURL": {
                 "description": "재생 목록에 대한 링크가 잘못되었습니다. Spotify에서 `공유하기 > 플레이리스트 링크 복사`를 사용하여 올바른 링크를 검색하십시오.",
@@ -1126,7 +1166,8 @@
                 "title": "게임 통계"
             },
             "help": {
-                "description": "다양한 사용/시스템 통계"
+                "description": "다양한 사용/시스템 통계",
+                "name": "통계입니다"
             },
             "system": {
                 "apiLatency": "API 지연 시간",
@@ -1146,12 +1187,12 @@
                     "exclude": "하위 단위를 포함하지 마십시오.",
                     "include": "자동으로 하위 단위를 포함합니다. (예를 들어 `{{groupCommand}} {{parentGroup}}`에는 {{parentGroup}}, {{subunitOne}}, {{subunitTwo}} 등의 노래가 포함됩니다.)",
                     "reset": "{{defaultSubunit}}의 기본 옵션으로 재설정합니다."
-                }
+                },
+                "name": "서브유닛입니다"
             },
             "interaction": {
                 "subunits": "하위 단위를 포함할지 여부입니다"
             }
-
         },
         "timer": {
             "help": {
@@ -1160,6 +1201,7 @@
                     "reset": "타이머 비활성화",
                     "set": "{{timer}}초 내에 사용자가 올바르게 추측하지 않으면 라운드가 종료되고 다음 라운드가 자동으로 시작됩니다."
                 },
+                "name": "타이머",
                 "usage": {
                     "seconds": "초"
                 }
@@ -1167,7 +1209,6 @@
             "interaction": {
                 "description": "타이머가 다 끝나기 전에 올바르게 추측하기 위해 최선을 다하십시오",
                 "timer": "건너뛰기 전에 각 노래를 재생하는 시간(초)입니다"
-
             }
         },
         "vote": {
@@ -1178,7 +1219,8 @@
             },
             "description": "[top.gg]({{voteLink}})에서 KMQ에 투표하면 1시간 동안 경험치가 2배 지급됩니다! ({{voteResetDuration}}시간마다 한 번씩 투표할 수 있습니다.\n\n[리뷰]({{reviewLink}})도 남겨주시면 감사하겠습니다.)",
             "help": {
-                "description": "1시간 동안 경험치 2배를 받기 위해 투표하는 방법에 대한 지침을 보여줍니다."
+                "description": "1시간 동안 경험치 2배를 받기 위해 투표하는 방법에 대한 지침을 보여줍니다.",
+                "name": "투표"
             },
             "timeLeft": "{{time}} 남았습니다.",
             "unavailable": {

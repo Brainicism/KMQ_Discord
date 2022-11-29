@@ -14,6 +14,7 @@ import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import SubunitsPreference from "../../enums/option_types/subunit_preference";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -42,7 +43,7 @@ export default class SubunitsCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "subunits",
-        description: LocalizationManager.localizer.translate(
+        description: LocalizationManager.translate(
             guildID,
             "command.subunits.help.description",
             { groups: `\`${process.env.BOT_PREFIX}groups\`` }
@@ -51,7 +52,7 @@ export default class SubunitsCommand implements BaseCommand {
         examples: [
             {
                 example: "`,subunits include`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.subunits.help.example.include",
                     {
@@ -64,14 +65,14 @@ export default class SubunitsCommand implements BaseCommand {
             },
             {
                 example: "`,subunits exclude`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.subunits.help.example.exclude"
                 ),
             },
             {
                 example: "`,subunits`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.subunits.help.example.reset",
                     { defaultSubunit: `\`${DEFAULT_SUBUNIT_PREFERENCE}\`` }
@@ -81,19 +82,15 @@ export default class SubunitsCommand implements BaseCommand {
         priority: 130,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "subunits",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.subunits.help.description",
-                { groups: `\`${process.env.BOT_PREFIX}groups\`` }
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
                     name: OptionAction.SET,
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         LocaleType.EN,
                         "command.subunits.help.description",
                         {
@@ -105,11 +102,10 @@ export default class SubunitsCommand implements BaseCommand {
                     options: [
                         {
                             name: "subunits",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.subunits.interaction.subunits"
-                                ),
+                            description: LocalizationManager.translate(
+                                LocaleType.EN,
+                                "command.subunits.interaction.subunits"
+                            ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             required: true,
@@ -124,7 +120,7 @@ export default class SubunitsCommand implements BaseCommand {
                 },
                 {
                     name: OptionAction.RESET,
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "subunits" }

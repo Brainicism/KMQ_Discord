@@ -5,9 +5,7 @@ import State from "../state";
 import i18next from "i18next";
 import path from "path";
 
-export default class LocalizationManager {
-    static localizer = new LocalizationManager();
-
+export class LocalizationManager {
     internalLocalizer: typeof i18next;
 
     constructor() {
@@ -105,3 +103,5 @@ export default class LocalizationManager {
         });
     }
 }
+
+export default new LocalizationManager();

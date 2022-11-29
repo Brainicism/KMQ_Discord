@@ -5,10 +5,10 @@ import {
 } from "../../helpers/discord_utils";
 import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
-import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -20,7 +20,7 @@ export default class OptionsCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "options",
-        description: LocalizationManager.localizer.translate(
+        description: LocalizationManager.translate(
             guildID,
             "command.options.help.description"
         ),
@@ -29,13 +29,10 @@ export default class OptionsCommand implements BaseCommand {
         priority: 50,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "options",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.options.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
         },
     ];

@@ -14,11 +14,11 @@ import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
 import KmqMember from "../../structures/kmq_member";
 import ListeningSession from "../../structures/listening_session";
-import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -40,7 +40,7 @@ export async function sendBeginListeningSessionMessage(
     guildPreference: GuildPreference,
     interaction?: Eris.CommandInteraction
 ): Promise<void> {
-    const startTitle = LocalizationManager.localizer.translate(
+    const startTitle = LocalizationManager.translate(
         messageContext.guildID,
         "command.listen.musicStarting",
         {
@@ -54,7 +54,7 @@ export async function sendBeginListeningSessionMessage(
     const fields: Eris.EmbedField[] = [];
     if (gameInfoMessage) {
         fields.push({
-            name: LocalizationManager.localizer.translate(
+            name: LocalizationManager.translate(
                 messageContext.guildID,
                 gameInfoMessage.title
             ),
@@ -107,7 +107,7 @@ export default class ListenCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "listen",
-        description: LocalizationManager.localizer.translate(
+        description: LocalizationManager.translate(
             guildID,
             "command.listen.help.description"
         ),
@@ -116,7 +116,7 @@ export default class ListenCommand implements BaseCommand {
         examples: [
             {
                 example: "`,listen`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.listen.help.example"
                 ),
@@ -124,13 +124,10 @@ export default class ListenCommand implements BaseCommand {
         ],
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "listen",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.listen.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
         },
     ];
@@ -173,11 +170,11 @@ export default class ListenCommand implements BaseCommand {
             await sendErrorMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: LocalizationManager.translate(
                         messageContext.guildID,
                         "misc.failure.notInVC.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         messageContext.guildID,
                         "misc.failure.notInVC.description",
                         { command: `\`${process.env.BOT_PREFIX}listen\`` }

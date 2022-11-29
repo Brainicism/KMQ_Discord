@@ -368,17 +368,17 @@ export default class GameRound extends Round {
         if (this.bonusModifier > 1 || this.isBonusArtist()) {
             let bonusType: string;
             if (this.isBonusArtist() && this.bonusModifier > 1) {
-                bonusType = LocalizationManager.localizer.translate(
+                bonusType = LocalizationManager.translate(
                     messageContext.guildID,
                     "misc.inGame.bonusExpArtistRound"
                 );
             } else if (this.bonusModifier > 1) {
-                bonusType = LocalizationManager.localizer.translate(
+                bonusType = LocalizationManager.translate(
                     messageContext.guildID,
                     "misc.inGame.bonusExpRound"
                 );
             } else {
-                bonusType = LocalizationManager.localizer.translate(
+                bonusType = LocalizationManager.translate(
                     messageContext.guildID,
                     "misc.inGame.bonusArtistRound"
                 );
@@ -399,7 +399,7 @@ export default class GameRound extends Round {
                     : ""
             }`;
 
-            correctDescription += LocalizationManager.localizer.translate(
+            correctDescription += LocalizationManager.translate(
                 messageContext.guildID,
                 "misc.inGame.correctGuess",
                 {
@@ -422,13 +422,13 @@ export default class GameRound extends Round {
                     .join("\n");
 
                 if (runnersUp.length >= ROUND_MAX_RUNNERS_UP) {
-                    runnersUpDescription += `\n${LocalizationManager.localizer.translate(
+                    runnersUpDescription += `\n${LocalizationManager.translate(
                         messageContext.guildID,
                         "misc.andManyOthers"
                     )}`;
                 }
 
-                correctDescription += `\n\n**${LocalizationManager.localizer.translate(
+                correctDescription += `\n\n**${LocalizationManager.translate(
                     messageContext.guildID,
                     "misc.inGame.runnersUp"
                 )}**\n${runnersUpDescription}`;
@@ -436,7 +436,7 @@ export default class GameRound extends Round {
         }
 
         if (!correctGuess) {
-            correctDescription = LocalizationManager.localizer.translate(
+            correctDescription = LocalizationManager.translate(
                 messageContext.guildID,
                 "misc.inGame.noCorrectGuesses"
             );

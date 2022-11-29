@@ -39,7 +39,7 @@ export default class Scoreboard {
         let winnerStr = "";
 
         if (this.firstPlace.length === 1) {
-            return LocalizationManager.localizer.translate(
+            return LocalizationManager.translate(
                 guildID,
                 "misc.inGame.winMessage",
                 {
@@ -309,7 +309,7 @@ export default class Scoreboard {
         return [
             {
                 name: bold(
-                    LocalizationManager.localizer.translate(
+                    LocalizationManager.translate(
                         guildID,
                         "command.score.scoreboardTitle"
                     )

@@ -195,11 +195,11 @@ export default abstract class Session {
                 );
             } catch (err) {
                 await sendErrorMessage(messageContext, {
-                    title: LocalizationManager.localizer.translate(
+                    title: LocalizationManager.translate(
                         this.guildID,
                         "misc.failure.errorSelectingSong.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         this.guildID,
                         "misc.failure.errorSelectingSong.description"
                     ),
@@ -226,11 +226,11 @@ export default abstract class Session {
             );
 
             await sendInfoMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
+                title: LocalizationManager.translate(
                     this.guildID,
                     "misc.uniqueSongsReset.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: LocalizationManager.translate(
                     this.guildID,
                     "misc.uniqueSongsReset.description",
                     { totalSongCount: friendlyFormattedNumber(totalSongCount) }
@@ -246,11 +246,11 @@ export default abstract class Session {
 
         if (randomSong === null) {
             sendErrorMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
+                title: LocalizationManager.translate(
                     this.guildID,
                     "misc.failure.songQuery.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: LocalizationManager.translate(
                     this.guildID,
                     "misc.failure.songQuery.description"
                 ),
@@ -283,11 +283,11 @@ export default abstract class Session {
             );
 
             await sendErrorMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
+                title: LocalizationManager.translate(
                     this.guildID,
                     "misc.failure.vcJoin.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: LocalizationManager.translate(
                     this.guildID,
                     "misc.failure.vcJoin.description"
                 ),
@@ -378,20 +378,20 @@ export default abstract class Session {
             ).reduce((total, x) => total + x.size, 0);
 
             await sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: LocalizationManager.localizer.translate(
+                title: LocalizationManager.translate(
                     this.guildID,
                     "misc.sendingBookmarkedSongs.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: LocalizationManager.translate(
                     this.guildID,
                     "misc.sendingBookmarkedSongs.description",
                     {
-                        songs: LocalizationManager.localizer.translateN(
+                        songs: LocalizationManager.translateN(
                             this.guildID,
                             "misc.plural.song",
                             bookmarkedSongCount
                         ),
-                        players: LocalizationManager.localizer.translateN(
+                        players: LocalizationManager.translateN(
                             this.guildID,
                             "misc.plural.player",
                             bookmarkedSongsPlayerCount
@@ -522,11 +522,11 @@ export default abstract class Session {
     /** Sends a message notifying who the new owner is */
     updateOwner(): void {
         sendInfoMessage(new MessageContext(this.textChannelID), {
-            title: LocalizationManager.localizer.translate(
+            title: LocalizationManager.translate(
                 this.guildID,
                 "misc.gameOwnerChanged.title"
             ),
-            description: LocalizationManager.localizer.translate(
+            description: LocalizationManager.translate(
                 this.guildID,
                 "misc.gameOwnerChanged.description",
                 {
@@ -560,7 +560,7 @@ export default abstract class Session {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 null,
-                LocalizationManager.localizer.translate(
+                LocalizationManager.translate(
                     this.guildID,
                     "misc.failure.interaction.invalidBookmark",
                     { BOOKMARK_MESSAGE_SIZE: String(BOOKMARK_MESSAGE_SIZE) }
@@ -571,11 +571,11 @@ export default abstract class Session {
 
         tryCreateInteractionSuccessAcknowledgement(
             interaction,
-            LocalizationManager.localizer.translate(
+            LocalizationManager.translate(
                 this.guildID,
                 "misc.interaction.bookmarked.title"
             ),
-            LocalizationManager.localizer.translate(
+            LocalizationManager.translate(
                 this.guildID,
                 "misc.interaction.bookmarked.description",
                 {
@@ -790,7 +790,7 @@ export default abstract class Session {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 null,
-                LocalizationManager.localizer.translate(
+                LocalizationManager.translate(
                     this.guildID,
                     "misc.failure.interaction.optionFromPreviousRound"
                 )
@@ -849,7 +849,7 @@ export default abstract class Session {
         if (fact) {
             fields.push({
                 name: underline(
-                    LocalizationManager.localizer.translate(
+                    LocalizationManager.translate(
                         messageContext.guildID,
                         "fact.didYouKnow"
                     )
@@ -876,7 +876,7 @@ export default abstract class Session {
 
         const views = `${friendlyFormattedNumber(
             round.song.views
-        )} ${LocalizationManager.localizer.translate(
+        )} ${LocalizationManager.translate(
             messageContext.guildID,
             "misc.views"
         )}\n`;
@@ -916,7 +916,7 @@ export default abstract class Session {
             buttons.push({
                 type: 2,
                 style: 1,
-                label: LocalizationManager.localizer.translate(
+                label: LocalizationManager.translate(
                     messageContext.guildID,
                     "misc.skip"
                 ),
@@ -926,7 +926,7 @@ export default abstract class Session {
             buttons.push({
                 type: 2,
                 style: 1,
-                label: LocalizationManager.localizer.translate(
+                label: LocalizationManager.translate(
                     messageContext.guildID,
                     "misc.bookmark"
                 ),
@@ -958,12 +958,12 @@ export default abstract class Session {
 
         durationText +=
             timeRemaining > 0
-                ? `⏰ ${LocalizationManager.localizer.translateN(
+                ? `⏰ ${LocalizationManager.translateN(
                       locale,
                       "misc.plural.minuteRemaining",
                       Math.ceil(timeRemaining)
                   )}`
-                : `⏰ ${LocalizationManager.localizer.translate(
+                : `⏰ ${LocalizationManager.translate(
                       locale,
                       "misc.timeFinished"
                   )}!`;
@@ -982,11 +982,11 @@ export default abstract class Session {
         });
 
         await sendErrorMessage(messageContext, {
-            title: LocalizationManager.localizer.translate(
+            title: LocalizationManager.translate(
                 this.guildID,
                 "misc.failure.songPlaying.title"
             ),
-            description: LocalizationManager.localizer.translate(
+            description: LocalizationManager.translate(
                 this.guildID,
                 "misc.failure.songPlaying.description"
             ),
@@ -1027,7 +1027,7 @@ export default abstract class Session {
             return "";
         }
 
-        const aliasesText = LocalizationManager.localizer.translate(
+        const aliasesText = LocalizationManager.translate(
             locale,
             "misc.inGame.aliases"
         );

@@ -13,6 +13,7 @@ import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -43,18 +44,18 @@ export default class GuessTimeoutCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "timer",
-        description: LocalizationManager.localizer.translate(
+        description: LocalizationManager.translate(
             guildID,
             "command.timer.help.description"
         ),
-        usage: `,timer [${LocalizationManager.localizer.translate(
+        usage: `,timer [${LocalizationManager.translate(
             guildID,
             "command.timer.help.usage.seconds"
         )}]`,
         examples: [
             {
                 example: "`,timer 15`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.timer.help.example.set",
                     { timer: String(15) }
@@ -62,7 +63,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
             },
             {
                 example: "`,timer`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.timer.help.example.reset"
                 ),
@@ -71,18 +72,15 @@ export default class GuessTimeoutCommand implements BaseCommand {
         priority: 110,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "timer",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.timer.interaction.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
                     name: OptionAction.SET,
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         LocaleType.EN,
                         "command.timer.interaction.description"
                     ),
@@ -91,11 +89,10 @@ export default class GuessTimeoutCommand implements BaseCommand {
                     options: [
                         {
                             name: "timer",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.timer.interaction.timer"
-                                ),
+                            description: LocalizationManager.translate(
+                                LocaleType.EN,
+                                "command.timer.interaction.timer"
+                            ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .INTEGER,
                             required: true,
@@ -106,7 +103,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
                 },
                 {
                     name: OptionAction.RESET,
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "timer" }

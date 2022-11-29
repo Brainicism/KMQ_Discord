@@ -14,6 +14,7 @@ import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import OstPreference from "../../enums/option_types/ost_preference";
 import Session from "../../structures/session";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -42,7 +43,7 @@ export default class OstCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "ost",
-        description: LocalizationManager.localizer.translate(
+        description: LocalizationManager.translate(
             guildID,
             "command.ost.help.description"
         ),
@@ -50,28 +51,28 @@ export default class OstCommand implements BaseCommand {
         examples: [
             {
                 example: "`,ost include`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.ost.help.example.include"
                 ),
             },
             {
                 example: "`,ost exclude`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.ost.help.example.exclude"
                 ),
             },
             {
                 example: "`,ost exclusive`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.ost.help.example.exclusive"
                 ),
             },
             {
                 example: "`,ost`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.ost.help.example.reset",
                     { defaultOst: `\`${DEFAULT_OST_PREFERENCE}\`` }
@@ -81,18 +82,15 @@ export default class OstCommand implements BaseCommand {
         priority: 130,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "ost",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.ost.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
                     name: OptionAction.SET,
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         LocaleType.EN,
                         "command.ost.help.description"
                     ),
@@ -101,11 +99,10 @@ export default class OstCommand implements BaseCommand {
                     options: [
                         {
                             name: "ost",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.ost.interaction.ost"
-                                ),
+                            description: LocalizationManager.translate(
+                                LocaleType.EN,
+                                "command.ost.interaction.ost"
+                            ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             required: true,
@@ -120,7 +117,7 @@ export default class OstCommand implements BaseCommand {
                 },
                 {
                     name: OptionAction.RESET,
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "ost" }

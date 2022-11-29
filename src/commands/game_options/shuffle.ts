@@ -22,6 +22,7 @@ import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import ShuffleType from "../../enums/option_types/shuffle_type";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type EmbedPayload from "../../interfaces/embed_payload";
@@ -51,7 +52,7 @@ export default class ShuffleCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "shuffle",
-        description: LocalizationManager.localizer.translate(
+        description: LocalizationManager.translate(
             guildID,
             "command.shuffle.help.description",
             {
@@ -62,14 +63,14 @@ export default class ShuffleCommand implements BaseCommand {
         examples: [
             {
                 example: "`,shuffle random`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.shuffle.help.example.random"
                 ),
             },
             {
                 example: "`,shuffle popularity`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.shuffle.help.example.popularity",
                     {
@@ -83,7 +84,7 @@ export default class ShuffleCommand implements BaseCommand {
             },
             {
                 example: "`,shuffle`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.shuffle.help.example.reset",
                     { defaultShuffle: `\`${DEFAULT_SHUFFLE}\`` }
@@ -93,18 +94,15 @@ export default class ShuffleCommand implements BaseCommand {
         priority: 110,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "shuffle",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.shuffle.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
                     name: OptionAction.SET,
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         LocaleType.EN,
                         "command.shuffle.help.description"
                     ),
@@ -113,11 +111,10 @@ export default class ShuffleCommand implements BaseCommand {
                     options: [
                         {
                             name: "shuffle",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.shuffle.interaction.shuffle"
-                                ),
+                            description: LocalizationManager.translate(
+                                LocaleType.EN,
+                                "command.shuffle.interaction.shuffle"
+                            ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             required: true,
@@ -132,7 +129,7 @@ export default class ShuffleCommand implements BaseCommand {
                 },
                 {
                     name: OptionAction.RESET,
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "shuffle" }
@@ -181,11 +178,11 @@ export default class ShuffleCommand implements BaseCommand {
                 );
 
                 const embedPayload: EmbedPayload = {
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         messageContext.guildID,
                         "command.premium.option.description"
                     ),
-                    title: LocalizationManager.localizer.translate(
+                    title: LocalizationManager.translate(
                         messageContext.guildID,
                         "command.premium.option.title"
                     ),

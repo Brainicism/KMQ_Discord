@@ -147,11 +147,11 @@ export default async function messageCreateHandler(
                 }
 
                 sendErrorMessage(messageContext, {
-                    title: LocalizationManager.localizer.translate(
+                    title: LocalizationManager.translate(
                         message.guildID,
                         "misc.failure.command.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         message.guildID,
                         "misc.failure.command.description",
                         { debugId }

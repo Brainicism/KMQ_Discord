@@ -15,6 +15,7 @@ import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -41,7 +42,7 @@ export default class AnswerCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "answer",
-        description: LocalizationManager.localizer.translate(
+        description: LocalizationManager.translate(
             guildID,
             "command.answer.help.description",
             {
@@ -56,14 +57,14 @@ export default class AnswerCommand implements BaseCommand {
         examples: [
             {
                 example: "`,answer typing`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.answer.help.example.typing"
                 ),
             },
             {
                 example: "`,answer typingtypos`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.answer.help.example.typingTypos",
                     {
@@ -75,7 +76,7 @@ export default class AnswerCommand implements BaseCommand {
             },
             {
                 example: "`,answer easy`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",
                     {
@@ -90,7 +91,7 @@ export default class AnswerCommand implements BaseCommand {
             },
             {
                 example: "`,answer medium`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",
                     {
@@ -105,7 +106,7 @@ export default class AnswerCommand implements BaseCommand {
             },
             {
                 example: "`,answer hard`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",
                     {
@@ -122,18 +123,15 @@ export default class AnswerCommand implements BaseCommand {
         priority: 150,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "answer",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.answer.help.interaction.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
                     name: OptionAction.SET,
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         LocaleType.EN,
                         "command.answer.help.interaction.description"
                     ),
@@ -142,11 +140,10 @@ export default class AnswerCommand implements BaseCommand {
                     options: [
                         {
                             name: "answer",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.answer.help.interaction.answerOption"
-                                ),
+                            description: LocalizationManager.translate(
+                                LocaleType.EN,
+                                "command.answer.help.interaction.answerOption"
+                            ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             required: true,
@@ -161,7 +158,7 @@ export default class AnswerCommand implements BaseCommand {
                 },
                 {
                     name: OptionAction.RESET,
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "answer" }

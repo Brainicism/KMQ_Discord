@@ -10,10 +10,10 @@ import {
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameType from "../../enums/game_type";
-import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type EliminationScoreboard from "../../structures/elimination_scoreboard";
@@ -28,11 +28,11 @@ async function sendSkipNotification(
     interaction?: Eris.CommandInteraction
 ): Promise<void> {
     const embedPayload = {
-        title: LocalizationManager.localizer.translate(
+        title: LocalizationManager.translate(
             messageContext.guildID,
             "command.skip.vote.title"
         ),
-        description: LocalizationManager.localizer.translate(
+        description: LocalizationManager.translate(
             messageContext.guildID,
             "command.skip.vote.description",
             {
@@ -64,11 +64,11 @@ async function sendSkipMessage(
 ): Promise<void> {
     const embedPayload = {
         color: EMBED_SUCCESS_COLOR,
-        title: LocalizationManager.localizer.translate(
+        title: LocalizationManager.translate(
             messageContext.guildID,
             "misc.skip"
         ),
-        description: LocalizationManager.localizer.translate(
+        description: LocalizationManager.translate(
             messageContext.guildID,
             "command.skip.success.description",
             {
@@ -141,7 +141,7 @@ export default class SkipCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "skip",
-        description: LocalizationManager.localizer.translate(
+        description: LocalizationManager.translate(
             guildID,
             "command.skip.help.description"
         ),
@@ -150,13 +150,10 @@ export default class SkipCommand implements BaseCommand {
         priority: 1010,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "skip",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.skip.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
         },
     ];
@@ -179,11 +176,11 @@ export default class SkipCommand implements BaseCommand {
             sendErrorMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: LocalizationManager.translate(
                         messageContext.guildID,
                         "misc.failure.round.noneInProgress.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         messageContext.guildID,
                         "misc.failure.round.noneInProgress.description"
                     ),
@@ -203,11 +200,11 @@ export default class SkipCommand implements BaseCommand {
             await sendErrorMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: LocalizationManager.translate(
                         messageContext.guildID,
                         "command.skip.failure.skipIgnored"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         messageContext.guildID,
                         "misc.preCheck.differentVC"
                     ),

@@ -24,11 +24,11 @@ export default class JoinCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             logger.warn(`${getDebugLogHeader(message)} | Missing team name.`);
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
+                title: LocalizationManager.translate(
                     message.guildID,
                     "command.join.failure.joinError.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: LocalizationManager.translate(
                     message.guildID,
                     "command.join.failure.joinError.noTeamName.description",
                     { joinCommand: `${process.env.BOT_PREFIX}join` }

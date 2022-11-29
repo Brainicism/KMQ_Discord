@@ -148,7 +148,7 @@ export default async function interactionCreateHandler(
                         tryCreateInteractionErrorAcknowledgement(
                             interaction as Eris.CommandInteraction,
                             null,
-                            LocalizationManager.localizer.translate(
+                            LocalizationManager.translate(
                                 interaction.guildID,
                                 "misc.failure.interaction.bookmarkOutsideGame"
                             )

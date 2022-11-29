@@ -222,17 +222,10 @@ export function standardDateFormat(date: Date): string {
  * @returns the date in (minutes/hours ago) or yyyy-mm-dd format
  */
 export function friendlyFormattedDate(date: Date, guildID: string): string {
-    let localizer: LocalizationManager;
-    if (guildID === null) {
-        localizer = new LocalizationManager();
-    } else {
-        localizer = LocalizationManager.localizer;
-    }
-
     const timeDiffSeconds = (Date.now() - date.getTime()) / 1000;
     const timeDiffMinutes = timeDiffSeconds / 60.0;
     if (timeDiffMinutes <= 60) {
-        return localizer.translateN(
+        return LocalizationManager.translateN(
             guildID,
             "misc.plural.minuteAgo",
             Math.ceil(timeDiffMinutes)
@@ -241,7 +234,7 @@ export function friendlyFormattedDate(date: Date, guildID: string): string {
 
     const timeDiffHours = timeDiffMinutes / 60.0;
     if (timeDiffHours <= 24) {
-        return localizer.translateN(
+        return LocalizationManager.translateN(
             guildID,
             "misc.plural.hourAgo",
             Math.ceil(timeDiffHours)

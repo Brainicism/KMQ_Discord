@@ -83,11 +83,11 @@ export default class DebugCommand implements BaseCommand {
 
         const debugID = uuid.v4();
         await sendInfoMessage(MessageContext.fromMessage(message), {
-            title: LocalizationManager.localizer.translate(
+            title: LocalizationManager.translate(
                 message.guildID,
                 "command.debug.title"
             ),
-            description: LocalizationManager.localizer.translate(
+            description: LocalizationManager.translate(
                 message.guildID,
                 "command.debug.description",
                 {

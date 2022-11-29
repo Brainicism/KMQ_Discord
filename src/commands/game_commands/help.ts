@@ -15,6 +15,7 @@ import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type { EmbedOptions } from "eris";
 import type { GuildTextableMessage } from "../../types";
 import type BaseCommand from "../interfaces/base_command";
@@ -29,25 +30,25 @@ const excludedCommands = ["premium"];
 export default class HelpCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "help",
-        description: LocalizationManager.localizer.translate(
+        description: LocalizationManager.translate(
             guildID,
             "command.help.help.description"
         ),
-        usage: `,help [${LocalizationManager.localizer.translate(
+        usage: `,help [${LocalizationManager.translate(
             guildID,
             "command.help.command"
         )}]`,
         examples: [
             {
                 example: "`,help`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.help.help.example.allCommands"
                 ),
             },
             {
                 example: "`,help cutoff`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.help.help.example.sampleCommand"
                 ),
@@ -56,18 +57,15 @@ export default class HelpCommand implements BaseCommand {
         priority: 1000,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "help",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.help.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
                     name: "action",
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         LocaleType.EN,
                         "command.help.interaction.action"
                     ),
@@ -136,14 +134,14 @@ export default class HelpCommand implements BaseCommand {
                 await sendErrorMessage(
                     messageContext,
                     {
-                        title: LocalizationManager.localizer.translate(
+                        title: LocalizationManager.translate(
                             messageContext.guildID,
                             "command.help.title",
                             {
                                 kmq: "K-pop Music Quiz",
                             }
                         ),
-                        description: LocalizationManager.localizer.translate(
+                        description: LocalizationManager.translate(
                             messageContext.guildID,
                             "command.help.failure.noDocs",
                             { action }
@@ -167,7 +165,7 @@ export default class HelpCommand implements BaseCommand {
             embedDesc = helpManual.description;
             embedActionRowComponents = helpManual.actionRowComponents;
             if (helpManual.examples.length > 0) {
-                embedDesc += `\n\n**${LocalizationManager.localizer.translate(
+                embedDesc += `\n\n**${LocalizationManager.translate(
                     messageContext.guildID,
                     "command.help.examples"
                 )}**\n`;
@@ -183,7 +181,7 @@ export default class HelpCommand implements BaseCommand {
 
             if (commandFilesWithAliases[action].aliases) {
                 embedFooter = {
-                    text: `${LocalizationManager.localizer.translate(
+                    text: `${LocalizationManager.translate(
                         messageContext.guildID,
                         "misc.inGame.aliases"
                     )}: ${commandFilesWithAliases[action].aliases.join(", ")}`,
@@ -203,7 +201,7 @@ export default class HelpCommand implements BaseCommand {
                 (x, y) => y.help(null).priority - x.help(null).priority
             );
 
-            embedTitle = LocalizationManager.localizer.translate(
+            embedTitle = LocalizationManager.translate(
                 messageContext.guildID,
                 "command.help.title",
                 {
@@ -211,14 +209,14 @@ export default class HelpCommand implements BaseCommand {
                 }
             );
 
-            embedDesc = LocalizationManager.localizer.translate(
+            embedDesc = LocalizationManager.translate(
                 messageContext.guildID,
                 "command.help.description",
                 {
                     play: `\`${process.env.BOT_PREFIX}play\``,
                     options: `\`${process.env.BOT_PREFIX}options\``,
                     help: `${process.env.BOT_PREFIX}help`,
-                    command: LocalizationManager.localizer.translate(
+                    command: LocalizationManager.translate(
                         messageContext.guildID,
                         "command.help.command"
                     ),
@@ -231,7 +229,7 @@ export default class HelpCommand implements BaseCommand {
                     name: helpManual.name,
                     value: `${
                         helpManual.description
-                    }\n${LocalizationManager.localizer.translate(
+                    }\n${LocalizationManager.translate(
                         messageContext.guildID,
                         "misc.usage"
                     )}: \`${helpManual.usage.replace(
@@ -246,7 +244,7 @@ export default class HelpCommand implements BaseCommand {
                     style: 5,
                     url: "https://discord.gg/RCuzwYV",
                     type: 2,
-                    label: LocalizationManager.localizer.translate(
+                    label: LocalizationManager.translate(
                         messageContext.guildID,
                         "misc.interaction.officialKmqServer"
                     ),
@@ -255,7 +253,7 @@ export default class HelpCommand implements BaseCommand {
                     style: 5,
                     url: "https://brainicism.github.io/KMQ_Discord/GAMEPLAY",
                     type: 2,
-                    label: LocalizationManager.localizer.translate(
+                    label: LocalizationManager.translate(
                         messageContext.guildID,
                         "misc.interaction.howToPlay"
                     ),
@@ -264,7 +262,7 @@ export default class HelpCommand implements BaseCommand {
                     style: 5,
                     url: "https://brainicism.github.io/KMQ_Discord/FAQ",
                     type: 2,
-                    label: LocalizationManager.localizer.translate(
+                    label: LocalizationManager.translate(
                         messageContext.guildID,
                         "misc.interaction.faq"
                     ),

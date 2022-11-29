@@ -14,6 +14,7 @@ import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import SeekType from "../../enums/option_types/seek_type";
 import Session from "../../structures/session";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -40,7 +41,7 @@ export default class SeekCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "seek",
-        description: LocalizationManager.localizer.translate(
+        description: LocalizationManager.translate(
             guildID,
             "command.seek.help.description"
         ),
@@ -48,28 +49,28 @@ export default class SeekCommand implements BaseCommand {
         examples: [
             {
                 example: "`,seek random`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.seek.help.example.random"
                 ),
             },
             {
                 example: "`,seek middle`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.seek.help.example.middle"
                 ),
             },
             {
                 example: "`,seek beginning`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.seek.help.example.beginning"
                 ),
             },
             {
                 example: "`,seek`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.seek.help.example.reset",
                     {
@@ -81,18 +82,15 @@ export default class SeekCommand implements BaseCommand {
         priority: 130,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "seek",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.seek.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
                     name: OptionAction.SET,
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         LocaleType.EN,
                         "command.seek.help.description"
                     ),
@@ -101,11 +99,10 @@ export default class SeekCommand implements BaseCommand {
                     options: [
                         {
                             name: "seek",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.seek.interaction.seek"
-                                ),
+                            description: LocalizationManager.translate(
+                                LocaleType.EN,
+                                "command.seek.interaction.seek"
+                            ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             required: true,
@@ -120,7 +117,7 @@ export default class SeekCommand implements BaseCommand {
                 },
                 {
                     name: OptionAction.RESET,
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "seek" }

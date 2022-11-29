@@ -5,6 +5,8 @@ import { sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
 import EnvType from "../../enums/env_type";
 import Eris from "eris";
+import LocaleType from "../../enums/locale_type";
+import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
 import type BaseCommand from "../interfaces/base_command";
@@ -62,8 +64,11 @@ export default class AppCommandsCommand implements BaseCommand {
         const commandsModifiedFailed = [];
         if (appCommandType === AppCommandsAction.RELOAD) {
             const commandsToModify = isSingleCommand
-                ? [State.client.commands[parsedMessage.components[1]]]
-                : Object.values(State.client.commands);
+                ? Object.entries({
+                      [parsedMessage.components[1]]:
+                          State.client.commands[parsedMessage.components[1]],
+                  })
+                : Object.entries(State.client.commands);
 
             const createApplicationCommandFunc: (
                 command: Eris.ApplicationCommandStructure
@@ -95,10 +100,48 @@ export default class AppCommandsCommand implements BaseCommand {
                           },
                       ];
 
-            for (const command of commandsToModify) {
+            for (const commandObj of commandsToModify) {
+                const commandName = commandObj[0];
+                const command = commandObj[1];
                 if (command.slashCommands) {
-                    const commands = command.slashCommands();
+                    const commands =
+                        command.slashCommands() as Array<Eris.ChatInputApplicationCommandStructure>;
+
                     for (const cmd of commands) {
+                        cmd.name =
+                            cmd.name ??
+                            LocalizationManager.translate(
+                                LocaleType.EN,
+                                `command.${commandName}.help.name`
+                            );
+
+                        cmd.name_localizations = cmd.name_localizations ?? {
+                            [LocaleType.KO]: LocalizationManager.translate(
+                                LocaleType.KO,
+                                `command.${commandName}.help.name`
+                            ),
+                        };
+                        if (
+                            cmd.type ===
+                            Eris.Constants.ApplicationCommandTypes.CHAT_INPUT
+                        ) {
+                            cmd.description =
+                                cmd.description ??
+                                LocalizationManager.translate(
+                                    LocaleType.EN,
+                                    `command.${commandName}.help.description`
+                                );
+
+                            cmd.description_localizations =
+                                cmd.description_localizations ?? {
+                                    [LocaleType.KO]:
+                                        LocalizationManager.translate(
+                                            LocaleType.KO,
+                                            `command.${commandName}.help.description`
+                                        ),
+                                };
+                        }
+
                         commandStructures.push(cmd);
                     }
                 }

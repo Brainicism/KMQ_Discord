@@ -16,6 +16,7 @@ import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import SpecialType from "../../enums/option_types/special_type";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type EmbedPayload from "../../interfaces/embed_payload";
@@ -44,7 +45,7 @@ export default class SpecialCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "special",
-        description: LocalizationManager.localizer.translate(
+        description: LocalizationManager.translate(
             guildID,
             "command.special.help.description"
         ),
@@ -52,56 +53,56 @@ export default class SpecialCommand implements BaseCommand {
         examples: [
             {
                 example: "`,special reverse`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.special.help.example.reverse"
                 ),
             },
             {
                 example: "`,special slow`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.special.help.example.slow"
                 ),
             },
             {
                 example: "`,special fast`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.special.help.example.fast"
                 ),
             },
             {
                 example: "`,special faster`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.special.help.example.faster"
                 ),
             },
             {
                 example: "`,special lowpitch`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.special.help.example.lowPitch"
                 ),
             },
             {
                 example: "`,special highpitch`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.special.help.example.highPitch"
                 ),
             },
             {
                 example: "`,special nightcore`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.special.help.example.nightcore"
                 ),
             },
             {
                 example: "`,special`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.special.help.example.reset"
                 ),
@@ -110,18 +111,15 @@ export default class SpecialCommand implements BaseCommand {
         priority: 130,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "special",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.special.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
                     name: OptionAction.SET,
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         LocaleType.EN,
                         "command.special.help.description"
                     ),
@@ -130,11 +128,10 @@ export default class SpecialCommand implements BaseCommand {
                     options: [
                         {
                             name: "special",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.special.interaction.special"
-                                ),
+                            description: LocalizationManager.translate(
+                                LocaleType.EN,
+                                "command.special.interaction.special"
+                            ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             required: true,
@@ -149,7 +146,7 @@ export default class SpecialCommand implements BaseCommand {
                 },
                 {
                     name: OptionAction.RESET,
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "special" }
@@ -199,11 +196,11 @@ export default class SpecialCommand implements BaseCommand {
             );
 
             const embedPayload: EmbedPayload = {
-                description: LocalizationManager.localizer.translate(
+                description: LocalizationManager.translate(
                     messageContext.guildID,
                     "command.premium.option.description_kmq_server"
                 ),
-                title: LocalizationManager.localizer.translate(
+                title: LocalizationManager.translate(
                     messageContext.guildID,
                     "command.premium.option.title"
                 ),

@@ -31,6 +31,7 @@ import MessageContext from "../../structures/message_context";
 import RemoveCommand, { RemoveType } from "./remove";
 import Session from "../../structures/session";
 import State from "../../state";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type EmbedPayload from "../../interfaces/embed_payload";
@@ -49,7 +50,7 @@ export default class ExcludeCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "exclude",
-        description: LocalizationManager.localizer.translate(
+        description: LocalizationManager.translate(
             guildID,
             "command.exclude.help.description",
             {
@@ -60,7 +61,7 @@ export default class ExcludeCommand implements BaseCommand {
         examples: [
             {
                 example: "`,exclude blackpink`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.exclude.help.example.singleGroup",
                     {
@@ -70,7 +71,7 @@ export default class ExcludeCommand implements BaseCommand {
             },
             {
                 example: "`,exclude blackpink, bts, red velvet`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.exclude.help.example.multipleGroups",
                     {
@@ -82,7 +83,7 @@ export default class ExcludeCommand implements BaseCommand {
             },
             {
                 example: "`,exclude`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.exclude.help.example.reset"
                 ),
@@ -93,7 +94,7 @@ export default class ExcludeCommand implements BaseCommand {
                 type: Eris.Constants.ComponentTypes.BUTTON,
                 style: Eris.Constants.ButtonStyles.LINK,
                 url: GROUP_LIST_URL,
-                label: LocalizationManager.localizer.translate(
+                label: LocalizationManager.translate(
                     guildID,
                     "misc.interaction.fullGroupsList"
                 ),
@@ -102,17 +103,14 @@ export default class ExcludeCommand implements BaseCommand {
         priority: 130,
     });
 
-    slashCommands = (): Array<Eris.ApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "exclude",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.exclude.interaction.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: Object.values(GroupAction).map((action) => ({
                 name: action,
-                description: LocalizationManager.localizer.translate(
+                description: LocalizationManager.translate(
                     LocaleType.EN,
                     `command.exclude.interaction.${action}.description`
                 ),
@@ -122,12 +120,11 @@ export default class ExcludeCommand implements BaseCommand {
                         ? []
                         : [...Array(25).keys()].map((x) => ({
                               name: `group_${x + 1}`,
-                              description:
-                                  LocalizationManager.localizer.translate(
-                                      LocaleType.EN,
-                                      `command.exclude.interaction.${action}.perGroupDescription`,
-                                      { ordinalNum: getOrdinalNum(x + 1) }
-                                  ),
+                              description: LocalizationManager.translate(
+                                  LocaleType.EN,
+                                  `command.exclude.interaction.${action}.perGroupDescription`,
+                                  { ordinalNum: getOrdinalNum(x + 1) }
+                              ),
                               type: Eris.Constants.ApplicationCommandOptionTypes
                                   .STRING,
                               autocomplete: true,
@@ -262,11 +259,11 @@ export default class ExcludeCommand implements BaseCommand {
                 await sendErrorMessage(
                     messageContext,
                     {
-                        title: LocalizationManager.localizer.translate(
+                        title: LocalizationManager.translate(
                             messageContext.guildID,
                             "misc.failure.groupsExcludeConflict.title"
                         ),
-                        description: LocalizationManager.localizer.translate(
+                        description: LocalizationManager.translate(
                             messageContext.guildID,
                             "misc.failure.groupsExcludeConflict.description",
                             {
@@ -281,11 +278,10 @@ export default class ExcludeCommand implements BaseCommand {
                                 solutionStepTwo: interaction
                                     ? "`/exclude`"
                                     : `\`${process.env.BOT_PREFIX}exclude\``,
-                                allowOrPrevent:
-                                    LocalizationManager.localizer.translate(
-                                        messageContext.guildID,
-                                        "misc.failure.groupsExcludeConflict.prevent"
-                                    ),
+                                allowOrPrevent: LocalizationManager.translate(
+                                    messageContext.guildID,
+                                    "misc.failure.groupsExcludeConflict.prevent"
+                                ),
                             }
                         ),
                     },
@@ -316,7 +312,7 @@ export default class ExcludeCommand implements BaseCommand {
                     ? "add"
                     : "remove";
 
-                excludeWarning = LocalizationManager.localizer.translate(
+                excludeWarning = LocalizationManager.translate(
                     messageContext.guildID,
                     "misc.warning.addRemoveOrdering.footer",
                     {
@@ -334,7 +330,7 @@ export default class ExcludeCommand implements BaseCommand {
                 );
 
                 if (suggestions.length > 0) {
-                    suggestionsText = LocalizationManager.localizer.translate(
+                    suggestionsText = LocalizationManager.translate(
                         messageContext.guildID,
                         "misc.failure.unrecognizedGroups.didYouMean",
                         {
@@ -352,20 +348,19 @@ export default class ExcludeCommand implements BaseCommand {
                 )}`
             );
 
-            const descriptionText = LocalizationManager.localizer.translate(
+            const descriptionText = LocalizationManager.translate(
                 messageContext.guildID,
                 "misc.failure.unrecognizedGroups.description",
                 {
-                    matchedGroupsAction:
-                        LocalizationManager.localizer.translate(
-                            messageContext.guildID,
-                            "command.exclude.failure.unrecognizedGroups.excluded"
-                        ),
+                    matchedGroupsAction: LocalizationManager.translate(
+                        messageContext.guildID,
+                        "command.exclude.failure.unrecognizedGroups.excluded"
+                    ),
                     helpGroups: interaction
                         ? "`/help groups`"
                         : `\`${process.env.BOT_PREFIX}help groups\``,
                     unmatchedGroups: `${unmatchedGroups.join(", ")}`,
-                    solution: LocalizationManager.localizer.translate(
+                    solution: LocalizationManager.translate(
                         messageContext.guildID,
                         "misc.failure.unrecognizedGroups.solution",
                         {
@@ -380,7 +375,7 @@ export default class ExcludeCommand implements BaseCommand {
             embeds.push({
                 color: EMBED_ERROR_COLOR,
                 author: messageContext.author,
-                title: LocalizationManager.localizer.translate(
+                title: LocalizationManager.translate(
                     messageContext.guildID,
                     "misc.failure.unrecognizedGroups.title"
                 ),

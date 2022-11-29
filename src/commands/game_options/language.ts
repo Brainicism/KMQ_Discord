@@ -14,6 +14,7 @@ import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -40,7 +41,7 @@ export default class LanguageCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "language",
-        description: LocalizationManager.localizer.translate(
+        description: LocalizationManager.translate(
             guildID,
             "command.language.help.description"
         ),
@@ -48,21 +49,21 @@ export default class LanguageCommand implements BaseCommand {
         examples: [
             {
                 example: "`,language korean`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.language.help.example.korean"
                 ),
             },
             {
                 example: "`,language all`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.language.help.example.all"
                 ),
             },
             {
                 example: "`,language`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.language.help.example.reset",
                     { defaultLanguage: `\`${LanguageType.ALL}\`` }
@@ -72,18 +73,15 @@ export default class LanguageCommand implements BaseCommand {
         priority: 150,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "language",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.language.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
                     name: OptionAction.SET,
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         LocaleType.EN,
                         "command.language.help.description"
                     ),
@@ -92,11 +90,10 @@ export default class LanguageCommand implements BaseCommand {
                     options: [
                         {
                             name: "language",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.language.interaction.language"
-                                ),
+                            description: LocalizationManager.translate(
+                                LocaleType.EN,
+                                "command.language.interaction.language"
+                            ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             required: true,
@@ -111,7 +108,7 @@ export default class LanguageCommand implements BaseCommand {
                 },
                 {
                     name: OptionAction.RESET,
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "language" }

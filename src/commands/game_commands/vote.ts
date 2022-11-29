@@ -14,10 +14,10 @@ import {
 } from "../../helpers/discord_utils";
 import { userBonusIsActive } from "../../helpers/game_utils";
 import Eris from "eris";
-import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import dbContext from "../../database_context";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type EmbedPayload from "../../interfaces/embed_payload";
@@ -30,7 +30,7 @@ export default class VoteCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "vote",
-        description: LocalizationManager.localizer.translate(
+        description: LocalizationManager.translate(
             guildID,
             "command.vote.help.description"
         ),
@@ -39,13 +39,10 @@ export default class VoteCommand implements BaseCommand {
         priority: 60,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "vote",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.vote.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
         },
     ];
@@ -72,12 +69,12 @@ export default class VoteCommand implements BaseCommand {
                 ).getTime() /
                 (1000 * 60);
 
-            voteStatusString = LocalizationManager.localizer.translate(
+            voteStatusString = LocalizationManager.translate(
                 messageContext.guildID,
                 "command.vote.timeLeft",
                 {
                     time: bold(
-                        LocalizationManager.localizer.translateN(
+                        LocalizationManager.translateN(
                             messageContext.guildID,
                             "misc.plural.minute",
                             Math.max(Math.ceil(timeRemaining), 0)
@@ -94,7 +91,7 @@ export default class VoteCommand implements BaseCommand {
                     VOTE_BONUS_DURATION
             );
             if (nextVoteTime.getTime() <= Date.now()) {
-                voteStatusString = LocalizationManager.localizer.translate(
+                voteStatusString = LocalizationManager.translate(
                     messageContext.guildID,
                     "command.vote.available"
                 );
@@ -112,11 +109,11 @@ export default class VoteCommand implements BaseCommand {
                 ).getSeconds();
 
                 if (hoursLeft > 0) {
-                    voteStatusString = LocalizationManager.localizer.translate(
+                    voteStatusString = LocalizationManager.translate(
                         messageContext.guildID,
                         "command.vote.unavailable.hours",
                         {
-                            hours: LocalizationManager.localizer.translateN(
+                            hours: LocalizationManager.translateN(
                                 messageContext.guildID,
                                 "misc.plural.hour",
                                 hoursLeft
@@ -124,11 +121,11 @@ export default class VoteCommand implements BaseCommand {
                         }
                     );
                 } else if (minutesLeft > 0) {
-                    voteStatusString = LocalizationManager.localizer.translate(
+                    voteStatusString = LocalizationManager.translate(
                         messageContext.guildID,
                         "command.vote.unavailable.minutes",
                         {
-                            minutes: LocalizationManager.localizer.translateN(
+                            minutes: LocalizationManager.translateN(
                                 messageContext.guildID,
                                 "misc.plural.minute",
                                 minutesLeft
@@ -136,11 +133,11 @@ export default class VoteCommand implements BaseCommand {
                         }
                     );
                 } else {
-                    voteStatusString = LocalizationManager.localizer.translate(
+                    voteStatusString = LocalizationManager.translate(
                         messageContext.guildID,
                         "command.vote.unavailable.seconds",
                         {
-                            seconds: LocalizationManager.localizer.translateN(
+                            seconds: LocalizationManager.translateN(
                                 messageContext.guildID,
                                 "misc.plural.second",
                                 secondsLeft
@@ -150,7 +147,7 @@ export default class VoteCommand implements BaseCommand {
                 }
             }
         } else {
-            voteStatusString = LocalizationManager.localizer.translate(
+            voteStatusString = LocalizationManager.translate(
                 messageContext.guildID,
                 "command.vote.available"
             );
@@ -159,15 +156,15 @@ export default class VoteCommand implements BaseCommand {
         const embedPayload: EmbedPayload = {
             color: boostActive ? EMBED_SUCCESS_BONUS_COLOR : null,
             title: boostActive
-                ? LocalizationManager.localizer.translate(
+                ? LocalizationManager.translate(
                       messageContext.guildID,
                       "command.vote.boost.active"
                   )
-                : LocalizationManager.localizer.translate(
+                : LocalizationManager.translate(
                       messageContext.guildID,
                       "command.vote.boost.inactive"
                   ),
-            description: `${voteStatusString}\n\n${LocalizationManager.localizer.translate(
+            description: `${voteStatusString}\n\n${LocalizationManager.translate(
                 messageContext.guildID,
                 "command.vote.description",
                 {
@@ -186,7 +183,7 @@ export default class VoteCommand implements BaseCommand {
                             style: Eris.Constants.ButtonStyles.LINK,
                             url: VOTE_LINK,
                             emoji: { name: "✅" },
-                            label: LocalizationManager.localizer.translate(
+                            label: LocalizationManager.translate(
                                 messageContext.guildID,
                                 "misc.interaction.vote"
                             ),
@@ -196,7 +193,7 @@ export default class VoteCommand implements BaseCommand {
                             style: Eris.Constants.ButtonStyles.LINK,
                             url: REVIEW_LINK,
                             emoji: { name: "📖" },
-                            label: LocalizationManager.localizer.translate(
+                            label: LocalizationManager.translate(
                                 messageContext.guildID,
                                 "misc.interaction.leaveReview"
                             ),

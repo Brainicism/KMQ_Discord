@@ -122,9 +122,8 @@ function getNodeKeys(node: Node): void {
         getNodeKeys(sourceFile);
     }
 
-    const localizationManager = new LocalizationManager();
     const missingKeys = Array.from(translationKeys).filter(
-        (key) => !localizationManager.hasKey(key)
+        (key) => !LocalizationManager.hasKey(key)
     );
 
     for (const missingKey of missingKeys) {

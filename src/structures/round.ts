@@ -92,7 +92,7 @@ export default abstract class Round {
             return "";
         }
 
-        const uniqueSongMessage = LocalizationManager.localizer.translate(
+        const uniqueSongMessage = LocalizationManager.translate(
             messageContext.guildID,
             "misc.inGame.uniqueSongsPlayed",
             {

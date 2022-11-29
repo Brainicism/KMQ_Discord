@@ -164,11 +164,8 @@ export default class ListeningSession extends Session {
                 await round.interactionSuccessfulSkip();
                 await tryCreateInteractionSuccessAcknowledgement(
                     interaction,
-                    LocalizationManager.localizer.translate(
-                        guildID,
-                        "misc.skip"
-                    ),
-                    LocalizationManager.localizer.translate(
+                    LocalizationManager.translate(guildID, "misc.skip"),
+                    LocalizationManager.translate(
                         guildID,
                         "command.skip.success.description",
                         {
@@ -183,11 +180,11 @@ export default class ListeningSession extends Session {
             } else {
                 tryCreateInteractionSuccessAcknowledgement(
                     interaction,
-                    LocalizationManager.localizer.translate(
+                    LocalizationManager.translate(
                         guildID,
                         "command.skip.vote.title"
                     ),
-                    LocalizationManager.localizer.translate(
+                    LocalizationManager.translate(
                         guildID,
                         "command.skip.vote.description",
                         {

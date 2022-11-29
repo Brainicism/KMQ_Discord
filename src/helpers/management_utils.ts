@@ -55,7 +55,7 @@ export async function warnServersImpendingRestart(
             await sendInfoMessage(
                 new MessageContext(gameSession.textChannelID),
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: LocalizationManager.translate(
                         gameSession.guildID,
                         "misc.restart.title",
                         {
@@ -63,11 +63,11 @@ export async function warnServersImpendingRestart(
                         }
                     ),
                     description: soft
-                        ? LocalizationManager.localizer.translate(
+                        ? LocalizationManager.translate(
                               gameSession.guildID,
                               "misc.restart.description_soft"
                           )
-                        : LocalizationManager.localizer.translate(
+                        : LocalizationManager.translate(
                               gameSession.guildID,
                               "misc.restart.description_hard",
                               {

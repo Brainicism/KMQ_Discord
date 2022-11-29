@@ -58,7 +58,7 @@ export default class RemoveCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "remove",
-        description: LocalizationManager.localizer.translate(
+        description: LocalizationManager.translate(
             guildID,
             "command.remove.help.description",
             {
@@ -67,14 +67,14 @@ export default class RemoveCommand implements BaseCommand {
                 include: `\`${process.env.BOT_PREFIX}include\``,
             }
         ),
-        usage: `,remove [groups | exclude | include] [${LocalizationManager.localizer.translate(
+        usage: `,remove [groups | exclude | include] [${LocalizationManager.translate(
             guildID,
             "misc.listOfGroups"
         )}]`,
         examples: [
             {
                 example: "`,remove groups twice, red velvet`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.remove.help.example.groups",
                     {
@@ -86,7 +86,7 @@ export default class RemoveCommand implements BaseCommand {
             },
             {
                 example: "`,remove exclude BESTie, Dia, iKON`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.remove.help.example.exclude",
                     {
@@ -99,7 +99,7 @@ export default class RemoveCommand implements BaseCommand {
             },
             {
                 example: "`,remove include exo`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: LocalizationManager.translate(
                     guildID,
                     "command.remove.help.example.include",
                     {
@@ -114,7 +114,7 @@ export default class RemoveCommand implements BaseCommand {
                 type: Eris.Constants.ComponentTypes.BUTTON,
                 style: Eris.Constants.ButtonStyles.LINK,
                 url: GROUP_LIST_URL,
-                label: LocalizationManager.localizer.translate(
+                label: LocalizationManager.translate(
                     guildID,
                     "misc.interaction.fullGroupsList"
                 ),
@@ -173,11 +173,11 @@ export default class RemoveCommand implements BaseCommand {
             sendErrorMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: LocalizationManager.translate(
                         messageContext.guildID,
                         "command.remove.failure.noGroupsSelected.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: LocalizationManager.translate(
                         messageContext.guildID,
                         "command.remove.failure.noGroupsSelected.description"
                     ),
@@ -214,7 +214,7 @@ export default class RemoveCommand implements BaseCommand {
                 );
 
                 if (suggestions.length > 0) {
-                    suggestionsText = LocalizationManager.localizer.translate(
+                    suggestionsText = LocalizationManager.translate(
                         messageContext.guildID,
                         "misc.failure.unrecognizedGroups.didYouMean",
                         {
@@ -224,15 +224,14 @@ export default class RemoveCommand implements BaseCommand {
                 }
             }
 
-            const descriptionText = LocalizationManager.localizer.translate(
+            const descriptionText = LocalizationManager.translate(
                 messageContext.guildID,
                 "misc.failure.unrecognizedGroups.description",
                 {
-                    matchedGroupsAction:
-                        LocalizationManager.localizer.translate(
-                            messageContext.guildID,
-                            "command.remove.failure.unrecognizedGroups.removed"
-                        ),
+                    matchedGroupsAction: LocalizationManager.translate(
+                        messageContext.guildID,
+                        "command.remove.failure.unrecognizedGroups.removed"
+                    ),
                     helpGroups: interaction
                         ? "/help groups"
                         : `\`${process.env.BOT_PREFIX}help groups\``,
@@ -244,7 +243,7 @@ export default class RemoveCommand implements BaseCommand {
             embeds.push({
                 color: EMBED_ERROR_COLOR,
                 author: messageContext.author,
-                title: LocalizationManager.localizer.translate(
+                title: LocalizationManager.translate(
                     messageContext.guildID,
                     "misc.failure.unrecognizedGroups.title"
                 ),
