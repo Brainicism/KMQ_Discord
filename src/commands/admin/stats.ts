@@ -11,12 +11,12 @@ import {
     sendInfoMessage,
 } from "../../helpers/discord_utils";
 import Eris from "eris";
-import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
 import dbContext from "../../database_context";
 import i18n from "../../helpers/localization_manager";
 import os from "os";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -32,13 +32,10 @@ export default class StatsCommand implements BaseCommand {
         priority: 1,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "stats",
-            description: i18n.translate(
-                LocaleType.EN,
-                "command.stats.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
         },
     ];
