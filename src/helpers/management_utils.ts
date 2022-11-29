@@ -10,8 +10,8 @@ import {
 import { reloadFactCache } from "../fact_generator";
 import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
 import KmqConfiguration from "../kmq_configuration";
-import LocalizationManager from "./localization_manager";
 import MessageContext from "../structures/message_context";
+import i18n from "./localization_manager";
 
 import { cleanSongName } from "../structures/game_round";
 import State from "../state";
@@ -55,7 +55,7 @@ export async function warnServersImpendingRestart(
             await sendInfoMessage(
                 new MessageContext(gameSession.textChannelID),
                 {
-                    title: LocalizationManager.translate(
+                    title: i18n.translate(
                         gameSession.guildID,
                         "misc.restart.title",
                         {
@@ -63,11 +63,11 @@ export async function warnServersImpendingRestart(
                         }
                     ),
                     description: soft
-                        ? LocalizationManager.translate(
+                        ? i18n.translate(
                               gameSession.guildID,
                               "misc.restart.description_soft"
                           )
-                        : LocalizationManager.translate(
+                        : i18n.translate(
                               gameSession.guildID,
                               "misc.restart.description_hard",
                               {

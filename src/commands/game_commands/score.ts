@@ -2,8 +2,8 @@ import { IPCLogger } from "../../logger";
 import { getDebugLogHeader } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
-import LocalizationManager from "../../helpers/localization_manager";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
 import type { CommandInteraction } from "eris";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type { GuildTextableMessage } from "src/types";
@@ -25,10 +25,7 @@ export default class ScoreCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "score",
-        description: LocalizationManager.translate(
-            guildID,
-            "command.score.help.description"
-        ),
+        description: i18n.translate(guildID, "command.score.help.description"),
         usage: ",score",
         examples: [],
         priority: 50,

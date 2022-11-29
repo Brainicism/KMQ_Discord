@@ -10,9 +10,9 @@ import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -44,18 +44,15 @@ export default class GuessTimeoutCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "timer",
-        description: LocalizationManager.translate(
-            guildID,
-            "command.timer.help.description"
-        ),
-        usage: `,timer [${LocalizationManager.translate(
+        description: i18n.translate(guildID, "command.timer.help.description"),
+        usage: `,timer [${i18n.translate(
             guildID,
             "command.timer.help.usage.seconds"
         )}]`,
         examples: [
             {
                 example: "`,timer 15`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.timer.help.example.set",
                     { timer: String(15) }
@@ -63,7 +60,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
             },
             {
                 example: "`,timer`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.timer.help.example.reset"
                 ),
@@ -80,7 +77,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
             options: [
                 {
                     name: OptionAction.SET,
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.timer.interaction.description"
                     ),
@@ -89,7 +86,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
                     options: [
                         {
                             name: "timer",
-                            description: LocalizationManager.translate(
+                            description: i18n.translate(
                                 LocaleType.EN,
                                 "command.timer.interaction.timer"
                             ),
@@ -103,7 +100,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
                 },
                 {
                     name: OptionAction.RESET,
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "timer" }

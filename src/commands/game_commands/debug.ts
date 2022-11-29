@@ -12,10 +12,10 @@ import {
     sendInfoMessage,
 } from "../../helpers/discord_utils";
 import GuildPreference from "../../structures/guild_preference";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
+import i18n from "../../helpers/localization_manager";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type Eris from "eris";
@@ -83,11 +83,8 @@ export default class DebugCommand implements BaseCommand {
 
         const debugID = uuid.v4();
         await sendInfoMessage(MessageContext.fromMessage(message), {
-            title: LocalizationManager.translate(
-                message.guildID,
-                "command.debug.title"
-            ),
-            description: LocalizationManager.translate(
+            title: i18n.translate(message.guildID, "command.debug.title"),
+            description: i18n.translate(
                 message.guildID,
                 "command.debug.description",
                 {

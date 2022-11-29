@@ -10,9 +10,9 @@ import {
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameType from "../../enums/game_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -28,11 +28,11 @@ async function sendSkipNotification(
     interaction?: Eris.CommandInteraction
 ): Promise<void> {
     const embedPayload = {
-        title: LocalizationManager.translate(
+        title: i18n.translate(
             messageContext.guildID,
             "command.skip.vote.title"
         ),
-        description: LocalizationManager.translate(
+        description: i18n.translate(
             messageContext.guildID,
             "command.skip.vote.description",
             {
@@ -64,11 +64,8 @@ async function sendSkipMessage(
 ): Promise<void> {
     const embedPayload = {
         color: EMBED_SUCCESS_COLOR,
-        title: LocalizationManager.translate(
-            messageContext.guildID,
-            "misc.skip"
-        ),
-        description: LocalizationManager.translate(
+        title: i18n.translate(messageContext.guildID, "misc.skip"),
+        description: i18n.translate(
             messageContext.guildID,
             "command.skip.success.description",
             {
@@ -141,10 +138,7 @@ export default class SkipCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "skip",
-        description: LocalizationManager.translate(
-            guildID,
-            "command.skip.help.description"
-        ),
+        description: i18n.translate(guildID, "command.skip.help.description"),
         usage: ",skip",
         examples: [],
         priority: 1010,
@@ -176,11 +170,11 @@ export default class SkipCommand implements BaseCommand {
             sendErrorMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "misc.failure.round.noneInProgress.title"
                     ),
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "misc.failure.round.noneInProgress.description"
                     ),
@@ -200,11 +194,11 @@ export default class SkipCommand implements BaseCommand {
             await sendErrorMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "command.skip.failure.skipIgnored"
                     ),
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "misc.preCheck.differentVC"
                     ),

@@ -5,9 +5,9 @@ import {
 } from "../../helpers/discord_utils";
 import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -20,7 +20,7 @@ export default class OptionsCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "options",
-        description: LocalizationManager.translate(
+        description: i18n.translate(
             guildID,
             "command.options.help.description"
         ),

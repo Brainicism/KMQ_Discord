@@ -1,6 +1,6 @@
 import { codeLine, friendlyFormattedNumber } from "../helpers/utils";
-import LocalizationManager from "../helpers/localization_manager";
 import State from "../state";
+import i18n from "../helpers/localization_manager";
 import type Eris from "eris";
 import type MessageContext from "./message_context";
 import type PlayerRoundResult from "../interfaces/player_round_result";
@@ -92,7 +92,7 @@ export default abstract class Round {
             return "";
         }
 
-        const uniqueSongMessage = LocalizationManager.translate(
+        const uniqueSongMessage = i18n.translate(
             messageContext.guildID,
             "misc.inGame.uniqueSongsPlayed",
             {

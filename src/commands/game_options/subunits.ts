@@ -10,10 +10,10 @@ import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import SubunitsPreference from "../../enums/option_types/subunit_preference";
+import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -43,7 +43,7 @@ export default class SubunitsCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "subunits",
-        description: LocalizationManager.translate(
+        description: i18n.translate(
             guildID,
             "command.subunits.help.description",
             { groups: `\`${process.env.BOT_PREFIX}groups\`` }
@@ -52,7 +52,7 @@ export default class SubunitsCommand implements BaseCommand {
         examples: [
             {
                 example: "`,subunits include`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.subunits.help.example.include",
                     {
@@ -65,14 +65,14 @@ export default class SubunitsCommand implements BaseCommand {
             },
             {
                 example: "`,subunits exclude`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.subunits.help.example.exclude"
                 ),
             },
             {
                 example: "`,subunits`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.subunits.help.example.reset",
                     { defaultSubunit: `\`${DEFAULT_SUBUNIT_PREFERENCE}\`` }
@@ -90,7 +90,7 @@ export default class SubunitsCommand implements BaseCommand {
             options: [
                 {
                     name: OptionAction.SET,
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.subunits.help.description",
                         {
@@ -102,7 +102,7 @@ export default class SubunitsCommand implements BaseCommand {
                     options: [
                         {
                             name: "subunits",
-                            description: LocalizationManager.translate(
+                            description: i18n.translate(
                                 LocaleType.EN,
                                 "command.subunits.interaction.subunits"
                             ),
@@ -120,7 +120,7 @@ export default class SubunitsCommand implements BaseCommand {
                 },
                 {
                     name: OptionAction.RESET,
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "subunits" }

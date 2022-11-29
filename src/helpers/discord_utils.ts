@@ -40,12 +40,12 @@ import Eris from "eris";
 import GameOption from "../enums/game_option_name";
 import GameType from "../enums/game_type";
 import LocaleType from "../enums/locale_type";
-import LocalizationManager from "./localization_manager";
 import MessageContext from "../structures/message_context";
 import State from "../state";
 import _ from "lodash";
 import axios from "axios";
 import dbContext from "../database_context";
+import i18n from "./localization_manager";
 import type { EmbedGenerator, GuildTextableMessage } from "../types";
 import type { GuildTextableChannel } from "eris";
 import type AutocompleteEntry from "../interfaces/autocomplete_entry";
@@ -115,15 +115,11 @@ function missingPermissionsText(
     guildID: string,
     missingPermissions: string[]
 ): string {
-    return LocalizationManager.translate(
-        guildID,
-        "misc.failure.missingPermissionsText",
-        {
-            missingPermissions: missingPermissions.join(", "),
-            permissionsLink: PERMISSIONS_LINK,
-            helpCommand: `\`${process.env.BOT_PREFIX}help\``,
-        }
-    );
+    return i18n.translate(guildID, "misc.failure.missingPermissionsText", {
+        missingPermissions: missingPermissions.join(", "),
+        permissionsLink: PERMISSIONS_LINK,
+        helpCommand: `\`${process.env.BOT_PREFIX}help\``,
+    });
 }
 
 /**
@@ -256,11 +252,11 @@ export async function textPermissionsCheck(
             )} | Missing SEND_MESSAGES permissions`
         );
         const embed: Eris.EmbedOptions = {
-            title: LocalizationManager.translate(
+            title: i18n.translate(
                 guildID,
                 "misc.failure.missingPermissions.title"
             ),
-            description: LocalizationManager.translate(
+            description: i18n.translate(
                 guildID,
                 "misc.failure.missingPermissions.description",
                 {
@@ -596,11 +592,8 @@ export async function sendInfoMessage(
             `Message was too long. message = ${embedPayload.description}`
         );
         return sendErrorMessage(messageContext, {
-            title: LocalizationManager.translate(
-                messageContext.guildID,
-                "misc.failure.error"
-            ),
-            description: LocalizationManager.translate(
+            title: i18n.translate(messageContext.guildID, "misc.failure.error"),
+            description: i18n.translate(
                 messageContext.guildID,
                 "misc.failure.messageTooLong"
             ),
@@ -660,7 +653,7 @@ export function getFormattedLimit(
         return friendlyFormattedNumber(visibleLimitEnd);
     }
 
-    return LocalizationManager.translate(guildID, "misc.formattedLimit", {
+    return i18n.translate(guildID, "misc.formattedLimit", {
         limitStart: getOrdinalNum(visibleLimitStart),
         limitEnd: getOrdinalNum(visibleLimitEnd),
         songCount: friendlyFormattedNumber(totalSongs.count),
@@ -709,11 +702,11 @@ export async function generateOptionsMessage(
 
     if (totalSongs === null) {
         sendErrorMessage(messageContext, {
-            title: LocalizationManager.translate(
+            title: i18n.translate(
                 guildID,
                 "misc.failure.retrievingSongData.title"
             ),
-            description: LocalizationManager.translate(
+            description: i18n.translate(
                 guildID,
                 "misc.failure.retrievingSongData.description",
                 { helpCommand: `\`${process.env.BOT_PREFIX}help\`` }
@@ -757,13 +750,13 @@ export async function generateOptionsMessage(
             : null;
 
     optionStrings[GameOption.TIMER] = guildPreference.isGuessTimeoutSet()
-        ? LocalizationManager.translate(guildID, "command.options.timer", {
+        ? i18n.translate(guildID, "command.options.timer", {
               timerInSeconds: String(gameOptions.guessTimeout),
           })
         : null;
 
     optionStrings[GameOption.DURATION] = guildPreference.isDurationSet()
-        ? LocalizationManager.translate(guildID, "command.options.duration", {
+        ? i18n.translate(guildID, "command.options.duration", {
               durationInMinutes: String(gameOptions.duration),
           })
         : null;
@@ -776,10 +769,7 @@ export async function generateOptionsMessage(
         ? guildPreference.getDisplayedIncludesGroupNames()
         : null;
 
-    const conflictString = LocalizationManager.translate(
-        guildID,
-        "misc.conflict"
-    );
+    const conflictString = i18n.translate(guildID, "misc.conflict");
 
     const generateConflictingCommandEntry = (
         commandValue: string,
@@ -833,9 +823,7 @@ export async function generateOptionsMessage(
     for (const option of Object.values(GameOption)) {
         optionStrings[option] =
             optionStrings[option] ||
-            italicize(
-                LocalizationManager.translate(guildID, "command.options.notSet")
-            );
+            italicize(i18n.translate(guildID, "command.options.notSet"));
     }
 
     // Underline changed option
@@ -888,7 +876,7 @@ export async function generateOptionsMessage(
 
     let optionsOverview: string;
     if (!isSpotify) {
-        optionsOverview = LocalizationManager.translate(
+        optionsOverview = i18n.translate(
             messageContext.guildID,
             "command.options.overview",
             {
@@ -899,7 +887,7 @@ export async function generateOptionsMessage(
             }
         );
     } else {
-        optionsOverview = LocalizationManager.translate(
+        optionsOverview = i18n.translate(
             messageContext.guildID,
             "command.options.spotify",
             {
@@ -924,7 +912,7 @@ export async function generateOptionsMessage(
     let nonPremiumGameWarning = "";
     if (premiumRequest && session?.isGameSession() && !session?.isPremium) {
         nonPremiumGameWarning = italicize(
-            LocalizationManager.translate(
+            i18n.translate(
                 messageContext.guildID,
                 "command.options.premiumOptionsNonPremiumGame"
             )
@@ -996,13 +984,13 @@ export async function generateOptionsMessage(
         updatedOptions[0] &&
         updatedOptions[0].reset
     ) {
-        footerText = LocalizationManager.translate(
+        footerText = i18n.translate(
             messageContext.guildID,
             "command.options.perCommandHelp",
             { helpCommand: `${process.env.BOT_PREFIX}help` }
         );
     } else if (session?.isListeningSession()) {
-        footerText = LocalizationManager.translate(
+        footerText = i18n.translate(
             messageContext.guildID,
             "command.options.listeningSessionNotAvailable"
         );
@@ -1010,13 +998,10 @@ export async function generateOptionsMessage(
 
     let title = "";
     if (updatedOptions === null || allReset) {
-        title = LocalizationManager.translate(
-            messageContext.guildID,
-            "command.options.title"
-        );
+        title = i18n.translate(messageContext.guildID, "command.options.title");
     } else {
         if (preset) {
-            title = LocalizationManager.translate(
+            title = i18n.translate(
                 messageContext.guildID,
                 "command.options.preset"
             );
@@ -1026,12 +1011,12 @@ export async function generateOptionsMessage(
 
         title =
             updatedOptions[0] && updatedOptions[0].reset
-                ? LocalizationManager.translate(
+                ? i18n.translate(
                       messageContext.guildID,
                       "command.options.reset",
                       { presetOrOption: title }
                   )
-                : LocalizationManager.translate(
+                : i18n.translate(
                       messageContext.guildID,
                       "command.options.updated",
                       { presetOrOption: title }
@@ -1112,7 +1097,7 @@ export async function getGameInfoMessage(
 
     // deprecated case, where message's translation key is stored as message in db
     if (endGameMessage.message.startsWith("misc.gameMessages")) {
-        endGameMessage.message = LocalizationManager.translate(
+        endGameMessage.message = i18n.translate(
             guildID,
             endGameMessage.message
         );
@@ -1142,10 +1127,7 @@ export async function getGameInfoMessage(
 
     // deprecated case, where title's translation key is stored as message in db
     if (endGameMessage.title.startsWith("misc.gameMessages")) {
-        endGameMessage.title = LocalizationManager.translate(
-            guildID,
-            endGameMessage.title
-        );
+        endGameMessage.title = i18n.translate(guildID, endGameMessage.title);
     } else {
         try {
             const gameInfoMessageContent: GameMessageMultiLocaleContent =
@@ -1348,7 +1330,7 @@ export function voicePermissionsCheck(
         sendErrorMessage(
             messageContext,
             {
-                title: LocalizationManager.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "misc.failure.missingPermissions.title"
                 ),
@@ -1370,11 +1352,11 @@ export function voicePermissionsCheck(
     if (channelFull) {
         logger.warn(`${getDebugLogHeader(messageContext)} | Channel full`);
         sendInfoMessage(messageContext, {
-            title: LocalizationManager.translate(
+            title: i18n.translate(
                 messageContext.guildID,
                 "misc.failure.vcFull.title"
             ),
-            description: LocalizationManager.translate(
+            description: i18n.translate(
                 messageContext.guildID,
                 "misc.failure.vcFull.description"
             ),
@@ -1391,11 +1373,11 @@ export function voicePermissionsCheck(
         );
 
         sendInfoMessage(messageContext, {
-            title: LocalizationManager.translate(
+            title: i18n.translate(
                 messageContext.guildID,
                 "misc.failure.afkChannel.title"
             ),
-            description: LocalizationManager.translate(
+            description: i18n.translate(
                 messageContext.guildID,
                 "misc.failure.afkChannel.description"
             ),
@@ -1506,10 +1488,9 @@ export async function sendBookmarkedSongs(
             )} (${standardDateFormat(bookmarkedSong[1].song.publishDate)})`,
             value: `[${friendlyFormattedNumber(
                 bookmarkedSong[1].song.views
-            )} ${LocalizationManager.translate(
-                guildID,
-                "misc.views"
-            )}](https://youtu.be/${bookmarkedSong[1].song.youtubeLink})`,
+            )} ${i18n.translate(guildID, "misc.views")}](https://youtu.be/${
+                bookmarkedSong[1].song.youtubeLink
+            })`,
             inline: false,
         }));
 
@@ -1520,14 +1501,14 @@ export async function sendBookmarkedSongs(
                     icon_url: KmqImages.READING_BOOK,
                 },
                 title: bold(
-                    LocalizationManager.translate(
+                    i18n.translate(
                         guildID,
                         "misc.interaction.bookmarked.message.title"
                     )
                 ),
                 fields,
                 footer: {
-                    text: LocalizationManager.translate(
+                    text: i18n.translate(
                         guildID,
                         "misc.interaction.bookmarked.message.playedOn",
                         { date: standardDateFormat(new Date()) }
@@ -1681,7 +1662,7 @@ export async function tryCreateInteractionErrorAcknowledgement(
                     title:
                         title ||
                         bold(
-                            LocalizationManager.translate(
+                            i18n.translate(
                                 interaction.guildID,
                                 "misc.interaction.title.failure"
                             )

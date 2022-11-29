@@ -11,9 +11,9 @@ import GameOption from "../../enums/game_option_name";
 import GuessModeType from "../../enums/option_types/guess_mode_type";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -43,7 +43,7 @@ export default class GuessModeCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "guessmode",
-        description: LocalizationManager.translate(
+        description: i18n.translate(
             guildID,
             "command.guessmode.help.description"
         ),
@@ -51,28 +51,28 @@ export default class GuessModeCommand implements BaseCommand {
         examples: [
             {
                 example: "`,guessmode song`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.guessmode.help.example.song"
                 ),
             },
             {
                 example: "`,guessmode artist`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.guessmode.help.example.artist"
                 ),
             },
             {
                 example: "`,guessmode both`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.guessmode.help.example.both"
                 ),
             },
             {
                 example: "`,guessmode`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.guessmode.help.example.reset",
                     {
@@ -92,7 +92,7 @@ export default class GuessModeCommand implements BaseCommand {
             options: [
                 {
                     name: OptionAction.SET,
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.guessmode.help.description"
                     ),
@@ -101,7 +101,7 @@ export default class GuessModeCommand implements BaseCommand {
                     options: [
                         {
                             name: "guessmode",
-                            description: LocalizationManager.translate(
+                            description: i18n.translate(
                                 LocaleType.EN,
                                 "command.guessmode.interaction.guessMode"
                             ),
@@ -119,7 +119,7 @@ export default class GuessModeCommand implements BaseCommand {
                 },
                 {
                     name: OptionAction.RESET,
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "guess mode" }

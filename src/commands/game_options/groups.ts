@@ -21,11 +21,11 @@ import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import RemoveCommand, { RemoveType } from "./remove";
 import Session from "../../structures/session";
 import State from "../../state";
+import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -45,7 +45,7 @@ export default class GroupsCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "groups",
-        description: LocalizationManager.translate(
+        description: i18n.translate(
             guildID,
             "command.groups.help.description",
             {
@@ -56,7 +56,7 @@ export default class GroupsCommand implements BaseCommand {
         examples: [
             {
                 example: "`,groups blackpink`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.groups.help.example.singleGroup",
                     {
@@ -66,7 +66,7 @@ export default class GroupsCommand implements BaseCommand {
             },
             {
                 example: "`,groups blackpink, bts, red velvet`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.groups.help.example.multipleGroups",
                     {
@@ -78,7 +78,7 @@ export default class GroupsCommand implements BaseCommand {
             },
             {
                 example: "`,groups`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.groups.help.example.reset"
                 ),
@@ -89,7 +89,7 @@ export default class GroupsCommand implements BaseCommand {
                 type: Eris.Constants.ComponentTypes.BUTTON,
                 style: Eris.Constants.ButtonStyles.LINK,
                 url: GROUP_LIST_URL,
-                label: LocalizationManager.translate(
+                label: i18n.translate(
                     guildID,
                     "misc.interaction.fullGroupsList"
                 ),
@@ -105,7 +105,7 @@ export default class GroupsCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: Object.values(GroupAction).map((action) => ({
                 name: action,
-                description: LocalizationManager.translate(
+                description: i18n.translate(
                     LocaleType.EN,
                     `command.groups.interaction.${action}.description`
                 ),
@@ -115,7 +115,7 @@ export default class GroupsCommand implements BaseCommand {
                         ? []
                         : [...Array(25).keys()].map((x) => ({
                               name: `group_${x + 1}`,
-                              description: LocalizationManager.translate(
+                              description: i18n.translate(
                                   LocaleType.EN,
                                   `command.groups.interaction.${action}.perGroupDescription`,
                                   { ordinalNum: getOrdinalNum(x + 1) }
@@ -196,11 +196,11 @@ export default class GroupsCommand implements BaseCommand {
                 sendErrorMessage(
                     messageContext,
                     {
-                        title: LocalizationManager.translate(
+                        title: i18n.translate(
                             messageContext.guildID,
                             "misc.failure.groupsExcludeConflict.title"
                         ),
-                        description: LocalizationManager.translate(
+                        description: i18n.translate(
                             messageContext.guildID,
                             "misc.failure.groupsExcludeConflict.description",
                             {
@@ -215,7 +215,7 @@ export default class GroupsCommand implements BaseCommand {
                                 solutionStepTwo: interaction
                                     ? "`/groups`"
                                     : `\`${process.env.BOT_PREFIX}groups\``,
-                                allowOrPrevent: LocalizationManager.translate(
+                                allowOrPrevent: i18n.translate(
                                     messageContext.guildID,
                                     "misc.failure.groupsExcludeConflict.allow"
                                 ),
@@ -249,7 +249,7 @@ export default class GroupsCommand implements BaseCommand {
                     ? "add"
                     : "remove";
 
-                groupsWarning = LocalizationManager.translate(
+                groupsWarning = i18n.translate(
                     messageContext.guildID,
                     "misc.warning.addRemoveOrdering.footer",
                     {
@@ -267,7 +267,7 @@ export default class GroupsCommand implements BaseCommand {
                 );
 
                 if (suggestions.length > 0) {
-                    suggestionsText = LocalizationManager.translate(
+                    suggestionsText = i18n.translate(
                         messageContext.guildID,
                         "misc.failure.unrecognizedGroups.didYouMean",
                         {
@@ -277,11 +277,11 @@ export default class GroupsCommand implements BaseCommand {
                 }
             }
 
-            const descriptionText = LocalizationManager.translate(
+            const descriptionText = i18n.translate(
                 messageContext.guildID,
                 "misc.failure.unrecognizedGroups.description",
                 {
-                    matchedGroupsAction: LocalizationManager.translate(
+                    matchedGroupsAction: i18n.translate(
                         messageContext.guildID,
                         "misc.failure.unrecognizedGroups.added"
                     ),
@@ -289,7 +289,7 @@ export default class GroupsCommand implements BaseCommand {
                         ? "`/help groups`"
                         : `\`${process.env.BOT_PREFIX}help groups\``,
                     unmatchedGroups: unmatchedGroups.join(", "),
-                    solution: LocalizationManager.translate(
+                    solution: i18n.translate(
                         messageContext.guildID,
                         "misc.failure.unrecognizedGroups.solution",
                         {
@@ -302,7 +302,7 @@ export default class GroupsCommand implements BaseCommand {
             );
 
             embeds.push({
-                title: LocalizationManager.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "misc.failure.unrecognizedGroups.title"
                 ),

@@ -5,10 +5,10 @@ import {
     sendInfoMessage,
 } from "../../helpers/discord_utils";
 import Eris from "eris";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
 import fs from "fs";
+import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -21,10 +21,7 @@ export default class NewsCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "news",
-        description: LocalizationManager.translate(
-            guildID,
-            "command.news.help.description"
-        ),
+        description: i18n.translate(guildID, "command.news.help.description"),
         usage: ",news",
         examples: [],
         priority: 10,
@@ -57,13 +54,13 @@ export default class NewsCommand implements BaseCommand {
         await sendInfoMessage(
             messageContext,
             {
-                title: LocalizationManager.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "command.news.updates.title"
                 ),
                 description: newsData,
                 thumbnailUrl: KmqImages.READING_BOOK,
-                footerText: `${State.version} | ${LocalizationManager.translate(
+                footerText: `${State.version} | ${i18n.translate(
                     messageContext.guildID,
                     "command.news.updates.footer"
                 )}`,
@@ -76,7 +73,7 @@ export default class NewsCommand implements BaseCommand {
                                 url: "https://discord.gg/gDdVXvqVUr",
                                 type: 2,
                                 emoji: { name: "🎵" },
-                                label: LocalizationManager.translate(
+                                label: i18n.translate(
                                     messageContext.guildID,
                                     "misc.interaction.officialKmqServer"
                                 ),

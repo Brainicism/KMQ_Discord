@@ -10,10 +10,10 @@ import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import MultiGuessType from "../../enums/option_types/multiguess_type";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -40,7 +40,7 @@ export default class MultiGuessCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "multiguess",
-        description: LocalizationManager.translate(
+        description: i18n.translate(
             guildID,
             "command.multiguess.help.description",
             { on: `\`${MultiGuessType.ON}\`` }
@@ -49,21 +49,21 @@ export default class MultiGuessCommand implements BaseCommand {
         examples: [
             {
                 example: "`,multiguess on`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.multiguess.help.example.on"
                 ),
             },
             {
                 example: "`,multiguess off`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.multiguess.help.example.off"
                 ),
             },
             {
                 example: "`,multiguess`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.multiguess.help.example.reset",
                     { defaultMultiguess: `\`${DEFAULT_MULTIGUESS_TYPE}\`` }
@@ -81,7 +81,7 @@ export default class MultiGuessCommand implements BaseCommand {
             options: [
                 {
                     name: OptionAction.SET,
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.multiguess.interaction.description"
                     ),
@@ -90,7 +90,7 @@ export default class MultiGuessCommand implements BaseCommand {
                     options: [
                         {
                             name: "multiguess",
-                            description: LocalizationManager.translate(
+                            description: i18n.translate(
                                 LocaleType.EN,
                                 "command.multiguess.interaction.multiguess"
                             ),
@@ -108,7 +108,7 @@ export default class MultiGuessCommand implements BaseCommand {
                 },
                 {
                     name: OptionAction.RESET,
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "multiguess" }

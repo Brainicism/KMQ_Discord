@@ -10,10 +10,10 @@ import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import SeekType from "../../enums/option_types/seek_type";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -41,36 +41,33 @@ export default class SeekCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "seek",
-        description: LocalizationManager.translate(
-            guildID,
-            "command.seek.help.description"
-        ),
+        description: i18n.translate(guildID, "command.seek.help.description"),
         usage: ",seek [beginning | middle | random]",
         examples: [
             {
                 example: "`,seek random`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.seek.help.example.random"
                 ),
             },
             {
                 example: "`,seek middle`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.seek.help.example.middle"
                 ),
             },
             {
                 example: "`,seek beginning`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.seek.help.example.beginning"
                 ),
             },
             {
                 example: "`,seek`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.seek.help.example.reset",
                     {
@@ -90,7 +87,7 @@ export default class SeekCommand implements BaseCommand {
             options: [
                 {
                     name: OptionAction.SET,
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.seek.help.description"
                     ),
@@ -99,7 +96,7 @@ export default class SeekCommand implements BaseCommand {
                     options: [
                         {
                             name: "seek",
-                            description: LocalizationManager.translate(
+                            description: i18n.translate(
                                 LocaleType.EN,
                                 "command.seek.interaction.seek"
                             ),
@@ -117,7 +114,7 @@ export default class SeekCommand implements BaseCommand {
                 },
                 {
                     name: OptionAction.RESET,
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "seek" }

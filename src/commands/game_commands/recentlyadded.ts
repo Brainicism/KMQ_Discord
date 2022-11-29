@@ -16,10 +16,10 @@ import {
 } from "../../helpers/game_utils";
 import Eris from "eris";
 import KmqMember from "../../structures/kmq_member";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
 import dbContext from "../../database_context";
+import i18n from "../../helpers/localization_manager";
 import type { CommandInteraction, EmbedOptions } from "eris";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type { GuildTextableMessage } from "../../types";
@@ -37,7 +37,7 @@ export default class RecentlyAddedCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "recentlyadded",
-        description: LocalizationManager.translate(
+        description: i18n.translate(
             guildID,
             "command.recentlyadded.help.description"
         ),
@@ -45,7 +45,7 @@ export default class RecentlyAddedCommand implements BaseCommand {
         examples: [
             {
                 example: "`,recentlyadded`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.recentlyadded.help.example"
                 ),
@@ -99,11 +99,11 @@ export default class RecentlyAddedCommand implements BaseCommand {
             sendInfoMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "command.recentlyadded.failure.noSongs.title"
                     ),
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "command.recentlyadded.failure.noSongs.description"
                     ),
@@ -125,14 +125,12 @@ export default class RecentlyAddedCommand implements BaseCommand {
                 song,
                 locale
             )}" - ${getLocalizedArtistName(song, locale)}`,
-            value: `${LocalizationManager.translate(
+            value: `${i18n.translate(
                 messageContext.guildID,
                 "command.recentlyadded.released"
             )} ${standardDateFormat(
                 song.publishDate
-            )}\n[${friendlyFormattedNumber(
-                song.views
-            )} ${LocalizationManager.translate(
+            )}\n[${friendlyFormattedNumber(song.views)} ${i18n.translate(
                 messageContext.guildID,
                 "misc.views"
             )}](https://youtu.be/${song.youtubeLink})`,
@@ -142,11 +140,11 @@ export default class RecentlyAddedCommand implements BaseCommand {
         const embedFieldSubsets = chunkArray(fields, FIELDS_PER_EMBED);
         const embeds: Array<EmbedOptions> = embedFieldSubsets.map(
             (embedFieldsSubset) => ({
-                title: LocalizationManager.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "command.recentlyadded.title"
                 ),
-                description: LocalizationManager.translate(
+                description: i18n.translate(
                     messageContext.guildID,
                     "command.recentlyadded.description"
                 ),

@@ -18,10 +18,10 @@ import ExpBonusModifier from "../../enums/exp_bonus_modifier";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import ShuffleType from "../../enums/option_types/shuffle_type";
+import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -52,7 +52,7 @@ export default class ShuffleCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "shuffle",
-        description: LocalizationManager.translate(
+        description: i18n.translate(
             guildID,
             "command.shuffle.help.description",
             {
@@ -63,14 +63,14 @@ export default class ShuffleCommand implements BaseCommand {
         examples: [
             {
                 example: "`,shuffle random`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.shuffle.help.example.random"
                 ),
             },
             {
                 example: "`,shuffle popularity`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.shuffle.help.example.popularity",
                     {
@@ -84,7 +84,7 @@ export default class ShuffleCommand implements BaseCommand {
             },
             {
                 example: "`,shuffle`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.shuffle.help.example.reset",
                     { defaultShuffle: `\`${DEFAULT_SHUFFLE}\`` }
@@ -102,7 +102,7 @@ export default class ShuffleCommand implements BaseCommand {
             options: [
                 {
                     name: OptionAction.SET,
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.shuffle.help.description"
                     ),
@@ -111,7 +111,7 @@ export default class ShuffleCommand implements BaseCommand {
                     options: [
                         {
                             name: "shuffle",
-                            description: LocalizationManager.translate(
+                            description: i18n.translate(
                                 LocaleType.EN,
                                 "command.shuffle.interaction.shuffle"
                             ),
@@ -129,7 +129,7 @@ export default class ShuffleCommand implements BaseCommand {
                 },
                 {
                     name: OptionAction.RESET,
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "shuffle" }
@@ -178,11 +178,11 @@ export default class ShuffleCommand implements BaseCommand {
                 );
 
                 const embedPayload: EmbedPayload = {
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "command.premium.option.description"
                     ),
-                    title: LocalizationManager.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "command.premium.option.title"
                     ),

@@ -12,9 +12,9 @@ import GameOption from "../../enums/game_option_name";
 import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -43,18 +43,15 @@ export default class GoalCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "goal",
-        description: LocalizationManager.translate(
-            guildID,
-            "command.goal.help.description"
-        ),
-        usage: `,goal [${LocalizationManager.translate(
+        description: i18n.translate(guildID, "command.goal.help.description"),
+        usage: `,goal [${i18n.translate(
             guildID,
             "command.goal.help.usage.points"
         )}]`,
         examples: [
             {
                 example: "`,goal 30`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.goal.help.example.set",
                     { goal: String(30) }
@@ -62,7 +59,7 @@ export default class GoalCommand implements BaseCommand {
             },
             {
                 example: "`,goal`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.goal.help.example.reset"
                 ),
@@ -79,7 +76,7 @@ export default class GoalCommand implements BaseCommand {
             options: [
                 {
                     name: OptionAction.SET,
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.goal.interaction.description"
                     ),
@@ -88,7 +85,7 @@ export default class GoalCommand implements BaseCommand {
                     options: [
                         {
                             name: "goal",
-                            description: LocalizationManager.translate(
+                            description: i18n.translate(
                                 LocaleType.EN,
                                 "command.goal.interaction.goal"
                             ),
@@ -101,7 +98,7 @@ export default class GoalCommand implements BaseCommand {
                 },
                 {
                     name: OptionAction.RESET,
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "goal" }
@@ -158,11 +155,11 @@ export default class GoalCommand implements BaseCommand {
                 sendErrorMessage(
                     messageContext,
                     {
-                        title: LocalizationManager.translate(
+                        title: i18n.translate(
                             messageContext.guildID,
                             "command.goal.failure.goalExceeded.title"
                         ),
-                        description: LocalizationManager.translate(
+                        description: i18n.translate(
                             messageContext.guildID,
                             "command.goal.failure.goalExceeded.description"
                         ),
@@ -184,11 +181,11 @@ export default class GoalCommand implements BaseCommand {
                 sendErrorMessage(
                     messageContext,
                     {
-                        title: LocalizationManager.translate(
+                        title: i18n.translate(
                             messageContext.guildID,
                             "misc.failure.gameOptionConflict.title"
                         ),
-                        description: LocalizationManager.translate(
+                        description: i18n.translate(
                             messageContext.guildID,
                             "command.goal.failure.gameOptionConflict.description",
                             {

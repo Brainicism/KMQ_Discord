@@ -3,7 +3,7 @@ import {
     SCOREBOARD_FIELD_CUTOFF,
 } from "../constants";
 import { bold, friendlyFormattedNumber, getMention } from "../helpers/utils";
-import LocalizationManager from "../helpers/localization_manager";
+import i18n from "../helpers/localization_manager";
 import type GuildPreference from "./guild_preference";
 import type Player from "./player";
 import type SuccessfulGuessResult from "../interfaces/success_guess_result";
@@ -39,17 +39,13 @@ export default class Scoreboard {
         let winnerStr = "";
 
         if (this.firstPlace.length === 1) {
-            return LocalizationManager.translate(
-                guildID,
-                "misc.inGame.winMessage",
-                {
-                    playerName: this.firstPlace[0].getDisplayedName(
-                        false,
-                        false,
-                        false
-                    ),
-                }
-            );
+            return i18n.translate(guildID, "misc.inGame.winMessage", {
+                playerName: this.firstPlace[0].getDisplayedName(
+                    false,
+                    false,
+                    false
+                ),
+            });
         }
 
         for (let i = 0; i < this.firstPlace.length; i++) {
@@ -309,10 +305,7 @@ export default class Scoreboard {
         return [
             {
                 name: bold(
-                    LocalizationManager.translate(
-                        guildID,
-                        "command.score.scoreboardTitle"
-                    )
+                    i18n.translate(guildID, "command.score.scoreboardTitle")
                 ),
                 value: players
                     .slice(0, Math.ceil(players.length / 3))

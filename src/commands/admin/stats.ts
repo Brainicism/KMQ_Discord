@@ -12,10 +12,10 @@ import {
 } from "../../helpers/discord_utils";
 import Eris from "eris";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
 import dbContext from "../../database_context";
+import i18n from "../../helpers/localization_manager";
 import os from "os";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -26,10 +26,7 @@ const logger = new IPCLogger("stats");
 export default class StatsCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "stats",
-        description: LocalizationManager.translate(
-            guildID,
-            "command.stats.help.description"
-        ),
+        description: i18n.translate(guildID, "command.stats.help.description"),
         usage: ",stats",
         examples: [],
         priority: 1,
@@ -38,7 +35,7 @@ export default class StatsCommand implements BaseCommand {
     slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
         {
             name: "stats",
-            description: LocalizationManager.translate(
+            description: i18n.translate(
                 LocaleType.EN,
                 "command.stats.help.description"
             ),
@@ -66,11 +63,11 @@ export default class StatsCommand implements BaseCommand {
         } catch (e) {
             logger.error(`Error retrieving stats via IPC. err = ${e}`);
             sendErrorMessage(messageContext, {
-                title: LocalizationManager.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "command.stats.failure.title"
                 ),
-                description: LocalizationManager.translate(
+                description: i18n.translate(
                     messageContext.guildID,
                     "command.stats.failure.description"
                 ),
@@ -159,33 +156,33 @@ export default class StatsCommand implements BaseCommand {
         )["stat_value"];
 
         const gameStatistics = {
-            [LocalizationManager.translate(
+            [i18n.translate(
                 messageContext.guildID,
                 "command.stats.game.activeGameSessions"
             )]: activeGameSessions,
-            [LocalizationManager.translate(
+            [i18n.translate(
                 messageContext.guildID,
                 "command.stats.game.activePlayers"
             )]: activePlayers,
-            [LocalizationManager.translate(
+            [i18n.translate(
                 messageContext.guildID,
                 "command.stats.game.recentGameSessions"
             )]: `${friendlyFormattedNumber(
                 Number(recentGameSessions)
             )} | ${friendlyFormattedNumber(Number(totalGameSessions))}`,
-            [LocalizationManager.translate(
+            [i18n.translate(
                 messageContext.guildID,
                 "command.stats.game.recentGameRounds"
             )]: `${friendlyFormattedNumber(
                 recentGameRounds
             )} | ${friendlyFormattedNumber(totalGameRounds)}`,
-            [LocalizationManager.translate(
+            [i18n.translate(
                 messageContext.guildID,
                 "command.stats.game.recentPlayers"
             )]: `${friendlyFormattedNumber(
                 Number(recentPlayers)
             )} | ${friendlyFormattedNumber(Number(totalPlayers))}`,
-            [LocalizationManager.translate(
+            [i18n.translate(
                 messageContext.guildID,
                 "command.stats.game.latestSongUpdate"
             )]: friendlyFormattedDate(
@@ -197,18 +194,18 @@ export default class StatsCommand implements BaseCommand {
         const guild = State.client.guilds.get(guildID);
 
         const systemStatistics = {
-            [LocalizationManager.translate(
+            [i18n.translate(
                 messageContext.guildID,
                 "command.stats.system.loadAverage"
             )]: os
                 .loadavg()
                 .map((x) => x.toFixed(2))
                 .toString(),
-            [LocalizationManager.translate(
+            [i18n.translate(
                 messageContext.guildID,
                 "command.stats.system.memoryUsage"
             )]: `${fleetStats.totalRam.toFixed(2)} MB`,
-            [LocalizationManager.translate(
+            [i18n.translate(
                 messageContext.guildID,
                 "command.stats.system.apiLatency"
             )]: `${
@@ -216,18 +213,18 @@ export default class StatsCommand implements BaseCommand {
                     ? "?"
                     : guild.shard.latency
             } ms`,
-            [LocalizationManager.translate(
+            [i18n.translate(
                 messageContext.guildID,
                 "command.stats.system.requestLatency"
             )]: `${requestLatency} ms`,
-            [LocalizationManager.translate(
+            [i18n.translate(
                 messageContext.guildID,
                 "command.stats.system.databaseLatency"
             )]: `${mysqlLatency.toFixed(2)} ms`,
-            [LocalizationManager.translate(
+            [i18n.translate(
                 messageContext.guildID,
                 "command.stats.system.uptime"
-            )]: LocalizationManager.translateN(
+            )]: i18n.translateN(
                 messageContext.guildID,
                 "misc.plural.hour",
                 Number((process.uptime() / (60 * 60)).toFixed(2))
@@ -236,7 +233,7 @@ export default class StatsCommand implements BaseCommand {
 
         const fields: Array<Eris.EmbedField> = [
             {
-                name: LocalizationManager.translate(
+                name: i18n.translate(
                     messageContext.guildID,
                     "command.stats.game.title"
                 ),
@@ -245,7 +242,7 @@ export default class StatsCommand implements BaseCommand {
                     .join("\n")}\`\`\``,
             },
             {
-                name: LocalizationManager.translate(
+                name: i18n.translate(
                     messageContext.guildID,
                     "command.stats.system.title"
                 ),
@@ -258,11 +255,11 @@ export default class StatsCommand implements BaseCommand {
         logger.info(`${getDebugLogHeader(messageContext)} | Stats retrieved`);
 
         const embedPayload = {
-            title: LocalizationManager.translate(
+            title: i18n.translate(
                 messageContext.guildID,
                 "command.stats.title"
             ),
-            description: LocalizationManager.translate(
+            description: i18n.translate(
                 messageContext.guildID,
                 "command.stats.description",
                 {
@@ -270,7 +267,7 @@ export default class StatsCommand implements BaseCommand {
                 }
             ),
             fields,
-            footerText: `${State.version} | ${LocalizationManager.translate(
+            footerText: `${State.version} | ${i18n.translate(
                 messageContext.guildID,
                 "command.stats.footer"
             )}`,

@@ -10,10 +10,10 @@ import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import OstPreference from "../../enums/option_types/ost_preference";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -43,36 +43,33 @@ export default class OstCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "ost",
-        description: LocalizationManager.translate(
-            guildID,
-            "command.ost.help.description"
-        ),
+        description: i18n.translate(guildID, "command.ost.help.description"),
         usage: ",ost [include | exclude | exclusive]",
         examples: [
             {
                 example: "`,ost include`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.ost.help.example.include"
                 ),
             },
             {
                 example: "`,ost exclude`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.ost.help.example.exclude"
                 ),
             },
             {
                 example: "`,ost exclusive`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.ost.help.example.exclusive"
                 ),
             },
             {
                 example: "`,ost`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.ost.help.example.reset",
                     { defaultOst: `\`${DEFAULT_OST_PREFERENCE}\`` }
@@ -90,7 +87,7 @@ export default class OstCommand implements BaseCommand {
             options: [
                 {
                     name: OptionAction.SET,
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.ost.help.description"
                     ),
@@ -99,7 +96,7 @@ export default class OstCommand implements BaseCommand {
                     options: [
                         {
                             name: "ost",
-                            description: LocalizationManager.translate(
+                            description: i18n.translate(
                                 LocaleType.EN,
                                 "command.ost.interaction.ost"
                             ),
@@ -117,7 +114,7 @@ export default class OstCommand implements BaseCommand {
                 },
                 {
                     name: OptionAction.RESET,
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "ost" }

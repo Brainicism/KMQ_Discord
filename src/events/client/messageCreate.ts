@@ -7,10 +7,10 @@ import {
 } from "../../helpers/discord_utils";
 import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
+import i18n from "../../helpers/localization_manager";
 import validate from "../../helpers/validate";
 import type { GuildTextableMessage } from "../../types";
 import type ParsedMessage from "../../interfaces/parsed_message";
@@ -147,11 +147,11 @@ export default async function messageCreateHandler(
                 }
 
                 sendErrorMessage(messageContext, {
-                    title: LocalizationManager.translate(
+                    title: i18n.translate(
                         message.guildID,
                         "misc.failure.command.title"
                     ),
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         message.guildID,
                         "misc.failure.command.description",
                         { debugId }

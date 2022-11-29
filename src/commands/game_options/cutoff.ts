@@ -15,9 +15,9 @@ import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -57,15 +57,12 @@ export default class CutoffCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "cutoff",
-        description: LocalizationManager.translate(
-            guildID,
-            "command.cutoff.help.description"
-        ),
+        description: i18n.translate(guildID, "command.cutoff.help.description"),
         usage: ",cutoff [year_start] {year_end}",
         examples: [
             {
                 example: "`,cutoff 2015`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.cutoff.help.example.singleCutoff",
                     {
@@ -75,7 +72,7 @@ export default class CutoffCommand implements BaseCommand {
             },
             {
                 example: "`,cutoff 2015 2018`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.cutoff.help.example.twoCutoffs",
                     {
@@ -86,7 +83,7 @@ export default class CutoffCommand implements BaseCommand {
             },
             {
                 example: "`,cutoff`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.cutoff.help.example.reset",
                     {
@@ -111,7 +108,7 @@ export default class CutoffCommand implements BaseCommand {
             options: [
                 {
                     name: OptionAction.SET,
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.cutoff.interaction.description"
                     ),
@@ -120,7 +117,7 @@ export default class CutoffCommand implements BaseCommand {
                     options: [
                         {
                             name: CutoffAppCommandAction.EARLIEST,
-                            description: LocalizationManager.translate(
+                            description: i18n.translate(
                                 LocaleType.EN,
                                 "command.cutoff.interaction.earliestOption"
                             ),
@@ -129,7 +126,7 @@ export default class CutoffCommand implements BaseCommand {
                             options: [
                                 {
                                     name: "beginning_year",
-                                    description: LocalizationManager.translate(
+                                    description: i18n.translate(
                                         LocaleType.EN,
                                         "command.cutoff.interaction.beginningYear"
                                     ),
@@ -143,7 +140,7 @@ export default class CutoffCommand implements BaseCommand {
                         },
                         {
                             name: CutoffAppCommandAction.RANGE,
-                            description: LocalizationManager.translate(
+                            description: i18n.translate(
                                 LocaleType.EN,
                                 "command.cutoff.interaction.rangeOption"
                             ),
@@ -152,7 +149,7 @@ export default class CutoffCommand implements BaseCommand {
                             options: [
                                 {
                                     name: "beginning_year",
-                                    description: LocalizationManager.translate(
+                                    description: i18n.translate(
                                         LocaleType.EN,
                                         "command.cutoff.interaction.beginningYear"
                                     ),
@@ -164,7 +161,7 @@ export default class CutoffCommand implements BaseCommand {
                                 } as any,
                                 {
                                     name: "ending_year",
-                                    description: LocalizationManager.translate(
+                                    description: i18n.translate(
                                         LocaleType.EN,
                                         "command.cutoff.interaction.endingYear"
                                     ),
@@ -180,7 +177,7 @@ export default class CutoffCommand implements BaseCommand {
                 },
                 {
                     name: OptionAction.RESET,
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "cutoff" }
@@ -260,11 +257,11 @@ export default class CutoffCommand implements BaseCommand {
                 await sendErrorMessage(
                     messageContext,
                     {
-                        title: LocalizationManager.translate(
+                        title: i18n.translate(
                             messageContext.guildID,
                             "command.cutoff.failure.invalidEndYear.title"
                         ),
-                        description: LocalizationManager.translate(
+                        description: i18n.translate(
                             messageContext.guildID,
                             "command.cutoff.failure.invalidEndYear.description"
                         ),

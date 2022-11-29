@@ -12,9 +12,9 @@ import ExpBonusModifier from "../../enums/exp_bonus_modifier";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -42,7 +42,7 @@ export default class AnswerCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "answer",
-        description: LocalizationManager.translate(
+        description: i18n.translate(
             guildID,
             "command.answer.help.description",
             {
@@ -57,14 +57,14 @@ export default class AnswerCommand implements BaseCommand {
         examples: [
             {
                 example: "`,answer typing`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.answer.help.example.typing"
                 ),
             },
             {
                 example: "`,answer typingtypos`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.answer.help.example.typingTypos",
                     {
@@ -76,7 +76,7 @@ export default class AnswerCommand implements BaseCommand {
             },
             {
                 example: "`,answer easy`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",
                     {
@@ -91,7 +91,7 @@ export default class AnswerCommand implements BaseCommand {
             },
             {
                 example: "`,answer medium`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",
                     {
@@ -106,7 +106,7 @@ export default class AnswerCommand implements BaseCommand {
             },
             {
                 example: "`,answer hard`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",
                     {
@@ -131,7 +131,7 @@ export default class AnswerCommand implements BaseCommand {
             options: [
                 {
                     name: OptionAction.SET,
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.answer.help.interaction.description"
                     ),
@@ -140,7 +140,7 @@ export default class AnswerCommand implements BaseCommand {
                     options: [
                         {
                             name: "answer",
-                            description: LocalizationManager.translate(
+                            description: i18n.translate(
                                 LocaleType.EN,
                                 "command.answer.help.interaction.answerOption"
                             ),
@@ -158,7 +158,7 @@ export default class AnswerCommand implements BaseCommand {
                 },
                 {
                     name: OptionAction.RESET,
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "answer" }

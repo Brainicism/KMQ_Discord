@@ -3,8 +3,8 @@ import { isUserPremium } from "../../helpers/game_utils";
 import { sendInfoMessage } from "../../helpers/discord_utils";
 import Eris from "eris";
 import KmqConfiguration from "../../kmq_configuration";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
+import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -18,14 +18,14 @@ export default class PremiumCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        description: LocalizationManager.translate(
+        description: i18n.translate(
             guildID,
             "command.premium.help.description"
         ),
         examples: [
             {
                 example: "`,premium`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.premium.help.example"
                 ),
@@ -60,49 +60,49 @@ export default class PremiumCommand implements BaseCommand {
             messageContext,
             {
                 color: premiumMember ? EMBED_SUCCESS_BONUS_COLOR : null,
-                description: `${LocalizationManager.translate(
+                description: `${i18n.translate(
                     messageContext.guildID,
                     premiumMember
                         ? "command.premium.status.description.premium"
                         : "command.premium.status.description.nonPremium"
-                )}\n\n${LocalizationManager.translate(
+                )}\n\n${i18n.translate(
                     messageContext.guildID,
                     "command.premium.status.description.connectionReminder"
                 )}`,
                 fields: [
                     {
-                        name: LocalizationManager.translate(
+                        name: i18n.translate(
                             messageContext.guildID,
                             "command.premium.status.perks.moreSongs.title"
                         ),
-                        value: LocalizationManager.translate(
+                        value: i18n.translate(
                             messageContext.guildID,
                             "command.premium.status.perks.moreSongs.description"
                         ),
                     },
                     {
-                        name: LocalizationManager.translate(
+                        name: i18n.translate(
                             messageContext.guildID,
                             "command.premium.status.perks.special.title"
                         ),
-                        value: LocalizationManager.translate(
+                        value: i18n.translate(
                             messageContext.guildID,
                             "command.premium.status.perks.special.description"
                         ),
                     },
                     {
-                        name: LocalizationManager.translate(
+                        name: i18n.translate(
                             messageContext.guildID,
                             "command.premium.status.perks.badge.title"
                         ),
-                        value: LocalizationManager.translate(
+                        value: i18n.translate(
                             messageContext.guildID,
                             "command.premium.status.perks.badge.description"
                         ),
                     },
                 ],
                 thumbnailUrl: KmqImages.HAPPY,
-                title: LocalizationManager.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     premiumMember
                         ? "command.premium.status.title.premium"

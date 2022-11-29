@@ -12,9 +12,9 @@ import GameOption from "../../enums/game_option_name";
 import Gender from "../../enums/option_types/gender";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -52,7 +52,7 @@ export default class GenderCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "gender",
-        description: LocalizationManager.translate(
+        description: i18n.translate(
             guildID,
             "command.gender.help.description",
             {
@@ -66,35 +66,35 @@ export default class GenderCommand implements BaseCommand {
         examples: [
             {
                 example: "`,gender female`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.gender.help.example.female"
                 ),
             },
             {
                 example: "`,gender male female`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.gender.help.example.maleFemale"
                 ),
             },
             {
                 example: "`,gender coed`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.gender.help.example.coed"
                 ),
             },
             {
                 example: "`,gender`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.gender.help.example.reset"
                 ),
             },
             {
                 example: "`,gender alternating`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.gender.help.example.alternating"
                 ),
@@ -111,7 +111,7 @@ export default class GenderCommand implements BaseCommand {
             options: [
                 {
                     name: OptionAction.SET,
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.gender.interaction.description"
                     ),
@@ -119,7 +119,7 @@ export default class GenderCommand implements BaseCommand {
                         .SUB_COMMAND,
                     options: [...Array(4).keys()].map((x) => ({
                         name: `gender_${x + 1}`,
-                        description: LocalizationManager.translate(
+                        description: i18n.translate(
                             LocaleType.EN,
                             "command.gender.interaction.gender"
                         ),
@@ -134,7 +134,7 @@ export default class GenderCommand implements BaseCommand {
                 },
                 {
                     name: OptionAction.RESET,
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "gender" }
@@ -201,11 +201,11 @@ export default class GenderCommand implements BaseCommand {
                 sendErrorMessage(
                     messageContext,
                     {
-                        title: LocalizationManager.translate(
+                        title: i18n.translate(
                             messageContext.guildID,
                             "misc.failure.gameOptionConflict.title"
                         ),
-                        description: LocalizationManager.translate(
+                        description: i18n.translate(
                             messageContext.guildID,
                             "misc.failure.gameOptionConflict.description",
                             {
@@ -229,11 +229,11 @@ export default class GenderCommand implements BaseCommand {
                 sendErrorMessage(
                     messageContext,
                     {
-                        title: LocalizationManager.translate(
+                        title: i18n.translate(
                             messageContext.guildID,
                             "command.gender.warning.gameOption.title"
                         ),
-                        description: LocalizationManager.translate(
+                        description: i18n.translate(
                             messageContext.guildID,
                             "command.gender.warning.gameOption.description",
                             {

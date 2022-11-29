@@ -14,10 +14,10 @@ import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
+import i18n from "../../helpers/localization_manager";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type EmbedPayload from "../../interfaces/embed_payload";
@@ -58,7 +58,7 @@ export default class RemoveCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "remove",
-        description: LocalizationManager.translate(
+        description: i18n.translate(
             guildID,
             "command.remove.help.description",
             {
@@ -67,14 +67,14 @@ export default class RemoveCommand implements BaseCommand {
                 include: `\`${process.env.BOT_PREFIX}include\``,
             }
         ),
-        usage: `,remove [groups | exclude | include] [${LocalizationManager.translate(
+        usage: `,remove [groups | exclude | include] [${i18n.translate(
             guildID,
             "misc.listOfGroups"
         )}]`,
         examples: [
             {
                 example: "`,remove groups twice, red velvet`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.remove.help.example.groups",
                     {
@@ -86,7 +86,7 @@ export default class RemoveCommand implements BaseCommand {
             },
             {
                 example: "`,remove exclude BESTie, Dia, iKON`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.remove.help.example.exclude",
                     {
@@ -99,7 +99,7 @@ export default class RemoveCommand implements BaseCommand {
             },
             {
                 example: "`,remove include exo`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.remove.help.example.include",
                     {
@@ -114,7 +114,7 @@ export default class RemoveCommand implements BaseCommand {
                 type: Eris.Constants.ComponentTypes.BUTTON,
                 style: Eris.Constants.ButtonStyles.LINK,
                 url: GROUP_LIST_URL,
-                label: LocalizationManager.translate(
+                label: i18n.translate(
                     guildID,
                     "misc.interaction.fullGroupsList"
                 ),
@@ -173,11 +173,11 @@ export default class RemoveCommand implements BaseCommand {
             sendErrorMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "command.remove.failure.noGroupsSelected.title"
                     ),
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "command.remove.failure.noGroupsSelected.description"
                     ),
@@ -214,7 +214,7 @@ export default class RemoveCommand implements BaseCommand {
                 );
 
                 if (suggestions.length > 0) {
-                    suggestionsText = LocalizationManager.translate(
+                    suggestionsText = i18n.translate(
                         messageContext.guildID,
                         "misc.failure.unrecognizedGroups.didYouMean",
                         {
@@ -224,11 +224,11 @@ export default class RemoveCommand implements BaseCommand {
                 }
             }
 
-            const descriptionText = LocalizationManager.translate(
+            const descriptionText = i18n.translate(
                 messageContext.guildID,
                 "misc.failure.unrecognizedGroups.description",
                 {
-                    matchedGroupsAction: LocalizationManager.translate(
+                    matchedGroupsAction: i18n.translate(
                         messageContext.guildID,
                         "command.remove.failure.unrecognizedGroups.removed"
                     ),
@@ -243,7 +243,7 @@ export default class RemoveCommand implements BaseCommand {
             embeds.push({
                 color: EMBED_ERROR_COLOR,
                 author: messageContext.author,
-                title: LocalizationManager.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "misc.failure.unrecognizedGroups.title"
                 ),

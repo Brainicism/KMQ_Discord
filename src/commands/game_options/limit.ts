@@ -11,9 +11,9 @@ import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -58,15 +58,12 @@ export default class LimitCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "limit",
-        description: LocalizationManager.translate(
-            guildID,
-            "command.limit.help.description"
-        ),
+        description: i18n.translate(guildID, "command.limit.help.description"),
         usage: ",limit [limit_1] {limit_2}",
         examples: [
             {
                 example: "`,limit 250`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.limit.help.example.singleLimit",
                     {
@@ -76,7 +73,7 @@ export default class LimitCommand implements BaseCommand {
             },
             {
                 example: "`,limit 250 500`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.limit.help.example.twoLimits",
                     { limitStart: String(250), limitEnd: String(500) }
@@ -84,7 +81,7 @@ export default class LimitCommand implements BaseCommand {
             },
             {
                 example: "`,limit`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.limit.help.example.reset",
                     { defaultLimit: `\`${DEFAULT_LIMIT}\`` }
@@ -102,7 +99,7 @@ export default class LimitCommand implements BaseCommand {
             options: [
                 {
                     name: "set",
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.limit.interaction.description"
                     ),
@@ -111,7 +108,7 @@ export default class LimitCommand implements BaseCommand {
                     options: [
                         {
                             name: LimitAppCommandAction.TOP,
-                            description: LocalizationManager.translate(
+                            description: i18n.translate(
                                 LocaleType.EN,
                                 "command.limit.interaction.description_top"
                             ),
@@ -120,7 +117,7 @@ export default class LimitCommand implements BaseCommand {
                             options: [
                                 {
                                     name: "limit",
-                                    description: LocalizationManager.translate(
+                                    description: i18n.translate(
                                         LocaleType.EN,
                                         "command.limit.interaction.limit"
                                     ),
@@ -134,7 +131,7 @@ export default class LimitCommand implements BaseCommand {
                         },
                         {
                             name: LimitAppCommandAction.RANGE,
-                            description: LocalizationManager.translate(
+                            description: i18n.translate(
                                 LocaleType.EN,
                                 "command.limit.interaction.description_range"
                             ),
@@ -143,7 +140,7 @@ export default class LimitCommand implements BaseCommand {
                             options: [
                                 {
                                     name: "limit_start",
-                                    description: LocalizationManager.translate(
+                                    description: i18n.translate(
                                         LocaleType.EN,
                                         "command.limit.interaction.limit_start"
                                     ),
@@ -155,7 +152,7 @@ export default class LimitCommand implements BaseCommand {
                                 } as any,
                                 {
                                     name: "limit_end",
-                                    description: LocalizationManager.translate(
+                                    description: i18n.translate(
                                         LocaleType.EN,
                                         "command.limit.interaction.limit_end"
                                     ),
@@ -171,7 +168,7 @@ export default class LimitCommand implements BaseCommand {
                 },
                 {
                     name: "reset",
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.limit.help.example.reset",
                         { defaultLimit: String(DEFAULT_LIMIT) }
@@ -227,11 +224,11 @@ export default class LimitCommand implements BaseCommand {
                 sendErrorMessage(
                     messageContext,
                     {
-                        title: LocalizationManager.translate(
+                        title: i18n.translate(
                             messageContext.guildID,
                             "command.limit.failure.invalidLimit.title"
                         ),
-                        description: LocalizationManager.translate(
+                        description: i18n.translate(
                             messageContext.guildID,
                             "command.limit.failure.invalidLimit.greaterThanZero.description"
                         ),
@@ -245,11 +242,11 @@ export default class LimitCommand implements BaseCommand {
                 sendErrorMessage(
                     messageContext,
                     {
-                        title: LocalizationManager.translate(
+                        title: i18n.translate(
                             messageContext.guildID,
                             "command.limit.failure.invalidLimit.title"
                         ),
-                        description: LocalizationManager.translate(
+                        description: i18n.translate(
                             messageContext.guildID,
                             "command.limit.failure.invalidLimit.greaterThanStart.description"
                         ),

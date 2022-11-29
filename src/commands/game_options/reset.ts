@@ -7,9 +7,9 @@ import {
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -29,15 +29,12 @@ export default class ResetCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "reset",
-        description: LocalizationManager.translate(
-            guildID,
-            "command.reset.help.description"
-        ),
+        description: i18n.translate(guildID, "command.reset.help.description"),
         usage: ",reset",
         examples: [
             {
                 example: "`,reset`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.reset.help.example.reset"
                 ),

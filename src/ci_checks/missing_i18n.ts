@@ -9,7 +9,7 @@ import {
     SyntaxKind,
     createProgram,
 } from "typescript";
-import LocalizationManager from "../helpers/localization_manager";
+import i18n from "../helpers/localization_manager";
 import type { CallExpression, Node } from "typescript";
 
 const logger = new IPCLogger("missing_i18n");
@@ -36,15 +36,13 @@ const dynamicTranslationKeyAllowlist = [
 ];
 
 const translationInterfaceFunctions = [
-    "LocalizationManager.localizer.translate",
-    "LocalizationManager.localizer.translateN",
-    "LocalizationManager.localizer.translateByLocale",
-    "LocalizationManager.localizer.translateNByLocale",
+    "i18n.localizer.translate",
+    "i18n.localizer.translateN",
+    "i18n.localizer.translateByLocale",
+    "i18n.localizer.translateNByLocale",
 ];
 
-const translationInternalFunctions = [
-    "LocalizationManager.localizer.internalLocalizer.t",
-];
+const translationInternalFunctions = ["i18n.localizer.internalLocalizer.t"];
 
 const translationKeys = new Set<string>();
 const dynamicTranslationKeys = new Set<string>();
@@ -123,7 +121,7 @@ function getNodeKeys(node: Node): void {
     }
 
     const missingKeys = Array.from(translationKeys).filter(
-        (key) => !LocalizationManager.hasKey(key)
+        (key) => !i18n.hasKey(key)
     );
 
     for (const missingKey of missingKeys) {

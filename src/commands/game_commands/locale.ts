@@ -7,10 +7,10 @@ import {
 } from "../../helpers/discord_utils";
 import Eris from "eris";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
 import dbContext from "../../database_context";
+import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -49,7 +49,7 @@ export default class LocaleTypeCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "locale",
-        description: LocalizationManager.translate(
+        description: i18n.translate(
             guildID,
             "command.locale.help.description",
             {
@@ -57,18 +57,18 @@ export default class LocaleTypeCommand implements BaseCommand {
                 korean: `\`${LocaleArgument.KOREAN}\``,
             }
         ),
-        usage: `,locale [${LocalizationManager.translate(
+        usage: `,locale [${i18n.translate(
             guildID,
             "command.locale.help.usage.language"
         )}]`,
         examples: [
             {
                 example: "`,locale english`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.locale.help.example.toEnglish",
                     {
-                        english: LocalizationManager.translate(
+                        english: i18n.translate(
                             guildID,
                             "command.locale.language.en"
                         ),
@@ -77,11 +77,11 @@ export default class LocaleTypeCommand implements BaseCommand {
             },
             {
                 example: "`,locale korean`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.locale.help.example.toKorean",
                     {
-                        korean: LocalizationManager.translate(
+                        korean: i18n.translate(
                             guildID,
                             "command.locale.language.ko"
                         ),
@@ -90,11 +90,11 @@ export default class LocaleTypeCommand implements BaseCommand {
             },
             {
                 example: "`,locale`",
-                explanation: LocalizationManager.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.locale.help.example.reset",
                     {
-                        defaultLocale: LocalizationManager.translate(
+                        defaultLocale: i18n.translate(
                             guildID,
                             `command.locale.language.${DEFAULT_LOCALE}`
                         ),
@@ -113,7 +113,7 @@ export default class LocaleTypeCommand implements BaseCommand {
             options: [
                 {
                     name: "language",
-                    description: LocalizationManager.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.locale.interaction.language"
                     ),
@@ -188,16 +188,16 @@ export default class LocaleTypeCommand implements BaseCommand {
         sendInfoMessage(
             messageContext,
             {
-                title: LocalizationManager.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "command.options.updated",
                     { presetOrOption: "Locale" }
                 ),
-                description: LocalizationManager.translate(
+                description: i18n.translate(
                     messageContext.guildID,
                     "command.locale.updatedDescription",
                     {
-                        language: LocalizationManager.translate(
+                        language: i18n.translate(
                             messageContext.guildID,
                             `command.locale.language.${localeType}`
                         ),
