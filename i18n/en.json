@@ -1302,6 +1302,10 @@
                     "title": "Round Finished"
                 }
             },
+            "slashCommandReminder": {
+                "description": "Slash commands have new features that make them easier to use such as command name and option auto-complete! Commands have also been re-organized to be easier to use. Start by using / instead of ,",
+                "title": "Text commands will soon be disabled."
+            },
             "songPlaying": {
                 "description": "Starting new round in 3 seconds...",
                 "title": "Error Playing Song"
@@ -1309,6 +1313,10 @@
             "songQuery": {
                 "description": "Failed to find songs matching this criteria. Try to broaden your search.",
                 "title": "Song Query Error"
+            },
+            "textCommandsDisabled": {
+                "description": "Text commands have been disabled. Please use the new and improved slash commands! Start by using / instead of ,",
+                "title": "Text Commands Disabled"
             },
             "unrecognizedGroups": {
                 "added": "added",
