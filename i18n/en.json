@@ -1465,7 +1465,7 @@
         "views": "views",
         "warning": {
             "addRemoveOrdering": {
-                "footer": "Did you mean to use {{addOrRemove}} {{command}}?"
+                "footer": "Did you mean to use {{command}} {{addOrRemove}}?"
             }
         },
         "yes": "Yes"

@@ -326,8 +326,8 @@ export default class ExcludeCommand implements BaseCommand {
                     messageContext.guildID,
                     "misc.warning.addRemoveOrdering.footer",
                     {
-                        addOrRemove: `${process.env.BOT_PREFIX}${misplacedPrefix}`,
-                        command: "exclude",
+                        command: "/exclude",
+                        addOrRemove: misplacedPrefix,
                     }
                 );
             }

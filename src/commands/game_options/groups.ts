@@ -263,8 +263,8 @@ export default class GroupsCommand implements BaseCommand {
                     messageContext.guildID,
                     "misc.warning.addRemoveOrdering.footer",
                     {
-                        addOrRemove: `${process.env.BOT_PREFIX}${misplacedPrefix}`,
-                        command: "groups",
+                        command: "/groups",
+                        addOrRemove: misplacedPrefix,
                     }
                 );
             }

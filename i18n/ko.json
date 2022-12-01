@@ -1469,7 +1469,7 @@
         "views": "조회수",
         "warning": {
             "addRemoveOrdering": {
-                "footer": "{{addOrRemove}} {{command}}을(를) 사용하시겠습니까?"
+                "footer": "{{command}} {{addOrRemove}}을(를) 사용하시겠습니까?"
             }
         },
         "yes": "예"

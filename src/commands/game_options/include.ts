@@ -259,8 +259,8 @@ export default class IncludeCommand implements BaseCommand {
                     messageContext.guildID,
                     "misc.warning.addRemoveOrdering.footer",
                     {
-                        addOrRemove: `${process.env.BOT_PREFIX}${misplacedPrefix}`,
-                        command: "include",
+                        command: "/include",
+                        addOrRemove: misplacedPrefix,
                     }
                 );
             }
