@@ -129,14 +129,14 @@ export default class AppCommandsCommand implements BaseCommand {
                                 cmd.description ??
                                 i18n.translate(
                                     LocaleType.EN,
-                                    `command.${commandName}.help.description`
+                                    `command.${commandName}.interaction.help.description`
                                 );
 
                             cmd.description_localizations =
                                 cmd.description_localizations ?? {
                                     [LocaleType.KO]: i18n.translate(
                                         LocaleType.KO,
-                                        `command.${commandName}.help.description`
+                                        `command.${commandName}.interaction.help.description`
                                     ),
                                 };
                         }

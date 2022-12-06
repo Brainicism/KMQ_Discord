@@ -156,7 +156,7 @@
                 }
             },
             "help": {
-                "description": "Select as many groups that you would like to ignore, separated by commas. A list of group names can be found [here]({{groupList}}).",
+                "description": "Select as many groups that you would like to ignore. A list of group names can be found [here]({{groupList}}).",
                 "example": {
                     "multipleGroups": "Ignore songs from {{groupOne}}, {{groupTwo}}, and {{groupThree}}",
                     "reset": "Resets the exclude option",
@@ -291,7 +291,7 @@
         },
         "groups": {
             "help": {
-                "description": "Select as many groups that you would like to hear from, separated by commas. A list of group names can be found [here]({{groupList}}).",
+                "description": "Select as many groups that you would like to hear from. A list of group names can be found [here]({{groupList}}).",
                 "example": {
                     "multipleGroups": "Plays songs only from {{groupOne}}, {{groupTwo}}, and {{groupThree}}",
                     "reset": "Resets the groups option",
@@ -387,7 +387,7 @@
                 }
             },
             "help": {
-                "description": "Select as many groups that you would like to forcefully include, ignoring other filters ({{gender}}, {{artisttype}}, etc.), separated by commas. A list of group names can be found [here]({{groupList}}).",
+                "description": "Select as many groups that you would like to forcefully include, ignoring other filters ({{gender}}, {{artisttype}}, etc.). A list of group names can be found [here]({{groupList}}).",
                 "example": {
                     "multipleGroups": "Forcefully include songs from {{groupOne}}, {{groupTwo}}, and {{groupThree}}",
                     "reset": "Resets the include option",
