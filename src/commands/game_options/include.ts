@@ -58,16 +58,16 @@ export default class IncludeCommand implements BaseCommand {
                 groupList: GROUP_LIST_URL,
             }
         ),
-        usage: `,include set [${LocalizationManager.localizer.translate(
+        usage: `/include set [${LocalizationManager.localizer.translate(
             guildID,
             "misc.listOfGroups"
-        )}]\n\n,include add [${LocalizationManager.localizer.translate(
+        )}]\n\n/include add [${LocalizationManager.localizer.translate(
             guildID,
             "misc.listOfGroups"
-        )}]\n\n,include remove [${LocalizationManager.localizer.translate(
+        )}]\n\n/include remove [${LocalizationManager.localizer.translate(
             guildID,
             "misc.listOfGroups"
-        )}]\n\n,include reset`,
+        )}]\n\n/include reset`,
         examples: [
             {
                 example: "`,include set group_1:blackpink`",

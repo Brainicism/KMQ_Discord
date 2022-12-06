@@ -46,7 +46,7 @@ export default class OstCommand implements BaseCommand {
             guildID,
             "command.ost.help.description"
         ),
-        usage: ",ost set\nost:[include | exclude | exclusive]\n\n,ost reset",
+        usage: "/ost set\nost:[include | exclude | exclusive]\n\n/ost reset",
         examples: [
             {
                 example: "`,ost set ost:include`",

@@ -56,7 +56,7 @@ export default class LocaleTypeCommand implements BaseCommand {
                 korean: `\`${LocaleArgument.KOREAN}\``,
             }
         ),
-        usage: `,locale language:[${LocalizationManager.localizer.translate(
+        usage: `/locale language:[${LocalizationManager.localizer.translate(
             guildID,
             "command.locale.help.usage.language"
         )}]`,

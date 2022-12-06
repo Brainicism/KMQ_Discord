@@ -287,7 +287,7 @@ export default class ProfileCommand implements BaseCommand {
             guildID,
             "command.profile.help.description"
         ),
-        usage: `,profile user_mention:{@${LocalizationManager.localizer.translate(
+        usage: `/profile user_mention:{@${LocalizationManager.localizer.translate(
             guildID,
             "command.profile.help.usage.mention"
         )}}\n\n,profile user_id:{user_id}`,

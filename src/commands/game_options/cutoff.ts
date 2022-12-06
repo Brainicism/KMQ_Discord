@@ -60,7 +60,7 @@ export default class CutoffCommand implements BaseCommand {
             guildID,
             "command.cutoff.help.description"
         ),
-        usage: ",cutoff set earliest\nbeginning_year:[year_start]\n\n,cutoff set range\nbeginning_year:[year_start]\nending_year:[year_end]\n\n,cutoff reset",
+        usage: "/cutoff set earliest\nbeginning_year:[year_start]\n\n/cutoff set range\nbeginning_year:[year_start]\nending_year:[year_end]\n\n/cutoff reset",
         examples: [
             {
                 example: "`,cutoff set earliest beginning_year:2015`",

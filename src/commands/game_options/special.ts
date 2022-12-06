@@ -48,7 +48,7 @@ export default class SpecialCommand implements BaseCommand {
             guildID,
             "command.special.help.description"
         ),
-        usage: ",special set\nspecial:[reverse | slow | fast | faster | lowpitch | highpitch | nightcore]\n\n,special reset",
+        usage: "/special set\nspecial:[reverse | slow | fast | faster | lowpitch | highpitch | nightcore]\n\n/special reset",
         examples: [
             {
                 example: "`,special set special:reverse`",

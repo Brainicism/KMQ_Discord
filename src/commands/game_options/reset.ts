@@ -33,7 +33,7 @@ export default class ResetCommand implements BaseCommand {
             guildID,
             "command.reset.help.description"
         ),
-        usage: ",reset",
+        usage: "/reset",
         examples: [
             {
                 example: "`,reset`",

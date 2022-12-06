@@ -52,7 +52,7 @@ export default class AnswerCommand implements BaseCommand {
                 hard: `\`${AnswerType.MULTIPLE_CHOICE_HARD}\``,
             }
         ),
-        usage: ",answer set\nanswer:[typing | typingtypos | easy | medium | hard]\n\n,answer reset",
+        usage: "/answer set\nanswer:[typing | typingtypos | easy | medium | hard]\n\n/answer reset",
         examples: [
             {
                 example: "`,answer set answer:typing`",

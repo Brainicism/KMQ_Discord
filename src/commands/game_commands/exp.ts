@@ -309,7 +309,7 @@ export default class ExpCommand implements BaseCommand {
             guildID,
             "command.exp.help.description"
         ),
-        usage: ",exp",
+        usage: "/exp",
         examples: [],
         priority: 50,
     });

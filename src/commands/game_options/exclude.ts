@@ -56,16 +56,16 @@ export default class ExcludeCommand implements BaseCommand {
                 groupList: GROUP_LIST_URL,
             }
         ),
-        usage: `,exclude set [${LocalizationManager.localizer.translate(
+        usage: `/exclude set [${LocalizationManager.localizer.translate(
             guildID,
             "misc.listOfGroups"
-        )}]\n\n,exclude add [${LocalizationManager.localizer.translate(
+        )}]\n\n/exclude add [${LocalizationManager.localizer.translate(
             guildID,
             "misc.listOfGroups"
-        )}]\n\n,exclude remove [${LocalizationManager.localizer.translate(
+        )}]\n\n/exclude remove [${LocalizationManager.localizer.translate(
             guildID,
             "misc.listOfGroups"
-        )}]\n\n,exclude reset`,
+        )}]\n\n/exclude reset`,
         examples: [
             {
                 example: "`,exclude set group_1:blackpink`",

@@ -67,13 +67,13 @@ export default class RemoveCommand implements BaseCommand {
                 include: "`/include`",
             }
         ),
-        usage: `,groups remove [${LocalizationManager.localizer.translate(
+        usage: `/groups remove [${LocalizationManager.localizer.translate(
             guildID,
             "misc.listOfGroups"
-        )}]\n\n,include remove [${LocalizationManager.localizer.translate(
+        )}]\n\n/include remove [${LocalizationManager.localizer.translate(
             guildID,
             "misc.listOfGroups"
-        )}]\n\n,exclude remove [${LocalizationManager.localizer.translate(
+        )}]\n\n/exclude remove [${LocalizationManager.localizer.translate(
             guildID,
             "misc.listOfGroups"
         )}]`,

@@ -372,7 +372,7 @@ export default class LookupCommand implements BaseCommand {
             guildID,
             "command.lookup.help.description"
         ),
-        usage: ",lookup song_name\nsong_name:[song]\nartist_name:[artist]\n\n,lookup song_link\nsong_link:{youtube_url}",
+        usage: "/lookup song_name\nsong_name:[song]\nartist_name:[artist]\n\n/lookup song_link\nsong_link:{youtube_url}",
         examples: [
             {
                 example: "`,lookup love dive`",

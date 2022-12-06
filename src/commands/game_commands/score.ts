@@ -29,7 +29,7 @@ export default class ScoreCommand implements BaseCommand {
             guildID,
             "command.score.help.description"
         ),
-        usage: ",score",
+        usage: "/score",
         examples: [],
         priority: 50,
     });

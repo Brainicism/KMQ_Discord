@@ -58,7 +58,7 @@ export default class ShuffleCommand implements BaseCommand {
                 random: `\`${ShuffleType.RANDOM}\``,
             }
         ),
-        usage: ",shuffle set\nshuffle:[random | popularity | weighted_easy | weighted_hard]\n\n,shuffle reset",
+        usage: "/shuffle set\nshuffle:[random | popularity | weighted_easy | weighted_hard]\n\n/shuffle reset",
         examples: [
             {
                 example: "`,shuffle set shuffle:random`",

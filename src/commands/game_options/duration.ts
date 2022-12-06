@@ -61,16 +61,16 @@ export default class DurationCommand implements BaseCommand {
             guildID,
             "command.duration.help.description"
         ),
-        usage: `,duration set\nduration:[${LocalizationManager.localizer.translate(
+        usage: `/duration set\nduration:[${LocalizationManager.localizer.translate(
             guildID,
             "command.duration.help.usage.minutes"
-        )}]\n\n,duration add\nduration:[${LocalizationManager.localizer.translate(
+        )}]\n\n/duration add\nduration:[${LocalizationManager.localizer.translate(
             guildID,
             "command.duration.help.usage.minutes"
-        )}]\n\n,duration remove\nduration:[${LocalizationManager.localizer.translate(
+        )}]\n\n/duration remove\nduration:[${LocalizationManager.localizer.translate(
             guildID,
             "command.duration.help.usage.minutes"
-        )}]\n\n,duration reset`,
+        )}]\n\n/duration reset`,
         examples: [
             {
                 example: "`,duration set duration:15`",

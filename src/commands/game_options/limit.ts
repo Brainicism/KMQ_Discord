@@ -61,7 +61,7 @@ export default class LimitCommand implements BaseCommand {
             guildID,
             "command.limit.help.description"
         ),
-        usage: ",limit set top\nlimit:{limit}\n\n,limit set range\nlimit_start:{limit_start}\nlimit_end:{limit_end}\n\n,limit reset",
+        usage: "/limit set top\nlimit:{limit}\n\n/limit set range\nlimit_start:{limit_start}\nlimit_end:{limit_end}\n\n/limit reset",
         examples: [
             {
                 example: "`,limit set top limit:250`",

@@ -51,16 +51,16 @@ export default class GroupsCommand implements BaseCommand {
                 groupList: GROUP_LIST_URL,
             }
         ),
-        usage: `,groups set [${LocalizationManager.localizer.translate(
+        usage: `/groups set [${LocalizationManager.localizer.translate(
             guildID,
             "misc.listOfGroups"
-        )}]\n\n,groups add [${LocalizationManager.localizer.translate(
+        )}]\n\n/groups add [${LocalizationManager.localizer.translate(
             guildID,
             "misc.listOfGroups"
-        )}]\n\n,groups remove [${LocalizationManager.localizer.translate(
+        )}]\n\n/groups remove [${LocalizationManager.localizer.translate(
             guildID,
             "misc.listOfGroups"
-        )}]\n\n,groups reset`,
+        )}]\n\n/groups reset`,
         examples: [
             {
                 example: "`,groups set group_1:blackpink`",

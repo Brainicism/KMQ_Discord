@@ -33,7 +33,7 @@ export default class PremiumCommand implements BaseCommand {
         ],
         name: "premium",
         priority: 50,
-        usage: ",premium",
+        usage: "/premium",
     });
 
     slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [

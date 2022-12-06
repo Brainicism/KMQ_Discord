@@ -51,7 +51,7 @@ export default class ArtistTypeCommand implements BaseCommand {
                 both: `\`${ArtistType.BOTH}\``,
             }
         ),
-        usage: ",artisttype set\nartisttype:[soloists | groups | both]\n\n,artisttype reset",
+        usage: "/artisttype set\nartisttype:[soloists | groups | both]\n\n/artisttype reset",
         examples: [
             {
                 example: "`,artisttype set artisttype:soloists`",

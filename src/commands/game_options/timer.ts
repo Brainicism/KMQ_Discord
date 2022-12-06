@@ -47,10 +47,10 @@ export default class GuessTimeoutCommand implements BaseCommand {
             guildID,
             "command.timer.help.description"
         ),
-        usage: `,timer set\ntimer:[${LocalizationManager.localizer.translate(
+        usage: `/timer set\ntimer:[${LocalizationManager.localizer.translate(
             guildID,
             "command.timer.help.usage.seconds"
-        )}]\n\n,timer reset`,
+        )}]\n\n/timer reset`,
         examples: [
             {
                 example: "`,timer set timer:15`",

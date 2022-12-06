@@ -25,7 +25,7 @@ export default class NewsCommand implements BaseCommand {
             guildID,
             "command.news.help.description"
         ),
-        usage: ",news",
+        usage: "/news",
         examples: [],
         priority: 10,
     });

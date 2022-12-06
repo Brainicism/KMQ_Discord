@@ -95,7 +95,7 @@ export default class SpotifyCommand implements BaseCommand {
             guildID,
             "command.spotify.help.description"
         ),
-        usage: ",spotify set\nplaylist_url:{playlist_url}\n\n,spotify reset",
+        usage: "/spotify set\nplaylist_url:{playlist_url}\n\n/spotify reset",
         examples: [
             {
                 example: `\`,spotify ${SPOTIFY_BASE_URL}...\``,

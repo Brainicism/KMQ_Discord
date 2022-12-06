@@ -145,7 +145,7 @@ export default class SkipCommand implements BaseCommand {
             guildID,
             "command.skip.help.description"
         ),
-        usage: ",skip",
+        usage: "/skip",
         examples: [],
         priority: 1010,
     });

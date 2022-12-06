@@ -34,7 +34,7 @@ export default class VoteCommand implements BaseCommand {
             guildID,
             "command.vote.help.description"
         ),
-        usage: ",vote",
+        usage: "/vote",
         examples: [],
         priority: 60,
     });

@@ -52,7 +52,7 @@ export default class ListCommand implements BaseCommand {
             guildID,
             "command.list.help.description"
         ),
-        usage: ",list type:[groups | exclude | include]",
+        usage: "/list type:[groups | exclude | include]",
         examples: [
             {
                 example: "`,list type:groups`",

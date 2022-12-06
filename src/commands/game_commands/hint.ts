@@ -249,7 +249,7 @@ export default class HintCommand implements BaseCommand {
             guildID,
             "command.hint.help.description"
         ),
-        usage: ",hint",
+        usage: "/hint",
         examples: [],
         priority: 1020,
     });

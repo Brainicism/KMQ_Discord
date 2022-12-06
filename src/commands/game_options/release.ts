@@ -98,7 +98,7 @@ export default class ReleaseCommand implements BaseCommand {
             guildID,
             "command.release.help.description"
         ),
-        usage: ",release set\nrelease:[official | all]\n\n,release reset",
+        usage: "/release set\nrelease:[official | all]\n\n/release reset",
         examples: [
             {
                 example: "`,release set release:official`",

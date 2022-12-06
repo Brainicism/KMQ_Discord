@@ -67,13 +67,13 @@ export default class AddCommand implements BaseCommand {
                 include: "`/include`",
             }
         ),
-        usage: `,groups add [${LocalizationManager.localizer.translate(
+        usage: `/groups add [${LocalizationManager.localizer.translate(
             guildID,
             "misc.listOfGroups"
-        )}]\n\n,include add [${LocalizationManager.localizer.translate(
+        )}]\n\n/include add [${LocalizationManager.localizer.translate(
             guildID,
             "misc.listOfGroups"
-        )}]\n\n,exclude add [${LocalizationManager.localizer.translate(
+        )}]\n\n/exclude add [${LocalizationManager.localizer.translate(
             guildID,
             "misc.listOfGroups"
         )}]`,

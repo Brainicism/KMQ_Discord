@@ -29,7 +29,7 @@ export default class EndCommand implements BaseCommand {
             guildID,
             "command.end.help.description"
         ),
-        usage: ",end",
+        usage: "/end",
         examples: [],
         priority: 1020,
     });

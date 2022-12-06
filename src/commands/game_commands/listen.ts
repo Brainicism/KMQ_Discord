@@ -111,7 +111,7 @@ export default class ListenCommand implements BaseCommand {
             guildID,
             "command.listen.help.description"
         ),
-        usage: ",listen",
+        usage: "/listen",
         priority: 1040,
         examples: [
             {
