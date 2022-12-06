@@ -68,7 +68,7 @@ export default class ExcludeCommand implements BaseCommand {
         )}]\n\n/exclude reset`,
         examples: [
             {
-                example: "`,exclude set group_1:blackpink`",
+                example: "`/exclude set group_1:blackpink`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.exclude.help.example.singleGroup",
@@ -79,7 +79,7 @@ export default class ExcludeCommand implements BaseCommand {
             },
             {
                 example:
-                    "`,exclude set group_1:blackpink group_2:bts group_3:red velvet`",
+                    "`/exclude set group_1:blackpink group_2:bts group_3:red velvet`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.exclude.help.example.multipleGroups",
@@ -91,7 +91,7 @@ export default class ExcludeCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,exclude reset`",
+                example: "`/exclude reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.exclude.help.example.reset"

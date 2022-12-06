@@ -79,7 +79,7 @@ export default class RemoveCommand implements BaseCommand {
         )}]`,
         examples: [
             {
-                example: "`,groups remove group_1:twice group_2:red velvet`",
+                example: "`/groups remove group_1:twice group_2:red velvet`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.remove.help.example.groups",
@@ -92,7 +92,7 @@ export default class RemoveCommand implements BaseCommand {
             },
             {
                 example:
-                    "`,exclude remove group_1:BESTie group_2:Dia group_3:iKON`",
+                    "`/exclude remove group_1:BESTie group_2:Dia group_3:iKON`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.remove.help.example.exclude",
@@ -105,7 +105,7 @@ export default class RemoveCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,include remove group_1:exo`",
+                example: "`/include remove group_1:exo`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.remove.help.example.include",

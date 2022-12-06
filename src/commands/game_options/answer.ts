@@ -55,14 +55,14 @@ export default class AnswerCommand implements BaseCommand {
         usage: "/answer set\nanswer:[typing | typingtypos | easy | medium | hard]\n\n/answer reset",
         examples: [
             {
-                example: "`,answer set answer:typing`",
+                example: "`/answer set answer:typing`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.answer.help.example.typing"
                 ),
             },
             {
-                example: "`,answer set answer:typingtypos`",
+                example: "`/answer set answer:typingtypos`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.answer.help.example.typingTypos",
@@ -74,7 +74,7 @@ export default class AnswerCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,answer set answer:easy`",
+                example: "`/answer set answer:easy`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",
@@ -89,7 +89,7 @@ export default class AnswerCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,answer set answer:medium`",
+                example: "`/answer set answer:medium`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",
@@ -104,7 +104,7 @@ export default class AnswerCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,answer set answer:hard`",
+                example: "`/answer set answer:hard`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",

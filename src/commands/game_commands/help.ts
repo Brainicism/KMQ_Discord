@@ -22,7 +22,7 @@ import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("help");
-const placeholder = /,/g;
+const placeholder = /\//g;
 const FIELDS_PER_EMBED = 6;
 const excludedCommands = ["premium"];
 
@@ -39,14 +39,14 @@ export default class HelpCommand implements BaseCommand {
         )}]`,
         examples: [
             {
-                example: "`,help`",
+                example: "`/help`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.help.help.example.allCommands"
                 ),
             },
             {
-                example: "`,help action:cutoff`",
+                example: "`/help action:cutoff`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.help.help.example.sampleCommand"

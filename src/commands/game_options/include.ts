@@ -70,7 +70,7 @@ export default class IncludeCommand implements BaseCommand {
         )}]\n\n/include reset`,
         examples: [
             {
-                example: "`,include set group_1:blackpink`",
+                example: "`/include set group_1:blackpink`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.include.help.example.singleGroup",
@@ -79,7 +79,7 @@ export default class IncludeCommand implements BaseCommand {
             },
             {
                 example:
-                    "`,include set group_1:blackpink group_2:bts group_3:red velvet`",
+                    "`/include set group_1:blackpink group_2:bts group_3:red velvet`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.include.help.example.multipleGroups",
@@ -91,7 +91,7 @@ export default class IncludeCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,include reset`",
+                example: "`/include reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.include.help.example.reset"

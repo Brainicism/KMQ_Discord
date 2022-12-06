@@ -64,14 +64,14 @@ export default class LeaderboardCommand implements BaseCommand {
         )}}\n\n/leaderboard enroll\n\n/leaderboard unenroll`,
         examples: [
             {
-                example: "`,leaderboard show`",
+                example: "`/leaderboard show`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.leaderboard.help.example.global"
                 ),
             },
             {
-                example: "`,leaderboard show page:3`",
+                example: "`/leaderboard show page:3`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.leaderboard.help.example.globalPage"
@@ -79,7 +79,7 @@ export default class LeaderboardCommand implements BaseCommand {
             },
             {
                 example:
-                    "`,leaderboard show scope:game duration:monthly page:2`",
+                    "`/leaderboard show scope:game duration:monthly page:2`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.leaderboard.help.example.gameMonthlyPage"
@@ -87,35 +87,35 @@ export default class LeaderboardCommand implements BaseCommand {
             },
             {
                 example:
-                    "`,leaderboard show type:songsguessed scope:server page:3`",
+                    "`/leaderboard show type:songsguessed scope:server page:3`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.leaderboard.help.example.serverSongsGuessedPage"
                 ),
             },
             {
-                example: "`,leaderboard enroll`",
+                example: "`/leaderboard enroll`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.leaderboard.help.example.enroll"
                 ),
             },
             {
-                example: "`,leaderboard unenroll`",
+                example: "`/leaderboard unenroll`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.leaderboard.help.example.unenroll"
                 ),
             },
             {
-                example: "`,leaderboard scope:server`",
+                example: "`/leaderboard scope:server`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.leaderboard.help.example.server"
                 ),
             },
             {
-                example: "`,leaderboard duration:weekly page:4`",
+                example: "`/leaderboard duration:weekly page:4`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.leaderboard.help.example.globalWeeklyPage"

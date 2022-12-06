@@ -51,56 +51,56 @@ export default class SpecialCommand implements BaseCommand {
         usage: "/special set\nspecial:[reverse | slow | fast | faster | lowpitch | highpitch | nightcore]\n\n/special reset",
         examples: [
             {
-                example: "`,special set special:reverse`",
+                example: "`/special set special:reverse`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.special.help.example.reverse"
                 ),
             },
             {
-                example: "`,special set special:slow`",
+                example: "`/special set special:slow`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.special.help.example.slow"
                 ),
             },
             {
-                example: "`,special set special:fast`",
+                example: "`/special set special:fast`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.special.help.example.fast"
                 ),
             },
             {
-                example: "`,special set special:faster`",
+                example: "`/special set special:faster`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.special.help.example.faster"
                 ),
             },
             {
-                example: "`,special set special:lowpitch`",
+                example: "`/special set special:lowpitch`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.special.help.example.lowPitch"
                 ),
             },
             {
-                example: "`,special set special:highpitch`",
+                example: "`/special set special:highpitch`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.special.help.example.highPitch"
                 ),
             },
             {
-                example: "`,special set special:nightcore`",
+                example: "`/special set special:nightcore`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.special.help.example.nightcore"
                 ),
             },
             {
-                example: "`,special reset`",
+                example: "`/special reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.special.help.example.reset"

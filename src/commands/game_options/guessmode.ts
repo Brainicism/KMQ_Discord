@@ -49,28 +49,28 @@ export default class GuessModeCommand implements BaseCommand {
         usage: "/guessmode set\nguessmode:[song | artist | both]\n\n/guessmode reset",
         examples: [
             {
-                example: "`,guessmode set guessmode:song`",
+                example: "`/guessmode set guessmode:song`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.guessmode.help.example.song"
                 ),
             },
             {
-                example: "`,guessmode set guessmode:artist`",
+                example: "`/guessmode set guessmode:artist`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.guessmode.help.example.artist"
                 ),
             },
             {
-                example: "`,guessmode set guessmode:both`",
+                example: "`/guessmode set guessmode:both`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.guessmode.help.example.both"
                 ),
             },
             {
-                example: "`,guessmode reset`",
+                example: "`/guessmode reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.guessmode.help.example.reset",

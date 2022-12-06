@@ -24,7 +24,7 @@ export default class PremiumCommand implements BaseCommand {
         ),
         examples: [
             {
-                example: "`,premium`",
+                example: "`/premium`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.premium.help.example"

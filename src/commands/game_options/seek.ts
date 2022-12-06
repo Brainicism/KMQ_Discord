@@ -47,28 +47,28 @@ export default class SeekCommand implements BaseCommand {
         usage: "/seek set\nseek:[beginning | middle | random]\n\n/seek reset",
         examples: [
             {
-                example: "`,seek set seek:random`",
+                example: "`/seek set seek:random`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.seek.help.example.random"
                 ),
             },
             {
-                example: "`,seek set seek:middle`",
+                example: "`/seek set seek:middle`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.seek.help.example.middle"
                 ),
             },
             {
-                example: "`,seek set seek:beginning`",
+                example: "`/seek set seek:beginning`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.seek.help.example.beginning"
                 ),
             },
             {
-                example: "`,seek reset`",
+                example: "`/seek reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.seek.help.example.reset",

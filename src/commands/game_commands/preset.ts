@@ -164,14 +164,14 @@ export default class PresetCommand implements BaseCommand {
         )}]`,
         examples: [
             {
-                example: "`,preset list`",
+                example: "`/preset list`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.preset.help.example.list"
                 ),
             },
             {
-                example: `\`,preset save preset_name:[${LocalizationManager.localizer.translate(
+                example: `\`/preset save preset_name:[${LocalizationManager.localizer.translate(
                     guildID,
                     "command.preset.help.usage.presetName"
                 )}]\``,
@@ -181,7 +181,7 @@ export default class PresetCommand implements BaseCommand {
                 ),
             },
             {
-                example: `\`,preset load preset_name:[${LocalizationManager.localizer.translate(
+                example: `\`/preset load preset_name:[${LocalizationManager.localizer.translate(
                     guildID,
                     "command.preset.help.usage.presetName"
                 )}]\n,preset load preset_identifier:[${LocalizationManager.localizer.translate(
@@ -195,7 +195,7 @@ export default class PresetCommand implements BaseCommand {
                 ),
             },
             {
-                example: `\`,preset replace preset_name:[${LocalizationManager.localizer.translate(
+                example: `\`/preset replace preset_name:[${LocalizationManager.localizer.translate(
                     guildID,
                     "command.preset.help.usage.presetName"
                 )}]\``,
@@ -205,7 +205,7 @@ export default class PresetCommand implements BaseCommand {
                 ),
             },
             {
-                example: `\`,preset delete preset_name:[${LocalizationManager.localizer.translate(
+                example: `\`/preset delete preset_name:[${LocalizationManager.localizer.translate(
                     guildID,
                     "command.preset.help.usage.presetName"
                 )}]\``,
@@ -215,7 +215,7 @@ export default class PresetCommand implements BaseCommand {
                 ),
             },
             {
-                example: `\`,preset export preset_name:[${LocalizationManager.localizer.translate(
+                example: `\`/preset export preset_name:[${LocalizationManager.localizer.translate(
                     guildID,
                     "command.preset.help.usage.presetName"
                 )}]\``,
@@ -225,7 +225,7 @@ export default class PresetCommand implements BaseCommand {
                 ),
             },
             {
-                example: `\`,preset import preset_identifier:[${LocalizationManager.localizer.translate(
+                example: `\`/preset import preset_identifier:[${LocalizationManager.localizer.translate(
                     guildID,
                     "command.preset.help.usage.presetIdentifier"
                 )}] preset_name:[${LocalizationManager.localizer.translate(

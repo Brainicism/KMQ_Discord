@@ -44,7 +44,7 @@ export default class RecentlyAddedCommand implements BaseCommand {
         usage: "/recentlyadded",
         examples: [
             {
-                example: "`,recentlyadded`",
+                example: "`/recentlyadded`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.recentlyadded.help.example"

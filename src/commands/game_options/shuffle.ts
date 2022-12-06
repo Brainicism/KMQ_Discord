@@ -61,14 +61,14 @@ export default class ShuffleCommand implements BaseCommand {
         usage: "/shuffle set\nshuffle:[random | popularity | weighted_easy | weighted_hard]\n\n/shuffle reset",
         examples: [
             {
-                example: "`,shuffle set shuffle:random`",
+                example: "`/shuffle set shuffle:random`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.shuffle.help.example.random"
                 ),
             },
             {
-                example: "`,shuffle set shuffle:popularity`",
+                example: "`/shuffle set shuffle:popularity`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.shuffle.help.example.popularity",
@@ -82,7 +82,7 @@ export default class ShuffleCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,shuffle reset`",
+                example: "`/shuffle reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.shuffle.help.example.reset",

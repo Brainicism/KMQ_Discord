@@ -375,7 +375,7 @@ export default class LookupCommand implements BaseCommand {
         usage: "/lookup song_name\nsong_name:[song]\nartist_name:[artist]\n\n/lookup song_link\nsong_link:{youtube_url}",
         examples: [
             {
-                example: "`,lookup love dive`",
+                example: "`/lookup love dive`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.lookup.help.example.song",
@@ -384,7 +384,7 @@ export default class LookupCommand implements BaseCommand {
             },
             {
                 example:
-                    "`,lookup https://www.youtube.com/watch?v=4TWR90KJl84`",
+                    "`/lookup https://www.youtube.com/watch?v=4TWR90KJl84`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.lookup.help.example.song",

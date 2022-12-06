@@ -63,7 +63,7 @@ export default class GroupsCommand implements BaseCommand {
         )}]\n\n/groups reset`,
         examples: [
             {
-                example: "`,groups set group_1:blackpink`",
+                example: "`/groups set group_1:blackpink`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.groups.help.example.singleGroup",
@@ -74,7 +74,7 @@ export default class GroupsCommand implements BaseCommand {
             },
             {
                 example:
-                    "`,groups set group_1:blackpink group_2:bts group_3:red velvet`",
+                    "`/groups set group_1:blackpink group_2:bts group_3:red velvet`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.groups.help.example.multipleGroups",
@@ -86,7 +86,7 @@ export default class GroupsCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,groups reset`",
+                example: "`/groups reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.groups.help.example.reset"

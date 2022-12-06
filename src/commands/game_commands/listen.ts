@@ -115,7 +115,7 @@ export default class ListenCommand implements BaseCommand {
         priority: 1040,
         examples: [
             {
-                example: "`,listen`",
+                example: "`/listen`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.listen.help.example"

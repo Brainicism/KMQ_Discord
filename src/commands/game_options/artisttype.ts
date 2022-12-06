@@ -54,28 +54,28 @@ export default class ArtistTypeCommand implements BaseCommand {
         usage: "/artisttype set\nartisttype:[soloists | groups | both]\n\n/artisttype reset",
         examples: [
             {
-                example: "`,artisttype set artisttype:soloists`",
+                example: "`/artisttype set artisttype:soloists`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.artisttype.help.example.soloists"
                 ),
             },
             {
-                example: "`,artisttype set artisttype:groups`",
+                example: "`/artisttype set artisttype:groups`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.artisttype.help.example.groups"
                 ),
             },
             {
-                example: "`,artisttype set artisttype:both`",
+                example: "`/artisttype set artisttype:both`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.artisttype.help.example.both"
                 ),
             },
             {
-                example: "`,artisttype reset`",
+                example: "`/artisttype reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.artisttype.help.example.reset"

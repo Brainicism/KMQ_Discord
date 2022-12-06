@@ -101,7 +101,7 @@ export default class ReleaseCommand implements BaseCommand {
         usage: "/release set\nrelease:[official | all]\n\n/release reset",
         examples: [
             {
-                example: "`,release set release:official`",
+                example: "`/release set release:official`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.release.help.example.official",
@@ -109,14 +109,14 @@ export default class ReleaseCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,release set release:all`",
+                example: "`/release set release:all`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.release.help.example.all"
                 ),
             },
             {
-                example: "`,release reset`",
+                example: "`/release reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.release.help.example.reset",

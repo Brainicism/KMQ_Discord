@@ -73,7 +73,7 @@ export default class DurationCommand implements BaseCommand {
         )}]\n\n/duration reset`,
         examples: [
             {
-                example: "`,duration set duration:15`",
+                example: "`/duration set duration:15`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.duration.help.example.set",
@@ -83,7 +83,7 @@ export default class DurationCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,duration add duration:5`",
+                example: "`/duration add duration:5`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.duration.help.example.increment",
@@ -93,7 +93,7 @@ export default class DurationCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,duration remove duration:5`",
+                example: "`/duration remove duration:5`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.duration.help.example.decrement",
@@ -103,7 +103,7 @@ export default class DurationCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,duration reset`",
+                example: "`/duration reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.duration.help.example.reset"

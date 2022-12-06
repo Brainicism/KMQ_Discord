@@ -50,7 +50,7 @@ export default class SubunitsCommand implements BaseCommand {
         usage: "/subunits set\nsubunits:[include | exclude]\n\n/subunits reset",
         examples: [
             {
-                example: "`,subunits set subunits:include`",
+                example: "`/subunits set subunits:include`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.subunits.help.example.include",
@@ -63,14 +63,14 @@ export default class SubunitsCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,subunits set subunits:exclude`",
+                example: "`/subunits set subunits:exclude`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.subunits.help.example.exclude"
                 ),
             },
             {
-                example: "`,subunits reset`",
+                example: "`/subunits reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.subunits.help.example.reset",

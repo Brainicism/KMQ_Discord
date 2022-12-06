@@ -62,7 +62,7 @@ export default class LocaleTypeCommand implements BaseCommand {
         )}]`,
         examples: [
             {
-                example: "`,locale language:English`",
+                example: "`/locale language:English`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.locale.help.example.toEnglish",
@@ -75,7 +75,7 @@ export default class LocaleTypeCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,locale language:Korean`",
+                example: "`/locale language:Korean`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.locale.help.example.toKorean",

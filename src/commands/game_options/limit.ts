@@ -64,7 +64,7 @@ export default class LimitCommand implements BaseCommand {
         usage: "/limit set top\nlimit:{limit}\n\n/limit set range\nlimit_start:{limit_start}\nlimit_end:{limit_end}\n\n/limit reset",
         examples: [
             {
-                example: "`,limit set top limit:250`",
+                example: "`/limit set top limit:250`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.limit.help.example.singleLimit",
@@ -74,7 +74,7 @@ export default class LimitCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,limit set range limit_start:250 limit_end:500`",
+                example: "`/limit set range limit_start:250 limit_end:500`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.limit.help.example.twoLimits",
@@ -82,7 +82,7 @@ export default class LimitCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,limit reset`",
+                example: "`/limit reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.limit.help.example.reset",

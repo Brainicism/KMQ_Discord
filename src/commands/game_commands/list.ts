@@ -55,7 +55,7 @@ export default class ListCommand implements BaseCommand {
         usage: "/list type:[groups | exclude | include]",
         examples: [
             {
-                example: "`,list type:groups`",
+                example: "`/list type:groups`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.list.help.example.groups",
@@ -63,7 +63,7 @@ export default class ListCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,list type:exclude`",
+                example: "`/list type:exclude`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.list.help.example.exclude",
@@ -71,7 +71,7 @@ export default class ListCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,list type:include`",
+                example: "`/list type:include`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.list.help.example.include",

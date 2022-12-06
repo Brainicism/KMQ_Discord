@@ -211,14 +211,14 @@ export default class PlayCommand implements BaseCommand {
         priority: 1050,
         examples: [
             {
-                example: "`,play classic`",
+                example: "`/play classic`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.play.help.example.classic"
                 ),
             },
             {
-                example: "`,play elimination lives:5`",
+                example: "`/play elimination lives:5`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.play.help.example.elimination",
@@ -228,7 +228,7 @@ export default class PlayCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,play elimination`",
+                example: "`/play elimination`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.play.help.example.elimination",
@@ -238,7 +238,7 @@ export default class PlayCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,play teams create`",
+                example: "`/play teams create`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.play.help.example.teams"

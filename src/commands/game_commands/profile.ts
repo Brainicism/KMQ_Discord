@@ -293,14 +293,14 @@ export default class ProfileCommand implements BaseCommand {
         )}}\n\n,profile user_id:{user_id}`,
         examples: [
             {
-                example: "`,profile`",
+                example: "`/profile`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.profile.help.example.self"
                 ),
             },
             {
-                example: "`,profile user_mention:@FortnitePlayer`",
+                example: "`/profile user_mention:@FortnitePlayer`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.profile.help.example.otherPlayerMention",
@@ -310,7 +310,7 @@ export default class ProfileCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,profile user_id:141734249702096896`",
+                example: "`/profile user_id:141734249702096896`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.profile.help.example.otherPlayerID"

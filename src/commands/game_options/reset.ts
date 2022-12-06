@@ -36,7 +36,7 @@ export default class ResetCommand implements BaseCommand {
         usage: "/reset",
         examples: [
             {
-                example: "`,reset`",
+                example: "`/reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.reset.help.example.reset"

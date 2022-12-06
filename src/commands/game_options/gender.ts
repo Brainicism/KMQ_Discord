@@ -64,35 +64,35 @@ export default class GenderCommand implements BaseCommand {
         usage: "/gender set\ngender_1:[gender]\ngender_2:{gender}\ngender_3:{gender}\n\n/gender reset",
         examples: [
             {
-                example: "`,gender set female`",
+                example: "`/gender set female`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.gender.help.example.female"
                 ),
             },
             {
-                example: "`,gender set gender_1:male gender_2:female`",
+                example: "`/gender set gender_1:male gender_2:female`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.gender.help.example.maleFemale"
                 ),
             },
             {
-                example: "`,gender set gender_1:coed`",
+                example: "`/gender set gender_1:coed`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.gender.help.example.coed"
                 ),
             },
             {
-                example: "`,gender set gender_1:alternating`",
+                example: "`/gender set gender_1:alternating`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.gender.help.example.alternating"
                 ),
             },
             {
-                example: "`,gender reset`",
+                example: "`/gender reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.gender.help.example.reset"

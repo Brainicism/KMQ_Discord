@@ -49,28 +49,28 @@ export default class OstCommand implements BaseCommand {
         usage: "/ost set\nost:[include | exclude | exclusive]\n\n/ost reset",
         examples: [
             {
-                example: "`,ost set ost:include`",
+                example: "`/ost set ost:include`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.ost.help.example.include"
                 ),
             },
             {
-                example: "`,ost set ost:exclude`",
+                example: "`/ost set ost:exclude`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.ost.help.example.exclude"
                 ),
             },
             {
-                example: "`,ost set ost:exclusive`",
+                example: "`/ost set ost:exclusive`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.ost.help.example.exclusive"
                 ),
             },
             {
-                example: "`,ost reset`",
+                example: "`/ost reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.ost.help.example.reset",
