@@ -30,7 +30,7 @@ export default class StatsCommand implements BaseCommand {
             guildID,
             "command.stats.help.description"
         ),
-        usage: ",stats",
+        usage: "/stats",
         examples: [],
         priority: 1,
     });

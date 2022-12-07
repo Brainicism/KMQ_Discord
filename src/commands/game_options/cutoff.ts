@@ -74,7 +74,7 @@ export default class CutoffCommand implements BaseCommand {
             },
             {
                 example:
-                    "`,cutoff set range beginning_year:2015 ending_year:2018`",
+                    "`/cutoff set range beginning_year:2015 ending_year:2018`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.cutoff.help.example.twoCutoffs",
@@ -85,7 +85,7 @@ export default class CutoffCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,cutoff reset`",
+                example: "`/cutoff reset`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.cutoff.help.example.reset",

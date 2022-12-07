@@ -22,7 +22,6 @@ import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("help");
-const placeholder = /\//g;
 const FIELDS_PER_EMBED = 6;
 const excludedCommands = ["premium"];
 
@@ -160,7 +159,7 @@ export default class HelpCommand implements BaseCommand {
                 messageContext.guildID
             );
 
-            embedTitle = `\`${helpManual.usage.replace(placeholder, "/")}\``;
+            embedTitle = `\`${helpManual.usage}\``;
             embedDesc = helpManual.description;
             embedActionRowComponents = helpManual.actionRowComponents;
             if (helpManual.examples.length > 0) {
@@ -171,7 +170,7 @@ export default class HelpCommand implements BaseCommand {
             }
 
             embedFields = helpManual.examples.map((example) => ({
-                name: example.example.replace(placeholder, "/"),
+                name: example.example,
                 value: example.explanation,
             }));
 
@@ -228,7 +227,7 @@ export default class HelpCommand implements BaseCommand {
                     }\n${LocalizationManager.localizer.translate(
                         messageContext.guildID,
                         "misc.usage"
-                    )}: \`${helpManual.usage.replace(placeholder, "/")}\``,
+                    )}: \`${helpManual.usage}\``,
                 };
             });
 
