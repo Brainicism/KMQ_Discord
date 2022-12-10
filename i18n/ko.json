@@ -38,7 +38,7 @@
                     "groups": "현재 {{groups}} 옵션에 {{groupOne}}, {{groupTwo}}을 추가합니다.",
                     "include": "현재 {{include}} 옵션에 {{groupOne}}을 추가합니다."
                 },
-                "name": "추가가"
+                "name": "추가"
             }
         },
         "answer": {
@@ -69,7 +69,7 @@
                     "artistTypeOption": "재생할 아티스트 유형입니다",
                     "description": "솔로 아티스트, 그룹 또는 모든 아티스트의 음악을 듣고 싶은지 선택하세요"
                 },
-                "name": "아티스트형유형"
+                "name": "아티스트 유형"
             }
         },
         "begin": {
