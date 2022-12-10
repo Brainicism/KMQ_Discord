@@ -128,7 +128,7 @@
                     "reset": "게임 지속 시간을 비활성화합니다.",
                     "set": "{{duration}}분 후에 게임이 자동으로 종료됩니다."
                 },
-                "name": "지속",
+                "name": "지속 시간 설정",
                 "usage": {
                     "minutes": "분"
                 }
@@ -142,7 +142,7 @@
         "end": {
             "help": {
                 "description": "현재 게임을 끝내고 승자를 결정합니다.",
-                "name": "종료"
+                "name": "게임 종료"
             },
             "interaction": {
                 "description": "즐거웠기를 바랍니다!",
@@ -152,17 +152,17 @@
         "exclude": {
             "failure": {
                 "unrecognizedGroups": {
-                    "excluded": "제외"
+                    "excluded": "그룹 제외"
                 }
             },
             "help": {
-                "description": "제외할 그룹을 력된 만큼 선택합니다. 그룹 이름 목록은 [여기]({{groupList}})에서 찾을 수 있습니다.",
+                "description": "제외할 그룹을 입력된 만큼 선택합니다. 그룹 이름 목록은 [여기]({{groupList}})에서 찾을 수 있습니다.",
                 "example": {
                     "multipleGroups": "{{groupOne}}, {{groupTwo}}, {{groupThree}}의 노래를 무시합니다.",
                     "reset": "제외 옵션을 재설정합니다.",
                     "singleGroup": "{{group}}의 노래를 제외합니다."
                 },
-                "name": "그룹 제외"
+                "name": "그룹 제외 설정"
             },
             "interaction": {
                 "add": {
@@ -203,7 +203,7 @@
             "firstGameOfDayBonus": "오늘의 첫 게임 보너스",
             "help": {
                 "description": "현재 경험치 수정 및 현재 보너스 경험치 아티스트 목록을 표시합니다.",
-                "name": "경험해요"
+                "name": "경험치"
             },
             "lowSongCountPenalty": "낮은 노래 수 패널티",
             "multipleChoicePenalty": "객관식 패널티",
@@ -223,7 +223,7 @@
             },
             "help": {
                 "description": "투표 없이 현재 곡에 대한 힌트를 직접 받을 수 있습니다",
-                "name": "암시를강요합니다"
+                "name": "강제 힌트"
             },
             "hintIgnored": "강제 힌트 무시"
         },
@@ -236,7 +236,7 @@
             },
             "help": {
                 "description": "투표 없이 현재 노래를 직접 건너뜁니다.",
-                "name": "강제로건너뜁니다"
+                "name": "강제 건너뛰기"
             },
             "skipIgnored": "강제 건너뛰기가 무시되었습니다."
         },
@@ -250,7 +250,7 @@
                     "maleFemale": "남성 및 여성 아티스트의 노래를 모두 재생합니다.",
                     "reset": "남성, 여성, 남녀 혼성 그룹의 기본 성별로 재설정합니다."
                 },
-                "name": "성"
+                "name": "성별 선택"
             },
             "interaction": {
                 "description": "듣고 싶은 아티스트의 성별을 선택하세요.",
@@ -279,7 +279,7 @@
                     "reset": "목표를 비활성화합니다.",
                     "set": "{{goal}}을(를) 먼저 달성한 플레이어가 게임에서 승리합니다."
                 },
-                "name": "골문",
+                "name": "점수",
                 "usage": {
                     "points": "점수"
                 }
@@ -297,7 +297,7 @@
                     "reset": "그룹 옵션을 재설정합니다.",
                     "singleGroup": "{{group}}의 노래만 재생합니다."
                 },
-                "name": "무리"
+                "name": "그룹 선택"
             },
             "interaction": {
                 "add": {
@@ -327,7 +327,7 @@
                     "reset": "{{defaultGuessMode}}의 기본 추측 모드로 재설정합니다.",
                     "song": "게임 라운드에서 승리하려면 올바른 노래 이름을 입력하세요."
                 },
-                "name": "추측모드입니다"
+                "name": "추측 모드입니다"
             },
             "interaction": {
                 "guessMode": "그것은 타당한 추측으로 여겨집니다"
@@ -393,7 +393,7 @@
                     "reset": "포함 옵션을 재설정합니다.",
                     "singleGroup": "{{group}}의 노래를 강제로 포함합니다."
                 },
-                "name": "포함해요"
+                "name": "포함 설정"
             },
             "interaction": {
                 "add": {
