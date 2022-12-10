@@ -291,7 +291,7 @@
         },
         "groups": {
             "help": {
-                "description": "듣고 싶은 그룹을 선택한 만큼 선택합니다. 그룹 이름 목록은 [여기]({groupList})에서 찾을 수 있습니다.",
+                "description": "듣고 싶은 그룹을 선택한 만큼 선택합니다. 그룹 이름 목록은 [여기({{groupList}})에서 찾을 수 있습니다.",
                 "example": {
                     "multipleGroups": "{{groupOne}}, {{groupTwo}}, {{groupThree}}의 노래만 재생합니다.",
                     "reset": "그룹 옵션을 재설정합니다.",
