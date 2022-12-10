@@ -69,7 +69,7 @@
                     "artistTypeOption": "재생할 아티스트 유형입니다",
                     "description": "솔로 아티스트, 그룹 또는 모든 아티스트의 음악을 듣고 싶은지 선택하세요"
                 },
-                "name": "아티스트 유형"
+                "name": "아티스트유형"
             }
         },
         "begin": {
@@ -94,7 +94,7 @@
                     "singleCutoff": "{{year}}년 이후에 발매된 노래 재생합니다.",
                     "twoCutoffs": "{{beginningYear}}~{{endYear}}년 사이에 발매된 노래 재생합니다."
                 },
-                "name": "년도 범위 선택"
+                "name": "년도범위선택"
             },
             "interaction": {
                 "beginningYear": "포함할 가장 빠른 연도입니다",
@@ -128,7 +128,7 @@
                     "reset": "게임 지속 시간을 비활성화합니다.",
                     "set": "{{duration}}분 후에 게임이 자동으로 종료됩니다."
                 },
-                "name": "지속 시간 설정",
+                "name": "지속시간설정",
                 "usage": {
                     "minutes": "분"
                 }
@@ -142,7 +142,7 @@
         "end": {
             "help": {
                 "description": "현재 게임을 끝내고 승자를 결정합니다.",
-                "name": "게임 종료"
+                "name": "게임종료"
             },
             "interaction": {
                 "description": "즐거웠기를 바랍니다!",
@@ -162,7 +162,7 @@
                     "reset": "제외 옵션을 재설정합니다.",
                     "singleGroup": "{{group}}의 노래를 제외합니다."
                 },
-                "name": "그룹 제외 설정"
+                "name": "그룹제외설정"
             },
             "interaction": {
                 "add": {
@@ -223,7 +223,7 @@
             },
             "help": {
                 "description": "투표 없이 현재 곡에 대한 힌트를 직접 받을 수 있습니다",
-                "name": "강제 힌트"
+                "name": "강제힌트"
             },
             "hintIgnored": "강제 힌트 무시"
         },
@@ -236,7 +236,7 @@
             },
             "help": {
                 "description": "투표 없이 현재 노래를 직접 건너뜁니다.",
-                "name": "강제 건너뛰기"
+                "name": "강제건너뛰기"
             },
             "skipIgnored": "강제 건너뛰기가 무시되었습니다."
         },
@@ -250,7 +250,7 @@
                     "maleFemale": "남성 및 여성 아티스트의 노래를 모두 재생합니다.",
                     "reset": "남성, 여성, 남녀 혼성 그룹의 기본 성별로 재설정합니다."
                 },
-                "name": "성별 선택"
+                "name": "성별선택"
             },
             "interaction": {
                 "description": "듣고 싶은 아티스트의 성별을 선택하세요.",
@@ -297,7 +297,7 @@
                     "reset": "그룹 옵션을 재설정합니다.",
                     "singleGroup": "{{group}}의 노래만 재생합니다."
                 },
-                "name": "그룹 선택"
+                "name": "그룹선택"
             },
             "interaction": {
                 "add": {
@@ -327,7 +327,7 @@
                     "reset": "{{defaultGuessMode}}의 기본 추측 모드로 재설정합니다.",
                     "song": "게임 라운드에서 승리하려면 올바른 노래 이름을 입력하세요."
                 },
-                "name": "추측 모드입니다"
+                "name": "추측모드입니다"
             },
             "interaction": {
                 "guessMode": "그것은 타당한 추측으로 여겨집니다"
@@ -393,7 +393,7 @@
                     "reset": "포함 옵션을 재설정합니다.",
                     "singleGroup": "{{group}}의 노래를 강제로 포함합니다."
                 },
-                "name": "포함 설정"
+                "name": "포함설정"
             },
             "interaction": {
                 "add": {
