@@ -105,28 +105,28 @@
             }
         },
         "debug": {
-            "description": "봇 개발자가 이 작업을 수행하도록 요청한 경우 다음을 제공하세요.\n{{debugID}}",
-            "title": "디버그 세부 정보가 전송되었습니다!"
+            "description": "만약 당신이 봇 개발자로부터 이것을 요청받았다면, 다음을 제공하세요:\n{{debugID}}",
+            "title": "디버그 세부 정보를 보냈습니다!"
         },
         "duration": {
             "failure": {
                 "removingDuration": {
                     "notSet": {
-                        "description": "년도는 현재 설정되어 있지 않습니다."
+                        "description": "지속 시간은 현재 설정되어 있지 않습니다."
                     },
-                    "title": "년도을 제거하는 동안 오류가 발생했습니다",
+                    "title": "지속 시간을 제거하는 중 오류가 발생했습니다.",
                     "tooShort": {
-                        "description": "지속 시간은 2분 이상이어야 합니다."
+                        "description": "지속 시간은 2분 미만일 수 없습니다."
                     }
                 }
             },
             "help": {
                 "description": "KMQ 게임의 최대 길이를 분 단위로 설정합니다.",
                 "example": {
-                    "decrement": "현재 게임 시간에서 {{duration}}분을 제거합니다.",
+                    "decrement": "현재 게임 시간에 {{duration}}분을 제거합니다.",
                     "increment": "현재 게임 시간에 {{duration}}분을 추가합니다.",
-                    "reset": "게임 지속 시간을 비활성화합니다.",
-                    "set": "{{duration}}분 후에 게임이 자동으로 종료됩니다."
+                    "reset": "지속 시간을 비활성화합니다.",
+                    "set": "{{duration}}분 후 게임이 자동으로 종료됩니다."
                 },
                 "name": "지속 시간 설정",
                 "usage": {
@@ -134,9 +134,9 @@
                 }
             },
             "interaction": {
-                "durationAdd": "지속 시간에 추가할 시간(분)입니다",
-                "durationRemove": "기간에서 제거할 시간(분)입니다",
-                "durationSet": "게임을 종료하기 전에 KMQ를 몇 분 동안 실행할 수 있습니다"
+                "durationAdd": "지속 시간에 추가할 시간 (분)",
+                "durationRemove": "지속 시간에 제거할 시간 (분)",
+                "durationSet": "게임 종료 전 KMQ 플레이 시간"
             }
         },
         "end": {
