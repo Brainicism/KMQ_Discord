@@ -58,16 +58,16 @@
         },
         "artisttype": {
             "help": {
-                "description": "솔로 아티스트, 그룹 또는 모든 아티스트의 음악을 듣고 싶은지 선택하세요. 옵션은 {{soloists}}, {{groups}}, {{both}}입니다.",
+                "description": "솔로 아티스트, 그룹 또는 모두 듣고 싶은지 선택하십시오. 옵션은 {{soloists}}, {{groups}}, {{both}}입니다.",
                 "example": {
-                    "both": "솔로 아티스트와 그룹의 노래를 모두 재생합니다.",
+                    "both": "솔로 아티스트 및 그룹의 노래를 모두 재생합니다.",
                     "groups": "그룹의 노래만 재생합니다.",
                     "reset": "아티스트 유형 옵션을 재설정합니다.",
-                    "soloists": "솔로 아티스트의 곡만 재생합니다."
+                    "soloists": "솔로 아티스트의 노래만 재생합니다."
                 },
                 "interaction": {
-                    "artistTypeOption": "재생할 아티스트 유형입니다",
-                    "description": "솔로 아티스트, 그룹 또는 모든 아티스트의 음악을 듣고 싶은지 선택하세요"
+                    "artistTypeOption": "재생할 아티스트 유형",
+                    "description": "솔로 아티스트, 그룹 또는 모두 듣고 싶은지 선택하십시오."
                 },
                 "name": "아티스트 유형"
             }
