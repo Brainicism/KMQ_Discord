@@ -32,7 +32,7 @@
                 }
             },
             "help": {
-                "description": "현재 {{groups}, {{exclude}} 또는 {{include}} 옵션에 하나 이상의 그룹을 추가합니다.",
+                "description": "현재 {{groups}}, {{exclude}} 또는 {{include}} 옵션에 하나 이상의 그룹을 추가합니다.",
                 "example": {
                     "exclude": "현재 {{exclude}} 옵션에 {{groupOne}}, {{groupTwo}}, {{groupThree}}을(를) 추가합니다.",
                     "groups": "{{groupOne}} 및 {{groupTwo}}을(를) 현재 {{groups}} 옵션에 추가합니다.",
