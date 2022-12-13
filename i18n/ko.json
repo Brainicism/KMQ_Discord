@@ -91,7 +91,7 @@
                 "description": "노래에 대한 연도 범위를 설정합니다. 하나의 값을 지정하면 해당 연도 이후의 노래만 재생됩니다. 두 개의 값을 지정하면 해당 값 사이의 노래만 재생됩니다.",
                 "example": {
                     "reset": "연도 설정 기본값인 {{defaultBeginingSearchYear}} ~ {{defaultEndSearchYear}}(으)로 재설정합니다.",
-                    "singleCutoff": "{{year}년 후에 발매된 곡을 재생합니다.",
+                    "singleCutoff": "{{year}}년 후에 발매된 곡을 재생합니다.",
                     "twoCutoffs": "{{beginingYear}} ~ {{endYear}}년 사이에 발매된 곡을 재생합니다."
                 },
                 "name": "연도 범위 선택"
