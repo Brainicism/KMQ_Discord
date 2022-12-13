@@ -32,28 +32,28 @@
                 }
             },
             "help": {
-                "description": "현재 {{groups}}, {{exclude}} 또는 {{include}} 옵션에 하나 이상의 그룹을 추가합니다.",
+                "description": "현재 {{groups}, {{exclude}} 또는 {{include}} 옵션에 하나 이상의 그룹을 추가합니다.",
                 "example": {
-                    "exclude": "현재 {{exclude}} 옵션에 {{groupOne}}, {{groupTwo}}, {{groupThree}}를 추가합니다.",
-                    "groups": "현재 {{groups}} 옵션에 {{groupOne}}, {{groupTwo}}을 추가합니다.",
-                    "include": "현재 {{include}} 옵션에 {{groupOne}}을 추가합니다."
+                    "exclude": "현재 {{exclude}} 옵션에 {{groupOne}}, {{groupTwo}}, {{groupThree}}을(를) 추가합니다.",
+                    "groups": "{{groupOne}} 및 {{groupTwo}}을(를) 현재 {{groups}} 옵션에 추가합니다.",
+                    "include": "현재 {{include}} 옵션에 {{groupOne}}을(를) 추가합니다."
                 },
                 "name": "추가"
             }
         },
         "answer": {
             "help": {
-                "description": "정답 입력 방법을 선택하세요. 정답을 입력하거나 객관식을 사용하세요. 옵션은 `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}`, `{{hard}}`입니다.",
+                "description": "답변 방법 선택: 답을 입력하거나 객관식을 통해 선택합니다. 옵션은 다음과 같습니다: `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}`, `{{hard}}`",
                 "example": {
-                    "multipleChoice": "{{optionCount}}개의 객관식 옵션에서 버튼을 클릭하여 추측하세요. ({{penalty}} 경험치 패널티가 적용됩니다.)",
-                    "typing": "자신이 추측한 것을 채팅에 입력하세요.",
-                    "typingTypos": "추측을 할려면 채팅에 입력하세요. (사소한 오타는 올바른 것으로 표시되며 {{penalty}} 경험치 패널티가 적용됩니다.)"
+                    "multipleChoice": "{{optionCount}개의 객관식 옵션에서 버튼을 클릭하여 추측하십시오. {{penalty}} 경험치 패널티가 적용됩니다.",
+                    "typing": "채팅에 답을 입력하여 추측합니다.",
+                    "typingTypos": "채팅에 답을 입력하여 추측합니다. 사소한 오타는 올바른 것으로 표시됩니다. {{penalty}} 경험치 패널티가 적용됩니다."
                 },
                 "interaction": {
                     "answerOption": "게임 내 답변 방법",
-                    "description": "정답 입력 방법 선택: 객관식 혹은 서술형 (정답 직접 입력)"
+                    "description": "답변 방법 선택: 답을 입력하거나 객관식을 통해 답을 선택하십시오."
                 },
-                "name": "정답"
+                "name": "답변"
             }
         },
         "artisttype": {
@@ -69,7 +69,7 @@
                     "artistTypeOption": "재생할 아티스트 유형입니다",
                     "description": "솔로 아티스트, 그룹 또는 모든 아티스트의 음악을 듣고 싶은지 선택하세요"
                 },
-                "name": "아티스트유형"
+                "name": "아티스트 유형"
             }
         },
         "begin": {
@@ -94,7 +94,7 @@
                     "singleCutoff": "{{year}}년 이후에 발매된 노래 재생합니다.",
                     "twoCutoffs": "{{beginningYear}}~{{endYear}}년 사이에 발매된 노래 재생합니다."
                 },
-                "name": "년도범위선택"
+                "name": "년도 범위 선택"
             },
             "interaction": {
                 "beginningYear": "포함할 가장 빠른 연도입니다",
@@ -128,7 +128,7 @@
                     "reset": "게임 지속 시간을 비활성화합니다.",
                     "set": "{{duration}}분 후에 게임이 자동으로 종료됩니다."
                 },
-                "name": "지속시간설정",
+                "name": "지속 시간 설정",
                 "usage": {
                     "minutes": "분"
                 }
@@ -142,7 +142,7 @@
         "end": {
             "help": {
                 "description": "현재 게임을 끝내고 승자를 결정합니다.",
-                "name": "게임종료"
+                "name": "게임 종료"
             },
             "interaction": {
                 "description": "즐거웠기를 바랍니다!",
@@ -162,7 +162,7 @@
                     "reset": "제외 옵션을 재설정합니다.",
                     "singleGroup": "{{group}}의 노래를 제외합니다."
                 },
-                "name": "그룹제외설정"
+                "name": "그룹 제외 설정"
             },
             "interaction": {
                 "add": {
@@ -223,7 +223,7 @@
             },
             "help": {
                 "description": "투표 없이 현재 곡에 대한 힌트를 직접 받을 수 있습니다",
-                "name": "강제힌트"
+                "name": "강제 힌트"
             },
             "hintIgnored": "강제 힌트 무시"
         },
@@ -236,7 +236,7 @@
             },
             "help": {
                 "description": "투표 없이 현재 노래를 직접 건너뜁니다.",
-                "name": "강제건너뛰기"
+                "name": "강제 건너뛰기"
             },
             "skipIgnored": "강제 건너뛰기가 무시되었습니다."
         },
@@ -250,7 +250,7 @@
                     "maleFemale": "남성 및 여성 아티스트의 노래를 모두 재생합니다.",
                     "reset": "남성, 여성, 남녀 혼성 그룹의 기본 성별로 재설정합니다."
                 },
-                "name": "성별선택"
+                "name": "성별 선택"
             },
             "interaction": {
                 "description": "듣고 싶은 아티스트의 성별을 선택하세요.",
@@ -291,13 +291,13 @@
         },
         "groups": {
             "help": {
-                "description": "듣고 싶은 그룹을 선택한 만큼 선택합니다. 그룹 이름 목록은 [여기({{groupList}})에서 찾을 수 있습니다.",
+                "description": "듣고 싶은 그룹을 쉼표로 구분하여 선택하십시오. (그룹 이름 목록은 [여기]({{groupList}})에서 찾을 수 있습니다.)",
                 "example": {
                     "multipleGroups": "{{groupOne}}, {{groupTwo}}, {{groupThree}}의 노래만 재생합니다.",
                     "reset": "그룹 옵션을 재설정합니다.",
                     "singleGroup": "{{group}}의 노래만 재생합니다."
                 },
-                "name": "그룹선택"
+                "name": "그룹 선택"
             },
             "interaction": {
                 "add": {
@@ -327,7 +327,7 @@
                     "reset": "{{defaultGuessMode}}의 기본 추측 모드로 재설정합니다.",
                     "song": "게임 라운드에서 승리하려면 올바른 노래 이름을 입력하세요."
                 },
-                "name": "추측모드"
+                "name": "추측 모드입니다"
             },
             "interaction": {
                 "guessMode": "그것은 타당한 추측으로 여겨집니다"
@@ -346,7 +346,7 @@
                     "allCommands": "사용 가능한 모든 명령어와 간단한 설명을 표시합니다.",
                     "sampleCommand": "년도 범위 명령어에 대한 자세한 설명을 표시합니다."
                 },
-                "name": "도움말"
+                "name": "도와주세요"
             },
             "interaction": {
                 "action": "설명서를 가져올 명령의 이름입니다"
@@ -387,13 +387,13 @@
                 }
             },
             "help": {
-                "description": "다른 필터 ({gender}, {{artisttype}} 등)는 무시하고 강제로 포함할 그룹만큼 선택합니다. 그룹 이름 목록은 [여기]({groupList})에서 찾을 수 있습니다.",
+                "description": "다른 필터 ({{gender}}, {{artisttype}} 등)를 무시하고 쉼표로 구분하여 강제로 포함할 그룹을 선택합니다. (그룹 이름 목록은 [여기]({{groupList}})에서 찾을 수 있습니다.)",
                 "example": {
                     "multipleGroups": "{{groupOne}}, {{groupTwo}}, {{groupThree}}의 노래를 강제로 포함합니다.",
                     "reset": "포함 옵션을 재설정합니다.",
                     "singleGroup": "{{group}}의 노래를 강제로 포함합니다."
                 },
-                "name": "포함설정"
+                "name": "포함 설정"
             },
             "interaction": {
                 "add": {
