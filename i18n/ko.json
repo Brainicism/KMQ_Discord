@@ -69,7 +69,7 @@
                     "artistTypeOption": "재생할 아티스트 유형",
                     "description": "솔로 아티스트, 그룹 또는 모두 듣고 싶은지 선택하십시오."
                 },
-                "name": "아티스트 유형"
+                "name": "아티스트유형"
             }
         },
         "begin": {
@@ -94,7 +94,7 @@
                     "singleCutoff": "{{year}}년 후에 발매된 곡을 재생합니다.",
                     "twoCutoffs": "{{beginingYear}} ~ {{endYear}}년 사이에 발매된 곡을 재생합니다."
                 },
-                "name": "연도 범위 선택"
+                "name": "연도범위선택"
             },
             "interaction": {
                 "beginningYear": "포함할 가장 빠른 연도",
@@ -128,7 +128,7 @@
                     "reset": "지속 시간을 비활성화합니다.",
                     "set": "{{duration}}분 후 게임이 자동으로 종료됩니다."
                 },
-                "name": "지속 시간 설정",
+                "name": "지속_시간_설정",
                 "usage": {
                     "minutes": "분"
                 }
@@ -142,7 +142,7 @@
         "end": {
             "help": {
                 "description": "현재 게임을 끝내고 승자를 결정합니다.",
-                "name": "게임 종료"
+                "name": "게임종료"
             },
             "interaction": {
                 "description": "즐거웠기를 바랍니다!",
@@ -156,13 +156,13 @@
                 }
             },
             "help": {
-                "description": "제외할 그룹을 입력된 만큼 선택합니다. 그룹 이름 목록은 [여기]({{groupList}})에서 찾을 수 있습니다.",
+                "description": "무시할 그룹을 최대한 많이 선택하십시오. 그룹 이름 목록은 [여기]({{groupList}})에서 찾을 수 있습니다.",
                 "example": {
                     "multipleGroups": "{{groupOne}}, {{groupTwo}}, {{groupThree}}의 노래를 무시합니다.",
                     "reset": "제외 옵션을 재설정합니다.",
-                    "singleGroup": "{{group}}의 노래를 제외합니다."
+                    "singleGroup": "{{group}}의 노래를 무시합니다."
                 },
-                "name": "그룹 제외 설정"
+                "name": "그룹무시설정"
             },
             "interaction": {
                 "add": {
@@ -175,43 +175,43 @@
                     "perGroupDescription": "{{ordinalNum}} 그룹 제거"
                 },
                 "reset": {
-                    "description": "제외 옵션을 재설정합니다."
+                    "description": "무시 옵션을 재설정합니다."
                 },
                 "set": {
-                    "description": "게임 옵션에서 지정된 그룹의 노래를 제외합니다.",
-                    "perGroupDescription": "{{ordinalNum}} 그룹 제외"
+                    "description": "게임 옵션에서 지정된 그룹의 노래를 무시합니다.",
+                    "perGroupDescription": "{{ordinalNum}} 그룹 노래 무시"
                 }
             }
         },
         "exp": {
-            "activeModifiers": "🚀 활성화된 수정 내용 🚀",
-            "artistGroupGuessModePenalty": "아티스트/그룹 추측 모드의 패널티입니다.",
-            "bonusArtists": "데일리 보너스 아티스트분들의 노래를 맞혀보세요.",
-            "bonusArtistsTitle": "🎤 현재 추가 경험치를 지급하는 아티스트 목록 🎤",
-            "bonusDescription": "다음에 대한 추가 경험치를 얻을 수 있습니다",
+            "activeModifiers": "🚀 활성화된 모듈 내용 🚀",
+            "artistGroupGuessModePenalty": "아티스트/그룹 추측 모드 페널티",
+            "bonusArtists": "일일 보너스 아티스트의 노래 추측",
+            "bonusArtistsTitle": "🎤 현재 보너스 지급 아티스트 🎤",
+            "bonusDescription": "다음에 대한 보너스 경험치를 받을 수 있습니다.",
             "bonusTitle": "경험치 보너스를 받는 방법",
             "explanation": {
-                "bonusArtistGuess": "보너스 아티스트의 정확한 추측",
+                "bonusArtistGuess": "보너스 아티스트에 대한 정확한 추측",
                 "firstGameOfDay": "오늘의 첫 게임",
-                "powerHour": "KMQ 슈퍼 시간 또는 주말 동안 플레이",
-                "quickGuess": "빠른 추측",
-                "rareGuess": "희귀한 정확 추측 보너스",
-                "rareGuessRange": "{{rareGuessLowerBound}} 최대 {{rareGuessUpperBound}}",
-                "streak": "추측 정답이 연속 5번 이상인 경우",
+                "powerHour": "KMQ Power Hour 또는 주말에 플레이하기",
+                "quickGuess": "빨리 추측하기",
+                "rareGuess": "희귀한 정확한 추측 보너스",
+                "rareGuessRange": "{{rareGuessLowerBound}} ~ {{rareGuessUpperBound}}",
+                "streak": "5개 이상의 연속 추측",
                 "voting": "투표"
             },
             "firstGameOfDayBonus": "오늘의 첫 게임 보너스",
             "help": {
-                "description": "현재 경험치 수정 및 현재 보너스 경험치 아티스트 목록을 표시합니다.",
+                "description": "현재 경험치 수정 내용과 현재 보너스 경험치 아티스트 목록을 표시합니다.",
                 "name": "경험치"
             },
-            "lowSongCountPenalty": "낮은 노래 수 패널티",
+            "lowSongCountPenalty": "낮은 노래 횟수 패널티",
             "multipleChoicePenalty": "객관식 패널티",
-            "powerHourBonus": "슈퍼 시간 보너스",
-            "shufflePopularityPenalty": "인기 셔플 페널티",
-            "shuffleWeightedEasyPenalty": "가중 난이도 셔플 페널티",
+            "powerHourBonus": "Power Hour 보너스",
+            "shufflePopularityPenalty": "셔플 인기 패널티",
+            "shuffleWeightedEasyPenalty": "Shuffle Weighted Easy Penalty",
             "title": "경험치 보너스",
-            "totalModifier": "총 수정",
+            "totalModifier": "모든 모듈",
             "typosAllowedPenalty": "오타 허용 패널티",
             "voteBonus": "투표 보너스"
         },
