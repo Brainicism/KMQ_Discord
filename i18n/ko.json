@@ -370,12 +370,12 @@
                 }
             },
             "help": {
-                "description": "현재 재생 중인 노래에 대한 힌트를 제공합니다.",
+                "description": "현재 재생 중인 노래의 힌트를 줍니다.",
                 "name": "힌트"
             },
             "request": {
-                "description": "{{hintCounter}} 힌트 요청이 전송되었습니다.",
-                "title": "힌트를 요청했습니다"
+                "description": "{{hintCounter}}개의 힌트 요청이 수신되었습니다.",
+                "title": "힌트 요청"
             },
             "songName": "노래 이름",
             "title": "힌트"
@@ -387,13 +387,13 @@
                 }
             },
             "help": {
-                "description": "다른 필터 ({{gender}}, {{artisttype}} 등)를 무시하고 쉼표로 구분하여 강제로 포함할 그룹을 선택합니다. (그룹 이름 목록은 [여기]({{groupList}})에서 찾을 수 있습니다.)",
+                "description": "다른 필터 ({{gender}}, {{artisttype}} 등)은(는) 무시하고 강제로 포함할 그룹만큼 선택합니다. 그룹 이름 목록은 [여기]({{groupList}})에서 찾을 수 있습니다.",
                 "example": {
                     "multipleGroups": "{{groupOne}}, {{groupTwo}}, {{groupThree}}의 노래를 강제로 포함합니다.",
                     "reset": "포함 옵션을 재설정합니다.",
                     "singleGroup": "{{group}}의 노래를 강제로 포함합니다."
                 },
-                "name": "포함 설정"
+                "name": "포함설정"
             },
             "interaction": {
                 "add": {
@@ -409,7 +409,7 @@
                     "description": "포함 옵션을 재설정합니다."
                 },
                 "set": {
-                    "description": "게임 옵션에 지정된 그룹의 노래를 설정합니다.",
+                    "description": "게임 옵션에 지정된 그룹의 노래를 포함합니다.",
                     "perGroupDescription": "{{ordinalNum}} 그룹 설정"
                 }
             }
