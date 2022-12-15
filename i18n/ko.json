@@ -418,7 +418,7 @@
             "failure": {
                 "joinError": {
                     "alreadyInTeam": {
-                        "description": "당신은 이미 팀의 구성원입니다."
+                        "description": "이미 이 팀의 멤버입니다."
                     },
                     "badEmojis": {
                         "description": "이 서버에 있는 이모티콘만 포함할 수 있습니다."
@@ -427,44 +427,44 @@
                         "description": "팀 이름이 잘못된 문자로만 구성되어 있습니다."
                     },
                     "invalidTeamName": {
-                        "title": "잘못된 팀 이름입니다"
+                        "title": "잘못된 팀 이름"
                     },
                     "noTeamName": {
-                        "description": "팀을 만들거나 이미 있는 경우 해당 팀에 합류하려면 팀 이름을 포함하세요. (`{{joinCommand}} [팀 이름]`)"
+                        "description": "팀 이름을 포함하여 팀을 만들거나 해당 팀이 이미 존재하는 경우 해당 팀에 가입합니다. (`{{joinCommand}} [팀 이름]`)"
                     },
                     "title": "가입 오류"
                 }
             },
             "playerJoined": {
-                "title": "참가한 플레이어"
+                "title": "플레이어 가입"
             },
             "playerJoinedTeam": {
                 "afterGameStart": {
-                    "description": "{{mentionedUser}}은(는) {{teamName}}을(를) 승리로 이끄는 데 필요한 모든 것이 있다고 생각합니다!"
+                    "description": "{{mentionedUser}}은(는) {{teamName}}을(를) 승리로 이끄는 데 필요한 자질이 있다고 생각합니다!"
                 },
                 "beforeGameStart": {
-                    "description": "모두가 팀에 합류하면 게임을 {{beginCommand}} 합니다!"
+                    "description": "모두가 한 팀에 가입하면 {{beginCommand}}을(를) 입력하여 게임을 진행합니다!"
                 },
-                "title": "{{joiningUser}}이(가) {{teamName}}에 합류했습니다"
+                "title": "{{joiningUser}}이(가) {{teamName}}에 가입했습니다"
             },
             "team": {
                 "join": "{{mentionedUser}}와 함께 {{teamName}}에 합류하려면 `{{joinCommand}} {{teamNameWithCleanEmojis}}`를 입력하세요. {{startGameInstructions}}",
-                "new": "새로운 팀이 생성되었습니다.",
-                "startGameInstructions": "\n{{beginCommand}}로 게임을 시작하세요."
+                "new": "새 팀이 생성되었습니다.",
+                "startGameInstructions": "\n{{beginCommand}}을(를) 입력하여 게임을 시작하십시오."
             }
         },
         "language": {
             "help": {
-                "description": "재생되는 노래를 한국어로만 제공할지 여부를 선택합니다.",
+                "description": "재생된 노래가 한국어로만 재생되어야 하는지 여부를 선택합니다.",
                 "example": {
-                    "all": "사용 가능한 모든 노래가 재생되었습니다!",
-                    "korean": "한국어로된 노래만 재생합니다. (외국어로 된 노래 무시: 영어, 일본어, 중국어)",
+                    "all": "사용 가능한 모든 노래를 재생합니다.",
+                    "korean": "한국어 노래만 재생합니다. 외국어로 된 노래 무시: 영어, 일본어, 중국어",
                     "reset": "{{defaultLanguage}}의 기본 언어로 재설정합니다."
                 },
                 "name": "언어"
             },
             "interaction": {
-                "language": "재생할 음악의 언어입니다"
+                "language": "재생할 음악의 언어"
             }
         },
         "leaderboard": {
@@ -476,26 +476,26 @@
                 "yearly": "년별"
             },
             "enrolled": {
-                "description": "이제 귀하의 이름이 리더보드에 표시됩니다.",
-                "title": "리더보드 등록 완료"
+                "description": "이제 사용자 이름이 순위표에 표시됩니다.",
+                "title": "순위표 등록 완료"
             },
             "failure": {
                 "alreadyEnrolled": {
-                    "description": "리더보드에 이미 표시되어 있습니다. (표시 이름을 업데이트하려면 등록을 취소하고 다시 등록하십시오.)",
-                    "title": "이미 등록된 플레이어입니다"
+                    "description": "사용자는 이미 순위표에 표시됩니다. 표시 이름을 업데이트하려면 등록을 취소하고 다시 등록하십시오.",
+                    "title": "이미 등록된 플레이어"
                 },
                 "empty": {
-                    "description": "이 기간 동안 경험치를 획득한 사람은 없습니다. (지금이 1위를 할 수 있는 기회입니다!)",
-                    "title": "빈 리더보드"
+                    "description": "이 시간 동안 경험치를 획득한 사람이 없습니다. 지금이 1등을 할 기회입니다!",
+                    "title": "빈 순위표"
                 },
                 "game": {
                     "noParticipants": {
-                        "description": "이 명령어가 작동하려면 누군가가 점수를 매겨야 합니다.",
-                        "title": "참가자가 없습니다"
+                        "description": "이 명령어가 작동하려면 누군가 점수를 얻어야 합니다.",
+                        "title": "참가자 없음"
                     }
                 },
                 "outOfRange": {
-                    "description": "순위표는 여기까지 오지 않습니다.",
+                    "description": "순위표는 여기까지 가지 않습니다.",
                     "title": "😐"
                 }
             },
