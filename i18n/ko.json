@@ -185,7 +185,7 @@
         },
         "exp": {
             "activeModifiers": "🚀 활성화된 모듈 내용 🚀",
-            "artistGroupGuessModePenalty": "아티스트/그룹 추측 모드 페널티",
+            "artistGroupGuessModePenalty": "아티스트/그룹 추측 모드 패널티",
             "bonusArtists": "일일 보너스 아티스트의 노래 추측",
             "bonusArtistsTitle": "🎤 현재 보너스 지급 아티스트 🎤",
             "bonusDescription": "다음에 대한 보너스 경험치를 받을 수 있습니다.",
@@ -222,8 +222,8 @@
                 }
             },
             "help": {
-                "description": "투표 없이 현재 곡에 대한 힌트를 직접 받을 수 있습니다",
-                "name": "강제 힌트"
+                "description": "투표 없이 현재 노래에 대한 힌트를 직접 받습니다.",
+                "name": "강제힌트"
             },
             "hintIgnored": "강제 힌트 무시"
         },
@@ -235,30 +235,30 @@
                 }
             },
             "help": {
-                "description": "투표 없이 현재 노래를 직접 건너뜁니다.",
-                "name": "강제 건너뛰기"
+                "description": "투표 없이 현재 노래를 바로 건너뜁니다.",
+                "name": "강제건너뛰기"
             },
             "skipIgnored": "강제 건너뛰기가 무시되었습니다."
         },
         "gender": {
             "help": {
-                "description": "듣고 싶은 아티스트의 성별을 선택하세요. (옵션은 {{male}}, {{female}}, {{coed}}이며 {{genderAlternating}}을 사용하여 라운드마다 남성 아티스트와 여성 아티스트 사이를 순환합니다.)",
+                "description": "듣고 싶은 아티스트의 성별을 선택합니다. 옵션은 {{male}}, {{female}}, {{coed}}입니다. 또는 {{genderAlternating}}을 사용하여 라운드마다 남성 아티스트와 여성 아티스트를 반복합니다.",
                 "example": {
-                    "alternating": "매 라운드마다 남성과 여성 아티스트를 번갈아 갑니다.",
-                    "coed": "남녀 혼성 그룹의 노래만 재생합니다. (남성과 여성이 모두 있는 그룹)",
+                    "alternating": "매 라운드마다 남성 아티스트와 여성 아티스트를 번갈아 가며 배치합니다.",
+                    "coed": "남녀 혼성 그룹 (남성 및 여성 구성원이 모두 있는 그룹)의 노래만 재생합니다.",
                     "female": "여성 아티스트의 노래만 재생합니다.",
                     "maleFemale": "남성 및 여성 아티스트의 노래를 모두 재생합니다.",
                     "reset": "남성, 여성, 남녀 혼성 그룹의 기본 성별로 재설정합니다."
                 },
-                "name": "성별 선택"
+                "name": "성별선택"
             },
             "interaction": {
-                "description": "듣고 싶은 아티스트의 성별을 선택하세요.",
-                "gender": "그룹 구성원 또는 솔리스트의 성별입니다"
+                "description": "듣고 싶은 아티스트의 성별을 선택합니다.",
+                "gender": "그룹 멤버 또는 솔로 아티스트의 성별"
             },
             "warning": {
                 "gameOption": {
-                    "description": "하나의 그룹만 선택하면 {{alternatingGenderCommand}}가 예상대로 작동하지 않을 수 있습니다. (성별을 올바르게 바꾸려면 더 많은 그룹을 포함하는 것이 좋습니다.)",
+                    "description": "그룹을 하나만 선택하면 {{alternatingGenderCommand}}이(가) 예상대로 작동하지 않을 수 있습니다. 올바른 대체 성별을 위해 더 많은 그룹을 포함하는 것을 고려하십시오.",
                     "title": "게임 옵션 경고"
                 }
             }
@@ -266,27 +266,27 @@
         "goal": {
             "failure": {
                 "gameOptionConflict": {
-                    "description": "{{elimination}} 게임이 현재 진행 중입니다. ({{goal}}과 {{elimination}}은(는) 호환되지 않으며 {{goal}}을(를) 사용하려면 {{classic}} 또는 {{teams}} 게임을 플레이하세요.)"
+                    "description": "현재 {{elimination}}의 게임이 진행 중입니다. {{goal}}과(와) {{elimination}}은(는) 호환되지 않습니다. {{classic}} 또는 {{teams}} 게임을 실행하여 {{goal}}을(를) 사용하십시오."
                 },
                 "goalExceeded": {
-                    "description": "주어진 목표가 최고 점수를 초과합니다. 목표를 높이거나 새로운 게임을 시작하세요.",
-                    "title": "목표를 적용하는 동안 오류가 발생했습니다"
+                    "description": "주어진 목표는 최고 점수를 초과합니다. 목표를 높이거나 새 게임을 시작하세요.",
+                    "title": "목표 적용 오류"
                 }
             },
             "help": {
-                "description": "가장 많은 점수를 얻은 플레이어가 목표 점수에 도달하면 게임이 종료됩니다. (인수 없이 호출하면 목표가 비활성화되며 게임이 진행 중인 경우 목표는 최고 점수를 초과해야 합니다.)",
+                "description": "가장 많은 점수를 얻은 플레이어가 목표 점수에 도달하면 게임이 종료됩니다. 인수 없이 호출하면 목표가 비활성화됩니다. 게임이 진행 중이면 목표가 최고 점수를 초과해야 합니다.",
                 "example": {
                     "reset": "목표를 비활성화합니다.",
                     "set": "{{goal}}을(를) 먼저 달성한 플레이어가 게임에서 승리합니다."
                 },
-                "name": "점수",
+                "name": "목표점수",
                 "usage": {
-                    "points": "점수"
+                    "points": "목표 점수"
                 }
             },
             "interaction": {
-                "description": "가장 많은 점수를 얻은 플레이어가 목표 점수에 도달하면 게임이 종료됩니다",
-                "goal": "이기는 데 필요한 포인트 수입니다"
+                "description": "가장 많은 점수를 얻은 플레이어가 목표 점수에 도달하면 게임이 종료됩니다.",
+                "goal": "승리에 필요한 점수"
             }
         },
         "groups": {
