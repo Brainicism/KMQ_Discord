@@ -793,7 +793,7 @@
                     },
                     "special": {
                         "description": "Change song playback speed anywhere you play!",
-                        "title": "`,special` in every server!"
+                        "title": "`/special` in every server!"
                     }
                 },
                 "title": {

@@ -795,7 +795,7 @@
                     },
                     "special": {
                         "description": "어디서든 노래 재생 속도를 변경하세요!",
-                        "title": "모든 서버에서 `,special`을 입력하세요!"
+                        "title": "모든 서버에서 `/special`을 입력하세요!"
                     }
                 },
                 "title": {
