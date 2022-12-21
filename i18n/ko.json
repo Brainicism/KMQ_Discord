@@ -94,14 +94,14 @@
                     "singleCutoff": "{{year}}년 이후에 발매된 노래 재생합니다.",
                     "twoCutoffs": "{{beginningYear}}~{{endYear}}년 사이에 발매된 노래 재생합니다."
                 },
+                "interaction": {
+                    "beginningYear": "포함할 가장 빠른 연도입니다",
+                    "description": "노래의 연도 범위를 설정합니다.",
+                    "earliestOption": "[beginning_year]부터 매년 노래 선택",
+                    "endingYear": "포함 마지막 연도입니다",
+                    "rangeOption": "[beginning_year]와 [ending_year] 사이의 매년 노래 선택"
+                },
                 "name": "년도범위선택"
-            },
-            "interaction": {
-                "beginningYear": "포함할 가장 빠른 연도입니다",
-                "description": "노래의 연도 범위를 설정합니다.",
-                "earliestOption": "[beginning_year]부터 매년 노래 선택",
-                "endingYear": "포함 마지막 연도입니다",
-                "rangeOption": "[beginningYear]와 [endingYear] 사이의 매년 노래 선택"
             }
         },
         "debug": {
@@ -162,25 +162,25 @@
                     "reset": "제외 옵션을 재설정합니다.",
                     "singleGroup": "{{group}}의 노래를 제외합니다."
                 },
+                "interaction": {
+                    "add": {
+                        "description": "게임 제외 옵션에 지정된 그룹을 추가합니다.",
+                        "perGroupDescription": "{{ordinalNum}} 그룹 추가"
+                    },
+                    "description": "지정된 그룹의 노래 재생을 방지합니다.",
+                    "remove": {
+                        "description": "게임 제외 옵션에서 지정된 그룹을 제거합니다.",
+                        "perGroupDescription": "{{ordinalNum}} 그룹 제거"
+                    },
+                    "reset": {
+                        "description": "제외 옵션을 재설정합니다."
+                    },
+                    "set": {
+                        "description": "게임 옵션에서 지정된 그룹의 노래를 제외합니다.",
+                        "perGroupDescription": "{{ordinalNum}} 그룹 제외"
+                    }
+                },
                 "name": "그룹제외설정"
-            },
-            "interaction": {
-                "add": {
-                    "description": "게임 제외 옵션에 지정된 그룹을 추가합니다.",
-                    "perGroupDescription": "{{ordinalNum}} 그룹 추가"
-                },
-                "description": "지정된 그룹의 노래 재생을 방지합니다.",
-                "remove": {
-                    "description": "게임 제외 옵션에서 지정된 그룹을 제거합니다.",
-                    "perGroupDescription": "{{ordinalNum}} 그룹 제거"
-                },
-                "reset": {
-                    "description": "제외 옵션을 재설정합니다."
-                },
-                "set": {
-                    "description": "게임 옵션에서 지정된 그룹의 노래를 제외합니다.",
-                    "perGroupDescription": "{{ordinalNum}} 그룹 제외"
-                }
             }
         },
         "exp": {
@@ -250,11 +250,11 @@
                     "maleFemale": "남성 및 여성 아티스트의 노래를 모두 재생합니다.",
                     "reset": "남성, 여성, 남녀 혼성 그룹의 기본 성별로 재설정합니다."
                 },
+                "interaction": {
+                    "description": "듣고 싶은 아티스트의 성별을 선택하세요.",
+                    "gender": "그룹 구성원 또는 솔리스트의 성별입니다"
+                },
                 "name": "성별선택"
-            },
-            "interaction": {
-                "description": "듣고 싶은 아티스트의 성별을 선택하세요.",
-                "gender": "그룹 구성원 또는 솔리스트의 성별입니다"
             },
             "warning": {
                 "gameOption": {
@@ -297,25 +297,25 @@
                     "reset": "그룹 옵션을 재설정합니다.",
                     "singleGroup": "{{group}}의 노래만 재생합니다."
                 },
+                "interaction": {
+                    "add": {
+                        "description": "게임 옵션에 지정된 그룹을 추가합니다",
+                        "perGroupDescription": "{{ordinalNum}} 그룹 추가"
+                    },
+                    "description": "독점적으로 재생할 아티스트를 선택하십시오",
+                    "remove": {
+                        "description": "게임 옵션에 지정된 그룹을 제거합니다",
+                        "perGroupDescription": "{{ordinalNum}} 그룹 제거"
+                    },
+                    "reset": {
+                        "description": "그룹 옵션 재설정"
+                    },
+                    "set": {
+                        "description": "지정된 그룹의 노래를 재생합니다",
+                        "perGroupDescription": "노래를 재생할 {{ordinalNum}} 그룹"
+                    }
+                },
                 "name": "그룹선택"
-            },
-            "interaction": {
-                "add": {
-                    "description": "게임 옵션에 지정된 그룹을 추가합니다",
-                    "perGroupDescription": "{{ordinalNum}} 그룹 추가"
-                },
-                "description": "독점적으로 재생할 아티스트를 선택하십시오",
-                "remove": {
-                    "description": "게임 옵션에 지정된 그룹을 제거합니다",
-                    "perGroupDescription": "{{ordinalNum}} 그룹 제거"
-                },
-                "reset": {
-                    "description": "그룹 옵션 재설정"
-                },
-                "set": {
-                    "description": "지정된 그룹의 노래를 재생합니다",
-                    "perGroupDescription": "노래를 재생할 {{ordinalNum}} 그룹"
-                }
             }
         },
         "guessmode": {
@@ -393,25 +393,25 @@
                     "reset": "포함 옵션을 재설정합니다.",
                     "singleGroup": "{{group}}의 노래를 강제로 포함합니다."
                 },
+                "interaction": {
+                    "add": {
+                        "description": "게임 포함 옵션에 지정된 그룹을 추가합니다.",
+                        "perGroupDescription": "{{ordinalNum}} 그룹 추가"
+                    },
+                    "description": "강제로 포함할 아티스트를 선택합니다.",
+                    "remove": {
+                        "description": "게임 포함 옵션에서 지정된 그룹을 제거합니다.",
+                        "perGroupDescription": "{{ordinalNum}} 그룹 제거"
+                    },
+                    "reset": {
+                        "description": "포함 옵션을 재설정합니다."
+                    },
+                    "set": {
+                        "description": "게임 옵션에 지정된 그룹의 노래를 설정합니다.",
+                        "perGroupDescription": "{{ordinalNum}} 그룹 설정"
+                    }
+                },
                 "name": "포함설정"
-            },
-            "interaction": {
-                "add": {
-                    "description": "게임 포함 옵션에 지정된 그룹을 추가합니다.",
-                    "perGroupDescription": "{{ordinalNum}} 그룹 추가"
-                },
-                "description": "강제로 포함할 아티스트를 선택합니다.",
-                "remove": {
-                    "description": "게임 포함 옵션에서 지정된 그룹을 제거합니다.",
-                    "perGroupDescription": "{{ordinalNum}} 그룹 제거"
-                },
-                "reset": {
-                    "description": "포함 옵션을 재설정합니다."
-                },
-                "set": {
-                    "description": "게임 옵션에 지정된 그룹의 노래를 설정합니다.",
-                    "perGroupDescription": "{{ordinalNum}} 그룹 설정"
-                }
             }
         },
         "join": {
@@ -689,11 +689,11 @@
                     "on": "첫 번째 정확한 추측이 발생한 후 1.5초의 유예 기간을 허용합니다. (여러 플레이어가 정확하게 추측할 수 있습니다.)",
                     "reset": "{{defaultMultiguess}}의 기본 다중 추측 유형으로 재설정합니다."
                 },
+                "interaction": {
+                    "description": "여러 사람이 노래를 정확하게 추측할 수 있는지 여부를 설정합니다",
+                    "multiguess": "여러 사람이 올바르게 추측할 수 있도록 허용할지 여부입니다"
+                },
                 "name": "여러가지추측입니다"
-            },
-            "interaction": {
-                "description": "여러 사람이 노래를 정확하게 추측할 수 있는지 여부를 설정합니다",
-                "multiguess": "여러 사람이 올바르게 추측할 수 있도록 허용할지 여부입니다"
             }
         },
         "news": {
@@ -1016,11 +1016,11 @@
                     "official": "{{official}} 뮤직 비디오만 재생",
                     "reset": "{{defaultRelease}}의 기본 릴리스 유형으로 재설정합니다."
                 },
+                "interaction": {
+                    "description": "공식 뮤직 비디오만 포함할지 아니면 모든 비디오를 포함할지 선택합니다.",
+                    "release": "재생할 릴리스 유형입니다"
+                },
                 "name": "풀어줘요"
-            },
-            "interaction": {
-                "description": "공식 뮤직 비디오만 포함할지 아니면 모든 비디오를 포함할지 선택합니다.",
-                "release": "재생할 릴리스 유형입니다"
             }
         },
         "remove": {
@@ -1435,7 +1435,7 @@
                 "inaccessible": "지금은 해당 사용자에 액세스할 수 없습니다. ({{profileUserID}}를 사용해 보세요.)",
                 "noStats": "이 사용자는 통계를 추적하기 전에 첫 게임을 플레이해야 합니다."
             },
-            "resetOption": "{{optionName}}의 옵션을 재설정합니다.",
+            "resetOption": "{{optionName}}의 옵션을 재설정합니다",
             "title": {
                 "failure": "이런!"
             },

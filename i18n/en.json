@@ -94,14 +94,14 @@
                     "singleCutoff": "Play songs released after the year {{year}}",
                     "twoCutoffs": "Play songs released between the years {{beginningYear}}-{{endYear}}"
                 },
+                "interaction": {
+                    "beginningYear": "The earliest year to include",
+                    "description": "Set a cutoff year range for songs",
+                    "earliestOption": "Pick songs for every year starting from [beginning_year]",
+                    "endingYear": "The last year to include",
+                    "rangeOption": "Pick songs for every year between [beginning_year] and [ending_year]"
+                },
                 "name": "cutoff"
-            },
-            "interaction": {
-                "beginningYear": "The earliest year to include",
-                "description": "Set a cutoff year range for songs",
-                "earliestOption": "Pick songs for every year starting from [beginningYear]",
-                "endingYear": "The last year to include",
-                "rangeOption": "Pick songs for every year between [beginningYear] and [endingYear]"
             }
         },
         "debug": {
@@ -162,25 +162,25 @@
                     "reset": "Resets the exclude option",
                     "singleGroup": "Ignore songs from {{group}}"
                 },
+                "interaction": {
+                    "add": {
+                        "description": "Add the given groups to the exclude game option",
+                        "perGroupDescription": "The {{ordinalNum}} group to add"
+                    },
+                    "description": "Prevent playing songs from the given groups",
+                    "remove": {
+                        "description": "Remove the given groups from the exclude game option",
+                        "perGroupDescription": "The {{ordinalNum}} group to remove"
+                    },
+                    "reset": {
+                        "description": "Reset the exclude option"
+                    },
+                    "set": {
+                        "description": "Exclude songs from the given groups in the game options",
+                        "perGroupDescription": "The {{ordinalNum}} group to exclude"
+                    }
+                },
                 "name": "exclude"
-            },
-            "interaction": {
-                "add": {
-                    "description": "Add the given groups to the exclude game option",
-                    "perGroupDescription": "The {{ordinalNum}} group to add"
-                },
-                "description": "Prevent playing songs from the given groups",
-                "remove": {
-                    "description": "Remove the given groups from the exclude game option",
-                    "perGroupDescription": "The {{ordinalNum}} group to remove"
-                },
-                "reset": {
-                    "description": "Reset the exclude option"
-                },
-                "set": {
-                    "description": "Exclude songs from the given groups in the game options",
-                    "perGroupDescription": "The {{ordinalNum}} group to exclude"
-                }
             }
         },
         "exp": {
@@ -250,11 +250,11 @@
                     "maleFemale": "Play songs from both male and female artists",
                     "reset": "Reset to the default genders of male, female, and coed"
                 },
+                "interaction": {
+                    "description": "Choose the gender of the artists you'd like to hear from.",
+                    "gender": "The gender of the group members or soloist"
+                },
                 "name": "gender"
-            },
-            "interaction": {
-                "description": "Choose the gender of the artists you'd like to hear from.",
-                "gender": "The gender of the group members or soloist"
             },
             "warning": {
                 "gameOption": {
@@ -297,25 +297,25 @@
                     "reset": "Resets the groups option",
                     "singleGroup": "Plays songs only from {{group}}"
                 },
+                "interaction": {
+                    "add": {
+                        "description": "Add the given groups to the game options",
+                        "perGroupDescription": "The {{ordinalNum}} group to add"
+                    },
+                    "description": "Select artists to exclusively play from",
+                    "remove": {
+                        "description": "Remove the given groups from the game options",
+                        "perGroupDescription": "The {{ordinalNum}} group to remove"
+                    },
+                    "reset": {
+                        "description": "Reset the groups option"
+                    },
+                    "set": {
+                        "description": "Play songs from the given groups",
+                        "perGroupDescription": "The {{ordinalNum}} group to play songs from"
+                    }
+                },
                 "name": "groups"
-            },
-            "interaction": {
-                "add": {
-                    "description": "Add the given groups to the game options",
-                    "perGroupDescription": "The {{ordinalNum}} group to add"
-                },
-                "description": "Select artists to exclusively play from",
-                "remove": {
-                    "description": "Remove the given groups from the game options",
-                    "perGroupDescription": "The {{ordinalNum}} group to remove"
-                },
-                "reset": {
-                    "description": "Reset the groups option"
-                },
-                "set": {
-                    "description": "Play songs from the given groups",
-                    "perGroupDescription": "The {{ordinalNum}} group to play songs from"
-                }
             }
         },
         "guessmode": {
@@ -393,25 +393,25 @@
                     "reset": "Resets the include option",
                     "singleGroup": "Forcefully include songs from {{group}}"
                 },
+                "interaction": {
+                    "add": {
+                        "description": "Add the given groups to the include game option",
+                        "perGroupDescription": "The {{ordinalNum}} group to add"
+                    },
+                    "description": "Select artists to forcefully include",
+                    "remove": {
+                        "description": "Remove the given groups from the include game option",
+                        "perGroupDescription": "The {{ordinalNum}} group to remove"
+                    },
+                    "reset": {
+                        "description": "Reset the include option"
+                    },
+                    "set": {
+                        "description": "Include songs from the given groups in the game options",
+                        "perGroupDescription": "The {{ordinalNum}} group to include"
+                    }
+                },
                 "name": "include"
-            },
-            "interaction": {
-                "add": {
-                    "description": "Add the given groups to the include game option",
-                    "perGroupDescription": "The {{ordinalNum}} group to add"
-                },
-                "description": "Select artists to forcefully include",
-                "remove": {
-                    "description": "Remove the given groups from the include game option",
-                    "perGroupDescription": "The {{ordinalNum}} group to remove"
-                },
-                "reset": {
-                    "description": "Reset the include option"
-                },
-                "set": {
-                    "description": "Include songs from the given groups in the game options",
-                    "perGroupDescription": "The {{ordinalNum}} group to include"
-                }
             }
         },
         "join": {
@@ -689,11 +689,11 @@
                     "on": "Allows for a 1.5 second grace period from when the first correct guess occurs. Multiple players are able to guess correctly",
                     "reset": "Reset to the default multiguess type of {{defaultMultiguess}}"
                 },
+                "interaction": {
+                    "description": "Sets whether multiple people can guess a song correctly",
+                    "multiguess": "Whether to allow multiple people to guess correctly"
+                },
                 "name": "multiguess"
-            },
-            "interaction": {
-                "description": "Sets whether multiple people can guess a song correctly",
-                "multiguess": "Whether to allow multiple people to guess correctly"
             }
         },
         "news": {
@@ -1016,11 +1016,11 @@
                     "official": "Plays only {{official}} music videos",
                     "reset": "Reset to the default release type of {{defaultRelease}}"
                 },
+                "interaction": {
+                    "description": "Choose whether to include only official music videos, or all videos.",
+                    "release": "The type of releases to play from"
+                },
                 "name": "release"
-            },
-            "interaction": {
-                "description": "Choose whether to include only official music videos, or all videos.",
-                "release": "The type of releases to play from"
             }
         },
         "remove": {
@@ -1435,7 +1435,7 @@
                 "inaccessible": "I can't access that user right now. Try using {{profileUserID}} instead.",
                 "noStats": "This user needs to play their first game before their stats are tracked."
             },
-            "resetOption": "Resets the {{optionName}} option.",
+            "resetOption": "Resets the {{optionName}} option",
             "title": {
                 "failure": "Uh-oh"
             },

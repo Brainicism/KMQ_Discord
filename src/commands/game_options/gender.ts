@@ -113,7 +113,7 @@ export default class GenderCommand implements BaseCommand {
                     name: OptionAction.SET,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.gender.interaction.description"
+                        "command.gender.help.interaction.description"
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
@@ -121,7 +121,7 @@ export default class GenderCommand implements BaseCommand {
                         name: `gender_${x + 1}`,
                         description: i18n.translate(
                             LocaleType.EN,
-                            "command.gender.interaction.gender"
+                            "command.gender.help.interaction.gender"
                         ),
                         type: Eris.Constants.ApplicationCommandOptionTypes
                             .STRING,

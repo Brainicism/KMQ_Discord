@@ -51,7 +51,7 @@ export default class ReleaseCommand implements BaseCommand {
                     name: OptionAction.SET,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.release.interaction.description"
+                        "command.release.help.interaction.description"
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
@@ -60,7 +60,7 @@ export default class ReleaseCommand implements BaseCommand {
                             name: "release",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.release.interaction.release"
+                                "command.release.help.interaction.release"
                             ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,

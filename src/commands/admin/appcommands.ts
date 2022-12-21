@@ -108,12 +108,20 @@ export default class AppCommandsCommand implements BaseCommand {
                         command.slashCommands() as Array<Eris.ChatInputApplicationCommandStructure>;
 
                     for (const cmd of commands) {
-                        cmd.name =
-                            cmd.name ??
-                            i18n.translate(
+                        if (!cmd.name) {
+                            if (
+                                !i18n.hasKey(`command.${commandName}.help.name`)
+                            ) {
+                                throw new Error(
+                                    `Missing slash command name: command.${commandName}.help.name`
+                                );
+                            }
+
+                            cmd.name = i18n.translate(
                                 LocaleType.EN,
                                 `command.${commandName}.help.name`
                             );
+                        }
 
                         cmd.name_localizations = cmd.name_localizations ?? {
                             [LocaleType.KO]: i18n.translate(
@@ -125,20 +133,31 @@ export default class AppCommandsCommand implements BaseCommand {
                             cmd.type ===
                             Eris.Constants.ApplicationCommandTypes.CHAT_INPUT
                         ) {
-                            cmd.description =
-                                cmd.description ??
-                                i18n.translate(
+                            if (!cmd.description) {
+                                let translationKey = `command.${commandName}.help.interaction.description`;
+                                const fallbackTranslationKey = `command.${commandName}.help.description`;
+                                if (!i18n.hasKey(translationKey)) {
+                                    if (!i18n.hasKey(fallbackTranslationKey)) {
+                                        throw new Error(
+                                            `Missing slash command description: ${translationKey} or ${fallbackTranslationKey}`
+                                        );
+                                    }
+
+                                    translationKey = fallbackTranslationKey;
+                                }
+
+                                cmd.description = i18n.translate(
                                     LocaleType.EN,
-                                    `command.${commandName}.interaction.help.description`
+                                    translationKey
                                 );
 
-                            cmd.description_localizations =
-                                cmd.description_localizations ?? {
+                                cmd.description_localizations = {
                                     [LocaleType.KO]: i18n.translate(
                                         LocaleType.KO,
-                                        `command.${commandName}.interaction.help.description`
+                                        translationKey
                                     ),
                                 };
+                            }
                         }
 
                         commandStructures.push(cmd);

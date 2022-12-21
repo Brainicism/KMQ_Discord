@@ -107,7 +107,7 @@ export default class GroupsCommand implements BaseCommand {
                 name: action,
                 description: i18n.translate(
                     LocaleType.EN,
-                    `command.groups.interaction.${action}.description`
+                    `command.groups.help.interaction.${action}.description`
                 ),
                 type: Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
                 options:
@@ -117,7 +117,7 @@ export default class GroupsCommand implements BaseCommand {
                               name: `group_${x + 1}`,
                               description: i18n.translate(
                                   LocaleType.EN,
-                                  `command.groups.interaction.${action}.perGroupDescription`,
+                                  `command.groups.help.interaction.${action}.perGroupDescription`,
                                   { ordinalNum: getOrdinalNum(x + 1) }
                               ),
                               type: Eris.Constants.ApplicationCommandOptionTypes

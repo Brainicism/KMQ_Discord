@@ -83,7 +83,7 @@ export default class MultiGuessCommand implements BaseCommand {
                     name: OptionAction.SET,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.multiguess.interaction.description"
+                        "command.multiguess.help.interaction.description"
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
@@ -92,7 +92,7 @@ export default class MultiGuessCommand implements BaseCommand {
                             name: "multiguess",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.multiguess.interaction.multiguess"
+                                "command.multiguess.help.interaction.multiguess"
                             ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
