@@ -45,7 +45,7 @@
             "help": {
                 "description": "답변 방법 선택: 답을 입력하거나 객관식을 통해 선택합니다. 옵션은 다음과 같습니다: `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}`, `{{hard}}`",
                 "example": {
-                    "multipleChoice": "{{optionCount}개의 객관식 옵션에서 버튼을 클릭하여 추측하십시오. {{penalty}} 경험치 패널티가 적용됩니다.",
+                    "multipleChoice": "{{optionCount}}개의 객관식 옵션에서 버튼을 클릭하여 추측하십시오. {{penalty}} 경험치 패널티가 적용됩니다.",
                     "typing": "채팅에 답을 입력하여 추측합니다.",
                     "typingTypos": "채팅에 답을 입력하여 추측합니다. 사소한 오타는 올바른 것으로 표시됩니다. {{penalty}} 경험치 패널티가 적용됩니다."
                 },
