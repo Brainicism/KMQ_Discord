@@ -46,13 +46,13 @@ export default class GoalCommand implements BaseCommand {
             guildID,
             "command.goal.help.description"
         ),
-        usage: `/goal set\ngoal:[${LocalizationManager.localizer.translate(
+        usage: `/goal set\nscore:[${LocalizationManager.localizer.translate(
             guildID,
             "command.goal.help.usage.points"
         )}]\n\n/goal reset`,
         examples: [
             {
-                example: "`/goal set goal:30`",
+                example: "`/goal set score:30`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.goal.help.example.set",
@@ -89,11 +89,11 @@ export default class GoalCommand implements BaseCommand {
                         .SUB_COMMAND,
                     options: [
                         {
-                            name: "goal",
+                            name: "score",
                             description:
                                 LocalizationManager.localizer.translate(
                                     LocaleType.EN,
-                                    "command.goal.interaction.goal"
+                                    "command.goal.interaction.score"
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .INTEGER,
@@ -252,7 +252,7 @@ export default class GoalCommand implements BaseCommand {
         if (action === OptionAction.RESET) {
             goalValue = null;
         } else if (action === OptionAction.SET) {
-            goalValue = interactionOptions["goal"] as number;
+            goalValue = interactionOptions["score"] as number;
         } else {
             logger.error(`Unexpected interaction name: ${interactionName}`);
             goalValue = null;

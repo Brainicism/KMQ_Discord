@@ -274,7 +274,7 @@
             },
             "interaction": {
                 "description": "Once the player with the most points reaches the goal score, the game ends.",
-                "goal": "The number of points needed to win"
+                "score": "The number of points needed to win"
             }
         },
         "groups": {

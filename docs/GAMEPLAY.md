@@ -151,7 +151,7 @@ Similarly, to force groups in to the game regardless of the current options, use
 
 ## /goal
 
-Setting the goal ends the game when the given goal score is reached. For example, if a player were to use `/goal set goal:50`, the first player to 50 points would win the game.
+Setting the goal ends the game when the given goal score is reached. For example, if a player were to use `/goal set score:50`, the first player to 50 points would win the game.
 
 ![goal](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/goal.png)
 
