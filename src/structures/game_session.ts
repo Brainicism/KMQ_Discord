@@ -54,13 +54,13 @@ import GameType from "../enums/game_type";
 import GuessModeType from "../enums/option_types/guess_mode_type";
 import GuildPreference from "./guild_preference";
 import KmqMember from "./kmq_member";
-import LocalizationManager from "../helpers/localization_manager";
 import MessageContext from "./message_context";
 import MultiGuessType from "../enums/option_types/multiguess_type";
 import Player from "./player";
 import Scoreboard from "./scoreboard";
 import Session from "./session";
 import TeamScoreboard from "./team_scoreboard";
+import i18n from "../helpers/localization_manager";
 import type { CommandInteraction } from "eris";
 import type { GuildTextableMessage } from "../types";
 import type GuessResult from "../interfaces/guess_result";
@@ -256,21 +256,18 @@ export default class GameSession extends Session {
             round.interactionMessage = await sendInfoMessage(
                 new MessageContext(this.textChannelID),
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         this.guildID,
                         "misc.interaction.guess.title",
                         {
                             songOrArtist:
                                 this.guildPreference.gameOptions
                                     .guessModeType === GuessModeType.ARTIST
-                                    ? LocalizationManager.localizer.translate(
+                                    ? i18n.translate(
                                           this.guildID,
                                           "misc.artist"
                                       )
-                                    : LocalizationManager.localizer.translate(
-                                          this.guildID,
-                                          "misc.song"
-                                      ),
+                                    : i18n.translate(this.guildID, "misc.song"),
                         }
                     ),
                     components,
@@ -373,7 +370,7 @@ export default class GameSession extends Session {
             if (!useLargerScoreboard) {
                 scoreboardTitle = "\n\n";
                 scoreboardTitle += bold(
-                    LocalizationManager.localizer.translate(
+                    i18n.translate(
                         messageContext.guildID,
                         "command.score.scoreboardTitle"
                     )
@@ -489,44 +486,32 @@ export default class GameSession extends Session {
                         b.endLevel - b.startLevel - (a.endLevel - a.startLevel)
                 )
                 .map((leveledUpPlayer) =>
-                    LocalizationManager.localizer.translate(
-                        this.guildID,
-                        "misc.levelUp.entry",
-                        {
-                            user: this.scoreboard.getPlayerDisplayedName(
-                                leveledUpPlayer.userID
-                            ),
-                            startLevel: codeLine(
-                                String(leveledUpPlayer.startLevel)
-                            ),
-                            endLevel: codeLine(
-                                String(leveledUpPlayer.endLevel)
-                            ),
-                            rank: codeLine(
-                                getRankNameByLevel(
-                                    leveledUpPlayer.endLevel,
-                                    this.guildID
-                                )
-                            ),
-                        }
-                    )
+                    i18n.translate(this.guildID, "misc.levelUp.entry", {
+                        user: this.scoreboard.getPlayerDisplayedName(
+                            leveledUpPlayer.userID
+                        ),
+                        startLevel: codeLine(
+                            String(leveledUpPlayer.startLevel)
+                        ),
+                        endLevel: codeLine(String(leveledUpPlayer.endLevel)),
+                        rank: codeLine(
+                            getRankNameByLevel(
+                                leveledUpPlayer.endLevel,
+                                this.guildID
+                            )
+                        ),
+                    })
                 )
                 .slice(0, 10);
 
             if (leveledUpPlayers.length > 10) {
                 levelUpMessages.push(
-                    LocalizationManager.localizer.translate(
-                        this.guildID,
-                        "misc.andManyOthers"
-                    )
+                    i18n.translate(this.guildID, "misc.andManyOthers")
                 );
             }
 
             sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: LocalizationManager.localizer.translate(
-                    this.guildID,
-                    "misc.levelUp.title"
-                ),
+                title: i18n.translate(this.guildID, "misc.levelUp.title"),
                 description: levelUpMessages.join("\n"),
                 thumbnailUrl: KmqImages.THUMBS_UP,
             });
@@ -699,7 +684,7 @@ export default class GameSession extends Session {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 null,
-                LocalizationManager.localizer.translate(
+                i18n.translate(
                     this.guildID,
                     "misc.failure.interaction.alreadyEliminated"
                 )
@@ -711,7 +696,7 @@ export default class GameSession extends Session {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 null,
-                LocalizationManager.localizer.translate(
+                i18n.translate(
                     this.guildID,
                     "misc.failure.interaction.eliminated"
                 )
@@ -841,7 +826,7 @@ export default class GameSession extends Session {
             EMBED_FIELDS_PER_PAGE
         );
 
-        let footerText = LocalizationManager.localizer.translate(
+        let footerText = i18n.translate(
             messageOrInteraction.guildID,
             "misc.classic.yourScore",
             {
@@ -858,7 +843,7 @@ export default class GameSession extends Session {
             const eliminationScoreboard = this
                 .scoreboard as EliminationScoreboard;
 
-            footerText = LocalizationManager.localizer.translate(
+            footerText = i18n.translate(
                 messageOrInteraction.guildID,
                 "misc.elimination.yourLives",
                 {
@@ -871,7 +856,7 @@ export default class GameSession extends Session {
             );
         } else if (this.gameType === GameType.TEAMS) {
             const teamScoreboard = this.scoreboard as TeamScoreboard;
-            footerText = LocalizationManager.localizer.translate(
+            footerText = i18n.translate(
                 messageOrInteraction.guildID,
                 "misc.team.yourTeamScore",
                 {
@@ -883,7 +868,7 @@ export default class GameSession extends Session {
                 }
             );
             footerText += "\n";
-            footerText += LocalizationManager.localizer.translate(
+            footerText += i18n.translate(
                 messageOrInteraction.guildID,
                 "misc.team.yourScore",
                 {
@@ -899,7 +884,7 @@ export default class GameSession extends Session {
         const embeds: Array<Eris.EmbedOptions> = winnersFieldSubsets.map(
             (winnersFieldSubset) => ({
                 color: EMBED_SUCCESS_COLOR,
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageOrInteraction.guildID,
                     "command.score.scoreboardTitle"
                 ),
@@ -917,7 +902,7 @@ export default class GameSession extends Session {
      * Sends an embed displaying the winner of the session as well as the scoreboard
      */
     async sendEndGameMessage(): Promise<void> {
-        const footerText = LocalizationManager.localizer.translate(
+        const footerText = i18n.translate(
             this.guildID,
             "misc.inGame.songsCorrectlyGuessed",
             {
@@ -927,10 +912,7 @@ export default class GameSession extends Session {
 
         if (this.scoreboard.getWinners().length === 0) {
             await sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: LocalizationManager.localizer.translate(
-                    this.guildID,
-                    "misc.inGame.noWinners"
-                ),
+                title: i18n.translate(this.guildID, "misc.inGame.noWinners"),
                 footerText,
                 thumbnailUrl: KmqImages.NOT_IMPRESSED,
             });
@@ -949,10 +931,7 @@ export default class GameSession extends Session {
 
             if (endGameMessage) {
                 fields.push({
-                    name: LocalizationManager.localizer.translate(
-                        this.guildID,
-                        endGameMessage.title
-                    ),
+                    name: i18n.translate(this.guildID, endGameMessage.title),
                     value: endGameMessage.message,
                     inline: false,
                 });
@@ -966,7 +945,7 @@ export default class GameSession extends Session {
                         : EMBED_SUCCESS_COLOR,
                 description: !useLargerScoreboard
                     ? bold(
-                          LocalizationManager.localizer.translate(
+                          i18n.translate(
                               this.guildID,
                               "command.score.scoreboardTitle"
                           )
@@ -987,7 +966,7 @@ export default class GameSession extends Session {
                                 url: VOTE_LINK,
                                 type: 2 as const,
                                 emoji: { name: "✅" },
-                                label: LocalizationManager.localizer.translate(
+                                label: i18n.translate(
                                     this.guildID,
                                     "misc.interaction.vote"
                                 ),
@@ -997,7 +976,7 @@ export default class GameSession extends Session {
                                 url: REVIEW_LINK,
                                 type: 2 as const,
                                 emoji: { name: "📖" },
-                                label: LocalizationManager.localizer.translate(
+                                label: i18n.translate(
                                     this.guildID,
                                     "misc.interaction.leaveReview"
                                 ),
@@ -1007,7 +986,7 @@ export default class GameSession extends Session {
                                 url: "https://discord.gg/RCuzwYV",
                                 type: 2,
                                 emoji: { name: "🎵" },
-                                label: LocalizationManager.localizer.translate(
+                                label: i18n.translate(
                                     this.guildID,
                                     "misc.interaction.officialKmqServer"
                                 ),

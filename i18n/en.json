@@ -37,7 +37,8 @@
                     "exclude": "Adds {{groupOne}}, {{groupTwo}}, and {{groupThree}} to the current {{exclude}} option",
                     "groups": "Adds {{groupOne}} and {{groupTwo}} to the current {{groups}} option",
                     "include": "Adds {{groupOne}} to the current {{include}} option"
-                }
+                },
+                "name": "add"
             }
         },
         "answer": {
@@ -51,7 +52,8 @@
                 "interaction": {
                     "answerOption": "How to answer in-game",
                     "description": "Choose how to answer: by typing your answer, or via multiple choice"
-                }
+                },
+                "name": "answer"
             }
         },
         "artisttype": {
@@ -66,7 +68,8 @@
                 "interaction": {
                     "artistTypeOption": "The type of artist to play from",
                     "description": "Choose whether you'd like to hear from soloists, groups, or both"
-                }
+                },
+                "name": "artisttype"
             }
         },
         "begin": {
@@ -90,14 +93,15 @@
                     "reset": "Reset to the default cutoff of {{defaultBeginningSearchYear}} to {{defaultEndSearchYear}}",
                     "singleCutoff": "Play songs released after the year {{year}}",
                     "twoCutoffs": "Play songs released between the years {{beginningYear}}-{{endYear}}"
-                }
-            },
-            "interaction": {
-                "beginningYear": "The earliest year to include",
-                "description": "Set a cutoff year range for songs",
-                "earliestOption": "Pick songs for every year starting from [beginningYear]",
-                "endingYear": "The last year to include",
-                "rangeOption": "Pick songs for every year between [beginningYear] and [endingYear]"
+                },
+                "interaction": {
+                    "beginningYear": "The earliest year to include",
+                    "description": "Set a cutoff year range for songs",
+                    "earliestOption": "Pick songs for every year starting from [beginning_year]",
+                    "endingYear": "The last year to include",
+                    "rangeOption": "Pick songs for every year between [beginning_year] and [ending_year]"
+                },
+                "name": "cutoff"
             }
         },
         "debug": {
@@ -124,6 +128,7 @@
                     "reset": "Disables the duration",
                     "set": "The game will automatically end after {{duration}} minutes"
                 },
+                "name": "duration",
                 "usage": {
                     "minutes": "minutes"
                 }
@@ -136,7 +141,8 @@
         },
         "end": {
             "help": {
-                "description": "Finishes the current game and decides on a winner."
+                "description": "Finishes the current game and decides on a winner.",
+                "name": "end"
             },
             "interaction": {
                 "description": "Hope you had fun!",
@@ -150,30 +156,31 @@
                 }
             },
             "help": {
-                "description": "Select as many groups that you would like to ignore, separated by commas. A list of group names can be found [here]({{groupList}}).",
+                "description": "Select as many groups that you would like to ignore. A list of group names can be found [here]({{groupList}}).",
                 "example": {
                     "multipleGroups": "Ignore songs from {{groupOne}}, {{groupTwo}}, and {{groupThree}}",
                     "reset": "Resets the exclude option",
                     "singleGroup": "Ignore songs from {{group}}"
-                }
-            },
-            "interaction": {
-                "add": {
-                    "description": "Add the given groups to the exclude game option",
-                    "perGroupDescription": "The {{ordinalNum}} group to add"
                 },
-                "description": "Prevent playing songs from the given groups",
-                "remove": {
-                    "description": "Remove the given groups from the exclude game option",
-                    "perGroupDescription": "The {{ordinalNum}} group to remove"
+                "interaction": {
+                    "add": {
+                        "description": "Add the given groups to the exclude game option",
+                        "perGroupDescription": "The {{ordinalNum}} group to add"
+                    },
+                    "description": "Prevent playing songs from the given groups",
+                    "remove": {
+                        "description": "Remove the given groups from the exclude game option",
+                        "perGroupDescription": "The {{ordinalNum}} group to remove"
+                    },
+                    "reset": {
+                        "description": "Reset the exclude option"
+                    },
+                    "set": {
+                        "description": "Exclude songs from the given groups in the game options",
+                        "perGroupDescription": "The {{ordinalNum}} group to exclude"
+                    }
                 },
-                "reset": {
-                    "description": "Reset the exclude option"
-                },
-                "set": {
-                    "description": "Exclude songs from the given groups in the game options",
-                    "perGroupDescription": "The {{ordinalNum}} group to exclude"
-                }
+                "name": "exclude"
             }
         },
         "exp": {
@@ -195,7 +202,8 @@
             },
             "firstGameOfDayBonus": "First Game of the Day Bonus",
             "help": {
-                "description": "Shows your current EXP modifier, and the list of current bonus EXP artists."
+                "description": "Shows your current EXP modifier, and the list of current bonus EXP artists.",
+                "name": "exp"
             },
             "lowSongCountPenalty": "Low Song Count Penalty",
             "multipleChoicePenalty": "Multiple Choice Penalty",
@@ -214,7 +222,8 @@
                 }
             },
             "help": {
-                "description": "Directly receive a hint to the current song without requiring voting."
+                "description": "Directly receive a hint to the current song without requiring voting.",
+                "name": "forcehint"
             },
             "hintIgnored": "Force Hint Ignored"
         },
@@ -226,7 +235,8 @@
                 }
             },
             "help": {
-                "description": "Directly skip the current song without requiring voting."
+                "description": "Directly skip the current song without requiring voting.",
+                "name": "forceskip"
             },
             "skipIgnored": "Force Skip Ignored"
         },
@@ -239,11 +249,12 @@
                     "female": "Play songs only from female artists",
                     "maleFemale": "Play songs from both male and female artists",
                     "reset": "Reset to the default genders of male, female, and coed"
-                }
-            },
-            "interaction": {
-                "description": "Choose the gender of the artists you'd like to hear from.",
-                "gender": "The gender of the group members or soloist"
+                },
+                "interaction": {
+                    "description": "Choose the gender of the artists you'd like to hear from.",
+                    "gender": "The gender of the group members or soloist"
+                },
+                "name": "gender"
             },
             "warning": {
                 "gameOption": {
@@ -268,6 +279,7 @@
                     "reset": "Disables the goal",
                     "set": "The first player to {{goal}} wins the game"
                 },
+                "name": "goal",
                 "usage": {
                     "points": "points"
                 }
@@ -279,30 +291,31 @@
         },
         "groups": {
             "help": {
-                "description": "Select as many groups that you would like to hear from, separated by commas. A list of group names can be found [here]({{groupList}}).",
+                "description": "Select as many groups that you would like to hear from. A list of group names can be found [here]({{groupList}}).",
                 "example": {
                     "multipleGroups": "Plays songs only from {{groupOne}}, {{groupTwo}}, and {{groupThree}}",
                     "reset": "Resets the groups option",
                     "singleGroup": "Plays songs only from {{group}}"
-                }
-            },
-            "interaction": {
-                "add": {
-                    "description": "Add the given groups to the game options",
-                    "perGroupDescription": "The {{ordinalNum}} group to add"
                 },
-                "description": "Select artists to exclusively play from",
-                "remove": {
-                    "description": "Remove the given groups from the game options",
-                    "perGroupDescription": "The {{ordinalNum}} group to remove"
+                "interaction": {
+                    "add": {
+                        "description": "Add the given groups to the game options",
+                        "perGroupDescription": "The {{ordinalNum}} group to add"
+                    },
+                    "description": "Select artists to exclusively play from",
+                    "remove": {
+                        "description": "Remove the given groups from the game options",
+                        "perGroupDescription": "The {{ordinalNum}} group to remove"
+                    },
+                    "reset": {
+                        "description": "Reset the groups option"
+                    },
+                    "set": {
+                        "description": "Play songs from the given groups",
+                        "perGroupDescription": "The {{ordinalNum}} group to play songs from"
+                    }
                 },
-                "reset": {
-                    "description": "Reset the groups option"
-                },
-                "set": {
-                    "description": "Play songs from the given groups",
-                    "perGroupDescription": "The {{ordinalNum}} group to play songs from"
-                }
+                "name": "groups"
             }
         },
         "guessmode": {
@@ -313,7 +326,8 @@
                     "both": "Type the correct name of the artist (0.2 points) or the name of the song (1 point) to win a game round",
                     "reset": "Reset to the default guess mode of {{defaultGuessMode}}",
                     "song": "Type the correct song name to win a game round"
-                }
+                },
+                "name": "guessmode"
             },
             "interaction": {
                 "guessMode": "What is considered a valid guess"
@@ -331,7 +345,8 @@
                 "example": {
                     "allCommands": "Shows all available commands and a short description",
                     "sampleCommand": "Shows a detailed description for the cutoff command"
-                }
+                },
+                "name": "help"
             },
             "interaction": {
                 "action": "The name of a command to get documentation of."
@@ -355,7 +370,8 @@
                 }
             },
             "help": {
-                "description": "Gives a hint to the currently playing song."
+                "description": "Gives a hint to the currently playing song.",
+                "name": "hint"
             },
             "request": {
                 "description": "{{hintCounter}} hint requests received.",
@@ -371,30 +387,31 @@
                 }
             },
             "help": {
-                "description": "Select as many groups that you would like to forcefully include, ignoring other filters ({{gender}}, {{artisttype}}, etc.), separated by commas. A list of group names can be found [here]({{groupList}}).",
+                "description": "Select as many groups that you would like to forcefully include, ignoring other filters ({{gender}}, {{artisttype}}, etc.). A list of group names can be found [here]({{groupList}}).",
                 "example": {
                     "multipleGroups": "Forcefully include songs from {{groupOne}}, {{groupTwo}}, and {{groupThree}}",
                     "reset": "Resets the include option",
                     "singleGroup": "Forcefully include songs from {{group}}"
-                }
-            },
-            "interaction": {
-                "add": {
-                    "description": "Add the given groups to the include game option",
-                    "perGroupDescription": "The {{ordinalNum}} group to add"
                 },
-                "description": "Select artists to forcefully include",
-                "remove": {
-                    "description": "Remove the given groups from the include game option",
-                    "perGroupDescription": "The {{ordinalNum}} group to remove"
+                "interaction": {
+                    "add": {
+                        "description": "Add the given groups to the include game option",
+                        "perGroupDescription": "The {{ordinalNum}} group to add"
+                    },
+                    "description": "Select artists to forcefully include",
+                    "remove": {
+                        "description": "Remove the given groups from the include game option",
+                        "perGroupDescription": "The {{ordinalNum}} group to remove"
+                    },
+                    "reset": {
+                        "description": "Reset the include option"
+                    },
+                    "set": {
+                        "description": "Include songs from the given groups in the game options",
+                        "perGroupDescription": "The {{ordinalNum}} group to include"
+                    }
                 },
-                "reset": {
-                    "description": "Reset the include option"
-                },
-                "set": {
-                    "description": "Include songs from the given groups in the game options",
-                    "perGroupDescription": "The {{ordinalNum}} group to include"
-                }
+                "name": "include"
             }
         },
         "join": {
@@ -443,7 +460,8 @@
                     "all": "Play all available songs",
                     "korean": "Plays only Korean songs. Ignores songs that are in foreign languages: English, Japanese, Chinese",
                     "reset": "Reset to the default language of {{defaultLanguage}}"
-                }
+                },
+                "name": "language"
             },
             "interaction": {
                 "language": "The language of music to play"
@@ -494,6 +512,7 @@
                     "serverSongsGuessedPage": "Shows the 3rd page of the server-wide leaderboard by total songs guessed",
                     "unenroll": "Hides your name from the leaderboard"
                 },
+                "name": "leaderboard",
                 "usage": {
                     "pageNumber": "page_number"
                 }
@@ -555,7 +574,8 @@
                     "reset": "Reset to the default limit of {{defaultLimit}}",
                     "singleLimit": "Plays the top {{limit}} most listened songs from the currently selected options",
                     "twoLimits": "Plays between the {{limitStart}} to {{limitEnd}} most listened songs from the currently selected options"
-                }
+                },
+                "name": "limit"
             },
             "interaction": {
                 "description": "Set a maximum number of results in the song query",
@@ -586,7 +606,8 @@
                     "exclude": "Lists the current {{exclude}} options",
                     "groups": "Lists the current {{groups}} options",
                     "include": "Lists the current {{include}} options"
-                }
+                },
+                "name": "list"
             },
             "interaction": {
                 "listType": "Whether to print the currently set groups, groups included, or groups excluded"
@@ -595,7 +616,8 @@
         "listen": {
             "help": {
                 "description": "Stream songs from the current options. Only available to KMQ Premium users.",
-                "example": "Music will start playing in the current voice channel."
+                "example": "Music will start playing in the current voice channel.",
+                "name": "listen"
             },
             "musicStarting": "Music Starting in #{{textChannelName}} in 🔊 {{voiceChannelName}}"
         },
@@ -607,6 +629,7 @@
                     "toEnglish": "Change the bot's language to {{english}}",
                     "toKorean": "Change the bot's language to {{korean}}"
                 },
+                "name": "locale",
                 "usage": {
                     "language": "language"
                 }
@@ -639,7 +662,8 @@
                             "song": "The name of the song"
                         }
                     }
-                }
+                },
+                "name": "lookup"
             },
             "inCurrentGameOptions": "In Current Game Options?",
             "inKMQ": "This song is included in KMQ! Here's the link to [Daisuki]({{link}}).",
@@ -664,16 +688,18 @@
                     "off": "Only the first person who guesses correct is awarded the point",
                     "on": "Allows for a 1.5 second grace period from when the first correct guess occurs. Multiple players are able to guess correctly",
                     "reset": "Reset to the default multiguess type of {{defaultMultiguess}}"
-                }
-            },
-            "interaction": {
-                "description": "Sets whether multiple people can guess a song correctly",
-                "multiguess": "Whether to allow multiple people to guess correctly"
+                },
+                "interaction": {
+                    "description": "Sets whether multiple people can guess a song correctly",
+                    "multiguess": "Whether to allow multiple people to guess correctly"
+                },
+                "name": "multiguess"
             }
         },
         "news": {
             "help": {
-                "description": "Displays the latest updates to KMQ."
+                "description": "Displays the latest updates to KMQ.",
+                "name": "news"
             },
             "updates": {
                 "footer": "Join the official KMQ server for more detailed updates!",
@@ -683,7 +709,8 @@
         "options": {
             "duration": "{{durationInMinutes}} mins",
             "help": {
-                "description": "Displays the current game options."
+                "description": "Displays the current game options.",
+                "name": "options"
             },
             "listeningSessionNotAvailable": "Some options are not available during a listening session",
             "notSet": "Not set",
@@ -705,7 +732,8 @@
                     "exclusive": "Exclusively play OST songs",
                     "include": "Include OST songs",
                     "reset": "Reset to the default option of {{defaultOst}}"
-                }
+                },
+                "name": "ost"
             },
             "interaction": {
                 "ost": "Whether to include, exclusively play, or exclude OST songs"
@@ -747,6 +775,7 @@
                 "interaction": {
                     "lives": "Choose how many lives each player starts with"
                 },
+                "name": "play",
                 "usage": {
                     "lives": "lives"
                 }
@@ -768,7 +797,8 @@
         "premium": {
             "help": {
                 "description": "Find out more about KMQ Premium including whether you're currently a member.",
-                "example": "Shows your premium status."
+                "example": "Shows your premium status.",
+                "name": "premium"
             },
             "option": {
                 "description": "This option can only be used by premium KMQ supporters.",
@@ -854,6 +884,7 @@
                     "replace": "Replace the mentioned preset's options with the current game options",
                     "save": "Saves the current game options as a preset"
                 },
+                "name": "preset",
                 "usage": {
                     "presetIdentifier": "preset_identifier",
                     "presetName": "preset_name"
@@ -926,6 +957,7 @@
                     "otherPlayerMention": "Views {{playerName}}'s player profile",
                     "self": "View your own player profile"
                 },
+                "name": "profile",
                 "usage": {
                     "mention": "mention"
                 }
@@ -970,7 +1002,8 @@
             },
             "help": {
                 "description": "View songs added to KMQ in the past two weeks.",
-                "example": "Show recently added songs"
+                "example": "Show recently added songs",
+                "name": "recentlyadded"
             },
             "released": "Released",
             "title": "Recently Added Songs"
@@ -982,11 +1015,12 @@
                     "all": "Plays all available videos, including dance practices, acoustic versions, remixes",
                     "official": "Plays only {{official}} music videos",
                     "reset": "Reset to the default release type of {{defaultRelease}}"
-                }
-            },
-            "interaction": {
-                "description": "Choose whether to include only official music videos, or all videos.",
-                "release": "The type of releases to play from"
+                },
+                "interaction": {
+                    "description": "Choose whether to include only official music videos, or all videos.",
+                    "release": "The type of releases to play from"
+                },
+                "name": "release"
             }
         },
         "remove": {
@@ -1005,7 +1039,8 @@
                     "exclude": "Removes {{groupOne}}, {{groupTwo}}, and {{groupThree}} from the current {{exclude}} option",
                     "groups": "Removes {{groupOne}} and {{groupTwo}} from the current {{groups}} option",
                     "include": "Removes {{group}} from the current {{include}} option"
-                }
+                },
+                "name": "remove"
             }
         },
         "reset": {
@@ -1013,12 +1048,14 @@
                 "description": "Reset to the default game options.",
                 "example": {
                     "reset": "Resets to the default game options"
-                }
+                },
+                "name": "reset"
             }
         },
         "score": {
             "help": {
-                "description": "See the scoreboard for the current game."
+                "description": "See the scoreboard for the current game.",
+                "name": "score"
             },
             "scoreboardTitle": "Scoreboard"
         },
@@ -1030,7 +1067,8 @@
                     "middle": "Songs will be played starting from the middle point",
                     "random": "Songs will be played starting from a random point in the middle",
                     "reset": "Reset to the default seek of {{defaultSeek}}"
-                }
+                },
+                "name": "seek"
             },
             "interaction": {
                 "seek": "Where to start playing each song from"
@@ -1043,7 +1081,8 @@
                     "popularity": "Songs will play based on descending popularity. {{penalty}} EXP penalty will be applied",
                     "random": "Songs will play randomly",
                     "reset": "Reset to the default shuffle mode of {{defaultShuffle}}"
-                }
+                },
+                "name": "shuffle"
             },
             "interaction": {
                 "shuffle": "The type of music shuffling to use in-game"
@@ -1054,7 +1093,8 @@
                 "skipIgnored": "Skip Ignored"
             },
             "help": {
-                "description": "Vote to skip the current song. A song is skipped when majority of participants vote to skip it."
+                "description": "Vote to skip the current song. A song is skipped when majority of participants vote to skip it.",
+                "name": "skip"
             },
             "success": {
                 "description": "{{skipCounter}} skips achieved, skipping..."
@@ -1076,7 +1116,8 @@
                     "reset": "Reset the special option",
                     "reverse": "Plays the song in reverse",
                     "slow": "Plays the song at a slow speed"
-                }
+                },
+                "name": "special"
             },
             "interaction": {
                 "special": "The type of modification to make on each song"
@@ -1091,7 +1132,8 @@
                 },
                 "interaction": {
                     "playlistURL": "The playlist to retrieve songs from"
-                }
+                },
+                "name": "spotify"
             },
             "invalidURL": {
                 "description": "The link to the playlist is invalid. Use `Share > Copy Link to Playlist` in Spotify to retrieve a valid link.",
@@ -1124,7 +1166,8 @@
                 "title": "Game Statistics"
             },
             "help": {
-                "description": "Various usage/system statistics."
+                "description": "Various usage/system statistics.",
+                "name": "stats"
             },
             "system": {
                 "apiLatency": "API Latency",
@@ -1144,7 +1187,8 @@
                     "exclude": "Do not include subunits",
                     "include": "Automatically include subunits. For example, `{{groupCommand}} {{parentGroup}}` would include songs by {{parentGroup}}, {{subunitOne}}, {{subunitTwo}}, etc.",
                     "reset": "Reset to the default option of {{defaultSubunit}}"
-                }
+                },
+                "name": "subunits"
             },
             "interaction": {
                 "subunits": "Whether to include subunits"
@@ -1157,6 +1201,7 @@
                     "reset": "Disables the timer",
                     "set": "In {{timer}} seconds, if no user has guessed correctly, the round ends and the next one begins automatically"
                 },
+                "name": "timer",
                 "usage": {
                     "seconds": "seconds"
                 }
@@ -1174,7 +1219,8 @@
             },
             "description": "Vote for KMQ on [top.gg]({{voteLink}}) and you'll receive 2x EXP for an hour! You can vote once every {{voteResetDuration}} hours.\n\nWe'd appreciate it if you could also leave a [review]({{reviewLink}}).",
             "help": {
-                "description": "Shows instructions on how to vote to receive 2x EXP for an hour."
+                "description": "Shows instructions on how to vote to receive 2x EXP for an hour.",
+                "name": "vote"
             },
             "timeLeft": "{{time}} left.",
             "unavailable": {
@@ -1389,7 +1435,7 @@
                 "inaccessible": "I can't access that user right now. Try using {{profileUserID}} instead.",
                 "noStats": "This user needs to play their first game before their stats are tracked."
             },
-            "resetOption": "Resets the {{optionName}} option.",
+            "resetOption": "Resets the {{optionName}} option",
             "title": {
                 "failure": "Uh-oh"
             },

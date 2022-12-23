@@ -4,9 +4,9 @@ import {
     sendErrorMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import PlayCommand from "./play";
+import i18n from "../../helpers/localization_manager";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 
@@ -24,11 +24,11 @@ export default class JoinCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             logger.warn(`${getDebugLogHeader(message)} | Missing team name.`);
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     message.guildID,
                     "command.join.failure.joinError.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     message.guildID,
                     "command.join.failure.joinError.noTeamName.description",
                     { joinCommand: `${process.env.BOT_PREFIX}join` }

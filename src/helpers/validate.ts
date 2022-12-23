@@ -1,8 +1,8 @@
 import { IPCLogger } from "../logger";
 import { arrayToString } from "./utils";
 import { getDebugLogHeader, sendErrorMessage } from "./discord_utils";
-import LocalizationManager from "./localization_manager";
 import MessageContext from "../structures/message_context";
+import i18n from "./localization_manager";
 import type { GuildTextableMessage } from "../types";
 import type CommandValidations from "../interfaces/command_validations";
 import type Eris from "eris";
@@ -27,7 +27,7 @@ export async function sendValidationErrorMessage(
     await sendErrorMessage(
         messageContext,
         {
-            title: LocalizationManager.localizer.translate(
+            title: i18n.translate(
                 messageContext.guildID,
                 "misc.failure.validation.title"
             ),
@@ -57,7 +57,7 @@ export default (
     ) {
         sendValidationErrorMessage(
             messageContext,
-            LocalizationManager.localizer.translate(
+            i18n.translate(
                 message.guildID,
                 "misc.failure.validation.numArguments.incorrect",
                 {
@@ -81,7 +81,7 @@ export default (
                 if (Number.isNaN(Number(arg))) {
                     sendValidationErrorMessage(
                         messageContext,
-                        LocalizationManager.localizer.translate(
+                        i18n.translate(
                             message.guildID,
                             "misc.failure.validation.number.notNumber",
                             { argument: `\`${validation.name}\`` }
@@ -97,7 +97,7 @@ export default (
                 if ("minValue" in validation && intArg < validation.minValue) {
                     sendValidationErrorMessage(
                         messageContext,
-                        LocalizationManager.localizer.translate(
+                        i18n.translate(
                             message.guildID,
                             "misc.failure.validation.number.min",
                             {
@@ -114,7 +114,7 @@ export default (
                 if ("maxValue" in validation && intArg > validation.maxValue) {
                     sendValidationErrorMessage(
                         messageContext,
-                        LocalizationManager.localizer.translate(
+                        i18n.translate(
                             message.guildID,
                             "misc.failure.validation.number.max",
                             {
@@ -136,7 +136,7 @@ export default (
                 if (!(arg === "false" || arg === "true")) {
                     sendValidationErrorMessage(
                         messageContext,
-                        LocalizationManager.localizer.translate(
+                        i18n.translate(
                             message.guildID,
                             "misc.failure.validation.boolean.notBoolean",
                             { argument: `\`${validation.name}\`` }
@@ -156,7 +156,7 @@ export default (
                 if (!enums.includes(arg)) {
                     sendValidationErrorMessage(
                         messageContext,
-                        LocalizationManager.localizer.translate(
+                        i18n.translate(
                             message.guildID,
                             "misc.failure.validation.enum.notInEnum",
                             {
@@ -178,7 +178,7 @@ export default (
                 if (arg.length !== 1) {
                     sendValidationErrorMessage(
                         messageContext,
-                        LocalizationManager.localizer.translate(
+                        i18n.translate(
                             message.guildID,
                             "misc.failure.validation.char.notChar",
                             { argument: `\`${validation.name}\`` }

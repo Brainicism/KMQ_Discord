@@ -11,9 +11,10 @@ import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -57,15 +58,12 @@ export default class LimitCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "limit",
-        description: LocalizationManager.localizer.translate(
-            guildID,
-            "command.limit.help.description"
-        ),
+        description: i18n.translate(guildID, "command.limit.help.description"),
         usage: ",limit [limit_1] {limit_2}",
         examples: [
             {
                 example: "`,limit 250`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.limit.help.example.singleLimit",
                     {
@@ -75,7 +73,7 @@ export default class LimitCommand implements BaseCommand {
             },
             {
                 example: "`,limit 250 500`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.limit.help.example.twoLimits",
                     { limitStart: String(250), limitEnd: String(500) }
@@ -83,7 +81,7 @@ export default class LimitCommand implements BaseCommand {
             },
             {
                 example: "`,limit`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.limit.help.example.reset",
                     { defaultLimit: `\`${DEFAULT_LIMIT}\`` }
@@ -93,18 +91,15 @@ export default class LimitCommand implements BaseCommand {
         priority: 140,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "limit",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.limit.interaction.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
                     name: "set",
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.limit.interaction.description"
                     ),
@@ -113,21 +108,19 @@ export default class LimitCommand implements BaseCommand {
                     options: [
                         {
                             name: LimitAppCommandAction.TOP,
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.limit.interaction.description_top"
-                                ),
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.limit.interaction.description_top"
+                            ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .SUB_COMMAND,
                             options: [
                                 {
                                     name: "limit",
-                                    description:
-                                        LocalizationManager.localizer.translate(
-                                            LocaleType.EN,
-                                            "command.limit.interaction.limit"
-                                        ),
+                                    description: i18n.translate(
+                                        LocaleType.EN,
+                                        "command.limit.interaction.limit"
+                                    ),
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,
                                     required: true,
@@ -138,21 +131,19 @@ export default class LimitCommand implements BaseCommand {
                         },
                         {
                             name: LimitAppCommandAction.RANGE,
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.limit.interaction.description_range"
-                                ),
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.limit.interaction.description_range"
+                            ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .SUB_COMMAND,
                             options: [
                                 {
                                     name: "limit_start",
-                                    description:
-                                        LocalizationManager.localizer.translate(
-                                            LocaleType.EN,
-                                            "command.limit.interaction.limit_start"
-                                        ),
+                                    description: i18n.translate(
+                                        LocaleType.EN,
+                                        "command.limit.interaction.limit_start"
+                                    ),
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,
                                     required: true,
@@ -161,11 +152,10 @@ export default class LimitCommand implements BaseCommand {
                                 } as any,
                                 {
                                     name: "limit_end",
-                                    description:
-                                        LocalizationManager.localizer.translate(
-                                            LocaleType.EN,
-                                            "command.limit.interaction.limit_end"
-                                        ),
+                                    description: i18n.translate(
+                                        LocaleType.EN,
+                                        "command.limit.interaction.limit_end"
+                                    ),
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,
                                     required: true,
@@ -178,7 +168,7 @@ export default class LimitCommand implements BaseCommand {
                 },
                 {
                     name: "reset",
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.limit.help.example.reset",
                         { defaultLimit: String(DEFAULT_LIMIT) }
@@ -234,11 +224,11 @@ export default class LimitCommand implements BaseCommand {
                 sendErrorMessage(
                     messageContext,
                     {
-                        title: LocalizationManager.localizer.translate(
+                        title: i18n.translate(
                             messageContext.guildID,
                             "command.limit.failure.invalidLimit.title"
                         ),
-                        description: LocalizationManager.localizer.translate(
+                        description: i18n.translate(
                             messageContext.guildID,
                             "command.limit.failure.invalidLimit.greaterThanZero.description"
                         ),
@@ -252,11 +242,11 @@ export default class LimitCommand implements BaseCommand {
                 sendErrorMessage(
                     messageContext,
                     {
-                        title: LocalizationManager.localizer.translate(
+                        title: i18n.translate(
                             messageContext.guildID,
                             "command.limit.failure.invalidLimit.title"
                         ),
-                        description: LocalizationManager.localizer.translate(
+                        description: i18n.translate(
                             messageContext.guildID,
                             "command.limit.failure.invalidLimit.greaterThanStart.description"
                         ),

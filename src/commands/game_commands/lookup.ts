@@ -29,14 +29,15 @@ import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
 import KmqMember from "../../structures/kmq_member";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import SongSelector from "../../structures/song_selector";
 import State from "../../state";
 import _ from "lodash";
 import dbContext from "../../database_context";
+import i18n from "../../helpers/localization_manager";
 import type { CommandInteraction, EmbedOptions } from "eris";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type { GuildTextableMessage } from "../../types";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -103,11 +104,9 @@ async function lookupByYoutubeID(
     let includedInOptions = false;
 
     if (kmqSongEntry) {
-        description = LocalizationManager.localizer.translate(
-            guildID,
-            "command.lookup.inKMQ",
-            { link: daisukiLink }
-        );
+        description = i18n.translate(guildID, "command.lookup.inKMQ", {
+            link: daisukiLink,
+        });
         songName = getLocalizedSongName(kmqSongEntry, locale);
         artistName = getLocalizedArtistName(kmqSongEntry, locale);
         songAliases = State.aliases.song[videoID]?.join(", ");
@@ -151,11 +150,9 @@ async function lookupByYoutubeID(
             )} | KMQ song lookup. videoID = ${videoID}. Included in options = ${includedInOptions}.`
         );
     } else {
-        description = LocalizationManager.localizer.translate(
-            guildID,
-            "command.lookup.notInKMQ",
-            { link: daisukiLink }
-        );
+        description = i18n.translate(guildID, "command.lookup.notInKMQ", {
+            link: daisukiLink,
+        });
         const isKorean = locale === LocaleType.KO;
         songName =
             daisukiEntry.kname && isKorean
@@ -190,10 +187,7 @@ async function lookupByYoutubeID(
         );
     }
 
-    const viewsString = LocalizationManager.localizer.translate(
-        guildID,
-        "misc.views"
-    );
+    const viewsString = i18n.translate(guildID, "misc.views");
 
     const fields = [
         {
@@ -201,52 +195,33 @@ async function lookupByYoutubeID(
             value: friendlyFormattedNumber(views),
         },
         {
-            name: LocalizationManager.localizer.translate(
-                guildID,
-                "misc.releaseDate"
-            ),
+            name: i18n.translate(guildID, "misc.releaseDate"),
             value: friendlyFormattedDate(publishDate, guildID),
         },
         {
-            name: LocalizationManager.localizer.translate(
-                guildID,
-                "misc.songAliases"
-            ),
-            value:
-                songAliases ||
-                LocalizationManager.localizer.translate(guildID, "misc.none"),
+            name: i18n.translate(guildID, "misc.songAliases"),
+            value: songAliases || i18n.translate(guildID, "misc.none"),
         },
         {
-            name: LocalizationManager.localizer.translate(
-                guildID,
-                "misc.artistAliases"
-            ),
-            value:
-                artistAliases ||
-                LocalizationManager.localizer.translate(guildID, "misc.none"),
+            name: i18n.translate(guildID, "misc.artistAliases"),
+            value: artistAliases || i18n.translate(guildID, "misc.none"),
         },
     ];
 
     if (kmqSongEntry) {
         fields.push(
             {
-                name: LocalizationManager.localizer.translate(
-                    guildID,
-                    "misc.duration"
-                ),
+                name: i18n.translate(guildID, "misc.duration"),
                 value:
                     songDuration ||
-                    LocalizationManager.localizer.translate(
-                        guildID,
-                        "misc.notApplicable"
-                    ),
+                    i18n.translate(guildID, "misc.notApplicable"),
             },
             {
-                name: LocalizationManager.localizer.translate(
+                name: i18n.translate(
                     guildID,
                     "command.lookup.inCurrentGameOptions"
                 ),
-                value: LocalizationManager.localizer.translate(
+                value: i18n.translate(
                     guildID,
                     includedInOptions ? "misc.yes" : "misc.no"
                 ),
@@ -343,11 +318,11 @@ async function lookupBySongName(
     const embedFieldSubsets = chunkArray(songEmbeds, 5);
     const embeds: Array<EmbedOptions> = embedFieldSubsets.map(
         (embedFieldsSubset) => ({
-            title: LocalizationManager.localizer.translate(
+            title: i18n.translate(
                 messageOrInteraction.guildID,
                 "command.lookup.songNameSearchResult.title"
             ),
-            description: LocalizationManager.localizer.translate(
+            description: i18n.translate(
                 messageOrInteraction.guildID,
                 "command.lookup.songNameSearchResult.successDescription"
             ),
@@ -368,15 +343,12 @@ export default class LookupCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "lookup",
-        description: LocalizationManager.localizer.translate(
-            guildID,
-            "command.lookup.help.description"
-        ),
+        description: i18n.translate(guildID, "command.lookup.help.description"),
         usage: ",lookup [song_name | youtube_id]",
         examples: [
             {
                 example: "`,lookup love dive`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.lookup.help.example.song",
                     { song: "Love Dive", artist: "IVE" }
@@ -385,7 +357,7 @@ export default class LookupCommand implements BaseCommand {
             {
                 example:
                     "`,lookup https://www.youtube.com/watch?v=4TWR90KJl84`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.lookup.help.example.song",
                     { song: "Next Level", artist: "Aespa" }
@@ -395,18 +367,15 @@ export default class LookupCommand implements BaseCommand {
         priority: 40,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "lookup",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.lookup.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
                     name: "song_name",
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.lookup.help.interaction.byName.description"
                     ),
@@ -415,22 +384,20 @@ export default class LookupCommand implements BaseCommand {
                     options: [
                         {
                             name: "song_name",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.lookup.help.interaction.byName.field.song"
-                                ),
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.lookup.help.interaction.byName.field.song"
+                            ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             autocomplete: true,
                         },
                         {
                             name: "artist_name",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.lookup.help.interaction.byName.field.artist"
-                                ),
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.lookup.help.interaction.byName.field.artist"
+                            ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             autocomplete: true,
@@ -439,7 +406,7 @@ export default class LookupCommand implements BaseCommand {
                 },
                 {
                     name: "song_link",
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.lookup.help.interaction.byLink.description"
                     ),
@@ -448,11 +415,10 @@ export default class LookupCommand implements BaseCommand {
                     options: [
                         {
                             name: "song_link",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.lookup.help.interaction.byLink.field"
-                                ),
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.lookup.help.interaction.byLink.field"
+                            ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             required: true,
@@ -504,7 +470,7 @@ export default class LookupCommand implements BaseCommand {
             } catch {
                 await sendValidationErrorMessage(
                     messageContext,
-                    LocalizationManager.localizer.translate(
+                    i18n.translate(
                         guildID,
                         "command.lookup.validation.invalidYouTubeID"
                     ),
@@ -530,11 +496,11 @@ export default class LookupCommand implements BaseCommand {
                 await sendErrorMessage(
                     messageContext,
                     {
-                        title: LocalizationManager.localizer.translate(
+                        title: i18n.translate(
                             guildID,
                             "command.lookup.notFound.title"
                         ),
-                        description: LocalizationManager.localizer.translate(
+                        description: i18n.translate(
                             guildID,
                             "command.lookup.notFound.description"
                         ),
@@ -563,11 +529,11 @@ export default class LookupCommand implements BaseCommand {
             await sendInfoMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         guildID,
                         "command.lookup.songNameSearchResult.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         guildID,
                         "command.lookup.songNameSearchResult.notFoundDescription"
                     ),

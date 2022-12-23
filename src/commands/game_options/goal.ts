@@ -12,9 +12,10 @@ import GameOption from "../../enums/game_option_name";
 import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type GameSession from "../../structures/game_session";
@@ -42,18 +43,15 @@ export default class GoalCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "goal",
-        description: LocalizationManager.localizer.translate(
-            guildID,
-            "command.goal.help.description"
-        ),
-        usage: `,goal [${LocalizationManager.localizer.translate(
+        description: i18n.translate(guildID, "command.goal.help.description"),
+        usage: `,goal [${i18n.translate(
             guildID,
             "command.goal.help.usage.points"
         )}]`,
         examples: [
             {
                 example: "`,goal 30`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.goal.help.example.set",
                     { goal: String(30) }
@@ -61,7 +59,7 @@ export default class GoalCommand implements BaseCommand {
             },
             {
                 example: "`,goal`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.goal.help.example.reset"
                 ),
@@ -70,18 +68,15 @@ export default class GoalCommand implements BaseCommand {
         priority: 120,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "goal",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.goal.interaction.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
                     name: OptionAction.SET,
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.goal.interaction.description"
                     ),
@@ -90,11 +85,10 @@ export default class GoalCommand implements BaseCommand {
                     options: [
                         {
                             name: "goal",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.goal.interaction.goal"
-                                ),
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.goal.interaction.goal"
+                            ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .INTEGER,
                             required: true,
@@ -104,7 +98,7 @@ export default class GoalCommand implements BaseCommand {
                 },
                 {
                     name: OptionAction.RESET,
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "goal" }
@@ -161,11 +155,11 @@ export default class GoalCommand implements BaseCommand {
                 sendErrorMessage(
                     messageContext,
                     {
-                        title: LocalizationManager.localizer.translate(
+                        title: i18n.translate(
                             messageContext.guildID,
                             "command.goal.failure.goalExceeded.title"
                         ),
-                        description: LocalizationManager.localizer.translate(
+                        description: i18n.translate(
                             messageContext.guildID,
                             "command.goal.failure.goalExceeded.description"
                         ),
@@ -187,11 +181,11 @@ export default class GoalCommand implements BaseCommand {
                 sendErrorMessage(
                     messageContext,
                     {
-                        title: LocalizationManager.localizer.translate(
+                        title: i18n.translate(
                             messageContext.guildID,
                             "misc.failure.gameOptionConflict.title"
                         ),
-                        description: LocalizationManager.localizer.translate(
+                        description: i18n.translate(
                             messageContext.guildID,
                             "command.goal.failure.gameOptionConflict.description",
                             {

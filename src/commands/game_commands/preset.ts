@@ -13,10 +13,11 @@ import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import dbContext from "../../database_context";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type GameOption from "../../enums/game_option_name";
@@ -51,11 +52,11 @@ const isValidPresetName = async (
         await sendErrorMessage(
             messageContext,
             {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "command.preset.failure.lengthyName.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     messageContext.guildID,
                     "command.preset.failure.lengthyName.description",
                     { presetNameMaxLength: String(PRESET_NAME_MAX_LENGTH) }
@@ -76,11 +77,11 @@ const isValidPresetName = async (
         await sendErrorMessage(
             messageContext,
             {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "command.preset.failure.illegalPrefix.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     messageContext.guildID,
                     "command.preset.failure.illegalPrefix.description",
                     { importPrefix: "`KMQ-`" }
@@ -111,11 +112,11 @@ const canSavePreset = async (
         await sendErrorMessage(
             messageContext,
             {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "command.preset.failure.tooMany.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     messageContext.guildID,
                     "command.preset.failure.tooMany.description",
                     { maxNumPresets: String(MAX_NUM_PRESETS) }
@@ -148,35 +149,32 @@ export default class PresetCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "preset",
-        description: LocalizationManager.localizer.translate(
-            guildID,
-            "command.preset.help.description"
-        ),
-        usage: `,preset [list | save | load | delete | export] {preset_name}\n,preset import [${LocalizationManager.localizer.translate(
+        description: i18n.translate(guildID, "command.preset.help.description"),
+        usage: `,preset [list | save | load | delete | export] {preset_name}\n,preset import [${i18n.translate(
             guildID,
             "command.preset.help.usage.presetIdentifier"
-        )}] [${LocalizationManager.localizer.translate(
+        )}] [${i18n.translate(
             guildID,
             "command.preset.help.usage.presetName"
         )}]`,
         examples: [
             {
                 example: "`,preset list`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.list"
                 ),
             },
             {
                 example: "`,preset save [preset_name]`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.save"
                 ),
             },
             {
                 example: "`,preset load [preset_name | preset_identifier]`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.load",
                     { exampleIdentifier: "`KMQ-XXXXX-...`" }
@@ -184,28 +182,28 @@ export default class PresetCommand implements BaseCommand {
             },
             {
                 example: "`,preset replace [preset_name]`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.replace"
                 ),
             },
             {
                 example: "`,preset delete [preset_name]`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.delete"
                 ),
             },
             {
                 example: "`,preset export [preset_name]`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.export"
                 ),
             },
             {
                 example: "`,preset import [preset_identifier] [preset_name]`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.import",
                     { exampleIdentifier: "`KMQ-XXXXX-...`" }
@@ -215,18 +213,15 @@ export default class PresetCommand implements BaseCommand {
         priority: 200,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "preset",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.preset.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
                     name: PresetAction.LIST,
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.preset.help.example.list"
                     ),
@@ -235,7 +230,7 @@ export default class PresetCommand implements BaseCommand {
                 },
                 {
                     name: PresetAction.SAVE,
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.preset.help.example.save"
                     ),
@@ -244,11 +239,10 @@ export default class PresetCommand implements BaseCommand {
                     options: [
                         {
                             name: "preset_name",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.preset.interaction.save.presetName"
-                                ),
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.preset.interaction.save.presetName"
+                            ),
                             required: true,
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
@@ -257,7 +251,7 @@ export default class PresetCommand implements BaseCommand {
                 },
                 {
                     name: PresetAction.LOAD,
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.preset.help.example.load"
                     ),
@@ -266,11 +260,10 @@ export default class PresetCommand implements BaseCommand {
                     options: [
                         {
                             name: "preset_name",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.preset.interaction.load.presetName"
-                                ),
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.preset.interaction.load.presetName"
+                            ),
                             required: true,
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
@@ -280,7 +273,7 @@ export default class PresetCommand implements BaseCommand {
                 },
                 {
                     name: PresetAction.DELETE,
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.preset.help.example.delete"
                     ),
@@ -289,11 +282,10 @@ export default class PresetCommand implements BaseCommand {
                     options: [
                         {
                             name: "preset_name",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.preset.interaction.delete.presetName"
-                                ),
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.preset.interaction.delete.presetName"
+                            ),
                             required: true,
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
@@ -303,7 +295,7 @@ export default class PresetCommand implements BaseCommand {
                 },
                 {
                     name: PresetAction.REPLACE,
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.preset.help.example.replace"
                     ),
@@ -312,11 +304,10 @@ export default class PresetCommand implements BaseCommand {
                     options: [
                         {
                             name: "preset_name",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.preset.interaction.replace.presetName"
-                                ),
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.preset.interaction.replace.presetName"
+                            ),
                             required: true,
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
@@ -326,7 +317,7 @@ export default class PresetCommand implements BaseCommand {
                 },
                 {
                     name: PresetAction.EXPORT,
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.preset.help.example.export"
                     ),
@@ -335,11 +326,10 @@ export default class PresetCommand implements BaseCommand {
                     options: [
                         {
                             name: "preset_name",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.preset.interaction.export.presetName"
-                                ),
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.preset.interaction.export.presetName"
+                            ),
                             required: true,
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
@@ -349,7 +339,7 @@ export default class PresetCommand implements BaseCommand {
                 },
                 {
                     name: PresetAction.IMPORT,
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.preset.help.example.import"
                     ),
@@ -358,22 +348,20 @@ export default class PresetCommand implements BaseCommand {
                     options: [
                         {
                             name: "exported_preset",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.preset.interaction.import.exportedPresetID"
-                                ),
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.preset.interaction.import.exportedPresetID"
+                            ),
                             required: true,
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                         },
                         {
                             name: "new_preset_name",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.preset.interaction.import.presetName"
-                                ),
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.preset.interaction.import.presetName"
+                            ),
                             required: true,
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
@@ -423,11 +411,11 @@ export default class PresetCommand implements BaseCommand {
             await sendErrorMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "command.preset.failure.noSuchPreset.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "command.preset.failure.noSuchPreset.description",
                         { presetName: `\`${presetName}\`` }
@@ -447,11 +435,11 @@ export default class PresetCommand implements BaseCommand {
         await sendInfoMessage(
             messageContext,
             {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "command.preset.deleted.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     messageContext.guildID,
                     "command.preset.deleted.description",
                     { presetName: `\`${presetName}\`` }
@@ -492,11 +480,11 @@ export default class PresetCommand implements BaseCommand {
                 await sendErrorMessage(
                     messageContext,
                     {
-                        title: LocalizationManager.localizer.translate(
+                        title: i18n.translate(
                             messageContext.guildID,
                             "command.preset.failure.noSuchPreset.title"
                         ),
-                        description: LocalizationManager.localizer.translate(
+                        description: i18n.translate(
                             messageContext.guildID,
                             "command.preset.failure.noSuchPreset.identifier.description",
                             { presetUUID: `\`${presetUUID}\`` }
@@ -546,11 +534,11 @@ export default class PresetCommand implements BaseCommand {
             await sendErrorMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "command.preset.failure.noSuchPreset.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "command.preset.failure.noSuchPreset.description",
                         { presetName: `\`${presetName}\`` }
@@ -589,11 +577,11 @@ export default class PresetCommand implements BaseCommand {
             await sendInfoMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "command.preset.saved.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "command.preset.savedOrReplaced.description",
                         {
@@ -617,11 +605,11 @@ export default class PresetCommand implements BaseCommand {
             await sendErrorMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "command.preset.failure.alreadyExists.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "command.preset.failure.alreadyExists.description",
                         {
@@ -668,11 +656,11 @@ export default class PresetCommand implements BaseCommand {
         await sendInfoMessage(
             messageContext,
             {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "command.preset.replaced.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     messageContext.guildID,
                     "command.preset.savedOrReplaced.description",
                     {
@@ -705,11 +693,11 @@ export default class PresetCommand implements BaseCommand {
             await sendErrorMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "command.preset.failure.noSuchPreset.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "command.preset.failure.noSuchPreset.description",
                         { presetName: `\`${presetName}\`` }
@@ -730,11 +718,11 @@ export default class PresetCommand implements BaseCommand {
         await sendInfoMessage(
             messageContext,
             {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "command.preset.exported.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     messageContext.guildID,
                     "command.preset.exported.description",
                     {
@@ -770,11 +758,11 @@ export default class PresetCommand implements BaseCommand {
             sendErrorMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "command.preset.failure.alreadyExists.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "command.preset.failure.alreadyExists.description",
                         {
@@ -807,11 +795,11 @@ export default class PresetCommand implements BaseCommand {
             await sendErrorMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "command.preset.failure.noSuchPreset.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "command.preset.failure.noSuchPreset.identifier.description",
                         { presetUUID: `\`${presetUUID}\`` }
@@ -862,11 +850,11 @@ export default class PresetCommand implements BaseCommand {
         sendInfoMessage(
             messageContext,
             {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "command.preset.imported.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     messageContext.guildID,
                     "command.preset.imported.description",
                     {
@@ -892,14 +880,14 @@ export default class PresetCommand implements BaseCommand {
         sendInfoMessage(
             messageContext,
             {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "command.preset.list.title"
                 ),
                 description:
                     presets.length > 0
                         ? presets.join("\n")
-                        : LocalizationManager.localizer.translate(
+                        : i18n.translate(
                               messageContext.guildID,
                               "command.preset.list.failure.noPresets.description",
                               {
@@ -908,7 +896,7 @@ export default class PresetCommand implements BaseCommand {
                           ),
                 footerText:
                     presets.length > 0
-                        ? LocalizationManager.localizer.translate(
+                        ? i18n.translate(
                               messageContext.guildID,
                               "command.preset.list.loadInstructions.footer",
                               {
@@ -953,11 +941,11 @@ export default class PresetCommand implements BaseCommand {
             sendErrorMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "command.preset.failure.missingName.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "command.preset.failure.missingName.description"
                     ),
@@ -1024,18 +1012,17 @@ export default class PresetCommand implements BaseCommand {
                     sendErrorMessage(
                         messageContext,
                         {
-                            title: LocalizationManager.localizer.translate(
+                            title: i18n.translate(
                                 messageContext.guildID,
                                 "command.preset.failure.missingIdentifier.title"
                             ),
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    messageContext.guildID,
-                                    "command.preset.failure.missingIdentifier.description",
-                                    {
-                                        presetExport: `${process.env.BOT_PREFIX}preset export`,
-                                    }
-                                ),
+                            description: i18n.translate(
+                                messageContext.guildID,
+                                "command.preset.failure.missingIdentifier.description",
+                                {
+                                    presetExport: `${process.env.BOT_PREFIX}preset export`,
+                                }
+                            ),
                             thumbnailUrl: KmqImages.NOT_IMPRESSED,
                         },
                         interaction

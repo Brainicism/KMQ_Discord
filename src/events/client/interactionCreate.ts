@@ -12,13 +12,13 @@ import GroupsCommand from "../../commands/game_options/groups";
 import HelpCommand from "../../commands/game_commands/help";
 import IncludeCommand from "../../commands/game_options/include";
 import KmqMember from "../../structures/kmq_member";
-import LocalizationManager from "../../helpers/localization_manager";
 import LookupCommand from "../../commands/game_commands/lookup";
 import MessageContext from "../../structures/message_context";
 import PresetCommand from "../../commands/game_commands/preset";
 import ProfileCommand from "../../commands/game_commands/profile";
 import Session from "../../structures/session";
 import State from "../../state";
+import i18n from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("interactionCreate");
 
@@ -148,7 +148,7 @@ export default async function interactionCreateHandler(
                         tryCreateInteractionErrorAcknowledgement(
                             interaction as Eris.CommandInteraction,
                             null,
-                            LocalizationManager.localizer.translate(
+                            i18n.translate(
                                 interaction.guildID,
                                 "misc.failure.interaction.bookmarkOutsideGame"
                             )

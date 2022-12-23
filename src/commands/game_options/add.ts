@@ -15,10 +15,10 @@ import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
+import i18n from "../../helpers/localization_manager";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type EmbedPayload from "../../interfaces/embed_payload";
@@ -58,23 +58,19 @@ export default class AddCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "add",
-        description: LocalizationManager.localizer.translate(
-            guildID,
-            "command.add.help.description",
-            {
-                groups: `\`${process.env.BOT_PREFIX}groups\``,
-                exclude: `\`${process.env.BOT_PREFIX}exclude\``,
-                include: `\`${process.env.BOT_PREFIX}include\``,
-            }
-        ),
-        usage: `,add [groups | exclude | include] [${LocalizationManager.localizer.translate(
+        description: i18n.translate(guildID, "command.add.help.description", {
+            groups: `\`${process.env.BOT_PREFIX}groups\``,
+            exclude: `\`${process.env.BOT_PREFIX}exclude\``,
+            include: `\`${process.env.BOT_PREFIX}include\``,
+        }),
+        usage: `,add [groups | exclude | include] [${i18n.translate(
             guildID,
             "misc.listOfGroups"
         )}]`,
         examples: [
             {
                 example: "`,add groups twice, red velvet`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.add.help.example.groups",
                     {
@@ -86,7 +82,7 @@ export default class AddCommand implements BaseCommand {
             },
             {
                 example: "`,add exclude BESTie, Dia, iKON`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.add.help.example.exclude",
                     {
@@ -99,7 +95,7 @@ export default class AddCommand implements BaseCommand {
             },
             {
                 example: "`,add include exo`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.add.help.example.include",
                     {
@@ -114,7 +110,7 @@ export default class AddCommand implements BaseCommand {
                 type: Eris.Constants.ComponentTypes.BUTTON,
                 style: Eris.Constants.ButtonStyles.LINK,
                 url: GROUP_LIST_URL,
-                label: LocalizationManager.localizer.translate(
+                label: i18n.translate(
                     guildID,
                     "misc.interaction.fullGroupsList"
                 ),
@@ -199,7 +195,7 @@ export default class AddCommand implements BaseCommand {
                 );
 
                 if (suggestions.length > 0) {
-                    suggestionsText = LocalizationManager.localizer.translate(
+                    suggestionsText = i18n.translate(
                         messageContext.guildID,
                         "misc.failure.unrecognizedGroups.didYouMean",
                         {
@@ -209,15 +205,14 @@ export default class AddCommand implements BaseCommand {
                 }
             }
 
-            const descriptionText = LocalizationManager.localizer.translate(
+            const descriptionText = i18n.translate(
                 messageContext.guildID,
                 "misc.failure.unrecognizedGroups.description",
                 {
-                    matchedGroupsAction:
-                        LocalizationManager.localizer.translate(
-                            messageContext.guildID,
-                            "misc.failure.unrecognizedGroups.added"
-                        ),
+                    matchedGroupsAction: i18n.translate(
+                        messageContext.guildID,
+                        "misc.failure.unrecognizedGroups.added"
+                    ),
                     helpGroups: interaction
                         ? "`/help groups`"
                         : `\`${process.env.BOT_PREFIX}help groups\``,
@@ -229,7 +224,7 @@ export default class AddCommand implements BaseCommand {
             embeds.push({
                 color: EMBED_ERROR_COLOR,
                 author: messageContext.author,
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "misc.failure.unrecognizedGroups.title"
                 ),
@@ -273,11 +268,11 @@ export default class AddCommand implements BaseCommand {
                     embeds.push({
                         color: EMBED_ERROR_COLOR,
                         author: messageContext.author,
-                        title: LocalizationManager.localizer.translate(
+                        title: i18n.translate(
                             messageContext.guildID,
                             "misc.failure.groupsExcludeConflict.title"
                         ),
-                        description: LocalizationManager.localizer.translate(
+                        description: i18n.translate(
                             messageContext.guildID,
                             "misc.failure.groupsExcludeConflict.description",
                             {
@@ -296,11 +291,10 @@ export default class AddCommand implements BaseCommand {
                                 solutionStepTwo: interaction
                                     ? "`/groups add`"
                                     : `\`${process.env.BOT_PREFIX}add groups\``,
-                                allowOrPrevent:
-                                    LocalizationManager.localizer.translate(
-                                        messageContext.guildID,
-                                        "misc.failure.groupsExcludeConflict.allow"
-                                    ),
+                                allowOrPrevent: i18n.translate(
+                                    messageContext.guildID,
+                                    "misc.failure.groupsExcludeConflict.allow"
+                                ),
                             }
                         ),
                         thumbnailUrl: KmqImages.DEAD,
@@ -339,22 +333,21 @@ export default class AddCommand implements BaseCommand {
                     sendErrorMessage(
                         messageContext,
                         {
-                            title: LocalizationManager.localizer.translate(
+                            title: i18n.translate(
                                 messageContext.guildID,
                                 "misc.failure.gameOptionConflict.title"
                             ),
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    messageContext.guildID,
-                                    "misc.failure.gameOptionConflict.description",
-                                    {
-                                        optionOne: "`groups`",
-                                        optionTwo: "`include`",
-                                        optionOneCommand: interaction
-                                            ? "`/groups`"
-                                            : `\`${process.env.BOT_PREFIX}groups\``,
-                                    }
-                                ),
+                            description: i18n.translate(
+                                messageContext.guildID,
+                                "misc.failure.gameOptionConflict.description",
+                                {
+                                    optionOne: "`groups`",
+                                    optionTwo: "`include`",
+                                    optionOneCommand: interaction
+                                        ? "`/groups`"
+                                        : `\`${process.env.BOT_PREFIX}groups\``,
+                                }
+                            ),
                         },
                         interaction
                     );
@@ -379,11 +372,11 @@ export default class AddCommand implements BaseCommand {
                     embeds.push({
                         color: EMBED_ERROR_COLOR,
                         author: messageContext.author,
-                        title: LocalizationManager.localizer.translate(
+                        title: i18n.translate(
                             messageContext.guildID,
                             "misc.failure.groupsExcludeConflict.title"
                         ),
-                        description: LocalizationManager.localizer.translate(
+                        description: i18n.translate(
                             messageContext.guildID,
                             "misc.failure.groupsExcludeConflict.description",
                             {
@@ -402,11 +395,10 @@ export default class AddCommand implements BaseCommand {
                                 solutionStepTwo: interaction
                                     ? "`/exclude add`"
                                     : `\`${process.env.BOT_PREFIX}add exclude\``,
-                                allowOrPrevent:
-                                    LocalizationManager.localizer.translate(
-                                        messageContext.guildID,
-                                        "misc.failure.groupsExcludeConflict.prevent"
-                                    ),
+                                allowOrPrevent: i18n.translate(
+                                    messageContext.guildID,
+                                    "misc.failure.groupsExcludeConflict.prevent"
+                                ),
                             }
                         ),
                         thumbnailUrl: KmqImages.DEAD,

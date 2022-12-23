@@ -10,8 +10,8 @@ import { isSkipMajority, skipSong } from "../commands/game_commands/skip";
 import { userBonusIsActive } from "../helpers/game_utils";
 import KmqMember from "./kmq_member";
 import ListeningRound from "./listening_round";
-import LocalizationManager from "../helpers/localization_manager";
 import Session from "./session";
+import i18n from "../helpers/localization_manager";
 import type Eris from "eris";
 import type GuessResult from "../interfaces/guess_result";
 import type GuildPreference from "./guild_preference";
@@ -164,11 +164,8 @@ export default class ListeningSession extends Session {
                 await round.interactionSuccessfulSkip();
                 await tryCreateInteractionSuccessAcknowledgement(
                     interaction,
-                    LocalizationManager.localizer.translate(
-                        guildID,
-                        "misc.skip"
-                    ),
-                    LocalizationManager.localizer.translate(
+                    i18n.translate(guildID, "misc.skip"),
+                    i18n.translate(
                         guildID,
                         "command.skip.success.description",
                         {
@@ -183,19 +180,12 @@ export default class ListeningSession extends Session {
             } else {
                 tryCreateInteractionSuccessAcknowledgement(
                     interaction,
-                    LocalizationManager.localizer.translate(
-                        guildID,
-                        "command.skip.vote.title"
-                    ),
-                    LocalizationManager.localizer.translate(
-                        guildID,
-                        "command.skip.vote.description",
-                        {
-                            skipCounter: `${round.getSkipCount()}/${getMajorityCount(
-                                guildID
-                            )}`,
-                        }
-                    )
+                    i18n.translate(guildID, "command.skip.vote.title"),
+                    i18n.translate(guildID, "command.skip.vote.description", {
+                        skipCounter: `${round.getSkipCount()}/${getMajorityCount(
+                            guildID
+                        )}`,
+                    })
                 );
 
                 logger.info(

@@ -5,8 +5,10 @@ import { sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
 import EnvType from "../../enums/env_type";
 import Eris from "eris";
+import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
+import i18n from "../../helpers/localization_manager";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 
@@ -62,8 +64,11 @@ export default class AppCommandsCommand implements BaseCommand {
         const commandsModifiedFailed = [];
         if (appCommandType === AppCommandsAction.RELOAD) {
             const commandsToModify = isSingleCommand
-                ? [State.client.commands[parsedMessage.components[1]]]
-                : Object.values(State.client.commands);
+                ? Object.entries({
+                      [parsedMessage.components[1]]:
+                          State.client.commands[parsedMessage.components[1]],
+                  })
+                : Object.entries(State.client.commands);
 
             const createApplicationCommandFunc: (
                 command: Eris.ApplicationCommandStructure
@@ -95,10 +100,66 @@ export default class AppCommandsCommand implements BaseCommand {
                           },
                       ];
 
-            for (const command of commandsToModify) {
+            for (const commandObj of commandsToModify) {
+                const commandName = commandObj[0];
+                const command = commandObj[1];
                 if (command.slashCommands) {
-                    const commands = command.slashCommands();
+                    const commands =
+                        command.slashCommands() as Array<Eris.ChatInputApplicationCommandStructure>;
+
                     for (const cmd of commands) {
+                        if (!cmd.name) {
+                            if (
+                                !i18n.hasKey(`command.${commandName}.help.name`)
+                            ) {
+                                throw new Error(
+                                    `Missing slash command name: command.${commandName}.help.name`
+                                );
+                            }
+
+                            cmd.name = i18n.translate(
+                                LocaleType.EN,
+                                `command.${commandName}.help.name`
+                            );
+                        }
+
+                        cmd.name_localizations = cmd.name_localizations ?? {
+                            [LocaleType.KO]: i18n.translate(
+                                LocaleType.KO,
+                                `command.${commandName}.help.name`
+                            ),
+                        };
+                        if (
+                            cmd.type ===
+                            Eris.Constants.ApplicationCommandTypes.CHAT_INPUT
+                        ) {
+                            if (!cmd.description) {
+                                let translationKey = `command.${commandName}.help.interaction.description`;
+                                const fallbackTranslationKey = `command.${commandName}.help.description`;
+                                if (!i18n.hasKey(translationKey)) {
+                                    if (!i18n.hasKey(fallbackTranslationKey)) {
+                                        throw new Error(
+                                            `Missing slash command description: ${translationKey} or ${fallbackTranslationKey}`
+                                        );
+                                    }
+
+                                    translationKey = fallbackTranslationKey;
+                                }
+
+                                cmd.description = i18n.translate(
+                                    LocaleType.EN,
+                                    translationKey
+                                );
+
+                                cmd.description_localizations = {
+                                    [LocaleType.KO]: i18n.translate(
+                                        LocaleType.KO,
+                                        translationKey
+                                    ),
+                                };
+                            }
+                        }
+
                         commandStructures.push(cmd);
                     }
                 }

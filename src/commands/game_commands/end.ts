@@ -6,9 +6,10 @@ import {
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -25,22 +26,16 @@ export default class EndCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "end",
-        description: LocalizationManager.localizer.translate(
-            guildID,
-            "command.end.help.description"
-        ),
+        description: i18n.translate(guildID, "command.end.help.description"),
         usage: ",end",
         examples: [],
         priority: 1020,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "end",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.end.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
         },
     ];
@@ -57,11 +52,8 @@ export default class EndCommand implements BaseCommand {
         if (interaction) {
             await tryCreateInteractionSuccessAcknowledgement(
                 interaction,
-                LocalizationManager.localizer.translate(
-                    LocaleType.EN,
-                    "command.end.interaction.title"
-                ),
-                LocalizationManager.localizer.translate(
+                i18n.translate(LocaleType.EN, "command.end.interaction.title"),
+                i18n.translate(
                     LocaleType.EN,
                     "command.end.interaction.description"
                 )

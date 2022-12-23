@@ -10,10 +10,11 @@ import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import ReleaseType from "../../enums/option_types/release_type";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -40,31 +41,27 @@ export default class ReleaseCommand implements BaseCommand {
         ],
     };
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "release",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.release.interaction.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
                     name: OptionAction.SET,
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
-                        "command.release.interaction.description"
+                        "command.release.help.interaction.description"
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
                         {
                             name: "release",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.release.interaction.release"
-                                ),
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.release.help.interaction.release"
+                            ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             required: true,
@@ -79,7 +76,7 @@ export default class ReleaseCommand implements BaseCommand {
                 },
                 {
                     name: OptionAction.RESET,
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "release" }
@@ -94,7 +91,7 @@ export default class ReleaseCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "release",
-        description: LocalizationManager.localizer.translate(
+        description: i18n.translate(
             guildID,
             "command.release.help.description"
         ),
@@ -102,7 +99,7 @@ export default class ReleaseCommand implements BaseCommand {
         examples: [
             {
                 example: "`,release official`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.release.help.example.official",
                     { official: `\`${ReleaseType.OFFICIAL}\`` }
@@ -110,14 +107,14 @@ export default class ReleaseCommand implements BaseCommand {
             },
             {
                 example: "`,release all`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.release.help.example.all"
                 ),
             },
             {
                 example: "`,release`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.release.help.example.reset",
                     { defaultRelease: `\`${DEFAULT_RELEASE_TYPE}\`` }

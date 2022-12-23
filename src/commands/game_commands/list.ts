@@ -9,8 +9,9 @@ import {
 import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -48,15 +49,12 @@ export default class ListCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "list",
-        description: LocalizationManager.localizer.translate(
-            guildID,
-            "command.list.help.description"
-        ),
+        description: i18n.translate(guildID, "command.list.help.description"),
         usage: ",list [groups | exclude | include]",
         examples: [
             {
                 example: "`,list groups`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.list.help.example.groups",
                     { groups: `\`${process.env.BOT_PREFIX}groups\`` }
@@ -64,7 +62,7 @@ export default class ListCommand implements BaseCommand {
             },
             {
                 example: "`,list exclude`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.list.help.example.exclude",
                     { exclude: `\`${process.env.BOT_PREFIX}exclude\`` }
@@ -72,7 +70,7 @@ export default class ListCommand implements BaseCommand {
             },
             {
                 example: "`,list include`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.list.help.example.include",
                     { include: `\`${process.env.BOT_PREFIX}include\`` }
@@ -82,18 +80,15 @@ export default class ListCommand implements BaseCommand {
         priority: 200,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "list",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.list.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
                     name: "type",
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.list.interaction.listType"
                     ),
@@ -153,7 +148,7 @@ export default class ListCommand implements BaseCommand {
 
         optionValue =
             optionValue ||
-            LocalizationManager.localizer.translate(
+            i18n.translate(
                 messageContext.guildID,
                 "command.list.currentValue.nothingSelected"
             );
@@ -163,7 +158,7 @@ export default class ListCommand implements BaseCommand {
                 sendMessage(
                     messageContext.textChannelID,
                     {
-                        content: LocalizationManager.localizer.translate(
+                        content: i18n.translate(
                             messageContext.guildID,
                             "command.list.failure.groupsInFile.description"
                         ),
@@ -185,11 +180,11 @@ export default class ListCommand implements BaseCommand {
                 await sendErrorMessage(
                     messageContext,
                     {
-                        title: LocalizationManager.localizer.translate(
+                        title: i18n.translate(
                             messageContext.guildID,
                             "command.list.failure.groupsInFile.noFilePermissions.title"
                         ),
-                        description: LocalizationManager.localizer.translate(
+                        description: i18n.translate(
                             messageContext.guildID,
                             "command.list.failure.groupsInFile.noFilePermissions.description",
                             { attachFile: "ATTACH_FILE" }
@@ -203,7 +198,7 @@ export default class ListCommand implements BaseCommand {
             await sendInfoMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "command.list.currentValue.title",
                         {

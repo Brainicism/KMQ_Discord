@@ -17,10 +17,11 @@ import {
 } from "../../helpers/utils";
 import Eris from "eris";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
 import dbContext from "../../database_context";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -60,25 +61,18 @@ export function getRankNameByLevel(level: number, guildID: string): string {
     if (levelsPastMaxRank >= 0) {
         // add roman numeral suffix for every 5 levels above max rank title
         const stepsAboveMaxRank = Math.floor(levelsPastMaxRank / 5) + 1;
-        return `${LocalizationManager.localizer.translate(
-            guildID,
-            highestRankTitle.title
-        )} ${romanize(stepsAboveMaxRank + 1)}`;
+        return `${i18n.translate(guildID, highestRankTitle.title)} ${romanize(
+            stepsAboveMaxRank + 1
+        )}`;
     }
 
     for (let i = RANK_TITLES.length - 1; i >= 0; i--) {
         const rankTitle = RANK_TITLES[i];
         if (level >= rankTitle.req)
-            return LocalizationManager.localizer.translate(
-                guildID,
-                rankTitle.title
-            );
+            return i18n.translate(guildID, rankTitle.title);
     }
 
-    return LocalizationManager.localizer.translate(
-        guildID,
-        RANK_TITLES[0].title
-    );
+    return i18n.translate(guildID, RANK_TITLES[0].title);
 }
 
 async function getProfileFields(
@@ -170,10 +164,7 @@ async function getProfileFields(
 
     const fields: Array<Eris.EmbedField> = [
         {
-            name: LocalizationManager.localizer.translate(
-                guildID,
-                "misc.level"
-            ),
+            name: i18n.translate(guildID, "misc.level"),
             value: `${friendlyFormattedNumber(level)} (${getRankNameByLevel(
                 level,
                 guildID
@@ -181,30 +172,21 @@ async function getProfileFields(
             inline: true,
         },
         {
-            name: LocalizationManager.localizer.translate(
-                guildID,
-                "command.profile.experience"
-            ),
+            name: i18n.translate(guildID, "command.profile.experience"),
             value: `${friendlyFormattedNumber(exp)}/${friendlyFormattedNumber(
                 CUM_EXP_TABLE[level + 1]
             )}`,
             inline: true,
         },
         {
-            name: LocalizationManager.localizer.translate(
-                guildID,
-                "command.profile.overallRank"
-            ),
+            name: i18n.translate(guildID, "command.profile.overallRank"),
             value: `#${friendlyFormattedNumber(
                 relativeLevelRank
             )}/${friendlyFormattedNumber(totalPlayers)}`,
             inline: true,
         },
         {
-            name: LocalizationManager.localizer.translate(
-                guildID,
-                "command.profile.songsGuessed"
-            ),
+            name: i18n.translate(guildID, "command.profile.songsGuessed"),
             value: `${friendlyFormattedNumber(
                 songsGuessed
             )} | #${friendlyFormattedNumber(
@@ -213,10 +195,7 @@ async function getProfileFields(
             inline: true,
         },
         {
-            name: LocalizationManager.localizer.translate(
-                guildID,
-                "command.profile.gamesPlayed"
-            ),
+            name: i18n.translate(guildID, "command.profile.gamesPlayed"),
             value: `${friendlyFormattedNumber(
                 gamesPlayed
             )} | #${friendlyFormattedNumber(
@@ -225,26 +204,17 @@ async function getProfileFields(
             inline: true,
         },
         {
-            name: LocalizationManager.localizer.translate(
-                guildID,
-                "command.profile.firstPlayed"
-            ),
+            name: i18n.translate(guildID, "command.profile.firstPlayed"),
             value: firstPlayDateString,
             inline: true,
         },
         {
-            name: LocalizationManager.localizer.translate(
-                guildID,
-                "command.profile.lastActive"
-            ),
+            name: i18n.translate(guildID, "command.profile.lastActive"),
             value: lastActiveDateString,
             inline: true,
         },
         {
-            name: LocalizationManager.localizer.translate(
-                guildID,
-                "command.profile.timesVoted"
-            ),
+            name: i18n.translate(guildID, "command.profile.timesVoted"),
             value: friendlyFormattedNumber(timesVoted),
             inline: true,
         },
@@ -261,17 +231,12 @@ async function getProfileFields(
             })
             .orderBy("badges.priority", "desc")
     )
-        .map((x) =>
-            LocalizationManager.localizer.translate(guildID, x["badge_name"])
-        )
+        .map((x) => i18n.translate(guildID, x["badge_name"]))
         .join("\n");
 
     if (badges) {
         fields.push({
-            name: LocalizationManager.localizer.translate(
-                guildID,
-                "command.profile.badges"
-            ),
+            name: i18n.translate(guildID, "command.profile.badges"),
             value: badges,
             inline: false,
         });
@@ -283,25 +248,25 @@ async function getProfileFields(
 export default class ProfileCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "profile",
-        description: LocalizationManager.localizer.translate(
+        description: i18n.translate(
             guildID,
             "command.profile.help.description"
         ),
-        usage: `,profile { @${LocalizationManager.localizer.translate(
+        usage: `,profile { @${i18n.translate(
             guildID,
             "command.profile.help.usage.mention"
         )} }`,
         examples: [
             {
                 example: "`,profile`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.profile.help.example.self"
                 ),
             },
             {
                 example: "`,profile @FortnitePlayer`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.profile.help.example.otherPlayerMention",
                     {
@@ -311,7 +276,7 @@ export default class ProfileCommand implements BaseCommand {
             },
             {
                 example: "`,profile 141734249702096896`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.profile.help.example.otherPlayerID"
                 ),
@@ -320,18 +285,15 @@ export default class ProfileCommand implements BaseCommand {
         priority: 50,
     });
 
-    slashCommands = (): Array<Eris.ApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "profile",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.profile.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
                     name: "user_mention",
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.profile.interaction.userMention"
                     ),
@@ -342,7 +304,7 @@ export default class ProfileCommand implements BaseCommand {
                 },
                 {
                     name: "user_id",
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.profile.interaction.userID"
                     ),
@@ -372,11 +334,11 @@ export default class ProfileCommand implements BaseCommand {
 
                 if (!requestedPlayer) {
                     sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: LocalizationManager.localizer.translate(
+                        title: i18n.translate(
                             message.guildID,
                             "command.profile.failure.notFound.title"
                         ),
-                        description: LocalizationManager.localizer.translate(
+                        description: i18n.translate(
                             message.guildID,
                             "command.profile.failure.notFound.description",
                             {
@@ -389,11 +351,11 @@ export default class ProfileCommand implements BaseCommand {
             }
         } else {
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     message.guildID,
                     "command.profile.failure.notFound.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     message.guildID,
                     "command.profile.failure.notFound.badUsage.description",
                     { profileHelp: `\`${process.env.BOT_PREFIX}help profile\`` }
@@ -406,11 +368,11 @@ export default class ProfileCommand implements BaseCommand {
 
         if (fields.length === 0) {
             sendInfoMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     message.guildID,
                     "command.profile.failure.notFound.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     message.guildID,
                     "misc.interaction.profile.noStats"
                 ),
@@ -478,11 +440,11 @@ export default class ProfileCommand implements BaseCommand {
         if (!user) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                LocalizationManager.localizer.translate(
+                i18n.translate(
                     interaction.guildID,
                     "command.profile.failure.notFound.title"
                 ),
-                LocalizationManager.localizer.translate(
+                i18n.translate(
                     interaction.guildID,
                     "misc.interaction.profile.inaccessible",
                     {
@@ -503,11 +465,11 @@ export default class ProfileCommand implements BaseCommand {
         if (fields.length === 0) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                LocalizationManager.localizer.translate(
+                i18n.translate(
                     interaction.guildID,
                     "command.profile.failure.notFound.title"
                 ),
-                LocalizationManager.localizer.translate(
+                i18n.translate(
                     interaction.guildID,
                     "misc.interaction.profile.noStats"
                 )
