@@ -1,6 +1,7 @@
 import { DEFAULT_LOCALE } from "../constants";
 import { IPCLogger } from "../logger";
 import Backend from "i18next-fs-backend";
+import EnvType from "../enums/env_type";
 import LocaleType from "../enums/locale_type";
 import State from "../state";
 import i18next from "i18next";
@@ -42,6 +43,9 @@ export class LocalizationManager {
     ): string {
         if (!this.hasKey(phrase)) {
             logger.error(`Missing translation for phrase: ${phrase}`);
+            if (process.env.NODE_ENV === EnvType.TEST) {
+                process.exit(1);
+            }
         }
 
         return this.translateByLocale(
