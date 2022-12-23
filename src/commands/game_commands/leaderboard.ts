@@ -186,6 +186,7 @@ export default class LeaderboardCommand implements BaseCommand {
                                 .STRING,
                             choices: [
                                 LeaderboardDuration.ALL_TIME,
+                                LeaderboardDuration.YEARLY,
                                 LeaderboardDuration.MONTHLY,
                                 LeaderboardDuration.WEEKLY,
                                 LeaderboardDuration.DAILY,
