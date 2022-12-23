@@ -57,24 +57,24 @@ Everyone starts off as a `Novice` and works their way up as a `Trainee` (Level 1
 You will only gain EXP if:
 
 -   There are a minimum of 10 songs selected
--   You are using `/guessmode set song` (full EXP)
--   You are using `/guessmode set artist` or `/guessmode set both` and are not using `/groups` (30% EXP)
+-   You are using `/guessmode set guessmode:song` (full EXP)
+-   You are using `/guessmode set guessmode:artist` or `/guessmode set guessmode:both` and are not using `/groups` (30% EXP)
 
 # Game Options
 
 KMQ offers different game options to dynamically narrow down the selection of songs based on your preferences. The current game options can be viewed by using `/options` or tagging KMQ Bot.
 
-Use `/help [command_name]` for details and examples for every bot command.
+Use `/help action:[command_name]` for details and examples for every bot command.
 
 ![options](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/options.png)
 
-When applying a new game option, the newly updated option will be bold in the bot's response. To learn more about how to use a specific game option, check `/help [option]`.
+When applying a new game option, the newly updated option will be bold in the bot's response.
 
 ## /limit
 
 Setting this option "limits" KMQ bot to the **top most viewed music videos** out of the total number of songs. Increasing the limit allows less popular songs to play; decreasing it restricts it to more popular songs.
 
-For example, `/limit set top 100` will play the 100 most viewed songs in the current game options, while `/limit set range limit_start:250 limit_end:500` will play between the 250th and 500th most viewed songs.
+For example, `/limit set top limit:100` will play the 100 most viewed songs in the current game options, while `/limit set range limit_start:250 limit_end:500` will play between the 250th and 500th most viewed songs.
 
 View counts are frequently updated from YouTube.
 
@@ -82,9 +82,9 @@ View counts are frequently updated from YouTube.
 
 ## /groups
 
-Setting the groups option limits the selection of songs to those belonging to the artist specified. For instance `/groups set group_1:blackpink group_2:itzy group_3:fromis 9 group_4:bts` will exclusively play songs from those four artists. You can view the list of groups names via the link in `/help groups`.
+Setting the groups option limits the selection of songs to those belonging to the artist specified. For instance `/groups set group_1:blackpink group_2:itzy group_3:fromis 9 group_4:bts` will exclusively play songs from those four artists. You can view the list of groups names via the link in `/help action:groups`.
 
--   List all set groups using `/list groups`
+-   List all set groups using `/list type:groups`
 -   Add groups using `/groups add`
 -   Remove groups using `/groups remove`
 -   To reset this option, type `/groups reset`
@@ -95,23 +95,23 @@ Setting the groups option limits the selection of songs to those belonging to th
 
 Setting a gender specifies the gender of the groups you'd like to hear from.
 
--   `/gender set male` will play songs by boy groups and male soloists
--   `/gender set female` will play songs by girl groups and female soloists
+-   `/gender set gender_1:male` will play songs by boy groups and male soloists
+-   `/gender set gender_1:female` will play songs by girl groups and female soloists
 -   `/gender set gender_1:male gender_2:female` will play songs by boy groups, girl groups, and all soloists
--   `/gender set coed` will play songs by groups containing a mix of male and female members
--   `/gender set alternating` will alternate between `male` and `female` artist songs each round
+-   `/gender set gender_1:coed` will play songs by groups containing a mix of male and female members
+-   `/gender set gender_1:alternating` will alternate between `male` and `female` artist songs each round
 
 `male`, `female`, and `coed` can all be used at once (`/gender set gender_1:male gender_2:female gender_3:coed`), but `alternating` must be used on its own.
 
 Note that `/groups` and `/gender` are incompatible with each other. If you wish to continue using `/gender`, reset `/groups` first.
 
-Want to control whether groups or soloists are exclusively played? Check out `/help artisttype`.
+Want to control whether groups or soloists are exclusively played? Check out `/help action:artisttype`.
 
 ![gender](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/gender.png)
 
 ## /cutoff
 
-Setting a cutoff limits songs based on which year they were released. Using `/cutoff set earliest 2015` will play songs from 2015 onwards, while `/cutoff set range beginning_year:2015 ending_year:2017` will play songs released between 2015 and 2017.
+Setting a cutoff limits songs based on which year they were released. Using `/cutoff set earliest beginning_year:2015` will play songs from 2015 onwards, while `/cutoff set range beginning_year:2015 ending_year:2017` will play songs released between 2015 and 2017.
 
 ![cutoff](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/cutoff.png)
 
@@ -119,9 +119,9 @@ Setting a cutoff limits songs based on which year they were released. Using `/cu
 
 Setting the seek type changes which point in a song the bot starts playing from.
 
--   `/seek set beginning` will play every song starting from the beginning
--   `/seek set random` will play from a random point in the song
--   `/seek set middle` will play from the middle of the song
+-   `/seek set seek:beginning` will play every song starting from the beginning
+-   `/seek set seek:random` will play from a random point in the song
+-   `/seek set seek:middle` will play from the middle of the song
 
 ![seek](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/seek.png)
 
@@ -129,9 +129,9 @@ Setting the seek type changes which point in a song the bot starts playing from.
 
 Setting the guess mode changes the objective of the game to guessing the name of the song, the artist, or both.
 
--   `/guessmode set song` only accepts song names as guesses
--   `/guessmode set artist` only accepts artist names as guesses
--   `/guessmode set both` accepts either the song or artist name
+-   `/guessmode set guessmode:song` only accepts song names as guesses
+-   `/guessmode set guessmode:artist` only accepts artist names as guesses
+-   `/guessmode set guessmode:both` accepts either the song or artist name
     -   A song guess will net you 1 point and an artist guess will net you 0.2 points
 
 ![guessmode](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/guessmode.png)
@@ -140,7 +140,7 @@ Setting the guess mode changes the objective of the game to guessing the name of
 
 Setting the exclude option ignores songs by the specified artists. For instance `/exclude set group_1:Day6 group_2:Momoland` ignore songs by those two artists. You can view the list of groups names via the link in `/help exclude`.
 
--   List all set excluded groups using `/list exclude`
+-   List all set excluded groups using `/list type:exclude`
 -   Add excluded groups (these artists won't play) using `/exclude add`
 -   Remove excluded groups (these artists will play) using `/exclude remove`
 -   To reset this option, type `/exclude reset`
@@ -151,7 +151,7 @@ Similarly, to force groups in to the game regardless of the current options, use
 
 ## /goal
 
-Setting the goal ends the game when the given goal score is reached. For example, if a player were to use `/goal set 50`, the first player to 50 points would win the game.
+Setting the goal ends the game when the given goal score is reached. For example, if a player were to use `/goal set goal:50`, the first player to 50 points would win the game.
 
 ![goal](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/goal.png)
 
@@ -173,7 +173,7 @@ Save the current options as a new preset.
 
 ## /preset export
 
-Get a preset identifier that can be used to load or import the preset in other servers.
+Get a preset identifier used to load or import the preset in other servers.
 
 ## /preset load
 
@@ -217,7 +217,7 @@ To keep the game fair, switching teams mid-game forfeits your current points and
 
 # Full Command List
 
-Use `/help [command_name]` for more details about the following commands:
+Use `/help action:[command_name]` for more details about the following commands:
 
 ## General Commands
 
@@ -248,18 +248,18 @@ Use `/help [command_name]` for more details about the following commands:
 -   `/gender`: Choose the gender of the artists to exclusively play from
 -   `/answer`: Choose whether to type in your answer (and allow typos), or to pick from multiple choices on buttons
 -   `/cutoff`: Set a cutoff year for songs. Only songs released during and after the cutoff year will be chosen
--   `/spotify`: Play songs from a Spotify playlist.
--   `/artisttype`: Choose whether to hear from soloists, groups, or both.
+-   `/spotify`: Play songs from a Spotify playlist
+-   `/artisttype`: Choose whether to hear from soloists, groups, or both
 -   `/release`: Specify whether official releases are played, or to include b-sides, dance practices, acoustic versions, and remixes
 -   `/language`: Choose whether to include Japanese/English/Chinese songs, or only Korean songs
 -   `/subunits`: Choose whether to automatically include a group's subunits when using `/groups`
 -   `/ost`: Include, exclude, or exclusively play OST music videos
 -   `/multiguess`: Choose whether to allow multiple players to guess correctly in a round
--   `/shuffle`: Choose whether songs should play in random order, or based on popularity.
+-   `/shuffle`: Choose whether songs should play in random order, or based on popularity
 -   `/seek`: Choose whether each song starts from the beginning, middle, or a random point
 -   `/special`: Modify how each song sounds, such as playing it in reverse, changing its pitch, etc.
 -   `/guessmode`: Choose whether to guess based on song name, artist name, or both
--   `/goal`: Specify a number of points to reach before a winner is selected and the game ends
+-   `/goal`: Specify how many points to reach before a winner is selected and the game ends
 -   `/timer`: Specify how many seconds each song is played before it's automatically skipped
 -   `/duration`: Set the maximum length of a KMQ game in minutes
 -   `/exclude`: Specify which artists to exclude
