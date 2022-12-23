@@ -98,7 +98,7 @@ export default class SpotifyCommand implements BaseCommand {
         usage: "/spotify set\nplaylist_url:{playlist_url}\n\n/spotify reset",
         examples: [
             {
-                example: `\`/spotify ${SPOTIFY_BASE_URL}...\``,
+                example: `\`/spotify playlist_url:${SPOTIFY_BASE_URL}...\``,
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.spotify.help.example.playlistURL"

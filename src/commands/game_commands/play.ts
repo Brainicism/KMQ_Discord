@@ -813,8 +813,6 @@ export default class PlayCommand implements BaseCommand {
             }
         }
 
-        const prefix = "/";
-
         // (1) No game session exists yet (create ELIMINATION, TEAMS, CLASSIC, or COMPETITION game), or
         // (2) User attempting to ,play after a ,play teams that didn't start, start CLASSIC game
         const textChannel = await fetchChannel(messageContext.textChannelID);
@@ -830,14 +828,14 @@ export default class PlayCommand implements BaseCommand {
                 guildID,
                 "command.play.team.joinTeam.title",
                 {
-                    join: `\`${prefix}play teams join\``,
+                    join: "`/play teams join`",
                 }
             );
 
             const gameInstructions = LocalizationManager.localizer.translate(
                 guildID,
                 "command.play.team.joinTeam.description",
-                { join: `${prefix}play teams join` }
+                { join: "/play teams join" }
             );
 
             gameSession = new GameSession(
@@ -878,7 +876,7 @@ export default class PlayCommand implements BaseCommand {
                     LocalizationManager.localizer.translate(
                         guildID,
                         "command.play.failure.overrideTeams.title",
-                        { playOldGameType: `\`${prefix}play ${oldGameType}\`` }
+                        { playOldGameType: `\`/play ${oldGameType}\`` }
                     );
 
                 const gameSpecificInstructions =
@@ -886,7 +884,7 @@ export default class PlayCommand implements BaseCommand {
                         guildID,
                         "command.play.failure.overrideTeams.teams.join",
                         {
-                            join: `${prefix}play teams join`,
+                            join: "/play teams join",
                         }
                     );
 
@@ -896,10 +894,10 @@ export default class PlayCommand implements BaseCommand {
                         "command.play.failure.overrideTeams.description",
                         {
                             oldGameType: `\`${oldGameType}\``,
-                            end: `\`${prefix}end\``,
-                            playOldGameType: `\`${prefix}play ${oldGameType}\``,
+                            end: "`/end`",
+                            playOldGameType: `\`/play ${oldGameType}\``,
                             gameSpecificInstructions,
-                            begin: `\`${prefix}begin\``,
+                            begin: "`/begin`",
                         }
                     );
 
