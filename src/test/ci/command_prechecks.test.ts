@@ -27,7 +27,7 @@ describe("command prechecks", () => {
     const messageContext = new MessageContext(
         "faketextchannelid",
         new KmqMember("fakeuserid"),
-        "fakeguilid",
+        "fakeguildid",
         null
     );
 
@@ -38,7 +38,6 @@ describe("command prechecks", () => {
                     CommandPrechecks.inSessionCommandPrecheck({
                         session: null,
                         messageContext,
-                        errorMessage: "error",
                     }),
                     false
                 );
@@ -64,7 +63,6 @@ describe("command prechecks", () => {
                         CommandPrechecks.inSessionCommandPrecheck({
                             session: listeningSession,
                             messageContext,
-                            errorMessage: "error",
                         }),
                         true
                     );
@@ -81,7 +79,6 @@ describe("command prechecks", () => {
                         CommandPrechecks.inSessionCommandPrecheck({
                             session: listeningSession,
                             messageContext,
-                            errorMessage: "error",
                         }),
                         false
                     );
@@ -134,7 +131,6 @@ describe("command prechecks", () => {
                             CommandPrechecks.inSessionCommandPrecheck({
                                 session,
                                 messageContext,
-                                errorMessage: "error",
                             }),
                             true
                         );
@@ -158,7 +154,6 @@ describe("command prechecks", () => {
                                 CommandPrechecks.inSessionCommandPrecheck({
                                     session: eliminationGameSession,
                                     messageContext,
-                                    errorMessage: "error",
                                 }),
                                 false
                             );
@@ -167,7 +162,6 @@ describe("command prechecks", () => {
                                 CommandPrechecks.inSessionCommandPrecheck({
                                     session: teamGameSession,
                                     messageContext,
-                                    errorMessage: "error",
                                 }),
                                 false
                             );
@@ -182,7 +176,6 @@ describe("command prechecks", () => {
                                 CommandPrechecks.inSessionCommandPrecheck({
                                     session: eliminationGameSession,
                                     messageContext,
-                                    errorMessage: "error",
                                 }),
                                 true
                             );
@@ -191,7 +184,6 @@ describe("command prechecks", () => {
                                 CommandPrechecks.inSessionCommandPrecheck({
                                     session: teamGameSession,
                                     messageContext,
-                                    errorMessage: "error",
                                 }),
                                 true
                             );
@@ -205,7 +197,6 @@ describe("command prechecks", () => {
                             CommandPrechecks.inSessionCommandPrecheck({
                                 session: classicGameSession,
                                 messageContext,
-                                errorMessage: "error",
                             }),
                             false
                         );

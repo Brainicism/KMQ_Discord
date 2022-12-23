@@ -62,7 +62,7 @@ export class LocalizationManager {
      */
     translateN(localeOrGuildID: string, phrase: string, count: number): string {
         if (!this.hasKey(`${phrase}_one`) || !this.hasKey(`${phrase}_other`)) {
-            logger.error(`Missing translation for phrase: ${phrase}`);
+            logger.error(`Missing translation for plural phrase: ${phrase}`);
         }
 
         return this.translateNByLocale(
