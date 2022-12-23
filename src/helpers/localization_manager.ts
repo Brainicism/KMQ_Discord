@@ -61,7 +61,7 @@ export class LocalizationManager {
      * @returns The translated phrase
      */
     translateN(localeOrGuildID: string, phrase: string, count: number): string {
-        if (!this.hasKey(phrase)) {
+        if (!this.hasKey(`${phrase}_one`) || !this.hasKey(`${phrase}_other`)) {
             logger.error(`Missing translation for phrase: ${phrase}`);
         }
 
