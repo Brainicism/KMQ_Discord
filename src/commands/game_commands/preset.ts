@@ -232,8 +232,7 @@ export default class PresetCommand implements BaseCommand {
                 )}]\``,
                 explanation: i18n.translate(
                     guildID,
-                    "command.preset.help.example.import",
-                    { exampleIdentifier: "`KMQ-XXXXX-...`" }
+                    "command.preset.help.example.import"
                 ),
             },
         ],
@@ -369,8 +368,7 @@ export default class PresetCommand implements BaseCommand {
                     name: PresetAction.IMPORT,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.preset.help.example.import",
-                        { exampleIdentifier: "KMQ-XXXXX-..." }
+                        "command.preset.help.example.import"
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
