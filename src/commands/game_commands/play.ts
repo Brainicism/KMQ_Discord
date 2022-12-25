@@ -35,12 +35,13 @@ import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";
 import KmqMember from "../../structures/kmq_member";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Player from "../../structures/player";
 import Session from "../../structures/session";
 import State from "../../state";
 import dbContext from "../../database_context";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -66,10 +67,7 @@ export async function sendBeginGameSessionMessage(
     interaction?: Eris.CommandInteraction
 ): Promise<void> {
     const guildID = messageContext.guildID;
-    let gameInstructions = LocalizationManager.localizer.translate(
-        guildID,
-        "command.play.typeGuess"
-    );
+    let gameInstructions = i18n.translate(guildID, "command.play.typeGuess");
 
     const bonusUsers = await activeBonusUsers();
     const bonusUserParticipantIDs = participantIDs.filter((x) =>
@@ -86,15 +84,12 @@ export async function sendBeginGameSessionMessage(
         if (bonusUserMentions.length > 10) {
             bonusUserMentions = bonusUserMentions.slice(0, 10);
             bonusUserMentions.push(
-                LocalizationManager.localizer.translate(
-                    guildID,
-                    "misc.andManyOthers"
-                )
+                i18n.translate(guildID, "misc.andManyOthers")
             );
         }
 
         gameInstructions += `\n\n${bonusUserMentions.join(", ")} `;
-        gameInstructions += LocalizationManager.localizer.translate(
+        gameInstructions += i18n.translate(
             guildID,
             "command.play.exp.doubleExpForVoting",
             {
@@ -103,7 +98,7 @@ export async function sendBeginGameSessionMessage(
         );
 
         gameInstructions += " ";
-        gameInstructions += LocalizationManager.localizer.translate(
+        gameInstructions += i18n.translate(
             guildID,
             "command.play.exp.howToVote",
             { vote: "`/vote`" }
@@ -111,35 +106,28 @@ export async function sendBeginGameSessionMessage(
     }
 
     if (isWeekend()) {
-        gameInstructions += `\n\n**⬆️ ${LocalizationManager.localizer.translate(
+        gameInstructions += `\n\n**⬆️ ${i18n.translate(
             guildID,
             "command.play.exp.weekend"
         )} ⬆️**`;
     } else if (isPowerHour()) {
-        gameInstructions += `\n\n**⬆️ ${LocalizationManager.localizer.translate(
+        gameInstructions += `\n\n**⬆️ ${i18n.translate(
             guildID,
             "command.play.exp.powerHour"
         )} ⬆️**`;
     }
 
-    const startTitle = LocalizationManager.localizer.translate(
-        guildID,
-        "command.play.gameStarting",
-        {
-            textChannelName,
-            voiceChannelName,
-        }
-    );
+    const startTitle = i18n.translate(guildID, "command.play.gameStarting", {
+        textChannelName,
+        voiceChannelName,
+    });
 
     const gameInfoMessage = await getGameInfoMessage(messageContext.guildID);
 
     const fields: Eris.EmbedField[] = [];
     if (gameInfoMessage) {
         fields.push({
-            name: LocalizationManager.localizer.translate(
-                guildID,
-                gameInfoMessage.title
-            ),
+            name: i18n.translate(guildID, gameInfoMessage.title),
             value: gameInfoMessage.message,
             inline: false,
         });
@@ -162,14 +150,13 @@ export async function sendBeginGameSessionMessage(
     );
 
     if (!isBonus && Math.random() < 0.5) {
-        optionsEmbedPayload.footerText =
-            LocalizationManager.localizer.translate(
-                messageContext.guildID,
-                "command.play.voteReminder",
-                {
-                    vote: "/vote",
-                }
-            );
+        optionsEmbedPayload.footerText = i18n.translate(
+            messageContext.guildID,
+            "command.play.voteReminder",
+            {
+                vote: "/vote",
+            }
+        );
     }
 
     await sendInfoMessage(
@@ -200,11 +187,8 @@ export default class PlayCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "play",
-        description: LocalizationManager.localizer.translate(
-            guildID,
-            "command.play.help.description"
-        ),
-        usage: `/play classic\n\n,play elimination\nlives:{${LocalizationManager.localizer.translate(
+        description: i18n.translate(guildID, "command.play.help.description"),
+        usage: `/play classic\n\n,play elimination\nlives:{${i18n.translate(
             guildID,
             "command.play.help.usage.lives"
         )}}\n\n/play teams create\n\n/play teams join`,
@@ -212,14 +196,14 @@ export default class PlayCommand implements BaseCommand {
         examples: [
             {
                 example: "`/play classic`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.play.help.example.classic"
                 ),
             },
             {
                 example: "`/play elimination lives:5`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.play.help.example.elimination",
                     {
@@ -229,7 +213,7 @@ export default class PlayCommand implements BaseCommand {
             },
             {
                 example: "`/play elimination`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.play.help.example.elimination",
                     {
@@ -239,7 +223,7 @@ export default class PlayCommand implements BaseCommand {
             },
             {
                 example: "`/play teams create`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.play.help.example.teams"
                 ),
@@ -247,18 +231,15 @@ export default class PlayCommand implements BaseCommand {
         ],
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "play",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.play.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
                     name: GameType.CLASSIC,
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.play.help.example.classic"
                     ),
@@ -266,7 +247,7 @@ export default class PlayCommand implements BaseCommand {
                 },
                 {
                     name: GameType.ELIMINATION,
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.play.help.example.elimination",
                         {
@@ -278,11 +259,10 @@ export default class PlayCommand implements BaseCommand {
                     options: [
                         {
                             name: "lives",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.play.help.interaction.lives"
-                                ),
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.play.help.interaction.lives"
+                            ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .INTEGER,
                             min_value: ELIMINATION_MIN_LIVES as any,
@@ -292,7 +272,7 @@ export default class PlayCommand implements BaseCommand {
                 },
                 {
                     name: GameType.TEAMS,
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.play.help.example.teams"
                     ),
@@ -301,41 +281,37 @@ export default class PlayCommand implements BaseCommand {
                     options: [
                         {
                             name: "create",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.play.interaction.teams_create"
-                                ),
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.play.interaction.teams_create"
+                            ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .SUB_COMMAND,
                         },
                         {
                             name: "begin",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.play.interaction.teams_begin"
-                                ),
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.play.interaction.teams_begin"
+                            ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .SUB_COMMAND,
                         },
                         {
                             name: "join",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.play.interaction.teams_join"
-                                ),
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.play.interaction.teams_join"
+                            ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .SUB_COMMAND,
                             options: [
                                 {
                                     name: "team_name",
-                                    description:
-                                        LocalizationManager.localizer.translate(
-                                            LocaleType.EN,
-                                            "command.play.interaction.teams_join_team_name"
-                                        ),
+                                    description: i18n.translate(
+                                        LocaleType.EN,
+                                        "command.play.interaction.teams_join_team_name"
+                                    ),
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.STRING,
                                     required: true,
@@ -397,11 +373,11 @@ export default class PlayCommand implements BaseCommand {
             sendErrorMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "misc.failure.game.noneInProgress.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "misc.failure.game.noneInProgress.description"
                     ),
@@ -417,11 +393,11 @@ export default class PlayCommand implements BaseCommand {
             sendErrorMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "command.begin.ignored.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "command.begin.ignored.noTeam.description",
                         { join: "/play teams join" }
@@ -498,11 +474,11 @@ export default class PlayCommand implements BaseCommand {
             sendErrorMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "misc.failure.game.noneInProgress.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "misc.failure.game.noneInProgress.description"
                     ),
@@ -530,11 +506,11 @@ export default class PlayCommand implements BaseCommand {
                 sendErrorMessage(
                     messageContext,
                     {
-                        title: LocalizationManager.localizer.translate(
+                        title: i18n.translate(
                             messageContext.guildID,
                             "command.join.failure.joinError.invalidTeamName.title"
                         ),
-                        description: LocalizationManager.localizer.translate(
+                        description: i18n.translate(
                             messageContext.guildID,
                             "command.join.failure.joinError.badEmojis.description"
                         ),
@@ -561,11 +537,11 @@ export default class PlayCommand implements BaseCommand {
             sendErrorMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "command.join.failure.joinError.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "command.join.failure.joinError.invalidCharacters.description"
                     ),
@@ -595,11 +571,11 @@ export default class PlayCommand implements BaseCommand {
             sendInfoMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "command.join.team.new"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "command.join.team.join",
                         {
@@ -609,7 +585,7 @@ export default class PlayCommand implements BaseCommand {
                             teamNameWithCleanEmojis,
                             startGameInstructions:
                                 !gameSession.sessionInitialized
-                                    ? LocalizationManager.localizer.translate(
+                                    ? i18n.translate(
                                           messageContext.guildID,
                                           "command.join.team.startGameInstructions",
                                           {
@@ -639,11 +615,11 @@ export default class PlayCommand implements BaseCommand {
                 sendErrorMessage(
                     messageContext,
                     {
-                        title: LocalizationManager.localizer.translate(
+                        title: i18n.translate(
                             messageContext.guildID,
                             "command.join.failure.joinError.title"
                         ),
-                        description: LocalizationManager.localizer.translate(
+                        description: i18n.translate(
                             messageContext.guildID,
                             "command.join.failure.joinError.alreadyInTeam.description"
                         ),
@@ -673,7 +649,7 @@ export default class PlayCommand implements BaseCommand {
             sendInfoMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "command.join.playerJoinedTeam.title",
                         {
@@ -682,14 +658,14 @@ export default class PlayCommand implements BaseCommand {
                         }
                     ),
                     description: !gameSession.sessionInitialized
-                        ? LocalizationManager.localizer.translate(
+                        ? i18n.translate(
                               messageContext.guildID,
                               "command.join.playerJoinedTeam.beforeGameStart.description",
                               {
                                   beginCommand: "`/play teams begin`",
                               }
                           )
-                        : LocalizationManager.localizer.translate(
+                        : i18n.translate(
                               messageContext.guildID,
                               "command.join.playerJoinedTeam.afterGameStart.description",
                               {
@@ -729,12 +705,9 @@ export default class PlayCommand implements BaseCommand {
         const voiceChannel = getUserVoiceChannel(messageContext);
 
         if (!voiceChannel) {
-            const title = LocalizationManager.localizer.translate(
-                guildID,
-                "misc.failure.notInVC.title"
-            );
+            const title = i18n.translate(guildID, "misc.failure.notInVC.title");
 
-            const description = LocalizationManager.localizer.translate(
+            const description = i18n.translate(
                 guildID,
                 "misc.failure.notInVC.description",
                 { command: "`/play`" }
@@ -790,7 +763,7 @@ export default class PlayCommand implements BaseCommand {
                     )} | Attempted to start a game while one is already in progress.`
                 );
 
-                const title = LocalizationManager.localizer.translate(
+                const title = i18n.translate(
                     guildID,
                     "command.play.failure.alreadyInSession"
                 );
@@ -824,7 +797,7 @@ export default class PlayCommand implements BaseCommand {
 
         if (gameType === GameType.TEAMS) {
             // (1) TEAMS game creation
-            const startTitle = LocalizationManager.localizer.translate(
+            const startTitle = i18n.translate(
                 guildID,
                 "command.play.team.joinTeam.title",
                 {
@@ -832,7 +805,7 @@ export default class PlayCommand implements BaseCommand {
                 }
             );
 
-            const gameInstructions = LocalizationManager.localizer.translate(
+            const gameInstructions = i18n.translate(
                 guildID,
                 "command.play.team.joinTeam.description",
                 { join: "/play teams join" }
@@ -872,34 +845,31 @@ export default class PlayCommand implements BaseCommand {
             if (gameSessions[guildID]) {
                 // (2) Let the user know they're starting a non-teams game
                 const oldGameType = gameSessions[guildID].gameType;
-                const ignoringOldGameTypeTitle =
-                    LocalizationManager.localizer.translate(
-                        guildID,
-                        "command.play.failure.overrideTeams.title",
-                        { playOldGameType: `\`/play ${oldGameType}\`` }
-                    );
+                const ignoringOldGameTypeTitle = i18n.translate(
+                    guildID,
+                    "command.play.failure.overrideTeams.title",
+                    { playOldGameType: `\`/play ${oldGameType}\`` }
+                );
 
-                const gameSpecificInstructions =
-                    LocalizationManager.localizer.translate(
-                        guildID,
-                        "command.play.failure.overrideTeams.teams.join",
-                        {
-                            join: "/play teams join",
-                        }
-                    );
+                const gameSpecificInstructions = i18n.translate(
+                    guildID,
+                    "command.play.failure.overrideTeams.teams.join",
+                    {
+                        join: "/play teams join",
+                    }
+                );
 
-                const oldGameTypeInstructions =
-                    LocalizationManager.localizer.translate(
-                        guildID,
-                        "command.play.failure.overrideTeams.description",
-                        {
-                            oldGameType: `\`${oldGameType}\``,
-                            end: "`/end`",
-                            playOldGameType: `\`/play ${oldGameType}\``,
-                            gameSpecificInstructions,
-                            begin: "`/begin`",
-                        }
-                    );
+                const oldGameTypeInstructions = i18n.translate(
+                    guildID,
+                    "command.play.failure.overrideTeams.description",
+                    {
+                        oldGameType: `\`${oldGameType}\``,
+                        end: "`/end`",
+                        playOldGameType: `\`/play ${oldGameType}\``,
+                        gameSpecificInstructions,
+                        begin: "`/begin`",
+                    }
+                );
 
                 logger.warn(
                     `${getDebugLogHeader(
@@ -928,11 +898,11 @@ export default class PlayCommand implements BaseCommand {
 
                 if (!isModerator) {
                     sendErrorMessage(messageContext, {
-                        title: LocalizationManager.localizer.translate(
+                        title: i18n.translate(
                             guildID,
                             "command.play.failure.hiddenGameMode.title"
                         ),
-                        description: LocalizationManager.localizer.translate(
+                        description: i18n.translate(
                             guildID,
                             "command.play.failure.hiddenGameMode.description"
                         ),

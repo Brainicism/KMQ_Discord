@@ -5,11 +5,11 @@ import {
     sendInfoMessage,
 } from "../../helpers/discord_utils";
 import Eris from "eris";
-import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
 import fs from "fs";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -21,10 +21,7 @@ export default class NewsCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "news",
-        description: LocalizationManager.localizer.translate(
-            guildID,
-            "command.news.help.description"
-        ),
+        description: i18n.translate(guildID, "command.news.help.description"),
         usage: "/news",
         examples: [],
         priority: 10,
@@ -34,13 +31,10 @@ export default class NewsCommand implements BaseCommand {
         await NewsCommand.sendNews(MessageContext.fromMessage(message));
     };
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "news",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.news.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
         },
     ];
@@ -60,15 +54,13 @@ export default class NewsCommand implements BaseCommand {
         await sendInfoMessage(
             messageContext,
             {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "command.news.updates.title"
                 ),
                 description: newsData,
                 thumbnailUrl: KmqImages.READING_BOOK,
-                footerText: `${
-                    State.version
-                } | ${LocalizationManager.localizer.translate(
+                footerText: `${State.version} | ${i18n.translate(
                     messageContext.guildID,
                     "command.news.updates.footer"
                 )}`,
@@ -81,7 +73,7 @@ export default class NewsCommand implements BaseCommand {
                                 url: "https://discord.gg/gDdVXvqVUr",
                                 type: 2,
                                 emoji: { name: "🎵" },
-                                label: LocalizationManager.localizer.translate(
+                                label: i18n.translate(
                                     messageContext.guildID,
                                     "misc.interaction.officialKmqServer"
                                 ),

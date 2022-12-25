@@ -11,8 +11,8 @@ import GameType from "./enums/game_type";
 import GuildPreference from "./structures/guild_preference";
 import KmqConfiguration from "./kmq_configuration";
 import LocaleType from "./enums/locale_type";
-import LocalizationManager from "./helpers/localization_manager";
 import dbContext from "./database_context";
+import i18n from "./helpers/localization_manager";
 import type EmbedPayload from "./interfaces/embed_payload";
 import type GameSession from "./structures/game_session";
 import type PrecheckArgs from "./interfaces/precheck_args";
@@ -28,11 +28,11 @@ export default class CommandPrechecks {
             if (interaction) {
                 tryCreateInteractionErrorAcknowledgement(
                     interaction,
-                    LocalizationManager.localizer.translate(
+                    i18n.translate(
                         LocaleType.EN,
                         "misc.failure.game.noneInProgress.title"
                     ),
-                    LocalizationManager.localizer.translate(
+                    i18n.translate(
                         LocaleType.EN,
                         "misc.failure.game.noneInProgress.description"
                     )
@@ -51,11 +51,11 @@ export default class CommandPrechecks {
             if (!userAndBotInSameChannel) {
                 tryCreateInteractionErrorAcknowledgement(
                     interaction,
-                    LocalizationManager.localizer.translate(
+                    i18n.translate(
                         messageContext.guildID,
                         "misc.preCheck.title"
                     ),
-                    LocalizationManager.localizer.translate(
+                    i18n.translate(
                         messageContext.guildID,
                         errorMessage ?? "misc.preCheck.differentVC"
                     )
@@ -87,11 +87,11 @@ export default class CommandPrechecks {
             );
 
             const embedPayload: EmbedPayload = {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "misc.preCheck.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     messageContext.guildID,
                     errorMessage ?? "misc.preCheck.differentVC"
                 ),
@@ -109,11 +109,11 @@ export default class CommandPrechecks {
         const { session, messageContext, interaction } = precheckArgs;
         if (session && !session.isGameSession()) {
             const embedPayload: EmbedPayload = {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "misc.preCheck.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     messageContext.guildID,
                     "misc.preCheck.notListeningSession"
                 ),
@@ -131,11 +131,11 @@ export default class CommandPrechecks {
         const { session, messageContext, interaction } = precheckArgs;
         if (session && session.isGameSession()) {
             const embedPayload: EmbedPayload = {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "misc.preCheck.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     messageContext.guildID,
                     "misc.preCheck.notGameSession"
                 ),
@@ -162,11 +162,11 @@ export default class CommandPrechecks {
             );
 
             const embedPayload: EmbedPayload = {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "misc.preCheck.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     messageContext.guildID,
                     errorMessage ?? "misc.preCheck.debugServer"
                 ),
@@ -184,11 +184,11 @@ export default class CommandPrechecks {
         const { messageContext, interaction } = precheckArgs;
         if (KmqConfiguration.Instance.maintenanceModeEnabled()) {
             const embedPayload: EmbedPayload = {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "misc.failure.maintenanceMode.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     messageContext.guildID,
                     "misc.failure.maintenanceMode.description"
                 ),
@@ -215,11 +215,11 @@ export default class CommandPrechecks {
             );
 
             const embedPayload: EmbedPayload = {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "misc.preCheck.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     messageContext.guildID,
                     errorMessage ?? "misc.preCheck.debugChannel"
                 ),
@@ -263,11 +263,11 @@ export default class CommandPrechecks {
             );
 
             const embedPayload: EmbedPayload = {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "misc.preCheck.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     messageContext.guildID,
                     errorMessage ?? "misc.preCheck.competition"
                 ),
@@ -288,11 +288,11 @@ export default class CommandPrechecks {
         if (timeUntilRestart !== null) {
             const { messageContext, interaction } = precheckArgs;
             const embedPayload: EmbedPayload = {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "command.play.failure.botRestarting.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     messageContext.guildID,
                     "command.play.failure.botRestarting.description",
                     { timeUntilRestart: `\`${timeUntilRestart}\`` }
@@ -315,11 +315,11 @@ export default class CommandPrechecks {
         }
 
         const embedPayload: EmbedPayload = {
-            title: LocalizationManager.localizer.translate(
+            title: i18n.translate(
                 messageContext.guildID,
                 "misc.preCheck.title"
             ),
-            description: LocalizationManager.localizer.translate(
+            description: i18n.translate(
                 messageContext.guildID,
                 "misc.preCheck.notPremium",
                 { premium: "`/premium`" }
@@ -350,11 +350,11 @@ export default class CommandPrechecks {
         );
 
         const embedPayload: EmbedPayload = {
-            title: LocalizationManager.localizer.translate(
+            title: i18n.translate(
                 messageContext.guildID,
                 "misc.preCheck.title"
             ),
-            description: LocalizationManager.localizer.translate(
+            description: i18n.translate(
                 messageContext.guildID,
                 "misc.preCheck.premiumOrDebugServer",
                 { premium: "`/premium`" }
@@ -376,11 +376,11 @@ export default class CommandPrechecks {
 
         if (guildPreference.isSpotifyPlaylist()) {
             const embedPayload: EmbedPayload = {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "misc.preCheck.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     messageContext.guildID,
                     "misc.preCheck.notSpotify"
                 ),

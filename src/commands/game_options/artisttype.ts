@@ -12,9 +12,10 @@ import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type EmbedPayload from "../../interfaces/embed_payload";
@@ -42,7 +43,7 @@ export default class ArtistTypeCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "artisttype",
-        description: LocalizationManager.localizer.translate(
+        description: i18n.translate(
             guildID,
             "command.artisttype.help.description",
             {
@@ -55,28 +56,28 @@ export default class ArtistTypeCommand implements BaseCommand {
         examples: [
             {
                 example: "`/artisttype set artisttype:soloists`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.artisttype.help.example.soloists"
                 ),
             },
             {
                 example: "`/artisttype set artisttype:groups`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.artisttype.help.example.groups"
                 ),
             },
             {
                 example: "`/artisttype set artisttype:both`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.artisttype.help.example.both"
                 ),
             },
             {
                 example: "`/artisttype reset`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.artisttype.help.example.reset"
                 ),
@@ -85,18 +86,15 @@ export default class ArtistTypeCommand implements BaseCommand {
         priority: 150,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "artisttype",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.artisttype.help.interaction.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
                     name: OptionAction.SET,
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.artisttype.help.interaction.description"
                     ),
@@ -105,11 +103,10 @@ export default class ArtistTypeCommand implements BaseCommand {
                     options: [
                         {
                             name: "artisttype",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.artisttype.help.interaction.artistTypeOption"
-                                ),
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.artisttype.help.interaction.artistTypeOption"
+                            ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             required: true,
@@ -124,7 +121,7 @@ export default class ArtistTypeCommand implements BaseCommand {
                 },
                 {
                     name: OptionAction.RESET,
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "artist type" }
@@ -187,11 +184,11 @@ export default class ArtistTypeCommand implements BaseCommand {
             );
 
             const embedPayload: EmbedPayload = {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "misc.failure.gameOptionConflict.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     messageContext.guildID,
                     "misc.failure.gameOptionConflict.description",
                     {

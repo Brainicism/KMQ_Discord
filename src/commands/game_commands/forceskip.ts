@@ -9,10 +9,10 @@ import {
 import { getMention } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
-import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -29,7 +29,7 @@ export default class ForceSkipCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "forceskip",
-        description: LocalizationManager.localizer.translate(
+        description: i18n.translate(
             guildID,
             "command.forceskip.help.description"
         ),
@@ -38,13 +38,10 @@ export default class ForceSkipCommand implements BaseCommand {
         priority: 1009,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "forceskip",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.forceskip.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
         },
     ];
@@ -68,11 +65,11 @@ export default class ForceSkipCommand implements BaseCommand {
             await sendErrorMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "command.forceskip.skipIgnored"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "misc.preCheck.differentVC"
                     ),
@@ -97,11 +94,11 @@ export default class ForceSkipCommand implements BaseCommand {
             sendErrorMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "misc.failure.round.noneInProgress.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "misc.failure.round.noneInProgress.description"
                     ),
@@ -116,11 +113,11 @@ export default class ForceSkipCommand implements BaseCommand {
             await sendErrorMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "command.forceskip.skipIgnored"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "command.forceskip.failure.notOwner.description",
                         { mentionedUser: getMention(session.owner.id) }
@@ -136,11 +133,8 @@ export default class ForceSkipCommand implements BaseCommand {
             messageContext,
             {
                 color: EMBED_SUCCESS_COLOR,
-                title: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "misc.skip"
-                ),
-                description: LocalizationManager.localizer.translate(
+                title: i18n.translate(messageContext.guildID, "misc.skip"),
+                description: i18n.translate(
                     messageContext.guildID,
                     "command.forceskip.description"
                 ),

@@ -15,11 +15,12 @@ import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LimitCommand from "./limit";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import SongSelector from "../../structures/song_selector";
 import State from "../../state";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type { MatchedPlaylist } from "../../helpers/spotify_manager";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -43,18 +44,15 @@ export default class SpotifyCommand implements BaseCommand {
         ],
     };
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "spotify",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.spotify.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
                     name: OptionAction.SET,
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.spotify.help.description"
                     ),
@@ -63,11 +61,10 @@ export default class SpotifyCommand implements BaseCommand {
                     options: [
                         {
                             name: "playlist_url",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.spotify.help.interaction.playlistURL"
-                                ),
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.spotify.help.interaction.playlistURL"
+                            ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             required: true,
@@ -76,7 +73,7 @@ export default class SpotifyCommand implements BaseCommand {
                 },
                 {
                     name: OptionAction.RESET,
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "spotify" }
@@ -91,7 +88,7 @@ export default class SpotifyCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "spotify",
-        description: LocalizationManager.localizer.translate(
+        description: i18n.translate(
             guildID,
             "command.spotify.help.description"
         ),
@@ -99,14 +96,14 @@ export default class SpotifyCommand implements BaseCommand {
         examples: [
             {
                 example: `\`/spotify playlist_url:${SPOTIFY_BASE_URL}...\``,
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.spotify.help.example.playlistURL"
                 ),
             },
             {
                 example: "`/spotify`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.spotify.help.example.reset"
                 ),
@@ -133,11 +130,11 @@ export default class SpotifyCommand implements BaseCommand {
             );
         } else {
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     message.guildID,
                     "command.spotify.invalidURL.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     message.guildID,
                     "command.spotify.invalidURL.description"
                 ),
@@ -180,7 +177,7 @@ export default class SpotifyCommand implements BaseCommand {
                 await sendInfoMessage(
                     messageContext,
                     {
-                        title: LocalizationManager.localizer.translate(
+                        title: i18n.translate(
                             guildID,
                             "command.spotify.parsing"
                         ),
@@ -217,11 +214,11 @@ export default class SpotifyCommand implements BaseCommand {
 
             if (matchedPlaylist.matchedSongs.length === 0) {
                 sendErrorMessage(messageContext, {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         guildID,
                         "command.spotify.noMatches.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         guildID,
                         "command.spotify.noMatches.description"
                     ),
@@ -249,14 +246,14 @@ export default class SpotifyCommand implements BaseCommand {
             );
 
             await sendInfoMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     guildID,
                     "command.spotify.matched.title",
                     {
                         playlistName: matchedPlaylist.metadata.playlistName,
                     }
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     guildID,
                     "command.spotify.matched.description",
                     {
@@ -275,11 +272,11 @@ export default class SpotifyCommand implements BaseCommand {
             sendErrorMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "command.spotify.invalidURL.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "command.spotify.invalidURL.description"
                     ),

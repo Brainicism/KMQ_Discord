@@ -11,9 +11,10 @@ import GameOption from "../../enums/game_option_name";
 import GuessModeType from "../../enums/option_types/guess_mode_type";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -42,7 +43,7 @@ export default class GuessModeCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "guessmode",
-        description: LocalizationManager.localizer.translate(
+        description: i18n.translate(
             guildID,
             "command.guessmode.help.description"
         ),
@@ -50,28 +51,28 @@ export default class GuessModeCommand implements BaseCommand {
         examples: [
             {
                 example: "`/guessmode set guessmode:song`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.guessmode.help.example.song"
                 ),
             },
             {
                 example: "`/guessmode set guessmode:artist`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.guessmode.help.example.artist"
                 ),
             },
             {
                 example: "`/guessmode set guessmode:both`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.guessmode.help.example.both"
                 ),
             },
             {
                 example: "`/guessmode reset`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.guessmode.help.example.reset",
                     {
@@ -83,18 +84,15 @@ export default class GuessModeCommand implements BaseCommand {
         priority: 130,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "guessmode",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.guessmode.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
                     name: OptionAction.SET,
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "command.guessmode.help.description"
                     ),
@@ -103,11 +101,10 @@ export default class GuessModeCommand implements BaseCommand {
                     options: [
                         {
                             name: "guessmode",
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.guessmode.interaction.guessMode"
-                                ),
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.guessmode.interaction.guessMode"
+                            ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             required: true,
@@ -122,7 +119,7 @@ export default class GuessModeCommand implements BaseCommand {
                 },
                 {
                     name: OptionAction.RESET,
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "guess mode" }

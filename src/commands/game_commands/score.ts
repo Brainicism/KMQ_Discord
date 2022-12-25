@@ -2,10 +2,10 @@ import { IPCLogger } from "../../logger";
 import { getDebugLogHeader } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
-import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
 import type { CommandInteraction } from "eris";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type { GuildTextableMessage } from "src/types";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -25,22 +25,16 @@ export default class ScoreCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "score",
-        description: LocalizationManager.localizer.translate(
-            guildID,
-            "command.score.help.description"
-        ),
+        description: i18n.translate(guildID, "command.score.help.description"),
         usage: "/score",
         examples: [],
         priority: 50,
     });
 
-    slashCommands = (): Array<Eris.ApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "score",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.score.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
         },
     ];

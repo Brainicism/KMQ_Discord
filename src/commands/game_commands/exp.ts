@@ -23,12 +23,12 @@ import Eris from "eris";
 import ExpBonusModifier from "../../enums/exp_bonus_modifier";
 import GuessModeType from "../../enums/option_types/guess_mode_type";
 import GuildPreference from "../../structures/guild_preference";
-import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import ShuffleType from "../../enums/option_types/shuffle_type";
 import State from "../../state";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type GameRound from "../../structures/game_round";
@@ -58,7 +58,7 @@ export async function calculateOptionsExpMultiplierInternal(
     // bonus for voting
     if (voteBonusExp) {
         modifiers.push({
-            displayName: LocalizationManager.localizer.translate(
+            displayName: i18n.translate(
                 guildPreference.guildID,
                 "command.exp.voteBonus"
             ),
@@ -70,7 +70,7 @@ export async function calculateOptionsExpMultiplierInternal(
     // power hour bonus
     if (isWeekend() || isPowerHour()) {
         modifiers.push({
-            displayName: LocalizationManager.localizer.translate(
+            displayName: i18n.translate(
                 guildPreference.guildID,
                 "command.exp.powerHourBonus"
             ),
@@ -82,7 +82,7 @@ export async function calculateOptionsExpMultiplierInternal(
     const isPlayersFirstGame = await isFirstGameOfDay(playerID);
     if (isPlayersFirstGame) {
         modifiers.push({
-            displayName: LocalizationManager.localizer.translate(
+            displayName: i18n.translate(
                 guildPreference.guildID,
                 "command.exp.firstGameOfDayBonus"
             ),
@@ -93,7 +93,7 @@ export async function calculateOptionsExpMultiplierInternal(
 
     if (guildPreference.typosAllowed()) {
         modifiers.push({
-            displayName: LocalizationManager.localizer.translate(
+            displayName: i18n.translate(
                 guildPreference.guildID,
                 "command.exp.typosAllowedPenalty"
             ),
@@ -104,7 +104,7 @@ export async function calculateOptionsExpMultiplierInternal(
 
     if (guildPreference.gameOptions.shuffleType === ShuffleType.POPULARITY) {
         modifiers.push({
-            displayName: LocalizationManager.localizer.translate(
+            displayName: i18n.translate(
                 guildPreference.guildID,
                 "command.exp.shufflePopularityPenalty"
             ),
@@ -115,7 +115,7 @@ export async function calculateOptionsExpMultiplierInternal(
         guildPreference.gameOptions.shuffleType === ShuffleType.WEIGHTED_EASY
     ) {
         modifiers.push({
-            displayName: LocalizationManager.localizer.translate(
+            displayName: i18n.translate(
                 guildPreference.guildID,
                 "command.exp.shuffleWeightedEasyPenalty"
             ),
@@ -142,7 +142,7 @@ export async function calculateOptionsExpMultiplierInternal(
         }
 
         modifiers.push({
-            displayName: LocalizationManager.localizer.translate(
+            displayName: i18n.translate(
                 guildPreference.guildID,
                 "command.exp.multipleChoicePenalty"
             ),
@@ -161,7 +161,7 @@ export async function calculateOptionsExpMultiplierInternal(
 
     if (totalSongs < 10) {
         modifiers.push({
-            displayName: LocalizationManager.localizer.translate(
+            displayName: i18n.translate(
                 guildPreference.guildID,
                 "command.exp.lowSongCountPenalty"
             ),
@@ -176,7 +176,7 @@ export async function calculateOptionsExpMultiplierInternal(
         guildPreference.gameOptions.guessModeType === GuessModeType.BOTH
     ) {
         modifiers.push({
-            displayName: LocalizationManager.localizer.translate(
+            displayName: i18n.translate(
                 guildPreference.guildID,
                 "command.exp.artistGroupGuessModePenalty"
             ),
@@ -305,22 +305,16 @@ export async function calculateTotalRoundExp(
 export default class ExpCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "exp",
-        description: LocalizationManager.localizer.translate(
-            guildID,
-            "command.exp.help.description"
-        ),
+        description: i18n.translate(guildID, "command.exp.help.description"),
         usage: "/exp",
         examples: [],
         priority: 50,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "exp",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.exp.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
         },
     ];
@@ -363,14 +357,14 @@ export default class ExpCommand implements BaseCommand {
         );
 
         modifierText.push(
-            `\`${LocalizationManager.localizer.translate(
+            `\`${i18n.translate(
                 messageContext.guildID,
                 "command.exp.totalModifier"
             )}:\` **__${totalModifier.toFixed(2)}x__**`
         );
 
         fields.push({
-            name: LocalizationManager.localizer.translate(
+            name: i18n.translate(
                 messageContext.guildID,
                 "command.exp.activeModifiers"
             ),
@@ -379,11 +373,11 @@ export default class ExpCommand implements BaseCommand {
         });
 
         fields.push({
-            name: LocalizationManager.localizer.translate(
+            name: i18n.translate(
                 messageContext.guildID,
                 "command.exp.bonusArtistsTitle"
             ),
-            value: `\`${LocalizationManager.localizer.translate(
+            value: `\`${i18n.translate(
                 messageContext.guildID,
                 "command.exp.bonusArtists"
             )}:\` ${ExpBonusModifierValues[
@@ -395,46 +389,46 @@ export default class ExpCommand implements BaseCommand {
         });
 
         const bonusExpExplanations = [
-            `\`${LocalizationManager.localizer.translate(
+            `\`${i18n.translate(
                 messageContext.guildID,
                 "command.exp.explanation.powerHour"
             )}:\` ${ExpBonusModifierValues[ExpBonusModifier.POWER_HOUR].toFixed(
                 2
             )}x 📈`,
-            `\`${LocalizationManager.localizer.translate(
+            `\`${i18n.translate(
                 messageContext.guildID,
                 "command.exp.explanation.firstGameOfDay"
             )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.FIRST_GAME_OF_DAY
             ].toFixed(2)}x 📈`,
-            `\`${LocalizationManager.localizer.translate(
+            `\`${i18n.translate(
                 messageContext.guildID,
                 "command.exp.explanation.voting"
             )}!:\` ${ExpBonusModifierValues[ExpBonusModifier.VOTE].toFixed(
                 2
             )}x 📈`,
-            `\`${LocalizationManager.localizer.translate(
+            `\`${i18n.translate(
                 messageContext.guildID,
                 "command.exp.explanation.streak"
             )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.GUESS_STREAK
             ].toFixed(2)}x 📈`,
-            `\`${LocalizationManager.localizer.translate(
+            `\`${i18n.translate(
                 messageContext.guildID,
                 "command.exp.explanation.quickGuess"
             )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.QUICK_GUESS
             ].toFixed(2)}x 📈 `,
-            `\`${LocalizationManager.localizer.translate(
+            `\`${i18n.translate(
                 messageContext.guildID,
                 "command.exp.explanation.bonusArtistGuess"
             )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.BONUS_ARTIST
             ].toFixed(2)}x 📈 `,
-            `\`${LocalizationManager.localizer.translate(
+            `\`${i18n.translate(
                 messageContext.guildID,
                 "command.exp.explanation.rareGuess"
-            )}:\` ${LocalizationManager.localizer.translate(
+            )}:\` ${i18n.translate(
                 messageContext.guildID,
                 "command.exp.explanation.rareGuessRange",
                 { rareGuessLowerBound: "2.00x", rareGuessUpperBound: "50.00x" }
@@ -442,11 +436,11 @@ export default class ExpCommand implements BaseCommand {
         ];
 
         fields.push({
-            name: LocalizationManager.localizer.translate(
+            name: i18n.translate(
                 messageContext.guildID,
                 "command.exp.bonusTitle"
             ),
-            value: `${LocalizationManager.localizer.translate(
+            value: `${i18n.translate(
                 messageContext.guildID,
                 "command.exp.bonusDescription"
             )}:\n ${bonusExpExplanations.map((x) => `- ${x}`).join("\n")}`,
@@ -454,10 +448,7 @@ export default class ExpCommand implements BaseCommand {
         });
 
         const embedPayload = {
-            title: LocalizationManager.localizer.translate(
-                messageContext.guildID,
-                "command.exp.title"
-            ),
+            title: i18n.translate(messageContext.guildID, "command.exp.title"),
             fields,
             thumbnailUrl: KmqImages.THUMBS_UP,
         };

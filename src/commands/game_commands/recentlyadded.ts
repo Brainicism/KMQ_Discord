@@ -16,12 +16,12 @@ import {
 } from "../../helpers/game_utils";
 import Eris from "eris";
 import KmqMember from "../../structures/kmq_member";
-import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
 import dbContext from "../../database_context";
+import i18n from "../../helpers/localization_manager";
 import type { CommandInteraction, EmbedOptions } from "eris";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type { GuildTextableMessage } from "../../types";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -37,7 +37,7 @@ export default class RecentlyAddedCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "recentlyadded",
-        description: LocalizationManager.localizer.translate(
+        description: i18n.translate(
             guildID,
             "command.recentlyadded.help.description"
         ),
@@ -45,7 +45,7 @@ export default class RecentlyAddedCommand implements BaseCommand {
         examples: [
             {
                 example: "`/recentlyadded`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.recentlyadded.help.example"
                 ),
@@ -54,13 +54,10 @@ export default class RecentlyAddedCommand implements BaseCommand {
         priority: 30,
     });
 
-    slashCommands = (): Array<Eris.ApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "recentlyadded",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.recentlyadded.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
         },
     ];
@@ -102,11 +99,11 @@ export default class RecentlyAddedCommand implements BaseCommand {
             sendInfoMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "command.recentlyadded.failure.noSongs.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "command.recentlyadded.failure.noSongs.description"
                     ),
@@ -128,14 +125,12 @@ export default class RecentlyAddedCommand implements BaseCommand {
                 song,
                 locale
             )}" - ${getLocalizedArtistName(song, locale)}`,
-            value: `${LocalizationManager.localizer.translate(
+            value: `${i18n.translate(
                 messageContext.guildID,
                 "command.recentlyadded.released"
             )} ${standardDateFormat(
                 song.publishDate
-            )}\n[${friendlyFormattedNumber(
-                song.views
-            )} ${LocalizationManager.localizer.translate(
+            )}\n[${friendlyFormattedNumber(song.views)} ${i18n.translate(
                 messageContext.guildID,
                 "misc.views"
             )}](https://youtu.be/${song.youtubeLink})`,
@@ -145,11 +140,11 @@ export default class RecentlyAddedCommand implements BaseCommand {
         const embedFieldSubsets = chunkArray(fields, FIELDS_PER_EMBED);
         const embeds: Array<EmbedOptions> = embedFieldSubsets.map(
             (embedFieldsSubset) => ({
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "command.recentlyadded.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     messageContext.guildID,
                     "command.recentlyadded.description"
                 ),

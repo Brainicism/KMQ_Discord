@@ -10,11 +10,11 @@ import { getMention } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
-import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type GameSession from "src/structures/game_session";
@@ -33,7 +33,7 @@ export default class ForceHintCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "forcehint",
-        description: LocalizationManager.localizer.translate(
+        description: i18n.translate(
             guildID,
             "command.forcehint.help.description"
         ),
@@ -42,13 +42,10 @@ export default class ForceHintCommand implements BaseCommand {
         priority: 1009,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "forcehint",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.forcehint.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
         },
     ];
@@ -88,11 +85,11 @@ export default class ForceHintCommand implements BaseCommand {
             await sendErrorMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "command.forcehint.hintIgnored"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "command.forcehint.failure.notOwner.description",
                         { mentionedUser: getMention(gameSession.owner.id) }
@@ -108,7 +105,7 @@ export default class ForceHintCommand implements BaseCommand {
         await sendInfoMessage(
             messageContext,
             {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "command.hint.title"
                 ),

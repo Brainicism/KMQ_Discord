@@ -15,9 +15,10 @@ import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -56,15 +57,12 @@ export default class CutoffCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "cutoff",
-        description: LocalizationManager.localizer.translate(
-            guildID,
-            "command.cutoff.help.description"
-        ),
+        description: i18n.translate(guildID, "command.cutoff.help.description"),
         usage: "/cutoff set earliest\nbeginning_year:[year_start]\n\n/cutoff set range\nbeginning_year:[year_start]\nending_year:[year_end]\n\n/cutoff reset",
         examples: [
             {
                 example: "`/cutoff set earliest beginning_year:2015`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.cutoff.help.example.singleCutoff",
                     {
@@ -75,7 +73,7 @@ export default class CutoffCommand implements BaseCommand {
             {
                 example:
                     "`/cutoff set range beginning_year:2015 ending_year:2018`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.cutoff.help.example.twoCutoffs",
                     {
@@ -86,7 +84,7 @@ export default class CutoffCommand implements BaseCommand {
             },
             {
                 example: "`/cutoff reset`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.cutoff.help.example.reset",
                     {
@@ -103,41 +101,36 @@ export default class CutoffCommand implements BaseCommand {
         priority: 140,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "cutoff",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.cutoff.interaction.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
                     name: OptionAction.SET,
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
-                        "command.cutoff.interaction.description"
+                        "command.cutoff.help.interaction.description"
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND_GROUP,
                     options: [
                         {
                             name: CutoffAppCommandAction.EARLIEST,
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.cutoff.interaction.earliestOption"
-                                ),
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.cutoff.help.interaction.earliestOption"
+                            ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .SUB_COMMAND,
                             options: [
                                 {
                                     name: "beginning_year",
-                                    description:
-                                        LocalizationManager.localizer.translate(
-                                            LocaleType.EN,
-                                            "command.cutoff.interaction.beginningYear"
-                                        ),
+                                    description: i18n.translate(
+                                        LocaleType.EN,
+                                        "command.cutoff.help.interaction.beginningYear"
+                                    ),
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,
                                     required: true,
@@ -148,21 +141,19 @@ export default class CutoffCommand implements BaseCommand {
                         },
                         {
                             name: CutoffAppCommandAction.RANGE,
-                            description:
-                                LocalizationManager.localizer.translate(
-                                    LocaleType.EN,
-                                    "command.cutoff.interaction.rangeOption"
-                                ),
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.cutoff.help.interaction.rangeOption"
+                            ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .SUB_COMMAND,
                             options: [
                                 {
                                     name: "beginning_year",
-                                    description:
-                                        LocalizationManager.localizer.translate(
-                                            LocaleType.EN,
-                                            "command.cutoff.interaction.beginningYear"
-                                        ),
+                                    description: i18n.translate(
+                                        LocaleType.EN,
+                                        "command.cutoff.help.interaction.beginningYear"
+                                    ),
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,
                                     required: true,
@@ -171,11 +162,10 @@ export default class CutoffCommand implements BaseCommand {
                                 } as any,
                                 {
                                     name: "ending_year",
-                                    description:
-                                        LocalizationManager.localizer.translate(
-                                            LocaleType.EN,
-                                            "command.cutoff.interaction.endingYear"
-                                        ),
+                                    description: i18n.translate(
+                                        LocaleType.EN,
+                                        "command.cutoff.help.interaction.endingYear"
+                                    ),
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,
                                     required: true,
@@ -188,7 +178,7 @@ export default class CutoffCommand implements BaseCommand {
                 },
                 {
                     name: OptionAction.RESET,
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
                         { optionName: "cutoff" }
@@ -268,11 +258,11 @@ export default class CutoffCommand implements BaseCommand {
                 await sendErrorMessage(
                     messageContext,
                     {
-                        title: LocalizationManager.localizer.translate(
+                        title: i18n.translate(
                             messageContext.guildID,
                             "command.cutoff.failure.invalidEndYear.title"
                         ),
-                        description: LocalizationManager.localizer.translate(
+                        description: i18n.translate(
                             messageContext.guildID,
                             "command.cutoff.failure.invalidEndYear.description"
                         ),

@@ -2,10 +2,10 @@
 import { DataFiles } from "../constants";
 import { IPCLogger } from "../logger";
 import { exec } from "child_process";
-import LocalizationManager from "./localization_manager";
 import _ from "lodash";
 import crypto from "crypto";
 import fs from "fs";
+import i18n from "./localization_manager";
 import moment from "moment-timezone";
 
 const logger = new IPCLogger("utils");
@@ -222,17 +222,10 @@ export function standardDateFormat(date: Date): string {
  * @returns the date in (minutes/hours ago) or yyyy-mm-dd format
  */
 export function friendlyFormattedDate(date: Date, guildID: string): string {
-    let localizer: LocalizationManager;
-    if (guildID === null) {
-        localizer = new LocalizationManager();
-    } else {
-        localizer = LocalizationManager.localizer;
-    }
-
     const timeDiffSeconds = (Date.now() - date.getTime()) / 1000;
     const timeDiffMinutes = timeDiffSeconds / 60.0;
     if (timeDiffMinutes <= 60) {
-        return localizer.translateN(
+        return i18n.translateN(
             guildID,
             "misc.plural.minuteAgo",
             Math.ceil(timeDiffMinutes)
@@ -241,7 +234,7 @@ export function friendlyFormattedDate(date: Date, guildID: string): string {
 
     const timeDiffHours = timeDiffMinutes / 60.0;
     if (timeDiffHours <= 24) {
-        return localizer.translateN(
+        return i18n.translateN(
             guildID,
             "misc.plural.hourAgo",
             Math.ceil(timeDiffHours)

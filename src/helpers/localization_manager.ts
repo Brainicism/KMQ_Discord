@@ -1,13 +1,15 @@
 import { DEFAULT_LOCALE } from "../constants";
+import { IPCLogger } from "../logger";
 import Backend from "i18next-fs-backend";
+import EnvType from "../enums/env_type";
 import LocaleType from "../enums/locale_type";
 import State from "../state";
 import i18next from "i18next";
 import path from "path";
 
-export default class LocalizationManager {
-    static localizer = new LocalizationManager();
+const logger = new IPCLogger("localization_manager");
 
+export class LocalizationManager {
     internalLocalizer: typeof i18next;
 
     constructor() {
@@ -39,8 +41,15 @@ export default class LocalizationManager {
         phrase: string,
         replace: { [key: string]: string } = {}
     ): string {
+        if (!this.hasKey(phrase)) {
+            logger.error(`Missing translation for phrase: ${phrase}`);
+            if (process.env.NODE_ENV === EnvType.TEST) {
+                process.exit(1);
+            }
+        }
+
         return this.translateByLocale(
-            localeOrGuildID in LocaleType
+            Object.values(LocaleType).includes(localeOrGuildID as LocaleType)
                 ? (localeOrGuildID as LocaleType)
                 : State.getGuildLocale(localeOrGuildID),
             phrase,
@@ -56,6 +65,10 @@ export default class LocalizationManager {
      * @returns The translated phrase
      */
     translateN(localeOrGuildID: string, phrase: string, count: number): string {
+        if (!this.hasKey(`${phrase}_one`) || !this.hasKey(`${phrase}_other`)) {
+            logger.error(`Missing translation for plural phrase: ${phrase}`);
+        }
+
         return this.translateNByLocale(
             localeOrGuildID in LocaleType
                 ? (localeOrGuildID as LocaleType)
@@ -105,3 +118,5 @@ export default class LocalizationManager {
         });
     }
 }
+
+export default new LocalizationManager();

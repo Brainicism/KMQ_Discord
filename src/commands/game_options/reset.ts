@@ -7,10 +7,10 @@ import {
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
-import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type GameOption from "../../enums/game_option_name";
@@ -29,15 +29,12 @@ export default class ResetCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "reset",
-        description: LocalizationManager.localizer.translate(
-            guildID,
-            "command.reset.help.description"
-        ),
+        description: i18n.translate(guildID, "command.reset.help.description"),
         usage: "/reset",
         examples: [
             {
                 example: "`/reset`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.reset.help.example.reset"
                 ),
@@ -46,13 +43,10 @@ export default class ResetCommand implements BaseCommand {
         priority: 130,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "reset",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.reset.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
         },
     ];

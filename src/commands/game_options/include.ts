@@ -26,11 +26,12 @@ import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import RemoveCommand, { RemoveType } from "./remove";
 import Session from "../../structures/session";
 import State from "../../state";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type EmbedPayload from "../../interfaces/embed_payload";
@@ -49,7 +50,7 @@ export default class IncludeCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "include",
-        description: LocalizationManager.localizer.translate(
+        description: i18n.translate(
             guildID,
             "command.include.help.description",
             {
@@ -58,20 +59,20 @@ export default class IncludeCommand implements BaseCommand {
                 groupList: GROUP_LIST_URL,
             }
         ),
-        usage: `/include set [${LocalizationManager.localizer.translate(
+        usage: `/include set [${i18n.translate(
             guildID,
             "misc.listOfGroups"
-        )}]\n\n/include add [${LocalizationManager.localizer.translate(
+        )}]\n\n/include add [${i18n.translate(
             guildID,
             "misc.listOfGroups"
-        )}]\n\n/include remove [${LocalizationManager.localizer.translate(
+        )}]\n\n/include remove [${i18n.translate(
             guildID,
             "misc.listOfGroups"
         )}]\n\n/include reset`,
         examples: [
             {
                 example: "`/include set group_1:blackpink`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.include.help.example.singleGroup",
                     { group: "Blackpink" }
@@ -80,7 +81,7 @@ export default class IncludeCommand implements BaseCommand {
             {
                 example:
                     "`/include set group_1:blackpink group_2:bts group_3:red velvet`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.include.help.example.multipleGroups",
                     {
@@ -92,7 +93,7 @@ export default class IncludeCommand implements BaseCommand {
             },
             {
                 example: "`/include reset`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.include.help.example.reset"
                 ),
@@ -103,7 +104,7 @@ export default class IncludeCommand implements BaseCommand {
                 type: Eris.Constants.ComponentTypes.BUTTON,
                 style: Eris.Constants.ButtonStyles.LINK,
                 url: GROUP_LIST_URL,
-                label: LocalizationManager.localizer.translate(
+                label: i18n.translate(
                     guildID,
                     "misc.interaction.fullGroupsList"
                 ),
@@ -112,19 +113,16 @@ export default class IncludeCommand implements BaseCommand {
         priority: 130,
     });
 
-    slashCommands = (): Array<Eris.ApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "include",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.include.interaction.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: Object.values(GroupAction).map((action) => ({
                 name: action,
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     LocaleType.EN,
-                    `command.include.interaction.${action}.description`
+                    `command.include.help.interaction.${action}.description`
                 ),
                 type: Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
                 options:
@@ -132,12 +130,11 @@ export default class IncludeCommand implements BaseCommand {
                         ? []
                         : [...Array(25).keys()].map((x) => ({
                               name: `group_${x + 1}`,
-                              description:
-                                  LocalizationManager.localizer.translate(
-                                      LocaleType.EN,
-                                      `command.include.interaction.${action}.perGroupDescription`,
-                                      { ordinalNum: getOrdinalNum(x + 1) }
-                                  ),
+                              description: i18n.translate(
+                                  LocaleType.EN,
+                                  `command.include.help.interaction.${action}.perGroupDescription`,
+                                  { ordinalNum: getOrdinalNum(x + 1) }
+                              ),
                               type: Eris.Constants.ApplicationCommandOptionTypes
                                   .STRING,
                               autocomplete: true,
@@ -215,11 +212,11 @@ export default class IncludeCommand implements BaseCommand {
             sendErrorMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "misc.failure.gameOptionConflict.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "misc.failure.gameOptionConflict.description",
                         {
@@ -255,7 +252,7 @@ export default class IncludeCommand implements BaseCommand {
                     ? "add"
                     : "remove";
 
-                includeWarning = LocalizationManager.localizer.translate(
+                includeWarning = i18n.translate(
                     messageContext.guildID,
                     "misc.warning.addRemoveOrdering.footer",
                     {
@@ -273,7 +270,7 @@ export default class IncludeCommand implements BaseCommand {
                 );
 
                 if (suggestions.length > 0) {
-                    suggestionsText = LocalizationManager.localizer.translate(
+                    suggestionsText = i18n.translate(
                         messageContext.guildID,
                         "misc.failure.unrecognizedGroups.didYouMean",
                         {
@@ -291,18 +288,17 @@ export default class IncludeCommand implements BaseCommand {
                 )}`
             );
 
-            const descriptionText = LocalizationManager.localizer.translate(
+            const descriptionText = i18n.translate(
                 messageContext.guildID,
                 "misc.failure.unrecognizedGroups.description",
                 {
-                    matchedGroupsAction:
-                        LocalizationManager.localizer.translate(
-                            messageContext.guildID,
-                            "command.include.failure.unrecognizedGroups.included"
-                        ),
+                    matchedGroupsAction: i18n.translate(
+                        messageContext.guildID,
+                        "command.include.failure.unrecognizedGroups.included"
+                    ),
                     helpGroups: "`/help groups`",
                     unmatchedGroups: unmatchedGroups.join(", "),
-                    solution: LocalizationManager.localizer.translate(
+                    solution: i18n.translate(
                         messageContext.guildID,
                         "misc.failure.unrecognizedGroups.solution",
                         {
@@ -315,7 +311,7 @@ export default class IncludeCommand implements BaseCommand {
             embeds.push({
                 color: EMBED_ERROR_COLOR,
                 author: messageContext.author,
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "misc.failure.unrecognizedGroups.title"
                 ),

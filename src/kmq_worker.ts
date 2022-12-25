@@ -10,7 +10,6 @@ import {
 } from "./helpers/management_utils";
 import EnvType from "./enums/env_type";
 import EvalCommand from "./commands/admin/eval";
-import LocalizationManager from "./helpers/localization_manager";
 import ReloadCommand from "./commands/admin/reload";
 import SIGINTHandler from "./events/process/SIGINT";
 import Session from "./structures/session";
@@ -233,7 +232,6 @@ export default class BotWorker extends BaseClusterWorker {
             );
         });
 
-        LocalizationManager.localizer = new LocalizationManager();
         logger.info(
             `Started worker ID: ${this.workerID} on cluster ID: ${this.clusterID}`
         );

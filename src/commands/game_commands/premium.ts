@@ -3,9 +3,9 @@ import { isUserPremium } from "../../helpers/game_utils";
 import { sendInfoMessage } from "../../helpers/discord_utils";
 import Eris from "eris";
 import KmqConfiguration from "../../kmq_configuration";
-import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -18,14 +18,14 @@ export default class PremiumCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        description: LocalizationManager.localizer.translate(
+        description: i18n.translate(
             guildID,
             "command.premium.help.description"
         ),
         examples: [
             {
                 example: "`/premium`",
-                explanation: LocalizationManager.localizer.translate(
+                explanation: i18n.translate(
                     guildID,
                     "command.premium.help.example"
                 ),
@@ -36,13 +36,10 @@ export default class PremiumCommand implements BaseCommand {
         usage: "/premium",
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "premium",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.premium.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
         },
     ];
@@ -63,49 +60,49 @@ export default class PremiumCommand implements BaseCommand {
             messageContext,
             {
                 color: premiumMember ? EMBED_SUCCESS_BONUS_COLOR : null,
-                description: `${LocalizationManager.localizer.translate(
+                description: `${i18n.translate(
                     messageContext.guildID,
                     premiumMember
                         ? "command.premium.status.description.premium"
                         : "command.premium.status.description.nonPremium"
-                )}\n\n${LocalizationManager.localizer.translate(
+                )}\n\n${i18n.translate(
                     messageContext.guildID,
                     "command.premium.status.description.connectionReminder"
                 )}`,
                 fields: [
                     {
-                        name: LocalizationManager.localizer.translate(
+                        name: i18n.translate(
                             messageContext.guildID,
                             "command.premium.status.perks.moreSongs.title"
                         ),
-                        value: LocalizationManager.localizer.translate(
+                        value: i18n.translate(
                             messageContext.guildID,
                             "command.premium.status.perks.moreSongs.description"
                         ),
                     },
                     {
-                        name: LocalizationManager.localizer.translate(
+                        name: i18n.translate(
                             messageContext.guildID,
                             "command.premium.status.perks.special.title"
                         ),
-                        value: LocalizationManager.localizer.translate(
+                        value: i18n.translate(
                             messageContext.guildID,
                             "command.premium.status.perks.special.description"
                         ),
                     },
                     {
-                        name: LocalizationManager.localizer.translate(
+                        name: i18n.translate(
                             messageContext.guildID,
                             "command.premium.status.perks.badge.title"
                         ),
-                        value: LocalizationManager.localizer.translate(
+                        value: i18n.translate(
                             messageContext.guildID,
                             "command.premium.status.perks.badge.description"
                         ),
                     },
                 ],
                 thumbnailUrl: KmqImages.HAPPY,
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     premiumMember
                         ? "command.premium.status.title.premium"

@@ -12,11 +12,11 @@ import Eris from "eris";
 import GameType from "../../enums/game_type";
 import GuessModeType from "../../enums/option_types/guess_mode_type";
 import GuildPreference from "../../structures/guild_preference";
-import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type EliminationScoreboard from "../../structures/elimination_scoreboard";
@@ -24,6 +24,7 @@ import type EmbedPayload from "../../interfaces/embed_payload";
 import type GameRound from "../../structures/game_round";
 import type GameSession from "../../structures/game_session";
 import type HelpDocumentation from "../../interfaces/help";
+import type LocaleType from "../../enums/locale_type";
 
 const logger = new IPCLogger("hint");
 
@@ -71,11 +72,11 @@ async function sendHintNotification(
         await sendInfoMessage(
             messageContext,
             {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "command.hint.request.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     messageContext.guildID,
                     "command.hint.request.description",
                     {
@@ -97,11 +98,11 @@ async function sendHintNotification(
         await sendInfoMessage(
             messageContext,
             {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "command.hint.request.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     messageContext.guildID,
                     "command.hint.request.description",
                     {
@@ -142,11 +143,11 @@ export function validHintCheck(
         sendErrorMessage(
             messageContext,
             {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "command.hint.failure.invalidHintRequest.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     messageContext.guildID,
                     "command.hint.failure.invalidHintRequest.noSongPlaying.description"
                 ),
@@ -167,11 +168,11 @@ export function validHintCheck(
             sendErrorMessage(
                 messageContext,
                 {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         messageContext.guildID,
                         "command.hint.failure.invalidHintRequest.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         messageContext.guildID,
                         "command.hint.failure.invalidHintRequest.eliminated.description"
                     ),
@@ -187,11 +188,11 @@ export function validHintCheck(
         sendErrorMessage(
             messageContext,
             {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "command.hint.failure.invalidHintRequest.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     messageContext.guildID,
                     "command.hint.failure.invalidHintRequest.multipleChoice.description"
                 ),
@@ -220,14 +221,14 @@ export function generateHint(
 ): string {
     switch (guessMode) {
         case GuessModeType.ARTIST:
-            return `${LocalizationManager.localizer.translate(
+            return `${i18n.translate(
                 guildID,
                 "command.hint.artistName"
             )}: ${codeLine(gameRound.hints.artistHint[locale])}`;
         case GuessModeType.SONG_NAME:
         case GuessModeType.BOTH:
         default:
-            return `${LocalizationManager.localizer.translate(
+            return `${i18n.translate(
                 guildID,
                 "command.hint.songName"
             )}: ${codeLine(gameRound.hints.songHint[locale])}`;
@@ -245,22 +246,16 @@ export default class HintCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "hint",
-        description: LocalizationManager.localizer.translate(
-            guildID,
-            "command.hint.help.description"
-        ),
+        description: i18n.translate(guildID, "command.hint.help.description"),
         usage: "/hint",
         examples: [],
         priority: 1020,
     });
 
-    slashCommands = (): Array<Eris.ChatInputApplicationCommandStructure> => [
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
         {
-            name: "hint",
-            description: LocalizationManager.localizer.translate(
-                LocaleType.EN,
-                "command.hint.help.description"
-            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
         },
     ];
@@ -298,7 +293,7 @@ export default class HintCommand implements BaseCommand {
         if (isHintAvailable(messageContext, gameSession)) {
             gameRound.hintUsed = true;
             const embedPayload: EmbedPayload = {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     messageContext.guildID,
                     "command.hint.title"
                 ),
