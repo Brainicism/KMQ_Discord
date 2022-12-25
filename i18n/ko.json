@@ -92,7 +92,7 @@
                 "example": {
                     "reset": "연도 설정 기본값인 {{defaultBeginningSearchYear}} ~ {{defaultEndSearchYear}}(으)로 재설정합니다.",
                     "singleCutoff": "{{year}}년 후에 발매된 곡을 재생합니다.",
-                    "twoCutoffs": "{{beginingYear}} ~ {{endingYear}}년 사이에 발매된 곡을 재생합니다."
+                    "twoCutoffs": "{{beginningYear}} ~ {{endingYear}}년 사이에 발매된 곡을 재생합니다."
                 },
                 "interaction": {
                     "beginningYear": "포함할 가장 빠른 연도",
