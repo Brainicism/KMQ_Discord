@@ -31,7 +31,7 @@ export default class VoteCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "vote",
         description: i18n.translate(guildID, "command.vote.help.description"),
-        usage: ",vote",
+        usage: "/vote",
         examples: [],
         priority: 60,
     });

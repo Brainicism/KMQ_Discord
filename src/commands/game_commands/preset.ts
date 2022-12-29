@@ -150,30 +150,42 @@ export default class PresetCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "preset",
         description: i18n.translate(guildID, "command.preset.help.description"),
-        usage: `,preset [list | save | load | delete | export] {preset_name}\n,preset import [${i18n.translate(
+        usage: `/preset list\n\n/preset [save | load | delete | export]\npreset_name:{${i18n.translate(
+            guildID,
+            "command.preset.help.usage.presetName"
+        )}}\n\n/preset import\nexported_preset:[${i18n.translate(
             guildID,
             "command.preset.help.usage.presetIdentifier"
-        )}] [${i18n.translate(
+        )}]\nnew_preset_name:[${i18n.translate(
             guildID,
             "command.preset.help.usage.presetName"
         )}]`,
         examples: [
             {
-                example: "`,preset list`",
+                example: "`/preset list`",
                 explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.list"
                 ),
             },
             {
-                example: "`,preset save [preset_name]`",
+                example: `\`/preset save preset_name:[${i18n.translate(
+                    guildID,
+                    "command.preset.help.usage.presetName"
+                )}]\``,
                 explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.save"
                 ),
             },
             {
-                example: "`,preset load [preset_name | preset_identifier]`",
+                example: `\`/preset load preset_name:[${i18n.translate(
+                    guildID,
+                    "command.preset.help.usage.presetName"
+                )}]\n,preset load preset_identifier:[${i18n.translate(
+                    guildID,
+                    "command.preset.help.usage.presetIdentifier"
+                )}]\``,
                 explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.load",
@@ -181,32 +193,46 @@ export default class PresetCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,preset replace [preset_name]`",
+                example: `\`/preset replace preset_name:[${i18n.translate(
+                    guildID,
+                    "command.preset.help.usage.presetName"
+                )}]\``,
                 explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.replace"
                 ),
             },
             {
-                example: "`,preset delete [preset_name]`",
+                example: `\`/preset delete preset_name:[${i18n.translate(
+                    guildID,
+                    "command.preset.help.usage.presetName"
+                )}]\``,
                 explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.delete"
                 ),
             },
             {
-                example: "`,preset export [preset_name]`",
+                example: `\`/preset export preset_name:[${i18n.translate(
+                    guildID,
+                    "command.preset.help.usage.presetName"
+                )}]\``,
                 explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.export"
                 ),
             },
             {
-                example: "`,preset import [preset_identifier] [preset_name]`",
+                example: `\`/preset import preset_identifier:[${i18n.translate(
+                    guildID,
+                    "command.preset.help.usage.presetIdentifier"
+                )}] preset_name:[${i18n.translate(
+                    guildID,
+                    "command.preset.help.usage.presetName"
+                )}]\``,
                 explanation: i18n.translate(
                     guildID,
-                    "command.preset.help.example.import",
-                    { exampleIdentifier: "`KMQ-XXXXX-...`" }
+                    "command.preset.help.example.import"
                 ),
             },
         ],
@@ -253,7 +279,8 @@ export default class PresetCommand implements BaseCommand {
                     name: PresetAction.LOAD,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.preset.help.example.load"
+                        "command.preset.help.example.load",
+                        { exampleIdentifier: "KMQ-XXXXX-..." }
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
@@ -585,7 +612,7 @@ export default class PresetCommand implements BaseCommand {
                         messageContext.guildID,
                         "command.preset.savedOrReplaced.description",
                         {
-                            presetLoad: `\`${process.env.BOT_PREFIX}preset load ${presetName}\``,
+                            presetLoad: `\`/preset load ${presetName}\``,
                         }
                     ),
                     thumbnailUrl: KmqImages.HAPPY,
@@ -614,7 +641,7 @@ export default class PresetCommand implements BaseCommand {
                         "command.preset.failure.alreadyExists.description",
                         {
                             presetNameFormatted: `\`${presetName}\``,
-                            presetDelete: `${process.env.BOT_PREFIX}preset delete`,
+                            presetDelete: "/preset delete",
                             presetName,
                         }
                     ),
@@ -664,7 +691,7 @@ export default class PresetCommand implements BaseCommand {
                     messageContext.guildID,
                     "command.preset.savedOrReplaced.description",
                     {
-                        presetLoad: `\`${process.env.BOT_PREFIX}preset load ${presetName}\``,
+                        presetLoad: `\`/preset load ${presetName}\``,
                     }
                 ),
                 thumbnailUrl: KmqImages.HAPPY,
@@ -727,9 +754,9 @@ export default class PresetCommand implements BaseCommand {
                     "command.preset.exported.description",
                     {
                         presetName: `\`${presetName}\``,
-                        presetImport: `${process.env.BOT_PREFIX}preset import`,
+                        presetImport: "/preset import",
                         presetUUID,
-                        presetLoad: `${process.env.BOT_PREFIX}preset load`,
+                        presetLoad: "/preset load",
                     }
                 ),
                 thumbnailUrl: KmqImages.THUMBS_UP,
@@ -767,7 +794,7 @@ export default class PresetCommand implements BaseCommand {
                         "command.preset.failure.alreadyExists.description",
                         {
                             presetNameFormatted: `\`${presetName}\``,
-                            presetDelete: `${process.env.BOT_PREFIX}preset delete`,
+                            presetDelete: "/preset delete",
                             presetName,
                         }
                     ),
@@ -858,7 +885,7 @@ export default class PresetCommand implements BaseCommand {
                     messageContext.guildID,
                     "command.preset.imported.description",
                     {
-                        presetLoad: `${process.env.BOT_PREFIX}preset load`,
+                        presetLoad: "/preset load",
                         presetName,
                     }
                 ),
@@ -891,7 +918,7 @@ export default class PresetCommand implements BaseCommand {
                               messageContext.guildID,
                               "command.preset.list.failure.noPresets.description",
                               {
-                                  presetHelp: `\`${process.env.BOT_PREFIX}help preset\``,
+                                  presetHelp: "`/help preset`",
                               }
                           ),
                 footerText:
@@ -900,7 +927,7 @@ export default class PresetCommand implements BaseCommand {
                               messageContext.guildID,
                               "command.preset.list.loadInstructions.footer",
                               {
-                                  presetLoad: `${process.env.BOT_PREFIX}preset load`,
+                                  presetLoad: "/preset load",
                               }
                           )
                         : null,
@@ -1020,7 +1047,7 @@ export default class PresetCommand implements BaseCommand {
                                 messageContext.guildID,
                                 "command.preset.failure.missingIdentifier.description",
                                 {
-                                    presetExport: `${process.env.BOT_PREFIX}preset export`,
+                                    presetExport: "/preset export",
                                 }
                             ),
                             thumbnailUrl: KmqImages.NOT_IMPRESSED,

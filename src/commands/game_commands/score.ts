@@ -26,7 +26,7 @@ export default class ScoreCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "score",
         description: i18n.translate(guildID, "command.score.help.description"),
-        usage: ",score",
+        usage: "/score",
         examples: [],
         priority: 50,
     });

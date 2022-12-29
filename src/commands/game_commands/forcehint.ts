@@ -37,7 +37,7 @@ export default class ForceHintCommand implements BaseCommand {
             guildID,
             "command.forcehint.help.description"
         ),
-        usage: ",forcehint",
+        usage: "/forcehint",
         examples: [],
         priority: 1009,
     });

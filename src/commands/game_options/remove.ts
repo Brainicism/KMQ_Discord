@@ -62,30 +62,37 @@ export default class RemoveCommand implements BaseCommand {
             guildID,
             "command.remove.help.description",
             {
-                groups: `\`${process.env.BOT_PREFIX}groups\``,
-                exclude: `\`${process.env.BOT_PREFIX}exclude\``,
-                include: `\`${process.env.BOT_PREFIX}include\``,
+                groups: "`/groups`",
+                exclude: "`/exclude`",
+                include: "`/include`",
             }
         ),
-        usage: `,remove [groups | exclude | include] [${i18n.translate(
+        usage: `/groups remove [${i18n.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n/include remove [${i18n.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n/exclude remove [${i18n.translate(
             guildID,
             "misc.listOfGroups"
         )}]`,
         examples: [
             {
-                example: "`,remove groups twice, red velvet`",
+                example: "`/groups remove group_1:twice group_2:red velvet`",
                 explanation: i18n.translate(
                     guildID,
                     "command.remove.help.example.groups",
                     {
                         groupOne: "Twice",
                         groupTwo: "Red Velvet",
-                        groups: `\`${process.env.BOT_PREFIX}groups\``,
+                        groups: "`/groups`",
                     }
                 ),
             },
             {
-                example: "`,remove exclude BESTie, Dia, iKON`",
+                example:
+                    "`/exclude remove group_1:BESTie group_2:Dia group_3:iKON`",
                 explanation: i18n.translate(
                     guildID,
                     "command.remove.help.example.exclude",
@@ -93,18 +100,18 @@ export default class RemoveCommand implements BaseCommand {
                         groupOne: "BESTie",
                         groupTwo: "Dia",
                         groupThree: "iKON",
-                        exclude: `\`${process.env.BOT_PREFIX}exclude\``,
+                        exclude: "`/exclude`",
                     }
                 ),
             },
             {
-                example: "`,remove include exo`",
+                example: "`/include remove group_1:exo`",
                 explanation: i18n.translate(
                     guildID,
                     "command.remove.help.example.include",
                     {
                         group: "exo",
-                        include: `\`${process.env.BOT_PREFIX}include\``,
+                        include: "`/include`",
                     }
                 ),
             },
@@ -232,9 +239,7 @@ export default class RemoveCommand implements BaseCommand {
                         messageContext.guildID,
                         "command.remove.failure.unrecognizedGroups.removed"
                     ),
-                    helpGroups: interaction
-                        ? "/help groups"
-                        : `\`${process.env.BOT_PREFIX}help groups\``,
+                    helpGroups: "/help groups",
                     unmatchedGroups: unmatchedGroups.join(", "),
                     solution: "",
                 }

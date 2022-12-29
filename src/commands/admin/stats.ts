@@ -27,7 +27,7 @@ export default class StatsCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "stats",
         description: i18n.translate(guildID, "command.stats.help.description"),
-        usage: ",stats",
+        usage: "/stats",
         examples: [],
         priority: 1,
     });

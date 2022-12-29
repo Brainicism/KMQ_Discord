@@ -52,31 +52,31 @@ export default class ArtistTypeCommand implements BaseCommand {
                 both: `\`${ArtistType.BOTH}\``,
             }
         ),
-        usage: ",artisttype [soloists | groups | both]",
+        usage: "/artisttype set\nartisttype:[soloists | groups | both]\n\n/artisttype reset",
         examples: [
             {
-                example: "`,artisttype soloists`",
+                example: "`/artisttype set artisttype:soloists`",
                 explanation: i18n.translate(
                     guildID,
                     "command.artisttype.help.example.soloists"
                 ),
             },
             {
-                example: "`,artisttype groups`",
+                example: "`/artisttype set artisttype:groups`",
                 explanation: i18n.translate(
                     guildID,
                     "command.artisttype.help.example.groups"
                 ),
             },
             {
-                example: "`,artisttype both`",
+                example: "`/artisttype set artisttype:both`",
                 explanation: i18n.translate(
                     guildID,
                     "command.artisttype.help.example.both"
                 ),
             },
             {
-                example: "`,artisttype`",
+                example: "`/artisttype reset`",
                 explanation: i18n.translate(
                     guildID,
                     "command.artisttype.help.example.reset"
@@ -194,7 +194,7 @@ export default class ArtistTypeCommand implements BaseCommand {
                     {
                         optionOne: "`groups`",
                         optionTwo: "`artisttype`",
-                        optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
+                        optionOneCommand: "`/groups reset`",
                     }
                 ),
                 color: EMBED_ERROR_COLOR,

@@ -52,10 +52,19 @@ export default class GroupsCommand implements BaseCommand {
                 groupList: GROUP_LIST_URL,
             }
         ),
-        usage: ",groups [group1],{group2}",
+        usage: `/groups set [${i18n.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n/groups add [${i18n.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n/groups remove [${i18n.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n/groups reset`,
         examples: [
             {
-                example: "`,groups blackpink`",
+                example: "`/groups set group_1:blackpink`",
                 explanation: i18n.translate(
                     guildID,
                     "command.groups.help.example.singleGroup",
@@ -65,7 +74,8 @@ export default class GroupsCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,groups blackpink, bts, red velvet`",
+                example:
+                    "`/groups set group_1:blackpink group_2:bts group_3:red velvet`",
                 explanation: i18n.translate(
                     guildID,
                     "command.groups.help.example.multipleGroups",
@@ -77,7 +87,7 @@ export default class GroupsCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,groups`",
+                example: "`/groups reset`",
                 explanation: i18n.translate(
                     guildID,
                     "command.groups.help.example.reset"
@@ -209,12 +219,8 @@ export default class GroupsCommand implements BaseCommand {
                                 groupsList: [...intersection]
                                     .filter((x) => !x.includes("+"))
                                     .join(", "),
-                                solutionStepOne: interaction
-                                    ? "`/exclude remove`"
-                                    : `\`${process.env.BOT_PREFIX}remove exclude\``,
-                                solutionStepTwo: interaction
-                                    ? "`/groups`"
-                                    : `\`${process.env.BOT_PREFIX}groups\``,
+                                solutionStepOne: "`/exclude remove`",
+                                solutionStepTwo: "`/groups`",
                                 allowOrPrevent: i18n.translate(
                                     messageContext.guildID,
                                     "misc.failure.groupsExcludeConflict.allow"
@@ -253,8 +259,8 @@ export default class GroupsCommand implements BaseCommand {
                     messageContext.guildID,
                     "misc.warning.addRemoveOrdering.footer",
                     {
-                        addOrRemove: `${process.env.BOT_PREFIX}${misplacedPrefix}`,
-                        command: "groups",
+                        command: "/groups",
+                        addOrRemove: misplacedPrefix,
                     }
                 );
             }
@@ -285,17 +291,13 @@ export default class GroupsCommand implements BaseCommand {
                         messageContext.guildID,
                         "misc.failure.unrecognizedGroups.added"
                     ),
-                    helpGroups: interaction
-                        ? "`/help groups`"
-                        : `\`${process.env.BOT_PREFIX}help groups\``,
+                    helpGroups: "`/help groups`",
                     unmatchedGroups: unmatchedGroups.join(", "),
                     solution: i18n.translate(
                         messageContext.guildID,
                         "misc.failure.unrecognizedGroups.solution",
                         {
-                            command: interaction
-                                ? "`/groups add`"
-                                : `\`${process.env.BOT_PREFIX}add groups\``,
+                            command: "`/groups add`",
                         }
                     ),
                 }

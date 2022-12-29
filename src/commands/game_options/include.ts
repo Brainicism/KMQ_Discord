@@ -59,10 +59,19 @@ export default class IncludeCommand implements BaseCommand {
                 groupList: GROUP_LIST_URL,
             }
         ),
-        usage: ",include [group1],{group2}",
+        usage: `/include set [${i18n.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n/include add [${i18n.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n/include remove [${i18n.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n/include reset`,
         examples: [
             {
-                example: "`,include blackpink`",
+                example: "`/include set group_1:blackpink`",
                 explanation: i18n.translate(
                     guildID,
                     "command.include.help.example.singleGroup",
@@ -70,7 +79,8 @@ export default class IncludeCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,include blackpink, bts, red velvet`",
+                example:
+                    "`/include set group_1:blackpink group_2:bts group_3:red velvet`",
                 explanation: i18n.translate(
                     guildID,
                     "command.include.help.example.multipleGroups",
@@ -82,7 +92,7 @@ export default class IncludeCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,include`",
+                example: "`/include reset`",
                 explanation: i18n.translate(
                     guildID,
                     "command.include.help.example.reset"
@@ -212,9 +222,7 @@ export default class IncludeCommand implements BaseCommand {
                         {
                             optionOne: "`groups`",
                             optionTwo: "`include`",
-                            optionOneCommand: interaction
-                                ? "`/groups`"
-                                : `\`${process.env.BOT_PREFIX}groups\``,
+                            optionOneCommand: "`/groups reset`",
                         }
                     ),
                 },
@@ -248,8 +256,8 @@ export default class IncludeCommand implements BaseCommand {
                     messageContext.guildID,
                     "misc.warning.addRemoveOrdering.footer",
                     {
-                        addOrRemove: `${process.env.BOT_PREFIX}${misplacedPrefix}`,
-                        command: "include",
+                        command: "/include",
+                        addOrRemove: misplacedPrefix,
                     }
                 );
             }
@@ -288,15 +296,13 @@ export default class IncludeCommand implements BaseCommand {
                         messageContext.guildID,
                         "command.include.failure.unrecognizedGroups.included"
                     ),
-                    helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
+                    helpGroups: "`/help groups`",
                     unmatchedGroups: unmatchedGroups.join(", "),
                     solution: i18n.translate(
                         messageContext.guildID,
                         "misc.failure.unrecognizedGroups.solution",
                         {
-                            command: interaction
-                                ? "`/include add`"
-                                : `\`${process.env.BOT_PREFIX}add include\``,
+                            command: "`/include add`",
                         }
                     ),
                 }

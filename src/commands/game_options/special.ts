@@ -49,59 +49,59 @@ export default class SpecialCommand implements BaseCommand {
             guildID,
             "command.special.help.description"
         ),
-        usage: ",special [reverse | slow | fast | faster | lowpitch | highpitch | nightcore]",
+        usage: "/special set\nspecial:[reverse | slow | fast | faster | lowpitch | highpitch | nightcore]\n\n/special reset",
         examples: [
             {
-                example: "`,special reverse`",
+                example: "`/special set special:reverse`",
                 explanation: i18n.translate(
                     guildID,
                     "command.special.help.example.reverse"
                 ),
             },
             {
-                example: "`,special slow`",
+                example: "`/special set special:slow`",
                 explanation: i18n.translate(
                     guildID,
                     "command.special.help.example.slow"
                 ),
             },
             {
-                example: "`,special fast`",
+                example: "`/special set special:fast`",
                 explanation: i18n.translate(
                     guildID,
                     "command.special.help.example.fast"
                 ),
             },
             {
-                example: "`,special faster`",
+                example: "`/special set special:faster`",
                 explanation: i18n.translate(
                     guildID,
                     "command.special.help.example.faster"
                 ),
             },
             {
-                example: "`,special lowpitch`",
+                example: "`/special set special:lowpitch`",
                 explanation: i18n.translate(
                     guildID,
                     "command.special.help.example.lowPitch"
                 ),
             },
             {
-                example: "`,special highpitch`",
+                example: "`/special set special:highpitch`",
                 explanation: i18n.translate(
                     guildID,
                     "command.special.help.example.highPitch"
                 ),
             },
             {
-                example: "`,special nightcore`",
+                example: "`/special set special:nightcore`",
                 explanation: i18n.translate(
                     guildID,
                     "command.special.help.example.nightcore"
                 ),
             },
             {
-                example: "`,special`",
+                example: "`/special reset`",
                 explanation: i18n.translate(
                     guildID,
                     "command.special.help.example.reset"

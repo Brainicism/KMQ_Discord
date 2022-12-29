@@ -42,31 +42,31 @@ export default class SeekCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "seek",
         description: i18n.translate(guildID, "command.seek.help.description"),
-        usage: ",seek [beginning | middle | random]",
+        usage: "/seek set\nseek:[beginning | middle | random]\n\n/seek reset",
         examples: [
             {
-                example: "`,seek random`",
+                example: "`/seek set seek:random`",
                 explanation: i18n.translate(
                     guildID,
                     "command.seek.help.example.random"
                 ),
             },
             {
-                example: "`,seek middle`",
+                example: "`/seek set seek:middle`",
                 explanation: i18n.translate(
                     guildID,
                     "command.seek.help.example.middle"
                 ),
             },
             {
-                example: "`,seek beginning`",
+                example: "`/seek set seek:beginning`",
                 explanation: i18n.translate(
                     guildID,
                     "command.seek.help.example.beginning"
                 ),
             },
             {
-                example: "`,seek`",
+                example: "`/seek reset`",
                 explanation: i18n.translate(
                     guildID,
                     "command.seek.help.example.reset",

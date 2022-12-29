@@ -344,10 +344,10 @@ export default class LookupCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "lookup",
         description: i18n.translate(guildID, "command.lookup.help.description"),
-        usage: ",lookup [song_name | youtube_id]",
+        usage: "/lookup song_name\nsong_name:[song]\nartist_name:[artist]\n\n/lookup song_link\nsong_link:{youtube_url}",
         examples: [
             {
-                example: "`,lookup love dive`",
+                example: "`/lookup song_name song_name:love dive`",
                 explanation: i18n.translate(
                     guildID,
                     "command.lookup.help.example.song",
@@ -356,7 +356,7 @@ export default class LookupCommand implements BaseCommand {
             },
             {
                 example:
-                    "`,lookup https://www.youtube.com/watch?v=4TWR90KJl84`",
+                    "`/lookup song_link song_link:https://www.youtube.com/watch?v=4TWR90KJl84`",
                 explanation: i18n.translate(
                     guildID,
                     "command.lookup.help.example.song",

@@ -22,7 +22,7 @@ export default class NewsCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "news",
         description: i18n.translate(guildID, "command.news.help.description"),
-        usage: ",news",
+        usage: "/news",
         examples: [],
         priority: 10,
     });

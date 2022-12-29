@@ -90,9 +90,9 @@
             "help": {
                 "description": "노래에 대한 연도 범위를 설정합니다. 하나의 값을 지정하면 해당 연도 이후의 노래만 재생됩니다. 두 개의 값을 지정하면 해당 값 사이의 노래만 재생됩니다.",
                 "example": {
-                    "reset": "연도 설정 기본값인 {{defaultBeginingSearchYear}} ~ {{defaultEndSearchYear}}(으)로 재설정합니다.",
+                    "reset": "연도 설정 기본값인 {{defaultBeginningSearchYear}} ~ {{defaultEndSearchYear}}(으)로 재설정합니다.",
                     "singleCutoff": "{{year}}년 후에 발매된 곡을 재생합니다.",
-                    "twoCutoffs": "{{beginingYear}} ~ {{endYear}}년 사이에 발매된 곡을 재생합니다."
+                    "twoCutoffs": "{{beginningYear}} ~ {{endingYear}}년 사이에 발매된 곡을 재생합니다."
                 },
                 "interaction": {
                     "beginningYear": "포함할 가장 빠른 연도",
@@ -286,7 +286,7 @@
             },
             "interaction": {
                 "description": "가장 많은 점수를 얻은 플레이어가 목표 점수에 도달하면 게임이 종료됩니다.",
-                "goal": "승리에 필요한 점수"
+                "score": "승리에 필요한 점수"
             }
         },
         "groups": {
@@ -781,9 +781,10 @@
                 }
             },
             "interaction": {
-                "teams_begin": "KMQ의 '팀' 게임 모드를 시작합니다. '/play teams create' 이후에만 사용할 수 있습니다.",
+                "teams_begin": "KMQ의 '팀' 게임 모드를 시작합니다. `/play teams create` 이후에만 사용할 수 있습니다.",
                 "teams_create": "팀 생성을 위해 KMQ의 '팀' 게임 모드를 준비합니다",
-                "teams_join": "팀에 합류. '/play teams create' 이후에만 사용할 수 있습니다."
+                "teams_join": "팀에 합류. `/play teams create` 이후에만 사용할 수 있습니다.",
+                "teams_join_team_name": "참여할 팀 이름"
             },
             "team": {
                 "joinTeam": {
@@ -822,7 +823,7 @@
                     },
                     "special": {
                         "description": "어디서든 노래 재생 속도를 변경하세요!",
-                        "title": "모든 서버에서 `,special`을 입력하세요!"
+                        "title": "모든 서버에서 `/special`을 입력하세요!"
                     }
                 },
                 "title": {
@@ -1510,7 +1511,7 @@
         "views": "조회수",
         "warning": {
             "addRemoveOrdering": {
-                "footer": "{{addOrRemove}} {{command}}을(를) 사용하시겠습니까?"
+                "footer": "{{command}} {{addOrRemove}}을(를) 사용하시겠습니까?"
             }
         },
         "yes": "예"

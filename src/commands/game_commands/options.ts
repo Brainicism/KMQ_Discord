@@ -24,7 +24,7 @@ export default class OptionsCommand implements BaseCommand {
             guildID,
             "command.options.help.description"
         ),
-        usage: ",options",
+        usage: "/options",
         examples: [],
         priority: 50,
     });

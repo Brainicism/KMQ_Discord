@@ -59,29 +59,33 @@ export default class AddCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "add",
         description: i18n.translate(guildID, "command.add.help.description", {
-            groups: `\`${process.env.BOT_PREFIX}groups\``,
-            exclude: `\`${process.env.BOT_PREFIX}exclude\``,
-            include: `\`${process.env.BOT_PREFIX}include\``,
+            groups: "`/groups`",
+            exclude: "`/exclude`",
+            include: "`/include`",
         }),
-        usage: `,add [groups | exclude | include] [${i18n.translate(
+        usage: `/groups add [${i18n.translate(
             guildID,
             "misc.listOfGroups"
-        )}]`,
+        )}]\n\n/include add [${i18n.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n/exclude add [${i18n.translate(guildID, "misc.listOfGroups")}]`,
         examples: [
             {
-                example: "`,add groups twice, red velvet`",
+                example: "`/groups add group_1:twice group_2:red velvet`",
                 explanation: i18n.translate(
                     guildID,
                     "command.add.help.example.groups",
                     {
                         groupOne: "Twice",
                         groupTwo: "Red Velvet",
-                        groups: `\`${process.env.BOT_PREFIX}groups\``,
+                        groups: "`/groups`",
                     }
                 ),
             },
             {
-                example: "`,add exclude BESTie, Dia, iKON`",
+                example:
+                    "`/exclude add group_1:BESTie group_2:Dia group_3:iKON`",
                 explanation: i18n.translate(
                     guildID,
                     "command.add.help.example.exclude",
@@ -89,18 +93,18 @@ export default class AddCommand implements BaseCommand {
                         groupOne: "BESTie",
                         groupTwo: "Dia",
                         groupThree: "IKON",
-                        exclude: `\`${process.env.BOT_PREFIX}exclude\``,
+                        exclude: "`/exclude`",
                     }
                 ),
             },
             {
-                example: "`,add include exo`",
+                example: "`/include add group_1:exo`",
                 explanation: i18n.translate(
                     guildID,
                     "command.add.help.example.include",
                     {
                         groupOne: "EXO",
-                        include: `\`${process.env.BOT_PREFIX}include\``,
+                        include: "`/include`",
                     }
                 ),
             },
@@ -213,9 +217,7 @@ export default class AddCommand implements BaseCommand {
                         messageContext.guildID,
                         "misc.failure.unrecognizedGroups.added"
                     ),
-                    helpGroups: interaction
-                        ? "`/help groups`"
-                        : `\`${process.env.BOT_PREFIX}help groups\``,
+                    helpGroups: "`/help groups`",
                     unmatchedGroups: unmatchedGroups.join(", "),
                     solution: "",
                 }
@@ -276,21 +278,13 @@ export default class AddCommand implements BaseCommand {
                             messageContext.guildID,
                             "misc.failure.groupsExcludeConflict.description",
                             {
-                                conflictingOptionOne: interaction
-                                    ? "`/groups`"
-                                    : `\`${process.env.BOT_PREFIX}groups\``,
-                                conflictingOptionTwo: interaction
-                                    ? "`/exclude`"
-                                    : `\`${process.env.BOT_PREFIX}exclude\``,
+                                conflictingOptionOne: "`/groups`",
+                                conflictingOptionTwo: "`/exclude`",
                                 groupsList: [...intersection]
                                     .filter((x) => !x.includes("+"))
                                     .join(", "),
-                                solutionStepOne: interaction
-                                    ? "`/exclude remove`"
-                                    : `\`${process.env.BOT_PREFIX}remove exclude\``,
-                                solutionStepTwo: interaction
-                                    ? "`/groups add`"
-                                    : `\`${process.env.BOT_PREFIX}add groups\``,
+                                solutionStepOne: "`/exclude remove`",
+                                solutionStepTwo: "`/groups add`",
                                 allowOrPrevent: i18n.translate(
                                     messageContext.guildID,
                                     "misc.failure.groupsExcludeConflict.allow"
@@ -343,9 +337,7 @@ export default class AddCommand implements BaseCommand {
                                 {
                                     optionOne: "`groups`",
                                     optionTwo: "`include`",
-                                    optionOneCommand: interaction
-                                        ? "`/groups`"
-                                        : `\`${process.env.BOT_PREFIX}groups\``,
+                                    optionOneCommand: "`/groups reset`",
                                 }
                             ),
                         },
@@ -380,21 +372,13 @@ export default class AddCommand implements BaseCommand {
                             messageContext.guildID,
                             "misc.failure.groupsExcludeConflict.description",
                             {
-                                conflictingOptionOne: interaction
-                                    ? "`/exclude`"
-                                    : `\`${process.env.BOT_PREFIX}exclude\``,
-                                conflictingOptionTwo: interaction
-                                    ? "`/groups`"
-                                    : `\`${process.env.BOT_PREFIX}groups\``,
+                                conflictingOptionOne: "`/exclude`",
+                                conflictingOptionTwo: "`/groups`",
                                 groupsList: [...intersection]
                                     .filter((x) => !x.includes("+"))
                                     .join(", "),
-                                solutionStepOne: interaction
-                                    ? "`/groups remove`"
-                                    : `\`${process.env.BOT_PREFIX}remove groups\``,
-                                solutionStepTwo: interaction
-                                    ? "`/exclude add`"
-                                    : `\`${process.env.BOT_PREFIX}add exclude\``,
+                                solutionStepOne: "`/groups remove`",
+                                solutionStepTwo: "`/exclude add`",
                                 allowOrPrevent: i18n.translate(
                                     messageContext.guildID,
                                     "misc.failure.groupsExcludeConflict.prevent"

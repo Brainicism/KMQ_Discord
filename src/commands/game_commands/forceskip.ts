@@ -33,7 +33,7 @@ export default class ForceSkipCommand implements BaseCommand {
             guildID,
             "command.forceskip.help.description"
         ),
-        usage: ",forceskip",
+        usage: "/forceskip",
         examples: [],
         priority: 1009,
     });

@@ -46,17 +46,17 @@ export default class SubunitsCommand implements BaseCommand {
         description: i18n.translate(
             guildID,
             "command.subunits.help.description",
-            { groups: `\`${process.env.BOT_PREFIX}groups\`` }
+            { groups: "`/groups`" }
         ),
-        usage: ",subunits [include | exclude]",
+        usage: "/subunits set\nsubunits:[include | exclude]\n\n/subunits reset",
         examples: [
             {
-                example: "`,subunits include`",
+                example: "`/subunits set subunits:include`",
                 explanation: i18n.translate(
                     guildID,
                     "command.subunits.help.example.include",
                     {
-                        groupCommand: `${process.env.BOT_PREFIX}groups`,
+                        groupCommand: "/groups",
                         parentGroup: "BTS",
                         subunitOne: "J-Hope",
                         subunitTwo: "RM",
@@ -64,14 +64,14 @@ export default class SubunitsCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,subunits exclude`",
+                example: "`/subunits set subunits:exclude`",
                 explanation: i18n.translate(
                     guildID,
                     "command.subunits.help.example.exclude"
                 ),
             },
             {
-                example: "`,subunits`",
+                example: "`/subunits reset`",
                 explanation: i18n.translate(
                     guildID,
                     "command.subunits.help.example.reset",
@@ -86,6 +86,12 @@ export default class SubunitsCommand implements BaseCommand {
         DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
     > => [
         {
+            name: "subunits",
+            description: i18n.translate(
+                LocaleType.EN,
+                "command.subunits.help.description",
+                { groups: "`/groups`" }
+            ),
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
@@ -94,7 +100,7 @@ export default class SubunitsCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.subunits.help.description",
                         {
-                            groups: `\`${process.env.BOT_PREFIX}groups\``,
+                            groups: "`/groups`",
                         }
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes

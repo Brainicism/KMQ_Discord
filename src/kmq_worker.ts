@@ -245,11 +245,9 @@ export default class BotWorker extends BaseClusterWorker {
         logger.info("Registering process event handlers...");
         this.registerProcessEvents();
 
-        if (process.env.NODE_ENV === EnvType.PROD) {
-            logger.info("Initializing Spotify manager...");
-            State.spotifyManager = new SpotifyManager();
-            State.spotifyManager.start();
-        }
+        logger.info("Initializing Spotify manager...");
+        State.spotifyManager = new SpotifyManager();
+        State.spotifyManager.start();
 
         if (
             [EnvType.CI, EnvType.DRY_RUN].includes(

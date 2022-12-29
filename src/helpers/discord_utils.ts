@@ -118,7 +118,7 @@ function missingPermissionsText(
     return i18n.translate(guildID, "misc.failure.missingPermissionsText", {
         missingPermissions: missingPermissions.join(", "),
         permissionsLink: PERMISSIONS_LINK,
-        helpCommand: `\`${process.env.BOT_PREFIX}help\``,
+        helpCommand: "`/help`",
     });
 }
 
@@ -709,7 +709,7 @@ export async function generateOptionsMessage(
             description: i18n.translate(
                 guildID,
                 "misc.failure.retrievingSongData.description",
-                { helpCommand: `\`${process.env.BOT_PREFIX}help\`` }
+                { helpCommand: "`/help`" }
             ),
         });
         return null;
@@ -775,9 +775,9 @@ export async function generateOptionsMessage(
         commandValue: string,
         conflictingOption: string
     ): string =>
-        `${strikethrough(commandValue)} (\`${
-            process.env.BOT_PREFIX
-        }${conflictingOption}\` ${italicize(conflictString)})`;
+        `${strikethrough(commandValue)} (\`/${conflictingOption}\` ${italicize(
+            conflictString
+        )})`;
 
     const isEliminationMode =
         session?.isGameSession() && session.gameType === GameType.ELIMINATION;
@@ -903,7 +903,7 @@ export async function generateOptionsMessage(
     )
         .map(
             (option) =>
-                `${bold(process.env.BOT_PREFIX + GameOptionCommand[option])}: ${
+                `${bold(`/${GameOptionCommand[option]}`)}: ${
                     optionStrings[option]
                 }`
         )
@@ -940,9 +940,9 @@ export async function generateOptionsMessage(
                 .slice(0, Math.ceil(fieldOptions.length / 3))
                 .map(
                     (option) =>
-                        `${bold(
-                            process.env.BOT_PREFIX + GameOptionCommand[option]
-                        )}: ${optionStrings[option]}`
+                        `${bold(`/${GameOptionCommand[option]}`)}: ${
+                            optionStrings[option]
+                        }`
                 )
                 .join("\n"),
             inline: true,
@@ -956,9 +956,9 @@ export async function generateOptionsMessage(
                 )
                 .map(
                     (option) =>
-                        `${bold(
-                            process.env.BOT_PREFIX + GameOptionCommand[option]
-                        )}: ${optionStrings[option]}`
+                        `${bold(`/${GameOptionCommand[option]}`)}: ${
+                            optionStrings[option]
+                        }`
                 )
                 .join("\n"),
             inline: true,
@@ -969,9 +969,9 @@ export async function generateOptionsMessage(
                 .slice(Math.ceil((2 * fieldOptions.length) / 3))
                 .map(
                     (option) =>
-                        `${bold(
-                            process.env.BOT_PREFIX + GameOptionCommand[option]
-                        )}: ${optionStrings[option]}`
+                        `${bold(`/${GameOptionCommand[option]}`)}: ${
+                            optionStrings[option]
+                        }`
                 )
                 .join("\n"),
             inline: true,
@@ -987,7 +987,7 @@ export async function generateOptionsMessage(
         footerText = i18n.translate(
             messageContext.guildID,
             "command.options.perCommandHelp",
-            { helpCommand: `${process.env.BOT_PREFIX}help` }
+            { helpCommand: "/help" }
         );
     } else if (session?.isListeningSession()) {
         footerText = i18n.translate(

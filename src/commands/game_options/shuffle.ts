@@ -59,17 +59,17 @@ export default class ShuffleCommand implements BaseCommand {
                 random: `\`${ShuffleType.RANDOM}\``,
             }
         ),
-        usage: ",shuffle [random | popularity]",
+        usage: "/shuffle set\nshuffle:[random | popularity | weighted_easy | weighted_hard]\n\n/shuffle reset",
         examples: [
             {
-                example: "`,shuffle random`",
+                example: "`/shuffle set shuffle:random`",
                 explanation: i18n.translate(
                     guildID,
                     "command.shuffle.help.example.random"
                 ),
             },
             {
-                example: "`,shuffle popularity`",
+                example: "`/shuffle set shuffle:popularity`",
                 explanation: i18n.translate(
                     guildID,
                     "command.shuffle.help.example.popularity",
@@ -83,7 +83,7 @@ export default class ShuffleCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,shuffle`",
+                example: "`/shuffle reset`",
                 explanation: i18n.translate(
                     guildID,
                     "command.shuffle.help.example.reset",

@@ -62,13 +62,19 @@ export default class DurationCommand implements BaseCommand {
             guildID,
             "command.duration.help.description"
         ),
-        usage: `,duration [${i18n.translate(
+        usage: `/duration set\nduration:[${i18n.translate(
             guildID,
             "command.duration.help.usage.minutes"
-        )}]`,
+        )}]\n\n/duration add\nduration:[${i18n.translate(
+            guildID,
+            "command.duration.help.usage.minutes"
+        )}]\n\n/duration remove\nduration:[${i18n.translate(
+            guildID,
+            "command.duration.help.usage.minutes"
+        )}]\n\n/duration reset`,
         examples: [
             {
-                example: "`,duration 15`",
+                example: "`/duration set duration:15`",
                 explanation: i18n.translate(
                     guildID,
                     "command.duration.help.example.set",
@@ -78,7 +84,7 @@ export default class DurationCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,duration 5 add`",
+                example: "`/duration add duration:5`",
                 explanation: i18n.translate(
                     guildID,
                     "command.duration.help.example.increment",
@@ -88,7 +94,7 @@ export default class DurationCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,duration 5 remove`",
+                example: "`/duration remove duration:5`",
                 explanation: i18n.translate(
                     guildID,
                     "command.duration.help.example.decrement",
@@ -98,7 +104,7 @@ export default class DurationCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,duration`",
+                example: "`/duration reset`",
                 explanation: i18n.translate(
                     guildID,
                     "command.duration.help.example.reset"

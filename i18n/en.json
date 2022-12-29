@@ -92,7 +92,7 @@
                 "example": {
                     "reset": "Reset to the default cutoff of {{defaultBeginningSearchYear}} to {{defaultEndSearchYear}}",
                     "singleCutoff": "Play songs released after the year {{year}}",
-                    "twoCutoffs": "Play songs released between the years {{beginningYear}}-{{endYear}}"
+                    "twoCutoffs": "Play songs released between the years {{beginningYear}}-{{endingYear}}"
                 },
                 "interaction": {
                     "beginningYear": "The earliest year to include",
@@ -286,7 +286,7 @@
             },
             "interaction": {
                 "description": "Once the player with the most points reaches the goal score, the game ends.",
-                "goal": "The number of points needed to win"
+                "score": "The number of points needed to win"
             }
         },
         "groups": {
@@ -781,9 +781,10 @@
                 }
             },
             "interaction": {
-                "teams_begin": "Starts a 'teams' game mode of KMQ. Can only be used after '/play teams create'",
+                "teams_begin": "Starts a 'teams' game mode of KMQ. Can only be used after `/play teams create`",
                 "teams_create": "Prepares a 'teams' game mode of KMQ for team creation.",
-                "teams_join": "Joins a team. Can only be used after '/play teams create'"
+                "teams_join": "Joins a team. Can only be used after `/play teams create`",
+                "teams_join_team_name": "The name of the team to join"
             },
             "team": {
                 "joinTeam": {
@@ -822,7 +823,7 @@
                     },
                     "special": {
                         "description": "Change song playback speed anywhere you play!",
-                        "title": "`,special` in every server!"
+                        "title": "`/special` in every server!"
                     }
                 },
                 "title": {
@@ -1510,7 +1511,7 @@
         "views": "views",
         "warning": {
             "addRemoveOrdering": {
-                "footer": "Did you mean to use {{addOrRemove}} {{command}}?"
+                "footer": "Did you mean to use {{command}} {{addOrRemove}}?"
             }
         },
         "yes": "Yes"

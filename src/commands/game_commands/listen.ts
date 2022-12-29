@@ -105,11 +105,11 @@ export default class ListenCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "listen",
         description: i18n.translate(guildID, "command.listen.help.description"),
-        usage: ",listen",
+        usage: "/listen",
         priority: 1040,
         examples: [
             {
-                example: "`,listen`",
+                example: "`/listen`",
                 explanation: i18n.translate(
                     guildID,
                     "command.listen.help.example"
@@ -171,7 +171,7 @@ export default class ListenCommand implements BaseCommand {
                     description: i18n.translate(
                         messageContext.guildID,
                         "misc.failure.notInVC.description",
-                        { command: `\`${process.env.BOT_PREFIX}listen\`` }
+                        { command: "`/listen`" }
                     ),
                 },
                 interaction

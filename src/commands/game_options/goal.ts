@@ -44,13 +44,13 @@ export default class GoalCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "goal",
         description: i18n.translate(guildID, "command.goal.help.description"),
-        usage: `,goal [${i18n.translate(
+        usage: `/goal set\nscore:[${i18n.translate(
             guildID,
             "command.goal.help.usage.points"
-        )}]`,
+        )}]\n\n/goal reset`,
         examples: [
             {
-                example: "`,goal 30`",
+                example: "`/goal set score:30`",
                 explanation: i18n.translate(
                     guildID,
                     "command.goal.help.example.set",
@@ -58,7 +58,7 @@ export default class GoalCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,goal`",
+                example: "`/goal reset`",
                 explanation: i18n.translate(
                     guildID,
                     "command.goal.help.example.reset"
@@ -84,10 +84,10 @@ export default class GoalCommand implements BaseCommand {
                         .SUB_COMMAND,
                     options: [
                         {
-                            name: "goal",
+                            name: "score",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.goal.interaction.goal"
+                                "command.goal.interaction.score"
                             ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .INTEGER,
@@ -246,7 +246,7 @@ export default class GoalCommand implements BaseCommand {
         if (action === OptionAction.RESET) {
             goalValue = null;
         } else if (action === OptionAction.SET) {
-            goalValue = interactionOptions["goal"] as number;
+            goalValue = interactionOptions["score"] as number;
         } else {
             logger.error(`Unexpected interaction name: ${interactionName}`);
             goalValue = null;

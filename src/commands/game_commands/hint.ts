@@ -247,7 +247,7 @@ export default class HintCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "hint",
         description: i18n.translate(guildID, "command.hint.help.description"),
-        usage: ",hint",
+        usage: "/hint",
         examples: [],
         priority: 1020,
     });

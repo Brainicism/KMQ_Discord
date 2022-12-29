@@ -59,44 +59,44 @@ export default class GenderCommand implements BaseCommand {
                 male: `\`${Gender.MALE}\``,
                 female: `\`${Gender.FEMALE}\``,
                 coed: `\`${Gender.COED}\``,
-                genderAlternating: `\`${process.env.BOT_PREFIX}gender alternating\``,
+                genderAlternating: "`/gender alternating`",
             }
         ),
-        usage: ",gender [gender_1 | alternating] {gender_2} {gender_3}",
+        usage: "/gender set\ngender_1:[gender]\ngender_2:{gender}\ngender_3:{gender}\n\n/gender reset",
         examples: [
             {
-                example: "`,gender female`",
+                example: "`/gender set female`",
                 explanation: i18n.translate(
                     guildID,
                     "command.gender.help.example.female"
                 ),
             },
             {
-                example: "`,gender male female`",
+                example: "`/gender set gender_1:male gender_2:female`",
                 explanation: i18n.translate(
                     guildID,
                     "command.gender.help.example.maleFemale"
                 ),
             },
             {
-                example: "`,gender coed`",
+                example: "`/gender set gender_1:coed`",
                 explanation: i18n.translate(
                     guildID,
                     "command.gender.help.example.coed"
                 ),
             },
             {
-                example: "`,gender`",
-                explanation: i18n.translate(
-                    guildID,
-                    "command.gender.help.example.reset"
-                ),
-            },
-            {
-                example: "`,gender alternating`",
+                example: "`/gender set gender_1:alternating`",
                 explanation: i18n.translate(
                     guildID,
                     "command.gender.help.example.alternating"
+                ),
+            },
+            {
+                example: "`/gender reset`",
+                explanation: i18n.translate(
+                    guildID,
+                    "command.gender.help.example.reset"
                 ),
             },
         ],
@@ -125,10 +125,15 @@ export default class GenderCommand implements BaseCommand {
                         ),
                         type: Eris.Constants.ApplicationCommandOptionTypes
                             .STRING,
-                        choices: Object.values(Gender).map((gender) => ({
-                            name: gender,
-                            value: gender,
-                        })),
+                        choices: Object.values(Gender)
+                            .filter(
+                                (gender) =>
+                                    x === 0 || gender !== Gender.ALTERNATING
+                            )
+                            .map((gender) => ({
+                                name: gender,
+                                value: gender,
+                            })),
                         required: x === 0,
                     })),
                 },
@@ -211,7 +216,7 @@ export default class GenderCommand implements BaseCommand {
                             {
                                 optionOne: "`groups`",
                                 optionTwo: "`gender`",
-                                optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
+                                optionOneCommand: "`/groups reset`",
                             }
                         ),
                     },
@@ -237,7 +242,8 @@ export default class GenderCommand implements BaseCommand {
                             messageContext.guildID,
                             "command.gender.warning.gameOption.description",
                             {
-                                alternatingGenderCommand: `\`${process.env.BOT_PREFIX}gender alternating\``,
+                                alternatingGenderCommand:
+                                    "`/gender alternating`",
                             }
                         ),
                     },

@@ -50,30 +50,30 @@ export default class ListCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "list",
         description: i18n.translate(guildID, "command.list.help.description"),
-        usage: ",list [groups | exclude | include]",
+        usage: "/list type:[groups | exclude | include]",
         examples: [
             {
-                example: "`,list groups`",
+                example: "`/list type:groups`",
                 explanation: i18n.translate(
                     guildID,
                     "command.list.help.example.groups",
-                    { groups: `\`${process.env.BOT_PREFIX}groups\`` }
+                    { groups: "`/groups`" }
                 ),
             },
             {
-                example: "`,list exclude`",
+                example: "`/list type:exclude`",
                 explanation: i18n.translate(
                     guildID,
                     "command.list.help.example.exclude",
-                    { exclude: `\`${process.env.BOT_PREFIX}exclude\`` }
+                    { exclude: "`/exclude`" }
                 ),
             },
             {
-                example: "`,list include`",
+                example: "`/list type:include`",
                 explanation: i18n.translate(
                     guildID,
                     "command.list.help.example.include",
-                    { include: `\`${process.env.BOT_PREFIX}include\`` }
+                    { include: "`/include`" }
                 ),
             },
         ],

@@ -101,7 +101,7 @@ export async function sendBeginGameSessionMessage(
         gameInstructions += i18n.translate(
             guildID,
             "command.play.exp.howToVote",
-            { vote: `\`${process.env.BOT_PREFIX}vote\`` }
+            { vote: "`/vote`" }
         );
     }
 
@@ -154,7 +154,7 @@ export async function sendBeginGameSessionMessage(
             messageContext.guildID,
             "command.play.voteReminder",
             {
-                vote: `${process.env.BOT_PREFIX}vote`,
+                vote: "/vote",
             }
         );
     }
@@ -188,21 +188,21 @@ export default class PlayCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "play",
         description: i18n.translate(guildID, "command.play.help.description"),
-        usage: `,play {classic | elimination | teams}\n,play elimination {${i18n.translate(
+        usage: `/play classic\n\n,play elimination\nlives:{${i18n.translate(
             guildID,
             "command.play.help.usage.lives"
-        )}}`,
+        )}}\n\n/play teams create\n\n/play teams join`,
         priority: 1050,
         examples: [
             {
-                example: "`,play`",
+                example: "`/play classic`",
                 explanation: i18n.translate(
                     guildID,
                     "command.play.help.example.classic"
                 ),
             },
             {
-                example: "`,play elimination 5`",
+                example: "`/play elimination lives:5`",
                 explanation: i18n.translate(
                     guildID,
                     "command.play.help.example.elimination",
@@ -212,7 +212,7 @@ export default class PlayCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,play elimination`",
+                example: "`/play elimination`",
                 explanation: i18n.translate(
                     guildID,
                     "command.play.help.example.elimination",
@@ -222,7 +222,7 @@ export default class PlayCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,play teams`",
+                example: "`/play teams create`",
                 explanation: i18n.translate(
                     guildID,
                     "command.play.help.example.teams"
@@ -310,7 +310,7 @@ export default class PlayCommand implements BaseCommand {
                                     name: "team_name",
                                     description: i18n.translate(
                                         LocaleType.EN,
-                                        "command.play.interaction.teams_join"
+                                        "command.play.interaction.teams_join_team_name"
                                     ),
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.STRING,
@@ -400,7 +400,7 @@ export default class PlayCommand implements BaseCommand {
                     description: i18n.translate(
                         messageContext.guildID,
                         "command.begin.ignored.noTeam.description",
-                        { join: `${process.env.BOT_PREFIX}join` }
+                        { join: "/play teams join" }
                     ),
                 },
                 interaction
@@ -581,7 +581,7 @@ export default class PlayCommand implements BaseCommand {
                         {
                             teamName: bold(teamName),
                             mentionedUser: getMention(messageContext.author.id),
-                            joinCommand: `${process.env.BOT_PREFIX}join`,
+                            joinCommand: "/play teams join",
                             teamNameWithCleanEmojis,
                             startGameInstructions:
                                 !gameSession.sessionInitialized
@@ -589,7 +589,8 @@ export default class PlayCommand implements BaseCommand {
                                           messageContext.guildID,
                                           "command.join.team.startGameInstructions",
                                           {
-                                              beginCommand: `\`${process.env.BOT_PREFIX}begin\``,
+                                              beginCommand:
+                                                  "`/play teams begin`",
                                           }
                                       )
                                     : "",
@@ -661,7 +662,7 @@ export default class PlayCommand implements BaseCommand {
                               messageContext.guildID,
                               "command.join.playerJoinedTeam.beforeGameStart.description",
                               {
-                                  beginCommand: `\`${process.env.BOT_PREFIX}begin\``,
+                                  beginCommand: "`/play teams begin`",
                               }
                           )
                         : i18n.translate(
@@ -709,7 +710,7 @@ export default class PlayCommand implements BaseCommand {
             const description = i18n.translate(
                 guildID,
                 "misc.failure.notInVC.description",
-                { command: `\`${process.env.BOT_PREFIX}play\`` }
+                { command: "`/play`" }
             );
 
             await sendErrorMessage(
@@ -785,8 +786,6 @@ export default class PlayCommand implements BaseCommand {
             }
         }
 
-        const prefix = process.env.BOT_PREFIX;
-
         // (1) No game session exists yet (create ELIMINATION, TEAMS, CLASSIC, or COMPETITION game), or
         // (2) User attempting to ,play after a ,play teams that didn't start, start CLASSIC game
         const textChannel = await fetchChannel(messageContext.textChannelID);
@@ -802,14 +801,14 @@ export default class PlayCommand implements BaseCommand {
                 guildID,
                 "command.play.team.joinTeam.title",
                 {
-                    join: `\`${prefix}join\``,
+                    join: "`/play teams join`",
                 }
             );
 
             const gameInstructions = i18n.translate(
                 guildID,
                 "command.play.team.joinTeam.description",
-                { join: `${prefix}join` }
+                { join: "/play teams join" }
             );
 
             gameSession = new GameSession(
@@ -849,14 +848,14 @@ export default class PlayCommand implements BaseCommand {
                 const ignoringOldGameTypeTitle = i18n.translate(
                     guildID,
                     "command.play.failure.overrideTeams.title",
-                    { playOldGameType: `\`${prefix}play ${oldGameType}\`` }
+                    { playOldGameType: `\`/play ${oldGameType}\`` }
                 );
 
                 const gameSpecificInstructions = i18n.translate(
                     guildID,
                     "command.play.failure.overrideTeams.teams.join",
                     {
-                        join: `${prefix}join`,
+                        join: "/play teams join",
                     }
                 );
 
@@ -865,10 +864,10 @@ export default class PlayCommand implements BaseCommand {
                     "command.play.failure.overrideTeams.description",
                     {
                         oldGameType: `\`${oldGameType}\``,
-                        end: `\`${prefix}end\``,
-                        playOldGameType: `\`${prefix}play ${oldGameType}\``,
+                        end: "`/end`",
+                        playOldGameType: `\`/play ${oldGameType}\``,
                         gameSpecificInstructions,
-                        begin: `\`${prefix}begin\``,
+                        begin: "`/begin`",
                     }
                 );
 

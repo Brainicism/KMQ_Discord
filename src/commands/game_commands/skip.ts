@@ -139,7 +139,7 @@ export default class SkipCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "skip",
         description: i18n.translate(guildID, "command.skip.help.description"),
-        usage: ",skip",
+        usage: "/skip",
         examples: [],
         priority: 1010,
     });

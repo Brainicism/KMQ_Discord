@@ -57,13 +57,13 @@ export default class LocaleTypeCommand implements BaseCommand {
                 korean: `\`${LocaleArgument.KOREAN}\``,
             }
         ),
-        usage: `,locale [${i18n.translate(
+        usage: `/locale language:[${i18n.translate(
             guildID,
             "command.locale.help.usage.language"
         )}]`,
         examples: [
             {
-                example: "`,locale english`",
+                example: "`/locale language:English`",
                 explanation: i18n.translate(
                     guildID,
                     "command.locale.help.example.toEnglish",
@@ -76,7 +76,7 @@ export default class LocaleTypeCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,locale korean`",
+                example: "`/locale language:Korean`",
                 explanation: i18n.translate(
                     guildID,
                     "command.locale.help.example.toKorean",
@@ -84,19 +84,6 @@ export default class LocaleTypeCommand implements BaseCommand {
                         korean: i18n.translate(
                             guildID,
                             "command.locale.language.ko"
-                        ),
-                    }
-                ),
-            },
-            {
-                example: "`,locale`",
-                explanation: i18n.translate(
-                    guildID,
-                    "command.locale.help.example.reset",
-                    {
-                        defaultLocale: i18n.translate(
-                            guildID,
-                            `command.locale.language.${DEFAULT_LOCALE}`
                         ),
                     }
                 ),

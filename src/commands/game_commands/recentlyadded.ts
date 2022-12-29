@@ -41,10 +41,10 @@ export default class RecentlyAddedCommand implements BaseCommand {
             guildID,
             "command.recentlyadded.help.description"
         ),
-        usage: ",recentlyadded",
+        usage: "/recentlyadded",
         examples: [
             {
-                example: "`,recentlyadded`",
+                example: "`/recentlyadded`",
                 explanation: i18n.translate(
                     guildID,
                     "command.recentlyadded.help.example"

@@ -57,10 +57,19 @@ export default class ExcludeCommand implements BaseCommand {
                 groupList: GROUP_LIST_URL,
             }
         ),
-        usage: ",exclude [group1],{group2}",
+        usage: `/exclude set [${i18n.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n/exclude add [${i18n.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n/exclude remove [${i18n.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n/exclude reset`,
         examples: [
             {
-                example: "`,exclude blackpink`",
+                example: "`/exclude set group_1:blackpink`",
                 explanation: i18n.translate(
                     guildID,
                     "command.exclude.help.example.singleGroup",
@@ -70,7 +79,8 @@ export default class ExcludeCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,exclude blackpink, bts, red velvet`",
+                example:
+                    "`/exclude set group_1:blackpink group_2:bts group_3:red velvet`",
                 explanation: i18n.translate(
                     guildID,
                     "command.exclude.help.example.multipleGroups",
@@ -82,7 +92,7 @@ export default class ExcludeCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,exclude`",
+                example: "`/exclude reset`",
                 explanation: i18n.translate(
                     guildID,
                     "command.exclude.help.example.reset"
@@ -272,12 +282,8 @@ export default class ExcludeCommand implements BaseCommand {
                                 groupsList: [...intersection]
                                     .filter((x) => !x.includes("+"))
                                     .join(", "),
-                                solutionStepOne: interaction
-                                    ? "`/groups remove`"
-                                    : `\`${process.env.BOT_PREFIX}remove groups\``,
-                                solutionStepTwo: interaction
-                                    ? "`/exclude`"
-                                    : `\`${process.env.BOT_PREFIX}exclude\``,
+                                solutionStepOne: "`/groups remove`",
+                                solutionStepTwo: "`/exclude`",
                                 allowOrPrevent: i18n.translate(
                                     messageContext.guildID,
                                     "misc.failure.groupsExcludeConflict.prevent"
@@ -316,8 +322,8 @@ export default class ExcludeCommand implements BaseCommand {
                     messageContext.guildID,
                     "misc.warning.addRemoveOrdering.footer",
                     {
-                        addOrRemove: `${process.env.BOT_PREFIX}${misplacedPrefix}`,
-                        command: "exclude",
+                        command: "/exclude",
+                        addOrRemove: misplacedPrefix,
                     }
                 );
             }
@@ -356,17 +362,13 @@ export default class ExcludeCommand implements BaseCommand {
                         messageContext.guildID,
                         "command.exclude.failure.unrecognizedGroups.excluded"
                     ),
-                    helpGroups: interaction
-                        ? "`/help groups`"
-                        : `\`${process.env.BOT_PREFIX}help groups\``,
+                    helpGroups: "`/help groups`",
                     unmatchedGroups: `${unmatchedGroups.join(", ")}`,
                     solution: i18n.translate(
                         messageContext.guildID,
                         "misc.failure.unrecognizedGroups.solution",
                         {
-                            command: interaction
-                                ? "`/exclude add`"
-                                : `\`${process.env.BOT_PREFIX}add exclude\``,
+                            command: "`/exclude add`",
                         }
                     ),
                 }

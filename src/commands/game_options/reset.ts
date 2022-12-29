@@ -30,10 +30,10 @@ export default class ResetCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "reset",
         description: i18n.translate(guildID, "command.reset.help.description"),
-        usage: ",reset",
+        usage: "/reset",
         examples: [
             {
-                example: "`,reset`",
+                example: "`/reset`",
                 explanation: i18n.translate(
                     guildID,
                     "command.reset.help.example.reset"

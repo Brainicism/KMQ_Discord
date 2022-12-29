@@ -45,13 +45,13 @@ export default class GuessTimeoutCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "timer",
         description: i18n.translate(guildID, "command.timer.help.description"),
-        usage: `,timer [${i18n.translate(
+        usage: `/timer set\ntimer:[${i18n.translate(
             guildID,
             "command.timer.help.usage.seconds"
-        )}]`,
+        )}]\n\n/timer reset`,
         examples: [
             {
-                example: "`,timer 15`",
+                example: "`/timer set timer:15`",
                 explanation: i18n.translate(
                     guildID,
                     "command.timer.help.example.set",
@@ -59,7 +59,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,timer`",
+                example: "`/timer reset`",
                 explanation: i18n.translate(
                     guildID,
                     "command.timer.help.example.reset"

@@ -24,7 +24,7 @@ export default class PremiumCommand implements BaseCommand {
         ),
         examples: [
             {
-                example: "`,premium`",
+                example: "`/premium`",
                 explanation: i18n.translate(
                     guildID,
                     "command.premium.help.example"
@@ -33,7 +33,7 @@ export default class PremiumCommand implements BaseCommand {
         ],
         name: "premium",
         priority: 50,
-        usage: ",premium",
+        usage: "/premium",
     });
 
     slashCommands = (): Array<

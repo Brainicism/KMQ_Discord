@@ -59,65 +59,64 @@ export default class LeaderboardCommand implements BaseCommand {
             guildID,
             "command.leaderboard.help.description"
         ),
-        usage: `,leaderboard {${i18n.translate(
+        usage: `/leaderboard show\ntype:{gamesplayed | songsguessed | exp}\nscope:{server | game | global}\nduration:{daily | weekly | monthly | yearly}\npage:{${i18n.translate(
             guildID,
             "command.leaderboard.help.usage.pageNumber"
-        )}}\n,leaderboard {gamesplayed | songsguessed} {server | game} {daily | weekly | monthly | yearly} {${i18n.translate(
-            guildID,
-            "command.leaderboard.help.usage.pageNumber"
-        )}}\n,leaderboard [enroll | unenroll]`,
+        )}}\n\n/leaderboard enroll\n\n/leaderboard unenroll`,
         examples: [
             {
-                example: "`,leaderboard`",
+                example: "`/leaderboard show`",
                 explanation: i18n.translate(
                     guildID,
                     "command.leaderboard.help.example.global"
                 ),
             },
             {
-                example: "`,leaderboard 3`",
+                example: "`/leaderboard show page:3`",
                 explanation: i18n.translate(
                     guildID,
                     "command.leaderboard.help.example.globalPage"
                 ),
             },
             {
-                example: "`,leaderboard game monthly 2`",
+                example:
+                    "`/leaderboard show scope:game duration:monthly page:2`",
                 explanation: i18n.translate(
                     guildID,
                     "command.leaderboard.help.example.gameMonthlyPage"
                 ),
             },
             {
-                example: "`,leaderboard songsguessed server 3`",
+                example:
+                    "`/leaderboard show type:songsguessed scope:server page:3`",
                 explanation: i18n.translate(
                     guildID,
                     "command.leaderboard.help.example.serverSongsGuessedPage"
                 ),
             },
             {
-                example: "`,leaderboard enroll`",
+                example: "`/leaderboard enroll`",
                 explanation: i18n.translate(
                     guildID,
                     "command.leaderboard.help.example.enroll"
                 ),
             },
             {
-                example: "`,leaderboard unenroll`",
+                example: "`/leaderboard unenroll`",
                 explanation: i18n.translate(
                     guildID,
                     "command.leaderboard.help.example.unenroll"
                 ),
             },
             {
-                example: "`,leaderboard server`",
+                example: "`/leaderboard scope:server`",
                 explanation: i18n.translate(
                     guildID,
                     "command.leaderboard.help.example.server"
                 ),
             },
             {
-                example: "`,leaderboard weekly 4`",
+                example: "`/leaderboard duration:weekly page:4`",
                 explanation: i18n.translate(
                     guildID,
                     "command.leaderboard.help.example.globalWeeklyPage"
@@ -857,7 +856,7 @@ export default class LeaderboardCommand implements BaseCommand {
                                     messageContext.guildID,
                                     chooseRandom(leaderboardQuotes),
                                     {
-                                        command: `${process.env.BOT_PREFIX}help leaderboard`,
+                                        command: "/help leaderboard",
                                     }
                                 ),
                             },

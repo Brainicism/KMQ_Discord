@@ -53,17 +53,17 @@ export default class AnswerCommand implements BaseCommand {
                 hard: `\`${AnswerType.MULTIPLE_CHOICE_HARD}\``,
             }
         ),
-        usage: ",answer [typing | typingtypos | easy | medium | hard]",
+        usage: "/answer set\nanswer:[typing | typingtypos | easy | medium | hard]\n\n/answer reset",
         examples: [
             {
-                example: "`,answer typing`",
+                example: "`/answer set answer:typing`",
                 explanation: i18n.translate(
                     guildID,
                     "command.answer.help.example.typing"
                 ),
             },
             {
-                example: "`,answer typingtypos`",
+                example: "`/answer set answer:typingtypos`",
                 explanation: i18n.translate(
                     guildID,
                     "command.answer.help.example.typingTypos",
@@ -75,7 +75,7 @@ export default class AnswerCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,answer easy`",
+                example: "`/answer set answer:easy`",
                 explanation: i18n.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",
@@ -90,7 +90,7 @@ export default class AnswerCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,answer medium`",
+                example: "`/answer set answer:medium`",
                 explanation: i18n.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",
@@ -105,7 +105,7 @@ export default class AnswerCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,answer hard`",
+                example: "`/answer set answer:hard`",
                 explanation: i18n.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",

@@ -252,20 +252,20 @@ export default class ProfileCommand implements BaseCommand {
             guildID,
             "command.profile.help.description"
         ),
-        usage: `,profile { @${i18n.translate(
+        usage: `/profile user_mention:{@${i18n.translate(
             guildID,
             "command.profile.help.usage.mention"
-        )} }`,
+        )}}\n\n/profile user_id:{user_id}`,
         examples: [
             {
-                example: "`,profile`",
+                example: "`/profile`",
                 explanation: i18n.translate(
                     guildID,
                     "command.profile.help.example.self"
                 ),
             },
             {
-                example: "`,profile @FortnitePlayer`",
+                example: "`/profile user_mention:@FortnitePlayer`",
                 explanation: i18n.translate(
                     guildID,
                     "command.profile.help.example.otherPlayerMention",
@@ -275,7 +275,7 @@ export default class ProfileCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,profile 141734249702096896`",
+                example: "`/profile user_id:141734249702096896`",
                 explanation: i18n.translate(
                     guildID,
                     "command.profile.help.example.otherPlayerID"
@@ -342,7 +342,7 @@ export default class ProfileCommand implements BaseCommand {
                             message.guildID,
                             "command.profile.failure.notFound.description",
                             {
-                                profileHelp: `\`${process.env.BOT_PREFIX}help profile\``,
+                                profileHelp: "`/help profile`",
                             }
                         ),
                     });
@@ -358,7 +358,7 @@ export default class ProfileCommand implements BaseCommand {
                 description: i18n.translate(
                     message.guildID,
                     "command.profile.failure.notFound.badUsage.description",
-                    { profileHelp: `\`${process.env.BOT_PREFIX}help profile\`` }
+                    { profileHelp: "`/help profile`" }
                 ),
             });
             return;
@@ -448,7 +448,7 @@ export default class ProfileCommand implements BaseCommand {
                     interaction.guildID,
                     "misc.interaction.profile.inaccessible",
                     {
-                        profileUserID: `\`${process.env.BOT_PREFIX}profile ${userId}\``,
+                        profileUserID: `\`/profile ${userId}\``,
                     }
                 )
             );

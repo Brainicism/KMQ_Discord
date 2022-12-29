@@ -31,7 +31,7 @@ export default class JoinCommand implements BaseCommand {
                 description: i18n.translate(
                     message.guildID,
                     "command.join.failure.joinError.noTeamName.description",
-                    { joinCommand: `${process.env.BOT_PREFIX}join` }
+                    { joinCommand: "/play teams join" }
                 ),
             });
             return;

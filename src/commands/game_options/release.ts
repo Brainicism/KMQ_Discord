@@ -95,10 +95,10 @@ export default class ReleaseCommand implements BaseCommand {
             guildID,
             "command.release.help.description"
         ),
-        usage: ",release [official | all]",
+        usage: "/release set\nrelease:[official | all]\n\n/release reset",
         examples: [
             {
-                example: "`,release official`",
+                example: "`/release set release:official`",
                 explanation: i18n.translate(
                     guildID,
                     "command.release.help.example.official",
@@ -106,14 +106,14 @@ export default class ReleaseCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,release all`",
+                example: "`/release set release:all`",
                 explanation: i18n.translate(
                     guildID,
                     "command.release.help.example.all"
                 ),
             },
             {
-                example: "`,release`",
+                example: "`/release reset`",
                 explanation: i18n.translate(
                     guildID,
                     "command.release.help.example.reset",

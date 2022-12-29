@@ -528,8 +528,8 @@ export default abstract class Session {
                 "misc.gameOwnerChanged.description",
                 {
                     newGameOwner: getMention(this.owner.id),
-                    forcehintCommand: `\`${process.env.BOT_PREFIX}forcehint\``,
-                    forceskipCommand: `\`${process.env.BOT_PREFIX}forceskip\``,
+                    forcehintCommand: "`/forcehint`",
+                    forceskipCommand: "`/forceskip`",
                 }
             ),
             thumbnailUrl: KmqImages.LISTENING,

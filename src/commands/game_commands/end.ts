@@ -27,7 +27,7 @@ export default class EndCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "end",
         description: i18n.translate(guildID, "command.end.help.description"),
-        usage: ",end",
+        usage: "/end",
         examples: [],
         priority: 1020,
     });
