@@ -727,7 +727,7 @@ export default class PlayCommand implements BaseCommand {
             return;
         }
 
-        if (!voicePermissionsCheck(messageContext)) {
+        if (!voicePermissionsCheck(messageContext, interaction)) {
             return;
         }
 
