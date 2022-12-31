@@ -92,6 +92,12 @@ export default class ListCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.list.interaction.listType"
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.list.interaction.listType"
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: true,
                     choices: [

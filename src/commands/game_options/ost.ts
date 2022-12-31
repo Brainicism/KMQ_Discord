@@ -91,6 +91,12 @@ export default class OstCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.ost.help.description"
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.ost.help.description"
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -100,6 +106,12 @@ export default class OstCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.ost.interaction.ost"
                             ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.ost.interaction.ost"
+                                ),
+                            },
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             required: true,
@@ -119,6 +131,13 @@ export default class OstCommand implements BaseCommand {
                         "misc.interaction.resetOption",
                         { optionName: "ost" }
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "misc.interaction.resetOption",
+                            { optionName: "ost" }
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [],

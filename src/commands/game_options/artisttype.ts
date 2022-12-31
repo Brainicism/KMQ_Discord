@@ -98,6 +98,12 @@ export default class ArtistTypeCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.artisttype.help.interaction.description"
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.artisttype.help.interaction.description"
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -107,6 +113,12 @@ export default class ArtistTypeCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.artisttype.help.interaction.artistTypeOption"
                             ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.artisttype.help.interaction.artistTypeOption"
+                                ),
+                            },
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             required: true,
@@ -126,6 +138,13 @@ export default class ArtistTypeCommand implements BaseCommand {
                         "misc.interaction.resetOption",
                         { optionName: "artist type" }
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "misc.interaction.resetOption",
+                            { optionName: "artist type" }
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [],

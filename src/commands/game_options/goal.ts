@@ -80,6 +80,12 @@ export default class GoalCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.goal.interaction.description"
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.goal.help.interaction.description"
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -89,6 +95,12 @@ export default class GoalCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.goal.interaction.score"
                             ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.goal.help.interaction.score"
+                                ),
+                            },
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .INTEGER,
                             required: true,
@@ -103,6 +115,13 @@ export default class GoalCommand implements BaseCommand {
                         "misc.interaction.resetOption",
                         { optionName: "goal" }
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "misc.interaction.resetOption",
+                            { optionName: "goal" }
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [],

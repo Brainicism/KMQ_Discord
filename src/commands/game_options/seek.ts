@@ -91,6 +91,12 @@ export default class SeekCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.seek.help.description"
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.seek.help.description"
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -100,6 +106,12 @@ export default class SeekCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.seek.interaction.seek"
                             ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.seek.interaction.seek"
+                                ),
+                            },
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             required: true,
@@ -119,6 +131,13 @@ export default class SeekCommand implements BaseCommand {
                         "misc.interaction.resetOption",
                         { optionName: "seek" }
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "misc.interaction.resetOption",
+                            { optionName: "seek" }
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [],

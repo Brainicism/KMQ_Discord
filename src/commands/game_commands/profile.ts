@@ -297,6 +297,12 @@ export default class ProfileCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.profile.interaction.userMention"
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.profile.interaction.userMention"
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .MENTIONABLE,
                     required: false,
@@ -308,6 +314,12 @@ export default class ProfileCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.profile.interaction.userID"
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.profile.interaction.userID"
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: false,
                 },

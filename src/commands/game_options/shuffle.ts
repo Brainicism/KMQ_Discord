@@ -106,6 +106,12 @@ export default class ShuffleCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.shuffle.help.description"
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.shuffle.help.description"
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -115,6 +121,12 @@ export default class ShuffleCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.shuffle.interaction.shuffle"
                             ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.shuffle.interaction.shuffle"
+                                ),
+                            },
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             required: true,
@@ -134,6 +146,13 @@ export default class ShuffleCommand implements BaseCommand {
                         "misc.interaction.resetOption",
                         { optionName: "shuffle" }
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "misc.interaction.resetOption",
+                            { optionName: "shuffle" }
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [],

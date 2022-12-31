@@ -123,6 +123,12 @@ export default class SpecialCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.special.help.description"
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.special.help.description"
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -132,6 +138,12 @@ export default class SpecialCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.special.interaction.special"
                             ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.special.interaction.special"
+                                ),
+                            },
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             required: true,
@@ -151,6 +163,13 @@ export default class SpecialCommand implements BaseCommand {
                         "misc.interaction.resetOption",
                         { optionName: "special" }
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "misc.interaction.resetOption",
+                            { optionName: "special" }
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [],

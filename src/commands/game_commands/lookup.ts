@@ -379,6 +379,12 @@ export default class LookupCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.lookup.help.interaction.byName.description"
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.lookup.help.interaction.byName.description"
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -388,6 +394,12 @@ export default class LookupCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.lookup.help.interaction.byName.field.song"
                             ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.lookup.help.interaction.byName.field.song"
+                                ),
+                            },
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             autocomplete: true,
@@ -398,6 +410,12 @@ export default class LookupCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.lookup.help.interaction.byName.field.artist"
                             ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.lookup.help.interaction.byName.field.artist"
+                                ),
+                            },
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             autocomplete: true,
@@ -410,6 +428,12 @@ export default class LookupCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.lookup.help.interaction.byLink.description"
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.lookup.help.interaction.byLink.description"
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -419,6 +443,12 @@ export default class LookupCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.lookup.help.interaction.byLink.field"
                             ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.lookup.help.interaction.byLink.field"
+                                ),
+                            },
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             required: true,
