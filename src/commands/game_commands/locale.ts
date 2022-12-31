@@ -102,7 +102,7 @@ export default class LocaleTypeCommand implements BaseCommand {
                     name: "language",
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.locale.interaction.language"
+                        "command.locale.help.interaction.language"
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: true,

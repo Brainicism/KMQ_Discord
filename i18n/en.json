@@ -629,14 +629,14 @@
                     "toEnglish": "Change the bot's language to {{english}}",
                     "toKorean": "Change the bot's language to {{korean}}"
                 },
+                "interaction": {
+                    "description": "Change the language of the bot.",
+                    "language": "The language to change to"
+                },
                 "name": "locale",
                 "usage": {
                     "language": "language"
                 }
-            },
-            "interaction": {
-                "description": "Change the language of the bot.",
-                "language": "The language to change to"
             },
             "language": {
                 "en": "English",

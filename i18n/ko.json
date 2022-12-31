@@ -629,14 +629,14 @@
                     "toEnglish": "봇의 언어를 {{english}}로 변경합니다.",
                     "toKorean": "봇의 언어를 {{korean}}로 변경합니다."
                 },
+                "interaction": {
+                    "description": "봇의 언어를 변경합니다.",
+                    "language": "변경할 언어입니다"
+                },
                 "name": "로캘",
                 "usage": {
                     "language": "언어"
                 }
-            },
-            "interaction": {
-                "description": "봇의 언어를 변경합니다.",
-                "language": "변경할 언어입니다"
             },
             "language": {
                 "en": "영어",
