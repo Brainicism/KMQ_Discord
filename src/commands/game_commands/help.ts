@@ -23,8 +23,8 @@ import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("help");
-const FIELDS_PER_EMBED = 6;
-const excludedCommands = ["premium"];
+const FIELDS_PER_EMBED = 8;
+const excludedCommands = [];
 
 export default class HelpCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
@@ -216,11 +216,8 @@ export default class HelpCommand implements BaseCommand {
             embedFields = commandsWithHelp.map((command) => {
                 const helpManual = command.help(messageContext.guildID);
                 return {
-                    name: helpManual.name,
-                    value: `${helpManual.description}\n${i18n.translate(
-                        messageContext.guildID,
-                        "misc.usage"
-                    )}: \`${helpManual.usage}\``,
+                    name: `/${helpManual.name}`,
+                    value: helpManual.description,
                 };
             });
 
