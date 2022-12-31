@@ -173,6 +173,12 @@ export default class AppCommandsCommand implements BaseCommand {
 
                                     cmd.description_localizations[entry[0]] =
                                         entry[1];
+
+                                    if (entry[1].length > 100) {
+                                        throw new Error(
+                                            `${commandName} description_localization too long: ${entry[1]}`
+                                        );
+                                    }
                                 }
                             }
 
@@ -183,6 +189,12 @@ export default class AppCommandsCommand implements BaseCommand {
                                             option.description.slice(0, -1);
                                     }
                                 }
+                            }
+
+                            if (cmd.description.length > 100) {
+                                throw new Error(
+                                    `${commandName} description too long: ${cmd.description}`
+                                );
                             }
                         }
 

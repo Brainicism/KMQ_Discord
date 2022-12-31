@@ -78,7 +78,7 @@ export default class GoalCommand implements BaseCommand {
                     name: OptionAction.SET,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.goal.interaction.description"
+                        "command.goal.help.interaction.description"
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
@@ -87,7 +87,7 @@ export default class GoalCommand implements BaseCommand {
                             name: "score",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.goal.interaction.score"
+                                "command.goal.help.interaction.score"
                             ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .INTEGER,

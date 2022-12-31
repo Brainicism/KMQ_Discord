@@ -79,7 +79,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
                     name: OptionAction.SET,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.timer.interaction.description"
+                        "command.timer.help.interaction.description"
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
@@ -88,7 +88,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
                             name: "timer",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.timer.interaction.timer"
+                                "command.timer.help.interaction.timer"
                             ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .INTEGER,
