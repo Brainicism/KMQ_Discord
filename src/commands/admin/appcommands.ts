@@ -158,6 +158,32 @@ export default class AppCommandsCommand implements BaseCommand {
                                     ),
                                 };
                             }
+
+                            if (cmd.description.slice(-1) === ".") {
+                                cmd.description = cmd.description.slice(0, -1);
+                            }
+
+                            if (cmd.description_localizations) {
+                                for (const entry of Object.entries(
+                                    cmd.description_localizations
+                                )) {
+                                    if (entry[1].slice(-1) === ".") {
+                                        entry[1] = entry[1].slice(0, -1);
+                                    }
+
+                                    cmd.description_localizations[entry[0]] =
+                                        entry[1];
+                                }
+                            }
+
+                            if (cmd.options) {
+                                for (const option of cmd.options) {
+                                    if (option.description.slice(-1) === ".") {
+                                        option.description =
+                                            option.description.slice(0, -1);
+                                    }
+                                }
+                            }
                         }
 
                         commandStructures.push(cmd);
