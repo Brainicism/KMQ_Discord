@@ -14,6 +14,8 @@ import type CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("app_commands");
 
+const MAX_DESCRIPTION_LENGTH = 100;
+
 enum AppCommandsAction {
     RELOAD = "reload",
     DELETE = "delete",
@@ -160,6 +162,49 @@ export default class AppCommandsCommand implements BaseCommand {
                             }
                         }
 
+                        const checkDescriptionLengthRecursively = (
+                            cmdObj: Object
+                        ): void => {
+                            for (const key in cmdObj) {
+                                if (
+                                    Object.prototype.hasOwnProperty.call(
+                                        cmdObj,
+                                        key
+                                    )
+                                ) {
+                                    const val = cmdObj[key];
+                                    if (key === "description") {
+                                        if (
+                                            val.length > MAX_DESCRIPTION_LENGTH
+                                        ) {
+                                            throw new Error(
+                                                `Slash command description too long: ${val}`
+                                            );
+                                        }
+                                    } else if (
+                                        key === "description_localizations"
+                                    ) {
+                                        for (const locale in val) {
+                                            if (
+                                                val[locale].length >
+                                                MAX_DESCRIPTION_LENGTH
+                                            ) {
+                                                throw new Error(
+                                                    `Slash command description_localization for ${locale} too long: ${val[locale]}`
+                                                );
+                                            }
+                                        }
+                                    } else if (Array.isArray(val)) {
+                                        for (const obj of val)
+                                            checkDescriptionLengthRecursively(
+                                                obj
+                                            );
+                                    }
+                                }
+                            }
+                        };
+
+                        checkDescriptionLengthRecursively(cmd);
                         commandStructures.push(cmd);
                     }
                 }
