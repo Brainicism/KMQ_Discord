@@ -279,14 +279,14 @@
                     "reset": "Disables the goal",
                     "set": "The first player to {{goal}} wins the game"
                 },
+                "interaction": {
+                    "description": "Once the player with the most points reaches the goal score, the game ends.",
+                    "score": "The number of points needed to win"
+                },
                 "name": "goal",
                 "usage": {
                     "points": "points"
                 }
-            },
-            "interaction": {
-                "description": "Once the player with the most points reaches the goal score, the game ends.",
-                "score": "The number of points needed to win"
             }
         },
         "groups": {
@@ -575,15 +575,15 @@
                     "singleLimit": "Plays the top {{limit}} most listened songs from the currently selected options",
                     "twoLimits": "Plays between the {{limitStart}} to {{limitEnd}} most listened songs from the currently selected options"
                 },
+                "interaction": {
+                    "description": "Set a maximum number of results in the song query",
+                    "description_range": "Play between the top [limit_start] and [limit_end] songs.",
+                    "description_top": "Play the top [limit] songs",
+                    "limit": "Play this many of the top songs",
+                    "limit_end": "Play songs between the starting limit and this value",
+                    "limit_start": "From the most listened songs, start playing from [limit_start]"
+                },
                 "name": "limit"
-            },
-            "interaction": {
-                "description": "Set a maximum number of results in the song query",
-                "description_range": "Play between the top [limit_start] and [limit_end] songs.",
-                "description_top": "Play the top [limit] songs",
-                "limit": "Play this many of the top songs",
-                "limit_end": "Play songs between the starting limit and this value",
-                "limit_start": "From the most listened songs, start playing from [limit_start]"
             }
         },
         "list": {
@@ -1202,14 +1202,14 @@
                     "reset": "Disables the timer",
                     "set": "In {{timer}} seconds, if no user has guessed correctly, the round ends and the next one begins automatically"
                 },
+                "interaction": {
+                    "description": "Try your best to guess correctly before the timer runs out!",
+                    "timer": "How many seconds to play each song before skipping"
+                },
                 "name": "timer",
                 "usage": {
                     "seconds": "seconds"
                 }
-            },
-            "interaction": {
-                "description": "Try your best to guess correctly before the timer runs out!",
-                "timer": "How many seconds to play each song before skipping"
             }
         },
         "vote": {

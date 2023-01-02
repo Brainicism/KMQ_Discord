@@ -101,7 +101,7 @@ export default class LimitCommand implements BaseCommand {
                     name: "set",
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.limit.interaction.description"
+                        "command.limit.help.interaction.description"
                     ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND_GROUP,
@@ -110,7 +110,7 @@ export default class LimitCommand implements BaseCommand {
                             name: LimitAppCommandAction.TOP,
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.limit.interaction.description_top"
+                                "command.limit.help.interaction.description_top"
                             ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .SUB_COMMAND,
@@ -119,7 +119,7 @@ export default class LimitCommand implements BaseCommand {
                                     name: "limit",
                                     description: i18n.translate(
                                         LocaleType.EN,
-                                        "command.limit.interaction.limit"
+                                        "command.limit.help.interaction.limit"
                                     ),
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,
@@ -133,7 +133,7 @@ export default class LimitCommand implements BaseCommand {
                             name: LimitAppCommandAction.RANGE,
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.limit.interaction.description_range"
+                                "command.limit.help.interaction.description_range"
                             ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .SUB_COMMAND,
@@ -142,7 +142,7 @@ export default class LimitCommand implements BaseCommand {
                                     name: "limit_start",
                                     description: i18n.translate(
                                         LocaleType.EN,
-                                        "command.limit.interaction.limit_start"
+                                        "command.limit.help.interaction.limit_start"
                                     ),
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,
@@ -154,7 +154,7 @@ export default class LimitCommand implements BaseCommand {
                                     name: "limit_end",
                                     description: i18n.translate(
                                         LocaleType.EN,
-                                        "command.limit.interaction.limit_end"
+                                        "command.limit.help.interaction.limit_end"
                                     ),
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,
