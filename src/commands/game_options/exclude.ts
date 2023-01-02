@@ -124,6 +124,12 @@ export default class ExcludeCommand implements BaseCommand {
                     LocaleType.EN,
                     `command.exclude.help.interaction.${action}.description`
                 ),
+                description_localizations: {
+                    [LocaleType.KO]: i18n.translate(
+                        LocaleType.KO,
+                        `command.exclude.help.interaction.${action}.description`
+                    ),
+                },
                 type: Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
                 options:
                     action === GroupAction.RESET
@@ -135,6 +141,13 @@ export default class ExcludeCommand implements BaseCommand {
                                   `command.exclude.help.interaction.${action}.perGroupDescription`,
                                   { ordinalNum: getOrdinalNum(x + 1) }
                               ),
+                              description_localizations: {
+                                  [LocaleType.KO]: i18n.translate(
+                                      LocaleType.KO,
+                                      `command.exclude.help.interaction.${action}.perGroupDescription`,
+                                      { ordinalNum: getOrdinalNum(x + 1) }
+                                  ),
+                              },
                               type: Eris.Constants.ApplicationCommandOptionTypes
                                   .STRING,
                               autocomplete: true,

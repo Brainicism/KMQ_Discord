@@ -85,6 +85,12 @@ export default class LanguageCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.language.help.description"
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.language.help.description"
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -94,6 +100,12 @@ export default class LanguageCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.language.interaction.language"
                             ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.language.interaction.language"
+                                ),
+                            },
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             required: true,
@@ -113,6 +125,13 @@ export default class LanguageCommand implements BaseCommand {
                         "misc.interaction.resetOption",
                         { optionName: "language" }
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "misc.interaction.resetOption",
+                            { optionName: "language" }
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [],

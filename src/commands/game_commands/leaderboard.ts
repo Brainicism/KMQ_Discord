@@ -138,6 +138,12 @@ export default class LeaderboardCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.leaderboard.help.example.enroll"
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.leaderboard.help.example.enroll"
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                 },
@@ -147,6 +153,12 @@ export default class LeaderboardCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.leaderboard.help.example.unenroll"
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.leaderboard.help.example.unenroll"
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                 },
@@ -156,6 +168,12 @@ export default class LeaderboardCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.leaderboard.help.description"
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.leaderboard.help.description"
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -165,6 +183,12 @@ export default class LeaderboardCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.leaderboard.interaction.type"
                             ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.leaderboard.interaction.type"
+                                ),
+                            },
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             choices: Object.values(LeaderboardType).map(
@@ -181,6 +205,12 @@ export default class LeaderboardCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.leaderboard.interaction.duration"
                             ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.leaderboard.interaction.duration"
+                                ),
+                            },
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             choices: [
@@ -202,6 +232,12 @@ export default class LeaderboardCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.leaderboard.interaction.scope"
                             ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.leaderboard.interaction.scope"
+                                ),
+                            },
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             choices: Object.values(LeaderboardScope).map(
@@ -218,6 +254,12 @@ export default class LeaderboardCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.leaderboard.interaction.page"
                             ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.leaderboard.interaction.page"
+                                ),
+                            },
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .INTEGER,
                         },

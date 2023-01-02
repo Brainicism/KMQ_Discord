@@ -113,6 +113,12 @@ export default class CutoffCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.cutoff.help.interaction.description"
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.cutoff.help.interaction.description"
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND_GROUP,
                     options: [
@@ -122,6 +128,12 @@ export default class CutoffCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.cutoff.help.interaction.earliestOption"
                             ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.cutoff.help.interaction.earliestOption"
+                                ),
+                            },
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .SUB_COMMAND,
                             options: [
@@ -131,6 +143,12 @@ export default class CutoffCommand implements BaseCommand {
                                         LocaleType.EN,
                                         "command.cutoff.help.interaction.beginningYear"
                                     ),
+                                    description_localizations: {
+                                        [LocaleType.KO]: i18n.translate(
+                                            LocaleType.KO,
+                                            "command.cutoff.help.interaction.beginningYear"
+                                        ),
+                                    },
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,
                                     required: true,
@@ -145,6 +163,12 @@ export default class CutoffCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.cutoff.help.interaction.rangeOption"
                             ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.cutoff.help.interaction.rangeOption"
+                                ),
+                            },
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .SUB_COMMAND,
                             options: [
@@ -154,6 +178,12 @@ export default class CutoffCommand implements BaseCommand {
                                         LocaleType.EN,
                                         "command.cutoff.help.interaction.beginningYear"
                                     ),
+                                    description_localizations: {
+                                        [LocaleType.KO]: i18n.translate(
+                                            LocaleType.KO,
+                                            "command.cutoff.help.interaction.beginningYear"
+                                        ),
+                                    },
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,
                                     required: true,
@@ -166,6 +196,12 @@ export default class CutoffCommand implements BaseCommand {
                                         LocaleType.EN,
                                         "command.cutoff.help.interaction.endingYear"
                                     ),
+                                    description_localizations: {
+                                        [LocaleType.KO]: i18n.translate(
+                                            LocaleType.KO,
+                                            "command.cutoff.help.interaction.endingYear"
+                                        ),
+                                    },
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,
                                     required: true,
@@ -183,6 +219,13 @@ export default class CutoffCommand implements BaseCommand {
                         "misc.interaction.resetOption",
                         { optionName: "cutoff" }
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "misc.interaction.resetOption",
+                            { optionName: "cutoff" }
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                 },

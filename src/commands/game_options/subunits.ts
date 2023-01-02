@@ -92,6 +92,13 @@ export default class SubunitsCommand implements BaseCommand {
                 "command.subunits.help.description",
                 { groups: "`/groups`" }
             ),
+            description_localizations: {
+                [LocaleType.KO]: i18n.translate(
+                    LocaleType.KO,
+                    "command.subunits.help.description",
+                    { groups: "`/groups`" }
+                ),
+            },
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
@@ -103,6 +110,15 @@ export default class SubunitsCommand implements BaseCommand {
                             groups: "`/groups`",
                         }
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.subunits.help.description",
+                            {
+                                groups: "`/groups`",
+                            }
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -112,6 +128,12 @@ export default class SubunitsCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.subunits.interaction.subunits"
                             ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.subunits.interaction.subunits"
+                                ),
+                            },
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             required: true,
@@ -131,6 +153,13 @@ export default class SubunitsCommand implements BaseCommand {
                         "misc.interaction.resetOption",
                         { optionName: "subunits" }
                     ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "misc.interaction.resetOption",
+                            { optionName: "subunits" }
+                        ),
+                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [],
