@@ -166,12 +166,7 @@ export default class AppCommandsCommand implements BaseCommand {
                             cmdObj: Object
                         ): void => {
                             for (const key in cmdObj) {
-                                if (
-                                    Object.prototype.hasOwnProperty.call(
-                                        cmdObj,
-                                        key
-                                    )
-                                ) {
+                                if (Object.hasOwn(cmdObj, key)) {
                                     const val = cmdObj[key];
                                     if (key === "description") {
                                         if (
