@@ -75,7 +75,7 @@ export default class AppCommandsCommand implements BaseCommand {
             const createApplicationCommandFunc: (
                 command: Eris.ApplicationCommandStructure
             ) => Promise<Eris.ApplicationCommand> = isProd
-                ? State.client.createCommand
+                ? State.client.createCommand.bind(State.client)
                 : debugServer.createCommand.bind(debugServer);
 
             logger.info(
