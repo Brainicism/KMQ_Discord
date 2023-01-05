@@ -293,9 +293,16 @@ export default class PlayCommand implements BaseCommand {
             }
         }
 
-        const gameType =
-            (parsedMessage.components[0]?.toLowerCase() as GameType) ??
-            GameType.CLASSIC;
+        const gameTypeRaw = parsedMessage.components[0]?.toLowerCase();
+        let gameType: GameType;
+        if (
+            !gameTypeRaw ||
+            !Object.values(GameType).includes(gameTypeRaw as GameType)
+        ) {
+            gameType = GameType.CLASSIC;
+        } else {
+            gameType = gameTypeRaw as GameType;
+        }
 
         if (gameSessions[guildID]) {
             if (gameSessions[guildID]?.sessionInitialized) {
