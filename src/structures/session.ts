@@ -292,8 +292,7 @@ export default abstract class Session {
             return false;
         }
 
-        this.playSong(messageContext);
-        return true;
+        return this.playSong(messageContext);
     }
 
     /**
@@ -648,11 +647,12 @@ export default abstract class Session {
     /**
      * Begin playing the Round's song in the VoiceChannel, listen on VoiceConnection events
      * @param messageContext - An object containing relevant parts of Eris.Message
+     * @returns whether the song streaming began successfully
      */
-    protected async playSong(messageContext: MessageContext): Promise<void> {
+    protected async playSong(messageContext: MessageContext): Promise<boolean> {
         const { round } = this;
         if (round === null) {
-            return;
+            return false;
         }
 
         const songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${round.song.youtubeLink}.ogg`;
@@ -713,7 +713,7 @@ export default abstract class Session {
         } catch (e) {
             logger.error(`Erroring playing on voice connection. err = ${e}`);
             await this.errorRestartRound();
-            return;
+            return false;
         }
 
         this.startGuessTimeout(messageContext);
@@ -749,6 +749,8 @@ export default abstract class Session {
             );
             this.errorRestartRound();
         });
+
+        return true;
     }
 
     protected getSongCount(): { count: number; countBeforeLimit: number } {
