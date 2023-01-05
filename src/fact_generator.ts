@@ -26,7 +26,6 @@ const musicShows = {
 
 const funFactFunctions: Array<(locale: LocaleType) => Promise<string[]>> = [
     recentMusicVideos,
-    recentMilestone,
     recentMusicShowWin,
     musicShowWins,
     mostViewedGroups,
@@ -203,44 +202,6 @@ async function recentMusicVideos(lng: LocaleType): Promise<string[]> {
                 x["artist"],
                 x["youtubeLink"]
             ),
-            lng,
-        })
-    );
-}
-
-async function recentMilestone(lng: LocaleType): Promise<string[]> {
-    const twoWeeksPriorDate = new Date();
-    twoWeeksPriorDate.setDate(twoWeeksPriorDate.getDate() - 14);
-    const result = await dbContext
-        .kpopVideos("app_kpop_miles")
-        .select([
-            "app_kpop_miles.mvalue as milestone_views",
-            "app_kpop.name as song_name",
-            "app_kpop_group.name as artist_name",
-            "app_kpop.vlink as link",
-        ])
-        .where("date", ">", twoWeeksPriorDate)
-        .join("app_kpop", function join() {
-            this.on("app_kpop.id", "=", "app_kpop_miles.id_mv");
-        })
-        .join("app_kpop_group", function join() {
-            this.on("app_kpop.id_artist", "=", "app_kpop_group.id");
-        });
-
-    if (result.length === 0) {
-        logger.warn("recentMilestone generated no facts");
-        return [];
-    }
-
-    return result.map((x) =>
-        i18n.internalLocalizer.t("fact.fun.mvViewMilestone", {
-            hyperlink: generateSongArtistHyperlink(
-                lng,
-                x["song_name"],
-                x["artist_name"],
-                x["link"]
-            ),
-            views: friendlyFormattedNumber(x["milestone_views"]),
             lng,
         })
     );

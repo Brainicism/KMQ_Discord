@@ -402,9 +402,16 @@ export default class PlayCommand implements BaseCommand {
     }
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const gameType =
-            (parsedMessage.components[0]?.toLowerCase() as GameType) ??
-            GameType.CLASSIC;
+        const gameTypeRaw = parsedMessage.components[0]?.toLowerCase();
+        let gameType: GameType;
+        if (
+            !gameTypeRaw ||
+            !Object.values(GameType).includes(gameTypeRaw as GameType)
+        ) {
+            gameType = GameType.CLASSIC;
+        } else {
+            gameType = gameTypeRaw as GameType;
+        }
 
         await PlayCommand.startGame(
             MessageContext.fromMessage(message),

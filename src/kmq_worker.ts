@@ -161,6 +161,7 @@ export default class BotWorker extends BaseClusterWorker {
             .on("guildDelete", guildDeleteHandler)
             .on("unavailableGuildCreate", unavailableGuildCreateHandler)
             .on("guildAvailable", guildAvailableHandler)
+            .on("guildUnavailable", unavailableGuildCreateHandler)
             .on("interactionCreate", interactionCreateHandler);
     }
 
