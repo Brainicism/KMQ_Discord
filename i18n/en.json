@@ -1001,6 +1001,7 @@
             "oldMV": "Fun Fact: {{hyperlink}} was released this week back in {{year}}!",
             "recentGaonWeekly": "Fun Fact: {{songName}} is the {{ordinalNum}} highest charting song on the Gaon Weekly charts last week!",
             "recentMusicShowWin": "Fun Fact: {{hyperlink}} recently won on {{musicShow}} on {{winDate}}",
+            "recentPak": "Fun Fact: {{hyperlink}} is the {{ordinalNum}} most recent music video to receive a PAK (Perfect All-Kill)!",
             "viewsByArtistType": "Fun Fact: There is a combined total of {{totalViews}} views on all K-Pop music videos on YouTube, {{groupViews}} ({{groupProportion}}%) of which are from groups, while {{soloViews}} ({{soloProportion}}%) are from solo artists.",
             "viewsByGender": "Fun Fact: There is a combined total of {{totalViews}} views on all K-Pop music videos on YouTube, {{maleViews}} ({{maleProportion}}%) of which are from male groups, {{femaleViews}} ({{femaleProportion}}%) from female groups, and the remaining {{coedViews}} ({{coedProportion}}%) from co-ed groups."
         },
