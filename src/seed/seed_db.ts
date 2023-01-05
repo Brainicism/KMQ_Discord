@@ -182,7 +182,13 @@ async function validateDaisukiTableSchema(
 ): Promise<void> {
     const outputMessages = [];
     await Promise.allSettled(
-        ["app_kpop", "app_kpop_group"].map(async (table) => {
+        [
+            "app_kpop",
+            "app_kpop_group",
+            "app_kpop_gaondigi",
+            "app_kpop_ms",
+            "app_kpop_agrelation",
+        ].map(async (table) => {
             const commaSeparatedColumnNames = (
                 await db.agnostic.raw(
                     `SELECT group_concat(COLUMN_NAME) as x FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'kpop_videos_validation' AND TABLE_NAME = '${table}';`

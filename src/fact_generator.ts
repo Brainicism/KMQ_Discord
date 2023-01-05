@@ -171,7 +171,7 @@ async function recentMusicVideos(lng: LocaleType): Promise<string[]> {
     const oneMonthPriorDate = new Date();
     oneMonthPriorDate.setMonth(oneMonthPriorDate.getMonth() - 1);
     const result = await dbContext
-        .kpopVideos("kpop_videos.app_kpop")
+        .kpopVideos("app_kpop")
         .select([
             "app_kpop.name as name",
             "app_kpop_group.name as artist",
