@@ -1,5 +1,5 @@
 import { IPCLogger } from "../../logger";
-import { KmqImages } from "../../constants";
+import { KmqImages, SHADOW_BANNED_ARTIST_IDS } from "../../constants";
 import {
     chunkArray,
     friendlyFormattedDate,
@@ -121,7 +121,8 @@ async function lookupByYoutubeID(
             ...(
                 await SongSelector.getFilteredSongList(
                     await GuildPreference.getGuildPreference(guildID),
-                    await isPremiumRequest(session, message.author.id)
+                    await isPremiumRequest(session, message.author.id),
+                    SHADOW_BANNED_ARTIST_IDS
                 )
             ).songs,
         ]

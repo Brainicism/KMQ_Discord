@@ -1,5 +1,8 @@
 import { IPCLogger } from "../logger";
-import { PATREON_SUPPORTER_BADGE_ID } from "../constants";
+import {
+    PATREON_SUPPORTER_BADGE_ID,
+    SHADOW_BANNED_ARTIST_IDS,
+} from "../constants";
 import { cleanArtistName, cleanSongName } from "../structures/game_round";
 import { containsHangul, md5Hash } from "./utils";
 import AnswerType from "../enums/option_types/answer_type";
@@ -50,7 +53,11 @@ export async function getAvailableSongCount(
 ): Promise<{ count: number; countBeforeLimit: number }> {
     try {
         const { songs, countBeforeLimit } =
-            await SongSelector.getFilteredSongList(guildPreference, isPremium);
+            await SongSelector.getFilteredSongList(
+                guildPreference,
+                isPremium,
+                SHADOW_BANNED_ARTIST_IDS
+            );
 
         return {
             count: songs.size,
