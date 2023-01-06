@@ -1,3 +1,5 @@
+import * as cp from "child_process";
+import * as util from "util";
 import {
     EMBED_ERROR_COLOR,
     EMBED_SUCCESS_COLOR,
@@ -32,6 +34,8 @@ import path from "path";
 import schedule from "node-schedule";
 import storeDailyStats from "./scripts/store-daily-stats";
 import type { Options, Stats } from "eris-fleet";
+
+const exec = util.promisify(cp.exec);
 
 const logger = getInternalLogger();
 
@@ -180,6 +184,7 @@ async function startWebServer(fleet: Fleet): Promise<void> {
 
         if (isSoftRestart) {
             logger.info("Soft restart initiated");
+            await exec("npx tsc");
             fleet.restartAllClusters(false);
         }
 
