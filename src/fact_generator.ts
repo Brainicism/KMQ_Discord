@@ -49,6 +49,7 @@ const funFactFunctions: Array<(locale: LocaleType) => Promise<string[]>> = [
     mostViewedEntertainmentCompany,
     songReleaseAnniversaries,
     mostAnnualAwardShowWins,
+    latestPak,
 ];
 
 const kmqFactFunctions: Array<(locale: LocaleType) => Promise<string[]>> = [
@@ -369,6 +370,43 @@ async function mostViewedVideo(lng: LocaleType): Promise<string[]> {
                     { lng }
                 ),
                 views: friendlyFormattedNumber(x["views"]),
+                lng,
+            }
+        )
+    );
+}
+
+async function latestPak(lng: LocaleType): Promise<string[]> {
+    const result = await dbContext
+        .kpopVideos("app_kpop")
+        .select([
+            "app_kpop_group.name as artist_name",
+            "app_kpop.name as song_name",
+            "app_kpop.vlink as link",
+            "app_kpop.releasedate as releasedate",
+        ])
+        .join("app_kpop_group", function join() {
+            this.on("app_kpop.id_artist", "=", "app_kpop_group.id");
+        })
+        .where("app_kpop.has_pak", "y")
+        .orderBy("releasedate", "DESC")
+        .limit(10);
+
+    return result.map((x, idx) =>
+        LocalizationManager.localizer.internalLocalizer.t(
+            "fact.fun.recentPak",
+            {
+                hyperlink: generateSongArtistHyperlink(
+                    lng,
+                    x["song_name"],
+                    x["artist_name"],
+                    x["link"]
+                ),
+                ordinalNum: LocalizationManager.localizer.internalLocalizer.t(
+                    getOrdinalNum(idx + 1),
+                    { lng }
+                ),
+                releasedate: x["releasedate"],
                 lng,
             }
         )
