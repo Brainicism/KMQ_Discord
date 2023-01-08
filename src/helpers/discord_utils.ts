@@ -1095,61 +1095,48 @@ export async function getGameInfoMessage(
 
     if (!endGameMessage) return null;
 
-    // deprecated case, where message's translation key is stored as message in db
-    if (endGameMessage.message.startsWith("misc.gameMessages")) {
-        endGameMessage.message = i18n.translate(
-            guildID,
-            endGameMessage.message
-        );
-    } else {
-        try {
-            const gameInfoMessageContent: GameMessageMultiLocaleContent =
-                JSON.parse(endGameMessage.message);
+    try {
+        const gameInfoMessageContent: GameMessageMultiLocaleContent =
+            JSON.parse(endGameMessage.message);
 
-            if (!gameInfoMessageContent.en || !gameInfoMessageContent.ko) {
-                logger.error(
-                    `Message's Game info message content is missing content. en = ${gameInfoMessageContent.en}, ko = ${gameInfoMessageContent.ko}`
-                );
-                return null;
-            }
-
-            const locale = State.getGuildLocale(guildID);
-            endGameMessage.message =
-                locale === LocaleType.EN
-                    ? gameInfoMessageContent.en
-                    : gameInfoMessageContent.ko;
-        } catch (e) {
+        if (!gameInfoMessageContent.en || !gameInfoMessageContent.ko) {
             logger.error(
-                `Error parsing message's game info message content, invalid JSON? message = ${endGameMessage.message}`
+                `Message's Game info message content is missing content. en = ${gameInfoMessageContent.en}, ko = ${gameInfoMessageContent.ko}`
             );
+            return null;
         }
+
+        const locale = State.getGuildLocale(guildID);
+        endGameMessage.message =
+            locale === LocaleType.EN
+                ? gameInfoMessageContent.en
+                : gameInfoMessageContent.ko;
+    } catch (e) {
+        logger.error(
+            `Error parsing message's game info message content, invalid JSON? message = ${endGameMessage.message}`
+        );
     }
 
-    // deprecated case, where title's translation key is stored as message in db
-    if (endGameMessage.title.startsWith("misc.gameMessages")) {
-        endGameMessage.title = i18n.translate(guildID, endGameMessage.title);
-    } else {
-        try {
-            const gameInfoMessageContent: GameMessageMultiLocaleContent =
-                JSON.parse(endGameMessage.title);
+    try {
+        const gameInfoMessageContent: GameMessageMultiLocaleContent =
+            JSON.parse(endGameMessage.title);
 
-            if (!gameInfoMessageContent.en || !gameInfoMessageContent.ko) {
-                logger.error(
-                    `Title's game info message content is missing content. en = ${gameInfoMessageContent.en}, ko = ${gameInfoMessageContent.ko}`
-                );
-                return null;
-            }
-
-            const locale = State.getGuildLocale(guildID);
-            endGameMessage.title =
-                locale === LocaleType.EN
-                    ? gameInfoMessageContent.en
-                    : gameInfoMessageContent.ko;
-        } catch (e) {
+        if (!gameInfoMessageContent.en || !gameInfoMessageContent.ko) {
             logger.error(
-                `Error parsing title's game info message content, invalid JSON? title = ${endGameMessage.title}`
+                `Title's game info message content is missing content. en = ${gameInfoMessageContent.en}, ko = ${gameInfoMessageContent.ko}`
             );
+            return null;
         }
+
+        const locale = State.getGuildLocale(guildID);
+        endGameMessage.title =
+            locale === LocaleType.EN
+                ? gameInfoMessageContent.en
+                : gameInfoMessageContent.ko;
+    } catch (e) {
+        logger.error(
+            `Error parsing title's game info message content, invalid JSON? title = ${endGameMessage.title}`
+        );
     }
 
     return endGameMessage;
