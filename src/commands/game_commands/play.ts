@@ -127,7 +127,7 @@ export async function sendBeginGameSessionMessage(
     const fields: Eris.EmbedField[] = [];
     if (gameInfoMessage) {
         fields.push({
-            name: i18n.translate(guildID, gameInfoMessage.title),
+            name: gameInfoMessage.title,
             value: gameInfoMessage.message,
             inline: false,
         });
