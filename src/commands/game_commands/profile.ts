@@ -231,7 +231,7 @@ async function getProfileFields(
             })
             .orderBy("badges.priority", "desc")
     )
-        .map((x) => i18n.translate(guildID, x["badge_name"]))
+        .map((x) => x["badge_name"])
         .join("\n");
 
     if (badges) {
