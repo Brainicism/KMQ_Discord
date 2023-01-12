@@ -430,6 +430,35 @@ describe("song selector", () => {
                 });
             });
 
+            describe("include subunits with shadowbanned artist", () => {
+                it("should exclude the shadowbanned artist", async () => {
+                    await guildPreference.setGroups([
+                        { id: 288, name: "Stray Kids" },
+                    ]);
+
+                    const shadowbannedArtists = [1177];
+
+                    await guildPreference.setSubunitPreference(
+                        SubunitsPreference.INCLUDE
+                    );
+
+                    const { songs } = await SongSelector.getFilteredSongList(
+                        guildPreference,
+                        true,
+                        shadowbannedArtists
+                    );
+
+                    // should not include shadow banned artist's songs
+                    assert.strictEqual(
+                        Array.from(songs).every(
+                            (song) =>
+                                !shadowbannedArtists.includes(song.artistID)
+                        ),
+                        true
+                    );
+                });
+            });
+
             describe("include subunits (and the subunit has a collab)", () => {
                 it("should match the songs from the group, collabs of that group, and collabs of any subunits of that group", async () => {
                     const artistWithCollabingSubunit = {

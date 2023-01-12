@@ -1,6 +1,6 @@
 {
     "name": "kmq",
-    "version": "5.9.4",
+    "version": "5.10.0",
     "main": "src/kmq.js",
     "scripts": {
         "seed": "ts-node src/seed/seed_db",
@@ -57,7 +57,7 @@
         "fluent-ffmpeg": "^2.1.2",
         "i18next": "^21.9.2",
         "i18next-fs-backend": "^1.1.5",
-        "knex": "^2.3.0",
+        "knex": "^2.4.0",
         "lodash": "^4.17.21",
         "mocha": "^10.0.0",
         "moment-timezone": "^0.5.37",

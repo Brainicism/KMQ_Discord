@@ -3,6 +3,7 @@ import {
     NON_OFFICIAL_VIDEO_TAGS,
     SELECTION_WEIGHT_VALUES_EASY,
     SELECTION_WEIGHT_VALUES_HARD,
+    SHADOW_BANNED_ARTIST_IDS,
 } from "../constants";
 import { IPCLogger } from "../logger";
 import { chooseWeightedRandom, setDifference } from "../helpers/utils";
@@ -204,7 +205,8 @@ export default class SongSelector {
         if (!playlistID) {
             this.filteredSongs = await SongSelector.getFilteredSongList(
                 guildPreference,
-                isPremium
+                isPremium,
+                SHADOW_BANNED_ARTIST_IDS
             );
 
             return null;
@@ -247,11 +249,13 @@ export default class SongSelector {
      * Returns a list of songs from the data store, narrowed down by the specified game options
      * @param guildPreference - The GuildPreference
      * @param premium - Whether the game is premium
+     * @param shadowBannedArtistIds - artist IDs that shouldn't be populated by subunit inclusion
      * @returns a list of songs, as well as the number of songs before the filter option was applied
      */
     static async getFilteredSongList(
         guildPreference: GuildPreference,
-        premium: boolean = false
+        premium: boolean = false,
+        shadowBannedArtistIds: Array<number> = []
     ): Promise<{ songs: Set<QueriedSong>; countBeforeLimit: number }> {
         const gameOptions = guildPreference.gameOptions;
         let result: Array<QueriedSong> = [];
@@ -279,6 +283,7 @@ export default class SongSelector {
                     .kpopVideos("app_kpop_group")
                     .select("id")
                     .whereIn("id_parentgroup", guildPreference.getGroupIDs())
+                    .whereNotIn("id", shadowBannedArtistIds)
             ).map((x) => x["id"]);
 
             collabGroupContainingSubunit = (
@@ -350,15 +355,20 @@ export default class SongSelector {
                     this.whereIn("id_artist", guildPreference.getGroupIDs());
                 } else {
                     this.andWhere(function () {
-                        this.whereIn("id_artist", guildPreference.getGroupIDs())
-                            .orWhereIn(
+                        this.whereIn(
+                            "id_artist",
+                            guildPreference.getGroupIDs()
+                        ).orWhere(function subunitFilter() {
+                            this.whereIn(
                                 "id_parent_artist",
                                 guildPreference.getGroupIDs()
                             )
-                            .orWhereIn(
-                                "id_artist",
-                                collabGroupContainingSubunit
-                            );
+                                .whereNotIn("id_artist", shadowBannedArtistIds)
+                                .orWhereIn(
+                                    "id_artist",
+                                    collabGroupContainingSubunit
+                                );
+                        });
                     });
                 }
             });

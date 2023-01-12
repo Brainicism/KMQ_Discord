@@ -263,3 +263,5 @@ export const IGNORED_WARNING_SUBSTRINGS = [
     "Unhandled MESSAGE_CREATE type",
     "Unknown guild text channel type",
 ];
+
+export const SHADOW_BANNED_ARTIST_IDS = [1177, 170];
