@@ -155,6 +155,7 @@ export default class SpotifyManager {
         }
 
         let matchedSongs: Array<QueriedSong> = [];
+        const unmatchedSongs: Array<SpotifyTrack> = [];
         for (const song of spotifySongs) {
             const aliasIDs = [];
             for (const artist of song.artists) {
@@ -204,7 +205,17 @@ export default class SpotifyManager {
 
             if (result) {
                 matchedSongs.push(result);
+            } else {
+                unmatchedSongs.push(song);
             }
+        }
+
+        if (unmatchedSongs.length > 0) {
+            logger.info(
+                `Unmatched Spotify songs for playlistID = ${playlistID}: ${JSON.stringify(
+                    unmatchedSongs
+                )}`
+            );
         }
 
         matchedSongs = _.uniq(matchedSongs);
