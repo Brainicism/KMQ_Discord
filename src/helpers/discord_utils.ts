@@ -8,14 +8,18 @@ import {
     EMBED_ERROR_COLOR,
     EMBED_SUCCESS_BONUS_COLOR,
     EMBED_SUCCESS_COLOR,
+    EPHEMERAL_MESSAGE_FLAG,
     KmqImages,
+    MAX_AUTOCOMPLETE_FIELDS,
     PERMISSIONS_LINK,
+    SPOTIFY_BASE_URL,
 } from "../constants";
 import { IPCLogger } from "../logger";
 import {
     bold,
     chooseWeightedRandom,
     chunkArray,
+    containsHangul,
     delay,
     friendlyFormattedNumber,
     getOrdinalNum,
@@ -36,17 +40,21 @@ import Eris from "eris";
 import GameOption from "../enums/game_option_name";
 import GameType from "../enums/game_type";
 import LocaleType from "../enums/locale_type";
-import LocalizationManager from "./localization_manager";
 import MessageContext from "../structures/message_context";
 import State from "../state";
+import _ from "lodash";
 import axios from "axios";
 import dbContext from "../database_context";
+import i18n from "./localization_manager";
 import type { EmbedGenerator, GuildTextableMessage } from "../types";
+import type { GuildTextableChannel } from "eris";
+import type AutocompleteEntry from "../interfaces/autocomplete_entry";
 import type BookmarkedSong from "../interfaces/bookmarked_song";
 import type EmbedPayload from "../interfaces/embed_payload";
 import type GameInfoMessage from "../interfaces/game_info_message";
 import type GameOptions from "../interfaces/game_options";
 import type GuildPreference from "../structures/guild_preference";
+import type MatchedArtist from "../interfaces/matched_artist";
 import type Session from "../structures/session";
 
 const logger = new IPCLogger("discord_utils");
@@ -54,6 +62,7 @@ const logger = new IPCLogger("discord_utils");
 const REQUIRED_TEXT_PERMISSIONS = [
     "addReactions" as const,
     "embedLinks" as const,
+    "attachFiles" as const,
 ];
 
 const REQUIRED_VOICE_PERMISSIONS = [
@@ -79,13 +88,15 @@ export function getDebugLogHeader(
         | Eris.Message
         | Eris.ComponentInteraction
         | Eris.CommandInteraction
+        | Eris.AutocompleteInteraction
 ): string {
     let header: string;
     if (context instanceof Eris.Message) {
         header = `gid: ${context.guildID}, uid: ${context.author.id}, tid: ${context.channel.id}`;
     } else if (
         context instanceof Eris.ComponentInteraction ||
-        context instanceof Eris.CommandInteraction
+        context instanceof Eris.CommandInteraction ||
+        context instanceof Eris.AutocompleteInteraction
     ) {
         header = `gid: ${context.guildID}, uid: ${context.member?.id}, tid: ${context.channel.id}`;
     } else {
@@ -104,15 +115,11 @@ function missingPermissionsText(
     guildID: string,
     missingPermissions: string[]
 ): string {
-    return LocalizationManager.localizer.translate(
-        guildID,
-        "misc.failure.missingPermissionsText",
-        {
-            missingPermissions: missingPermissions.join(", "),
-            permissionsLink: PERMISSIONS_LINK,
-            helpCommand: `\`${process.env.BOT_PREFIX}help\``,
-        }
-    );
+    return i18n.translate(guildID, "misc.failure.missingPermissionsText", {
+        missingPermissions: missingPermissions.join(", "),
+        permissionsLink: PERMISSIONS_LINK,
+        helpCommand: "`/help`",
+    });
 }
 
 /**
@@ -168,7 +175,9 @@ export async function fetchUser(
  * @param textChannelID - the text channel's ID
  * @returns an instance of the TextChannel
  */
-async function fetchChannel(textChannelID: string): Promise<Eris.TextChannel> {
+export async function fetchChannel(
+    textChannelID: string
+): Promise<Eris.TextChannel> {
     let channel: Eris.TextChannel = null;
     const { client, ipc } = State;
 
@@ -243,11 +252,11 @@ export async function textPermissionsCheck(
             )} | Missing SEND_MESSAGES permissions`
         );
         const embed: Eris.EmbedOptions = {
-            title: LocalizationManager.localizer.translate(
+            title: i18n.translate(
                 guildID,
                 "misc.failure.missingPermissions.title"
             ),
-            description: LocalizationManager.localizer.translate(
+            description: i18n.translate(
                 guildID,
                 "misc.failure.missingPermissions.description",
                 {
@@ -377,13 +386,29 @@ async function sendMessageExceptionHandler(
  * @param messageContent - The MessageContent to send
  * @param file - The file to send
  * @param authorID - The author's ID
+ * @param interaction - The interaction
  */
 export async function sendMessage(
     textChannelID: string,
     messageContent: Eris.AdvancedMessageContent,
     file?: Eris.FileContent,
-    authorID?: string
+    authorID?: string,
+    interaction?: Eris.ComponentInteraction | Eris.CommandInteraction
 ): Promise<Eris.Message> {
+    if (interaction) {
+        if (!withinInteractionInterval(interaction)) {
+            return null;
+        }
+
+        try {
+            await interaction.createMessage(messageContent, file);
+        } catch (err) {
+            interactionRejectionHandler(interaction, err);
+        }
+
+        return null;
+    }
+
     const channel = await fetchChannel(textChannelID);
 
     // only reply to message if has required permissions
@@ -461,10 +486,12 @@ async function sendDmMessage(
  * Sends an error embed with the specified title/description
  * @param messageContext - An object containing relevant parts of Eris.Message
  * @param embedPayload - The embed payload
+ * @param interaction - The interaction
  */
 export async function sendErrorMessage(
     messageContext: MessageContext,
-    embedPayload: EmbedPayload
+    embedPayload: EmbedPayload,
+    interaction?: Eris.CommandInteraction
 ): Promise<Eris.Message<Eris.TextableChannel>> {
     const author =
         embedPayload.author == null || embedPayload.author
@@ -499,7 +526,8 @@ export async function sendErrorMessage(
             components: embedPayload.components,
         },
         null,
-        messageContext.author.id
+        messageContext.author.id,
+        interaction
     );
 }
 
@@ -507,13 +535,11 @@ export async function sendErrorMessage(
  * Create and return a Discord embed with the specified payload
  * @param messageContext - An object containing relevant parts of Eris.Message
  * @param embedPayload - What to include in the message
- * @param boldTitle - Whether to bold the title
  *  @returns a Discord embed
  */
 export function generateEmbed(
     messageContext: MessageContext,
-    embedPayload: EmbedPayload,
-    boldTitle = true
+    embedPayload: EmbedPayload
 ): Eris.EmbedOptions {
     const author =
         embedPayload.author == null || embedPayload.author
@@ -528,7 +554,7 @@ export function generateEmbed(
                   icon_url: author.avatarUrl,
               }
             : null,
-        title: boldTitle ? bold(embedPayload.title) : embedPayload.title,
+        title: bold(embedPayload.title),
         url: embedPayload.url,
         description: embedPayload.description,
         fields: embedPayload.fields,
@@ -549,40 +575,42 @@ export function generateEmbed(
  * @param messageContext - An object containing relevant parts of Eris.Message
  * @param embedPayload - What to include in the message
  * @param reply - Whether to reply to the given message
- * @param boldTitle - Whether to bold the title
  * @param content - Plain text content
  * @param additionalEmbeds - Additional embeds to include in the message
+ * @param interaction - The interaction
  */
 export async function sendInfoMessage(
     messageContext: MessageContext,
     embedPayload: EmbedPayload,
     reply = false,
-    boldTitle = true,
     content?: string,
-    additionalEmbeds: Array<Eris.EmbedOptions> = []
+    additionalEmbeds: Array<EmbedPayload> = [],
+    interaction?: Eris.CommandInteraction
 ): Promise<Eris.Message<Eris.TextableChannel>> {
     if (embedPayload.description && embedPayload.description.length > 2048) {
         logger.error(
             `Message was too long. message = ${embedPayload.description}`
         );
         return sendErrorMessage(messageContext, {
-            title: LocalizationManager.localizer.translate(
-                messageContext.guildID,
-                "misc.failure.error"
-            ),
-            description: LocalizationManager.localizer.translate(
+            title: i18n.translate(messageContext.guildID, "misc.failure.error"),
+            description: i18n.translate(
                 messageContext.guildID,
                 "misc.failure.messageTooLong"
             ),
         });
     }
 
-    const embed = generateEmbed(messageContext, embedPayload, boldTitle);
+    const embed = generateEmbed(messageContext, embedPayload);
 
     return sendMessage(
         messageContext.textChannelID,
         {
-            embeds: [embed, ...additionalEmbeds],
+            embeds: [
+                embed,
+                ...additionalEmbeds.map((x) =>
+                    generateEmbed(messageContext, x)
+                ),
+            ],
             messageReference:
                 reply && messageContext.referencedMessageID
                     ? {
@@ -591,10 +619,11 @@ export async function sendInfoMessage(
                       }
                     : null,
             components: embedPayload.components,
-            content,
+            content: content || undefined,
         },
         null,
-        messageContext.author.id
+        messageContext.author.id,
+        interaction
     );
 }
 
@@ -624,15 +653,11 @@ export function getFormattedLimit(
         return friendlyFormattedNumber(visibleLimitEnd);
     }
 
-    return LocalizationManager.localizer.translate(
-        guildID,
-        "misc.formattedLimit",
-        {
-            limitStart: getOrdinalNum(visibleLimitStart),
-            limitEnd: getOrdinalNum(visibleLimitEnd),
-            songCount: friendlyFormattedNumber(totalSongs.count),
-        }
-    );
+    return i18n.translate(guildID, "misc.formattedLimit", {
+        limitStart: getOrdinalNum(visibleLimitStart),
+        limitEnd: getOrdinalNum(visibleLimitEnd),
+        songCount: friendlyFormattedNumber(totalSongs.count),
+    });
 }
 
 /**
@@ -677,14 +702,14 @@ export async function generateOptionsMessage(
 
     if (totalSongs === null) {
         sendErrorMessage(messageContext, {
-            title: LocalizationManager.localizer.translate(
+            title: i18n.translate(
                 guildID,
                 "misc.failure.retrievingSongData.title"
             ),
-            description: LocalizationManager.localizer.translate(
+            description: i18n.translate(
                 guildID,
                 "misc.failure.retrievingSongData.description",
-                { helpCommand: `\`${process.env.BOT_PREFIX}help\`` }
+                { helpCommand: "`/help`" }
             ),
         });
         return null;
@@ -719,24 +744,21 @@ export async function generateOptionsMessage(
     optionStrings[GameOption.SEEK_TYPE] = gameOptions.seekType;
     optionStrings[GameOption.GUESS_MODE_TYPE] = gameOptions.guessModeType;
     optionStrings[GameOption.SPECIAL_TYPE] = gameOptions.specialType;
+    optionStrings[GameOption.SPOTIFY_PLAYLIST_METADATA] =
+        gameOptions.spotifyPlaylistMetadata
+            ? `[${gameOptions.spotifyPlaylistMetadata.playlistName}](${SPOTIFY_BASE_URL}${gameOptions.spotifyPlaylistMetadata.playlistID})`
+            : null;
+
     optionStrings[GameOption.TIMER] = guildPreference.isGuessTimeoutSet()
-        ? LocalizationManager.localizer.translate(
-              guildID,
-              "command.options.timer",
-              {
-                  timerInSeconds: String(gameOptions.guessTimeout),
-              }
-          )
+        ? i18n.translate(guildID, "command.options.timer", {
+              timerInSeconds: String(gameOptions.guessTimeout),
+          })
         : null;
 
     optionStrings[GameOption.DURATION] = guildPreference.isDurationSet()
-        ? LocalizationManager.localizer.translate(
-              guildID,
-              "command.options.duration",
-              {
-                  durationInMinutes: String(gameOptions.duration),
-              }
-          )
+        ? i18n.translate(guildID, "command.options.duration", {
+              durationInMinutes: String(gameOptions.duration),
+          })
         : null;
 
     optionStrings[GameOption.EXCLUDE] = guildPreference.isExcludesMode()
@@ -747,14 +769,14 @@ export async function generateOptionsMessage(
         ? guildPreference.getDisplayedIncludesGroupNames()
         : null;
 
+    const conflictString = i18n.translate(guildID, "misc.conflict");
+
     const generateConflictingCommandEntry = (
         commandValue: string,
         conflictingOption: string
     ): string =>
-        `${strikethrough(commandValue)} (\`${
-            process.env.BOT_PREFIX
-        }${conflictingOption}\` ${italicize(
-            LocalizationManager.localizer.translate(guildID, "misc.conflict")
+        `${strikethrough(commandValue)} (\`/${conflictingOption}\` ${italicize(
+            conflictString
         )})`;
 
     const isEliminationMode =
@@ -785,7 +807,10 @@ export async function generateOptionsMessage(
             for (const option of ConflictingGameOptions[
                 gameOptionConflictCheck.gameOption
             ]) {
-                if (optionStrings[option]) {
+                if (
+                    optionStrings[option] &&
+                    !optionStrings[option].includes(conflictString)
+                ) {
                     optionStrings[option] = generateConflictingCommandEntry(
                         optionStrings[option],
                         GameOptionCommand[gameOptionConflictCheck.gameOption]
@@ -798,12 +823,7 @@ export async function generateOptionsMessage(
     for (const option of Object.values(GameOption)) {
         optionStrings[option] =
             optionStrings[option] ||
-            italicize(
-                LocalizationManager.localizer.translate(
-                    guildID,
-                    "command.options.notSet"
-                )
-            );
+            italicize(i18n.translate(guildID, "command.options.notSet"));
     }
 
     // Underline changed option
@@ -832,24 +852,58 @@ export async function generateOptionsMessage(
         }
     }
 
-    const optionsOverview = LocalizationManager.localizer.translate(
-        messageContext.guildID,
-        "command.options.overview",
-        {
-            limit: bold(limit),
-            totalSongs: bold(
-                friendlyFormattedNumber(totalSongs.countBeforeLimit)
-            ),
+    // Special case: Options that rely on modifying queried songs are disabled when playing from Spotify
+    const isSpotify = guildPreference.isSpotifyPlaylist();
+    if (isSpotify) {
+        const disabledOptions = [
+            GameOption.LIMIT,
+            GameOption.GROUPS,
+            GameOption.GENDER,
+            GameOption.CUTOFF,
+            GameOption.ARTIST_TYPE,
+            GameOption.RELEASE_TYPE,
+            GameOption.LANGUAGE_TYPE,
+            GameOption.SUBUNIT_PREFERENCE,
+            GameOption.OST_PREFERENCE,
+            GameOption.EXCLUDE,
+            GameOption.INCLUDE,
+        ];
+
+        for (const option of disabledOptions) {
+            optionStrings[option] = null;
         }
-    );
+    }
+
+    let optionsOverview: string;
+    if (!isSpotify) {
+        optionsOverview = i18n.translate(
+            messageContext.guildID,
+            "command.options.overview",
+            {
+                limit: bold(limit),
+                totalSongs: bold(
+                    friendlyFormattedNumber(totalSongs.countBeforeLimit)
+                ),
+            }
+        );
+    } else {
+        optionsOverview = i18n.translate(
+            messageContext.guildID,
+            "command.options.spotify",
+            {
+                songCount: bold(limit),
+            }
+        );
+    }
 
     // Options excluded from embed fields since they are of higher importance (shown above them as part of the embed description)
-    const priorityOptions = PriorityGameOption.filter(
+    let priorityOptions: string;
+    priorityOptions = PriorityGameOption.filter(
         (option) => optionStrings[option]
     )
         .map(
             (option) =>
-                `${bold(process.env.BOT_PREFIX + GameOptionCommand[option])}: ${
+                `${bold(`/${GameOptionCommand[option]}`)}: ${
                     optionStrings[option]
                 }`
         )
@@ -858,7 +912,7 @@ export async function generateOptionsMessage(
     let nonPremiumGameWarning = "";
     if (premiumRequest && session?.isGameSession() && !session?.isPremium) {
         nonPremiumGameWarning = italicize(
-            LocalizationManager.localizer.translate(
+            i18n.translate(
                 messageContext.guildID,
                 "command.options.premiumOptionsNonPremiumGame"
             )
@@ -868,6 +922,13 @@ export async function generateOptionsMessage(
     const fieldOptions = Object.keys(GameOptionCommand)
         .filter((option) => optionStrings[option as GameOption])
         .filter((option) => !PriorityGameOption.includes(option as GameOption));
+
+    // Remove priority options; emplace ,spotify/,answer at the start of options
+    if (isSpotify) {
+        priorityOptions = "";
+        fieldOptions.unshift(GameOption.ANSWER_TYPE);
+        fieldOptions.unshift(GameOption.SPOTIFY_PLAYLIST_METADATA);
+    }
 
     const ZERO_WIDTH_SPACE = "​";
 
@@ -879,9 +940,9 @@ export async function generateOptionsMessage(
                 .slice(0, Math.ceil(fieldOptions.length / 3))
                 .map(
                     (option) =>
-                        `${bold(
-                            process.env.BOT_PREFIX + GameOptionCommand[option]
-                        )}: ${optionStrings[option]}`
+                        `${bold(`/${GameOptionCommand[option]}`)}: ${
+                            optionStrings[option]
+                        }`
                 )
                 .join("\n"),
             inline: true,
@@ -895,9 +956,9 @@ export async function generateOptionsMessage(
                 )
                 .map(
                     (option) =>
-                        `${bold(
-                            process.env.BOT_PREFIX + GameOptionCommand[option]
-                        )}: ${optionStrings[option]}`
+                        `${bold(`/${GameOptionCommand[option]}`)}: ${
+                            optionStrings[option]
+                        }`
                 )
                 .join("\n"),
             inline: true,
@@ -908,9 +969,9 @@ export async function generateOptionsMessage(
                 .slice(Math.ceil((2 * fieldOptions.length) / 3))
                 .map(
                     (option) =>
-                        `${bold(
-                            process.env.BOT_PREFIX + GameOptionCommand[option]
-                        )}: ${optionStrings[option]}`
+                        `${bold(`/${GameOptionCommand[option]}`)}: ${
+                            optionStrings[option]
+                        }`
                 )
                 .join("\n"),
             inline: true,
@@ -923,27 +984,24 @@ export async function generateOptionsMessage(
         updatedOptions[0] &&
         updatedOptions[0].reset
     ) {
-        footerText = LocalizationManager.localizer.translate(
+        footerText = i18n.translate(
             messageContext.guildID,
             "command.options.perCommandHelp",
-            { helpCommand: `${process.env.BOT_PREFIX}help` }
+            { helpCommand: "/help" }
         );
     } else if (session?.isListeningSession()) {
-        footerText = LocalizationManager.localizer.translate(
+        footerText = i18n.translate(
             messageContext.guildID,
-            "command.options.musicSessionNotAvailable"
+            "command.options.listeningSessionNotAvailable"
         );
     }
 
     let title = "";
     if (updatedOptions === null || allReset) {
-        title = LocalizationManager.localizer.translate(
-            messageContext.guildID,
-            "command.options.title"
-        );
+        title = i18n.translate(messageContext.guildID, "command.options.title");
     } else {
         if (preset) {
-            title = LocalizationManager.localizer.translate(
+            title = i18n.translate(
                 messageContext.guildID,
                 "command.options.preset"
             );
@@ -953,12 +1011,12 @@ export async function generateOptionsMessage(
 
         title =
             updatedOptions[0] && updatedOptions[0].reset
-                ? LocalizationManager.localizer.translate(
+                ? i18n.translate(
                       messageContext.guildID,
                       "command.options.reset",
                       { presetOrOption: title }
                   )
-                : LocalizationManager.localizer.translate(
+                : i18n.translate(
                       messageContext.guildID,
                       "command.options.updated",
                       { presetOrOption: title }
@@ -992,6 +1050,7 @@ export async function generateOptionsMessage(
  * @param preset - Specifies whether the GameOptions were modified by a preset
  * @param allReset - Specifies whether all GameOptions were reset
  * @param footerText - The footer text
+ * @param interaction - The interaction
  */
 export async function sendOptionsMessage(
     session: Session,
@@ -1000,9 +1059,10 @@ export async function sendOptionsMessage(
     updatedOptions?: { option: GameOption; reset: boolean }[],
     preset = false,
     allReset = false,
-    footerText?: string
+    footerText?: string,
+    interaction?: Eris.CommandInteraction
 ): Promise<void> {
-    const optionsEmbed = generateOptionsMessage(
+    const optionsEmbed = await generateOptionsMessage(
         session,
         messageContext,
         guildPreference,
@@ -1012,7 +1072,14 @@ export async function sendOptionsMessage(
         footerText
     );
 
-    await sendInfoMessage(messageContext, await optionsEmbed, true);
+    await sendInfoMessage(
+        messageContext,
+        optionsEmbed,
+        true,
+        null,
+        [],
+        interaction
+    );
 }
 
 /**
@@ -1028,64 +1095,48 @@ export async function getGameInfoMessage(
 
     if (!endGameMessage) return null;
 
-    // deprecated case, where message's translation key is stored as message in db
-    if (endGameMessage.message.startsWith("misc.gameMessages")) {
-        endGameMessage.message = LocalizationManager.localizer.translate(
-            guildID,
-            endGameMessage.message
-        );
-    } else {
-        try {
-            const gameInfoMessageContent: GameMessageMultiLocaleContent =
-                JSON.parse(endGameMessage.message);
+    try {
+        const gameInfoMessageContent: GameMessageMultiLocaleContent =
+            JSON.parse(endGameMessage.message);
 
-            if (!gameInfoMessageContent.en || !gameInfoMessageContent.ko) {
-                logger.error(
-                    `Message's Game info message content is missing content. en = ${gameInfoMessageContent.en}, ko = ${gameInfoMessageContent.ko}`
-                );
-                return null;
-            }
-
-            const locale = State.getGuildLocale(guildID);
-            endGameMessage.message =
-                locale === LocaleType.EN
-                    ? gameInfoMessageContent.en
-                    : gameInfoMessageContent.ko;
-        } catch (e) {
+        if (!gameInfoMessageContent.en || !gameInfoMessageContent.ko) {
             logger.error(
-                `Error parsing message's game info message content, invalid JSON? message = ${endGameMessage.message}`
+                `Message's Game info message content is missing content. en = ${gameInfoMessageContent.en}, ko = ${gameInfoMessageContent.ko}`
             );
+            return null;
         }
+
+        const locale = State.getGuildLocale(guildID);
+        endGameMessage.message =
+            locale === LocaleType.EN
+                ? gameInfoMessageContent.en
+                : gameInfoMessageContent.ko;
+    } catch (e) {
+        logger.error(
+            `Error parsing message's game info message content, invalid JSON? message = ${endGameMessage.message}`
+        );
     }
 
-    // deprecated case, where title's translation key is stored as message in db
-    if (endGameMessage.title.startsWith("misc.gameMessages")) {
-        endGameMessage.title = LocalizationManager.localizer.translate(
-            guildID,
-            endGameMessage.title
-        );
-    } else {
-        try {
-            const gameInfoMessageContent: GameMessageMultiLocaleContent =
-                JSON.parse(endGameMessage.title);
+    try {
+        const gameInfoMessageContent: GameMessageMultiLocaleContent =
+            JSON.parse(endGameMessage.title);
 
-            if (!gameInfoMessageContent.en || !gameInfoMessageContent.ko) {
-                logger.error(
-                    `Title's game info message content is missing content. en = ${gameInfoMessageContent.en}, ko = ${gameInfoMessageContent.ko}`
-                );
-                return null;
-            }
-
-            const locale = State.getGuildLocale(guildID);
-            endGameMessage.title =
-                locale === LocaleType.EN
-                    ? gameInfoMessageContent.en
-                    : gameInfoMessageContent.ko;
-        } catch (e) {
+        if (!gameInfoMessageContent.en || !gameInfoMessageContent.ko) {
             logger.error(
-                `Error parsing title's game info message content, invalid JSON? title = ${endGameMessage.title}`
+                `Title's game info message content is missing content. en = ${gameInfoMessageContent.en}, ko = ${gameInfoMessageContent.ko}`
             );
+            return null;
         }
+
+        const locale = State.getGuildLocale(guildID);
+        endGameMessage.title =
+            locale === LocaleType.EN
+                ? gameInfoMessageContent.en
+                : gameInfoMessageContent.ko;
+    } catch (e) {
+        logger.error(
+            `Error parsing title's game info message content, invalid JSON? title = ${endGameMessage.title}`
+        );
     }
 
     return endGameMessage;
@@ -1093,13 +1144,13 @@ export async function getGameInfoMessage(
 
 /**
  * Sends a paginated embed
- * @param message - The Message object
+ * @param messageOrInteraction - The Message object
  * @param embeds - A list of embeds to paginate over
  * @param components - A list of components to add to the embed
  * @param startPage - The page to start on
  */
 export async function sendPaginationedEmbed(
-    message: GuildTextableMessage,
+    messageOrInteraction: GuildTextableMessage | Eris.CommandInteraction,
     embeds: Array<Eris.EmbedOptions> | Array<EmbedGenerator>,
     components?: Array<Eris.ActionRow>,
     startPage = 1
@@ -1107,17 +1158,21 @@ export async function sendPaginationedEmbed(
     if (embeds.length > 1) {
         if (
             await textPermissionsCheck(
-                message.channel.id,
-                message.guildID,
-                message.author.id,
+                messageOrInteraction.channel.id,
+                messageOrInteraction.guildID,
+                messageOrInteraction.member.id,
                 [...REQUIRED_TEXT_PERMISSIONS, "readMessageHistory"]
             )
         ) {
             return EmbedPaginator.createPaginationEmbed(
-                message,
+                messageOrInteraction.channel as GuildTextableChannel,
+                messageOrInteraction.member.id,
                 embeds,
                 { timeout: 60000, startPage, cycling: true },
-                components
+                components,
+                messageOrInteraction instanceof Eris.CommandInteraction
+                    ? messageOrInteraction
+                    : null
             );
         }
 
@@ -1132,10 +1187,13 @@ export async function sendPaginationedEmbed(
     }
 
     return sendMessage(
-        message.channel.id,
+        messageOrInteraction.channel.id,
         { embeds: [embed], components },
         null,
-        message.author.id
+        messageOrInteraction.member.id,
+        messageOrInteraction instanceof Eris.CommandInteraction
+            ? messageOrInteraction
+            : null
     );
 }
 
@@ -1159,21 +1217,22 @@ export function getVoiceConnection(
 }
 
 /**
- * @param message - The Message
+ * @param userID - the user's ID
+ * @param guildID - the guild ID
  * @returns whether the message's author and the bot are in the same voice channel
  */
 export function areUserAndBotInSameVoiceChannel(
-    message: Eris.Message
+    userID: string,
+    guildID: string
 ): boolean {
-    const botVoiceConnection = State.client.voiceConnections.get(
-        message.guildID
-    );
+    const member = State.client.guilds.get(guildID)?.members.get(userID);
+    const botVoiceConnection = State.client.voiceConnections.get(guildID);
 
-    if (!message.member.voiceState || !botVoiceConnection) {
+    if (!member || !member.voiceState || !botVoiceConnection) {
         return false;
     }
 
-    return message.member.voiceState.channelID === botVoiceConnection.channelID;
+    return member.voiceState.channelID === botVoiceConnection.channelID;
 }
 
 /**
@@ -1229,15 +1288,16 @@ export function getNumParticipants(voiceChannelID: string): number {
 }
 
 /**
- * @param message - The Message object
+ * @param messageContext - An object containing relevant parts of Eris.Message
+ * @param interaction - The interaction
  * @returns whether the bot has permissions to join the message author's currently active voice channel
  */
-export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
-    const voiceChannel = getUserVoiceChannel(
-        MessageContext.fromMessage(message)
-    );
+export function voicePermissionsCheck(
+    messageContext: MessageContext,
+    interaction?: Eris.CommandInteraction
+): boolean {
+    const voiceChannel = getUserVoiceChannel(messageContext);
 
-    const messageContext = MessageContext.fromMessage(message);
     const missingPermissions = REQUIRED_VOICE_PERMISSIONS.filter(
         (permission) =>
             !voiceChannel
@@ -1254,18 +1314,21 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
             )}] permissions`
         );
 
-        sendErrorMessage(MessageContext.fromMessage(message), {
-            title: LocalizationManager.localizer.translate(
-                message.guildID,
-                "misc.failure.missingPermissions.title"
-            ),
-            description: missingPermissionsText(
-                message.guildID,
-                missingPermissions
-            ),
-            url: PERMISSIONS_LINK,
-        });
-
+        sendErrorMessage(
+            messageContext,
+            {
+                title: i18n.translate(
+                    messageContext.guildID,
+                    "misc.failure.missingPermissions.title"
+                ),
+                description: missingPermissionsText(
+                    messageContext.guildID,
+                    missingPermissions
+                ),
+                url: PERMISSIONS_LINK,
+            },
+            interaction
+        );
         return false;
     }
 
@@ -1275,13 +1338,13 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
 
     if (channelFull) {
         logger.warn(`${getDebugLogHeader(messageContext)} | Channel full`);
-        sendInfoMessage(MessageContext.fromMessage(message), {
-            title: LocalizationManager.localizer.translate(
-                message.guildID,
+        sendInfoMessage(messageContext, {
+            title: i18n.translate(
+                messageContext.guildID,
                 "misc.failure.vcFull.title"
             ),
-            description: LocalizationManager.localizer.translate(
-                message.guildID,
+            description: i18n.translate(
+                messageContext.guildID,
                 "misc.failure.vcFull.description"
             ),
         });
@@ -1296,13 +1359,13 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
             )} | Attempted to start game in AFK voice channel`
         );
 
-        sendInfoMessage(MessageContext.fromMessage(message), {
-            title: LocalizationManager.localizer.translate(
-                message.guildID,
+        sendInfoMessage(messageContext, {
+            title: i18n.translate(
+                messageContext.guildID,
                 "misc.failure.afkChannel.title"
             ),
-            description: LocalizationManager.localizer.translate(
-                message.guildID,
+            description: i18n.translate(
+                messageContext.guildID,
                 "misc.failure.afkChannel.description"
             ),
         });
@@ -1412,10 +1475,9 @@ export async function sendBookmarkedSongs(
             )} (${standardDateFormat(bookmarkedSong[1].song.publishDate)})`,
             value: `[${friendlyFormattedNumber(
                 bookmarkedSong[1].song.views
-            )} ${LocalizationManager.localizer.translate(
-                guildID,
-                "misc.views"
-            )}](https://youtu.be/${bookmarkedSong[1].song.youtubeLink})`,
+            )} ${i18n.translate(guildID, "misc.views")}](https://youtu.be/${
+                bookmarkedSong[1].song.youtubeLink
+            })`,
             inline: false,
         }));
 
@@ -1426,14 +1488,14 @@ export async function sendBookmarkedSongs(
                     icon_url: KmqImages.READING_BOOK,
                 },
                 title: bold(
-                    LocalizationManager.localizer.translate(
+                    i18n.translate(
                         guildID,
                         "misc.interaction.bookmarked.message.title"
                     )
                 ),
                 fields,
                 footer: {
-                    text: LocalizationManager.localizer.translate(
+                    text: i18n.translate(
                         guildID,
                         "misc.interaction.bookmarked.message.playedOn",
                         { date: standardDateFormat(new Date()) }
@@ -1450,7 +1512,10 @@ export async function sendBookmarkedSongs(
 }
 
 function withinInteractionInterval(
-    interaction: Eris.ComponentInteraction | Eris.CommandInteraction
+    interaction:
+        | Eris.ComponentInteraction
+        | Eris.CommandInteraction
+        | Eris.AutocompleteInteraction
 ): boolean {
     return (
         new Date().getTime() - interaction.createdAt <=
@@ -1459,7 +1524,10 @@ function withinInteractionInterval(
 }
 
 function interactionRejectionHandler(
-    interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
+    interaction:
+        | Eris.ComponentInteraction
+        | Eris.CommandInteraction
+        | Eris.AutocompleteInteraction,
     err
 ): void {
     if (err.code === 10062) {
@@ -1498,22 +1566,41 @@ export async function tryInteractionAcknowledge(
 }
 
 /**
- * Attempts to send a success response to an interaction
+ * Attempts to acknowledge an autocomplete interaction with the given response data
  * @param interaction - The originating interaction
- * @param title - The embed title
- * @param description - The embed description
+ * @param response - The autocomplete data to show the user
  */
-export async function tryCreateInteractionSuccessAcknowledgement(
-    interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
-    title: string,
-    description: string
+export async function tryAutocompleteInteractionAcknowledge(
+    interaction: Eris.AutocompleteInteraction,
+    response: Array<{ name: string; value: string }>
 ): Promise<void> {
     if (!withinInteractionInterval(interaction)) {
         return;
     }
 
     try {
-        await interaction.createMessage({
+        await interaction.acknowledge(response);
+    } catch (err) {
+        interactionRejectionHandler(interaction, err);
+    }
+}
+
+/**
+ * Attempts to send a success response to an interaction
+ * @param interaction - The originating interaction
+ * @param title - The embed title
+ * @param description - The embed description
+ * @param ephemeral - Whether the embed can only be seen by the triggering user
+ */
+export async function tryCreateInteractionSuccessAcknowledgement(
+    interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
+    title: string,
+    description: string,
+    ephemeral: boolean = false
+): Promise<void> {
+    await sendMessage(
+        null,
+        {
             embeds: [
                 {
                     color: (await userBonusIsActive(interaction.member?.id))
@@ -1528,28 +1615,30 @@ export async function tryCreateInteractionSuccessAcknowledgement(
                     thumbnail: { url: KmqImages.THUMBS_UP },
                 },
             ],
-            flags: 64,
-        });
-    } catch (err) {
-        interactionRejectionHandler(interaction, err);
-    }
+            flags: ephemeral ? EPHEMERAL_MESSAGE_FLAG : null,
+        },
+        null,
+        null,
+        interaction
+    );
 }
 
 /**
  * Attempts to send a error message to an interaction
  * @param interaction - The originating interaction
+ * @param title - The embed title
  * @param description - The embed description
+ * @param ephemeral - Whether the embed can only be seen by the triggering user
  */
 export async function tryCreateInteractionErrorAcknowledgement(
     interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
-    description: string
+    title: string,
+    description: string,
+    ephemeral: boolean = true
 ): Promise<void> {
-    if (!withinInteractionInterval(interaction)) {
-        return;
-    }
-
-    try {
-        await interaction.createMessage({
+    await sendMessage(
+        null,
+        {
             embeds: [
                 {
                     color: EMBED_ERROR_COLOR,
@@ -1557,21 +1646,24 @@ export async function tryCreateInteractionErrorAcknowledgement(
                         name: interaction.member?.username,
                         icon_url: interaction.member?.avatarURL,
                     },
-                    title: bold(
-                        LocalizationManager.localizer.translate(
-                            interaction.guildID,
-                            "misc.interaction.title.failure"
-                        )
-                    ),
+                    title:
+                        title ||
+                        bold(
+                            i18n.translate(
+                                interaction.guildID,
+                                "misc.interaction.title.failure"
+                            )
+                        ),
                     description,
                     thumbnail: { url: KmqImages.DEAD },
                 },
             ],
-            flags: 64,
-        });
-    } catch (err) {
-        interactionRejectionHandler(interaction, err);
-    }
+            flags: ephemeral ? EPHEMERAL_MESSAGE_FLAG : null,
+        },
+        null,
+        null,
+        interaction
+    );
 }
 
 /**
@@ -1594,7 +1686,160 @@ export function sendPowerHourNotification(): void {
             thumbnailUrl: KmqImages.LISTENING,
         },
         false,
-        true,
         `<@&${process.env.POWER_HOUR_NOTIFICATION_ROLE_ID}>`
+    );
+}
+
+/**
+ * @param interaction - The interaction
+ * @returns the interaction key and value
+ */
+export function getInteractionValue(
+    interaction: Eris.CommandInteraction | Eris.AutocompleteInteraction
+): {
+    interactionKey: string;
+    interactionOptions: {
+        [optionName: string]: any;
+    };
+    interactionName: string;
+    focusedKey: string;
+} {
+    let options = interaction.data.options;
+
+    if (options == null) {
+        return {
+            interactionKey: null,
+            interactionOptions: {},
+            interactionName: null,
+            focusedKey: null,
+        };
+    }
+
+    let parentInteractionDataName = null;
+    const keys = [];
+    while (options.length > 0) {
+        keys.push(options[0].name);
+        if (
+            options[0].type ===
+                Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND ||
+            options[0].type ===
+                Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND_GROUP
+        ) {
+            parentInteractionDataName = options[0].name;
+            options = options[0].options;
+        } else {
+            break;
+        }
+    }
+
+    return {
+        interactionKey: keys.join("."),
+        interactionOptions: options.reduce(
+            (result, filter: Eris.InteractionDataOptionsWithValue) => {
+                result[filter.name] = filter.value;
+                return result;
+            },
+            {}
+        ),
+        interactionName: parentInteractionDataName,
+        focusedKey: options.find((x) => x["focused"])?.name,
+    };
+}
+
+/**
+ * Retrieve artist names from the interaction options
+ * @param enteredNames - Artist names the user has entered
+ * @returns the matched artists
+ */
+export function getMatchedArtists(enteredNames: Array<string>): {
+    matchedGroups: Array<MatchedArtist>;
+    unmatchedGroups: Array<string>;
+} {
+    const matchedGroups: Array<MatchedArtist> = [];
+    const unmatchedGroups: Array<string> = [];
+    for (const artistName of enteredNames) {
+        const match = State.artistToEntry[artistName.toLowerCase()];
+        if (match) {
+            matchedGroups.push(match);
+        } else {
+            unmatchedGroups.push(artistName);
+        }
+    }
+
+    return {
+        matchedGroups: _.uniqBy(matchedGroups, "id"),
+        unmatchedGroups,
+    };
+}
+
+/**
+ * Get artists that match the given query, or top artists if no query is provided
+ * @param lowercaseUserInput - The user's input, in lowercase
+ * @param excludedArtistNames - Artists to exclude in the result
+ * @returns a list of group names
+ */
+export function searchArtists(
+    lowercaseUserInput: string,
+    excludedArtistNames: Array<string>
+): Array<MatchedArtist> {
+    if (lowercaseUserInput === "") {
+        return Object.values(State.topArtists).filter(
+            (x) => !excludedArtistNames.includes(x.name)
+        );
+    }
+
+    return Object.entries(State.artistToEntry)
+        .filter((x) => x[0].startsWith(lowercaseUserInput))
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .filter((x) => !excludedArtistNames.includes(x[1].name))
+        .map((x) => x[1]);
+}
+
+/**
+ * Transform the given data into autocomplete format
+ * @param data - Data to include in the result
+ * @param showHangul - Whether to use hangul
+ * @returns a list of group names
+ */
+export function localizedAutocompleteFormat(
+    data: Array<{ name: string; hangulName?: string }>,
+    showHangul: boolean
+): Array<AutocompleteEntry> {
+    return data
+        .map((x) => ({
+            name: showHangul && x.hangulName ? x.hangulName : x.name,
+            value: showHangul && x.hangulName ? x.hangulName : x.name,
+        }))
+        .slice(0, MAX_AUTOCOMPLETE_FIELDS);
+}
+
+/**
+ * Handles showing suggested artists as the user types for the groups/include/exclude slash commands
+ * @param interaction - The interaction with intermediate typing state
+ */
+export async function processGroupAutocompleteInteraction(
+    interaction: Eris.AutocompleteInteraction
+): Promise<void> {
+    const interactionData = getInteractionValue(interaction);
+    const focusedKey = interactionData.focusedKey;
+    const focusedVal = interactionData.interactionOptions[focusedKey];
+    const lowercaseUserInput = focusedVal.toLowerCase();
+
+    const previouslyEnteredArtists = getMatchedArtists(
+        Object.entries(interactionData.interactionOptions)
+            .filter((x) => x[0] !== focusedKey)
+            .map((x) => x[1])
+    ).matchedGroups.map((x) => x.name);
+
+    const showHangul =
+        containsHangul(lowercaseUserInput) ||
+        State.getGuildLocale(interaction.guildID) === LocaleType.KO;
+
+    await tryAutocompleteInteractionAcknowledge(
+        interaction,
+        localizedAutocompleteFormat(
+            searchArtists(lowercaseUserInput, previouslyEnteredArtists),
+            showHangul
+        )
     );
 }

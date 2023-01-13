@@ -13,11 +13,14 @@ import {
     sendInfoMessage,
 } from "../../helpers/discord_utils";
 import { userBonusIsActive } from "../../helpers/game_utils";
-import LocalizationManager from "../../helpers/localization_manager";
+import Eris from "eris";
 import MessageContext from "../../structures/message_context";
 import dbContext from "../../database_context";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
+import type EmbedPayload from "../../interfaces/embed_payload";
 import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("vote");
@@ -27,21 +30,33 @@ export default class VoteCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "vote",
-        description: LocalizationManager.localizer.translate(
-            guildID,
-            "command.vote.help.description"
-        ),
-        usage: ",vote",
+        description: i18n.translate(guildID, "command.vote.help.description"),
+        usage: "/vote",
         examples: [],
         priority: 60,
     });
 
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
+        {
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+        },
+    ];
+
     call = async ({ message }: CommandArgs): Promise<void> => {
+        await VoteCommand.sendVoteMessage(MessageContext.fromMessage(message));
+    };
+
+    static async sendVoteMessage(
+        messageContext: MessageContext,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
         let voteStatusString = "";
-        const boostActive = await userBonusIsActive(message.author.id);
+        const boostActive = await userBonusIsActive(messageContext.author.id);
         const userVoterStatus = await dbContext
             .kmq("top_gg_user_votes")
-            .where("user_id", "=", message.author.id)
+            .where("user_id", "=", messageContext.author.id)
             .first();
 
         if (boostActive) {
@@ -51,13 +66,13 @@ export default class VoteCommand implements BaseCommand {
                 ).getTime() /
                 (1000 * 60);
 
-            voteStatusString = LocalizationManager.localizer.translate(
-                message.guildID,
+            voteStatusString = i18n.translate(
+                messageContext.guildID,
                 "command.vote.timeLeft",
                 {
                     time: bold(
-                        LocalizationManager.localizer.translateN(
-                            message.guildID,
+                        i18n.translateN(
+                            messageContext.guildID,
                             "misc.plural.minute",
                             Math.max(Math.ceil(timeRemaining), 0)
                         )
@@ -73,8 +88,8 @@ export default class VoteCommand implements BaseCommand {
                     VOTE_BONUS_DURATION
             );
             if (nextVoteTime.getTime() <= Date.now()) {
-                voteStatusString = LocalizationManager.localizer.translate(
-                    message.guildID,
+                voteStatusString = i18n.translate(
+                    messageContext.guildID,
                     "command.vote.available"
                 );
             } else {
@@ -91,36 +106,36 @@ export default class VoteCommand implements BaseCommand {
                 ).getSeconds();
 
                 if (hoursLeft > 0) {
-                    voteStatusString = LocalizationManager.localizer.translate(
-                        message.guildID,
+                    voteStatusString = i18n.translate(
+                        messageContext.guildID,
                         "command.vote.unavailable.hours",
                         {
-                            hours: LocalizationManager.localizer.translateN(
-                                message.guildID,
+                            hours: i18n.translateN(
+                                messageContext.guildID,
                                 "misc.plural.hour",
                                 hoursLeft
                             ),
                         }
                     );
                 } else if (minutesLeft > 0) {
-                    voteStatusString = LocalizationManager.localizer.translate(
-                        message.guildID,
+                    voteStatusString = i18n.translate(
+                        messageContext.guildID,
                         "command.vote.unavailable.minutes",
                         {
-                            minutes: LocalizationManager.localizer.translateN(
-                                message.guildID,
+                            minutes: i18n.translateN(
+                                messageContext.guildID,
                                 "misc.plural.minute",
                                 minutesLeft
                             ),
                         }
                     );
                 } else {
-                    voteStatusString = LocalizationManager.localizer.translate(
-                        message.guildID,
+                    voteStatusString = i18n.translate(
+                        messageContext.guildID,
                         "command.vote.unavailable.seconds",
                         {
-                            seconds: LocalizationManager.localizer.translateN(
-                                message.guildID,
+                            seconds: i18n.translateN(
+                                messageContext.guildID,
                                 "misc.plural.second",
                                 secondsLeft
                             ),
@@ -129,68 +144,86 @@ export default class VoteCommand implements BaseCommand {
                 }
             }
         } else {
-            voteStatusString = LocalizationManager.localizer.translate(
-                message.guildID,
+            voteStatusString = i18n.translate(
+                messageContext.guildID,
                 "command.vote.available"
             );
         }
 
-        sendInfoMessage(
-            MessageContext.fromMessage(message),
-            {
-                color: boostActive ? EMBED_SUCCESS_BONUS_COLOR : null,
-                title: boostActive
-                    ? LocalizationManager.localizer.translate(
-                          message.guildID,
-                          "command.vote.boost.active"
-                      )
-                    : LocalizationManager.localizer.translate(
-                          message.guildID,
-                          "command.vote.boost.inactive"
-                      ),
-                description: `${voteStatusString}\n\n${LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "command.vote.description",
-                    {
-                        voteLink: VOTE_LINK,
-                        voteResetDuration: String(VOTE_RESET_DURATION),
-                        reviewLink: REVIEW_LINK,
-                    }
-                )} `,
-                thumbnailUrl: KmqImages.THUMBS_UP,
-                components: [
-                    {
-                        type: 1,
-                        components: [
-                            {
-                                style: 5,
-                                url: VOTE_LINK,
-                                type: 2 as const,
-                                emoji: { name: "✅" },
-                                label: LocalizationManager.localizer.translate(
-                                    message.guildID,
-                                    "misc.interaction.vote"
-                                ),
-                            },
-                            {
-                                style: 5,
-                                url: REVIEW_LINK,
-                                type: 2 as const,
-                                emoji: { name: "📖" },
-                                label: LocalizationManager.localizer.translate(
-                                    message.guildID,
-                                    "misc.interaction.leaveReview"
-                                ),
-                            },
-                        ],
-                    },
-                ],
-            },
-            true
+        const embedPayload: EmbedPayload = {
+            color: boostActive ? EMBED_SUCCESS_BONUS_COLOR : null,
+            title: boostActive
+                ? i18n.translate(
+                      messageContext.guildID,
+                      "command.vote.boost.active"
+                  )
+                : i18n.translate(
+                      messageContext.guildID,
+                      "command.vote.boost.inactive"
+                  ),
+            description: `${voteStatusString}\n\n${i18n.translate(
+                messageContext.guildID,
+                "command.vote.description",
+                {
+                    voteLink: VOTE_LINK,
+                    voteResetDuration: String(VOTE_RESET_DURATION),
+                    reviewLink: REVIEW_LINK,
+                }
+            )} `,
+            thumbnailUrl: KmqImages.THUMBS_UP,
+            components: [
+                {
+                    type: 1,
+                    components: [
+                        {
+                            type: Eris.Constants.ComponentTypes.BUTTON,
+                            style: Eris.Constants.ButtonStyles.LINK,
+                            url: VOTE_LINK,
+                            emoji: { name: "✅" },
+                            label: i18n.translate(
+                                messageContext.guildID,
+                                "misc.interaction.vote"
+                            ),
+                        },
+                        {
+                            type: Eris.Constants.ComponentTypes.BUTTON,
+                            style: Eris.Constants.ButtonStyles.LINK,
+                            url: REVIEW_LINK,
+                            emoji: { name: "📖" },
+                            label: i18n.translate(
+                                messageContext.guildID,
+                                "misc.interaction.leaveReview"
+                            ),
+                        },
+                    ],
+                },
+            ],
+        };
+
+        await sendInfoMessage(
+            messageContext,
+            embedPayload,
+            true,
+            null,
+            [],
+            interaction
         );
 
         logger.info(
-            `${getDebugLogHeader(message)} | Vote instructions retrieved.`
+            `${getDebugLogHeader(
+                messageContext
+            )} | Vote instructions retrieved.`
         );
-    };
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        await VoteCommand.sendVoteMessage(messageContext, interaction);
+    }
 }

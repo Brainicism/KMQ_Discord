@@ -1,13 +1,15 @@
 import { DEFAULT_LOCALE } from "../constants";
+import { IPCLogger } from "../logger";
 import Backend from "i18next-fs-backend";
+import EnvType from "../enums/env_type";
 import LocaleType from "../enums/locale_type";
 import State from "../state";
 import i18next from "i18next";
 import path from "path";
 
-export default class LocalizationManager {
-    static localizer = new LocalizationManager();
+const logger = new IPCLogger("localization_manager");
 
+export class LocalizationManager {
     internalLocalizer: typeof i18next;
 
     constructor() {
@@ -29,21 +31,55 @@ export default class LocalizationManager {
 
     /**
      * Wrapper for translateByLocale
-     * @param guildID - The guild ID associated with the guild receiving the string
+     * @param localeOrGuildID - A locale to translate to, or the guild ID to translate for
      * @param phrase - The phrase to translate
      * @param replace - Replacements to be applied to the phrase
      * @returns The translated phrase
      */
     translate(
-        guildID: string,
+        localeOrGuildID: LocaleType | string,
         phrase: string,
         replace: { [key: string]: string } = {}
     ): string {
+        if (!this.hasKey(phrase)) {
+            logger.error(`Missing translation for phrase: ${phrase}`);
+            if (process.env.NODE_ENV === EnvType.TEST) {
+                process.exit(1);
+            }
+        }
+
         return this.translateByLocale(
-            State.getGuildLocale(guildID),
+            Object.values(LocaleType).includes(localeOrGuildID as LocaleType)
+                ? (localeOrGuildID as LocaleType)
+                : State.getGuildLocale(localeOrGuildID),
             phrase,
             replace
         );
+    }
+
+    /**
+     * Wrapper for translateNByLocale
+     * @param localeOrGuildID - A locale to translate to, or the guild ID to translate for
+     * @param phrase - The phrase to translate
+     * @param count - The number which decides whether to select singular or plural
+     * @returns The translated phrase
+     */
+    translateN(localeOrGuildID: string, phrase: string, count: number): string {
+        if (!this.hasKey(`${phrase}_one`) || !this.hasKey(`${phrase}_other`)) {
+            logger.error(`Missing translation for plural phrase: ${phrase}`);
+        }
+
+        return this.translateNByLocale(
+            localeOrGuildID in LocaleType
+                ? (localeOrGuildID as LocaleType)
+                : State.getGuildLocale(localeOrGuildID),
+            phrase,
+            count
+        );
+    }
+
+    hasKey(key: string): boolean {
+        return this.internalLocalizer.exists(key);
     }
 
     /**
@@ -53,7 +89,7 @@ export default class LocalizationManager {
      * @param replace - Replacements to be applied to the phrase
      * @returns The translated phrase
      */
-    translateByLocale(
+    private translateByLocale(
         locale: LocaleType,
         phrase: string,
         replace: { [key: string]: string } = {}
@@ -65,28 +101,13 @@ export default class LocalizationManager {
     }
 
     /**
-     * Wrapper for translateNByLocale
-     * @param guildID - The guild ID associated with the guild receiving the string
-     * @param phrase - The phrase to translate
-     * @param count - The number which decides whether to select singular or plural
-     * @returns The translated phrase
-     */
-    translateN(guildID: string, phrase: string, count: number): string {
-        return this.translateNByLocale(
-            State.getGuildLocale(guildID),
-            phrase,
-            count
-        );
-    }
-
-    /**
      * Translate with plural condition the given phrase and count using locale configuration
      * @param locale - The locale to translate to
      * @param phrase - The phrase to translate
      * @param count - The number which decides whether to select singular or plural
      * @returns The translated phrase
      */
-    translateNByLocale(
+    private translateNByLocale(
         locale: LocaleType,
         phrase: string,
         count: number
@@ -96,8 +117,6 @@ export default class LocalizationManager {
             count,
         });
     }
-
-    hasKey(key: string): boolean {
-        return this.internalLocalizer.exists(key);
-    }
 }
+
+export default new LocalizationManager();

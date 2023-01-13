@@ -9,14 +9,14 @@ import {
     SyntaxKind,
     createProgram,
 } from "typescript";
-import LocalizationManager from "../helpers/localization_manager";
+import i18n from "../helpers/localization_manager";
 import type { CallExpression, Node } from "typescript";
 
 const logger = new IPCLogger("missing_i18n");
 
 const dynamicTranslationKeyAllowlist = [
     "`command.locale.language.${DEFAULT_LOCALE}`",
-    "`command.locale.language.${language}`",
+    "`command.locale.language.${localeType}`",
     "highestRankTitle.title",
     "rankTitle.title",
     "RANK_TITLES[0].title",
@@ -27,18 +27,22 @@ const dynamicTranslationKeyAllowlist = [
     "gameInfoMessage.message",
     "gameInfoMessage.title",
     "getOrdinalNum(idx + 1)",
+    "`command.groups.interaction.${action}.perGroupDescription`",
+    "`command.groups.interaction.${action}.description`",
+    "`command.exclude.interaction.${action}.perGroupDescription`",
+    "`command.exclude.interaction.${action}.description`",
+    "`command.include.interaction.${action}.perGroupDescription`",
+    "`command.include.interaction.${action}.description`",
 ];
 
 const translationInterfaceFunctions = [
-    "LocalizationManager.localizer.translate",
-    "LocalizationManager.localizer.translateN",
-    "LocalizationManager.localizer.translateByLocale",
-    "LocalizationManager.localizer.translateNByLocale",
+    "i18n.localizer.translate",
+    "i18n.localizer.translateN",
+    "i18n.localizer.translateByLocale",
+    "i18n.localizer.translateNByLocale",
 ];
 
-const translationInternalFunctions = [
-    "LocalizationManager.localizer.internalLocalizer.t",
-];
+const translationInternalFunctions = ["i18n.localizer.internalLocalizer.t"];
 
 const translationKeys = new Set<string>();
 const dynamicTranslationKeys = new Set<string>();
@@ -116,9 +120,8 @@ function getNodeKeys(node: Node): void {
         getNodeKeys(sourceFile);
     }
 
-    const localizationManager = new LocalizationManager();
     const missingKeys = Array.from(translationKeys).filter(
-        (key) => !localizationManager.hasKey(key)
+        (key) => !i18n.hasKey(key)
     );
 
     for (const missingKey of missingKeys) {

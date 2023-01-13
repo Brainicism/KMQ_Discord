@@ -3,14 +3,17 @@ import {
     areUserAndBotInSameVoiceChannel,
     getDebugLogHeader,
     sendErrorMessage,
+    tryCreateInteractionErrorAcknowledgement,
 } from "./helpers/discord_utils";
 import { getTimeUntilRestart } from "./helpers/management_utils";
 import { isUserPremium } from "./helpers/game_utils";
 import GameType from "./enums/game_type";
+import GuildPreference from "./structures/guild_preference";
 import KmqConfiguration from "./kmq_configuration";
-import LocalizationManager from "./helpers/localization_manager";
-import MessageContext from "./structures/message_context";
+import LocaleType from "./enums/locale_type";
 import dbContext from "./database_context";
+import i18n from "./helpers/localization_manager";
+import type EmbedPayload from "./interfaces/embed_payload";
 import type GameSession from "./structures/game_session";
 import type PrecheckArgs from "./interfaces/precheck_args";
 
@@ -18,17 +21,54 @@ const logger = new IPCLogger("command_prechecks");
 
 export default class CommandPrechecks {
     static inSessionCommandPrecheck(precheckArgs: PrecheckArgs): boolean {
-        const { message, session, errorMessage } = precheckArgs;
+        const { messageContext, session, errorMessage, interaction } =
+            precheckArgs;
+
         if (!session) {
+            if (interaction) {
+                tryCreateInteractionErrorAcknowledgement(
+                    interaction,
+                    i18n.translate(
+                        LocaleType.EN,
+                        "misc.failure.game.noneInProgress.title"
+                    ),
+                    i18n.translate(
+                        LocaleType.EN,
+                        "misc.failure.game.noneInProgress.description"
+                    )
+                );
+            }
+
             return false;
         }
 
+        const userAndBotInSameChannel = areUserAndBotInSameVoiceChannel(
+            messageContext.author.id,
+            messageContext.guildID
+        );
+
         if (session.isListeningSession()) {
-            return areUserAndBotInSameVoiceChannel(message);
+            if (!userAndBotInSameChannel) {
+                tryCreateInteractionErrorAcknowledgement(
+                    interaction,
+                    i18n.translate(
+                        messageContext.guildID,
+                        "misc.preCheck.title"
+                    ),
+                    i18n.translate(
+                        messageContext.guildID,
+                        errorMessage ?? "misc.preCheck.differentVC"
+                    )
+                );
+
+                return false;
+            }
+
+            return true;
         }
 
         const gameSession = session as GameSession;
-        if (!areUserAndBotInSameVoiceChannel(message)) {
+        if (!userAndBotInSameChannel) {
             if (
                 gameSession.gameType === GameType.ELIMINATION ||
                 gameSession.gameType === GameType.TEAMS
@@ -42,20 +82,23 @@ export default class CommandPrechecks {
 
             logger.warn(
                 `${getDebugLogHeader(
-                    message
+                    messageContext
                 )} | User and bot are not in the same voice connection`
             );
 
-            sendErrorMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
+            const embedPayload: EmbedPayload = {
+                title: i18n.translate(
+                    messageContext.guildID,
                     "misc.preCheck.title"
                 ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
+                description: i18n.translate(
+                    messageContext.guildID,
                     errorMessage ?? "misc.preCheck.differentVC"
                 ),
-            });
+            };
+
+            sendErrorMessage(messageContext, embedPayload, interaction);
+
             return false;
         }
 
@@ -63,18 +106,42 @@ export default class CommandPrechecks {
     }
 
     static notListeningPrecheck(precheckArgs: PrecheckArgs): boolean {
-        const { session, message } = precheckArgs;
+        const { session, messageContext, interaction } = precheckArgs;
         if (session && !session.isGameSession()) {
-            sendErrorMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
+            const embedPayload: EmbedPayload = {
+                title: i18n.translate(
+                    messageContext.guildID,
                     "misc.preCheck.title"
                 ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "misc.preCheck.notMusicSession"
+                description: i18n.translate(
+                    messageContext.guildID,
+                    "misc.preCheck.notListeningSession"
                 ),
-            });
+            };
+
+            sendErrorMessage(messageContext, embedPayload, interaction);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    static notInGamePrecheck(precheckArgs: PrecheckArgs): boolean {
+        const { session, messageContext, interaction } = precheckArgs;
+        if (session && session.isGameSession()) {
+            const embedPayload: EmbedPayload = {
+                title: i18n.translate(
+                    messageContext.guildID,
+                    "misc.preCheck.title"
+                ),
+                description: i18n.translate(
+                    messageContext.guildID,
+                    "misc.preCheck.notGameSession"
+                ),
+            };
+
+            sendErrorMessage(messageContext, embedPayload, interaction);
 
             return false;
         }
@@ -83,43 +150,51 @@ export default class CommandPrechecks {
     }
 
     static debugServerPrecheck(precheckArgs: PrecheckArgs): boolean {
-        const { message, errorMessage } = precheckArgs;
-        const isDebugServer = process.env.DEBUG_SERVER_ID === message.guildID;
+        const { messageContext, errorMessage, interaction } = precheckArgs;
+        const isDebugServer =
+            process.env.DEBUG_SERVER_ID === messageContext.guildID;
+
         if (!isDebugServer) {
             logger.warn(
                 `${getDebugLogHeader(
-                    message
+                    messageContext
                 )} | User attempted to use a command only usable in the debug server`
             );
 
-            sendErrorMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
+            const embedPayload: EmbedPayload = {
+                title: i18n.translate(
+                    messageContext.guildID,
                     "misc.preCheck.title"
                 ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
+                description: i18n.translate(
+                    messageContext.guildID,
                     errorMessage ?? "misc.preCheck.debugServer"
                 ),
-            });
+            };
+
+            sendErrorMessage(messageContext, embedPayload, interaction);
+
+            return false;
         }
 
-        return isDebugServer;
+        return true;
     }
 
     static maintenancePrecheck(precheckArgs: PrecheckArgs): boolean {
-        const { message } = precheckArgs;
+        const { messageContext, interaction } = precheckArgs;
         if (KmqConfiguration.Instance.maintenanceModeEnabled()) {
-            sendErrorMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
+            const embedPayload: EmbedPayload = {
+                title: i18n.translate(
+                    messageContext.guildID,
                     "misc.failure.maintenanceMode.title"
                 ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
+                description: i18n.translate(
+                    messageContext.guildID,
                     "misc.failure.maintenanceMode.description"
                 ),
-            });
+            };
+
+            sendErrorMessage(messageContext, embedPayload, interaction);
 
             return false;
         }
@@ -128,36 +203,42 @@ export default class CommandPrechecks {
     }
 
     static debugChannelPrecheck(precheckArgs: PrecheckArgs): boolean {
-        const { message, errorMessage } = precheckArgs;
+        const { messageContext, errorMessage, interaction } = precheckArgs;
         const isDebugChannel =
-            process.env.DEBUG_TEXT_CHANNEL_ID === message.channel.id;
+            process.env.DEBUG_TEXT_CHANNEL_ID === messageContext.textChannelID;
 
         if (!isDebugChannel) {
             logger.warn(
                 `${getDebugLogHeader(
-                    message
+                    messageContext
                 )} | User attempted to use a command only usable in the debug channel`
             );
 
-            sendErrorMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
+            const embedPayload: EmbedPayload = {
+                title: i18n.translate(
+                    messageContext.guildID,
                     "misc.preCheck.title"
                 ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
+                description: i18n.translate(
+                    messageContext.guildID,
                     errorMessage ?? "misc.preCheck.debugChannel"
                 ),
-            });
+            };
+
+            sendErrorMessage(messageContext, embedPayload, interaction);
+
+            return false;
         }
 
-        return isDebugChannel;
+        return true;
     }
 
     static async competitionPrecheck(
         precheckArgs: PrecheckArgs
     ): Promise<boolean> {
-        const { message, session, errorMessage } = precheckArgs;
+        const { messageContext, session, errorMessage, interaction } =
+            precheckArgs;
+
         const gameSession = session as GameSession;
         if (
             !session ||
@@ -171,29 +252,33 @@ export default class CommandPrechecks {
             .kmq("competition_moderators")
             .select("user_id")
             .where("guild_id", "=", gameSession.guildID)
-            .andWhere("user_id", "=", message.author.id)
+            .andWhere("user_id", "=", messageContext.author.id)
             .first();
 
         if (!isModerator) {
             logger.warn(
                 `${getDebugLogHeader(
-                    message
+                    messageContext
                 )} | User attempted to use a command only available to moderators in a competition`
             );
 
-            sendErrorMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
+            const embedPayload: EmbedPayload = {
+                title: i18n.translate(
+                    messageContext.guildID,
                     "misc.preCheck.title"
                 ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
+                description: i18n.translate(
+                    messageContext.guildID,
                     errorMessage ?? "misc.preCheck.competition"
                 ),
-            });
+            };
+
+            sendErrorMessage(messageContext, embedPayload, interaction);
+
+            return false;
         }
 
-        return isModerator;
+        return true;
     }
 
     static async notRestartingPrecheck(
@@ -201,18 +286,20 @@ export default class CommandPrechecks {
     ): Promise<boolean> {
         const timeUntilRestart = getTimeUntilRestart();
         if (timeUntilRestart !== null) {
-            const { message } = precheckArgs;
-            await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
+            const { messageContext, interaction } = precheckArgs;
+            const embedPayload: EmbedPayload = {
+                title: i18n.translate(
+                    messageContext.guildID,
                     "command.play.failure.botRestarting.title"
                 ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
+                description: i18n.translate(
+                    messageContext.guildID,
                     "command.play.failure.botRestarting.description",
                     { timeUntilRestart: `\`${timeUntilRestart}\`` }
                 ),
-            });
+            };
+
+            await sendErrorMessage(messageContext, embedPayload, interaction);
 
             return false;
         }
@@ -221,23 +308,25 @@ export default class CommandPrechecks {
     }
 
     static async premiumPrecheck(precheckArgs: PrecheckArgs): Promise<boolean> {
-        const { message } = precheckArgs;
-        const premium = await isUserPremium(message.author.id);
+        const { messageContext, interaction } = precheckArgs;
+        const premium = await isUserPremium(messageContext.author.id);
         if (premium) {
             return true;
         }
 
-        await sendErrorMessage(MessageContext.fromMessage(message), {
-            title: LocalizationManager.localizer.translate(
-                message.guildID,
+        const embedPayload: EmbedPayload = {
+            title: i18n.translate(
+                messageContext.guildID,
                 "misc.preCheck.title"
             ),
-            description: LocalizationManager.localizer.translate(
-                message.guildID,
+            description: i18n.translate(
+                messageContext.guildID,
                 "misc.preCheck.notPremium",
-                { premium: `\`${process.env.BOT_PREFIX}premium\`` }
+                { premium: "`/premium`" }
             ),
-        });
+        };
+
+        await sendErrorMessage(messageContext, embedPayload, interaction);
 
         return false;
     }
@@ -245,31 +334,62 @@ export default class CommandPrechecks {
     static async premiumOrDebugServerPrecheck(
         precheckArgs: PrecheckArgs
     ): Promise<boolean> {
-        const { message } = precheckArgs;
-        const premium = await isUserPremium(message.author.id);
-        const isDebugServer = process.env.DEBUG_SERVER_ID === message.guildID;
+        const { messageContext, interaction } = precheckArgs;
+        const premium = await isUserPremium(messageContext.author.id);
+        const isDebugServer =
+            process.env.DEBUG_SERVER_ID === messageContext.guildID;
+
         if (premium || isDebugServer) {
             return true;
         }
 
         logger.warn(
             `${getDebugLogHeader(
-                message
+                messageContext
             )} | User attempted to use a command only usable in the debug server/for premium users`
         );
 
-        sendErrorMessage(MessageContext.fromMessage(message), {
-            title: LocalizationManager.localizer.translate(
-                message.guildID,
+        const embedPayload: EmbedPayload = {
+            title: i18n.translate(
+                messageContext.guildID,
                 "misc.preCheck.title"
             ),
-            description: LocalizationManager.localizer.translate(
-                message.guildID,
+            description: i18n.translate(
+                messageContext.guildID,
                 "misc.preCheck.premiumOrDebugServer",
-                { premium: `\`${process.env.BOT_PREFIX}premium\`` }
+                { premium: "`/premium`" }
             ),
-        });
+        };
+
+        sendErrorMessage(messageContext, embedPayload, interaction);
 
         return false;
+    }
+
+    static async notSpotifyPrecheck(
+        precheckArgs: PrecheckArgs
+    ): Promise<boolean> {
+        const { messageContext, interaction } = precheckArgs;
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID
+        );
+
+        if (guildPreference.isSpotifyPlaylist()) {
+            const embedPayload: EmbedPayload = {
+                title: i18n.translate(
+                    messageContext.guildID,
+                    "misc.preCheck.title"
+                ),
+                description: i18n.translate(
+                    messageContext.guildID,
+                    "misc.preCheck.notSpotify"
+                ),
+            };
+
+            sendErrorMessage(messageContext, embedPayload, interaction);
+            return false;
+        }
+
+        return true;
     }
 }

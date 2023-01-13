@@ -52,6 +52,16 @@ export async function getAvailableSongCount(
     isPremium: boolean
 ): Promise<{ count: number; countBeforeLimit: number }> {
     try {
+        if (guildPreference.isSpotifyPlaylist()) {
+            const spotifyMetadata =
+                guildPreference.getSpotifyPlaylistMetadata();
+
+            return {
+                count: spotifyMetadata.matchedSongsLength,
+                countBeforeLimit: spotifyMetadata.matchedSongsLength,
+            };
+        }
+
         const { songs, countBeforeLimit } =
             await SongSelector.getFilteredSongList(
                 guildPreference,
@@ -575,7 +585,7 @@ export function isPowerHour(): boolean {
     const dateSeed =
         (date.getDate() * 31 + date.getMonth()) * 31 + date.getFullYear();
 
-    // distribute between each third of the day to accomodate timezone differences
+    // distribute between each third of the day to accommodate timezone differences
     const powerHours = [
         md5Hash(dateSeed, 8) % 7,
         (md5Hash(dateSeed + 1, 8) % 7) + 8,

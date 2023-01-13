@@ -1,21 +1,31 @@
-import { DEFAULT_SHUFFLE, ExpBonusModifierValues } from "../../constants";
+import {
+    DEFAULT_SHUFFLE,
+    EMBED_ERROR_COLOR,
+    ExpBonusModifierValues,
+    OptionAction,
+} from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
+    getInteractionValue,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import { isUserPremium } from "../../helpers/game_utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import ExpBonusModifier from "../../enums/exp_bonus_modifier";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
-import LocalizationManager from "../../helpers/localization_manager";
+import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import ShuffleType from "../../enums/option_types/shuffle_type";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
+import type EmbedPayload from "../../interfaces/embed_payload";
 import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("shuffle");
@@ -42,25 +52,25 @@ export default class ShuffleCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "shuffle",
-        description: LocalizationManager.localizer.translate(
+        description: i18n.translate(
             guildID,
             "command.shuffle.help.description",
             {
                 random: `\`${ShuffleType.RANDOM}\``,
             }
         ),
-        usage: ",shuffle [random | popularity]",
+        usage: "/shuffle set\nshuffle:[random | popularity | weighted_easy | weighted_hard]\n\n/shuffle reset",
         examples: [
             {
-                example: "`,shuffle random`",
-                explanation: LocalizationManager.localizer.translate(
+                example: "`/shuffle set shuffle:random`",
+                explanation: i18n.translate(
                     guildID,
                     "command.shuffle.help.example.random"
                 ),
             },
             {
-                example: "`,shuffle popularity`",
-                explanation: LocalizationManager.localizer.translate(
+                example: "`/shuffle set shuffle:popularity`",
+                explanation: i18n.translate(
                     guildID,
                     "command.shuffle.help.example.popularity",
                     {
@@ -73,8 +83,8 @@ export default class ShuffleCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,shuffle`",
-                explanation: LocalizationManager.localizer.translate(
+                example: "`/shuffle reset`",
+                explanation: i18n.translate(
                     guildID,
                     "command.shuffle.help.example.reset",
                     { defaultShuffle: `\`${DEFAULT_SHUFFLE}\`` }
@@ -84,60 +94,186 @@ export default class ShuffleCommand implements BaseCommand {
         priority: 110,
     });
 
-    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
-        );
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
+        {
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+            options: [
+                {
+                    name: OptionAction.SET,
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "command.shuffle.help.description"
+                    ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.shuffle.help.description"
+                        ),
+                    },
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "shuffle",
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.shuffle.interaction.shuffle"
+                            ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.shuffle.interaction.shuffle"
+                                ),
+                            },
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            required: true,
+                            choices: Object.values(ShuffleType).map(
+                                (shuffleType) => ({
+                                    name: shuffleType,
+                                    value: shuffleType,
+                                })
+                            ),
+                        },
+                    ],
+                },
+                {
+                    name: OptionAction.RESET,
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "misc.interaction.resetOption",
+                        { optionName: "shuffle" }
+                    ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "misc.interaction.resetOption",
+                            { optionName: "shuffle" }
+                        ),
+                    },
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [],
+                },
+            ],
+        },
+    ];
 
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+        let shuffleType: ShuffleType;
         if (parsedMessage.components.length === 0) {
-            await guildPreference.reset(GameOption.SHUFFLE_TYPE);
-            await sendOptionsMessage(
-                Session.getSession(message.guildID),
-                MessageContext.fromMessage(message),
-                guildPreference,
-                [{ option: GameOption.SHUFFLE_TYPE, reset: true }]
-            );
-            logger.info(`${getDebugLogHeader(message)} | Shuffle type reset.`);
-            return;
+            shuffleType = null;
+        } else {
+            shuffleType =
+                parsedMessage.components[0].toLowerCase() as ShuffleType;
         }
 
-        const shuffleType =
-            parsedMessage.components[0].toLowerCase() as ShuffleType;
+        await ShuffleCommand.updateOption(
+            MessageContext.fromMessage(message),
+            shuffleType,
+            null,
+            shuffleType == null
+        );
+    };
+
+    static async updateOption(
+        messageContext: MessageContext,
+        shuffleType: ShuffleType,
+        interaction?: Eris.CommandInteraction,
+        reset = false
+    ): Promise<void> {
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID
+        );
 
         if (PREMIUM_SHUFFLE_TYPES.includes(shuffleType)) {
-            if (!(await isUserPremium(message.author.id))) {
+            if (!(await isUserPremium(messageContext.author.id))) {
                 logger.info(
                     `${getDebugLogHeader(
-                        message
+                        messageContext
                     )} | Non-premium user attempted to use shuffle option = ${shuffleType}`
                 );
 
-                sendErrorMessage(MessageContext.fromMessage(message), {
-                    description: LocalizationManager.localizer.translate(
-                        message.guildID,
+                const embedPayload: EmbedPayload = {
+                    description: i18n.translate(
+                        messageContext.guildID,
                         "command.premium.option.description"
                     ),
-                    title: LocalizationManager.localizer.translate(
-                        message.guildID,
+                    title: i18n.translate(
+                        messageContext.guildID,
                         "command.premium.option.title"
                     ),
-                });
+                    color: EMBED_ERROR_COLOR,
+                };
+
+                await sendErrorMessage(
+                    messageContext,
+                    embedPayload,
+                    interaction
+                );
+
                 return;
             }
         }
 
-        await guildPreference.setShuffleType(shuffleType);
-        await sendOptionsMessage(
-            Session.getSession(message.guildID),
-            MessageContext.fromMessage(message),
-            guildPreference,
-            [{ option: GameOption.SHUFFLE_TYPE, reset: false }]
-        );
+        if (reset) {
+            await guildPreference.reset(GameOption.SHUFFLE_TYPE);
+            logger.info(
+                `${getDebugLogHeader(messageContext)} | Shuffle type reset.`
+            );
+        } else {
+            await guildPreference.setShuffleType(shuffleType);
+            logger.info(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Shuffle type set to ${shuffleType}`
+            );
+        }
 
-        logger.info(
-            `${getDebugLogHeader(message)} | Shuffle set to ${shuffleType}`
+        await sendOptionsMessage(
+            Session.getSession(messageContext.guildID),
+            messageContext,
+            guildPreference,
+            [{ option: GameOption.SHUFFLE_TYPE, reset }],
+            null,
+            null,
+            null,
+            interaction
         );
-    };
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
+
+        let shuffleValue: ShuffleType;
+
+        const action = interactionName as OptionAction;
+        if (action === OptionAction.RESET) {
+            shuffleValue = null;
+        } else if (action === OptionAction.SET) {
+            shuffleValue = interactionOptions["shuffle"] as ShuffleType;
+        } else {
+            logger.error(`Unexpected interaction name: ${interactionName}`);
+            shuffleValue = null;
+        }
+
+        await ShuffleCommand.updateOption(
+            messageContext,
+            shuffleValue,
+            interaction,
+            shuffleValue == null
+        );
+    }
 
     resetPremium = async (guildPreference: GuildPreference): Promise<void> => {
         await guildPreference.reset(GameOption.SHUFFLE_TYPE);

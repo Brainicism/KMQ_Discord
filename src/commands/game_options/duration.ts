@@ -1,15 +1,19 @@
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
+    getInteractionValue,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
-import LocalizationManager from "../../helpers/localization_manager";
+import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -21,6 +25,16 @@ enum DurationAction {
     REMOVE = "remove",
 }
 
+enum DurationActionInternal {
+    ADD = "add",
+    REMOVE = "remove",
+    RESET = "reset",
+    SET = "set",
+}
+
+const DURATION_DELTA_MIN = 2;
+const DURATION_DELTA_MAX = 600;
+
 export default class DurationCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
@@ -31,8 +45,8 @@ export default class DurationCommand implements BaseCommand {
             {
                 name: "duration",
                 type: "number" as const,
-                minValue: 2,
-                maxValue: 600,
+                minValue: DURATION_DELTA_MIN,
+                maxValue: DURATION_DELTA_MAX,
             },
             {
                 name: "action",
@@ -44,18 +58,24 @@ export default class DurationCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "duration",
-        description: LocalizationManager.localizer.translate(
+        description: i18n.translate(
             guildID,
             "command.duration.help.description"
         ),
-        usage: `,duration [${LocalizationManager.localizer.translate(
+        usage: `/duration set\nduration:[${i18n.translate(
             guildID,
             "command.duration.help.usage.minutes"
-        )}]`,
+        )}]\n\n/duration add\nduration:[${i18n.translate(
+            guildID,
+            "command.duration.help.usage.minutes"
+        )}]\n\n/duration remove\nduration:[${i18n.translate(
+            guildID,
+            "command.duration.help.usage.minutes"
+        )}]\n\n/duration reset`,
         examples: [
             {
-                example: "`,duration 15`",
-                explanation: LocalizationManager.localizer.translate(
+                example: "`/duration set duration:15`",
+                explanation: i18n.translate(
                     guildID,
                     "command.duration.help.example.set",
                     {
@@ -64,8 +84,8 @@ export default class DurationCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,duration 5 add`",
-                explanation: LocalizationManager.localizer.translate(
+                example: "`/duration add duration:5`",
+                explanation: i18n.translate(
                     guildID,
                     "command.duration.help.example.increment",
                     {
@@ -74,8 +94,8 @@ export default class DurationCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,duration 5 remove`",
-                explanation: LocalizationManager.localizer.translate(
+                example: "`/duration remove duration:5`",
+                explanation: i18n.translate(
                     guildID,
                     "command.duration.help.example.decrement",
                     {
@@ -84,8 +104,8 @@ export default class DurationCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,duration`",
-                explanation: LocalizationManager.localizer.translate(
+                example: "`/duration reset`",
+                explanation: i18n.translate(
                     guildID,
                     "command.duration.help.example.reset"
                 ),
@@ -94,80 +114,282 @@ export default class DurationCommand implements BaseCommand {
         priority: 110,
     });
 
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
+        {
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+            options: [
+                {
+                    name: DurationActionInternal.SET,
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "command.duration.help.example.set",
+                        { duration: "[duration]" }
+                    ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.duration.help.example.set",
+                            { duration: "[duration]" }
+                        ),
+                    },
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "duration",
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.duration.interaction.durationSet"
+                            ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.duration.interaction.durationSet"
+                                ),
+                            },
+                            required: true,
+                            min_value: DURATION_DELTA_MIN,
+                            max_value: DURATION_DELTA_MAX,
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .INTEGER,
+                        } as any,
+                    ],
+                },
+                {
+                    name: DurationActionInternal.ADD,
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "command.duration.help.example.increment",
+                        { duration: "[duration]" }
+                    ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.duration.help.example.increment",
+                            { duration: "[duration]" }
+                        ),
+                    },
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "duration",
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.duration.interaction.durationAdd"
+                            ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.duration.interaction.durationAdd"
+                                ),
+                            },
+                            required: true,
+                            min_value: DURATION_DELTA_MIN,
+                            max_value: DURATION_DELTA_MAX,
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .INTEGER,
+                        },
+                    ],
+                },
+                {
+                    name: DurationActionInternal.REMOVE,
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "command.duration.help.example.decrement",
+                        { duration: "[duration]" }
+                    ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.duration.help.example.decrement",
+                            { duration: "[duration]" }
+                        ),
+                    },
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "duration",
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.duration.interaction.durationRemove"
+                            ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.duration.interaction.durationRemove"
+                                ),
+                            },
+                            required: true,
+                            min_value: DURATION_DELTA_MIN,
+                            max_value: DURATION_DELTA_MAX,
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .INTEGER,
+                        },
+                    ],
+                },
+                {
+                    name: DurationActionInternal.RESET,
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "misc.interaction.resetOption",
+                        { optionName: "duration" }
+                    ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "misc.interaction.resetOption",
+                            { optionName: "duration" }
+                        ),
+                    },
+                    type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+                },
+            ],
+        },
+    ];
+
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
-        );
+        let durationActionInternal: DurationActionInternal = null;
+        let durationValue: number = null;
 
         if (parsedMessage.components.length === 0) {
-            await guildPreference.reset(GameOption.DURATION);
-            await sendOptionsMessage(
-                Session.getSession(message.guildID),
-                MessageContext.fromMessage(message),
-                guildPreference,
-                [{ option: GameOption.DURATION, reset: true }]
-            );
-            logger.info(`${getDebugLogHeader(message)} | Duration disabled.`);
-            return;
-        }
-
-        let duration: number;
-        const durationDelta = parseInt(parsedMessage.components[0], 10);
-        if (parsedMessage.components[1]) {
-            const action = parsedMessage.components[1] as DurationAction;
-            const currentDuration = guildPreference.gameOptions.duration;
-            if (action === DurationAction.ADD) {
-                if (!guildPreference.isDurationSet()) {
-                    duration = durationDelta;
-                } else {
-                    duration = currentDuration + durationDelta;
-                }
-            } else if (action === DurationAction.REMOVE) {
-                if (!guildPreference.isDurationSet()) {
-                    sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: LocalizationManager.localizer.translate(
-                            message.guildID,
-                            "command.duration.failure.removingDuration.title"
-                        ),
-                        description: LocalizationManager.localizer.translate(
-                            message.guildID,
-                            "command.duration.failure.removingDuration.notSet.description"
-                        ),
-                    });
-                    return;
-                }
-
-                duration = currentDuration - durationDelta;
-                if (duration < 2) {
-                    sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: LocalizationManager.localizer.translate(
-                            message.guildID,
-                            "command.duration.failure.removingDuration.title"
-                        ),
-                        description: LocalizationManager.localizer.translate(
-                            message.guildID,
-                            "command.duration.failure.removingDuration.tooShort.description"
-                        ),
-                    });
-                    return;
-                }
-            }
+            durationActionInternal = DurationActionInternal.RESET;
         } else {
-            duration = parseInt(parsedMessage.components[0], 10);
+            durationActionInternal =
+                (parsedMessage.components[1] as DurationActionInternal) ??
+                DurationActionInternal.SET;
+            durationValue = parseInt(parsedMessage.components[0], 10);
         }
 
-        await guildPreference.setDuration(duration);
-        await sendOptionsMessage(
-            Session.getSession(message.guildID),
+        await DurationCommand.updateOption(
             MessageContext.fromMessage(message),
-            guildPreference,
-            [{ option: GameOption.DURATION, reset: false }]
-        );
-
-        logger.info(
-            `${getDebugLogHeader(message)} | Duration set to ${
-                guildPreference.gameOptions.duration
-            }`
+            durationActionInternal,
+            durationValue,
+            null,
+            durationActionInternal === DurationActionInternal.RESET
         );
     };
+
+    static async updateOption(
+        messageContext: MessageContext,
+        action: DurationActionInternal,
+        durationValue?: number,
+        interaction?: Eris.CommandInteraction,
+        reset = false
+    ): Promise<void> {
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID
+        );
+
+        let finalDuration: number = null;
+        if (reset) {
+            await guildPreference.reset(GameOption.DURATION);
+            logger.info(
+                `${getDebugLogHeader(messageContext)} | Duration disabled.`
+            );
+        } else {
+            const currentDuration = guildPreference.gameOptions.duration;
+            if (action === DurationActionInternal.ADD) {
+                if (!guildPreference.isDurationSet()) {
+                    finalDuration = durationValue;
+                } else {
+                    finalDuration = currentDuration + durationValue;
+                }
+            } else if (action === DurationActionInternal.REMOVE) {
+                if (!guildPreference.isDurationSet()) {
+                    sendErrorMessage(
+                        messageContext,
+                        {
+                            title: i18n.translate(
+                                messageContext.guildID,
+                                "command.duration.failure.removingDuration.title"
+                            ),
+                            description: i18n.translate(
+                                messageContext.guildID,
+                                "command.duration.failure.removingDuration.notSet.description"
+                            ),
+                        },
+                        interaction
+                    );
+                    return;
+                }
+
+                finalDuration = currentDuration - durationValue;
+                if (finalDuration < 2) {
+                    sendErrorMessage(
+                        messageContext,
+                        {
+                            title: i18n.translate(
+                                messageContext.guildID,
+                                "command.duration.failure.removingDuration.title"
+                            ),
+                            description: i18n.translate(
+                                messageContext.guildID,
+                                "command.duration.failure.removingDuration.tooShort.description"
+                            ),
+                        },
+                        interaction
+                    );
+                    return;
+                }
+            } else if (action === DurationActionInternal.SET) {
+                finalDuration = durationValue;
+            }
+
+            logger.info(
+                `${getDebugLogHeader(messageContext)} | Duration set to ${
+                    guildPreference.gameOptions.duration
+                }`
+            );
+        }
+
+        await guildPreference.setDuration(finalDuration);
+        await sendOptionsMessage(
+            Session.getSession(messageContext.guildID),
+            messageContext,
+            guildPreference,
+            [{ option: GameOption.DURATION, reset: false }],
+            null,
+            null,
+            null,
+            interaction
+        );
+    }
+
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
+
+        const action = interactionName as DurationActionInternal;
+        let durationValue: number;
+
+        if (action === DurationActionInternal.RESET) {
+            durationValue = null;
+        } else if (
+            [
+                DurationActionInternal.ADD,
+                DurationActionInternal.REMOVE,
+                DurationActionInternal.SET,
+            ].includes(action)
+        ) {
+            durationValue = interactionOptions["duration"];
+        } else {
+            logger.error(`Unexpected interaction name: ${interactionName}`);
+            durationValue = null;
+        }
+
+        await DurationCommand.updateOption(
+            messageContext,
+            action,
+            durationValue,
+            interaction,
+            action === DurationActionInternal.RESET
+        );
+    }
 }

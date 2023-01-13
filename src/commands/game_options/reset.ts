@@ -5,10 +5,12 @@ import {
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type GameOption from "../../enums/game_option_name";
@@ -27,15 +29,12 @@ export default class ResetCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "reset",
-        description: LocalizationManager.localizer.translate(
-            guildID,
-            "command.reset.help.description"
-        ),
-        usage: ",reset",
+        description: i18n.translate(guildID, "command.reset.help.description"),
+        usage: "/reset",
         examples: [
             {
-                example: "`,reset`",
-                explanation: LocalizationManager.localizer.translate(
+                example: "`/reset`",
+                explanation: i18n.translate(
                     guildID,
                     "command.reset.help.example.reset"
                 ),
@@ -44,26 +43,56 @@ export default class ResetCommand implements BaseCommand {
         priority: 130,
     });
 
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
+        {
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+        },
+    ];
+
     call = async ({ message }: CommandArgs): Promise<void> => {
+        await ResetCommand.updateOption(MessageContext.fromMessage(message));
+    };
+
+    static async updateOption(
+        messageContext: MessageContext,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
+            messageContext.guildID
         );
 
         const resetOptions = await guildPreference.resetToDefault();
         logger.info(
-            `${getDebugLogHeader(message)} | Reset to default guild preferences`
+            `${getDebugLogHeader(
+                messageContext
+            )} | Reset to default guild preferences`
         );
 
         await sendOptionsMessage(
-            Session.getSession(message.guildID),
-            MessageContext.fromMessage(message),
+            Session.getSession(messageContext.guildID),
+            messageContext,
             guildPreference,
             resetOptions.map((x) => ({
                 option: GameOptionInternalToGameOption[x] as GameOption,
                 reset: true,
             })),
             false,
-            true
+            true,
+            null,
+            interaction
         );
-    };
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        await ResetCommand.updateOption(messageContext, interaction);
+    }
 }

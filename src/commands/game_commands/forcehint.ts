@@ -8,11 +8,13 @@ import {
 } from "../../helpers/discord_utils";
 import { getMention } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type GameSession from "src/structures/game_session";
@@ -31,54 +33,109 @@ export default class ForceHintCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "forcehint",
-        description: LocalizationManager.localizer.translate(
+        description: i18n.translate(
             guildID,
             "command.forcehint.help.description"
         ),
-        usage: ",forcehint",
+        usage: "/forcehint",
         examples: [],
         priority: 1009,
     });
 
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
+        {
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+        },
+    ];
+
     call = async ({ message }: CommandArgs): Promise<void> => {
-        const gameSession = Session.getSession(message.guildID) as GameSession;
+        await ForceHintCommand.sendForceHint(
+            MessageContext.fromMessage(message)
+        );
+    };
+
+    static sendForceHint = async (
+        messageContext: MessageContext,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> => {
+        const gameSession = Session.getSession(
+            messageContext.guildID
+        ) as GameSession;
+
         const gameRound = gameSession?.round;
         const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
+            messageContext.guildID
         );
 
-        if (!validHintCheck(gameSession, guildPreference, gameRound, message))
-            return;
-        if (message.author.id !== gameSession.owner.id) {
-            await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "command.forcehint.failure.notOwner.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "command.forcehint.failure.notOwner.description",
-                    { mentionedUser: getMention(gameSession.owner.id) }
-                ),
-            });
+        if (
+            !validHintCheck(
+                gameSession,
+                guildPreference,
+                gameRound,
+                messageContext,
+                interaction
+            )
+        ) {
             return;
         }
 
-        gameRound.hintRequested(message.author.id);
+        if (messageContext.author.id !== gameSession.owner.id) {
+            await sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "command.forcehint.hintIgnored"
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "command.forcehint.failure.notOwner.description",
+                        { mentionedUser: getMention(gameSession.owner.id) }
+                    ),
+                },
+                interaction
+            );
+            return;
+        }
+
+        gameRound.hintRequested(messageContext.author.id);
         gameRound.hintUsed = true;
-        await sendInfoMessage(MessageContext.fromMessage(message), {
-            title: LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.hint.title"
-            ),
-            description: generateHint(
-                message.guildID,
-                guildPreference.gameOptions.guessModeType,
-                gameRound,
-                State.getGuildLocale(message.guildID)
-            ),
-            thumbnailUrl: KmqImages.READING_BOOK,
-        });
-        logger.info(`${getDebugLogHeader(message)} | Owner force-hinted.`);
+        await sendInfoMessage(
+            messageContext,
+            {
+                title: i18n.translate(
+                    messageContext.guildID,
+                    "command.hint.title"
+                ),
+                description: generateHint(
+                    messageContext.guildID,
+                    guildPreference.gameOptions.guessModeType,
+                    gameRound,
+                    State.getGuildLocale(messageContext.guildID)
+                ),
+                thumbnailUrl: KmqImages.READING_BOOK,
+            },
+            null,
+            null,
+            [],
+            interaction
+        );
+
+        logger.info(
+            `${getDebugLogHeader(messageContext)} | Owner force-hinted.`
+        );
     };
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        await ForceHintCommand.sendForceHint(messageContext, interaction);
+    }
 }

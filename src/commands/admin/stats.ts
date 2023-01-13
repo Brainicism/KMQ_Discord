@@ -10,14 +10,15 @@ import {
     sendErrorMessage,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
-import LocalizationManager from "../../helpers/localization_manager";
+import Eris from "eris";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
 import dbContext from "../../database_context";
+import i18n from "../../helpers/localization_manager";
 import os from "os";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
-import type Eris from "eris";
 import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("stats");
@@ -25,16 +26,25 @@ const logger = new IPCLogger("stats");
 export default class StatsCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "stats",
-        description: LocalizationManager.localizer.translate(
-            guildID,
-            "command.stats.help.description"
-        ),
-        usage: ",stats",
+        description: i18n.translate(guildID, "command.stats.help.description"),
+        usage: "/stats",
         examples: [],
         priority: 1,
     });
 
-    call = async ({ message, channel }: CommandArgs): Promise<void> => {
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
+        {
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+        },
+    ];
+
+    static sendStatsMessage = async (
+        messageContext: MessageContext,
+        guildID: string,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> => {
         const fleetStats = await State.ipc.getStats();
         let gameSessionStats;
         try {
@@ -49,13 +59,13 @@ export default class StatsCommand implements BaseCommand {
             );
         } catch (e) {
             logger.error(`Error retrieving stats via IPC. err = ${e}`);
-            sendErrorMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
+            sendErrorMessage(messageContext, {
+                title: i18n.translate(
+                    messageContext.guildID,
                     "command.stats.failure.title"
                 ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
+                description: i18n.translate(
+                    messageContext.guildID,
                     "command.stats.failure.description"
                 ),
             });
@@ -143,71 +153,76 @@ export default class StatsCommand implements BaseCommand {
         )["stat_value"];
 
         const gameStatistics = {
-            [LocalizationManager.localizer.translate(
-                message.guildID,
+            [i18n.translate(
+                messageContext.guildID,
                 "command.stats.game.activeGameSessions"
             )]: activeGameSessions,
-            [LocalizationManager.localizer.translate(
-                message.guildID,
+            [i18n.translate(
+                messageContext.guildID,
                 "command.stats.game.activePlayers"
             )]: activePlayers,
-            [LocalizationManager.localizer.translate(
-                message.guildID,
+            [i18n.translate(
+                messageContext.guildID,
                 "command.stats.game.recentGameSessions"
             )]: `${friendlyFormattedNumber(
                 Number(recentGameSessions)
             )} | ${friendlyFormattedNumber(Number(totalGameSessions))}`,
-            [LocalizationManager.localizer.translate(
-                message.guildID,
+            [i18n.translate(
+                messageContext.guildID,
                 "command.stats.game.recentGameRounds"
             )]: `${friendlyFormattedNumber(
                 recentGameRounds
             )} | ${friendlyFormattedNumber(totalGameRounds)}`,
-            [LocalizationManager.localizer.translate(
-                message.guildID,
+            [i18n.translate(
+                messageContext.guildID,
                 "command.stats.game.recentPlayers"
             )]: `${friendlyFormattedNumber(
                 Number(recentPlayers)
             )} | ${friendlyFormattedNumber(Number(totalPlayers))}`,
-            [LocalizationManager.localizer.translate(
-                message.guildID,
+            [i18n.translate(
+                messageContext.guildID,
                 "command.stats.game.latestSongUpdate"
-            )]: friendlyFormattedDate(latestAvailableSong, message.guildID),
+            )]: friendlyFormattedDate(
+                latestAvailableSong,
+                messageContext.guildID
+            ),
         };
 
+        const guild = State.client.guilds.get(guildID);
+
         const systemStatistics = {
-            [LocalizationManager.localizer.translate(
-                message.guildID,
+            [i18n.translate(
+                messageContext.guildID,
                 "command.stats.system.loadAverage"
             )]: os
                 .loadavg()
                 .map((x) => x.toFixed(2))
                 .toString(),
-            [LocalizationManager.localizer.translate(
-                message.guildID,
+            [i18n.translate(
+                messageContext.guildID,
                 "command.stats.system.memoryUsage"
             )]: `${fleetStats.totalRam.toFixed(2)} MB`,
-            [LocalizationManager.localizer.translate(
-                message.guildID,
+            [i18n.translate(
+                messageContext.guildID,
                 "command.stats.system.apiLatency"
             )]: `${
-                !Number.isFinite(channel.guild.shard.latency)
+                !Number.isFinite(guild.shard.latency)
                     ? "?"
-                    : channel.guild.shard.latency
+                    : guild.shard.latency
             } ms`,
-            [LocalizationManager.localizer.translate(
-                message.guildID,
+            [i18n.translate(
+                messageContext.guildID,
                 "command.stats.system.requestLatency"
             )]: `${requestLatency} ms`,
-            [LocalizationManager.localizer.translate(
-                message.guildID,
+            [i18n.translate(
+                messageContext.guildID,
                 "command.stats.system.databaseLatency"
             )]: `${mysqlLatency.toFixed(2)} ms`,
-            [LocalizationManager.localizer.translate(
-                message.guildID,
+            [i18n.translate(
+                messageContext.guildID,
                 "command.stats.system.uptime"
-            )]: LocalizationManager.localizer.translateN(
-                message.guildID,
+            )]: i18n.translateN(
+                messageContext.guildID,
                 "misc.plural.hour",
                 Number((process.uptime() / (60 * 60)).toFixed(2))
             ),
@@ -215,8 +230,8 @@ export default class StatsCommand implements BaseCommand {
 
         const fields: Array<Eris.EmbedField> = [
             {
-                name: LocalizationManager.localizer.translate(
-                    message.guildID,
+                name: i18n.translate(
+                    messageContext.guildID,
                     "command.stats.game.title"
                 ),
                 value: `\`\`\`\n${Object.entries(gameStatistics)
@@ -224,8 +239,8 @@ export default class StatsCommand implements BaseCommand {
                     .join("\n")}\`\`\``,
             },
             {
-                name: LocalizationManager.localizer.translate(
-                    message.guildID,
+                name: i18n.translate(
+                    messageContext.guildID,
                     "command.stats.system.title"
                 ),
                 value: `\`\`\`\n${Object.entries(systemStatistics)
@@ -234,28 +249,58 @@ export default class StatsCommand implements BaseCommand {
             },
         ];
 
-        logger.info(`${getDebugLogHeader(message)} | Stats retrieved`);
-        sendInfoMessage(MessageContext.fromMessage(message), {
-            title: LocalizationManager.localizer.translate(
-                message.guildID,
+        logger.info(`${getDebugLogHeader(messageContext)} | Stats retrieved`);
+
+        const embedPayload = {
+            title: i18n.translate(
+                messageContext.guildID,
                 "command.stats.title"
             ),
-            description: LocalizationManager.localizer.translate(
-                message.guildID,
+            description: i18n.translate(
+                messageContext.guildID,
                 "command.stats.description",
                 {
                     link: "https://kmq.kpop.gg/status",
                 }
             ),
             fields,
-            footerText: `${
-                State.version
-            } | ${LocalizationManager.localizer.translate(
-                message.guildID,
+            footerText: `${State.version} | ${i18n.translate(
+                messageContext.guildID,
                 "command.stats.footer"
             )}`,
             timestamp: new Date(),
             thumbnailUrl: KmqImages.READING_BOOK,
-        });
+        };
+
+        await sendInfoMessage(
+            messageContext,
+            embedPayload,
+            null,
+            null,
+            undefined,
+            interaction
+        );
     };
+
+    call = async ({ message }: CommandArgs): Promise<void> => {
+        await StatsCommand.sendStatsMessage(
+            MessageContext.fromMessage(message),
+            message.guildID
+        );
+    };
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        await StatsCommand.sendStatsMessage(
+            messageContext,
+            interaction.guildID,
+            interaction
+        );
+    }
 }

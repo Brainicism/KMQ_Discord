@@ -3,16 +3,21 @@ import { GameOptionInternalToGameOption, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
+    getInteractionValue,
     sendErrorMessage,
     sendInfoMessage,
     sendOptionsMessage,
+    tryAutocompleteInteractionAcknowledge,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
-import LocalizationManager from "../../helpers/localization_manager";
+import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import dbContext from "../../database_context";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type GameOption from "../../enums/game_option_name";
@@ -31,6 +36,99 @@ enum PresetAction {
     EXPORT = "export",
     IMPORT = "import",
 }
+
+const isValidPresetName = async (
+    presetName: string,
+    messageContext: MessageContext,
+    interaction: Eris.CommandInteraction
+): Promise<boolean> => {
+    if (presetName.length > PRESET_NAME_MAX_LENGTH) {
+        logger.warn(
+            `${getDebugLogHeader(
+                messageContext
+            )} | Can't add preset, character limit reached.`
+        );
+
+        await sendErrorMessage(
+            messageContext,
+            {
+                title: i18n.translate(
+                    messageContext.guildID,
+                    "command.preset.failure.lengthyName.title"
+                ),
+                description: i18n.translate(
+                    messageContext.guildID,
+                    "command.preset.failure.lengthyName.description",
+                    { presetNameMaxLength: String(PRESET_NAME_MAX_LENGTH) }
+                ),
+            },
+            interaction
+        );
+        return false;
+    }
+
+    if (presetName.startsWith("KMQ-")) {
+        logger.warn(
+            `${getDebugLogHeader(
+                messageContext
+            )} | Can't add preset, illegal prefix.`
+        );
+
+        await sendErrorMessage(
+            messageContext,
+            {
+                title: i18n.translate(
+                    messageContext.guildID,
+                    "command.preset.failure.illegalPrefix.title"
+                ),
+                description: i18n.translate(
+                    messageContext.guildID,
+                    "command.preset.failure.illegalPrefix.description",
+                    { importPrefix: "`KMQ-`" }
+                ),
+            },
+            interaction
+        );
+        return false;
+    }
+
+    return true;
+};
+
+const canSavePreset = async (
+    presetName: string,
+    guildPreference: GuildPreference,
+    messageContext: MessageContext,
+    interaction: Eris.CommandInteraction
+): Promise<boolean> => {
+    const presets = await guildPreference.listPresets();
+    if (presets.length >= MAX_NUM_PRESETS) {
+        logger.warn(
+            `${getDebugLogHeader(
+                messageContext
+            )} | Can't add preset, maximum reached.`
+        );
+
+        await sendErrorMessage(
+            messageContext,
+            {
+                title: i18n.translate(
+                    messageContext.guildID,
+                    "command.preset.failure.tooMany.title"
+                ),
+                description: i18n.translate(
+                    messageContext.guildID,
+                    "command.preset.failure.tooMany.description",
+                    { maxNumPresets: String(MAX_NUM_PRESETS) }
+                ),
+            },
+            interaction
+        );
+        return false;
+    }
+
+    return isValidPresetName(presetName, messageContext, interaction);
+};
 
 export default class PresetCommand implements BaseCommand {
     aliases = ["presets"];
@@ -51,199 +149,368 @@ export default class PresetCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "preset",
-        description: LocalizationManager.localizer.translate(
+        description: i18n.translate(guildID, "command.preset.help.description"),
+        usage: `/preset list\n\n/preset [save | load | delete | export]\npreset_name:{${i18n.translate(
             guildID,
-            "command.preset.help.description"
-        ),
-        usage: `,preset [list | save | load | delete | export] {preset_name}\n,preset import [${LocalizationManager.localizer.translate(
+            "command.preset.help.usage.presetName"
+        )}}\n\n/preset import\nexported_preset:[${i18n.translate(
             guildID,
             "command.preset.help.usage.presetIdentifier"
-        )}] [${LocalizationManager.localizer.translate(
+        )}]\nnew_preset_name:[${i18n.translate(
             guildID,
             "command.preset.help.usage.presetName"
         )}]`,
         examples: [
             {
-                example: "`,preset list`",
-                explanation: LocalizationManager.localizer.translate(
+                example: "`/preset list`",
+                explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.list"
                 ),
             },
             {
-                example: "`,preset save [preset_name]`",
-                explanation: LocalizationManager.localizer.translate(
+                example: `\`/preset save preset_name:[${i18n.translate(
+                    guildID,
+                    "command.preset.help.usage.presetName"
+                )}]\``,
+                explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.save"
                 ),
             },
             {
-                example: "`,preset load [preset_name | preset_identifier]`",
-                explanation: LocalizationManager.localizer.translate(
+                example: `\`/preset load preset_name:[${i18n.translate(
+                    guildID,
+                    "command.preset.help.usage.presetName"
+                )}]\n,preset load preset_identifier:[${i18n.translate(
+                    guildID,
+                    "command.preset.help.usage.presetIdentifier"
+                )}]\``,
+                explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.load",
                     { exampleIdentifier: "`KMQ-XXXXX-...`" }
                 ),
             },
             {
-                example: "`,preset replace [preset_name]`",
-                explanation: LocalizationManager.localizer.translate(
+                example: `\`/preset replace preset_name:[${i18n.translate(
+                    guildID,
+                    "command.preset.help.usage.presetName"
+                )}]\``,
+                explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.replace"
                 ),
             },
             {
-                example: "`,preset delete [preset_name]`",
-                explanation: LocalizationManager.localizer.translate(
+                example: `\`/preset delete preset_name:[${i18n.translate(
+                    guildID,
+                    "command.preset.help.usage.presetName"
+                )}]\``,
+                explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.delete"
                 ),
             },
             {
-                example: "`,preset export [preset_name]`",
-                explanation: LocalizationManager.localizer.translate(
+                example: `\`/preset export preset_name:[${i18n.translate(
+                    guildID,
+                    "command.preset.help.usage.presetName"
+                )}]\``,
+                explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.export"
                 ),
             },
             {
-                example: "`,preset import [preset_identifier] [preset_name]`",
-                explanation: LocalizationManager.localizer.translate(
+                example: `\`/preset import preset_identifier:[${i18n.translate(
                     guildID,
-                    "command.preset.help.example.import",
-                    { exampleIdentifier: "`KMQ-XXXXX-...`" }
+                    "command.preset.help.usage.presetIdentifier"
+                )}] preset_name:[${i18n.translate(
+                    guildID,
+                    "command.preset.help.usage.presetName"
+                )}]\``,
+                explanation: i18n.translate(
+                    guildID,
+                    "command.preset.help.example.import"
                 ),
             },
         ],
         priority: 200,
     });
 
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
+        {
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+            options: [
+                {
+                    name: PresetAction.LIST,
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "command.preset.help.example.list"
+                    ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.preset.help.example.list"
+                        ),
+                    },
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                },
+                {
+                    name: PresetAction.SAVE,
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "command.preset.help.example.save"
+                    ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.preset.help.example.save"
+                        ),
+                    },
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "preset_name",
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.preset.interaction.save.presetName"
+                            ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.preset.interaction.save.presetName"
+                                ),
+                            },
+                            required: true,
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                        },
+                    ],
+                },
+                {
+                    name: PresetAction.LOAD,
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "command.preset.help.example.load",
+                        { exampleIdentifier: "KMQ-XXXXX-..." }
+                    ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.preset.help.example.load",
+                            { exampleIdentifier: "KMQ-XXXXX-..." }
+                        ),
+                    },
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "preset_name",
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.preset.interaction.load.presetName"
+                            ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.preset.interaction.load.presetName"
+                                ),
+                            },
+                            required: true,
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            autocomplete: true,
+                        },
+                    ],
+                },
+                {
+                    name: PresetAction.DELETE,
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "command.preset.help.example.delete"
+                    ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.preset.help.example.delete"
+                        ),
+                    },
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "preset_name",
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.preset.interaction.delete.presetName"
+                            ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.preset.interaction.delete.presetName"
+                                ),
+                            },
+                            required: true,
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            autocomplete: true,
+                        },
+                    ],
+                },
+                {
+                    name: PresetAction.REPLACE,
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "command.preset.help.example.replace"
+                    ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.preset.help.example.replace"
+                        ),
+                    },
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "preset_name",
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.preset.interaction.replace.presetName"
+                            ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.preset.interaction.replace.presetName"
+                                ),
+                            },
+                            required: true,
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            autocomplete: true,
+                        },
+                    ],
+                },
+                {
+                    name: PresetAction.EXPORT,
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "command.preset.help.example.export"
+                    ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.preset.help.example.export"
+                        ),
+                    },
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "preset_name",
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.preset.interaction.export.presetName"
+                            ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.preset.interaction.export.presetName"
+                                ),
+                            },
+                            required: true,
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            autocomplete: true,
+                        },
+                    ],
+                },
+                {
+                    name: PresetAction.IMPORT,
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "command.preset.help.example.import"
+                    ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.preset.help.example.import"
+                        ),
+                    },
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "exported_preset",
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.preset.interaction.import.exportedPresetID"
+                            ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.preset.interaction.import.exportedPresetID"
+                                ),
+                            },
+                            required: true,
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                        },
+                        {
+                            name: "new_preset_name",
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.preset.interaction.import.presetName"
+                            ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.preset.interaction.import.presetName"
+                                ),
+                            },
+                            required: true,
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                        },
+                    ],
+                },
+            ],
+        },
+    ];
+
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
-        );
-
         const presetAction =
-            (parsedMessage.components[0] as PresetAction) || null;
-
-        const messageContext = MessageContext.fromMessage(message);
-        if (!presetAction || presetAction === PresetAction.LIST) {
-            PresetCommand.listPresets(guildPreference, messageContext);
-            return;
-        }
-
-        const missingPresetMessage = (): void => {
-            sendErrorMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "command.preset.failure.missingName.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "command.preset.failure.missingName.description"
-                ),
-                thumbnailUrl: KmqImages.NOT_IMPRESSED,
-            });
-
-            logger.warn(
-                `${getDebugLogHeader(message)} | Preset name not specified`
-            );
-        };
+            (parsedMessage.components[0] as PresetAction) ?? PresetAction.LIST;
 
         const presetName =
             parsedMessage.components[
                 presetAction !== PresetAction.IMPORT ? 1 : 2
             ];
 
-        if (presetAction !== PresetAction.IMPORT && !presetName) {
-            missingPresetMessage();
-            return;
-        }
+        const presetUUID =
+            presetAction === PresetAction.IMPORT
+                ? parsedMessage.components[1]
+                : null;
 
-        switch (presetAction) {
-            case PresetAction.SAVE:
-                await PresetCommand.savePreset(
-                    presetName,
-                    guildPreference,
-                    messageContext
-                );
-                break;
-            case PresetAction.LOAD:
-                await PresetCommand.loadPreset(
-                    presetName,
-                    guildPreference,
-                    messageContext
-                );
-                break;
-            case PresetAction.DELETE:
-                await PresetCommand.deletePreset(
-                    presetName,
-                    guildPreference,
-                    messageContext
-                );
-                break;
-            case PresetAction.REPLACE:
-                await PresetCommand.replacePreset(
-                    presetName,
-                    guildPreference,
-                    messageContext
-                );
-                break;
-            case PresetAction.EXPORT:
-                await PresetCommand.exportPreset(
-                    presetName,
-                    guildPreference,
-                    messageContext
-                );
-                break;
-            case PresetAction.IMPORT: {
-                const presetUUID = parsedMessage.components[1];
-                if (!presetUUID) {
-                    sendErrorMessage(messageContext, {
-                        title: LocalizationManager.localizer.translate(
-                            message.guildID,
-                            "command.preset.failure.missingIdentifier.title"
-                        ),
-                        description: LocalizationManager.localizer.translate(
-                            message.guildID,
-                            "command.preset.failure.missingIdentifier.description",
-                            {
-                                presetExport: `${process.env.BOT_PREFIX}preset export`,
-                            }
-                        ),
-                        thumbnailUrl: KmqImages.NOT_IMPRESSED,
-                    });
-
-                    logger.warn(
-                        `${getDebugLogHeader(
-                            message
-                        )} | Preset UUID not specified`
-                    );
-                    break;
-                }
-
-                if (!presetName) {
-                    missingPresetMessage();
-                    break;
-                }
-
-                await PresetCommand.importPreset(
-                    presetUUID,
-                    presetName,
-                    guildPreference,
-                    messageContext
-                );
-                break;
-            }
-
-            default:
-        }
+        await PresetCommand.processPresetAction(
+            MessageContext.fromMessage(message),
+            presetAction,
+            presetName,
+            presetUUID
+        );
     };
 
     static async deletePreset(
         presetName: string,
         guildPreference: GuildPreference,
-        messageContext: MessageContext
+        messageContext: MessageContext,
+        interaction: Eris.CommandInteraction
     ): Promise<void> {
         const deleteResult = await guildPreference.deletePreset(presetName);
         if (!deleteResult) {
@@ -253,17 +520,21 @@ export default class PresetCommand implements BaseCommand {
                 )} | Tried to delete non-existent preset '${presetName}'`
             );
 
-            await sendErrorMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.noSuchPreset.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.noSuchPreset.description",
-                    { presetName: `\`${presetName}\`` }
-                ),
-            });
+            await sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "command.preset.failure.noSuchPreset.title"
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "command.preset.failure.noSuchPreset.description",
+                        { presetName: `\`${presetName}\`` }
+                    ),
+                },
+                interaction
+            );
             return;
         }
 
@@ -273,24 +544,32 @@ export default class PresetCommand implements BaseCommand {
             )} | Preset '${presetName}' successfully deleted.`
         );
 
-        await sendInfoMessage(messageContext, {
-            title: LocalizationManager.localizer.translate(
-                messageContext.guildID,
-                "command.preset.deleted.title"
-            ),
-            description: LocalizationManager.localizer.translate(
-                messageContext.guildID,
-                "command.preset.deleted.description",
-                { presetName: `\`${presetName}\`` }
-            ),
-            thumbnailUrl: KmqImages.NOT_IMPRESSED,
-        });
+        await sendInfoMessage(
+            messageContext,
+            {
+                title: i18n.translate(
+                    messageContext.guildID,
+                    "command.preset.deleted.title"
+                ),
+                description: i18n.translate(
+                    messageContext.guildID,
+                    "command.preset.deleted.description",
+                    { presetName: `\`${presetName}\`` }
+                ),
+                thumbnailUrl: KmqImages.NOT_IMPRESSED,
+            },
+            null,
+            null,
+            [],
+            interaction
+        );
     }
 
     static async loadPreset(
         presetName: string,
         guildPreference: GuildPreference,
-        messageContext: MessageContext
+        messageContext: MessageContext,
+        interaction: Eris.CommandInteraction
     ): Promise<void> {
         let guildID = messageContext.guildID;
         if (presetName.startsWith("KMQ-")) {
@@ -310,17 +589,21 @@ export default class PresetCommand implements BaseCommand {
                     )} | Tried to load non-existent preset identifier \`${presetUUID}\`.`
                 );
 
-                await sendErrorMessage(messageContext, {
-                    title: LocalizationManager.localizer.translate(
-                        messageContext.guildID,
-                        "command.preset.failure.noSuchPreset.title"
-                    ),
-                    description: LocalizationManager.localizer.translate(
-                        messageContext.guildID,
-                        "command.preset.failure.noSuchPreset.identifier.description",
-                        { presetUUID: `\`${presetUUID}\`` }
-                    ),
-                });
+                await sendErrorMessage(
+                    messageContext,
+                    {
+                        title: i18n.translate(
+                            messageContext.guildID,
+                            "command.preset.failure.noSuchPreset.title"
+                        ),
+                        description: i18n.translate(
+                            messageContext.guildID,
+                            "command.preset.failure.noSuchPreset.identifier.description",
+                            { presetUUID: `\`${presetUUID}\`` }
+                        ),
+                    },
+                    interaction
+                );
                 return;
             }
 
@@ -348,7 +631,10 @@ export default class PresetCommand implements BaseCommand {
                     option: GameOptionInternalToGameOption[x] as GameOption,
                     reset: false,
                 })),
-                true
+                true,
+                null,
+                null,
+                interaction
             );
         } else {
             logger.warn(
@@ -357,86 +643,38 @@ export default class PresetCommand implements BaseCommand {
                 )} | Tried to load non-existent preset '${presetName}'`
             );
 
-            await sendErrorMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.noSuchPreset.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.noSuchPreset.description",
-                    { presetName: `\`${presetName}\`` }
-                ),
-            });
+            await sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "command.preset.failure.noSuchPreset.title"
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "command.preset.failure.noSuchPreset.description",
+                        { presetName: `\`${presetName}\`` }
+                    ),
+                },
+                interaction
+            );
         }
     }
 
     static async savePreset(
         presetName: string,
         guildPreference: GuildPreference,
-        messageContext: MessageContext
+        messageContext: MessageContext,
+        interaction: Eris.CommandInteraction
     ): Promise<void> {
-        const presets = await guildPreference.listPresets();
-        if (presets.length >= MAX_NUM_PRESETS) {
-            logger.warn(
-                `${getDebugLogHeader(
-                    messageContext
-                )} | Can't add present, maximum reached.`
-            );
-
-            await sendErrorMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.tooMany.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.tooMany.description",
-                    { maxNumPresets: String(MAX_NUM_PRESETS) }
-                ),
-            });
-            return;
-        }
-
-        if (presetName.length > PRESET_NAME_MAX_LENGTH) {
-            logger.warn(
-                `${getDebugLogHeader(
-                    messageContext
-                )} | Can't add preset, character limit reached.`
-            );
-
-            await sendErrorMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.lengthyName.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.lengthyName.description",
-                    { presetNameMaxLength: String(PRESET_NAME_MAX_LENGTH) }
-                ),
-            });
-            return;
-        }
-
-        if (presetName.startsWith("KMQ-")) {
-            logger.warn(
-                `${getDebugLogHeader(
-                    messageContext
-                )} | Can't add preset, illegal prefix.`
-            );
-
-            await sendErrorMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.illegalPrefix.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.illegalPrefix.description",
-                    { importPrefix: "`KMQ-`" }
-                ),
-            });
+        if (
+            !(await canSavePreset(
+                presetName,
+                guildPreference,
+                messageContext,
+                interaction
+            ))
+        ) {
             return;
         }
 
@@ -448,20 +686,27 @@ export default class PresetCommand implements BaseCommand {
                 )} | Preset '${presetName}' successfully saved`
             );
 
-            await sendInfoMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.saved.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.savedOrReplaced.description",
-                    {
-                        presetLoad: `\`${process.env.BOT_PREFIX}preset load ${presetName}\``,
-                    }
-                ),
-                thumbnailUrl: KmqImages.HAPPY,
-            });
+            await sendInfoMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "command.preset.saved.title"
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "command.preset.savedOrReplaced.description",
+                        {
+                            presetLoad: `\`/preset load ${presetName}\``,
+                        }
+                    ),
+                    thumbnailUrl: KmqImages.HAPPY,
+                },
+                null,
+                null,
+                [],
+                interaction
+            );
         } else {
             logger.warn(
                 `${getDebugLogHeader(
@@ -469,29 +714,34 @@ export default class PresetCommand implements BaseCommand {
                 )} | Preset '${presetName}' already exists`
             );
 
-            await sendErrorMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.alreadyExists.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.alreadyExists.description",
-                    {
-                        presetNameFormatted: `\`${presetName}\``,
-                        presetDelete: `${process.env.BOT_PREFIX}preset delete`,
-                        presetName,
-                    }
-                ),
-                thumbnailUrl: KmqImages.DEAD,
-            });
+            await sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "command.preset.failure.alreadyExists.title"
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "command.preset.failure.alreadyExists.description",
+                        {
+                            presetNameFormatted: `\`${presetName}\``,
+                            presetDelete: "/preset delete",
+                            presetName,
+                        }
+                    ),
+                    thumbnailUrl: KmqImages.DEAD,
+                },
+                interaction
+            );
         }
     }
 
     static async replacePreset(
         presetName: string,
         guildPreference: GuildPreference,
-        messageContext: MessageContext
+        messageContext: MessageContext,
+        interaction: Eris.CommandInteraction
     ): Promise<void> {
         const oldUUID = await guildPreference.deletePreset(presetName);
         if (!oldUUID) {
@@ -502,6 +752,12 @@ export default class PresetCommand implements BaseCommand {
             );
         }
 
+        if (
+            !(await isValidPresetName(presetName, messageContext, interaction))
+        ) {
+            return;
+        }
+
         await guildPreference.savePreset(presetName, oldUUID);
         logger.info(
             `${getDebugLogHeader(
@@ -509,26 +765,34 @@ export default class PresetCommand implements BaseCommand {
             )} | Preset '${presetName}' successfully replaced`
         );
 
-        await sendInfoMessage(messageContext, {
-            title: LocalizationManager.localizer.translate(
-                messageContext.guildID,
-                "command.preset.replaced.title"
-            ),
-            description: LocalizationManager.localizer.translate(
-                messageContext.guildID,
-                "command.preset.savedOrReplaced.description",
-                {
-                    presetLoad: `\`${process.env.BOT_PREFIX}preset load ${presetName}\``,
-                }
-            ),
-            thumbnailUrl: KmqImages.HAPPY,
-        });
+        await sendInfoMessage(
+            messageContext,
+            {
+                title: i18n.translate(
+                    messageContext.guildID,
+                    "command.preset.replaced.title"
+                ),
+                description: i18n.translate(
+                    messageContext.guildID,
+                    "command.preset.savedOrReplaced.description",
+                    {
+                        presetLoad: `\`/preset load ${presetName}\``,
+                    }
+                ),
+                thumbnailUrl: KmqImages.HAPPY,
+            },
+            null,
+            null,
+            [],
+            interaction
+        );
     }
 
     static async exportPreset(
         presetName: string,
         guildPreference: GuildPreference,
-        messageContext: MessageContext
+        messageContext: MessageContext,
+        interaction: Eris.CommandInteraction
     ): Promise<void> {
         const presetUUID = await guildPreference.getPresetUUID(presetName);
         if (!presetUUID) {
@@ -538,18 +802,22 @@ export default class PresetCommand implements BaseCommand {
                 )} | Preset export failed; '${presetName}' does not exist`
             );
 
-            await sendInfoMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.noSuchPreset.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.noSuchPreset.description",
-                    { presetName: `\`${presetName}\`` }
-                ),
-                thumbnailUrl: KmqImages.DEAD,
-            });
+            await sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "command.preset.failure.noSuchPreset.title"
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "command.preset.failure.noSuchPreset.description",
+                        { presetName: `\`${presetName}\`` }
+                    ),
+                    thumbnailUrl: KmqImages.DEAD,
+                },
+                interaction
+            );
             return;
         }
 
@@ -559,30 +827,38 @@ export default class PresetCommand implements BaseCommand {
             )} | Preset '${presetName}' successfully exported as ${presetUUID}`
         );
 
-        await sendInfoMessage(messageContext, {
-            title: LocalizationManager.localizer.translate(
-                messageContext.guildID,
-                "command.preset.exported.title"
-            ),
-            description: LocalizationManager.localizer.translate(
-                messageContext.guildID,
-                "command.preset.exported.description",
-                {
-                    presetName: `\`${presetName}\``,
-                    presetImport: `${process.env.BOT_PREFIX}preset import`,
-                    presetUUID,
-                    presetLoad: `${process.env.BOT_PREFIX}preset load`,
-                }
-            ),
-            thumbnailUrl: KmqImages.THUMBS_UP,
-        });
+        await sendInfoMessage(
+            messageContext,
+            {
+                title: i18n.translate(
+                    messageContext.guildID,
+                    "command.preset.exported.title"
+                ),
+                description: i18n.translate(
+                    messageContext.guildID,
+                    "command.preset.exported.description",
+                    {
+                        presetName: `\`${presetName}\``,
+                        presetImport: "/preset import",
+                        presetUUID,
+                        presetLoad: "/preset load",
+                    }
+                ),
+                thumbnailUrl: KmqImages.THUMBS_UP,
+            },
+            null,
+            null,
+            [],
+            interaction
+        );
     }
 
     static async importPreset(
         presetUUID: string,
         presetName: string,
         guildPreference: GuildPreference,
-        messageContext: MessageContext
+        messageContext: MessageContext,
+        interaction: Eris.CommandInteraction
     ): Promise<void> {
         if ((await guildPreference.listPresets()).includes(presetName)) {
             logger.warn(
@@ -591,22 +867,26 @@ export default class PresetCommand implements BaseCommand {
                 )} | Preset import failed; '${presetName}' already exists`
             );
 
-            sendErrorMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.alreadyExists.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.alreadyExists.description",
-                    {
-                        presetNameFormatted: `\`${presetName}\``,
-                        presetDelete: `${process.env.BOT_PREFIX}preset delete`,
-                        presetName,
-                    }
-                ),
-                thumbnailUrl: KmqImages.DEAD,
-            });
+            sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "command.preset.failure.alreadyExists.title"
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "command.preset.failure.alreadyExists.description",
+                        {
+                            presetNameFormatted: `\`${presetName}\``,
+                            presetDelete: "/preset delete",
+                            presetName,
+                        }
+                    ),
+                    thumbnailUrl: KmqImages.DEAD,
+                },
+                interaction
+            );
             return;
         }
 
@@ -624,17 +904,21 @@ export default class PresetCommand implements BaseCommand {
                 )} | Tried to load non-existent preset identifier \`${presetUUID}\`.`
             );
 
-            await sendErrorMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.noSuchPreset.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.noSuchPreset.identifier.description",
-                    { presetUUID: `\`${presetUUID}\`` }
-                ),
-            });
+            await sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "command.preset.failure.noSuchPreset.title"
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "command.preset.failure.noSuchPreset.identifier.description",
+                        { presetUUID: `\`${presetUUID}\`` }
+                    ),
+                },
+                interaction
+            );
             return;
         }
 
@@ -675,55 +959,273 @@ export default class PresetCommand implements BaseCommand {
             )} | Preset '${presetName}' imported`
         );
 
-        sendInfoMessage(messageContext, {
-            title: LocalizationManager.localizer.translate(
-                messageContext.guildID,
-                "command.preset.imported.title"
-            ),
-            description: LocalizationManager.localizer.translate(
-                messageContext.guildID,
-                "command.preset.imported.description",
-                {
-                    presetLoad: `${process.env.BOT_PREFIX}preset load`,
-                    presetName,
-                }
-            ),
-            thumbnailUrl: KmqImages.THUMBS_UP,
-        });
+        sendInfoMessage(
+            messageContext,
+            {
+                title: i18n.translate(
+                    messageContext.guildID,
+                    "command.preset.imported.title"
+                ),
+                description: i18n.translate(
+                    messageContext.guildID,
+                    "command.preset.imported.description",
+                    {
+                        presetLoad: "/preset load",
+                        presetName,
+                    }
+                ),
+                thumbnailUrl: KmqImages.THUMBS_UP,
+            },
+            null,
+            null,
+            [],
+            interaction
+        );
     }
 
     static async listPresets(
         guildPreference: GuildPreference,
-        messageContext: MessageContext
+        messageContext: MessageContext,
+        interaction: Eris.CommandInteraction
     ): Promise<void> {
         const presets = await guildPreference.listPresets();
-        sendInfoMessage(messageContext, {
-            title: LocalizationManager.localizer.translate(
-                messageContext.guildID,
-                "command.preset.list.title"
-            ),
-            description:
-                presets.length > 0
-                    ? presets.join("\n")
-                    : LocalizationManager.localizer.translate(
-                          messageContext.guildID,
-                          "command.preset.list.failure.noPresets.description",
-                          {
-                              presetHelp: `\`${process.env.BOT_PREFIX}help preset\``,
-                          }
-                      ),
-            footerText:
-                presets.length > 0
-                    ? LocalizationManager.localizer.translate(
-                          messageContext.guildID,
-                          "command.preset.list.loadInstructions.footer",
-                          { presetLoad: `${process.env.BOT_PREFIX}preset load` }
-                      )
-                    : null,
-        });
+        sendInfoMessage(
+            messageContext,
+            {
+                title: i18n.translate(
+                    messageContext.guildID,
+                    "command.preset.list.title"
+                ),
+                description:
+                    presets.length > 0
+                        ? presets.join("\n")
+                        : i18n.translate(
+                              messageContext.guildID,
+                              "command.preset.list.failure.noPresets.description",
+                              {
+                                  presetHelp: "`/help preset`",
+                              }
+                          ),
+                footerText:
+                    presets.length > 0
+                        ? i18n.translate(
+                              messageContext.guildID,
+                              "command.preset.list.loadInstructions.footer",
+                              {
+                                  presetLoad: "/preset load",
+                              }
+                          )
+                        : null,
+            },
+            null,
+            null,
+            [],
+            interaction
+        );
 
         logger.info(
             `${getDebugLogHeader(messageContext)} | Listed all presets`
+        );
+    }
+
+    static async processPresetAction(
+        messageContext: MessageContext,
+        presetAction: PresetAction,
+        presetName: string,
+        presetUUID: string,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID
+        );
+
+        if (presetAction === PresetAction.LIST) {
+            PresetCommand.listPresets(
+                guildPreference,
+                messageContext,
+                interaction
+            );
+
+            return;
+        }
+
+        const missingPresetMessage = (): void => {
+            sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "command.preset.failure.missingName.title"
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "command.preset.failure.missingName.description"
+                    ),
+                    thumbnailUrl: KmqImages.NOT_IMPRESSED,
+                },
+                interaction
+            );
+
+            logger.warn(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Preset name not specified`
+            );
+        };
+
+        if (presetAction !== PresetAction.IMPORT && !presetName) {
+            missingPresetMessage();
+            return;
+        }
+
+        switch (presetAction) {
+            case PresetAction.SAVE:
+                await PresetCommand.savePreset(
+                    presetName,
+                    guildPreference,
+                    messageContext,
+                    interaction
+                );
+                break;
+            case PresetAction.LOAD:
+                await PresetCommand.loadPreset(
+                    presetName,
+                    guildPreference,
+                    messageContext,
+                    interaction
+                );
+                break;
+            case PresetAction.DELETE:
+                await PresetCommand.deletePreset(
+                    presetName,
+                    guildPreference,
+                    messageContext,
+                    interaction
+                );
+                break;
+            case PresetAction.REPLACE:
+                await PresetCommand.replacePreset(
+                    presetName,
+                    guildPreference,
+                    messageContext,
+                    interaction
+                );
+                break;
+            case PresetAction.EXPORT:
+                await PresetCommand.exportPreset(
+                    presetName,
+                    guildPreference,
+                    messageContext,
+                    interaction
+                );
+                break;
+            case PresetAction.IMPORT: {
+                if (!presetUUID) {
+                    sendErrorMessage(
+                        messageContext,
+                        {
+                            title: i18n.translate(
+                                messageContext.guildID,
+                                "command.preset.failure.missingIdentifier.title"
+                            ),
+                            description: i18n.translate(
+                                messageContext.guildID,
+                                "command.preset.failure.missingIdentifier.description",
+                                {
+                                    presetExport: "/preset export",
+                                }
+                            ),
+                            thumbnailUrl: KmqImages.NOT_IMPRESSED,
+                        },
+                        interaction
+                    );
+
+                    logger.warn(
+                        `${getDebugLogHeader(
+                            messageContext
+                        )} | Preset UUID not specified`
+                    );
+                    break;
+                }
+
+                if (!presetName) {
+                    missingPresetMessage();
+                    break;
+                }
+
+                await PresetCommand.importPreset(
+                    presetUUID,
+                    presetName,
+                    guildPreference,
+                    messageContext,
+                    interaction
+                );
+                break;
+            }
+
+            default:
+        }
+    }
+
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        const { interactionOptions, interactionName } =
+            getInteractionValue(interaction);
+
+        const presetAction = interactionName as PresetAction;
+
+        let presetName: string = null;
+        let presetUUID: string = null;
+
+        if (presetAction === PresetAction.IMPORT) {
+            presetName = interactionOptions["new_preset_name"];
+
+            presetUUID = interactionOptions["exported_preset"];
+        } else {
+            presetName = interactionOptions["preset_name"];
+        }
+
+        await PresetCommand.processPresetAction(
+            messageContext,
+            presetAction,
+            presetName,
+            presetUUID,
+            interaction
+        );
+    }
+
+    /**
+     * Handles showing suggested presets as the user types
+     * @param interaction - The interaction with intermediate typing state
+     */
+    static async processAutocompleteInteraction(
+        interaction: Eris.AutocompleteInteraction
+    ): Promise<void> {
+        const guildPreference = await GuildPreference.getGuildPreference(
+            interaction.guildID
+        );
+
+        const presets = await guildPreference.listPresets();
+        const lowercaseUserInput = (
+            (
+                interaction.data
+                    .options[0] as Eris.InteractionDataOptionsSubCommand
+            ).options.filter(
+                (x) => x["focused"]
+            )[0] as Eris.InteractionDataOptionsString
+        ).value.toLowerCase();
+
+        await tryAutocompleteInteractionAcknowledge(
+            interaction,
+            presets
+                .filter((x) =>
+                    lowercaseUserInput.length === 0
+                        ? true
+                        : x.toLowerCase().startsWith(lowercaseUserInput)
+                )
+                .map((x) => ({ name: x, value: x }))
         );
     }
 }

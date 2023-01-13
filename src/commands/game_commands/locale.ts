@@ -2,13 +2,16 @@ import { DEFAULT_LOCALE, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
+    getInteractionValue,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
+import Eris from "eris";
 import LocaleType from "../../enums/locale_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
 import dbContext from "../../database_context";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -23,6 +26,11 @@ enum LocaleArgument {
     KR = "kr",
     KOREAN = "korean",
 }
+
+const LanguageNameToLocaleType = {
+    English: LocaleType.EN,
+    Korean: LocaleType.KO,
+};
 
 export default class LocaleTypeCommand implements BaseCommand {
     aliases = ["botlanguage"];
@@ -41,7 +49,7 @@ export default class LocaleTypeCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "locale",
-        description: LocalizationManager.localizer.translate(
+        description: i18n.translate(
             guildID,
             "command.locale.help.description",
             {
@@ -49,18 +57,18 @@ export default class LocaleTypeCommand implements BaseCommand {
                 korean: `\`${LocaleArgument.KOREAN}\``,
             }
         ),
-        usage: `,locale [${LocalizationManager.localizer.translate(
+        usage: `/locale language:[${i18n.translate(
             guildID,
             "command.locale.help.usage.language"
         )}]`,
         examples: [
             {
-                example: "`,locale english`",
-                explanation: LocalizationManager.localizer.translate(
+                example: "`/locale language:English`",
+                explanation: i18n.translate(
                     guildID,
                     "command.locale.help.example.toEnglish",
                     {
-                        english: LocalizationManager.localizer.translate(
+                        english: i18n.translate(
                             guildID,
                             "command.locale.language.en"
                         ),
@@ -68,27 +76,14 @@ export default class LocaleTypeCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,locale korean`",
-                explanation: LocalizationManager.localizer.translate(
+                example: "`/locale language:Korean`",
+                explanation: i18n.translate(
                     guildID,
                     "command.locale.help.example.toKorean",
                     {
-                        korean: LocalizationManager.localizer.translate(
+                        korean: i18n.translate(
                             guildID,
                             "command.locale.language.ko"
-                        ),
-                    }
-                ),
-            },
-            {
-                example: "`,locale`",
-                explanation: LocalizationManager.localizer.translate(
-                    guildID,
-                    "command.locale.help.example.reset",
-                    {
-                        defaultLocale: LocalizationManager.localizer.translate(
-                            guildID,
-                            `command.locale.language.${DEFAULT_LOCALE}`
                         ),
                     }
                 ),
@@ -97,51 +92,62 @@ export default class LocaleTypeCommand implements BaseCommand {
         priority: 30,
     });
 
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
+        {
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+            options: [
+                {
+                    name: "language",
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "command.locale.help.interaction.language"
+                    ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.locale.help.interaction.language"
+                        ),
+                    },
+                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
+                    required: true,
+                    choices: Object.keys(LanguageNameToLocaleType).map(
+                        (languageName) => ({
+                            name: languageName,
+                            value: languageName,
+                        })
+                    ),
+                },
+            ],
+        },
+    ];
+
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        let language: LocaleType;
+        let localeType: LocaleType;
         if (parsedMessage.components.length === 0) {
-            language = DEFAULT_LOCALE;
+            localeType = DEFAULT_LOCALE;
         } else {
             switch (
                 parsedMessage.components[0].toLowerCase() as LocaleArgument
             ) {
                 case LocaleArgument.EN:
                 case LocaleArgument.ENGLISH:
-                    language = LocaleType.EN;
+                    localeType = LocaleType.EN;
                     break;
                 case LocaleArgument.KO:
                 case LocaleArgument.KR:
                 case LocaleArgument.KOREAN:
-                    language = LocaleType.KO;
+                    localeType = LocaleType.KO;
                     break;
                 default:
                     return;
             }
         }
 
-        await LocaleTypeCommand.updateLocale(message.guildID, language);
-
-        sendInfoMessage(MessageContext.fromMessage(message), {
-            title: LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.options.updated",
-                { presetOrOption: "Locale" }
-            ),
-            description: LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.locale.updatedDescription",
-                {
-                    language: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        `command.locale.language.${language}`
-                    ),
-                }
-            ),
-            thumbnailUrl: KmqImages.THUMBS_UP,
-        });
-
-        logger.info(
-            `${getDebugLogHeader(message)} | Changed locale to ${language}.`
+        await LocaleTypeCommand.updateLocaleMessage(
+            MessageContext.fromMessage(message),
+            localeType
         );
     };
 
@@ -160,5 +166,67 @@ export default class LocaleTypeCommand implements BaseCommand {
             delete State.locales[guildID];
             await dbContext.kmq("locale").where({ guild_id: guildID }).del();
         }
+    }
+
+    static async updateLocaleMessage(
+        messageContext: MessageContext,
+        localeType: LocaleType,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
+        await LocaleTypeCommand.updateLocale(
+            messageContext.guildID,
+            localeType
+        );
+
+        sendInfoMessage(
+            messageContext,
+            {
+                title: i18n.translate(
+                    messageContext.guildID,
+                    "command.options.updated",
+                    { presetOrOption: "Locale" }
+                ),
+                description: i18n.translate(
+                    messageContext.guildID,
+                    "command.locale.updatedDescription",
+                    {
+                        language: i18n.translate(
+                            messageContext.guildID,
+                            `command.locale.language.${localeType}`
+                        ),
+                    }
+                ),
+                thumbnailUrl: KmqImages.THUMBS_UP,
+            },
+            null,
+            null,
+            [],
+            interaction
+        );
+
+        logger.info(
+            `${getDebugLogHeader(
+                messageContext
+            )} | Changed locale to ${localeType}.`
+        );
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        const { interactionOptions } = getInteractionValue(interaction);
+        const localeType =
+            LanguageNameToLocaleType[interactionOptions["language"]];
+
+        await LocaleTypeCommand.updateLocaleMessage(
+            messageContext,
+            localeType,
+            interaction
+        );
     }
 }

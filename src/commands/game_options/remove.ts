@@ -1,29 +1,32 @@
-import { GROUP_LIST_URL } from "../../constants";
+import { EMBED_ERROR_COLOR, GROUP_LIST_URL, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
+    generateOptionsMessage,
     getDebugLogHeader,
     sendErrorMessage,
-    sendOptionsMessage,
+    sendInfoMessage,
 } from "../../helpers/discord_utils";
 import {
     getMatchingGroupNames,
     getSimilarGroupNames,
 } from "../../helpers/game_utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
+import i18n from "../../helpers/localization_manager";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
+import type EmbedPayload from "../../interfaces/embed_payload";
 import type HelpDocumentation from "../../interfaces/help";
 import type MatchedArtist from "../../interfaces/matched_artist";
 
 const logger = new IPCLogger("remove");
 
-enum RemoveType {
+export enum RemoveType {
     // Groups with aliases
     GROUPS = "groups",
     GROUP = "group",
@@ -55,63 +58,70 @@ export default class RemoveCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "remove",
-        description: LocalizationManager.localizer.translate(
+        description: i18n.translate(
             guildID,
             "command.remove.help.description",
             {
-                groups: `\`${process.env.BOT_PREFIX}groups\``,
-                exclude: `\`${process.env.BOT_PREFIX}exclude\``,
-                include: `\`${process.env.BOT_PREFIX}include\``,
+                groups: "`/groups`",
+                exclude: "`/exclude`",
+                include: "`/include`",
             }
         ),
-        usage: `,remove [groups | exclude | include] [${LocalizationManager.localizer.translate(
+        usage: `/groups remove [${i18n.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n/include remove [${i18n.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n/exclude remove [${i18n.translate(
             guildID,
             "misc.listOfGroups"
         )}]`,
         examples: [
             {
-                example: "`,remove groups twice, red velvet`",
-                explanation: LocalizationManager.localizer.translate(
+                example: "`/groups remove group_1:twice group_2:red velvet`",
+                explanation: i18n.translate(
                     guildID,
                     "command.remove.help.example.groups",
                     {
                         groupOne: "Twice",
                         groupTwo: "Red Velvet",
-                        groups: `\`${process.env.BOT_PREFIX}groups\``,
+                        groups: "`/groups`",
                     }
                 ),
             },
             {
-                example: "`,remove exclude BESTie, Dia, iKON`",
-                explanation: LocalizationManager.localizer.translate(
+                example:
+                    "`/exclude remove group_1:BESTie group_2:Dia group_3:iKON`",
+                explanation: i18n.translate(
                     guildID,
                     "command.remove.help.example.exclude",
                     {
                         groupOne: "BESTie",
                         groupTwo: "Dia",
                         groupThree: "iKON",
-                        exclude: `\`${process.env.BOT_PREFIX}exclude\``,
+                        exclude: "`/exclude`",
                     }
                 ),
             },
             {
-                example: "`,remove include exo`",
-                explanation: LocalizationManager.localizer.translate(
+                example: "`/include remove group_1:exo`",
+                explanation: i18n.translate(
                     guildID,
                     "command.remove.help.example.include",
                     {
                         group: "exo",
-                        include: `\`${process.env.BOT_PREFIX}include\``,
+                        include: "`/include`",
                     }
                 ),
             },
         ],
         actionRowComponents: [
             {
-                style: 5 as const,
+                type: Eris.Constants.ComponentTypes.BUTTON,
+                style: Eris.Constants.ButtonStyles.LINK,
                 url: GROUP_LIST_URL,
-                type: 2 as const,
-                label: LocalizationManager.localizer.translate(
+                label: i18n.translate(
                     guildID,
                     "misc.interaction.fullGroupsList"
                 ),
@@ -121,13 +131,34 @@ export default class RemoveCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+        const rawGroupsToRemove = parsedMessage.argument
+            .split(" ")
+            .slice(1)
+            .join(" ")
+            .split(",")
+            .map((groupName) => groupName.trim().toLowerCase());
+
+        const removeType = parsedMessage.components[0] as RemoveType;
+
+        await RemoveCommand.updateOption(
+            MessageContext.fromMessage(message),
+            removeType,
+            rawGroupsToRemove
+        );
+    };
+
+    static async updateOption(
+        messageContext: MessageContext,
+        removeType: RemoveType,
+        rawGroupsToRemove: Array<string>,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
+            messageContext.guildID
         );
 
-        const optionListed = parsedMessage.components[0] as RemoveType;
         let currentMatchedArtists: MatchedArtist[];
-        switch (optionListed) {
+        switch (removeType) {
             case RemoveType.GROUPS:
             case RemoveType.GROUP:
             case RemoveType.ARTIST:
@@ -146,25 +177,22 @@ export default class RemoveCommand implements BaseCommand {
         }
 
         if (!currentMatchedArtists) {
-            sendErrorMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "command.remove.failure.noGroupsSelected.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "command.remove.failure.noGroupsSelected.description"
-                ),
-            });
+            sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "command.remove.failure.noGroupsSelected.title"
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "command.remove.failure.noGroupsSelected.description"
+                    ),
+                },
+                interaction
+            );
             return;
         }
-
-        const rawGroupsToRemove = parsedMessage.argument
-            .split(" ")
-            .slice(1)
-            .join(" ")
-            .split(",")
-            .map((groupName) => groupName.trim().toLowerCase());
 
         const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames(
             rawGroupsToRemove
@@ -174,11 +202,13 @@ export default class RemoveCommand implements BaseCommand {
             (group) => !matchedGroups.some((x) => x.id === group.id)
         );
 
+        const embeds: Array<EmbedPayload> = [];
+
         if (unmatchedGroups.length) {
             logger.info(
                 `${getDebugLogHeader(
-                    message
-                )} | Attempted to set unknown groups. groups =  ${unmatchedGroups.join(
+                    messageContext
+                )} | Attempted to set unknown groups. groups = ${unmatchedGroups.join(
                     ", "
                 )}`
             );
@@ -187,12 +217,12 @@ export default class RemoveCommand implements BaseCommand {
             if (unmatchedGroups.length === 1) {
                 const suggestions = await getSimilarGroupNames(
                     unmatchedGroups[0],
-                    State.getGuildLocale(message.guildID)
+                    State.getGuildLocale(messageContext.guildID)
                 );
 
                 if (suggestions.length > 0) {
-                    suggestionsText = LocalizationManager.localizer.translate(
-                        message.guildID,
+                    suggestionsText = i18n.translate(
+                        messageContext.guildID,
                         "misc.failure.unrecognizedGroups.didYouMean",
                         {
                             suggestions: suggestions.join("\n"),
@@ -201,87 +231,93 @@ export default class RemoveCommand implements BaseCommand {
                 }
             }
 
-            const descriptionText = LocalizationManager.localizer.translate(
-                message.guildID,
+            const descriptionText = i18n.translate(
+                messageContext.guildID,
                 "misc.failure.unrecognizedGroups.description",
                 {
-                    matchedGroupsAction:
-                        LocalizationManager.localizer.translate(
-                            message.guildID,
-                            "command.remove.failure.unrecognizedGroups.removed"
-                        ),
-                    helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
+                    matchedGroupsAction: i18n.translate(
+                        messageContext.guildID,
+                        "command.remove.failure.unrecognizedGroups.removed"
+                    ),
+                    helpGroups: "/help groups",
                     unmatchedGroups: unmatchedGroups.join(", "),
                     solution: "",
                 }
             );
 
-            await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
+            embeds.push({
+                color: EMBED_ERROR_COLOR,
+                author: messageContext.author,
+                title: i18n.translate(
+                    messageContext.guildID,
                     "misc.failure.unrecognizedGroups.title"
                 ),
                 description: `${descriptionText}\n\n${suggestionsText || ""}`,
+                thumbnailUrl: KmqImages.DEAD,
             });
         }
 
         // if none of the new groups were matched
         if (unmatchedGroups.length === rawGroupsToRemove.length) {
+            if (embeds.length > 0) {
+                await sendInfoMessage(
+                    messageContext,
+                    embeds[0],
+                    false,
+                    null,
+                    embeds.slice(1),
+                    interaction
+                );
+            }
+
             return;
         }
 
-        switch (optionListed) {
+        let gameOption: GameOption;
+        switch (removeType) {
             case RemoveType.GROUPS:
             case RemoveType.GROUP:
             case RemoveType.ARTIST:
             case RemoveType.ARTISTS:
+                gameOption = GameOption.GROUPS;
                 await guildPreference.setGroups(remainingGroups);
-                await sendOptionsMessage(
-                    Session.getSession(message.guildID),
-                    MessageContext.fromMessage(message),
-                    guildPreference,
-                    [{ option: GameOption.GROUPS, reset: false }]
-                );
-
-                logger.info(
-                    `${getDebugLogHeader(
-                        message
-                    )} | Group removed: ${rawGroupsToRemove}`
-                );
                 break;
             case RemoveType.INCLUDE:
             case RemoveType.INCLUDES:
+                gameOption = GameOption.INCLUDE;
                 await guildPreference.setIncludes(remainingGroups);
-                await sendOptionsMessage(
-                    Session.getSession(message.guildID),
-                    MessageContext.fromMessage(message),
-                    guildPreference,
-                    [{ option: GameOption.INCLUDE, reset: false }]
-                );
-
-                logger.info(
-                    `${getDebugLogHeader(
-                        message
-                    )} | Include removed: ${rawGroupsToRemove}`
-                );
                 break;
             case RemoveType.EXCLUDE:
             case RemoveType.EXCLUDES:
+                gameOption = GameOption.EXCLUDE;
                 await guildPreference.setExcludes(remainingGroups);
-                await sendOptionsMessage(
-                    Session.getSession(message.guildID),
-                    MessageContext.fromMessage(message),
-                    guildPreference,
-                    [{ option: GameOption.EXCLUDE, reset: false }]
-                );
-
-                logger.info(
-                    `${getDebugLogHeader(
-                        message
-                    )} | Exclude removed: ${rawGroupsToRemove}`
-                );
                 break;
             default:
         }
-    };
+
+        logger.info(
+            `${getDebugLogHeader(
+                messageContext
+            )} | ${gameOption} removed: ${rawGroupsToRemove}`
+        );
+
+        const optionsMessage = await generateOptionsMessage(
+            Session.getSession(messageContext.guildID),
+            messageContext,
+            guildPreference,
+            [{ option: gameOption, reset: false }],
+            null,
+            null,
+            null
+        );
+
+        await sendInfoMessage(
+            messageContext,
+            optionsMessage,
+            true,
+            null,
+            embeds,
+            interaction
+        );
+    }
 }

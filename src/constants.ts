@@ -151,6 +151,8 @@ export const DATABASE_DOWNLOAD_DIR = path.join(
 );
 
 export const ELIMINATION_DEFAULT_LIVES = 10;
+export const ELIMINATION_MAX_LIVES = 10000;
+export const ELIMINATION_MIN_LIVES = 1;
 
 export const enum GameOptionInternal {
     BEGINNING_YEAR = "beginningYear",
@@ -176,6 +178,7 @@ export const enum GameOptionInternal {
     SUBUNIT_PREFERENCE = "subunitPreference",
     OST_PREFERENCE = "ostPreference",
     FORCE_PLAY_SONG = "forcePlaySongID",
+    SPOTIFY_PLAYLIST_METADATA = "spotifyPlaylistMetadata",
 }
 
 export const GameOptionInternalToGameOption: { [option: string]: string } = {
@@ -202,6 +205,8 @@ export const GameOptionInternalToGameOption: { [option: string]: string } = {
     [GameOptionInternal.SUBUNIT_PREFERENCE]: GameOption.SUBUNIT_PREFERENCE,
     [GameOptionInternal.OST_PREFERENCE]: GameOption.OST_PREFERENCE,
     [GameOptionInternal.FORCE_PLAY_SONG]: GameOption.FORCE_PLAY_SONG,
+    [GameOptionInternal.SPOTIFY_PLAYLIST_METADATA]:
+        GameOption.SPOTIFY_PLAYLIST_METADATA,
 };
 
 export const ROUND_MAX_RUNNERS_UP = 30;
@@ -209,12 +214,15 @@ export const ROUND_MAX_SCOREBOARD_PLAYERS = 30;
 export const SCOREBOARD_FIELD_CUTOFF = 6;
 
 export const EMBED_FIELDS_PER_PAGE = 20;
+export const MAX_AUTOCOMPLETE_FIELDS = 25;
 
 export const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
 export const SELECTION_WEIGHT_VALUES_HARD = [1, 2, 4, 8, 16];
 export const SELECTION_WEIGHT_VALUES_EASY = [
     ...SELECTION_WEIGHT_VALUES_HARD,
 ].reverse();
+
+export const EPHEMERAL_MESSAGE_FLAG = 64;
 
 export const DataFiles = {
     SKIP_SEED_COOKIE: path.join(__dirname, "../data/skip_seed"),
@@ -232,6 +240,19 @@ export const DataFiles = {
 };
 
 export const PERMISSIONS_LINK = "https://www.youtube.com/watch?v=87GW0SmF5LI";
+export const SPOTIFY_BASE_URL = "https://open.spotify.com/playlist/";
+
+export enum GroupAction {
+    ADD = "add",
+    REMOVE = "remove",
+    SET = "set",
+    RESET = "reset",
+}
+
+export enum OptionAction {
+    SET = "set",
+    RESET = "reset",
+}
 
 export const TEST_DB_CACHED_EXPORT = path.join(
     __dirname,

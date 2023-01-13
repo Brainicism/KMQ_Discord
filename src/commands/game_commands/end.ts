@@ -1,8 +1,15 @@
 import { IPCLogger } from "../../logger";
-import { getDebugLogHeader } from "../../helpers/discord_utils";
+import {
+    getDebugLogHeader,
+    tryCreateInteractionSuccessAcknowledgement,
+} from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
-import LocalizationManager from "../../helpers/localization_manager";
+import Eris from "eris";
+import LocaleType from "../../enums/locale_type";
+import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -19,23 +26,52 @@ export default class EndCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "end",
-        description: LocalizationManager.localizer.translate(
-            guildID,
-            "command.end.help.description"
-        ),
-        usage: ",end",
+        description: i18n.translate(guildID, "command.end.help.description"),
+        usage: "/end",
         examples: [],
         priority: 1020,
     });
 
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
+        {
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+        },
+    ];
+
     call = async ({ message }: CommandArgs): Promise<void> => {
-        const session = Session.getSession(message.guildID);
-        if (!session) {
-            logger.warn(`${getDebugLogHeader(message)} | No active session`);
-            return;
+        await EndCommand.endGame(MessageContext.fromMessage(message));
+    };
+
+    static endGame = async (
+        messageContext: MessageContext,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> => {
+        const session = Session.getSession(messageContext.guildID);
+        if (interaction) {
+            await tryCreateInteractionSuccessAcknowledgement(
+                interaction,
+                i18n.translate(LocaleType.EN, "command.end.interaction.title"),
+                i18n.translate(
+                    LocaleType.EN,
+                    "command.end.interaction.description"
+                )
+            );
         }
 
         await session.endSession();
-        logger.info(`${getDebugLogHeader(message)} | Session ended`);
+        logger.info(`${getDebugLogHeader(messageContext)} | Session ended`);
     };
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        await EndCommand.endGame(messageContext, interaction);
+    }
 }

@@ -27,20 +27,20 @@ import { getFact } from "../fact_generator";
 import Eris from "eris";
 import GameRound from "./game_round";
 import GuessModeType from "../enums/option_types/guess_mode_type";
-import GuildPreference from "./guild_preference";
 import ListeningRound from "./listening_round";
 import LocaleType from "../enums/locale_type";
-import LocalizationManager from "../helpers/localization_manager";
 import MessageContext from "./message_context";
 import SeekType from "../enums/option_types/seek_type";
 import SongSelector from "./song_selector";
 import State from "../state";
 import dbContext from "../database_context";
 import fs from "fs";
+import i18n from "../helpers/localization_manager";
 import type BookmarkedSong from "../interfaces/bookmarked_song";
 import type EmbedPayload from "../interfaces/embed_payload";
 import type GameSession from "./game_session";
 import type GuessResult from "../interfaces/guess_result";
+import type GuildPreference from "./guild_preference";
 import type KmqMember from "./kmq_member";
 import type ListeningSession from "./listening_session";
 import type QueriedSong from "../interfaces/queried_song";
@@ -132,7 +132,8 @@ export default abstract class Session {
 
             await this.songSelector.reloadSongs(
                 this.guildPreference,
-                this.isPremium
+                this.isPremium,
+                this.guildPreference.getSpotifyPlaylistMetadata()?.playlistID
             );
         };
     }
@@ -188,15 +189,17 @@ export default abstract class Session {
             try {
                 await this.songSelector.reloadSongs(
                     this.guildPreference,
-                    this.isPremium
+                    this.isPremium,
+                    this.guildPreference.getSpotifyPlaylistMetadata()
+                        ?.playlistID
                 );
             } catch (err) {
                 await sendErrorMessage(messageContext, {
-                    title: LocalizationManager.localizer.translate(
+                    title: i18n.translate(
                         this.guildID,
                         "misc.failure.errorSelectingSong.title"
                     ),
-                    description: LocalizationManager.localizer.translate(
+                    description: i18n.translate(
                         this.guildID,
                         "misc.failure.errorSelectingSong.description"
                     ),
@@ -223,11 +226,11 @@ export default abstract class Session {
             );
 
             await sendInfoMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     this.guildID,
                     "misc.uniqueSongsReset.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     this.guildID,
                     "misc.uniqueSongsReset.description",
                     { totalSongCount: friendlyFormattedNumber(totalSongCount) }
@@ -243,11 +246,11 @@ export default abstract class Session {
 
         if (randomSong === null) {
             sendErrorMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     this.guildID,
                     "misc.failure.songQuery.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     this.guildID,
                     "misc.failure.songQuery.description"
                 ),
@@ -280,11 +283,11 @@ export default abstract class Session {
             );
 
             await sendErrorMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     this.guildID,
                     "misc.failure.vcJoin.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     this.guildID,
                     "misc.failure.vcJoin.description"
                 ),
@@ -374,20 +377,20 @@ export default abstract class Session {
             ).reduce((total, x) => total + x.size, 0);
 
             await sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: LocalizationManager.localizer.translate(
+                title: i18n.translate(
                     this.guildID,
                     "misc.sendingBookmarkedSongs.title"
                 ),
-                description: LocalizationManager.localizer.translate(
+                description: i18n.translate(
                     this.guildID,
                     "misc.sendingBookmarkedSongs.description",
                     {
-                        songs: LocalizationManager.localizer.translateN(
+                        songs: i18n.translateN(
                             this.guildID,
                             "misc.plural.song",
                             bookmarkedSongCount
                         ),
-                        players: LocalizationManager.localizer.translateN(
+                        players: i18n.translateN(
                             this.guildID,
                             "misc.plural.player",
                             bookmarkedSongsPlayerCount
@@ -518,17 +521,14 @@ export default abstract class Session {
     /** Sends a message notifying who the new owner is */
     updateOwner(): void {
         sendInfoMessage(new MessageContext(this.textChannelID), {
-            title: LocalizationManager.localizer.translate(
-                this.guildID,
-                "misc.gameOwnerChanged.title"
-            ),
-            description: LocalizationManager.localizer.translate(
+            title: i18n.translate(this.guildID, "misc.gameOwnerChanged.title"),
+            description: i18n.translate(
                 this.guildID,
                 "misc.gameOwnerChanged.description",
                 {
                     newGameOwner: getMention(this.owner.id),
-                    forcehintCommand: `\`${process.env.BOT_PREFIX}forcehint\``,
-                    forceskipCommand: `\`${process.env.BOT_PREFIX}forceskip\``,
+                    forcehintCommand: "`/forcehint`",
+                    forceskipCommand: "`/forceskip`",
                 }
             ),
             thumbnailUrl: KmqImages.LISTENING,
@@ -555,7 +555,8 @@ export default abstract class Session {
         if (!song) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                LocalizationManager.localizer.translate(
+                null,
+                i18n.translate(
                     this.guildID,
                     "misc.failure.interaction.invalidBookmark",
                     { BOOKMARK_MESSAGE_SIZE: String(BOOKMARK_MESSAGE_SIZE) }
@@ -566,22 +567,18 @@ export default abstract class Session {
 
         tryCreateInteractionSuccessAcknowledgement(
             interaction,
-            LocalizationManager.localizer.translate(
-                this.guildID,
-                "misc.interaction.bookmarked.title"
-            ),
-            LocalizationManager.localizer.translate(
+            i18n.translate(this.guildID, "misc.interaction.bookmarked.title"),
+            i18n.translate(
                 this.guildID,
                 "misc.interaction.bookmarked.description",
                 {
-                    songName: bold(
-                        getLocalizedSongName(
-                            song,
-                            State.getGuildLocale(this.guildID)
-                        )
+                    songName: getLocalizedSongName(
+                        song,
+                        State.getGuildLocale(this.guildID)
                     ),
                 }
-            )
+            ),
+            true
         );
 
         this.addBookmarkedSong(interaction.member?.id, {
@@ -610,11 +607,11 @@ export default abstract class Session {
 
         this.isPremium = isPremium;
 
-        const guildPreference = await GuildPreference.getGuildPreference(
-            this.guildID
+        await this.songSelector.reloadSongs(
+            this.guildPreference,
+            isPremium,
+            this.guildPreference.getSpotifyPlaylistMetadata()?.playlistID
         );
-
-        await this.songSelector.reloadSongs(guildPreference, isPremium);
 
         if (!isPremium) {
             await Promise.allSettled(
@@ -624,7 +621,7 @@ export default abstract class Session {
                             logger.info(
                                 `gid: ${this.guildID} | Resetting premium for game option: ${commandName}`
                             );
-                            await command.resetPremium(guildPreference);
+                            await command.resetPremium(this.guildPreference);
                         }
                     }
                 )
@@ -788,7 +785,8 @@ export default abstract class Session {
         if (!round.isValidInteraction(interaction.data.custom_id)) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                LocalizationManager.localizer.translate(
+                null,
+                i18n.translate(
                     this.guildID,
                     "misc.failure.interaction.optionFromPreviousRound"
                 )
@@ -847,10 +845,7 @@ export default abstract class Session {
         if (fact) {
             fields.push({
                 name: underline(
-                    LocalizationManager.localizer.translate(
-                        messageContext.guildID,
-                        "fact.didYouKnow"
-                    )
+                    i18n.translate(messageContext.guildID, "fact.didYouKnow")
                 ),
                 value: fact,
                 inline: false,
@@ -859,12 +854,10 @@ export default abstract class Session {
 
         const locale = State.getGuildLocale(messageContext.guildID);
 
-        const songAndArtist = bold(
-            `"${getLocalizedSongName(
-                round.song,
-                locale
-            )}" - ${getLocalizedArtistName(round.song, locale)}`
-        );
+        const songAndArtist = `"${getLocalizedSongName(
+            round.song,
+            locale
+        )}" - ${getLocalizedArtistName(round.song, locale)}`;
 
         const embed: EmbedPayload = {
             color: embedColor,
@@ -876,10 +869,7 @@ export default abstract class Session {
 
         const views = `${friendlyFormattedNumber(
             round.song.views
-        )} ${LocalizationManager.localizer.translate(
-            messageContext.guildID,
-            "misc.views"
-        )}\n`;
+        )} ${i18n.translate(messageContext.guildID, "misc.views")}\n`;
 
         const aliases = this.getAliasFooter(
             this.guildPreference.gameOptions.guessModeType,
@@ -902,6 +892,7 @@ export default abstract class Session {
             ) {
                 embed["thumbnail"] = { url: thumbnailUrl };
                 embed["footer"] = { text: footerText };
+                embed.title = bold(embed.title);
                 await round.interactionMessage.edit({
                     embeds: [embed as Object],
                 });
@@ -915,20 +906,14 @@ export default abstract class Session {
             buttons.push({
                 type: 2,
                 style: 1,
-                label: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "misc.skip"
-                ),
+                label: i18n.translate(messageContext.guildID, "misc.skip"),
                 custom_id: round.interactionSkipUUID,
             });
 
             buttons.push({
                 type: 2,
                 style: 1,
-                label: LocalizationManager.localizer.translate(
-                    messageContext.guildID,
-                    "misc.bookmark"
-                ),
+                label: i18n.translate(messageContext.guildID, "misc.bookmark"),
                 custom_id: "bookmark",
             });
 
@@ -938,7 +923,7 @@ export default abstract class Session {
 
         embed.thumbnailUrl = thumbnailUrl;
         embed.footerText = footerText;
-        return sendInfoMessage(messageContext, embed, shouldReply, false);
+        return sendInfoMessage(messageContext, embed, shouldReply);
     }
 
     private getDurationFooter(
@@ -957,15 +942,12 @@ export default abstract class Session {
 
         durationText +=
             timeRemaining > 0
-                ? `⏰ ${LocalizationManager.localizer.translateNByLocale(
+                ? `⏰ ${i18n.translateN(
                       locale,
                       "misc.plural.minuteRemaining",
                       Math.ceil(timeRemaining)
                   )}`
-                : `⏰ ${LocalizationManager.localizer.translateByLocale(
-                      locale,
-                      "misc.timeFinished"
-                  )}!`;
+                : `⏰ ${i18n.translate(locale, "misc.timeFinished")}!`;
 
         return durationText;
     }
@@ -981,11 +963,11 @@ export default abstract class Session {
         });
 
         await sendErrorMessage(messageContext, {
-            title: LocalizationManager.localizer.translate(
+            title: i18n.translate(
                 this.guildID,
                 "misc.failure.songPlaying.title"
             ),
-            description: LocalizationManager.localizer.translate(
+            description: i18n.translate(
                 this.guildID,
                 "misc.failure.songPlaying.description"
             ),
@@ -1026,10 +1008,7 @@ export default abstract class Session {
             return "";
         }
 
-        const aliasesText = LocalizationManager.localizer.translateByLocale(
-            locale,
-            "misc.inGame.aliases"
-        );
+        const aliasesText = i18n.translate(locale, "misc.inGame.aliases");
 
         return `${aliasesText}: ${aliases.join(", ")}`;
     }

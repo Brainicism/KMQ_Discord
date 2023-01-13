@@ -1,12 +1,17 @@
 import { IPCLogger } from "../../logger";
 import { getDebugLogHeader } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
-import LocalizationManager from "../../helpers/localization_manager";
+import Eris from "eris";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
+import type { CommandInteraction } from "eris";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
+import type { GuildTextableMessage } from "src/types";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type GameSession from "../../structures/game_session";
 import type HelpDocumentation from "../../interfaces/help";
+import type MessageContext from "../../structures/message_context";
 
 const logger = new IPCLogger("score");
 
@@ -20,18 +25,45 @@ export default class ScoreCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "score",
-        description: LocalizationManager.localizer.translate(
-            guildID,
-            "command.score.help.description"
-        ),
-        usage: ",score",
+        description: i18n.translate(guildID, "command.score.help.description"),
+        usage: "/score",
         examples: [],
         priority: 50,
     });
 
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
+        {
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+        },
+    ];
+
     call = async ({ message }: CommandArgs): Promise<void> => {
-        const gameSession = Session.getSession(message.guildID) as GameSession;
-        await gameSession.sendScoreboardMessage(message);
-        logger.info(`${getDebugLogHeader(message)} | Score retrieved`);
+        await ScoreCommand.showScore(message);
     };
+
+    static async showScore(
+        messageOrInteraction: GuildTextableMessage | CommandInteraction
+    ): Promise<void> {
+        const gameSession = Session.getSession(
+            messageOrInteraction.guildID
+        ) as GameSession;
+
+        await gameSession.sendScoreboardMessage(messageOrInteraction);
+        logger.info(
+            `${getDebugLogHeader(messageOrInteraction)} | Score retrieved`
+        );
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param _messageContext - Unused
+     */
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        _messageContext: MessageContext
+    ): Promise<void> {
+        await ScoreCommand.showScore(interaction);
+    }
 }

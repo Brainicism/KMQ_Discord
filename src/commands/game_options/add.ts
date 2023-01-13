@@ -1,9 +1,10 @@
-import { GROUP_LIST_URL } from "../../constants";
+import { EMBED_ERROR_COLOR, GROUP_LIST_URL, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
+    generateOptionsMessage,
     getDebugLogHeader,
     sendErrorMessage,
-    sendOptionsMessage,
+    sendInfoMessage,
 } from "../../helpers/discord_utils";
 import {
     getMatchingGroupNames,
@@ -11,19 +12,21 @@ import {
 } from "../../helpers/game_utils";
 import { setIntersection } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
+import i18n from "../../helpers/localization_manager";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
+import type EmbedPayload from "../../interfaces/embed_payload";
 import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("add");
 
-enum AddType {
+export enum AddType {
     // Groups with aliases
     GROUPS = "groups",
     GROUP = "group",
@@ -55,63 +58,63 @@ export default class AddCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "add",
-        description: LocalizationManager.localizer.translate(
-            guildID,
-            "command.add.help.description",
-            {
-                groups: `\`${process.env.BOT_PREFIX}groups\``,
-                exclude: `\`${process.env.BOT_PREFIX}exclude\``,
-                include: `\`${process.env.BOT_PREFIX}include\``,
-            }
-        ),
-        usage: `,add [groups | exclude | include] [${LocalizationManager.localizer.translate(
+        description: i18n.translate(guildID, "command.add.help.description", {
+            groups: "`/groups`",
+            exclude: "`/exclude`",
+            include: "`/include`",
+        }),
+        usage: `/groups add [${i18n.translate(
             guildID,
             "misc.listOfGroups"
-        )}]`,
+        )}]\n\n/include add [${i18n.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]\n\n/exclude add [${i18n.translate(guildID, "misc.listOfGroups")}]`,
         examples: [
             {
-                example: "`,add groups twice, red velvet`",
-                explanation: LocalizationManager.localizer.translate(
+                example: "`/groups add group_1:twice group_2:red velvet`",
+                explanation: i18n.translate(
                     guildID,
                     "command.add.help.example.groups",
                     {
                         groupOne: "Twice",
                         groupTwo: "Red Velvet",
-                        groups: `\`${process.env.BOT_PREFIX}groups\``,
+                        groups: "`/groups`",
                     }
                 ),
             },
             {
-                example: "`,add exclude BESTie, Dia, iKON`",
-                explanation: LocalizationManager.localizer.translate(
+                example:
+                    "`/exclude add group_1:BESTie group_2:Dia group_3:iKON`",
+                explanation: i18n.translate(
                     guildID,
                     "command.add.help.example.exclude",
                     {
                         groupOne: "BESTie",
                         groupTwo: "Dia",
                         groupThree: "IKON",
-                        exclude: `\`${process.env.BOT_PREFIX}exclude\``,
+                        exclude: "`/exclude`",
                     }
                 ),
             },
             {
-                example: "`,add include exo`",
-                explanation: LocalizationManager.localizer.translate(
+                example: "`/include add group_1:exo`",
+                explanation: i18n.translate(
                     guildID,
                     "command.add.help.example.include",
                     {
                         groupOne: "EXO",
-                        include: `\`${process.env.BOT_PREFIX}include\``,
+                        include: "`/include`",
                     }
                 ),
             },
         ],
         actionRowComponents: [
             {
-                style: 5 as const,
+                type: Eris.Constants.ComponentTypes.BUTTON,
+                style: Eris.Constants.ButtonStyles.LINK,
                 url: GROUP_LIST_URL,
-                type: 2 as const,
-                label: LocalizationManager.localizer.translate(
+                label: i18n.translate(
                     guildID,
                     "misc.interaction.fullGroupsList"
                 ),
@@ -121,13 +124,35 @@ export default class AddCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+        const newGroupNames = parsedMessage.argument
+            .split(" ")
+            .slice(1)
+            .join(" ")
+            .split(",")
+            .map((groupName) => groupName.trim());
+
+        const addType = parsedMessage.components[0] as AddType;
+        await AddCommand.updateOption(
+            MessageContext.fromMessage(message),
+            addType,
+            newGroupNames
+        );
+    };
+
+    static async updateOption(
+        messageContext: MessageContext,
+        addType: AddType,
+        newGroupNames: Array<string>,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
+            messageContext.guildID
         );
 
-        const optionListed = parsedMessage.components[0] as AddType;
+        const embeds: Array<EmbedPayload> = [];
+
         let groupNamesString: string;
-        switch (optionListed) {
+        switch (addType) {
             case AddType.GROUPS:
             case AddType.GROUP:
             case AddType.ARTIST:
@@ -151,13 +176,6 @@ export default class AddCommand implements BaseCommand {
             ? []
             : groupNamesString.split(",");
 
-        const newGroupNames = parsedMessage.argument
-            .split(" ")
-            .slice(1)
-            .join(" ")
-            .split(",")
-            .map((groupName) => groupName.trim());
-
         const groups = await getMatchingGroupNames(
             currentGroupNames.concat(newGroupNames)
         );
@@ -167,8 +185,8 @@ export default class AddCommand implements BaseCommand {
         if (unmatchedGroups.length) {
             logger.info(
                 `${getDebugLogHeader(
-                    message
-                )} | Attempted to set unknown groups. groups =  ${unmatchedGroups.join(
+                    messageContext
+                )} | Attempted to set unknown groups. groups = ${unmatchedGroups.join(
                     ", "
                 )}`
             );
@@ -177,12 +195,12 @@ export default class AddCommand implements BaseCommand {
             if (unmatchedGroups.length === 1) {
                 const suggestions = await getSimilarGroupNames(
                     unmatchedGroups[0],
-                    State.getGuildLocale(message.guildID)
+                    State.getGuildLocale(messageContext.guildID)
                 );
 
                 if (suggestions.length > 0) {
-                    suggestionsText = LocalizationManager.localizer.translate(
-                        message.guildID,
+                    suggestionsText = i18n.translate(
+                        messageContext.guildID,
                         "misc.failure.unrecognizedGroups.didYouMean",
                         {
                             suggestions: suggestions.join("\n"),
@@ -191,40 +209,55 @@ export default class AddCommand implements BaseCommand {
                 }
             }
 
-            const descriptionText = LocalizationManager.localizer.translate(
-                message.guildID,
+            const descriptionText = i18n.translate(
+                messageContext.guildID,
                 "misc.failure.unrecognizedGroups.description",
                 {
-                    matchedGroupsAction:
-                        LocalizationManager.localizer.translate(
-                            message.guildID,
-                            "misc.failure.unrecognizedGroups.added"
-                        ),
-                    helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
+                    matchedGroupsAction: i18n.translate(
+                        messageContext.guildID,
+                        "misc.failure.unrecognizedGroups.added"
+                    ),
+                    helpGroups: "`/help groups`",
                     unmatchedGroups: unmatchedGroups.join(", "),
                     solution: "",
                 }
             );
 
-            await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
+            embeds.push({
+                color: EMBED_ERROR_COLOR,
+                author: messageContext.author,
+                title: i18n.translate(
+                    messageContext.guildID,
                     "misc.failure.unrecognizedGroups.title"
                 ),
                 description: `${descriptionText}\n\n${suggestionsText || ""}`,
+                thumbnailUrl: KmqImages.DEAD,
             });
         }
 
         // if none of the new groups were matched
         if (unmatchedGroups.length === newGroupNames.length) {
+            if (embeds.length > 0) {
+                await sendInfoMessage(
+                    messageContext,
+                    embeds[0],
+                    false,
+                    null,
+                    embeds.slice(1),
+                    interaction
+                );
+            }
+
             return;
         }
 
-        switch (optionListed) {
+        let gameOption: GameOption;
+        switch (addType) {
             case AddType.GROUPS:
             case AddType.GROUP:
             case AddType.ARTIST:
             case AddType.ARTISTS: {
+                gameOption = GameOption.GROUPS;
                 const intersection = setIntersection(
                     matchedGroups.map((x) => x.name),
                     guildPreference.getExcludesGroupNames()
@@ -234,70 +267,91 @@ export default class AddCommand implements BaseCommand {
                     (x) => !intersection.has(x.name)
                 );
                 if (intersection.size > 0) {
-                    sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: LocalizationManager.localizer.translate(
-                            message.guildID,
+                    embeds.push({
+                        color: EMBED_ERROR_COLOR,
+                        author: messageContext.author,
+                        title: i18n.translate(
+                            messageContext.guildID,
                             "misc.failure.groupsExcludeConflict.title"
                         ),
-                        description: LocalizationManager.localizer.translate(
-                            message.guildID,
+                        description: i18n.translate(
+                            messageContext.guildID,
                             "misc.failure.groupsExcludeConflict.description",
                             {
-                                conflictingOptionOne: `\`${process.env.BOT_PREFIX}groups\``,
-                                conflictingOptionTwo: `\`${process.env.BOT_PREFIX}exclude\``,
+                                conflictingOptionOne: "`/groups`",
+                                conflictingOptionTwo: "`/exclude`",
                                 groupsList: [...intersection]
                                     .filter((x) => !x.includes("+"))
                                     .join(", "),
-                                solutionStepOne: `\`${process.env.BOT_PREFIX}remove exclude\``,
-                                solutionStepTwo: `\`${process.env.BOT_PREFIX}groups\``,
-                                allowOrPrevent:
-                                    LocalizationManager.localizer.translate(
-                                        message.guildID,
-                                        "misc.failure.groupsExcludeConflict.allow"
-                                    ),
+                                solutionStepOne: "`/exclude remove`",
+                                solutionStepTwo: "`/groups add`",
+                                allowOrPrevent: i18n.translate(
+                                    messageContext.guildID,
+                                    "misc.failure.groupsExcludeConflict.allow"
+                                ),
                             }
                         ),
+                        thumbnailUrl: KmqImages.DEAD,
                     });
                 }
 
                 if (matchedGroups.length === 0) {
+                    if (embeds.length > 0) {
+                        await sendInfoMessage(
+                            messageContext,
+                            embeds[0],
+                            false,
+                            null,
+                            embeds.slice(1),
+                            interaction
+                        );
+                    }
+
                     return;
                 }
 
                 await guildPreference.setGroups(matchedGroups);
-                await sendOptionsMessage(
-                    Session.getSession(message.guildID),
-                    MessageContext.fromMessage(message),
-                    guildPreference,
-                    [{ option: GameOption.GROUPS, reset: false }]
-                );
-
-                logger.info(
-                    `${getDebugLogHeader(
-                        message
-                    )} | Group added: ${guildPreference.getDisplayedGroupNames()}`
-                );
                 break;
             }
 
             case AddType.INCLUDE:
             case AddType.INCLUDES:
-                await guildPreference.setIncludes(matchedGroups);
-                await sendOptionsMessage(
-                    Session.getSession(message.guildID),
-                    MessageContext.fromMessage(message),
-                    guildPreference,
-                    [{ option: GameOption.INCLUDE, reset: false }]
-                );
+                gameOption = GameOption.INCLUDE;
+                if (guildPreference.isGroupsMode()) {
+                    logger.warn(
+                        `${getDebugLogHeader(
+                            messageContext
+                        )} | Game option conflict between include and groups.`
+                    );
 
-                logger.info(
-                    `${getDebugLogHeader(
-                        message
-                    )} | Include added: ${guildPreference.getDisplayedIncludesGroupNames()}`
-                );
+                    sendErrorMessage(
+                        messageContext,
+                        {
+                            title: i18n.translate(
+                                messageContext.guildID,
+                                "misc.failure.gameOptionConflict.title"
+                            ),
+                            description: i18n.translate(
+                                messageContext.guildID,
+                                "misc.failure.gameOptionConflict.description",
+                                {
+                                    optionOne: "`groups`",
+                                    optionTwo: "`include`",
+                                    optionOneCommand: "`/groups reset`",
+                                }
+                            ),
+                        },
+                        interaction
+                    );
+
+                    return;
+                }
+
+                await guildPreference.setIncludes(matchedGroups);
                 break;
             case AddType.EXCLUDE:
             case AddType.EXCLUDES: {
+                gameOption = GameOption.EXCLUDE;
                 const intersection = setIntersection(
                     matchedGroups.map((x) => x.name),
                     guildPreference.getGroupNames()
@@ -307,48 +361,79 @@ export default class AddCommand implements BaseCommand {
                     (x) => !intersection.has(x.name)
                 );
                 if (intersection.size > 0) {
-                    sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: LocalizationManager.localizer.translate(
-                            message.guildID,
+                    embeds.push({
+                        color: EMBED_ERROR_COLOR,
+                        author: messageContext.author,
+                        title: i18n.translate(
+                            messageContext.guildID,
                             "misc.failure.groupsExcludeConflict.title"
                         ),
-                        description: LocalizationManager.localizer.translate(
-                            message.guildID,
+                        description: i18n.translate(
+                            messageContext.guildID,
                             "misc.failure.groupsExcludeConflict.description",
                             {
-                                conflictingOptionOne: `\`${process.env.BOT_PREFIX}exclude\``,
-                                conflictingOptionTwo: `\`${process.env.BOT_PREFIX}groups\``,
+                                conflictingOptionOne: "`/exclude`",
+                                conflictingOptionTwo: "`/groups`",
                                 groupsList: [...intersection]
                                     .filter((x) => !x.includes("+"))
                                     .join(", "),
-                                solutionPartOne: `\`${process.env.BOT_PREFIX}remove groups\``,
-                                solutionPartTwo: `\`${process.env.BOT_PREFIX}add exclude\``,
+                                solutionStepOne: "`/groups remove`",
+                                solutionStepTwo: "`/exclude add`",
+                                allowOrPrevent: i18n.translate(
+                                    messageContext.guildID,
+                                    "misc.failure.groupsExcludeConflict.prevent"
+                                ),
                             }
                         ),
+                        thumbnailUrl: KmqImages.DEAD,
                     });
                 }
 
                 if (matchedGroups.length === 0) {
+                    if (embeds.length > 0) {
+                        await sendInfoMessage(
+                            messageContext,
+                            embeds[0],
+                            false,
+                            null,
+                            embeds.slice(1),
+                            interaction
+                        );
+                    }
+
                     return;
                 }
 
                 await guildPreference.setExcludes(matchedGroups);
-                await sendOptionsMessage(
-                    Session.getSession(message.guildID),
-                    MessageContext.fromMessage(message),
-                    guildPreference,
-                    [{ option: GameOption.EXCLUDE, reset: false }]
-                );
-
-                logger.info(
-                    `${getDebugLogHeader(
-                        message
-                    )} | Exclude added: ${guildPreference.getDisplayedExcludesGroupNames()}`
-                );
                 break;
             }
 
             default:
         }
-    };
+
+        logger.info(
+            `${getDebugLogHeader(
+                messageContext
+            )} | ${gameOption} added: ${guildPreference.getDisplayedGroupNames()}`
+        );
+
+        const optionsMessage = await generateOptionsMessage(
+            Session.getSession(messageContext.guildID),
+            messageContext,
+            guildPreference,
+            [{ option: gameOption, reset: false }],
+            null,
+            null,
+            null
+        );
+
+        await sendInfoMessage(
+            messageContext,
+            optionsMessage,
+            true,
+            null,
+            embeds,
+            interaction
+        );
+    }
 }

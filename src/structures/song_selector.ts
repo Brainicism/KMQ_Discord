@@ -13,13 +13,20 @@ import LanguageType from "../enums/option_types/language_type";
 import OstPreference from "../enums/option_types/ost_preference";
 import ReleaseType from "../enums/option_types/release_type";
 import ShuffleType from "../enums/option_types/shuffle_type";
+import State from "../state";
 import SubunitsPreference from "../enums/option_types/subunit_preference";
 import dbContext from "../database_context";
+import type { MatchedPlaylist } from "../helpers/spotify_manager";
 import type GuildPreference from "./guild_preference";
 import type QueriedSong from "../interfaces/queried_song";
 import type UniqueSongCounter from "../interfaces/unique_song_counter";
 
 const logger = new IPCLogger("song_selector");
+
+interface QueriedSongList {
+    songs: Set<QueriedSong>;
+    countBeforeLimit: number;
+}
 
 export default class SongSelector {
     /** List of songs matching the user's game options */
@@ -192,13 +199,26 @@ export default class SongSelector {
 
     async reloadSongs(
         guildPreference: GuildPreference,
-        isPremium: boolean
-    ): Promise<void> {
-        this.filteredSongs = await SongSelector.getFilteredSongList(
-            guildPreference,
+        isPremium: boolean,
+        playlistID?: string
+    ): Promise<MatchedPlaylist> {
+        if (!playlistID) {
+            this.filteredSongs = await SongSelector.getFilteredSongList(
+                guildPreference,
+                isPremium,
+                SHADOW_BANNED_ARTIST_IDS
+            );
+
+            return null;
+        }
+
+        const playlist = await SongSelector.getSpotifySongList(
             isPremium,
-            SHADOW_BANNED_ARTIST_IDS
+            playlistID
         );
+
+        this.filteredSongs = playlist as QueriedSongList;
+        return playlist;
     }
 
     /**
@@ -206,22 +226,22 @@ export default class SongSelector {
      */
     static getQueriedSongFields(): Array<string> {
         return [
-            "clean_song_name_en as songName",
-            "song_name_en as originalSongName",
-            "song_name_ko as hangulSongName",
-            "clean_song_name_ko as originalHangulSongName",
-            "artist_name_en as artistName",
-            "artist_name_ko as hangulArtistName",
-            "link as youtubeLink",
-            "publishedon as publishDate",
-            "members",
-            "id_artist as artistID",
-            "issolo as isSolo",
-            "members",
-            "tags",
-            "views",
-            "rank",
-            "vtype",
+            "available_songs.clean_song_name_en as songName",
+            "available_songs.song_name_en as originalSongName",
+            "available_songs.clean_song_name_ko as hangulSongName",
+            "available_songs.song_name_ko as originalHangulSongName",
+            "available_songs.artist_name_en as artistName",
+            "available_songs.artist_name_ko as hangulArtistName",
+            "available_songs.link as youtubeLink",
+            "available_songs.publishedon as publishDate",
+            "available_songs.members",
+            "available_songs.id_artist as artistID",
+            "available_songs.issolo as isSolo",
+            "available_songs.members",
+            "available_songs.tags",
+            "available_songs.views",
+            "available_songs.rank",
+            "available_songs.vtype",
         ];
     }
 
@@ -237,15 +257,17 @@ export default class SongSelector {
         premium: boolean = false,
         shadowBannedArtistIds: Array<number> = []
     ): Promise<{ songs: Set<QueriedSong>; countBeforeLimit: number }> {
+        const gameOptions = guildPreference.gameOptions;
+        let result: Array<QueriedSong> = [];
         let queryBuilder = dbContext
             .kmq("available_songs")
             .select(SongSelector.getQueriedSongFields());
 
-        if (guildPreference.gameOptions.forcePlaySongID) {
+        if (gameOptions.forcePlaySongID) {
             queryBuilder = queryBuilder.where(
                 "link",
                 "=",
-                guildPreference.gameOptions.forcePlaySongID
+                gameOptions.forcePlaySongID
             );
             return {
                 songs: new Set(await queryBuilder),
@@ -253,7 +275,6 @@ export default class SongSelector {
             };
         }
 
-        const gameOptions = guildPreference.gameOptions;
         let subunits = [];
         let collabGroupContainingSubunit = [];
         if (gameOptions.subunitPreference === SubunitsPreference.INCLUDE) {
@@ -393,7 +414,7 @@ export default class SongSelector {
                 : process.env.AUDIO_SONGS_PER_ARTIST
         );
 
-        let result: Array<QueriedSong> = await queryBuilder;
+        result = await queryBuilder;
 
         const count = result.length;
         result = result.slice(gameOptions.limitStart, gameOptions.limitEnd);
@@ -425,6 +446,36 @@ export default class SongSelector {
         return {
             songs: new Set(result),
             countBeforeLimit: count,
+        };
+    }
+
+    static async getSpotifySongList(
+        isPremium: boolean,
+        playlistID: string
+    ): Promise<QueriedSongList & MatchedPlaylist> {
+        const { matchedSongs, metadata } =
+            await State.spotifyManager.getMatchedSpotifySongs(
+                playlistID,
+                isPremium
+            );
+
+        const result = new Set(
+            matchedSongs.filter(
+                (x) =>
+                    x.rank <=
+                    Number(
+                        isPremium
+                            ? process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST
+                            : process.env.AUDIO_SONGS_PER_ARTIST
+                    )
+            )
+        );
+
+        return {
+            songs: result,
+            countBeforeLimit: result.size,
+            matchedSongs,
+            metadata,
         };
     }
 }

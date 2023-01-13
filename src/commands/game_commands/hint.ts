@@ -8,17 +8,19 @@ import {
     sendInfoMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GameType from "../../enums/game_type";
 import GuessModeType from "../../enums/option_types/guess_mode_type";
 import GuildPreference from "../../structures/guild_preference";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
-import type { GuildTextableMessage } from "../../types";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type EliminationScoreboard from "../../structures/elimination_scoreboard";
+import type EmbedPayload from "../../interfaces/embed_payload";
 import type GameRound from "../../structures/game_round";
 import type GameSession from "../../structures/game_session";
 import type HelpDocumentation from "../../interfaces/help";
@@ -27,7 +29,7 @@ import type LocaleType from "../../enums/locale_type";
 const logger = new IPCLogger("hint");
 
 function isHintMajority(
-    message: GuildTextableMessage,
+    messageContext: MessageContext,
     gameSession: GameSession
 ): boolean {
     if (gameSession.gameType === GameType.ELIMINATION) {
@@ -41,21 +43,26 @@ function isHintMajority(
     }
 
     return (
-        gameSession.round.getHintRequests() >= getMajorityCount(message.guildID)
+        gameSession.round.getHintRequests() >=
+        getMajorityCount(messageContext.guildID)
     );
 }
 
 function isHintAvailable(
-    message: GuildTextableMessage,
+    messageContext: MessageContext,
     gameSession: GameSession
 ): boolean {
     if (!gameSession.round) return false;
-    return gameSession.round.hintUsed || isHintMajority(message, gameSession);
+    return (
+        gameSession.round.hintUsed ||
+        isHintMajority(messageContext, gameSession)
+    );
 }
 
 async function sendHintNotification(
-    message: GuildTextableMessage,
-    gameSession: GameSession
+    messageContext: MessageContext,
+    gameSession: GameSession,
+    interaction?: Eris.CommandInteraction
 ): Promise<void> {
     if (!gameSession.round) return;
     if (gameSession.gameType === GameType.ELIMINATION) {
@@ -63,14 +70,14 @@ async function sendHintNotification(
             gameSession.scoreboard as EliminationScoreboard;
 
         await sendInfoMessage(
-            MessageContext.fromMessage(message),
+            messageContext,
             {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
+                title: i18n.translate(
+                    messageContext.guildID,
                     "command.hint.request.title"
                 ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
+                description: i18n.translate(
+                    messageContext.guildID,
                     "command.hint.request.description",
                     {
                         hintCounter: `${gameSession.round.getHintRequests()}/${
@@ -82,27 +89,33 @@ async function sendHintNotification(
                     }
                 ),
             },
-            true
+            true,
+            null,
+            [],
+            interaction
         );
     } else {
         await sendInfoMessage(
-            MessageContext.fromMessage(message),
+            messageContext,
             {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
+                title: i18n.translate(
+                    messageContext.guildID,
                     "command.hint.request.title"
                 ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
+                description: i18n.translate(
+                    messageContext.guildID,
                     "command.hint.request.description",
                     {
                         hintCounter: `${gameSession.round.getHintRequests()}/${getMajorityCount(
-                            message.guildID
+                            messageContext.guildID
                         )}`,
                     }
                 ),
             },
-            true
+            true,
+            null,
+            [],
+            interaction
         );
     }
 }
@@ -111,28 +124,37 @@ async function sendHintNotification(
  * @param gameSession - The game session
  * @param guildPreference - The guild preference
  * @param gameRound - The game round
- * @param message - The originating message
+ * @param messageContext - The message context
+ * @param interaction - The interaction
  * @returns whether the hint request was valid
  */
 export function validHintCheck(
     gameSession: GameSession,
     guildPreference: GuildPreference,
     gameRound: GameRound,
-    message: GuildTextableMessage
+    messageContext: MessageContext,
+    interaction?: Eris.CommandInteraction
 ): boolean {
     if (!gameSession || !gameRound) {
-        logger.warn(`${getDebugLogHeader(message)} | No active game session`);
-        sendErrorMessage(MessageContext.fromMessage(message), {
-            title: LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.hint.failure.invalidHintRequest.title"
-            ),
-            description: LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.hint.failure.invalidHintRequest.noSongPlaying.description"
-            ),
-            thumbnailUrl: KmqImages.NOT_IMPRESSED,
-        });
+        logger.warn(
+            `${getDebugLogHeader(messageContext)} | No active game session`
+        );
+
+        sendErrorMessage(
+            messageContext,
+            {
+                title: i18n.translate(
+                    messageContext.guildID,
+                    "command.hint.failure.invalidHintRequest.title"
+                ),
+                description: i18n.translate(
+                    messageContext.guildID,
+                    "command.hint.failure.invalidHintRequest.noSongPlaying.description"
+                ),
+                thumbnailUrl: KmqImages.NOT_IMPRESSED,
+            },
+            interaction
+        );
         return false;
     }
 
@@ -140,32 +162,44 @@ export function validHintCheck(
         const eliminationScoreboard =
             gameSession.scoreboard as EliminationScoreboard;
 
-        if (eliminationScoreboard.isPlayerEliminated(message.author.id)) {
-            sendErrorMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "command.hint.failure.invalidHintRequest.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "command.hint.failure.invalidHintRequest.eliminated.description"
-                ),
-                thumbnailUrl: KmqImages.NOT_IMPRESSED,
-            });
+        if (
+            eliminationScoreboard.isPlayerEliminated(messageContext.author.id)
+        ) {
+            sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "command.hint.failure.invalidHintRequest.title"
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "command.hint.failure.invalidHintRequest.eliminated.description"
+                    ),
+                    thumbnailUrl: KmqImages.NOT_IMPRESSED,
+                },
+                interaction
+            );
             return false;
         }
-    } else if (guildPreference.isMultipleChoiceMode()) {
-        sendErrorMessage(MessageContext.fromMessage(message), {
-            title: LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.hint.failure.invalidHintRequest.title"
-            ),
-            description: LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.hint.failure.invalidHintRequest.multipleChoice.description"
-            ),
-            thumbnailUrl: KmqImages.NOT_IMPRESSED,
-        });
+    }
+
+    if (guildPreference.isMultipleChoiceMode()) {
+        sendErrorMessage(
+            messageContext,
+            {
+                title: i18n.translate(
+                    messageContext.guildID,
+                    "command.hint.failure.invalidHintRequest.title"
+                ),
+                description: i18n.translate(
+                    messageContext.guildID,
+                    "command.hint.failure.invalidHintRequest.multipleChoice.description"
+                ),
+                thumbnailUrl: KmqImages.NOT_IMPRESSED,
+            },
+            interaction
+        );
         return false;
     }
 
@@ -187,14 +221,14 @@ export function generateHint(
 ): string {
     switch (guessMode) {
         case GuessModeType.ARTIST:
-            return `${LocalizationManager.localizer.translate(
+            return `${i18n.translate(
                 guildID,
                 "command.hint.artistName"
             )}: ${codeLine(gameRound.hints.artistHint[locale])}`;
         case GuessModeType.SONG_NAME:
         case GuessModeType.BOTH:
         default:
-            return `${LocalizationManager.localizer.translate(
+            return `${i18n.translate(
                 guildID,
                 "command.hint.songName"
             )}: ${codeLine(gameRound.hints.songHint[locale])}`;
@@ -212,51 +246,99 @@ export default class HintCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "hint",
-        description: LocalizationManager.localizer.translate(
-            guildID,
-            "command.hint.help.description"
-        ),
-        usage: ",hint",
+        description: i18n.translate(guildID, "command.hint.help.description"),
+        usage: "/hint",
         examples: [],
         priority: 1020,
     });
 
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
+        {
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+        },
+    ];
+
     call = async ({ message }: CommandArgs): Promise<void> => {
-        const gameSession = Session.getSession(message.guildID) as GameSession;
+        await HintCommand.sendHint(MessageContext.fromMessage(message));
+    };
+
+    static sendHint = async (
+        messageContext: MessageContext,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> => {
+        const gameSession = Session.getSession(
+            messageContext.guildID
+        ) as GameSession;
+
         const gameRound = gameSession?.round;
         const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
+            messageContext.guildID
         );
 
-        if (!validHintCheck(gameSession, guildPreference, gameRound, message))
+        if (
+            !validHintCheck(
+                gameSession,
+                guildPreference,
+                gameRound,
+                messageContext,
+                interaction
+            )
+        )
             return;
 
-        gameRound.hintRequested(message.author.id);
+        gameRound.hintRequested(messageContext.author.id);
 
-        if (isHintAvailable(message, gameSession)) {
+        if (isHintAvailable(messageContext, gameSession)) {
             gameRound.hintUsed = true;
-            await sendInfoMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
+            const embedPayload: EmbedPayload = {
+                title: i18n.translate(
+                    messageContext.guildID,
                     "command.hint.title"
                 ),
                 description: generateHint(
-                    message.guildID,
+                    messageContext.guildID,
                     guildPreference.gameOptions.guessModeType,
                     gameRound,
-                    State.getGuildLocale(message.guildID)
+                    State.getGuildLocale(messageContext.guildID)
                 ),
                 thumbnailUrl: KmqImages.READING_BOOK,
-            });
+            };
+
+            await sendInfoMessage(
+                messageContext,
+                embedPayload,
+                null,
+                null,
+                undefined,
+                interaction
+            );
 
             logger.info(
-                `${getDebugLogHeader(message)} | Hint majority received.`
+                `${getDebugLogHeader(messageContext)} | Hint majority received.`
             );
         } else {
-            await sendHintNotification(message, gameSession);
+            await sendHintNotification(
+                messageContext,
+                gameSession,
+                interaction
+            );
+
             logger.info(
-                `${getDebugLogHeader(message)} | Hint request received.`
+                `${getDebugLogHeader(messageContext)} | Hint request received.`
             );
         }
     };
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        await HintCommand.sendHint(messageContext, interaction);
+    }
 }

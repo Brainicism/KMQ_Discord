@@ -4,14 +4,16 @@ import {
     areUserAndBotInSameVoiceChannel,
     getDebugLogHeader,
     getMajorityCount,
+    sendErrorMessage,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GameType from "../../enums/game_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
-import type { GuildTextableMessage } from "../../types";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type EliminationScoreboard from "../../structures/elimination_scoreboard";
@@ -21,51 +23,68 @@ import type Round from "../../structures/round";
 const logger = new IPCLogger("skip");
 
 async function sendSkipNotification(
-    message: GuildTextableMessage,
-    round: Round
+    messageContext: MessageContext,
+    round: Round,
+    interaction?: Eris.CommandInteraction
 ): Promise<void> {
+    const embedPayload = {
+        title: i18n.translate(
+            messageContext.guildID,
+            "command.skip.vote.title"
+        ),
+        description: i18n.translate(
+            messageContext.guildID,
+            "command.skip.vote.description",
+            {
+                skipCounter: `${round.getSkipCount()}/${getMajorityCount(
+                    messageContext.guildID
+                )}`,
+            }
+        ),
+    };
+
     await sendInfoMessage(
-        MessageContext.fromMessage(message),
-        {
-            title: LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.skip.vote.title"
-            ),
-            description: LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.skip.vote.description",
-                {
-                    skipCounter: `${round.getSkipCount()}/${getMajorityCount(
-                        message.guildID
-                    )}`,
-                }
-            ),
-        },
-        true
+        messageContext,
+        embedPayload,
+        true,
+        null,
+        [],
+        interaction
+    );
+
+    logger.info(
+        `${getDebugLogHeader(messageContext)} | Vote instructions retrieved.`
     );
 }
 
 async function sendSkipMessage(
-    message: GuildTextableMessage,
-    round: Round
+    messageContext: MessageContext,
+    round: Round,
+    interaction?: Eris.CommandInteraction
 ): Promise<void> {
-    await sendInfoMessage(MessageContext.fromMessage(message), {
+    const embedPayload = {
         color: EMBED_SUCCESS_COLOR,
-        title: LocalizationManager.localizer.translate(
-            message.guildID,
-            "misc.skip"
-        ),
-        description: LocalizationManager.localizer.translate(
-            message.guildID,
+        title: i18n.translate(messageContext.guildID, "misc.skip"),
+        description: i18n.translate(
+            messageContext.guildID,
             "command.skip.success.description",
             {
                 skipCounter: `${round.getSkipCount()}/${getMajorityCount(
-                    message.guildID
+                    messageContext.guildID
                 )}`,
             }
         ),
         thumbnailUrl: KmqImages.NOT_IMPRESSED,
-    });
+    };
+
+    await sendInfoMessage(
+        messageContext,
+        embedPayload,
+        null,
+        null,
+        [],
+        interaction
+    );
 }
 
 /**
@@ -119,31 +138,79 @@ export default class SkipCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "skip",
-        description: LocalizationManager.localizer.translate(
-            guildID,
-            "command.skip.help.description"
-        ),
-        usage: ",skip",
+        description: i18n.translate(guildID, "command.skip.help.description"),
+        usage: "/skip",
         examples: [],
         priority: 1010,
     });
 
-    call = async ({ message }: CommandArgs): Promise<void> => {
-        if (!areUserAndBotInSameVoiceChannel(message)) {
-            logger.warn(
-                `${getDebugLogHeader(
-                    message
-                )} | Invalid skip. User and bot are not in the same voice channel.`
-            );
-            return;
-        }
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
+        {
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+        },
+    ];
 
-        const session = Session.getSession(message.guildID);
+    call = async ({ message }: CommandArgs): Promise<void> => {
+        await SkipCommand.executeSkip(MessageContext.fromMessage(message));
+    };
+
+    static async executeSkip(
+        messageContext: MessageContext,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> {
+        const session = Session.getSession(messageContext.guildID);
+
         if (
             !session.round ||
             session.round.skipAchieved ||
             session.round.finished
         ) {
+            sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "misc.failure.round.noneInProgress.title"
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "misc.failure.round.noneInProgress.description"
+                    ),
+                    thumbnailUrl: KmqImages.NOT_IMPRESSED,
+                },
+                interaction
+            );
+            return;
+        }
+
+        if (
+            !areUserAndBotInSameVoiceChannel(
+                messageContext.author.id,
+                messageContext.guildID
+            )
+        ) {
+            await sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "command.skip.failure.skipIgnored"
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "misc.preCheck.differentVC"
+                    ),
+                },
+                interaction
+            );
+
+            logger.warn(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Invalid skip. User and bot are not in the same voice channel.`
+            );
             return;
         }
 
@@ -152,29 +219,47 @@ export default class SkipCommand implements BaseCommand {
                 if (
                     !(
                         session.scoreboard as EliminationScoreboard
-                    ).isPlayerEliminated(message.author.id)
+                    ).isPlayerEliminated(messageContext.author.id)
                 ) {
                     logger.info(
                         `${getDebugLogHeader(
-                            message
+                            messageContext
                         )} | User skipped, elimination mode`
                     );
-                    session.round.userSkipped(message.author.id);
+                    session.round.userSkipped(messageContext.author.id);
                 }
             }
         }
 
-        session.round.userSkipped(message.author.id);
-        logger.info(`${getDebugLogHeader(message)} | User skipped`);
+        session.round.userSkipped(messageContext.author.id);
+        logger.info(`${getDebugLogHeader(messageContext)} | User skipped`);
 
-        if (isSkipMajority(message.guildID, session)) {
-            sendSkipMessage(message, session.round);
-            skipSong(MessageContext.fromMessage(message), session);
+        if (isSkipMajority(messageContext.guildID, session)) {
+            sendSkipMessage(messageContext, session.round, interaction);
+            skipSong(messageContext, session);
         } else {
-            logger.info(`${getDebugLogHeader(message)} | Skip vote received.`);
-            await sendSkipNotification(message, session.round);
+            logger.info(
+                `${getDebugLogHeader(messageContext)} | Skip vote received.`
+            );
+
+            await sendSkipNotification(
+                messageContext,
+                session.round,
+                interaction
+            );
         }
 
         session.lastActiveNow();
-    };
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        await SkipCommand.executeSkip(messageContext, interaction);
+    }
 }

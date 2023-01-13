@@ -1,15 +1,20 @@
+/* eslint-disable no-await-in-loop */
 import { BOOKMARK_COMMAND_NAME, PROFILE_COMMAND_NAME } from "../../constants";
 import { IPCLogger } from "../../logger";
-import { sendInfoMessage } from "../../helpers/discord_utils";
+import { sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
 import EnvType from "../../enums/env_type";
 import Eris from "eris";
+import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
+import i18n from "../../helpers/localization_manager";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("app_commands");
+
+const MAX_DESCRIPTION_LENGTH = 100;
 
 enum AppCommandsAction {
     RELOAD = "reload",
@@ -19,12 +24,16 @@ enum AppCommandsAction {
 export default class AppCommandsCommand implements BaseCommand {
     validations = {
         minArgCount: 1,
-        maxArgCount: 1,
+        maxArgCount: 2,
         arguments: [
             {
                 name: "action",
                 type: "enum" as const,
                 enums: Object.values(AppCommandsAction),
+            },
+            {
+                name: "command",
+                type: "string" as const,
             },
         ],
     };
@@ -32,88 +41,242 @@ export default class AppCommandsCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.debugChannelPrecheck }];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const artistType = parsedMessage.components[0] as AppCommandsAction;
-        if (artistType === AppCommandsAction.RELOAD) {
-            if (process.env.NODE_ENV === EnvType.PROD) {
-                logger.info("Creating global application commands...");
-                await State.client.createCommand({
-                    name: BOOKMARK_COMMAND_NAME,
-                    type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
-                });
+        const appCommandType = parsedMessage.components[0] as AppCommandsAction;
+        const isSingleCommand = parsedMessage.components.length === 2;
+        if (
+            isSingleCommand &&
+            !State.client.commands[parsedMessage.components[1]]
+        ) {
+            sendErrorMessage(MessageContext.fromMessage(message), {
+                title: "Invalid Command Name",
+            });
+            return;
+        }
 
-                await State.client.createCommand({
-                    name: PROFILE_COMMAND_NAME,
-                    type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
-                });
+        const isProd = process.env.NODE_ENV === EnvType.PROD;
+        const debugServer = State.client.guilds.get(
+            process.env.DEBUG_SERVER_ID
+        );
 
-                await State.client.createCommand({
-                    name: PROFILE_COMMAND_NAME,
-                    type: Eris.Constants.ApplicationCommandTypes.USER,
-                });
-            } else if (process.env.NODE_ENV === EnvType.DEV) {
-                logger.info("Creating guild application commands...");
-                const debugServer = State.client.guilds.get(
-                    process.env.DEBUG_SERVER_ID
+        if (!isProd && !debugServer) return;
+
+        const commandModificationScope = isProd ? "global" : "guild";
+
+        const commandsModifiedSuccess = [];
+        const commandsModifiedFailed = [];
+        if (appCommandType === AppCommandsAction.RELOAD) {
+            const commandsToModify = isSingleCommand
+                ? Object.entries({
+                      [parsedMessage.components[1]]:
+                          State.client.commands[parsedMessage.components[1]],
+                  })
+                : Object.entries(State.client.commands);
+
+            const createApplicationCommandFunc: (
+                command: Eris.ApplicationCommandStructure
+            ) => Promise<Eris.ApplicationCommand> = isProd
+                ? State.client.createCommand.bind(State.client)
+                : debugServer.createCommand.bind(debugServer);
+
+            logger.info(
+                `Creating ${commandModificationScope} application commands...`
+            );
+
+            const commandStructures: Array<Eris.ApplicationCommandStructure> =
+                isSingleCommand
+                    ? []
+                    : [
+                          {
+                              name: BOOKMARK_COMMAND_NAME,
+                              type: Eris.Constants.ApplicationCommandTypes
+                                  .MESSAGE,
+                          },
+                          {
+                              name: PROFILE_COMMAND_NAME,
+                              type: Eris.Constants.ApplicationCommandTypes
+                                  .MESSAGE,
+                          },
+                          {
+                              name: PROFILE_COMMAND_NAME,
+                              type: Eris.Constants.ApplicationCommandTypes.USER,
+                          },
+                      ];
+
+            for (const commandObj of commandsToModify) {
+                const commandName = commandObj[0];
+                const command = commandObj[1];
+                if (command.slashCommands) {
+                    const commands =
+                        command.slashCommands() as Array<Eris.ChatInputApplicationCommandStructure>;
+
+                    for (const cmd of commands) {
+                        if (!cmd.name) {
+                            if (
+                                !i18n.hasKey(`command.${commandName}.help.name`)
+                            ) {
+                                throw new Error(
+                                    `Missing slash command name: command.${commandName}.help.name`
+                                );
+                            }
+
+                            cmd.name = i18n.translate(
+                                LocaleType.EN,
+                                `command.${commandName}.help.name`
+                            );
+                        }
+
+                        cmd.name_localizations = cmd.name_localizations ?? {
+                            [LocaleType.KO]: i18n.translate(
+                                LocaleType.KO,
+                                `command.${commandName}.help.name`
+                            ),
+                        };
+                        if (
+                            cmd.type ===
+                            Eris.Constants.ApplicationCommandTypes.CHAT_INPUT
+                        ) {
+                            if (!cmd.description) {
+                                let translationKey = `command.${commandName}.help.interaction.description`;
+                                const fallbackTranslationKey = `command.${commandName}.help.description`;
+                                if (!i18n.hasKey(translationKey)) {
+                                    if (!i18n.hasKey(fallbackTranslationKey)) {
+                                        throw new Error(
+                                            `Missing slash command description: ${translationKey} or ${fallbackTranslationKey}`
+                                        );
+                                    }
+
+                                    translationKey = fallbackTranslationKey;
+                                }
+
+                                cmd.description = i18n.translate(
+                                    LocaleType.EN,
+                                    translationKey
+                                );
+
+                                cmd.description_localizations = {
+                                    [LocaleType.KO]: i18n.translate(
+                                        LocaleType.KO,
+                                        translationKey
+                                    ),
+                                };
+                            }
+                        }
+
+                        const checkDescriptionLengthRecursively = (
+                            cmdObj: Object
+                        ): void => {
+                            for (const key in cmdObj) {
+                                if (Object.hasOwn(cmdObj, key)) {
+                                    const val = cmdObj[key];
+                                    if (key === "description") {
+                                        if (
+                                            val.length > MAX_DESCRIPTION_LENGTH
+                                        ) {
+                                            throw new Error(
+                                                `Slash command description too long: ${val}`
+                                            );
+                                        }
+                                    } else if (
+                                        key === "description_localizations"
+                                    ) {
+                                        for (const locale in val) {
+                                            if (
+                                                val[locale].length >
+                                                MAX_DESCRIPTION_LENGTH
+                                            ) {
+                                                throw new Error(
+                                                    `Slash command description_localization for ${locale} too long: ${val[locale]}`
+                                                );
+                                            }
+                                        }
+                                    } else if (Array.isArray(val)) {
+                                        for (const obj of val)
+                                            checkDescriptionLengthRecursively(
+                                                obj
+                                            );
+                                    }
+                                }
+                            }
+                        };
+
+                        checkDescriptionLengthRecursively(cmd);
+                        commandStructures.push(cmd);
+                    }
+                }
+            }
+
+            for (const commandStructure of commandStructures) {
+                logger.info(
+                    `Creating ${commandModificationScope} command: ${commandStructure.name}`
                 );
-
-                if (!debugServer) return;
-                await debugServer.createCommand({
-                    name: BOOKMARK_COMMAND_NAME,
-                    type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
-                });
-
-                await debugServer.createCommand({
-                    name: PROFILE_COMMAND_NAME,
-                    type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
-                });
-
-                await debugServer.createCommand({
-                    name: PROFILE_COMMAND_NAME,
-                    type: Eris.Constants.ApplicationCommandTypes.USER,
-                });
+                try {
+                    await createApplicationCommandFunc(commandStructure);
+                    commandsModifiedSuccess.push(commandStructure.name);
+                } catch (e) {
+                    commandsModifiedFailed.push(commandStructure.name);
+                    logger.error(
+                        `(Potentially) Failed to create ${commandModificationScope} command: ${
+                            commandStructure.name
+                        }. err = ${JSON.stringify(e)}`
+                    );
+                    continue;
+                }
             }
 
             sendInfoMessage(MessageContext.fromMessage(message), {
                 title: "Application Commands Reloaded",
-                description: "Yay.",
+                description: `**Successfully loaded**: ${commandsModifiedSuccess.join(
+                    ", "
+                )}\n**(Potentially) Failed to load**: ${commandsModifiedFailed.join(
+                    ", "
+                )}`,
             });
         } else {
-            const commands = await State.client.getCommands();
+            let commands = isProd
+                ? await State.client.getCommands()
+                : await State.client.getGuildCommands(debugServer.id);
 
-            await Promise.allSettled(
-                commands.map(async (command) => {
-                    logger.info(
-                        `Deleting global application command: ${command.id}`
+            if (isSingleCommand) {
+                commands = commands.filter(
+                    (x) => x.name === parsedMessage.components[1]
+                );
+            }
+
+            for (const command of commands) {
+                logger.info(
+                    `Deleting ${commandModificationScope} application command: ${command.name} -- ${command.id}`
+                );
+
+                try {
+                    if (isProd) {
+                        State.client.getCommands();
+                        await State.client.deleteCommand(command.id);
+                    } else {
+                        await State.client.deleteGuildCommand(
+                            debugServer.id,
+                            command.id
+                        );
+                    }
+
+                    commandsModifiedSuccess.push(command.name);
+                } catch (e) {
+                    logger.error(
+                        `(Potentially) Failed to delete ${commandModificationScope} command: ${
+                            command.name
+                        }. err = ${JSON.stringify(e)}`
                     );
-                    await State.client.deleteCommand(command.id);
-                })
-            );
-
-            const debugServer = State.client.guilds.get(
-                process.env.DEBUG_SERVER_ID
-            );
-
-            if (!debugServer) return;
-            const guildCommands = await State.client.getGuildCommands(
-                debugServer.id
-            );
-
-            await Promise.allSettled(
-                guildCommands.map(async (command) => {
-                    logger.info(
-                        `Deleting guild application command: ${command.id}`
-                    );
-
-                    await State.client.deleteGuildCommand(
-                        debugServer.id,
-                        command.id
-                    );
-                })
-            );
+                    commandsModifiedFailed.push(command.name);
+                    continue;
+                }
+            }
 
             sendInfoMessage(MessageContext.fromMessage(message), {
                 title: "Commands Deleted",
-                description: "No!!",
+                description: `**Successfully deleted**: ${commandsModifiedSuccess.join(
+                    ", "
+                )}\n**(Potentially) Failed to delete**: ${commandsModifiedFailed.join(
+                    ", "
+                )}`,
             });
         }
     };

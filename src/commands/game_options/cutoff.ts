@@ -1,27 +1,40 @@
 import {
     DEFAULT_BEGINNING_SEARCH_YEAR,
     DEFAULT_ENDING_SEARCH_YEAR,
+    OptionAction,
 } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
+    getInteractionValue,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
-import LocalizationManager from "../../helpers/localization_manager";
+import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("cutoff");
 
+enum CutoffAppCommandAction {
+    EARLIEST = "earliest",
+    RANGE = "range",
+}
+
 export default class CutoffCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notSpotifyPrecheck },
+    ];
 
     validations = {
         minArgCount: 0,
@@ -44,15 +57,12 @@ export default class CutoffCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "cutoff",
-        description: LocalizationManager.localizer.translate(
-            guildID,
-            "command.cutoff.help.description"
-        ),
-        usage: ",cutoff [year_start] {year_end}",
+        description: i18n.translate(guildID, "command.cutoff.help.description"),
+        usage: "/cutoff set earliest\nbeginning_year:[year_start]\n\n/cutoff set range\nbeginning_year:[year_start]\nending_year:[year_end]\n\n/cutoff reset",
         examples: [
             {
-                example: "`,cutoff 2015`",
-                explanation: LocalizationManager.localizer.translate(
+                example: "`/cutoff set earliest beginning_year:2015`",
+                explanation: i18n.translate(
                     guildID,
                     "command.cutoff.help.example.singleCutoff",
                     {
@@ -61,19 +71,20 @@ export default class CutoffCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,cutoff 2015 2018`",
-                explanation: LocalizationManager.localizer.translate(
+                example:
+                    "`/cutoff set range beginning_year:2015 ending_year:2018`",
+                explanation: i18n.translate(
                     guildID,
                     "command.cutoff.help.example.twoCutoffs",
                     {
                         beginningYear: String(2015),
-                        endYear: String(2018),
+                        endingYear: String(2018),
                     }
                 ),
             },
             {
-                example: "`,cutoff`",
-                explanation: LocalizationManager.localizer.translate(
+                example: "`/cutoff reset`",
+                explanation: i18n.translate(
                     guildID,
                     "command.cutoff.help.example.reset",
                     {
@@ -90,71 +101,275 @@ export default class CutoffCommand implements BaseCommand {
         priority: 140,
     });
 
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
+        {
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+            options: [
+                {
+                    name: OptionAction.SET,
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "command.cutoff.help.interaction.description"
+                    ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.cutoff.help.interaction.description"
+                        ),
+                    },
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND_GROUP,
+                    options: [
+                        {
+                            name: CutoffAppCommandAction.EARLIEST,
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.cutoff.help.interaction.earliestOption"
+                            ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.cutoff.help.interaction.earliestOption"
+                                ),
+                            },
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .SUB_COMMAND,
+                            options: [
+                                {
+                                    name: "beginning_year",
+                                    description: i18n.translate(
+                                        LocaleType.EN,
+                                        "command.cutoff.help.interaction.beginningYear"
+                                    ),
+                                    description_localizations: {
+                                        [LocaleType.KO]: i18n.translate(
+                                            LocaleType.KO,
+                                            "command.cutoff.help.interaction.beginningYear"
+                                        ),
+                                    },
+                                    type: Eris.Constants
+                                        .ApplicationCommandOptionTypes.INTEGER,
+                                    required: true,
+                                    max_value: DEFAULT_ENDING_SEARCH_YEAR,
+                                    min_value: DEFAULT_BEGINNING_SEARCH_YEAR,
+                                } as any,
+                            ],
+                        },
+                        {
+                            name: CutoffAppCommandAction.RANGE,
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.cutoff.help.interaction.rangeOption"
+                            ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.cutoff.help.interaction.rangeOption"
+                                ),
+                            },
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .SUB_COMMAND,
+                            options: [
+                                {
+                                    name: "beginning_year",
+                                    description: i18n.translate(
+                                        LocaleType.EN,
+                                        "command.cutoff.help.interaction.beginningYear"
+                                    ),
+                                    description_localizations: {
+                                        [LocaleType.KO]: i18n.translate(
+                                            LocaleType.KO,
+                                            "command.cutoff.help.interaction.beginningYear"
+                                        ),
+                                    },
+                                    type: Eris.Constants
+                                        .ApplicationCommandOptionTypes.INTEGER,
+                                    required: true,
+                                    max_value: DEFAULT_ENDING_SEARCH_YEAR,
+                                    min_value: DEFAULT_BEGINNING_SEARCH_YEAR,
+                                } as any,
+                                {
+                                    name: "ending_year",
+                                    description: i18n.translate(
+                                        LocaleType.EN,
+                                        "command.cutoff.help.interaction.endingYear"
+                                    ),
+                                    description_localizations: {
+                                        [LocaleType.KO]: i18n.translate(
+                                            LocaleType.KO,
+                                            "command.cutoff.help.interaction.endingYear"
+                                        ),
+                                    },
+                                    type: Eris.Constants
+                                        .ApplicationCommandOptionTypes.INTEGER,
+                                    required: true,
+                                    max_value: DEFAULT_ENDING_SEARCH_YEAR,
+                                    min_value: DEFAULT_BEGINNING_SEARCH_YEAR,
+                                } as any,
+                            ],
+                        },
+                    ],
+                },
+                {
+                    name: OptionAction.RESET,
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "misc.interaction.resetOption",
+                        { optionName: "cutoff" }
+                    ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "misc.interaction.resetOption",
+                            { optionName: "cutoff" }
+                        ),
+                    },
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                },
+            ],
+        },
+    ];
+
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+        let beginningYear: number = null;
+        let endingYear: number = null;
+        const yearRange = parsedMessage.components;
+
+        if (yearRange.length === 0) {
+            beginningYear = null;
+            endingYear = null;
+        } else if (yearRange.length === 1) {
+            beginningYear = parseInt(yearRange[0], 10);
+        } else {
+            beginningYear = parseInt(yearRange[0], 10);
+            endingYear = parseInt(yearRange[1], 10);
+        }
+
+        await CutoffCommand.updateOption(
+            MessageContext.fromMessage(message),
+            beginningYear,
+            endingYear,
+            null,
+            beginningYear == null && endingYear == null
+        );
+    };
+
+    static async updateOption(
+        messageContext: MessageContext,
+        beginningYear: number,
+        endingYear: number,
+        interaction?: Eris.CommandInteraction,
+        reset = false
+    ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
+            messageContext.guildID
         );
 
-        if (parsedMessage.components.length === 0) {
+        if (reset) {
             await guildPreference.setBeginningCutoffYear(
                 DEFAULT_BEGINNING_SEARCH_YEAR
             );
             await guildPreference.setEndCutoffYear(DEFAULT_ENDING_SEARCH_YEAR);
             await sendOptionsMessage(
-                Session.getSession(message.guildID),
-                MessageContext.fromMessage(message),
+                Session.getSession(messageContext.guildID),
+                messageContext,
                 guildPreference,
-                [{ option: GameOption.CUTOFF, reset: true }]
+                [{ option: GameOption.CUTOFF, reset: true }],
+                null,
+                null,
+                null,
+                interaction
             );
 
             logger.info(
-                `${getDebugLogHeader(message)} | Cutoff set to ${
+                `${getDebugLogHeader(messageContext)} | Cutoff set to ${
                     guildPreference.gameOptions.beginningYear
                 } - ${guildPreference.gameOptions.endYear}`
             );
+
             return;
         }
 
-        const yearRange = parsedMessage.components;
-        const startYear = yearRange[0];
-        if (yearRange.length === 1) {
-            await guildPreference.setBeginningCutoffYear(
-                parseInt(startYear, 10)
-            );
+        if (beginningYear && !endingYear) {
+            await guildPreference.setBeginningCutoffYear(beginningYear);
             await guildPreference.setEndCutoffYear(DEFAULT_ENDING_SEARCH_YEAR);
-        } else if (yearRange.length === 2) {
-            const endYear = yearRange[1];
-            if (endYear < startYear) {
-                await sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "command.cutoff.failure.invalidEndYear.title"
-                    ),
-                    description: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "command.cutoff.failure.invalidEndYear.description"
-                    ),
-                });
+        } else {
+            if (endingYear < beginningYear) {
+                await sendErrorMessage(
+                    messageContext,
+                    {
+                        title: i18n.translate(
+                            messageContext.guildID,
+                            "command.cutoff.failure.invalidEndYear.title"
+                        ),
+                        description: i18n.translate(
+                            messageContext.guildID,
+                            "command.cutoff.failure.invalidEndYear.description"
+                        ),
+                    },
+                    interaction
+                );
                 return;
             }
 
-            await guildPreference.setBeginningCutoffYear(
-                parseInt(startYear, 10)
-            );
-            await guildPreference.setEndCutoffYear(parseInt(endYear, 10));
+            await guildPreference.setBeginningCutoffYear(beginningYear);
+            await guildPreference.setEndCutoffYear(endingYear);
         }
 
         await sendOptionsMessage(
-            Session.getSession(message.guildID),
-            MessageContext.fromMessage(message),
+            Session.getSession(messageContext.guildID),
+            messageContext,
             guildPreference,
-            [{ option: GameOption.CUTOFF, reset: false }]
+            [{ option: GameOption.CUTOFF, reset: false }],
+            null,
+            null,
+            null,
+            interaction
         );
 
         logger.info(
-            `${getDebugLogHeader(message)} | Cutoff set to ${
+            `${getDebugLogHeader(messageContext)} | Cutoff set to ${
                 guildPreference.gameOptions.beginningYear
             } - ${guildPreference.gameOptions.endYear}`
         );
-    };
+    }
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        const { interactionName, interactionOptions } =
+            getInteractionValue(interaction);
+
+        let beginningYear: number;
+        let endingYear: number;
+        if (interactionName === OptionAction.RESET) {
+            beginningYear = null;
+            endingYear = null;
+        } else if (interactionName === CutoffAppCommandAction.RANGE) {
+            beginningYear = interactionOptions["beginning_year"];
+            endingYear = interactionOptions["ending_year"];
+        } else if (interactionName === CutoffAppCommandAction.EARLIEST) {
+            beginningYear = interactionOptions["beginning_year"];
+        } else {
+            logger.error(`Unexpected interaction name: ${interactionName}`);
+            beginningYear = null;
+            endingYear = null;
+        }
+
+        await CutoffCommand.updateOption(
+            messageContext,
+            beginningYear,
+            endingYear,
+            interaction,
+            beginningYear == null && endingYear == null
+        );
+    }
 }

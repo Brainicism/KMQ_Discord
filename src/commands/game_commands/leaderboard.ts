@@ -5,29 +5,31 @@ import {
     bold,
     chooseRandom,
     friendlyFormattedNumber,
-    getUserTag,
 } from "../../helpers/utils";
 import {
     getDebugLogHeader,
+    getInteractionValue,
     sendErrorMessage,
     sendInfoMessage,
-    sendMessage,
     sendPaginationedEmbed,
 } from "../../helpers/discord_utils";
 import { getRankNameByLevel } from "./profile";
 import { sendValidationErrorMessage } from "../../helpers/validate";
 import EnvType from "../../enums/env_type";
+import Eris from "eris";
+import KmqMember from "../../structures/kmq_member";
 import LeaderboardDuration from "../../enums/option_types/leaderboard_duration";
 import LeaderboardScope from "../../enums/option_types/leaderboard_scope";
 import LeaderboardType from "../../enums/option_types/leaderboard_type";
-import LocalizationManager from "../../helpers/localization_manager";
+import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
 import dbContext from "../../database_context";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type { EmbedGenerator, GuildTextableMessage } from "../../types";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
-import type Eris from "eris";
 import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("leaderboard");
@@ -53,70 +55,69 @@ export default class LeaderboardCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "leaderboard",
-        description: LocalizationManager.localizer.translate(
+        description: i18n.translate(
             guildID,
             "command.leaderboard.help.description"
         ),
-        usage: `,leaderboard {${LocalizationManager.localizer.translate(
+        usage: `/leaderboard show\ntype:{gamesplayed | songsguessed | exp}\nscope:{server | game | global}\nduration:{daily | weekly | monthly | yearly}\npage:{${i18n.translate(
             guildID,
             "command.leaderboard.help.usage.pageNumber"
-        )}}\n,leaderboard {gamesplayed | songsguessed} {server | game} {daily | weekly | monthly | yearly} {${LocalizationManager.localizer.translate(
-            guildID,
-            "command.leaderboard.help.usage.pageNumber"
-        )}}\n,leaderboard [enroll | unenroll]`,
+        )}}\n\n/leaderboard enroll\n\n/leaderboard unenroll`,
         examples: [
             {
-                example: "`,leaderboard`",
-                explanation: LocalizationManager.localizer.translate(
+                example: "`/leaderboard show`",
+                explanation: i18n.translate(
                     guildID,
                     "command.leaderboard.help.example.global"
                 ),
             },
             {
-                example: "`,leaderboard 3`",
-                explanation: LocalizationManager.localizer.translate(
+                example: "`/leaderboard show page:3`",
+                explanation: i18n.translate(
                     guildID,
                     "command.leaderboard.help.example.globalPage"
                 ),
             },
             {
-                example: "`,leaderboard game monthly 2`",
-                explanation: LocalizationManager.localizer.translate(
+                example:
+                    "`/leaderboard show scope:game duration:monthly page:2`",
+                explanation: i18n.translate(
                     guildID,
                     "command.leaderboard.help.example.gameMonthlyPage"
                 ),
             },
             {
-                example: "`,leaderboard songsguessed server 3`",
-                explanation: LocalizationManager.localizer.translate(
+                example:
+                    "`/leaderboard show type:songsguessed scope:server page:3`",
+                explanation: i18n.translate(
                     guildID,
                     "command.leaderboard.help.example.serverSongsGuessedPage"
                 ),
             },
             {
-                example: "`,leaderboard enroll`",
-                explanation: LocalizationManager.localizer.translate(
+                example: "`/leaderboard enroll`",
+                explanation: i18n.translate(
                     guildID,
                     "command.leaderboard.help.example.enroll"
                 ),
             },
             {
-                example: "`,leaderboard unenroll`",
-                explanation: LocalizationManager.localizer.translate(
+                example: "`/leaderboard unenroll`",
+                explanation: i18n.translate(
                     guildID,
                     "command.leaderboard.help.example.unenroll"
                 ),
             },
             {
-                example: "`,leaderboard server`",
-                explanation: LocalizationManager.localizer.translate(
+                example: "`/leaderboard scope:server`",
+                explanation: i18n.translate(
                     guildID,
                     "command.leaderboard.help.example.server"
                 ),
             },
             {
-                example: "`,leaderboard weekly 4`",
-                explanation: LocalizationManager.localizer.translate(
+                example: "`/leaderboard duration:weekly page:4`",
+                explanation: i18n.translate(
                     guildID,
                     "command.leaderboard.help.example.globalWeeklyPage"
                 ),
@@ -124,6 +125,171 @@ export default class LeaderboardCommand implements BaseCommand {
         ],
         priority: 50,
     });
+
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
+        {
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+            options: [
+                {
+                    name: LeaderboardAction.ENROLL,
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "command.leaderboard.help.example.enroll"
+                    ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.leaderboard.help.example.enroll"
+                        ),
+                    },
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                },
+                {
+                    name: LeaderboardAction.UNENROLL,
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "command.leaderboard.help.example.unenroll"
+                    ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.leaderboard.help.example.unenroll"
+                        ),
+                    },
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                },
+                {
+                    name: "show",
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "command.leaderboard.help.description"
+                    ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.leaderboard.help.description"
+                        ),
+                    },
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "type",
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.leaderboard.interaction.type"
+                            ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.leaderboard.interaction.type"
+                                ),
+                            },
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            choices: Object.values(LeaderboardType).map(
+                                (type) => ({
+                                    name: type,
+                                    value: type,
+                                    default: type === LeaderboardType.EXP,
+                                })
+                            ),
+                        },
+                        {
+                            name: "duration",
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.leaderboard.interaction.duration"
+                            ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.leaderboard.interaction.duration"
+                                ),
+                            },
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            choices: [
+                                LeaderboardDuration.ALL_TIME,
+                                LeaderboardDuration.YEARLY,
+                                LeaderboardDuration.MONTHLY,
+                                LeaderboardDuration.WEEKLY,
+                                LeaderboardDuration.DAILY,
+                            ].map((duration) => ({
+                                name: duration,
+                                value: duration,
+                                default:
+                                    duration === LeaderboardDuration.ALL_TIME,
+                            })),
+                        },
+                        {
+                            name: "scope",
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.leaderboard.interaction.scope"
+                            ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.leaderboard.interaction.scope"
+                                ),
+                            },
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .STRING,
+                            choices: Object.values(LeaderboardScope).map(
+                                (scope) => ({
+                                    name: scope,
+                                    value: scope,
+                                    default: scope === LeaderboardScope.GLOBAL,
+                                })
+                            ),
+                        },
+                        {
+                            name: "page",
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.leaderboard.interaction.page"
+                            ),
+                            description_localizations: {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    "command.leaderboard.interaction.page"
+                                ),
+                            },
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .INTEGER,
+                        },
+                    ],
+                },
+            ],
+        },
+    ];
+
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        const { interactionOptions, interactionName } =
+            getInteractionValue(interaction);
+
+        if (interactionName === LeaderboardAction.ENROLL) {
+            LeaderboardCommand.enrollLeaderboard(messageContext, interaction);
+        } else if (interactionName === LeaderboardAction.UNENROLL) {
+            LeaderboardCommand.unenrollLeaderboard(messageContext, interaction);
+        } else {
+            await LeaderboardCommand.showLeaderboard(
+                interaction,
+                interactionOptions["type"],
+                interactionOptions["scope"],
+                interactionOptions["duration"],
+                interactionOptions["page"]
+            );
+        }
+    }
 
     call = ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         if (parsedMessage.components.length === 0) {
@@ -137,14 +303,15 @@ export default class LeaderboardCommand implements BaseCommand {
         }
 
         let arg = parsedMessage.components[0];
+        const messageContext = MessageContext.fromMessage(message);
         if (
             Object.values(LeaderboardAction).includes(arg as LeaderboardAction)
         ) {
             const action = arg as LeaderboardAction;
             if (action === LeaderboardAction.ENROLL) {
-                LeaderboardCommand.enrollLeaderboard(message);
+                LeaderboardCommand.enrollLeaderboard(messageContext);
             } else if (action === LeaderboardAction.UNENROLL) {
-                LeaderboardCommand.unenrollLeaderboard(message);
+                LeaderboardCommand.unenrollLeaderboard(messageContext);
             }
 
             return;
@@ -179,8 +346,8 @@ export default class LeaderboardCommand implements BaseCommand {
 
         if (pageOffset === 0 && !type && !scope && !duration) {
             sendValidationErrorMessage(
-                message,
-                LocalizationManager.localizer.translate(
+                messageContext,
+                i18n.translate(
                     message.guildID,
                     "command.leaderboard.validation.firstArg",
                     {
@@ -219,8 +386,8 @@ export default class LeaderboardCommand implements BaseCommand {
             duration = arg as LeaderboardDuration;
         } else if (pageOffset === 0) {
             sendValidationErrorMessage(
-                message,
-                LocalizationManager.localizer.translate(
+                messageContext,
+                i18n.translate(
                     message.guildID,
                     "command.leaderboard.validation.secondArg",
                     {
@@ -256,8 +423,8 @@ export default class LeaderboardCommand implements BaseCommand {
             duration = arg as LeaderboardDuration;
         } else if (pageOffset === 0) {
             sendValidationErrorMessage(
-                message,
-                LocalizationManager.localizer.translate(
+                messageContext,
+                i18n.translate(
                     message.guildID,
                     "command.leaderboard.validation.secondArg",
                     {
@@ -274,8 +441,8 @@ export default class LeaderboardCommand implements BaseCommand {
 
         if (pageOffset === 0 && parsedMessage.components.length > 3) {
             sendValidationErrorMessage(
-                message,
-                LocalizationManager.localizer.translate(
+                messageContext,
+                i18n.translate(
                     message.guildID,
                     "command.leaderboard.validation.thirdArg"
                 ),
@@ -500,7 +667,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
                                     const displayName = enrolledPlayer
                                         ? enrolledPlayer.display_name
-                                        : LocalizationManager.localizer.translate(
+                                        : i18n.translate(
                                               messageContext.guildID,
                                               "command.leaderboard.rankNumber",
                                               {
@@ -512,46 +679,42 @@ export default class LeaderboardCommand implements BaseCommand {
 
                                     let level: string;
                                     if (permanentLb) {
-                                        level =
-                                            LocalizationManager.localizer.translate(
-                                                messageContext.guildID,
-                                                "command.leaderboard.levelEntry.permanent",
-                                                {
-                                                    level: LocalizationManager.localizer.translate(
-                                                        messageContext.guildID,
-                                                        "misc.level"
+                                        level = i18n.translate(
+                                            messageContext.guildID,
+                                            "command.leaderboard.levelEntry.permanent",
+                                            {
+                                                level: i18n.translate(
+                                                    messageContext.guildID,
+                                                    "misc.level"
+                                                ),
+                                                formattedNumber:
+                                                    friendlyFormattedNumber(
+                                                        player.level
                                                     ),
-                                                    formattedNumber:
-                                                        friendlyFormattedNumber(
-                                                            player.level
-                                                        ),
-                                                    rankName:
-                                                        getRankNameByLevel(
-                                                            player.level,
-                                                            messageContext.guildID
-                                                        ),
-                                                }
-                                            );
+                                                rankName: getRankNameByLevel(
+                                                    player.level,
+                                                    messageContext.guildID
+                                                ),
+                                            }
+                                        );
                                     } else {
-                                        const levelPluralized =
-                                            LocalizationManager.localizer.translateN(
-                                                messageContext.guildID,
-                                                "misc.plural.level",
-                                                player.level
-                                            );
+                                        const levelPluralized = i18n.translateN(
+                                            messageContext.guildID,
+                                            "misc.plural.level",
+                                            player.level
+                                        );
 
-                                        level =
-                                            LocalizationManager.localizer.translate(
-                                                messageContext.guildID,
-                                                "command.leaderboard.levelEntry.temporary",
-                                                {
-                                                    formattedNumber:
-                                                        friendlyFormattedNumber(
-                                                            player.level
-                                                        ),
-                                                    levelPluralized,
-                                                }
-                                            );
+                                        level = i18n.translate(
+                                            messageContext.guildID,
+                                            "command.leaderboard.levelEntry.temporary",
+                                            {
+                                                formattedNumber:
+                                                    friendlyFormattedNumber(
+                                                        player.level
+                                                    ),
+                                                levelPluralized,
+                                            }
+                                        );
                                     }
 
                                     let value: string;
@@ -573,34 +736,32 @@ export default class LeaderboardCommand implements BaseCommand {
 
                                             break;
                                         case LeaderboardType.GAMES_PLAYED: {
-                                            const games =
-                                                LocalizationManager.localizer.translate(
-                                                    messageContext.guildID,
-                                                    "command.leaderboard.gamesPlayed",
-                                                    {
-                                                        gameCount:
-                                                            friendlyFormattedNumber(
-                                                                player.game_count
-                                                            ),
-                                                    }
-                                                );
+                                            const games = i18n.translate(
+                                                messageContext.guildID,
+                                                "command.leaderboard.gamesPlayed",
+                                                {
+                                                    gameCount:
+                                                        friendlyFormattedNumber(
+                                                            player.game_count
+                                                        ),
+                                                }
+                                            );
 
                                             value = `${games} | ${level}`;
                                             break;
                                         }
 
                                         case LeaderboardType.SONGS_GUESSED: {
-                                            const guesses =
-                                                LocalizationManager.localizer.translate(
-                                                    messageContext.guildID,
-                                                    "command.leaderboard.songsGuessed",
-                                                    {
-                                                        songsGuessed:
-                                                            friendlyFormattedNumber(
-                                                                player.songs_guessed
-                                                            ),
-                                                    }
-                                                );
+                                            const guesses = i18n.translate(
+                                                messageContext.guildID,
+                                                "command.leaderboard.songsGuessed",
+                                                {
+                                                    songsGuessed:
+                                                        friendlyFormattedNumber(
+                                                            player.songs_guessed
+                                                        ),
+                                                }
+                                            );
 
                                             value = `${guesses} | ${level}`;
                                             break;
@@ -620,40 +781,35 @@ export default class LeaderboardCommand implements BaseCommand {
                         let leaderboardScope: string;
                         switch (scope) {
                             case LeaderboardScope.GLOBAL:
-                                leaderboardScope =
-                                    LocalizationManager.localizer.translate(
-                                        messageContext.guildID,
-                                        "command.leaderboard.scope.global"
-                                    );
+                                leaderboardScope = i18n.translate(
+                                    messageContext.guildID,
+                                    "command.leaderboard.scope.global"
+                                );
                                 break;
                             case LeaderboardScope.SERVER:
                                 if (process.env.NODE_ENV !== EnvType.TEST) {
-                                    leaderboardScope =
-                                        LocalizationManager.localizer.translate(
-                                            messageContext.guildID,
-                                            "command.leaderboard.scope.server.withName",
-                                            {
-                                                serverName:
-                                                    State.client.guilds.get(
-                                                        messageContext.guildID
-                                                    ).name,
-                                            }
-                                        );
+                                    leaderboardScope = i18n.translate(
+                                        messageContext.guildID,
+                                        "command.leaderboard.scope.server.withName",
+                                        {
+                                            serverName: State.client.guilds.get(
+                                                messageContext.guildID
+                                            ).name,
+                                        }
+                                    );
                                 } else {
-                                    leaderboardScope =
-                                        LocalizationManager.localizer.translate(
-                                            messageContext.guildID,
-                                            "command.leaderboard.scope.server.noName"
-                                        );
+                                    leaderboardScope = i18n.translate(
+                                        messageContext.guildID,
+                                        "command.leaderboard.scope.server.noName"
+                                    );
                                 }
 
                                 break;
                             case LeaderboardScope.GAME:
-                                leaderboardScope =
-                                    LocalizationManager.localizer.translate(
-                                        messageContext.guildID,
-                                        "command.leaderboard.scope.currentGame"
-                                    );
+                                leaderboardScope = i18n.translate(
+                                    messageContext.guildID,
+                                    "command.leaderboard.scope.currentGame"
+                                );
                                 break;
                             default:
                                 break;
@@ -663,42 +819,37 @@ export default class LeaderboardCommand implements BaseCommand {
                         switch (duration) {
                             case LeaderboardDuration.TODAY:
                             case LeaderboardDuration.DAILY:
-                                leaderboardDuration =
-                                    LocalizationManager.localizer.translate(
-                                        messageContext.guildID,
-                                        "command.leaderboard.duration.daily"
-                                    );
+                                leaderboardDuration = i18n.translate(
+                                    messageContext.guildID,
+                                    "command.leaderboard.duration.daily"
+                                );
                                 break;
                             case LeaderboardDuration.WEEK:
                             case LeaderboardDuration.WEEKLY:
-                                leaderboardDuration =
-                                    LocalizationManager.localizer.translate(
-                                        messageContext.guildID,
-                                        "command.leaderboard.duration.weekly"
-                                    );
+                                leaderboardDuration = i18n.translate(
+                                    messageContext.guildID,
+                                    "command.leaderboard.duration.weekly"
+                                );
                                 break;
                             case LeaderboardDuration.MONTH:
                             case LeaderboardDuration.MONTHLY:
-                                leaderboardDuration =
-                                    LocalizationManager.localizer.translate(
-                                        messageContext.guildID,
-                                        "command.leaderboard.duration.monthly"
-                                    );
+                                leaderboardDuration = i18n.translate(
+                                    messageContext.guildID,
+                                    "command.leaderboard.duration.monthly"
+                                );
                                 break;
                             case LeaderboardDuration.YEAR:
                             case LeaderboardDuration.YEARLY:
-                                leaderboardDuration =
-                                    LocalizationManager.localizer.translate(
-                                        messageContext.guildID,
-                                        "command.leaderboard.duration.yearly"
-                                    );
+                                leaderboardDuration = i18n.translate(
+                                    messageContext.guildID,
+                                    "command.leaderboard.duration.yearly"
+                                );
                                 break;
                             case LeaderboardDuration.ALL_TIME:
-                                leaderboardDuration =
-                                    LocalizationManager.localizer.translate(
-                                        messageContext.guildID,
-                                        "command.leaderboard.duration.allTime"
-                                    );
+                                leaderboardDuration = i18n.translate(
+                                    messageContext.guildID,
+                                    "command.leaderboard.duration.allTime"
+                                );
                                 break;
                             default:
                                 break;
@@ -710,13 +861,13 @@ export default class LeaderboardCommand implements BaseCommand {
                                 leaderboardType = "";
                                 break;
                             case LeaderboardType.GAMES_PLAYED:
-                                leaderboardType = `(${LocalizationManager.localizer.translate(
+                                leaderboardType = `(${i18n.translate(
                                     messageContext.guildID,
                                     "command.leaderboard.type.byGamesPlayed"
                                 )})`;
                                 break;
                             case LeaderboardType.SONGS_GUESSED:
-                                leaderboardType = `(${LocalizationManager.localizer.translate(
+                                leaderboardType = `(${i18n.translate(
                                     messageContext.guildID,
                                     "command.leaderboard.type.bySongsGuessed"
                                 )})`;
@@ -727,7 +878,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
                         resolve({
                             title: bold(
-                                LocalizationManager.localizer
+                                i18n
                                     .translate(
                                         messageContext.guildID,
                                         "command.leaderboard.title",
@@ -743,11 +894,11 @@ export default class LeaderboardCommand implements BaseCommand {
                             timestamp: new Date(),
                             thumbnail: { url: KmqImages.THUMBS_UP },
                             footer: {
-                                text: LocalizationManager.localizer.translate(
+                                text: i18n.translate(
                                     messageContext.guildID,
                                     chooseRandom(leaderboardQuotes),
                                     {
-                                        command: `${process.env.BOT_PREFIX}help leaderboard`,
+                                        command: "/help leaderboard",
                                     }
                                 ),
                             },
@@ -760,89 +911,116 @@ export default class LeaderboardCommand implements BaseCommand {
     }
 
     private static async enrollLeaderboard(
-        message: GuildTextableMessage
+        messageContext: MessageContext,
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const alreadyEnrolled = !!(await dbContext
             .kmq("leaderboard_enrollment")
-            .where("player_id", "=", message.author.id)
+            .where("player_id", "=", messageContext.author.id)
             .first());
 
         if (alreadyEnrolled) {
-            sendErrorMessage(MessageContext.fromMessage(message), {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "command.leaderboard.failure.alreadyEnrolled.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "command.leaderboard.failure.alreadyEnrolled.description"
-                ),
-            });
+            sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "command.leaderboard.failure.alreadyEnrolled.title"
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "command.leaderboard.failure.alreadyEnrolled.description"
+                    ),
+                },
+                interaction
+            );
             return;
         }
 
         await dbContext.kmq("leaderboard_enrollment").insert({
-            player_id: message.author.id,
-            display_name: getUserTag(message.author),
+            player_id: messageContext.author.id,
+            display_name: messageContext.author.tag,
         });
 
-        sendInfoMessage(MessageContext.fromMessage(message), {
-            title: LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.leaderboard.enrolled.title"
-            ),
-            description: LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.leaderboard.enrolled.description"
-            ),
-        });
+        sendInfoMessage(
+            messageContext,
+            {
+                title: i18n.translate(
+                    messageContext.guildID,
+                    "command.leaderboard.enrolled.title"
+                ),
+                description: i18n.translate(
+                    messageContext.guildID,
+                    "command.leaderboard.enrolled.description"
+                ),
+            },
+            false,
+            null,
+            [],
+            interaction
+        );
     }
 
     private static async unenrollLeaderboard(
-        message: GuildTextableMessage
+        messageContext: MessageContext,
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         await dbContext
             .kmq("leaderboard_enrollment")
-            .where("player_id", "=", message.author.id)
+            .where("player_id", "=", messageContext.author.id)
             .del();
 
-        sendInfoMessage(MessageContext.fromMessage(message), {
-            title: LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.leaderboard.unenrolled.title"
-            ),
-            description: LocalizationManager.localizer.translate(
-                message.guildID,
-                "command.leaderboard.unenrolled.description"
-            ),
-        });
+        sendInfoMessage(
+            messageContext,
+            {
+                title: i18n.translate(
+                    messageContext.guildID,
+                    "command.leaderboard.unenrolled.title"
+                ),
+                description: i18n.translate(
+                    messageContext.guildID,
+                    "command.leaderboard.unenrolled.description"
+                ),
+            },
+            false,
+            null,
+            [],
+            interaction
+        );
     }
 
     private static async showLeaderboard(
-        message: GuildTextableMessage | MessageContext,
+        messageOrInteraction: GuildTextableMessage | Eris.CommandInteraction,
         type: LeaderboardType = LeaderboardType.EXP,
         scope: LeaderboardScope = LeaderboardScope.GLOBAL,
         duration: LeaderboardDuration = LeaderboardDuration.ALL_TIME,
         pageOffset: number = 0
     ): Promise<void> {
-        const messageContext: MessageContext =
-            message instanceof MessageContext
-                ? message
-                : MessageContext.fromMessage(message);
+        const messageContext = new MessageContext(
+            messageOrInteraction.channel.id,
+            new KmqMember(messageOrInteraction.member.id),
+            messageOrInteraction.guildID
+        );
 
         if (scope === LeaderboardScope.GAME) {
-            if (!State.gameSessions[message.guildID]) {
-                sendErrorMessage(messageContext, {
-                    title: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "misc.failure.game.noneInProgress.title"
-                    ),
-                    description: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "command.leaderboard.failure.game.noneInProgress.description"
-                    ),
-                    thumbnailUrl: KmqImages.NOT_IMPRESSED,
-                });
+            if (!State.gameSessions[messageContext.guildID]) {
+                sendErrorMessage(
+                    messageContext,
+                    {
+                        title: i18n.translate(
+                            messageContext.guildID,
+                            "misc.failure.game.noneInProgress.title"
+                        ),
+                        description: i18n.translate(
+                            messageContext.guildID,
+                            "misc.failure.game.noneInProgress.description"
+                        ),
+                        thumbnailUrl: KmqImages.NOT_IMPRESSED,
+                    },
+                    messageOrInteraction instanceof Eris.CommandInteraction
+                        ? messageOrInteraction
+                        : null
+                );
                 return;
             }
 
@@ -852,17 +1030,23 @@ export default class LeaderboardCommand implements BaseCommand {
                 ].scoreboard.getPlayerIDs();
 
             if (participantIDs.length === 0) {
-                sendErrorMessage(messageContext, {
-                    title: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "command.leaderboard.failure.game.noParticipants.title"
-                    ),
-                    description: LocalizationManager.localizer.translate(
-                        message.guildID,
-                        "command.leaderboard.failure.game.noParticipants.description"
-                    ),
-                    thumbnailUrl: KmqImages.NOT_IMPRESSED,
-                });
+                sendErrorMessage(
+                    messageContext,
+                    {
+                        title: i18n.translate(
+                            messageContext.guildID,
+                            "command.leaderboard.failure.game.noParticipants.title"
+                        ),
+                        description: i18n.translate(
+                            messageContext.guildID,
+                            "command.leaderboard.failure.game.noParticipants.description"
+                        ),
+                        thumbnailUrl: KmqImages.NOT_IMPRESSED,
+                    },
+                    messageOrInteraction instanceof Eris.CommandInteraction
+                        ? messageOrInteraction
+                        : null
+                );
                 return;
             }
         }
@@ -876,52 +1060,58 @@ export default class LeaderboardCommand implements BaseCommand {
             );
 
         if (pageCount === 0) {
-            sendErrorMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "command.leaderboard.failure.empty.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "command.leaderboard.failure.empty.description"
-                ),
-                thumbnailUrl: KmqImages.DEAD,
-            });
+            sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "command.leaderboard.failure.empty.title"
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "command.leaderboard.failure.empty.description"
+                    ),
+                    thumbnailUrl: KmqImages.DEAD,
+                },
+                messageOrInteraction instanceof Eris.CommandInteraction
+                    ? messageOrInteraction
+                    : null
+            );
             return;
         }
 
         if (pageOffset > pageCount) {
-            sendErrorMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "command.leaderboard.failure.outOfRange.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "command.leaderboard.failure.outOfRange.description"
-                ),
-                thumbnailUrl: KmqImages.NOT_IMPRESSED,
-            });
+            sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "command.leaderboard.failure.outOfRange.title"
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "command.leaderboard.failure.outOfRange.description"
+                    ),
+                    thumbnailUrl: KmqImages.NOT_IMPRESSED,
+                },
+                messageOrInteraction instanceof Eris.CommandInteraction
+                    ? messageOrInteraction
+                    : null
+            );
             return;
         }
 
-        logger.info(
-            `${getDebugLogHeader(message)} | Leaderboard retrieved (${scope})`
+        await sendPaginationedEmbed(
+            messageOrInteraction,
+            embeds,
+            null,
+            pageOffset
         );
-        if (!(message instanceof MessageContext)) {
-            await sendPaginationedEmbed(message, embeds, null, pageOffset);
-            logger.info(
-                `${getDebugLogHeader(message)} | Leaderboard retrieved.`
-            );
-        } else {
-            // Used only in sending leaderboard in debug channel before reset
-            await sendMessage(process.env.DEBUG_TEXT_CHANNEL_ID, {
-                embeds: [await embeds[pageOffset]()],
-            });
 
-            logger.info(
-                `${getDebugLogHeader(message)} | Debug leaderboard retrieved..`
-            );
-        }
+        logger.info(
+            `${getDebugLogHeader(
+                messageOrInteraction
+            )} | Leaderboard retrieved (${scope})`
+        );
     }
 }

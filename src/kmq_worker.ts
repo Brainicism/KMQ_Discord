@@ -4,22 +4,41 @@ import { BaseClusterWorker } from "eris-fleet";
 import { IPCLogger } from "./logger";
 import { config } from "dotenv";
 import {
-    registerClientEvents,
     registerIntervals,
-    registerProcessEvents,
     reloadCaches,
     updateBotStatus,
 } from "./helpers/management_utils";
 import EnvType from "./enums/env_type";
 import EvalCommand from "./commands/admin/eval";
-import LocalizationManager from "./helpers/localization_manager";
 import ReloadCommand from "./commands/admin/reload";
+import SIGINTHandler from "./events/process/SIGINT";
 import Session from "./structures/session";
+import SpotifyManager from "./helpers/spotify_manager";
 import State from "./state";
+import channelDeleteHandler from "./events/client/channelDelete";
+import connectHandler from "./events/client/connect";
 import dbContext from "./database_context";
+import debugHandler from "./events/client/debug";
+import disconnectHandler from "./events/client/disconnect";
+import errorHandler from "./events/client/error";
 import fs from "fs";
+import guildAvailableHandler from "./events/client/guildAvailable";
+import guildCreateHandler from "./events/client/guildCreate";
+import guildDeleteHandler from "./events/client/guildDelete";
+import interactionCreateHandler from "./events/client/interactionCreate";
+import messageCreateHandler from "./events/client/messageCreate";
 import path from "path";
 import schedule from "node-schedule";
+import shardDisconnectHandler from "./events/client/shardDisconnect";
+import shardReadyHandler from "./events/client/shardReady";
+import shardResumeHandler from "./events/client/shardResume";
+import unavailableGuildCreateHandler from "./events/client/unavailableGuildCreate";
+import uncaughtExceptionHandler from "./events/process/uncaughtException";
+import unhandledRejectionHandler from "./events/process/unhandledRejection";
+import voiceChannelJoinHandler from "./events/client/voiceChannelJoin";
+import voiceChannelLeaveHandler from "./events/client/voiceChannelLeave";
+import voiceChannelSwitchHandler from "./events/client/voiceChannelSwitch";
+import warnHandler from "./events/client/warn";
 import type KmqClient from "./kmq_client";
 
 const logger = new IPCLogger("kmq");
@@ -118,6 +137,47 @@ export default class BotWorker extends BaseClusterWorker {
         }
     };
 
+    // eslint-disable-next-line class-methods-use-this
+    registerClientEvents(client: KmqClient): void {
+        // remove listeners registered by eris-fleet, handle on cluster instead
+        client.removeAllListeners("warn");
+        client.removeAllListeners("error");
+        // register listeners
+        client
+            .on("messageCreate", messageCreateHandler)
+            .on("voiceChannelLeave", voiceChannelLeaveHandler)
+            .on("voiceChannelSwitch", voiceChannelSwitchHandler)
+            .on("voiceChannelJoin", voiceChannelJoinHandler)
+            .on("channelDelete", channelDeleteHandler)
+            .on("connect", connectHandler)
+            .on("error", errorHandler)
+            .on("warn", warnHandler)
+            .on("shardDisconnect", shardDisconnectHandler)
+            .on("shardReady", shardReadyHandler)
+            .on("shardResume", shardResumeHandler)
+            .on("disconnect", disconnectHandler)
+            .on("debug", debugHandler)
+            .on("guildCreate", guildCreateHandler)
+            .on("guildDelete", guildDeleteHandler)
+            .on("unavailableGuildCreate", unavailableGuildCreateHandler)
+            .on("guildAvailable", guildAvailableHandler)
+            .on("guildUnavailable", unavailableGuildCreateHandler)
+            .on("interactionCreate", interactionCreateHandler);
+    }
+
+    // eslint-disable-next-line class-methods-use-this
+    registerProcessEvents(): void {
+        // remove listeners registered by eris-fleet, handle on cluster instead
+        process.removeAllListeners("unhandledRejection");
+        process.removeAllListeners("uncaughtException");
+
+        process
+            .on("unhandledRejection", unhandledRejectionHandler)
+            .on("uncaughtException", uncaughtExceptionHandler)
+            .on("SIGINT", SIGINTHandler);
+    }
+
+    // eslint-disable-next-line class-methods-use-this
     shutdown = async (done): Promise<void> => {
         logger.debug("SHUTDOWN received, cleaning up...");
 
@@ -173,7 +233,6 @@ export default class BotWorker extends BaseClusterWorker {
             );
         });
 
-        LocalizationManager.localizer = new LocalizationManager();
         logger.info(
             `Started worker ID: ${this.workerID} on cluster ID: ${this.clusterID}`
         );
@@ -182,10 +241,14 @@ export default class BotWorker extends BaseClusterWorker {
         registerIntervals(this.clusterID);
 
         logger.info("Registering client event handlers...");
-        registerClientEvents();
+        this.registerClientEvents(State.client);
 
         logger.info("Registering process event handlers...");
-        registerProcessEvents();
+        this.registerProcessEvents();
+
+        logger.info("Initializing Spotify manager...");
+        State.spotifyManager = new SpotifyManager();
+        State.spotifyManager.start();
 
         if (
             [EnvType.CI, EnvType.DRY_RUN].includes(

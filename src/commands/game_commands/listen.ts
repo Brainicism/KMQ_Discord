@@ -1,7 +1,6 @@
 import { EMBED_SUCCESS_BONUS_COLOR, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
-    generateEmbed,
     generateOptionsMessage,
     getDebugLogHeader,
     getGameInfoMessage,
@@ -11,16 +10,17 @@ import {
     voicePermissionsCheck,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
 import KmqMember from "../../structures/kmq_member";
 import ListeningSession from "../../structures/listening_session";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
+import i18n from "../../helpers/localization_manager";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
-import type Eris from "eris";
 import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("listen");
@@ -31,14 +31,16 @@ const logger = new IPCLogger("listen");
  * @param voiceChannelName - The name of the voice channel to join
  * @param messageContext - The original message that triggered the command
  * @param guildPreference - The guild's preferences
+ * @param interaction - The interaction
  */
 export async function sendBeginListeningSessionMessage(
     textChannelName: string,
     voiceChannelName: string,
     messageContext: MessageContext,
-    guildPreference: GuildPreference
+    guildPreference: GuildPreference,
+    interaction?: Eris.CommandInteraction
 ): Promise<void> {
-    const startTitle = LocalizationManager.localizer.translate(
+    const startTitle = i18n.translate(
         messageContext.guildID,
         "command.listen.musicStarting",
         {
@@ -52,10 +54,7 @@ export async function sendBeginListeningSessionMessage(
     const fields: Eris.EmbedField[] = [];
     if (gameInfoMessage) {
         fields.push({
-            name: LocalizationManager.localizer.translate(
-                messageContext.guildID,
-                gameInfoMessage.title
-            ),
+            name: i18n.translate(messageContext.guildID, gameInfoMessage.title),
             value: gameInfoMessage.message,
             inline: false,
         });
@@ -80,9 +79,9 @@ export async function sendBeginListeningSessionMessage(
             fields,
         },
         false,
-        true,
         undefined,
-        [generateEmbed(messageContext, optionsEmbedPayload)]
+        [optionsEmbedPayload],
+        interaction
     );
 }
 
@@ -91,6 +90,8 @@ export default class ListenCommand implements BaseCommand {
         { checkFn: CommandPrechecks.notRestartingPrecheck },
         { checkFn: CommandPrechecks.premiumPrecheck },
         { checkFn: CommandPrechecks.maintenancePrecheck },
+        { checkFn: CommandPrechecks.notListeningPrecheck },
+        { checkFn: CommandPrechecks.notInGamePrecheck },
     ];
 
     validations = {
@@ -103,22 +104,27 @@ export default class ListenCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "listen",
-        description: LocalizationManager.localizer.translate(
-            guildID,
-            "command.listen.help.description"
-        ),
-        usage: ",listen",
+        description: i18n.translate(guildID, "command.listen.help.description"),
+        usage: "/listen",
         priority: 1040,
         examples: [
             {
-                example: "`,listen`",
-                explanation: LocalizationManager.localizer.translate(
+                example: "`/listen`",
+                explanation: i18n.translate(
                     guildID,
                     "command.listen.help.example"
                 ),
             },
         ],
     });
+
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
+        {
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+        },
+    ];
 
     resetPremium = async (guildPreference: GuildPreference): Promise<void> => {
         const guildID = guildPreference.guildID;
@@ -135,45 +141,51 @@ export default class ListenCommand implements BaseCommand {
         }
     };
 
-    call = async ({ message, channel }: CommandArgs): Promise<void> => {
-        const messageContext = MessageContext.fromMessage(message);
-        const guildID = message.guildID;
-        const session = Session.getSession(guildID);
-        if (session?.isGameSession()) {
-            sendErrorMessage(messageContext, {
-                title: "command.listen.failure.existingGameSession.title",
-                description: "command.listen.failure.existingGameSession.title",
-            });
-            return;
-        }
+    call = async ({ message }: CommandArgs): Promise<void> => {
+        await ListenCommand.startListening(MessageContext.fromMessage(message));
+    };
 
+    static startListening = async (
+        messageContext: MessageContext,
+        interaction?: Eris.CommandInteraction
+    ): Promise<void> => {
+        const guildID = messageContext.guildID;
         const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
+            messageContext.guildID
         );
 
-        const textChannel = channel;
-        const gameOwner = new KmqMember(message.author.id);
+        const textChannel = State.client.getChannel(
+            messageContext.textChannelID
+        ) as Eris.TextChannel;
+
+        const gameOwner = new KmqMember(messageContext.author.id);
         const voiceChannel = getUserVoiceChannel(messageContext);
         if (!voiceChannel) {
-            await sendErrorMessage(messageContext, {
-                title: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "misc.failure.notInVC.title"
-                ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "misc.failure.notInVC.description",
-                    { command: `\`${process.env.BOT_PREFIX}listen\`` }
-                ),
-            });
+            await sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "misc.failure.notInVC.title"
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "misc.failure.notInVC.description",
+                        { command: "`/listen`" }
+                    ),
+                },
+                interaction
+            );
 
             logger.warn(
-                `${getDebugLogHeader(message)} | User not in voice channel`
+                `${getDebugLogHeader(
+                    messageContext
+                )} | User not in voice channel`
             );
             return;
         }
 
-        if (!voicePermissionsCheck(message)) {
+        if (!voicePermissionsCheck(messageContext, interaction)) {
             return;
         }
 
@@ -190,9 +202,21 @@ export default class ListenCommand implements BaseCommand {
             textChannel.name,
             voiceChannel.name,
             messageContext,
-            guildPreference
+            guildPreference,
+            interaction
         );
 
         listeningSession.startRound(messageContext);
     };
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    async processChatInputInteraction(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        await ListenCommand.startListening(messageContext, interaction);
+    }
 }
