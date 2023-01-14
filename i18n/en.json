@@ -1482,7 +1482,7 @@
             "notGameSession": "You can't do that while in a game session.",
             "notListeningSession": "You can't do that while in a listening session.",
             "notPremium": "You need KMQ Premium to use this command (see {{premium}}).",
-            "notSpotify": "You can't change that option when playing from Spotify.",
+            "notSpotify": "You can't change that option when playing from Spotify. Use {{spotifyReset}} before changing this option.",
             "premiumOrDebugServer": "This command only works in the official KMQ server or for KMQ Premium members (see {{premium}}).",
             "title": "Wait..."
         },
