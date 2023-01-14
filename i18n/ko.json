@@ -504,32 +504,32 @@
                 "description": "KMQ 리더보드를 봅니다.",
                 "example": {
                     "enroll": "리더보드에 이름을 표시할 수 있습니다.",
-                    "gameMonthlyPage": "현재 게임에서 포인트를 보유한 플레이어가 포함된 월별 점수판의 두 번째 페이지를 표시합니다.",
+                    "gameMonthlyPage": "현재 게임에서 포인트가 있는 플레이어가 포함된 월별 리더보드의 두 번째 페이지를 표시합니다.",
                     "global": "글로벌 리더보드를 표시합니다!",
                     "globalPage": "글로벌 리더보드의 세 번째 페이지를 표시합니다.",
-                    "globalWeeklyPage": "이번 주에 얻은 경험치로 순위표의 4번째 페이지를 보여줍니다.",
+                    "globalWeeklyPage": "이번 주 획득한 경험치로 리더보드의 네번째 페이지를 보여줍니다.",
                     "server": "서버 전체 리더보드를 표시합니다.",
-                    "serverSongsGuessedPage": "추측한 총 노래로 서버 전체 순위표의 세 번째 페이지를 표시합니다.",
+                    "serverSongsGuessedPage": "추측한 총 노래의 수로 서버 전체 순위표의 세번째 페이지를 표시합니다.",
                     "unenroll": "리더보드에서 이름을 숨깁니다."
                 },
-                "name": "리더보드입니다",
+                "name": "리더보드",
                 "usage": {
-                    "pageNumber": "페이지 수"
+                    "pageNumber": "페이지_수"
                 }
             },
             "interaction": {
-                "duration": "리더 보드가 뒤로 볼 거리를 선택합니다",
-                "page": "리더보드 표시를 시작할 페이지를 선택합니다",
-                "scope": "리더보드에 포함할 플레이어를 선택합니다",
-                "type": "리더보드의 순서를 정의할 항목을 선택합니다"
+                "duration": "리더보드가 얼마나 뒤로 가야하는지 선택합니다.",
+                "page": "리더보드 표시를 시작할 페이지 선택합니다.",
+                "scope": "리더보드에 포함할 플레이어 선택합니다.",
+                "type": "리더보드의 순서를 정의하는 항목을 선택하세요."
             },
             "levelEntry": {
                 "permanent": "{{level}} {{formattedNumber}} ({{rankName}})",
-                "temporary": "{{formattedNumber}} {{levelPluralized}}를 획득하셨습니다!"
+                "temporary": "{{formattedNumber}} {{levelPluralized}}을(를) 획득하셨습니다!"
             },
             "quote": {
-                "name": "당신이 리더보드에 표시되기를 원하십니까? (참고: {{command}})",
-                "nextPage": "리더보드의 다음 페이지를 보고 싶으십니까? (참고: {{command}})"
+                "name": "리더보드에 이름을 표시하고 싶습니까? {{command}}을(를) 참조하세요.",
+                "nextPage": "리더보드의 다음 페이지를 보고 싶으십니까? {{command}}을(를) 참조하세요."
             },
             "rankNumber": "순위: {{rank}}위",
             "scope": {
@@ -548,7 +548,7 @@
             },
             "unenrolled": {
                 "description": "더 이상 리더보드에 표시되지 않습니다.",
-                "title": "리더보드 등록 취소가 완료되었습니다!"
+                "title": "리더보드 등록 취소 완료"
             },
             "validation": {
                 "firstArg": "첫 번째 인수에 대해 다음 유효한 값 중 하나가 필요합니다. (양수, {{typeOrScopeOrDuration}})",
