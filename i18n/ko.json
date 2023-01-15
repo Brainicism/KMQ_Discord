@@ -747,17 +747,17 @@
                 "weekend": "주말 두 배 경험치가 활성화되었습니다!"
             },
             "failure": {
-                "alreadyInSession": "게임이 이미 세션 중입니다.",
+                "alreadyInSession": "이미 세션에 있는 게임입니다.",
                 "botRestarting": {
-                    "description": "봇이 {{timeUntilRestart}}분 후에 다시 시작됩니다. (봇이 백업될 때까지 기다리세요!)",
-                    "title": "새 게임을 시작할 수 없습니다"
+                    "description": "봇이 {{timeUntilRestart}}분 후에 다시 시작됩니다. 봇이 백업될 때까지 기다리십시오!",
+                    "title": "새 게임을 시작할 수 없습니다."
                 },
                 "hiddenGameMode": {
-                    "description": "이 명령어를 사용할 권한이 없습니다.",
+                    "description": "이 명령어를 사용할 수 있는 권한이 없습니다.",
                     "title": "숨겨진 게임 모드"
                 },
                 "overrideTeams": {
-                    "description": "{{oldGameType}} 게임, 이 게임을 {{end}} 시작하려면 {{playOldGameType}}, {{gameSpecificInstructions}}를 호출한 다음 {{begin}}를 호출하세요.",
+                    "description": "{{oldGameType}} 게임, {{end}} 이 게임을 시작하려는 경우 {{playOldGameType}}, {{gameSpecificInstructions}}을(를) 호출한 다음 {{{begin}}을(를) 호출합니다.",
                     "teams": {
                         "join": "`{{join}} [팀 이름]` 팀에 입장하셨습니다."
                     },
