@@ -834,44 +834,44 @@
         },
         "preset": {
             "deleted": {
-                "description": "{{presetName}} 사전 설정이 성공적으로 삭제되었습니다.",
-                "title": "사전 설정을 삭제합니다"
+                "description": "사전 설정 {{presetName}}이 성공적으로 삭제되었습니다.",
+                "title": "사전 설정이 삭제됨."
             },
             "exported": {
-                "description": "다음을 사용하여 다른 서버의 새 사전 설정으로 {{presetName}} 가져옵니다.:\n\n`{{presetImport}} {{presetUUID}} [사전 설정 이름]`\n\n다음을 사용하여 사전 설정의 옵션을 직접 로드:\n`{{presetLoad}} {{presetUUID}}`",
-                "title": "사전 설정을 내보내기합니다"
+                "description": "다음을 사용하여 {{presetName}}을(를) 다른 서버의 새 사전 설정으로 가져옵니다.\n`{{presetImport}} {{presetUUID}} [preset_name]`\n\n또는 다음을 사용하여 사전 설정 옵션을 직접 로드합니다.\n`{{presetLoad}} {{presetUUID}}`",
+                "title": "사전 설정을 내보냄."
             },
             "failure": {
                 "alreadyExists": {
-                    "description": "{{presetNameFormatted}} 사전 설정이 이미 있습니다. (`{{presetDelete}} {{presetName}}`로 이전 것을 삭제할 수 있습니다.)",
-                    "title": "사전 설정이 이미 있습니다"
+                    "description": "사전 설정 {{presetNameFormatted}}이(가) 이미 존재합니다. `{{presetDelete}} {{presetName}}`으로 이전 항목을 삭제할 수 있습니다.",
+                    "title": "사전 설정이 이미 있음."
                 },
                 "illegalPrefix": {
-                    "description": "사전 설정 이름은 {{importPrefix}}로 시작할 수 없습니다.",
-                    "title": "사전 설정에 오류가 있습니다"
+                    "description": "사전 설정 이름은 {{importPrefix}}으(로) 시작할 수 없습니다.",
+                    "title": "사전 설정 오류"
                 },
                 "lengthyName": {
-                    "description": "사전 설정 이름은 {{presetNameMaxLength}}자 이하여야 합니다.",
-                    "title": "사전 설정 이름이 너무 깁니다"
+                    "description": "사전 설정 이름은 최대 {{presetNameMaxLength}}자여야 합니다.",
+                    "title": "사전 설정 이름이 너무 긺."
                 },
                 "missingIdentifier": {
-                    "description": "사전 설정 식별자를 지정해야 합니다. (사전 설정의 식별자를 검색하려면 `{{presetExport}} [사전 설정 이름]`를 사용하세요.)",
-                    "title": "사전 설정 식별자가 누락되었습니다"
+                    "description": "미리 설정된 식별자를 지정해야 합니다. 사전 설정의 식별자를 검색하려면 `{{presetExport}} [사전 설정 이름]`을(를) 사용하십시오.",
+                    "title": "사전 설정 식별자 누락"
                 },
                 "missingName": {
                     "description": "사전 설정 이름을 지정해야 합니다.",
-                    "title": "사전 설정 이름이 누락되었습니다"
+                    "title": "사전 설정 이름 누락"
                 },
                 "noSuchPreset": {
                     "description": "사전 설정 {{presetName}}이(가) 존재하지 않습니다.",
                     "identifier": {
-                        "description": "사전 설정 식별자 {{presetUUID}}가 존재하지 않습니다."
+                        "description": "사전 설정 식별자 {{presetUUID}}이(가) 존재하지 않습니다."
                     },
-                    "title": "그러한 사전 설정이 없습니다"
+                    "title": "해당 사전 설정 없음"
                 },
                 "tooMany": {
-                    "description": "각 길드는 최대 {{maxNumPresets}}개의 사전 설정만 가질 수 있습니다. (더 추가하기 전에 일부를 삭제하십시오.)",
-                    "title": "사전 설정이 너무 많습니다"
+                    "description": "각 길드는 최대 {{maxNumPresets}}개의 사전 설정만 가질 수 있습니다. 더 추가하기 전에 일부를 삭제하십시오.",
+                    "title": "너무 많은 사전 설정"
                 }
             },
             "help": {
