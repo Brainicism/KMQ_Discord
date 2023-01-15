@@ -38,7 +38,7 @@
                     "groups": "{{groupOne}} 및 {{groupTwo}}을(를) 현재 {{groups}} 옵션에 추가합니다.",
                     "include": "현재 {{include}} 옵션에 {{groupOne}}을(를) 추가합니다."
                 },
-                "name": "추가"
+                "name": "add"
             }
         },
         "answer": {
@@ -53,7 +53,7 @@
                     "answerOption": "게임 내 답변 방법",
                     "description": "답변 방법 선택: 답을 입력하거나 객관식을 통해 답을 선택하십시오."
                 },
-                "name": "답변"
+                "name": "answer"
             }
         },
         "artisttype": {
@@ -69,7 +69,7 @@
                     "artistTypeOption": "재생할 아티스트 유형",
                     "description": "솔로 아티스트, 그룹 또는 모두 듣고 싶은지 선택하십시오."
                 },
-                "name": "아티스트유형"
+                "name": "artisttype"
             }
         },
         "begin": {
@@ -101,7 +101,7 @@
                     "endingYear": "마지막으로 포함된 연도",
                     "rangeOption": "[beginning_year]와 [ending_year] 사이의 연도별 곡 선택"
                 },
-                "name": "연도범위선택"
+                "name": "cutoff"
             }
         },
         "debug": {
@@ -128,7 +128,7 @@
                     "reset": "지속 시간을 비활성화합니다.",
                     "set": "{{duration}}분 후 게임이 자동으로 종료됩니다."
                 },
-                "name": "지속_시간_설정",
+                "name": "duration",
                 "usage": {
                     "minutes": "분"
                 }
@@ -142,7 +142,7 @@
         "end": {
             "help": {
                 "description": "현재 게임을 끝내고 승자를 결정합니다.",
-                "name": "게임종료"
+                "name": "end"
             },
             "interaction": {
                 "description": "즐거웠기를 바랍니다!",
@@ -180,7 +180,7 @@
                         "perGroupDescription": "{{ordinalNum}} 그룹 노래 무시"
                     }
                 },
-                "name": "그룹제외설정"
+                "name": "exclude"
             }
         },
         "exp": {
@@ -203,7 +203,7 @@
             "firstGameOfDayBonus": "오늘의 첫 게임 보너스",
             "help": {
                 "description": "현재 경험치 수정 내용과 현재 보너스 경험치 아티스트 목록을 표시합니다.",
-                "name": "경험치"
+                "name": "exp"
             },
             "lowSongCountPenalty": "낮은 노래 횟수 패널티",
             "multipleChoicePenalty": "객관식 패널티",
@@ -223,7 +223,7 @@
             },
             "help": {
                 "description": "투표 없이 현재 노래에 대한 힌트를 직접 받습니다.",
-                "name": "강제힌트"
+                "name": "forcehint"
             },
             "hintIgnored": "강제 힌트 무시"
         },
@@ -236,7 +236,7 @@
             },
             "help": {
                 "description": "투표 없이 현재 노래를 바로 건너뜁니다.",
-                "name": "강제건너뛰기"
+                "name": "forceskip"
             },
             "skipIgnored": "강제 건너뛰기가 무시되었습니다."
         },
@@ -254,7 +254,7 @@
                     "description": "듣고 싶은 아티스트의 성별을 선택합니다.",
                     "gender": "그룹 멤버 또는 솔로 아티스트의 성별"
                 },
-                "name": "성별선택"
+                "name": "gender"
             },
             "warning": {
                 "gameOption": {
@@ -283,9 +283,9 @@
                     "description": "가장 많은 점수를 얻은 플레이어가 목표 점수에 도달하면 게임이 종료됩니다.",
                     "score": "승리에 필요한 점수"
                 },
-                "name": "목표점수",
+                "name": "goal",
                 "usage": {
-                    "points": "목표 점수"
+                    "points": "points"
                 }
             }
         },
@@ -315,7 +315,7 @@
                         "perGroupDescription": "노래를 재생할 {{ordinalNum}} 그룹"
                     }
                 },
-                "name": "그룹선택"
+                "name": "groups"
             }
         },
         "guessmode": {
@@ -327,7 +327,7 @@
                     "reset": "{{defaultGuessMode}}의 기본 추측 모드로 재설정합니다.",
                     "song": "게임 라운드에서 승리하려면 올바른 노래 이름을 입력하세요."
                 },
-                "name": "추측모드"
+                "name": "guessmode"
             },
             "interaction": {
                 "guessMode": "올바른 추측으로 간주되는 것은 무엇입니까?"
@@ -346,7 +346,7 @@
                     "allCommands": "사용 가능한 모든 명령어와 간단한 설명을 표시합니다.",
                     "sampleCommand": "연도 설정 명령어에 대한 자세한 설명을 표시합니다."
                 },
-                "name": "도움말"
+                "name": "help"
             },
             "interaction": {
                 "action": "문서를 가져올 명령어의 이름입니다."
@@ -371,7 +371,7 @@
             },
             "help": {
                 "description": "현재 재생 중인 곡에 대한 힌트를 줍니다.",
-                "name": "힌트"
+                "name": "hint"
             },
             "request": {
                 "description": "{{hintCounter}}개의 힌트 요청을 받았습니다.",
@@ -411,7 +411,7 @@
                         "perGroupDescription": "{{ordinalNum}} 그룹 설정"
                     }
                 },
-                "name": "포함설정"
+                "name": "include"
             }
         },
         "join": {
@@ -461,7 +461,7 @@
                     "korean": "한국어 노래만 재생합니다. 외국어로 된 노래 무시: 영어, 일본어, 중국어",
                     "reset": "{{defaultLanguage}}의 기본 언어로 재설정합니다."
                 },
-                "name": "언어"
+                "name": "language"
             },
             "interaction": {
                 "language": "재생할 음악의 언어"
@@ -512,9 +512,9 @@
                     "serverSongsGuessedPage": "추측한 총 노래의 수로 서버 전체 순위표의 세번째 페이지를 표시합니다.",
                     "unenroll": "리더보드에서 이름을 숨깁니다."
                 },
-                "name": "리더보드",
+                "name": "leaderboard",
                 "usage": {
-                    "pageNumber": "페이지_수"
+                    "pageNumber": "page_number"
                 }
             },
             "interaction": {
@@ -565,38 +565,38 @@
                     "greaterThanZero": {
                         "description": "종료 제한은 0보다 커야 합니다."
                     },
-                    "title": "유효하지 않은 종료 제한합니다"
+                    "title": "유효하지 않은 종료 제한"
                 }
             },
             "help": {
-                "description": "노래 결과에서 최대 결과 수를 설정합니다. (이렇게 하면 선택한 필터를 기반으로 \"상위 X개의 노래\"가 효과적으로 설정됩니다.)",
+                "description": "노래 쿼리의 최대 결과 수를 설정합니다. 이렇게 하면 선택한 필터를 기준으로 \"상위 X 노래 수\"가 효과적으로 설정됩니다.",
                 "example": {
                     "reset": "{{defaultLimit}}의 기본 제한으로 재설정합니다.",
-                    "singleLimit": "현재 선택한 옵션에서 가장 많이 듣는 노래 상위 {{limit}}개를 재생합니다.",
-                    "twoLimits": "현재 선택한 옵션에서 {{limitStart}}에서 {{limitEnd}}까지 가장 많이 듣는 노래 사이에서 재생합니다."
+                    "singleLimit": "현재 선택한 옵션에서 가장 많이 들은 {{limit}} 노래을 재생합니다.",
+                    "twoLimits": "현재 선택된 옵션에서 {{limitStart}}에서 {{limitEnd}}까지 가장 많이 듣는 노래 사이에서 재생합니다."
                 },
                 "interaction": {
-                    "description": "노래 결과에서 최대 결과 수를 설정합니다",
-                    "description_range": "상위 [limit_start] 곡과 [limit_end] 곡 사이에서 재생합니다",
-                    "description_top": "상위 [limit]곡을 재생합니다",
-                    "limit": "이렇게 많은 상위 곡을 재생하십시오",
-                    "limit_end": "시작 제한과 이 값 사이의 노래를 재생합니다",
-                    "limit_start": "가장 많이 들은 노래에서 [limit_start]부터 재생하십시오"
+                    "description": "노래 쿼리에서 최대 결과 수를 설정합니다.",
+                    "description_range": "상위 [limit_start] 노래와 [limit_end] 노래 사이에서 재생합니다.",
+                    "description_top": "상위 [limit] 노래를 재생합니다.",
+                    "limit": "많은 인기곡을 재생해 보세요.",
+                    "limit_end": "시작 제한과 이 값 사이의 노래를 재생합니다.",
+                    "limit_start": "가장 많이 들은 곡부터 [limit_start]부터 재생을 시작합니다."
                 },
-                "name": "제한"
+                "name": "limit"
             }
         },
         "list": {
             "currentValue": {
                 "nothingSelected": "현재 선택된 항목이 없습니다.",
-                "title": "현재 {{optionListed}} 값입니다"
+                "title": "현재 {{optionListed}} 값"
             },
             "failure": {
                 "groupsInFile": {
-                    "description": "그룹이 너무 많아 디스코드 메시지에 나열할 수 없습니다. (첨부 파일을 참조하세요.)",
+                    "description": "디스코드 메시지에 나열하기에는 그룹이 너무 많습니다. 첨부 파일을 참조하세요.",
                     "noFilePermissions": {
-                        "description": "디스코드 메시지에 나열할 그룹이 너무 많습니다. (봇은 그룹 목록 파일을 보내려면 {{attachFile}} 권한이 필요합니다.)",
-                        "title": "파일 전송에 오류가 있습니다"
+                        "description": "디스코드 메시지에 나열할 그룹이 너무 많습니다. 봇이 그룹 목록 파일을 보내려면 {{attachFile}} 권한이 필요합니다.",
+                        "title": "파일 전송 오류"
                     }
                 }
             },
@@ -607,7 +607,7 @@
                     "groups": "현재 {{groups}} 옵션을 나열합니다.",
                     "include": "현재 {{include}} 옵션을 나열합니다."
                 },
-                "name": "목록"
+                "name": "list"
             },
             "interaction": {
                 "listType": "현재 설정된 그룹, 포함된 그룹 또는 제외된 그룹을 인쇄할지 여부를 지정합니다"
