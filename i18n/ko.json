@@ -610,30 +610,30 @@
                 "name": "list"
             },
             "interaction": {
-                "listType": "현재 설정된 그룹, 포함된 그룹 또는 제외된 그룹을 인쇄할지 여부를 지정합니다"
+                "listType": "현재 설정된 그룹, 포함된 그룹 또는 제외된 그룹을 표시할지 여부를 지정합니다."
             }
         },
         "listen": {
             "help": {
-                "description": "현재 옵션에서 음악을 재생합니다. (KMQ 프리미엄 사용자만 사용할 수 있습니다.)",
-                "example": "현재 음성 채널에서 음악 재생을 시작합니다.",
-                "name": "들어봐요"
+                "description": "현재 옵션에서 노래를 스트리밍합니다. KMQ 프리미엄 사용자에게만 제공됩니다.",
+                "example": "현재 음성 채널에서 음악 재생이 시작됩니다.",
+                "name": "listen"
             },
-            "musicStarting": "🔊 {{voiceChannelName}}의 {{textChannelName}}에서 시작하는 음악"
+            "musicStarting": "🔊 {{voiceChannelName}}의 #{{textChannelName}}에서 음악이 시작됩니다."
         },
         "locale": {
             "help": {
-                "description": "봇의 언어를 변경합니다. (옵션은 {{english}}, {{korean}}입니다.)",
+                "description": "봇의 언어를 변경합니다. 옵션은 다음과 같습니다: {{english}}, {{korean}}.",
                 "example": {
-                    "reset": "봇의 언어를 {{defaultLocale}}로 재설정합니다.",
-                    "toEnglish": "봇의 언어를 {{english}}로 변경합니다.",
-                    "toKorean": "봇의 언어를 {{korean}}로 변경합니다."
+                    "reset": "봇의 언어를 {{defaultLocale}}으(로) 재설정합니다.",
+                    "toEnglish": "봇의 언어를 {{english}}으(로) 변경합니다..",
+                    "toKorean": "봇의 언어를 {{korean}}으(로) 변경합니다."
                 },
                 "interaction": {
                     "description": "봇의 언어를 변경합니다.",
-                    "language": "변경할 언어입니다"
+                    "language": "변경할 언어"
                 },
-                "name": "로캘",
+                "name": "locale",
                 "usage": {
                     "language": "언어"
                 }
@@ -642,28 +642,28 @@
                 "en": "영어",
                 "ko": "한국어"
             },
-            "updatedDescription": "봇의 언어가 `{{language}}`로 업데이트되었습니다."
+            "updatedDescription": "봇의 언어가 `{{language}}`으(로) 업데이트되었습니다."
         },
         "lookup": {
             "help": {
-                "description": "주어진 유튜브 동영상이 KMQ의 데이터베이스와 현재 게임 옵션에 포함되어 있는지 확인합니다.",
+                "description": "주어진 유튜브 동영상이 KMQ의 데이터베이스와 현재 게임 옵션에 포함되어 있는지 확인하십시오.",
                 "example": {
-                    "song": "{{artist}} - {{song}}에 대한 정보를 제공합니다."
+                    "song": "{{artist}}의 {{song}}에 대한 정보를 제공합니다."
                 },
                 "interaction": {
                     "byLink": {
-                        "description": "YouTube 링크에서 노래를 찾습니다.",
-                        "field": "해당 노래의 YouTube 링크입니다."
+                        "description": "유튜브 링크로 노래를 찾습니다.",
+                        "field": "노래의 유튜브 링크"
                     },
                     "byName": {
-                        "description": "이름 또는 아티스트별로 노래를 필터링합니다.",
+                        "description": "이름 및/또는 아티스트별로 노래를 필터링합니다.",
                         "field": {
-                            "artist": "노래를 만든 아티스트입니다.",
-                            "song": "노래의 이름입니다."
+                            "artist": "노래를 만든 아티스트",
+                            "song": "노래의 이름"
                         }
                     }
                 },
-                "name": "찾아요"
+                "name": "lookup"
             },
             "inCurrentGameOptions": "현재 게임 옵션",
             "inKMQ": "KMQ에 수록된 곡이며 [여기]({{link}})에 링크가 있습니다.",
