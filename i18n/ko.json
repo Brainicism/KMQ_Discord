@@ -875,45 +875,45 @@
                 }
             },
             "help": {
-                "description": "게임 옵션 사전 설정을 저장/로드하는 다양한 작업이며 사전 설정 이름은 한 단어여야 합니다.",
+                "description": "게임 옵션 사전 설정을 저장/로드하기 위한 다양한 작업입니다. 사전 설정 이름은 한 단어 길이여야 합니다.",
                 "example": {
                     "delete": "언급된 사전 설정을 삭제합니다.",
-                    "export": "언급된 사전 설정을 로드/가져오기하는 데 사용할 수 있는 고유 식별자를 반환합니다.",
+                    "export": "언급된 사전 설정을 로드/가져오기 위해 사용할 수 있는 고유 식별자를 반환합니다.",
                     "import": "내보낸 사전 설정 식별자를 사용하여 새 사전 설정을 만듭니다",
-                    "list": "서버의 모든 사전 설정을 나열합니다.",
-                    "load": "언급된 사전 설정 또는 사전 설정 식별자 ({{exampleIdentifier}})를 게임 옵션에 로드합니다.",
-                    "replace": "언급된 사전 설정의 옵션을 현재 게임 옵션으로 교체합니다.",
+                    "list": "서버의 모든 사전 설정을 나열합니다",
+                    "load": "언급된 프리셋 또는 사전 설정 식별자 ({{exampleIdentifier}})을(를) 게임 옵션에 로드합니다.",
+                    "replace": "언급된 사전 설정 옵션을 현재 게임 옵션으로 교체합니다.",
                     "save": "현재 게임 옵션을 사전 설정으로 저장합니다."
                 },
-                "name": "미리조정하다",
+                "name": "preset",
                 "usage": {
-                    "presetIdentifier": "사전 설정 식별자",
-                    "presetName": "사전 설정 이름"
+                    "presetIdentifier": "사전_설정_식별자",
+                    "presetName": "사전_설정_이름"
                 }
             },
             "imported": {
-                "description": "`{{presetLoad}} {{presetName}}`를 사용하여 새로 가져온 사전 설정을 로드합니다.",
-                "title": "사전 설정을 가져옵니다"
+                "description": "`{{presetLoad}} {{presetName}}`을(를) 사용하여 새로 가져온 사전 설정을 로드합니다.",
+                "title": "사전 설정을 가져옴."
             },
             "interaction": {
                 "delete": {
-                    "presetName": "삭제할 사전 설정입니다"
+                    "presetName": "삭제할 사전 설정"
                 },
                 "export": {
-                    "presetName": "내보낼 사전 설정입니다"
+                    "presetName": "내보낼 사전 설정"
                 },
                 "import": {
-                    "exportedPresetID": "가져올 사전 설정의 ID입니다",
-                    "presetName": "가져온 사전 설정을 지정할 이름입니다"
+                    "exportedPresetID": "가져올 사전 설정의 ID",
+                    "presetName": "가져온 사전 설정에 부여할 이름"
                 },
                 "load": {
-                    "presetName": "로드할 사전 설정입니다"
+                    "presetName": "로드할 사전 설정"
                 },
                 "replace": {
-                    "presetName": "바꿀 사전 설정입니다"
+                    "presetName": "변경할 사전 설정입니다"
                 },
                 "save": {
-                    "presetName": "이 사전 설정의 이름을 지정합니다"
+                    "presetName": "이 사전 설정의 이름"
                 }
             },
             "list": {
