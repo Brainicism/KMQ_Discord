@@ -931,7 +931,7 @@ export default class GameSession extends Session {
 
             if (endGameMessage) {
                 fields.push({
-                    name: i18n.translate(this.guildID, endGameMessage.title),
+                    name: endGameMessage.title,
                     value: endGameMessage.message,
                     inline: false,
                 });
