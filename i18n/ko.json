@@ -666,44 +666,44 @@
                 "name": "lookup"
             },
             "inCurrentGameOptions": "현재 게임 옵션",
-            "inKMQ": "KMQ에 수록된 곡이며 [여기]({{link}})에 링크가 있습니다.",
+            "inKMQ": "KMQ에 등록된 곡입니다! [Daisuki]({{link}}) 링크입니다.",
             "notFound": {
-                "description": "요청한 노래는 KMQ의 Daisuki 데이터베이스 사본에서 찾을 수 없으므로 KMQ에 포함되지 않습니다.",
+                "description": "요청한 곡이 KMQ의 Daisuki 데이터베이스 복사본에서 발견되지 않아 KMQ에 포함되지 않습니다.",
                 "title": "노래를 찾을 수 없음"
             },
             "notInKMQ": "이 노래는 [Daisuki]({{link}})에 항목이 있지만 KMQ에는 포함되어 있지 않습니다.",
             "songNameSearchResult": {
                 "notFoundDescription": "해당 이름의 노래를 찾을 수 없습니다.",
-                "successDescription": "다음 노래는 KMQ에서 사용할 수 있습니다:",
-                "title": "검색 결과"
+                "successDescription": "KMQ에서 사용할 수 있는 노래는 다음과 같습니다.:",
+                "title": "조회 결과"
             },
             "validation": {
-                "invalidYouTubeID": "올바른 유튜브 아이디 또는 링크가 필요합니다."
+                "invalidYouTubeID": "유효한 유튜브 ID 또는 링크가 필요합니다."
             }
         },
         "multiguess": {
             "help": {
-                "description": "여러 사람이 노래를 정확하게 추측할 수 있는지 여부를 설정합니다. ({{on}}일 때 플레이어는 첫 번째 정답이 제출된 후 1.5초 내에 정답을 제출해야 하며 첫 번째 정답은 모든 경험치를 받고, 두 번째 정답부터는 배수로 더 적은 경험치를 받습니다.)",
+                "description": "여러 사람이 노래를 맞힐 수 있는지 여부를 설정합니다. {{on}}일 때 플레이어는 첫 번째 정답이 주어진 후 1.5초 동안 계속해서 답을 해야 합니다. 첫 번째 정답은 전체 경험치를 받고 이후의 정답은 경험치를 곱하여 적게 받습니다.",
                 "example": {
-                    "off": "먼저 정답을 맞춘 사람에게만 점수가 부여됩니다.",
-                    "on": "첫 번째 정확한 추측이 발생한 후 1.5초의 유예 기간을 허용합니다. (여러 플레이어가 정확하게 추측할 수 있습니다.)",
-                    "reset": "{{defaultMultiguess}}의 기본 다중 추측 유형으로 재설정합니다."
+                    "off": "정답을 맞힌 첫 번째 사람에게만 점수가 부여됩니다.",
+                    "on": "첫 번째 정확한 추측이 발생한 때로부터 1.5초의 유예 기간을 허용합니다. 여러 플레이어가 정확하게 추측할 수 있습니다.",
+                    "reset": "기본 다중 추측 유형인 {{defaultMultiguess}}(으)로 재설정합니다."
                 },
                 "interaction": {
-                    "description": "여러 사람이 노래를 정확하게 추측할 수 있는지 여부를 설정합니다",
-                    "multiguess": "여러 사람이 올바르게 추측할 수 있도록 허용할지 여부입니다"
+                    "description": "여러 명이 한 곡을 올바르게 추측할 수 있는지 여부를 설정합니다.",
+                    "multiguess": "여러 사람이 올바르게 추측할 수 있도록 허용할지 여부입니다."
                 },
-                "name": "여러가지추측입니다"
+                "name": "multiguess"
             }
         },
         "news": {
             "help": {
                 "description": "KMQ에 대한 최신 업데이트를 표시합니다.",
-                "name": "뉴스"
+                "name": "news"
             },
             "updates": {
-                "footer": "더 자세한 업데이트를 위해 공식 KMQ 서버에 가입하세요!",
-                "title": "업데이트"
+                "footer": "자세한 업데이트를 보려면 공식 KMQ 서버에 가입하십시오!",
+                "title": "Updates"
             }
         },
         "options": {
