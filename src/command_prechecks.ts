@@ -382,8 +382,7 @@ export default class CommandPrechecks {
                 ),
                 description: i18n.translate(
                     messageContext.guildID,
-                    "misc.preCheck.notSpotify",
-                    { spotifyReset: "`/spotify reset`" }
+                    "misc.preCheck.notSpotify"
                 ),
             };
 
