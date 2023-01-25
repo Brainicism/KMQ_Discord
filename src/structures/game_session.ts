@@ -407,14 +407,15 @@ export default class GameSession extends Session {
         this.updateBookmarkSongList(round);
 
         if (this.scoreboard.gameFinished(this.guildPreference)) {
-            this.endSession();
+            this.endSession("Game finished due to game options");
         }
     }
 
     /**
      * Ends the current GameSession
+     * @param reason - The reason for the game session end
      */
-    async endSession(): Promise<void> {
+    async endSession(reason: string): Promise<void> {
         if (this.finished) {
             return;
         }
@@ -541,7 +542,7 @@ export default class GameSession extends Session {
             await this.storeSongStats();
         }
 
-        await super.endSession();
+        await super.endSession(reason);
         await this.sendEndGameMessage();
 
         logger.info(

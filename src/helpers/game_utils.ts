@@ -93,7 +93,7 @@ export async function cleanupInactiveGameSessions(): Promise<void> {
             const timeDiffMin = timeDiffMs / (1000 * 60);
             if (timeDiffMin > GAME_SESSION_INACTIVE_THRESHOLD) {
                 inactiveSessions++;
-                await gameSessions[guildID].endSession();
+                await gameSessions[guildID].endSession("Inactive game session");
             }
         })
     );

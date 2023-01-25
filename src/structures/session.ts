@@ -212,7 +212,7 @@ export default abstract class Session {
                         this.guildPreference
                     )}`
                 );
-                await this.endSession();
+                await this.endSession("Error reloading songs");
                 return false;
             }
         }
@@ -255,7 +255,7 @@ export default abstract class Session {
                     "misc.failure.songQuery.description"
                 ),
             });
-            await this.endSession();
+            await this.endSession("Error querying random song");
             return false;
         }
 
@@ -267,7 +267,7 @@ export default abstract class Session {
         ) as Eris.VoiceChannel;
 
         if (!voiceChannel || voiceChannel.voiceMembers.size === 0) {
-            await this.endSession();
+            await this.endSession("Voice channel is empty, during startRound");
             return false;
         }
 
@@ -275,7 +275,7 @@ export default abstract class Session {
         try {
             await ensureVoiceConnection(this);
         } catch (err) {
-            await this.endSession();
+            await this.endSession("Unable to obtain voice connection");
             logger.error(
                 `${getDebugLogHeader(
                     messageContext
@@ -337,14 +337,17 @@ export default abstract class Session {
 
         if (remainingDuration && remainingDuration < 0) {
             logger.info(`gid: ${this.guildID} | Game session duration reached`);
-            this.endSession();
+            this.endSession("Game session duration reached");
         }
     }
 
     /**
      * Ends the current GameSession
+     * @param reason - The reason for the session end
      */
-    async endSession(): Promise<void> {
+    async endSession(reason: string): Promise<void> {
+        logger.info(`gid: ${this.guildID} | Session ended. Reason: ${reason}`);
+
         this.guildPreference.reloadSongCallback = null;
         Session.deleteSession(this.guildID);
         await this.endRound(
