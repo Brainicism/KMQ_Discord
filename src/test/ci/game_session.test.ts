@@ -133,7 +133,7 @@ describe("game session", () => {
                     "sendEndGameMessage"
                 );
 
-                await gameSession.endSession();
+                await gameSession.endSession(null);
                 assert.ok(gameSession.finished);
 
                 assert.ok(sendEndGameMessageStub.called);
