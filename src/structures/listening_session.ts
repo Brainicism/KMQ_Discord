@@ -127,7 +127,7 @@ export default class ListeningSession extends Session {
         super.endRound(messageContext, guessResult);
     }
 
-    endSession(): Promise<void> {
+    endSession(reason: string): Promise<void> {
         if (this.finished) {
             return;
         }
@@ -136,7 +136,7 @@ export default class ListeningSession extends Session {
         logger.info(
             `gid: ${this.guildID} | Listening session ended. rounds_played = ${this.roundsPlayed}`
         );
-        super.endSession();
+        super.endSession(reason);
     }
 
     async handleComponentInteraction(

@@ -27,7 +27,9 @@ export default async function voiceChannelSwitchHandler(
     }
 
     if (checkBotIsAlone(guildID)) {
-        session.endSession();
+        session.endSession(
+            "Voice channel is empty, during voice channel switch"
+        );
         return;
     }
 
