@@ -21,6 +21,10 @@ export default async function voiceChannelLeaveHandler(
         return;
     }
 
+    if (member.id === process.env.BOT_CLIENT_ID) {
+        return;
+    }
+
     if (checkBotIsAlone(guildID)) {
         session.endSession(
             "Voice channel is empty, during voice channel leave"
