@@ -22,6 +22,7 @@ import {
     getDebugLogHeader,
     getGameInfoMessage,
     getInteractionValue,
+    getUserTag,
     getUserVoiceChannel,
     sendErrorMessage,
     sendInfoMessage,
@@ -711,7 +712,10 @@ export default class PlayCommand implements BaseCommand {
                         messageContext.guildID,
                         "command.join.playerJoinedTeam.title",
                         {
-                            joiningUser: messageContext.author.tag,
+                            joiningUser: getUserTag(
+                                messageContext.author.id,
+                                messageContext.guildID
+                            ),
                             teamName: team.getName(),
                         }
                     ),
