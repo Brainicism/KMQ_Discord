@@ -61,8 +61,8 @@ import Scoreboard from "./scoreboard";
 import Session from "./session";
 import TeamScoreboard from "./team_scoreboard";
 import i18n from "../helpers/localization_manager";
+import type { ButtonActionRow, GuildTextableMessage } from "../types";
 import type { CommandInteraction } from "eris";
-import type { GuildTextableMessage } from "../types";
 import type GuessResult from "../interfaces/guess_result";
 import type QueriedSong from "../interfaces/queried_song";
 import type Round from "./round";
@@ -225,10 +225,10 @@ export default class GameSession extends Session {
 
             buttons = _.shuffle(buttons);
 
-            let components: Array<Eris.ActionRow>;
+            let actionRows: Array<ButtonActionRow>;
             switch (this.guildPreference.gameOptions.answerType) {
                 case AnswerType.MULTIPLE_CHOICE_EASY:
-                    components = [
+                    actionRows = [
                         {
                             type: 1,
                             components: buttons,
@@ -236,13 +236,13 @@ export default class GameSession extends Session {
                     ];
                     break;
                 case AnswerType.MULTIPLE_CHOICE_MED:
-                    components = chunkArray(buttons, 3).map((x) => ({
+                    actionRows = chunkArray(buttons, 3).map((x) => ({
                         type: 1,
                         components: x,
                     }));
                     break;
                 case AnswerType.MULTIPLE_CHOICE_HARD:
-                    components = chunkArray(buttons, 4).map((x) => ({
+                    actionRows = chunkArray(buttons, 4).map((x) => ({
                         type: 1,
                         components: x,
                     }));
@@ -251,7 +251,7 @@ export default class GameSession extends Session {
                     break;
             }
 
-            round.interactionComponents = components;
+            round.interactionComponents = actionRows;
 
             round.interactionMessage = await sendInfoMessage(
                 new MessageContext(this.textChannelID),
@@ -270,7 +270,7 @@ export default class GameSession extends Session {
                                     : i18n.translate(this.guildID, "misc.song"),
                         }
                     ),
-                    components,
+                    components: actionRows,
                     thumbnailUrl: KmqImages.LISTENING,
                 }
             );
