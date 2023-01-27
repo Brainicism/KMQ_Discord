@@ -1842,3 +1842,13 @@ export async function processGroupAutocompleteInteraction(
         )
     );
 }
+
+/**
+ * @param userID - The user ID
+ * @param guildID - The guild ID
+ * @returns - The user's tag
+ */
+export function getUserTag(userID: string, guildID: string): string {
+    const member = State.client.guilds.get(guildID).members.get(userID);
+    return member ? `${member.username}#${member.discriminator}` : null;
+}
