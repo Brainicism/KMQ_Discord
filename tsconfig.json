@@ -8,6 +8,8 @@
         "moduleResolution": "node",
         "baseUrl": ".",
         "rootDir": "src",
+        "strictBindCallApply": true,
+        "strictFunctionTypes": true,
         "lib": ["es2022"],
         "resolveJsonModule": true,
         "esModuleInterop": true,

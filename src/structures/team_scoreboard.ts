@@ -140,7 +140,7 @@ export default class TeamScoreboard extends Scoreboard {
         if (!team) return;
         team.removePlayer(userID);
         if (team.getNumPlayers() === 0) {
-            this.firstPlace = this.firstPlace.filter((t: Team) => t !== team);
+            this.firstPlace = this.firstPlace.filter((t) => t !== team);
             delete this.players[team.getName()];
             // If the removed team was the only team in first, first place is now second place
             if (this.firstPlace.length === 0) {

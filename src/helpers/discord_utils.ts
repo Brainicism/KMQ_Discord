@@ -1704,7 +1704,7 @@ export function getInteractionValue(
     interactionName: string;
     focusedKey: string;
 } {
-    let options = interaction.data.options;
+    let options = interaction.data.options as Eris.InteractionDataOptions[];
 
     if (options == null) {
         return {
@@ -1734,13 +1734,12 @@ export function getInteractionValue(
 
     return {
         interactionKey: keys.join("."),
-        interactionOptions: options.reduce(
-            (result, filter: Eris.InteractionDataOptionsWithValue) => {
-                result[filter.name] = filter.value;
-                return result;
-            },
-            {}
-        ),
+        interactionOptions: (
+            options as Eris.InteractionDataOptionsWithValue[]
+        ).reduce((result, filter: Eris.InteractionDataOptionsWithValue) => {
+            result[filter.name] = filter.value;
+            return result;
+        }, {}),
         interactionName: parentInteractionDataName,
         focusedKey: options.find((x) => x["focused"])?.name,
     };

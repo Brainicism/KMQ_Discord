@@ -45,3 +45,7 @@ export const ConflictingGameOptions: { [option: string]: Array<GameOption> } = {
         GameOption.ARTIST_TYPE,
     ],
 };
+
+export type ButtonActionRow = Omit<Eris.ActionRow, "components"> & {
+    components: Eris.InteractionButton[];
+};
