@@ -2,9 +2,6 @@ export default class KmqMember {
     /** The username */
     public username: string;
 
-    /** The Discord tag  */
-    public tag: string;
-
     /** The avatar Url */
     public avatarUrl: string;
 

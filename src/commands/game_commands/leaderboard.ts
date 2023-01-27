@@ -9,6 +9,7 @@ import {
 import {
     getDebugLogHeader,
     getInteractionValue,
+    getUserTag,
     sendErrorMessage,
     sendInfoMessage,
     sendPaginationedEmbed,
@@ -939,7 +940,10 @@ export default class LeaderboardCommand implements BaseCommand {
 
         await dbContext.kmq("leaderboard_enrollment").insert({
             player_id: messageContext.author.id,
-            display_name: messageContext.author.tag,
+            display_name: getUserTag(
+                messageContext.author.id,
+                messageContext.guildID
+            ),
         });
 
         sendInfoMessage(
