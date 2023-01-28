@@ -919,11 +919,11 @@
             "list": {
                 "failure": {
                     "noPresets": {
-                        "description": "사전 설정이 없습니다. 생성 방법은 {{presetHelp}}를 참조하세요."
+                        "description": "사전 설정이 없습니다. 만드는 방법은 {{presetHelp}}을(를) 참조하세요."
                     }
                 },
                 "loadInstructions": {
-                    "footer": "{{presetLoad}} [preset_name]로 사전 설정을 로드합니다."
+                    "footer": "{{presetLoad}} [preset_name]으(로) 사전 설정을 로드합니다."
                 },
                 "title": "사용 가능한 사전 설정"
             },
@@ -934,7 +934,7 @@
                 "title": "사전 설정이 저장됨"
             },
             "savedOrReplaced": {
-                "description": "이 사전 설정은 나중에 {{presetLoad}}로 로드할 수 있습니다."
+                "description": "나중에 {{presetLoad}}으(로) 이 사전 설정을 로드할 수 있습니다."
             }
         },
         "profile": {
@@ -943,22 +943,22 @@
             "failure": {
                 "notFound": {
                     "badUsage": {
-                        "description": "이 명령어를 올바르게 사용하고 있는지 확인하십시오. (자세한 내용은 {{profileHelp}}를 참조하세요.)"
+                        "description": "이 명령어를 올바르게 사용하고 있는지 확인하십시오. 자세한 내용은 {{profileHelp}}을(를) 참조하세요."
                     },
-                    "description": "지정된 사용자 ID를 찾을 수 없습니다. (자세한 내용은 {{profileHelp}}를 참조하세요.)",
+                    "description": "지정된 사용자 ID를 찾을 수 없습니다. 자세한 내용은 {{profileHelp}}를 참조하세요.",
                     "title": "프로필을 찾을 수 없습니다"
                 }
             },
-            "firstPlayed": "첫 번째로 플레이",
+            "firstPlayed": "첫 게임",
             "gamesPlayed": "플레이한 게임",
             "help": {
                 "description": "게임 통계를 보여줍니다.",
                 "example": {
-                    "otherPlayerID": "디스코드 아이디를 기반으로 플레이어 프로필을 봅니다.",
+                    "otherPlayerID": "Discord ID를 기반으로 플레이어 프로필 보기",
                     "otherPlayerMention": "{{playerName}}의 플레이어 프로필 보기",
                     "self": "자신의 프로필 보기"
                 },
-                "name": "개요",
+                "name": "profile",
                 "usage": {
                     "mention": "멘션"
                 }
@@ -972,32 +972,32 @@
             "rank": {
                 "almighty": "태양계의 전능한 통치자",
                 "aoty": "올해의 아티스트",
-                "benevolent": "자비로운 대지의 지배자",
+                "benevolent": "지구의 인자한 통치자",
                 "bonsang": "본상 수상자",
-                "ceo": "KMQ 엔터테인먼트 대표이사",
+                "ceo": "KMQ 엔터테인먼트 CEO",
                 "daesang": "대상 수상자",
-                "divine": "별의 신성한 통치자",
-                "enlightened": "계몽된 은하계의 지배자",
+                "divine": "신성한 별들의 지배자",
+                "enlightened": "은하계의 계몽된 지배자",
                 "immortal": "우주의 불멸의 지배자",
                 "newAoty": "올해의 신인 아티스트",
-                "novice": "초심자",
-                "nugu": "누구",
-                "omniscient": "다우주의 전지전능한 통치자",
-                "preDebut": "데뷔 전",
-                "president": "대한민국 대통령",
-                "reuniter": "남/북한의 통일",
+                "novice": "초보자",
+                "nugu": "Nugu",
+                "omniscient": "다중우주의 전지전능한 지배자",
+                "preDebut": "사전 데뷔",
+                "president": "대한민국의 대통령",
+                "reuniter": "남/북한의 재통일자",
                 "ruler": "남/북한의 통치자",
                 "supreme": "남/북한의 최고 통치자",
                 "trainee": "연습생"
             },
-            "songsGuessed": "추측한 노래 개수",
+            "songsGuessed": "추측한 노래 수",
             "timesVoted": "투표 횟수"
         },
         "recentlyadded": {
-            "description": "지난 2주 동안 다음 노래가 KMQ에 추가되었습니다.",
+            "description": "지난 2주 동안 다음 노래가 KMQ에 추가되었습니다.:",
             "failure": {
                 "noSongs": {
-                    "description": "KMQ에 새 노래가 추가되었는지 나중에 다시 확인하세요.",
+                    "description": "KMQ가 새 노래를 추가했는지 나중에 다시 확인하십시오.",
                     "title": "최근에 추가된 노래 없음"
                 }
             },
@@ -1482,7 +1482,7 @@
             "notGameSession": "게임 세션 중에는 그렇게 할 수 없습니다.",
             "notListeningSession": "이 명령은 수신 대기 세션에서 사용할 수 없습니다.",
             "notPremium": "이 명령을 사용하려면 KMQ Premium이 필요합니다. ({{premium}} 참조)",
-            "notSpotify": "스포티파이에서 재생할 때는 해당 옵션을 변경할 수 없습니다. 이 옵션을 변경하기 전에 `/spotify reset`을(를) 사용하세요.",
+            "notSpotify": "Spotify에서 재생할 때는 이 옵션을 변경할 수 없습니다.",
             "premiumOrDebugServer": "이 명령은 공식 KMQ 서버 또는 KMQ Premium 멤버에 대해서만 작동합니다. ({{premium}} 참조)",
             "title": "잠시만 기다려주십시오..."
         },
