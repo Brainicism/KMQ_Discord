@@ -1493,7 +1493,7 @@
             "title": "{{timeUntilRestart}} 분 후 재시동 예정"
         },
         "sendingBookmarkedSongs": {
-            "description": "{{players}}에게 {{songs}}을(를) 보냅니다.\n\n노래 메시지를 마우스 오른쪽 버튼으로 클릭하고 `앱 > Bookmark Song`를 선택하여 게임 중에 노래를 북마크하세요.",
+            "description": "{{songs}}을(를) {{players}(으)로 보내는 중입니다.\n\n노래 메시지를 마우스 오른쪽 단추로 클릭하고 `앱 > 북마크 노래`를 선택하여 게임 중 노래를 북마크합니다",
             "title": "북마크된 노래를 보내는 중..."
         },
         "skip": "건너뛰기",
@@ -1505,14 +1505,14 @@
         },
         "timeFinished": "시간의 최대",
         "uniqueSongsReset": {
-            "description": "모든 곡이 재생되었습니다. ({{totalSongCount}}곡이 재구성됩니다.)",
+            "description": "모든 곡이 재생되었습니다. {{totalSongCount}}곡이 재구성됩니다.",
             "title": "곡 재설정"
         },
         "usage": "사용법",
         "views": "조회수",
         "warning": {
             "addRemoveOrdering": {
-                "footer": "{{command}} {{addOrRemove}}을(를) 사용하시겠습니까?"
+                "footer": "{{command}} {{addOrRemove}}을(를) 사용하려고 했습니까?"
             }
         },
         "yes": "예"
