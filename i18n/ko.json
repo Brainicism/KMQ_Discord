@@ -1284,65 +1284,65 @@
         "classic": {
             "yourScore": "당신의 점수는 {{score}}점 입니다."
         },
-        "conflict": "갈등",
+        "conflict": "conflict",
         "duration": "시간",
         "elimination": {
-            "yourLives": "당신의 목숨은 {{lives}}개 남았습니다."
+            "yourLives": "{{lives}}개의 목숨이 있습니다."
         },
         "failure": {
             "afkChannel": {
-                "description": "봇이 노래를 재생할 수 있도록 비활성화된 음성 채널에 있지 않은지 확인하세요!",
-                "title": "잠수 음성 채널"
+                "description": "봇이 노래를 재생할 수 있도록 비활성 음성 채널에 있지 않은지 확인하세요!",
+                "title": "AFK 음성 채널"
             },
             "command": {
-                "description": "이 명령어를 실행하는 동안 오류가 발생했습니다.\n이 문제가 지속적으로 발생하면 개발자에게 제공하세요.\n{{debugId}}",
-                "title": "명령어를 실행하는 동안 오류가 발생했습니다"
+                "description": "이 명령어를 실행하는 동안 오류가 발생했습니다.\n이 문제가 계속 발생하면 개발자에게 다음 정보를 제공하세요.\n{{debugId}}",
+                "title": "명령어 실행 오류"
             },
             "error": "오류",
             "errorSelectingSong": {
-                "description": "라운드를 다시 시작해 주세요. (문제가 지속되면 공식 KMQ 서버에 보고하십시오.)",
+                "description": "라운드를 다시 시작하십시오. 문제가 지속되면 공식 KMQ 서버에 보고하세요.",
                 "title": "노래 선택 오류"
             },
             "game": {
                 "noneInProgress": {
-                    "description": "진행 중인 게임이 없습니다.",
-                    "title": "활성화된 게임 없음"
+                    "description": "진행중인 게임이 없습니다.",
+                    "title": "활성화된 게임 없음."
                 }
             },
             "gameOptionConflict": {
-                "description": "{{optionOne}} 게임 옵션이 현재 설정되어 있습니다. ({{optionTwo}} 및 {{optionOne}}은(는) 호환되지 않으며 계속하려면 {{optionOneCommand}}를 입력하여 {{optionOne}} 옵션을 제거하세요.)",
+                "description": "현재 {{optionOne}} 게임 옵션이 설정되어 있습니다. {{optionTwo}} 및 {{optionOne}}은(는) 호환되지 않습니다. 계속하려면 {{optionOneCommand}}을(를) 입력하여 {{optionOne}} 옵션을 제거하세요.",
                 "title": "게임 옵션 충돌"
             },
             "groupsExcludeConflict": {
                 "allow": "재생을 할 수 있도록",
-                "description": "지정된 {{conflictingOptionOne}} 중 하나 이상이 이미 {{conflictingOptionTwo}}에 포함되어 있습니다.\n다음 그룹은 {{conflictingOptionOne}}에 **추가되지 않았습니다.**\n{{groupsList}}\n{{solutionStepOne}}을 사용한 다음 {{solutionStepTwo}}{{allowOrPrevent}}를 사용하세요.",
+                "description": "주어진 {{conflictingOptionOne}} 중 하나 이상이 {{conflictingOptionTwo}}에 이미 포함되어 있습니다. \n다음 그룹은 {{conflictingOptionOne}}에 추가되지 **않았습니다**:\n {{groupsList}}\n{{solutionStepOne}}을(를) 사용한 다음 {{solutionStepTwo}} {{allowOrPrevent}}을(를) 사용하세요.",
                 "prevent": "재생을 하지 못하도록",
-                "title": "그룹 및 충돌 제외"
+                "title": "그룹 및 제외 충돌"
             },
             "interaction": {
                 "alreadyEliminated": "당신은 이미 이번 라운드에서 탈락했습니다.",
-                "bookmarkOutsideGame": "북마크는 게임 중에만 사용할 수 있습니다.",
-                "eliminated": "이번 라운드에서 탈락했습니다.",
-                "invalidBookmark": "최근 {{BOOKMARK_MESSAGE_SIZE}} 라운드에서 재생한 노래만 북마크에 추가할 수 있습니다. (노래가 포함된 봇이 보낸 메시지를 북마크에 추가해야 합니다.)",
+                "bookmarkOutsideGame": "게임 중에만 노래를 북마크할 수 있습니다.",
+                "eliminated": "당신은 이번 라운드에서 탈락했습니다.",
+                "invalidBookmark": "최근 {{BOOKMARK_MESSAGE_SIZE}} 라운드에서 재생한 노래만 북마크에 추가할 수 있습니다. 노래가 포함된 봇이 보낸 메시지를 북마크해야 합니다.",
                 "optionFromPreviousRound": "이미 완료된 라운드에서 옵션을 선택하려고 합니다."
             },
             "maintenanceMode": {
                 "description": "KMQ는 현재 점검 중이며 새 게임을 시작할 수 없습니다. 나중에 다시 확인하세요!",
                 "title": "유지 관리 모드"
             },
-            "messageTooLong": "응답 메시지가 너무 깁니다. (이 오류를 KMQ 도움말 서버에 보고하세요.)",
+            "messageTooLong": "응답 메시지가 너무 깁니다. 이 오류를 KMQ 도움말 서버에 보고하십시오.",
             "missingPermissions": {
-                "description": "{{channelName}} 채널에서 메시지를 보낼 수 없습니다. 봇에 이 채널에서 메시지를 보낼 수 있는 권한이 있는지 확인하세요. 자세한 내용은 {{permissionsLink}} 링크를 참조하세요.",
+                "description": "안녕하세요! {{channelName}} 채널에서 메시지를 보낼 수 없습니다. 봇이 이 채널에서 메시지를 보낼 수 있는 권한이 있는지 확인하십시오. 자세한 내용은 {{permissionsLink}} 링크를 참조하세요.",
                 "title": "누락된 권한"
             },
-            "missingPermissionsText": "봇에 {{missingPermissions}} 권한이 있는지 확인하세요.\n\n자세한 내용은 {{permissionsLink}} 링크를 참조하세요. (여전히 문제가 발생하면 {{helpCommand}}에 있는 공식 KMQ 서버에 가입하세요.)",
+            "missingPermissionsText": "봇에 다음 권한이 있는지 확인하세요. {{missingPermissions}}\n\n자세한 내용은 {{permissionsLink}} 링크를 참조하세요. 여전히 문제가 있는 경우 {{helpCommand}}에 있는 공식 KMQ 서버에 가입하세요.",
             "notInVC": {
-                "description": "음성 채널에 있을 때 {{command}}를 다시 보내세요.",
-                "title": "음성 채널을 가입하세요!"
+                "description": "음성 채널에 있을 때 {{command}}를 다시 보냅니다.",
+                "title": "음성 채널 가입"
             },
             "retrievingSongData": {
                 "description": "잠시 후 다시 시도하거나 {{helpCommand}}에 있는 공식 KMQ 서버에 이 오류를 보고하세요.",
-                "title": "노래 데이터를 검색하는 동안 오류가 발생했습니다"
+                "title": "노래 데이터 검색 오류"
             },
             "round": {
                 "noneInProgress": {
@@ -1351,8 +1351,8 @@
                 }
             },
             "songPlaying": {
-                "description": "3초 후에 새 라운드 시작됩니다...",
-                "title": "노래를 재생하는 동안 오류가 발생했습니다"
+                "description": "3초 안에 새로운 라운드 시작됩니다...",
+                "title": "노래 재생 오류"
             },
             "songQuery": {
                 "description": "이 기준과 일치하는 노래를 찾지 못했습니다. 검색 범위를 넓히십시오.",
@@ -1360,14 +1360,14 @@
             },
             "unrecognizedGroups": {
                 "added": "추가",
-                "description": "지정된 그룹 이름 중 하나 이상이 인식되지 않습니다. (일치하는 그룹은 {{matchedGroupsAction}}이며 그룹 이름이 {{helpGroups}}에서 제공한 목록과 정확히 일치하는지 확인하세요.)\n\n다음 그룹은 **인식되지 않습니다**.\n\n{{unmatchedGroups}}\n{{solution}}",
-                "didYouMean": "__그런 뜻 이었나요?:__\n {{suggestions}}",
-                "solution": "{{command}}를 사용하여 일치하지 않는 그룹을 추가합니다.",
+                "description": "지정된 그룹 이름 중 하나 이상이 인식되지 않았습니다. 일치하는 그룹은 {{matchedGroupsAction}}입니다. 그룹 이름이 {{helpGroups}}에서 제공한 목록과 정확히 일치하는지 확인하세요.\n다음 그룹은 인식되지 **않았습니다**:\n {{unmatchedGroups}}\n{{solution}}",
+                "didYouMean": "__이건 어떠신가요?:__\n {{suggestions}}",
+                "solution": "일치하지 않는 그룹을 추가하려면 {{command}}을(를) 사용하세요.",
                 "title": "알 수 없는 그룹 이름"
             },
             "validation": {
                 "boolean": {
-                    "notBoolean": "{{argument}}에 대한 True/False 값이 예상됩니다."
+                    "notBoolean": "{{argument}}에 대한 예상 true/false 값입니다."
                 },
                 "char": {
                     "notChar": "{{argument}}에 대한 문자가 필요합니다."
@@ -1376,7 +1376,7 @@
                     "notInEnum": "다음 유효한 {{argument}} 값 중 하나가 필요합니다: ({{validValues}})."
                 },
                 "numArguments": {
-                    "incorrect": "인수 수가 잘못되었습니다. (사용법은 `{{help}} {{command}}`를 참조하세요.)"
+                    "incorrect": "인수 수가 잘못되었습니다. 사용법은 `{{help}} {{command}}`을(를) 참조하세요."
                 },
                 "number": {
                     "max": "{{argument}}에 대해 {{max}}보다 작거나 같은 예상 값입니다.",
@@ -1386,17 +1386,17 @@
                 "title": "입력 유효성 검사 오류"
             },
             "vcFull": {
-                "description": "봇이 참여할 수 있도록 음성 채널에 충분한 공간이 있는지 확인하십시오.",
+                "description": "봇이 참여할 수 있도록 음성 채널에 충분한 공간이 있는지 확인하세요.",
                 "title": "음성 채널이 가득 참"
             },
             "vcJoin": {
-                "description": "문제가 발생했습니다. (잠시 후 게임을 다시 시작해 보세요.)",
+                "description": "문제가 발생했습니다. 잠시 후 게임을 다시 시작해 보세요.",
                 "title": "음성 채널 가입 오류"
             }
         },
-        "formattedLimit": "{{limitStart}} ~ {{limitEnd}} ({{songCount}}곡)",
+        "formattedLimit": "{{limitStart}} ~ {{limitEnd}} ({{songCount}} 곡)",
         "gameOwnerChanged": {
-            "description": "새 게임 소유자는 {{newGameOwner}}입니다. ({{forcehintCommand}} 및 {{forceskipCommand}}를 담당합니다.)",
+            "description": "새 게임 소유자는 {{newGameOwner}}입니다. {{forcehintCommand}} 및 {{forceskipCommand}}을(를) 담당합니다.",
             "title": "게임 소유자 변경"
         },
         "inGame": {
@@ -1414,9 +1414,9 @@
         },
         "interaction": {
             "bookmarked": {
-                "description": "게임이 끝나면 {{songName}} 링크가 포함된 다이렉트 메시지를 받게 됩니다.",
+                "description": "게임이 끝나면 {{songName}}에 대한 링크가 포함된 다이렉트 메시지를 받게 됩니다.",
                 "message": {
-                    "playedOn": "{{date}}에 재생됨",
+                    "playedOn": "{{date}}에 플레이함.",
                     "title": "북마크된 노래들"
                 },
                 "title": "노래 북마크"
@@ -1434,10 +1434,10 @@
             "leaveReview": "리뷰를 남겨주세요!",
             "officialKmqServer": "공식 KMQ 서버",
             "profile": {
-                "inaccessible": "지금은 해당 사용자에 액세스할 수 없습니다. ({{profileUserID}}를 사용해 보세요.)",
-                "noStats": "이 사용자는 통계를 추적하기 전에 첫 게임을 플레이해야 합니다."
+                "inaccessible": "지금은 해당 사용자에 액세스할 수 없습니다. 대신 {{profileUserID}}을(를) 사용해 보세요.",
+                "noStats": "이 사용자는 통계를 추적하기 전에 첫 번째 게임을 플레이해야 합니다."
             },
-            "resetOption": "{{optionName}}의 옵션을 재설정합니다",
+            "resetOption": "{{optionName}} 옵션을 재설정합니다.",
             "title": {
                 "failure": "이런!"
             },
