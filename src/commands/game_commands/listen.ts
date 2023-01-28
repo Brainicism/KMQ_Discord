@@ -137,7 +137,10 @@ export default class ListenCommand implements BaseCommand {
             logger.info(
                 `gid: ${guildID} | Listening session ending, no longer premium.`
             );
-            await session.endSession();
+
+            await session.endSession(
+                "Listening session end due to no premium users"
+            );
         }
     };
 

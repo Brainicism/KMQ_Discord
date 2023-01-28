@@ -22,6 +22,7 @@ import {
     getDebugLogHeader,
     getGameInfoMessage,
     getInteractionValue,
+    getUserTag,
     getUserVoiceChannel,
     sendErrorMessage,
     sendInfoMessage,
@@ -711,7 +712,10 @@ export default class PlayCommand implements BaseCommand {
                         messageContext.guildID,
                         "command.join.playerJoinedTeam.title",
                         {
-                            joiningUser: messageContext.author.tag,
+                            joiningUser: getUserTag(
+                                messageContext.author.id,
+                                messageContext.guildID
+                            ),
                             teamName: team.getName(),
                         }
                     ),
@@ -997,7 +1001,7 @@ export default class PlayCommand implements BaseCommand {
 
         // prevent any duplicate game sessions
         if (gameSessions[guildID]) {
-            await gameSessions[guildID].endSession();
+            await gameSessions[guildID].endSession("Duplicate game session");
         }
 
         State.gameSessions[guildID] = gameSession;

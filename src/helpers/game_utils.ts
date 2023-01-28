@@ -93,7 +93,7 @@ export async function cleanupInactiveGameSessions(): Promise<void> {
             const timeDiffMin = timeDiffMs / (1000 * 60);
             if (timeDiffMin > GAME_SESSION_INACTIVE_THRESHOLD) {
                 inactiveSessions++;
-                await gameSessions[guildID].endSession();
+                await gameSessions[guildID].endSession("Inactive game session");
             }
         })
     );
@@ -287,11 +287,9 @@ export async function getMultipleChoiceOptions(
             await dbContext
                 .kmq("available_songs")
                 .select("clean_song_name_en", "clean_song_name_ko")
-                .groupByRaw(`UPPER(${songName})`)
+                .groupBy(songName)
                 .where("members", gender)
-                .andWhereRaw(`NOT UPPER(${songName}) = ?`, [
-                    answer.toUpperCase(),
-                ])
+                .andWhereNot(songName, answer)
                 .andWhereNot("id_artist", artistID)
         ).map((x) => pickNonEmpty(x));
         switch (answerType) {
@@ -308,11 +306,9 @@ export async function getMultipleChoiceOptions(
                         await dbContext
                             .kmq("available_songs")
                             .select("clean_song_name_en", "clean_song_name_ko")
-                            .groupByRaw(`UPPER(${songName})`)
+                            .groupBy(songName)
                             .where("id_artist", artistID)
-                            .andWhereRaw(`NOT UPPER(${songName}) = ?`, [
-                                answer.toUpperCase(),
-                            ])
+                            .andWhereNot(songName, answer)
                     ).map((x) => pickNonEmpty(x)),
                     MEDIUM_SAME_ARTIST_CHOICES
                 );
@@ -322,13 +318,9 @@ export async function getMultipleChoiceOptions(
                         await dbContext
                             .kmq("available_songs")
                             .select("clean_song_name_en", "clean_song_name_ko")
-                            .groupByRaw(`UPPER(${songName})`)
+                            .groupBy(songName)
                             .where("members", gender)
-                            .andWhereRaw(`UPPER(${songName}) NOT IN (?)`, [
-                                [...sameArtistSongs, answer].map((x) =>
-                                    x.toUpperCase()
-                                ),
-                            ])
+                            .whereNotIn(songName, [...sameArtistSongs, answer])
                             .andWhereNot("id_artist", artistID)
                     ).map((x) => pickNonEmpty(x)),
                     MEDIUM_CHOICES - MEDIUM_SAME_ARTIST_CHOICES
@@ -344,11 +336,9 @@ export async function getMultipleChoiceOptions(
                     await dbContext
                         .kmq("available_songs")
                         .select("clean_song_name_en", "clean_song_name_ko")
-                        .groupByRaw(`UPPER(${songName})`)
+                        .groupBy(songName)
                         .where("id_artist", artistID)
-                        .andWhereRaw(`NOT UPPER(${songName}) = ?`, [
-                            answer.toUpperCase(),
-                        ])
+                        .andWhereNot(songName, answer)
                 ).map((x) => pickNonEmpty(x));
                 result = _.sampleSize(names, HARD_CHOICES);
                 break;

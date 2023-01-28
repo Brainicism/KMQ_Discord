@@ -1,6 +1,7 @@
 import { codeLine, friendlyFormattedNumber } from "../helpers/utils";
 import State from "../state";
 import i18n from "../helpers/localization_manager";
+import type { ButtonActionRow } from "../types";
 import type Eris from "eris";
 import type MessageContext from "./message_context";
 import type PlayerRoundResult from "../interfaces/player_round_result";
@@ -36,7 +37,7 @@ export default abstract class Round {
     public skipAchieved: boolean;
 
     /** Interactable components attached to this round's message */
-    public interactionComponents: Array<Eris.ActionRow>;
+    public interactionComponents: Array<ButtonActionRow>;
 
     /** The message containing this round's interactable components */
     public interactionMessage: Eris.Message<Eris.TextableChannel>;

@@ -5,6 +5,7 @@ import {
     fetchUser,
     getDebugLogHeader,
     getInteractionValue,
+    getUserTag,
     sendErrorMessage,
     sendInfoMessage,
     tryCreateInteractionErrorAcknowledgement,
@@ -12,7 +13,6 @@ import {
 import {
     friendlyFormattedDate,
     friendlyFormattedNumber,
-    getUserTag,
     romanize,
 } from "../../helpers/utils";
 import Eris from "eris";
@@ -399,7 +399,7 @@ export default class ProfileCommand implements BaseCommand {
         );
 
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: getUserTag(requestedPlayer),
+            title: getUserTag(requestedPlayer.id, message.guildID),
             fields,
             author: {
                 username: requestedPlayer.username,
@@ -499,7 +499,7 @@ export default class ProfileCommand implements BaseCommand {
             await interaction.createMessage({
                 embeds: [
                     {
-                        title: getUserTag(user),
+                        title: getUserTag(user.id, interaction.guildID),
                         fields,
                         timestamp: new Date(),
                     },
