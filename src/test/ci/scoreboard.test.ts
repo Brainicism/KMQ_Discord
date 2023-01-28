@@ -5,13 +5,14 @@ import Scoreboard from "../../structures/scoreboard";
 import assert from "assert";
 
 const userIDs = ["12345", "23456", "34567"];
-
+const guildID = "guild_id";
+const avatarURL = "avatar_url";
 describe("scoreboard", () => {
     let scoreboard: Scoreboard;
     beforeEach(() => {
         scoreboard = new Scoreboard();
         userIDs.map((x) =>
-            scoreboard.addPlayer(new Player(x, null, null, 0, x))
+            scoreboard.addPlayer(new Player(x, guildID, avatarURL, 0, x))
         );
     });
 
@@ -213,7 +214,7 @@ describe("scoreboard", () => {
                     const winningPlayer = new Player(
                         "ohmiID",
                         "guildID",
-                        null,
+                        avatarURL,
                         0,
                         "ohmi"
                     );
@@ -237,7 +238,7 @@ describe("scoreboard", () => {
                     const losingPlayer = new Player(
                         "12345",
                         "guildID",
-                        null,
+                        avatarURL,
                         0,
                         "cool"
                     );
@@ -261,7 +262,7 @@ describe("scoreboard", () => {
                     const samePlayer = new Player(
                         "jisooID",
                         "guildID",
-                        null,
+                        avatarURL,
                         0,
                         "jisoo"
                     );
@@ -285,7 +286,7 @@ describe("scoreboard", () => {
                     const winningPlayer = new Player(
                         "ohmiID",
                         "guildID",
-                        null,
+                        avatarURL,
                         0,
                         "ohmi"
                     );

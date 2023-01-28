@@ -30,13 +30,16 @@ interface QueriedSongList {
 
 export default class SongSelector {
     /** List of songs matching the user's game options */
-    public filteredSongs: { songs: Set<QueriedSong>; countBeforeLimit: number };
+    public filteredSongs: {
+        songs: Set<QueriedSong>;
+        countBeforeLimit: number;
+    } | null;
 
     /** List of songs played with ,shuffle unique enabled */
     public uniqueSongsPlayed: Set<string>;
 
     /** The last gender played when gender is set to alternating, can be null (in not alternating mode), GENDER.MALE, or GENDER.FEMALE */
-    public lastAlternatingGender: Gender;
+    public lastAlternatingGender: Gender | null;
 
     constructor() {
         this.filteredSongs = null;
