@@ -776,7 +776,7 @@ describe("song selector", () => {
                                     femaleOrCoedSongs.map((x) => x.youtubeLink)
                                 ),
                                 Gender.FEMALE
-                            )
+                            ) as QueriedSong
                         );
                     }
 
@@ -806,7 +806,7 @@ describe("song selector", () => {
                                     maleOrCoedSongs.map((x) => x.youtubeLink)
                                 ),
                                 Gender.MALE
-                            )
+                            ) as QueriedSong
                         );
                     }
 
@@ -844,8 +844,9 @@ describe("song selector", () => {
                                     [...ignoredSongs, ...selectedSongs].map(
                                         (x) => x.youtubeLink
                                     )
-                                )
-                            )
+                                ),
+                                null
+                            ) as QueriedSong
                         );
                     }
 
@@ -910,7 +911,11 @@ describe("song selector", () => {
 
                 const songs: Array<QueriedSong> = [];
                 for (let i = 0; i < limit; i++) {
-                    songs.push(songSelector.queryRandomSong(guildPreference));
+                    songs.push(
+                        songSelector.queryRandomSong(
+                            guildPreference
+                        ) as QueriedSong
+                    );
                 }
 
                 for (let i = 1; i < songs.length - 1; i++) {

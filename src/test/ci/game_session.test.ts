@@ -91,6 +91,7 @@ describe("game session", () => {
             it("should complete successfully", async () => {
                 // round starts successfully
                 voiceChannelStub.voiceMembers.add({ id: "1" } as any);
+
                 await gameSession.startRound(new MessageContext("id"));
                 gameSession.connection = voiceConnection;
                 assert.ok(prepareRoundSpy.called);
