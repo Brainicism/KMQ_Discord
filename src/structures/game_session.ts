@@ -12,6 +12,7 @@ import {
     setDifference,
 } from "../helpers/utils";
 import {
+    fetchUser,
     getCurrentVoiceMembers,
     getDebugLogHeader,
     getGameInfoMessage,
@@ -91,7 +92,7 @@ export default class GameSession extends Session {
     public readonly scoreboard: Scoreboard;
 
     /** The current GameRound */
-    public round: GameRound;
+    public round: GameRound | null;
 
     /** The number of songs correctly guessed */
     private correctGuesses: number;
@@ -112,7 +113,7 @@ export default class GameSession extends Session {
     };
 
     /** The most recent Guesser, including their current streak */
-    private lastGuesser: LastGuesser;
+    private lastGuesser: LastGuesser | null;
 
     constructor(
         guildPreference: GuildPreference,
@@ -735,6 +736,7 @@ export default class GameSession extends Session {
             return;
         }
 
+        const user = await fetchUser(userID);
         if (
             inVC &&
             !this.scoreboard.getPlayerIDs().includes(userID) &&
@@ -742,8 +744,8 @@ export default class GameSession extends Session {
         ) {
             this.scoreboard.addPlayer(
                 this.gameType === GameType.ELIMINATION
-                    ? EliminationPlayer.fromUserID(
-                          userID,
+                    ? EliminationPlayer.fromUser(
+                          user,
                           this.guildID,
                           (
                               this.scoreboard as EliminationScoreboard
@@ -751,8 +753,8 @@ export default class GameSession extends Session {
                           await isFirstGameOfDay(userID),
                           await isUserPremium(userID)
                       )
-                    : Player.fromUserID(
-                          userID,
+                    : Player.fromUser(
+                          user,
                           this.guildID,
                           0,
                           await isFirstGameOfDay(userID),
@@ -768,14 +770,14 @@ export default class GameSession extends Session {
      * Add all players in VC that aren't tracked to the scoreboard, and update those who left
      */
     async syncAllVoiceMembers(): Promise<void> {
-        const currentVoiceMembers = getCurrentVoiceMembers(
+        const currentVoiceMemberIds = getCurrentVoiceMembers(
             this.voiceChannelID
         ).map((x) => x.id);
 
         await Promise.allSettled(
             this.scoreboard
                 .getPlayerIDs()
-                .filter((x) => !currentVoiceMembers.includes(x))
+                .filter((x) => !currentVoiceMemberIds.includes(x))
                 .map(async (player) => {
                     await this.setPlayerInVC(player, false);
                 })
@@ -787,14 +789,15 @@ export default class GameSession extends Session {
         }
 
         await Promise.allSettled(
-            currentVoiceMembers
+            currentVoiceMemberIds
                 .filter((x) => x !== process.env.BOT_CLIENT_ID)
-                .map(async (player) => {
-                    const firstGameOfDay = await isFirstGameOfDay(player);
-                    const premium = await isUserPremium(player);
+                .map(async (playerId) => {
+                    const firstGameOfDay = await isFirstGameOfDay(playerId);
+                    const premium = await isUserPremium(playerId);
+                    const player = await fetchUser(playerId);
                     this.scoreboard.addPlayer(
                         this.gameType === GameType.ELIMINATION
-                            ? EliminationPlayer.fromUserID(
+                            ? EliminationPlayer.fromUser(
                                   player,
                                   this.guildID,
                                   (this.scoreboard as EliminationScoreboard)
@@ -802,7 +805,7 @@ export default class GameSession extends Session {
                                   firstGameOfDay,
                                   premium
                               )
-                            : Player.fromUserID(
+                            : Player.fromUser(
                                   player,
                                   this.guildID,
                                   0,

@@ -234,7 +234,7 @@ export default class Scoreboard {
     getScoreboardEmbedSingleColumn(
         showExp: boolean,
         inProgress: boolean,
-        roundWinnerIDs?: Array<string>
+        roundWinnerIDs: Array<string> = []
     ): Array<{ name: string; value: string; inline: boolean }> {
         const currentRanking = this.getScoreToRankingMap();
         return Object.values(this.players)
@@ -270,7 +270,7 @@ export default class Scoreboard {
         guildID: string,
         showExp: boolean,
         inProgress: boolean,
-        roundWinnerIDs?: Array<string>
+        roundWinnerIDs: Array<string> = []
     ): Array<{ name: string; value: string; inline: boolean }> {
         const ZERO_WIDTH_SPACE = "​";
         const currentRanking = this.getScoreToRankingMap();

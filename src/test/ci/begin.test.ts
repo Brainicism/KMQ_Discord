@@ -104,7 +104,8 @@ describe("begin command", () => {
                     const scoreboard = gameSession.scoreboard as TeamScoreboard;
                     scoreboard.addTeam(
                         "Loona",
-                        new Player("dummy", "dummy", "dummy", 0, "dummy")
+                        new Player("dummy", "dummy", "dummy", 0, "dummy"),
+                        "dummy"
                     );
 
                     assert.strictEqual(
@@ -117,7 +118,8 @@ describe("begin command", () => {
 
                     scoreboard.addTeam(
                         "Loona2",
-                        new Player("dummy", "dummy", "dummy", 0, "dummy")
+                        new Player("dummy", "dummy", "dummy", 0, "dummy"),
+                        "dummy"
                     );
 
                     assert.strictEqual(
