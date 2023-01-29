@@ -11,8 +11,8 @@ const SECOND_TEAM_NAME = "not kmqer";
 const USER_IDS = ["12345", "23456", "252525", "1000000"];
 const USERNAMES = ["ohmi", "cool", "kpopper", "kmq player"];
 
-const AVATAR_URL = null;
-const GUILD_ID = null;
+const AVATAR_URL = "avatar_url";
+const GUILD_ID = "guild_id";
 
 describe("team scoreboard", () => {
     let scoreboard: TeamScoreboard;

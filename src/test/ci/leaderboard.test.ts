@@ -16,11 +16,13 @@ import assert from "assert";
 import dbContext from "../../database_context";
 import sinon from "sinon";
 import type { EmbedGenerator } from "eris-pagination";
+import type Eris from "eris";
 
 const SERVER_ID = "0";
 const gameStarter = new KmqMember("123");
 const messageContext = new MessageContext("", gameStarter, SERVER_ID, "");
-
+const guildID = "guild_id";
+const avatarURL = "avatar_URL";
 const INITIAL_MONTH = 5;
 const INITIAL_DAY = 14;
 const INITIAL_HOUR = 6;
@@ -48,7 +50,31 @@ function getMockGuildPreference(): GuildPreference {
     return guildPreference;
 }
 
-function generatePlayerStats(numberPlayers: number, offset = 0): any {
+interface PlayerGameSessionStat {
+    player_id: string;
+    date: Date;
+    songs_guessed: number;
+    exp_gained: number;
+    levels_gained: number;
+}
+
+interface PlayerStat {
+    player_id: string;
+    songs_guessed: number;
+    games_played: number;
+    exp: number;
+    level: number;
+}
+
+interface PlayerServer {
+    player_id: string;
+    server_id: string;
+}
+
+function generatePlayerStats(
+    numberPlayers: number,
+    offset = 0
+): Array<PlayerStat> {
     return [...Array(numberPlayers).keys()].map((i) => ({
         player_id: String(i + offset),
         songs_guessed: i,
@@ -58,7 +84,10 @@ function generatePlayerStats(numberPlayers: number, offset = 0): any {
     }));
 }
 
-function generatePlayerServers(numberPlayers: number, serverID: string): any {
+function generatePlayerServers(
+    numberPlayers: number,
+    serverID: string
+): Array<PlayerServer> {
     return [...Array(numberPlayers).keys()].map((i) => ({
         player_id: String(i),
         server_id: serverID,
@@ -69,7 +98,8 @@ async function getNumberOfFields(
     embedGenerators: EmbedGenerator[]
 ): Promise<number> {
     return embedGenerators.reduce(
-        async (prev, curr) => (await prev) + (await curr()).fields.length,
+        async (prev, curr) =>
+            (await prev) + ((await curr()).fields as Eris.EmbedField[]).length,
         Promise.resolve(0)
     );
 }
@@ -196,8 +226,8 @@ describe("leaderboard command", () => {
                 });
 
                 it("should match the number of pages and embeds", async () => {
-                    const statsRows = [];
-                    const serversRows = [];
+                    const statsRows: Array<PlayerStat> = [];
+                    const serversRows: Array<PlayerServer> = [];
 
                     statsRows.push(
                         ...generatePlayerStats(INITIAL_TOTAL_ENTRIES)
@@ -262,7 +292,7 @@ describe("leaderboard command", () => {
                     sandbox.restore();
 
                     State.gameSessions = { [SERVER_ID]: gameSession };
-                    const statsRows = [];
+                    const statsRows: Array<PlayerStat> = [];
 
                     statsRows.push(
                         ...generatePlayerStats(INITIAL_TOTAL_ENTRIES)
@@ -272,8 +302,8 @@ describe("leaderboard command", () => {
                         gameSession.scoreboard.addPlayer(
                             new Player(
                                 i.toString(),
-                                null,
-                                null,
+                                guildID,
+                                avatarURL,
                                 0,
                                 i.toString()
                             )
@@ -513,7 +543,7 @@ describe("leaderboard command", () => {
                 beforeEach(async () => {
                     await dbContext.kmq("player_servers").del();
 
-                    const serversRows = [];
+                    const serversRows: Array<PlayerServer> = [];
                     // Player with id 0 is outside server
                     for (let i = 1; i <= INITIAL_TOTAL_ENTRIES; i++) {
                         serversRows.push({
@@ -633,8 +663,8 @@ describe("leaderboard command", () => {
                             gameSession.scoreboard.addPlayer(
                                 new Player(
                                     i.toString(),
-                                    null,
-                                    null,
+                                    guildID,
+                                    avatarURL,
                                     0,
                                     i.toString()
                                 )
@@ -726,7 +756,7 @@ describe("leaderboard command", () => {
 
             describe("games played leaderboard", () => {
                 it("should match the number of pages and embeds", async () => {
-                    const rows = [];
+                    const rows: Array<PlayerGameSessionStat> = [];
                     for (let i = 0; i < 10; i++) {
                         rows.push({
                             player_id: "1",
@@ -768,7 +798,7 @@ describe("leaderboard command", () => {
 
             describe("songs guessed leaderboard", () => {
                 it("should match the number of pages and embeds", async () => {
-                    const rows = [];
+                    const rows: Array<PlayerGameSessionStat> = [];
                     for (let i = 0; i < 10; i++) {
                         rows.push({
                             player_id: "1",

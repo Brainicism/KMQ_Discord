@@ -60,7 +60,7 @@ describe("exp command", () => {
                         await calculateOptionsExpMultiplierInternal(
                             guildPreference,
                             false,
-                            null
+                            "dummy"
                         );
 
                     assert.strictEqual(modifiers.length, 1);
@@ -94,7 +94,7 @@ describe("exp command", () => {
                             await calculateOptionsExpMultiplierInternal(
                                 guildPreference,
                                 false,
-                                null
+                                "dummy"
                             );
 
                         assert.strictEqual(modifiers.length, 0);
@@ -107,7 +107,7 @@ describe("exp command", () => {
                             await calculateOptionsExpMultiplierInternal(
                                 guildPreference,
                                 true,
-                                null
+                                "dummy"
                             );
 
                         assert.strictEqual(modifiers.length, 1);
@@ -128,7 +128,7 @@ describe("exp command", () => {
                             await calculateOptionsExpMultiplierInternal(
                                 guildPreference,
                                 false,
-                                null
+                                "dummy"
                             );
 
                         assert.strictEqual(modifiers.length, 1);
@@ -149,7 +149,7 @@ describe("exp command", () => {
                             await calculateOptionsExpMultiplierInternal(
                                 guildPreference,
                                 false,
-                                null
+                                "dummy"
                             );
 
                         assert.strictEqual(modifiers.length, 1);
@@ -182,7 +182,7 @@ describe("exp command", () => {
                                 await calculateOptionsExpMultiplierInternal(
                                     guildPreference,
                                     false,
-                                    null
+                                    "dummy"
                                 );
 
                             assert.strictEqual(modifiers.length, 1);
@@ -204,7 +204,7 @@ describe("exp command", () => {
                                 await calculateOptionsExpMultiplierInternal(
                                     guildPreference,
                                     false,
-                                    null
+                                    "dummy"
                                 );
 
                             assert.strictEqual(modifiers.length, 1);
@@ -224,7 +224,7 @@ describe("exp command", () => {
                                 await calculateOptionsExpMultiplierInternal(
                                     guildPreference,
                                     false,
-                                    null
+                                    "dummy"
                                 );
 
                             assert.strictEqual(modifiers.length, 1);
@@ -248,7 +248,7 @@ describe("exp command", () => {
                                 await calculateOptionsExpMultiplierInternal(
                                     guildPreference,
                                     false,
-                                    null
+                                    "dummy"
                                 );
 
                             assert.strictEqual(modifiers.length, 1);
@@ -282,7 +282,7 @@ describe("exp command", () => {
                         await calculateOptionsExpMultiplierInternal(
                             guildPreference,
                             false,
-                            null
+                            "dummy"
                         );
 
                     assert.strictEqual(modifiers.length, 1);
@@ -302,7 +302,7 @@ describe("exp command", () => {
                         await calculateOptionsExpMultiplierInternal(
                             guildPreference,
                             false,
-                            null
+                            "dummy"
                         );
 
                     assert.strictEqual(modifiers.length, 1);
@@ -329,7 +329,7 @@ describe("exp command", () => {
                 const modifiers = await calculateOptionsExpMultiplierInternal(
                     guildPreference,
                     false,
-                    null
+                    "dummy"
                 );
 
                 assert.strictEqual(modifiers.length, 1);
@@ -365,7 +365,7 @@ describe("exp command", () => {
                 const modifiers = await calculateOptionsExpMultiplierInternal(
                     guildPreference,
                     true,
-                    null
+                    "dummy"
                 );
 
                 const expectedModifiers = [

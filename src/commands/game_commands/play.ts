@@ -424,7 +424,7 @@ export default class PlayCommand implements BaseCommand {
     };
 
     static canStartTeamsGame(
-        gameSession: GameSession,
+        gameSession: GameSession | null,
         messageContext: MessageContext,
         interaction?: Eris.CommandInteraction
     ): boolean {

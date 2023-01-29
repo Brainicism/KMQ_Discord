@@ -14,10 +14,10 @@ import sinon from "sinon";
 
 describe("command prechecks", () => {
     const sandbox = sinon.createSandbox();
+    const mockKmqMember = new KmqMember("dummy");
     beforeEach(() => {
         sandbox.stub(discord_utils, "getDebugLogHeader").callsFake(() => "");
         sandbox.stub(discord_utils, "sendErrorMessage");
-        sandbox.stub(MessageContext, "fromMessage").callsFake(() => null);
     });
 
     afterEach(() => {
@@ -27,8 +27,17 @@ describe("command prechecks", () => {
     const messageContext = new MessageContext(
         "faketextchannelid",
         new KmqMember("fakeuserid"),
-        "fakeguildid",
-        null
+        "fakeguildid"
+    );
+
+    const mockGameSession = new GameSession(
+        new GuildPreference("dummy"),
+        "dummy",
+        "dummy",
+        "dummy",
+        new KmqMember("dummy"),
+        GameType.CLASSIC,
+        false
     );
 
     describe("inSessionCommandPrecheck", () => {
@@ -50,7 +59,7 @@ describe("command prechecks", () => {
                 "123",
                 "1234",
                 "12345",
-                null
+                mockKmqMember
             );
 
             describe("user and bot are in the same vc", () => {
@@ -92,7 +101,7 @@ describe("command prechecks", () => {
                 "12",
                 "123",
                 "1234",
-                null,
+                mockKmqMember,
                 GameType.ELIMINATION,
                 true
             );
@@ -102,7 +111,7 @@ describe("command prechecks", () => {
                 "12",
                 "123",
                 "1234",
-                null,
+                mockKmqMember,
                 GameType.TEAMS,
                 false
             );
@@ -112,7 +121,7 @@ describe("command prechecks", () => {
                 "12",
                 "123",
                 "1234",
-                null,
+                mockKmqMember,
                 GameType.CLASSIC,
                 true
             );
@@ -212,7 +221,7 @@ describe("command prechecks", () => {
             "123",
             "1234",
             "1235",
-            null
+            mockKmqMember
         );
 
         const gameSession = new GameSession(
@@ -220,7 +229,7 @@ describe("command prechecks", () => {
             "123",
             "1234",
             "1235",
-            null,
+            mockKmqMember,
             GameType.CLASSIC,
             true
         );
@@ -229,7 +238,7 @@ describe("command prechecks", () => {
             it("should return true", () => {
                 assert.strictEqual(
                     CommandPrechecks.notListeningPrecheck({
-                        session: null,
+                        session: mockGameSession,
                         messageContext,
                     }),
                     true
@@ -269,7 +278,7 @@ describe("command prechecks", () => {
             "123",
             "1234",
             debugServerId,
-            null,
+            mockKmqMember,
             GameType.CLASSIC,
             false
         );
@@ -324,7 +333,7 @@ describe("command prechecks", () => {
             it("should return false", () => {
                 assert.strictEqual(
                     CommandPrechecks.maintenancePrecheck({
-                        session: null,
+                        session: mockGameSession,
                         messageContext,
                     }),
                     false
@@ -346,7 +355,7 @@ describe("command prechecks", () => {
             it("should return true", () => {
                 assert.strictEqual(
                     CommandPrechecks.maintenancePrecheck({
-                        session: null,
+                        session: mockGameSession,
                         messageContext,
                     }),
                     true
@@ -362,7 +371,7 @@ describe("command prechecks", () => {
             debugChannelId,
             "1234",
             "12345",
-            null,
+            mockKmqMember,
             GameType.CLASSIC,
             true
         );
@@ -409,7 +418,7 @@ describe("command prechecks", () => {
             "123",
             "1234",
             "12345",
-            null,
+            mockKmqMember,
             GameType.CLASSIC,
             true
         );
@@ -453,7 +462,7 @@ describe("command prechecks", () => {
             "123",
             "1234",
             "12345",
-            null,
+            mockKmqMember,
             GameType.CLASSIC,
             false
         );
@@ -498,7 +507,7 @@ describe("command prechecks", () => {
             "123",
             "1234",
             "12345",
-            null,
+            mockKmqMember,
             GameType.CLASSIC,
             false
         );
@@ -572,7 +581,7 @@ describe("command prechecks", () => {
             "123",
             "1234",
             GUILD_ID,
-            null,
+            mockKmqMember,
             GameType.CLASSIC,
             false
         );

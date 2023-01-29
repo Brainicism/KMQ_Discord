@@ -37,5 +37,5 @@ export default interface GameOptions {
     subunitPreference: SubunitsPreference;
     ostPreference: OstPreference;
     forcePlaySongID: string;
-    spotifyPlaylistMetadata: PlaylistMetadata;
+    spotifyPlaylistMetadata: PlaylistMetadata | null;
 }

@@ -28,7 +28,7 @@ const RESTART_WARNING_INTERVALS = new Set([10, 5, 3, 2, 1]);
  * Gets the remaining time until the next server restart
  * @returns null if no restart is imminent, a date in epoch milliseconds
  */
-export function getTimeUntilRestart(): number {
+export function getTimeUntilRestart(): number | null {
     if (!State.restartNotification?.restartDate) return null;
     const restartNotificationTime =
         State.restartNotification.restartDate.getTime();

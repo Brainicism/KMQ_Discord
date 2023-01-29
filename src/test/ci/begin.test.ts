@@ -16,6 +16,8 @@ function getMockGuildPreference(): GuildPreference {
     return guildPreference;
 }
 
+const mockMessageContext = new MessageContext("dummy", new KmqMember("dummy"));
+
 describe("begin command", () => {
     const sandbox = sinon.createSandbox();
     const gameStarter = new KmqMember("123");
@@ -40,9 +42,9 @@ describe("begin command", () => {
 
             const gameSession = new GameSession(
                 getMockGuildPreference(),
-                null,
-                null,
-                null,
+                "dummy",
+                "dummy",
+                "dummy",
                 gameStarter,
                 GameType.CLASSIC,
                 false
@@ -75,9 +77,9 @@ describe("begin command", () => {
                 .callsFake((_voiceChannelID) => []);
             const gameSession = new GameSession(
                 getMockGuildPreference(),
-                null,
-                null,
-                null,
+                "dummy",
+                "dummy",
+                "dummy",
                 gameStarter,
                 GameType.TEAMS,
                 true
@@ -102,21 +104,27 @@ describe("begin command", () => {
                     const scoreboard = gameSession.scoreboard as TeamScoreboard;
                     scoreboard.addTeam(
                         "Loona",
-                        new Player(null, null, null, 0, null)
+                        new Player("dummy", "dummy", "dummy", 0, "dummy")
                     );
 
                     assert.strictEqual(
-                        PlayCommand.canStartTeamsGame(gameSession, null),
+                        PlayCommand.canStartTeamsGame(
+                            gameSession,
+                            mockMessageContext
+                        ),
                         true
                     );
 
                     scoreboard.addTeam(
                         "Loona2",
-                        new Player(null, null, null, 0, null)
+                        new Player("dummy", "dummy", "dummy", 0, "dummy")
                     );
 
                     assert.strictEqual(
-                        PlayCommand.canStartTeamsGame(gameSession, null),
+                        PlayCommand.canStartTeamsGame(
+                            gameSession,
+                            mockMessageContext
+                        ),
                         true
                     );
                 });

@@ -57,7 +57,8 @@ type GameOptionValue =
     | SubunitsPreference
     | OstPreference
     | PlaylistMetadata
-    | string;
+    | string
+    | null;
 
 /**
  * @param groups - The artists to combine into a string
@@ -844,7 +845,7 @@ export default class GuildPreference {
      * @param playlistMetadata - Spotify playlist ID, length, name
      */
     async setSpotifyPlaylistMetadata(
-        playlistMetadata: PlaylistMetadata
+        playlistMetadata: PlaylistMetadata | null
     ): Promise<void> {
         this.gameOptions.spotifyPlaylistMetadata = playlistMetadata;
         await this.updateGuildPreferences([
@@ -856,7 +857,7 @@ export default class GuildPreference {
     }
 
     /** @returns the ID of the playlist to retrieve songs from */
-    getSpotifyPlaylistMetadata(): PlaylistMetadata {
+    getSpotifyPlaylistMetadata(): PlaylistMetadata | null {
         return this.gameOptions.spotifyPlaylistMetadata;
     }
 

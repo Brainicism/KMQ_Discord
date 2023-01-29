@@ -6,7 +6,9 @@ import {
 } from "../../helpers/game_utils";
 import { describe } from "mocha";
 import GameSession from "../../structures/game_session";
+import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";
+import KmqMember from "../../structures/kmq_member";
 import OstPreference from "../../enums/option_types/ost_preference";
 import ReleaseType from "../../enums/option_types/release_type";
 import State from "../../state";
@@ -315,11 +317,11 @@ describe("game utils", () => {
             guildPreference = await getMockGuildPreference();
             const gameSession = new GameSession(
                 guildPreference,
-                null,
-                null,
+                "id",
+                "id",
                 guildId,
-                null,
-                null,
+                new KmqMember("id"),
+                GameType.CLASSIC,
                 false
             );
 

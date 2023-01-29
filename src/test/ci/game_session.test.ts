@@ -91,7 +91,7 @@ describe("game session", () => {
             it("should complete successfully", async () => {
                 // round starts successfully
                 voiceChannelStub.voiceMembers.add({ id: "1" } as any);
-                await gameSession.startRound(null);
+                await gameSession.startRound(new MessageContext("id"));
                 gameSession.connection = voiceConnection;
                 assert.ok(prepareRoundSpy.called);
                 assert.ok(ensureVoiceConnectionSpy.called);
@@ -133,7 +133,7 @@ describe("game session", () => {
                     "sendEndGameMessage"
                 );
 
-                await gameSession.endSession(null);
+                await gameSession.endSession("Initiated by test");
                 assert.ok(gameSession.finished);
 
                 assert.ok(sendEndGameMessageStub.called);

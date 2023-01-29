@@ -9,7 +9,7 @@ function getMockEliminationPlayer(
     id: string,
     lives = DEFAULT_LIVES
 ): EliminationPlayer {
-    return new EliminationPlayer(id, null, null, lives, null);
+    return new EliminationPlayer(id, "dummy", "dummy", lives, "dummy");
 }
 
 describe("elimination scoreboard", () => {

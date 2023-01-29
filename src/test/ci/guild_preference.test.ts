@@ -41,7 +41,9 @@ describe("guild preference", () => {
                         ...GuildPreference.DEFAULT_OPTIONS,
                     };
 
-                    delete gameOptionsWithMissingLanguageType["languageType"];
+                    delete (gameOptionsWithMissingLanguageType as any)[
+                        "languageType"
+                    ];
                     const guildPreference = GuildPreference.fromGuild(
                         "123",
                         gameOptionsWithMissingLanguageType
