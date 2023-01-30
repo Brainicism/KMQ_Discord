@@ -167,7 +167,12 @@ export default class SpotifyManager {
                         for (const alias of State.aliases.artist[
                             lowercaseArtist
                         ]) {
-                            aliasIDs.push(State.artistToEntry[alias].id);
+                            const lowercaseAlias = alias.toLowerCase();
+                            if (lowercaseAlias in State.artistToEntry) {
+                                aliasIDs.push(
+                                    State.artistToEntry[lowercaseAlias].id
+                                );
+                            }
                         }
                     }
                 }
