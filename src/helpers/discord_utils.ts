@@ -63,6 +63,7 @@ const REQUIRED_TEXT_PERMISSIONS = [
     "addReactions" as const,
     "embedLinks" as const,
     "attachFiles" as const,
+    "useApplicationCommands" as const,
 ];
 
 const REQUIRED_VOICE_PERMISSIONS = [
