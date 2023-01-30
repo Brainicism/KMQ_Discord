@@ -18,7 +18,7 @@ describe("team", () => {
             0,
             "kpopper"
         );
-        team = new Team("kmq", goodPlayer);
+        team = new Team("kmq", goodPlayer, "dummy");
     });
 
     describe("add a teammate", () => {

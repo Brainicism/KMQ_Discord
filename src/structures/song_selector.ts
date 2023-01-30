@@ -30,13 +30,16 @@ interface QueriedSongList {
 
 export default class SongSelector {
     /** List of songs matching the user's game options */
-    public filteredSongs: { songs: Set<QueriedSong>; countBeforeLimit: number };
+    public filteredSongs: {
+        songs: Set<QueriedSong>;
+        countBeforeLimit: number;
+    } | null;
 
     /** List of songs played with ,shuffle unique enabled */
     public uniqueSongsPlayed: Set<string>;
 
     /** The last gender played when gender is set to alternating, can be null (in not alternating mode), GENDER.MALE, or GENDER.FEMALE */
-    public lastAlternatingGender: Gender;
+    public lastAlternatingGender: Gender | null;
 
     constructor() {
         this.filteredSongs = null;
@@ -45,6 +48,13 @@ export default class SongSelector {
     }
 
     getUniqueSongCounter(guildPreference: GuildPreference): UniqueSongCounter {
+        if (!this.filteredSongs) {
+            return {
+                uniqueSongsPlayed: 0,
+                totalSongs: 0,
+            };
+        }
+
         const filteredSongs = new Set(
             [...this.filteredSongs.songs].map((x) => x.youtubeLink)
         );
@@ -95,9 +105,9 @@ export default class SongSelector {
         }
     }
 
-    queryRandomSong(guildPreference: GuildPreference): QueriedSong {
+    queryRandomSong(guildPreference: GuildPreference): QueriedSong | null {
         const selectedSongs = this.getSongs().songs;
-        let randomSong: QueriedSong;
+        let randomSong: QueriedSong | null;
         const ignoredSongs = new Set([...this.uniqueSongsPlayed]);
 
         if (this.lastAlternatingGender) {
@@ -135,10 +145,10 @@ export default class SongSelector {
      */
     static selectRandomSong(
         filteredSongs: Set<QueriedSong>,
-        ignoredSongs?: Set<string>,
-        alternatingGender?: Gender,
+        ignoredSongs: Set<string>,
+        alternatingGender: Gender | null,
         shuffleType = ShuffleType.RANDOM
-    ): QueriedSong {
+    ): QueriedSong | null {
         let queriedSongList = [...filteredSongs];
         if (ignoredSongs) {
             queriedSongList = queriedSongList.filter(
@@ -190,18 +200,25 @@ export default class SongSelector {
     }
 
     getSongs(): { songs: Set<QueriedSong>; countBeforeLimit: number } {
+        if (!this.filteredSongs) {
+            return {
+                songs: new Set(),
+                countBeforeLimit: 0,
+            };
+        }
+
         return this.filteredSongs;
     }
 
     getCurrentSongCount(): number {
-        return this.filteredSongs.songs.size;
+        return this.filteredSongs ? this.filteredSongs.songs.size : 0;
     }
 
     async reloadSongs(
         guildPreference: GuildPreference,
         isPremium: boolean,
         playlistID?: string
-    ): Promise<MatchedPlaylist> {
+    ): Promise<MatchedPlaylist | null> {
         if (!playlistID) {
             this.filteredSongs = await SongSelector.getFilteredSongList(
                 guildPreference,
@@ -275,8 +292,8 @@ export default class SongSelector {
             };
         }
 
-        let subunits = [];
-        let collabGroupContainingSubunit = [];
+        let subunits: Array<String> = [];
+        let collabGroupContainingSubunit: Array<string> = [];
         if (gameOptions.subunitPreference === SubunitsPreference.INCLUDE) {
             subunits = (
                 await dbContext

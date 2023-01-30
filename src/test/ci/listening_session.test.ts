@@ -6,10 +6,13 @@ import GuildPreference from "../../structures/guild_preference";
 import KmqClient from "../../kmq_client";
 import KmqMember from "../../structures/kmq_member";
 import ListeningSession from "../../structures/listening_session";
+import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
 import assert from "assert";
 import sinon from "sinon";
+
+const mockMessageContext = new MessageContext("dummy", new KmqMember("dummy"));
 
 function getMockGuildPreference(): GuildPreference {
     const guildPreference = new GuildPreference("test");
@@ -75,7 +78,7 @@ describe("listening session", () => {
         describe("happy path", () => {
             it("should start the round successfully", async () => {
                 voiceChannelStub.voiceMembers.add({ id: "1" } as any);
-                await listeningSession.startRound(null);
+                await listeningSession.startRound(mockMessageContext);
                 assert.ok(prepareRoundSpy.called);
                 assert.ok(ensureVoiceConnectionSpy.called);
                 assert.ok(playSongSpy.called);

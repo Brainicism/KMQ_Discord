@@ -32,24 +32,31 @@ export default class TeamScoreboard extends Scoreboard {
         // give everybody EXP
         for (const guessResult of guessResults) {
             const correctGuesser = this.getPlayer(guessResult.userID);
-            correctGuesser.incrementExp(guessResult.expGain);
+            if (correctGuesser) {
+                correctGuesser.incrementExp(guessResult.expGain);
+            }
         }
 
         // first guesser gets the point for their team
         const firstGuessResult = guessResults[0];
         const firstCorrectGuesser = this.getPlayer(firstGuessResult.userID);
 
-        firstCorrectGuesser.incrementScore(firstGuessResult.pointsEarned);
+        if (firstCorrectGuesser) {
+            firstCorrectGuesser.incrementScore(firstGuessResult.pointsEarned);
+        }
+
         const correctGuesserTeam = this.getTeamOfPlayer(
             firstGuessResult.userID
         );
 
-        const correctGuesserTeamScore = correctGuesserTeam.getScore();
-        if (correctGuesserTeamScore === this.highestScore) {
-            this.firstPlace.push(correctGuesserTeam);
-        } else if (correctGuesserTeamScore > this.highestScore) {
-            this.highestScore = correctGuesserTeamScore;
-            this.firstPlace = [correctGuesserTeam];
+        if (correctGuesserTeam) {
+            const correctGuesserTeamScore = correctGuesserTeam.getScore();
+            if (correctGuesserTeamScore === this.highestScore) {
+                this.firstPlace.push(correctGuesserTeam);
+            } else if (correctGuesserTeamScore > this.highestScore) {
+                this.highestScore = correctGuesserTeamScore;
+                this.firstPlace = [correctGuesserTeam];
+            }
         }
     }
 
@@ -57,15 +64,16 @@ export default class TeamScoreboard extends Scoreboard {
      * Create a new team with containing the player who created it
      * @param name - The name of the team
      * @param player - The player that created the team
+     * @param guildID - The guild ID
      * @returns the newly created team
      */
-    addTeam(name: string, player: Player): Team {
+    addTeam(name: string, player: Player, guildID: string): Team {
         // If the user is switching teams, remove them from their existing team first
         if (this.getPlayer(player.id)) {
             this.removePlayer(player.id);
         }
 
-        this.players[name] = new Team(name, player);
+        this.players[name] = new Team(name, player, guildID);
         return this.players[name];
     }
 
@@ -111,7 +119,7 @@ export default class TeamScoreboard extends Scoreboard {
      * @param userID - The unique identifier of the player being searching for
      * @returns the team containing the given player
      */
-    getTeamOfPlayer(userID: string): Team {
+    getTeamOfPlayer(userID: string): Team | null {
         return (
             Object.values(this.players).find((t: Team) =>
                 t.hasPlayer(userID)
@@ -163,7 +171,7 @@ export default class TeamScoreboard extends Scoreboard {
      * @param userID - The unique identifier of the player to find
      * @returns the player associated with the given userID, or null if it isn't in any of the teams
      */
-    getPlayer(userID: string): Player {
+    getPlayer(userID: string): Player | null {
         const teamOfPlayer = this.getTeamOfPlayer(userID);
         return teamOfPlayer ? teamOfPlayer.getPlayer(userID) : null;
     }
@@ -173,15 +181,29 @@ export default class TeamScoreboard extends Scoreboard {
      * @returns the exp gained by the player (with a 10% bonus to the winning team if there are multiple teams)
      */
     getPlayerExpGain(userID: string): number {
+        const team = this.getTeamOfPlayer(userID);
+        const player = this.getPlayer(userID);
+
+        if (!player) {
+            return 0;
+        }
+
+        if (!team) {
+            logger.error(
+                `getPlayerExpGain | Player ${player.id}  unexpectedly not part of a team`
+            );
+            return 0;
+        }
+
         if (
-            this.isTeamFirstPlace(this.getTeamOfPlayer(userID).getName()) &&
+            this.isTeamFirstPlace(team.getName()) &&
             Object.keys(this.getTeams()).length > 1 &&
             this.firstPlace.length === 1
         ) {
-            return this.getPlayer(userID).getExpGain() * 1.1;
+            return player.getExpGain() * 1.1;
         }
 
-        return this.getPlayer(userID).getExpGain();
+        return player.getExpGain();
     }
 
     /**
@@ -201,8 +223,13 @@ export default class TeamScoreboard extends Scoreboard {
      * @param userID - The unique identifier of the player to get
      * @returns the player's tag
      */
-    getPlayerName(userID: string): string {
-        return this.getPlayer(userID).getName();
+    getPlayerName(userID: string): string | null {
+        const player = this.getPlayer(userID);
+        if (!player) {
+            return null;
+        }
+
+        return player.getName();
     }
 
     /**

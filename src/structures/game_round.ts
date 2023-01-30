@@ -134,7 +134,7 @@ export default class GameRound extends Round {
     };
 
     /** UUID associated with right guess interaction custom_id */
-    public interactionCorrectAnswerUUID: string;
+    public interactionCorrectAnswerUUID: string | null;
 
     /** UUID associated with wrong guesses in multiple choice */
     public interactionIncorrectAnswerUUIDs: { [uuid: string]: number };
@@ -189,7 +189,7 @@ export default class GameRound extends Round {
         this.playerRoundResults = [];
         this.bonusModifier =
             Math.random() < 0.01
-                ? _.sample([
+                ? (_.sample([
                       ExpBonusModifierValues[
                           ExpBonusModifier.RANDOM_GUESS_BONUS_COMMON
                       ],
@@ -202,7 +202,7 @@ export default class GameRound extends Round {
                       ExpBonusModifierValues[
                           ExpBonusModifier.RANDOM_GUESS_BONUS_LEGENDARY
                       ],
-                  ])
+                  ]) as number)
                 : 1;
     }
 
@@ -501,7 +501,7 @@ export default class GameRound extends Round {
         );
 
         return {
-            exact: this.song.songName && cleanedSongAliases.includes(guess),
+            exact: !!this.song.songName && cleanedSongAliases.includes(guess),
             similar: GameRound.similarityCheck(guess, cleanedSongAliases),
         };
     }
@@ -518,7 +518,7 @@ export default class GameRound extends Round {
         );
 
         return {
-            exact: this.song.songName && cleanedArtistAliases.includes(guess),
+            exact: !!this.song.songName && cleanedArtistAliases.includes(guess),
             similar: GameRound.similarityCheck(guess, cleanedArtistAliases),
         };
     }

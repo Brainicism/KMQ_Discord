@@ -24,7 +24,7 @@ const logger = new IPCLogger("game_utils");
 
 interface GroupMatchResults {
     unmatchedGroups: Array<string>;
-    matchedGroups?: Array<MatchedArtist>;
+    matchedGroups: Array<MatchedArtist>;
 }
 
 /**

@@ -73,7 +73,7 @@ export default abstract class Session {
     public lastActive: number;
 
     /** The current Round */
-    public round: Round;
+    public round: Round | null;
 
     /** Whether the GameSession has ended or not */
     public finished: boolean;
@@ -185,7 +185,7 @@ export default abstract class Session {
         }
 
         this.sessionInitialized = true;
-        if (this.songSelector.getSongs() === null) {
+        if (this.songSelector.getSongs().songs.size === 0) {
             try {
                 await this.songSelector.reloadSongs(
                     this.guildPreference,
@@ -445,8 +445,9 @@ export default abstract class Session {
         if (
             this.isListeningSession() ||
             !this.guildPreference.isGuessTimeoutSet()
-        )
+        ) {
             return;
+        }
 
         const time = this.guildPreference.gameOptions.guessTimeout;
         this.guessTimeoutFunc = setTimeout(async () => {

@@ -8,7 +8,7 @@ import type UniqueSongCounter from "../interfaces/unique_song_counter";
 
 export default class ListeningRound extends Round {
     /** UUID associated with skip interaction custom_id */
-    public interactionSkipUUID: string;
+    public interactionSkipUUID: string | null;
 
     constructor(song: QueriedSong) {
         super(song);
@@ -26,7 +26,10 @@ export default class ListeningRound extends Round {
         );
     }
 
-    getEndRoundColor(_correctGuess: boolean, userBonusActive: boolean): number {
+    getEndRoundColor(
+        _correctGuess: boolean,
+        userBonusActive: boolean
+    ): number | null {
         if (userBonusActive) {
             return EMBED_SUCCESS_BONUS_COLOR;
         }

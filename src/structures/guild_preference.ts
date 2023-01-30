@@ -57,7 +57,8 @@ type GameOptionValue =
     | SubunitsPreference
     | OstPreference
     | PlaylistMetadata
-    | string;
+    | string
+    | null;
 
 /**
  * @param groups - The artists to combine into a string
@@ -194,7 +195,7 @@ export default class GuildPreference {
     public readonly guildID: string;
 
     /** Callback to reload songs */
-    public reloadSongCallback: () => Promise<void>;
+    public reloadSongCallback: (() => Promise<void>) | null;
 
     /** The guild preference cache */
     private static guildPreferencesCache = {};
@@ -229,11 +230,11 @@ export default class GuildPreference {
     }
 
     static async getGuildPreference(guildID: string): Promise<GuildPreference> {
-        if (!this.locks.has(guildID)) {
+        if (!(guildID in this.locks)) {
             this.locks.set(guildID, new Mutex());
         }
 
-        return this.locks.get(guildID).runExclusive(async () => {
+        return this.locks.get(guildID)!.runExclusive(async () => {
             if (guildID in GuildPreference.guildPreferencesCache) {
                 return GuildPreference.guildPreferencesCache[guildID];
             }
@@ -311,7 +312,7 @@ export default class GuildPreference {
      * @param presetName - The game preset to be deleted
      * @returns the old UUID if the deletion was successful and null otherwise
      */
-    async deletePreset(presetName: string): Promise<string> {
+    async deletePreset(presetName: string): Promise<string | null> {
         const presetUUID = await this.getPresetUUID(presetName);
 
         if (!presetUUID) {
@@ -412,7 +413,7 @@ export default class GuildPreference {
      * @param presetName - The name of the preset whose UUID is requested
      * @returns whether the UUID of the given preset or null if the preset doesn't exist
      */
-    async getPresetUUID(presetName: string): Promise<string> {
+    async getPresetUUID(presetName: string): Promise<string | null> {
         const presetID = await dbContext
             .kmq("game_option_presets")
             .select(["option_value"])
@@ -445,7 +446,9 @@ export default class GuildPreference {
     async reset(gameOption: GameOption): Promise<void> {
         if (gameOption in this.resetArgs) {
             const resetArg = this.resetArgs[gameOption];
-            await resetArg.setter.bind(this)(...resetArg.default);
+            if (resetArg) {
+                await resetArg.setter.bind(this)(...resetArg.default);
+            }
         }
     }
 
@@ -503,7 +506,7 @@ export default class GuildPreference {
      * @param original - Whether to include collabs or not
      * @returns a friendly, potentially truncated, string displaying the currently selected groups option
      * */
-    getDisplayedGroupNames(original = false): string {
+    getDisplayedGroupNames(original = false): string | null {
         if (this.gameOptions.groups === null) return null;
         if (original) {
             return getGroupNamesString(
@@ -554,7 +557,7 @@ export default class GuildPreference {
      * @param original - Whether to include collabs or not
      * @returns a friendly, potentially truncated, string displaying the currently selected exclude option
      * */
-    getDisplayedExcludesGroupNames(original = false): string {
+    getDisplayedExcludesGroupNames(original = false): string | null {
         if (this.gameOptions.excludes === null) return null;
         if (original) {
             return getGroupNamesString(
@@ -599,7 +602,7 @@ export default class GuildPreference {
      * @param original - Whether to include collabs or not
      * @returns a friendly, potentially truncated, string displaying the currently selected include option
      * */
-    getDisplayedIncludesGroupNames(original = false): string {
+    getDisplayedIncludesGroupNames(original = false): string | null {
         if (this.gameOptions.includes === null) return null;
         if (original) {
             return getGroupNamesString(
@@ -844,7 +847,7 @@ export default class GuildPreference {
      * @param playlistMetadata - Spotify playlist ID, length, name
      */
     async setSpotifyPlaylistMetadata(
-        playlistMetadata: PlaylistMetadata
+        playlistMetadata: PlaylistMetadata | null
     ): Promise<void> {
         this.gameOptions.spotifyPlaylistMetadata = playlistMetadata;
         await this.updateGuildPreferences([
@@ -856,7 +859,7 @@ export default class GuildPreference {
     }
 
     /** @returns the ID of the playlist to retrieve songs from */
-    getSpotifyPlaylistMetadata(): PlaylistMetadata {
+    getSpotifyPlaylistMetadata(): PlaylistMetadata | null {
         return this.gameOptions.spotifyPlaylistMetadata;
     }
 

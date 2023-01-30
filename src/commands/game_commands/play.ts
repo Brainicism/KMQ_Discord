@@ -17,6 +17,7 @@ import {
 import { bold, getMention, isWeekend } from "../../helpers/utils";
 import {
     fetchChannel,
+    fetchUser,
     generateOptionsMessage,
     getCurrentVoiceMembers,
     getDebugLogHeader,
@@ -424,7 +425,7 @@ export default class PlayCommand implements BaseCommand {
     };
 
     static canStartTeamsGame(
-        gameSession: GameSession,
+        gameSession: GameSession | null,
         messageContext: MessageContext,
         interaction?: Eris.CommandInteraction
     ): boolean {
@@ -612,15 +613,17 @@ export default class PlayCommand implements BaseCommand {
 
         const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
         if (!teamScoreboard.hasTeam(teamName)) {
+            const user = await fetchUser(messageContext.author.id);
             teamScoreboard.addTeam(
                 teamName,
-                Player.fromUserID(
-                    messageContext.author.id,
+                Player.fromUser(
+                    user,
                     messageContext.guildID,
                     0,
                     await isFirstGameOfDay(messageContext.author.id),
                     await isUserPremium(messageContext.author.id)
-                )
+                ),
+                messageContext.guildID
             );
             const teamNameWithCleanEmojis = teamName.replace(
                 /(<a?)(:[a-zA-Z0-9]+:)([0-9]+>)/gm,
@@ -694,10 +697,11 @@ export default class PlayCommand implements BaseCommand {
                 return;
             }
 
+            const player = await fetchUser(messageContext.author.id);
             teamScoreboard.addTeamPlayer(
                 team.id,
-                Player.fromUserID(
-                    messageContext.author.id,
+                Player.fromUser(
+                    player,
                     messageContext.guildID,
                     0,
                     await isFirstGameOfDay(messageContext.author.id),

@@ -28,7 +28,7 @@ export default abstract class Round {
     public finished: boolean;
 
     /**  The Discord ID of the end round message */
-    public roundMessageID: string;
+    public roundMessageID: string | null;
 
     /** List of players who have opted to skip the current Round */
     public skippers: Set<string>;
@@ -40,7 +40,7 @@ export default abstract class Round {
     public interactionComponents: Array<ButtonActionRow>;
 
     /** The message containing this round's interactable components */
-    public interactionMessage: Eris.Message<Eris.TextableChannel>;
+    public interactionMessage: Eris.Message<Eris.TextableChannel> | null;
 
     constructor(song: QueriedSong) {
         this.song = song;
@@ -65,7 +65,7 @@ export default abstract class Round {
     abstract getEndRoundColor(
         correctGuess: boolean,
         userBonusActive: boolean
-    ): number;
+    ): number | null;
 
     abstract isValidInteraction(interactionUUID: string): boolean;
 

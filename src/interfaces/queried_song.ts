@@ -8,7 +8,7 @@ export default interface QueriedSong {
     artistName: string;
     hangulArtistName?: string;
     youtubeLink: string;
-    publishDate?: Date;
+    publishDate: Date;
     members: Gender;
     artistID: number;
     isSolo: string;

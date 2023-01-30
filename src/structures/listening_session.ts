@@ -23,7 +23,7 @@ const logger = new IPCLogger("listening_session");
 
 export default class ListeningSession extends Session {
     /** The current ListeningRound */
-    public round: ListeningRound;
+    public round: ListeningRound | null;
 
     constructor(
         guildPreference: GuildPreference,
@@ -85,12 +85,13 @@ export default class ListeningSession extends Session {
         }
 
         const round = this.round;
+
         if (messageContext) {
             const remainingDuration = this.getRemainingDuration(
                 this.guildPreference
             );
 
-            const embedColor = round.getEndRoundColor(
+            const embedColor = this.round.getEndRoundColor(
                 null,
                 await userBonusIsActive(messageContext.author.id)
             );

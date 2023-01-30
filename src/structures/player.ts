@@ -2,6 +2,7 @@ import { ExpBonusModifierValues } from "../constants";
 import { bold, escapedFormatting, getMention } from "../helpers/utils";
 import ExpBonusModifier from "../enums/exp_bonus_modifier";
 import State from "../state";
+import type Eris from "eris";
 
 export default class Player {
     /** The Discord user ID of the player */
@@ -23,7 +24,7 @@ export default class Player {
     protected score: number;
 
     /** The player's avatar URL */
-    private readonly avatarURL: string;
+    private readonly avatarURL: string | null;
 
     /** The player's EXP gain */
     private expGain: number;
@@ -32,12 +33,12 @@ export default class Player {
     private firstGameOfTheDay: boolean;
 
     /** The previous round's ranking */
-    private previousRoundRanking: number;
+    private previousRoundRanking: number | null;
 
     constructor(
         id: string,
         guildID: string,
-        avatarURL: string,
+        avatarURL: string | null,
         points: number,
         username: string,
         firstGameOfTheDay = false,
@@ -55,21 +56,19 @@ export default class Player {
         this.previousRoundRanking = null;
     }
 
-    static fromUserID(
-        userID: string,
+    static fromUser(
+        user: Eris.User,
         guildID: string,
         score = 0,
         firstGameOfDay = false,
         premium = false
     ): Player {
-        const user = State.client.users.get(userID);
-
         return new Player(
-            userID,
+            user.id,
             guildID,
             user.avatarURL,
             score,
-            State.client.users.get(userID).username,
+            user.username,
             firstGameOfDay,
             premium
         );
@@ -142,7 +141,7 @@ export default class Player {
 
     /** @returns the player's avatar URL */
     getAvatarURL(): string {
-        return this.avatarURL;
+        return this.avatarURL || "";
     }
 
     /**

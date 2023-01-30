@@ -760,7 +760,7 @@ describe("song selector", () => {
 
             describe("override to female", () => {
                 it("should only return female/coed songs", async () => {
-                    const femaleOrCoedSongs = [];
+                    const femaleOrCoedSongs: Array<QueriedSong> = [];
                     const filteredSongs = (
                         await SongSelector.getFilteredSongList(
                             guildPreference,
@@ -776,7 +776,7 @@ describe("song selector", () => {
                                     femaleOrCoedSongs.map((x) => x.youtubeLink)
                                 ),
                                 Gender.FEMALE
-                            )
+                            ) as QueriedSong
                         );
                     }
 
@@ -790,7 +790,7 @@ describe("song selector", () => {
 
             describe("override to male", () => {
                 it("should only return male/coed songs", async () => {
-                    const maleOrCoedSongs = [];
+                    const maleOrCoedSongs: Array<QueriedSong> = [];
                     const filteredSongs = (
                         await SongSelector.getFilteredSongList(
                             guildPreference,
@@ -806,7 +806,7 @@ describe("song selector", () => {
                                     maleOrCoedSongs.map((x) => x.youtubeLink)
                                 ),
                                 Gender.MALE
-                            )
+                            ) as QueriedSong
                         );
                     }
 
@@ -835,13 +835,18 @@ describe("song selector", () => {
                         Array.from(filteredSongs).slice(0, numIgnored)
                     );
 
-                    const selectedSongs = [];
+                    const selectedSongs: Array<QueriedSong> = [];
                     for (let i = 0; i < filteredSongs.size - numIgnored; i++) {
                         selectedSongs.push(
                             SongSelector.selectRandomSong(
                                 filteredSongs,
-                                new Set([...ignoredSongs, ...selectedSongs])
-                            )
+                                new Set(
+                                    [...ignoredSongs, ...selectedSongs].map(
+                                        (x) => x.youtubeLink
+                                    )
+                                ),
+                                null
+                            ) as QueriedSong
                         );
                     }
 
@@ -851,9 +856,7 @@ describe("song selector", () => {
                     );
 
                     assert.ok(
-                        selectedSongs.every(
-                            (song) => !ignoredSongs.has(song.youtubeLink)
-                        )
+                        selectedSongs.every((song) => !ignoredSongs.has(song))
                     );
                 });
             });
@@ -908,7 +911,11 @@ describe("song selector", () => {
 
                 const songs: Array<QueriedSong> = [];
                 for (let i = 0; i < limit; i++) {
-                    songs.push(songSelector.queryRandomSong(guildPreference));
+                    songs.push(
+                        songSelector.queryRandomSong(
+                            guildPreference
+                        ) as QueriedSong
+                    );
                 }
 
                 for (let i = 1; i < songs.length - 1; i++) {
