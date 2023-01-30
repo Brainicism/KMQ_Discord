@@ -53,7 +53,11 @@ export async function warnServersImpendingRestart(
             if (gameSession.finished) continue;
             // eslint-disable-next-line no-await-in-loop
             await sendInfoMessage(
-                new MessageContext(gameSession.textChannelID),
+                new MessageContext(
+                    gameSession.textChannelID,
+                    null,
+                    gameSession.guildID
+                ),
                 {
                     title: i18n.translate(
                         gameSession.guildID,

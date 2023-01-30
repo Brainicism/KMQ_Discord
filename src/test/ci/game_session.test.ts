@@ -92,7 +92,9 @@ describe("game session", () => {
                 // round starts successfully
                 voiceChannelStub.voiceMembers.add({ id: "1" } as any);
 
-                await gameSession.startRound(new MessageContext("id"));
+                await gameSession.startRound(
+                    new MessageContext("id", null, "guild_id")
+                );
                 gameSession.connection = voiceConnection;
                 assert.ok(prepareRoundSpy.called);
                 assert.ok(ensureVoiceConnectionSpy.called);
@@ -102,6 +104,7 @@ describe("game session", () => {
                 assert.ok(
                     gameSession.songSelector.getSongs().countBeforeLimit > 0
                 );
+                assert(gameSession.round);
 
                 const correctGuess = gameSession.round.acceptedSongAnswers[0];
                 const gameStarter = new KmqMember("123");

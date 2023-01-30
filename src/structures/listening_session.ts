@@ -74,32 +74,30 @@ export default class ListeningSession extends Session {
      * Starting a new ListeningRound
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
-    async startRound(messageContext: MessageContext): Promise<boolean> {
+    async startRound(messageContext: MessageContext): Promise<Round | null> {
         if (this.finished || this.round) {
-            return false;
+            return null;
         }
 
-        const startRoundResult = await super.startRound(messageContext);
-        if (!startRoundResult) {
-            return false;
+        const round = await super.startRound(messageContext);
+        if (!round) {
+            return null;
         }
-
-        const round = this.round;
 
         if (messageContext) {
             const remainingDuration = this.getRemainingDuration(
                 this.guildPreference
             );
 
-            const embedColor = this.round.getEndRoundColor(
-                null,
+            const embedColor = round.getEndRoundColor(
+                false,
                 await userBonusIsActive(messageContext.author.id)
             );
 
             const description = `${round.getEndRoundDescription(
                 messageContext,
                 this.songSelector.getUniqueSongCounter(this.guildPreference),
-                null
+                []
             )}`;
 
             const startRoundMessage = await this.sendRoundMessage(
@@ -107,7 +105,7 @@ export default class ListeningSession extends Session {
                 [],
                 round,
                 description,
-                embedColor,
+                embedColor ?? undefined,
                 false,
                 remainingDuration
             );
@@ -117,7 +115,7 @@ export default class ListeningSession extends Session {
             this.updateBookmarkSongList(round);
         }
 
-        return true;
+        return round;
     }
 
     async endRound(
@@ -128,7 +126,7 @@ export default class ListeningSession extends Session {
         super.endRound(messageContext, guessResult);
     }
 
-    endSession(reason: string): Promise<void> {
+    async endSession(reason: string): Promise<void> {
         if (this.finished) {
             return;
         }
@@ -137,7 +135,7 @@ export default class ListeningSession extends Session {
         logger.info(
             `gid: ${this.guildID} | Listening session ended. rounds_played = ${this.roundsPlayed}`
         );
-        super.endSession(reason);
+        await super.endSession(reason);
     }
 
     async handleComponentInteraction(
@@ -156,11 +154,11 @@ export default class ListeningSession extends Session {
         }
 
         const round = this.round;
-        const guildID = interaction.guildID;
+        const guildID = interaction.guildID as string;
         if (interaction.data.custom_id === "bookmark") {
             this.handleBookmarkInteraction(interaction);
         } else if (interaction.data.custom_id === round.interactionSkipUUID) {
-            round.userSkipped(interaction.member.id);
+            round.userSkipped(interaction.member!.id);
             if (isSkipMajority(guildID, this)) {
                 await round.interactionSuccessfulSkip();
                 await tryCreateInteractionSuccessAcknowledgement(

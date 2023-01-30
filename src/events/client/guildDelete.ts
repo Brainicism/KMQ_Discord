@@ -24,29 +24,43 @@ export default async function guildDeleteHandler(
     )} ${leaveDate.toLocaleTimeString("en-US")}`;
 
     if (guild instanceof Eris.Guild) {
-        await sendInfoMessage(new MessageContext(kmqDebugChannel.id), {
-            author: {
-                username: guild.name,
-                avatarUrl: guild.iconURL,
-            },
-            title,
-            fields: [
-                {
-                    name: "**Member Count**:",
-                    value: guild.memberCount.toString(),
+        await sendInfoMessage(
+            new MessageContext(
+                kmqDebugChannel.id,
+                null,
+                kmqDebugChannel.guild.id
+            ),
+            {
+                author: {
+                    username: guild.name,
+                    avatarUrl: guild.iconURL,
                 },
-                { name: "**Language**:", value: guild.preferredLocale },
-                {
-                    name: "**Nitro Boosts**:",
-                    value: guild.premiumSubscriptionCount.toString(),
-                },
-            ],
-            footerText,
-        });
+                title,
+                fields: [
+                    {
+                        name: "**Member Count**:",
+                        value: guild.memberCount.toString(),
+                    },
+                    { name: "**Language**:", value: guild.preferredLocale },
+                    {
+                        name: "**Nitro Boosts**:",
+                        value: guild.premiumSubscriptionCount.toString(),
+                    },
+                ],
+                footerText,
+            }
+        );
     } else {
-        await sendInfoMessage(new MessageContext(kmqDebugChannel.id), {
-            title,
-            footerText,
-        });
+        await sendInfoMessage(
+            new MessageContext(
+                kmqDebugChannel.id,
+                null,
+                kmqDebugChannel.guild.id
+            ),
+            {
+                title,
+                footerText,
+            }
+        );
     }
 }

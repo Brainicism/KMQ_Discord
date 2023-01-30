@@ -16,7 +16,11 @@ function getMockGuildPreference(): GuildPreference {
     return guildPreference;
 }
 
-const mockMessageContext = new MessageContext("dummy", new KmqMember("dummy"));
+const mockMessageContext = new MessageContext(
+    "dummy",
+    new KmqMember("dummy"),
+    "dummy"
+);
 
 describe("begin command", () => {
     const sandbox = sinon.createSandbox();
@@ -28,7 +32,7 @@ describe("begin command", () => {
                 assert.strictEqual(
                     PlayCommand.canStartTeamsGame(
                         null,
-                        new MessageContext("", gameStarter)
+                        new MessageContext("", gameStarter, "dummy")
                     ),
                     false
                 );
@@ -56,7 +60,7 @@ describe("begin command", () => {
                 assert.strictEqual(
                     PlayCommand.canStartTeamsGame(
                         gameSession,
-                        new MessageContext("", gameStarter)
+                        new MessageContext("", gameStarter, "dummy")
                     ),
                     false
                 );
@@ -64,7 +68,7 @@ describe("begin command", () => {
                 assert.strictEqual(
                     PlayCommand.canStartTeamsGame(
                         gameSession,
-                        new MessageContext("", gameStarter)
+                        new MessageContext("", gameStarter, "dummy")
                     ),
                     false
                 );
@@ -92,7 +96,7 @@ describe("begin command", () => {
                     assert.strictEqual(
                         PlayCommand.canStartTeamsGame(
                             gameSession,
-                            new MessageContext("", gameStarter)
+                            new MessageContext("", gameStarter, "dummy")
                         ),
                         false
                     );

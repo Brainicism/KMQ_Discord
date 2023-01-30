@@ -25,24 +25,30 @@ export default async function guildCreateHandler(
     const kmqDebugChannel = await getDebugChannel();
     if (!kmqDebugChannel) return;
     const joinDate: Date = new Date(guild.joinedAt);
-    await sendInfoMessage(new MessageContext(kmqDebugChannel.id), {
-        author: {
-            username: guild.name,
-            avatarUrl: guild.iconURL,
-        },
-        title: "New Server Joined!",
-        fields: [
-            { name: "**Member Count**:", value: guild.memberCount.toString() },
-            { name: "**Language**:", value: guild.preferredLocale },
-            {
-                name: "**Nitro Boosts**:",
-                value: guild.premiumSubscriptionCount.toString(),
+    await sendInfoMessage(
+        new MessageContext(kmqDebugChannel.id, null, kmqDebugChannel.guild.id),
+        {
+            author: {
+                username: guild.name,
+                avatarUrl: guild.iconURL,
             },
-        ],
-        footerText: `gid: ${
-            guild.id
-        } | Joined at: ${joinDate.toLocaleDateString(
-            "en-US"
-        )} ${joinDate.toLocaleTimeString("en-US")}`,
-    });
+            title: "New Server Joined!",
+            fields: [
+                {
+                    name: "**Member Count**:",
+                    value: guild.memberCount.toString(),
+                },
+                { name: "**Language**:", value: guild.preferredLocale },
+                {
+                    name: "**Nitro Boosts**:",
+                    value: guild.premiumSubscriptionCount.toString(),
+                },
+            ],
+            footerText: `gid: ${
+                guild.id
+            } | Joined at: ${joinDate.toLocaleDateString(
+                "en-US"
+            )} ${joinDate.toLocaleTimeString("en-US")}`,
+        }
+    );
 }
