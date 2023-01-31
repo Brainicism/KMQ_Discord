@@ -351,7 +351,7 @@ export default abstract class Session {
 
         this.guildPreference.reloadSongCallback = null;
         Session.deleteSession(this.guildID);
-        await this.endRound(
+        this.endRound(
             new MessageContext(this.textChannelID, null, this.guildID),
             { correct: false }
         );
@@ -454,7 +454,7 @@ export default abstract class Session {
         }
 
         const time = this.guildPreference.gameOptions.guessTimeout;
-        this.guessTimeoutFunc = setTimeout(async () => {
+        this.guessTimeoutFunc = setTimeout(() => {
             if (this.finished || !this.round || this.round.finished) return;
             logger.info(
                 `${getDebugLogHeader(
@@ -731,7 +731,7 @@ export default abstract class Session {
         this.startGuessTimeout(messageContext);
 
         // song finished without being guessed
-        this.connection.once("end", async () => {
+        this.connection.once("end", () => {
             // replace listener with no-op to catch any exceptions thrown after this event
             this.connection.removeAllListeners("end");
             this.connection.on("end", () => {});

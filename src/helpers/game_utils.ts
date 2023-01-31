@@ -12,13 +12,13 @@ import SongSelector from "../structures/song_selector";
 import State from "../state";
 import _ from "lodash";
 import dbContext from "../database_context";
+import type { PlaylistMetadata } from "./spotify_manager";
 import type Gender from "../enums/option_types/gender";
 import type GuildPreference from "../structures/guild_preference";
 import type MatchedArtist from "../interfaces/matched_artist";
 import type Patron from "../interfaces/patron";
 import type QueriedSong from "../interfaces/queried_song";
 import type Session from "../structures/session";
-import { PlaylistMetadata } from "./spotify_manager";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 10;
 const logger = new IPCLogger("game_utils");

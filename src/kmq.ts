@@ -20,7 +20,7 @@ import { seedAndDownloadNewSongs } from "./seed/seed_db";
 import { sendDebugAlertWebhook } from "./helpers/discord_utils";
 import { userVoted } from "./helpers/bot_listing_manager";
 import EnvType from "./enums/env_type";
-import Eris, { Shard } from "eris";
+import Eris from "eris";
 import KmqClient from "./kmq_client";
 import _ from "lodash";
 import backupKmqDatabase from "./scripts/backup-kmq-database";
@@ -212,6 +212,7 @@ async function startWebServer(fleet: Fleet): Promise<void> {
         const restartMinutes = (request.body as any)[
             "restartMinutes"
         ] as number;
+
         await fleet.ipc.allClustersCommand(
             `announce_restart|${isSoftRestart}|${restartMinutes}`
         );

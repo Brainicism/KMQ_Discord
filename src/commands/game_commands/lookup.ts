@@ -461,7 +461,7 @@ export default class LookupCommand implements BaseCommand {
     ];
 
     call = async ({ parsedMessage, message }: CommandArgs): Promise<void> => {
-        await this.lookupSong(message, parsedMessage.components[0]);
+        await this.lookupSong(message, parsedMessage.argument);
     };
 
     async lookupSong(
