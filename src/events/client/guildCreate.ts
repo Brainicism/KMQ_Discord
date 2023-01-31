@@ -30,7 +30,7 @@ export default async function guildCreateHandler(
         {
             author: {
                 username: guild.name,
-                avatarUrl: guild.iconURL,
+                avatarUrl: guild.iconURL as string,
             },
             title: "New Server Joined!",
             fields: [
@@ -41,7 +41,7 @@ export default async function guildCreateHandler(
                 { name: "**Language**:", value: guild.preferredLocale },
                 {
                     name: "**Nitro Boosts**:",
-                    value: guild.premiumSubscriptionCount.toString(),
+                    value: (guild.premiumSubscriptionCount ?? 0).toString(),
                 },
             ],
             footerText: `gid: ${

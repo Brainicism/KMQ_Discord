@@ -224,7 +224,11 @@ export default class BotWorker extends BaseClusterWorker {
             restartDate.setMinutes(
                 restartDate.getMinutes() + timeRemaining / (1000 * 60)
             );
-            State.restartNotification.restartDate = restartDate;
+
+            State.restartNotification = {
+                restartDate,
+                soft: true,
+            };
 
             logger.info(
                 `Soft restart ready to proceed: ${JSON.stringify(

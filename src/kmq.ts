@@ -20,7 +20,7 @@ import { seedAndDownloadNewSongs } from "./seed/seed_db";
 import { sendDebugAlertWebhook } from "./helpers/discord_utils";
 import { userVoted } from "./helpers/bot_listing_manager";
 import EnvType from "./enums/env_type";
-import Eris from "eris";
+import Eris, { Shard } from "eris";
 import KmqClient from "./kmq_client";
 import _ from "lodash";
 import backupKmqDatabase from "./scripts/backup-kmq-database";
@@ -45,6 +45,27 @@ enum HealthIndicator {
     HEALTHY = 0,
     WARNING = 1,
     UNHEALTHY = 2,
+}
+
+interface ClusterData {
+    id: number;
+    ram: string;
+    apiLatency: string;
+    uptime: string;
+    version: string;
+    voiceConnections: number;
+    activeGameSessions: number;
+    activePlayers: number;
+    shardData: Array<ShardData>;
+}
+
+interface ShardData {
+    latency: string;
+    status: string;
+    members: string;
+    id: number;
+    guilds: string;
+    healthIndicator: HealthIndicator;
 }
 
 const ERIS_INTENTS = Eris.Constants.Intents;
@@ -101,7 +122,7 @@ function registerGlobalIntervals(fleet: Fleet): void {
     schedule.scheduleJob("0 0 * * *", async () => {
         if (await isPrimaryInstance()) {
             logger.info("Saving daily stats");
-            storeDailyStats(fleet.stats?.guilds);
+            storeDailyStats(fleet.stats?.guilds as number);
         }
     });
 
@@ -180,7 +201,7 @@ async function startWebServer(fleet: Fleet): Promise<void> {
             return;
         }
 
-        const isSoftRestart = request.body["soft"] ? 1 : 0;
+        const isSoftRestart = (request.body as any)["soft"] ? 1 : 0;
 
         if (isSoftRestart) {
             logger.info("Soft restart initiated");
@@ -188,7 +209,9 @@ async function startWebServer(fleet: Fleet): Promise<void> {
             fleet.restartAllClusters(false);
         }
 
-        const restartMinutes = request.body["restartMinutes"];
+        const restartMinutes = (request.body as any)[
+            "restartMinutes"
+        ] as number;
         await fleet.ipc.allClustersCommand(
             `announce_restart|${isSoftRestart}|${restartMinutes}`
         );
@@ -216,7 +239,7 @@ async function startWebServer(fleet: Fleet): Promise<void> {
             return;
         }
 
-        const userID = request.body["user"];
+        const userID = (request.body as any)["user"] as string;
         await userVoted(userID);
         reply.code(200).send();
     });
@@ -248,7 +271,7 @@ async function startWebServer(fleet: Fleet): Promise<void> {
     );
 
     httpServer.get("/status", async (request, reply) => {
-        if (fleet.stats.guilds === 0) {
+        if (fleet.stats?.guilds === 0) {
             return "KMQ is still starting up. Check back in a few minutes!";
         }
 
@@ -272,25 +295,27 @@ async function startWebServer(fleet: Fleet): Promise<void> {
             return "Couldn't retrieve status information. Please try again later.";
         }
 
-        const clusterData = [];
+        const clusterData: Array<ClusterData> = [];
         for (let i = 0; i < fleetStats.clusters.length; i++) {
             const fleetCluster = fleetStats.clusters[i];
-            const shardData = fleetCluster.shards.map((rawShardData) => {
-                let healthIndicator: HealthIndicator;
-                if (rawShardData.ready === false)
-                    healthIndicator = HealthIndicator.UNHEALTHY;
-                else if (rawShardData.latency > 300)
-                    healthIndicator = HealthIndicator.WARNING;
-                else healthIndicator = HealthIndicator.HEALTHY;
-                return {
-                    latency: rawShardData.latency ?? "?",
-                    status: rawShardData.status,
-                    members: rawShardData.members.toLocaleString(),
-                    id: rawShardData.id,
-                    guilds: rawShardData.guilds.toLocaleString(),
-                    healthIndicator,
-                };
-            });
+            const shardData: Array<ShardData> = fleetCluster.shards.map(
+                (rawShardData) => {
+                    let healthIndicator: HealthIndicator;
+                    if (rawShardData.ready === false)
+                        healthIndicator = HealthIndicator.UNHEALTHY;
+                    else if (rawShardData.latency > 300)
+                        healthIndicator = HealthIndicator.WARNING;
+                    else healthIndicator = HealthIndicator.HEALTHY;
+                    return {
+                        latency: rawShardData.latency.toString() ?? "?",
+                        status: rawShardData.status,
+                        members: rawShardData.members.toLocaleString(),
+                        id: rawShardData.id,
+                        guilds: rawShardData.guilds.toLocaleString(),
+                        healthIndicator,
+                    };
+                }
+            );
 
             clusterData.push({
                 id: fleetCluster.id,
@@ -301,7 +326,7 @@ async function startWebServer(fleet: Fleet): Promise<void> {
                 uptime: standardDateFormat(
                     new Date(Date.now() - fleetCluster.uptime)
                 ),
-                version: workerVersions.get(i),
+                version: workerVersions.get(i) as string,
                 voiceConnections: fleetCluster.voice,
                 activeGameSessions: gameplayStats.get(i).activeGameSessions,
                 activePlayers: gameplayStats.get(i).activePlayers,
@@ -321,7 +346,7 @@ async function startWebServer(fleet: Fleet): Promise<void> {
         else databaseLatencyHealthIndicator = HealthIndicator.UNHEALTHY;
 
         const requestLatency =
-            fleetStats.centralRequestHandlerLatencyRef.latency;
+            fleetStats.centralRequestHandlerLatencyRef?.latency ?? -1;
 
         let requestLatencyHealthIndicator: HealthIndicator;
         if (requestLatency < 500)

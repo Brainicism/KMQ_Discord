@@ -57,7 +57,7 @@ export default class ListeningSession extends Session {
             return;
         }
 
-        this.owner = new KmqMember(chooseRandom(voiceMembers).id);
+        this.owner = new KmqMember(chooseRandom(voiceMembers)!.id);
 
         super.updateOwner();
     }

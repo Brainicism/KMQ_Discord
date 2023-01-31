@@ -18,6 +18,7 @@ import type MatchedArtist from "../interfaces/matched_artist";
 import type Patron from "../interfaces/patron";
 import type QueriedSong from "../interfaces/queried_song";
 import type Session from "../structures/session";
+import { PlaylistMetadata } from "./spotify_manager";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 10;
 const logger = new IPCLogger("game_utils");
@@ -54,7 +55,7 @@ export async function getAvailableSongCount(
     try {
         if (guildPreference.isSpotifyPlaylist()) {
             const spotifyMetadata =
-                guildPreference.getSpotifyPlaylistMetadata();
+                guildPreference.getSpotifyPlaylistMetadata() as PlaylistMetadata;
 
             return {
                 count: spotifyMetadata.matchedSongsLength,
@@ -75,7 +76,10 @@ export async function getAvailableSongCount(
         };
     } catch (e) {
         logger.error(`Error retrieving song count ${e}`);
-        return null;
+        return {
+            count: 0,
+            countBeforeLimit: 0,
+        };
     }
 }
 
@@ -345,11 +349,13 @@ export async function getMultipleChoiceOptions(
             }
 
             default:
+                logger.error(`Unexpected answer type: ${answerType}`);
+                result = _.sampleSize(easyNames, EASY_CHOICES);
                 break;
         }
 
         const uniqueResult = new Map();
-        const removedResults = [];
+        const removedResults: Array<string> = [];
         for (const song of result) {
             if (uniqueResult.has(cleanSongName(song))) {
                 removedResults.push(song);
@@ -412,6 +418,8 @@ export async function getMultipleChoiceOptions(
                 result = _.sampleSize(names, CHOICES_BY_DIFFICULTY[answerType]);
                 break;
             default:
+                logger.error(`Unexpected answerType: ${answerType}`);
+                result = _.sampleSize(easyNames, EASY_CHOICES);
                 break;
         }
     }

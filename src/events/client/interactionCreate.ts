@@ -45,16 +45,16 @@ export default async function interactionCreateHandler(
         | Eris.ComponentInteraction
         | Eris.AutocompleteInteraction
 ): Promise<void> {
-    const member = new KmqMember(interaction.member.id);
+    const member = new KmqMember(interaction.member!.id);
     const messageContext = new MessageContext(
         interaction.channel.id,
         member,
-        interaction.guildID
+        interaction.guildID as string
     );
 
-    const session = Session.getSession(interaction.guildID);
-    let interactionPromise: Promise<any> = null;
-    let interactionName: string = null;
+    const session = Session.getSession(interaction.guildID as string);
+    let interactionPromise: Promise<any> | null = null;
+    let interactionName: string | null = null;
     if (interaction instanceof Eris.ComponentInteraction) {
         if (
             !session ||
@@ -104,6 +104,7 @@ export default async function interactionCreateHandler(
                 logger.error(
                     `No handler found for CHAT_INPUT CommandInteraction: ${interaction.data.name}`
                 );
+                return;
             }
         } else {
             switch (interaction.data.name) {
@@ -117,7 +118,7 @@ export default async function interactionCreateHandler(
                         interactionPromise =
                             ProfileCommand.handleProfileInteraction(
                                 interaction as Eris.CommandInteraction,
-                                interaction.data.target_id,
+                                interaction.data.target_id as string,
                                 true
                             );
                     } else if (
@@ -127,7 +128,8 @@ export default async function interactionCreateHandler(
                         const messageID = interaction.data.target_id;
                         const authorID = (
                             interaction as Eris.CommandInteraction
-                        ).data.resolved["messages"].get(messageID).author.id;
+                        ).data.resolved!["messages"]!.get(messageID as string)!
+                            .author.id;
 
                         interactionName = `MESSAGE Application Command for '${interaction.data.name}'`;
 
@@ -148,7 +150,7 @@ export default async function interactionCreateHandler(
                             interaction as Eris.CommandInteraction,
                             null,
                             i18n.translate(
-                                interaction.guildID,
+                                interaction.guildID as string,
                                 "misc.failure.interaction.bookmarkOutsideGame"
                             )
                         );
@@ -166,6 +168,7 @@ export default async function interactionCreateHandler(
                     logger.error(
                         `No handler found for CommandInteraction  (type = ${interaction.data.type}): ${interaction.data.name}`
                     );
+                    return;
                 }
             }
         }
@@ -178,6 +181,10 @@ export default async function interactionCreateHandler(
             interactionName = `Autocomplete interaction for '${interaction.data.name}' for value '${parsedInteraction.focusedKey}'`;
             interactionPromise = autocompleteInteractionHandler(interaction);
         }
+    }
+
+    if (interactionPromise === null) {
+        return;
     }
 
     const executionTime = await measureExecutionTime(interactionPromise);

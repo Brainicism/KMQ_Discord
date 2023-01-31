@@ -92,7 +92,7 @@ export default class BotListingManager {
                 },
                 {
                     headers: {
-                        Authorization: process.env[siteConfigKeyName],
+                        Authorization: process.env[siteConfigKeyName] as string,
                     },
                 }
             );

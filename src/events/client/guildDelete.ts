@@ -33,7 +33,7 @@ export default async function guildDeleteHandler(
             {
                 author: {
                     username: guild.name,
-                    avatarUrl: guild.iconURL,
+                    avatarUrl: guild.iconURL as string,
                 },
                 title,
                 fields: [
@@ -44,7 +44,7 @@ export default async function guildDeleteHandler(
                     { name: "**Language**:", value: guild.preferredLocale },
                     {
                         name: "**Nitro Boosts**:",
-                        value: guild.premiumSubscriptionCount.toString(),
+                        value: (guild.premiumSubscriptionCount ?? 0).toString(),
                     },
                 ],
                 footerText,

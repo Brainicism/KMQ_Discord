@@ -112,14 +112,21 @@ function clearInactiveVoiceConnections(): void {
                 existingVoiceChannelGuildID
             )
         ) {
-            const voiceChannelID = State.client.voiceConnections.get(
+            const voiceConnection = State.client.voiceConnections.get(
                 existingVoiceChannelGuildID
-            ).channelID;
-
-            logger.info(
-                `gid: ${existingVoiceChannelGuildID}, vid: ${voiceChannelID} | Disconnected inactive voice connection`
             );
-            State.client.voiceConnections.leave(existingVoiceChannelGuildID);
+
+            if (voiceConnection) {
+                const voiceChannelID = voiceConnection.channelID;
+
+                logger.info(
+                    `gid: ${existingVoiceChannelGuildID}, vid: ${voiceChannelID} | Disconnected inactive voice connection`
+                );
+
+                State.client.voiceConnections.leave(
+                    existingVoiceChannelGuildID
+                );
+            }
         }
     }
 }
@@ -395,7 +402,8 @@ export function registerIntervals(clusterID: number): void {
     // Every hour
     schedule.scheduleJob("0 * * * *", () => {
         if (!isPowerHour() || isWeekend()) return;
-        if (!State.client.guilds.has(process.env.DEBUG_SERVER_ID)) return;
+        if (!State.client.guilds.has(process.env.DEBUG_SERVER_ID as string))
+            return;
         // Ping a role in KMQ server notifying of power hour
         sendPowerHourNotification();
     });
@@ -426,7 +434,7 @@ export function registerIntervals(clusterID: number): void {
         KmqConfiguration.reload();
         // set up check for restart notifications
         const timeUntilRestart = getTimeUntilRestart();
-        if (timeUntilRestart) {
+        if (timeUntilRestart && State.restartNotification) {
             updateBotStatus();
             await warnServersImpendingRestart(
                 timeUntilRestart,

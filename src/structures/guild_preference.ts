@@ -870,7 +870,9 @@ export default class GuildPreference {
     /**
      * @returns whether the spotify playing option is set
      */
-    isSpotifyPlaylist(): boolean {
+    isSpotifyPlaylist(): this is GuildPreference & {
+        gameOptions: { spotifyPlaylistMetadata: PlaylistMetadata };
+    } {
         return this.gameOptions.spotifyPlaylistMetadata !== null;
     }
 
