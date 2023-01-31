@@ -62,22 +62,7 @@ export default class AppCommandsCommand implements BaseCommand {
 
         const commandModificationScope = isProd ? "global" : "guild";
 
-        const commandsModifiedSuccess = [];
-        const commandsModifiedFailed = [];
         if (appCommandType === AppCommandsAction.RELOAD) {
-            const commandsToModify = isSingleCommand
-                ? Object.entries({
-                      [parsedMessage.components[1]]:
-                          State.client.commands[parsedMessage.components[1]],
-                  })
-                : Object.entries(State.client.commands);
-
-            const createApplicationCommandFunc: (
-                command: Eris.ApplicationCommandStructure
-            ) => Promise<Eris.ApplicationCommand> = isProd
-                ? State.client.createCommand.bind(State.client)
-                : debugServer.createCommand.bind(debugServer);
-
             logger.info(
                 `Creating ${commandModificationScope} application commands...`
             );
@@ -102,7 +87,7 @@ export default class AppCommandsCommand implements BaseCommand {
                           },
                       ];
 
-            for (const commandObj of commandsToModify) {
+            for (const commandObj of Object.entries(State.client.commands)) {
                 const commandName = commandObj[0];
                 const command = commandObj[1];
                 if (command.slashCommands) {
@@ -205,78 +190,39 @@ export default class AppCommandsCommand implements BaseCommand {
                 }
             }
 
-            for (const commandStructure of commandStructures) {
-                logger.info(
-                    `Creating ${commandModificationScope} command: ${commandStructure.name}`
+            if (isProd) {
+                await State.client.bulkEditCommands(commandStructures);
+            } else {
+                await State.client.bulkEditGuildCommands(
+                    debugServer.id,
+                    commandStructures
                 );
-                try {
-                    await createApplicationCommandFunc(commandStructure);
-                    commandsModifiedSuccess.push(commandStructure.name);
-                } catch (e) {
-                    commandsModifiedFailed.push(commandStructure.name);
-                    logger.error(
-                        `(Potentially) Failed to create ${commandModificationScope} command: ${
-                            commandStructure.name
-                        }. err = ${JSON.stringify(e)}`
-                    );
-                    continue;
-                }
             }
 
-            sendInfoMessage(MessageContext.fromMessage(message), {
+            logger.info(
+                `Created ${commandModificationScope} application commands`
+            );
+
+            await sendInfoMessage(MessageContext.fromMessage(message), {
                 title: "Application Commands Reloaded",
-                description: `**Successfully loaded**: ${commandsModifiedSuccess.join(
-                    ", "
-                )}\n**(Potentially) Failed to load**: ${commandsModifiedFailed.join(
-                    ", "
-                )}`,
             });
         } else {
-            let commands = isProd
-                ? await State.client.getCommands()
-                : await State.client.getGuildCommands(debugServer.id);
+            logger.info(
+                `Deleting ${commandModificationScope} application commands`
+            );
 
-            if (isSingleCommand) {
-                commands = commands.filter(
-                    (x) => x.name === parsedMessage.components[1]
-                );
+            if (isProd) {
+                await State.client.bulkEditCommands([]);
+            } else {
+                await State.client.bulkEditGuildCommands(debugServer.id, []);
             }
 
-            for (const command of commands) {
-                logger.info(
-                    `Deleting ${commandModificationScope} application command: ${command.name} -- ${command.id}`
-                );
+            logger.info(
+                `Deleted ${commandModificationScope} application commands`
+            );
 
-                try {
-                    if (isProd) {
-                        State.client.getCommands();
-                        await State.client.deleteCommand(command.id);
-                    } else {
-                        await State.client.deleteGuildCommand(
-                            debugServer.id,
-                            command.id
-                        );
-                    }
-
-                    commandsModifiedSuccess.push(command.name);
-                } catch (e) {
-                    logger.error(
-                        `(Potentially) Failed to delete ${commandModificationScope} command: ${
-                            command.name
-                        }. err = ${JSON.stringify(e)}`
-                    );
-                    commandsModifiedFailed.push(command.name);
-                    continue;
-                }
-            }
-
-            sendInfoMessage(MessageContext.fromMessage(message), {
+            await sendInfoMessage(MessageContext.fromMessage(message), {
                 title: "Commands Deleted",
-                description: `**Successfully deleted**: ${commandsModifiedSuccess.join(
-                    ", "
-                )}\n**(Potentially) Failed to delete**: ${commandsModifiedFailed.join(
-                    ", "
-                )}`,
             });
         }
     };

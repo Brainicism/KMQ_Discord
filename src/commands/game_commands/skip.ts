@@ -116,16 +116,15 @@ export function isSkipMajority(guildID: string, session: Session): boolean {
  * @param messageContext - The context that triggered skipping
  * @param session - The current session
  */
-export async function skipSong(
+export function skipSong(
     messageContext: MessageContext,
     session: Session
-): Promise<void> {
+): void {
     logger.info(
         `${getDebugLogHeader(messageContext)} | Skip majority achieved.`
     );
     session.round.skipAchieved = true;
-    await session.endRound(messageContext, { correct: false });
-
+    session.endRound(messageContext, { correct: false });
     session.startRound(messageContext);
 }
 
