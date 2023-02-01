@@ -156,7 +156,7 @@ export default class ListeningSession extends Session {
         const round = this.round;
         const guildID = interaction.guildID as string;
         if (interaction.data.custom_id === "bookmark") {
-            this.handleBookmarkInteraction(interaction);
+            await this.handleBookmarkInteraction(interaction);
         } else if (interaction.data.custom_id === round.interactionSkipUUID) {
             round.userSkipped(interaction.member!.id);
             if (isSkipMajority(guildID, this)) {

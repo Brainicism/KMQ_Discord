@@ -94,7 +94,10 @@ export default (
 
                 // parse as integer for now, might cause problems later?
                 const intArg = parseInt(arg, 10);
-                if (validation.minValue && intArg < validation.minValue) {
+                if (
+                    validation.minValue != null &&
+                    intArg < validation.minValue
+                ) {
                     sendValidationErrorMessage(
                         messageContext,
                         i18n.translate(
@@ -111,7 +114,10 @@ export default (
                     return false;
                 }
 
-                if (validation.maxValue && intArg > validation.maxValue) {
+                if (
+                    validation.maxValue != null &&
+                    intArg > validation.maxValue
+                ) {
                     sendValidationErrorMessage(
                         messageContext,
                         i18n.translate(

@@ -104,7 +104,6 @@ export default async function interactionCreateHandler(
                 logger.error(
                     `No handler found for CHAT_INPUT CommandInteraction: ${interaction.data.name}`
                 );
-                return;
             }
         } else {
             switch (interaction.data.name) {
@@ -168,7 +167,6 @@ export default async function interactionCreateHandler(
                     logger.error(
                         `No handler found for CommandInteraction  (type = ${interaction.data.type}): ${interaction.data.name}`
                     );
-                    return;
                 }
             }
         }
