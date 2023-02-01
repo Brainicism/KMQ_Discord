@@ -100,8 +100,10 @@ export default class Team extends Player {
 
     /** @returns a random team member's avatar URL */
     getAvatarURL(): string {
-        return chooseRandom(
-            Object.values(this.players).map((x) => x.getAvatarURL())
+        return (
+            chooseRandom(
+                Object.values(this.players).map((x) => x.getAvatarURL())
+            ) ?? ""
         );
     }
 

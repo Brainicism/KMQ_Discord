@@ -47,7 +47,7 @@ export default class State {
         artistID: number;
     }> = [];
 
-    static restartNotification: RestartNotification;
+    static restartNotification: RestartNotification | null;
     static spotifyManager: SpotifyManager;
     static cachedPlaylists: {
         [spotifySnapshotID: string]: Array<SpotifyTrack>;

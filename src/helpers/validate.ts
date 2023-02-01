@@ -45,14 +45,14 @@ export async function sendValidationErrorMessage(
 export default (
     message: GuildTextableMessage,
     parsedMessage: ParsedMessage,
-    validations: CommandValidations,
+    validations: CommandValidations | null,
     usage?: string
 ): boolean => {
     if (!validations) return true;
     const args = parsedMessage.components;
     const messageContext = MessageContext.fromMessage(message);
     if (
-        args.length > validations.maxArgCount ||
+        (validations.maxArgCount && args.length > validations.maxArgCount) ||
         args.length < validations.minArgCount
     ) {
         sendValidationErrorMessage(
@@ -94,7 +94,10 @@ export default (
 
                 // parse as integer for now, might cause problems later?
                 const intArg = parseInt(arg, 10);
-                if ("minValue" in validation && intArg < validation.minValue) {
+                if (
+                    validation.minValue != null &&
+                    intArg < validation.minValue
+                ) {
                     sendValidationErrorMessage(
                         messageContext,
                         i18n.translate(
@@ -111,7 +114,10 @@ export default (
                     return false;
                 }
 
-                if ("maxValue" in validation && intArg > validation.maxValue) {
+                if (
+                    validation.maxValue != null &&
+                    intArg > validation.maxValue
+                ) {
                     sendValidationErrorMessage(
                         messageContext,
                         i18n.translate(
@@ -152,22 +158,24 @@ export default (
 
             case "enum": {
                 const { enums } = validation;
-                arg = arg.toLowerCase();
-                if (!enums.includes(arg)) {
-                    sendValidationErrorMessage(
-                        messageContext,
-                        i18n.translate(
-                            message.guildID,
-                            "misc.failure.validation.enum.notInEnum",
-                            {
-                                argument: `\`${validation.name}\``,
-                                validValues: arrayToString(enums),
-                            }
-                        ),
-                        arg,
-                        usage
-                    );
-                    return false;
+                if (enums) {
+                    arg = arg.toLowerCase();
+                    if (!enums.includes(arg)) {
+                        sendValidationErrorMessage(
+                            messageContext,
+                            i18n.translate(
+                                message.guildID,
+                                "misc.failure.validation.enum.notInEnum",
+                                {
+                                    argument: `\`${validation.name}\``,
+                                    validValues: arrayToString(enums),
+                                }
+                            ),
+                            arg,
+                            usage
+                        );
+                        return false;
+                    }
                 }
 
                 args[i] = arg;

@@ -175,7 +175,7 @@ export default abstract class Session {
      * Starting a new Round
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
-    async startRound(messageContext: MessageContext): Promise<boolean> {
+    async startRound(messageContext: MessageContext): Promise<Round | null> {
         if (!this.sessionInitialized) {
             logger.info(
                 `${getDebugLogHeader(
@@ -213,7 +213,7 @@ export default abstract class Session {
                     )}`
                 );
                 await this.endSession("Error reloading songs");
-                return false;
+                return null;
             }
         }
 
@@ -256,7 +256,7 @@ export default abstract class Session {
                 ),
             });
             await this.endSession("Error querying random song");
-            return false;
+            return null;
         }
 
         // create a new round with randomly chosen song
@@ -268,7 +268,7 @@ export default abstract class Session {
 
         if (!voiceChannel || voiceChannel.voiceMembers.size === 0) {
             await this.endSession("Voice channel is empty, during startRound");
-            return false;
+            return null;
         }
 
         // join voice channel and start round
@@ -292,10 +292,11 @@ export default abstract class Session {
                     "misc.failure.vcJoin.description"
                 ),
             });
-            return false;
+            return null;
         }
 
-        return this.playSong(messageContext);
+        const voiceConnectionSuccess = await this.playSong(messageContext);
+        return voiceConnectionSuccess ? this.round : null;
     }
 
     /**
@@ -306,7 +307,7 @@ export default abstract class Session {
     endRound(
         _messageContext?: MessageContext,
         _guessResult?: GuessResult
-    ): Promise<void> {
+    ): void {
         if (this.round === null) {
             return;
         }
@@ -350,7 +351,7 @@ export default abstract class Session {
 
         this.guildPreference.reloadSongCallback = null;
         Session.deleteSession(this.guildID);
-        await this.endRound(
+        this.endRound(
             new MessageContext(this.textChannelID, null, this.guildID),
             { correct: false }
         );
@@ -379,29 +380,32 @@ export default abstract class Session {
                 this.bookmarkedSongs
             ).reduce((total, x) => total + x.size, 0);
 
-            await sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: i18n.translate(
-                    this.guildID,
-                    "misc.sendingBookmarkedSongs.title"
-                ),
-                description: i18n.translate(
-                    this.guildID,
-                    "misc.sendingBookmarkedSongs.description",
-                    {
-                        songs: i18n.translateN(
-                            this.guildID,
-                            "misc.plural.song",
-                            bookmarkedSongCount
-                        ),
-                        players: i18n.translateN(
-                            this.guildID,
-                            "misc.plural.player",
-                            bookmarkedSongsPlayerCount
-                        ),
-                    }
-                ),
-                thumbnailUrl: KmqImages.READING_BOOK,
-            });
+            await sendInfoMessage(
+                new MessageContext(this.textChannelID, null, this.guildID),
+                {
+                    title: i18n.translate(
+                        this.guildID,
+                        "misc.sendingBookmarkedSongs.title"
+                    ),
+                    description: i18n.translate(
+                        this.guildID,
+                        "misc.sendingBookmarkedSongs.description",
+                        {
+                            songs: i18n.translateN(
+                                this.guildID,
+                                "misc.plural.song",
+                                bookmarkedSongCount
+                            ),
+                            players: i18n.translateN(
+                                this.guildID,
+                                "misc.plural.player",
+                                bookmarkedSongsPlayerCount
+                            ),
+                        }
+                    ),
+                    thumbnailUrl: KmqImages.READING_BOOK,
+                }
+            );
             await sendBookmarkedSongs(this.guildID, this.bookmarkedSongs);
 
             // Store bookmarked songs
@@ -441,7 +445,7 @@ export default abstract class Session {
      * @param messageContext - An object containing relevant parts of Eris.Message
      * @param guildPreference - The GuildPreference
      */
-    startGuessTimeout(messageContext: MessageContext): Promise<void> {
+    startGuessTimeout(messageContext: MessageContext): void {
         if (
             this.isListeningSession() ||
             !this.guildPreference.isGuessTimeoutSet()
@@ -450,7 +454,7 @@ export default abstract class Session {
         }
 
         const time = this.guildPreference.gameOptions.guessTimeout;
-        this.guessTimeoutFunc = setTimeout(async () => {
+        this.guessTimeoutFunc = setTimeout(() => {
             if (this.finished || !this.round || this.round.finished) return;
             logger.info(
                 `${getDebugLogHeader(
@@ -458,7 +462,7 @@ export default abstract class Session {
                 )} | Song finished without being guessed, timer of: ${time} seconds.`
             );
 
-            await this.endRound(
+            this.endRound(
                 new MessageContext(this.textChannelID, null, this.guildID),
                 { correct: false }
             );
@@ -490,12 +494,11 @@ export default abstract class Session {
      * @param messageID - The Discord message ID used to locate the song
      * @returns the queried song, or null if it doesn't exist
      */
-    getSongFromMessageID(messageID: string): QueriedSong {
-        if (!this.songMessageIDs.map((x) => x.messageID).includes(messageID)) {
-            return null;
-        }
-
-        return this.songMessageIDs.find((x) => x.messageID === messageID).song;
+    getSongFromMessageID(messageID: string): QueriedSong | null {
+        return (
+            this.songMessageIDs.find((x) => x.messageID === messageID)?.song ??
+            null
+        );
     }
 
     /**
@@ -524,40 +527,48 @@ export default abstract class Session {
 
     /** Sends a message notifying who the new owner is */
     updateOwner(): void {
-        sendInfoMessage(new MessageContext(this.textChannelID), {
-            title: i18n.translate(this.guildID, "misc.gameOwnerChanged.title"),
-            description: i18n.translate(
-                this.guildID,
-                "misc.gameOwnerChanged.description",
-                {
-                    newGameOwner: getMention(this.owner.id),
-                    forcehintCommand: "`/forcehint`",
-                    forceskipCommand: "`/forceskip`",
-                }
-            ),
-            thumbnailUrl: KmqImages.LISTENING,
-        });
+        sendInfoMessage(
+            new MessageContext(this.textChannelID, null, this.guildID),
+            {
+                title: i18n.translate(
+                    this.guildID,
+                    "misc.gameOwnerChanged.title"
+                ),
+                description: i18n.translate(
+                    this.guildID,
+                    "misc.gameOwnerChanged.description",
+                    {
+                        newGameOwner: getMention(this.owner.id),
+                        forcehintCommand: "`/forcehint`",
+                        forceskipCommand: "`/forceskip`",
+                    }
+                ),
+                thumbnailUrl: KmqImages.LISTENING,
+            }
+        );
     }
 
-    getRemainingDuration(guildPreference: GuildPreference): number {
+    getRemainingDuration(guildPreference: GuildPreference): number | null {
         const currGameLength = (Date.now() - this.startedAt) / 60000;
         return guildPreference.isDurationSet()
             ? guildPreference.gameOptions.duration - currGameLength
             : null;
     }
 
-    handleBookmarkInteraction(
+    async handleBookmarkInteraction(
         interaction: Eris.CommandInteraction | Eris.ComponentInteraction
     ): Promise<void> {
-        let song: QueriedSong;
+        let song: QueriedSong | null = null;
         if (interaction instanceof Eris.CommandInteraction) {
-            song = this.getSongFromMessageID(interaction.data.target_id);
+            song = this.getSongFromMessageID(
+                interaction.data.target_id as string
+            );
         } else if (interaction instanceof Eris.ComponentInteraction) {
             song = this.getSongFromMessageID(interaction.message.id);
         }
 
         if (!song) {
-            tryCreateInteractionErrorAcknowledgement(
+            await tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 null,
                 i18n.translate(
@@ -569,7 +580,7 @@ export default abstract class Session {
             return;
         }
 
-        tryCreateInteractionSuccessAcknowledgement(
+        await tryCreateInteractionSuccessAcknowledgement(
             interaction,
             i18n.translate(this.guildID, "misc.interaction.bookmarked.title"),
             i18n.translate(
@@ -585,7 +596,7 @@ export default abstract class Session {
             true
         );
 
-        this.addBookmarkedSong(interaction.member?.id, {
+        this.addBookmarkedSong(interaction.member?.id as string, {
             song,
             bookmarkedAt: new Date(),
         });
@@ -658,7 +669,7 @@ export default abstract class Session {
 
         const songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${round.song.youtubeLink}.ogg`;
 
-        let seekLocation: number;
+        let seekLocation = 0;
         const seekType = this.isListeningSession()
             ? SeekType.BEGINNING
             : this.guildPreference.gameOptions.seekType;
@@ -695,7 +706,7 @@ export default abstract class Session {
 
         try {
             let inputArgs = ["-ss", seekLocation.toString()];
-            let encoderArgs = [];
+            let encoderArgs: Array<string> = [];
             const specialType = this.isListeningSession()
                 ? null
                 : this.guildPreference.gameOptions.specialType;
@@ -720,7 +731,7 @@ export default abstract class Session {
         this.startGuessTimeout(messageContext);
 
         // song finished without being guessed
-        this.connection.once("end", async () => {
+        this.connection.once("end", () => {
             // replace listener with no-op to catch any exceptions thrown after this event
             this.connection.removeAllListeners("end");
             this.connection.on("end", () => {});
@@ -731,7 +742,7 @@ export default abstract class Session {
             );
             this.stopGuessTimeout();
 
-            await this.endRound(
+            this.endRound(
                 new MessageContext(this.textChannelID, null, this.guildID),
                 { correct: false }
             );
@@ -780,7 +791,7 @@ export default abstract class Session {
         if (
             !getCurrentVoiceMembers(this.voiceChannelID)
                 .map((x) => x.id)
-                .includes(interaction.member.id)
+                .includes(interaction.member!.id)
         ) {
             tryInteractionAcknowledge(interaction);
             return false;
@@ -839,9 +850,9 @@ export default abstract class Session {
         fields: Eris.EmbedField[],
         round: Round,
         description: string,
-        embedColor: number,
+        embedColor: number | undefined,
         shouldReply: boolean,
-        timeRemaining?: number
+        timeRemaining: number | null
     ): Promise<Eris.Message<Eris.TextableChannel>> {
         const fact =
             Math.random() <= 0.05 ? getFact(messageContext.guildID) : null;
@@ -883,7 +894,7 @@ export default abstract class Session {
 
         const duration = this.getDurationFooter(
             locale,
-            timeRemaining,
+            timeRemaining ?? null,
             [views, aliases].every((x) => x.length > 0)
         );
 
@@ -932,7 +943,7 @@ export default abstract class Session {
 
     private getDurationFooter(
         locale: LocaleType,
-        timeRemaining: number,
+        timeRemaining: number | null,
         nonEmptyFooter: boolean
     ): string {
         if (!timeRemaining) {
@@ -960,8 +971,13 @@ export default abstract class Session {
      * Attempt to restart game with different song
      */
     private async errorRestartRound(): Promise<void> {
-        const messageContext = new MessageContext(this.textChannelID);
-        await this.endRound(null, {
+        const messageContext = new MessageContext(
+            this.textChannelID,
+            null,
+            this.guildID
+        );
+
+        this.endRound(messageContext, {
             correct: false,
             error: true,
         });

@@ -69,8 +69,8 @@ async function songThresholdReached(db: DatabaseContext): Promise<boolean> {
     if (!availableSongsTableExists) return false;
 
     return (
-        (await db.kmq("available_songs").count("* as count").first()).count >=
-        SONG_DOWNLOAD_THRESHOLD
+        ((await db.kmq("available_songs").count("* as count").first()) as any)
+            .count >= SONG_DOWNLOAD_THRESHOLD
     );
 }
 

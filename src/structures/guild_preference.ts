@@ -756,7 +756,7 @@ export default class GuildPreference {
     }
 
     /** @returns whether the goal option is set */
-    isGoalSet(): boolean {
+    isGoalSet(): this is GuildPreference & { gameOptions: { goal: number } } {
         return this.gameOptions.goal !== null;
     }
 
@@ -772,7 +772,9 @@ export default class GuildPreference {
     }
 
     /** @returns whether the duratiopn option is active */
-    isDurationSet(): boolean {
+    isDurationSet(): this is GuildPreference & {
+        gameOptions: { duration: number };
+    } {
         return this.gameOptions.duration !== null;
     }
 
@@ -788,7 +790,9 @@ export default class GuildPreference {
     }
 
     /** @returns whether the timer option is active */
-    isGuessTimeoutSet(): boolean {
+    isGuessTimeoutSet(): this is GuildPreference & {
+        gameOptions: { guessTimeout: number };
+    } {
         return this.gameOptions.guessTimeout !== null;
     }
 
@@ -866,7 +870,9 @@ export default class GuildPreference {
     /**
      * @returns whether the spotify playing option is set
      */
-    isSpotifyPlaylist(): boolean {
+    isSpotifyPlaylist(): this is GuildPreference & {
+        gameOptions: { spotifyPlaylistMetadata: PlaylistMetadata };
+    } {
         return this.gameOptions.spotifyPlaylistMetadata !== null;
     }
 

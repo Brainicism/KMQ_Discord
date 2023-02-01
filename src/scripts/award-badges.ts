@@ -22,12 +22,11 @@ async function getObjects(): Promise<[{ id: string }]> {
             let badgesObj: [{ id: string }];
             try {
                 badgesObj = JSON.parse(jsonInput);
+                resolve(badgesObj);
             } catch (err) {
                 logger.error(`Error parsing array of object, err: ${err}`);
                 reject(err);
             }
-
-            resolve(badgesObj);
         });
     });
 }

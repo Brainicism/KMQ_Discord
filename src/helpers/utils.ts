@@ -83,9 +83,9 @@ export function chunkArray<T>(
     array: Array<T>,
     chunkSize: number
 ): Array<Array<T>> {
-    const chunkedArrays = [];
+    const chunkedArrays: Array<Array<T>> = [];
     for (let i = 0; i < array.length; i += chunkSize) {
-        const embedFieldsSubset = array.slice(
+        const embedFieldsSubset: Array<T> = array.slice(
             i,
             Math.min(i + chunkSize, array.length)
         );
@@ -173,7 +173,7 @@ export function weekOfYear(dateObj?: Date): number {
  * @returns the randomly selected element
  */
 export function chooseRandom<T>(list: Array<T>): T {
-    return list[Math.floor(Math.random() * list.length)] || null;
+    return list[Math.floor(Math.random() * list.length)];
 }
 
 /**
@@ -188,7 +188,7 @@ export function chooseWeightedRandom(
     list: Array<any>,
     weightKey = "weight"
 ): any {
-    const weights = [];
+    const weights: Array<number> = [];
     for (let i = 0; i < list.length; i++) {
         const previousWeight = weights[i - 1] || 0;
         if (!list[i][weightKey]) {
@@ -367,7 +367,8 @@ export function romanize(num: number): string | number {
     let roman = "";
     let i = 3;
     while (i--) {
-        roman = (key[+digits.pop() + i * 10] || "") + roman;
+        const digit = digits.pop();
+        roman = digit ? (key[+digit + i * 10] || "") + roman : roman;
     }
 
     return Array(+digits.join("") + 1).join("M") + roman;

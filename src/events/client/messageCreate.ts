@@ -27,10 +27,10 @@ function isGuildMessage(
     );
 }
 
-const parseMessage = (message: string): ParsedMessage => {
+const parseMessage = (message: string): ParsedMessage | null => {
     if (message.charAt(0) !== process.env.BOT_PREFIX) return null;
     const components = message.split(/\s+/);
-    const action = components.shift().substring(1).toLowerCase();
+    const action = components.shift()!.substring(1).toLowerCase();
     const argument = components.join(" ");
     return {
         action,
@@ -55,7 +55,7 @@ export default async function messageCreateHandler(
         return;
     }
 
-    const parsedMessage = parseMessage(message.content) || null;
+    const parsedMessage = parseMessage(message.content);
     const textChannel = message.channel as Eris.TextChannel;
     const messageContext = MessageContext.fromMessage(message);
     if (
@@ -71,7 +71,7 @@ export default async function messageCreateHandler(
             Session.getSession(message.guildID),
             messageContext,
             guildPreference,
-            null
+            []
         );
         return;
     }
@@ -82,7 +82,7 @@ export default async function messageCreateHandler(
         : null;
 
     const session = Session.getSession(message.guildID);
-    if (invokedCommand) {
+    if (parsedMessage && invokedCommand) {
         if (!State.rateLimiter.check(message.author.id)) {
             logger.error(
                 `User ${
@@ -98,10 +98,10 @@ export default async function messageCreateHandler(
             validate(
                 message,
                 parsedMessage,
-                invokedCommand.validations,
+                invokedCommand.validations ?? null,
                 typeof invokedCommand.help === "function"
                     ? invokedCommand.help(message.guildID).usage
-                    : null
+                    : undefined
             )
         ) {
             if (invokedCommand.preRunChecks) {

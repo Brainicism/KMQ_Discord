@@ -1632,7 +1632,7 @@ export async function tryCreateInteractionSuccessAcknowledgement(
  */
 export async function tryCreateInteractionErrorAcknowledgement(
     interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
-    title: string,
+    title: string | null,
     description: string,
     ephemeral: boolean = true
 ): Promise<void> {
@@ -1679,7 +1679,11 @@ export function sendPowerHourNotification(): void {
 
     logger.info("Sending power hour notification");
     sendInfoMessage(
-        new MessageContext(process.env.POWER_HOUR_NOTIFICATION_CHANNEL_ID),
+        new MessageContext(
+            process.env.POWER_HOUR_NOTIFICATION_CHANNEL_ID,
+            null,
+            ""
+        ),
         {
             title: "⬆️ KMQ Power Hour Starts Now! ⬆️",
             description: "Earn 2x EXP for the next hour!",
