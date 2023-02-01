@@ -1632,7 +1632,7 @@ export async function tryCreateInteractionSuccessAcknowledgement(
  */
 export async function tryCreateInteractionErrorAcknowledgement(
     interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
-    title: string,
+    title: string | null,
     description: string,
     ephemeral: boolean = true
 ): Promise<void> {
@@ -1679,7 +1679,11 @@ export function sendPowerHourNotification(): void {
 
     logger.info("Sending power hour notification");
     sendInfoMessage(
-        new MessageContext(process.env.POWER_HOUR_NOTIFICATION_CHANNEL_ID),
+        new MessageContext(
+            process.env.POWER_HOUR_NOTIFICATION_CHANNEL_ID,
+            null,
+            ""
+        ),
         {
             title: "⬆️ KMQ Power Hour Starts Now! ⬆️",
             description: "Earn 2x EXP for the next hour!",
@@ -1845,10 +1849,9 @@ export async function processGroupAutocompleteInteraction(
 
 /**
  * @param userID - The user ID
- * @param guildID - The guild ID
  * @returns - The user's tag
  */
-export function getUserTag(userID: string, guildID: string): string {
-    const member = State.client.guilds.get(guildID).members.get(userID);
+export async function getUserTag(userID: string): Promise<string> {
+    const member = await fetchUser(userID);
     return member ? `${member.username}#${member.discriminator}` : null;
 }

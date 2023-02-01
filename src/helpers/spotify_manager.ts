@@ -157,7 +157,7 @@ export default class SpotifyManager {
         let matchedSongs: Array<QueriedSong> = [];
         const unmatchedSongs: Array<SpotifyTrack> = [];
         for (const song of spotifySongs) {
-            const aliasIDs = [];
+            const aliasIDs: Array<number> = [];
             for (const artist of song.artists) {
                 const lowercaseArtist = artist.toLowerCase();
                 const artistMapping = State.artistToEntry[lowercaseArtist];
@@ -167,7 +167,12 @@ export default class SpotifyManager {
                         for (const alias of State.aliases.artist[
                             lowercaseArtist
                         ]) {
-                            aliasIDs.push(State.artistToEntry[alias].id);
+                            const lowercaseAlias = alias.toLowerCase();
+                            if (lowercaseAlias in State.artistToEntry) {
+                                aliasIDs.push(
+                                    State.artistToEntry[lowercaseAlias].id
+                                );
+                            }
                         }
                     }
                 }
@@ -226,7 +231,7 @@ export default class SpotifyManager {
                 playlistLength: spotifySongs.length,
                 playlistName: spotifyMetadata.playlistName,
                 matchedSongsLength: matchedSongs.length,
-                thumbnailUrl: spotifyMetadata.thumbnailUrl,
+                thumbnailUrl: spotifyMetadata.thumbnailUrl as string,
             },
         };
     };
@@ -263,11 +268,11 @@ export default class SpotifyManager {
 
     private async getPlaylistMetadata(playlistID: string): Promise<{
         playlistName: string;
-        thumbnailUrl: string;
+        thumbnailUrl: string | null;
         snapshotID: string;
-    }> {
+    } | null> {
         const requestURL = `${BASE_URL}/playlists/${playlistID}`;
-        let thumbnailUrl: string;
+        let thumbnailUrl: string | null = null;
         let playlistName: string;
         let snapshotID: string;
         try {
@@ -295,7 +300,7 @@ export default class SpotifyManager {
                 logger.info(err.response.status);
             }
 
-            return undefined;
+            return null;
         }
 
         return { playlistName, thumbnailUrl, snapshotID };

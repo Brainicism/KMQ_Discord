@@ -36,6 +36,7 @@ import dbContext from "../database_context";
 
 import {
     CUM_EXP_TABLE,
+    ELIMINATION_DEFAULT_LIVES,
     EMBED_FIELDS_PER_PAGE,
     EMBED_SUCCESS_BONUS_COLOR,
     EMBED_SUCCESS_COLOR,
@@ -147,7 +148,9 @@ export default class GameSession extends Session {
                 this.scoreboard = new TeamScoreboard();
                 break;
             case GameType.ELIMINATION:
-                this.scoreboard = new EliminationScoreboard(eliminationLives);
+                this.scoreboard = new EliminationScoreboard(
+                    eliminationLives || ELIMINATION_DEFAULT_LIVES
+                );
                 break;
             default:
                 this.scoreboard = new Scoreboard();
@@ -165,7 +168,7 @@ export default class GameSession extends Session {
      * Starting a new GameRound
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
-    async startRound(messageContext: MessageContext): Promise<boolean> {
+    async startRound(messageContext: MessageContext): Promise<Round | null> {
         if (this.sessionInitialized) {
             // Only add a delay if the game has already started
             await delay(
@@ -176,16 +179,15 @@ export default class GameSession extends Session {
         }
 
         if (this.finished || this.round) {
-            return false;
+            return null;
         }
 
-        const startRoundResult = await super.startRound(messageContext);
+        const round = (await super.startRound(messageContext)) as GameRound;
 
-        if (!startRoundResult) {
-            return false;
+        if (!round) {
+            return null;
         }
 
-        const round = this.round;
         if (this.guildPreference.isMultipleChoiceMode()) {
             const locale = State.getGuildLocale(this.guildID);
             const randomSong = round.song;
@@ -249,13 +251,23 @@ export default class GameSession extends Session {
                     }));
                     break;
                 default:
+                    logger.error(
+                        `Unexpected answerType: ${this.guildPreference.gameOptions.answerType}`
+                    );
+
+                    actionRows = [
+                        {
+                            type: 1,
+                            components: buttons,
+                        },
+                    ];
                     break;
             }
 
             round.interactionComponents = actionRows;
 
             round.interactionMessage = await sendInfoMessage(
-                new MessageContext(this.textChannelID),
+                new MessageContext(this.textChannelID, null, this.guildID),
                 {
                     title: i18n.translate(
                         this.guildID,
@@ -277,7 +289,7 @@ export default class GameSession extends Session {
             );
         }
 
-        return true;
+        return round;
     }
 
     /**
@@ -286,30 +298,32 @@ export default class GameSession extends Session {
      * @param guessResult - Whether the round ended via a correct guess (includes exp gain), or other (timeout, error, etc)
      */
     async endRound(
-        messageContext?: MessageContext,
-        guessResult?: GuessResult
+        messageContext: MessageContext,
+        guessResult: GuessResult
     ): Promise<void> {
         if (this.round === null) {
             return;
         }
 
         const round = this.round;
-        await super.endRound(messageContext);
+        super.endRound(messageContext);
 
-        round.interactionMarkAnswers(guessResult.correctGuessers?.length);
+        round.interactionMarkAnswers(guessResult.correctGuessers?.length ?? 0);
 
         const timePlayed = Date.now() - round.startedAt;
         if (guessResult.correct) {
             // update guessing streaks
             if (
-                this.lastGuesser === null ||
-                this.lastGuesser.userID !== guessResult.correctGuessers[0].id
+                guessResult.correctGuessers &&
+                (this.lastGuesser === null ||
+                    this.lastGuesser.userID !==
+                        guessResult.correctGuessers[0].id)
             ) {
                 this.lastGuesser = {
                     userID: guessResult.correctGuessers[0].id,
                     streak: 1,
                 };
-            } else {
+            } else if (this.lastGuesser) {
                 this.lastGuesser.streak++;
             }
 
@@ -350,7 +364,7 @@ export default class GameSession extends Session {
             if (this.scoreboard instanceof TeamScoreboard) {
                 const teamScoreboard = this.scoreboard as TeamScoreboard;
                 roundResultIDs = playerRoundResults.map(
-                    (x) => teamScoreboard.getTeamOfPlayer(x.player.id).id
+                    (x) => teamScoreboard.getTeamOfPlayer(x.player.id)!.id
                 );
             } else {
                 roundResultIDs = playerRoundResults.map((x) => x.player.id);
@@ -457,7 +471,7 @@ export default class GameSession extends Session {
                 const playerExpGain =
                     this.scoreboard.getPlayerExpGain(participant);
 
-                let levelUpResult: LevelUpResult;
+                let levelUpResult: LevelUpResult | null = null;
                 if (playerExpGain > 0) {
                     levelUpResult = await GameSession.incrementPlayerExp(
                         participant,
@@ -512,11 +526,14 @@ export default class GameSession extends Session {
                 );
             }
 
-            sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: i18n.translate(this.guildID, "misc.levelUp.title"),
-                description: levelUpMessages.join("\n"),
-                thumbnailUrl: KmqImages.THUMBS_UP,
-            });
+            sendInfoMessage(
+                new MessageContext(this.textChannelID, null, this.guildID),
+                {
+                    title: i18n.translate(this.guildID, "misc.levelUp.title"),
+                    description: levelUpMessages.join("\n"),
+                    thumbnailUrl: KmqImages.THUMBS_UP,
+                }
+            );
         }
 
         // commit guild's game session
@@ -680,7 +697,7 @@ export default class GameSession extends Session {
         const round = this.round;
 
         if (
-            round.incorrectMCGuessers.has(interaction.member.id) ||
+            round.incorrectMCGuessers.has(interaction.member!.id) ||
             !this.guessEligible(messageContext)
         ) {
             tryCreateInteractionErrorAcknowledgement(
@@ -704,7 +721,7 @@ export default class GameSession extends Session {
                 )
             );
 
-            round.incorrectMCGuessers.add(interaction.member.id);
+            round.incorrectMCGuessers.add(interaction.member!.id);
             round.interactionIncorrectAnswerUUIDs[interaction.data.custom_id]++;
 
             // Add the user as a participant
@@ -831,12 +848,12 @@ export default class GameSession extends Session {
         );
 
         let footerText = i18n.translate(
-            messageOrInteraction.guildID,
+            messageOrInteraction.guildID as string,
             "misc.classic.yourScore",
             {
                 score: String(
                     this.scoreboard.getPlayerDisplayedScore(
-                        messageOrInteraction.member.id,
+                        messageOrInteraction.member!.id,
                         false
                     )
                 ),
@@ -848,12 +865,12 @@ export default class GameSession extends Session {
                 .scoreboard as EliminationScoreboard;
 
             footerText = i18n.translate(
-                messageOrInteraction.guildID,
+                messageOrInteraction.guildID as string,
                 "misc.elimination.yourLives",
                 {
                     lives: String(
                         eliminationScoreboard.getPlayerLives(
-                            messageOrInteraction.member.id
+                            messageOrInteraction.member!.id
                         )
                     ),
                 }
@@ -861,24 +878,24 @@ export default class GameSession extends Session {
         } else if (this.gameType === GameType.TEAMS) {
             const teamScoreboard = this.scoreboard as TeamScoreboard;
             footerText = i18n.translate(
-                messageOrInteraction.guildID,
+                messageOrInteraction.guildID as string,
                 "misc.team.yourTeamScore",
                 {
                     teamScore: String(
                         teamScoreboard
-                            .getTeamOfPlayer(messageOrInteraction.member.id)
-                            .getScore()
+                            .getTeamOfPlayer(messageOrInteraction.member!.id)
+                            ?.getScore()
                     ),
                 }
             );
             footerText += "\n";
             footerText += i18n.translate(
-                messageOrInteraction.guildID,
+                messageOrInteraction.guildID as string,
                 "misc.team.yourScore",
                 {
                     score: String(
                         teamScoreboard.getPlayerScore(
-                            messageOrInteraction.member.id
+                            messageOrInteraction.member!.id
                         )
                     ),
                 }
@@ -889,7 +906,7 @@ export default class GameSession extends Session {
             (winnersFieldSubset) => ({
                 color: EMBED_SUCCESS_COLOR,
                 title: i18n.translate(
-                    messageOrInteraction.guildID,
+                    messageOrInteraction.guildID as string,
                     "command.score.scoreboardTitle"
                 ),
                 fields: winnersFieldSubset,
@@ -915,11 +932,17 @@ export default class GameSession extends Session {
         );
 
         if (this.scoreboard.getWinners().length === 0) {
-            await sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: i18n.translate(this.guildID, "misc.inGame.noWinners"),
-                footerText,
-                thumbnailUrl: KmqImages.NOT_IMPRESSED,
-            });
+            await sendInfoMessage(
+                new MessageContext(this.textChannelID, null, this.guildID),
+                {
+                    title: i18n.translate(
+                        this.guildID,
+                        "misc.inGame.noWinners"
+                    ),
+                    footerText,
+                    thumbnailUrl: KmqImages.NOT_IMPRESSED,
+                }
+            );
         } else {
             const winners = this.scoreboard.getWinners();
             const useLargerScoreboard =
@@ -941,64 +964,67 @@ export default class GameSession extends Session {
                 });
             }
 
-            await sendInfoMessage(new MessageContext(this.textChannelID), {
-                color:
-                    this.gameType !== GameType.TEAMS &&
-                    (await userBonusIsActive(winners[0].id))
-                        ? EMBED_SUCCESS_BONUS_COLOR
-                        : EMBED_SUCCESS_COLOR,
-                description: !useLargerScoreboard
-                    ? bold(
-                          i18n.translate(
-                              this.guildID,
-                              "command.score.scoreboardTitle"
+            await sendInfoMessage(
+                new MessageContext(this.textChannelID, null, this.guildID),
+                {
+                    color:
+                        this.gameType !== GameType.TEAMS &&
+                        (await userBonusIsActive(winners[0].id))
+                            ? EMBED_SUCCESS_BONUS_COLOR
+                            : EMBED_SUCCESS_COLOR,
+                    description: !useLargerScoreboard
+                        ? bold(
+                              i18n.translate(
+                                  this.guildID,
+                                  "command.score.scoreboardTitle"
+                              )
                           )
-                      )
-                    : null,
-                thumbnailUrl: winners[0].getAvatarURL(),
-                title: `🎉 ${this.scoreboard.getWinnerMessage(
-                    this.guildID
-                )} 🎉`,
-                fields,
-                footerText,
-                components: [
-                    {
-                        type: 1,
-                        components: [
-                            {
-                                style: 5,
-                                url: VOTE_LINK,
-                                type: 2 as const,
-                                emoji: { name: "✅" },
-                                label: i18n.translate(
-                                    this.guildID,
-                                    "misc.interaction.vote"
-                                ),
-                            },
-                            {
-                                style: 5,
-                                url: REVIEW_LINK,
-                                type: 2 as const,
-                                emoji: { name: "📖" },
-                                label: i18n.translate(
-                                    this.guildID,
-                                    "misc.interaction.leaveReview"
-                                ),
-                            },
-                            {
-                                style: 5,
-                                url: "https://discord.gg/RCuzwYV",
-                                type: 2,
-                                emoji: { name: "🎵" },
-                                label: i18n.translate(
-                                    this.guildID,
-                                    "misc.interaction.officialKmqServer"
-                                ),
-                            },
-                        ],
-                    },
-                ],
-            });
+                        : undefined,
+                    thumbnailUrl: winners[0].getAvatarURL(),
+                    title: `🎉 ${this.scoreboard.getWinnerMessage(
+                        this.guildID
+                    )} 🎉`,
+                    fields,
+                    footerText,
+                    components: [
+                        {
+                            type: 1,
+                            components: [
+                                {
+                                    style: 5,
+                                    url: VOTE_LINK,
+                                    type: 2 as const,
+                                    emoji: { name: "✅" },
+                                    label: i18n.translate(
+                                        this.guildID,
+                                        "misc.interaction.vote"
+                                    ),
+                                },
+                                {
+                                    style: 5,
+                                    url: REVIEW_LINK,
+                                    type: 2 as const,
+                                    emoji: { name: "📖" },
+                                    label: i18n.translate(
+                                        this.guildID,
+                                        "misc.interaction.leaveReview"
+                                    ),
+                                },
+                                {
+                                    style: 5,
+                                    url: "https://discord.gg/RCuzwYV",
+                                    type: 2,
+                                    emoji: { name: "🎵" },
+                                    label: i18n.translate(
+                                        this.guildID,
+                                        "misc.interaction.officialKmqServer"
+                                    ),
+                                },
+                            ],
+                        },
+                    ],
+                }
+            );
         }
     }
 
@@ -1155,7 +1181,7 @@ export default class GameSession extends Session {
     private static async incrementPlayerExp(
         userID: string,
         expGain: number
-    ): Promise<LevelUpResult> {
+    ): Promise<LevelUpResult | null> {
         const { exp: currentExp, level } = await dbContext
             .kmq("player_stats")
             .select(["exp", "level"])
@@ -1329,54 +1355,56 @@ export default class GameSession extends Session {
         messageContext: MessageContext
     ): Promise<void> {
         // update scoreboard
-        const lastGuesserStreak = this.lastGuesser.streak;
+        const lastGuesserStreak = this.lastGuesser?.streak ?? 0;
         const playerRoundResults = await Promise.all(
-            guessResult.correctGuessers.map(async (correctGuesser, idx) => {
-                const guessPosition = idx + 1;
-                const expGain = await calculateTotalRoundExp(
-                    guildPreference,
-                    round,
-                    getNumParticipants(this.voiceChannelID),
-                    lastGuesserStreak,
-                    timePlayed,
-                    guessPosition,
-                    await userBonusIsActive(correctGuesser.id),
-                    correctGuesser.id
-                );
+            (guessResult.correctGuessers ?? []).map(
+                async (correctGuesser, idx) => {
+                    const guessPosition = idx + 1;
+                    const expGain = await calculateTotalRoundExp(
+                        guildPreference,
+                        round,
+                        getNumParticipants(this.voiceChannelID),
+                        lastGuesserStreak,
+                        timePlayed,
+                        guessPosition,
+                        await userBonusIsActive(correctGuesser.id),
+                        correctGuesser.id
+                    );
 
-                let streak = 0;
-                if (idx === 0) {
-                    streak = lastGuesserStreak;
-                    logger.info(
-                        `${getDebugLogHeader(messageContext)}, uid: ${
-                            correctGuesser.id
-                        } | Song correctly guessed. song = ${
-                            round.song.songName
-                        }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
-                    );
-                } else {
-                    streak = 0;
-                    logger.info(
-                        `${getDebugLogHeader(messageContext)}, uid: ${
-                            correctGuesser.id
-                        } | Song correctly guessed ${getOrdinalNum(
-                            guessPosition
-                        )}. song = ${
-                            round.song.songName
-                        }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
-                    );
+                    let streak = 0;
+                    if (idx === 0) {
+                        streak = lastGuesserStreak;
+                        logger.info(
+                            `${getDebugLogHeader(messageContext)}, uid: ${
+                                correctGuesser.id
+                            } | Song correctly guessed. song = ${
+                                round.song.songName
+                            }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
+                        );
+                    } else {
+                        streak = 0;
+                        logger.info(
+                            `${getDebugLogHeader(messageContext)}, uid: ${
+                                correctGuesser.id
+                            } | Song correctly guessed ${getOrdinalNum(
+                                guessPosition
+                            )}. song = ${
+                                round.song.songName
+                            }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
+                        );
+                    }
+
+                    return {
+                        player: correctGuesser,
+                        pointsEarned:
+                            idx === 0
+                                ? correctGuesser.pointsAwarded
+                                : correctGuesser.pointsAwarded / 2,
+                        expGain,
+                        streak,
+                    };
                 }
-
-                return {
-                    player: correctGuesser,
-                    pointsEarned:
-                        idx === 0
-                            ? correctGuesser.pointsAwarded
-                            : correctGuesser.pointsAwarded / 2,
-                    expGain,
-                    streak,
-                };
-            })
+            )
         );
 
         round.playerRoundResults = playerRoundResults;

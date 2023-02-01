@@ -13,23 +13,18 @@ export default class MessageContext {
     public guildID: string;
 
     /** The ID of the originating message */
-    public referencedMessageID: string;
+    public referencedMessageID: string | null;
 
     constructor(
         textChannelID: string,
-        author?: KmqMember,
-        guildID?: string,
+        author: KmqMember | null,
+        guildID: string,
         referencedMessageID?: string
     ) {
         this.textChannelID = textChannelID;
-        this.author = author;
-        if (!author) {
-            const clientUser = State.client.user;
-            this.author = new KmqMember(clientUser.id);
-        }
-
-        this.guildID = guildID;
-        this.referencedMessageID = referencedMessageID;
+        this.author = author ?? new KmqMember(State.client.user.id);
+        this.guildID = guildID ?? null;
+        this.referencedMessageID = referencedMessageID ?? null;
     }
 
     /**
@@ -40,7 +35,7 @@ export default class MessageContext {
         return new MessageContext(
             message.channel.id,
             new KmqMember(message.author.id),
-            message.guildID,
+            message.guildID as string,
             message.id
         );
     }

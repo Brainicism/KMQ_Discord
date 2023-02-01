@@ -94,12 +94,15 @@ export default class DebugCommand implements BaseCommand {
             thumbnailUrl: KmqImages.READING_BOOK,
         });
 
-        await sendInfoMessage(new MessageContext(debugChannel.id), {
-            title: `Debug Details for User: ${message.author.id}, Guild: ${message.guildID}`,
-            footerText: debugID,
-            fields,
-            timestamp: new Date(),
-        });
+        await sendInfoMessage(
+            new MessageContext(debugChannel.id, null, debugChannel.guild.id),
+            {
+                title: `Debug Details for User: ${message.author.id}, Guild: ${message.guildID}`,
+                footerText: debugID,
+                fields,
+                timestamp: new Date(),
+            }
+        );
 
         logger.info(`${getDebugLogHeader(message)} | Debug info retrieved.`);
     };

@@ -12,7 +12,11 @@ import State from "../../state";
 import assert from "assert";
 import sinon from "sinon";
 
-const mockMessageContext = new MessageContext("dummy", new KmqMember("dummy"));
+const mockMessageContext = new MessageContext(
+    "dummy",
+    new KmqMember("dummy"),
+    "dummy"
+);
 
 function getMockGuildPreference(): GuildPreference {
     const guildPreference = new GuildPreference("test");

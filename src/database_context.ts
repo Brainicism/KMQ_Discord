@@ -7,7 +7,7 @@ import type { Knex } from "knex";
 config({ path: resolve(__dirname, "../.env") });
 
 function generateKnexContext(
-    databaseName: string,
+    databaseName: string | null,
     minPoolSize: number,
     maxPoolSize: number
 ): any {

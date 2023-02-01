@@ -63,12 +63,12 @@ export async function tableExists(
 ): Promise<boolean> {
     return (
         (
-            await db
+            (await db
                 .agnostic("information_schema.tables")
                 .where("table_schema", "=", databaseName)
                 .where("table_name", "=", tableName)
                 .count("* as count")
-                .first()
+                .first()) as any
         ).count === 1
     );
 }
@@ -188,7 +188,7 @@ async function validateDaisukiTableSchema(
     db: DatabaseContext,
     frozenSchema: any
 ): Promise<void> {
-    const outputMessages = [];
+    const outputMessages: Array<string> = [];
     await Promise.allSettled(
         MONITORED_DAISUKI_TABLES.map(async (table) => {
             const commaSeparatedColumnNames = (
@@ -247,32 +247,32 @@ async function validateSqlDump(
 
         logger.info("Validating MV song count");
         const mvSongCount = (
-            await db
+            (await db
                 .kpopVideosValidation("app_kpop")
                 .count("* as count")
                 .where("is_audio", "=", "n")
-                .first()
+                .first()) as any
         ).count;
 
         logger.info(`Found ${mvSongCount} music videos`);
 
         logger.info("Validating audio-only song count");
         const audioSongCount = (
-            await db
+            (await db
                 .kpopVideosValidation("app_kpop")
                 .count("* as count")
                 .where("is_audio", "=", "y")
-                .first()
+                .first()) as any
         ).count;
 
         logger.info(`Found ${audioSongCount} audio-only videos`);
 
         logger.info("Validating group count");
         const artistCount = (
-            await db
+            (await db
                 .kpopVideosValidation("app_kpop_group")
                 .count("* as count")
-                .first()
+                .first()) as any
         ).count;
 
         logger.info(`Found ${artistCount} artists`);
@@ -446,10 +446,17 @@ async function hasRecentDump(): Promise<boolean> {
     }
 
     if (files.length === 0) return false;
-    const seedFileDateString = files[files.length - 1].match(
-        /mainbackup_([0-9]{4}-[0-9]{2}-[0-9]{2}).sql/
-    )[1];
 
+    const seedFiles = files[files.length - 1].match(
+        /mainbackup_([0-9]{4}-[0-9]{2}-[0-9]{2}).sql/
+    );
+
+    if (!seedFiles) {
+        logger.error("No matching seed files found");
+        return false;
+    }
+
+    const seedFileDateString = seedFiles[1];
     logger.info(`Most recent seed file has date: ${seedFileDateString}`);
     const daysDiff =
         (new Date().getTime() - Date.parse(seedFileDateString)) / 86400000;

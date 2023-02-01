@@ -1,4 +1,4 @@
 export default interface RestartNotification {
     soft: boolean;
-    restartDate: Date;
+    restartDate: Date | null;
 }

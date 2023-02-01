@@ -67,14 +67,12 @@ function parsePatreonResponse(patreonResponse: PatreonResponse): Array<Patron> {
         }
 
         patrons.push({
-            discordID:
-                matchedPatreonUser.attributes.social_connections?.discord
-                    ?.user_id,
+            discordID: matchedPatreonUser.attributes.social_connections?.discord
+                ?.user_id as string,
             activePatron:
                 userData.attributes.patron_status === PatronState.ACTIVE,
-            firstSubscribed: new Date(
-                userData.attributes.pledge_relationship_start
-            ),
+            firstSubscribed: userData.attributes
+                .pledge_relationship_start as Date,
         });
     }
 

@@ -69,7 +69,7 @@ const kmqFactFunctions: Array<(locale: LocaleType) => Promise<string[]>> = [
 interface FactCache {
     funFacts: string[][];
     kmqFacts: string[][];
-    lastUpdated: number;
+    lastUpdated: number | null;
 }
 
 const localeToFactCache: { [locale: string]: FactCache } = {};
@@ -156,7 +156,7 @@ function parseGaonWeeklyRankList(
  * @param guildID - The guild ID
  * @returns a random cached fact
  */
-export function getFact(guildID: string): string {
+export function getFact(guildID: string): string | null {
     const locale: LocaleType = State.getGuildLocale(guildID);
     const randomVal = Math.random();
     const factGroup =
@@ -165,6 +165,7 @@ export function getFact(guildID: string): string {
             : localeToFactCache[locale].kmqFacts;
 
     if (factGroup.length === 0) return null;
+
     return chooseRandom(chooseRandom(factGroup));
 }
 
@@ -472,7 +473,7 @@ async function mostArtistsEntertainmentCompany(
             ordinalNum: i18n.internalLocalizer.t(getOrdinalNum(idx + 1), {
                 lng,
             }),
-            num: friendlyFormattedNumber(x["count"]),
+            num: friendlyFormattedNumber(x["count"] as number),
             lng,
         })
     );
@@ -908,7 +909,6 @@ async function recentUniquePlayers(lng: LocaleType): Promise<string[]> {
                 .count("* as count")
                 .where("last_active", ">", priorDate);
 
-            if (result.length === 0) return null;
             const recentActivePlayers = result[0].count as number;
             return i18n.internalLocalizer.t("fact.kmq.uniquePlayers", {
                 recentActivePlayers:

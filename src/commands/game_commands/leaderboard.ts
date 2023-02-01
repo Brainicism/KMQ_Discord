@@ -940,10 +940,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
         await dbContext.kmq("leaderboard_enrollment").insert({
             player_id: messageContext.author.id,
-            display_name: getUserTag(
-                messageContext.author.id,
-                messageContext.guildID
-            ),
+            display_name: await getUserTag(messageContext.author.id),
         });
 
         sendInfoMessage(

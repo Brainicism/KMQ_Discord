@@ -47,7 +47,7 @@ export default class CommandPrechecks {
             messageContext.guildID
         );
 
-        if (session.isListeningSession()) {
+        if (session.isListeningSession() && interaction) {
             if (!userAndBotInSameChannel) {
                 tryCreateInteractionErrorAcknowledgement(
                     interaction,
