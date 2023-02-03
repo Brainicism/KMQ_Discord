@@ -36,7 +36,7 @@ export class KmqImages {
 
 export const GROUP_LIST_URL = "https://kmq.kpop.gg/groups";
 
-export const DEFAULT_BEGINNING_SEARCH_YEAR = 1990;
+export const DEFAULT_BEGINNING_SEARCH_YEAR = 1988;
 export const DEFAULT_ENDING_SEARCH_YEAR = new Date().getFullYear();
 export const DEFAULT_GUESS_MODE = GuessModeType.SONG_NAME;
 export const DEFAULT_ARTIST_TYPE = ArtistType.BOTH;
