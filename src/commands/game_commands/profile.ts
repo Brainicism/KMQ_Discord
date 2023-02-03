@@ -391,7 +391,7 @@ export default class ProfileCommand implements BaseCommand {
         );
 
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: getUserTag(requestedPlayer.id, message.guildID),
+            title: await getUserTag(requestedPlayer.id),
             fields,
             author: {
                 username: requestedPlayer.username,
@@ -495,10 +495,7 @@ export default class ProfileCommand implements BaseCommand {
             await interaction.createMessage({
                 embeds: [
                     {
-                        title: getUserTag(
-                            user.id,
-                            interaction.guildID as string
-                        ),
+                        title: await getUserTag(user.id),
                         fields,
                         timestamp: new Date(),
                     },

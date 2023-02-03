@@ -716,9 +716,8 @@ export default class PlayCommand implements BaseCommand {
                         messageContext.guildID,
                         "command.join.playerJoinedTeam.title",
                         {
-                            joiningUser: getUserTag(
-                                messageContext.author.id,
-                                messageContext.guildID
+                            joiningUser: await getUserTag(
+                                messageContext.author.id
                             ),
                             teamName: team.getName(),
                         }
