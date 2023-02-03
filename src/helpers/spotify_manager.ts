@@ -121,18 +121,38 @@ export default class SpotifyManager {
                     }
 
                     spotifySongs.push(
-                        ...response.data.items.map(
-                            (song: {
-                                track: {
-                                    name: string;
-                                    artists: Array<{ name: string }>;
-                                };
-                            }) => ({
-                                name: song.track.name,
-                                artists: song.track.artists.map(
-                                    (artist: { name: string }) => artist.name
-                                ),
-                            })
+                        ...response.data.items.reduce(
+                            (
+                                songs: Array<SpotifyTrack>,
+                                song: {
+                                    track: {
+                                        name: string;
+                                        artists: Array<{ name: string }>;
+                                    };
+                                }
+                            ) => {
+                                let parsedSong: SpotifyTrack;
+                                try {
+                                    parsedSong = {
+                                        name: song.track.name,
+                                        artists: song.track.artists.map(
+                                            (artist: { name: string }) =>
+                                                artist.name
+                                        ),
+                                    };
+                                } catch (err) {
+                                    logger.warn(
+                                        `Failed parsing song. song = ${JSON.stringify(
+                                            song
+                                        )}. err = ${err}`
+                                    );
+                                    return songs;
+                                }
+
+                                songs.push(parsedSong);
+                                return songs;
+                            },
+                            []
                         )
                     );
 
