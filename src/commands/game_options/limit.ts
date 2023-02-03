@@ -287,7 +287,7 @@ export default class LimitCommand implements BaseCommand {
                 return;
             }
 
-            if (limitEnd !== null && limitEnd <= limitStart) {
+            if (limitEnd <= limitStart) {
                 sendErrorMessage(
                     messageContext,
                     {
