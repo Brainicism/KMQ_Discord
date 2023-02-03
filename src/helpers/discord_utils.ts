@@ -997,7 +997,7 @@ export async function generateOptionsMessage(
     }
 
     let title = "";
-    if (updatedOptions === null || allReset) {
+    if (updatedOptions.length === 0 || allReset) {
         title = i18n.translate(messageContext.guildID, "command.options.title");
     } else {
         if (preset) {
