@@ -131,7 +131,7 @@ export default class GoalCommand implements BaseCommand {
     ];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        let userGoal: number;
+        let userGoal: number | null;
         if (parsedMessage.components.length === 0) {
             userGoal = null;
         } else {
@@ -141,16 +141,14 @@ export default class GoalCommand implements BaseCommand {
         await GoalCommand.updateOption(
             MessageContext.fromMessage(message),
             userGoal,
-            null,
-            userGoal == null
+            undefined
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
-        userGoal: number,
-        interaction?: Eris.CommandInteraction,
-        reset = false
+        userGoal: number | null,
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
@@ -162,6 +160,7 @@ export default class GoalCommand implements BaseCommand {
 
         if (gameSession) {
             if (
+                userGoal !== null &&
                 gameSession.scoreboard.getWinners().length > 0 &&
                 userGoal <= gameSession.scoreboard.getWinners()[0].getScore()
             ) {
@@ -222,6 +221,7 @@ export default class GoalCommand implements BaseCommand {
             }
         }
 
+        const reset = userGoal == null;
         if (reset) {
             await guildPreference.reset(GameOption.GOAL);
             logger.info(
@@ -241,9 +241,9 @@ export default class GoalCommand implements BaseCommand {
             messageContext,
             guildPreference,
             [{ option: GameOption.GOAL, reset }],
-            null,
-            null,
-            null,
+            false,
+            undefined,
+            undefined,
             interaction
         );
     }
@@ -259,7 +259,7 @@ export default class GoalCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
-        let goalValue: number;
+        let goalValue: number | null;
 
         const action = interactionName as OptionAction;
         if (action === OptionAction.RESET) {
@@ -271,11 +271,6 @@ export default class GoalCommand implements BaseCommand {
             goalValue = null;
         }
 
-        await GoalCommand.updateOption(
-            messageContext,
-            goalValue,
-            interaction,
-            goalValue == null
-        );
+        await GoalCommand.updateOption(messageContext, goalValue, interaction);
     }
 }

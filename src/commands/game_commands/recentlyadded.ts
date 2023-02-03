@@ -71,8 +71,8 @@ export default class RecentlyAddedCommand implements BaseCommand {
     ): Promise<void> {
         const messageContext = new MessageContext(
             messageOrInteraction.channel.id,
-            new KmqMember(messageOrInteraction.member.id),
-            messageOrInteraction.guildID
+            new KmqMember(messageOrInteraction.member!.id),
+            messageOrInteraction.guildID as string
         );
 
         const newSongs: Array<QueriedSong> = await dbContext
@@ -110,11 +110,11 @@ export default class RecentlyAddedCommand implements BaseCommand {
                     thumbnailUrl: KmqImages.NOT_IMPRESSED,
                 },
                 false,
-                null,
+                undefined,
                 [],
                 messageOrInteraction instanceof Eris.CommandInteraction
                     ? messageOrInteraction
-                    : null
+                    : undefined
             );
             return;
         }
@@ -152,7 +152,7 @@ export default class RecentlyAddedCommand implements BaseCommand {
             })
         );
 
-        await sendPaginationedEmbed(messageOrInteraction, embeds, null);
+        await sendPaginationedEmbed(messageOrInteraction, embeds, undefined);
         logger.info(
             `${getDebugLogHeader(
                 messageContext

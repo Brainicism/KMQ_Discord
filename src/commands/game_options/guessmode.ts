@@ -152,7 +152,7 @@ export default class GuessModeCommand implements BaseCommand {
     ];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        let guessModeType: GuessModeType;
+        let guessModeType: GuessModeType | null;
 
         if (parsedMessage.components.length === 0) {
             guessModeType = null;
@@ -164,20 +164,20 @@ export default class GuessModeCommand implements BaseCommand {
         await GuessModeCommand.updateOption(
             MessageContext.fromMessage(message),
             guessModeType,
-            null,
-            guessModeType == null
+            undefined
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
-        guessModeType: GuessModeType,
-        interaction?: Eris.CommandInteraction,
-        reset = false
+        guessModeType: GuessModeType | null,
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
+
+        const reset = guessModeType == null;
 
         if (reset) {
             await guildPreference.reset(GameOption.GUESS_MODE_TYPE);
@@ -198,9 +198,9 @@ export default class GuessModeCommand implements BaseCommand {
             messageContext,
             guildPreference,
             [{ option: GameOption.GUESS_MODE_TYPE, reset }],
-            null,
-            null,
-            null,
+            false,
+            undefined,
+            undefined,
             interaction
         );
     }
@@ -216,7 +216,7 @@ export default class GuessModeCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
-        let guessModeValue: GuessModeType;
+        let guessModeValue: GuessModeType | null;
 
         const action = interactionName as OptionAction;
         if (action === OptionAction.RESET) {
@@ -231,8 +231,7 @@ export default class GuessModeCommand implements BaseCommand {
         await GuessModeCommand.updateOption(
             messageContext,
             guessModeValue,
-            interaction,
-            guessModeValue == null
+            interaction
         );
     }
 }

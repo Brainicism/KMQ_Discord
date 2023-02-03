@@ -292,7 +292,7 @@ export default class LeaderboardCommand implements BaseCommand {
         }
     }
 
-    call = ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+    call = ({ message, parsedMessage }: CommandArgs): void => {
         if (parsedMessage.components.length === 0) {
             LeaderboardCommand.showLeaderboard(
                 message,
@@ -318,9 +318,9 @@ export default class LeaderboardCommand implements BaseCommand {
             return;
         }
 
-        let type: LeaderboardType;
-        let scope: LeaderboardScope;
-        let duration: LeaderboardDuration;
+        let type: LeaderboardType | undefined;
+        let scope: LeaderboardScope | undefined;
+        let duration: LeaderboardDuration | undefined;
         const lastArg =
             parsedMessage.components[parsedMessage.components.length - 1];
 
@@ -551,12 +551,11 @@ export default class LeaderboardCommand implements BaseCommand {
         }
 
         const pageCount = Math.ceil(
-            ((
-                await topPlayersQuery
-                    .clone()
-                    .countDistinct("player_id AS count")
-                    .first()
-            )["count"] as number) / LEADERBOARD_ENTRIES_PER_PAGE
+            (((await topPlayersQuery
+                .clone()
+                .countDistinct("player_id AS count")
+                .first()) ?? {})["count"] as number) /
+                LEADERBOARD_ENTRIES_PER_PAGE
         );
 
         switch (type) {
@@ -769,6 +768,10 @@ export default class LeaderboardCommand implements BaseCommand {
                                         }
 
                                         default:
+                                            logger.error(
+                                                `Unexpected leaderboardType = ${type}`
+                                            );
+                                            value = "null";
                                             break;
                                     }
 
@@ -795,7 +798,7 @@ export default class LeaderboardCommand implements BaseCommand {
                                         {
                                             serverName: State.client.guilds.get(
                                                 messageContext.guildID
-                                            ).name,
+                                            )!.name,
                                         }
                                     );
                                 } else {
@@ -813,6 +816,10 @@ export default class LeaderboardCommand implements BaseCommand {
                                 );
                                 break;
                             default:
+                                logger.error(
+                                    `Unexpected leaderboardScope = ${scope}`
+                                );
+                                leaderboardScope = "invalid";
                                 break;
                         }
 
@@ -853,6 +860,10 @@ export default class LeaderboardCommand implements BaseCommand {
                                 );
                                 break;
                             default:
+                                leaderboardDuration = "invalid";
+                                logger.error(
+                                    `Unexpected leaderboardDuration = ${duration}`
+                                );
                                 break;
                         }
 
@@ -874,6 +885,10 @@ export default class LeaderboardCommand implements BaseCommand {
                                 )})`;
                                 break;
                             default:
+                                logger.error(
+                                    `Unexpected leaderboardType = ${type}`
+                                );
+                                leaderboardType = "invalid";
                                 break;
                         }
 
@@ -959,7 +974,7 @@ export default class LeaderboardCommand implements BaseCommand {
                 ),
             },
             false,
-            null,
+            undefined,
             [],
             interaction
         );
@@ -987,7 +1002,7 @@ export default class LeaderboardCommand implements BaseCommand {
                 ),
             },
             false,
-            null,
+            undefined,
             [],
             interaction
         );
@@ -1002,8 +1017,8 @@ export default class LeaderboardCommand implements BaseCommand {
     ): Promise<void> {
         const messageContext = new MessageContext(
             messageOrInteraction.channel.id,
-            new KmqMember(messageOrInteraction.member.id),
-            messageOrInteraction.guildID
+            new KmqMember(messageOrInteraction.member!.id),
+            messageOrInteraction.guildID as string
         );
 
         if (scope === LeaderboardScope.GAME) {
@@ -1023,7 +1038,7 @@ export default class LeaderboardCommand implements BaseCommand {
                     },
                     messageOrInteraction instanceof Eris.CommandInteraction
                         ? messageOrInteraction
-                        : null
+                        : undefined
                 );
                 return;
             }
@@ -1049,7 +1064,7 @@ export default class LeaderboardCommand implements BaseCommand {
                     },
                     messageOrInteraction instanceof Eris.CommandInteraction
                         ? messageOrInteraction
-                        : null
+                        : undefined
                 );
                 return;
             }
@@ -1079,7 +1094,7 @@ export default class LeaderboardCommand implements BaseCommand {
                 },
                 messageOrInteraction instanceof Eris.CommandInteraction
                     ? messageOrInteraction
-                    : null
+                    : undefined
             );
             return;
         }
@@ -1100,7 +1115,7 @@ export default class LeaderboardCommand implements BaseCommand {
                 },
                 messageOrInteraction instanceof Eris.CommandInteraction
                     ? messageOrInteraction
-                    : null
+                    : undefined
             );
             return;
         }
@@ -1108,7 +1123,7 @@ export default class LeaderboardCommand implements BaseCommand {
         await sendPaginationedEmbed(
             messageOrInteraction,
             embeds,
-            null,
+            undefined,
             pageOffset
         );
 

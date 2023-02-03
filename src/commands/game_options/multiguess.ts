@@ -141,7 +141,7 @@ export default class MultiGuessCommand implements BaseCommand {
     ];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        let multiGuessType: MultiGuessType;
+        let multiGuessType: MultiGuessType | null;
 
         if (parsedMessage.components.length === 0) {
             multiGuessType = null;
@@ -153,20 +153,20 @@ export default class MultiGuessCommand implements BaseCommand {
         await MultiGuessCommand.updateOption(
             MessageContext.fromMessage(message),
             multiGuessType,
-            null,
-            multiGuessType == null
+            undefined
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
-        multiguessType: MultiGuessType,
-        interaction?: Eris.CommandInteraction,
-        reset = false
+        multiguessType: MultiGuessType | null,
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
+
+        const reset = multiguessType == null;
 
         if (reset) {
             await guildPreference.reset(GameOption.MULTIGUESS);
@@ -187,9 +187,9 @@ export default class MultiGuessCommand implements BaseCommand {
             messageContext,
             guildPreference,
             [{ option: GameOption.MULTIGUESS, reset }],
-            null,
-            null,
-            null,
+            false,
+            undefined,
+            undefined,
             interaction
         );
     }
@@ -205,7 +205,7 @@ export default class MultiGuessCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
-        let multiguessValue: MultiGuessType;
+        let multiguessValue: MultiGuessType | null;
 
         const action = interactionName as OptionAction;
         if (action === OptionAction.RESET) {
@@ -222,8 +222,7 @@ export default class MultiGuessCommand implements BaseCommand {
         await MultiGuessCommand.updateOption(
             messageContext,
             multiguessValue,
-            interaction,
-            multiguessValue == null
+            interaction
         );
     }
 }

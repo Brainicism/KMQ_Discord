@@ -138,6 +138,10 @@ export async function calculateOptionsExpMultiplierInternal(
                 multipleChoicePenalty = ExpBonusModifier.MC_GUESS_HARD;
                 break;
             default:
+                multipleChoicePenalty = ExpBonusModifier.MC_GUESS_EASY;
+                logger.error(
+                    `Unexpected multiple choice difficulty: ${difficulty}`
+                );
                 break;
         }
 
@@ -456,8 +460,8 @@ export default class ExpCommand implements BaseCommand {
         await sendInfoMessage(
             messageContext,
             embedPayload,
-            null,
-            null,
+            false,
+            undefined,
             undefined,
             interaction
         );

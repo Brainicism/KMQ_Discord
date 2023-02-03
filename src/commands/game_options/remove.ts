@@ -157,7 +157,7 @@ export default class RemoveCommand implements BaseCommand {
             messageContext.guildID
         );
 
-        let currentMatchedArtists: MatchedArtist[];
+        let currentMatchedArtists: MatchedArtist[] | null;
         switch (removeType) {
             case RemoveType.GROUPS:
             case RemoveType.GROUP:
@@ -174,6 +174,8 @@ export default class RemoveCommand implements BaseCommand {
                 currentMatchedArtists = guildPreference.gameOptions.excludes;
                 break;
             default:
+                logger.error(`Unexpected removeType: ${removeType}`);
+                currentMatchedArtists = [];
         }
 
         if (!currentMatchedArtists) {
@@ -213,7 +215,7 @@ export default class RemoveCommand implements BaseCommand {
                 )}`
             );
 
-            let suggestionsText: string = null;
+            let suggestionsText: string | undefined;
             if (unmatchedGroups.length === 1) {
                 const suggestions = await getSimilarGroupNames(
                     unmatchedGroups[0],
@@ -264,7 +266,7 @@ export default class RemoveCommand implements BaseCommand {
                     messageContext,
                     embeds[0],
                     false,
-                    null,
+                    undefined,
                     embeds.slice(1),
                     interaction
                 );
@@ -293,6 +295,8 @@ export default class RemoveCommand implements BaseCommand {
                 await guildPreference.setExcludes(remainingGroups);
                 break;
             default:
+                logger.error(`Unexpected removeType: ${removeType}`);
+                return;
         }
 
         logger.info(
@@ -306,16 +310,16 @@ export default class RemoveCommand implements BaseCommand {
             messageContext,
             guildPreference,
             [{ option: gameOption, reset: false }],
-            null,
-            null,
-            null
+            false,
+            undefined,
+            undefined
         );
 
         await sendInfoMessage(
             messageContext,
             optionsMessage,
             true,
-            null,
+            undefined,
             embeds,
             interaction
         );

@@ -47,7 +47,7 @@ async function sendSkipNotification(
         messageContext,
         embedPayload,
         true,
-        null,
+        undefined,
         [],
         interaction
     );
@@ -80,8 +80,8 @@ async function sendSkipMessage(
     await sendInfoMessage(
         messageContext,
         embedPayload,
-        null,
-        null,
+        false,
+        undefined,
         [],
         interaction
     );
@@ -94,6 +94,10 @@ async function sendSkipMessage(
  * @returns whether the song has enough votes to be skipped
  */
 export function isSkipMajority(guildID: string, session: Session): boolean {
+    if (!session.round) {
+        return false;
+    }
+
     if (session.isGameSession()) {
         if (session.gameType === GameType.ELIMINATION) {
             return (
@@ -123,6 +127,11 @@ export function skipSong(
     logger.info(
         `${getDebugLogHeader(messageContext)} | Skip majority achieved.`
     );
+
+    if (!session.round) {
+        return;
+    }
+
     session.round.skipAchieved = true;
     session.endRound(messageContext, { correct: false });
     session.startRound(messageContext);

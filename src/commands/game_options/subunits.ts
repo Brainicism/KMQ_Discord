@@ -169,7 +169,7 @@ export default class SubunitsCommand implements BaseCommand {
     ];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        let subunitsPreference: SubunitsPreference;
+        let subunitsPreference: SubunitsPreference | null;
 
         if (parsedMessage.components.length === 0) {
             subunitsPreference = null;
@@ -181,21 +181,20 @@ export default class SubunitsCommand implements BaseCommand {
         await SubunitsCommand.updateOption(
             MessageContext.fromMessage(message),
             subunitsPreference,
-            null,
-            subunitsPreference == null
+            undefined
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
-        subunitsPreference: SubunitsPreference,
-        interaction?: Eris.CommandInteraction,
-        reset = false
+        subunitsPreference: SubunitsPreference | null,
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
+        const reset = subunitsPreference == null;
         if (reset) {
             await guildPreference.reset(GameOption.SUBUNIT_PREFERENCE);
             logger.info(
@@ -217,9 +216,9 @@ export default class SubunitsCommand implements BaseCommand {
             messageContext,
             guildPreference,
             [{ option: GameOption.SUBUNIT_PREFERENCE, reset }],
-            null,
-            null,
-            null,
+            false,
+            undefined,
+            undefined,
             interaction
         );
     }
@@ -235,7 +234,7 @@ export default class SubunitsCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
-        let subunitsValue: SubunitsPreference;
+        let subunitsValue: SubunitsPreference | null;
 
         const action = interactionName as OptionAction;
         if (action === OptionAction.RESET) {
@@ -252,8 +251,7 @@ export default class SubunitsCommand implements BaseCommand {
         await SubunitsCommand.updateOption(
             messageContext,
             subunitsValue,
-            interaction,
-            subunitsValue == null
+            interaction
         );
     }
 }

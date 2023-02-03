@@ -176,20 +176,20 @@ export default class GenderCommand implements BaseCommand {
         await GenderCommand.updateOption(
             MessageContext.fromMessage(message),
             selectedGenders,
-            null,
-            selectedGenders.length === 0
+            undefined
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         selectedGenders: Array<Gender>,
-        interaction?: Eris.CommandInteraction,
-        reset = false
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
+
+        const reset = selectedGenders.length === 0;
 
         if (reset) {
             await guildPreference.reset(GameOption.GENDER);
@@ -198,9 +198,9 @@ export default class GenderCommand implements BaseCommand {
                 messageContext,
                 guildPreference,
                 [{ option: GameOption.GENDER, reset: true }],
-                null,
-                null,
-                null,
+                false,
+                undefined,
+                undefined,
                 interaction
             );
 
@@ -281,9 +281,9 @@ export default class GenderCommand implements BaseCommand {
             messageContext,
             guildPreference,
             [{ option: GameOption.GENDER, reset: false }],
-            null,
-            null,
-            null,
+            false,
+            undefined,
+            undefined,
             interaction
         );
 
@@ -311,19 +311,18 @@ export default class GenderCommand implements BaseCommand {
 
         const action = interactionName as OptionAction;
         if (action === OptionAction.RESET) {
-            selectedGenders = null;
+            selectedGenders = [];
         } else if (action === OptionAction.SET) {
             selectedGenders = Object.values(interactionOptions);
         } else {
             logger.error(`Unexpected interaction name: ${interactionName}`);
-            selectedGenders = null;
+            selectedGenders = [];
         }
 
         await GenderCommand.updateOption(
             messageContext,
             selectedGenders,
-            interaction,
-            selectedGenders == null
+            interaction
         );
     }
 }

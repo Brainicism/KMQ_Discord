@@ -141,7 +141,7 @@ export default class ForceSkipCommand implements BaseCommand {
                 thumbnailUrl: KmqImages.NOT_IMPRESSED,
             },
             true,
-            null,
+            undefined,
             [],
             interaction
         );

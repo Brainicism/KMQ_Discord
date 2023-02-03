@@ -151,7 +151,7 @@ export default class VoteCommand implements BaseCommand {
         }
 
         const embedPayload: EmbedPayload = {
-            color: boostActive ? EMBED_SUCCESS_BONUS_COLOR : null,
+            color: boostActive ? EMBED_SUCCESS_BONUS_COLOR : undefined,
             title: boostActive
                 ? i18n.translate(
                       messageContext.guildID,
@@ -204,7 +204,7 @@ export default class VoteCommand implements BaseCommand {
             messageContext,
             embedPayload,
             true,
-            null,
+            undefined,
             [],
             interaction
         );

@@ -147,7 +147,7 @@ export default class OstCommand implements BaseCommand {
     ];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        let ostPreference: OstPreference;
+        let ostPreference: OstPreference | null;
 
         if (parsedMessage.components.length === 0) {
             ostPreference = null;
@@ -159,21 +159,20 @@ export default class OstCommand implements BaseCommand {
         await OstCommand.updateOption(
             MessageContext.fromMessage(message),
             ostPreference,
-            null,
-            ostPreference == null
+            undefined
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
-        ostPreference: OstPreference,
-        interaction?: Eris.CommandInteraction,
-        reset = false
+        ostPreference: OstPreference | null,
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
+        const reset = ostPreference == null;
         if (reset) {
             await guildPreference.reset(GameOption.OST_PREFERENCE);
             logger.info(
@@ -193,9 +192,9 @@ export default class OstCommand implements BaseCommand {
             messageContext,
             guildPreference,
             [{ option: GameOption.OST_PREFERENCE, reset }],
-            null,
-            null,
-            null,
+            false,
+            undefined,
+            undefined,
             interaction
         );
     }
@@ -211,7 +210,7 @@ export default class OstCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
-        let ostValue: OstPreference;
+        let ostValue: OstPreference | null;
 
         const action = interactionName as OptionAction;
         if (action === OptionAction.RESET) {
@@ -223,11 +222,6 @@ export default class OstCommand implements BaseCommand {
             ostValue = null;
         }
 
-        await OstCommand.updateOption(
-            messageContext,
-            ostValue,
-            interaction,
-            ostValue == null
-        );
+        await OstCommand.updateOption(messageContext, ostValue, interaction);
     }
 }

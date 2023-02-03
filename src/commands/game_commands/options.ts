@@ -55,10 +55,10 @@ export default class OptionsCommand implements BaseCommand {
             Session.getSession(messageContext.guildID),
             messageContext,
             guildPreference,
-            null,
-            null,
-            null,
-            null,
+            [],
+            false,
+            false,
+            undefined,
             interaction
         );
 

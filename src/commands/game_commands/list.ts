@@ -130,7 +130,7 @@ export default class ListCommand implements BaseCommand {
             messageContext.guildID
         );
 
-        let optionValue: string;
+        let optionValue: string | null;
         switch (listType) {
             case ListType.GROUPS:
             case ListType.GROUP:
@@ -173,7 +173,7 @@ export default class ListCommand implements BaseCommand {
                         name: "groups.txt",
                         file: Buffer.from(`${optionValue}\n`),
                     },
-                    null,
+                    undefined,
                     interaction
                 );
             } catch (e) {
@@ -213,8 +213,8 @@ export default class ListCommand implements BaseCommand {
                     ),
                     description: optionValue,
                 },
-                null,
-                null,
+                false,
+                undefined,
                 [],
                 interaction
             );

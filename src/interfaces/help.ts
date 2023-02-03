@@ -6,5 +6,5 @@ export default interface HelpDocumentation {
     usage: string;
     examples: Array<{ example: string; explanation: string }>;
     actionRowComponents?: Eris.ActionRowComponents[];
-    priority?: number;
+    priority: number;
 }

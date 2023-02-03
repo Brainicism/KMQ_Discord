@@ -154,7 +154,7 @@ export default class ArtistTypeCommand implements BaseCommand {
     ];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        let artistType: ArtistType;
+        let artistType: ArtistType | null;
 
         if (parsedMessage.components.length === 0) {
             artistType = null;
@@ -166,21 +166,20 @@ export default class ArtistTypeCommand implements BaseCommand {
         await ArtistTypeCommand.updateOption(
             MessageContext.fromMessage(message),
             artistType,
-            null,
-            artistType == null
+            undefined
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
-        artistType: ArtistType,
-        interaction?: Eris.CommandInteraction,
-        reset = false
+        artistType: ArtistType | null,
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
+        const reset = artistType == null;
         if (reset) {
             await guildPreference.reset(GameOption.ARTIST_TYPE);
             logger.info(
@@ -229,9 +228,9 @@ export default class ArtistTypeCommand implements BaseCommand {
             messageContext,
             guildPreference,
             [{ option: GameOption.ARTIST_TYPE, reset }],
-            null,
-            null,
-            null,
+            false,
+            undefined,
+            undefined,
             interaction
         );
     }
@@ -247,7 +246,7 @@ export default class ArtistTypeCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
-        let artistTypeValue: ArtistType;
+        let artistTypeValue: ArtistType | null;
 
         const action = interactionName as OptionAction;
         if (action === OptionAction.RESET) {
@@ -262,8 +261,7 @@ export default class ArtistTypeCommand implements BaseCommand {
         await ArtistTypeCommand.updateOption(
             messageContext,
             artistTypeValue,
-            interaction,
-            artistTypeValue == null
+            interaction
         );
     }
 }

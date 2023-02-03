@@ -64,10 +64,9 @@ export async function sendBeginListeningSessionMessage(
         Session.getSession(messageContext.guildID),
         messageContext,
         guildPreference,
-        null,
+        [],
         false,
-        false,
-        null
+        false
     );
 
     await sendInfoMessage(
