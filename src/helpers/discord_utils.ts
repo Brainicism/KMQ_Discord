@@ -675,7 +675,7 @@ export async function generateOptionsMessage(
     session: Session,
     messageContext: MessageContext,
     guildPreference: GuildPreference,
-    updatedOptions?: { option: GameOption; reset: boolean }[],
+    updatedOptions: { option: GameOption; reset: boolean }[],
     preset = false,
     allReset = false,
     footerText?: string
@@ -827,7 +827,7 @@ export async function generateOptionsMessage(
     }
 
     // Underline changed option
-    if (updatedOptions) {
+    if (updatedOptions.length > 0) {
         for (const updatedOption of updatedOptions) {
             optionStrings[updatedOption.option as GameOption] = underline(
                 optionStrings[updatedOption.option]
@@ -979,7 +979,7 @@ export async function generateOptionsMessage(
     ];
 
     if (
-        updatedOptions &&
+        updatedOptions.length > 0 &&
         !allReset &&
         updatedOptions[0] &&
         updatedOptions[0].reset
