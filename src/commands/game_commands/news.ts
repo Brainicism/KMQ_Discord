@@ -82,8 +82,8 @@ export default class NewsCommand implements BaseCommand {
                     },
                 ],
             },
-            null,
-            null,
+            false,
+            undefined,
             [],
             interaction
         );

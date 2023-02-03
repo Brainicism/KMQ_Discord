@@ -191,7 +191,7 @@ export default class AnswerCommand implements BaseCommand {
     ];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        let answerType: AnswerType;
+        let answerType: AnswerType | null;
 
         if (parsedMessage.components.length === 0) {
             answerType = null;
@@ -203,20 +203,20 @@ export default class AnswerCommand implements BaseCommand {
         await AnswerCommand.updateOption(
             MessageContext.fromMessage(message),
             answerType,
-            null,
-            answerType == null
+            undefined
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
-        answerType: AnswerType,
-        interaction?: Eris.CommandInteraction,
-        reset = false
+        answerType: AnswerType | null,
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
+
+        const reset = answerType == null;
 
         if (reset) {
             await guildPreference.reset(GameOption.ANSWER_TYPE);
@@ -237,9 +237,9 @@ export default class AnswerCommand implements BaseCommand {
             messageContext,
             guildPreference,
             [{ option: GameOption.ANSWER_TYPE, reset }],
-            null,
-            null,
-            null,
+            false,
+            undefined,
+            undefined,
             interaction
         );
     }
@@ -255,7 +255,7 @@ export default class AnswerCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
-        let answerType: AnswerType;
+        let answerType: AnswerType | null;
         const action = interactionName as OptionAction;
         if (action === OptionAction.RESET) {
             answerType = null;
@@ -269,8 +269,7 @@ export default class AnswerCommand implements BaseCommand {
         await AnswerCommand.updateOption(
             messageContext,
             answerType,
-            interaction,
-            answerType == null
+            interaction
         );
     }
 }

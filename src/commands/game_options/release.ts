@@ -144,7 +144,7 @@ export default class ReleaseCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        let releaseType: ReleaseType;
+        let releaseType: ReleaseType | null;
         if (parsedMessage.components.length === 0) {
             releaseType = null;
         } else {
@@ -155,21 +155,20 @@ export default class ReleaseCommand implements BaseCommand {
         await ReleaseCommand.updateOption(
             MessageContext.fromMessage(message),
             releaseType,
-            null,
-            releaseType == null
+            undefined
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
-        releaseType: ReleaseType,
-        interaction?: Eris.CommandInteraction,
-        reset = false
+        releaseType: ReleaseType | null,
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
+        const reset = releaseType == null;
         if (reset) {
             await guildPreference.reset(GameOption.RELEASE_TYPE);
             logger.info(
@@ -189,9 +188,9 @@ export default class ReleaseCommand implements BaseCommand {
             messageContext,
             guildPreference,
             [{ option: GameOption.RELEASE_TYPE, reset }],
-            null,
-            null,
-            null,
+            false,
+            undefined,
+            undefined,
             interaction
         );
     }
@@ -207,7 +206,7 @@ export default class ReleaseCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
-        let releaseValue: ReleaseType;
+        let releaseValue: ReleaseType | null;
 
         const action = interactionName as OptionAction;
         if (action === OptionAction.RESET) {
@@ -222,8 +221,7 @@ export default class ReleaseCommand implements BaseCommand {
         await ReleaseCommand.updateOption(
             messageContext,
             releaseValue,
-            interaction,
-            releaseValue == null
+            interaction
         );
     }
 }

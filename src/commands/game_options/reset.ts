@@ -80,7 +80,7 @@ export default class ResetCommand implements BaseCommand {
             })),
             false,
             true,
-            null,
+            undefined,
             interaction
         );
     }

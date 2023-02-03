@@ -151,7 +151,7 @@ export default class AddCommand implements BaseCommand {
 
         const embeds: Array<EmbedPayload> = [];
 
-        let groupNamesString: string;
+        let groupNamesString: string | null;
         switch (addType) {
             case AddType.GROUPS:
             case AddType.GROUP:
@@ -170,6 +170,9 @@ export default class AddCommand implements BaseCommand {
                     guildPreference.getDisplayedExcludesGroupNames(true);
                 break;
             default:
+                logger.error(`Unexpected addType: ${addType}`);
+                groupNamesString = guildPreference.getDisplayedGroupNames(true);
+                break;
         }
 
         const currentGroupNames = !groupNamesString
@@ -191,7 +194,7 @@ export default class AddCommand implements BaseCommand {
                 )}`
             );
 
-            let suggestionsText: string = null;
+            let suggestionsText: string | undefined;
             if (unmatchedGroups.length === 1) {
                 const suggestions = await getSimilarGroupNames(
                     unmatchedGroups[0],
@@ -230,7 +233,7 @@ export default class AddCommand implements BaseCommand {
                     messageContext.guildID,
                     "misc.failure.unrecognizedGroups.title"
                 ),
-                description: `${descriptionText}\n\n${suggestionsText || ""}`,
+                description: `${descriptionText}\n\n${suggestionsText ?? ""}`,
                 thumbnailUrl: KmqImages.DEAD,
             });
         }
@@ -242,7 +245,7 @@ export default class AddCommand implements BaseCommand {
                     messageContext,
                     embeds[0],
                     false,
-                    null,
+                    undefined,
                     embeds.slice(1),
                     interaction
                 );
@@ -301,7 +304,7 @@ export default class AddCommand implements BaseCommand {
                             messageContext,
                             embeds[0],
                             false,
-                            null,
+                            undefined,
                             embeds.slice(1),
                             interaction
                         );
@@ -395,7 +398,7 @@ export default class AddCommand implements BaseCommand {
                             messageContext,
                             embeds[0],
                             false,
-                            null,
+                            undefined,
                             embeds.slice(1),
                             interaction
                         );
@@ -409,6 +412,8 @@ export default class AddCommand implements BaseCommand {
             }
 
             default:
+                logger.error(`Unexpected addType: ${addType}`);
+                return;
         }
 
         logger.info(
@@ -422,16 +427,16 @@ export default class AddCommand implements BaseCommand {
             messageContext,
             guildPreference,
             [{ option: gameOption, reset: false }],
-            null,
-            null,
-            null
+            false,
+            undefined,
+            undefined
         );
 
         await sendInfoMessage(
             messageContext,
             optionsMessage,
             true,
-            null,
+            undefined,
             embeds,
             interaction
         );

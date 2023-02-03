@@ -55,37 +55,36 @@ export default class AppCommandsCommand implements BaseCommand {
 
         const isProd = process.env.NODE_ENV === EnvType.PROD;
         const debugServer = State.client.guilds.get(
-            process.env.DEBUG_SERVER_ID
+            process.env.DEBUG_SERVER_ID as string
         );
 
         if (!isProd && !debugServer) return;
 
         const commandModificationScope = isProd ? "global" : "guild";
 
+        let commandStructures: Eris.ApplicationCommandStructure[] = [];
+
         if (appCommandType === AppCommandsAction.RELOAD) {
             logger.info(
                 `Creating ${commandModificationScope} application commands...`
             );
 
-            const commandStructures: Array<Eris.ApplicationCommandStructure> =
-                isSingleCommand
-                    ? []
-                    : [
-                          {
-                              name: BOOKMARK_COMMAND_NAME,
-                              type: Eris.Constants.ApplicationCommandTypes
-                                  .MESSAGE,
-                          },
-                          {
-                              name: PROFILE_COMMAND_NAME,
-                              type: Eris.Constants.ApplicationCommandTypes
-                                  .MESSAGE,
-                          },
-                          {
-                              name: PROFILE_COMMAND_NAME,
-                              type: Eris.Constants.ApplicationCommandTypes.USER,
-                          },
-                      ];
+            commandStructures = isSingleCommand
+                ? []
+                : [
+                      {
+                          name: BOOKMARK_COMMAND_NAME,
+                          type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
+                      },
+                      {
+                          name: PROFILE_COMMAND_NAME,
+                          type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
+                      },
+                      {
+                          name: PROFILE_COMMAND_NAME,
+                          type: Eris.Constants.ApplicationCommandTypes.USER,
+                      },
+                  ];
 
             for (const commandObj of Object.entries(State.client.commands)) {
                 const commandName = commandObj[0];
@@ -189,41 +188,29 @@ export default class AppCommandsCommand implements BaseCommand {
                     }
                 }
             }
-
-            if (isProd) {
-                await State.client.bulkEditCommands(commandStructures);
-            } else {
-                await State.client.bulkEditGuildCommands(
-                    debugServer.id,
-                    commandStructures
-                );
-            }
-
-            logger.info(
-                `Created ${commandModificationScope} application commands`
-            );
-
-            await sendInfoMessage(MessageContext.fromMessage(message), {
-                title: "Application Commands Reloaded",
-            });
         } else {
             logger.info(
                 `Deleting ${commandModificationScope} application commands`
             );
 
-            if (isProd) {
-                await State.client.bulkEditCommands([]);
-            } else {
-                await State.client.bulkEditGuildCommands(debugServer.id, []);
-            }
-
-            logger.info(
-                `Deleted ${commandModificationScope} application commands`
-            );
-
-            await sendInfoMessage(MessageContext.fromMessage(message), {
-                title: "Commands Deleted",
-            });
+            commandStructures = [];
         }
+
+        if (isProd) {
+            await State.client.bulkEditCommands(commandStructures);
+        } else {
+            if (debugServer) {
+                await State.client.bulkEditGuildCommands(
+                    debugServer.id,
+                    commandStructures
+                );
+            } else {
+                logger.error("Debug server unexpectedly unavailable");
+            }
+        }
+
+        await sendInfoMessage(MessageContext.fromMessage(message), {
+            title: "Commands Updated",
+        });
     };
 }

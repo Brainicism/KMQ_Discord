@@ -24,7 +24,7 @@ import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("help");
 const FIELDS_PER_EMBED = 8;
-const excludedCommands = [];
+const excludedCommands: Array<string> = [];
 
 export default class HelpCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
@@ -85,8 +85,10 @@ export default class HelpCommand implements BaseCommand {
     ): Promise<void> {
         let embedTitle = "";
         let embedDesc = "";
-        let embedFields = [];
-        let embedActionRowComponents: Eris.ActionRowComponents[] = null;
+        let embedFields: { name: string; value: string }[] = [];
+        let embedActionRowComponents: Eris.ActionRowComponents[] | undefined =
+            [];
+
         const commandFiles = State.client.commands;
         for (const command of excludedCommands) {
             delete commandFiles[command];
@@ -94,8 +96,8 @@ export default class HelpCommand implements BaseCommand {
 
         const messageContext = new MessageContext(
             messageOrInteraction.channel.id,
-            new KmqMember(messageOrInteraction.member.id),
-            messageOrInteraction.guildID
+            new KmqMember(messageOrInteraction.member!.id),
+            messageOrInteraction.guildID as string
         );
 
         const commandFilesWithAliases: { [commandName: string]: BaseCommand } =
@@ -108,12 +110,12 @@ export default class HelpCommand implements BaseCommand {
 
         for (const commandName of commandNamesWithAliases) {
             const { aliases } = commandFiles[commandName];
-            for (const alias of aliases) {
+            for (const alias of aliases ?? []) {
                 commandFilesWithAliases[alias] = commandFiles[commandName];
             }
         }
 
-        let embedFooter = null;
+        let embedFooter: { text: string } | undefined;
         if (action) {
             const commandNamesWithHelp = Object.keys(
                 commandFilesWithAliases
@@ -151,14 +153,18 @@ export default class HelpCommand implements BaseCommand {
                     },
                     messageOrInteraction instanceof Eris.CommandInteraction
                         ? messageOrInteraction
-                        : null
+                        : undefined
                 );
                 return;
             }
 
-            const helpManual = commandFilesWithAliases[action].help(
-                messageContext.guildID
-            );
+            const helpManualFunc = commandFilesWithAliases[action].help;
+            if (!helpManualFunc) {
+                logger.error(`No help manual found for ${action}. Skipping.`);
+                return;
+            }
+
+            const helpManual = helpManualFunc(messageContext.guildID);
 
             embedTitle = `\`${helpManual.usage}\``;
             embedDesc = helpManual.description;
@@ -175,12 +181,13 @@ export default class HelpCommand implements BaseCommand {
                 value: example.explanation,
             }));
 
-            if (commandFilesWithAliases[action].aliases) {
+            const aliases = commandFilesWithAliases[action].aliases;
+            if (aliases) {
                 embedFooter = {
                     text: `${i18n.translate(
                         messageContext.guildID,
                         "misc.inGame.aliases"
-                    )}: ${commandFilesWithAliases[action].aliases.join(", ")}`,
+                    )}: ${aliases.join(", ")}`,
                 };
             }
         } else {
@@ -194,7 +201,7 @@ export default class HelpCommand implements BaseCommand {
             );
 
             commandsWithHelp.sort(
-                (x, y) => y.help(null).priority - x.help(null).priority
+                (x, y) => y.help!("").priority - x.help!("").priority
             );
 
             embedTitle = i18n.translate(
@@ -220,7 +227,7 @@ export default class HelpCommand implements BaseCommand {
             );
 
             embedFields = commandsWithHelp.map((command) => {
-                const helpManual = command.help(messageContext.guildID);
+                const helpManual = command.help!(messageContext.guildID);
                 return {
                     name: `/${helpManual.name}`,
                     value: helpManual.description,
@@ -285,18 +292,18 @@ export default class HelpCommand implements BaseCommand {
                 {
                     title: embedTitle,
                     description: embedDesc,
-                    footerText: embedFooter ? embedFooter.text : null,
+                    footerText: embedFooter ? embedFooter.text : undefined,
                     thumbnailUrl: KmqImages.READING_BOOK,
                     components: embedActionRowComponents
                         ? [{ type: 1, components: embedActionRowComponents }]
                         : undefined,
                 },
                 false,
-                null,
+                undefined,
                 [],
                 messageOrInteraction instanceof Eris.CommandInteraction
                     ? messageOrInteraction
-                    : null
+                    : undefined
             );
         }
     }
@@ -335,7 +342,7 @@ export default class HelpCommand implements BaseCommand {
         const lowercaseUserInput = focusedVal.toLowerCase();
         const commands = Object.values(State.client.commands)
             .filter((x) => x.help)
-            .map((x) => x.help(interaction.guildID))
+            .map((x) => x.help!(interaction.guildID as string))
             .filter((x) => !excludedCommands.includes(x.name))
             .sort((a, b) => b.priority - a.priority);
 

@@ -111,46 +111,38 @@ async function getProfileFields(
     const exp = playerStats["exp"];
     const level = playerStats["level"];
 
-    const totalPlayers = (
-        await dbContext
-            .kmq("player_stats")
-            .count("* as count")
-            .where("exp", ">", "0")
-            .first()
-    )["count"] as number;
+    const totalPlayers = ((await dbContext
+        .kmq("player_stats")
+        .count("* as count")
+        .where("exp", ">", "0")
+        .first()) ?? {})["count"] as number;
 
     const relativeSongRank = Math.min(
-        ((
-            await dbContext
-                .kmq("player_stats")
-                .count("* as count")
-                .where("songs_guessed", ">", songsGuessed)
-                .where("exp", ">", "0")
-                .first()
-        )["count"] as number) + 1,
+        (((await dbContext
+            .kmq("player_stats")
+            .count("* as count")
+            .where("songs_guessed", ">", songsGuessed)
+            .where("exp", ">", "0")
+            .first()) ?? {})["count"] as number) + 1,
         totalPlayers
     );
 
     const relativeGamesPlayedRank = Math.min(
-        ((
-            await dbContext
-                .kmq("player_stats")
-                .count("* as count")
-                .where("games_played", ">", gamesPlayed)
-                .where("exp", ">", "0")
-                .first()
-        )["count"] as number) + 1,
+        (((await dbContext
+            .kmq("player_stats")
+            .count("* as count")
+            .where("games_played", ">", gamesPlayed)
+            .where("exp", ">", "0")
+            .first()) ?? {})["count"] as number) + 1,
         totalPlayers
     );
 
     const relativeLevelRank = Math.min(
-        ((
-            await dbContext
-                .kmq("player_stats")
-                .count("* as count")
-                .where("exp", ">", exp)
-                .first()
-        )["count"] as number) + 1,
+        (((await dbContext
+            .kmq("player_stats")
+            .count("* as count")
+            .where("exp", ">", exp)
+            .first()) ?? {})["count"] as number) + 1,
         totalPlayers
     );
 
@@ -328,7 +320,7 @@ export default class ProfileCommand implements BaseCommand {
     ];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        let requestedPlayer: Eris.User;
+        let requestedPlayer: Eris.User | null;
         if (parsedMessage.components.length === 0) {
             requestedPlayer = message.author;
         } else if (parsedMessage.components.length === 1) {
@@ -453,11 +445,11 @@ export default class ProfileCommand implements BaseCommand {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 i18n.translate(
-                    interaction.guildID,
+                    interaction.guildID as string,
                     "command.profile.failure.notFound.title"
                 ),
                 i18n.translate(
-                    interaction.guildID,
+                    interaction.guildID as string,
                     "misc.interaction.profile.inaccessible",
                     {
                         profileUserID: `\`/profile ${userId}\``,
@@ -473,16 +465,20 @@ export default class ProfileCommand implements BaseCommand {
             return;
         }
 
-        const fields = await getProfileFields(user, interaction.guildID);
+        const fields = await getProfileFields(
+            user,
+            interaction.guildID as string
+        );
+
         if (fields.length === 0) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 i18n.translate(
-                    interaction.guildID,
+                    interaction.guildID as string,
                     "command.profile.failure.notFound.title"
                 ),
                 i18n.translate(
-                    interaction.guildID,
+                    interaction.guildID as string,
                     "misc.interaction.profile.noStats"
                 )
             );
@@ -504,7 +500,7 @@ export default class ProfileCommand implements BaseCommand {
                         timestamp: new Date(),
                     },
                 ],
-                flags: ephemeral ? EPHEMERAL_MESSAGE_FLAG : null,
+                flags: ephemeral ? EPHEMERAL_MESSAGE_FLAG : undefined,
             });
 
             logger.info(

@@ -138,7 +138,7 @@ export async function sendBeginGameSessionMessage(
     const startGamePayload = {
         title: startTitle,
         description: gameInstructions,
-        color: isBonus ? EMBED_SUCCESS_BONUS_COLOR : null,
+        color: isBonus ? EMBED_SUCCESS_BONUS_COLOR : undefined,
         thumbnailUrl: KmqImages.HAPPY,
         fields,
         footerText: `KMQ ${State.version}`,
@@ -148,7 +148,7 @@ export async function sendBeginGameSessionMessage(
         Session.getSession(guildID),
         messageContext,
         guildPreference,
-        null
+        []
     );
 
     if (!isBonus && Math.random() < 0.5) {
@@ -553,13 +553,13 @@ export default class PlayCommand implements BaseCommand {
         // Emojis are of the format: <(a if animated):(alphanumeric):(number)>
         const emojis = teamName.match(/<a?:[a-zA-Z0-9]+:[0-9]+>/gm) || [];
         for (const emoji of emojis) {
-            const emojiID = emoji
-                .match(/(?<=<a?:[a-zA-Z0-9]+:)[0-9]+(?=>)/gm)
-                .join("");
+            const emojiID = (
+                emoji.match(/(?<=<a?:[a-zA-Z0-9]+:)[0-9]+(?=>)/gm) ?? []
+            ).join("");
 
             if (
                 !State.client.guilds
-                    .get(messageContext.guildID)
+                    .get(messageContext.guildID)!
                     .emojis.map((e) => e.id)
                     .includes(emojiID)
             ) {
@@ -661,7 +661,7 @@ export default class PlayCommand implements BaseCommand {
                     thumbnailUrl: KmqImages.READING_BOOK,
                 },
                 false,
-                null,
+                undefined,
                 [],
                 interaction
             );
@@ -743,7 +743,7 @@ export default class PlayCommand implements BaseCommand {
                     thumbnailUrl: KmqImages.LISTENING,
                 },
                 false,
-                null,
+                undefined,
                 [],
                 interaction
             );
@@ -759,7 +759,7 @@ export default class PlayCommand implements BaseCommand {
     static async startGame(
         messageContext: MessageContext,
         gameType: GameType,
-        livesArg: string,
+        livesArg: string | null,
         interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const guildID = messageContext.guildID;
@@ -814,7 +814,7 @@ export default class PlayCommand implements BaseCommand {
                             `Session started by non-premium request, clearing premium option: ${commandName}`
                         );
                         // eslint-disable-next-line no-await-in-loop
-                        await command.resetPremium(guildPreference);
+                        await command.resetPremium!(guildPreference);
                     }
                 }
             }

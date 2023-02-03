@@ -141,7 +141,7 @@ export default class LanguageCommand implements BaseCommand {
     ];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        let languageType: LanguageType;
+        let languageType: LanguageType | null;
         if (parsedMessage.components.length === 0) {
             languageType = null;
         } else {
@@ -151,21 +151,20 @@ export default class LanguageCommand implements BaseCommand {
         await LanguageCommand.updateOption(
             MessageContext.fromMessage(message),
             languageType,
-            null,
-            languageType == null
+            undefined
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
-        languageType: LanguageType,
-        interaction?: Eris.CommandInteraction,
-        reset = false
+        languageType: LanguageType | null,
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
+        const reset = languageType == null;
         if (reset) {
             await guildPreference.reset(GameOption.LANGUAGE_TYPE);
             logger.info(
@@ -185,9 +184,9 @@ export default class LanguageCommand implements BaseCommand {
             messageContext,
             guildPreference,
             [{ option: GameOption.LANGUAGE_TYPE, reset }],
-            null,
-            null,
-            null,
+            false,
+            undefined,
+            undefined,
             interaction
         );
     }
@@ -203,7 +202,7 @@ export default class LanguageCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
-        let languageValue: LanguageType;
+        let languageValue: LanguageType | null;
 
         const action = interactionName as OptionAction;
         if (action === OptionAction.RESET) {
@@ -218,8 +217,7 @@ export default class LanguageCommand implements BaseCommand {
         await LanguageCommand.updateOption(
             messageContext,
             languageValue,
-            interaction,
-            languageValue == null
+            interaction
         );
     }
 }

@@ -60,7 +60,7 @@ async function lookupByYoutubeID(
     videoID: string,
     locale: LocaleType
 ): Promise<boolean> {
-    const guildID = messageOrInteraction.guildID;
+    const guildID = messageOrInteraction.guildID as string;
     const kmqSongEntry: QueriedSong = await dbContext
         .kmq("available_songs")
         .select(SongSelector.getQueriedSongFields())
@@ -100,7 +100,7 @@ async function lookupByYoutubeID(
     let artistAliases: string;
     let views: number;
     let publishDate: Date;
-    let songDuration: string;
+    let songDuration: string | null = null;
     let includedInOptions = false;
 
     if (kmqSongEntry) {
@@ -136,7 +136,7 @@ async function lookupByYoutubeID(
                     await GuildPreference.getGuildPreference(guildID),
                     await isPremiumRequest(
                         session,
-                        messageOrInteraction.member.id
+                        messageOrInteraction.member!.id
                     ),
                     SHADOW_BANNED_ARTIST_IDS
                 )
@@ -232,8 +232,8 @@ async function lookupByYoutubeID(
 
     const messageContext = new MessageContext(
         messageOrInteraction.channel.id,
-        new KmqMember(messageOrInteraction.member.id),
-        messageOrInteraction.guildID
+        new KmqMember(messageOrInteraction.member!.id),
+        messageOrInteraction.guildID as string
     );
 
     sendInfoMessage(
@@ -250,11 +250,11 @@ async function lookupByYoutubeID(
             })),
         },
         false,
-        null,
+        undefined,
         [],
         messageOrInteraction instanceof Eris.CommandInteraction
             ? messageOrInteraction
-            : null
+            : undefined
     );
 
     return true;
@@ -320,11 +320,11 @@ async function lookupBySongName(
     const embeds: Array<EmbedOptions> = embedFieldSubsets.map(
         (embedFieldsSubset) => ({
             title: i18n.translate(
-                messageOrInteraction.guildID,
+                messageOrInteraction.guildID as string,
                 "command.lookup.songNameSearchResult.title"
             ),
             description: i18n.translate(
-                messageOrInteraction.guildID,
+                messageOrInteraction.guildID as string,
                 "command.lookup.songNameSearchResult.successDescription"
             ),
             fields: embedFieldsSubset,
@@ -483,18 +483,18 @@ export default class LookupCommand implements BaseCommand {
             linkOrName = `https://${linkOrName}`;
         }
 
-        const guildID = messageOrInteraction.guildID;
+        const guildID = messageOrInteraction.guildID as string;
         const messageContext = new MessageContext(
             messageOrInteraction.channel.id,
-            new KmqMember(messageOrInteraction.member.id),
-            messageOrInteraction.guildID
+            new KmqMember(messageOrInteraction.member!.id),
+            messageOrInteraction.guildID as string
         );
 
-        const locale = State.getGuildLocale(guildID);
+        const locale = State.getGuildLocale(guildID as string);
 
         // attempt to look up by video ID
         if (isValidURL(linkOrName) || validateID(linkOrName)) {
-            let videoID: string = null;
+            let videoID: string;
 
             try {
                 videoID = getVideoID(linkOrName);
@@ -539,7 +539,7 @@ export default class LookupCommand implements BaseCommand {
                     },
                     messageOrInteraction instanceof Eris.CommandInteraction
                         ? messageOrInteraction
-                        : null
+                        : undefined
                 );
 
                 logger.info(
@@ -570,11 +570,11 @@ export default class LookupCommand implements BaseCommand {
                     ),
                 },
                 false,
-                null,
+                undefined,
                 [],
                 messageOrInteraction instanceof Eris.CommandInteraction
                     ? messageOrInteraction
-                    : null
+                    : undefined
             );
 
             logger.info(
@@ -603,7 +603,7 @@ export default class LookupCommand implements BaseCommand {
             const artistName =
                 interactionData.interactionOptions["artist_name"];
 
-            let artistID: number;
+            let artistID: number | undefined;
             if (artistName) {
                 const matchingArtist =
                     State.artistToEntry[artistName.toLowerCase()];
@@ -631,13 +631,14 @@ export default class LookupCommand implements BaseCommand {
         const lowercaseUserInput = focusedVal.toLowerCase();
         const showHangul =
             containsHangul(lowercaseUserInput) ||
-            State.getGuildLocale(interaction.guildID) === LocaleType.KO;
+            State.getGuildLocale(interaction.guildID as string) ===
+                LocaleType.KO;
 
         if (focusedKey === "song_name") {
             const artistName =
                 interactionData.interactionOptions["artist_name"];
 
-            let artistID: number;
+            let artistID: number | undefined;
             if (artistName) {
                 artistID = State.artistToEntry[artistName.toLowerCase()]?.id;
             }
@@ -693,7 +694,7 @@ export default class LookupCommand implements BaseCommand {
                 ).filter(
                     (x) =>
                         x.cleanName.startsWith(cleanEnteredSongName) ||
-                        x.hangulCleanName.startsWith(cleanEnteredSongName)
+                        x.hangulCleanName?.startsWith(cleanEnteredSongName)
                 );
 
                 const matchingSongArtistIDs = matchingSongs.map(

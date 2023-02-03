@@ -147,7 +147,7 @@ export default class SeekCommand implements BaseCommand {
     ];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        let seekType: SeekType;
+        let seekType: SeekType | null;
 
         if (parsedMessage.components.length === 0) {
             seekType = null;
@@ -158,21 +158,20 @@ export default class SeekCommand implements BaseCommand {
         await SeekCommand.updateOption(
             MessageContext.fromMessage(message),
             seekType,
-            null,
-            seekType == null
+            undefined
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
-        seekType: SeekType,
-        interaction?: Eris.CommandInteraction,
-        reset = false
+        seekType: SeekType | null,
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
+        const reset = seekType == null;
         if (reset) {
             await guildPreference.reset(GameOption.SEEK_TYPE);
             logger.info(
@@ -192,9 +191,9 @@ export default class SeekCommand implements BaseCommand {
             messageContext,
             guildPreference,
             [{ option: GameOption.SEEK_TYPE, reset }],
-            null,
-            null,
-            null,
+            false,
+            undefined,
+            undefined,
             interaction
         );
     }
@@ -210,7 +209,7 @@ export default class SeekCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
-        let seekValue: SeekType;
+        let seekValue: SeekType | null;
 
         const action = interactionName as OptionAction;
         if (action === OptionAction.RESET) {
@@ -222,11 +221,6 @@ export default class SeekCommand implements BaseCommand {
             seekValue = null;
         }
 
-        await SeekCommand.updateOption(
-            messageContext,
-            seekValue,
-            interaction,
-            seekValue == null
-        );
+        await SeekCommand.updateOption(messageContext, seekValue, interaction);
     }
 }

@@ -333,7 +333,10 @@ export default class GuildPreference {
      * @param oldUUID - The UUID of a previous preset with the same name (in case of replacement)
      * @returns whether the preset was saved
      */
-    async savePreset(presetName: string, oldUUID?: string): Promise<boolean> {
+    async savePreset(
+        presetName: string,
+        oldUUID: string | null
+    ): Promise<boolean> {
         try {
             const presetOptions = Object.entries(this.gameOptions).map(
                 (option) => ({
@@ -652,7 +655,7 @@ export default class GuildPreference {
      * Sets the special type option value
      * @param specialType - The SpecialType
      */
-    async setSpecialType(specialType: SpecialType): Promise<void> {
+    async setSpecialType(specialType: SpecialType | null): Promise<void> {
         this.gameOptions.specialType = specialType;
         await this.updateGuildPreferences([
             { name: GameOptionInternal.SPECIAL_TYPE, value: specialType },
@@ -748,7 +751,7 @@ export default class GuildPreference {
      * Sets the goal option value
      * @param goal - The goal option
      */
-    async setGoal(goal: number): Promise<void> {
+    async setGoal(goal: number | null): Promise<void> {
         this.gameOptions.goal = goal;
         await this.updateGuildPreferences([
             { name: GameOptionInternal.GOAL, value: goal },
@@ -782,7 +785,7 @@ export default class GuildPreference {
      * Sets the timer option value
      * @param guessTimeout - The timer option
      */
-    async setGuessTimeout(guessTimeout: number): Promise<void> {
+    async setGuessTimeout(guessTimeout: number | null): Promise<void> {
         this.gameOptions.guessTimeout = guessTimeout;
         await this.updateGuildPreferences([
             { name: GameOptionInternal.GUESS_TIMEOUT, value: guessTimeout },

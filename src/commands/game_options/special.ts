@@ -179,7 +179,7 @@ export default class SpecialCommand implements BaseCommand {
     ];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        let specialType: SpecialType;
+        let specialType: SpecialType | null;
         if (parsedMessage.components.length === 0) {
             specialType = null;
         } else {
@@ -189,16 +189,14 @@ export default class SpecialCommand implements BaseCommand {
         await SpecialCommand.updateOption(
             MessageContext.fromMessage(message),
             specialType,
-            null,
-            specialType == null
+            undefined
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
-        specialType: SpecialType,
-        interaction?: Eris.CommandInteraction,
-        reset = false
+        specialType: SpecialType | null,
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
@@ -231,6 +229,7 @@ export default class SpecialCommand implements BaseCommand {
             return;
         }
 
+        const reset = specialType == null;
         if (reset) {
             await guildPreference.reset(GameOption.SPECIAL_TYPE);
             logger.info(
@@ -250,9 +249,9 @@ export default class SpecialCommand implements BaseCommand {
             messageContext,
             guildPreference,
             [{ option: GameOption.SPECIAL_TYPE, reset }],
-            null,
-            null,
-            null,
+            false,
+            undefined,
+            undefined,
             interaction
         );
     }
@@ -268,7 +267,7 @@ export default class SpecialCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
-        let specialValue: SpecialType;
+        let specialValue: SpecialType | null;
 
         const action = interactionName as OptionAction;
         if (action === OptionAction.RESET) {
@@ -283,8 +282,7 @@ export default class SpecialCommand implements BaseCommand {
         await SpecialCommand.updateOption(
             messageContext,
             specialValue,
-            interaction,
-            specialValue == null
+            interaction
         );
     }
 

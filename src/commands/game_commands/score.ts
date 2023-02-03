@@ -47,7 +47,7 @@ export default class ScoreCommand implements BaseCommand {
         messageOrInteraction: GuildTextableMessage | CommandInteraction
     ): Promise<void> {
         const gameSession = Session.getSession(
-            messageOrInteraction.guildID
+            messageOrInteraction.guildID as string
         ) as GameSession;
 
         await gameSession.sendScoreboardMessage(messageOrInteraction);
