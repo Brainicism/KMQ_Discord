@@ -6,6 +6,21 @@ rebuild () {
     npx tsc
 }
 
+echo "Killing running instances..."
+ps x | grep node | grep "${PWD}/" | egrep "kmq\.js|cluster_manager\.js|kmq\.ts" | awk '{print $1}' | xargs kill &> /dev/null || echo "No running instances to kill"
+
+echo "Bootstrapping..."
+npx ts-node src/seed/bootstrap.ts
+
+echo "Starting bot in ${NODE_ENV}..."
+
+# run with ts-node + swc, no transpile needed
+if [ "${NODE_ENV}" == "development_ts_node" ]; then
+    cd src/
+    exec npx ts-node kmq.ts
+fi
+
+# transpile project
 if [[ $1 == 'native' ]]
 then
     if [ "${NODE_ENV}" == "production" ]; then
@@ -17,11 +32,6 @@ then
     rebuild
 fi
 
-echo "Killing running instances..."
-ps x | grep node | grep "${PWD}/" | egrep "kmq\.js|cluster_manager\.js" | awk '{print $1}' | xargs kill &> /dev/null || echo "No running instances to kill"
-echo "Bootstrapping..."
-node build/seed/bootstrap.js
-echo "Starting bot..."
 cd build/
 if [ "${NODE_ENV}" == "dry-run" ] || [ "${NODE_ENV}" == "ci" ]; then
     exec node --trace-warnings "${PWD}/kmq.js"

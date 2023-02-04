@@ -76,10 +76,20 @@ const options: Options = {
     services: [
         {
             name: "kmq_service",
-            path: path.join(__dirname, "./kmq_service.js"),
+            path: path.join(
+                __dirname,
+                process.env.NODE_ENV === EnvType.DEV_TS_NODE
+                    ? "./kmq_service.ts"
+                    : "./kmq_service.js"
+            ),
         },
     ],
-    path: path.join(__dirname, "./kmq_worker.js"),
+    path: path.join(
+        __dirname,
+        process.env.NODE_ENV === EnvType.DEV_TS_NODE
+            ? "./kmq_worker.ts"
+            : "./kmq_worker.js"
+    ),
     token: process.env.BOT_TOKEN,
     clientOptions: {
         disableEvents: {
