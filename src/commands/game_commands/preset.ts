@@ -182,7 +182,7 @@ export default class PresetCommand implements BaseCommand {
                 example: `\`/preset load preset_name:[${i18n.translate(
                     guildID,
                     "command.preset.help.usage.presetName"
-                )}]\n,preset load preset_identifier:[${i18n.translate(
+                )}]\n/preset load preset_identifier:[${i18n.translate(
                     guildID,
                     "command.preset.help.usage.presetIdentifier"
                 )}]\``,

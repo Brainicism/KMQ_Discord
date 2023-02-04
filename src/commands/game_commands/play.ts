@@ -190,7 +190,7 @@ export default class PlayCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "play",
         description: i18n.translate(guildID, "command.play.help.description"),
-        usage: `/play classic\n\n,play elimination\nlives:{${i18n.translate(
+        usage: `/play classic\n\n/play elimination\nlives:{${i18n.translate(
             guildID,
             "command.play.help.usage.lives"
         )}}\n\n/play teams create\n\n/play teams join`,
@@ -841,7 +841,7 @@ export default class PlayCommand implements BaseCommand {
                 !gameSessions[guildID].sessionInitialized &&
                 gameType === GameType.TEAMS
             ) {
-                // User sent ,play teams twice, reset the GameSession
+                // User sent /play teams twice, reset the GameSession
                 Session.deleteSession(guildID);
                 logger.info(
                     `${getDebugLogHeader(
@@ -852,7 +852,7 @@ export default class PlayCommand implements BaseCommand {
         }
 
         // (1) No game session exists yet (create ELIMINATION, TEAMS, CLASSIC, or COMPETITION game), or
-        // (2) User attempting to ,play after a ,play teams that didn't start, start CLASSIC game
+        // (2) User attempting to /play after a /play teams that didn't start, start CLASSIC game
         const textChannel = await fetchChannel(messageContext.textChannelID);
         const gameOwner = new KmqMember(messageContext.author.id);
         let gameSession: GameSession;
@@ -939,7 +939,7 @@ export default class PlayCommand implements BaseCommand {
                 logger.warn(
                     `${getDebugLogHeader(
                         messageContext
-                    )} | User attempted ,play on a mode that requires player joins.`
+                    )} | User attempted /play on a mode that requires player joins.`
                 );
 
                 await sendErrorMessage(
