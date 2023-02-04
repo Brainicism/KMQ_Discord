@@ -162,7 +162,7 @@ export default class ShuffleCommand implements BaseCommand {
     ];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        let shuffleType: ShuffleType;
+        let shuffleType: ShuffleType | null;
         if (parsedMessage.components.length === 0) {
             shuffleType = null;
         } else {
@@ -173,22 +173,20 @@ export default class ShuffleCommand implements BaseCommand {
         await ShuffleCommand.updateOption(
             MessageContext.fromMessage(message),
             shuffleType,
-            null,
-            shuffleType == null
+            undefined
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
-        shuffleType: ShuffleType,
-        interaction?: Eris.CommandInteraction,
-        reset = false
+        shuffleType: ShuffleType | null,
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
-        if (PREMIUM_SHUFFLE_TYPES.includes(shuffleType)) {
+        if (shuffleType && PREMIUM_SHUFFLE_TYPES.includes(shuffleType)) {
             if (!(await isUserPremium(messageContext.author.id))) {
                 logger.info(
                     `${getDebugLogHeader(
@@ -218,6 +216,7 @@ export default class ShuffleCommand implements BaseCommand {
             }
         }
 
+        const reset = shuffleType == null;
         if (reset) {
             await guildPreference.reset(GameOption.SHUFFLE_TYPE);
             logger.info(
@@ -237,9 +236,9 @@ export default class ShuffleCommand implements BaseCommand {
             messageContext,
             guildPreference,
             [{ option: GameOption.SHUFFLE_TYPE, reset }],
-            null,
-            null,
-            null,
+            false,
+            undefined,
+            undefined,
             interaction
         );
     }
@@ -255,7 +254,7 @@ export default class ShuffleCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
-        let shuffleValue: ShuffleType;
+        let shuffleValue: ShuffleType | null;
 
         const action = interactionName as OptionAction;
         if (action === OptionAction.RESET) {
@@ -270,8 +269,7 @@ export default class ShuffleCommand implements BaseCommand {
         await ShuffleCommand.updateOption(
             messageContext,
             shuffleValue,
-            interaction,
-            shuffleValue == null
+            interaction
         );
     }
 

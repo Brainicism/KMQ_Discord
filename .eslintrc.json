@@ -17,6 +17,8 @@
     "rules": {
         "node/no-sync": ["error"],
         "import/order": ["off"],
+        "no-lonely-if":["off"],
+        "no-else-return":["off"],
         "deprecation/deprecation": "warn",
         "@typescript-eslint/await-thenable": [
             "error"

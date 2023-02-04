@@ -132,7 +132,7 @@ export default class SpotifyCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        let playlistURL: string = null;
+        let playlistURL: string | undefined;
         if (
             parsedMessage.components.length > 0 &&
             isValidURL(parsedMessage.components[0])
@@ -144,7 +144,7 @@ export default class SpotifyCommand implements BaseCommand {
             await SpotifyCommand.updateOption(
                 MessageContext.fromMessage(message),
                 playlistURL,
-                null,
+                undefined,
                 playlistURL == null
             );
         } else {
@@ -163,10 +163,11 @@ export default class SpotifyCommand implements BaseCommand {
 
     static async updateOption(
         messageContext: MessageContext,
-        playlistURL: string,
-        interaction?: Eris.CommandInteraction,
+        playlistURL?: string,
+        origInteraction?: Eris.CommandInteraction,
         reset = false
     ): Promise<void> {
+        let interaction: Eris.CommandInteraction | undefined = origInteraction;
         const guildID = messageContext.guildID;
         const guildPreference = await GuildPreference.getGuildPreference(
             guildID
@@ -178,7 +179,15 @@ export default class SpotifyCommand implements BaseCommand {
             logger.info(
                 `${getDebugLogHeader(messageContext)} | Spotify playlist reset.`
             );
-        } else if (
+            return;
+        }
+
+        if (!playlistURL) {
+            logger.error("playlistURL unexpectedly undefined");
+            return;
+        }
+
+        if (
             isValidURL(playlistURL) &&
             new RegExp(`^${SPOTIFY_BASE_URL}.+`).test(playlistURL)
         ) {
@@ -202,27 +211,27 @@ export default class SpotifyCommand implements BaseCommand {
                         ),
                     },
                     false,
-                    null,
+                    undefined,
                     [],
                     interaction
                 );
 
-                interaction = null;
+                interaction = undefined;
             }
 
             let matchedPlaylist: MatchedPlaylist;
             if (gameSession) {
-                matchedPlaylist = await gameSession.songSelector.reloadSongs(
+                matchedPlaylist = (await gameSession.songSelector.reloadSongs(
                     guildPreference,
                     premiumRequest,
                     playlistID
-                );
+                )) as MatchedPlaylist;
             } else {
-                matchedPlaylist = await new SongSelector().reloadSongs(
+                matchedPlaylist = (await new SongSelector().reloadSongs(
                     guildPreference,
                     premiumRequest,
                     playlistID
-                );
+                )) as MatchedPlaylist;
             }
 
             logger.info(
@@ -254,7 +263,7 @@ export default class SpotifyCommand implements BaseCommand {
                 messageContext,
                 0,
                 matchedPlaylist.metadata.matchedSongsLength,
-                null,
+                undefined,
                 false
             );
 
@@ -310,9 +319,9 @@ export default class SpotifyCommand implements BaseCommand {
             messageContext,
             guildPreference,
             [{ option: GameOption.SPOTIFY_PLAYLIST_METADATA, reset }],
-            null,
-            null,
-            null,
+            false,
+            undefined,
+            undefined,
             interaction
         );
     }
@@ -328,10 +337,10 @@ export default class SpotifyCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
-        let playlistURL: string;
+        let playlistURL: string | undefined;
         const action = interactionName as OptionAction;
         if (action === OptionAction.RESET) {
-            playlistURL = null;
+            playlistURL = undefined;
         } else if (action === OptionAction.SET) {
             playlistURL = interactionOptions["playlist_url"];
         }

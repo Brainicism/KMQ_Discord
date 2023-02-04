@@ -40,7 +40,7 @@ enum PresetAction {
 const isValidPresetName = async (
     presetName: string,
     messageContext: MessageContext,
-    interaction: Eris.CommandInteraction
+    interaction?: Eris.CommandInteraction
 ): Promise<boolean> => {
     if (presetName.length > PRESET_NAME_MAX_LENGTH) {
         logger.warn(
@@ -99,7 +99,7 @@ const canSavePreset = async (
     presetName: string,
     guildPreference: GuildPreference,
     messageContext: MessageContext,
-    interaction: Eris.CommandInteraction
+    interaction?: Eris.CommandInteraction
 ): Promise<boolean> => {
     const presets = await guildPreference.listPresets();
     if (presets.length >= MAX_NUM_PRESETS) {
@@ -182,7 +182,7 @@ export default class PresetCommand implements BaseCommand {
                 example: `\`/preset load preset_name:[${i18n.translate(
                     guildID,
                     "command.preset.help.usage.presetName"
-                )}]\n,preset load preset_identifier:[${i18n.translate(
+                )}]\n/preset load preset_identifier:[${i18n.translate(
                     guildID,
                     "command.preset.help.usage.presetIdentifier"
                 )}]\``,
@@ -510,7 +510,7 @@ export default class PresetCommand implements BaseCommand {
         presetName: string,
         guildPreference: GuildPreference,
         messageContext: MessageContext,
-        interaction: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const deleteResult = await guildPreference.deletePreset(presetName);
         if (!deleteResult) {
@@ -558,8 +558,8 @@ export default class PresetCommand implements BaseCommand {
                 ),
                 thumbnailUrl: KmqImages.NOT_IMPRESSED,
             },
-            null,
-            null,
+            false,
+            undefined,
             [],
             interaction
         );
@@ -569,7 +569,7 @@ export default class PresetCommand implements BaseCommand {
         presetName: string,
         guildPreference: GuildPreference,
         messageContext: MessageContext,
-        interaction: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         let guildID = messageContext.guildID;
         if (presetName.startsWith("KMQ-")) {
@@ -632,8 +632,8 @@ export default class PresetCommand implements BaseCommand {
                     reset: false,
                 })),
                 true,
-                null,
-                null,
+                false,
+                undefined,
                 interaction
             );
         } else {
@@ -665,7 +665,7 @@ export default class PresetCommand implements BaseCommand {
         presetName: string,
         guildPreference: GuildPreference,
         messageContext: MessageContext,
-        interaction: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         if (
             !(await canSavePreset(
@@ -678,7 +678,7 @@ export default class PresetCommand implements BaseCommand {
             return;
         }
 
-        const saveResult = await guildPreference.savePreset(presetName);
+        const saveResult = await guildPreference.savePreset(presetName, null);
         if (saveResult) {
             logger.info(
                 `${getDebugLogHeader(
@@ -702,8 +702,8 @@ export default class PresetCommand implements BaseCommand {
                     ),
                     thumbnailUrl: KmqImages.HAPPY,
                 },
-                null,
-                null,
+                false,
+                undefined,
                 [],
                 interaction
             );
@@ -741,7 +741,7 @@ export default class PresetCommand implements BaseCommand {
         presetName: string,
         guildPreference: GuildPreference,
         messageContext: MessageContext,
-        interaction: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const oldUUID = await guildPreference.deletePreset(presetName);
         if (!oldUUID) {
@@ -781,8 +781,8 @@ export default class PresetCommand implements BaseCommand {
                 ),
                 thumbnailUrl: KmqImages.HAPPY,
             },
-            null,
-            null,
+            false,
+            undefined,
             [],
             interaction
         );
@@ -792,7 +792,7 @@ export default class PresetCommand implements BaseCommand {
         presetName: string,
         guildPreference: GuildPreference,
         messageContext: MessageContext,
-        interaction: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const presetUUID = await guildPreference.getPresetUUID(presetName);
         if (!presetUUID) {
@@ -846,8 +846,8 @@ export default class PresetCommand implements BaseCommand {
                 ),
                 thumbnailUrl: KmqImages.THUMBS_UP,
             },
-            null,
-            null,
+            false,
+            undefined,
             [],
             interaction
         );
@@ -858,7 +858,7 @@ export default class PresetCommand implements BaseCommand {
         presetName: string,
         guildPreference: GuildPreference,
         messageContext: MessageContext,
-        interaction: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         if ((await guildPreference.listPresets()).includes(presetName)) {
             logger.warn(
@@ -976,8 +976,8 @@ export default class PresetCommand implements BaseCommand {
                 ),
                 thumbnailUrl: KmqImages.THUMBS_UP,
             },
-            null,
-            null,
+            false,
+            undefined,
             [],
             interaction
         );
@@ -986,7 +986,7 @@ export default class PresetCommand implements BaseCommand {
     static async listPresets(
         guildPreference: GuildPreference,
         messageContext: MessageContext,
-        interaction: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const presets = await guildPreference.listPresets();
         sendInfoMessage(
@@ -1015,10 +1015,10 @@ export default class PresetCommand implements BaseCommand {
                                   presetLoad: "/preset load",
                               }
                           )
-                        : null,
+                        : undefined,
             },
-            null,
-            null,
+            false,
+            undefined,
             [],
             interaction
         );
@@ -1032,7 +1032,7 @@ export default class PresetCommand implements BaseCommand {
         messageContext: MessageContext,
         presetAction: PresetAction,
         presetName: string,
-        presetUUID: string,
+        presetUUID: string | null,
         interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
@@ -1176,8 +1176,8 @@ export default class PresetCommand implements BaseCommand {
 
         const presetAction = interactionName as PresetAction;
 
-        let presetName: string = null;
-        let presetUUID: string = null;
+        let presetName: string;
+        let presetUUID: string | null = null;
 
         if (presetAction === PresetAction.IMPORT) {
             presetName = interactionOptions["new_preset_name"];
@@ -1204,7 +1204,7 @@ export default class PresetCommand implements BaseCommand {
         interaction: Eris.AutocompleteInteraction
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            interaction.guildID
+            interaction.guildID as string
         );
 
         const presets = await guildPreference.listPresets();
@@ -1212,7 +1212,7 @@ export default class PresetCommand implements BaseCommand {
             (
                 interaction.data
                     .options[0] as Eris.InteractionDataOptionsSubCommand
-            ).options.filter(
+            ).options!.filter(
                 (x) => x["focused"]
             )[0] as Eris.InteractionDataOptionsString
         ).value.toLowerCase();

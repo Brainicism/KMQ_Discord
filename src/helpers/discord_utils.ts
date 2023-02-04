@@ -675,7 +675,7 @@ export async function generateOptionsMessage(
     session: Session,
     messageContext: MessageContext,
     guildPreference: GuildPreference,
-    updatedOptions?: { option: GameOption; reset: boolean }[],
+    updatedOptions: { option: GameOption; reset: boolean }[],
     preset = false,
     allReset = false,
     footerText?: string
@@ -827,7 +827,7 @@ export async function generateOptionsMessage(
     }
 
     // Underline changed option
-    if (updatedOptions) {
+    if (updatedOptions.length > 0) {
         for (const updatedOption of updatedOptions) {
             optionStrings[updatedOption.option as GameOption] = underline(
                 optionStrings[updatedOption.option]
@@ -923,7 +923,7 @@ export async function generateOptionsMessage(
         .filter((option) => optionStrings[option as GameOption])
         .filter((option) => !PriorityGameOption.includes(option as GameOption));
 
-    // Remove priority options; emplace ,spotify/,answer at the start of options
+    // Remove priority options; emplace /spotify / /answer at the start of options
     if (isSpotify) {
         priorityOptions = "";
         fieldOptions.unshift(GameOption.ANSWER_TYPE);
@@ -979,7 +979,7 @@ export async function generateOptionsMessage(
     ];
 
     if (
-        updatedOptions &&
+        updatedOptions.length > 0 &&
         !allReset &&
         updatedOptions[0] &&
         updatedOptions[0].reset
@@ -997,7 +997,7 @@ export async function generateOptionsMessage(
     }
 
     let title = "";
-    if (updatedOptions === null || allReset) {
+    if (updatedOptions.length === 0 || allReset) {
         title = i18n.translate(messageContext.guildID, "command.options.title");
     } else {
         if (preset) {

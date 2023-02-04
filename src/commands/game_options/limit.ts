@@ -223,8 +223,8 @@ export default class LimitCommand implements BaseCommand {
     ];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        let limitStart: number;
-        let limitEnd: number;
+        let limitStart: number | null;
+        let limitEnd: number | null;
 
         if (parsedMessage.components.length === 0) {
             limitStart = null;
@@ -241,24 +241,23 @@ export default class LimitCommand implements BaseCommand {
             MessageContext.fromMessage(message),
             limitStart,
             limitEnd,
-            null,
-            true,
-            limitStart == null && limitEnd == null
+            undefined,
+            true
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
-        limitStart: number,
-        limitEnd: number,
+        limitStart: number | null,
+        limitEnd: number | null,
         interaction?: Eris.CommandInteraction,
-        optionsOnUpdate = true,
-        reset = false
+        optionsOnUpdate = true
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
+        const reset = limitStart == null && limitEnd == null;
         if (reset) {
             await guildPreference.reset(GameOption.LIMIT);
             logger.info(`${getDebugLogHeader(messageContext)} | Limit reset.`);
@@ -277,6 +276,13 @@ export default class LimitCommand implements BaseCommand {
                         ),
                     },
                     interaction
+                );
+                return;
+            }
+
+            if (limitStart === null || limitEnd === null) {
+                logger.error(
+                    `Unexpected null limitStart/limitEnd: ${limitStart} ${limitEnd}`
                 );
                 return;
             }
@@ -314,9 +320,9 @@ export default class LimitCommand implements BaseCommand {
                 messageContext,
                 guildPreference,
                 [{ option: GameOption.LIMIT, reset }],
-                null,
-                null,
-                null,
+                false,
+                undefined,
+                undefined,
                 interaction
             );
         }
@@ -333,8 +339,8 @@ export default class LimitCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
-        let limitStart: number;
-        let limitEnd: number;
+        let limitStart: number | null;
+        let limitEnd: number | null;
 
         if (interactionName === OptionAction.RESET) {
             limitStart = null;
@@ -356,8 +362,7 @@ export default class LimitCommand implements BaseCommand {
             limitStart,
             limitEnd,
             interaction,
-            true,
-            limitStart == null && limitEnd == null
+            true
         );
     }
 }

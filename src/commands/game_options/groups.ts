@@ -156,9 +156,9 @@ export default class GroupsCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             await GroupsCommand.updateOption(
                 MessageContext.fromMessage(message),
-                null,
-                null,
-                null,
+                [],
+                [],
+                undefined,
                 true
             );
             return;
@@ -180,8 +180,8 @@ export default class GroupsCommand implements BaseCommand {
 
     static async updateOption(
         messageContext: MessageContext,
-        matchedGroups?: MatchedArtist[],
-        unmatchedGroups?: string[],
+        matchedGroups: MatchedArtist[],
+        unmatchedGroups: string[],
         interaction?: Eris.CommandInteraction,
         reset = false
     ): Promise<void> {
@@ -197,9 +197,9 @@ export default class GroupsCommand implements BaseCommand {
                 messageContext,
                 guildPreference,
                 [{ option: GameOption.GROUPS, reset: true }],
-                null,
-                null,
-                null,
+                false,
+                undefined,
+                undefined,
                 interaction
             );
 
@@ -278,7 +278,7 @@ export default class GroupsCommand implements BaseCommand {
                 );
             }
 
-            let suggestionsText: string = null;
+            let suggestionsText: string | undefined;
             if (unmatchedGroups.length === 1) {
                 const suggestions = await getSimilarGroupNames(
                     unmatchedGroups[0],
@@ -332,7 +332,7 @@ export default class GroupsCommand implements BaseCommand {
                     messageContext,
                     embeds[0],
                     false,
-                    null,
+                    undefined,
                     embeds.slice(1),
                     interaction
                 );
@@ -353,16 +353,16 @@ export default class GroupsCommand implements BaseCommand {
             messageContext,
             guildPreference,
             [{ option: GameOption.GROUPS, reset: false }],
-            null,
-            null,
-            null
+            false,
+            undefined,
+            undefined
         );
 
         await sendInfoMessage(
             messageContext,
             optionsMessage,
             true,
-            null,
+            undefined,
             embeds,
             interaction
         );

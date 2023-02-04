@@ -801,7 +801,7 @@ export default class GameSession extends Session {
         );
 
         if (this.gameType === GameType.TEAMS) {
-            // Players join teams manually with ,join
+            // Players join teams manually with /join
             return;
         }
 

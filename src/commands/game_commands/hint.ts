@@ -32,6 +32,10 @@ function isHintMajority(
     messageContext: MessageContext,
     gameSession: GameSession
 ): boolean {
+    if (!gameSession.round) {
+        return false;
+    }
+
     if (gameSession.gameType === GameType.ELIMINATION) {
         const eliminationScoreboard =
             gameSession.scoreboard as EliminationScoreboard;
@@ -90,7 +94,7 @@ async function sendHintNotification(
                 ),
             },
             true,
-            null,
+            undefined,
             [],
             interaction
         );
@@ -113,7 +117,7 @@ async function sendHintNotification(
                 ),
             },
             true,
-            null,
+            undefined,
             [],
             interaction
         );
@@ -131,10 +135,10 @@ async function sendHintNotification(
 export function validHintCheck(
     gameSession: GameSession,
     guildPreference: GuildPreference,
-    gameRound: GameRound,
+    gameRound: GameRound | null,
     messageContext: MessageContext,
     interaction?: Eris.CommandInteraction
-): boolean {
+): gameRound is GameRound {
     if (!gameSession || !gameRound) {
         logger.warn(
             `${getDebugLogHeader(messageContext)} | No active game session`
@@ -309,8 +313,8 @@ export default class HintCommand implements BaseCommand {
             await sendInfoMessage(
                 messageContext,
                 embedPayload,
-                null,
-                null,
+                false,
+                undefined,
                 undefined,
                 interaction
             );

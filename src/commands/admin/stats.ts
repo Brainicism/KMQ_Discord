@@ -85,48 +85,51 @@ export default class StatsCommand implements BaseCommand {
         const dateThreshold = new Date();
         dateThreshold.setHours(dateThreshold.getHours() - 24);
         const recentGameSessions = (
-            await dbContext
+            (await dbContext
                 .kmq("game_sessions")
                 .where("start_date", ">", dateThreshold)
                 .count("* as count")
-                .first()
+                .first()) ?? {}
         ).count;
 
         const totalGameSessions = (
-            await dbContext.kmq("game_sessions").count("* as count").first()
+            (await dbContext
+                .kmq("game_sessions")
+                .count("* as count")
+                .first()) ?? {}
         ).count;
 
         const recentGameRounds =
             (
-                await dbContext
+                (await dbContext
                     .kmq("game_sessions")
                     .where("start_date", ">", dateThreshold)
                     .sum("rounds_played as total")
-                    .first()
+                    .first()) ?? {}
             ).total || 0;
 
         const totalGameRounds =
             (
-                await dbContext
+                (await dbContext
                     .kmq("game_sessions")
                     .sum("rounds_played as total")
-                    .first()
+                    .first()) ?? {}
             ).total || 0;
 
         const recentPlayers = (
-            await dbContext
+            (await dbContext
                 .kmq("player_stats")
                 .where("last_active", ">", dateThreshold)
                 .count("* as count")
-                .first()
+                .first()) ?? {}
         ).count;
 
         const totalPlayers = (
-            await dbContext
+            (await dbContext
                 .kmq("player_stats")
                 .count("* as count")
                 .where("exp", ">", "0")
-                .first()
+                .first()) ?? {}
         ).count;
 
         const latestAvailableSong = new Date(
@@ -188,7 +191,7 @@ export default class StatsCommand implements BaseCommand {
             ),
         };
 
-        const guild = State.client.guilds.get(guildID);
+        const guild = State.client.guilds.get(guildID) as Eris.Guild;
 
         const systemStatistics = {
             [i18n.translate(
@@ -275,8 +278,8 @@ export default class StatsCommand implements BaseCommand {
         await sendInfoMessage(
             messageContext,
             embedPayload,
-            null,
-            null,
+            false,
+            undefined,
             undefined,
             interaction
         );
@@ -299,7 +302,7 @@ export default class StatsCommand implements BaseCommand {
     ): Promise<void> {
         await StatsCommand.sendStatsMessage(
             messageContext,
-            interaction.guildID,
+            interaction.guildID as string,
             interaction
         );
     }

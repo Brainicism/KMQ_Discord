@@ -252,8 +252,8 @@ export default class DurationCommand implements BaseCommand {
     ];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        let durationActionInternal: DurationActionInternal = null;
-        let durationValue: number = null;
+        let durationActionInternal: DurationActionInternal | undefined;
+        let durationValue: number | undefined;
 
         if (parsedMessage.components.length === 0) {
             durationActionInternal = DurationActionInternal.RESET;
@@ -268,8 +268,7 @@ export default class DurationCommand implements BaseCommand {
             MessageContext.fromMessage(message),
             durationActionInternal,
             durationValue,
-            null,
-            durationActionInternal === DurationActionInternal.RESET
+            undefined
         );
     };
 
@@ -277,27 +276,43 @@ export default class DurationCommand implements BaseCommand {
         messageContext: MessageContext,
         action: DurationActionInternal,
         durationValue?: number,
-        interaction?: Eris.CommandInteraction,
-        reset = false
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 
-        let finalDuration: number = null;
+        let finalDuration: number;
+        const reset = action === DurationActionInternal.RESET;
         if (reset) {
             await guildPreference.reset(GameOption.DURATION);
             logger.info(
                 `${getDebugLogHeader(messageContext)} | Duration disabled.`
             );
+
+            await sendOptionsMessage(
+                Session.getSession(messageContext.guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.DURATION, reset: true }],
+                false,
+                undefined,
+                undefined,
+                interaction
+            );
+            return;
         } else {
-            const currentDuration = guildPreference.gameOptions.duration;
+            if (durationValue === undefined) {
+                logger.error("durationValue unexpectedly undefined");
+                return;
+            }
+
+            const currentDuration = guildPreference.isDurationSet()
+                ? guildPreference.gameOptions.duration
+                : 0;
+
             if (action === DurationActionInternal.ADD) {
-                if (!guildPreference.isDurationSet()) {
-                    finalDuration = durationValue;
-                } else {
-                    finalDuration = currentDuration + durationValue;
-                }
+                finalDuration = currentDuration + durationValue;
             } else if (action === DurationActionInternal.REMOVE) {
                 if (!guildPreference.isDurationSet()) {
                     sendErrorMessage(
@@ -337,6 +352,9 @@ export default class DurationCommand implements BaseCommand {
                 }
             } else if (action === DurationActionInternal.SET) {
                 finalDuration = durationValue;
+            } else {
+                logger.error(`Unexpected duration action internal: ${action}`);
+                return;
             }
 
             logger.info(
@@ -352,9 +370,9 @@ export default class DurationCommand implements BaseCommand {
             messageContext,
             guildPreference,
             [{ option: GameOption.DURATION, reset: false }],
-            null,
-            null,
-            null,
+            false,
+            undefined,
+            undefined,
             interaction
         );
     }
@@ -367,10 +385,10 @@ export default class DurationCommand implements BaseCommand {
             getInteractionValue(interaction);
 
         const action = interactionName as DurationActionInternal;
-        let durationValue: number;
+        let durationValue: number | undefined;
 
         if (action === DurationActionInternal.RESET) {
-            durationValue = null;
+            durationValue = undefined;
         } else if (
             [
                 DurationActionInternal.ADD,
@@ -381,15 +399,14 @@ export default class DurationCommand implements BaseCommand {
             durationValue = interactionOptions["duration"];
         } else {
             logger.error(`Unexpected interaction name: ${interactionName}`);
-            durationValue = null;
+            durationValue = undefined;
         }
 
         await DurationCommand.updateOption(
             messageContext,
             action,
             durationValue,
-            interaction,
-            action === DurationActionInternal.RESET
+            interaction
         );
     }
 }

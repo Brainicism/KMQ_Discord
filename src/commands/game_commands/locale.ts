@@ -198,8 +198,8 @@ export default class LocaleTypeCommand implements BaseCommand {
                 ),
                 thumbnailUrl: KmqImages.THUMBS_UP,
             },
-            null,
-            null,
+            false,
+            undefined,
             [],
             interaction
         );

@@ -59,7 +59,7 @@ export default class PremiumCommand implements BaseCommand {
         sendInfoMessage(
             messageContext,
             {
-                color: premiumMember ? EMBED_SUCCESS_BONUS_COLOR : null,
+                color: premiumMember ? EMBED_SUCCESS_BONUS_COLOR : undefined,
                 description: `${i18n.translate(
                     messageContext.guildID,
                     premiumMember
@@ -109,8 +109,8 @@ export default class PremiumCommand implements BaseCommand {
                         : "command.premium.status.title.nonPremium"
                 ),
             },
-            null,
-            null,
+            false,
+            undefined,
             [],
             interaction
         );

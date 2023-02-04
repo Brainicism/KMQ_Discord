@@ -234,8 +234,8 @@ export default class CutoffCommand implements BaseCommand {
     ];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        let beginningYear: number = null;
-        let endingYear: number = null;
+        let beginningYear: number | null = null;
+        let endingYear: number | null = null;
         const yearRange = parsedMessage.components;
 
         if (yearRange.length === 0) {
@@ -252,21 +252,21 @@ export default class CutoffCommand implements BaseCommand {
             MessageContext.fromMessage(message),
             beginningYear,
             endingYear,
-            null,
-            beginningYear == null && endingYear == null
+            undefined
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
-        beginningYear: number,
-        endingYear: number,
-        interaction?: Eris.CommandInteraction,
-        reset = false
+        beginningYear: number | null,
+        endingYear: number | null,
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
+
+        const reset = beginningYear == null && endingYear == null;
 
         if (reset) {
             await guildPreference.setBeginningCutoffYear(
@@ -278,9 +278,9 @@ export default class CutoffCommand implements BaseCommand {
                 messageContext,
                 guildPreference,
                 [{ option: GameOption.CUTOFF, reset: true }],
-                null,
-                null,
-                null,
+                false,
+                undefined,
+                undefined,
                 interaction
             );
 
@@ -297,6 +297,13 @@ export default class CutoffCommand implements BaseCommand {
             await guildPreference.setBeginningCutoffYear(beginningYear);
             await guildPreference.setEndCutoffYear(DEFAULT_ENDING_SEARCH_YEAR);
         } else {
+            if (beginningYear === null || endingYear === null) {
+                logger.error(
+                    `Unexpected null beginningYear or ending year: ${beginningYear} ${endingYear}`
+                );
+                return;
+            }
+
             if (endingYear < beginningYear) {
                 await sendErrorMessage(
                     messageContext,
@@ -324,9 +331,9 @@ export default class CutoffCommand implements BaseCommand {
             messageContext,
             guildPreference,
             [{ option: GameOption.CUTOFF, reset: false }],
-            null,
-            null,
-            null,
+            false,
+            undefined,
+            undefined,
             interaction
         );
 
@@ -348,8 +355,8 @@ export default class CutoffCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
-        let beginningYear: number;
-        let endingYear: number;
+        let beginningYear: number | null;
+        let endingYear: number | null;
         if (interactionName === OptionAction.RESET) {
             beginningYear = null;
             endingYear = null;
@@ -358,6 +365,7 @@ export default class CutoffCommand implements BaseCommand {
             endingYear = interactionOptions["ending_year"];
         } else if (interactionName === CutoffAppCommandAction.EARLIEST) {
             beginningYear = interactionOptions["beginning_year"];
+            endingYear = null;
         } else {
             logger.error(`Unexpected interaction name: ${interactionName}`);
             beginningYear = null;
@@ -368,8 +376,7 @@ export default class CutoffCommand implements BaseCommand {
             messageContext,
             beginningYear,
             endingYear,
-            interaction,
-            beginningYear == null && endingYear == null
+            interaction
         );
     }
 }

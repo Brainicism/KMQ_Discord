@@ -117,8 +117,8 @@ export default class ForceHintCommand implements BaseCommand {
                 ),
                 thumbnailUrl: KmqImages.READING_BOOK,
             },
-            null,
-            null,
+            false,
+            undefined,
             [],
             interaction
         );

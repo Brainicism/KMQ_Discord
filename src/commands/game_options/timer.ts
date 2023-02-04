@@ -133,7 +133,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
     ];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        let timer: number;
+        let timer: number | null;
         if (parsedMessage.components.length === 0) {
             timer = null;
         } else {
@@ -143,16 +143,14 @@ export default class GuessTimeoutCommand implements BaseCommand {
         await GuessTimeoutCommand.updateOption(
             MessageContext.fromMessage(message),
             timer,
-            null,
-            timer == null
+            undefined
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
-        timer: number,
-        interaction?: Eris.CommandInteraction,
-        reset = false
+        timer: number | null,
+        interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
@@ -160,6 +158,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
 
         const session = Session.getSession(messageContext.guildID);
 
+        const reset = timer == null;
         if (reset) {
             await guildPreference.reset(GameOption.TIMER);
             if (session) {
@@ -190,9 +189,9 @@ export default class GuessTimeoutCommand implements BaseCommand {
             messageContext,
             guildPreference,
             [{ option: GameOption.TIMER, reset }],
-            null,
-            null,
-            null,
+            false,
+            undefined,
+            undefined,
             interaction
         );
     }
@@ -208,7 +207,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
-        let timerValue: number;
+        let timerValue: number | null;
 
         const action = interactionName as OptionAction;
         if (action === OptionAction.RESET) {
@@ -223,8 +222,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
         await GuessTimeoutCommand.updateOption(
             messageContext,
             timerValue,
-            interaction,
-            timerValue == null
+            interaction
         );
     }
 }
