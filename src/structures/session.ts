@@ -100,7 +100,7 @@ export default abstract class Session {
         [userID: string]: Map<string, BookmarkedSong>;
     };
 
-    /** Timer function used to for ,timer command */
+    /** Timer function used to for /timer command */
     private guessTimeoutFunc: NodeJS.Timer;
 
     constructor(

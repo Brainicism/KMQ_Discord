@@ -959,7 +959,7 @@ export async function generateOptionsMessage(
         .filter((option) => optionStrings[option as GameOption])
         .filter((option) => !PriorityGameOption.includes(option as GameOption));
 
-    // Remove priority options; emplace ,spotify/,answer at the start of options
+    // Remove priority options; emplace /spotify / /answer at the start of options
     if (isSpotify) {
         priorityOptions = "";
         fieldOptions.unshift(GameOption.ANSWER_TYPE);

@@ -56,7 +56,7 @@ describe("begin command", () => {
 
             sandbox.restore();
 
-            it("should return false (classic games are not started using ,begin)", () => {
+            it("should return false (classic games are not started using /begin)", () => {
                 assert.strictEqual(
                     PlayCommand.canStartTeamsGame(
                         gameSession,

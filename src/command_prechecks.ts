@@ -74,8 +74,8 @@ export default class CommandPrechecks {
                 gameSession.gameType === GameType.TEAMS
             ) {
                 if (!gameSession.sessionInitialized) {
-                    // The bot doesn't join the voice channel until after ,begin is called;
-                    // players should still be able ,end before that happens in these game modes
+                    // The bot doesn't join the voice channel until after /begin is called;
+                    // players should still be able /end before that happens in these game modes
                     return true;
                 }
             }

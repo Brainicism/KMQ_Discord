@@ -35,7 +35,7 @@ export default class SongSelector {
         countBeforeLimit: number;
     } | null;
 
-    /** List of songs played with ,shuffle unique enabled */
+    /** List of songs played with /shuffle unique enabled */
     public uniqueSongsPlayed: Set<string>;
 
     /** The last gender played when gender is set to alternating, can be null (in not alternating mode), GENDER.MALE, or GENDER.FEMALE */
@@ -139,7 +139,7 @@ export default class SongSelector {
      * Selects a random song based on the GameOptions, avoiding recently played songs
      * @param filteredSongs - The filtered songs to select from
      * @param ignoredSongs - The union of last played songs and unique songs to not select from
-     * @param alternatingGender - The gender to limit selecting from if ,gender alternating
+     * @param alternatingGender - The gender to limit selecting from if /gender alternating
      * @param shuffleType - The shuffle type
      * @returns the QueriedSong
      */

@@ -243,7 +243,11 @@ async function getSongsFromDb(db: DatabaseContext): Promise<any> {
         )
         .select("songName", "artistName", "youtubeLink", "views")
         .from("rankedAudioSongs")
-        .where("rank", "<=", process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST)
+        .where(
+            "rank",
+            "<=",
+            process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST as string
+        )
         .union(function () {
             this.select(
                 "app_kpop.name AS songName",
