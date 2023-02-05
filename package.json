@@ -25,8 +25,8 @@
         "backup": "ts-node src/scripts/backup-kmq-database",
         "import": "ts-node src/scripts/backup-kmq-database --import",
         "regenerate-test-db-dump": "NODE_ENV=test ts-node src/scripts/regenerate-test-db-dump",
-        "test": "TS_NODE_PROJECT=src/test/ NODE_ENV=test mocha -r ts-node/register -C 'src/test/**/*.ts'",
-        "test_ci": "TS_NODE_PROJECT=src/test/ NODE_ENV=test mocha -- --forbid-only -r ts-node/register -C 'src/test/**/*.ts'",
+        "test": "NODE_ENV=test mocha -r ts-node/register 'src/test/**/*.ts'",
+        "test_ci": "NODE_ENV=test mocha -- --forbid-only -r ts-node/register 'src/test/**/*.ts'",
         "prettier": "prettier --write '**/*.{js,ts}'",
         "prettier_ci": "prettier --check '**/*.{js,ts}'"
     },

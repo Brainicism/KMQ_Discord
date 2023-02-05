@@ -10,14 +10,14 @@ echo "Killing running instances..."
 ps x | grep node | grep "${PWD}/" | egrep "kmq\.js|cluster_manager\.js|kmq\.ts" | awk '{print $1}' | xargs kill &> /dev/null || echo "No running instances to kill"
 
 echo "Bootstrapping..."
-npx ts-node src/seed/bootstrap.ts
+npx ts-node  --swc src/seed/bootstrap.ts
 
 echo "Starting bot in ${NODE_ENV}..."
 
 # run with ts-node + swc, no transpile needed
 if [ "${NODE_ENV}" == "development_ts_node" ]; then
     cd src/
-    exec npx ts-node kmq.ts
+    exec npx ts-node --swc kmq.ts
 fi
 
 # transpile project

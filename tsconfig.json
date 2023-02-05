@@ -19,8 +19,5 @@
     },
     "include": [
         "./src/**/*"
-    ],
-    "ts-node": {
-        "swc": true
-    }
+    ]
 }
