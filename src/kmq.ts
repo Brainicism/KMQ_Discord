@@ -188,7 +188,7 @@ function registerProcessEvents(fleet: Fleet): void {
 
     process.on("SIGINT", () => {
         logger.info("Received SIGINT. Shutting down");
-        fleet.totalShutdown(false);
+        fleet.totalShutdown(true);
     });
 }
 
