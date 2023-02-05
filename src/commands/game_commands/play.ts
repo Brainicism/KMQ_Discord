@@ -151,6 +151,10 @@ export async function sendBeginGameSessionMessage(
         []
     );
 
+    if (!optionsEmbedPayload) {
+        throw new Error("Error generating options embed payload");
+    }
+
     if (!isBonus && Math.random() < 0.5) {
         optionsEmbedPayload.footerText = i18n.translate(
             messageContext.guildID,
@@ -384,6 +388,13 @@ export default class PlayCommand implements BaseCommand {
         const { interactionKey, interactionOptions } =
             getInteractionValue(interaction);
 
+        if (interactionKey === null) {
+            logger.error(
+                "interactionKey unexpectedly null in processChatInputInteraction"
+            );
+            return;
+        }
+
         const gameType = interactionKey.split(".")[0] as GameType;
         if (interactionKey === "teams.begin") {
             await PlayCommand.beginTeamsGame(messageContext, interaction);
@@ -503,9 +514,15 @@ export default class PlayCommand implements BaseCommand {
                 messageContext.textChannelID
             ) as Eris.TextChannel;
 
+            const voiceChannel = getUserVoiceChannel(messageContext);
+
+            if (!voiceChannel) {
+                logger.error("Voice channel unexpectedly not found");
+            }
+
             sendBeginGameSessionMessage(
                 channel.name,
-                getUserVoiceChannel(messageContext).name,
+                voiceChannel!.name ?? "unknown",
                 messageContext,
                 participantIDs,
                 guildPreference
@@ -613,7 +630,10 @@ export default class PlayCommand implements BaseCommand {
 
         const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
         if (!teamScoreboard.hasTeam(teamName)) {
-            const user = await fetchUser(messageContext.author.id);
+            const user = (await fetchUser(
+                messageContext.author.id
+            )) as Eris.User;
+
             teamScoreboard.addTeam(
                 teamName,
                 Player.fromUser(
@@ -697,7 +717,10 @@ export default class PlayCommand implements BaseCommand {
                 return;
             }
 
-            const player = await fetchUser(messageContext.author.id);
+            const player = (await fetchUser(
+                messageContext.author.id
+            )) as Eris.User;
+
             teamScoreboard.addTeamPlayer(
                 team.id,
                 Player.fromUser(
@@ -853,7 +876,10 @@ export default class PlayCommand implements BaseCommand {
 
         // (1) No game session exists yet (create ELIMINATION, TEAMS, CLASSIC, or COMPETITION game), or
         // (2) User attempting to ,play after a ,play teams that didn't start, start CLASSIC game
-        const textChannel = await fetchChannel(messageContext.textChannelID);
+        const textChannel = (await fetchChannel(
+            messageContext.textChannelID
+        )) as Eris.TextChannel;
+
         const gameOwner = new KmqMember(messageContext.author.id);
         let gameSession: GameSession;
         const isPremium = await areUsersPremium(

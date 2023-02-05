@@ -10,7 +10,7 @@
         "rootDir": "src",
         "strictBindCallApply": true,
         "strictFunctionTypes": true,
-        "strictNullChecks": false,
+        "strictNullChecks": true,
         "lib": ["es2022"],
         "resolveJsonModule": true,
         "esModuleInterop": true,

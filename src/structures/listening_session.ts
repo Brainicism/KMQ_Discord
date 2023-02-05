@@ -111,7 +111,7 @@ export default class ListeningSession extends Session {
             );
 
             round.interactionMessage = startRoundMessage;
-            round.roundMessageID = startRoundMessage?.id;
+            round.roundMessageID = startRoundMessage?.id as string;
             this.updateBookmarkSongList(round);
         }
 

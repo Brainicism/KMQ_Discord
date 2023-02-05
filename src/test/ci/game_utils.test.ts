@@ -304,6 +304,8 @@ describe("game utils", () => {
                     true
                 );
 
+                assert(songCount.count);
+                assert(songCount.countBeforeLimit);
                 assert.strictEqual(songCount.count, limit);
                 assert.strictEqual(songCount.countBeforeLimit > 0, true);
             });

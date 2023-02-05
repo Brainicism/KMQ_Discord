@@ -19,7 +19,7 @@ function generateKnexContext(
             database: databaseName,
             host: process.env.DB_HOST,
             charset: "utf8mb4",
-            port: parseInt(process.env.DB_PORT, 10),
+            port: parseInt(process.env.DB_PORT as string, 10),
             decimalNumbers: true,
             multipleStatements: true,
         },

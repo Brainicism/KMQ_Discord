@@ -18,14 +18,18 @@ const TARGET_AVERAGE_VOLUME = -30;
 
 async function clearPartiallyCachedSongs(): Promise<void> {
     logger.info("Clearing partially cached songs");
-    if (!(await pathExists(process.env.SONG_DOWNLOAD_DIR))) {
+    if (
+        !(await pathExists(process.env.SONG_DOWNLOAD_DIR as string as string))
+    ) {
         logger.error("Song cache directory doesn't exist.");
         return;
     }
 
     let files: Array<string>;
     try {
-        files = await fs.promises.readdir(process.env.SONG_DOWNLOAD_DIR);
+        files = await fs.promises.readdir(
+            process.env.SONG_DOWNLOAD_DIR as string as string
+        );
     } catch (err) {
         logger.error(err);
         return;
@@ -38,7 +42,7 @@ async function clearPartiallyCachedSongs(): Promise<void> {
         partFiles.map(async (partFile) => {
             try {
                 await fs.promises.unlink(
-                    `${process.env.SONG_DOWNLOAD_DIR}/${partFile}`
+                    `${process.env.SONG_DOWNLOAD_DIR as string}/${partFile}`
                 );
             } catch (err) {
                 logger.error(err);
@@ -71,7 +75,11 @@ function getAverageVolume(mp3File: string): Promise<number> {
 }
 
 async function ffmpegOpusJob(id: string): Promise<void> {
-    const mp3File = path.join(process.env.SONG_DOWNLOAD_DIR, `${id}.mp3`);
+    const mp3File = path.join(
+        process.env.SONG_DOWNLOAD_DIR as string,
+        `${id}.mp3`
+    );
+
     return new Promise(async (resolve, reject) => {
         const oggFileWithPath = mp3File.replace(".mp3", ".ogg");
         if (await pathExists(oggFileWithPath)) {
@@ -94,7 +102,7 @@ async function ffmpegOpusJob(id: string): Promise<void> {
                     await fs.promises.rename(oggPartWithPath, oggFileWithPath);
                     await fs.promises.unlink(
                         path.join(
-                            process.env.SONG_DOWNLOAD_DIR,
+                            process.env.SONG_DOWNLOAD_DIR as string,
                             path.basename(mp3File)
                         )
                     );
@@ -124,7 +132,7 @@ async function ffmpegOpusJob(id: string): Promise<void> {
 
 const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
     const cachedSongLocation = path.join(
-        process.env.SONG_DOWNLOAD_DIR,
+        process.env.SONG_DOWNLOAD_DIR as string,
         `${id}.mp3`
     );
 
@@ -262,9 +270,9 @@ async function getSongsFromDb(db: DatabaseContext): Promise<any> {
 
 async function getCurrentlyDownloadedFiles(): Promise<Set<string>> {
     return new Set(
-        (await fs.promises.readdir(process.env.SONG_DOWNLOAD_DIR)).filter(
-            (file) => file.endsWith(".ogg")
-        )
+        (
+            await fs.promises.readdir(process.env.SONG_DOWNLOAD_DIR as string)
+        ).filter((file) => file.endsWith(".ogg"))
     );
 }
 
@@ -334,7 +342,9 @@ const downloadNewSongs = async (
             try {
                 // eslint-disable-next-line no-await-in-loop
                 await fs.promises.unlink(
-                    `${process.env.SONG_DOWNLOAD_DIR}/${song.youtubeLink}.mp3.part`
+                    `${process.env.SONG_DOWNLOAD_DIR as string}/${
+                        song.youtubeLink
+                    }.mp3.part`
                 );
             } catch (tempErr) {
                 logger.error(
@@ -378,7 +388,7 @@ export default async function downloadAndConvertSongs(
 ): Promise<number> {
     const db = getNewConnection();
     try {
-        if (!(await pathExists(process.env.SONG_DOWNLOAD_DIR))) {
+        if (!(await pathExists(process.env.SONG_DOWNLOAD_DIR as string))) {
             logger.error("Song cache directory doesn't exist.");
             return 0;
         }

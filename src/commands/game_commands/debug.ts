@@ -35,7 +35,7 @@ export default class DebugCommand implements BaseCommand {
         );
 
         const session = Session.getSession(message.guildID);
-        const songCount = await getAvailableSongCount(
+        const { count, countBeforeLimit } = await getAvailableSongCount(
             guildPreference,
             await isPremiumRequest(session, message.author.id)
         );
@@ -49,14 +49,16 @@ export default class DebugCommand implements BaseCommand {
 
         fields.push({
             name: "Song Count",
-            value: `${songCount.count.toString()}/${songCount.countBeforeLimit.toString()}`,
+            value: `${(count ?? "undefined").toString()}/${(
+                countBeforeLimit ?? "undefined"
+            ).toString()}`,
             inline: false,
         });
 
         fields.push({
             name: "Text Permissions",
             value: JSON.stringify(
-                channel.permissionsOf(process.env.BOT_CLIENT_ID).json
+                channel.permissionsOf(process.env.BOT_CLIENT_ID as string).json
             ),
             inline: false,
         });
@@ -75,7 +77,9 @@ export default class DebugCommand implements BaseCommand {
             fields.push({
                 name: "Voice Permissions",
                 value: JSON.stringify(
-                    voiceChannel.permissionsOf(process.env.BOT_CLIENT_ID).json
+                    voiceChannel.permissionsOf(
+                        process.env.BOT_CLIENT_ID as string
+                    ).json
                 ),
                 inline: false,
             });

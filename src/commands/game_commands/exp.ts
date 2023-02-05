@@ -156,14 +156,16 @@ export async function calculateOptionsExpMultiplierInternal(
     }
 
     const session = Session.getSession(guildPreference.guildID);
-    const totalSongs = (
-        await getAvailableSongCount(
-            guildPreference,
-            await isPremiumRequest(session, playerID)
-        )
-    ).count;
+    const { count, countBeforeLimit } = await getAvailableSongCount(
+        guildPreference,
+        await isPremiumRequest(session, playerID)
+    );
 
-    if (totalSongs < 10) {
+    if (count === undefined || countBeforeLimit === undefined) {
+        throw new Error("Error retrieving song count");
+    }
+
+    if (count < 10) {
         modifiers.push({
             displayName: i18n.translate(
                 guildPreference.guildID,

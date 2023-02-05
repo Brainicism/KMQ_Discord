@@ -853,7 +853,7 @@ export default abstract class Session {
         embedColor: number | undefined,
         shouldReply: boolean,
         timeRemaining: number | null
-    ): Promise<Eris.Message<Eris.TextableChannel>> {
+    ): Promise<Eris.Message<Eris.TextableChannel> | null> {
         const fact =
             Math.random() <= 0.05 ? getFact(messageContext.guildID) : null;
 

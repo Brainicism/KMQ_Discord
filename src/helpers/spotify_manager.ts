@@ -223,8 +223,8 @@ export default class SpotifyManager {
                     "rank",
                     "<=",
                     isPremium
-                        ? process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST
-                        : process.env.AUDIO_SONGS_PER_ARTIST
+                        ? (process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST as string)
+                        : (process.env.AUDIO_SONGS_PER_ARTIST as string)
                 )
                 .first()) as QueriedSong;
 
