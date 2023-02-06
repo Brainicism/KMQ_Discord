@@ -10,7 +10,7 @@ interface PatreonResponse {
     data: Array<{
         attributes: {
             patron_status: string;
-            pledge_relationship_start?: Date;
+            pledge_relationship_start?: string;
             social_connections: {
                 discord: string;
             };
@@ -71,8 +71,9 @@ function parsePatreonResponse(patreonResponse: PatreonResponse): Array<Patron> {
                 ?.user_id as string,
             activePatron:
                 userData.attributes.patron_status === PatronState.ACTIVE,
-            firstSubscribed: userData.attributes
-                .pledge_relationship_start as Date,
+            firstSubscribed: new Date(
+                userData.attributes.pledge_relationship_start as string
+            ),
         });
     }
 
