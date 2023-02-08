@@ -306,7 +306,7 @@ export default class GameSession extends Session {
         }
 
         const round = this.round;
-        super.endRound(messageContext);
+        await super.endRound(messageContext);
 
         round.interactionMarkAnswers(guessResult.correctGuessers?.length ?? 0);
 
@@ -621,7 +621,7 @@ export default class GameSession extends Session {
                 .where("guild_id", this.guildID)
                 .increment("songs_guessed", 1);
 
-            this.startRound(messageContext);
+            await this.startRound(messageContext);
         } else if (this.guildPreference.isMultipleChoiceMode()) {
             if (
                 setDifference(
@@ -640,7 +640,7 @@ export default class GameSession extends Session {
                     { correct: false }
                 );
 
-                this.startRound(messageContext);
+                await this.startRound(messageContext);
             }
         }
     }
