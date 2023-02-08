@@ -123,7 +123,7 @@ export default class ListeningSession extends Session {
         guessResult?: GuessResult
     ): Promise<void> {
         await this.round?.interactionMarkButtons();
-        super.endRound(messageContext, guessResult);
+        await super.endRound(messageContext, guessResult);
     }
 
     async endSession(reason: string): Promise<void> {

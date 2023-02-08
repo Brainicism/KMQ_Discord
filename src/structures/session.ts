@@ -307,7 +307,7 @@ export default abstract class Session {
     endRound(
         _messageContext?: MessageContext,
         _guessResult?: GuessResult
-    ): void {
+    ): Promise<void> {
         if (this.round === null) {
             return;
         }
@@ -351,7 +351,7 @@ export default abstract class Session {
 
         this.guildPreference.reloadSongCallback = null;
         Session.deleteSession(this.guildID);
-        this.endRound(
+        await this.endRound(
             new MessageContext(this.textChannelID, null, this.guildID),
             { correct: false }
         );
@@ -454,7 +454,7 @@ export default abstract class Session {
         }
 
         const time = this.guildPreference.gameOptions.guessTimeout;
-        this.guessTimeoutFunc = setTimeout(() => {
+        this.guessTimeoutFunc = setTimeout(async () => {
             if (this.finished || !this.round || this.round.finished) return;
             logger.info(
                 `${getDebugLogHeader(
@@ -462,12 +462,12 @@ export default abstract class Session {
                 )} | Song finished without being guessed, timer of: ${time} seconds.`
             );
 
-            this.endRound(
+            await this.endRound(
                 new MessageContext(this.textChannelID, null, this.guildID),
                 { correct: false }
             );
 
-            this.startRound(messageContext);
+            await this.startRound(messageContext);
         }, time * 1000);
     }
 
@@ -731,7 +731,7 @@ export default abstract class Session {
         this.startGuessTimeout(messageContext);
 
         // song finished without being guessed
-        this.connection.once("end", () => {
+        this.connection.once("end", async () => {
             // replace listener with no-op to catch any exceptions thrown after this event
             this.connection.removeAllListeners("end");
             this.connection.on("end", () => {});
@@ -742,12 +742,12 @@ export default abstract class Session {
             );
             this.stopGuessTimeout();
 
-            this.endRound(
+            await this.endRound(
                 new MessageContext(this.textChannelID, null, this.guildID),
                 { correct: false }
             );
 
-            this.startRound(messageContext);
+            await this.startRound(messageContext);
         });
 
         this.connection.once("error", (err) => {
@@ -977,7 +977,7 @@ export default abstract class Session {
             this.guildID
         );
 
-        this.endRound(messageContext, {
+        await this.endRound(messageContext, {
             correct: false,
             error: true,
         });
@@ -993,7 +993,7 @@ export default abstract class Session {
             ),
         });
         this.roundsPlayed--;
-        this.startRound(messageContext);
+        await this.startRound(messageContext);
     }
 
     private getAliasFooter(
