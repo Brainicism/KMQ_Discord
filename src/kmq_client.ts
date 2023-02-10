@@ -36,7 +36,7 @@ export default class KmqClient extends Eris.Client {
                             path.resolve(__dirname, "./commands", category)
                         )
                     )
-                        .filter((x) => x.endsWith(".js"))
+                        .filter((x) => x.endsWith(".ts") || x.endsWith(".js"))
                         .map((x) =>
                             path.resolve(__dirname, "./commands", category, x)
                         )
