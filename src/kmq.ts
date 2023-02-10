@@ -105,8 +105,9 @@ const options: Options = {
     },
     fetchTimeout: 5000,
     customClient: KmqClient,
-    guildsPerShard:
-        parseInt(process.env.GUILDS_PER_SHARD as string, 10) ?? 2000,
+    guildsPerShard: process.env.GUILDS_PER_SHARD
+        ? parseInt(process.env.GUILDS_PER_SHARD as string, 10)
+        : 2000,
     useCentralRequestHandler: true,
     softKillNotificationPeriod: 3 * 60 * 1000,
 };
