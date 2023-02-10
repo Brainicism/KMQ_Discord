@@ -416,7 +416,7 @@ export default class GameSession extends Session {
                 remainingDuration
             );
 
-            round.roundMessageID = endRoundMessage?.id;
+            round.roundMessageID = endRoundMessage?.id as string;
         }
 
         this.updateBookmarkSongList(round);
@@ -762,7 +762,7 @@ export default class GameSession extends Session {
             this.scoreboard.addPlayer(
                 this.gameType === GameType.ELIMINATION
                     ? EliminationPlayer.fromUser(
-                          user,
+                          user as Eris.User,
                           this.guildID,
                           (
                               this.scoreboard as EliminationScoreboard
@@ -771,7 +771,7 @@ export default class GameSession extends Session {
                           await isUserPremium(userID)
                       )
                     : Player.fromUser(
-                          user,
+                          user as Eris.User,
                           this.guildID,
                           0,
                           await isFirstGameOfDay(userID),
@@ -811,7 +811,7 @@ export default class GameSession extends Session {
                 .map(async (playerId) => {
                     const firstGameOfDay = await isFirstGameOfDay(playerId);
                     const premium = await isUserPremium(playerId);
-                    const player = await fetchUser(playerId);
+                    const player = (await fetchUser(playerId)) as Eris.User;
                     this.scoreboard.addPlayer(
                         this.gameType === GameType.ELIMINATION
                             ? EliminationPlayer.fromUser(
@@ -841,7 +841,7 @@ export default class GameSession extends Session {
      */
     sendScoreboardMessage(
         messageOrInteraction: GuildTextableMessage | CommandInteraction
-    ): Promise<Eris.Message> {
+    ): Promise<Eris.Message | null> {
         const winnersFieldSubsets = chunkArray(
             this.scoreboard.getScoreboardEmbedSingleColumn(true, true),
             EMBED_FIELDS_PER_PAGE

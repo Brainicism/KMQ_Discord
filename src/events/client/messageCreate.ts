@@ -157,6 +157,14 @@ export default async function messageCreateHandler(
                         { debugId }
                     ),
                 });
+
+                const newSession = Session.getSession(message.guildID);
+
+                if (newSession) {
+                    await newSession.endSession(
+                        "Unknown error during command invocation, cleaning up"
+                    );
+                }
             }
         }
     } else if (session?.isGameSession()) {

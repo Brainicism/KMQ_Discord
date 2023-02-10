@@ -22,13 +22,13 @@ program.parse();
     );
 
     const downloadedSongs = (
-        await fs.promises.readdir(process.env.SONG_DOWNLOAD_DIR)
+        await fs.promises.readdir(process.env.SONG_DOWNLOAD_DIR as string)
     )
         .filter((x) => x.endsWith(".ogg"))
         .map((x) => x.replace(".ogg", ""));
 
     const danglingSongs = _.difference(downloadedSongs, availableSongs).map(
-        (x) => path.join(process.env.SONG_DOWNLOAD_DIR, `${x}.ogg`)
+        (x) => path.join(process.env.SONG_DOWNLOAD_DIR as string, `${x}.ogg`)
     );
 
     let totalSize = 0;

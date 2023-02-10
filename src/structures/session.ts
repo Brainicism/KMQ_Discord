@@ -304,7 +304,8 @@ export default abstract class Session {
      * @param _messageContext - unused
      * @param _guessResult - unused
      */
-    endRound(
+    // eslint-disable-next-line @typescript-eslint/require-await
+    async endRound(
         _messageContext?: MessageContext,
         _guessResult?: GuessResult
     ): Promise<void> {
@@ -853,7 +854,7 @@ export default abstract class Session {
         embedColor: number | undefined,
         shouldReply: boolean,
         timeRemaining: number | null
-    ): Promise<Eris.Message<Eris.TextableChannel>> {
+    ): Promise<Eris.Message<Eris.TextableChannel> | null> {
         const fact =
             Math.random() <= 0.05 ? getFact(messageContext.guildID) : null;
 

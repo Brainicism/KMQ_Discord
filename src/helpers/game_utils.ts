@@ -51,7 +51,10 @@ export async function ensureVoiceConnection(session: Session): Promise<void> {
 export async function getAvailableSongCount(
     guildPreference: GuildPreference,
     isPremium: boolean
-): Promise<{ count: number; countBeforeLimit: number }> {
+): Promise<{
+    count: number | undefined;
+    countBeforeLimit: number | undefined;
+}> {
     try {
         if (guildPreference.isSpotifyPlaylist()) {
             const spotifyMetadata =
@@ -75,10 +78,12 @@ export async function getAvailableSongCount(
             countBeforeLimit,
         };
     } catch (e) {
-        logger.error(`Error retrieving song count ${e}`);
+        logger.error(
+            `gid: ${guildPreference.guildID} | Error retrieving song count ${e}`
+        );
         return {
-            count: 0,
-            countBeforeLimit: 0,
+            count: undefined,
+            countBeforeLimit: undefined,
         };
     }
 }

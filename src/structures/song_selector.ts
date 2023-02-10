@@ -423,12 +423,12 @@ export default class SongSelector {
             .andWhere("publishedon", "<=", `${gameOptions.endYear}-12-31`)
             .orderBy("views", "DESC");
 
-        queryBuilder = queryBuilder.andWhere(
+        queryBuilder = queryBuilder.where(
             "rank",
             "<=",
             premium
-                ? process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST
-                : process.env.AUDIO_SONGS_PER_ARTIST
+                ? (process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST as string)
+                : (process.env.AUDIO_SONGS_PER_ARTIST as string)
         );
 
         result = await queryBuilder;

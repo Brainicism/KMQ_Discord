@@ -84,7 +84,10 @@ export default class BotListingManager {
         const botListing = BOT_LISTING_SITES[siteConfigKeyName];
         try {
             await Axios.post(
-                botListing.endpoint.replace("%d", process.env.BOT_CLIENT_ID),
+                botListing.endpoint.replace(
+                    "%d",
+                    process.env.BOT_CLIENT_ID as string
+                ),
                 {
                     [botListing.payloadKeyName]: (
                         await this.ipc.getStats()

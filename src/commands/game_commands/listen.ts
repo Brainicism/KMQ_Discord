@@ -69,6 +69,10 @@ export async function sendBeginListeningSessionMessage(
         false
     );
 
+    if (!optionsEmbedPayload) {
+        throw new Error("Error generating options embed payload");
+    }
+
     await sendInfoMessage(
         messageContext,
         {

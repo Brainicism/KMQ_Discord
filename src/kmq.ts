@@ -90,7 +90,7 @@ const options: Options = {
             ? "./kmq_worker.ts"
             : "./kmq_worker.js"
     ),
-    token: process.env.BOT_TOKEN,
+    token: process.env.BOT_TOKEN as string,
     clientOptions: {
         disableEvents: {
             CHANNEL_PINS_UPDATE: true,
@@ -115,7 +115,9 @@ const options: Options = {
     },
     fetchTimeout: 5000,
     customClient: KmqClient,
-    guildsPerShard: process.env.GUILDS_PER_SHARD ?? 2000,
+    guildsPerShard: process.env.GUILDS_PER_SHARD
+        ? parseInt(process.env.GUILDS_PER_SHARD as string, 10)
+        : 2000,
     useCentralRequestHandler: true,
     softKillNotificationPeriod: 3 * 60 * 1000,
 };

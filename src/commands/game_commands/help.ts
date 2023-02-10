@@ -338,6 +338,14 @@ export default class HelpCommand implements BaseCommand {
     ): Promise<void> {
         const interactionData = getInteractionValue(interaction);
         const focusedKey = interactionData.focusedKey;
+        if (focusedKey === null) {
+            logger.error(
+                "focusedKey unexpectedly null in processGroupAutocompleteInteraction"
+            );
+
+            return;
+        }
+
         const focusedVal = interactionData.interactionOptions[focusedKey];
         const lowercaseUserInput = focusedVal.toLowerCase();
         const commands = Object.values(State.client.commands)

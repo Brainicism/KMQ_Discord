@@ -358,6 +358,10 @@ export default class GroupsCommand implements BaseCommand {
             undefined
         );
 
+        if (!optionsMessage) {
+            throw new Error("Error generating options embed payload");
+        }
+
         await sendInfoMessage(
             messageContext,
             optionsMessage,
