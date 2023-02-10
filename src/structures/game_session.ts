@@ -218,7 +218,7 @@ export default class GameSession extends Session {
                 });
             }
 
-            round.interactionCorrectAnswerUUID = uuid.v4();
+            round.interactionCorrectAnswerUUID = uuid.v4() as string;
             buttons.push({
                 type: 2,
                 style: 1,

@@ -918,7 +918,7 @@ export default abstract class Session {
 
         if (round instanceof ListeningRound) {
             const buttons: Array<Eris.InteractionButton> = [];
-            round.interactionSkipUUID = uuid.v4();
+            round.interactionSkipUUID = uuid.v4() as string;
             buttons.push({
                 type: 2,
                 style: 1,
