@@ -7,7 +7,6 @@ import {
     friendlyFormattedNumber,
     isValidURL,
 } from "../../helpers/utils";
-import { cleanSongName } from "../../structures/game_round";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -22,8 +21,10 @@ import {
     getLocalizedArtistName,
     getLocalizedSongName,
     isPremiumRequest,
+    normalizeArtistNameEntry,
 } from "../../helpers/game_utils";
 import { getVideoID, validateID } from "ytdl-core";
+import { normalizePunctuationInName } from "../../structures/game_round";
 import { sendValidationErrorMessage } from "../../helpers/validate";
 import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
@@ -606,7 +607,7 @@ export default class LookupCommand implements BaseCommand {
             let artistID: number | undefined;
             if (artistName) {
                 const matchingArtist =
-                    State.artistToEntry[artistName.toLowerCase()];
+                    State.artistToEntry[normalizeArtistNameEntry(artistName)];
 
                 if (matchingArtist) {
                     artistID = matchingArtist.id;
@@ -636,7 +637,7 @@ export default class LookupCommand implements BaseCommand {
 
         const focusedVal = interactionData.interactionOptions[focusedKey];
 
-        const lowercaseUserInput = focusedVal.toLowerCase();
+        const lowercaseUserInput = normalizeArtistNameEntry(focusedVal);
         const showHangul =
             containsHangul(lowercaseUserInput) ||
             State.getGuildLocale(interaction.guildID as string) ===
@@ -648,7 +649,9 @@ export default class LookupCommand implements BaseCommand {
 
             let artistID: number | undefined;
             if (artistName) {
-                artistID = State.artistToEntry[artistName.toLowerCase()]?.id;
+                artistID =
+                    State.artistToEntry[normalizeArtistNameEntry(artistName)]
+                        ?.id;
             }
 
             if (lowercaseUserInput.length < 2) {
@@ -695,7 +698,8 @@ export default class LookupCommand implements BaseCommand {
                 matchingArtists = searchArtists(lowercaseUserInput, []);
             } else {
                 // only return artists that have a song that matches the entered one
-                const cleanEnteredSongName = cleanSongName(enteredSongName);
+                const cleanEnteredSongName =
+                    normalizePunctuationInName(enteredSongName);
 
                 const matchingSongs = Object.values(
                     State.songLinkToEntry

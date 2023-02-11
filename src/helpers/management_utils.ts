@@ -6,6 +6,7 @@ import {
     cleanupInactiveGameSessions,
     getMatchingGroupNames,
     isPowerHour,
+    normalizeArtistNameEntry,
 } from "./game_utils";
 import { reloadFactCache } from "../fact_generator";
 import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
@@ -13,7 +14,7 @@ import KmqConfiguration from "../kmq_configuration";
 import MessageContext from "../structures/message_context";
 import i18n from "./localization_manager";
 
-import { cleanSongName } from "../structures/game_round";
+import { normalizePunctuationInName } from "../structures/game_round";
 import State from "../state";
 import _ from "lodash";
 import dbContext from "../database_context";
@@ -302,12 +303,16 @@ async function reloadArtists(): Promise<void> {
             id: mapping["id_artist"],
         };
 
-        State.artistToEntry[mapping["artist_name_en"].toLowerCase()] =
-            artistEntry;
+        State.artistToEntry[
+            normalizeArtistNameEntry(mapping["artist_name_en"])
+        ] = artistEntry;
+
         State.artistToEntry[mapping["artist_name_ko"]] = artistEntry;
+
         for (const alias in aliases) {
             if (alias.length > 0) {
-                State.artistToEntry[alias.toLowerCase()] = artistEntry;
+                State.artistToEntry[normalizeArtistNameEntry(alias)] =
+                    artistEntry;
             }
         }
     }
@@ -343,8 +348,12 @@ async function reloadSongs(): Promise<void> {
             hangulName: mapping["song_name_ko"],
             artistID: mapping["id_artist"],
             songLink: mapping["link"],
-            cleanName: cleanSongName(mapping["clean_song_name_en"]),
-            hangulCleanName: cleanSongName(mapping["clean_song_name_ko"]),
+            cleanName: normalizePunctuationInName(
+                mapping["clean_song_name_en"]
+            ),
+            hangulCleanName: normalizePunctuationInName(
+                mapping["clean_song_name_ko"]
+            ),
         };
 
         State.songLinkToEntry[songEntry.songLink] = songEntry;

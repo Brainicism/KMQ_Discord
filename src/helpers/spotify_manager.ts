@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import { IPCLogger } from "../logger";
+import { normalizeArtistNameEntry } from "./game_utils";
 import { retryJob } from "./utils";
 import Axios from "axios";
 import SongSelector from "../structures/song_selector";
@@ -174,12 +175,15 @@ export default class SpotifyManager {
             State.cachedPlaylists[spotifyMetadata.snapshotID] = spotifySongs;
         }
 
+        logger.info(
+            `Starting to parse playlist: ${playlistID}, number of songs: ${spotifySongs.length}`
+        );
         let matchedSongs: Array<QueriedSong> = [];
         const unmatchedSongs: Array<SpotifyTrack> = [];
         for (const song of spotifySongs) {
             const aliasIDs: Array<number> = [];
             for (const artist of song.artists) {
-                const lowercaseArtist = artist.toLowerCase();
+                const lowercaseArtist = normalizeArtistNameEntry(artist);
                 const artistMapping = State.artistToEntry[lowercaseArtist];
                 if (artistMapping) {
                     aliasIDs.push(artistMapping.id);
@@ -187,7 +191,9 @@ export default class SpotifyManager {
                         for (const alias of State.aliases.artist[
                             lowercaseArtist
                         ]) {
-                            const lowercaseAlias = alias.toLowerCase();
+                            const lowercaseAlias =
+                                normalizeArtistNameEntry(alias);
+
                             if (lowercaseAlias in State.artistToEntry) {
                                 aliasIDs.push(
                                     State.artistToEntry[lowercaseAlias].id
@@ -198,26 +204,47 @@ export default class SpotifyManager {
                 }
             }
 
-            const result = (await dbContext
+            // handle songs with brackets in name, consider all components separately
+            const songNameBracketComponents = song.name.split("(");
+            const songNames = [songNameBracketComponents[0], song.name];
+            if (songNameBracketComponents.length > 1) {
+                songNames.push(songNameBracketComponents[1].replace(")", ""));
+            }
+
+            const query = dbContext
                 .kmq("available_songs")
-                .join(
-                    "kpop_groups",
-                    "available_songs.id_artist",
-                    "kpop_groups.id"
-                )
+                .join("kpop_videos.app_kpop_group", function () {
+                    this.on(
+                        "available_songs.id_artist",
+                        "=",
+                        "kpop_videos.app_kpop_group.id"
+                    );
+
+                    this.orOn(
+                        "available_songs.id_parent_artist",
+                        "=",
+                        "kpop_videos.app_kpop_group.id"
+                    );
+                })
                 .select(SongSelector.getQueriedSongFields())
                 .where((qb) => {
-                    qb.whereRaw("available_songs.song_name_en SOUNDS LIKE ?", [
-                        song.name,
-                    ]);
+                    for (const songName of songNames) {
+                        // compare with non-alphanumeric characters removed
+                        qb = qb.orWhereRaw(
+                            "REGEXP_REPLACE(available_songs.song_name_en, '[^0-9a-zA-Z]', '') LIKE ?",
+                            [songName.replace(/[^0-9a-z]/gi, "")]
+                        );
+                    }
+
+                    return qb;
                 })
                 .andWhere((qb) => {
-                    qb.whereRaw(
-                        "available_songs.artist_name_en SOUNDS LIKE ?",
-                        [song.artists[0]]
-                    )
+                    qb.whereRaw("available_songs.artist_name_en LIKE ?", [
+                        song.artists[0],
+                    ])
                         .orWhereIn("id_artist", aliasIDs)
-                        .orWhereIn("id_parentgroup", aliasIDs);
+                        .orWhereIn("id_parentgroup", aliasIDs)
+                        .orWhereIn("id_parent_artist", aliasIDs);
                 })
                 .andWhere(
                     "rank",
@@ -226,7 +253,9 @@ export default class SpotifyManager {
                         ? (process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST as string)
                         : (process.env.AUDIO_SONGS_PER_ARTIST as string)
                 )
-                .first()) as QueriedSong;
+                .first();
+
+            const result = (await query) as QueriedSong;
 
             if (result) {
                 matchedSongs.push(result);
@@ -235,10 +264,12 @@ export default class SpotifyManager {
             }
         }
 
+        logger.info(`Finished parsing playlist: ${playlistID}`);
+
         if (unmatchedSongs.length > 0) {
             logger.info(
                 `Unmatched Spotify songs for playlistID = ${playlistID}: ${JSON.stringify(
-                    unmatchedSongs
+                    unmatchedSongs.map((x) => `${x.name} - ${x.artists[0]}`)
                 )}`
             );
         }

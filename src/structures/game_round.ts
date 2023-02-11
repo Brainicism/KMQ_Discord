@@ -39,7 +39,7 @@ interface GuessCorrectness {
  * @param name - the song name
  * @returns The cleaned song name
  */
-export function cleanSongName(name: string): string {
+export function normalizePunctuationInName(name: string): string {
     let cleanName = name.toLowerCase();
     for (const characterReplacement of CHARACTER_REPLACEMENTS) {
         cleanName = cleanName.replace(
@@ -495,9 +495,9 @@ export default class GameRound extends Round {
      * @returns whether or not the guess was correct
      */
     private checkSongGuess(message: string): GuessCorrectness {
-        const guess = cleanSongName(message);
+        const guess = normalizePunctuationInName(message);
         const cleanedSongAliases = this.acceptedSongAnswers.map((x) =>
-            cleanSongName(x)
+            normalizePunctuationInName(x)
         );
 
         return {

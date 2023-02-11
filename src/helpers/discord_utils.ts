@@ -33,6 +33,7 @@ import {
     getLocalizedArtistName,
     getLocalizedSongName,
     isPremiumRequest,
+    normalizeArtistNameEntry,
     userBonusIsActive,
 } from "./game_utils";
 import EmbedPaginator from "eris-pagination";
@@ -1878,7 +1879,7 @@ export async function processGroupAutocompleteInteraction(
     }
 
     const focusedVal = interactionData.interactionOptions[focusedKey];
-    const lowercaseUserInput = focusedVal.toLowerCase();
+    const lowercaseUserInput = normalizeArtistNameEntry(focusedVal);
 
     const previouslyEnteredArtists = getMatchedArtists(
         Object.entries(interactionData.interactionOptions)
