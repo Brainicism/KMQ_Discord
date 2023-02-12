@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import { IPCLogger } from "../logger";
+import { chunkArray, retryJob } from "./utils";
 import { normalizeArtistNameEntry } from "./game_utils";
-import { retryJob } from "./utils";
 import Axios from "axios";
 import SongSelector from "../structures/song_selector";
 import State from "../state";
@@ -175,12 +175,72 @@ export default class SpotifyManager {
             State.cachedPlaylists[spotifyMetadata.snapshotID] = spotifySongs;
         }
 
+        let matchedSongs: Array<QueriedSong> = [];
+        const unmatchedSongs: Array<string> = [];
+        const chunkedSpotifySongs = chunkArray(spotifySongs, 4);
+
         logger.info(
             `Starting to parse playlist: ${playlistID}, number of songs: ${spotifySongs.length}`
         );
-        let matchedSongs: Array<QueriedSong> = [];
-        const unmatchedSongs: Array<SpotifyTrack> = [];
-        for (const song of spotifySongs) {
+        const start = Date.now();
+        for (const [idx, spotifySongChunk] of chunkedSpotifySongs.entries()) {
+            logger.info(
+                `Processing chunk ${idx + 1}/${
+                    chunkedSpotifySongs.length
+                } of ${playlistID}.`
+            );
+            const promises = spotifySongChunk.map((x) =>
+                this.generateSongMatchingPromise(x, isPremium)
+            );
+
+            const settledPromises = await Promise.allSettled(promises);
+            unmatchedSongs.push(
+                ...(
+                    settledPromises.filter(
+                        (x) => x.status === "rejected"
+                    ) as PromiseRejectedResult[]
+                ).map((x) => x.reason as string)
+            );
+
+            matchedSongs.push(
+                ...(
+                    settledPromises.filter(
+                        (x) => x.status === "fulfilled"
+                    ) as PromiseFulfilledResult<QueriedSong>[]
+                ).map((x) => x.value)
+            );
+        }
+
+        const end = Date.now();
+        logger.info(
+            `Finished parsing playlist: ${playlistID} after ${end - start}ms.`
+        );
+        if (unmatchedSongs.length > 0) {
+            logger.info(
+                `Unmatched Spotify songs for playlistID = ${playlistID}: ${JSON.stringify(
+                    unmatchedSongs
+                )}`
+            );
+        }
+
+        matchedSongs = _.uniq(matchedSongs);
+        return {
+            matchedSongs,
+            metadata: {
+                playlistID,
+                playlistLength: spotifySongs.length,
+                playlistName: spotifyMetadata.playlistName,
+                matchedSongsLength: matchedSongs.length,
+                thumbnailUrl: spotifyMetadata.thumbnailUrl as string,
+            },
+        };
+    };
+
+    private generateSongMatchingPromise(
+        song: SpotifyTrack,
+        isPremium: boolean
+    ): Promise<QueriedSong> {
+        return new Promise(async (resolve, reject) => {
             const aliasIDs: Array<number> = [];
             for (const artist of song.artists) {
                 const lowercaseArtist = normalizeArtistNameEntry(artist);
@@ -259,34 +319,13 @@ export default class SpotifyManager {
             const result = (await query) as QueriedSong;
 
             if (result) {
-                matchedSongs.push(result);
+                resolve(result);
             } else {
-                unmatchedSongs.push(song);
+                // eslint-disable-next-line prefer-promise-reject-errors
+                reject(`${song.name} - ${song.artists[0]}`);
             }
-        }
-
-        logger.info(`Finished parsing playlist: ${playlistID}`);
-
-        if (unmatchedSongs.length > 0) {
-            logger.info(
-                `Unmatched Spotify songs for playlistID = ${playlistID}: ${JSON.stringify(
-                    unmatchedSongs.map((x) => `${x.name} - ${x.artists[0]}`)
-                )}`
-            );
-        }
-
-        matchedSongs = _.uniq(matchedSongs);
-        return {
-            matchedSongs,
-            metadata: {
-                playlistID,
-                playlistLength: spotifySongs.length,
-                playlistName: spotifyMetadata.playlistName,
-                matchedSongsLength: matchedSongs.length,
-                thumbnailUrl: spotifyMetadata.thumbnailUrl as string,
-            },
-        };
-    };
+        });
+    }
 
     private refreshToken = async (): Promise<void> => {
         if (

@@ -237,7 +237,10 @@ export default class SpotifyCommand implements BaseCommand {
             logger.info(
                 `${getDebugLogHeader(messageContext)} | Matched ${
                     matchedPlaylist.metadata.matchedSongsLength
-                }/${matchedPlaylist.metadata.playlistLength} Spotify songs`
+                }/${matchedPlaylist.metadata.playlistLength} (${(
+                    (100.0 * matchedPlaylist.metadata.matchedSongsLength) /
+                    matchedPlaylist.metadata.playlistLength
+                ).toFixed(2)}%) Spotify songs`
             );
 
             if (matchedPlaylist.matchedSongs.length === 0) {
