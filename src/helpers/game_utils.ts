@@ -458,18 +458,19 @@ export async function isUserPremium(userID: string): Promise<boolean> {
 }
 
 /**
- * @param patrons - The users to grant premium membership
+ * @param activePatrons - The users to grant premium membership
+ * @param inactiveUserIDs - The users to revoke premium membership from
  */
-export async function addPremium(patrons: Array<Patron>): Promise<void> {
-    if (patrons.length === 0) {
-        return;
-    }
-
+export async function updatePremium(
+    activePatrons: Array<Patron>,
+    inactiveUserIDs: string[]
+): Promise<void> {
     await dbContext.kmq.transaction(async (trx) => {
+        // Grant premium
         await dbContext
             .kmq("premium_users")
             .insert(
-                patrons.map((x) => ({
+                activePatrons.map((x) => ({
                     active: x.activePatron,
                     first_subscribed: x.firstSubscribed,
                     user_id: x.discordID,
@@ -482,7 +483,7 @@ export async function addPremium(patrons: Array<Patron>): Promise<void> {
         await dbContext
             .kmq("badges_players")
             .insert(
-                patrons.map((x) => ({
+                activePatrons.map((x) => ({
                     user_id: x.discordID,
                     badge_id: PATREON_SUPPORTER_BADGE_ID,
                 }))
@@ -490,23 +491,17 @@ export async function addPremium(patrons: Array<Patron>): Promise<void> {
             .onConflict(["user_id", "badge_name"])
             .ignore()
             .transacting(trx);
-    });
-}
 
-/**
- * @param userIDs - The users to revoke premium membership from
- */
-export async function removePremium(userIDs: string[]): Promise<void> {
-    await dbContext.kmq.transaction(async (trx) => {
+        // Revoke premium
         await dbContext
             .kmq("premium_users")
-            .whereIn("user_id", userIDs)
+            .whereIn("user_id", inactiveUserIDs)
             .update({ active: false })
             .transacting(trx);
 
         await dbContext
             .kmq("badges_players")
-            .whereIn("user_id", userIDs)
+            .whereIn("user_id", inactiveUserIDs)
             .andWhere("badge_id", "=", PATREON_SUPPORTER_BADGE_ID)
             .del()
             .transacting(trx);
