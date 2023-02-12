@@ -3,7 +3,10 @@ import {
     PATREON_SUPPORTER_BADGE_ID,
     SHADOW_BANNED_ARTIST_IDS,
 } from "../constants";
-import { cleanArtistName, cleanSongName } from "../structures/game_round";
+import {
+    cleanArtistName,
+    normalizePunctuationInName,
+} from "../structures/game_round";
 import { containsHangul, md5Hash } from "./utils";
 import AnswerType from "../enums/option_types/answer_type";
 import GuessModeType from "../enums/option_types/guess_mode_type";
@@ -362,12 +365,12 @@ export async function getMultipleChoiceOptions(
         const uniqueResult = new Map();
         const removedResults: Array<string> = [];
         for (const song of result) {
-            if (uniqueResult.has(cleanSongName(song))) {
+            if (uniqueResult.has(normalizePunctuationInName(song))) {
                 removedResults.push(song);
                 continue;
             }
 
-            uniqueResult.set(cleanSongName(song), song);
+            uniqueResult.set(normalizePunctuationInName(song), song);
         }
 
         result = [...uniqueResult.values()];
@@ -599,4 +602,12 @@ export function isPowerHour(): boolean {
     return powerHours.some(
         (powerHour) => currentHour >= powerHour && currentHour <= powerHour + 1
     );
+}
+
+/**
+ * @param artistName - the artist name
+ * @returns the normalized artist name for state entry
+ */
+export function normalizeArtistNameEntry(artistName: string): string {
+    return normalizePunctuationInName(artistName.toLowerCase());
 }
