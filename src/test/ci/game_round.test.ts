@@ -3,7 +3,7 @@ import { ExpBonusModifierValues } from "../../constants";
 import ExpBonusModifier from "../../enums/exp_bonus_modifier";
 import GameRound, {
     cleanArtistName,
-    cleanSongName,
+    normalizePunctuationInName,
 } from "../../structures/game_round";
 import Gender from "../../enums/option_types/gender";
 import GuessModeType from "../../enums/option_types/guess_mode_type";
@@ -189,7 +189,10 @@ describe("game round", () => {
     describe("clean song/artist name", () => {
         describe("has uppercase characters", () => {
             it("converts to full lower case", () => {
-                assert.strictEqual(cleanSongName("BLahBLah"), "blahblah");
+                assert.strictEqual(
+                    normalizePunctuationInName("BLahBLah"),
+                    "blahblah"
+                );
                 assert.strictEqual(cleanArtistName("ClaHClaH"), "clahclah");
             });
         });
@@ -197,7 +200,7 @@ describe("game round", () => {
         describe("has trailing or leading spaces", () => {
             it("removes the whitespace", () => {
                 assert.strictEqual(
-                    cleanSongName("       blahblah          "),
+                    normalizePunctuationInName("       blahblah          "),
                     "blahblah"
                 );
 
@@ -210,14 +213,21 @@ describe("game round", () => {
 
         describe("has unwanted punctuation or symbols", () => {
             it("removes the specified list of removed punctuation", () => {
-                assert.strictEqual(cleanSongName("!bl:ah blah?"), "blahblah");
+                assert.strictEqual(
+                    normalizePunctuationInName("!bl:ah blah?"),
+                    "blahblah"
+                );
                 assert.strictEqual(cleanArtistName("!cl:ah clah?"), "clahclah");
             });
         });
 
         describe("has punctuation to replace", () => {
             it("replaces the punctuation with the correct replacement", () => {
-                assert.strictEqual(cleanSongName("blah & blah"), "blahandblah");
+                assert.strictEqual(
+                    normalizePunctuationInName("blah & blah"),
+                    "blahandblah"
+                );
+
                 assert.strictEqual(
                     cleanArtistName("clah & clah"),
                     "clahandclah"
