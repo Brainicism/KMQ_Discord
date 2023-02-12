@@ -44,8 +44,8 @@ export class DatabaseContext {
                 generateKnexContext("kpop_videos_test", 0, 1)
             );
         } else {
-            this.kmq = knex(generateKnexContext("kmq", 0, 5));
-            this.kpopVideos = knex(generateKnexContext("kpop_videos", 0, 1));
+            this.kmq = knex(generateKnexContext("kmq", 0, 20));
+            this.kpopVideos = knex(generateKnexContext("kpop_videos", 0, 5));
         }
 
         this.agnostic = knex(generateKnexContext(null, 0, 1));
