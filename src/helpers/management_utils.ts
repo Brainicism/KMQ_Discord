@@ -324,7 +324,11 @@ async function reloadArtists(): Promise<void> {
             "artist_name_en AS name",
             "artist_name_ko AS hangulName",
         ])
-        .join("kpop_groups", "available_songs.id_artist", "kpop_groups.id")
+        .join(
+            "kpop_videos.app_kpop_group",
+            "available_songs.id_artist",
+            "kpop_videos.app_kpop_group.id"
+        )
         .orderByRaw("SUM(views) DESC")
         .limit(25)
         .groupBy("id_artist");
