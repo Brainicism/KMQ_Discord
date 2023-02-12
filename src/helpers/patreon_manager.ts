@@ -1,5 +1,5 @@
 import { IPCLogger } from "../logger";
-import { addPremium, removePremium } from "./game_utils";
+import { updatePremium } from "./game_utils";
 import Axios from "axios";
 import dbContext from "../database_context";
 import type Patron from "../interfaces/patron";
@@ -120,7 +120,8 @@ export default async function updatePremiumUsers(): Promise<void> {
         .filter((x) => x.activePatron)
         .map((x) => x.discordID);
 
-    await removePremium(
+    await updatePremium(
+        patrons,
         (
             await dbContext
                 .kmq("premium_users")
@@ -129,5 +130,4 @@ export default async function updatePremiumUsers(): Promise<void> {
                 .whereNot("source", "=", "loyalty")
         ).map((x) => x.user_id)
     );
-    await addPremium(patrons);
 }

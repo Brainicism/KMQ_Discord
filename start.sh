@@ -7,7 +7,7 @@ rebuild () {
 }
 
 echo "Killing running instances..."
-ps x | grep node | grep "${PWD}/" | egrep "kmq\.js|cluster_manager\.js|kmq\.ts" | awk '{print $1}' | xargs kill &> /dev/null || echo "No running instances to kill"
+ps x | grep node | grep "${PWD}/" | grep -E "kmq\.js|cluster_manager\.js|kmq\.ts" | awk '{print $1}' | xargs kill &> /dev/null || echo "No running instances to kill"
 
 echo "Bootstrapping..."
 npx ts-node  --swc src/seed/bootstrap.ts
