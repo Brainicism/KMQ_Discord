@@ -206,9 +206,10 @@ export default class SpotifyManager {
 
             // handle songs with brackets in name, consider all components separately
             const songNameBracketComponents = song.name.split("(");
-            const songNames = [songNameBracketComponents[0], song.name];
+            const songNames = [songNameBracketComponents[0]];
             if (songNameBracketComponents.length > 1) {
                 songNames.push(songNameBracketComponents[1].replace(")", ""));
+                songNames.push(song.name);
             }
 
             const query = dbContext

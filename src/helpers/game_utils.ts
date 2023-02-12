@@ -609,7 +609,5 @@ export function isPowerHour(): boolean {
  * @returns the normalized artist name for state entry
  */
 export function normalizeArtistNameEntry(artistName: string): string {
-    return normalizePunctuationInName(
-        artistName.toLowerCase().replaceAll(" ", "")
-    );
+    return normalizePunctuationInName(artistName.toLowerCase());
 }
