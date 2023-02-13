@@ -92,26 +92,30 @@ const options: Options = {
     ),
     token: process.env.BOT_TOKEN as string,
     clientOptions: {
-        disableEvents: {
-            CHANNEL_PINS_UPDATE: true,
-            MESSAGE_UPDATE: true,
-            MESSAGE_DELETE: true,
-            MESSAGE_DELETE_BULK: true,
-            MESSAGE_REACTION_REMOVE: true,
-            MESSAGE_REACTION_REMOVE_ALL: true,
-            MESSAGE_REACTION_REMOVE_EMOJI: true,
-            GUILD_BAN_ADD: true,
-            GUILD_BAN_REMOVE: true,
-            TYPING_START: true,
+        gateway: {
+            disableEvents: {
+                CHANNEL_PINS_UPDATE: true,
+                MESSAGE_UPDATE: true,
+                MESSAGE_DELETE: true,
+                MESSAGE_DELETE_BULK: true,
+                MESSAGE_REACTION_REMOVE: true,
+                MESSAGE_REACTION_REMOVE_ALL: true,
+                MESSAGE_REACTION_REMOVE_EMOJI: true,
+                GUILD_BAN_ADD: true,
+                GUILD_BAN_REMOVE: true,
+                TYPING_START: true,
+            },
+            maxShards: "auto" as const,
+            intents:
+                ERIS_INTENTS.guilds ^
+                ERIS_INTENTS.guildVoiceStates ^
+                ERIS_INTENTS.guildMessages ^
+                ERIS_INTENTS.guildMessageReactions ^
+                ERIS_INTENTS.messageContent,
         },
         restMode: true,
-        maxShards: "auto" as const,
         messageLimit: 0,
-        intents:
-            ERIS_INTENTS.guilds ^
-            ERIS_INTENTS.guildVoiceStates ^
-            ERIS_INTENTS.guildMessages ^
-            ERIS_INTENTS.guildMessageReactions,
+        requestTimeout: 15000,
     },
     fetchTimeout: 5000,
     customClient: KmqClient,

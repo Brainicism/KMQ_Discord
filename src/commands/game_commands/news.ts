@@ -72,7 +72,7 @@ export default class NewsCommand implements BaseCommand {
                                 style: 5,
                                 url: "https://discord.gg/gDdVXvqVUr",
                                 type: 2,
-                                emoji: { name: "🎵" },
+                                emoji: { name: "🎵", id: null },
                                 label: i18n.translate(
                                     messageContext.guildID,
                                     "misc.interaction.officialKmqServer"

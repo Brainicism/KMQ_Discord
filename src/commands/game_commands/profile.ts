@@ -298,7 +298,6 @@ export default class ProfileCommand implements BaseCommand {
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .MENTIONABLE,
                     required: false,
-                    channel_types: undefined as never,
                 },
                 {
                     name: "user_id",
