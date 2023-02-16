@@ -5,6 +5,11 @@ import {
     SPOTIFY_BASE_URL,
 } from "../../constants";
 import {
+    friendlyFormattedNumber,
+    isValidURL,
+    italicize,
+} from "../../helpers/utils";
+import {
     getDebugLogHeader,
     getInteractionValue,
     sendErrorMessage,
@@ -12,7 +17,6 @@ import {
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import { isPremiumRequest } from "../../helpers/game_utils";
-import { isValidURL, italicize } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
@@ -295,8 +299,12 @@ export default class SpotifyCommand implements BaseCommand {
                 guildID,
                 "command.spotify.matched.description",
                 {
-                    matchedCount: String(matchedPlaylist.matchedSongs.length),
-                    totalCount: String(matchedPlaylist.metadata.playlistLength),
+                    matchedCount: friendlyFormattedNumber(
+                        matchedPlaylist.matchedSongs.length
+                    ),
+                    totalCount: friendlyFormattedNumber(
+                        matchedPlaylist.metadata.playlistLength
+                    ),
                 }
             );
 
@@ -306,7 +314,10 @@ export default class SpotifyCommand implements BaseCommand {
                     i18n.translate(
                         guildID,
                         "command.spotify.matched.truncated",
-                        { maxSpotifySongs: String(MAX_SPOTIFY_SONGS) }
+                        {
+                            maxSpotifySongs:
+                                friendlyFormattedNumber(MAX_SPOTIFY_SONGS),
+                        }
                     )
                 );
             }
