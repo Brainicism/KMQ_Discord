@@ -183,6 +183,17 @@ export default class SpotifyCommand implements BaseCommand {
             logger.info(
                 `${getDebugLogHeader(messageContext)} | Spotify playlist reset.`
             );
+
+            await sendOptionsMessage(
+                Session.getSession(guildID),
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.SPOTIFY_PLAYLIST_METADATA, reset }],
+                false,
+                undefined,
+                undefined,
+                interaction
+            );
             return;
         }
 

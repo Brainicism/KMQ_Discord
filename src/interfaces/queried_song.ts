@@ -3,8 +3,8 @@ import type Gender from "../enums/option_types/gender";
 export default interface QueriedSong {
     songName: string;
     originalSongName: string;
-    hangulSongName: string;
-    originalHangulSongName: string;
+    hangulSongName?: string;
+    originalHangulSongName?: string;
     artistName: string;
     hangulArtistName?: string;
     youtubeLink: string;
