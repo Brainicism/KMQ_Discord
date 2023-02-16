@@ -97,12 +97,13 @@ async function lookupByYoutubeID(
     let description: string;
     let songName: string;
     let artistName: string;
-    let songAliases: string;
-    let artistAliases: string;
+    const songAliases: string[] = [];
+    const artistAliases: string[] = [];
     let views: number;
     let publishDate: Date;
     let songDuration: string | null = null;
     let includedInOptions = false;
+    const isKorean = locale === LocaleType.KO;
 
     if (kmqSongEntry) {
         description = i18n.translate(guildID, "command.lookup.inKMQ", {
@@ -110,9 +111,24 @@ async function lookupByYoutubeID(
         });
         songName = getLocalizedSongName(kmqSongEntry, locale);
         artistName = getLocalizedArtistName(kmqSongEntry, locale);
-        songAliases = State.aliases.song[videoID]?.join(", ");
-        artistAliases =
-            State.aliases.artist[kmqSongEntry.artistName]?.join(", ");
+        songAliases.push(...(State.aliases.song[videoID] ?? []));
+        artistAliases.push(
+            ...(State.aliases.artist[kmqSongEntry.artistName] ?? [])
+        );
+
+        if (isKorean) {
+            songAliases.push(kmqSongEntry.songName);
+            artistAliases.push(kmqSongEntry.artistName);
+        } else {
+            if (kmqSongEntry.hangulSongName) {
+                songAliases.push(kmqSongEntry.hangulSongName);
+            }
+
+            if (kmqSongEntry.hangulArtistName) {
+                artistAliases.push(kmqSongEntry.hangulArtistName);
+            }
+        }
+
         views = kmqSongEntry.views;
         publishDate = kmqSongEntry.publishDate;
 
@@ -155,7 +171,7 @@ async function lookupByYoutubeID(
         description = i18n.translate(guildID, "command.lookup.notInKMQ", {
             link: daisukiLink,
         });
-        const isKorean = locale === LocaleType.KO;
+
         songName =
             daisukiEntry.kname && isKorean
                 ? daisukiEntry.kname
@@ -172,12 +188,26 @@ async function lookupByYoutubeID(
                 ? artistNameQuery.kname
                 : artistNameQuery.name;
 
-        songAliases = daisukiEntry.alias.replaceAll(";", ", ");
-        songAliases += songAliases
-            ? `, ${daisukiEntry.kname}`
-            : daisukiEntry.kname;
+        if (daisukiEntry.alias) {
+            songAliases.push(...daisukiEntry.alias.split(";"));
+        }
 
-        artistAliases = State.aliases.artist[artistNameQuery.name]?.join(", ");
+        artistAliases.push(
+            ...(State.aliases.artist[artistNameQuery.name] ?? [])
+        );
+
+        if (isKorean) {
+            songAliases.push(daisukiEntry.name);
+            artistAliases.push(artistNameQuery.name);
+        } else {
+            if (daisukiEntry.kname) {
+                songAliases.push(daisukiEntry.kname);
+            }
+
+            if (artistNameQuery.kname) {
+                artistAliases.push(artistNameQuery.kname);
+            }
+        }
 
         views = daisukiEntry.views;
         publishDate = new Date(daisukiEntry.publishedon);
@@ -202,11 +232,14 @@ async function lookupByYoutubeID(
         },
         {
             name: i18n.translate(guildID, "misc.songAliases"),
-            value: songAliases || i18n.translate(guildID, "misc.none"),
+            value:
+                songAliases?.join(", ") || i18n.translate(guildID, "misc.none"),
         },
         {
             name: i18n.translate(guildID, "misc.artistAliases"),
-            value: artistAliases || i18n.translate(guildID, "misc.none"),
+            value:
+                artistAliases?.join(", ") ||
+                i18n.translate(guildID, "misc.none"),
         },
     ];
 
