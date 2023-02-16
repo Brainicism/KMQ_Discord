@@ -4,6 +4,12 @@ CREATE PROCEDURE CreateKmqDataTables(
 	IN maxRank INT
 )
 BEGIN
+	/* de-duplicate conflicting names */
+	UPDATE kpop_videos.app_kpop_group as a
+	RIGHT JOIN
+	(SELECT LOWER(name) as name, count(*) as c FROM kpop_videos.app_kpop_group GROUP BY LOWER(name) HAVING count(*) > 1 AND name NOT LIKE "%(%)%" ) as b USING (name)
+	SET a.name = concat(a.name, " (", a.fname, ")");
+	
 	/* update available_songs table */
 	DROP TABLE IF EXISTS available_songs_temp;
 	CREATE TABLE available_songs_temp (
@@ -105,12 +111,5 @@ BEGIN
 
 	RENAME TABLE available_songs TO old, available_songs_temp TO available_songs;
 	DROP TABLE old;
-
-	/* de-duplicate conflicting names */
-	UPDATE kpop_videos.app_kpop_group as a
-	RIGHT JOIN
-	(SELECT LOWER(name) as name, count(*) as c FROM kpop_videos.app_kpop_group GROUP BY LOWER(name) HAVING count(*) > 1 AND name NOT LIKE "%(%)%" ) as b USING (name)
-	SET a.name = concat(a.name, " (", a.fname, ")");
-
 END //
 DELIMITER ;
