@@ -233,12 +233,12 @@ async function lookupByYoutubeID(
         {
             name: i18n.translate(guildID, "misc.songAliases"),
             value:
-                songAliases?.join(", ") || i18n.translate(guildID, "misc.none"),
+                songAliases.join(", ") || i18n.translate(guildID, "misc.none"),
         },
         {
             name: i18n.translate(guildID, "misc.artistAliases"),
             value:
-                artistAliases?.join(", ") ||
+                artistAliases.join(", ") ||
                 i18n.translate(guildID, "misc.none"),
         },
     ];
