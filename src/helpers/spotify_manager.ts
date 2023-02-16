@@ -14,6 +14,7 @@ import type SpotifyTrack from "../interfaces/spotify_track";
 const logger = new IPCLogger("spotify_manager");
 
 const BASE_URL = "https://api.spotify.com/v1";
+const MAX_SPOTIFY_SONGS = 1000;
 
 export interface PlaylistMetadata {
     playlistID: string;
@@ -159,9 +160,15 @@ export default class SpotifyManager {
 
                     requestURL = response.data.next;
                 } catch (err) {
-                    logger.error(
-                        `Failed fetching Spotify playlist. err = ${err}`
-                    );
+                    if (err.response?.status === 404) {
+                        logger.warn(
+                            `Failed fetching Spotify playlist. err = ${err}`
+                        );
+                    } else {
+                        logger.error(
+                            `Failed fetching Spotify playlist. err = ${err}`
+                        );
+                    }
 
                     if (err.response) {
                         logger.info(err.response.data);
@@ -170,7 +177,7 @@ export default class SpotifyManager {
 
                     break;
                 }
-            } while (requestURL);
+            } while (requestURL && spotifySongs.length < MAX_SPOTIFY_SONGS);
 
             State.cachedPlaylists[spotifyMetadata.snapshotID] = spotifySongs;
         }
@@ -382,9 +389,15 @@ export default class SpotifyManager {
                 thumbnailUrl = response.images[0].url;
             }
         } catch (err) {
-            logger.error(
-                `Failed fetching Spotify playlist metadata. err = ${err}`
-            );
+            if (err.response?.status === 404) {
+                logger.warn(
+                    `Failed fetching Spotify playlist metadata. err = ${err}`
+                );
+            } else {
+                logger.error(
+                    `Failed fetching Spotify playlist metadata. err = ${err}`
+                );
+            }
 
             if (err.response) {
                 logger.info(err.response.data);
