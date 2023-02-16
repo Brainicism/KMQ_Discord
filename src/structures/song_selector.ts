@@ -470,7 +470,7 @@ export default class SongSelector {
         isPremium: boolean,
         playlistID: string
     ): Promise<QueriedSongList & MatchedPlaylist> {
-        const { matchedSongs, metadata } =
+        const { matchedSongs, metadata, truncated } =
             await State.spotifyManager.getMatchedSpotifySongs(
                 playlistID,
                 isPremium
@@ -493,6 +493,7 @@ export default class SongSelector {
             countBeforeLimit: result.size,
             matchedSongs,
             metadata,
+            truncated,
         };
     }
 }

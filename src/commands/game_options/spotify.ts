@@ -1,5 +1,9 @@
 import { IPCLogger } from "../../logger";
-import { OptionAction, SPOTIFY_BASE_URL } from "../../constants";
+import {
+    MAX_SPOTIFY_SONGS,
+    OptionAction,
+    SPOTIFY_BASE_URL,
+} from "../../constants";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -8,7 +12,7 @@ import {
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import { isPremiumRequest } from "../../helpers/game_utils";
-import { isValidURL } from "../../helpers/utils";
+import { isValidURL, italicize } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
@@ -276,6 +280,26 @@ export default class SpotifyCommand implements BaseCommand {
                 )} | Spotify playlist set to ${playlistID}`
             );
 
+            let matchedDescription = i18n.translate(
+                guildID,
+                "command.spotify.matched.description",
+                {
+                    matchedCount: String(matchedPlaylist.matchedSongs.length),
+                    totalCount: String(matchedPlaylist.metadata.playlistLength),
+                }
+            );
+
+            if (matchedPlaylist.truncated) {
+                matchedDescription += "\n\n";
+                matchedDescription += italicize(
+                    i18n.translate(
+                        guildID,
+                        "command.spotify.matched.truncated",
+                        { maxSpotifySongs: String(MAX_SPOTIFY_SONGS) }
+                    )
+                );
+            }
+
             await sendInfoMessage(messageContext, {
                 title: i18n.translate(
                     guildID,
@@ -284,18 +308,7 @@ export default class SpotifyCommand implements BaseCommand {
                         playlistName: matchedPlaylist.metadata.playlistName,
                     }
                 ),
-                description: i18n.translate(
-                    guildID,
-                    "command.spotify.matched.description",
-                    {
-                        matchedCount: String(
-                            matchedPlaylist.matchedSongs.length
-                        ),
-                        totalCount: String(
-                            matchedPlaylist.metadata.playlistLength
-                        ),
-                    }
-                ),
+                description: matchedDescription,
                 url: playlistURL,
                 thumbnailUrl: matchedPlaylist.metadata.thumbnailUrl,
             });

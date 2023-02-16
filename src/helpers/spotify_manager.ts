@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import { IPCLogger } from "../logger";
+import { MAX_SPOTIFY_SONGS } from "../constants";
 import { chunkArray, retryJob } from "./utils";
 import { normalizeArtistNameEntry } from "./game_utils";
 import Axios from "axios";
@@ -14,7 +15,6 @@ import type SpotifyTrack from "../interfaces/spotify_track";
 const logger = new IPCLogger("spotify_manager");
 
 const BASE_URL = "https://api.spotify.com/v1";
-const MAX_SPOTIFY_SONGS = 1000;
 
 export interface PlaylistMetadata {
     playlistID: string;
@@ -27,6 +27,7 @@ export interface PlaylistMetadata {
 export interface MatchedPlaylist {
     matchedSongs: Array<QueriedSong>;
     metadata: PlaylistMetadata;
+    truncated: boolean;
 }
 
 export default class SpotifyManager {
@@ -66,6 +67,7 @@ export default class SpotifyManager {
                     matchedSongsLength: 0,
                 },
                 matchedSongs: [],
+                truncated: false,
             };
         }
 
@@ -79,9 +81,11 @@ export default class SpotifyManager {
                     matchedSongsLength: 0,
                 },
                 matchedSongs: [],
+                truncated: false,
             };
         }
 
+        let truncated = false;
         let spotifySongs: Array<SpotifyTrack> = [];
         let requestURL = `${BASE_URL}/playlists/${playlistID}/tracks?${encodeURI(
             "market=US&fields=items(track(name,artists(name))),next&limit=50"
@@ -160,24 +164,23 @@ export default class SpotifyManager {
 
                     requestURL = response.data.next;
                 } catch (err) {
-                    if (err.response?.status === 404) {
-                        logger.warn(
-                            `Failed fetching Spotify playlist. err = ${err}`
-                        );
-                    } else {
-                        logger.error(
-                            `Failed fetching Spotify playlist. err = ${err}`
-                        );
-                    }
+                    logger.error(
+                        `Failed fetching Spotify playlist. err = ${err}`
+                    );
 
                     if (err.response) {
                         logger.info(err.response.data);
                         logger.info(err.response.status);
                     }
 
+                    requestURL = "";
                     break;
                 }
             } while (requestURL && spotifySongs.length < MAX_SPOTIFY_SONGS);
+
+            if (requestURL) {
+                truncated = true;
+            }
 
             State.cachedPlaylists[spotifyMetadata.snapshotID] = spotifySongs;
         }
@@ -240,6 +243,7 @@ export default class SpotifyManager {
                 matchedSongsLength: matchedSongs.length,
                 thumbnailUrl: spotifyMetadata.thumbnailUrl as string,
             },
+            truncated,
         };
     };
 
@@ -391,7 +395,7 @@ export default class SpotifyManager {
         } catch (err) {
             if (err.response?.status === 404) {
                 logger.warn(
-                    `Failed fetching Spotify playlist metadata. err = ${err}`
+                    `Spotify playlist doesn't exist or is private. err = ${err}`
                 );
             } else {
                 logger.error(

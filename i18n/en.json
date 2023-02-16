@@ -1142,7 +1142,8 @@
             },
             "matched": {
                 "description": "Matched `{{matchedCount}}/{{totalCount}}` songs.",
-                "title": "Playing \"{{playlistName}}\" on Spotify"
+                "title": "Playing \"{{playlistName}}\" on Spotify",
+                "truncated": "Note: The playlist has more than {{maxSpotifySongs}} songs. Only the first {{maxSpotifySongs}} songs will be played."
             },
             "noMatches": {
                 "description": "No songs were matched.",

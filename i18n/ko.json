@@ -1142,7 +1142,8 @@
             },
             "matched": {
                 "description": "`{{matchedCount}}/{{totalCount}}` 노래가 일치합니다.",
-                "title": "Spotify에서 \"{{playlistName}}\"을(를) 재생 중"
+                "title": "Spotify에서 \"{{playlistName}}\"을(를) 재생 중",
+                "truncated": "참고: 재생 목록에 {{maxSpotifySongs}}개 이상의 노래가 있습니다. 처음 {{maxSpotifySongs}}곡만 재생됩니다."
             },
             "noMatches": {
                 "description": "일치하는 노래가 없습니다.",
