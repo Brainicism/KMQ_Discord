@@ -83,16 +83,26 @@ export default class SpotifyManager {
 
         let spotifySongs: Array<SpotifyTrack> = [];
         let requestURL = `${BASE_URL}/playlists/${playlistID}/tracks?${encodeURI(
-            "market=US&fields=items(track(name,artists(name))),next&limit=50"
+            `market=US&fields=items(track(name,artists(name))),next&limit=${spotifyMetadata.limit}`
         )}`;
 
         if (State.cachedPlaylists[spotifyMetadata.snapshotID]) {
             logger.info(`Using cached playlist for ${playlistID}`);
             spotifySongs = State.cachedPlaylists[spotifyMetadata.snapshotID];
         } else {
+            const start = Date.now();
             logger.info(`Using Spotify API for playlist ${playlistID}`);
+
+            let pageNumber = 0;
             do {
                 try {
+                    pageNumber++;
+                    logger.info(
+                        `Grabbing Spotify song data ${pageNumber}/${Math.ceil(
+                            spotifyMetadata.songCount / spotifyMetadata.limit
+                        )} of playlist ${playlistID}`
+                    );
+
                     const spotifyRequest = async (
                         url: string
                     ): Promise<AxiosResponse> =>
@@ -172,6 +182,12 @@ export default class SpotifyManager {
                 }
             } while (requestURL);
 
+            logger.info(
+                `Finished grabbing Spotify song data for playlist ${playlistID} after ${
+                    Date.now() - start
+                }ms`
+            );
+
             State.cachedPlaylists[spotifyMetadata.snapshotID] = spotifySongs;
         }
 
@@ -185,7 +201,7 @@ export default class SpotifyManager {
         const start = Date.now();
         for (const [idx, spotifySongChunk] of chunkedSpotifySongs.entries()) {
             logger.info(
-                `Processing chunk ${idx + 1}/${
+                `Processing database lookup for chunk ${idx + 1}/${
                     chunkedSpotifySongs.length
                 } of ${playlistID}.`
             );
@@ -361,11 +377,11 @@ export default class SpotifyManager {
         playlistName: string;
         thumbnailUrl: string | null;
         snapshotID: string;
+        limit: number;
+        songCount: number;
     } | null> {
         const requestURL = `${BASE_URL}/playlists/${playlistID}`;
-        let thumbnailUrl: string | null = null;
-        let playlistName: string;
-        let snapshotID: string;
+
         try {
             const response = (
                 await Axios.get(requestURL, {
@@ -376,11 +392,23 @@ export default class SpotifyManager {
                 })
             ).data;
 
-            playlistName = response.name;
-            snapshotID = response.snapshot_id;
+            const playlistName = response.name;
+            const snapshotID = response.snapshot_id;
+            let thumbnailUrl: string | null = null;
             if (response.images.length > 0) {
                 thumbnailUrl = response.images[0].url;
             }
+
+            const limit = response.tracks.limit;
+            const songCount = response.tracks.total;
+
+            return {
+                playlistName,
+                thumbnailUrl,
+                snapshotID,
+                limit,
+                songCount,
+            };
         } catch (err) {
             logger.error(
                 `Failed fetching Spotify playlist metadata. err = ${err}`
@@ -393,7 +421,5 @@ export default class SpotifyManager {
 
             return null;
         }
-
-        return { playlistName, thumbnailUrl, snapshotID };
     }
 }
