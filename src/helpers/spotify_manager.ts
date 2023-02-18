@@ -223,13 +223,6 @@ export default class SpotifyManager {
         logger.info(
             `Finished parsing playlist: ${playlistID} after ${end - start}ms.`
         );
-        if (unmatchedSongs.length > 0) {
-            logger.info(
-                `Unmatched Spotify songs for playlistID = ${playlistID}: ${JSON.stringify(
-                    unmatchedSongs
-                )}`
-            );
-        }
 
         matchedSongs = _.uniq(matchedSongs);
         return {
