@@ -300,7 +300,7 @@ export default class SpotifyManager {
                     for (const songName of songNames) {
                         // compare with non-alphanumeric characters removed
                         qb = qb.orWhereRaw(
-                            "REGEXP_REPLACE(available_songs.song_name_en, '[^0-9a-zA-Z]', '') LIKE ?",
+                            "available_songs.clean_song_name_alpha_numeric LIKE ?",
                             [songName.replace(/[^0-9a-z]/gi, "")]
                         );
                     }
