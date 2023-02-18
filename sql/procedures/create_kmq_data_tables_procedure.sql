@@ -15,6 +15,7 @@ BEGIN
 	CREATE TABLE available_songs_temp (
 		song_name_en VARCHAR(255) NOT NULL,
 		clean_song_name_en VARCHAR(255) NOT NULL,
+		clean_song_name_alpha_numeric VARCHAR(255) NOT NULL,
 		song_name_ko VARCHAR(255) NOT NULL,
 		clean_song_name_ko VARCHAR(255) NOT NULL,
 		song_aliases VARCHAR(255) NOT NULL,
@@ -42,6 +43,7 @@ BEGIN
 	SELECT
 		TRIM(kpop_videos.app_kpop.name) AS song_name_en,
 		TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1)) AS clean_song_name_en,
+		REGEXP_REPLACE(kpop_videos.app_kpop.name, '[^0-9a-zA-Z]', '') AS clean_song_name_alpha_numeric,
 		TRIM(kpop_videos.app_kpop.kname) AS song_name_ko,
 		TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop.kname, '(', 1)) AS clean_song_name_ko,
 		kpop_videos.app_kpop.alias AS song_aliases,
@@ -78,6 +80,7 @@ BEGIN
 		SELECT
 			TRIM(kpop_videos.app_kpop.name) AS song_name_en,
 			TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1)) AS clean_song_name_en,
+			REGEXP_REPLACE(kpop_videos.app_kpop.name, '[^0-9a-zA-Z]', '') AS clean_song_name_alpha_numeric,
 			TRIM(kpop_videos.app_kpop.kname) AS song_name_ko,
 			TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop.kname, '(', 1)) AS clean_song_name_ko,
 			kpop_videos.app_kpop.alias AS song_aliases,
