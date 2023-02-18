@@ -193,7 +193,7 @@ export default class SpotifyManager {
         }
 
         let matchedSongs: Array<QueriedSong> = [];
-        const unmatchedSongs: Array<string> = [];
+        let unmatchedSongCount = 0;
 
         logger.info(
             `Starting to parse playlist: ${playlistID}, number of songs: ${spotifySongs.length}`
@@ -204,16 +204,16 @@ export default class SpotifyManager {
             spotifySongs,
             (x: SpotifyTrack) => this.generateSongMatchingPromise(x, isPremium)
         )) {
-            if ((unmatchedSongs.length + matchedSongs.length) % 100 === 0) {
+            if ((unmatchedSongCount + matchedSongs.length) % 100 === 0) {
                 logger.info(
-                    `Processed ${unmatchedSongs.length + matchedSongs.length}/${
+                    `Processed ${unmatchedSongCount + matchedSongs.length}/${
                         spotifySongs.length
                     } for playlist ${playlistID}`
                 );
             }
 
             if (typeof queryOutput === "string") {
-                unmatchedSongs.push(queryOutput);
+                unmatchedSongCount++;
             } else {
                 matchedSongs.push(queryOutput);
             }
