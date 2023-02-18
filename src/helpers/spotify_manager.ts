@@ -1,11 +1,12 @@
 /* eslint-disable no-await-in-loop */
 import { IPCLogger } from "../logger";
-import { chunkArray, retryJob } from "./utils";
 import { normalizeArtistNameEntry } from "./game_utils";
+import { retryJob } from "./utils";
 import Axios from "axios";
 import SongSelector from "../structures/song_selector";
 import State from "../state";
 import _ from "lodash";
+import asyncPool from "tiny-async-pool";
 import dbContext from "../database_context";
 import type { AxiosResponse } from "axios";
 import type QueriedSong from "../interfaces/queried_song";
@@ -193,38 +194,29 @@ export default class SpotifyManager {
 
         let matchedSongs: Array<QueriedSong> = [];
         const unmatchedSongs: Array<string> = [];
-        const chunkedSpotifySongs = chunkArray(spotifySongs, 4);
 
         logger.info(
             `Starting to parse playlist: ${playlistID}, number of songs: ${spotifySongs.length}`
         );
         const start = Date.now();
-        for (const [idx, spotifySongChunk] of chunkedSpotifySongs.entries()) {
-            logger.info(
-                `Processing database lookup for chunk ${idx + 1}/${
-                    chunkedSpotifySongs.length
-                } of ${playlistID}.`
-            );
-            const promises = spotifySongChunk.map((x) =>
-                this.generateSongMatchingPromise(x, isPremium)
-            );
+        for await (const queryOutput of asyncPool(
+            4,
+            spotifySongs,
+            (x: SpotifyTrack) => this.generateSongMatchingPromise(x, isPremium)
+        )) {
+            if ((unmatchedSongs.length + matchedSongs.length) % 100 === 0) {
+                logger.info(
+                    `Processed ${unmatchedSongs.length + matchedSongs.length}/${
+                        spotifySongs.length
+                    } for playlist ${playlistID}`
+                );
+            }
 
-            const settledPromises = await Promise.allSettled(promises);
-            unmatchedSongs.push(
-                ...(
-                    settledPromises.filter(
-                        (x) => x.status === "rejected"
-                    ) as PromiseRejectedResult[]
-                ).map((x) => x.reason as string)
-            );
-
-            matchedSongs.push(
-                ...(
-                    settledPromises.filter(
-                        (x) => x.status === "fulfilled"
-                    ) as PromiseFulfilledResult<QueriedSong>[]
-                ).map((x) => x.value)
-            );
+            if (typeof queryOutput === "string") {
+                unmatchedSongs.push(queryOutput);
+            } else {
+                matchedSongs.push(queryOutput);
+            }
         }
 
         const end = Date.now();
@@ -255,8 +247,8 @@ export default class SpotifyManager {
     private generateSongMatchingPromise(
         song: SpotifyTrack,
         isPremium: boolean
-    ): Promise<QueriedSong> {
-        return new Promise(async (resolve, reject) => {
+    ): Promise<QueriedSong | string> {
+        return new Promise(async (resolve) => {
             const aliasIDs: Array<number> = [];
             for (const artist of song.artists) {
                 const lowercaseArtist = normalizeArtistNameEntry(artist);
@@ -337,8 +329,7 @@ export default class SpotifyManager {
             if (result) {
                 resolve(result);
             } else {
-                // eslint-disable-next-line prefer-promise-reject-errors
-                reject(`${song.name} - ${song.artists[0]}`);
+                resolve(`${song.name} - ${song.artists[0]}`);
             }
         });
     }
