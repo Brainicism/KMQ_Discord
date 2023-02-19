@@ -254,7 +254,6 @@ export default class SongSelector {
             "available_songs.members",
             "available_songs.id_artist as artistID",
             "available_songs.issolo as isSolo",
-            "available_songs.members",
             "available_songs.tags",
             "available_songs.views",
             "available_songs.rank",

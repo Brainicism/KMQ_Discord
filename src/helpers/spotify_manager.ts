@@ -83,9 +83,6 @@ export default class SpotifyManager {
         }
 
         let spotifySongs: Array<SpotifyTrack> = [];
-        let requestURL = `${BASE_URL}/playlists/${playlistID}/tracks?${encodeURI(
-            `market=US&fields=items(track(name,artists(name))),next&limit=${spotifyMetadata.limit}`
-        )}`;
 
         if (State.cachedPlaylists[spotifyMetadata.snapshotID]) {
             logger.info(`Using cached playlist for ${playlistID}`);
@@ -94,94 +91,41 @@ export default class SpotifyManager {
             const start = Date.now();
             logger.info(`Using Spotify API for playlist ${playlistID}`);
 
-            let pageNumber = 0;
-            do {
-                try {
-                    pageNumber++;
+            const numPlaylistPages = Math.ceil(
+                spotifyMetadata.songCount / spotifyMetadata.limit
+            );
+
+            const requestURLs = [...Array(numPlaylistPages).keys()].map(
+                (n) =>
+                    `${BASE_URL}/playlists/${playlistID}/tracks?${encodeURI(
+                        `market=US&fields=items(track(name,artists(name))),next&limit=${
+                            spotifyMetadata.limit
+                        }&offset=${n * spotifyMetadata.limit}`
+                    )}`
+            );
+
+            let numProcessedPlaylistPages = 0;
+            for await (const results of asyncPool(
+                10,
+                requestURLs,
+                (requestURL: string) =>
+                    this.generateSpotifyResponsePromise(requestURL)
+            )) {
+                numProcessedPlaylistPages++;
+                if (
+                    numProcessedPlaylistPages %
+                        Math.floor(numPlaylistPages / 4) ===
+                        1 ||
+                    numProcessedPlaylistPages === numPlaylistPages ||
+                    numProcessedPlaylistPages === 1
+                ) {
                     logger.info(
-                        `Grabbing Spotify song data ${pageNumber}/${Math.ceil(
-                            spotifyMetadata.songCount / spotifyMetadata.limit
-                        )} of playlist ${playlistID}`
+                        `Calling Spotify API ${numProcessedPlaylistPages}/${numPlaylistPages} for playlist ${playlistID}`
                     );
-
-                    const spotifyRequest = async (
-                        url: string
-                    ): Promise<AxiosResponse> =>
-                        Axios.get(url, {
-                            headers: {
-                                Authorization: `Bearer ${this.accessToken}`,
-                                "Content-Type":
-                                    "application/x-www-form-urlencoded",
-                            },
-                        });
-
-                    let response = await spotifyRequest(requestURL);
-
-                    const rateLimit = Number(response.headers["retry-after"]);
-                    if (rateLimit) {
-                        logger.warn(
-                            `Spotify rate limit exceeded, waiting ${rateLimit} seconds...`
-                        );
-
-                        response = await retryJob(
-                            spotifyRequest,
-                            [requestURL],
-                            1,
-                            false,
-                            rateLimit
-                        );
-                    }
-
-                    spotifySongs.push(
-                        ...response.data.items.reduce(
-                            (
-                                songs: Array<SpotifyTrack>,
-                                song: {
-                                    track: {
-                                        name: string;
-                                        artists: Array<{ name: string }>;
-                                    };
-                                }
-                            ) => {
-                                let parsedSong: SpotifyTrack;
-                                try {
-                                    parsedSong = {
-                                        name: song.track.name,
-                                        artists: song.track.artists.map(
-                                            (artist: { name: string }) =>
-                                                artist.name
-                                        ),
-                                    };
-                                } catch (err) {
-                                    logger.warn(
-                                        `Failed parsing song. song = ${JSON.stringify(
-                                            song
-                                        )}. err = ${err}`
-                                    );
-                                    return songs;
-                                }
-
-                                songs.push(parsedSong);
-                                return songs;
-                            },
-                            []
-                        )
-                    );
-
-                    requestURL = response.data.next;
-                } catch (err) {
-                    logger.error(
-                        `Failed fetching Spotify playlist. err = ${err}`
-                    );
-
-                    if (err.response) {
-                        logger.info(err.response.data);
-                        logger.info(err.response.status);
-                    }
-
-                    break;
                 }
-            } while (requestURL);
+
+                spotifySongs.push(...results);
+            }
 
             logger.info(
                 `Finished grabbing Spotify song data for playlist ${playlistID} after ${
@@ -204,18 +148,21 @@ export default class SpotifyManager {
             spotifySongs,
             (x: SpotifyTrack) => this.generateSongMatchingPromise(x, isPremium)
         )) {
-            if ((unmatchedSongCount + matchedSongs.length) % 100 === 0) {
-                logger.info(
-                    `Processed ${unmatchedSongCount + matchedSongs.length}/${
-                        spotifySongs.length
-                    } for playlist ${playlistID}`
-                );
-            }
-
             if (typeof queryOutput === "string") {
                 unmatchedSongCount++;
             } else {
                 matchedSongs.push(queryOutput);
+            }
+
+            const processedSongCount = unmatchedSongCount + matchedSongs.length;
+            if (
+                processedSongCount % 100 === 0 ||
+                processedSongCount === 1 ||
+                processedSongCount === spotifySongs.length
+            ) {
+                logger.info(
+                    `Processed ${processedSongCount}/${spotifySongs.length} for playlist ${playlistID}`
+                );
             }
         }
 
@@ -236,6 +183,86 @@ export default class SpotifyManager {
             },
         };
     };
+
+    private generateSpotifyResponsePromise(
+        requestURL: string
+    ): Promise<Array<SpotifyTrack>> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const spotifyRequest = async (
+                    url: string
+                ): Promise<AxiosResponse> =>
+                    Axios.get(url, {
+                        headers: {
+                            Authorization: `Bearer ${this.accessToken}`,
+                            "Content-Type": "application/x-www-form-urlencoded",
+                        },
+                    });
+
+                let response = await spotifyRequest(requestURL);
+
+                const rateLimit = Number(response.headers["retry-after"]);
+                if (rateLimit) {
+                    logger.warn(
+                        `Spotify rate limit exceeded, waiting ${rateLimit} seconds...`
+                    );
+
+                    response = await retryJob(
+                        spotifyRequest,
+                        [requestURL],
+                        1,
+                        false,
+                        rateLimit
+                    );
+                }
+
+                resolve(
+                    response.data.items.reduce(
+                        (
+                            songs: Array<SpotifyTrack>,
+                            song: {
+                                track: {
+                                    name: string;
+                                    artists: Array<{ name: string }>;
+                                };
+                            }
+                        ) => {
+                            let parsedSong: SpotifyTrack;
+                            try {
+                                parsedSong = {
+                                    name: song.track.name,
+                                    artists: song.track.artists.map(
+                                        (artist: { name: string }) =>
+                                            artist.name
+                                    ),
+                                };
+                            } catch (err) {
+                                logger.warn(
+                                    `Failed parsing song. song = ${JSON.stringify(
+                                        song
+                                    )}. err = ${err}`
+                                );
+                                return songs;
+                            }
+
+                            songs.push(parsedSong);
+                            return songs;
+                        },
+                        []
+                    )
+                );
+            } catch (err) {
+                logger.error(`Failed fetching Spotify playlist. err = ${err}`);
+
+                if (err.response) {
+                    logger.info(err.response.data);
+                    logger.info(err.response.status);
+                }
+
+                reject(err);
+            }
+        });
+    }
 
     private generateSongMatchingPromise(
         song: SpotifyTrack,
