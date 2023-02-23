@@ -5,6 +5,9 @@ CREATE PROCEDURE CreateKmqDataTables(
 )
 BEGIN
 	/* de-duplicate conflicting names */
+	ALTER TABLE kpop_videos.app_kpop_group ADD COLUMN IF NOT EXISTS original_name VARCHAR(255);
+	UPDATE kpop_videos.app_kpop_group SET original_name = name;
+	
 	UPDATE kpop_videos.app_kpop_group as a
 	RIGHT JOIN
 	(SELECT LOWER(name) as name, count(*) as c FROM kpop_videos.app_kpop_group GROUP BY LOWER(name) HAVING count(*) > 1 AND name NOT LIKE "%(%)%" ) as b USING (name)
@@ -21,6 +24,7 @@ BEGIN
 		song_aliases VARCHAR(255) NOT NULL,
 		link VARCHAR(255) NOT NULL,
 		artist_name_en VARCHAR(255) NOT NULL,
+		original_artist_name_en VARCHAR(255) NOT NULL,
 		artist_name_ko VARCHAR(255),
 		artist_aliases VARCHAR(255) NOT NULL,
 		previous_name_en VARCHAR(255),
@@ -49,6 +53,7 @@ BEGIN
 		kpop_videos.app_kpop.alias AS song_aliases,
 		vlink AS link,
 		TRIM(kpop_videos.app_kpop_group.name) AS artist_name_en,
+		TRIM(kpop_videos.app_kpop_group.original_name) AS original_artist_name_en,
 		TRIM(kpop_videos.app_kpop_group.kname) AS artist_name_ko,
 		kpop_videos.app_kpop_group.alias AS artist_aliases,
 		kpop_videos.app_kpop_group.previous_name AS previous_name_en,
@@ -86,6 +91,7 @@ BEGIN
 			kpop_videos.app_kpop.alias AS song_aliases,
 			vlink AS link,
 			TRIM(kpop_videos.app_kpop_group.name) AS artist_name_en,
+			TRIM(kpop_videos.app_kpop_group.original_name) AS original_artist_name_en,
 			TRIM(kpop_videos.app_kpop_group.kname) AS artist_name_ko,
 			kpop_videos.app_kpop_group.alias AS artist_aliases,
 			kpop_videos.app_kpop_group.previous_name AS previous_name_en,
