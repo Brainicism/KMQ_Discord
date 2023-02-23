@@ -328,9 +328,10 @@ export default class SpotifyManager {
                     return qb;
                 })
                 .andWhere((qb) => {
-                    qb.whereRaw("available_songs.artist_name_en LIKE ?", [
-                        song.artists[0],
-                    ])
+                    qb.whereRaw(
+                        "available_songs.original_artist_name_en LIKE ?",
+                        [song.artists[0]]
+                    )
                         .orWhereIn("id_artist", aliasIDs)
                         .orWhereIn("id_parentgroup", aliasIDs)
                         .orWhereIn("id_parent_artist", aliasIDs);

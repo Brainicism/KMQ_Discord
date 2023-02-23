@@ -3,7 +3,7 @@
     "version": "6.1.0",
     "main": "src/kmq.js",
     "scripts": {
-        "seed": "ts-node src/seed/seed_db",
+        "seed": "ts-node --swc src/seed/seed_db",
         "bootstrap": "ts-node src/seed/bootstrap.ts",
         "start": "./start.sh native",
         "dry-run": "NODE_ENV=dry-run npm run start",
