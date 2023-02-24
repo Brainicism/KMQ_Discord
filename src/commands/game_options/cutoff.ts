@@ -154,7 +154,7 @@ export default class CutoffCommand implements BaseCommand {
                                     required: true,
                                     max_value: DEFAULT_ENDING_SEARCH_YEAR,
                                     min_value: DEFAULT_BEGINNING_SEARCH_YEAR,
-                                } as any,
+                                },
                             ],
                         },
                         {
@@ -189,7 +189,7 @@ export default class CutoffCommand implements BaseCommand {
                                     required: true,
                                     max_value: DEFAULT_ENDING_SEARCH_YEAR,
                                     min_value: DEFAULT_BEGINNING_SEARCH_YEAR,
-                                } as any,
+                                },
                                 {
                                     name: "ending_year",
                                     description: i18n.translate(
@@ -207,7 +207,7 @@ export default class CutoffCommand implements BaseCommand {
                                     required: true,
                                     max_value: DEFAULT_ENDING_SEARCH_YEAR,
                                     min_value: DEFAULT_BEGINNING_SEARCH_YEAR,
-                                } as any,
+                                },
                             ],
                         },
                     ],
