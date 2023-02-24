@@ -4,16 +4,27 @@ CREATE PROCEDURE CreateKmqDataTables(
 	IN maxRank INT
 )
 BEGIN
+	/* de-duplicate conflicting names */
+	ALTER TABLE kpop_videos.app_kpop_group ADD COLUMN IF NOT EXISTS original_name VARCHAR(255);
+	UPDATE kpop_videos.app_kpop_group SET original_name = name;
+	
+	UPDATE kpop_videos.app_kpop_group as a
+	RIGHT JOIN
+	(SELECT LOWER(name) as name, count(*) as c FROM kpop_videos.app_kpop_group GROUP BY LOWER(name) HAVING count(*) > 1 AND name NOT LIKE "%(%)%" ) as b USING (name)
+	SET a.name = concat(a.name, " (", a.fname, ")");
+	
 	/* update available_songs table */
 	DROP TABLE IF EXISTS available_songs_temp;
 	CREATE TABLE available_songs_temp (
 		song_name_en VARCHAR(255) NOT NULL,
 		clean_song_name_en VARCHAR(255) NOT NULL,
+		clean_song_name_alpha_numeric VARCHAR(255) NOT NULL,
 		song_name_ko VARCHAR(255) NOT NULL,
 		clean_song_name_ko VARCHAR(255) NOT NULL,
 		song_aliases VARCHAR(255) NOT NULL,
 		link VARCHAR(255) NOT NULL,
 		artist_name_en VARCHAR(255) NOT NULL,
+		original_artist_name_en VARCHAR(255) NOT NULL,
 		artist_name_ko VARCHAR(255),
 		artist_aliases VARCHAR(255) NOT NULL,
 		previous_name_en VARCHAR(255),
@@ -36,11 +47,13 @@ BEGIN
 	SELECT
 		TRIM(kpop_videos.app_kpop.name) AS song_name_en,
 		TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1)) AS clean_song_name_en,
+		REGEXP_REPLACE(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1), '[^0-9a-zA-Z]', '') AS clean_song_name_alpha_numeric,
 		TRIM(kpop_videos.app_kpop.kname) AS song_name_ko,
 		TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop.kname, '(', 1)) AS clean_song_name_ko,
 		kpop_videos.app_kpop.alias AS song_aliases,
 		vlink AS link,
 		TRIM(kpop_videos.app_kpop_group.name) AS artist_name_en,
+		TRIM(kpop_videos.app_kpop_group.original_name) AS original_artist_name_en,
 		TRIM(kpop_videos.app_kpop_group.kname) AS artist_name_ko,
 		kpop_videos.app_kpop_group.alias AS artist_aliases,
 		kpop_videos.app_kpop_group.previous_name AS previous_name_en,
@@ -72,11 +85,13 @@ BEGIN
 		SELECT
 			TRIM(kpop_videos.app_kpop.name) AS song_name_en,
 			TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1)) AS clean_song_name_en,
+			REGEXP_REPLACE(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1), '[^0-9a-zA-Z]', '') AS clean_song_name_alpha_numeric,
 			TRIM(kpop_videos.app_kpop.kname) AS song_name_ko,
 			TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop.kname, '(', 1)) AS clean_song_name_ko,
 			kpop_videos.app_kpop.alias AS song_aliases,
 			vlink AS link,
 			TRIM(kpop_videos.app_kpop_group.name) AS artist_name_en,
+			TRIM(kpop_videos.app_kpop_group.original_name) AS original_artist_name_en,
 			TRIM(kpop_videos.app_kpop_group.kname) AS artist_name_ko,
 			kpop_videos.app_kpop_group.alias AS artist_aliases,
 			kpop_videos.app_kpop_group.previous_name AS previous_name_en,
@@ -105,12 +120,5 @@ BEGIN
 
 	RENAME TABLE available_songs TO old, available_songs_temp TO available_songs;
 	DROP TABLE old;
-
-	/* de-duplicate conflicting names */
-	UPDATE kpop_videos.app_kpop_group as a
-	RIGHT JOIN
-	(SELECT LOWER(name) as name, count(*) as c FROM kpop_videos.app_kpop_group GROUP BY LOWER(name) HAVING count(*) > 1 AND name NOT LIKE "%(%)%" ) as b USING (name)
-	SET a.name = concat(a.name, " (", a.fname, ")");
-
 END //
 DELIMITER ;
