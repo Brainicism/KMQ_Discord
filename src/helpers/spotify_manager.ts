@@ -1,13 +1,15 @@
 /* eslint-disable no-await-in-loop */
 import { IPCLogger } from "../logger";
 import { normalizeArtistNameEntry } from "./game_utils";
-import { retryJob } from "./utils";
+import { pathExists, retryJob, standardDateFormat } from "./utils";
 import Axios from "axios";
 import SongSelector from "../structures/song_selector";
 import State from "../state";
 import _ from "lodash";
 import asyncPool from "tiny-async-pool";
 import dbContext from "../database_context";
+import fs from "fs";
+import path from "path";
 import type { AxiosResponse } from "axios";
 import type QueriedSong from "../interfaces/queried_song";
 import type SpotifyTrack from "../interfaces/spotify_track";
@@ -137,7 +139,7 @@ export default class SpotifyManager {
         }
 
         let matchedSongs: Array<QueriedSong> = [];
-        let unmatchedSongCount = 0;
+        const unmatchedSongs: Array<String> = [];
 
         logger.info(
             `Starting to parse playlist: ${playlistID}, number of songs: ${spotifySongs.length}`
@@ -149,12 +151,14 @@ export default class SpotifyManager {
             (x: SpotifyTrack) => this.generateSongMatchingPromise(x, isPremium)
         )) {
             if (typeof queryOutput === "string") {
-                unmatchedSongCount++;
+                unmatchedSongs.push(queryOutput);
             } else {
                 matchedSongs.push(queryOutput);
             }
 
-            const processedSongCount = unmatchedSongCount + matchedSongs.length;
+            const processedSongCount =
+                unmatchedSongs.length + matchedSongs.length;
+
             if (
                 processedSongCount % 100 === 0 ||
                 processedSongCount === 1 ||
@@ -170,6 +174,28 @@ export default class SpotifyManager {
         logger.info(
             `Finished parsing playlist: ${playlistID} after ${end - start}ms.`
         );
+
+        const SPOTIFY_PLAYLIST_UNMATCHED_SONGS_DIR = path.join(
+            __dirname,
+            "../../data/spotify_unmatched_playlists"
+        );
+
+        if (unmatchedSongs.length) {
+            if (!(await pathExists(SPOTIFY_PLAYLIST_UNMATCHED_SONGS_DIR))) {
+                await fs.promises.mkdir(SPOTIFY_PLAYLIST_UNMATCHED_SONGS_DIR);
+            }
+
+            const playlistUnmatchedSongsPath = path.resolve(
+                __dirname,
+                SPOTIFY_PLAYLIST_UNMATCHED_SONGS_DIR,
+                `${playlistID}-${standardDateFormat(new Date())}.txt`
+            );
+
+            await fs.promises.writeFile(
+                playlistUnmatchedSongsPath,
+                unmatchedSongs.join("\n")
+            );
+        }
 
         matchedSongs = _.uniq(matchedSongs);
         return {
