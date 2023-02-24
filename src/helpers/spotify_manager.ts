@@ -3,6 +3,7 @@ import { IPCLogger } from "../logger";
 import { normalizeArtistNameEntry } from "./game_utils";
 import { pathExists, retryJob, standardDateFormat } from "./utils";
 import Axios from "axios";
+import KmqConfiguration from "../kmq_configuration";
 import SongSelector from "../structures/song_selector";
 import State from "../state";
 import _ from "lodash";
@@ -197,6 +198,20 @@ export default class SpotifyManager {
             );
         }
 
+        if (KmqConfiguration.Instance.persistMatchedSpotifySongs()) {
+            await fs.promises.writeFile(
+                path.resolve(
+                    SPOTIFY_PLAYLIST_UNMATCHED_SONGS_DIR,
+                    `${playlistID}-${standardDateFormat(
+                        new Date()
+                    )}.matched.txt`
+                ),
+                matchedSongs
+                    .map((x) => `${x.songName} - ${x.artistName}`)
+                    .join("\n")
+            );
+        }
+
         matchedSongs = _.uniq(matchedSongs);
         return {
             matchedSongs,
@@ -359,6 +374,7 @@ export default class SpotifyManager {
                         [song.artists[0]]
                     )
                         .orWhereIn("id_artist", aliasIDs)
+                        .orWhereILike("artist_aliases", `%${song.artists[0]}%`)
                         .orWhereIn("id_parentgroup", aliasIDs)
                         .orWhereIn("id_parent_artist", aliasIDs);
                 })
