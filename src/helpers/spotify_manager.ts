@@ -212,7 +212,8 @@ export default class SpotifyManager {
             );
         }
 
-        matchedSongs = _.uniq(matchedSongs);
+        matchedSongs = _.uniqBy(matchedSongs, "youtubeLink");
+
         return {
             matchedSongs,
             metadata: {
