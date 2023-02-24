@@ -144,7 +144,7 @@ export default class LimitCommand implements BaseCommand {
                                     required: true,
                                     max_value: LIMIT_END_MAX,
                                     min_value: LIMIT_END_MIN,
-                                } as any,
+                                },
                             ],
                         },
                         {
@@ -179,7 +179,7 @@ export default class LimitCommand implements BaseCommand {
                                     required: true,
                                     max_value: LIMIT_START_MAX,
                                     min_value: LIMIT_START_MIN,
-                                } as any,
+                                },
                                 {
                                     name: "limit_end",
                                     description: i18n.translate(
@@ -197,7 +197,7 @@ export default class LimitCommand implements BaseCommand {
                                     required: true,
                                     max_value: LIMIT_END_MAX,
                                     min_value: LIMIT_END_MIN,
-                                } as any,
+                                },
                             ],
                         },
                     ],

@@ -168,10 +168,12 @@ export default class ListCommand implements BaseCommand {
                             messageContext.guildID,
                             "command.list.failure.groupsInFile.description"
                         ),
-                    },
-                    {
-                        name: "groups.txt",
-                        file: Buffer.from(`${optionValue}\n`),
+                        attachments: [
+                            {
+                                filename: "groups.txt",
+                                file: optionValue,
+                            },
+                        ],
                     },
                     undefined,
                     interaction

@@ -105,7 +105,7 @@ export default class GoalCommand implements BaseCommand {
                                 .INTEGER,
                             required: true,
                             min_value: 1,
-                        } as any,
+                        },
                     ],
                 },
                 {

@@ -1,8 +1,10 @@
 import GameOption from "./enums/game_option_name";
-import type { GuildTextableWithThread } from "eris";
+import type { GuildTextableWithThreads } from "eris";
 import type Eris from "eris";
 
-export type GuildTextableMessage = Eris.Message<GuildTextableWithThread>;
+export type GuildTextableMessage = Eris.Message<GuildTextableWithThreads> & {
+    guildID: string;
+};
 export type EmbedGenerator = () => Promise<Eris.EmbedOptions>;
 
 export const GameOptionCommand: { [option: string]: string } = {

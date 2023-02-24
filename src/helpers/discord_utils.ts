@@ -406,14 +406,12 @@ async function sendMessageExceptionHandler(
  * and when a Eris Message object isn't available in the context
  * @param textChannelID - The channel ID where the message should be delivered
  * @param messageContent - The MessageContent to send
- * @param file - The file to send
  * @param authorID - The author's ID
  * @param interaction - The interaction
  */
 export async function sendMessage(
     textChannelID: string | null,
     messageContent: Eris.AdvancedMessageContent,
-    file?: Eris.FileContent,
     authorID?: string,
     interaction?: Eris.ComponentInteraction | Eris.CommandInteraction
 ): Promise<Eris.Message | null> {
@@ -423,7 +421,7 @@ export async function sendMessage(
         }
 
         try {
-            await interaction.createMessage(messageContent, file);
+            await interaction.createMessage(messageContent);
         } catch (err) {
             interactionRejectionHandler(interaction, err);
         }
@@ -454,11 +452,7 @@ export async function sendMessage(
     }
 
     try {
-        return await State.client.createMessage(
-            textChannelID,
-            messageContent,
-            file
-        );
+        return await State.client.createMessage(textChannelID, messageContent);
     } catch (e) {
         if (!channel) {
             logger.warn(
@@ -555,7 +549,6 @@ export async function sendErrorMessage(
             ],
             components: embedPayload.components,
         },
-        undefined,
         messageContext.author.id,
         interaction
     );
@@ -651,7 +644,6 @@ export async function sendInfoMessage(
             components: embedPayload.components,
             content: content || undefined,
         },
-        undefined,
         messageContext.author.id,
         interaction
     );
@@ -1232,7 +1224,6 @@ export async function sendPaginationedEmbed(
     return sendMessage(
         messageOrInteraction.channel.id,
         { embeds: [embed], components },
-        undefined,
         messageOrInteraction.member?.id,
         messageOrInteraction instanceof Eris.CommandInteraction
             ? messageOrInteraction
@@ -1659,7 +1650,6 @@ export async function tryCreateInteractionSuccessAcknowledgement(
             flags: ephemeral ? EPHEMERAL_MESSAGE_FLAG : undefined,
         },
         undefined,
-        undefined,
         interaction
     );
 }
@@ -1701,7 +1691,6 @@ export async function tryCreateInteractionErrorAcknowledgement(
             ],
             flags: ephemeral ? EPHEMERAL_MESSAGE_FLAG : undefined,
         },
-        undefined,
         undefined,
         interaction
     );
