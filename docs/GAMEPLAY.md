@@ -265,3 +265,4 @@ Use `/help action:[command_name]` for more details about the following commands:
 -   `/exclude`: Specify which artists to exclude
 -   `/include`: Specify which artists to forcefully include, regardless of other game options
 -   `/reset`: Reset all options to the default settings
+-   `/feedback`: Submit feedback to the KMQ team

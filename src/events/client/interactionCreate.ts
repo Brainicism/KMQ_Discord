@@ -8,6 +8,7 @@ import {
 import { measureExecutionTime } from "../../helpers/utils";
 import Eris from "eris";
 import ExcludeCommand from "../../commands/game_options/exclude";
+import FeedbackCommand from "../../commands/game_commands/feedback";
 import GroupsCommand from "../../commands/game_options/groups";
 import HelpCommand from "../../commands/game_commands/help";
 import IncludeCommand from "../../commands/game_options/include";
@@ -35,6 +36,14 @@ const AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS: {
     help: HelpCommand.processAutocompleteInteraction,
 };
 
+const MODAL_SUBMIT_INTERACTION_HANDLERS: {
+    [command: string]: (
+        interaction: Eris.ModalSubmitInteraction
+    ) => Promise<void>;
+} = {
+    feedback: FeedbackCommand.processModalSubmitInteraction,
+};
+
 /**
  * Handles the 'interactionCreate' event
  * @param interaction - The originating Interaction
@@ -44,6 +53,7 @@ export default async function interactionCreateHandler(
         | Eris.CommandInteraction
         | Eris.ComponentInteraction
         | Eris.AutocompleteInteraction
+        | Eris.ModalSubmitInteraction
 ): Promise<void> {
     const member = new KmqMember(interaction.member!.id);
     const messageContext = new MessageContext(
@@ -178,6 +188,22 @@ export default async function interactionCreateHandler(
         if (autocompleteInteractionHandler) {
             interactionName = `Autocomplete interaction for '${interaction.data.name}' for value '${parsedInteraction.focusedKey}'`;
             interactionPromise = autocompleteInteractionHandler(interaction);
+        } else {
+            logger.error(
+                `No handler for for AutocompleteInteraction (type = ${interaction.data.type}): ${interaction.data.name}`
+            );
+        }
+    } else if (interaction instanceof Eris.ModalSubmitInteraction) {
+        interactionName = `ModalSubmit interaction for ${interaction.data.custom_id}`;
+        const modalSubmitInteractionHandler =
+            MODAL_SUBMIT_INTERACTION_HANDLERS[interaction.data.custom_id];
+
+        if (modalSubmitInteractionHandler) {
+            interactionPromise = modalSubmitInteractionHandler(interaction);
+        } else {
+            logger.error(
+                `No handler for for ModalSubmitInteraction (custom_id = ${interaction.data.custom_id})`
+            );
         }
     }
 
@@ -186,5 +212,5 @@ export default async function interactionCreateHandler(
     }
 
     const executionTime = await measureExecutionTime(interactionPromise);
-    logger.info(` ${interactionName} took ${executionTime}ms`);
+    logger.info(`${interactionName} took ${executionTime}ms`);
 }

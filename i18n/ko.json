@@ -215,6 +215,23 @@
             "typosAllowedPenalty": "오타 허용 패널티",
             "voteBonus": "투표 보너스"
         },
+        "feedback": {
+            "help": {
+                "description": "KMQ에 대한 피드백 또는 버그 보고서 제출",
+                "name": "피드백"
+            },
+            "questions": {
+                "title": "KMQ 피드백",
+                "improveKMQ": {
+                    "placeholder": "KMQ는 너무 중독성이 있습니다. 가족과 친구들이 저를 그리워합니다.",
+                    "question": "KMQ에서 개선할 수 있는 점은 무엇입니까?"
+                },
+                "likeKMQ": {
+                    "placeholder": "KMQ는 새로운 음악과 장르를 발견하도록 도와줍니다.",
+                    "question": "KMQ의 어떤 점이 마음에 드나요?"
+                }
+            }
+        },
         "forcehint": {
             "failure": {
                 "notOwner": {
