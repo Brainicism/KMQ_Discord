@@ -33,6 +33,8 @@ export interface MatchedPlaylist {
     truncated: boolean;
 }
 
+const SONG_MATCH_TIMEOUT_MS = 15000;
+
 export default class SpotifyManager {
     private accessToken: string;
 
@@ -88,7 +90,6 @@ export default class SpotifyManager {
             };
         }
 
-        let truncated = false;
         let spotifySongs: Array<SpotifyTrack> = [];
 
         if (State.cachedPlaylists[spotifyMetadata.snapshotID]) {
@@ -149,7 +150,9 @@ export default class SpotifyManager {
         logger.info(
             `Starting to parse playlist: ${playlistID}, number of songs: ${spotifySongs.length}`
         );
-        const start = Date.now();
+
+        let truncated = false;
+        const songMatchStartTime = Date.now();
         for await (const queryOutput of asyncPool(
             4,
             spotifySongs,
@@ -173,11 +176,20 @@ export default class SpotifyManager {
                     `Processed ${processedSongCount}/${spotifySongs.length} for playlist ${playlistID}`
                 );
             }
+
+            if (Date.now() - songMatchStartTime > SONG_MATCH_TIMEOUT_MS) {
+                logger.warn(
+                    `Playlist '${playlistID}' exceeded song match timeout of ${SONG_MATCH_TIMEOUT_MS}ms after processing ${processedSongCount}/${spotifySongs.length}`
+                );
+                truncated = true;
+                break;
+            }
         }
 
-        const end = Date.now();
         logger.info(
-            `Finished parsing playlist: ${playlistID} after ${end - start}ms.`
+            `Finished parsing playlist: ${playlistID} after ${
+                Date.now() - songMatchStartTime
+            }ms.`
         );
 
         const SPOTIFY_PLAYLIST_UNMATCHED_SONGS_DIR = path.join(

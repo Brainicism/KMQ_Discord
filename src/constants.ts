@@ -265,5 +265,3 @@ export const IGNORED_WARNING_SUBSTRINGS = [
 ];
 
 export const SHADOW_BANNED_ARTIST_IDS = [1177, 170];
-
-export const MAX_SPOTIFY_SONGS = 1000;

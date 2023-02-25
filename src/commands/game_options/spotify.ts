@@ -1,9 +1,5 @@
 import { IPCLogger } from "../../logger";
-import {
-    MAX_SPOTIFY_SONGS,
-    OptionAction,
-    SPOTIFY_BASE_URL,
-} from "../../constants";
+import { OptionAction, SPOTIFY_BASE_URL } from "../../constants";
 import {
     friendlyFormattedNumber,
     isValidURL,
@@ -311,14 +307,7 @@ export default class SpotifyCommand implements BaseCommand {
             if (matchedPlaylist.truncated) {
                 matchedDescription += "\n\n";
                 matchedDescription += italicize(
-                    i18n.translate(
-                        guildID,
-                        "command.spotify.matched.truncated",
-                        {
-                            maxSpotifySongs:
-                                friendlyFormattedNumber(MAX_SPOTIFY_SONGS),
-                        }
-                    )
+                    i18n.translate(guildID, "command.spotify.matched.truncated")
                 );
             }
 
