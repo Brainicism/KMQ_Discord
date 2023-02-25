@@ -401,12 +401,6 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
     await db.kpopVideos.raw("DROP TABLE IF EXISTS kpop_videos.old;");
     await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_tmp;");
 
-    // freeze table schema
-    if (!(await pathExists(DataFiles.FROZEN_TABLE_SCHEMA))) {
-        logger.info("Frozen Daisuki schema doesn't exist... creating");
-        await recordDaisukiTableSchema(db);
-    }
-
     // override queries
     logger.info("Performing data overrides");
     const overrideQueries = await getOverrideQueries(db);
@@ -534,6 +528,12 @@ async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
     await generateKmqDataTables(db);
     if (process.env.NODE_ENV === EnvType.PROD) {
         await updateGroupList(db);
+    }
+
+    // freeze table schema
+    if (!(await pathExists(DataFiles.FROZEN_TABLE_SCHEMA))) {
+        logger.info("Frozen Daisuki schema doesn't exist... creating");
+        await recordDaisukiTableSchema(db);
     }
 
     logger.info(
