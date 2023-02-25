@@ -107,7 +107,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
                             required: true,
                             min_value: TIMER_MIN_VALUE,
                             max_value: TIMER_MAX_VALUE,
-                        } as any,
+                        },
                     ],
                 },
                 {

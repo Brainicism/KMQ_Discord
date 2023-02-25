@@ -1,9 +1,9 @@
 {
     "name": "kmq",
-    "version": "6.1.0",
+    "version": "6.2.0",
     "main": "src/kmq.js",
     "scripts": {
-        "seed": "ts-node src/seed/seed_db",
+        "seed": "ts-node --swc src/seed/seed_db",
         "bootstrap": "ts-node src/seed/bootstrap.ts",
         "start": "./start.sh native",
         "dry-run": "NODE_ENV=dry-run npm run start",
@@ -51,7 +51,7 @@
         "damerau-levenshtein": "^1.0.8",
         "dotenv": "^16.0.3",
         "ejs": "^3.1.8",
-        "eris": "https://github.com/Brainicism/eris.git#dev",
+        "eris": "https://github.com/Brainicism/eris#dev",
         "eris-fleet": "https://github.com/Brainicism/eris-fleet#feature/soft-kill-warning",
         "eris-pagination": "https://github.com/Brainicism/eris-pagination#9a112cb",
         "erlpack": "https://github.com/abalabahaha/erlpack.git",
@@ -67,6 +67,7 @@
         "node-schedule": "^2.1.0",
         "sinon": "^14.0.0",
         "sodium-native": "^3.4.1",
+        "tiny-async-pool": "^2.1.0",
         "ts-node": "^10.9.1",
         "uuid": "^9.0.0",
         "winston": "^3.8.2",

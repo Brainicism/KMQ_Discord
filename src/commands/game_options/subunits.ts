@@ -92,7 +92,7 @@ export default class SubunitsCommand implements BaseCommand {
                 "command.subunits.help.description",
                 { groups: "`/groups`" }
             ),
-            description_localizations: {
+            descriptionLocalizations: {
                 [LocaleType.KO]: i18n.translate(
                     LocaleType.KO,
                     "command.subunits.help.description",

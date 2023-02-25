@@ -154,7 +154,7 @@ export default class DurationCommand implements BaseCommand {
                             max_value: DURATION_DELTA_MAX,
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .INTEGER,
-                        } as any,
+                        },
                     ],
                 },
                 {

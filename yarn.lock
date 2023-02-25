@@ -1138,9 +1138,9 @@ eris-reactions@^0.1.4:
   resolved "https://registry.yarnpkg.com/eris-reactions/-/eris-reactions-0.1.4.tgz#4b642f7411144f164b6097138c262eac6b03def1"
   integrity sha512-U2rMtfywnhh4TmqFcF7uo/ciyQN8vb9ptwSJMQs/uaY1a401f+t3sei1R3IR2gYqaFejJzgjTmzBMT6jIBPYYQ==
 
-"eris@https://github.com/Brainicism/eris.git#dev":
-  version "0.17.1-dev"
-  resolved "https://github.com/Brainicism/eris.git#fa4f23c5271019a2f5329de11c7a0641706947ef"
+"eris@https://github.com/Brainicism/eris#dev":
+  version "0.1.0-dev"
+  resolved "https://github.com/Brainicism/eris#ca160c245ead441ed89903fbdbb998cdb4aedea1"
   dependencies:
     ws "^8.2.3"
   optionalDependencies:
@@ -3308,6 +3308,11 @@ tildify@2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/tildify/-/tildify-2.0.0.tgz#f205f3674d677ce698b7067a99e949ce03b4754a"
   integrity sha512-Cc+OraorugtXNfs50hU9KS369rFXCfgGLpfCfvlc+Ud5u6VWmUQsOAa9HbTvheQdYnrdJqqv1e5oIqXppMYnSw==
+
+tiny-async-pool@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/tiny-async-pool/-/tiny-async-pool-2.1.0.tgz#3ec126568c18a7916912fb9fbecf812337ec6b84"
+  integrity sha512-ltAHPh/9k0STRQqaoUX52NH4ZQYAJz24ZAEwf1Zm+HYg3l9OXTWeqWKyYsHu40wF/F0rxd2N2bk5sLvX2qlSvg==
 
 tiny-lru@^10.0.0:
   version "10.0.1"

@@ -292,8 +292,8 @@ export default class PlayCommand implements BaseCommand {
                             },
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .INTEGER,
-                            min_value: ELIMINATION_MIN_LIVES as any,
-                            max_value: ELIMINATION_MAX_LIVES as any,
+                            min_value: ELIMINATION_MIN_LIVES,
+                            max_value: ELIMINATION_MAX_LIVES,
                         },
                     ],
                 },

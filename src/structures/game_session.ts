@@ -994,7 +994,7 @@ export default class GameSession extends Session {
                                     style: 5,
                                     url: VOTE_LINK,
                                     type: 2 as const,
-                                    emoji: { name: "✅" },
+                                    emoji: { name: "✅", id: null },
                                     label: i18n.translate(
                                         this.guildID,
                                         "misc.interaction.vote"
@@ -1004,7 +1004,7 @@ export default class GameSession extends Session {
                                     style: 5,
                                     url: REVIEW_LINK,
                                     type: 2 as const,
-                                    emoji: { name: "📖" },
+                                    emoji: { name: "📖", id: null },
                                     label: i18n.translate(
                                         this.guildID,
                                         "misc.interaction.leaveReview"
@@ -1014,7 +1014,7 @@ export default class GameSession extends Session {
                                     style: 5,
                                     url: "https://discord.gg/RCuzwYV",
                                     type: 2,
-                                    emoji: { name: "🎵" },
+                                    emoji: { name: "🎵", id: null },
                                     label: i18n.translate(
                                         this.guildID,
                                         "misc.interaction.officialKmqServer"

@@ -109,7 +109,7 @@ export default class AppCommandsCommand implements BaseCommand {
                             );
                         }
 
-                        cmd.name_localizations = cmd.name_localizations ?? {
+                        cmd.nameLocalizations = cmd.nameLocalizations ?? {
                             [LocaleType.KO]: i18n.translate(
                                 LocaleType.KO,
                                 `command.${commandName}.help.name`
@@ -137,7 +137,7 @@ export default class AppCommandsCommand implements BaseCommand {
                                     translationKey
                                 );
 
-                                cmd.description_localizations = {
+                                cmd.descriptionLocalizations = {
                                     [LocaleType.KO]: i18n.translate(
                                         LocaleType.KO,
                                         translationKey
