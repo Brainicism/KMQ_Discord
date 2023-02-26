@@ -1,13 +1,18 @@
 import * as uuid from "uuid";
 import { IPCLogger } from "../../logger";
-import { getUserTag } from "../../helpers/discord_utils";
+import {
+    getUserTag,
+    sendDeprecatedTextCommandMessage,
+} from "../../helpers/discord_utils";
 import { pathExists } from "../../helpers/utils";
 import Eris from "eris";
+import MessageContext from "../../structures/message_context";
 import fs from "fs";
 import i18n from "../../helpers/localization_manager";
 import path from "path";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("feedback");
@@ -55,8 +60,11 @@ export default class FeedbackCommand implements BaseCommand {
         },
     ];
 
-    call = (): void => {
+    call = async ({ message }: CommandArgs): Promise<void> => {
         logger.warn("Text-based command not supported for feedback");
+        await sendDeprecatedTextCommandMessage(
+            MessageContext.fromMessage(message)
+        );
     };
 
     static sendFeedbackModal = async (

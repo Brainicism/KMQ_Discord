@@ -1316,6 +1316,10 @@
                 "description": "I ran into an error while running this command.\nProvide this to a developer if this happens consistently:\n{{debugId}}",
                 "title": "Error Running Command"
             },
+            "deprecatedTextCommand": {
+                "description": "Text commands are no longer supported for new commands. Try out the new and improved slash commands instead! If slash commands are not visible in the server, please re-invite KMQ to the server.",
+                "title": "Text Commands Deprecated"
+            },
             "error": "Error",
             "errorSelectingSong": {
                 "description": "Please try starting the round again. If the issue persists, report it in our official KMQ server.",
