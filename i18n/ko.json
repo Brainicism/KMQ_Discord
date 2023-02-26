@@ -215,6 +215,23 @@
             "typosAllowedPenalty": "오타 허용 패널티",
             "voteBonus": "투표 보너스"
         },
+        "feedback": {
+            "help": {
+                "description": "KMQ에 대한 피드백 또는 버그 보고서 제출",
+                "name": "피드백"
+            },
+            "questions": {
+                "improveKMQ": {
+                    "placeholder": "KMQ는 너무 중독성이 있습니다. 가족과 친구들이 저를 그리워합니다.",
+                    "question": "KMQ에서 개선할 수 있는 점은 무엇입니까?"
+                },
+                "likeKMQ": {
+                    "placeholder": "KMQ는 새로운 음악과 장르를 발견하도록 도와줍니다.",
+                    "question": "KMQ의 어떤 점이 마음에 드나요?"
+                },
+                "title": "KMQ의 피드백"
+            }
+        },
         "forcehint": {
             "failure": {
                 "notOwner": {
@@ -1143,7 +1160,7 @@
             "matched": {
                 "description": "`{{matchedCount}}/{{totalCount}}` 노래가 일치합니다.",
                 "title": "Spotify에서 \"{{playlistName}}\"을(를) 재생 중",
-                "truncated": "참고: 재생 목록을 처리하는 데 시간이 너무 오래 걸리고 완료되지 않았습니다. 다음에 더 작은 재생목록으로 다시 시도하세요."
+                "truncated": "참고: 재생 목록을 처리하는 데 시간이 너무 오래 걸리고 완료할 때까지 완료되지 않았습니다. 다음에는 더 작은 재생 목록을 사용하여 다시 시도하십시오."
             },
             "noMatches": {
                 "description": "일치하는 노래가 없습니다.",

@@ -215,6 +215,23 @@
             "typosAllowedPenalty": "Typos Allowed Penalty",
             "voteBonus": "Vote Bonus"
         },
+        "feedback": {
+            "help": {
+                "description": "Submit any feedback or bug reports about KMQ",
+                "name": "feedback"
+            },
+            "questions": {
+                "improveKMQ": {
+                    "placeholder": "KMQ is TOO addictive. My family and friends miss me.",
+                    "question": "What can be improved about KMQ?"
+                },
+                "likeKMQ": {
+                    "placeholder": "KMQ helps me discover new music and genres.",
+                    "question": "What do you like about KMQ?"
+                },
+                "title": "KMQ Feedback"
+            }
+        },
         "forcehint": {
             "failure": {
                 "notOwner": {
