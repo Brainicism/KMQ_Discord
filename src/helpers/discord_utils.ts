@@ -1897,3 +1897,21 @@ export async function getUserTag(userID: string): Promise<string> {
     const member = await fetchUser(userID);
     return member ? `${member.username}#${member.discriminator}` : "";
 }
+
+/**
+ * @param messageContext - the messager context
+ */
+export async function sendDeprecatedTextCommandMessage(
+    messageContext: MessageContext
+): Promise<Eris.Message<Eris.TextableChannel> | null> {
+    return sendErrorMessage(messageContext, {
+        title: i18n.translate(
+            messageContext.guildID,
+            "misc.failure.deprecatedTextCommand.title"
+        ),
+        description: i18n.translate(
+            messageContext.guildID,
+            "misc.failure.deprecatedTextCommand.description"
+        ),
+    });
+}
