@@ -1140,7 +1140,7 @@ eris-reactions@^0.1.4:
 
 "eris@https://github.com/Brainicism/eris#dev":
   version "0.1.0-dev"
-  resolved "https://github.com/Brainicism/eris#ca160c245ead441ed89903fbdbb998cdb4aedea1"
+  resolved "https://github.com/Brainicism/eris#a7e64a96548e947e364a64fd279852768a214a6c"
   dependencies:
     ws "^8.2.3"
   optionalDependencies:
@@ -3547,9 +3547,9 @@ wrappy@1:
   integrity sha1-tSQ9jz7BqjXxNkYFvA0QNuMKtp8=
 
 ws@^8.2.3:
-  version "8.5.0"
-  resolved "https://registry.yarnpkg.com/ws/-/ws-8.5.0.tgz#bfb4be96600757fe5382de12c670dab984a1ed4f"
-  integrity sha512-BWX0SWVgLPzYwF8lTzEy1egjhS4S4OEAHfsO8o65WOVsrnSRGaSiUaa9e0ggGlkMTtBlmOpEXiie9RUcBO86qg==
+  version "8.12.1"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-8.12.1.tgz#c51e583d79140b5e42e39be48c934131942d4a8f"
+  integrity sha512-1qo+M9Ba+xNhPB+YTWUlK6M17brTut5EXbcBaMRN5pH5dFrXz7lzz1ChFSUq3bOUl8yEvSenhHmYUNJxFzdJew==
 
 y18n@^5.0.5:
   version "5.0.8"
