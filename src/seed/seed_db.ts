@@ -110,7 +110,6 @@ async function getOverrideQueries(db: DatabaseContext): Promise<Array<string>> {
     );
 }
 
-// eslint-disable-next-line import/prefer-default-export
 /**
  * Re-creates the KMQ data tables
  * @param db - The database context
@@ -122,6 +121,17 @@ export async function generateKmqDataTables(
     await db.kmq.raw(
         `CALL CreateKmqDataTables(${process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST});`
     );
+}
+
+/**
+ * Re-creates the KMQ data tables
+ * @param db - The database context
+ */
+export async function deduplicateGroupNames(
+    db: DatabaseContext
+): Promise<void> {
+    logger.info("Deduplicating group names...");
+    await db.kmq.raw("CALL DeduplicateGroupNames();");
 }
 
 /**
@@ -295,6 +305,27 @@ async function validateSqlDump(
         );
 
         if (!bootstrap) {
+            logger.info("Validating deduplication of group names");
+            const originalDedupGroupNamesSqlPath = path.join(
+                __dirname,
+                "../../sql/procedures/deduplicate_app_kpop_group_names.sql"
+            );
+
+            const validationDedupGroupNamesSqlPath = path.join(
+                __dirname,
+                "../../sql/deduplicate_app_kpop_group_names.validation.sql"
+            );
+
+            await exec(
+                `sed 's/kpop_videos/kpop_videos_validation/g' ${originalDedupGroupNamesSqlPath} > ${validationDedupGroupNamesSqlPath}`
+            );
+
+            await exec(
+                `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${validationDedupGroupNamesSqlPath}`
+            );
+
+            await db.kpopVideosValidation.raw("CALL DeduplicateGroupNames();");
+
             logger.info("Validating creation of data tables");
             const originalCreateKmqTablesProcedureSqlPath = path.join(
                 __dirname,
@@ -525,6 +556,7 @@ async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
         songsDownloaded = await downloadAndConvertSongs(options.limit);
     }
 
+    await deduplicateGroupNames(db);
     await generateKmqDataTables(db);
     if (process.env.NODE_ENV === EnvType.PROD) {
         await updateGroupList(db);
