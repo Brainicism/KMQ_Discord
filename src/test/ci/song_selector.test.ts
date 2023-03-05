@@ -408,7 +408,7 @@ describe("song selector", () => {
                         true
                     );
 
-                    const expectedSubunitIds = [17, 43, 105, 248];
+                    const expectedSubunitIds = [17, 43, 105, 248, 4531];
 
                     // all songs must be one of the artist, or the subunit's
                     assert.strictEqual(
