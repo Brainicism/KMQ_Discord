@@ -397,7 +397,7 @@ describe("song selector", () => {
             });
 
             describe("include subunits", () => {
-                it.only("should only return the songs by the specified group, including subunits", async () => {
+                it("should only return the songs by the specified group, including subunits", async () => {
                     await guildPreference.setGroups(artists);
                     await guildPreference.setSubunitPreference(
                         SubunitsPreference.INCLUDE
