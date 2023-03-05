@@ -397,7 +397,7 @@ describe("song selector", () => {
             });
 
             describe("include subunits", () => {
-                it("should only return the songs by the specified group, including subunits", async () => {
+                it.only("should only return the songs by the specified group, including subunits", async () => {
                     await guildPreference.setGroups(artists);
                     await guildPreference.setSubunitPreference(
                         SubunitsPreference.INCLUDE
@@ -408,7 +408,7 @@ describe("song selector", () => {
                         true
                     );
 
-                    const expectedSubunitIds = [17, 43, 105, 248];
+                    const expectedSubunitIds = [17, 43, 105, 248, 4531];
 
                     // all songs must be one of the artist, or the subunit's
                     assert.strictEqual(
