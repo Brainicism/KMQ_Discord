@@ -55,6 +55,30 @@ before(async function () {
         "INSERT IGNORE INTO kmq_test.cached_song_duration SELECT vlink, 1 FROM kpop_videos_test.app_kpop;"
     );
 
+    // create dedup group name procedure
+    const originalDedupGroupNamesSqlPath = path.join(
+        __dirname,
+        "../../sql/procedures/deduplicate_app_kpop_group_names.sql"
+    );
+
+    const testDedupGroupNamesSqlPath = path.join(
+        __dirname,
+        "../../sql/deduplicate_app_kpop_group_names.validation.sql"
+    );
+
+    cp.execSync(
+        `sed 's/kpop_videos/kpop_videos_test/g;s/kmq/kmq_test/g' ${originalDedupGroupNamesSqlPath} > ${testDedupGroupNamesSqlPath}`
+    );
+
+    cp.execSync(
+        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test < ${testDedupGroupNamesSqlPath}`,
+        { stdio: "inherit" }
+    );
+
+    cp.execSync(
+        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test -e "CALL DeduplicateGroupNames()"`
+    );
+
     // create kmq data generation procedure
     const originalCreateKmqTablesProcedureSqlPath = path.join(
         __dirname,
@@ -70,12 +94,12 @@ before(async function () {
         `sed 's/kpop_videos/kpop_videos_test/g;s/kmq/kmq_test/g' ${originalCreateKmqTablesProcedureSqlPath} > ${testCreateKmqTablesProcedureSqlPath}`
     );
 
+    logger.info("Creating KMQ data tables");
     cp.execSync(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test < ${testCreateKmqTablesProcedureSqlPath}`,
         { stdio: "inherit" }
     );
 
-    logger.info("Creating KMQ data tables");
     cp.execSync(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test -e "CALL CreateKmqDataTables(1)"`
     );
