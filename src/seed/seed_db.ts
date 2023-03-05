@@ -14,6 +14,7 @@ import fs from "fs";
 import path from "path";
 import util from "util";
 import type { DatabaseContext } from "../database_context";
+import type { Knex } from "knex";
 
 const exec = util.promisify(cp.exec);
 
@@ -71,6 +72,37 @@ export async function tableExists(
                 .first()) as any
         ).count === 1
     );
+}
+
+async function replaceBetterAudioSongs(database: Knex): Promise<void> {
+    const songsWithBetterAudioCounterpart = await database("app_kpop as a")
+        .select([
+            "a.id as original_id",
+            "a.original_name as original_name",
+            "b.vlink as better_audio_link",
+        ])
+        .leftJoin("app_kpop AS b", function join() {
+            this.on("a.id_better_audio", "=", "b.id");
+        })
+        .whereNotNull("b.vlink");
+
+    for (const betterAudioSong of songsWithBetterAudioCounterpart) {
+        logger.info(
+            `Replacing audio for ${betterAudioSong.original_name} with ${betterAudioSong.better_audio_link} for ${betterAudioSong.original_id}`
+        );
+
+        // remove 'better' audio entry to not consume b-side limit
+        await database("app_kpop")
+            .where("vlink", "=", betterAudioSong.better_audio_link)
+            .delete();
+
+        // replace main video with better audio entry
+        await database("app_kpop")
+            .where("id", "=", betterAudioSong.original_id)
+            .update({
+                vlink: betterAudioSong.better_audio_link,
+            });
+    }
 }
 
 async function listTables(
@@ -255,6 +287,8 @@ async function validateSqlDump(
             `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${mvSeedFilePath}`
         );
 
+        await replaceBetterAudioSongs(db.kpopVideosValidation);
+
         logger.info("Validating MV song count");
         const mvSongCount = (
             (await db
@@ -431,6 +465,9 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
 
     await db.kpopVideos.raw("DROP TABLE IF EXISTS kpop_videos.old;");
     await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_tmp;");
+
+    logger.info("Substituting songs with better audio");
+    await replaceBetterAudioSongs(db.kpopVideos);
 
     // override queries
     logger.info("Performing data overrides");
