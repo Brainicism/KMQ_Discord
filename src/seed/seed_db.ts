@@ -517,6 +517,7 @@ async function updateKpopDatabase(
 
     if (!options.skipReseed) {
         await seedDb(db, bootstrap);
+        await deduplicateGroupNames(db);
     } else {
         logger.info("Skipping reseed");
     }
@@ -556,7 +557,6 @@ async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
         songsDownloaded = await downloadAndConvertSongs(options.limit);
     }
 
-    await deduplicateGroupNames(db);
     await generateKmqDataTables(db);
     if (process.env.NODE_ENV === EnvType.PROD) {
         await updateGroupList(db);
