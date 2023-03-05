@@ -113,13 +113,12 @@ async function bootstrapDatabases(): Promise<void> {
     }
 
     await performMigrations(db);
+    await loadStoredProcedures();
 
     if (!(await kpopDataDatabaseExists(db))) {
         logger.info("Seeding K-pop data database");
         await updateKpopDatabase(db, true);
     }
-
-    await loadStoredProcedures();
 
     if (!(await songThresholdReached(db))) {
         logger.info(
