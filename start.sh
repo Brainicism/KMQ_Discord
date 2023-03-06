@@ -27,7 +27,8 @@ then
         echo "Cleaning project..."
         npm run clean
         echo "Installing dependencies..."
-        yarn install -f
+        rm -rf node_modules/
+        yarn install --frozen-lockfile
     fi
     rebuild
 fi
