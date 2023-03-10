@@ -465,47 +465,41 @@ export async function updatePremium(
     activePatrons: Array<Patron>,
     inactiveUserIDs: string[]
 ): Promise<void> {
-    await dbContext.kmq.transaction(async (trx) => {
-        // Grant premium
-        await dbContext
-            .kmq("premium_users")
-            .insert(
-                activePatrons.map((x) => ({
-                    active: x.activePatron,
-                    first_subscribed: x.firstSubscribed,
-                    user_id: x.discordID,
-                }))
-            )
-            .onConflict("user_id")
-            .merge()
-            .transacting(trx);
+    // Grant premium
+    await dbContext
+        .kmq("premium_users")
+        .insert(
+            activePatrons.map((x) => ({
+                active: x.activePatron,
+                first_subscribed: x.firstSubscribed,
+                user_id: x.discordID,
+            }))
+        )
+        .onConflict("user_id")
+        .merge();
 
-        await dbContext
-            .kmq("badges_players")
-            .insert(
-                activePatrons.map((x) => ({
-                    user_id: x.discordID,
-                    badge_id: PATREON_SUPPORTER_BADGE_ID,
-                }))
-            )
-            .onConflict(["user_id", "badge_name"])
-            .ignore()
-            .transacting(trx);
+    await dbContext
+        .kmq("badges_players")
+        .insert(
+            activePatrons.map((x) => ({
+                user_id: x.discordID,
+                badge_id: PATREON_SUPPORTER_BADGE_ID,
+            }))
+        )
+        .onConflict(["user_id", "badge_name"])
+        .ignore();
 
-        // Revoke premium
-        await dbContext
-            .kmq("premium_users")
-            .whereIn("user_id", inactiveUserIDs)
-            .update({ active: false })
-            .transacting(trx);
+    // Revoke premium
+    await dbContext
+        .kmq("premium_users")
+        .whereIn("user_id", inactiveUserIDs)
+        .update({ active: false });
 
-        await dbContext
-            .kmq("badges_players")
-            .whereIn("user_id", inactiveUserIDs)
-            .andWhere("badge_id", "=", PATREON_SUPPORTER_BADGE_ID)
-            .del()
-            .transacting(trx);
-    });
+    await dbContext
+        .kmq("badges_players")
+        .whereIn("user_id", inactiveUserIDs)
+        .andWhere("badge_id", "=", PATREON_SUPPORTER_BADGE_ID)
+        .del();
 }
 
 /**
