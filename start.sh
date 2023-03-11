@@ -29,6 +29,7 @@ then
         echo "Installing dependencies..."
         rm -rf node_modules/
         yarn install --frozen-lockfile
+        git log -n 1 --pretty=format:"%H" > ../version
     fi
     rebuild
 fi
@@ -39,6 +40,5 @@ if [ "${NODE_ENV}" == "dry-run" ] || [ "${NODE_ENV}" == "ci" ]; then
 elif [ "${NODE_ENV}" == "development" ]; then
     exec node --trace-warnings --inspect=9229 "${PWD}/kmq.js"
 elif [ "${NODE_ENV}" == "production" ]; then
-    git log -n 1 --pretty=format:"%H" > ../version
     exec node --trace-warnings "${PWD}/kmq.js"
 fi

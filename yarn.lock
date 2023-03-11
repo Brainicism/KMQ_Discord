@@ -2588,9 +2588,9 @@ node-fetch@^2.6.7:
     whatwg-url "^5.0.0"
 
 node-gyp-build@^4.3.0:
-  version "4.4.0"
-  resolved "https://registry.yarnpkg.com/node-gyp-build/-/node-gyp-build-4.4.0.tgz#42e99687ce87ddeaf3a10b99dc06abc11021f3f4"
-  integrity sha512-amJnQCcgtRVw9SvoebO3BKGESClrfXGCUTX9hSn1OuGQTQBOZmVd0Z0OlecpuRksKvbsUqALE8jls/ErClAPuQ==
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/node-gyp-build/-/node-gyp-build-4.6.0.tgz#0c52e4cbf54bbd28b709820ef7b6a3c2d6209055"
+  integrity sha512-NTZVKn9IylLwUzaKjkas1e4u2DLNcV4rdYagA4PWdPwW87Bi7z+BznyKSRwS/761tV/lzCGXplWsiaMjLqP2zQ==
 
 node-schedule@^2.1.0:
   version "2.1.0"
@@ -3143,10 +3143,10 @@ slash@^3.0.0:
   resolved "https://registry.yarnpkg.com/slash/-/slash-3.0.0.tgz#6539be870c165adbd5240220dbe361f1bc4d4634"
   integrity sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==
 
-sodium-native@^3.4.1:
-  version "3.4.1"
-  resolved "https://registry.yarnpkg.com/sodium-native/-/sodium-native-3.4.1.tgz#44616c07ccecea15195f553af88b3e574b659741"
-  integrity sha512-PaNN/roiFWzVVTL6OqjzYct38NSXewdl2wz8SRB51Br/MLIJPrbM3XexhVWkq7D3UWMysfrhKVf1v1phZq6MeQ==
+sodium-native@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/sodium-native/-/sodium-native-4.0.1.tgz#773201b0d7872da294b9b12cd90d4a913dc9a2dd"
+  integrity sha512-OQTaxrVLtMvrnfcwZVsOTHe58MfDApJiHJNoOwcmmrhwvlYkfaUt2WuzRio8PgEMOd96R5aDHY49DCtock1zsA==
   dependencies:
     node-gyp-build "^4.3.0"
 

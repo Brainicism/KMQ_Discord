@@ -34,6 +34,7 @@ function hasRequiredEnvironmentVariables(): boolean {
         "BOT_PREFIX",
         "NODE_ENV",
         "PREMIUM_AUDIO_SONGS_PER_ARTIST",
+        "AUDIO_SONGS_PER_ARTIST",
     ];
 
     for (const requiredEnvVariable of requiredEnvVariables) {
