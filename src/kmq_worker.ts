@@ -1,5 +1,4 @@
 /* eslint-disable node/no-sync */
-import * as cp from "child_process";
 import { BaseClusterWorker } from "eris-fleet";
 import { IPCLogger } from "./logger";
 import { config } from "dotenv";
@@ -204,20 +203,13 @@ export default class BotWorker extends BaseClusterWorker {
         State.ipc = this.ipc;
         State.client = this.bot as KmqClient;
 
-        try {
-            State.version = cp
-                .execSync("git describe --tags")
-                .toString()
-                .trim();
-        } catch (e) {
-            State.version = `v${
-                JSON.parse(
-                    fs
-                        .readFileSync(path.join(__dirname, "../package.json"))
-                        .toString()
-                ).version
-            }`;
-        }
+        State.version = `v${
+            JSON.parse(
+                fs
+                    .readFileSync(path.resolve(__dirname, "../package.json"))
+                    .toString()
+            )["version"]
+        }`;
 
         this.ipc.register("softRestartPending", (timeRemaining) => {
             const restartDate = new Date();
