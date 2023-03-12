@@ -14,6 +14,7 @@ COPY yarn.lock package.json ./
 RUN yarn install
 
 COPY start.sh tsconfig.json ./
+COPY i18n/ i18n/
 COPY src/ src/
 RUN npx tsc
 
