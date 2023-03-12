@@ -1,4 +1,4 @@
-FROM node:16-alpine AS build
+FROM node:18-alpine AS build
 
 RUN apk add --no-cache git \
     python3 \
@@ -22,7 +22,7 @@ COPY sql_dumps/daisuki/bootstrap.sql sql_dumps/daisuki/bootstrap.sql
 COPY sql/ sql/
 
 # ================================================================= #
-FROM node:16-alpine
+FROM node:18-alpine
 RUN apk add --no-cache mysql-client \
     ffmpeg \ 
     bash
