@@ -21,7 +21,7 @@
         "docker-compose-db": "cd docker/ && docker-compose up -d db",
         "docker-compose-dev": "cd docker/ && NODE_ENV=development docker-compose up  --exit-code-from kmq --build kmq",
         "docker-compose-dryrun": "cd docker/ && NODE_ENV=dry-run docker-compose up --exit-code-from kmq --build kmq",
-        "docker-build": "cd docker/ && docker build -f kmq/Dockerfile -t kmq:$(date +'%Y-%m-%d_%H-%M')_$(git rev-parse --short HEAD) ../",
+        "docker-build": "cd docker/ && docker build -f kmq/Dockerfile -t kmq ../",
         "docker-run": ". ./.env && docker run -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} -v ${PWD}/data:/app/data -v ${PWD}/.env:/app/.env -v ${PWD}/logs:/app/logs --env NODE_ENV=production --network=host --name kmq kmq",
         "backup": "ts-node src/scripts/backup-kmq-database",
         "import": "ts-node src/scripts/backup-kmq-database --import",
