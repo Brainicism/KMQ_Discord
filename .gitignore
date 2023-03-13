@@ -4,7 +4,7 @@ main.db
 src/config/debug_settings.json
 logs/
 build/
-sql_dumps/backups
+sql_dumps/kmq_backup
 sql_dumps/daisuki
 news.md
 tmp/
