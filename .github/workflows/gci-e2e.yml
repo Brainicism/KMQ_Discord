@@ -43,6 +43,7 @@ jobs:
                   echo "AUDIO_SONGS_PER_ARTIST=$PREMIUM_AUDIO_SONGS_PER_ARTIST" >> docker/.env
                   echo "BOT_CLIENT_ID=123" >> docker/.env
                   echo "BOT_PREFIX=." >> docker/.env
+                  echo "APP_NAME=kmq-gci" >> docker/.env
             - name: Build and bootstrap dry-run
               run: npm run docker-compose-dryrun
             - name: Post-bootstrap dry-run
