@@ -1,0 +1,41 @@
+name: Create and publish KMQ image
+
+on:
+    pull_request:
+        paths-ignore:
+            - "images/**"
+            - "sql/analytics/**"
+            - "**.md"
+            - "docs/**"
+
+env:
+    REGISTRY: ghcr.io
+
+jobs:
+    build-and-push-image:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v3
+              with:
+                  ref: prod
+            - name: Get application version
+              id: app-version-parser
+              run: echo APP_VERSION=$(npm pkg get version | sed 's/"//g') > $GITHUB_OUTPUT
+            - name: Log in to the Container registry
+              uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+              with:
+                  registry: ${{ env.REGISTRY }}
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+            - name: Build and push Docker image
+              uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+              with:
+                  context: .
+                  file: docker/kmq/Dockerfile
+                  push: true
+                  tags: ${{ env.REGISTRY }}/brainicism/kmq_discord:${{ steps.app-version-parser.outputs.APP_VERSION }}
