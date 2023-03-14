@@ -73,7 +73,7 @@
         "uuid": "^9.0.0",
         "winston": "^3.8.2",
         "winston-daily-rotate-file": "^4.7.1",
-        "ytdl-core": "github:fent/node-ytdl-core#pull/1187/head",
+        "ytdl-core": "https://github.com/Brainicism/node-ytdl-core#9a81a7c",
         "zlib-sync": "^0.1.7"
     },
     "devDependencies": {
