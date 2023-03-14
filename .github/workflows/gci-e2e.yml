@@ -48,6 +48,7 @@ jobs:
                   echo "AUDIO_SONGS_PER_ARTIST=$AUDIO_SONGS_PER_ARTIST" >> .env
                   echo "BOT_CLIENT_ID=123" >> .env
                   echo "BOT_PREFIX=." >> .env
+                  echo "APP_NAME=kmq-gci" >> .env
             - name: Extract metadata (tags, labels) for Docker
               id: meta
               uses: docker/metadata-action@v4

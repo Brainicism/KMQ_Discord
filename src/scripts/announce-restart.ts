@@ -48,7 +48,6 @@ function serverShutdown(
     dockerImage: string
 ): Promise<void> {
     return new Promise((resolve, reject) => {
-        restartMinutes = 0.1;
         setInterval(() => {
             console.log(
                 `Restarting in ${Math.floor(
