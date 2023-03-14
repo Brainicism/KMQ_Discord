@@ -53,6 +53,11 @@ jobs:
               uses: docker/metadata-action@v4
               with:
                   images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+            - name: Setup MariaDB
+              uses: getong/mariadb-action@v1.1
+              with:
+                  mariadb version: "10.3.34"
+                  mysql root password: "$DB_PASS_CI"
             - name: Build Docker image
               uses: docker/build-push-action@v4
               with:
@@ -60,16 +65,6 @@ jobs:
                   file: docker/kmq/Dockerfile
                   push: false
                   tags: ${{ steps.meta.outputs.tags }}
-            - name: Setup MariaDB
-              uses: getong/mariadb-action@v1.1
-              with:
-                  mariadb version: "10.3.34"
-                  mysql root password: "$DB_PASS_CI"
-            - name: Wait for MySQL server to start
-              run: |
-                  while ! mysqladmin ping --host=127.0.0.1 --password="$DB_PASS_CI" --silent; do
-                    sleep 1
-                  done
             - name: Dry-run bootstrap KMQ
               run: . ./.env && docker run -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} -v ${PWD}/data:/app/data -v ${PWD}/.env:/app/.env -v ${PWD}/logs:/app/logs --env NODE_ENV=dry-run --network=host --name kmq ${{ steps.meta.outputs.tags }}
             - name: Validate available_songs
