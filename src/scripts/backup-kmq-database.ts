@@ -3,8 +3,10 @@ import * as cp from "child_process";
 import { IPCLogger } from "../logger";
 import { join } from "path";
 import { program } from "commander";
-import { standardDateFormat } from "../helpers/utils";
 import fs from "fs";
+import util from "util";
+
+const exec = util.promisify(cp.exec);
 
 const BACKUP_TTL = 30;
 
@@ -24,30 +26,31 @@ async function backupKmqDatabase(): Promise<void> {
         fs.mkdirSync(databaseBackupDir);
     }
 
-    cp.execSync(
+    await exec(
         `find ${databaseBackupDir} -mindepth 1 -name "*kmq_backup_*" -mtime +${BACKUP_TTL} -delete`
     );
 
-    return new Promise((resolve, reject) => {
-        cp.exec(
-            `mysqldump -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${
-                process.env.DB_HOST
-            } --port ${
-                process.env.DB_PORT
-            } --routines kmq > ${databaseBackupDir}/kmq_backup_${standardDateFormat(
-                new Date()
-            )}.sql`,
-            (err) => {
-                if (err) {
-                    logger.error(`Error backing up kmq database, err = ${err}`);
-                    reject(err);
-                    return;
-                }
+    const backupSqlFileName = `kmq_backup_${new Date().toISOString()}.sql`;
 
-                resolve();
-            }
+    try {
+        logger.info("Dumping database...");
+        await exec(
+            `mysqldump -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} --routines kmq > ${databaseBackupDir}/${backupSqlFileName}`
         );
-    });
+
+        logger.info("Compressing output...");
+        await exec(
+            `tar -C ${databaseBackupDir} -czvf ${databaseBackupDir}/${backupSqlFileName.replace(
+                ".sql",
+                ".tar.gz"
+            )} ${backupSqlFileName}`
+        );
+
+        logger.info("Cleaning up...");
+        await fs.promises.unlink(`${databaseBackupDir}/${backupSqlFileName}`);
+    } catch (err) {
+        logger.error(`Error backing up kmq database, err = ${err}`);
+    }
 }
 
 function importKmqDatabase(fileWithPath: string): void {
