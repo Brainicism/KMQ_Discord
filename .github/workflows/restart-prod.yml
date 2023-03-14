@@ -7,6 +7,9 @@ on:
             restart-type:
                 required: true
                 type: string
+            image-name:
+                required: false
+                type: string
         secrets:
             SSH_DEPLOY_PRIVATE_KEY:
                 required: true

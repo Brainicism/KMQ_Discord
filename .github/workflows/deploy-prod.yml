@@ -43,12 +43,45 @@ jobs:
                   git log -n 1 --pretty
                   git push
                   echo "Pushing new prod branch"
+    build-and-push-image:
+        needs: snap
+        runs-on: ubuntu-latest
+        outputs:
+            image-name: ${{ steps.app-version-parser.outputs.IMAGE_NAME }}
+        permissions:
+            contents: read
+            packages: write
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v3
+              with:
+                  ref: prod
+            - name: Get application version
+              id: app-version-parser
+              run: |
+                  APP_VERSION=$(npm pkg get version | sed 's/"//g') 
+                  echo IMAGE_NAME=${{ env.REGISTRY }}/brainicism/kmq_discord:$APP_VERSION > $GITHUB_OUTPUT
+            - name: Log in to the Container registry
+              uses: docker/login-action@v2
+              with:
+                  registry: ${{ env.REGISTRY }}
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+            - name: Build and push Docker image
+              uses: docker/build-push-action@v4
+              with:
+                  context: .
+                  file: docker/kmq/Dockerfile
+                  push: true
+                  tags: ${{ steps.app-version-parser.outputs.IMAGE_NAME }}
     redeploy:
         uses: Brainicism/KMQ_Discord/.github/workflows/restart-prod.yml@master
-        needs: snap
+        needs: build-and-push-image
         secrets:
             SSH_DEPLOY_PRIVATE_KEY: ${{ secrets.SSH_DEPLOY_PRIVATE_KEY }}
             SSH_DEPLOY_KNOWN_HOSTS: ${{ secrets.SSH_DEPLOY_KNOWN_HOSTS }}
             PROD_SSH_CONNECTION_STRING: ${{ secrets.PROD_SSH_CONNECTION_STRING }}
         with:
             restart-type: ${{ github.event.inputs.restart-type }}
+            image-name: ${{ needs.build-and-push-image.outputs.image-name }}

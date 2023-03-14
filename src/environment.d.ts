@@ -29,5 +29,6 @@ declare namespace NodeJS {
         SPOTIFY_CLIENT_SECRET?: string | undefined;
         DAISUKI_SEED_CRON_JOB?: string | undefined;
         GUILDS_PER_SHARD?: string | undefined;
+        APP_NAME: string | undefined;
     }
 }
