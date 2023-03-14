@@ -40,11 +40,14 @@ async function backupKmqDatabase(): Promise<void> {
 
         logger.info("Compressing output...");
         await exec(
-            `tar -C ${databaseBackupDir} --remove-files -czvf ${databaseBackupDir}/${backupSqlFileName.replace(
+            `tar -C ${databaseBackupDir} -czvf ${databaseBackupDir}/${backupSqlFileName.replace(
                 ".sql",
                 ".tar.gz"
             )} ${backupSqlFileName}`
         );
+
+        logger.info("Cleaning up...");
+        await fs.promises.unlink(`${databaseBackupDir}/${backupSqlFileName}`);
     } catch (err) {
         logger.error(`Error backing up kmq database, err = ${err}`);
     }
