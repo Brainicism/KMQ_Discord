@@ -16,6 +16,10 @@ on:
     pull_request_target:
         types: [labeled]
 
+env:
+    REGISTRY: ghcr.io
+    IMAGE_NAME: ${{ github.repository }}
+
 jobs:
     build:
         runs-on: ubuntu-latest
@@ -34,17 +38,36 @@ jobs:
               env:
                   BOT_TOKEN: ${{ secrets.KMQ_CI_BOT_TOKEN }}
               run: |
-                  echo "DB_USER=$DB_USER_CI" >> docker/.env
-                  echo "DB_PASS=$DB_PASS_CI" >> docker/.env
-                  echo "DB_PORT=$DB_PORT" >> docker/.env
-                  echo "DB_HOST=db" >> docker/.env
-                  echo "BOT_TOKEN=$BOT_TOKEN" >> docker/.env
-                  echo "PREMIUM_AUDIO_SONGS_PER_ARTIST=$PREMIUM_AUDIO_SONGS_PER_ARTIST" >> docker/.env
-                  echo "AUDIO_SONGS_PER_ARTIST=$PREMIUM_AUDIO_SONGS_PER_ARTIST" >> docker/.env
-                  echo "BOT_CLIENT_ID=123" >> docker/.env
-                  echo "BOT_PREFIX=." >> docker/.env
-                  echo "APP_NAME=kmq-gci" >> docker/.env
-            - name: Build and bootstrap dry-run
-              run: npm run docker-compose-dryrun
-            - name: Post-bootstrap dry-run
-              run: npm run docker-compose-dryrun
+                  echo "DB_USER=$DB_USER_CI" >> .env
+                  echo "DB_PASS=$DB_PASS_CI" >> .env
+                  echo "DB_PORT=$DB_PORT" >> .env
+                  echo "DB_HOST=127.0.0.1" >> .env
+                  echo "BOT_TOKEN=$BOT_TOKEN" >> .env
+                  echo "SONG_DOWNLOAD_DIR=/songs" >> .env
+                  echo "PREMIUM_AUDIO_SONGS_PER_ARTIST=$PREMIUM_AUDIO_SONGS_PER_ARTIST" >> .env
+                  echo "AUDIO_SONGS_PER_ARTIST=$AUDIO_SONGS_PER_ARTIST" >> .env
+                  echo "BOT_CLIENT_ID=123" >> .env
+                  echo "BOT_PREFIX=." >> .env
+                  echo "APP_NAME=kmq-gci" >> .env
+            - name: Extract metadata (tags, labels) for Docker
+              id: meta
+              uses: docker/metadata-action@v4
+              with:
+                  images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+            - name: Setup MariaDB
+              uses: getong/mariadb-action@v1.1
+              with:
+                  mariadb version: "10.3.34"
+                  mysql root password: "$DB_PASS_CI"
+            - name: Build Docker image
+              uses: docker/build-push-action@v4
+              with:
+                  context: .
+                  file: docker/kmq/Dockerfile
+                  push: false
+                  tags: ${{ steps.meta.outputs.tags }}
+            - name: Dry-run bootstrap KMQ
+              run: . ./.env && docker run -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} -v ${PWD}/data:/app/data -v ${PWD}/.env:/app/.env -v ${PWD}/logs:/app/logs --env NODE_ENV=dry-run --network=host --name kmq ${{ steps.meta.outputs.tags }}
+            - name: Validate available_songs
+              run: |
+                  [[ $(mysql kmq -s -N -h 127.0.0.1 -u $DB_USER_CI -p$DB_PASS_CI -e 'select count(1) from available_songs') -eq 3 ]]
