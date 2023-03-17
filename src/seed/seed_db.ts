@@ -11,6 +11,7 @@ import { config } from "dotenv";
 import { getNewConnection } from "../database_context";
 import { parseJsonFile, pathExists } from "../helpers/utils";
 import { program } from "commander";
+import { sendDebugAlertWebhook } from "../helpers/discord_utils";
 import Axios from "axios";
 import EnvType from "../enums/env_type";
 import _ from "lodash";
@@ -20,7 +21,6 @@ import path from "path";
 import util from "util";
 import type { DatabaseContext } from "../database_context";
 import type { Knex } from "knex";
-import { sendDebugAlertWebhook } from "../helpers/discord_utils";
 
 const exec = util.promisify(cp.exec);
 
@@ -642,4 +642,4 @@ async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
     }
 })();
 
-export { seedAndDownloadNewSongs, updateKpopDatabase };
+export { updateKpopDatabase };

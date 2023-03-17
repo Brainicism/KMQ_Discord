@@ -1,7 +1,6 @@
 import * as cp from "child_process";
 import * as util from "util";
 import {
-    EMBED_ERROR_COLOR,
     EMBED_SUCCESS_COLOR,
     IGNORED_WARNING_SUBSTRINGS,
     KmqImages,
@@ -13,10 +12,8 @@ import { getInternalLogger } from "./logger";
 import {
     isPrimaryInstance,
     measureExecutionTime,
-    shouldSkipSeed,
     standardDateFormat,
 } from "./helpers/utils";
-import { seedAndDownloadNewSongs } from "./seed/seed_db";
 import { sendDebugAlertWebhook } from "./helpers/discord_utils";
 import { userVoted } from "./helpers/bot_listing_manager";
 import EnvType from "./enums/env_type";
