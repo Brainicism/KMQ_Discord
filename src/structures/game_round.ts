@@ -148,7 +148,7 @@ export default class GameRound extends Round {
     /** The base EXP for this GameRound */
     private baseExp: number;
 
-    constructor(song: QueriedSong) {
+    constructor(song: QueriedSong, baseExp: number) {
         super(song);
         this.acceptedSongAnswers = [song.songName, ...this.songAliases];
         if (song.hangulSongName) {
@@ -164,6 +164,7 @@ export default class GameRound extends Round {
 
         this.acceptedArtistAnswers = [...artistNames, ...this.artistAliases];
 
+        this.baseExp = baseExp;
         this.hintUsed = false;
         this.hintRequesters = new Set();
         this.correctGuessers = [];

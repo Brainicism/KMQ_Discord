@@ -37,7 +37,6 @@ export class DatabaseContext {
     public agnostic: Knex;
 
     constructor() {
-        if ([EnvType.CI].includes(process.env.NODE_ENV as EnvType)) return;
         if (process.env.NODE_ENV === EnvType.TEST) {
             this.kmq = knex(generateKnexContext("kmq_test", 0, 1));
             this.kpopVideos = knex(

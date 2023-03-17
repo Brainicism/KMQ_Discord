@@ -1034,9 +1034,7 @@ export default class GameSession extends Session {
      * @returns the new GameRound
      */
     protected prepareRound(randomSong: QueriedSong): Round {
-        const gameRound = new GameRound(randomSong);
-
-        gameRound.setBaseExpReward(this.calculateBaseExp());
+        const gameRound = new GameRound(randomSong, this.calculateBaseExp());
         return gameRound;
     }
 

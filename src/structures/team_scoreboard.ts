@@ -19,6 +19,11 @@ export default class TeamScoreboard extends Scoreboard {
      */
     protected players: TeamMap;
 
+    constructor() {
+        super();
+        this.players = {};
+    }
+
     /**
      * Updates the scoreboard with information about correct guessers
      * @param guessResults - Objects containing the user ID, points earned, and EXP gain
