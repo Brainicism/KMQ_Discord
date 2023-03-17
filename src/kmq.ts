@@ -152,31 +152,6 @@ function registerGlobalIntervals(fleet: Fleet): void {
             });
         }
     });
-
-    // as defined in DAISUKI_SEED_CRON_JOB
-    schedule.scheduleJob(
-        process.env.DAISUKI_SEED_CRON_JOB ?? "15 3,15 * * *",
-        async () => {
-            if (process.env.NODE_ENV !== EnvType.PROD) return;
-            if (!(await isPrimaryInstance()) || (await shouldSkipSeed())) {
-                logger.info("Skipping scheduled Daisuki database seed");
-                return;
-            }
-
-            logger.info("Performing regularly scheduled Daisuki database seed");
-
-            try {
-                await seedAndDownloadNewSongs(dbContext);
-            } catch (e) {
-                await sendDebugAlertWebhook(
-                    "Download and seed failure",
-                    e.toString(),
-                    EMBED_ERROR_COLOR,
-                    KmqImages.NOT_IMPRESSED
-                );
-            }
-        }
-    );
 }
 
 function registerProcessEvents(fleet: Fleet): void {
