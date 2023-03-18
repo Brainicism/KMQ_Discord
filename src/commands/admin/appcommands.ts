@@ -146,13 +146,16 @@ export default class AppCommandsCommand implements BaseCommand {
                             }
                         }
 
-                        const checkDescriptionLengthRecursively = (
-                            cmdObj: Object
-                        ): void => {
+                        const checkDescriptionLengthRecursively = (cmdObj: {
+                            [key: string]:
+                                | string
+                                | { [locale: string]: string }
+                                | any;
+                        }): void => {
                             for (const key in cmdObj) {
                                 if (Object.hasOwn(cmdObj, key)) {
-                                    const val = cmdObj[key];
                                     if (key === "description") {
+                                        const val = cmdObj[key] as string;
                                         if (
                                             val.length > MAX_DESCRIPTION_LENGTH
                                         ) {
@@ -163,6 +166,10 @@ export default class AppCommandsCommand implements BaseCommand {
                                     } else if (
                                         key === "description_localizations"
                                     ) {
+                                        const val = cmdObj[key] as {
+                                            [locale: string]: string;
+                                        };
+
                                         for (const locale in val) {
                                             if (
                                                 val[locale].length >
@@ -173,7 +180,8 @@ export default class AppCommandsCommand implements BaseCommand {
                                                 );
                                             }
                                         }
-                                    } else if (Array.isArray(val)) {
+                                    } else if (Array.isArray(cmdObj[key])) {
+                                        const val = cmdObj[key] as Array<any>;
                                         for (const obj of val)
                                             checkDescriptionLengthRecursively(
                                                 obj
