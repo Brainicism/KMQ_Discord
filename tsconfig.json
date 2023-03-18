@@ -11,6 +11,8 @@
         "strictBindCallApply": true,
         "strictFunctionTypes": true,
         "strictNullChecks": true,
+        "noImplicitThis": true,
+        "strictPropertyInitialization": true,
         "lib": ["es2022"],
         "resolveJsonModule": true,
         "esModuleInterop": true,

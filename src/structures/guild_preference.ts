@@ -195,7 +195,7 @@ export default class GuildPreference {
     public readonly guildID: string;
 
     /** Callback to reload songs */
-    public reloadSongCallback: (() => Promise<void>) | null;
+    public reloadSongCallback: (() => Promise<void>) | undefined;
 
     /** The guild preference cache */
     private static guildPreferencesCache = {};

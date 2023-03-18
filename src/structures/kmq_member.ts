@@ -12,6 +12,8 @@ export default class KmqMember {
     public pointsAwarded: number;
 
     constructor(id: string, pointsAwarded = 0) {
+        this.username = "";
+        this.avatarUrl = "";
         this.id = id;
         this.pointsAwarded = pointsAwarded;
     }

@@ -67,7 +67,7 @@ export default abstract class Session {
     public owner: KmqMember;
 
     /** The current active Eris.VoiceConnection */
-    public connection: Eris.VoiceConnection;
+    public connection: Eris.VoiceConnection | undefined;
 
     /** The last time of activity in epoch milliseconds, used to track inactive sessions  */
     public lastActive: number;
@@ -101,7 +101,7 @@ export default abstract class Session {
     };
 
     /** Timer function used to for /timer command */
-    private guessTimeoutFunc: NodeJS.Timer;
+    private guessTimeoutFunc: NodeJS.Timer | undefined;
 
     constructor(
         guildPreference: GuildPreference,
@@ -119,6 +119,8 @@ export default abstract class Session {
         this.lastActive = Date.now();
         this.startedAt = Date.now();
         this.finished = false;
+        this.round = null;
+        this.sessionInitialized = false;
         this.roundsPlayed = 0;
         this.songMessageIDs = [];
         this.bookmarkedSongs = {};
@@ -350,7 +352,7 @@ export default abstract class Session {
     async endSession(reason: string): Promise<void> {
         logger.info(`gid: ${this.guildID} | Session ended. Reason: ${reason}`);
 
-        this.guildPreference.reloadSongCallback = null;
+        this.guildPreference.reloadSongCallback = undefined;
         Session.deleteSession(this.guildID);
         await this.endRound(
             new MessageContext(this.textChannelID, null, this.guildID),
@@ -476,7 +478,9 @@ export default abstract class Session {
      * Stops the timer set in timer mode
      */
     stopGuessTimeout(): void {
-        clearTimeout(this.guessTimeoutFunc);
+        if (this.guessTimeoutFunc) {
+            clearTimeout(this.guessTimeoutFunc);
+        }
     }
 
     /**
@@ -668,6 +672,15 @@ export default abstract class Session {
             return false;
         }
 
+        if (!this.connection) {
+            logger.error(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Unexpectedly null connection in playSong`
+            );
+            return false;
+        }
+
         const songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${round.song.youtubeLink}.ogg`;
 
         let seekLocation = 0;
@@ -734,13 +747,16 @@ export default abstract class Session {
         // song finished without being guessed
         this.connection.once("end", async () => {
             // replace listener with no-op to catch any exceptions thrown after this event
-            this.connection.removeAllListeners("end");
-            this.connection.on("end", () => {});
-            logger.info(
-                `${getDebugLogHeader(
-                    messageContext
-                )} | Song finished without being guessed.`
-            );
+            if (this.connection) {
+                this.connection.removeAllListeners("end");
+                this.connection.on("end", () => {});
+                logger.info(
+                    `${getDebugLogHeader(
+                        messageContext
+                    )} | Song finished without being guessed.`
+                );
+            }
+
             this.stopGuessTimeout();
 
             await this.endRound(
@@ -752,9 +768,12 @@ export default abstract class Session {
         });
 
         this.connection.once("error", (err) => {
-            // replace listener with no-op to catch any exceptions thrown after this event
-            this.connection.removeAllListeners("error");
-            this.connection.on("error", () => {});
+            if (this.connection) {
+                // replace listener with no-op to catch any exceptions thrown after this event
+                this.connection.removeAllListeners("error");
+                this.connection.on("error", () => {});
+            }
+
             logger.error(
                 `${getDebugLogHeader(
                     messageContext

@@ -50,6 +50,9 @@ export default abstract class Round {
             (x) => State.aliases.artist[x] || []
         );
         this.startedAt = Date.now();
+        this.lastActive = Date.now();
+        this.finished = false;
+        this.interactionMessage = null;
         this.roundMessageID = null;
         this.skippers = new Set();
         this.skipAchieved = false;

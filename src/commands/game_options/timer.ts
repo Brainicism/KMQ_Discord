@@ -178,7 +178,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
             );
         }
 
-        if (session && session.round && session.connection.playing) {
+        if (session && session.round && session.connection?.playing) {
             // Timer can start mid-song, starting when the user enters the command
             session.stopGuessTimeout();
             session.startGuessTimeout(messageContext);

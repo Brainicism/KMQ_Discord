@@ -11,6 +11,7 @@ export default class EliminationScoreboard extends Scoreboard {
 
     constructor(lives: number) {
         super();
+        this.players = {};
         this.startingLives = lives;
     }
 

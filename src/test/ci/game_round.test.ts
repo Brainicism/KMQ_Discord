@@ -15,24 +15,27 @@ describe("game round", () => {
     describe("constructor defaults", () => {
         describe("artist/song names without aliases", () => {
             it("adds the corresponding name as a correct answer", () => {
-                gameRound = new GameRound({
-                    songName: "Song1",
-                    originalSongName: "Song1",
-                    hangulSongName: "노래1",
-                    originalHangulSongName: "노래1",
-                    artistName: "Jisoo",
-                    hangulArtistName: "지수",
-                    youtubeLink: "abcde",
-                    publishDate: new Date(),
-                    members: Gender.FEMALE,
-                    artistID: 1,
-                    isSolo: "y",
-                    rank: 0,
-                    views: 1000000,
-                    tags: "",
-                    vtype: "main",
-                    selectionWeight: 1,
-                });
+                gameRound = new GameRound(
+                    {
+                        songName: "Song1",
+                        originalSongName: "Song1",
+                        hangulSongName: "노래1",
+                        originalHangulSongName: "노래1",
+                        artistName: "Jisoo",
+                        hangulArtistName: "지수",
+                        youtubeLink: "abcde",
+                        publishDate: new Date(),
+                        members: Gender.FEMALE,
+                        artistID: 1,
+                        isSolo: "y",
+                        rank: 0,
+                        views: 1000000,
+                        tags: "",
+                        vtype: "main",
+                        selectionWeight: 1,
+                    },
+                    5
+                );
 
                 assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
                     "Jisoo",
@@ -48,24 +51,27 @@ describe("game round", () => {
 
         describe("artist collabs", () => {
             it("should record them as two separate artists", () => {
-                gameRound = new GameRound({
-                    songName: "Poggers Song",
-                    originalSongName: "Poggers Song",
-                    hangulSongName: "리그마 포트나이트",
-                    originalHangulSongName: "리그마 포트나이트",
-                    artistName: "IU + Blackpink",
-                    hangulArtistName: "아이유+블랙핑크",
-                    youtubeLink: "abcde",
-                    publishDate: new Date(),
-                    members: Gender.FEMALE,
-                    artistID: 2,
-                    isSolo: "n",
-                    rank: 10,
-                    views: 69420,
-                    tags: "",
-                    vtype: "main",
-                    selectionWeight: 1,
-                });
+                gameRound = new GameRound(
+                    {
+                        songName: "Poggers Song",
+                        originalSongName: "Poggers Song",
+                        hangulSongName: "리그마 포트나이트",
+                        originalHangulSongName: "리그마 포트나이트",
+                        artistName: "IU + Blackpink",
+                        hangulArtistName: "아이유+블랙핑크",
+                        youtubeLink: "abcde",
+                        publishDate: new Date(),
+                        members: Gender.FEMALE,
+                        artistID: 2,
+                        isSolo: "n",
+                        rank: 10,
+                        views: 69420,
+                        tags: "",
+                        vtype: "main",
+                        selectionWeight: 1,
+                    },
+                    5
+                );
 
                 assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
                     "IU",
@@ -78,24 +84,27 @@ describe("game round", () => {
 
         describe("artist name has trailing or leading spaces", () => {
             it("should remove them", () => {
-                gameRound = new GameRound({
-                    songName: "Lovesick Girls",
-                    originalSongName: "Lovesick Girls",
-                    hangulSongName: "상사병에 걸린 소녀들",
-                    originalHangulSongName: "상사병에 걸린 소녀들",
-                    artistName: " Blackpink + IU             ",
-                    hangulArtistName: "   블랙핑크+아이유                ",
-                    youtubeLink: "abcde",
-                    publishDate: new Date(),
-                    members: Gender.FEMALE,
-                    artistID: 3,
-                    isSolo: "y",
-                    rank: 0,
-                    views: 123456789,
-                    tags: "",
-                    vtype: "main",
-                    selectionWeight: 1,
-                });
+                gameRound = new GameRound(
+                    {
+                        songName: "Lovesick Girls",
+                        originalSongName: "Lovesick Girls",
+                        hangulSongName: "상사병에 걸린 소녀들",
+                        originalHangulSongName: "상사병에 걸린 소녀들",
+                        artistName: " Blackpink + IU             ",
+                        hangulArtistName: "   블랙핑크+아이유                ",
+                        youtubeLink: "abcde",
+                        publishDate: new Date(),
+                        members: Gender.FEMALE,
+                        artistID: 3,
+                        isSolo: "y",
+                        rank: 0,
+                        views: 123456789,
+                        tags: "",
+                        vtype: "main",
+                        selectionWeight: 1,
+                    },
+                    5
+                );
 
                 assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
                     "Blackpink",
@@ -120,24 +129,27 @@ describe("game round", () => {
                             "A good song",
                         ];
 
-                        gameRound = new GameRound({
-                            songName: "A really epic song",
-                            originalSongName: "A really epic song",
-                            hangulSongName: "정말 서사시 노래",
-                            originalHangulSongName: "정말 서사시 노래",
-                            artistName: "A really epic person",
-                            hangulArtistName: "정말 서사시인",
-                            youtubeLink: "abcde",
-                            publishDate: new Date(),
-                            members: Gender.MALE,
-                            artistID: 4,
-                            isSolo: "y",
-                            rank: 0,
-                            views: 2,
-                            tags: "",
-                            vtype: "main",
-                            selectionWeight: 1,
-                        });
+                        gameRound = new GameRound(
+                            {
+                                songName: "A really epic song",
+                                originalSongName: "A really epic song",
+                                hangulSongName: "정말 서사시 노래",
+                                originalHangulSongName: "정말 서사시 노래",
+                                artistName: "A really epic person",
+                                hangulArtistName: "정말 서사시인",
+                                youtubeLink: "abcde",
+                                publishDate: new Date(),
+                                members: Gender.MALE,
+                                artistID: 4,
+                                isSolo: "y",
+                                rank: 0,
+                                views: 2,
+                                tags: "",
+                                vtype: "main",
+                                selectionWeight: 1,
+                            },
+                            5
+                        );
 
                         assert.deepStrictEqual(gameRound.acceptedSongAnswers, [
                             "A really epic song",
@@ -157,24 +169,27 @@ describe("game round", () => {
                             "Person Too",
                         ];
 
-                        gameRound = new GameRound({
-                            songName: "A really epic song",
-                            originalSongName: "A really epic song",
-                            hangulSongName: "정말 서사시 노래",
-                            originalHangulSongName: "정말 서사시 노래",
-                            artistName: "Person2",
-                            hangulArtistName: "2인칭",
-                            youtubeLink: "abcde",
-                            publishDate: new Date(),
-                            members: Gender.FEMALE,
-                            artistID: 4,
-                            isSolo: "y",
-                            rank: 0,
-                            views: 5,
-                            tags: "",
-                            vtype: "main",
-                            selectionWeight: 1,
-                        });
+                        gameRound = new GameRound(
+                            {
+                                songName: "A really epic song",
+                                originalSongName: "A really epic song",
+                                hangulSongName: "정말 서사시 노래",
+                                originalHangulSongName: "정말 서사시 노래",
+                                artistName: "Person2",
+                                hangulArtistName: "2인칭",
+                                youtubeLink: "abcde",
+                                publishDate: new Date(),
+                                members: Gender.FEMALE,
+                                artistID: 4,
+                                isSolo: "y",
+                                rank: 0,
+                                views: 5,
+                                tags: "",
+                                vtype: "main",
+                                selectionWeight: 1,
+                            },
+                            5
+                        );
 
                         assert.deepStrictEqual(
                             gameRound.acceptedArtistAnswers,
@@ -249,24 +264,27 @@ describe("game round", () => {
 
     describe("skipping", () => {
         beforeEach(() => {
-            gameRound = new GameRound({
-                songName: "1",
-                originalSongName: "2",
-                hangulSongName: "3",
-                originalHangulSongName: "4",
-                artistName: "5",
-                hangulArtistName: "6",
-                youtubeLink: "7",
-                publishDate: new Date(2015, 0),
-                members: Gender.COED,
-                artistID: 4,
-                isSolo: "n",
-                rank: 0,
-                views: 123,
-                tags: "",
-                vtype: "main",
-                selectionWeight: 1,
-            });
+            gameRound = new GameRound(
+                {
+                    songName: "1",
+                    originalSongName: "2",
+                    hangulSongName: "3",
+                    originalHangulSongName: "4",
+                    artistName: "5",
+                    hangulArtistName: "6",
+                    youtubeLink: "7",
+                    publishDate: new Date(2015, 0),
+                    members: Gender.COED,
+                    artistID: 4,
+                    isSolo: "n",
+                    rank: 0,
+                    views: 123,
+                    tags: "",
+                    vtype: "main",
+                    selectionWeight: 1,
+                },
+                5
+            );
         });
 
         describe("unique skippers", () => {
@@ -309,24 +327,27 @@ describe("game round", () => {
 
     describe("check guess", () => {
         beforeEach(() => {
-            gameRound = new GameRound({
-                songName: "very cool song",
-                originalSongName: "very cool song",
-                hangulSongName: "매우 시원한 노래",
-                originalHangulSongName: "매우 시원한 노래",
-                artistName: "artist",
-                hangulArtistName: "예술가",
-                youtubeLink: "a1b2c3",
-                publishDate: new Date(2015, 0),
-                members: Gender.MALE,
-                artistID: 4,
-                isSolo: "n",
-                rank: 0,
-                views: 3141592653589,
-                tags: "",
-                vtype: "main",
-                selectionWeight: 1,
-            });
+            gameRound = new GameRound(
+                {
+                    songName: "very cool song",
+                    originalSongName: "very cool song",
+                    hangulSongName: "매우 시원한 노래",
+                    originalHangulSongName: "매우 시원한 노래",
+                    artistName: "artist",
+                    hangulArtistName: "예술가",
+                    youtubeLink: "a1b2c3",
+                    publishDate: new Date(2015, 0),
+                    members: Gender.MALE,
+                    artistID: 4,
+                    isSolo: "n",
+                    rank: 0,
+                    views: 3141592653589,
+                    tags: "",
+                    vtype: "main",
+                    selectionWeight: 1,
+                },
+                5
+            );
         });
 
         describe("incorrect guess", () => {
@@ -598,24 +619,27 @@ describe("game round", () => {
     describe("getExpReward", () => {
         const exp = 500;
         beforeEach(() => {
-            gameRound = new GameRound({
-                songName: "very cool song",
-                originalSongName: "very cool song",
-                hangulSongName: "매우 시원한 노래",
-                originalHangulSongName: "매우 시원한 노래",
-                artistName: "artist",
-                hangulArtistName: "예술가",
-                youtubeLink: "a1b2c3",
-                publishDate: new Date(2015),
-                members: Gender.FEMALE,
-                artistID: 4,
-                isSolo: "y",
-                rank: 2,
-                views: 246810121416,
-                tags: "",
-                vtype: "main",
-                selectionWeight: 1,
-            });
+            gameRound = new GameRound(
+                {
+                    songName: "very cool song",
+                    originalSongName: "very cool song",
+                    hangulSongName: "매우 시원한 노래",
+                    originalHangulSongName: "매우 시원한 노래",
+                    artistName: "artist",
+                    hangulArtistName: "예술가",
+                    youtubeLink: "a1b2c3",
+                    publishDate: new Date(2015),
+                    members: Gender.FEMALE,
+                    artistID: 4,
+                    isSolo: "y",
+                    rank: 2,
+                    views: 246810121416,
+                    tags: "",
+                    vtype: "main",
+                    selectionWeight: 1,
+                },
+                5
+            );
         });
 
         describe("no hint used", () => {

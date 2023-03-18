@@ -390,24 +390,27 @@ describe("exp command", () => {
     describe("calculateRoundExpMultiplier", () => {
         let gameRound: GameRound;
         beforeEach(() => {
-            gameRound = new GameRound({
-                songName: "x",
-                originalSongName: "x",
-                hangulSongName: "x",
-                originalHangulSongName: "x",
-                artistName: "x",
-                hangulArtistName: "x",
-                youtubeLink: "x",
-                publishDate: new Date(),
-                members: Gender.FEMALE,
-                artistID: 1,
-                isSolo: "y",
-                rank: 0,
-                views: 1,
-                tags: "",
-                vtype: "main",
-                selectionWeight: 1,
-            });
+            gameRound = new GameRound(
+                {
+                    songName: "x",
+                    originalSongName: "x",
+                    hangulSongName: "x",
+                    originalHangulSongName: "x",
+                    artistName: "x",
+                    hangulArtistName: "x",
+                    youtubeLink: "x",
+                    publishDate: new Date(),
+                    members: Gender.FEMALE,
+                    artistID: 1,
+                    isSolo: "y",
+                    rank: 0,
+                    views: 1,
+                    tags: "",
+                    vtype: "main",
+                    selectionWeight: 1,
+                },
+                5
+            );
             gameRound.bonusModifier = 1;
             guildPreference = GuildPreference.fromGuild("123");
             sandbox.stub(guildPreference, "updateGuildPreferences");

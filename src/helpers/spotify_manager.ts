@@ -36,7 +36,7 @@ export interface MatchedPlaylist {
 const SONG_MATCH_TIMEOUT_MS = 15000;
 
 export default class SpotifyManager {
-    private accessToken: string;
+    private accessToken: string | undefined;
 
     constructor() {
         this.refreshToken();
