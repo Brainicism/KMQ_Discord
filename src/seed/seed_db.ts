@@ -1,11 +1,17 @@
 /* eslint-disable no-await-in-loop */
 import * as cp from "child_process";
-import { DATABASE_DOWNLOAD_DIR, DataFiles } from "../constants";
+import {
+    DATABASE_DOWNLOAD_DIR,
+    DataFiles,
+    EMBED_ERROR_COLOR,
+    KmqImages,
+} from "../constants";
 import { IPCLogger } from "../logger";
 import { config } from "dotenv";
 import { getNewConnection } from "../database_context";
 import { parseJsonFile, pathExists } from "../helpers/utils";
 import { program } from "commander";
+import { sendDebugAlertWebhook } from "../helpers/discord_utils";
 import Axios from "axios";
 import EnvType from "../enums/env_type";
 import _ from "lodash";
@@ -581,33 +587,44 @@ export async function updateGroupList(db: DatabaseContext): Promise<void> {
  * @param db - The database context
  */
 async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
-    await pruneSqlDumps();
+    logger.info("Performing regularly scheduled Daisuki database seed");
     try {
-        await updateKpopDatabase(db);
+        await pruneSqlDumps();
+        try {
+            await updateKpopDatabase(db);
+        } catch (e) {
+            logger.error(`Failed to update kpop_videos database. ${e}`);
+            throw e;
+        }
+
+        let songsDownloaded = 0;
+        if (!options.skipDownload) {
+            songsDownloaded = await downloadAndConvertSongs(options.limit);
+        }
+
+        await generateKmqDataTables(db);
+        if (process.env.NODE_ENV === EnvType.PROD) {
+            await updateGroupList(db);
+        }
+
+        // freeze table schema
+        if (!(await pathExists(DataFiles.FROZEN_TABLE_SCHEMA))) {
+            logger.info("Frozen Daisuki schema doesn't exist... creating");
+            await recordDaisukiTableSchema(db);
+        }
+
+        logger.info(
+            `Finishing seeding and downloading ${songsDownloaded} new songs`
+        );
     } catch (e) {
-        logger.error(`Failed to update kpop_videos database. ${e}`);
-        throw e;
+        logger.error(`Download/seed failure: ${e}`);
+        await sendDebugAlertWebhook(
+            "Download and seed failure",
+            e.toString(),
+            EMBED_ERROR_COLOR,
+            KmqImages.NOT_IMPRESSED
+        );
     }
-
-    let songsDownloaded = 0;
-    if (!options.skipDownload) {
-        songsDownloaded = await downloadAndConvertSongs(options.limit);
-    }
-
-    await generateKmqDataTables(db);
-    if (process.env.NODE_ENV === EnvType.PROD) {
-        await updateGroupList(db);
-    }
-
-    // freeze table schema
-    if (!(await pathExists(DataFiles.FROZEN_TABLE_SCHEMA))) {
-        logger.info("Frozen Daisuki schema doesn't exist... creating");
-        await recordDaisukiTableSchema(db);
-    }
-
-    logger.info(
-        `Finishing seeding and downloading ${songsDownloaded} new songs`
-    );
 }
 
 (async () => {
@@ -625,4 +642,4 @@ async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
     }
 })();
 
-export { seedAndDownloadNewSongs, updateKpopDatabase };
+export { updateKpopDatabase };
