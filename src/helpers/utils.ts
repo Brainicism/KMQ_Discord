@@ -446,13 +446,6 @@ export async function isPrimaryInstance(): Promise<boolean> {
 }
 
 /**
- * @returns whether this instance should skip seed
- */
-export async function shouldSkipSeed(): Promise<boolean> {
-    return pathExists(DataFiles.SKIP_SEED_COOKIE);
-}
-
-/**
  * @param url - the URL
  * @returns whether the URL is valid
  */

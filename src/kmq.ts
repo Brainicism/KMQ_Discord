@@ -1,7 +1,6 @@
 import * as cp from "child_process";
 import * as util from "util";
 import {
-    EMBED_ERROR_COLOR,
     EMBED_SUCCESS_COLOR,
     IGNORED_WARNING_SUBSTRINGS,
     KmqImages,
@@ -13,10 +12,8 @@ import { getInternalLogger } from "./logger";
 import {
     isPrimaryInstance,
     measureExecutionTime,
-    shouldSkipSeed,
     standardDateFormat,
 } from "./helpers/utils";
-import { seedAndDownloadNewSongs } from "./seed/seed_db";
 import { sendDebugAlertWebhook } from "./helpers/discord_utils";
 import { userVoted } from "./helpers/bot_listing_manager";
 import EnvType from "./enums/env_type";
@@ -152,31 +149,6 @@ function registerGlobalIntervals(fleet: Fleet): void {
             });
         }
     });
-
-    // as defined in DAISUKI_SEED_CRON_JOB
-    schedule.scheduleJob(
-        process.env.DAISUKI_SEED_CRON_JOB ?? "15 3,15 * * *",
-        async () => {
-            if (process.env.NODE_ENV !== EnvType.PROD) return;
-            if (!(await isPrimaryInstance()) || (await shouldSkipSeed())) {
-                logger.info("Skipping scheduled Daisuki database seed");
-                return;
-            }
-
-            logger.info("Performing regularly scheduled Daisuki database seed");
-
-            try {
-                await seedAndDownloadNewSongs(dbContext);
-            } catch (e) {
-                await sendDebugAlertWebhook(
-                    "Download and seed failure",
-                    e.toString(),
-                    EMBED_ERROR_COLOR,
-                    KmqImages.NOT_IMPRESSED
-                );
-            }
-        }
-    );
 }
 
 function registerProcessEvents(fleet: Fleet): void {
