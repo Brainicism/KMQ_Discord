@@ -14,6 +14,7 @@ import {
     underline,
 } from "../helpers/utils";
 import {
+    generateEmbed,
     getCurrentVoiceMembers,
     getDebugLogHeader,
     sendBookmarkedSongs,
@@ -925,11 +926,11 @@ export default abstract class Session {
                 this.guildPreference.isMultipleChoiceMode() &&
                 round.interactionMessage
             ) {
-                embed["thumbnail"] = { url: thumbnailUrl };
-                embed["footer"] = { text: footerText };
+                embed.thumbnailUrl = thumbnailUrl;
+                embed.footerText = footerText;
                 embed.title = bold(embed.title);
                 await round.interactionMessage.edit({
-                    embeds: [embed as Object],
+                    embeds: [generateEmbed(messageContext, embed)],
                 });
                 return round.interactionMessage;
             }

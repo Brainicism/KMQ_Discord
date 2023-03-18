@@ -209,7 +209,12 @@ export async function reloadAliases(): Promise<void> {
         .select(["link", "song_aliases"])
         .where("song_aliases", "<>", "");
 
-    const artistAliasMapping = await dbContext
+    const artistAliasMapping: {
+        artist_name_en: string;
+        artist_aliases: string;
+        previous_name_en: string;
+        previous_name_ko: string;
+    }[] = await dbContext
         .kmq("available_songs")
         .distinct([
             "artist_name_en",
@@ -227,14 +232,14 @@ export async function reloadAliases(): Promise<void> {
         .orWhere("previous_name_en", "<>", "")
         .orWhere("previous_name_ko", "<>", "");
 
-    const songAliases = {};
+    const songAliases: { [songName: string]: string[] } = {};
     for (const mapping of songAliasMapping) {
         songAliases[mapping["link"]] = mapping["song_aliases"]
             .split(";")
             .filter((x: string) => x);
     }
 
-    const artistAliases = {};
+    const artistAliases: { [artistName: string]: string[] } = {};
     for (const mapping of artistAliasMapping) {
         const aliases: Array<string> = mapping["artist_aliases"]
             .split(";")

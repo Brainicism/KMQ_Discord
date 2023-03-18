@@ -2,11 +2,12 @@ import { BaseServiceWorker } from "eris-fleet";
 import { IPCLogger } from "./logger";
 import BotListingManager from "./helpers/bot_listing_manager";
 import EnvType from "./enums/env_type";
+import type { Setup } from "eris-fleet/dist/services/BaseServiceWorker";
 
 const logger = new IPCLogger("kmq_service");
 
 export default class ServiceWorker extends BaseServiceWorker {
-    constructor(setup) {
+    constructor(setup: Setup) {
         super(setup);
         if (process.env.NODE_ENV === EnvType.PROD) {
             logger.info("Initializing bot stats poster...");
@@ -17,7 +18,7 @@ export default class ServiceWorker extends BaseServiceWorker {
         this.serviceReady();
     }
 
-    shutdown = (done): void => {
+    shutdown = (done: () => void): void => {
         done();
     };
 }

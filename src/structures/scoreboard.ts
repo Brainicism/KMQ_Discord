@@ -203,7 +203,7 @@ export default class Scoreboard {
      * @returns a mapping of player scores to ranking
      */
     getScoreToRankingMap(): { [score: number]: number } {
-        const rankingToScore = {};
+        const rankingToScore: { [score: number]: number } = {};
         const sortedUniqueScores = [
             ...new Set(Object.values(this.players).map((x) => x.getScore())),
         ].sort((a, b) => b - a);

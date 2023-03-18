@@ -11,7 +11,7 @@ export default class KmqClient extends Eris.Client {
     public commands: { [commandName: string]: BaseCommand };
     public aliases: { [aliasName: string]: BaseCommand };
 
-    constructor(token, options) {
+    constructor(token: string, options: Eris.ClientOptions) {
         super(token, options);
         logger.info("Starting KMQ Client");
         this.commands = {};
@@ -26,7 +26,7 @@ export default class KmqClient extends Eris.Client {
     public static async getCommandFiles(shouldReload: boolean): Promise<{
         [commandName: string]: BaseCommand;
     }> {
-        const commandMap = {};
+        const commandMap: { [commandName: string]: any } = {};
         try {
             let files: Array<string> = [];
             for (const category of ["admin", "game_options", "game_commands"]) {

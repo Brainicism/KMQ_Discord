@@ -624,7 +624,14 @@ export default class LeaderboardCommand implements BaseCommand {
             embedsFns.push(
                 () =>
                     new Promise(async (resolve) => {
-                        let topPlayers;
+                        let topPlayers: {
+                            player_id: string;
+                            level: number;
+                            exp: number;
+                            game_count: number;
+                            songs_guessed: number;
+                        }[];
+
                         switch (type) {
                             case LeaderboardType.EXP:
                                 topPlayers = await topPlayersQuery
@@ -645,6 +652,10 @@ export default class LeaderboardCommand implements BaseCommand {
                                     .limit(LEADERBOARD_ENTRIES_PER_PAGE);
                                 break;
                             default:
+                                topPlayers = [];
+                                logger.error(
+                                    `Unexpected leaderboard type: ${type}`
+                                );
                                 break;
                         }
 

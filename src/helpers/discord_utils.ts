@@ -749,7 +749,7 @@ export async function generateOptionsMessage(
 
     // Store the VALUE of ,[option]: [VALUE] into optionStrings
     // Null optionStrings values are set to "Not set" below
-    const optionStrings = {};
+    const optionStrings: { [option: string]: string | null } = {};
     optionStrings[GameOption.LIMIT] = `${limit} / ${friendlyFormattedNumber(
         totalSongs.countBeforeLimit
     )}`;
@@ -816,7 +816,7 @@ export async function generateOptionsMessage(
         optionStrings[GameOption.GOAL] = String(gameOptions.goal);
         if (isEliminationMode) {
             optionStrings[GameOption.GOAL] = generateConflictingCommandEntry(
-                optionStrings[GameOption.GOAL],
+                optionStrings[GameOption.GOAL] as string,
                 `play ${GameType.ELIMINATION}`
             );
         }
@@ -836,12 +836,10 @@ export async function generateOptionsMessage(
             for (const option of ConflictingGameOptions[
                 gameOptionConflictCheck.gameOption
             ]) {
-                if (
-                    optionStrings[option] &&
-                    !optionStrings[option].includes(conflictString)
-                ) {
+                const optionString = optionStrings[option];
+                if (optionString && !optionString.includes(conflictString)) {
                     optionStrings[option] = generateConflictingCommandEntry(
-                        optionStrings[option],
+                        optionString,
                         GameOptionCommand[gameOptionConflictCheck.gameOption]
                     );
                 }
@@ -858,9 +856,10 @@ export async function generateOptionsMessage(
     // Underline changed option
     if (updatedOptions.length > 0) {
         for (const updatedOption of updatedOptions) {
-            optionStrings[updatedOption.option as GameOption] = underline(
-                optionStrings[updatedOption.option]
-            );
+            const optionString = optionStrings[updatedOption.option];
+            if (optionString) {
+                optionStrings[updatedOption.option] = underline(optionString);
+            }
         }
     }
 
@@ -1558,7 +1557,7 @@ function interactionRejectionHandler(
         | Eris.ComponentInteraction
         | Eris.CommandInteraction
         | Eris.AutocompleteInteraction,
-    err
+    err: Error & { code: number }
 ): void {
     if (err.code === 10062) {
         logger.warn(
@@ -1776,7 +1775,7 @@ export function getInteractionValue(
         ).reduce((result, filter: Eris.InteractionDataOptionsWithValue) => {
             result[filter.name] = filter.value;
             return result;
-        }, {}),
+        }, {} as { [name: string]: string | number | boolean }),
         interactionName: parentInteractionDataName,
         focusedKey: options.find((x) => x["focused"])?.name ?? null,
     };

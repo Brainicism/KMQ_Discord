@@ -58,7 +58,9 @@ describe("guild preference", () => {
 
             describe("it has extraneous game options", () => {
                 it("should return a guild preference without the extraneous values", () => {
-                    const gameOptionsWithExtraValues = {
+                    const gameOptionsWithExtraValues: {
+                        [optionName: string]: any;
+                    } = {
                         ...GuildPreference.DEFAULT_OPTIONS,
                     };
 

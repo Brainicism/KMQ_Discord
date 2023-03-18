@@ -38,6 +38,7 @@ import voiceChannelJoinHandler from "./events/client/voiceChannelJoin";
 import voiceChannelLeaveHandler from "./events/client/voiceChannelLeave";
 import voiceChannelSwitchHandler from "./events/client/voiceChannelSwitch";
 import warnHandler from "./events/client/warn";
+import type { Setup } from "eris-fleet/dist/clusters/BaseClusterWorker";
 import type KmqClient from "./kmq_client";
 
 const logger = new IPCLogger("kmq");
@@ -177,7 +178,7 @@ export default class BotWorker extends BaseClusterWorker {
     }
 
     // eslint-disable-next-line class-methods-use-this
-    shutdown = async (done): Promise<void> => {
+    shutdown = async (done: () => void): Promise<void> => {
         logger.debug("SHUTDOWN received, cleaning up...");
 
         const endSessionPromises = Object.keys(State.gameSessions).map(
@@ -198,7 +199,7 @@ export default class BotWorker extends BaseClusterWorker {
         done();
     };
 
-    constructor(setup) {
+    constructor(setup: Setup) {
         super(setup);
         State.ipc = this.ipc;
         State.client = this.bot as KmqClient;
