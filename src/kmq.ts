@@ -296,7 +296,7 @@ async function startWebServer(fleet: Fleet): Promise<void> {
                         healthIndicator = HealthIndicator.WARNING;
                     else healthIndicator = HealthIndicator.HEALTHY;
                     return {
-                        latency: rawShardData.latency.toString() ?? "?",
+                        latency: (rawShardData.latency ?? "?").toString(),
                         status: rawShardData.status,
                         members: rawShardData.members.toLocaleString(),
                         id: rawShardData.id,
