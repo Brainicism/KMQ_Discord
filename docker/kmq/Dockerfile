@@ -16,6 +16,7 @@ RUN yarn install
 COPY start.sh tsconfig.json ./
 COPY i18n/ i18n/
 COPY src/ src/
+COPY templates/ templates/
 RUN npx tsc
 
 COPY sql_dumps/daisuki/bootstrap.sql sql_dumps/daisuki/bootstrap.sql
@@ -25,7 +26,8 @@ COPY sql/ sql/
 FROM node:18-alpine
 RUN apk add --no-cache mysql-client \
     ffmpeg \ 
-    bash
+    bash \
+    curl
 
 COPY --from=build /app /app
 WORKDIR /app
