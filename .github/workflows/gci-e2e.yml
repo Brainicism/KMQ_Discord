@@ -43,6 +43,7 @@ jobs:
                   echo "DB_PORT=$DB_PORT" >> .env
                   echo "DB_HOST=127.0.0.1" >> .env
                   echo "BOT_TOKEN=$BOT_TOKEN" >> .env
+                  echo "WEB_SERVER_PORT=5858" >> .env
                   echo "SONG_DOWNLOAD_DIR=/songs" >> .env
                   echo "PREMIUM_AUDIO_SONGS_PER_ARTIST=$PREMIUM_AUDIO_SONGS_PER_ARTIST" >> .env
                   echo "AUDIO_SONGS_PER_ARTIST=$AUDIO_SONGS_PER_ARTIST" >> .env
