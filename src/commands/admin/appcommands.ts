@@ -14,8 +14,6 @@ import type CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("app_commands");
 
-const MAX_DESCRIPTION_LENGTH = 100;
-
 enum AppCommandsAction {
     RELOAD = "reload",
     DELETE = "delete",
