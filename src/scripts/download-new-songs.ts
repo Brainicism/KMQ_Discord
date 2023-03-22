@@ -123,7 +123,7 @@ async function ffmpegOpusJob(id: string): Promise<void> {
                     );
                 }
             })
-            .on("error", (transcodingErr) => {
+            .on("error", (transcodingErr: Error) => {
                 reject(transcodingErr);
             })
             .run();

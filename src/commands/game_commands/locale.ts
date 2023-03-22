@@ -221,7 +221,11 @@ export default class LocaleTypeCommand implements BaseCommand {
     ): Promise<void> {
         const { interactionOptions } = getInteractionValue(interaction);
         const localeType =
-            LanguageNameToLocaleType[interactionOptions["language"]];
+            LanguageNameToLocaleType[
+                interactionOptions[
+                    "language"
+                ] as keyof typeof LanguageNameToLocaleType
+            ];
 
         await LocaleTypeCommand.updateLocaleMessage(
             messageContext,

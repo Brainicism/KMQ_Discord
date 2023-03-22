@@ -375,11 +375,16 @@ export async function getMultipleChoiceOptions(
 
         result = [...uniqueResult.values()];
 
-        if (result.length < CHOICES_BY_DIFFICULTY[answerType]) {
+        const numChoices =
+            CHOICES_BY_DIFFICULTY[
+                answerType as keyof typeof CHOICES_BY_DIFFICULTY
+            ];
+
+        if (result.length < numChoices) {
             easyNames = _.difference(easyNames, result, removedResults);
             for (const choice of _.sampleSize(
                 easyNames,
-                CHOICES_BY_DIFFICULTY[answerType] - result.length
+                numChoices - result.length
             )) {
                 result.push(choice);
             }

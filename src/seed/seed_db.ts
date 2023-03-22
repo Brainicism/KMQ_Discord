@@ -212,7 +212,7 @@ async function extractDb(): Promise<void> {
 }
 
 async function recordDaisukiTableSchema(db: DatabaseContext): Promise<void> {
-    const frozenTableColumnNames = {};
+    const frozenTableColumnNames: { [table: string]: string[] } = {};
     await Promise.allSettled(
         MONITORED_DAISUKI_TABLES.map(async (table) => {
             const commaSeparatedColumnNames = (

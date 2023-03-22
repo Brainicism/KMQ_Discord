@@ -161,7 +161,9 @@ describe("exp command", () => {
                 });
 
                 describe("multiple choice penalty", () => {
-                    const multipleChoicePenaltyMap = {
+                    const multipleChoicePenaltyMap: {
+                        [difficulty: string]: number;
+                    } = {
                         [AnswerType.MULTIPLE_CHOICE_EASY]:
                             ExpBonusModifier.MC_GUESS_EASY,
                         [AnswerType.MULTIPLE_CHOICE_MED]:

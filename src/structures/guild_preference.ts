@@ -18,7 +18,9 @@ import {
 } from "../constants";
 import { IPCLogger } from "../logger";
 import { Mutex } from "async-mutex";
+import { mapTo } from "../helpers/utils";
 import AnswerType from "../enums/option_types/answer_type";
+import EnvType from "../enums/env_type";
 import GameOption from "../enums/game_option_name";
 import Gender from "../enums/option_types/gender";
 import _ from "lodash";
@@ -90,7 +92,9 @@ export default class GuildPreference {
     resetArgs: {
         [gameOption in GameOption]?: {
             default: Array<any>;
-            setter: ((...args) => Promise<void>) | ((...args) => void);
+            setter:
+                | ((...args: any) => Promise<void>)
+                | ((...args: any) => void);
         };
     } = {
         [GameOption.LIMIT]: {
@@ -161,7 +165,7 @@ export default class GuildPreference {
         },
     };
 
-    static DEFAULT_OPTIONS = {
+    static DEFAULT_OPTIONS: GameOptions = {
         beginningYear: DEFAULT_BEGINNING_SEARCH_YEAR,
         endYear: DEFAULT_ENDING_SEARCH_YEAR,
         gender: DEFAULT_GENDER,
@@ -198,7 +202,9 @@ export default class GuildPreference {
     public reloadSongCallback: (() => Promise<void>) | undefined;
 
     /** The guild preference cache */
-    private static guildPreferencesCache = {};
+    private static guildPreferencesCache: {
+        [guildID: string]: GuildPreference;
+    } = {};
 
     /** Locks for generating GuildPreference */
     private static locks: Map<string, MutexInterface> = new Map();
@@ -206,27 +212,48 @@ export default class GuildPreference {
     constructor(guildID: string, options?: GameOptions) {
         this.guildID = guildID;
         this.gameOptions = options || { ...GuildPreference.DEFAULT_OPTIONS };
+        this.validateGameOptions();
     }
 
-    static validateGameOptions(gameOptions: GameOptions): GameOptions {
-        gameOptions = { ...gameOptions };
-
+    validateGameOptions(): void {
+        const validatedGameOptions = { ...this.gameOptions };
+        let newDefaultOptionsAdded = 0;
+        let extraneousKeysRemoved = 0;
         // apply default game option for empty
         for (const defaultOption in GuildPreference.DEFAULT_OPTIONS) {
-            if (!(defaultOption in gameOptions)) {
-                gameOptions[defaultOption] =
-                    GuildPreference.DEFAULT_OPTIONS[defaultOption];
+            if (!(defaultOption in validatedGameOptions)) {
+                mapTo(
+                    validatedGameOptions,
+                    GuildPreference.DEFAULT_OPTIONS,
+                    defaultOption as keyof typeof validatedGameOptions
+                );
+
+                newDefaultOptionsAdded++;
             }
         }
 
         // extraneous keys
-        for (const option in gameOptions) {
+        // TODO: this doesn't actually remove the entries in the database
+        for (const option in validatedGameOptions) {
             if (!(option in GuildPreference.DEFAULT_OPTIONS)) {
-                delete gameOptions[option];
+                extraneousKeysRemoved++;
+                delete validatedGameOptions[
+                    option as keyof typeof validatedGameOptions
+                ];
             }
         }
 
-        return gameOptions;
+        this.gameOptions = validatedGameOptions;
+
+        if (
+            (newDefaultOptionsAdded || extraneousKeysRemoved) &&
+            process.env.NODE_ENV !== EnvType.TEST
+        ) {
+            logger.info(
+                `gid: ${this.guildID} | validateGameOptions: options modified during validation (+${newDefaultOptionsAdded} | -${extraneousKeysRemoved})`
+            );
+            this.updateGuildPreferences();
+        }
     }
 
     static async getGuildPreference(guildID: string): Promise<GuildPreference> {
@@ -289,10 +316,7 @@ export default class GuildPreference {
             });
         }
 
-        return new GuildPreference(
-            guildID,
-            this.validateGameOptions(gameOptionsJson as GameOptions)
-        );
+        return new GuildPreference(guildID, gameOptionsJson as GameOptions);
     }
 
     /** @returns a list of saved game option presets by name */
@@ -390,11 +414,13 @@ export default class GuildPreference {
         }
 
         const oldOptions = this.gameOptions;
-        this.gameOptions = GuildPreference.validateGameOptions(
-            preset as GameOptions
-        );
+        this.validateGameOptions();
         const updatedOptions = Object.entries(this.gameOptions).filter(
-            (option) => !_.isEqual(oldOptions[option[0]], option[1])
+            (option) =>
+                !_.isEqual(
+                    oldOptions[option[0] as keyof typeof oldOptions],
+                    option[1]
+                )
         );
 
         if (updatedOptions.length === 0) {
@@ -882,16 +908,37 @@ export default class GuildPreference {
      * @param updatedOptionsObjects - An array of objects containing the names and values of updated options
      */
     async updateGuildPreferences(
-        updatedOptionsObjects: Array<{ name: string; value: GameOptionValue }>
+        updatedOptionsObjects?: Array<{ name: string; value: GameOptionValue }>
     ): Promise<void> {
-        const updatedOptions = Object.values(updatedOptionsObjects).map(
-            (option) => ({
-                guild_id: this.guildID,
-                client_id: process.env.BOT_CLIENT_ID,
-                option_name: option.name,
-                option_value: JSON.stringify(option.value),
-            })
-        );
+        interface GameOptionDatabaseEntry {
+            guild_id: string;
+            client_id: string | undefined;
+            option_name: string;
+            option_value: string;
+        }
+
+        let updatedOptions: GameOptionDatabaseEntry[] = [];
+        if (updatedOptionsObjects) {
+            updatedOptions = Object.values(updatedOptionsObjects).map(
+                (option) => ({
+                    guild_id: this.guildID,
+                    client_id: process.env.BOT_CLIENT_ID,
+                    option_name: option.name,
+                    option_value: JSON.stringify(option.value),
+                })
+            );
+        } else {
+            updatedOptions = Object.entries(this.gameOptions).map((x) => {
+                const optionName = x[0];
+                const optionValue = x[1];
+                return {
+                    guild_id: this.guildID,
+                    client_id: process.env.BOT_CLIENT_ID,
+                    option_name: optionName,
+                    option_value: JSON.stringify(optionValue),
+                };
+            });
+        }
 
         await dbContext.kmq.transaction(async (trx) => {
             await dbContext
@@ -930,7 +977,11 @@ export default class GuildPreference {
         await this.updateGuildPreferences(options);
 
         const updatedOptions = Object.entries(this.gameOptions).filter(
-            (option) => !_.isEqual(oldOptions[option[0]], option[1])
+            (option) =>
+                !_.isEqual(
+                    oldOptions[option[0] as keyof typeof oldOptions],
+                    option[1]
+                )
         );
 
         return _.uniq(updatedOptions.map((x) => x[0] as GameOption));

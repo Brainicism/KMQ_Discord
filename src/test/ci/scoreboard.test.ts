@@ -143,7 +143,7 @@ describe("scoreboard", () => {
 
         describe("position changes", () => {
             it("should return the correct ranking of every player", () => {
-                const players = {
+                const players: { [user: string]: Player } = {
                     ohmiID: new Player("ohmiID", "guildID", "", 2, "ohmi"),
                     12345: new Player("12345", "guildID", "", 2, "cool"),
                     jisooID: new Player("jisooID", "guildID", "", 3, "jisoo"),

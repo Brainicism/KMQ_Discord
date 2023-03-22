@@ -122,10 +122,11 @@ export default class FeedbackCommand implements BaseCommand {
         for (const [idx, modalComponent] of Object.entries(
             interaction.data.components
         )) {
+            const questionIndex = parseInt(idx, 10);
             feedbackResponse += "--------------------------------\n";
-            feedbackResponse += `Q${parseInt(idx, 10) + 1}. ${i18n.translate(
+            feedbackResponse += `Q${questionIndex + 1}. ${i18n.translate(
                 interaction.guildID as string,
-                FEEDBACK_QUESTIONS[idx].question
+                FEEDBACK_QUESTIONS[questionIndex].question
             )}\n`;
             feedbackResponse += `${modalComponent.components[0].value}\n`;
         }

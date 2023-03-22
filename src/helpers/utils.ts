@@ -458,3 +458,17 @@ export function isValidURL(url: string): boolean {
         return false;
     }
 }
+
+/**
+ * Type-safe property copy
+ * @param target - the target object
+ * @param source - the source object
+ * @param key - the key of the property to be copied
+ */
+export function mapTo<T, S extends T, K extends keyof T>(
+    target: T,
+    source: S,
+    key: K
+): void {
+    target[key] = source[key];
+}

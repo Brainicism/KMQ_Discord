@@ -137,7 +137,7 @@ function parseGaonWeeklyRankList(
     ranklist: string,
     year: string
 ): Array<GaonWeeklyEntry> {
-    return JSON.parse(ranklist).map((x) => {
+    return JSON.parse(ranklist).map((x: string[]) => {
         const songName = x[0];
         const artistName = x[1];
         const artistID = x[2] || null;
@@ -243,7 +243,7 @@ async function recentMusicShowWin(lng: LocaleType): Promise<string[]> {
                 x["artist_name"],
                 x["link"]
             ),
-            musicShow: musicShows[x["music_show"]],
+            musicShow: musicShows[x["music_show"] as keyof typeof musicShows],
             winDate: x["win_date"].toISOString().substring(0, 10),
             lng,
         })

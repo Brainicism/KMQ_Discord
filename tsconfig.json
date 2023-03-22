@@ -12,6 +12,7 @@
         "strictFunctionTypes": true,
         "strictNullChecks": true,
         "noImplicitThis": true,
+        "noImplicitAny": true,
         "strictPropertyInitialization": true,
         "lib": ["es2022"],
         "resolveJsonModule": true,
