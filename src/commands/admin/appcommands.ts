@@ -146,52 +146,112 @@ export default class AppCommandsCommand implements BaseCommand {
                             }
                         }
 
-                        const checkDescriptionLengthRecursively = (cmdObj: {
-                            [key: string]:
-                                | string
-                                | { [locale: string]: string }
-                                | any;
-                        }): void => {
+                        type CommandStructure =
+                            Eris.ChatInputApplicationCommandStructure & {
+                                [key: string]:
+                                    | string
+                                    | Array<string>
+                                    | { [key: string]: string | Array<string> };
+                            };
+
+                        const verifyDescriptionLengths = (
+                            cmdObj: CommandStructure
+                        ): void => {
+                            const checkDescriptionLength = (
+                                description: string
+                            ): void => {
+                                if (
+                                    description.length > MAX_DESCRIPTION_LENGTH
+                                ) {
+                                    throw new Error(
+                                        `Slash command description too long: ${description}`
+                                    );
+                                }
+                            };
+
+                            const checkDescriptionLocalizationsLength = (
+                                descriptionLocalizations: Array<string>
+                            ): void => {
+                                for (const locale in descriptionLocalizations) {
+                                    if (
+                                        descriptionLocalizations[locale]
+                                            .length > MAX_DESCRIPTION_LENGTH
+                                    ) {
+                                        throw new Error(
+                                            `Slash command descriptionLocalization for ${locale} too long: ${descriptionLocalizations[locale]}`
+                                        );
+                                    }
+                                }
+                            };
+
                             for (const key in cmdObj) {
                                 if (Object.hasOwn(cmdObj, key)) {
+                                    const val:
+                                        | string
+                                        | Array<string>
+                                        | {
+                                              [key: string]:
+                                                  | string
+                                                  | Array<string>;
+                                          } = cmdObj[key];
+
                                     if (key === "description") {
-                                        const val = cmdObj[key] as string;
-                                        if (
-                                            val.length > MAX_DESCRIPTION_LENGTH
-                                        ) {
-                                            throw new Error(
-                                                `Slash command description too long: ${val}`
-                                            );
-                                        }
+                                        const description = val as string;
+                                        checkDescriptionLength(description);
                                     } else if (
-                                        key === "description_localizations"
+                                        key === "descriptionLocalizations"
                                     ) {
-                                        const val = cmdObj[key] as {
-                                            [locale: string]: string;
+                                        const descriptionLocalizations =
+                                            val as Array<string>;
+
+                                        checkDescriptionLocalizationsLength(
+                                            descriptionLocalizations
+                                        );
+                                    } else if (key === "options") {
+                                        const options = val as {
+                                            [key: string]:
+                                                | string
+                                                | Array<string>;
                                         };
 
-                                        for (const locale in val) {
+                                        for (const nestedKey in options) {
                                             if (
-                                                val[locale].length >
-                                                MAX_DESCRIPTION_LENGTH
+                                                Object.hasOwn(
+                                                    options,
+                                                    nestedKey
+                                                )
                                             ) {
-                                                throw new Error(
-                                                    `Slash command description_localization for ${locale} too long: ${val[locale]}`
-                                                );
+                                                const nestedVal =
+                                                    options[nestedKey];
+
+                                                if (
+                                                    nestedKey === "description"
+                                                ) {
+                                                    const description =
+                                                        nestedVal as string;
+
+                                                    checkDescriptionLength(
+                                                        description
+                                                    );
+                                                } else if (
+                                                    nestedKey ===
+                                                    "descriptionLocalizations"
+                                                ) {
+                                                    const descriptionLocalizations =
+                                                        nestedVal as Array<string>;
+
+                                                    checkDescriptionLocalizationsLength(
+                                                        descriptionLocalizations
+                                                    );
+                                                }
                                             }
                                         }
-                                    } else if (Array.isArray(cmdObj[key])) {
-                                        const val = cmdObj[key] as Array<any>;
-                                        for (const obj of val)
-                                            checkDescriptionLengthRecursively(
-                                                obj
-                                            );
                                     }
                                 }
                             }
                         };
 
-                        checkDescriptionLengthRecursively(cmd);
+                        verifyDescriptionLengths(cmd as CommandStructure);
                         commandStructures.push(cmd);
                     }
                 }
