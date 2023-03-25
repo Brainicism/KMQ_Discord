@@ -61,11 +61,11 @@ jobs:
               id: app-version-parser
               run: |
                   APP_VERSION=$(npm pkg get version | sed 's/"//g') 
-                  echo IMAGE_NAME=${{ env.REGISTRY }}/brainicism/kmq_discord:$APP_VERSION > $GITHUB_OUTPUT
+                  echo IMAGE_NAME=ghcr.io/brainicism/kmq_discord:$APP_VERSION > $GITHUB_OUTPUT
             - name: Log in to the Container registry
               uses: docker/login-action@v2
               with:
-                  registry: ${{ env.REGISTRY }}
+                  registry: ghcr.io
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
             - name: Build and push Docker image
