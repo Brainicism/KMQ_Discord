@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 restart_type=$1
 kmq_dir=$2
 docker_image=$3
