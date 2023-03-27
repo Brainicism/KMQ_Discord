@@ -31,6 +31,7 @@ async function backupKmqDatabase(): Promise<void> {
     );
 
     const backupSqlFileName = `kmq_backup_${new Date().toISOString()}.sql`;
+    const backupGzipFileName = backupSqlFileName.replace(".sql", ".tar.gz");
 
     try {
         logger.info("Dumping database...");
@@ -40,11 +41,14 @@ async function backupKmqDatabase(): Promise<void> {
 
         logger.info("Compressing output...");
         await exec(
-            `tar -C ${databaseBackupDir} -czvf ${databaseBackupDir}/${backupSqlFileName.replace(
-                ".sql",
-                ".tar.gz"
-            )} ${backupSqlFileName}`
+            `tar -C ${databaseBackupDir} -czvf ${databaseBackupDir}/${backupGzipFileName} ${backupSqlFileName}`
         );
+
+        if (process.env.AZURE_STORAGE_SAS_TOKEN) {
+            await exec(
+                `azcopy copy "${databaseBackupDir}/${backupGzipFileName}" "${process.env.AZURE_STORAGE_SAS_TOKEN}"`
+            );
+        }
 
         logger.info("Cleaning up...");
         await fs.promises.unlink(`${databaseBackupDir}/${backupSqlFileName}`);
