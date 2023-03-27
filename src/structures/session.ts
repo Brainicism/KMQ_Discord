@@ -8,7 +8,6 @@ import {
     getLocalizedSongName,
 } from "../helpers/game_utils";
 import {
-    bold,
     friendlyFormattedNumber,
     getMention,
     underline,
