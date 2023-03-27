@@ -25,9 +25,11 @@ COPY sql/ sql/
 # ================================================================= #
 FROM node:18-alpine
 RUN apk add --no-cache mysql-client \
-    ffmpeg \ 
     bash \
     curl
+
+COPY --from=mwader/static-ffmpeg:6.0 /ffmpeg /usr/local/bin/
+COPY --from=mwader/static-ffmpeg:6.0 /ffprobe /usr/local/bin/
 
 COPY --from=build /app /app
 WORKDIR /app
