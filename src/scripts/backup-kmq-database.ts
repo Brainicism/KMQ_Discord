@@ -31,6 +31,7 @@ async function backupKmqDatabase(): Promise<void> {
     );
 
     const backupSqlFileName = `kmq_backup_${new Date().toISOString()}.sql`;
+    const backupGzipFileName = backupSqlFileName.replace(".sql", ".tar.gz");
 
     try {
         logger.info("Dumping database...");
@@ -38,16 +39,25 @@ async function backupKmqDatabase(): Promise<void> {
             `mysqldump -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} --routines kmq > ${databaseBackupDir}/${backupSqlFileName}`
         );
 
-        logger.info("Compressing output...");
-        await exec(
-            `tar -C ${databaseBackupDir} -czvf ${databaseBackupDir}/${backupSqlFileName.replace(
-                ".sql",
-                ".tar.gz"
-            )} ${backupSqlFileName}`
-        );
+        if (
+            process.env.AZURE_STORAGE_ACCOUNT &&
+            process.env.AZURE_STORAGE_CONTAINER &&
+            process.env.AZURE_STORAGE_SECRET
+        ) {
+            logger.info("Compressing output...");
+            await exec(
+                `tar -C ${databaseBackupDir} -czvf ${databaseBackupDir}/${backupGzipFileName} ${backupSqlFileName}`
+            );
 
-        logger.info("Cleaning up...");
-        await fs.promises.unlink(`${databaseBackupDir}/${backupSqlFileName}`);
+            await exec(
+                `azcopy copy "${databaseBackupDir}/${backupGzipFileName}" "https://${process.env.AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${process.env.AZURE_STORAGE_CONTAINER}/kmq_backup/${backupGzipFileName}?sv=${process.env.AZURE_STORAGE_SECRET}"`
+            );
+
+            logger.info("Cleaning up...");
+            await fs.promises.unlink(
+                `${databaseBackupDir}/${backupGzipFileName}`
+            );
+        }
     } catch (err) {
         logger.error(`Error backing up kmq database, err = ${err}`);
     }
