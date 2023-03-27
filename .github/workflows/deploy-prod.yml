@@ -11,13 +11,7 @@ on:
                     - major
                     - minor
                     - patch
-            restart-type:
-                type: choice
-                description: Soft or hard restart
-                default: soft
-                options:
-                    - soft
-                    - hard
+
 jobs:
     snap:
         runs-on: ubuntu-latest
@@ -84,5 +78,4 @@ jobs:
             SSH_DEPLOY_KNOWN_HOSTS: ${{ secrets.SSH_DEPLOY_KNOWN_HOSTS }}
             PROD_SSH_CONNECTION_STRING: ${{ secrets.PROD_SSH_CONNECTION_STRING }}
         with:
-            restart-type: ${{ github.event.inputs.restart-type }}
             image-name: ${{ needs.build-and-push-image.outputs.image-name }}

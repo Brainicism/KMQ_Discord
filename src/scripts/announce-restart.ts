@@ -11,13 +11,8 @@ config({ path: path.resolve(__dirname, "../../.env") });
 
 program
     .option(
-        "--soft-restart",
-        "Initiate soft-restart for minimal downtime",
-        false
-    )
-    .option(
         "--no-restart",
-        "Automatically restart pm2 process when countdown is over"
+        "Automatically restart process when countdown is over"
     )
     .option("--docker-image <docker_image>", "Docker image")
     .option(
@@ -62,18 +57,10 @@ function serverShutdown(
             let command = "";
             if (!restart) {
                 console.log("Stopping KMQ...");
-                if (dockerImage) {
-                    command = `APP_NAME=${appName} npm run docker-stop`;
-                } else {
-                    command = "pm2 stop kmq";
-                }
+                command = `APP_NAME=${appName} npm run docker-stop`;
             } else {
                 console.log("Restarting KMQ...");
-                if (dockerImage) {
-                    command = `docker rm -f ${appName} && docker pull ${dockerImage} && APP_NAME=${appName} IMAGE_NAME=${dockerImage} npm run docker-run`;
-                } else {
-                    command = "pm2 restart kmq";
-                }
+                command = `docker rm -f ${appName} && docker pull ${dockerImage} && APP_NAME=${appName} IMAGE_NAME=${dockerImage} npm run docker-run`;
             }
 
             console.log(command);
@@ -107,7 +94,6 @@ process.on("SIGINT", async () => {
         await Axios.post(
             `http://127.0.0.1:${process.env.WEB_SERVER_PORT}/announce-restart`,
             {
-                soft: options.softRestart,
                 restartMinutes,
             },
             {
@@ -121,24 +107,18 @@ process.on("SIGINT", async () => {
         process.exit(1);
     }
 
-    if (options.softRestart) {
-        console.log(
-            "Soft restart initiated, see application logs for more details"
-        );
-    } else {
-        console.log(
-            `Next ${
-                options.restart ? "restart" : "shutdown"
-            } scheduled at ${restartDate}`
-        );
+    console.log(
+        `Next ${
+            options.restart ? "restart" : "shutdown"
+        } scheduled at ${restartDate}`
+    );
 
-        await serverShutdown(
-            restartMinutes,
-            restartDate,
-            options.restart,
-            dockerImage
-        );
-    }
+    await serverShutdown(
+        restartMinutes,
+        restartDate,
+        options.restart,
+        dockerImage
+    );
 
     await dbContext.destroy();
 })();

@@ -42,11 +42,9 @@ export function getTimeUntilRestart(): number | null {
 /**
  * Sends a warning message to all active GameSessions for impending restarts at predefined intervals
  * @param timeUntilRestart - time until the restart
- * @param soft - whether it is a soft restart
  */
 export async function warnServersImpendingRestart(
-    timeUntilRestart: number,
-    soft: boolean
+    timeUntilRestart: number
 ): Promise<void> {
     let serversWarned = 0;
     if (RESTART_WARNING_INTERVALS.has(timeUntilRestart)) {
@@ -67,18 +65,13 @@ export async function warnServersImpendingRestart(
                             timeUntilRestart: String(timeUntilRestart),
                         }
                     ),
-                    description: soft
-                        ? i18n.translate(
-                              gameSession.guildID,
-                              "misc.restart.description_soft"
-                          )
-                        : i18n.translate(
-                              gameSession.guildID,
-                              "misc.restart.description_hard",
-                              {
-                                  downtimeMinutes: String(5),
-                              }
-                          ),
+                    description: i18n.translate(
+                        gameSession.guildID,
+                        "misc.restart.description_hard",
+                        {
+                            downtimeMinutes: String(5),
+                        }
+                    ),
                 }
             );
             // eslint-disable-next-line no-await-in-loop
@@ -454,10 +447,7 @@ export function registerIntervals(clusterID: number): void {
         const timeUntilRestart = getTimeUntilRestart();
         if (timeUntilRestart && State.restartNotification) {
             updateBotStatus();
-            await warnServersImpendingRestart(
-                timeUntilRestart,
-                State.restartNotification.soft
-            );
+            await warnServersImpendingRestart(timeUntilRestart);
         }
 
         // Sync state with Patreon subscribers
