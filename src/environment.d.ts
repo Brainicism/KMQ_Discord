@@ -30,8 +30,6 @@ declare namespace NodeJS {
         DAISUKI_SEED_CRON_JOB?: string | undefined;
         GUILDS_PER_SHARD?: string | undefined;
         APP_NAME: string | undefined;
-        AZURE_STORAGE_ACCOUNT?: string | undefined;
-        AZURE_STORAGE_CONTAINER?: string | undefined;
-        AZURE_STORAGE_SECRET?: string | undefined;
+        AZURE_STORAGE_URL?: string | undefined;
     }
 }
