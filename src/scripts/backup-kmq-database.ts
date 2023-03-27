@@ -46,7 +46,7 @@ async function backupKmqDatabase(): Promise<void> {
             );
 
             await exec(
-                `azcopy copy "${databaseBackupDir}/${backupGzipFileName}" "${process.env.AZURE_STORAGE_URL}"`
+                `azcopy copy "${databaseBackupDir}/${backupGzipFileName}" "${process.env.AZURE_STORAGE_SAS_TOKEN}"`
             );
 
             logger.info("Cleaning up...");
