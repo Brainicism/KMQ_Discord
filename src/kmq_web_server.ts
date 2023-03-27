@@ -1,5 +1,3 @@
-import * as cp from "child_process";
-import * as util from "util";
 import { IPCLogger } from "./logger";
 import { measureExecutionTime, standardDateFormat } from "./helpers/utils";
 import { userVoted } from "./helpers/bot_listing_manager";
@@ -12,8 +10,6 @@ import type { DatabaseContext } from "./database_context";
 import type { Fleet, Stats } from "eris-fleet";
 
 const logger = new IPCLogger("web_server");
-
-const exec = util.promisify(cp.exec);
 
 interface ClusterData {
     id: number;
@@ -67,20 +63,12 @@ export default class KmqWebServer {
                 return;
             }
 
-            const isSoftRestart = (request.body as any)["soft"] ? 1 : 0;
-
-            if (isSoftRestart) {
-                logger.info("Soft restart initiated");
-                await exec("npx tsc");
-                fleet.restartAllClusters(false);
-            }
-
             const restartMinutes = (request.body as any)[
                 "restartMinutes"
             ] as number;
 
             await fleet.ipc.allClustersCommand(
-                `announce_restart|${isSoftRestart}|${restartMinutes}`
+                `announce_restart|${restartMinutes}`
             );
             reply.code(200).send();
         });

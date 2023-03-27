@@ -4,11 +4,8 @@ on:
     workflow_dispatch:
     workflow_call:
         inputs:
-            restart-type:
-                required: true
-                type: string
             image-name:
-                required: false
+                required: true
                 type: string
         secrets:
             SSH_DEPLOY_PRIVATE_KEY:
@@ -31,4 +28,4 @@ jobs:
                   echo "${{ secrets.SSH_DEPLOY_PRIVATE_KEY }}" > ~/.ssh/id_rsa
                   echo "${{ secrets.SSH_DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
             - name: Redeploy over SSH
-              run: ssh ${{ secrets.PROD_SSH_CONNECTION_STRING }} "source ~/.zshrc; ./.github/workflows/redeploy_prod.sh ${{ inputs.restart-type }} $KMQ_DIR ${{ inputs.image-name }}"
+              run: ssh ${{ secrets.PROD_SSH_CONNECTION_STRING }} "source ~/.zshrc; ./.github/workflows/redeploy_prod.sh $KMQ_DIR ${{ inputs.image-name }}"
