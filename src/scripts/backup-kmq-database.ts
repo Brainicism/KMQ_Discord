@@ -39,21 +39,19 @@ async function backupKmqDatabase(): Promise<void> {
             `mysqldump -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} --routines kmq > ${databaseBackupDir}/${backupSqlFileName}`
         );
 
-        if (process.env.AZURE_STORAGE_URL) {
-            logger.info("Compressing output...");
-            await exec(
-                `tar -C ${databaseBackupDir} -czvf ${databaseBackupDir}/${backupGzipFileName} ${backupSqlFileName}`
-            );
+        logger.info("Compressing output...");
+        await exec(
+            `tar -C ${databaseBackupDir} -czvf ${databaseBackupDir}/${backupGzipFileName} ${backupSqlFileName}`
+        );
 
+        if (process.env.AZURE_STORAGE_URL) {
             await exec(
                 `azcopy copy "${databaseBackupDir}/${backupGzipFileName}" "${process.env.AZURE_STORAGE_SAS_TOKEN}"`
             );
-
-            logger.info("Cleaning up...");
-            await fs.promises.unlink(
-                `${databaseBackupDir}/${backupGzipFileName}`
-            );
         }
+
+        logger.info("Cleaning up...");
+        await fs.promises.unlink(`${databaseBackupDir}/${backupSqlFileName}`);
     } catch (err) {
         logger.error(`Error backing up kmq database, err = ${err}`);
     }
