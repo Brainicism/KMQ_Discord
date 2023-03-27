@@ -1,5 +1,3 @@
-import * as cp from "child_process";
-import * as util from "util";
 import { IPCLogger } from "./logger";
 import { measureExecutionTime, standardDateFormat } from "./helpers/utils";
 import { userVoted } from "./helpers/bot_listing_manager";
