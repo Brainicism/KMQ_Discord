@@ -13,8 +13,6 @@ import type { Fleet, Stats } from "eris-fleet";
 
 const logger = new IPCLogger("web_server");
 
-const exec = util.promisify(cp.exec);
-
 interface ClusterData {
     id: number;
     ram: string;
@@ -67,20 +65,12 @@ export default class KmqWebServer {
                 return;
             }
 
-            const isSoftRestart = (request.body as any)["soft"] ? 1 : 0;
-
-            if (isSoftRestart) {
-                logger.info("Soft restart initiated");
-                await exec("npx tsc");
-                fleet.restartAllClusters(false);
-            }
-
             const restartMinutes = (request.body as any)[
                 "restartMinutes"
             ] as number;
 
             await fleet.ipc.allClustersCommand(
-                `announce_restart|${isSoftRestart}|${restartMinutes}`
+                `announce_restart|${restartMinutes}`
             );
             reply.code(200).send();
         });

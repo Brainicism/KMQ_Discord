@@ -60,25 +60,14 @@ export default class BotWorker extends BaseClusterWorker {
             const components = commandName.split("|");
             components.shift();
 
-            const isSoftRestart = parseInt(components[0], 10) === 1;
-            const restartMinutes = parseInt(components[1], 10);
+            const restartMinutes = parseInt(components[0], 10);
 
-            if (isSoftRestart) {
-                State.restartNotification = {
-                    soft: isSoftRestart,
-                    restartDate: null,
-                };
-            } else {
-                const restartDate = new Date();
-                restartDate.setMinutes(
-                    restartDate.getMinutes() + restartMinutes
-                );
+            const restartDate = new Date();
+            restartDate.setMinutes(restartDate.getMinutes() + restartMinutes);
 
-                State.restartNotification = {
-                    soft: isSoftRestart,
-                    restartDate,
-                };
-            }
+            State.restartNotification = {
+                restartDate,
+            };
 
             logger.info(
                 `Received restart notification: ${JSON.stringify(
@@ -119,13 +108,6 @@ export default class BotWorker extends BaseClusterWorker {
             case "clear_restart":
                 if (!State.restartNotification) {
                     logger.warn("No active restart notification to clear");
-                    return null;
-                }
-
-                if (State.restartNotification.soft) {
-                    logger.warn(
-                        "Cannot clear restart notification for soft restarts"
-                    );
                     return null;
                 }
 
@@ -220,7 +202,6 @@ export default class BotWorker extends BaseClusterWorker {
 
             State.restartNotification = {
                 restartDate,
-                soft: true,
             };
 
             logger.info(
