@@ -80,6 +80,7 @@ jobs:
         needs: build-and-push-image
         secrets:
             SSH_DEPLOY_PRIVATE_KEY: ${{ secrets.SSH_DEPLOY_PRIVATE_KEY }}
-            PROD_SSH_CONNECTION_STRING: ${{ secrets.PROD_SSH_CONNECTION_STRING }}
+            PROD_SSH_ADDRESS: ${{ secrets.PROD_SSH_ADDRESS }}
+            PROD_SSH_USER: ${{ secrets.PROD_SSH_USER }}
         with:
             image-name: ${{ needs.build-and-push-image.outputs.image-name }}
