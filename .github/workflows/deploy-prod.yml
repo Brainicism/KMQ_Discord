@@ -79,7 +79,6 @@ jobs:
         needs: build-and-push-image
         secrets:
             SSH_DEPLOY_PRIVATE_KEY: ${{ secrets.SSH_DEPLOY_PRIVATE_KEY }}
-            SSH_DEPLOY_KNOWN_HOSTS: ${{ secrets.SSH_DEPLOY_KNOWN_HOSTS }}
             PROD_SSH_CONNECTION_STRING: ${{ secrets.PROD_SSH_CONNECTION_STRING }}
         with:
             image-name: ${{ needs.build-and-push-image.outputs.image-name }}
