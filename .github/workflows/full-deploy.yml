@@ -1,4 +1,4 @@
-name: deploy
+name: full-deploy
 
 on:
     workflow_dispatch:
@@ -76,7 +76,7 @@ jobs:
                   platforms: linux/arm64
                   tags: ${{ steps.app-version-parser.outputs.IMAGE_NAME }},ghcr.io/brainicism/kmq_discord:latest
     upgrade:
-        uses: Brainicism/KMQ_Discord/.github/workflows/restart-prod.yml@master
+        uses: Brainicism/KMQ_Discord/.github/workflows/upgrade-prod.yml@master
         needs: build-and-push-image
         secrets:
             SSH_DEPLOY_PRIVATE_KEY: ${{ secrets.SSH_DEPLOY_PRIVATE_KEY }}

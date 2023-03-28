@@ -1,4 +1,4 @@
-name: upgrade-prod
+name: upgrade
 
 on:
     workflow_dispatch:
