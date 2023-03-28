@@ -27,6 +27,7 @@ jobs:
                   git config --global user.name 'KMQ GH Action Committer'
                   git config --global user.email '<>'
                   git checkout master
+                  echo $PATH
                   npm version ${{ github.event.inputs.semver-type }}
                   git push --follow-tags
                   git checkout prod
@@ -39,7 +40,7 @@ jobs:
                   echo "Pushing new prod branch"
     build-and-push-image:
         needs: snap
-        runs-on: ubuntu-latest
+        runs-on: self-hosted
         outputs:
             image-name: ${{ steps.app-version-parser.outputs.IMAGE_NAME }}
         permissions:
