@@ -5,7 +5,7 @@ docker_image=$2
 cd $1
 
 echo "git fetch"
-git fetch -all
+git fetch --all
 
 echo "Checking out prod branch"
 git reset --hard origin/prod
