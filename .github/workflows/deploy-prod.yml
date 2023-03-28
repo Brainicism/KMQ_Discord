@@ -14,7 +14,7 @@ on:
 
 jobs:
     snap:
-        runs-on: ubuntu-latest
+        runs-on: self-hosted
         timeout-minutes: 10
         steps:
             - name: Checkout KMQ_Discord
