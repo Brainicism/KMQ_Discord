@@ -1,0 +1,36 @@
+name: build-image
+
+on:
+    workflow_dispatch:
+
+jobs:
+    build-and-push-image:
+        needs: snap
+        runs-on: self-hosted
+        permissions:
+            contents: read
+            packages: write
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v3
+              with:
+                  ref: ${{ github.ref_name }}
+            - name: Get application version
+              id: app-version-parser
+              run: |
+                  APP_VERSION=$(npm pkg get version | sed 's/"//g') 
+                  echo IMAGE_NAME=ghcr.io/brainicism/kmq_discord:$APP_VERSION > $GITHUB_OUTPUT
+            - name: Log in to the Container registry
+              uses: docker/login-action@v2
+              with:
+                  registry: ghcr.io
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+            - name: Build and push Docker image
+              uses: docker/build-push-action@v4
+              with:
+                  context: .
+                  file: docker/kmq/Dockerfile
+                  push: false
+                  platforms: linux/arm64
+                  tags: ${{ steps.app-version-parser.outputs.IMAGE_NAME }},ghcr.io/brainicism/kmq_discord:latest
