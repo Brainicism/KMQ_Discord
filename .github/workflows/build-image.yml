@@ -5,7 +5,6 @@ on:
 
 jobs:
     build-and-push-image:
-        needs: snap
         runs-on: self-hosted
         permissions:
             contents: read
