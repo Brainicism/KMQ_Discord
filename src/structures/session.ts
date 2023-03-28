@@ -8,7 +8,6 @@ import {
     getLocalizedSongName,
 } from "../helpers/game_utils";
 import {
-    bold,
     friendlyFormattedNumber,
     getMention,
     underline,
@@ -928,7 +927,6 @@ export default abstract class Session {
             ) {
                 embed.thumbnailUrl = thumbnailUrl;
                 embed.footerText = footerText;
-                embed.title = bold(embed.title);
                 await round.interactionMessage.edit({
                     embeds: [generateEmbed(messageContext, embed)],
                 });
