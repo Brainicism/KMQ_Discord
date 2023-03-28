@@ -1,4 +1,4 @@
-name: restart-prod
+name: upgrade-prod
 
 on:
     workflow_dispatch:
@@ -15,7 +15,7 @@ on:
             PROD_SSH_USER:
                 required: true
 jobs:
-    build:
+    upgrade:
         env:
             KMQ_DIR: /home/kmq/prod
         runs-on: ubuntu-latest

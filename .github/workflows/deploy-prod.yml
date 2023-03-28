@@ -1,4 +1,4 @@
-name: deploy-prod
+name: deploy
 
 on:
     workflow_dispatch:
@@ -75,7 +75,7 @@ jobs:
                   push: true
                   platforms: linux/arm64
                   tags: ${{ steps.app-version-parser.outputs.IMAGE_NAME }},ghcr.io/brainicism/kmq_discord:latest
-    redeploy:
+    upgrade:
         uses: Brainicism/KMQ_Discord/.github/workflows/restart-prod.yml@master
         needs: build-and-push-image
         secrets:
