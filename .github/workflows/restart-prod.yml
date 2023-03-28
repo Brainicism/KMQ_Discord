@@ -10,8 +10,6 @@ on:
         secrets:
             SSH_DEPLOY_PRIVATE_KEY:
                 required: true
-            SSH_DEPLOY_KNOWN_HOSTS:
-                required: true
             PROD_SSH_CONNECTION_STRING:
                 required: true
 jobs:
