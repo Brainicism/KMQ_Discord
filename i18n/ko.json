@@ -1230,6 +1230,28 @@
                 }
             }
         },
+        "upcomingreleases": {
+            "ep": "EP",
+            "single": "싱글",
+            "album": "앨범",
+            "help": {
+                "description": "곧 출시될 예정인 노래, 앨범 및 EPs(확장 재생)를 봅니다.",
+                "defaultExample": "노래, 앨범 및 EP를 포함한 다가오는 아티스트 릴리스 표시",
+                "albumExample": "다가오는 앨범 릴리스 표시",
+                "name": "곧발매될음반",
+                "interaction": {
+                    "releaseType": "표시할 릴리스 유형"
+                }
+            },
+            "failure": {
+                "noSongs": {
+                    "description": "예약된 새 릴리스가 있는지 나중에 다시 확인하십시오.",
+                    "title": "출시 예정 없음"
+                }
+            },
+            "title": "출시 예정",
+            "description": "다음 곡, 앨범 및 EP가 발매될 예정입니다:"
+        },
         "vote": {
             "available": "지금 투표할 수 있습니다!",
             "boost": {

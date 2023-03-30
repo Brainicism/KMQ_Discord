@@ -1230,6 +1230,28 @@
                 }
             }
         },
+        "upcomingreleases": {
+            "ep": "EP",
+            "single": "Single",
+            "album": "Album",
+            "help": {
+                "description": "View songs, albums, and extended plays (EPs) that are scheduled to release soon.",
+                "defaultExample": "Show upcoming artist releases, including songs, albums, and EPs",
+                "albumExample": "Show upcoming album releases",
+                "name": "upcomingreleases",
+                "interaction": {
+                    "releaseType": "The type of release to show"
+                }
+            },
+            "failure": {
+                "noSongs": {
+                    "description": "Check back later to see if there are new releases scheduled.",
+                    "title": "No Upcoming Releases"
+                }
+            },
+            "title": "Upcoming Releases",
+            "description": "The following songs, albums, and EPs are scheduled to be released:"
+        },
         "vote": {
             "available": "You can vote now!",
             "boost": {
