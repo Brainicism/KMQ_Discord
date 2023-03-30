@@ -8,6 +8,7 @@ import {
 import {
     getDebugLogHeader,
     getInteractionValue,
+    sendDeprecatedTextCommandMessage,
     sendInfoMessage,
     sendPaginationedEmbed,
 } from "../../helpers/discord_utils";
@@ -23,6 +24,7 @@ import type { CommandInteraction, EmbedOptions } from "eris";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type { GuildTextableMessage } from "../../types";
 import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "src/interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("upcomingreleases");
@@ -206,4 +208,11 @@ export default class UpcomingReleasesCommand implements BaseCommand {
             interactionOptions["release"] as ReleaseType
         );
     }
+
+    call = async ({ message }: CommandArgs): Promise<void> => {
+        logger.warn("Text-based command not supported for upcomingreleases");
+        await sendDeprecatedTextCommandMessage(
+            MessageContext.fromMessage(message)
+        );
+    };
 }
