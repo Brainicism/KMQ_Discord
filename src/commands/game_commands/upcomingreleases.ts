@@ -11,11 +11,10 @@ import {
     sendInfoMessage,
     sendPaginationedEmbed,
 } from "../../helpers/discord_utils";
-import {
-    getLocalizedArtistName,
-} from "../../helpers/game_utils";
+import { getLocalizedArtistName } from "../../helpers/game_utils";
 import Eris from "eris";
 import KmqMember from "../../structures/kmq_member";
+import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
 import dbContext from "../../database_context";
@@ -24,9 +23,7 @@ import type { CommandInteraction, EmbedOptions } from "eris";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type { GuildTextableMessage } from "../../types";
 import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
-import LocaleType from "../../enums/locale_type";
 
 const logger = new IPCLogger("upcomingreleases");
 
@@ -81,30 +78,33 @@ export default class UpcomingReleasesCommand implements BaseCommand {
     > => [
         {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
-            options: [{
-                name: "release",
-                description: i18n.translate(
-                    LocaleType.EN,
-                    "command.upcomingreleases.help.interaction.releaseType"
-                ),
-                description_localizations: {
-                    [LocaleType.KO]: i18n.translate(
-                        LocaleType.KO,
+            options: [
+                {
+                    name: "release",
+                    description: i18n.translate(
+                        LocaleType.EN,
                         "command.upcomingreleases.help.interaction.releaseType"
+                    ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.upcomingreleases.help.interaction.releaseType"
                         ),
+                    },
+                    required: false,
+                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
+                    choices: Object.values(ReleaseType).map((releaseType) => ({
+                        name: releaseType,
+                        value: releaseType,
+                    })),
                 },
-                required: false,
-                type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
-                choices: Object.values(ReleaseType).map((releaseType) => ({
-                    name: releaseType,
-                    value: releaseType,
-                }))
-            }]
-        }
+            ],
+        },
     ];
 
     static async showUpcomingReleases(
-        messageOrInteraction: GuildTextableMessage | CommandInteraction, releaseType?: ReleaseType
+        messageOrInteraction: GuildTextableMessage | CommandInteraction,
+        releaseType?: ReleaseType
     ): Promise<void> {
         const messageContext = new MessageContext(
             messageOrInteraction.channel.id,
@@ -125,13 +125,12 @@ export default class UpcomingReleasesCommand implements BaseCommand {
                 this.on("app_upcoming.id_artist", "=", "app_kpop_group.id");
             })
             .orderBy("rdate", "ASC")
-            .where(
-                "rdate",
-                ">=",
-                standardDateFormat(new Date())
-            )
+            .where("rdate", ">=", standardDateFormat(new Date()))
             .whereNot("app_upcoming.name", "")
-            .whereIn("rtype", releaseType ? [releaseType] : Object.values(ReleaseType));
+            .whereIn(
+                "rtype",
+                releaseType ? [releaseType] : Object.values(ReleaseType)
+            );
 
         if (upcomingReleases.length === 0) {
             sendInfoMessage(
@@ -159,10 +158,14 @@ export default class UpcomingReleasesCommand implements BaseCommand {
 
         const locale = State.getGuildLocale(messageContext.guildID);
         const fields = upcomingReleases.map((release) => ({
-            name: `"${release.name}" - ${getLocalizedArtistName(release, locale)}`,
-            value: `${discordDateFormat(
-                release.releaseDate
-            )}\n${i18n.translate(messageContext.guildID, `command.upcomingreleases.${release.releaseType}`)}`,
+            name: `"${release.name}" - ${getLocalizedArtistName(
+                release,
+                locale
+            )}`,
+            value: `${discordDateFormat(release.releaseDate)}\n${i18n.translate(
+                messageContext.guildID,
+                `command.upcomingreleases.${release.releaseType}`
+            )}`,
             inline: true,
         }));
 
@@ -198,6 +201,9 @@ export default class UpcomingReleasesCommand implements BaseCommand {
         _messageContext: MessageContext
     ): Promise<void> {
         const { interactionOptions } = getInteractionValue(interaction);
-        await UpcomingReleasesCommand.showUpcomingReleases(interaction, interactionOptions["release"] as ReleaseType);
+        await UpcomingReleasesCommand.showUpcomingReleases(
+            interaction,
+            interactionOptions["release"] as ReleaseType
+        );
     }
 }
