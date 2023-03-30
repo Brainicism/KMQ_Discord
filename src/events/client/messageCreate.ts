@@ -126,11 +126,21 @@ export default async function messageCreateHandler(
             );
 
             try {
-                await invokedCommand.call({
-                    channel: textChannel,
-                    message,
-                    parsedMessage,
-                });
+                if (invokedCommand.call) {
+                    await invokedCommand.call({
+                        channel: textChannel,
+                        message,
+                        parsedMessage,
+                    });
+                } else {
+                    logger.info(
+                        `${getDebugLogHeader(
+                            message
+                        )} | User attempted to use '${
+                            parsedMessage.action
+                        }', a command without text command support.`
+                    );
+                }
             } catch (err) {
                 const debugId = uuid.v4();
 
