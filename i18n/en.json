@@ -1023,7 +1023,6 @@
                 "example": "Show recently added songs",
                 "name": "recentlyadded"
             },
-            "released": "Released",
             "title": "Recently Added Songs"
         },
         "release": {
