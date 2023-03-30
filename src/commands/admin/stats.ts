@@ -46,6 +46,7 @@ export default class StatsCommand implements BaseCommand {
         interaction?: Eris.CommandInteraction
     ): Promise<void> => {
         const fleetStats = await State.ipc.getStats();
+        let s = Date.now();
         let gameSessionStats;
         try {
             gameSessionStats = Array.from(
@@ -82,6 +83,9 @@ export default class StatsCommand implements BaseCommand {
             0
         );
 
+        logger.info(`gameSessionStats took ${Date.now() - s}`);
+        s = Date.now();
+
         const dateThreshold = new Date();
         dateThreshold.setHours(dateThreshold.getHours() - 24);
         const recentGameSessions = (
@@ -92,12 +96,17 @@ export default class StatsCommand implements BaseCommand {
                 .first()) ?? {}
         ).count;
 
+        logger.info(`recentGameSessions took ${Date.now() - s}`);
+        s = Date.now();
         const totalGameSessions = (
             (await dbContext
                 .kmq("game_sessions")
                 .count("* as count")
                 .first()) ?? {}
         ).count;
+
+        logger.info(`totalGameSessions took ${Date.now() - s}`);
+        s = Date.now();
 
         const recentGameRounds =
             (
@@ -108,6 +117,9 @@ export default class StatsCommand implements BaseCommand {
                     .first()) ?? {}
             ).total || 0;
 
+        logger.info(`recentGameRounds took ${Date.now() - s}`);
+        s = Date.now();
+
         const totalGameRounds =
             (
                 (await dbContext
@@ -115,6 +127,9 @@ export default class StatsCommand implements BaseCommand {
                     .sum("rounds_played as total")
                     .first()) ?? {}
             ).total || 0;
+
+        logger.info(`totalGameRounds took ${Date.now() - s}`);
+        s = Date.now();
 
         const recentPlayers = (
             (await dbContext
@@ -124,6 +139,9 @@ export default class StatsCommand implements BaseCommand {
                 .first()) ?? {}
         ).count;
 
+        logger.info(`recentPlayers took ${Date.now() - s}`);
+        s = Date.now();
+
         const totalPlayers = (
             (await dbContext
                 .kmq("player_stats")
@@ -131,6 +149,9 @@ export default class StatsCommand implements BaseCommand {
                 .where("exp", ">", "0")
                 .first()) ?? {}
         ).count;
+
+        logger.info(`totalPlayers took ${Date.now() - s}`);
+        s = Date.now();
 
         const latestAvailableSong = new Date(
             (
@@ -142,9 +163,15 @@ export default class StatsCommand implements BaseCommand {
             ).publishedon
         );
 
+        logger.info(`latestAvailableSong took ${Date.now() - s}`);
+        s = Date.now();
+
         const mysqlLatency = await measureExecutionTime(
             dbContext.kmq.raw("SELECT 1;")
         );
+
+        logger.info(`mysqlLatency took ${Date.now() - s}`);
+        s = Date.now();
 
         const requestLatency = (
             await dbContext
@@ -154,6 +181,9 @@ export default class StatsCommand implements BaseCommand {
                 .orderBy("date", "DESC")
                 .first()
         )["stat_value"];
+
+        logger.info(`requestLatency took ${Date.now() - s}`);
+        s = Date.now();
 
         const gameStatistics = {
             [i18n.translate(
