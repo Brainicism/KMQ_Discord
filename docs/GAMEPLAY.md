@@ -240,6 +240,7 @@ Use `/help action:[command_name]` for more details about the following commands:
 -   `/exp`: Show your current bonus EXP modifiers
 -   `/locale`: Change the language of the bot
 -   `/lookup`: Get information about the given song (whether it's available in KMQ, aliases, etc.)
+-   `/upcomingreleases`: See a list of confirmed songs, albums, and EPs planned for release in the future
 
 ## Game Option Commands
 

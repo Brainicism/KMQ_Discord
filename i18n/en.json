@@ -1023,7 +1023,6 @@
                 "example": "Show recently added songs",
                 "name": "recentlyadded"
             },
-            "released": "Released",
             "title": "Recently Added Songs"
         },
         "release": {
@@ -1229,6 +1228,28 @@
                     "seconds": "seconds"
                 }
             }
+        },
+        "upcomingreleases": {
+            "album": "Album",
+            "description": "The following songs, albums, and EPs are scheduled to be released:",
+            "ep": "EP",
+            "failure": {
+                "noReleases": {
+                    "description": "Check back later to see if there are new releases scheduled.",
+                    "title": "No Upcoming Releases"
+                }
+            },
+            "help": {
+                "albumExample": "Show upcoming album releases",
+                "defaultExample": "Show upcoming artist releases, including songs, albums, and EPs",
+                "description": "View songs, albums, and extended plays (EPs) that are scheduled to release soon.",
+                "interaction": {
+                    "releaseType": "The type of release to show"
+                },
+                "name": "upcomingreleases"
+            },
+            "single": "Single",
+            "title": "Upcoming Releases"
         },
         "vote": {
             "available": "You can vote now!",

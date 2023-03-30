@@ -218,6 +218,14 @@ export function standardDateFormat(date: Date): string {
 
 /**
  * @param date - the date Object
+ * @returns a formatted string that appears as an interactable date in Discord
+ */
+export function discordDateFormat(date: Date): string {
+    return `<t:${Math.floor(date.getTime() / 1000)}:d>`;
+}
+
+/**
+ * @param date - the date Object
  * @param guildID - the guild ID
  * @returns the date in (minutes/hours ago) or yyyy-mm-dd format
  */

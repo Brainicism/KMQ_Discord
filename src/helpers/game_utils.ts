@@ -569,7 +569,7 @@ export function getLocalizedSongName(
  * the artist's name otherwise
  */
 export function getLocalizedArtistName(
-    song: QueriedSong,
+    song: { artistName: string; hangulArtistName?: string },
     locale: LocaleType
 ): string {
     if (locale !== LocaleType.KO) {

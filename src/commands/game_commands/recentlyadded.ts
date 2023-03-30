@@ -2,6 +2,7 @@ import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import {
     chunkArray,
+    discordDateFormat,
     friendlyFormattedNumber,
     standardDateFormat,
 } from "../../helpers/utils";
@@ -125,10 +126,7 @@ export default class RecentlyAddedCommand implements BaseCommand {
                 song,
                 locale
             )}" - ${getLocalizedArtistName(song, locale)}`,
-            value: `${i18n.translate(
-                messageContext.guildID,
-                "command.recentlyadded.released"
-            )} ${standardDateFormat(
+            value: `${discordDateFormat(
                 song.publishDate
             )}\n[${friendlyFormattedNumber(song.views)} ${i18n.translate(
                 messageContext.guildID,
