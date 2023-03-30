@@ -33,10 +33,13 @@ const logger = new IPCLogger("seed_db");
 
 const MONITORED_DAISUKI_TABLES = [
     "app_kpop",
+    "app_kpop_audio",
     "app_kpop_group",
     "app_kpop_gaondigi",
     "app_kpop_ms",
+    "app_kpop_company",
     "app_kpop_agrelation",
+    "app_upcoming",
 ];
 
 /**
