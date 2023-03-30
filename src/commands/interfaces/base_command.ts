@@ -12,7 +12,7 @@ export type DefaultSlashCommand = Omit<
 >;
 
 export default interface BaseCommand {
-    call: CallFunc;
+    call?: CallFunc;
     help?: (guildID: string) => HelpDocumentation;
     aliases?: Array<string>;
     validations?: CommandValidations;
