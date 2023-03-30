@@ -1,8 +1,8 @@
--- MySQL dump 10.19  Distrib 10.3.34-MariaDB, for debian-linux-gnu (x86_64)
+-- MySQL dump 10.19  Distrib 10.3.38-MariaDB, for debian-linux-gnu (x86_64)
 --
 -- Host: 127.0.0.1    Database: kmq_test
 -- ------------------------------------------------------
--- Server version	10.3.34-MariaDB-0ubuntu0.20.04.1
+-- Server version	10.3.38-MariaDB-0ubuntu0.20.04.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -27,7 +27,7 @@ CREATE TABLE `badges` (
   `name` varchar(255) NOT NULL,
   `priority` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -52,7 +52,7 @@ CREATE TABLE `badges_players` (
   PRIMARY KEY (`user_id`,`badge_id`),
   KEY `badges_players_badge_id_foreign` (`badge_id`),
   CONSTRAINT `badges_players_badge_id_foreign` FOREIGN KEY (`badge_id`) REFERENCES `badges` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -75,7 +75,7 @@ CREATE TABLE `bookmarked_songs` (
   `user_id` varchar(255) NOT NULL,
   `vlink` varchar(255) NOT NULL,
   `bookmarked_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -98,7 +98,7 @@ CREATE TABLE `cached_song_duration` (
   `vlink` varchar(255) NOT NULL,
   `duration` smallint(6) NOT NULL,
   UNIQUE KEY `cached_song_duration_vlink_unique` (`vlink`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -121,7 +121,7 @@ CREATE TABLE `competition_moderators` (
   `guild_id` varchar(255) NOT NULL,
   `user_id` varchar(255) NOT NULL,
   PRIMARY KEY (`guild_id`,`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -148,7 +148,7 @@ CREATE TABLE `daily_stats` (
   `newPlayers` int(11) DEFAULT 0,
   `serverCount` int(11) DEFAULT 0,
   UNIQUE KEY `daily_stats_date_unique` (`date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -171,7 +171,7 @@ CREATE TABLE `dead_links` (
   `vlink` varchar(255) NOT NULL,
   `reason` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`vlink`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -197,7 +197,7 @@ CREATE TABLE `game_messages` (
   `weight` int(11) DEFAULT 1,
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -222,7 +222,7 @@ CREATE TABLE `game_option_presets` (
   `option_name` varchar(255) NOT NULL,
   `option_value` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   UNIQUE KEY `game_option_presets_guild_id_preset_name_option_name_unique` (`guild_id`,`preset_name`,`option_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -246,7 +246,7 @@ CREATE TABLE `game_option_presets_json` (
   `preset_name` varchar(255) NOT NULL,
   `game_options` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
   PRIMARY KEY (`guild_id`,`preset_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -271,7 +271,7 @@ CREATE TABLE `game_options` (
   `option_value` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `client_id` varchar(255) NOT NULL DEFAULT '708411013384634371',
   UNIQUE KEY `game_options_guild_id_option_name_client_id_unique` (`guild_id`,`option_name`,`client_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -299,8 +299,9 @@ CREATE TABLE `game_sessions` (
   `session_length` float(8,2) NOT NULL,
   `rounds_played` int(11) NOT NULL,
   `correct_guesses` int(11) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  PRIMARY KEY (`id`),
+  KEY `game_sessions_start_date_index` (`start_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -326,7 +327,7 @@ CREATE TABLE `guilds` (
   `games_played` int(11) DEFAULT 0,
   `songs_guessed` int(11) DEFAULT 0,
   PRIMARY KEY (`guild_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -351,7 +352,7 @@ CREATE TABLE `knex_migrations` (
   `batch` int(11) DEFAULT NULL,
   `migration_time` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -360,7 +361,7 @@ CREATE TABLE `knex_migrations` (
 
 LOCK TABLES `knex_migrations` WRITE;
 /*!40000 ALTER TABLE `knex_migrations` DISABLE KEYS */;
-INSERT INTO `knex_migrations` VALUES (1,'20200530145825_guild_preferences.js',1,'2022-10-02 00:59:20'),(2,'20200726213404_restart_table.js',1,'2022-10-02 00:59:20'),(3,'20200802155423_usage-data.js',1,'2022-10-02 00:59:20'),(4,'20200804002244_game-session-table.js',1,'2022-10-02 00:59:20'),(5,'20200815154316_not-downloaded.js',1,'2022-10-02 00:59:20'),(6,'20200815163208_deadlinks.js',1,'2022-10-02 00:59:20'),(7,'20201031163516_guild_preferences_index.js',1,'2022-10-02 00:59:20'),(8,'20201106004706_player_stats_table.js',1,'2022-10-02 00:59:20'),(9,'20201123155842_store-daily-stats.js',1,'2022-10-02 00:59:20'),(10,'20210112130147_player-exp-system.js',1,'2022-10-02 00:59:20'),(11,'20210117140712_leaderboard_enrollment.js',1,'2022-10-02 00:59:20'),(12,'20210117201417_leaderboard_enrollment_display_charset.js',1,'2022-10-02 00:59:20'),(13,'20210118113657_leaderboard_enrollment_display_utf8mb4.js',1,'2022-10-02 00:59:20'),(14,'20210123222227_player-server-table.js',1,'2022-10-02 00:59:20'),(15,'20210402030127_add_correct_guesses_to_game-session-table.js',1,'2022-10-02 00:59:20'),(16,'20210402031946_song_guess_count.js',1,'2022-10-02 00:59:20'),(17,'20210403131250_game-option-presets.js',1,'2022-10-02 00:59:20'),(18,'20210417005116_top_gg_user_votes.js',1,'2022-10-02 00:59:20'),(19,'20210418172425_top_gg_user_votes_bonus_expiry.js',1,'2022-10-02 00:59:20'),(20,'20210515023220_rename_json_presets.js',1,'2022-10-02 00:59:20'),(21,'20210515215351_game_options.js',1,'2022-10-02 00:59:21'),(22,'20210518065112_game_options_presets_by_option.js',1,'2022-10-02 00:59:21'),(23,'20210518215005_remove_guild_preference_json.js',1,'2022-10-02 00:59:23'),(24,'20210528022206_badges.js',1,'2022-10-02 00:59:23'),(25,'20210605023240_publish_date_overrides_table.js',1,'2022-10-02 00:59:23'),(26,'20210605035348_end_game_messages_table.js',1,'2022-10-02 00:59:23'),(27,'20210606234249_cached_song_duration.js',1,'2022-10-02 00:59:23'),(28,'20210619035132_drop-publish-date-overrides.js',1,'2022-10-02 00:59:23'),(29,'20210724002405_cluster_stats.js',1,'2022-10-02 00:59:23'),(30,'20210814061902_rename_end_game_messages.js',1,'2022-10-02 00:59:23'),(31,'20210819022349_system_statistics.js',1,'2022-10-02 00:59:23'),(32,'20210819160851_bookmarked_songs.js',1,'2022-10-02 00:59:23'),(33,'20210821155505_premium_users.js',1,'2022-10-02 00:59:23'),(34,'20210825230408_nullable_cluster_id_system_stats.js',1,'2022-10-02 00:59:23'),(35,'20210828065453_player_game_session_stats_table.js',1,'2022-10-02 00:59:23'),(36,'20210831203402_guild_preference_primary_idx.js',1,'2022-10-02 00:59:24'),(37,'20210906065406_competition_moderators.js',1,'2022-10-02 00:59:24'),(38,'20210925060749_badges_refactor.js',1,'2022-10-02 00:59:24'),(39,'20210926083508_badges_migrate_table.js',1,'2022-10-02 00:59:24'),(40,'20211002052649_drop_cluster_stats_table.js',1,'2022-10-02 00:59:24'),(41,'20211109030655_sql_overrides_table.js',1,'2022-10-02 00:59:24'),(42,'20211109064140_dead_links_unique.js',1,'2022-10-02 00:59:24'),(43,'20211216025236_song_guess_count_to_song_metadata.js',1,'2022-10-02 00:59:24'),(44,'20211222105158_locale.js',1,'2022-10-02 00:59:24'),(45,'20220218012204_guild_preferences_to_guild_metadata.js',1,'2022-10-02 00:59:24'),(46,'20220218013908_client_id_in_game_options.js',1,'2022-10-02 00:59:24'),(47,'20220409183111_deprecate_old_shuffle.js',1,'2022-10-02 00:59:24'),(48,'20220514235230_game-messages-varchar-to-text.js',1,'2022-10-02 00:59:25'),(49,'20220605044555_bookmarked_songs_date.js',1,'2022-10-02 00:59:25'),(50,'20220703183828_drop_restart_notifications_table.js',1,'2022-10-02 00:59:25');
+INSERT INTO `knex_migrations` VALUES (1,'20200530145825_guild_preferences.js',1,'2023-03-30 04:46:08'),(2,'20200726213404_restart_table.js',1,'2023-03-30 04:46:08'),(3,'20200802155423_usage-data.js',1,'2023-03-30 04:46:08'),(4,'20200804002244_game-session-table.js',1,'2023-03-30 04:46:08'),(5,'20200815154316_not-downloaded.js',1,'2023-03-30 04:46:08'),(6,'20200815163208_deadlinks.js',1,'2023-03-30 04:46:08'),(7,'20201031163516_guild_preferences_index.js',1,'2023-03-30 04:46:08'),(8,'20201106004706_player_stats_table.js',1,'2023-03-30 04:46:08'),(9,'20201123155842_store-daily-stats.js',1,'2023-03-30 04:46:09'),(10,'20210112130147_player-exp-system.js',1,'2023-03-30 04:46:09'),(11,'20210117140712_leaderboard_enrollment.js',1,'2023-03-30 04:46:09'),(12,'20210117201417_leaderboard_enrollment_display_charset.js',1,'2023-03-30 04:46:09'),(13,'20210118113657_leaderboard_enrollment_display_utf8mb4.js',1,'2023-03-30 04:46:09'),(14,'20210123222227_player-server-table.js',1,'2023-03-30 04:46:09'),(15,'20210402030127_add_correct_guesses_to_game-session-table.js',1,'2023-03-30 04:46:09'),(16,'20210402031946_song_guess_count.js',1,'2023-03-30 04:46:09'),(17,'20210403131250_game-option-presets.js',1,'2023-03-30 04:46:09'),(18,'20210417005116_top_gg_user_votes.js',1,'2023-03-30 04:46:09'),(19,'20210418172425_top_gg_user_votes_bonus_expiry.js',1,'2023-03-30 04:46:09'),(20,'20210515023220_rename_json_presets.js',1,'2023-03-30 04:46:09'),(21,'20210515215351_game_options.js',1,'2023-03-30 04:46:09'),(22,'20210518065112_game_options_presets_by_option.js',1,'2023-03-30 04:46:09'),(23,'20210518215005_remove_guild_preference_json.js',1,'2023-03-30 04:46:11'),(24,'20210528022206_badges.js',1,'2023-03-30 04:46:11'),(25,'20210605023240_publish_date_overrides_table.js',1,'2023-03-30 04:46:11'),(26,'20210605035348_end_game_messages_table.js',1,'2023-03-30 04:46:11'),(27,'20210606234249_cached_song_duration.js',1,'2023-03-30 04:46:12'),(28,'20210619035132_drop-publish-date-overrides.js',1,'2023-03-30 04:46:12'),(29,'20210724002405_cluster_stats.js',1,'2023-03-30 04:46:12'),(30,'20210814061902_rename_end_game_messages.js',1,'2023-03-30 04:46:12'),(31,'20210819022349_system_statistics.js',1,'2023-03-30 04:46:12'),(32,'20210819160851_bookmarked_songs.js',1,'2023-03-30 04:46:12'),(33,'20210821155505_premium_users.js',1,'2023-03-30 04:46:12'),(34,'20210825230408_nullable_cluster_id_system_stats.js',1,'2023-03-30 04:46:12'),(35,'20210828065453_player_game_session_stats_table.js',1,'2023-03-30 04:46:12'),(36,'20210831203402_guild_preference_primary_idx.js',1,'2023-03-30 04:46:12'),(37,'20210906065406_competition_moderators.js',1,'2023-03-30 04:46:12'),(38,'20210925060749_badges_refactor.js',1,'2023-03-30 04:46:12'),(39,'20210926083508_badges_migrate_table.js',1,'2023-03-30 04:46:13'),(40,'20211002052649_drop_cluster_stats_table.js',1,'2023-03-30 04:46:13'),(41,'20211109030655_sql_overrides_table.js',1,'2023-03-30 04:46:13'),(42,'20211109064140_dead_links_unique.js',1,'2023-03-30 04:46:13'),(43,'20211216025236_song_guess_count_to_song_metadata.js',1,'2023-03-30 04:46:13'),(44,'20211222105158_locale.js',1,'2023-03-30 04:46:13'),(45,'20220218012204_guild_preferences_to_guild_metadata.js',1,'2023-03-30 04:46:13'),(46,'20220218013908_client_id_in_game_options.js',1,'2023-03-30 04:46:13'),(47,'20220409183111_deprecate_old_shuffle.js',1,'2023-03-30 04:46:13'),(48,'20220514235230_game-messages-varchar-to-text.js',1,'2023-03-30 04:46:13'),(49,'20220605044555_bookmarked_songs_date.js',1,'2023-03-30 04:46:13'),(50,'20220703183828_drop_restart_notifications_table.js',1,'2023-03-30 04:46:13'),(51,'20230330043817_game-sessions-index.js',1,'2023-03-30 04:46:13');
 /*!40000 ALTER TABLE `knex_migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -375,7 +376,7 @@ CREATE TABLE `knex_migrations_lock` (
   `index` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `is_locked` int(11) DEFAULT NULL,
   PRIMARY KEY (`index`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -400,7 +401,7 @@ CREATE TABLE `kpop_videos_sql_overrides` (
   `query` varchar(255) NOT NULL,
   `reason` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -424,7 +425,7 @@ CREATE TABLE `leaderboard_enrollment` (
   `display_name` varchar(255) NOT NULL,
   `player_id` varchar(255) NOT NULL,
   UNIQUE KEY `leaderboard_enrollment_player_id_unique` (`player_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -447,7 +448,7 @@ CREATE TABLE `locale` (
   `guild_id` varchar(255) NOT NULL,
   `locale` varchar(255) NOT NULL,
   PRIMARY KEY (`guild_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -468,7 +469,7 @@ DROP TABLE IF EXISTS `not_downloaded`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `not_downloaded` (
   `vlink` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -494,7 +495,7 @@ CREATE TABLE `player_game_session_stats` (
   `exp_gained` int(11) DEFAULT 0,
   `levels_gained` int(11) DEFAULT 0,
   UNIQUE KEY `player_game_session_stats_player_id_date_unique` (`player_id`,`date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -517,7 +518,7 @@ CREATE TABLE `player_servers` (
   `player_id` varchar(255) NOT NULL,
   `server_id` varchar(255) NOT NULL,
   PRIMARY KEY (`player_id`,`server_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -545,7 +546,7 @@ CREATE TABLE `player_stats` (
   `exp` int(11) DEFAULT 0,
   `level` int(11) DEFAULT 1,
   UNIQUE KEY `player_stats_player_id_unique` (`player_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -570,7 +571,7 @@ CREATE TABLE `premium_users` (
   `first_subscribed` datetime DEFAULT NULL,
   `source` enum('patreon','loyalty') NOT NULL,
   PRIMARY KEY (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -600,7 +601,7 @@ CREATE TABLE `song_metadata` (
   `time_to_guess_ms` int(11) DEFAULT 0,
   `time_played_ms` int(11) DEFAULT 0,
   UNIQUE KEY `song_guess_count_vlink_unique` (`vlink`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -624,7 +625,7 @@ CREATE TABLE `system_stats` (
   `stat_name` varchar(255) NOT NULL,
   `stat_value` int(11) NOT NULL,
   `date` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -648,7 +649,7 @@ CREATE TABLE `top_gg_user_votes` (
   `buff_expiry_date` datetime NOT NULL,
   `total_votes` int(11) DEFAULT 0,
   PRIMARY KEY (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -669,4 +670,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-10-02  0:59:25
+-- Dump completed on 2023-03-30  4:46:13
