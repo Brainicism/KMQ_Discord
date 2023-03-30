@@ -31,16 +31,14 @@ const daisukiDbDownloadUrl =
 
 const logger = new IPCLogger("seed_db");
 
-const MONITORED_DAISUKI_TABLES = [
-    "app_kpop",
-    "app_kpop_audio",
-    "app_kpop_group",
-    "app_kpop_gaondigi",
-    "app_kpop_ms",
-    "app_kpop_company",
-    "app_kpop_agrelation",
-    "app_upcoming",
-];
+async function getDaisukiTableNames(db: DatabaseContext): Promise<string[]> {
+    return (
+        await db
+            .agnostic("information_schema.tables")
+            .select("table_name")
+            .where("table_schema", "=", "kpop_videos")
+    ).map((x) => x["table_name"]);
+}
 
 /**
  * @param db - The database context
@@ -217,7 +215,9 @@ async function extractDb(): Promise<void> {
 async function recordDaisukiTableSchema(db: DatabaseContext): Promise<void> {
     const frozenTableColumnNames: { [table: string]: string[] } = {};
     await Promise.allSettled(
-        MONITORED_DAISUKI_TABLES.map(async (table) => {
+        (
+            await getDaisukiTableNames(db)
+        ).map(async (table) => {
             const commaSeparatedColumnNames = (
                 await db.agnostic.raw(
                     `SELECT group_concat(COLUMN_NAME) as x FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'kpop_videos' AND TABLE_NAME = '${table}';`
@@ -241,7 +241,9 @@ async function validateDaisukiTableSchema(
 ): Promise<void> {
     const outputMessages: Array<string> = [];
     await Promise.allSettled(
-        MONITORED_DAISUKI_TABLES.map(async (table) => {
+        (
+            await getDaisukiTableNames(db)
+        ).map(async (table) => {
             const commaSeparatedColumnNames = (
                 await db.agnostic.raw(
                     `SELECT group_concat(COLUMN_NAME) as x FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'kpop_videos_validation' AND TABLE_NAME = '${table}';`
