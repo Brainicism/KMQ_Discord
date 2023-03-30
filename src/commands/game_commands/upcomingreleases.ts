@@ -139,11 +139,11 @@ export default class UpcomingReleasesCommand implements BaseCommand {
                 {
                     title: i18n.translate(
                         messageContext.guildID,
-                        "command.upcomingreleases.failure.noSongs.title"
+                        "command.upcomingreleases.failure.noReleases.title"
                     ),
                     description: i18n.translate(
                         messageContext.guildID,
-                        "command.upcomingreleases.failure.noSongs.description"
+                        "command.upcomingreleases.failure.noReleases.description"
                     ),
                     thumbnailUrl: KmqImages.NOT_IMPRESSED,
                 },

@@ -1243,7 +1243,7 @@
                 }
             },
             "failure": {
-                "noSongs": {
+                "noReleases": {
                     "description": "예약된 새 릴리스가 있는지 나중에 다시 확인하십시오.",
                     "title": "출시 예정 없음"
                 }

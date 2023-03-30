@@ -1243,7 +1243,7 @@
                 }
             },
             "failure": {
-                "noSongs": {
+                "noReleases": {
                     "description": "Check back later to see if there are new releases scheduled.",
                     "title": "No Upcoming Releases"
                 }
