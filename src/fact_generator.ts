@@ -910,7 +910,7 @@ async function recentUniquePlayers(lng: LocaleType): Promise<string[]> {
                 .where("last_active", ">", priorDate);
 
             const recentActivePlayers = result[0].count as number;
-            return i18n.internalLocalizer.t("fact.kmq.uniquePlayers", {
+            const fact = i18n.internalLocalizer.t("fact.kmq.uniquePlayers", {
                 recentActivePlayers:
                     friendlyFormattedNumber(recentActivePlayers),
                 xDays: i18n.internalLocalizer.t("misc.plural.day", {
@@ -919,6 +919,8 @@ async function recentUniquePlayers(lng: LocaleType): Promise<string[]> {
                 }),
                 lng,
             });
+
+            return fact;
         })
     );
 }

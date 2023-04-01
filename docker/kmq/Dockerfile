@@ -11,7 +11,7 @@ RUN apk add --no-cache git \
 WORKDIR /app
 
 COPY yarn.lock package.json ./
-RUN yarn install
+RUN yarn install --frozen-lockfile
 
 COPY start.sh tsconfig.json ./
 COPY i18n/ i18n/
