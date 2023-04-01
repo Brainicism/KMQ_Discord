@@ -121,7 +121,7 @@ export default class KmqWebServer {
                     } catch (e) {
                         reply.code(400).send(`Error: ${e.message}`);
                     }
-                }.call(fleet.eris.requestHandler, query));
+                }).call(fleet.eris.requestHandler, query);
             }
         );
 
