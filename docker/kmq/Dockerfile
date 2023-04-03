@@ -24,12 +24,20 @@ COPY sql/ sql/
 
 # ================================================================= #
 FROM node:18-alpine
+ARG TARGETARCH
 RUN apk add --no-cache mysql-client \
     bash \
     curl
 
 COPY --from=mwader/static-ffmpeg:6.0 /ffmpeg /usr/local/bin/
 COPY --from=mwader/static-ffmpeg:6.0 /ffprobe /usr/local/bin/
+
+RUN wget "https://azcopyvnext.azureedge.net/release20230331/azcopy_linux_${TARGETARCH}_10.18.0.tar.gz" \
+    && tar xzfv azcopy_linux_${TARGETARCH}_10.18.0.tar.gz \
+    && cp -fv azcopy_linux_${TARGETARCH}_10.18.0/azcopy /usr/bin \
+    && chmod +x /usr/bin/azcopy \
+    && rm -rfv azcopy_linux_${TARGETARCH}_10.18.0.tar.gz \
+    && rm -rfv azcopy_linux_${TARGETARCH}_10.18.0/azcopy
 
 COPY --from=build /app /app
 WORKDIR /app
