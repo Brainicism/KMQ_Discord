@@ -127,7 +127,8 @@ export default class RecentlyAddedCommand implements BaseCommand {
                 locale
             )}" - ${getLocalizedArtistName(song, locale)}`,
             value: `${discordDateFormat(
-                song.publishDate
+                song.publishDate,
+                "d"
             )}\n[${friendlyFormattedNumber(song.views)} ${i18n.translate(
                 messageContext.guildID,
                 "misc.views"

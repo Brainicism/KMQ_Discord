@@ -164,7 +164,10 @@ export default class UpcomingReleasesCommand implements BaseCommand {
                 release,
                 locale
             )}`,
-            value: `${discordDateFormat(release.releaseDate)}\n${i18n.translate(
+            value: `${discordDateFormat(
+                release.releaseDate,
+                "d"
+            )}\n${i18n.translate(
                 messageContext.guildID,
                 `command.upcomingreleases.${release.releaseType}`
             )}`,
