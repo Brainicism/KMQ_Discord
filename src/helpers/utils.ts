@@ -218,10 +218,14 @@ export function standardDateFormat(date: Date): string {
 
 /**
  * @param date - the date Object
+ * @param format - the date format to use https://discord.com/developers/docs/reference#message-formatting-timestamp-styles
  * @returns a formatted string that appears as an interactable date in Discord
  */
-export function discordDateFormat(date: Date): string {
-    return `<t:${Math.floor(date.getTime() / 1000)}:d>`;
+export function discordDateFormat(
+    date: Date,
+    format: "t" | "T" | "d" | "D" | "f" | "F" | "R"
+): string {
+    return `<t:${Math.floor(date.getTime() / 1000)}:${format}>`;
 }
 
 /**
