@@ -31,5 +31,6 @@ declare namespace NodeJS {
         GUILDS_PER_SHARD?: string | undefined;
         APP_NAME: string | undefined;
         AZURE_STORAGE_SAS_TOKEN?: string | undefined;
+        DAISUKI_DB_PASSWORD?: string | undefined;
     }
 }

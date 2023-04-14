@@ -36,6 +36,7 @@ function hasRequiredEnvironmentVariables(): boolean {
         "PREMIUM_AUDIO_SONGS_PER_ARTIST",
         "AUDIO_SONGS_PER_ARTIST",
         "APP_NAME",
+        "DAISUKI_DB_PASSWORD",
     ];
 
     for (const requiredEnvVariable of requiredEnvVariables) {
