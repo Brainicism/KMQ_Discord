@@ -190,12 +190,6 @@ export async function loadStoredProcedures(): Promise<void> {
 
 const downloadDb = async (): Promise<void> => {
     const mvOutput = `${DATABASE_DOWNLOAD_DIR}/mv-download.zip`;
-    console.log(
-        daisukiDbDownloadUrl.replace(
-            "$PASSWORD",
-            process.env.DAISUKI_DB_PASSWORD as string
-        )
-    );
     const daisukiDownloadResp = await Axios.get(
         daisukiDbDownloadUrl.replace(
             "$PASSWORD",
