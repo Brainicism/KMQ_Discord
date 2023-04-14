@@ -27,7 +27,7 @@ const exec = util.promisify(cp.exec);
 config({ path: path.resolve(__dirname, "../../.env") });
 const SQL_DUMP_EXPIRY = 10;
 const daisukiDbDownloadUrl =
-    "http://kpop.daisuki.com.br/download.php?file=full";
+    "http://kpop.daisuki.com.br/download.php?pass=$PASSWORD";
 
 const logger = new IPCLogger("seed_db");
 
@@ -190,12 +190,18 @@ export async function loadStoredProcedures(): Promise<void> {
 
 const downloadDb = async (): Promise<void> => {
     const mvOutput = `${DATABASE_DOWNLOAD_DIR}/mv-download.zip`;
-    const daisukiDownloadResp = await Axios.get(daisukiDbDownloadUrl, {
-        responseType: "arraybuffer",
-        headers: {
-            "User-Agent": "KMQ (K-pop Music Quiz)",
-        },
-    });
+    const daisukiDownloadResp = await Axios.get(
+        daisukiDbDownloadUrl.replace(
+            "$PASSWORD",
+            process.env.DAISUKI_DB_PASSWORD as string
+        ),
+        {
+            responseType: "arraybuffer",
+            headers: {
+                "User-Agent": "KMQ (K-pop Music Quiz)",
+            },
+        }
+    );
 
     await fs.promises.writeFile(mvOutput, daisukiDownloadResp.data, {
         encoding: null,
