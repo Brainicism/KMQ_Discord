@@ -4,8 +4,10 @@ import { IPCLogger } from "./logger";
 import { URL } from "url";
 import {
     chooseRandom,
+    discordDateFormat,
     friendlyFormattedNumber,
     getOrdinalNum,
+    italicize,
     weekOfYear,
 } from "./helpers/utils";
 import LocaleType from "./enums/locale_type";
@@ -50,6 +52,7 @@ const funFactFunctions: Array<(locale: LocaleType) => Promise<string[]>> = [
     songReleaseAnniversaries,
     mostAnnualAwardShowWins,
     latestPak,
+    upcomingReleases,
 ];
 
 const kmqFactFunctions: Array<(locale: LocaleType) => Promise<string[]>> = [
@@ -1095,6 +1098,37 @@ async function topLeveledPlayers(lng: LocaleType): Promise<Array<string>> {
             level: `\`${x["level"]}\``,
             songsGuessed: `\`${friendlyFormattedNumber(x["songs_guessed"])}\``,
             gamesPlayed: `\`${friendlyFormattedNumber(x["games_played"])}\``,
+            lng,
+        })
+    );
+}
+
+async function upcomingReleases(lng: LocaleType): Promise<Array<string>> {
+    const result = await dbContext
+        .kpopVideos("app_upcoming")
+        .select([
+            "app_upcoming.rdate as release_date",
+            "app_upcoming.rtype as release_type",
+            "app_upcoming.name as release_name",
+            "app_kpop_group.name as artist_name",
+        ])
+        .select(dbContext.kpopVideos.raw("DATEDIFF(rdate, NOW()) as diff"))
+        .whereRaw("DATEDIFF(rdate, NOW()) >= 1")
+        .whereRaw("DATEDIFF(rdate, NOW()) < 31")
+        .where("app_upcoming.name", "<>", "")
+        .join("kpop_videos.app_kpop_group", function join() {
+            this.on("app_upcoming.id_artist", "=", "app_kpop_group.id");
+        });
+
+    return result.map((x) =>
+        i18n.internalLocalizer.t("fact.fun.upcomingReleases", {
+            releaseName: x["release_name"],
+            artistName: italicize(x["artist_name"]),
+            releaseType: x["release_type"],
+            dateString: `${discordDateFormat(
+                x["release_date"],
+                "d"
+            )} (${discordDateFormat(x["release_date"], "R")})`,
             lng,
         })
     );

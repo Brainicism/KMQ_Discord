@@ -1,6 +1,6 @@
 {
     "name": "kmq",
-    "version": "6.6.0",
+    "version": "6.6.1",
     "main": "src/kmq.js",
     "scripts": {
         "seed": ". ./.env && ts-node --swc src/seed/seed_db",
@@ -66,7 +66,7 @@
         "uuid": "^9.0.0",
         "winston": "^3.8.2",
         "winston-daily-rotate-file": "^4.7.1",
-        "ytdl-core": "https://github.com/Brainicism/node-ytdl-core#9a81a7c",
+        "ytdl-core": "https://github.com/khlevon/node-ytdl-core.git#v4.11.3-patch.1",
         "zlib-sync": "^0.1.8"
     },
     "devDependencies": {
