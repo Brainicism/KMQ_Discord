@@ -79,6 +79,8 @@ export default class BotWorker extends BaseClusterWorker {
         }
 
         switch (commandName) {
+            case "ping":
+                return null;
             case "worker_version":
                 return State.version;
             case "reload_commands":
