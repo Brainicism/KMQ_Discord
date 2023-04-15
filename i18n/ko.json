@@ -689,6 +689,7 @@
                 "title": "노래를 찾을 수 없음"
             },
             "notInKMQ": "이 노래는 [Daisuki]({{link}})에 항목이 있지만 KMQ에는 포함되어 있지 않습니다.",
+            "premiumSong": "KMQ 프리미엄만?",
             "songNameSearchResult": {
                 "notFoundDescription": "해당 이름의 노래를 찾을 수 없습니다.",
                 "successDescription": "KMQ에서 사용할 수 있는 노래는 다음과 같습니다.:",

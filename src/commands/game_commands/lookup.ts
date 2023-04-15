@@ -104,6 +104,7 @@ async function lookupByYoutubeID(
     let songDuration: string | null = null;
     let includedInOptions = false;
     const isKorean = locale === LocaleType.KO;
+    let premiumSong = false;
 
     if (kmqSongEntry) {
         description = i18n.translate(guildID, "command.lookup.inKMQ", {
@@ -161,6 +162,9 @@ async function lookupByYoutubeID(
         ]
             .map((x) => x.youtubeLink)
             .includes(videoID);
+
+        premiumSong =
+            kmqSongEntry.rank > Number(process.env.AUDIO_SONGS_PER_ARTIST);
 
         logger.info(
             `${getDebugLogHeader(
@@ -259,6 +263,13 @@ async function lookupByYoutubeID(
                 value: i18n.translate(
                     guildID,
                     includedInOptions ? "misc.yes" : "misc.no"
+                ),
+            },
+            {
+                name: i18n.translate(guildID, "command.lookup.premiumSong"),
+                value: i18n.translate(
+                    guildID,
+                    premiumSong ? "misc.yes" : "misc.no"
                 ),
             }
         );
