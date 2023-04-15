@@ -126,7 +126,13 @@ export default class KmqWebServer {
         );
 
         httpServer.get("/ping", async (request, reply) => {
-            reply.code(200).send();
+            try {
+                await fleet.ipc.allClustersCommand("ping", true);
+                reply.code(200).send();
+            } catch (e) {
+                logger.error(`Health check on /ping failed with error: ${e}`);
+                reply.code(500).send(e);
+            }
         });
 
         httpServer.get("/status", async (request, reply) => {

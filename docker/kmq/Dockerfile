@@ -45,6 +45,6 @@ WORKDIR /app
 STOPSIGNAL SIGINT
 ARG NODE_ENV
 ENV NODE_ENV=$NODE_ENV
-HEALTHCHECK --interval=5s --timeout=3s \
+HEALTHCHECK --interval=5s --timeout=3s --start-period=30s \
   CMD curl -f 127.0.0.1:5858/ping || exit 1
 ENTRYPOINT ["./start.sh", "docker"]
