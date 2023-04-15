@@ -51,6 +51,8 @@ jobs:
                   echo "BOT_PREFIX=." >> .env
                   echo "APP_NAME=kmq-gci" >> .env
                   echo "DAISUKI_DB_PASSWORD=unusedpw" >> .env
+            - name: Install node dependencies
+              run: yarn install --frozen-lockfile
             - name: Extract metadata (tags, labels) for Docker
               id: meta
               uses: docker/metadata-action@v4
@@ -61,15 +63,38 @@ jobs:
               with:
                   mariadb version: "10.3.34"
                   mysql root password: "$DB_PASS_CI"
+            - name: Log in to the Container registry
+              uses: docker/login-action@v2
+              with:
+                  registry: ghcr.io
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
             - name: Build Docker image
               uses: docker/build-push-action@v4
               with:
                   context: .
                   file: docker/kmq/Dockerfile
-                  push: false
+                  push: true
                   tags: ghcr.io/brainicism/kmq_discord:gci
-            - name: Dry-run bootstrap KMQ
-              run: . ./.env && docker run -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} -v ${PWD}/data:/app/data -v ${PWD}/.env:/app/.env -v ${PWD}/logs:/app/logs --env NODE_ENV=dry-run --network=host --name kmq ghcr.io/brainicism/kmq_discord:gci
+            - name: Dry-run bootstrap
+              run: . ./.env && docker run -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} -v ${PWD}/data:/app/data -v ${PWD}/.env:/app/.env -v ${PWD}/logs:/app/logs --env NODE_ENV=dry-run --network=host --name kmq-gci ghcr.io/brainicism/kmq_discord:gci && docker rm -f kmq-gci
+            - name: Pre-upgrade run
+              run: . ./.env && docker run -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} -v ${PWD}/data:/app/data -v ${PWD}/.env:/app/.env -v ${PWD}/logs:/app/logs --env NODE_ENV=production --network=host --name kmq-gci ghcr.io/brainicism/kmq_discord:gci &
+            - name: Check pre-upgrade KMQ healthiness
+              run: while [[ "$(docker inspect --format='{{json .State.Health.Status}}' kmq-gci)" != "\"healthy\"" ]]; do sleep 1; done
+            - name: Parse pre-upgrade container ID
+              id: old-container-id
+              run: |
+                  docker ps 
+                  echo OLD_CONTAINER_ID=$(sudo docker ps -aqf "name=kmq-gci") > $GITHUB_OUTPUT
+            - name: Begin upgrade
+              run: npx ts-node src/scripts/announce-restart.ts --docker-image=ghcr.io/brainicism/kmq_discord:gci --timer=0
+            - name: Check post-upgrade KMQ healthiness
+              run: while [[ "$(docker inspect --format='{{json .State.Health.Status}}' kmq-gci)" != "\"healthy\"" ]]; do sleep 1; done
+            - name: Check old primary no longer exists
+              run: |
+                  docker ps
+                  [ $(docker ps -aq | grep -c ${{ steps.old-container-id.outputs.OLD_CONTAINER_ID }}) -eq 0 ]
             - name: Validate available_songs
               run: |
                   [[ $(mysql kmq -s -N -h 127.0.0.1 -u $DB_USER_CI -p$DB_PASS_CI -e 'select count(1) from available_songs') -eq 3 ]]
