@@ -176,7 +176,7 @@ function registerProcessEvents(fleet: Fleet): void {
             if (await pathExists(STANDBY_COOKIE)) {
                 await fs.promises.writeFile(STANDBY_COOKIE, "ready");
 
-                // wait for upgrade workflow to promote to primary by deleting standby cookiew
+                // wait for upgrade workflow to promote to primary by deleting standby cookie
                 while (await pathExists(STANDBY_COOKIE)) {
                     logger.info("Standby waiting for promotion...");
                     await delay(2000);
