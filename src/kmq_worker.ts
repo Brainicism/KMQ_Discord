@@ -114,6 +114,10 @@ export default class BotWorker extends BaseClusterWorker {
                 logger.info("Cleared pending restart notification");
                 State.restartNotification = null;
                 return null;
+            case "activate":
+                logger.info("Registering interactive client events");
+                this.registerInteractiveClientEvents(State.client);
+                return null;
             default:
                 return null;
         }
@@ -126,7 +130,6 @@ export default class BotWorker extends BaseClusterWorker {
         client.removeAllListeners("error");
         // register listeners
         client
-            .on("messageCreate", messageCreateHandler)
             .on("voiceChannelLeave", voiceChannelLeaveHandler)
             .on("voiceChannelSwitch", voiceChannelSwitchHandler)
             .on("voiceChannelJoin", voiceChannelJoinHandler)
@@ -143,7 +146,13 @@ export default class BotWorker extends BaseClusterWorker {
             .on("guildDelete", guildDeleteHandler)
             .on("unavailableGuildCreate", unavailableGuildCreateHandler)
             .on("guildAvailable", guildAvailableHandler)
-            .on("guildUnavailable", unavailableGuildCreateHandler)
+            .on("guildUnavailable", unavailableGuildCreateHandler);
+    }
+
+    // eslint-disable-next-line class-methods-use-this
+    registerInteractiveClientEvents(client: KmqClient): void {
+        client
+            .on("messageCreate", messageCreateHandler)
             .on("interactionCreate", interactionCreateHandler);
     }
 

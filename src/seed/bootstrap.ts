@@ -1,4 +1,5 @@
 import { IPCLogger } from "../logger";
+import { STANDBY_COOKIE } from "../constants";
 import { config } from "dotenv";
 import {
     databaseExists,
@@ -151,6 +152,11 @@ async function bootstrapDatabases(): Promise<void> {
         if (!hasRequiredEnvironmentVariables()) {
             logger.error("Missing required environment variables, aborting...");
             process.exit(1);
+        }
+
+        if (process.env.IS_STANDBY === "true") {
+            logger.info("Preparing standby instance");
+            fs.promises.writeFile(STANDBY_COOKIE, "starting");
         }
 
         const dataDir = path.join(__dirname, "../../data");

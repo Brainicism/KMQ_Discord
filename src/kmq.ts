@@ -1,13 +1,15 @@
+/* eslint-disable no-await-in-loop */
 import {
     EMBED_SUCCESS_COLOR,
     IGNORED_WARNING_SUBSTRINGS,
     KmqImages,
+    STANDBY_COOKIE,
 } from "./constants";
 import { Fleet } from "eris-fleet";
 import { clearRestartNotification } from "./helpers/management_utils";
 import { config } from "dotenv";
+import { delay, isPrimaryInstance, pathExists } from "./helpers/utils";
 import { getInternalLogger } from "./logger";
-import { isPrimaryInstance } from "./helpers/utils";
 import { sendDebugAlertWebhook } from "./helpers/discord_utils";
 import EnvType from "./enums/env_type";
 import Eris from "eris";
@@ -15,6 +17,7 @@ import KmqClient from "./kmq_client";
 import backupKmqDatabase from "./scripts/backup-kmq-database";
 import cluster from "cluster";
 import dbContext from "./database_context";
+import fs from "fs";
 
 import KmqWebServer from "./kmq_web_server";
 import path from "path";
@@ -131,7 +134,7 @@ function registerProcessEvents(fleet: Fleet): void {
     });
 }
 
-(async () => {
+(() => {
     let fleet: Fleet;
     try {
         fleet = new Fleet(options);
@@ -167,24 +170,40 @@ function registerProcessEvents(fleet: Fleet): void {
 
         fleet.on("ready", async () => {
             logger.info("All shards have connected.");
+
+            // check if current instance is a standby currently being spun up, assign ready state
+            // as all shards are now ready
+            if (await pathExists(STANDBY_COOKIE)) {
+                await fs.promises.writeFile(STANDBY_COOKIE, "ready");
+
+                // wait for upgrade workflow to promote to primary by deleting standby cookiew
+                while (await pathExists(STANDBY_COOKIE)) {
+                    logger.info("Standby waiting for promotion...");
+                    await delay(2000);
+                }
+            }
+
+            // inform workers to begin accepting commands
+            fleet.ipc.allClustersCommand("activate");
+
             await sendDebugAlertWebhook(
                 "Bot started successfully",
                 "Shards have connected!",
                 EMBED_SUCCESS_COLOR,
                 KmqImages.HAPPY
             );
+
+            logger.info("Starting web server...");
+            await new KmqWebServer(dbContext).startWebServer(fleet);
+
+            logger.info("Registering process event handlers...");
+            registerProcessEvents(fleet);
+
+            logger.info("Clearing existing restart notifications...");
+            clearRestartNotification();
+
+            logger.info("Registering global intervals");
+            registerGlobalIntervals(fleet);
         });
-
-        logger.info("Starting web server...");
-        await new KmqWebServer(dbContext).startWebServer(fleet);
-
-        logger.info("Registering process event handlers...");
-        registerProcessEvents(fleet);
-
-        logger.info("Clearing existing restart notifications...");
-        clearRestartNotification();
-
-        logger.info("Registering global intervals");
-        registerGlobalIntervals(fleet);
     }
 })();
