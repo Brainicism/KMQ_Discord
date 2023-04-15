@@ -32,5 +32,6 @@ declare namespace NodeJS {
         APP_NAME: string | undefined;
         AZURE_STORAGE_SAS_TOKEN?: string | undefined;
         DAISUKI_DB_PASSWORD?: string | undefined;
+        IS_STANDBY?: string | undefined;
     }
 }
