@@ -549,7 +549,6 @@
                 "nextPage": "Want to see the next page of the leaderboard? See {{command}}"
             },
             "rankNumber": "Rank #{{rank}}",
-            "reset": "Reset {{timestamp}}",
             "resets": "Resets {{timestamp}}",
             "scope": {
                 "currentGame": "Current Game's",

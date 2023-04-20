@@ -915,22 +915,6 @@ export default class LeaderboardCommand implements BaseCommand {
                         }
 
                         let description = "";
-                        if (resetDate) {
-                            description += i18n.translate(
-                                messageContext.guildID,
-                                "command.leaderboard.reset",
-                                {
-                                    timestamp: `<t:${Math.floor(
-                                        resetDate.getTime() / 1000
-                                    )}:R>`,
-                                }
-                            );
-                        }
-
-                        if (resetDate && futureResetDate) {
-                            description += " | ";
-                        }
-
                         if (futureResetDate) {
                             description += i18n.translate(
                                 messageContext.guildID,
