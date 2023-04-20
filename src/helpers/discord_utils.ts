@@ -1,10 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import {
-    ConflictingGameOptions,
-    GameOptionCommand,
-    PriorityGameOption,
-} from "../types";
-import {
+    BOOKMARK_COMMAND_NAME,
     EMBED_ERROR_COLOR,
     EMBED_SUCCESS_BONUS_COLOR,
     EMBED_SUCCESS_COLOR,
@@ -12,8 +8,14 @@ import {
     KmqImages,
     MAX_AUTOCOMPLETE_FIELDS,
     PERMISSIONS_LINK,
+    PROFILE_COMMAND_NAME,
     SPOTIFY_BASE_URL,
 } from "../constants";
+import {
+    ConflictingGameOptions,
+    GameOptionCommand,
+    PriorityGameOption,
+} from "../types";
 import { IPCLogger } from "../logger";
 import {
     bold,
@@ -36,7 +38,9 @@ import {
     normalizeArtistNameEntry,
     userBonusIsActive,
 } from "./game_utils";
+import AppCommandsAction from "../enums/app_command_action";
 import EmbedPaginator from "eris-pagination";
+import EnvType from "../enums/env_type";
 import Eris from "eris";
 import GameOption from "../enums/game_option_name";
 import GameType from "../enums/game_type";
@@ -1914,3 +1918,142 @@ export async function sendDeprecatedTextCommandMessage(
         ),
     });
 }
+
+/**
+ * Fetches a map of app command names to their IDs
+ */
+export const fetchAppCommandIDs = async (): Promise<{
+    [commandName: string]: string;
+}> => {
+    const commands =
+        process.env.NODE_ENV === EnvType.PROD
+            ? await State.client.getCommands()
+            : await State.client.getGuildCommands(
+                  process.env.DEBUG_SERVER_ID as string
+              );
+
+    const commandToID: { [commandName: string]: string } = {};
+    for (const command of commands) {
+        commandToID[command.name] = command.id;
+    }
+
+    return commandToID;
+};
+
+/**
+ * Updates the Discord slash commands
+ * @param appCommandType - Whether to reload or delete app commands
+ */
+export const updateAppCommands = async (
+    appCommandType = AppCommandsAction.RELOAD
+): Promise<{ [commandName: string]: string }> => {
+    const isProd = process.env.NODE_ENV === EnvType.PROD;
+    const debugServer = State.client.guilds.get(
+        process.env.DEBUG_SERVER_ID as string
+    );
+
+    let commandStructures: Eris.ApplicationCommandStructure[] = [];
+
+    if (appCommandType === AppCommandsAction.RELOAD) {
+        commandStructures = [
+            {
+                name: BOOKMARK_COMMAND_NAME,
+                type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
+            },
+            {
+                name: PROFILE_COMMAND_NAME,
+                type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
+            },
+            {
+                name: PROFILE_COMMAND_NAME,
+                type: Eris.Constants.ApplicationCommandTypes.USER,
+            },
+        ];
+
+        for (const commandObj of Object.entries(State.client.commands)) {
+            const commandName = commandObj[0];
+            const command = commandObj[1];
+            if (command.slashCommands) {
+                const commands =
+                    command.slashCommands() as Array<Eris.ChatInputApplicationCommandStructure>;
+
+                for (const cmd of commands) {
+                    if (!cmd.name) {
+                        if (!i18n.hasKey(`command.${commandName}.help.name`)) {
+                            throw new Error(
+                                `Missing slash command name: command.${commandName}.help.name`
+                            );
+                        }
+
+                        cmd.name = i18n.translate(
+                            LocaleType.EN,
+                            `command.${commandName}.help.name`
+                        );
+                    }
+
+                    cmd.nameLocalizations = cmd.nameLocalizations ?? {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            `command.${commandName}.help.name`
+                        ),
+                    };
+                    if (
+                        cmd.type ===
+                        Eris.Constants.ApplicationCommandTypes.CHAT_INPUT
+                    ) {
+                        if (!cmd.description) {
+                            let translationKey = `command.${commandName}.help.interaction.description`;
+                            const fallbackTranslationKey = `command.${commandName}.help.description`;
+                            if (!i18n.hasKey(translationKey)) {
+                                if (!i18n.hasKey(fallbackTranslationKey)) {
+                                    throw new Error(
+                                        `Missing slash command description: ${translationKey} or ${fallbackTranslationKey}`
+                                    );
+                                }
+
+                                translationKey = fallbackTranslationKey;
+                            }
+
+                            cmd.description = i18n.translate(
+                                LocaleType.EN,
+                                translationKey
+                            );
+
+                            cmd.descriptionLocalizations = {
+                                [LocaleType.KO]: i18n.translate(
+                                    LocaleType.KO,
+                                    translationKey
+                                ),
+                            };
+                        }
+                    }
+
+                    commandStructures.push(cmd);
+                }
+            }
+        }
+    } else {
+        commandStructures = [];
+    }
+
+    let commands: Eris.AnyApplicationCommand<true>[] = [];
+    if (isProd) {
+        commands = await State.client.bulkEditCommands(commandStructures);
+    } else {
+        if (debugServer) {
+            commands = await State.client.bulkEditGuildCommands(
+                debugServer.id,
+                commandStructures
+            );
+        } else {
+            logger.error("Debug server unexpectedly unavailable");
+        }
+    }
+
+    const commandToID: { [commandName: string]: string } = {};
+    for (const command of commands) {
+        commandToID[command.name] = command.id;
+    }
+
+    return commandToID;
+};

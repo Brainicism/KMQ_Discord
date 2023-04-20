@@ -24,8 +24,8 @@ export function delay(delayDuration: number): Promise<void> {
  * @param text - Text to bold
  * @returns bolded text
  */
-export function bold(text: string): string {
-    return `**${text.split("*").join("\\*")}**`;
+export function bold(text: string | number): string {
+    return `**${String(text).split("*").join("\\*")}**`;
 }
 
 /**

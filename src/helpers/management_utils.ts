@@ -8,16 +8,21 @@ import {
     isPowerHour,
     normalizeArtistNameEntry,
 } from "./game_utils";
+import {
+    fetchAppCommandIDs,
+    sendInfoMessage,
+    sendPowerHourNotification,
+    updateAppCommands,
+} from "./discord_utils";
+import { normalizePunctuationInName } from "../structures/game_round";
 import { reloadFactCache } from "../fact_generator";
-import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
 import KmqConfiguration from "../kmq_configuration";
 import MessageContext from "../structures/message_context";
-import i18n from "./localization_manager";
-
-import { normalizePunctuationInName } from "../structures/game_round";
 import State from "../state";
 import _ from "lodash";
+import cluster from "cluster";
 import dbContext from "../database_context";
+import i18n from "./localization_manager";
 import schedule from "node-schedule";
 import updatePremiumUsers from "./patreon_manager";
 import type LocaleType from "../enums/locale_type";
@@ -380,6 +385,14 @@ async function reloadLocales(): Promise<void> {
     }
 }
 
+async function reloadCommandIDs(): Promise<void> {
+    if (cluster.isPrimary) {
+        State.commandToID = await updateAppCommands();
+    } else {
+        State.commandToID = await fetchAppCommandIDs();
+    }
+}
+
 function clearCachedPlaylists(): void {
     State.cachedPlaylists = {};
 }
@@ -465,4 +478,5 @@ export function reloadCaches(): void {
     reloadBonusGroups();
     reloadLocales();
     reloadSongs();
+    reloadCommandIDs();
 }

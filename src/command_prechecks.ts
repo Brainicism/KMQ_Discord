@@ -1,12 +1,15 @@
 import { IPCLogger } from "./logger";
+import { OptionAction } from "./constants";
 import {
     areUserAndBotInSameVoiceChannel,
     getDebugLogHeader,
+    getInteractionValue,
     sendErrorMessage,
     tryCreateInteractionErrorAcknowledgement,
 } from "./helpers/discord_utils";
 import { getTimeUntilRestart } from "./helpers/management_utils";
 import { isUserPremium } from "./helpers/game_utils";
+import AnswerType from "./enums/option_types/answer_type";
 import GameType from "./enums/game_type";
 import GuildPreference from "./structures/guild_preference";
 import KmqConfiguration from "./kmq_configuration";
@@ -391,5 +394,104 @@ export default class CommandPrechecks {
         }
 
         return true;
+    }
+
+    static answerHiddenPrecheck(precheckArgs: PrecheckArgs): boolean {
+        if (
+            !precheckArgs.session ||
+            precheckArgs.session.isListeningSession() ||
+            (precheckArgs.session as GameSession).gameType !== GameType.HIDDEN
+        ) {
+            return true;
+        }
+
+        if (!precheckArgs.interaction) {
+            if (
+                precheckArgs.parsedMessage.components.length === 0 ||
+                [AnswerType.TYPING, AnswerType.TYPING_TYPOS].includes(
+                    precheckArgs.parsedMessage.components[0] as AnswerType
+                )
+            ) {
+                // Allow /answer change to different typing modes during hidden
+                return true;
+            }
+        } else {
+            const { interactionName, interactionOptions } = getInteractionValue(
+                precheckArgs.interaction
+            );
+
+            const action = interactionName as OptionAction;
+            if (action === OptionAction.SET) {
+                if (
+                    [AnswerType.TYPING, AnswerType.TYPING_TYPOS].includes(
+                        interactionOptions["answer"] as AnswerType
+                    )
+                ) {
+                    return true;
+                }
+            }
+        }
+
+        const embedPayload: EmbedPayload = {
+            title: i18n.translate(
+                precheckArgs.messageContext.guildID,
+                "misc.preCheck.title"
+            ),
+            description: i18n.translate(
+                precheckArgs.messageContext.guildID,
+                "misc.preCheck.notHidden"
+            ),
+        };
+
+        sendErrorMessage(
+            precheckArgs.messageContext,
+            embedPayload,
+            precheckArgs.interaction
+        );
+        return false;
+    }
+
+    static timerHiddenPrecheck(precheckArgs: PrecheckArgs): boolean {
+        if (
+            !precheckArgs.session ||
+            precheckArgs.session.isListeningSession() ||
+            (precheckArgs.session as GameSession).gameType !== GameType.HIDDEN
+        ) {
+            return true;
+        }
+
+        if (!precheckArgs.interaction) {
+            if (precheckArgs.parsedMessage.components.length > 0) {
+                // Allow /timer change but not reset during hidden
+                return true;
+            }
+        } else {
+            const { interactionName } = getInteractionValue(
+                precheckArgs.interaction
+            );
+
+            const action = interactionName as OptionAction;
+            if (action === OptionAction.RESET) {
+                return true;
+            }
+        }
+
+        const embedPayload: EmbedPayload = {
+            title: i18n.translate(
+                precheckArgs.messageContext.guildID,
+                "misc.preCheck.title"
+            ),
+            description: i18n.translate(
+                precheckArgs.messageContext.guildID,
+                "misc.preCheck.notHidden"
+            ),
+        };
+
+        sendErrorMessage(
+            precheckArgs.messageContext,
+            embedPayload,
+            precheckArgs.interaction
+        );
+        return false;
     }
 }

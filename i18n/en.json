@@ -335,6 +335,22 @@
                 "name": "groups"
             }
         },
+        "guess": {
+            "help": {
+                "description": "Submit your answer for the current song during /play hidden.",
+                "example": {
+                    "song": "Use {{name}} as your guess for the current song"
+                },
+                "name": "guess"
+            },
+            "interaction": {
+                "guessReceived": {
+                    "description:": "You guessed {{guess}}",
+                    "title": "Guess Received"
+                },
+                "name": "Your best shot at the current song"
+            }
+        },
         "guessmode": {
             "help": {
                 "description": "Choose whether to guess by song title, artist name, or both.",
@@ -788,6 +804,7 @@
                 "example": {
                     "classic": "Start a classic game of KMQ (type in your guess first to get a point)",
                     "elimination": "Start an elimination game of KMQ where each player starts with {{lives}} lives",
+                    "hidden": "Start a hidden game of KMQ, where players can only answer with /guess",
                     "teams": "Split up into as many teams as you want and see who you can depend on to help you win!"
                 },
                 "interaction": {
@@ -1450,6 +1467,8 @@
             "bonusExpArtistRound": "BONUS EXP AND ARTIST ROUND",
             "bonusExpRound": "BONUS EXP ROUND",
             "correctGuess": "{{correctGuesser}} guessed correctly (+{{expGain}} EXP)",
+            "hiddenRemainingPlayers": "Waiting for",
+            "hiddenTimerInfo": "{{guessButton}} before the round end {{timestamp}}!",
             "noCorrectGuesses": "Nobody got it.",
             "noWinners": "Nobody Won",
             "runnersUp": "Runners Up",
@@ -1473,7 +1492,7 @@
                 "title": "Working on it!"
             },
             "guess": {
-                "title": "Guess the {{songOrArtist}}"
+                "title": "Guess the {{songOrArtist}}!"
             },
             "howToPlay": "How To Play",
             "leaveReview": "Leave a review!",
@@ -1525,6 +1544,7 @@
             "debugServer": "You can't do that in this server.",
             "differentVC": "You must be in the same voice channel as the bot to use this command.",
             "notGameSession": "You can't do that while in a game session.",
+            "notHidden": "You can't do that during a hidden game.",
             "notListeningSession": "You can't do that while in a listening session.",
             "notPremium": "You need KMQ Premium to use this command (see {{premium}}).",
             "notSpotify": "You can't change that option when playing from Spotify. Use `/spotify reset` before changing this option.",

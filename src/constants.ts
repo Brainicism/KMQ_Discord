@@ -267,3 +267,7 @@ export const IGNORED_WARNING_SUBSTRINGS = [
 ];
 
 export const SHADOW_BANNED_ARTIST_IDS = [1177, 170];
+
+export const CORRECT_GUESS_EMOJI = "✅";
+export const INCORRECT_GUESS_EMOJI = "❌";
+export const HIDDEN_DEFAULT_TIMER = 15;

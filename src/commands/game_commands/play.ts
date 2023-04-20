@@ -3,6 +3,7 @@ import {
     ELIMINATION_MAX_LIVES,
     ELIMINATION_MIN_LIVES,
     EMBED_SUCCESS_BONUS_COLOR,
+    HIDDEN_DEFAULT_TIMER,
     KmqImages,
 } from "../../constants";
 import { IPCLogger } from "../../logger";
@@ -30,6 +31,7 @@ import {
     tryCreateInteractionSuccessAcknowledgement,
     voicePermissionsCheck,
 } from "../../helpers/discord_utils";
+import AnswerType from "../../enums/option_types/answer_type";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameSession from "../../structures/game_session";
@@ -253,6 +255,20 @@ export default class PlayCommand implements BaseCommand {
                         [LocaleType.KO]: i18n.translate(
                             LocaleType.KO,
                             "command.play.help.example.classic"
+                        ),
+                    },
+                    type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+                },
+                {
+                    name: GameType.HIDDEN,
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "command.play.help.example.hidden"
+                    ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.play.help.example.hidden"
                         ),
                     },
                     type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
@@ -1034,6 +1050,19 @@ export default class PlayCommand implements BaseCommand {
         }
 
         State.gameSessions[guildID] = gameSession;
+        if (
+            gameType === GameType.HIDDEN &&
+            guildPreference.isMultipleChoiceMode()
+        ) {
+            await guildPreference.setAnswerType(AnswerType.TYPING);
+        }
+
+        if (
+            gameType === GameType.HIDDEN &&
+            !guildPreference.isGuessTimeoutSet()
+        ) {
+            await guildPreference.setGuessTimeout(HIDDEN_DEFAULT_TIMER);
+        }
 
         if (gameType !== GameType.TEAMS) {
             await sendBeginGameSessionMessage(

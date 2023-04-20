@@ -117,12 +117,20 @@ describe("game session", () => {
 
                 // incorrect guesses
                 for (let i = 0; i < 5; i++) {
-                    await gameSession.guessSong(messageContext, `badguess${i}`);
+                    await gameSession.guessSong(
+                        messageContext,
+                        `badguess${i}`,
+                        new Date().getTime()
+                    );
                     assert.ok(endRoundStub.notCalled);
                 }
 
                 // correct guess
-                await gameSession.guessSong(messageContext, correctGuess);
+                await gameSession.guessSong(
+                    messageContext,
+                    correctGuess,
+                    new Date().getTime()
+                );
 
                 assert.ok(
                     endRoundStub.calledWith(messageContext, {
