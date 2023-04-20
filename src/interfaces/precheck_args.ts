@@ -8,5 +8,5 @@ export default interface PrecheckArgs {
     session: Session | null;
     errorMessage?: string;
     interaction?: Eris.CommandInteraction;
-    parsedMessage: ParsedMessage;
+    parsedMessage?: ParsedMessage;
 }

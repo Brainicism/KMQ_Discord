@@ -47,12 +47,6 @@ describe("command prechecks", () => {
                     CommandPrechecks.inSessionCommandPrecheck({
                         session: null,
                         messageContext,
-                        parsedMessage: {
-                            action: "",
-                            argument: "",
-                            message: "",
-                            components: [],
-                        },
                     }),
                     false
                 );
@@ -78,12 +72,6 @@ describe("command prechecks", () => {
                         CommandPrechecks.inSessionCommandPrecheck({
                             session: listeningSession,
                             messageContext,
-                            parsedMessage: {
-                                action: "",
-                                argument: "",
-                                message: "",
-                                components: [],
-                            },
                         }),
                         true
                     );
@@ -100,12 +88,6 @@ describe("command prechecks", () => {
                         CommandPrechecks.inSessionCommandPrecheck({
                             session: listeningSession,
                             messageContext,
-                            parsedMessage: {
-                                action: "",
-                                argument: "",
-                                message: "",
-                                components: [],
-                            },
                         }),
                         false
                     );
@@ -158,12 +140,6 @@ describe("command prechecks", () => {
                             CommandPrechecks.inSessionCommandPrecheck({
                                 session,
                                 messageContext,
-                                parsedMessage: {
-                                    action: "",
-                                    argument: "",
-                                    message: "",
-                                    components: [],
-                                },
                             }),
                             true
                         );
@@ -187,12 +163,6 @@ describe("command prechecks", () => {
                                 CommandPrechecks.inSessionCommandPrecheck({
                                     session: eliminationGameSession,
                                     messageContext,
-                                    parsedMessage: {
-                                        action: "",
-                                        argument: "",
-                                        message: "",
-                                        components: [],
-                                    },
                                 }),
                                 false
                             );
@@ -201,12 +171,6 @@ describe("command prechecks", () => {
                                 CommandPrechecks.inSessionCommandPrecheck({
                                     session: teamGameSession,
                                     messageContext,
-                                    parsedMessage: {
-                                        action: "",
-                                        argument: "",
-                                        message: "",
-                                        components: [],
-                                    },
                                 }),
                                 false
                             );
@@ -221,12 +185,6 @@ describe("command prechecks", () => {
                                 CommandPrechecks.inSessionCommandPrecheck({
                                     session: eliminationGameSession,
                                     messageContext,
-                                    parsedMessage: {
-                                        action: "",
-                                        argument: "",
-                                        message: "",
-                                        components: [],
-                                    },
                                 }),
                                 true
                             );
@@ -235,12 +193,6 @@ describe("command prechecks", () => {
                                 CommandPrechecks.inSessionCommandPrecheck({
                                     session: teamGameSession,
                                     messageContext,
-                                    parsedMessage: {
-                                        action: "",
-                                        argument: "",
-                                        message: "",
-                                        components: [],
-                                    },
                                 }),
                                 true
                             );
@@ -254,12 +206,6 @@ describe("command prechecks", () => {
                             CommandPrechecks.inSessionCommandPrecheck({
                                 session: classicGameSession,
                                 messageContext,
-                                parsedMessage: {
-                                    action: "",
-                                    argument: "",
-                                    message: "",
-                                    components: [],
-                                },
                             }),
                             false
                         );
@@ -294,12 +240,6 @@ describe("command prechecks", () => {
                     CommandPrechecks.notListeningPrecheck({
                         session: mockGameSession,
                         messageContext,
-                        parsedMessage: {
-                            action: "",
-                            argument: "",
-                            message: "",
-                            components: [],
-                        },
                     }),
                     true
                 );
@@ -312,12 +252,6 @@ describe("command prechecks", () => {
                     CommandPrechecks.notListeningPrecheck({
                         session: listeningSession,
                         messageContext,
-                        parsedMessage: {
-                            action: "",
-                            argument: "",
-                            message: "",
-                            components: [],
-                        },
                     }),
                     false
                 );
@@ -330,12 +264,6 @@ describe("command prechecks", () => {
                     CommandPrechecks.notListeningPrecheck({
                         session: gameSession,
                         messageContext,
-                        parsedMessage: {
-                            action: "",
-                            argument: "",
-                            message: "",
-                            components: [],
-                        },
                     }),
                     true
                 );
@@ -370,12 +298,6 @@ describe("command prechecks", () => {
                             ...messageContext,
                             guildID: debugServerId,
                         },
-                        parsedMessage: {
-                            action: "",
-                            argument: "",
-                            message: "",
-                            components: [],
-                        },
                     }),
                     true
                 );
@@ -389,12 +311,6 @@ describe("command prechecks", () => {
                     CommandPrechecks.debugServerPrecheck({
                         session: gameSession,
                         messageContext,
-                        parsedMessage: {
-                            action: "",
-                            argument: "",
-                            message: "",
-                            components: [],
-                        },
                     }),
                     false
                 );
@@ -419,12 +335,6 @@ describe("command prechecks", () => {
                     CommandPrechecks.maintenancePrecheck({
                         session: mockGameSession,
                         messageContext,
-                        parsedMessage: {
-                            action: "",
-                            argument: "",
-                            message: "",
-                            components: [],
-                        },
                     }),
                     false
                 );
@@ -447,12 +357,6 @@ describe("command prechecks", () => {
                     CommandPrechecks.maintenancePrecheck({
                         session: mockGameSession,
                         messageContext,
-                        parsedMessage: {
-                            action: "",
-                            argument: "",
-                            message: "",
-                            components: [],
-                        },
                     }),
                     true
                 );
@@ -487,12 +391,6 @@ describe("command prechecks", () => {
                             ...messageContext,
                             textChannelID: debugChannelId,
                         },
-                        parsedMessage: {
-                            action: "",
-                            argument: "",
-                            message: "",
-                            components: [],
-                        },
                     }),
                     true
                 );
@@ -507,12 +405,6 @@ describe("command prechecks", () => {
                     CommandPrechecks.debugChannelPrecheck({
                         session: gameSession,
                         messageContext,
-                        parsedMessage: {
-                            action: "",
-                            argument: "",
-                            message: "",
-                            components: [],
-                        },
                     }),
                     false
                 );
@@ -541,12 +433,6 @@ describe("command prechecks", () => {
                     await CommandPrechecks.notRestartingPrecheck({
                         messageContext,
                         session: gameSession,
-                        parsedMessage: {
-                            action: "",
-                            argument: "",
-                            message: "",
-                            components: [],
-                        },
                     }),
                     false
                 );
@@ -563,12 +449,6 @@ describe("command prechecks", () => {
                     await CommandPrechecks.notRestartingPrecheck({
                         messageContext,
                         session: gameSession,
-                        parsedMessage: {
-                            action: "",
-                            argument: "",
-                            message: "",
-                            components: [],
-                        },
                     }),
                     true
                 );
@@ -597,12 +477,6 @@ describe("command prechecks", () => {
                     await CommandPrechecks.premiumPrecheck({
                         messageContext,
                         session: gameSession,
-                        parsedMessage: {
-                            action: "",
-                            argument: "",
-                            message: "",
-                            components: [],
-                        },
                     }),
                     true
                 );
@@ -619,12 +493,6 @@ describe("command prechecks", () => {
                     await CommandPrechecks.premiumPrecheck({
                         messageContext,
                         session: gameSession,
-                        parsedMessage: {
-                            action: "",
-                            argument: "",
-                            message: "",
-                            components: [],
-                        },
                     }),
                     false
                 );
@@ -658,12 +526,6 @@ describe("command prechecks", () => {
                     await CommandPrechecks.premiumOrDebugServerPrecheck({
                         messageContext,
                         session: gameSession,
-                        parsedMessage: {
-                            action: "",
-                            argument: "",
-                            message: "",
-                            components: [],
-                        },
                     }),
                     true
                 );
@@ -680,12 +542,6 @@ describe("command prechecks", () => {
                         messageContext: {
                             ...messageContext,
                             guildID: debugServerId,
-                        },
-                        parsedMessage: {
-                            action: "",
-                            argument: "",
-                            message: "",
-                            components: [],
                         },
                     }),
                     true
@@ -704,12 +560,6 @@ describe("command prechecks", () => {
                     await CommandPrechecks.premiumOrDebugServerPrecheck({
                         session: gameSession,
                         messageContext,
-                        parsedMessage: {
-                            action: "",
-                            argument: "",
-                            message: "",
-                            components: [],
-                        },
                     }),
                     false
                 );
@@ -749,12 +599,6 @@ describe("command prechecks", () => {
                     await CommandPrechecks.notSpotifyPrecheck({
                         messageContext,
                         session,
-                        parsedMessage: {
-                            action: "",
-                            argument: "",
-                            message: "",
-                            components: [],
-                        },
                     }),
                     false
                 );
@@ -769,12 +613,6 @@ describe("command prechecks", () => {
                     await CommandPrechecks.notSpotifyPrecheck({
                         session,
                         messageContext,
-                        parsedMessage: {
-                            action: "",
-                            argument: "",
-                            message: "",
-                            components: [],
-                        },
                     }),
                     true
                 );

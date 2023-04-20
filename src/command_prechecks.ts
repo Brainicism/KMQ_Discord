@@ -407,9 +407,9 @@ export default class CommandPrechecks {
 
         if (!precheckArgs.interaction) {
             if (
-                precheckArgs.parsedMessage.components.length === 0 ||
+                precheckArgs.parsedMessage!.components.length === 0 ||
                 [AnswerType.TYPING, AnswerType.TYPING_TYPOS].includes(
-                    precheckArgs.parsedMessage.components[0] as AnswerType
+                    precheckArgs.parsedMessage!.components[0] as AnswerType
                 )
             ) {
                 // Allow /answer change to different typing modes during hidden
@@ -461,7 +461,7 @@ export default class CommandPrechecks {
         }
 
         if (!precheckArgs.interaction) {
-            if (precheckArgs.parsedMessage.components.length > 0) {
+            if (precheckArgs.parsedMessage!.components.length > 0) {
                 // Allow /timer change but not reset during hidden
                 return true;
             }
