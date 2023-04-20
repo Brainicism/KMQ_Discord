@@ -688,17 +688,17 @@ export default abstract class Session {
             ? SeekType.BEGINNING
             : this.guildPreference.gameOptions.seekType;
 
+        const songDuration = (
+            await dbContext
+                .kmq("cached_song_duration")
+                .select(["duration"])
+                .where("vlink", "=", round.song.youtubeLink)
+                .first()
+        ).duration;
+
         if (seekType === SeekType.BEGINNING) {
             seekLocation = 0;
         } else {
-            const songDuration = (
-                await dbContext
-                    .kmq("cached_song_duration")
-                    .select(["duration"])
-                    .where("vlink", "=", round.song.youtubeLink)
-                    .first()
-            ).duration;
-
             if (seekType === SeekType.RANDOM) {
                 seekLocation = songDuration * (0.6 * Math.random());
             } else if (seekType === SeekType.MIDDLE) {
@@ -726,7 +726,11 @@ export default abstract class Session {
                 : this.guildPreference.gameOptions.specialType;
 
             if (specialType) {
-                const ffmpegArgs = specialFfmpegArgs[specialType](seekLocation);
+                const ffmpegArgs = specialFfmpegArgs[specialType](
+                    seekLocation,
+                    songDuration
+                );
+
                 inputArgs = ffmpegArgs.inputArgs;
                 encoderArgs = ffmpegArgs.encoderArgs;
             }
