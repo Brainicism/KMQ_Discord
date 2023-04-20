@@ -339,7 +339,7 @@ export default class GameSession extends Session {
                     (x) => x.id
                 );
 
-                for (const player in Object.keys(this.lastGuessers)) {
+                for (const player of Object.keys(this.lastGuessers)) {
                     // Remove players who didn't guess correctly
                     if (!correctGuesserIDs.includes(player)) {
                         delete this.lastGuessers[player];
