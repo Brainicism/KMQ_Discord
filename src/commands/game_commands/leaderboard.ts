@@ -480,42 +480,53 @@ export default class LeaderboardCommand implements BaseCommand {
             .where(permanentLb ? "exp" : "exp_gained", ">", 0);
 
         const d = date || new Date();
+        let resetDate: Date | null = null;
+        let futureResetDate: Date | null = null;
         switch (duration) {
             case LeaderboardDuration.TODAY:
             case LeaderboardDuration.DAILY:
-                topPlayersQuery = topPlayersQuery.where(
-                    "date",
-                    ">",
-                    new Date(d.getFullYear(), d.getMonth(), d.getDate())
+                resetDate = new Date(
+                    d.getFullYear(),
+                    d.getMonth(),
+                    d.getDate()
                 );
+
+                futureResetDate = new Date(
+                    d.getFullYear(),
+                    d.getMonth(),
+                    d.getDate() + 1
+                );
+                topPlayersQuery = topPlayersQuery.where("date", ">", resetDate);
                 break;
             case LeaderboardDuration.WEEK:
             case LeaderboardDuration.WEEKLY:
-                topPlayersQuery = topPlayersQuery.where(
-                    "date",
-                    ">",
-                    new Date(
-                        d.getFullYear(),
-                        d.getMonth(),
-                        d.getDate() - d.getDay()
-                    )
+                resetDate = new Date(
+                    d.getFullYear(),
+                    d.getMonth(),
+                    d.getDate() - d.getDay()
                 );
+
+                futureResetDate = new Date(
+                    d.getFullYear(),
+                    d.getMonth(),
+                    d.getDate() - d.getDay() + 7
+                );
+
+                topPlayersQuery = topPlayersQuery.where("date", ">", resetDate);
                 break;
             case LeaderboardDuration.MONTH:
             case LeaderboardDuration.MONTHLY:
-                topPlayersQuery = topPlayersQuery.where(
-                    "date",
-                    ">",
-                    new Date(d.getFullYear(), d.getMonth())
-                );
+                resetDate = new Date(d.getFullYear(), d.getMonth());
+                topPlayersQuery = topPlayersQuery.where("date", ">", resetDate);
+
+                futureResetDate = new Date(d.getFullYear(), d.getMonth() + 1);
                 break;
             case LeaderboardDuration.YEAR:
             case LeaderboardDuration.YEARLY:
-                topPlayersQuery = topPlayersQuery.where(
-                    "date",
-                    ">",
-                    new Date(d.getFullYear(), 0)
-                );
+                resetDate = new Date(d.getFullYear(), 0);
+                topPlayersQuery = topPlayersQuery.where("date", ">", resetDate);
+
+                futureResetDate = new Date(d.getFullYear() + 1, 0);
                 break;
             case LeaderboardDuration.ALL_TIME:
             default:
@@ -903,6 +914,19 @@ export default class LeaderboardCommand implements BaseCommand {
                                 break;
                         }
 
+                        let description = "";
+                        if (futureResetDate) {
+                            description += i18n.translate(
+                                messageContext.guildID,
+                                "command.leaderboard.resets",
+                                {
+                                    timestamp: `<t:${Math.floor(
+                                        futureResetDate.getTime() / 1000
+                                    )}:R>`,
+                                }
+                            );
+                        }
+
                         resolve({
                             title: bold(
                                 i18n
@@ -917,6 +941,7 @@ export default class LeaderboardCommand implements BaseCommand {
                                     )
                                     .trimEnd()
                             ),
+                            description,
                             fields,
                             timestamp: new Date(),
                             thumbnail: { url: KmqImages.THUMBS_UP },

@@ -549,6 +549,7 @@
                 "nextPage": "리더보드의 다음 페이지를 보고 싶으십니까? {{command}}을(를) 참조하세요."
             },
             "rankNumber": "순위: {{rank}}위",
+            "resets": "{{timestamp}} 재설정",
             "scope": {
                 "currentGame": "현재 게임",
                 "global": "글로벌",
