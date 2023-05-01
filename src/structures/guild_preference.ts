@@ -414,6 +414,7 @@ export default class GuildPreference {
         }
 
         const oldOptions = this.gameOptions;
+        this.gameOptions = preset as GameOptions;
         this.validateGameOptions();
         const updatedOptions = Object.entries(this.gameOptions).filter(
             (option) =>
