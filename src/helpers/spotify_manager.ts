@@ -1,7 +1,12 @@
 /* eslint-disable no-await-in-loop */
 import { IPCLogger } from "../logger";
 import { normalizeArtistNameEntry } from "./game_utils";
-import { pathExists, retryJob, standardDateFormat } from "./utils";
+import {
+    pathExists,
+    retryJob,
+    retryWithExponentialBackoff,
+    standardDateFormat,
+} from "./utils";
 import Axios from "axios";
 import KmqConfiguration from "../kmq_configuration";
 import SongSelector from "../structures/song_selector";
@@ -38,14 +43,12 @@ const SONG_MATCH_TIMEOUT_MS = 15000;
 export default class SpotifyManager {
     private accessToken: string | undefined;
 
-    constructor() {
-        this.refreshToken();
-    }
+    async start(): Promise<void> {
+        await this.refreshToken();
 
-    start(): void {
         setInterval(async () => {
             await this.refreshToken();
-        }, 3600000);
+        }, 3600000 * 0.8);
     }
 
     /**
@@ -314,8 +317,8 @@ export default class SpotifyManager {
                 logger.error(`Failed fetching Spotify playlist. err = ${err}`);
 
                 if (err.response) {
-                    logger.info(err.response.data);
-                    logger.info(err.response.status);
+                    logger.error(err.response.data);
+                    logger.error(err.response.status);
                 }
 
                 reject(err);
@@ -416,6 +419,19 @@ export default class SpotifyManager {
     }
 
     private refreshToken = async (): Promise<void> => {
+        try {
+            await this.refreshTokenInternal();
+        } catch (e) {
+            await retryWithExponentialBackoff(
+                this.refreshTokenInternal,
+                "Refreshing Spotify refresh token",
+                5,
+                5000
+            );
+        }
+    };
+
+    private refreshTokenInternal = async (): Promise<void> => {
         if (
             !process.env.SPOTIFY_CLIENT_ID ||
             !process.env.SPOTIFY_CLIENT_SECRET
@@ -441,7 +457,7 @@ export default class SpotifyManager {
 
             this.accessToken = resp.data.access_token;
         } catch (err) {
-            logger.error(`Failed to refresh Spotify token. err = ${err}`);
+            throw new Error(`Failed to refresh Spotify token. err = ${err}`);
         }
     };
 
