@@ -2,7 +2,6 @@ import { IPCLogger } from "../../logger";
 import { KmqImages, LEADERBOARD_ENTRIES_PER_PAGE } from "../../constants";
 import {
     arrayToString,
-    bold,
     chooseRandom,
     friendlyFormattedNumber,
 } from "../../helpers/utils";
@@ -928,19 +927,17 @@ export default class LeaderboardCommand implements BaseCommand {
                         }
 
                         resolve({
-                            title: bold(
-                                i18n
-                                    .translate(
-                                        messageContext.guildID,
-                                        "command.leaderboard.title",
-                                        {
-                                            leaderboardScope,
-                                            leaderboardDuration,
-                                            leaderboardType,
-                                        }
-                                    )
-                                    .trimEnd()
-                            ),
+                            title: i18n
+                                .translate(
+                                    messageContext.guildID,
+                                    "command.leaderboard.title",
+                                    {
+                                        leaderboardScope,
+                                        leaderboardDuration,
+                                        leaderboardType,
+                                    }
+                                )
+                                .trimEnd(),
                             description,
                             fields,
                             timestamp: new Date(),
