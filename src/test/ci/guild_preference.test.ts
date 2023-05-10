@@ -93,12 +93,12 @@ describe("guild preference", () => {
         filledGameOptions.beginningYear = BEGINNING_CUTOFF_YEAR;
         filledGameOptions.endYear = END_CUTOFF_YEAR;
 
-        beforeEach(() => {
-            guildPreference.resetToDefault();
-            guildPreference.setBeginningCutoffYear(BEGINNING_CUTOFF_YEAR);
-            guildPreference.setEndCutoffYear(END_CUTOFF_YEAR);
-            guildPreference.savePreset(TEST_PRESET_NAME, null);
-            guildPreference.resetToDefault();
+        beforeEach(async () => {
+            await guildPreference.resetToDefault();
+            await guildPreference.setBeginningCutoffYear(BEGINNING_CUTOFF_YEAR);
+            await guildPreference.setEndCutoffYear(END_CUTOFF_YEAR);
+            await guildPreference.savePreset(TEST_PRESET_NAME, null);
+            await guildPreference.resetToDefault();
         });
 
         describe("savePreset", () => {
@@ -118,8 +118,8 @@ describe("guild preference", () => {
             });
         });
 
-        afterEach(() => {
-            guildPreference.deletePreset(TEST_PRESET_NAME);
+        afterEach(async () => {
+            await guildPreference.deletePreset(TEST_PRESET_NAME);
         });
     });
 });
