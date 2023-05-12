@@ -4,6 +4,7 @@ import {
     IGNORED_WARNING_SUBSTRINGS,
     KmqImages,
     STANDBY_COOKIE,
+    STATUS_COOKIE,
 } from "./constants";
 import { Fleet } from "eris-fleet";
 import { clearRestartNotification } from "./helpers/management_utils";
@@ -195,6 +196,9 @@ function registerProcessEvents(fleet: Fleet): void {
 
             logger.info("Starting web server...");
             await new KmqWebServer(dbContext).startWebServer(fleet);
+
+            // notify that the current instance is now ready
+            await fs.promises.writeFile(STATUS_COOKIE, "ready");
 
             logger.info("Registering process event handlers...");
             registerProcessEvents(fleet);
