@@ -636,7 +636,9 @@ export default class GameSession extends Session {
             return;
         }
 
-        this.stopHiddenUpdateTimer();
+        if (this.gameType === GameType.HIDDEN) {
+            this.stopHiddenUpdateTimer();
+        }
 
         if (pointsEarned > 0) {
             if (round.finished) {
@@ -1414,11 +1416,11 @@ export default class GameSession extends Session {
 
     private multiguessDelayIsActive(guildPreference: GuildPreference): boolean {
         const playerIsAlone = getNumParticipants(this.voiceChannelID) === 1;
-        const hiddenGameType = this.gameType === GameType.HIDDEN;
+        const isHiddenGameType = this.gameType === GameType.HIDDEN;
         return (
             guildPreference.gameOptions.multiGuessType === MultiGuessType.ON &&
             !playerIsAlone &&
-            !hiddenGameType
+            !isHiddenGameType
         );
     }
 

@@ -276,7 +276,7 @@ describe("song selector", () => {
             });
 
             describe("songs in 2017", () => {
-                it("sshould only return the songs published in 2017", async () => {
+                it("should only return the songs published in 2017", async () => {
                     await guildPreference.setBeginningCutoffYear(2017);
                     await guildPreference.setEndCutoffYear(2017);
                     const { songs } = await SongSelector.getFilteredSongList(

@@ -348,7 +348,13 @@
                     "description:": "You guessed {{guess}}",
                     "title": "Guess Received"
                 },
-                "name": "Your best shot at the current song"
+                "name": "Your best shot at the current song",
+                "failure": {
+                    "notHidden": {
+                        "title": "Guess Ignored",
+                        "description": "`/guess` can only be used during `/play hidden`."
+                    }
+                }
             }
         },
         "guessmode": {

@@ -101,6 +101,17 @@ export default class GuessCommand implements BaseCommand {
 
         if (session && session.isGameSession()) {
             if (session.gameType !== GameType.HIDDEN) {
+                await tryCreateInteractionErrorAcknowledgement(
+                    interaction,
+                    i18n.translate(
+                        messageContext.guildID,
+                        "command.guess.interaction.failure.notHidden.title"
+                    ),
+                    i18n.translate(
+                        messageContext.guildID,
+                        "command.guess.interaction.failure.notHidden.description"
+                    )
+                );
                 return;
             }
 

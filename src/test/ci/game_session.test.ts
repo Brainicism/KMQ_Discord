@@ -120,7 +120,7 @@ describe("game session", () => {
                     await gameSession.guessSong(
                         messageContext,
                         `badguess${i}`,
-                        new Date().getTime()
+                        Date.now()
                     );
                     assert.ok(endRoundStub.notCalled);
                 }
@@ -129,7 +129,7 @@ describe("game session", () => {
                 await gameSession.guessSong(
                     messageContext,
                     correctGuess,
-                    new Date().getTime()
+                    Date.now()
                 );
 
                 assert.ok(

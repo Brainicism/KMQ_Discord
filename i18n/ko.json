@@ -348,7 +348,13 @@
                     "description:": "{{guess}}를 맞혀주셨습니다",
                     "title": "받은 추측"
                 },
-                "name": "현재 노래에 대한 당신의 최고의 샷"
+                "name": "현재 노래에 대한 당신의 최고의 샷",
+                "failure": {
+                    "notHidden": {
+                        "title": "추측 무시됨",
+                        "description": "`/guess`는 `/play hidden` 중에만 사용할 수 있습니다."
+                    }
+                }
             }
         },
         "guessmode": {

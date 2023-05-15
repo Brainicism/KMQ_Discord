@@ -421,14 +421,13 @@ export default class CommandPrechecks {
             );
 
             const action = interactionName as OptionAction;
-            if (action === OptionAction.SET) {
-                if (
-                    [AnswerType.TYPING, AnswerType.TYPING_TYPOS].includes(
-                        interactionOptions["answer"] as AnswerType
-                    )
-                ) {
-                    return true;
-                }
+            if (
+                action === OptionAction.SET &&
+                [AnswerType.TYPING, AnswerType.TYPING_TYPOS].includes(
+                    interactionOptions["answer"] as AnswerType
+                )
+            ) {
+                return true;
             }
         }
 
@@ -460,9 +459,9 @@ export default class CommandPrechecks {
             return true;
         }
 
+        // Allow /timer change during hidden, but prevent them from disabling it
         if (!precheckArgs.interaction) {
             if (precheckArgs.parsedMessage!.components.length > 0) {
-                // Allow /timer change but not reset during hidden
                 return true;
             }
         } else {

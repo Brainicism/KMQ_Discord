@@ -325,6 +325,15 @@ export default class GameRound extends Round {
     }
 
     /**
+     * @returns the guesses made in the round so far
+     */
+    getGuesses(): {
+        [playerID: string]: { guess: string; createdAt: number };
+    } {
+        return this.guesses;
+    }
+
+    /**
      * Sets the base exp
      * @param baseExp - The base exp
      */
