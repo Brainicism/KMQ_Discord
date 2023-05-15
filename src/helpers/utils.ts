@@ -533,3 +533,13 @@ export function mapTo<T, S extends T, K extends keyof T>(
 ): void {
     target[key] = source[key];
 }
+
+/**
+ * Get the number of seconds between two timestamps
+ * @param startTime - the beginning timestamp
+ * @param endTime - the ending timestamp
+ * @returns the number of seconds between the two timestamps
+ */
+export function durationSeconds(startTime: number, endTime: number): number {
+    return (endTime - startTime) / 1000;
+}

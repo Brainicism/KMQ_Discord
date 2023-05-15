@@ -2,6 +2,7 @@
 import { BaseClusterWorker } from "eris-fleet";
 import { IPCLogger } from "./logger";
 import { config } from "dotenv";
+import { durationSeconds } from "./helpers/utils";
 import {
     registerIntervals,
     reloadCaches,
@@ -257,9 +258,10 @@ export default class BotWorker extends BaseClusterWorker {
         logger.info(
             `Logged in as ${State.client.user.username}#${
                 State.client.user.discriminator
-            }! in '${process.env.NODE_ENV}' mode (${
-                (Date.now() - State.processStartTime) / 1000
-            }s)`
+            }! in '${process.env.NODE_ENV}' mode (${durationSeconds(
+                State.processStartTime,
+                Date.now()
+            )}s)`
         );
     }
 }

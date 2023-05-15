@@ -1126,15 +1126,7 @@ export default class GameSession extends Session {
         const round = this.round;
         if (multipleChoiceMode && round.incorrectGuessers.has(userID)) return 0;
 
-        if (this.gameType === GameType.HIDDEN) {
-            round.storeGuess(
-                userID,
-                guess,
-                createdAt,
-                guessModeType,
-                typosAllowed
-            );
-        }
+        round.storeGuess(userID, guess, createdAt, guessModeType, typosAllowed);
 
         const pointsAwarded = round.checkGuess(
             guess,

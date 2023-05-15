@@ -7,7 +7,11 @@ import {
     INCORRECT_GUESS_EMOJI,
     ROUND_MAX_RUNNERS_UP,
 } from "../constants";
-import { friendlyFormattedNumber, getMention } from "../helpers/utils";
+import {
+    durationSeconds,
+    friendlyFormattedNumber,
+    getMention,
+} from "../helpers/utils";
 import ExpBonusModifier from "../enums/exp_bonus_modifier";
 import GameType from "../enums/game_type";
 import GuessModeType from "../enums/option_types/guess_mode_type";
@@ -292,7 +296,7 @@ export default class GameRound extends Round {
     }
 
     /**
-     * Stores a player's guess if HIDDEN gameType
+     * Stores a player's guess
      * @param playerID - The player's id
      * @param guess - The player's guess
      * @param createdAt - The time the guess was made
@@ -442,9 +446,9 @@ export default class GameRound extends Round {
 
         const correctGuess = playerRoundResults.length > 0;
         if (gameType === GameType.HIDDEN && correctGuess) {
-            for (const entry of Object.entries(this.guesses).sort(
-                (a, b) => a[1].createdAt - b[1].createdAt
-            )) {
+            for (const entry of Object.entries(this.guesses)
+                .sort((a, b) => a[1].createdAt - b[1].createdAt)
+                .slice(0, ROUND_MAX_RUNNERS_UP)) {
                 const userID = entry[0];
                 const { guess, createdAt } = entry[1];
                 const playerResult = playerRoundResults.find(
@@ -466,9 +470,19 @@ export default class GameRound extends Round {
                     !this.incorrectGuessers.has(userID)
                         ? CORRECT_GUESS_EMOJI
                         : INCORRECT_GUESS_EMOJI
-                } ${getMention(userID)}: \`\`${guess}\`\`${streak}(${
-                    (createdAt - this.startedAt) / 1000
-                }s)${expGain}`;
+                } ${getMention(
+                    userID
+                )}: \`\`${guess}\`\`${streak}(${durationSeconds(
+                    this.startedAt,
+                    createdAt
+                )}s)${expGain}`;
+            }
+
+            if (Object.keys(this.guesses).length >= ROUND_MAX_RUNNERS_UP) {
+                correctDescription += `\n${i18n.translate(
+                    messageContext.guildID,
+                    "misc.andManyOthers"
+                )}`;
             }
         } else if (correctGuess) {
             const correctGuesser = `${getMention(
@@ -489,6 +503,13 @@ export default class GameRound extends Round {
                     expGain: friendlyFormattedNumber(
                         playerRoundResults[0].expGain
                     ),
+                    timeToGuess: String(
+                        durationSeconds(
+                            this.startedAt,
+                            this.guesses[playerRoundResults[0].player.id]
+                                .createdAt
+                        )
+                    ),
                 }
             );
             if (playerRoundResults.length > 1) {
@@ -498,7 +519,12 @@ export default class GameRound extends Round {
                         (x) =>
                             `${getMention(
                                 x.player.id
-                            )} (+${friendlyFormattedNumber(x.expGain)} EXP)`
+                            )} (+${friendlyFormattedNumber(
+                                x.expGain
+                            )} EXP) (${durationSeconds(
+                                this.startedAt,
+                                this.guesses[x.player.id].createdAt
+                            )}s)`
                     )
                     .slice(0, ROUND_MAX_RUNNERS_UP)
                     .join("\n");
