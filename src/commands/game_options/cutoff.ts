@@ -1,6 +1,7 @@
 import {
     DEFAULT_BEGINNING_SEARCH_YEAR,
     DEFAULT_ENDING_SEARCH_YEAR,
+    EARLIEST_BEGINNING_SEARCH_YEAR,
     OptionAction,
 } from "../../constants";
 import { IPCLogger } from "../../logger";
@@ -43,13 +44,13 @@ export default class CutoffCommand implements BaseCommand {
             {
                 name: "cutoff_start",
                 type: "number" as const,
-                minValue: DEFAULT_BEGINNING_SEARCH_YEAR,
+                minValue: EARLIEST_BEGINNING_SEARCH_YEAR,
                 maxValue: DEFAULT_ENDING_SEARCH_YEAR,
             },
             {
                 name: "cutoff_end",
                 type: "number" as const,
-                minValue: DEFAULT_BEGINNING_SEARCH_YEAR,
+                minValue: EARLIEST_BEGINNING_SEARCH_YEAR,
                 maxValue: DEFAULT_ENDING_SEARCH_YEAR,
             },
         ],
@@ -153,7 +154,7 @@ export default class CutoffCommand implements BaseCommand {
                                         .ApplicationCommandOptionTypes.INTEGER,
                                     required: true,
                                     max_value: DEFAULT_ENDING_SEARCH_YEAR,
-                                    min_value: DEFAULT_BEGINNING_SEARCH_YEAR,
+                                    min_value: EARLIEST_BEGINNING_SEARCH_YEAR,
                                 },
                             ],
                         },
@@ -188,7 +189,7 @@ export default class CutoffCommand implements BaseCommand {
                                         .ApplicationCommandOptionTypes.INTEGER,
                                     required: true,
                                     max_value: DEFAULT_ENDING_SEARCH_YEAR,
-                                    min_value: DEFAULT_BEGINNING_SEARCH_YEAR,
+                                    min_value: EARLIEST_BEGINNING_SEARCH_YEAR,
                                 },
                                 {
                                     name: "ending_year",
@@ -206,7 +207,7 @@ export default class CutoffCommand implements BaseCommand {
                                         .ApplicationCommandOptionTypes.INTEGER,
                                     required: true,
                                     max_value: DEFAULT_ENDING_SEARCH_YEAR,
-                                    min_value: DEFAULT_BEGINNING_SEARCH_YEAR,
+                                    min_value: EARLIEST_BEGINNING_SEARCH_YEAR,
                                 },
                             ],
                         },

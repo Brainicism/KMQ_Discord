@@ -1,4 +1,5 @@
 /* eslint-disable tsdoc/syntax */
+import * as uuid from "uuid";
 import { DataFiles } from "../constants";
 import { IPCLogger } from "../logger";
 import { exec } from "child_process";
@@ -282,6 +283,54 @@ export async function retryJob<Type>(
         }
 
         return retryJob(job, jobArgs, maxRetries - 1, false, delayDuration);
+    });
+}
+
+/**
+ * @param func - the function to retry
+ * @param description - description of the function
+ * @param maxRetries - retries of job before throwing
+ * @param initialDelayMs - time (in ms) before attempting job retry
+ * @returns the result of job
+ */
+export function retryWithExponentialBackoff<T>(
+    func: () => Promise<T>,
+    description: string | undefined,
+    maxRetries = 5,
+    initialDelayMs = 1000
+): Promise<T> {
+    logger.info(
+        `Executing retry with exponential backoff for ${uuid.v4()}}. ${description}`
+    );
+    return new Promise((resolve, reject) => {
+        let retryCount = 0;
+        let delayMs = initialDelayMs;
+
+        async function attempt(): Promise<void> {
+            try {
+                logger.info(
+                    `Executing retry with exponential backoff for ${uuid.v4()}}. Retries remaining: ${
+                        maxRetries - retryCount
+                    }/${maxRetries}`
+                );
+                const result = await func();
+                resolve(result);
+            } catch (error) {
+                if (retryCount >= maxRetries) {
+                    logger.info(
+                        `Retry with exponential backoff for ${uuid.v4()}} failed. after ${maxRetries} retries`
+                    );
+                    reject(error);
+                    return;
+                }
+
+                retryCount++;
+                setTimeout(attempt, delayMs);
+                delayMs *= 2;
+            }
+        }
+
+        attempt();
     });
 }
 

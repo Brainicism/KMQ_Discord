@@ -565,6 +565,7 @@
                 "nextPage": "리더보드의 다음 페이지를 보고 싶으십니까? {{command}}을(를) 참조하세요."
             },
             "rankNumber": "순위: {{rank}}위",
+            "resets": "{{timestamp}} 재설정",
             "scope": {
                 "currentGame": "현재 게임",
                 "global": "글로벌",
@@ -1553,7 +1554,7 @@
         },
         "releaseDate": "발매 날짜",
         "restart": {
-            "description_hard": "작동 중지 시간은 약 {{downtimeMinutes}}분입니다. 진행 상황이 저장되었는지 확인하려면 현재 게임을 종료하세요!",
+            "description_hard": "작동 중지 시간은 약 몇 초입니다. 진행 상황이 저장되었는지 확인하려면 현재 게임을 종료하세요!",
             "title": "{{timeUntilRestart}} 분 후 재시동 예정"
         },
         "sendingBookmarkedSongs": {

@@ -1,5 +1,5 @@
 import { IPCLogger } from "../logger";
-import { STANDBY_COOKIE } from "../constants";
+import { STANDBY_COOKIE, STATUS_COOKIE } from "../constants";
 import { config } from "dotenv";
 import {
     databaseExists,
@@ -156,8 +156,10 @@ async function bootstrapDatabases(): Promise<void> {
 
         if (process.env.IS_STANDBY === "true") {
             logger.info("Preparing standby instance");
-            fs.promises.writeFile(STANDBY_COOKIE, "starting");
+            await fs.promises.writeFile(STANDBY_COOKIE, "starting");
         }
+
+        await fs.promises.writeFile(STATUS_COOKIE, "starting");
 
         const dataDir = path.join(__dirname, "../../data");
 

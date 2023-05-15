@@ -538,7 +538,7 @@ export async function sendErrorMessage(
                               icon_url: author.avatarUrl,
                           }
                         : undefined,
-                    title: bold(embedPayload.title),
+                    title: embedPayload.title,
                     description: embedPayload.description,
                     footer: embedPayload.footerText
                         ? {
@@ -581,7 +581,7 @@ export function generateEmbed(
                   icon_url: author.avatarUrl,
               }
             : undefined,
-        title: bold(embedPayload.title),
+        title: embedPayload.title,
         url: embedPayload.url,
         description: embedPayload.description,
         fields: embedPayload.fields,
@@ -1520,11 +1520,9 @@ export async function sendBookmarkedSongs(
                     name: "Kimiqo",
                     icon_url: KmqImages.READING_BOOK,
                 },
-                title: bold(
-                    i18n.translate(
-                        guildID,
-                        "misc.interaction.bookmarked.message.title"
-                    )
+                title: i18n.translate(
+                    guildID,
+                    "misc.interaction.bookmarked.message.title"
                 ),
                 fields,
                 footer: {
@@ -1645,7 +1643,7 @@ export async function tryCreateInteractionSuccessAcknowledgement(
                         name: interaction.member!.username,
                         icon_url: interaction.member?.avatarURL,
                     },
-                    title: bold(title),
+                    title,
                     description,
                     thumbnail: { url: KmqImages.THUMBS_UP },
                 },
@@ -1682,11 +1680,9 @@ export async function tryCreateInteractionErrorAcknowledgement(
                     },
                     title:
                         title ||
-                        bold(
-                            i18n.translate(
-                                interaction.guildID as string,
-                                "misc.interaction.title.failure"
-                            )
+                        i18n.translate(
+                            interaction.guildID as string,
+                            "misc.interaction.title.failure"
                         ),
                     description,
                     thumbnail: { url: KmqImages.DEAD },

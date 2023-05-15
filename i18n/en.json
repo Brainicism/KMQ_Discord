@@ -565,6 +565,7 @@
                 "nextPage": "Want to see the next page of the leaderboard? See {{command}}"
             },
             "rankNumber": "Rank #{{rank}}",
+            "resets": "Resets {{timestamp}}",
             "scope": {
                 "currentGame": "Current Game's",
                 "global": "Global",
@@ -1553,7 +1554,7 @@
         },
         "releaseDate": "Release Date",
         "restart": {
-            "description_hard": "Downtime will be approximately {{downtimeMinutes}} minutes. Please end the current game to ensure your progress is saved!",
+            "description_hard": "Downtime will be approximately a few seconds. Please end the current game to ensure your progress is saved!",
             "title": "Upcoming Restart in {{timeUntilRestart}} Minutes."
         },
         "sendingBookmarkedSongs": {

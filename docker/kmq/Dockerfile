@@ -15,12 +15,12 @@ RUN yarn install --frozen-lockfile
 
 COPY start.sh tsconfig.json ./
 COPY i18n/ i18n/
-COPY src/ src/
-COPY templates/ templates/
-RUN npx tsc
-
 COPY sql_dumps/daisuki/bootstrap.sql sql_dumps/daisuki/bootstrap.sql
 COPY sql/ sql/
+COPY templates/ templates/
+
+COPY src/ src/
+RUN npx tsc
 
 # ================================================================= #
 FROM node:18-alpine
@@ -46,5 +46,5 @@ STOPSIGNAL SIGINT
 ARG NODE_ENV
 ENV NODE_ENV=$NODE_ENV
 HEALTHCHECK --interval=5s --timeout=3s --start-period=30s \
-  CMD curl -f 127.0.0.1:5858/ping || exit 1
+  CMD [ "$(cat status)" == "ready" ] && curl -f 127.0.0.1:5858/ping || exit 1
 ENTRYPOINT ["./start.sh", "docker"]
