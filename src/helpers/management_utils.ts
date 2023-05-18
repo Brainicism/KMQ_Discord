@@ -117,9 +117,15 @@ function clearInactiveVoiceConnections(): void {
                     `gid: ${existingVoiceChannelGuildID}, vid: ${voiceChannelID} | Disconnected inactive voice connection`
                 );
 
-                State.client.voiceConnections.leave(
-                    existingVoiceChannelGuildID
-                );
+                try {
+                    State.client.voiceConnections.leave(
+                        existingVoiceChannelGuildID
+                    );
+                } catch (e) {
+                    logger.error(
+                        `Failed to disconnect inactive voice connection for gid: ${existingVoiceChannelGuildID}. err = ${e}`
+                    );
+                }
             }
         }
     }

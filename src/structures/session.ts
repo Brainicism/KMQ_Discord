@@ -369,7 +369,13 @@ export default abstract class Session {
             ) as Eris.VoiceChannel;
 
             if (voiceChannel) {
-                voiceChannel.leave();
+                try {
+                    voiceChannel.leave();
+                } catch (e) {
+                    logger.error(
+                        `Failed to disconnect inactive voice connection for gid: ${this.guildID}. err = ${e}`
+                    );
+                }
             }
         }
 
