@@ -394,6 +394,9 @@ export default class SpotifyManager {
                         "available_songs.original_artist_name_en LIKE ?",
                         [song.artists[0]]
                     )
+                        .orWhereRaw("available_songs.previous_name_en LIKE ?", [
+                            song.artists[0],
+                        ])
                         .orWhereIn("id_artist", aliasIDs)
                         .orWhereILike("artist_aliases", `%${song.artists[0]}%`)
                         .orWhereIn("id_parentgroup", aliasIDs)
