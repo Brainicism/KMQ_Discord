@@ -44,8 +44,18 @@ jobs:
               uses: actions/setup-node@v2.1.2
               with:
                   node-version: 16
+            - name: Get yarn cache directory path
+              id: yarn-cache-dir-path
+              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+            - name: Check yarn dependency cache
+              uses: actions/cache@v3
+              with:
+                  path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-yarn-
             - name: Install node dependencies
-              run: yarn install --frozen-lockfile
+              run: yarn install --frozen-lockfile --prefer-offline
             - name: Prettier
               run: npm run prettier_ci
             - name: npm run lint
