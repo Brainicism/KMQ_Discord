@@ -394,6 +394,15 @@ export default class SpotifyManager {
                         "available_songs.original_artist_name_en LIKE ?",
                         [song.artists[0]]
                     )
+                        .orWhere((q) => {
+                            q.whereILike(
+                                "available_songs.original_artist_name_en",
+                                "%+%"
+                            ).andWhereILike(
+                                "available_songs.original_artist_name_en",
+                                `%${song.artists[0]}%`
+                            );
+                        })
                         .orWhereRaw("available_songs.previous_name_en LIKE ?", [
                             song.artists[0],
                         ])
