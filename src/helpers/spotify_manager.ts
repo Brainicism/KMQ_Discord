@@ -409,6 +409,8 @@ export default class SpotifyManager {
                         ? (process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST as string)
                         : (process.env.AUDIO_SONGS_PER_ARTIST as string)
                 )
+                .orderByRaw("CHAR_LENGTH(tags) ASC")
+                .orderBy("views", "DESC")
                 .first();
 
             const result = (await query) as QueriedSong;

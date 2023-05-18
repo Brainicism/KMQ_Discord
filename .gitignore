@@ -1,6 +1,7 @@
 node_modules/
 main.db
 .env
+status
 src/config/debug_settings.json
 logs/
 build/
