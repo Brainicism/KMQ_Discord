@@ -337,11 +337,11 @@
         },
         "guess": {
             "help": {
-                "description": "/플레이 hidden 중에 현재 곡에 대한 답변을 제출합니다.",
+                "description": "/play hidden 하는 동안 현재 노래에 대한 답을 제출하세요.",
                 "example": {
-                    "song": "현재 곡의 추측으로는 {{name}}을 사용합니다"
+                    "song": "현재 노래에 대한 추측으로 {{name}}을(를) 사용합니다."
                 },
-                "name": "맞혀봐"
+                "name": "추측"
             },
             "interaction": {
                 "failure": {
@@ -351,7 +351,7 @@
                     }
                 },
                 "guessReceived": {
-                    "description:": "{{guess}}를 맞혀주셨습니다",
+                    "description:": "{{guess}}을(를) 맞혀주셨습니다",
                     "title": "받은 추측"
                 },
                 "name": "현재 노래에 대한 당신의 최고의 샷"
