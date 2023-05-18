@@ -48,6 +48,14 @@ jobs:
               run: yarn install --frozen-lockfile
             - name: Prettier
               run: npm run prettier_ci
+            - name: ESLint cache
+              uses: actions/cache@v3
+              with:
+                  path: ./.eslintcache
+                  key: |
+                      ${{ runner.os }}-eslint-${{ hashFiles('.eslintrc.json') }}
+                  restore-keys: |
+                      ${{ runner.os }}-eslint-
             - name: npm run lint
               run: npm run lint_ci
             - name: Lint translations
