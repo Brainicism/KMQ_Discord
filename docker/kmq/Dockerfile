@@ -31,10 +31,13 @@ COPY templates/ templates/
 COPY src/ src/
 RUN npx tsc
 
+# remove dev dependencies
+RUN yarn install --production --ignore-scripts --prefer-offline
 # ================================================================= #
 FROM node:18-slim
 RUN apt-get update && apt-get install -y default-mysql-client \
     ffmpeg \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /app /app
@@ -45,5 +48,5 @@ STOPSIGNAL SIGINT
 ARG NODE_ENV
 ENV NODE_ENV=$NODE_ENV
 HEALTHCHECK --interval=5s --timeout=3s --start-period=30s \
-  CMD [ "$(cat status)" == "ready" ] && curl -f 127.0.0.1:5858/ping || exit 1
+  CMD [ "$(cat status)" = "ready" ] && curl -f 127.0.0.1:5858/ping || exit 1
 ENTRYPOINT ["./start.sh", "docker"]
