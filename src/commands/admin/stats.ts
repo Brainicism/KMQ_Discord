@@ -20,6 +20,7 @@ import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import { sql } from "kysely";
 
 const logger = new IPCLogger("stats");
 
@@ -84,76 +85,89 @@ export default class StatsCommand implements BaseCommand {
 
         const dateThreshold = new Date();
         dateThreshold.setHours(dateThreshold.getHours() - 24);
-        const recentGameSessions = (
-            (await dbContext
-                .kmq("game_sessions")
-                .where("start_date", ">", dateThreshold)
-                .count("* as count")
-                .first()) ?? {}
-        ).count;
+        const recentGameSessions =
+            (
+                await dbContext.kmq2
+                    .selectFrom("game_sessions")
+                    .select((eb) => eb.fn.countAll().as("count"))
+                    .where("start_date", ">", dateThreshold)
+                    .executeTakeFirst()
+            )?.count || 0;
 
-        const totalGameSessions = (
-            (await dbContext
-                .kmq("game_sessions")
-                .count("* as count")
-                .first()) ?? {}
-        ).count;
+        const totalGameSessions =
+            (
+                await dbContext.kmq2
+                    .selectFrom("game_sessions")
+                    .select((eb) => eb.fn.countAll().as("count"))
+                    .executeTakeFirst()
+            )?.count || 0;
 
         const recentGameRounds =
-            (
-                (await dbContext
-                    .kmq("game_sessions")
-                    .where("start_date", ">", dateThreshold)
-                    .sum("rounds_played as total")
-                    .first()) ?? {}
-            ).total || 0;
+            parseInt(
+                (
+                    await dbContext.kmq2
+                        .selectFrom("game_sessions")
+                        .where("start_date", ">", dateThreshold)
+                        .select((eb) => eb.fn.sum("rounds_played").as("total"))
+                        .executeTakeFirst()
+                )?.total as string,
+                10
+            ) || 0;
 
         const totalGameRounds =
-            (
-                (await dbContext
-                    .kmq("game_sessions")
-                    .sum("rounds_played as total")
-                    .first()) ?? {}
-            ).total || 0;
+            parseInt(
+                (
+                    await dbContext.kmq2
+                        .selectFrom("game_sessions")
+                        .select((eb) => eb.fn.sum("rounds_played").as("total"))
+                        .executeTakeFirst()
+                )?.total as string,
+                10
+            ) || 0;
 
-        const recentPlayers = (
-            (await dbContext
-                .kmq("player_stats")
-                .where("last_active", ">", dateThreshold)
-                .count("* as count")
-                .first()) ?? {}
-        ).count;
+        const recentPlayers =
+            ((
+                await dbContext.kmq2
+                    .selectFrom("player_stats")
+                    .where("last_active", ">", dateThreshold)
+                    .select((eb) => eb.fn.countAll().as("count"))
+                    .executeTakeFirst()
+            )?.count as number) || 0;
 
-        const totalPlayers = (
-            (await dbContext
-                .kmq("player_stats")
-                .count("* as count")
-                .where("exp", ">", "0")
-                .first()) ?? {}
-        ).count;
+        const totalPlayers =
+            ((
+                await dbContext.kmq2
+                    .selectFrom("player_stats")
+                    .select((eb) => eb.fn.countAll().as("count"))
+                    .where("exp", ">", 0)
+                    .executeTakeFirst()
+            )?.count as number) || 0;
 
         const latestAvailableSong = new Date(
             (
-                await dbContext
-                    .kmq("available_songs")
-                    .select("publishedon")
-                    .orderBy("publishedon", "DESC")
-                    .first()
-            ).publishedon
+                await dbContext.kmq2
+                    .selectFrom("available_songs")
+                    .select(["publishedon"])
+                    .orderBy("publishedon", "desc")
+                    .executeTakeFirst()
+            )?.publishedon as Date
         );
 
         const mysqlLatency = await measureExecutionTime(
-            dbContext.kmq.raw("SELECT 1;")
+            dbContext.kmq2
+                .selectFrom("available_songs")
+                .select(sql`1`.as("x"))
+                .execute()
         );
 
         const requestLatency = (
-            await dbContext
-                .kmq("system_stats")
-                .select("stat_value")
+            await dbContext.kmq2
+                .selectFrom("system_stats")
+                .select(["stat_value"])
                 .where("stat_name", "=", "request_latency")
-                .orderBy("date", "DESC")
-                .first()
-        )["stat_value"];
+                .orderBy("date", "desc")
+                .executeTakeFirst()
+        )?.stat_value;
 
         const gameStatistics = {
             [i18n.translate(
