@@ -188,6 +188,16 @@ export async function loadStoredProcedures(): Promise<void> {
     }
 }
 
+/**
+ * Update typings for Kyseley
+ */
+export async function updateDaisukiSchemaTypings(): Promise<void> {
+    logger.info("Updating Kyseley typings");
+    await exec(
+        `bash ${path.resolve(__dirname, "../scripts/prepare-kysely-schema.sh")}`
+    );
+}
+
 const downloadDb = async (): Promise<void> => {
     const mvOutput = `${DATABASE_DOWNLOAD_DIR}/mv-download.zip`;
     const daisukiDownloadResp = await Axios.get(
@@ -644,6 +654,10 @@ async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
         try {
             await loadStoredProcedures();
             await seedAndDownloadNewSongs(db);
+
+            if (process.env.NODE_ENV !== EnvType.PROD) {
+                await updateDaisukiSchemaTypings();
+            }
         } catch (e) {
             logger.error(e);
             process.exit(1);
