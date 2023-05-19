@@ -111,15 +111,16 @@ describe("leaderboard command", () => {
     describe("getLeaderboardEmbeds", () => {
         describe("off by one errors", () => {
             beforeEach(async () => {
-                await dbContext.kmq("player_stats").del();
+                await dbContext.kmq2.deleteFrom("player_stats").execute();
             });
 
             describe("fits a page perfectly", () => {
                 it("should match the number of pages and embeds", async () => {
                     const totalEntries = LEADERBOARD_ENTRIES_PER_PAGE;
-                    await dbContext
-                        .kmq("player_stats")
-                        .insert(generatePlayerStats(totalEntries));
+                    await dbContext.kmq2
+                        .insertInto("player_stats")
+                        .values(generatePlayerStats(totalEntries))
+                        .execute();
 
                     const { embeds, pageCount } =
                         await LeaderboardCommand.getLeaderboardEmbeds(
@@ -141,9 +142,10 @@ describe("leaderboard command", () => {
             describe("one full page + 1 field", () => {
                 it("should match the number of pages and embeds", async () => {
                     const totalEntries = LEADERBOARD_ENTRIES_PER_PAGE + 1;
-                    await dbContext
-                        .kmq("player_stats")
-                        .insert(generatePlayerStats(totalEntries));
+                    await dbContext.kmq2
+                        .insertInto("player_stats")
+                        .values(generatePlayerStats(totalEntries))
+                        .execute();
 
                     const { embeds, pageCount } =
                         await LeaderboardCommand.getLeaderboardEmbeds(
@@ -165,9 +167,10 @@ describe("leaderboard command", () => {
             describe("one field short of a full page", () => {
                 it("should match the number of pages and embeds", async () => {
                     const totalEntries = LEADERBOARD_ENTRIES_PER_PAGE - 1;
-                    await dbContext
-                        .kmq("player_stats")
-                        .insert(generatePlayerStats(totalEntries));
+                    await dbContext.kmq2
+                        .insertInto("player_stats")
+                        .values(generatePlayerStats(totalEntries))
+                        .execute();
 
                     const { embeds, pageCount } =
                         await LeaderboardCommand.getLeaderboardEmbeds(
@@ -191,13 +194,14 @@ describe("leaderboard command", () => {
         describe("all-time leaderboard", () => {
             describe("global leaderboard", () => {
                 beforeEach(async () => {
-                    await dbContext.kmq("player_stats").del();
+                    await dbContext.kmq2.deleteFrom("player_stats").execute();
                 });
 
                 it("should match the number of pages and embeds", async () => {
-                    await dbContext
-                        .kmq("player_stats")
-                        .insert(generatePlayerStats(INITIAL_TOTAL_ENTRIES));
+                    await dbContext.kmq2
+                        .insertInto("player_stats")
+                        .values(generatePlayerStats(INITIAL_TOTAL_ENTRIES))
+                        .execute();
 
                     const { embeds, pageCount } =
                         await LeaderboardCommand.getLeaderboardEmbeds(
@@ -221,8 +225,8 @@ describe("leaderboard command", () => {
 
             describe("server leaderboard", () => {
                 beforeEach(async () => {
-                    await dbContext.kmq("player_stats").del();
-                    await dbContext.kmq("player_servers").del();
+                    await dbContext.kmq2.deleteFrom("player_stats").execute();
+                    await dbContext.kmq2.deleteFrom("player_servers").execute();
                 });
 
                 it("should match the number of pages and embeds", async () => {
@@ -245,9 +249,15 @@ describe("leaderboard command", () => {
                         ...generatePlayerStats(5, INITIAL_TOTAL_ENTRIES)
                     );
 
-                    await dbContext.kmq("player_stats").insert(statsRows);
+                    await dbContext.kmq2
+                        .insertInto("player_stats")
+                        .values(statsRows)
+                        .execute();
 
-                    await dbContext.kmq("player_servers").insert(serversRows);
+                    await dbContext.kmq2
+                        .insertInto("player_servers")
+                        .values(serversRows)
+                        .execute();
 
                     const { embeds, pageCount } =
                         await LeaderboardCommand.getLeaderboardEmbeds(
@@ -271,7 +281,7 @@ describe("leaderboard command", () => {
 
             describe("game leaderboard", () => {
                 beforeEach(async () => {
-                    await dbContext.kmq("player_stats").del();
+                    await dbContext.kmq2.deleteFrom("player_stats").execute();
                     guildPreference = getMockGuildPreference();
                 });
 
@@ -315,7 +325,10 @@ describe("leaderboard command", () => {
                         ...generatePlayerStats(5, INITIAL_TOTAL_ENTRIES)
                     );
 
-                    await dbContext.kmq("player_stats").insert(statsRows);
+                    await dbContext.kmq2
+                        .insertInto("player_stats")
+                        .values(statsRows)
+                        .execute();
 
                     const { embeds, pageCount } =
                         await LeaderboardCommand.getLeaderboardEmbeds(
@@ -339,13 +352,14 @@ describe("leaderboard command", () => {
 
             describe("games played leaderboard", () => {
                 beforeEach(async () => {
-                    await dbContext.kmq("player_stats").del();
+                    await dbContext.kmq2.deleteFrom("player_stats").execute();
                 });
 
                 it("should match the number of pages and embeds", async () => {
-                    await dbContext
-                        .kmq("player_stats")
-                        .insert(generatePlayerStats(INITIAL_TOTAL_ENTRIES));
+                    await dbContext.kmq2
+                        .insertInto("player_stats")
+                        .values(generatePlayerStats(INITIAL_TOTAL_ENTRIES))
+                        .execute();
 
                     const { embeds, pageCount } =
                         await LeaderboardCommand.getLeaderboardEmbeds(
@@ -369,13 +383,14 @@ describe("leaderboard command", () => {
 
             describe("songs guessed leaderboard", () => {
                 beforeEach(async () => {
-                    await dbContext.kmq("player_stats").del();
+                    await dbContext.kmq2.deleteFrom("player_stats").execute();
                 });
 
                 it("should match the number of pages and embeds", async () => {
-                    await dbContext
-                        .kmq("player_stats")
-                        .insert(generatePlayerStats(INITIAL_TOTAL_ENTRIES));
+                    await dbContext.kmq2
+                        .insertInto("player_stats")
+                        .values(generatePlayerStats(INITIAL_TOTAL_ENTRIES))
+                        .execute();
 
                     const { embeds, pageCount } =
                         await LeaderboardCommand.getLeaderboardEmbeds(
@@ -400,7 +415,9 @@ describe("leaderboard command", () => {
 
         describe("temporary leaderboard", () => {
             beforeEach(async () => {
-                await dbContext.kmq("player_game_session_stats").del();
+                await dbContext.kmq2
+                    .deleteFrom("player_game_session_stats")
+                    .execute();
 
                 const rows = [
                     {
@@ -457,7 +474,10 @@ describe("leaderboard command", () => {
                     });
                 }
 
-                await dbContext.kmq("player_game_session_stats").insert(rows);
+                await dbContext.kmq2
+                    .insertInto("player_game_session_stats")
+                    .values(rows)
+                    .execute();
             });
 
             describe("global leaderboard", () => {
@@ -541,7 +561,7 @@ describe("leaderboard command", () => {
 
             describe("server leaderboard", () => {
                 beforeEach(async () => {
-                    await dbContext.kmq("player_servers").del();
+                    await dbContext.kmq2.deleteFrom("player_servers").execute();
 
                     const serversRows: Array<PlayerServer> = [];
                     // Player with id 0 is outside server
@@ -552,7 +572,10 @@ describe("leaderboard command", () => {
                         });
                     }
 
-                    await dbContext.kmq("player_servers").insert(serversRows);
+                    await dbContext.kmq2
+                        .insertInto("player_servers")
+                        .values(serversRows)
+                        .execute();
                 });
 
                 describe("daily leaderboard", () => {
@@ -769,9 +792,10 @@ describe("leaderboard command", () => {
                         });
                     }
 
-                    await dbContext
-                        .kmq("player_game_session_stats")
-                        .insert(rows);
+                    await dbContext.kmq2
+                        .insertInto("player_game_session_stats")
+                        .values(rows)
+                        .execute();
 
                     // Counting distinct entries only -- player "0" has two entries, player "1" has 11 entries
                     const validEntryCount = INITIAL_TOTAL_ENTRIES - 1;
@@ -811,9 +835,10 @@ describe("leaderboard command", () => {
                         });
                     }
 
-                    await dbContext
-                        .kmq("player_game_session_stats")
-                        .insert(rows);
+                    await dbContext.kmq2
+                        .insertInto("player_game_session_stats")
+                        .values(rows)
+                        .execute();
 
                     // Counting distinct entries only -- player "0" has two entries, player "1" has 11 entries
                     const validEntryCount = INITIAL_TOTAL_ENTRIES - 1;
