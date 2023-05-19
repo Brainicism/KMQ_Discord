@@ -54,6 +54,7 @@
         "i18next": "^22.4.13",
         "i18next-fs-backend": "^2.1.1",
         "knex": "^2.4.2",
+        "kysely": "^0.24.2",
         "lodash": "^4.17.21",
         "mocha": "^10.2.0",
         "moment-timezone": "^0.5.42",
@@ -70,9 +71,6 @@
         "zlib-sync": "^0.1.8"
     },
     "devDependencies": {
-        "@types/uuid": "^9.0.1",
-        "@typescript-eslint/eslint-plugin": "^5.57.0",
-        "@typescript-eslint/parser": "^5.57.0",
         "@types/damerau-levenshtein": "^1.0.0",
         "@types/ejs": "^3.1.2",
         "@types/fluent-ffmpeg": "^2.1.21",
@@ -83,6 +81,9 @@
         "@types/pluralize": "^0.0.29",
         "@types/sinon": "^10.0.13",
         "@types/tiny-async-pool": "^2.0.0",
+        "@types/uuid": "^9.0.1",
+        "@typescript-eslint/eslint-plugin": "^5.57.0",
+        "@typescript-eslint/parser": "^5.57.0",
         "eslint": "^8.37.0",
         "eslint-config-airbnb-base": "^15.0.0",
         "eslint-config-airbnb-typescript": "^17.0.0",
@@ -95,6 +96,7 @@
         "eslint-plugin-only-warn": "^1.1.0",
         "eslint-plugin-sort-imports-es6-autofix": "^0.6.0",
         "eslint-plugin-tsdoc": "^0.2.17",
+        "kysely-codegen": "^0.10.0",
         "prettier": "2.8.7",
         "typescript": "~5.0.2"
     },

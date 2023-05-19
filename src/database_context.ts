@@ -1,7 +1,10 @@
+import { Kysely, MysqlDialect } from "kysely";
 import { config } from "dotenv";
+import { createPool } from "mysql2";
 import { knex } from "knex";
 import { resolve } from "path";
 import EnvType from "./enums/env_type";
+import type { KmqDB, KpopVideosDB } from "kysely-codegen";
 import type { Knex } from "knex";
 
 config({ path: resolve(__dirname, "../.env") });
@@ -30,21 +33,51 @@ function generateKnexContext(
     };
 }
 
+function generateKysleyContext<T>(
+    databaseName: string,
+    maxPoolSize: number
+): Kysely<T> {
+    return new Kysely<T>({
+        dialect: new MysqlDialect({
+            pool: createPool({
+                host: process.env.DB_HOST,
+                user: process.env.DB_USER,
+                password: process.env.DB_PASS,
+                database: databaseName,
+                connectionLimit: maxPoolSize,
+            }),
+        }),
+    });
+}
+
 export class DatabaseContext {
     public kmq: Knex;
+    public kmq2: Kysely<KmqDB>;
     public kpopVideos: Knex;
+    public kpopVideos2: Kysely<KpopVideosDB>;
     public kpopVideosValidation: Knex;
     public agnostic: Knex;
 
     constructor() {
         if (process.env.NODE_ENV === EnvType.TEST) {
             this.kmq = knex(generateKnexContext("kmq_test", 0, 1));
+            this.kmq2 = generateKysleyContext<KmqDB>("kmq_test", 1);
             this.kpopVideos = knex(
                 generateKnexContext("kpop_videos_test", 0, 1)
             );
+
+            this.kpopVideos2 = generateKysleyContext<KpopVideosDB>(
+                "kpop_videos_test",
+                1
+            );
         } else {
             this.kmq = knex(generateKnexContext("kmq", 0, 20));
+            this.kmq2 = generateKysleyContext<KmqDB>("kmq", 20);
             this.kpopVideos = knex(generateKnexContext("kpop_videos", 0, 5));
+            this.kpopVideos2 = generateKysleyContext<KpopVideosDB>(
+                "kpop_videos",
+                5
+            );
         }
 
         this.agnostic = knex(generateKnexContext(null, 0, 1));
