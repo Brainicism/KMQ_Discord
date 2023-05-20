@@ -33,3 +33,5 @@ jobs:
                   push: false
                   platforms: linux/arm64
                   tags: ${{ steps.app-version-parser.outputs.IMAGE_NAME }},ghcr.io/brainicism/kmq_discord:latest
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
