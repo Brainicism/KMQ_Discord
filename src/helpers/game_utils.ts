@@ -453,6 +453,7 @@ export async function areUsersPremium(
 ): Promise<boolean> {
     return !!(await dbContext.kmq2
         .selectFrom("premium_users")
+        .selectAll()
         .where("active", "=", 1)
         .where("user_id", "in", userIDs)
         .executeTakeFirst());

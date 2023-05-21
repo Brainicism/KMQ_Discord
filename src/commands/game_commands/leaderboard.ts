@@ -31,7 +31,6 @@ import type { EmbedGenerator, GuildTextableMessage } from "../../types";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
-import { reject } from "lodash";
 
 const logger = new IPCLogger("leaderboard");
 
@@ -935,8 +934,6 @@ export default class LeaderboardCommand implements BaseCommand {
                                 }
                             );
                         }
-                        const filteredArray: Array<Eris.EmbedField> =
-                            fields.filter((element) => !Array.isArray(element));
 
                         resolve({
                             title: i18n

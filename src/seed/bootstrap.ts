@@ -9,6 +9,7 @@ import {
     updateKpopDatabase,
 } from "./seed_db";
 import { getNewConnection } from "../database_context";
+import { sql } from "kysely";
 import EnvType from "../enums/env_type";
 import KmqConfiguration from "../kmq_configuration";
 import downloadAndConvertSongs from "../scripts/download-new-songs";
@@ -116,8 +117,8 @@ async function bootstrapDatabases(): Promise<void> {
 
     if (!(await kmqDatabaseExists(db))) {
         logger.info("Performing migrations on KMQ database");
-        await db.agnostic.raw("CREATE DATABASE IF NOT EXISTS kmq");
-        await db.agnostic.raw("CREATE DATABASE IF NOT EXISTS kmq_test");
+        await sql`CREATE DATABASE IF NOT EXISTS kmq;`.execute(db.agnostic);
+        await sql`CREATE DATABASE IF NOT EXISTS kmq_test;`.execute(db.agnostic);
     }
 
     await performMigrations(db);

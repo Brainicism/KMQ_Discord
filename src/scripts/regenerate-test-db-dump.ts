@@ -3,6 +3,7 @@ import * as cp from "child_process";
 import { IPCLogger } from "../logger";
 import { TEST_DB_CACHED_EXPORT } from "../constants";
 import { getNewConnection } from "../database_context";
+import { sql } from "kysely";
 import EnvType from "../enums/env_type";
 import kmqKnexConfig from "../config/knexfile_kmq";
 
@@ -17,8 +18,8 @@ const logger = new IPCLogger("regenerate-test-db-dump");
 
         logger.info("Regenerating test db dump..");
         const db = getNewConnection();
-        await db.agnostic.raw("DROP DATABASE IF EXISTS kmq_test;");
-        await db.agnostic.raw("CREATE DATABASE kmq_test;");
+        await sql`DROP DATABASE IF EXISTS kmq_test;`.execute(db.agnostic);
+        await sql`CREATE DATABASE kmq_test;`.execute(db.agnostic);
 
         logger.info("Performing migrations on KMQ test database");
         await db.kmq.migrate.latest({

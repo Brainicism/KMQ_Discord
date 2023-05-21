@@ -4,7 +4,7 @@ import { createPool } from "mysql2";
 import { knex } from "knex";
 import { resolve } from "path";
 import EnvType from "./enums/env_type";
-import type { KmqDB, KpopVideosDB } from "kysely-codegen";
+import type { InfoSchemaDB, KmqDB, KpopVideosDB } from "kysely-codegen";
 import type { Knex } from "knex";
 
 config({ path: resolve(__dirname, "../.env") });
@@ -55,9 +55,9 @@ export class DatabaseContext {
     public kmq2: Kysely<KmqDB>;
     public kpopVideos: Knex;
     public kpopVideos2: Kysely<KpopVideosDB>;
+    public infoSchema: Kysely<InfoSchemaDB>;
     public kpopVideosValidation: Knex;
-    public agnostic: Knex;
-    public agnostic2: Kysely<null>;
+    public agnostic: Kysely<null>;
 
     constructor() {
         if (process.env.NODE_ENV === EnvType.TEST) {
@@ -81,8 +81,8 @@ export class DatabaseContext {
             );
         }
 
-        this.agnostic = knex(generateKnexContext(null, 0, 1));
-        this.agnostic2 = generateKysleyContext(undefined, 1);
+        this.infoSchema = generateKysleyContext("information_schema", 1);
+        this.agnostic = generateKysleyContext(undefined, 1);
         this.kpopVideosValidation = knex(
             generateKnexContext("kpop_videos_validation", 0, 1)
         );
@@ -109,13 +109,11 @@ export class DatabaseContext {
             await this.agnostic.destroy();
         }
 
-        if (this.agnostic2) {
-            await this.agnostic2.destroy();
-        }
-
         if (this.kpopVideosValidation) {
             await this.kpopVideosValidation.destroy();
         }
+
+        await this.infoSchema.destroy();
     }
 }
 

@@ -12,6 +12,7 @@ import { getNewConnection } from "../database_context";
 import { parseJsonFile, pathExists } from "../helpers/utils";
 import { program } from "commander";
 import { sendDebugAlertWebhook } from "../helpers/discord_utils";
+import { sql } from "kysely";
 import Axios from "axios";
 import EnvType from "../enums/env_type";
 import _ from "lodash";
@@ -33,11 +34,12 @@ const logger = new IPCLogger("seed_db");
 
 async function getDaisukiTableNames(db: DatabaseContext): Promise<string[]> {
     return (
-        await db
-            .agnostic("information_schema.tables")
-            .select("table_name")
-            .where("table_schema", "=", "kpop_videos")
-    ).map((x) => x["table_name"]);
+        await db.infoSchema
+            .selectFrom("TABLES")
+            .select("TABLE_NAME")
+            .where("TABLE_SCHEMA", "=", "kpop_videos")
+            .execute()
+    ).map((x) => x.TABLE_NAME);
 }
 
 /**
@@ -51,9 +53,11 @@ export async function databaseExists(
 ): Promise<boolean> {
     return (
         (
-            await db
-                .agnostic("information_schema.schemata")
-                .where("schema_name", "=", databaseName)
+            await db.infoSchema
+                .selectFrom("SCHEMATA")
+                .selectAll()
+                .where("SCHEMA_NAME", "=", databaseName)
+                .execute()
         ).length === 1
     );
 }
@@ -71,12 +75,12 @@ export async function tableExists(
 ): Promise<boolean> {
     return (
         (
-            (await db
-                .agnostic("information_schema.tables")
-                .where("table_schema", "=", databaseName)
-                .where("table_name", "=", tableName)
-                .count("* as count")
-                .first()) as any
+            await db.infoSchema
+                .selectFrom("TABLES")
+                .where("TABLE_SCHEMA", "=", databaseName)
+                .where("TABLE_NAME", "=", tableName)
+                .select((eb) => eb.fn.countAll<number>().as("count"))
+                .executeTakeFirstOrThrow()
         ).count === 1
     );
 }
@@ -117,11 +121,12 @@ async function listTables(
     databaseName: string
 ): Promise<Array<string>> {
     return (
-        await db
-            .agnostic("information_schema.tables")
-            .where("table_schema", "=", databaseName)
-            .select("table_name")
-    ).map((x) => x["table_name"]);
+        await db.infoSchema
+            .selectFrom("TABLES")
+            .where("TABLE_SCHEMA", "=", databaseName)
+            .select("TABLE_NAME")
+            .execute()
+    ).map((x) => x["TABLE_NAME"]);
 }
 
 program
@@ -245,10 +250,15 @@ async function recordDaisukiTableSchema(db: DatabaseContext): Promise<void> {
             await getDaisukiTableNames(db)
         ).map(async (table) => {
             const commaSeparatedColumnNames = (
-                await db.agnostic.raw(
-                    `SELECT group_concat(COLUMN_NAME) as x FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'kpop_videos' AND TABLE_NAME = '${table}';`
-                )
-            )[0][0]["x"];
+                await db.infoSchema
+                    .selectFrom("COLUMNS")
+                    .select((eb) =>
+                        eb.fn<string>("group_concat", ["COLUMN_NAME"]).as("x")
+                    )
+                    .where("TABLE_SCHEMA", "=", "kpop_videos")
+                    .where("TABLE_NAME", "=", table)
+                    .executeTakeFirstOrThrow()
+            ).x;
 
             const columnNames = _.sortBy(commaSeparatedColumnNames.split(","));
             frozenTableColumnNames[table] = columnNames;
@@ -271,10 +281,15 @@ async function validateDaisukiTableSchema(
             await getDaisukiTableNames(db)
         ).map(async (table) => {
             const commaSeparatedColumnNames = (
-                await db.agnostic.raw(
-                    `SELECT group_concat(COLUMN_NAME) as x FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'kpop_videos_validation' AND TABLE_NAME = '${table}';`
-                )
-            )[0][0]["x"];
+                await db.infoSchema
+                    .selectFrom("COLUMNS")
+                    .select((eb) =>
+                        eb.fn<string>("group_concat", ["COLUMN_NAME"]).as("x")
+                    )
+                    .where("TABLE_SCHEMA", "=", "kpop_videos_validation")
+                    .where("TABLE_NAME", "=", table)
+                    .executeTakeFirstOrThrow()
+            ).x;
 
             const columnNames = _.sortBy(commaSeparatedColumnNames.split(","));
             if (!_.isEqual(frozenSchema[table], columnNames)) {
@@ -316,10 +331,12 @@ async function validateSqlDump(
     bootstrap = false
 ): Promise<void> {
     try {
-        await db.agnostic.raw(
-            "DROP DATABASE IF EXISTS kpop_videos_validation;"
+        await sql`DROP DATABASE IF EXISTS kpop_videos_validation;`.execute(
+            db.agnostic
         );
-        await db.agnostic.raw("CREATE DATABASE kpop_videos_validation;");
+
+        await sql`CREATE DATABASE kpop_videos_validation;`.execute(db.agnostic);
+
         await exec(
             `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${mvSeedFilePath}`
         );
@@ -432,7 +449,9 @@ async function validateSqlDump(
         await validateDaisukiTableSchema(db, frozenSchema);
     }
 
-    await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_validation;");
+    await sql`DROP DATABASE IF EXISTS kpop_videos_validation;`.execute(
+        db.agnostic
+    );
     logger.info("SQL dump validated successfully");
 }
 
@@ -463,9 +482,9 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
 
     // importing dump into temporary database
     logger.info("Dropping K-Pop video temporary database");
-    await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_tmp;");
+    await sql`DROP DATABASE IF EXISTS kpop_videos_tmp;`.execute(db.agnostic);
     logger.info("Creating K-Pop video temporary database");
-    await db.agnostic.raw("CREATE DATABASE kpop_videos_tmp;");
+    await sql`CREATE DATABASE kpop_videos_tmp;`.execute(db.agnostic);
     logger.info("Seeding K-Pop video temporary database");
     await exec(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_tmp < ${dbSeedFilePath}`
@@ -482,26 +501,30 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
 
         if (!(await databaseExists(db, "kpop_videos"))) {
             logger.info("Database 'kpop_videos' doesn't exist, creating...");
-            await db.agnostic.raw("CREATE DATABASE kpop_videos;");
+            await sql`CREATE DATABASE kpop_videos;`.execute(db.agnostic);
         }
 
         if (kpopVideoTableExists) {
             logger.info(`Table '${tableName}' exists, updating...`);
-            await db.kpopVideos.raw("DROP TABLE IF EXISTS kpop_videos.old;");
-            await db.kpopVideos.raw(
-                `RENAME TABLE kpop_videos.${tableName} TO old, kpop_videos_tmp.${tableName} TO kpop_videos.${tableName};`
+            await sql`DROP TABLE IF EXISTS kpop_videos.old`.execute(
+                db.agnostic
             );
+
+            await sql`RENAME TABLE kpop_videos.${sql.raw(
+                tableName
+            )} TO old, kpop_videos_tmp.${sql.raw(
+                tableName
+            )} TO kpop_videos.${sql.raw(tableName)};`.execute(db.kpopVideos2);
         } else {
             logger.info(`Table '${tableName} doesn't exist, creating...`);
-
-            await db.agnostic.raw(
-                `ALTER TABLE kpop_videos_tmp.${tableName} RENAME kpop_videos.${tableName}`
+            await sql`ALTER TABLE kpop_videos_tmp.${tableName} RENAME kpop_videos.${tableName}`.execute(
+                db.agnostic
             );
         }
     }
 
-    await db.kpopVideos.raw("DROP TABLE IF EXISTS kpop_videos.old;");
-    await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_tmp;");
+    await sql`DROP TABLE IF EXISTS kpop_videos.old;`.execute(db.agnostic);
+    await sql`DROP DATABASE IF EXISTS kpop_videos_tmp;`.execute(db.agnostic);
 
     logger.info("Substituting songs with better audio");
     await replaceBetterAudioSongs(db.kpopVideos);
