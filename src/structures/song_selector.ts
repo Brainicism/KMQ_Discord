@@ -8,7 +8,6 @@ import {
 import { IPCLogger } from "../logger";
 import { chooseWeightedRandom, setDifference } from "../helpers/utils";
 import ArtistType from "../enums/option_types/artist_type";
-import Gender from "../enums/option_types/gender";
 import LanguageType from "../enums/option_types/language_type";
 import OstPreference from "../enums/option_types/ost_preference";
 import ReleaseType from "../enums/option_types/release_type";
@@ -16,6 +15,7 @@ import ShuffleType from "../enums/option_types/shuffle_type";
 import State from "../state";
 import SubunitsPreference from "../enums/option_types/subunit_preference";
 import dbContext from "../database_context";
+import type { AvailableGenders } from "../enums/option_types/gender";
 import type { MatchedPlaylist } from "../helpers/spotify_manager";
 import type GuildPreference from "./guild_preference";
 import type QueriedSong from "../interfaces/queried_song";
@@ -35,11 +35,29 @@ export default class SongSelector {
         countBeforeLimit: number;
     } | null;
 
+    public static QueriedSongFields = [
+        "available_songs.clean_song_name_en as songName",
+        "available_songs.song_name_en as originalSongName",
+        "available_songs.clean_song_name_ko as hangulSongName",
+        "available_songs.song_name_ko as originalHangulSongName",
+        "available_songs.artist_name_en as artistName",
+        "available_songs.artist_name_ko as hangulArtistName",
+        "available_songs.link as youtubeLink",
+        "available_songs.publishedon as publishDate",
+        "available_songs.members",
+        "available_songs.id_artist as artistID",
+        "available_songs.issolo as isSolo",
+        "available_songs.tags",
+        "available_songs.views",
+        "available_songs.rank",
+        "available_songs.vtype",
+    ] as const;
+
     /** List of songs played with /shuffle unique enabled */
     public uniqueSongsPlayed: Set<string>;
 
     /** The last gender played when gender is set to alternating, can be null (in not alternating mode), GENDER.MALE, or GENDER.FEMALE */
-    public lastAlternatingGender: Gender | null;
+    public lastAlternatingGender: AvailableGenders | null;
 
     constructor() {
         this.filteredSongs = null;
@@ -93,12 +111,10 @@ export default class SongSelector {
         if (guildPreference.isGenderAlternating()) {
             if (this.lastAlternatingGender === null) {
                 this.lastAlternatingGender =
-                    Math.random() < 0.5 ? Gender.MALE : Gender.FEMALE;
+                    Math.random() < 0.5 ? "male" : "female";
             } else {
                 this.lastAlternatingGender =
-                    this.lastAlternatingGender === Gender.MALE
-                        ? Gender.FEMALE
-                        : Gender.MALE;
+                    this.lastAlternatingGender === "male" ? "female" : "male";
             }
         } else {
             this.lastAlternatingGender = null;
@@ -146,7 +162,7 @@ export default class SongSelector {
     static selectRandomSong(
         filteredSongs: Set<QueriedSong>,
         ignoredSongs: Set<string>,
-        alternatingGender: Gender | null,
+        alternatingGender: AvailableGenders | null,
         shuffleType = ShuffleType.RANDOM
     ): QueriedSong | null {
         let queriedSongList = [...filteredSongs];
@@ -159,14 +175,13 @@ export default class SongSelector {
         if (
             alternatingGender &&
             queriedSongList.some(
-                (y) =>
-                    y.members === alternatingGender || y.members === Gender.COED
+                (y) => y.members === alternatingGender || y.members === "coed"
             )
         ) {
             queriedSongList = queriedSongList.filter(
                 (song) =>
                     song.members === alternatingGender ||
-                    song.members === Gender.COED
+                    song.members === "coed"
             );
         }
 
@@ -239,29 +254,6 @@ export default class SongSelector {
     }
 
     /**
-     * @returns the fields queried to generate the song list
-     */
-    static getQueriedSongFields(): Array<string> {
-        return [
-            "available_songs.clean_song_name_en as songName",
-            "available_songs.song_name_en as originalSongName",
-            "available_songs.clean_song_name_ko as hangulSongName",
-            "available_songs.song_name_ko as originalHangulSongName",
-            "available_songs.artist_name_en as artistName",
-            "available_songs.artist_name_ko as hangulArtistName",
-            "available_songs.link as youtubeLink",
-            "available_songs.publishedon as publishDate",
-            "available_songs.members",
-            "available_songs.id_artist as artistID",
-            "available_songs.issolo as isSolo",
-            "available_songs.tags",
-            "available_songs.views",
-            "available_songs.rank",
-            "available_songs.vtype",
-        ];
-    }
-
-    /**
      * Returns a list of songs from the data store, narrowed down by the specified game options
      * @param guildPreference - The GuildPreference
      * @param premium - Whether the game is premium
@@ -277,7 +269,7 @@ export default class SongSelector {
         let result: Array<QueriedSong> = [];
         let queryBuilder = dbContext
             .kmq("available_songs")
-            .select(SongSelector.getQueriedSongFields());
+            .select(SongSelector.QueriedSongFields);
 
         if (gameOptions.forcePlaySongID) {
             queryBuilder = queryBuilder.where(
@@ -350,7 +342,7 @@ export default class SongSelector {
                 );
                 if (!guildPreference.isGroupsMode()) {
                     const gender = guildPreference.isGenderAlternating()
-                        ? [Gender.MALE, Gender.FEMALE, Gender.COED]
+                        ? ["male", "female", "coed"]
                         : gameOptions.gender;
 
                     this.whereIn("members", gender);

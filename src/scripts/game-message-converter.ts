@@ -31,12 +31,13 @@ const koFile = JSON.parse(
                 logger.info(gameMessageTranslationKey);
                 logger.info(newMessageContent);
 
-                await dbContext
-                    .kmq("game_messages")
+                await dbContext.kmq2
+                    .updateTable("game_messages")
                     .where("message", "=", gameMessageTranslationKey)
-                    .update({
+                    .set({
                         message: newMessageContent,
-                    });
+                    })
+                    .execute();
             }
         }
 

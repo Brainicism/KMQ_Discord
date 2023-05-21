@@ -31,6 +31,7 @@ import type { EmbedGenerator, GuildTextableMessage } from "../../types";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import { reject } from "lodash";
 
 const logger = new IPCLogger("leaderboard");
 
@@ -534,10 +535,11 @@ export default class LeaderboardCommand implements BaseCommand {
 
         if (scope === LeaderboardScope.SERVER) {
             const serverPlayers = (
-                await dbContext
-                    .kmq("player_servers")
+                await dbContext.kmq2
+                    .selectFrom("player_servers")
                     .select("player_id")
                     .where("server_id", "=", messageContext.guildID)
+                    .execute()
             ).map((x) => x.player_id);
 
             topPlayersQuery = topPlayersQuery.whereIn(
@@ -671,136 +673,144 @@ export default class LeaderboardCommand implements BaseCommand {
 
                         const fields: Array<Eris.EmbedField> =
                             await Promise.all(
-                                topPlayers.map(async (player, relativeRank) => {
-                                    const rank = relativeRank + offset;
-                                    const enrolledPlayer = await dbContext
-                                        .kmq("leaderboard_enrollment")
-                                        .where(
-                                            "player_id",
-                                            "=",
-                                            player.player_id
-                                        )
-                                        .first();
+                                topPlayers.flatMap(
+                                    async (player, relativeRank) => {
+                                        const rank = relativeRank + offset;
+                                        const enrolledPlayer =
+                                            await dbContext.kmq2
+                                                .selectFrom(
+                                                    "leaderboard_enrollment"
+                                                )
+                                                .select(["display_name"])
+                                                .where(
+                                                    "player_id",
+                                                    "=",
+                                                    player.player_id
+                                                )
+                                                .executeTakeFirst();
 
-                                    const displayedRank =
-                                        ["🥇", "🥈", "🥉"][rank] ||
-                                        `${rank + 1}.`;
+                                        const displayedRank =
+                                            ["🥇", "🥈", "🥉"][rank] ||
+                                            `${rank + 1}.`;
 
-                                    const displayName = enrolledPlayer
-                                        ? enrolledPlayer.display_name
-                                        : i18n.translate(
-                                              messageContext.guildID,
-                                              "command.leaderboard.rankNumber",
-                                              {
-                                                  rank: friendlyFormattedNumber(
-                                                      rank + 1
-                                                  ),
-                                              }
-                                          );
+                                        const displayName = enrolledPlayer
+                                            ? enrolledPlayer.display_name
+                                            : i18n.translate(
+                                                  messageContext.guildID,
+                                                  "command.leaderboard.rankNumber",
+                                                  {
+                                                      rank: friendlyFormattedNumber(
+                                                          rank + 1
+                                                      ),
+                                                  }
+                                              );
 
-                                    let level: string;
-                                    if (permanentLb) {
-                                        level = i18n.translate(
-                                            messageContext.guildID,
-                                            "command.leaderboard.levelEntry.permanent",
-                                            {
-                                                level: i18n.translate(
+                                        let level: string;
+                                        if (permanentLb) {
+                                            level = i18n.translate(
+                                                messageContext.guildID,
+                                                "command.leaderboard.levelEntry.permanent",
+                                                {
+                                                    level: i18n.translate(
+                                                        messageContext.guildID,
+                                                        "misc.level"
+                                                    ),
+                                                    formattedNumber:
+                                                        friendlyFormattedNumber(
+                                                            player.level
+                                                        ),
+                                                    rankName:
+                                                        getRankNameByLevel(
+                                                            player.level,
+                                                            messageContext.guildID
+                                                        ),
+                                                }
+                                            );
+                                        } else {
+                                            const levelPluralized =
+                                                i18n.translateN(
                                                     messageContext.guildID,
-                                                    "misc.level"
-                                                ),
-                                                formattedNumber:
-                                                    friendlyFormattedNumber(
-                                                        player.level
-                                                    ),
-                                                rankName: getRankNameByLevel(
-                                                    player.level,
-                                                    messageContext.guildID
-                                                ),
-                                            }
-                                        );
-                                    } else {
-                                        const levelPluralized = i18n.translateN(
-                                            messageContext.guildID,
-                                            "misc.plural.level",
-                                            player.level
-                                        );
+                                                    "misc.plural.level",
+                                                    player.level
+                                                );
 
-                                        level = i18n.translate(
-                                            messageContext.guildID,
-                                            "command.leaderboard.levelEntry.temporary",
-                                            {
-                                                formattedNumber:
-                                                    friendlyFormattedNumber(
-                                                        player.level
-                                                    ),
-                                                levelPluralized,
-                                            }
-                                        );
-                                    }
-
-                                    let value: string;
-                                    switch (type) {
-                                        case LeaderboardType.EXP:
-                                            if (permanentLb) {
-                                                const exp = `${friendlyFormattedNumber(
-                                                    player.exp
-                                                )} EXP`;
-
-                                                value = `${exp} | ${level}`;
-                                            } else {
-                                                const expGained = `+${friendlyFormattedNumber(
-                                                    player.exp
-                                                )} EXP`;
-
-                                                value = `${expGained} | ${level}`;
-                                            }
-
-                                            break;
-                                        case LeaderboardType.GAMES_PLAYED: {
-                                            const games = i18n.translate(
+                                            level = i18n.translate(
                                                 messageContext.guildID,
-                                                "command.leaderboard.gamesPlayed",
+                                                "command.leaderboard.levelEntry.temporary",
                                                 {
-                                                    gameCount:
+                                                    formattedNumber:
                                                         friendlyFormattedNumber(
-                                                            player.game_count
+                                                            player.level
                                                         ),
+                                                    levelPluralized,
                                                 }
                                             );
-
-                                            value = `${games} | ${level}`;
-                                            break;
                                         }
 
-                                        case LeaderboardType.SONGS_GUESSED: {
-                                            const guesses = i18n.translate(
-                                                messageContext.guildID,
-                                                "command.leaderboard.songsGuessed",
-                                                {
-                                                    songsGuessed:
-                                                        friendlyFormattedNumber(
-                                                            player.songs_guessed
-                                                        ),
+                                        let value: string;
+                                        switch (type) {
+                                            case LeaderboardType.EXP:
+                                                if (permanentLb) {
+                                                    const exp = `${friendlyFormattedNumber(
+                                                        player.exp
+                                                    )} EXP`;
+
+                                                    value = `${exp} | ${level}`;
+                                                } else {
+                                                    const expGained = `+${friendlyFormattedNumber(
+                                                        player.exp
+                                                    )} EXP`;
+
+                                                    value = `${expGained} | ${level}`;
                                                 }
-                                            );
 
-                                            value = `${guesses} | ${level}`;
-                                            break;
+                                                break;
+                                            case LeaderboardType.GAMES_PLAYED: {
+                                                const games = i18n.translate(
+                                                    messageContext.guildID,
+                                                    "command.leaderboard.gamesPlayed",
+                                                    {
+                                                        gameCount:
+                                                            friendlyFormattedNumber(
+                                                                player.game_count
+                                                            ),
+                                                    }
+                                                );
+
+                                                value = `${games} | ${level}`;
+                                                break;
+                                            }
+
+                                            case LeaderboardType.SONGS_GUESSED: {
+                                                const guesses = i18n.translate(
+                                                    messageContext.guildID,
+                                                    "command.leaderboard.songsGuessed",
+                                                    {
+                                                        songsGuessed:
+                                                            friendlyFormattedNumber(
+                                                                player.songs_guessed
+                                                            ),
+                                                    }
+                                                );
+
+                                                value = `${guesses} | ${level}`;
+                                                break;
+                                            }
+
+                                            default:
+                                                logger.error(
+                                                    `Unexpected leaderboardType = ${type}`
+                                                );
+                                                value = "null";
+                                                break;
                                         }
 
-                                        default:
-                                            logger.error(
-                                                `Unexpected leaderboardType = ${type}`
-                                            );
-                                            value = "null";
-                                            break;
+                                        return {
+                                            name: `${displayedRank} ${displayName}`,
+                                            value,
+                                        };
                                     }
-
-                                    return {
-                                        name: `${displayedRank} ${displayName}`,
-                                        value,
-                                    };
-                                })
+                                )
                             );
 
                         let leaderboardScope: string;
@@ -925,6 +935,8 @@ export default class LeaderboardCommand implements BaseCommand {
                                 }
                             );
                         }
+                        const filteredArray: Array<Eris.EmbedField> =
+                            fields.filter((element) => !Array.isArray(element));
 
                         resolve({
                             title: i18n
@@ -963,10 +975,10 @@ export default class LeaderboardCommand implements BaseCommand {
         messageContext: MessageContext,
         interaction?: Eris.CommandInteraction
     ): Promise<void> {
-        const alreadyEnrolled = !!(await dbContext
-            .kmq("leaderboard_enrollment")
+        const alreadyEnrolled = !!(await dbContext.kmq2
+            .selectFrom("leaderboard_enrollment")
             .where("player_id", "=", messageContext.author.id)
-            .first());
+            .executeTakeFirst());
 
         if (alreadyEnrolled) {
             sendErrorMessage(
@@ -986,10 +998,13 @@ export default class LeaderboardCommand implements BaseCommand {
             return;
         }
 
-        await dbContext.kmq("leaderboard_enrollment").insert({
-            player_id: messageContext.author.id,
-            display_name: await getUserTag(messageContext.author.id),
-        });
+        await dbContext.kmq2
+            .insertInto("leaderboard_enrollment")
+            .values({
+                player_id: messageContext.author.id,
+                display_name: await getUserTag(messageContext.author.id),
+            })
+            .execute();
 
         sendInfoMessage(
             messageContext,
@@ -1014,10 +1029,10 @@ export default class LeaderboardCommand implements BaseCommand {
         messageContext: MessageContext,
         interaction?: Eris.CommandInteraction
     ): Promise<void> {
-        await dbContext
-            .kmq("leaderboard_enrollment")
+        await dbContext.kmq2
+            .deleteFrom("leaderboard_enrollment")
             .where("player_id", "=", messageContext.author.id)
-            .del();
+            .execute();
 
         sendInfoMessage(
             messageContext,

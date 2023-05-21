@@ -377,7 +377,7 @@ export default class SpotifyManager {
                         "kpop_videos.app_kpop_group.id"
                     );
                 })
-                .select(SongSelector.getQueriedSongFields())
+                .select(SongSelector.QueriedSongFields)
                 .where((qb) => {
                     for (const songName of songNames) {
                         // compare with non-alphanumeric characters removed

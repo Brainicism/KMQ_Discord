@@ -10,6 +10,7 @@ import {
     sendErrorMessage,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
+import { sql } from "kysely";
 import Eris from "eris";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
@@ -20,7 +21,6 @@ import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
-import { sql } from "kysely";
 
 const logger = new IPCLogger("stats");
 

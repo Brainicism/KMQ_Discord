@@ -23,21 +23,24 @@ async function cacheSongDuration(db: DatabaseContext): Promise<void> {
     for (const fileName of files) {
         const vlink = fileName.slice(0, -4);
         if (
-            !(await db
-                .kmq("cached_song_duration")
-                .select("*")
+            !(await db.kmq2
+                .selectFrom("cached_song_duration")
+                .select("vlink")
                 .where("vlink", "=", vlink)
-                .first())
+                .executeTakeFirst())
         ) {
             // uncached song
             const songDuration = await getAudioDurationInSeconds(
                 path.join(process.env.SONG_DOWNLOAD_DIR as string, fileName)
             );
 
-            await db.kmq("cached_song_duration").insert({
-                vlink,
-                duration: songDuration,
-            });
+            await db.kmq2
+                .insertInto("cached_song_duration")
+                .values({
+                    vlink,
+                    duration: songDuration,
+                })
+                .execute();
             cachedSongs++;
             if (cachedSongs % 100 === 0) {
                 logger.info(

@@ -22,9 +22,9 @@ import { mapTo } from "../helpers/utils";
 import AnswerType from "../enums/option_types/answer_type";
 import EnvType from "../enums/env_type";
 import GameOption from "../enums/game_option_name";
-import Gender from "../enums/option_types/gender";
 import _ from "lodash";
 import dbContext from "../database_context";
+import type { AvailableGenders } from "../enums/option_types/gender";
 import type { MutexInterface } from "async-mutex";
 import type { PlaylistMetadata } from "src/helpers/spotify_manager";
 import type ArtistType from "../enums/option_types/artist_type";
@@ -45,7 +45,7 @@ const logger = new IPCLogger("guild_preference");
 
 type GameOptionValue =
     | number
-    | Array<Gender>
+    | Array<AvailableGenders>
     | SeekType
     | SpecialType
     | GuessModeType
@@ -266,32 +266,40 @@ export default class GuildPreference {
                 return GuildPreference.guildPreferencesCache[guildID];
             }
 
-            const guildPreferences = await dbContext
-                .kmq("guilds")
-                .select("*")
-                .where("guild_id", "=", guildID);
+            const guildPreferences = await dbContext.kmq2
+                .selectFrom("guilds")
+                .select("guild_id")
+                .where("guild_id", "=", guildID)
+                .executeTakeFirst();
 
-            if (guildPreferences.length === 0) {
+            if (!guildPreferences) {
                 const guildPreference = GuildPreference.fromGuild(guildID);
-                await dbContext
-                    .kmq("guilds")
-                    .insert({ guild_id: guildID, join_date: new Date() });
+                await dbContext.kmq2
+                    .insertInto("guilds")
+                    .values({ guild_id: guildID, join_date: new Date() })
+                    .execute();
                 return guildPreference;
             }
 
             const gameOptionPairs = (
-                await dbContext.kmq("game_options").select("*").where({
-                    guild_id: guildID,
-                    client_id: process.env.BOT_CLIENT_ID,
-                })
+                await dbContext.kmq2
+                    .selectFrom("game_options")
+                    .select(["option_name", "option_value"])
+                    .where("guild_id", "=", guildID)
+                    .where(
+                        "client_id",
+                        "=",
+                        process.env.BOT_CLIENT_ID as string
+                    )
+                    .execute()
             )
                 .map((x) => ({
-                    [x["option_name"]]: JSON.parse(x["option_value"]),
+                    [x["option_name"]]: JSON.parse(x["option_value"] as string),
                 }))
                 .reduce((total, curr) => Object.assign(total, curr), {});
 
             const guildPreference = GuildPreference.fromGuild(
-                guildPreferences[0].guild_id,
+                guildPreferences.guild_id,
                 gameOptionPairs
             );
 
@@ -322,11 +330,12 @@ export default class GuildPreference {
     /** @returns a list of saved game option presets by name */
     async listPresets(): Promise<string[]> {
         const presets = (
-            await dbContext
-                .kmq("game_option_presets")
+            await dbContext.kmq2
+                .selectFrom("game_option_presets")
                 .select(["preset_name"])
                 .where("guild_id", "=", this.guildID)
-                .distinct("preset_name")
+                .distinct()
+                .execute()
         ).map((x) => x["preset_name"]);
 
         return presets;
@@ -343,11 +352,11 @@ export default class GuildPreference {
             return null;
         }
 
-        await dbContext
-            .kmq("game_option_presets")
+        await dbContext.kmq2
+            .deleteFrom("game_option_presets")
             .where("guild_id", "=", this.guildID)
-            .andWhere("preset_name", "=", presetName)
-            .del();
+            .where("preset_name", "=", presetName)
+            .execute();
 
         return presetUUID;
     }
@@ -378,11 +387,11 @@ export default class GuildPreference {
                 option_value: JSON.stringify(oldUUID ?? `KMQ-${uuid.v4()}`),
             });
 
-            await dbContext.kmq.transaction(async (trx) => {
-                await dbContext
-                    .kmq("game_option_presets")
-                    .insert(presetOptions)
-                    .transacting(trx);
+            await dbContext.kmq2.transaction().execute(async (trx) => {
+                await trx
+                    .insertInto("game_option_presets")
+                    .values(presetOptions)
+                    .execute();
             });
             return true;
         } catch (e) {
@@ -400,13 +409,16 @@ export default class GuildPreference {
         guildID: string
     ): Promise<[boolean, Array<GameOption>]> {
         const preset: { [x: string]: any } = (
-            await dbContext
-                .kmq("game_option_presets")
+            await dbContext.kmq2
+                .selectFrom("game_option_presets")
                 .select(["option_name", "option_value"])
                 .where("guild_id", "=", guildID)
-                .andWhere("preset_name", "=", presetName)
+                .where("preset_name", "=", presetName)
+                .execute()
         )
-            .map((x) => ({ [x["option_name"]]: JSON.parse(x["option_value"]) }))
+            .map((x) => ({
+                [x["option_name"]]: JSON.parse(x["option_value"] as string),
+            }))
             .reduce((total, curr) => Object.assign(total, curr), {});
 
         if (!preset || Object.keys(preset).length === 0) {
@@ -444,19 +456,19 @@ export default class GuildPreference {
      * @returns whether the UUID of the given preset or null if the preset doesn't exist
      */
     async getPresetUUID(presetName: string): Promise<string | null> {
-        const presetID = await dbContext
-            .kmq("game_option_presets")
+        const presetID = await dbContext.kmq2
+            .selectFrom("game_option_presets")
             .select(["option_value"])
             .where("guild_id", "=", this.guildID)
-            .andWhere("preset_name", "=", presetName)
-            .andWhere("option_name", "=", "uuid")
-            .first();
+            .where("preset_name", "=", presetName)
+            .where("option_name", "=", "uuid")
+            .executeTakeFirst();
 
         if (!presetID) {
             return null;
         }
 
-        return JSON.parse(presetID["option_value"]);
+        return JSON.parse(presetID["option_value"] as string);
     }
 
     /**
@@ -655,7 +667,7 @@ export default class GuildPreference {
      * Sets the gender option value
      * @param genderArr - A list of GENDER enums
      */
-    async setGender(genderArr: Array<Gender>): Promise<void> {
+    async setGender(genderArr: Array<AvailableGenders>): Promise<void> {
         this.gameOptions.gender = [...new Set(genderArr)];
         await this.updateGuildPreferences([
             { name: GameOptionInternal.GENDER, value: this.gameOptions.gender },
@@ -664,7 +676,7 @@ export default class GuildPreference {
 
     /** @returns whether gender is set to alternating */
     isGenderAlternating(): boolean {
-        return this.gameOptions.gender[0] === Gender.ALTERNATING;
+        return this.gameOptions.gender[0] === "alternating";
     }
 
     /**
@@ -913,7 +925,7 @@ export default class GuildPreference {
     ): Promise<void> {
         interface GameOptionDatabaseEntry {
             guild_id: string;
-            client_id: string | undefined;
+            client_id: string;
             option_name: string;
             option_value: string;
         }
@@ -923,7 +935,7 @@ export default class GuildPreference {
             updatedOptions = Object.values(updatedOptionsObjects).map(
                 (option) => ({
                     guild_id: this.guildID,
-                    client_id: process.env.BOT_CLIENT_ID,
+                    client_id: process.env.BOT_CLIENT_ID as string,
                     option_name: option.name,
                     option_value: JSON.stringify(option.value),
                 })
@@ -934,20 +946,23 @@ export default class GuildPreference {
                 const optionValue = x[1];
                 return {
                     guild_id: this.guildID,
-                    client_id: process.env.BOT_CLIENT_ID,
+                    client_id: process.env.BOT_CLIENT_ID as string,
                     option_name: optionName,
                     option_value: JSON.stringify(optionValue),
                 };
             });
         }
 
-        await dbContext.kmq.transaction(async (trx) => {
-            await dbContext
-                .kmq("game_options")
-                .insert(updatedOptions)
-                .onConflict(["guild_id", "option_name", "client_id"])
-                .merge()
-                .transacting(trx);
+        await dbContext.kmq2.transaction().execute(async (trx) => {
+            await Promise.all(
+                updatedOptions.map((x) =>
+                    trx
+                        .insertInto("game_options")
+                        .values(x)
+                        .onDuplicateKeyUpdate(x)
+                        .execute()
+                )
+            );
         });
 
         if (this.reloadSongCallback) {

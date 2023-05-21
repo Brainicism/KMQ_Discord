@@ -17,9 +17,9 @@ program.parse();
 (async () => {
     const options = program.opts();
     const db = getNewConnection();
-    const availableSongs = (await db.kmq("available_songs").select("link")).map(
-        (x) => x["link"]
-    );
+    const availableSongs = (
+        await db.kmq2.selectFrom("available_songs").select("link").execute()
+    ).map((x) => x["link"]);
 
     const downloadedSongs = (
         await fs.promises.readdir(process.env.SONG_DOWNLOAD_DIR as string)

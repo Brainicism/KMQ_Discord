@@ -5,7 +5,6 @@ import {
 } from "../../constants";
 import { getMatchingGroupNames } from "../../helpers/game_utils";
 import ArtistType from "../../enums/option_types/artist_type";
-import Gender from "../../enums/option_types/gender";
 import GuildPreference from "../../structures/guild_preference";
 import LanguageType from "../../enums/option_types/language_type";
 import OstPreference from "../../enums/option_types/ost_preference";
@@ -16,6 +15,7 @@ import SubunitsPreference from "../../enums/option_types/subunit_preference";
 import _ from "lodash";
 import assert from "assert";
 import sinon from "sinon";
+import type { AvailableGenders } from "../../enums/option_types/gender";
 import type QueriedSong from "../../interfaces/queried_song";
 
 async function getMockGuildPreference(): Promise<GuildPreference> {
@@ -39,10 +39,10 @@ describe("song selector", () => {
             describe("single-select gender", () => {
                 it("should only return the songs matching the specified gender", async () => {
                     for (const gender of [
-                        Gender.MALE,
-                        Gender.FEMALE,
-                        Gender.COED,
-                    ]) {
+                        "male",
+                        "female",
+                        "coed",
+                    ] as Array<AvailableGenders>) {
                         await guildPreference.setGender([gender]);
                         const { songs } =
                             await SongSelector.getFilteredSongList(
@@ -63,7 +63,11 @@ describe("song selector", () => {
 
             describe("multi-select gender", () => {
                 it("should only return the songs matching the specified genders", async () => {
-                    const genderSetting = [Gender.MALE, Gender.FEMALE];
+                    const genderSetting = [
+                        "male",
+                        "female",
+                    ] as Array<AvailableGenders>;
+
                     await guildPreference.setGender(genderSetting);
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
@@ -72,7 +76,7 @@ describe("song selector", () => {
 
                     assert.strictEqual(
                         Array.from(songs).every((song) =>
-                            [Gender.MALE, Gender.FEMALE].includes(song.members)
+                            ["male", "female"].includes(song.members)
                         ),
                         true
                     );
@@ -82,7 +86,7 @@ describe("song selector", () => {
 
         describe("groups", () => {
             beforeEach(async () => {
-                await guildPreference.setGender([Gender.ALTERNATING]);
+                await guildPreference.setGender(["alternating"]);
             });
 
             describe("single-selected group", () => {
@@ -138,7 +142,7 @@ describe("song selector", () => {
 
             describe("female gender, include 2 male groups", () => {
                 it("should only return the songs matching the specified gender, and the explicitly included artists", async () => {
-                    await guildPreference.setGender([Gender.FEMALE]);
+                    await guildPreference.setGender(["female"]);
                     await guildPreference.setIncludes(includedArtists);
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
@@ -148,7 +152,7 @@ describe("song selector", () => {
                     assert.strictEqual(
                         Array.from(songs).every(
                             (song) =>
-                                song.members === Gender.FEMALE ||
+                                song.members === "female" ||
                                 includedArtists
                                     .map((x) => x.id)
                                     .includes(song.artistID)
@@ -167,7 +171,7 @@ describe("song selector", () => {
 
             describe("female gender, exclude 2 female groups", () => {
                 it("should only return the songs matching the specified gender, explicitly excluding excluded artists ", async () => {
-                    await guildPreference.setGender([Gender.FEMALE]);
+                    await guildPreference.setGender(["female"]);
                     await guildPreference.setExcludes(excludeArtists);
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
@@ -177,7 +181,7 @@ describe("song selector", () => {
                     assert.strictEqual(
                         Array.from(songs).every(
                             (song) =>
-                                song.members === Gender.FEMALE &&
+                                song.members === "female" &&
                                 excludeArtists
                                     .map((x) => x.id)
                                     .every((x) => x !== song.artistID)
@@ -330,15 +334,15 @@ describe("song selector", () => {
 
                         const songsArray = Array.from(songs);
                         assert.ok(
-                            songsArray[0].selectionWeight >
+                            songsArray[0].selectionWeight! >
                                 songsArray[songsArray.length - 1]
-                                    .selectionWeight
+                                    .selectionWeight!
                         );
 
                         for (let i = 1; i < songsArray.length - 1; i++) {
                             assert.ok(
-                                songsArray[i - 1].selectionWeight >=
-                                    songsArray[i].selectionWeight
+                                songsArray[i - 1].selectionWeight! >=
+                                    songsArray[i].selectionWeight!
                             );
                         }
                     });
@@ -357,15 +361,15 @@ describe("song selector", () => {
 
                         const songsArray = Array.from(songs);
                         assert.ok(
-                            songsArray[0].selectionWeight <
+                            songsArray[0].selectionWeight! <
                                 songsArray[songsArray.length - 1]
-                                    .selectionWeight
+                                    .selectionWeight!
                         );
 
                         for (let i = 1; i < songsArray.length - 1; i++) {
                             assert.ok(
-                                songsArray[i - 1].selectionWeight <=
-                                    songsArray[i].selectionWeight
+                                songsArray[i - 1].selectionWeight! <=
+                                    songsArray[i].selectionWeight!
                             );
                         }
                     });
@@ -526,7 +530,7 @@ describe("song selector", () => {
 
                     assert.strictEqual(
                         Array.from(songs).every(
-                            (song) => !song.tags.includes("o")
+                            (song) => !song.tags!.includes("o")
                         ),
                         true
                     );
@@ -546,10 +550,10 @@ describe("song selector", () => {
                     // should have both non osts and osts
                     assert.strictEqual(
                         Array.from(songs).filter((song) =>
-                            song.tags.includes("o")
+                            song.tags!.includes("o")
                         ).length > 0 &&
                             Array.from(songs).filter(
-                                (song) => !song.tags.includes("o")
+                                (song) => !song.tags!.includes("o")
                             ).length > 0,
                         true
                     );
@@ -568,7 +572,7 @@ describe("song selector", () => {
 
                     assert.strictEqual(
                         Array.from(songs).every((song) =>
-                            song.tags.includes("o")
+                            song.tags!.includes("o")
                         ),
                         true
                     );
@@ -579,7 +583,7 @@ describe("song selector", () => {
         describe("limit", () => {
             const limit = 17;
             beforeEach(async () => {
-                await guildPreference.setGender([Gender.COED]);
+                await guildPreference.setGender(["coed"]);
             });
 
             describe("with limit", () => {
@@ -610,7 +614,7 @@ describe("song selector", () => {
                         Array.from(songs).every(
                             (song) =>
                                 _.intersection(
-                                    song.tags.split(""),
+                                    song.tags!.split(""),
                                     FOREIGN_LANGUAGE_TAGS
                                 ).length === 0
                         ),
@@ -631,7 +635,7 @@ describe("song selector", () => {
                     assert.strictEqual(
                         FOREIGN_LANGUAGE_TAGS.every((languageTag) =>
                             Array.from(songs).some((song) =>
-                                song.tags.split("").includes(languageTag)
+                                song.tags!.split("").includes(languageTag)
                             )
                         ),
                         true
@@ -755,7 +759,7 @@ describe("song selector", () => {
     describe("selectRandomSong", () => {
         describe("gender override", () => {
             beforeEach(async () => {
-                await guildPreference.setGender([Gender.ALTERNATING]);
+                await guildPreference.setGender(["alternating"]);
             });
 
             describe("override to female", () => {
@@ -775,14 +779,14 @@ describe("song selector", () => {
                                 new Set(
                                     femaleOrCoedSongs.map((x) => x.youtubeLink)
                                 ),
-                                Gender.FEMALE
+                                "female"
                             ) as QueriedSong
                         );
                     }
 
                     assert.ok(
                         femaleOrCoedSongs.every((song) =>
-                            [Gender.FEMALE, Gender.COED].includes(song.members)
+                            ["female", "coed"].includes(song.members)
                         )
                     );
                 });
@@ -805,14 +809,14 @@ describe("song selector", () => {
                                 new Set(
                                     maleOrCoedSongs.map((x) => x.youtubeLink)
                                 ),
-                                Gender.MALE
+                                "male"
                             ) as QueriedSong
                         );
                     }
 
                     assert.ok(
                         maleOrCoedSongs.every((song) =>
-                            [Gender.MALE, Gender.COED].includes(song.members)
+                            ["male", "coed"].includes(song.members)
                         )
                     );
                 });
@@ -1212,14 +1216,14 @@ describe("song selector", () => {
 
         describe("alternating gender is not set", () => {
             it("should set lastAlternatingGender to null", async () => {
-                await guildPreference.setGender([Gender.MALE]);
+                await guildPreference.setGender(["male"]);
                 assert.strictEqual(songSelector.lastAlternatingGender, null);
             });
         });
 
         describe("alternating gender is set", () => {
             beforeEach(async () => {
-                await guildPreference.setGender([Gender.ALTERNATING]);
+                await guildPreference.setGender(["alternating"]);
             });
 
             describe("lastAlternatingGender is null", () => {
@@ -1233,22 +1237,22 @@ describe("song selector", () => {
             describe("lastAlternatingGender is not null", () => {
                 describe("lastAlternatingGender is male", () => {
                     it("should set lastAlternating Gender to female", () => {
-                        songSelector.lastAlternatingGender = Gender.MALE;
+                        songSelector.lastAlternatingGender = "male";
                         songSelector.checkAlternatingGender(guildPreference);
                         assert.strictEqual(
                             songSelector.lastAlternatingGender,
-                            Gender.FEMALE
+                            "female"
                         );
                     });
                 });
 
                 describe("lastAlternatingGender is female", () => {
                     it("should set lastAlternating Gender to male", () => {
-                        songSelector.lastAlternatingGender = Gender.FEMALE;
+                        songSelector.lastAlternatingGender = "female";
                         songSelector.checkAlternatingGender(guildPreference);
                         assert.strictEqual(
                             songSelector.lastAlternatingGender,
-                            Gender.MALE
+                            "male"
                         );
                     });
                 });

@@ -144,9 +144,12 @@ program.parse();
 const options = program.opts();
 
 async function getOverrideQueries(db: DatabaseContext): Promise<Array<string>> {
-    return (await db.kmq("kpop_videos_sql_overrides").select(["query"])).map(
-        (x) => x.query
-    );
+    return (
+        await db.kmq2
+            .selectFrom("kpop_videos_sql_overrides")
+            .select(["query"])
+            .execute()
+    ).map((x) => x.query);
 }
 
 /**
@@ -190,9 +193,16 @@ export async function loadStoredProcedures(): Promise<void> {
 
 /**
  * Update typings for Kyseley
+ * @param db - The database context
  */
-export async function updateDaisukiSchemaTypings(): Promise<void> {
-    logger.info("Updating Kyseley typings");
+export async function updateDaisukiSchemaTypings(
+    db: DatabaseContext
+): Promise<void> {
+    await db.kpopVideos2.schema
+        .alterTable("app_kpop_group")
+        .modifyColumn("name", "varchar(255)", (cb) => cb.notNull())
+        .execute();
+
     await exec(
         `bash ${path.resolve(__dirname, "../scripts/prepare-kysely-schema.sh")}`
     );
@@ -656,7 +666,7 @@ async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
             await seedAndDownloadNewSongs(db);
 
             if (process.env.NODE_ENV !== EnvType.PROD) {
-                await updateDaisukiSchemaTypings();
+                await updateDaisukiSchemaTypings(db);
             }
         } catch (e) {
             logger.error(e);

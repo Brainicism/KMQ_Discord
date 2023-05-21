@@ -157,14 +157,17 @@ export default class LocaleTypeCommand implements BaseCommand {
     ): Promise<void> {
         if (locale !== DEFAULT_LOCALE) {
             State.locales[guildID] = locale;
-            await dbContext
-                .kmq("locale")
-                .insert({ guild_id: guildID, locale })
-                .onConflict("guild_id")
-                .merge();
+            await dbContext.kmq2
+                .insertInto("locale")
+                .values({ guild_id: guildID, locale })
+                .onDuplicateKeyUpdate({ guild_id: guildID, locale })
+                .execute();
         } else if (State.locales[guildID]) {
             delete State.locales[guildID];
-            await dbContext.kmq("locale").where({ guild_id: guildID }).del();
+            await dbContext.kmq2
+                .deleteFrom("locale")
+                .where("guild_id", "=", guildID)
+                .execute();
         }
     }
 

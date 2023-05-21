@@ -1,10 +1,11 @@
 /* eslint-disable node/no-sync */
 import * as cp from "child_process";
 import { DATABASE_DOWNLOAD_DIR, TEST_DB_CACHED_EXPORT } from "../constants";
+import { FileMigrationProvider, Migrator } from "kysely";
 import { IPCLogger } from "../logger";
 import EnvType from "../enums/env_type";
 import dbContext, { getNewConnection } from "../database_context";
-import fs from "fs";
+import fs, { promises as fsPromises } from "fs";
 import kmqKnexConfig from "../config/knexfile_kmq";
 import path from "path";
 import sinon from "sinon";
@@ -37,9 +38,35 @@ before(async function () {
     }
 
     logger.info("Performing migrations on KMQ database");
-    await db.kmq.migrate.latest({
-        directory: kmqKnexConfig.migrations.directory,
+    const migrator = new Migrator({
+        db: db.kmq2,
+        provider: new FileMigrationProvider({
+            fs: fsPromises,
+            path,
+            migrationFolder: kmqKnexConfig.migrations.directory,
+        }),
     });
+
+    const { error, results } = await migrator.migrateToLatest();
+
+    if (results) {
+        for (const result of results) {
+            if (result.status === "Success") {
+                logger.info(
+                    `Migration "${result.migrationName}" was executed successfully`
+                );
+            } else if (result.status === "Error") {
+                logger.error(
+                    `Failed to execute migration "${result.migrationName}"`
+                );
+            }
+        }
+    }
+
+    if (error) {
+        logger.error(`Failed to run migrations. "${error}"`);
+        process.exit(1);
+    }
 
     logger.info("Setting up test Daisuki database");
     // import frozen db dump

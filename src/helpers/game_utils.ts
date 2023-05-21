@@ -8,6 +8,7 @@ import {
     normalizePunctuationInName,
 } from "../structures/game_round";
 import { containsHangul, md5Hash } from "./utils";
+import { sql } from "kysely";
 import AnswerType from "../enums/option_types/answer_type";
 import GuessModeType from "../enums/option_types/guess_mode_type";
 import LocaleType from "../enums/locale_type";
@@ -15,8 +16,8 @@ import SongSelector from "../structures/song_selector";
 import State from "../state";
 import _ from "lodash";
 import dbContext from "../database_context";
+import type { AvailableGenders } from "../enums/option_types/gender";
 import type { PlaylistMetadata } from "./spotify_manager";
-import type Gender from "../enums/option_types/gender";
 import type GuildPreference from "../structures/guild_preference";
 import type MatchedArtist from "../interfaces/matched_artist";
 import type Patron from "../interfaces/patron";
@@ -122,20 +123,23 @@ export async function cleanupInactiveGameSessions(): Promise<void> {
  * @returns whether the player has bonus active
  */
 export async function userBonusIsActive(userId: string): Promise<boolean> {
-    return !!(await dbContext
-        .kmq("top_gg_user_votes")
+    return !!(await dbContext.kmq2
+        .selectFrom("top_gg_user_votes")
+        .select("buff_expiry_date")
         .where("user_id", "=", userId)
         .where("buff_expiry_date", ">", new Date())
-        .first());
+        .executeTakeFirst());
 }
 
 /**
  * @returns whether the player has bonus active
  */
 export async function activeBonusUsers(): Promise<Set<string>> {
-    const bonusUsers = await dbContext
-        .kmq("top_gg_user_votes")
-        .where("buff_expiry_date", ">", new Date());
+    const bonusUsers = await dbContext.kmq2
+        .selectFrom("top_gg_user_votes")
+        .select("user_id")
+        .where("buff_expiry_date", ">", new Date())
+        .execute();
 
     return new Set(bonusUsers.map((x) => x.user_id));
 }
@@ -251,7 +255,7 @@ export async function getMatchingGroupNames(
 export async function getMultipleChoiceOptions(
     answerType: AnswerType,
     guessMode: GuessModeType,
-    gender: Gender,
+    gender: AvailableGenders,
     answer: string,
     artistID: number,
     locale: LocaleType
@@ -447,11 +451,11 @@ export async function getMultipleChoiceOptions(
 export async function areUsersPremium(
     userIDs: Array<string>
 ): Promise<boolean> {
-    return !!(await dbContext
-        .kmq("premium_users")
-        .where("active", "=", true)
-        .whereIn("user_id", userIDs)
-        .first());
+    return !!(await dbContext.kmq2
+        .selectFrom("premium_users")
+        .where("active", "=", 1)
+        .where("user_id", "in", userIDs)
+        .executeTakeFirst());
 }
 
 /**
@@ -471,40 +475,46 @@ export async function updatePremium(
     inactiveUserIDs: string[]
 ): Promise<void> {
     // Grant premium
-    await dbContext
-        .kmq("premium_users")
-        .insert(
-            activePatrons.map((x) => ({
-                active: x.activePatron,
-                first_subscribed: x.firstSubscribed,
-                user_id: x.discordID,
-            }))
-        )
-        .onConflict("user_id")
-        .merge();
+    const activePatronsPayload = activePatrons.map((x) => ({
+        active: x.activePatron ? 1 : 0,
+        first_subscribed: x.firstSubscribed,
+        user_id: x.discordID,
+        source: "patreon" as const,
+    }));
 
-    await dbContext
-        .kmq("badges_players")
-        .insert(
-            activePatrons.map((x) => ({
-                user_id: x.discordID,
-                badge_id: PATREON_SUPPORTER_BADGE_ID,
-            }))
-        )
-        .onConflict(["user_id", "badge_name"])
-        .ignore();
+    await Promise.all(
+        activePatronsPayload.map(async (activePatronPayload) => {
+            await dbContext.kmq2
+                .insertInto("premium_users")
+                .values(activePatronPayload)
+                .onDuplicateKeyUpdate(activePatronPayload)
+                .execute();
+        })
+    );
+
+    const payload = activePatrons.map((x) => ({
+        user_id: x.discordID,
+        badge_id: PATREON_SUPPORTER_BADGE_ID,
+    }));
+
+    await dbContext.kmq2
+        .insertInto("badges_players")
+        .values(payload)
+        .ignore()
+        .execute();
 
     // Revoke premium
-    await dbContext
-        .kmq("premium_users")
-        .whereIn("user_id", inactiveUserIDs)
-        .update({ active: false });
+    await dbContext.kmq2
+        .updateTable("premium_users")
+        .where("user_id", "in", inactiveUserIDs)
+        .set({ active: 0 })
+        .execute();
 
-    await dbContext
-        .kmq("badges_players")
-        .whereIn("user_id", inactiveUserIDs)
-        .andWhere("badge_id", "=", PATREON_SUPPORTER_BADGE_ID)
-        .del();
+    await dbContext.kmq2
+        .deleteFrom("badges_players")
+        .where("user_id", "in", inactiveUserIDs)
+        .where("badge_id", "=", PATREON_SUPPORTER_BADGE_ID)
+        .execute();
 }
 
 /**
@@ -524,15 +534,15 @@ export async function isPremiumRequest(
  * @returns whether this is the user's first game played today
  */
 export async function isFirstGameOfDay(userID: string): Promise<boolean> {
-    const player = await dbContext
-        .kmq("player_stats")
+    const player = await dbContext.kmq2
+        .selectFrom("player_stats")
         .select(
-            dbContext.kmq.raw(
-                "DAYOFYEAR(last_active) = DAYOFYEAR(CURDATE()) as firstGameOfDay"
+            sql<number>`DAYOFYEAR(last_active) = DAYOFYEAR(CURDATE())`.as(
+                "firstGameOfDay"
             )
         )
         .where("player_id", "=", userID)
-        .first();
+        .executeTakeFirst();
 
     if (!player) return true;
     return player["firstGameOfDay"] === 0;
@@ -569,7 +579,7 @@ export function getLocalizedSongName(
  * the artist's name otherwise
  */
 export function getLocalizedArtistName(
-    song: { artistName: string; hangulArtistName?: string },
+    song: { artistName: string; hangulArtistName: string | null },
     locale: LocaleType
 ): string {
     if (locale !== LocaleType.KO) {

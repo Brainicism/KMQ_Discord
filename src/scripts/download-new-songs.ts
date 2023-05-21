@@ -152,14 +152,14 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
 
             const { playabilityStatus }: any = infoResponse.player_response;
             if (playabilityStatus.status !== "OK") {
-                await db
-                    .kmq("dead_links")
-                    .insert({
+                await db.kmq2
+                    .insertInto("dead_links")
+                    .values({
                         vlink: id,
                         reason: `Failed to load video: error = ${playabilityStatus.reason}`,
                     })
-                    .onConflict("vlink")
-                    .ignore();
+                    .ignore()
+                    .execute();
 
                 reject(
                     new Error(
@@ -175,14 +175,14 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
             );
         } catch (e) {
             const errorMessage = `Failed to retrieve video metadata for '${id}'. error = ${e}`;
-            await db
-                .kmq("dead_links")
-                .insert({
+            await db.kmq2
+                .insertInto("dead_links")
+                .values({
                     vlink: id,
                     reason: errorMessage,
                 })
-                .onConflict("vlink")
-                .ignore();
+                .ignore()
+                .execute();
 
             reject(new Error(errorMessage));
             return;
@@ -195,11 +195,12 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
                     cachedSongLocation
                 );
 
-                await db
-                    .kmq("cached_song_duration")
-                    .insert({ vlink: id, duration })
-                    .onConflict(["vlink"])
-                    .merge();
+                await db.kmq2
+                    .insertInto("cached_song_duration")
+                    .values({ vlink: id, duration })
+                    .onDuplicateKeyUpdate({ vlink: id, duration })
+                    .execute();
+
                 resolve();
             } catch (err) {
                 reject(
@@ -291,13 +292,13 @@ async function updateNotDownloaded(
         .filter((x) => !currentlyDownloadedFiles.has(`${x.youtubeLink}.ogg`))
         .map((x) => ({ vlink: x.youtubeLink }));
 
-    await db.kmq.transaction(async (trx) => {
-        await db.kmq("not_downloaded").del().transacting(trx);
+    await db.kmq2.transaction().execute(async (trx) => {
+        await trx.deleteFrom("not_downloaded").execute();
         if (songIDsNotDownloaded.length > 0) {
-            await db
-                .kmq("not_downloaded")
-                .insert(songIDsNotDownloaded)
-                .transacting(trx);
+            await trx
+                .insertInto("not_downloaded")
+                .values(songIDsNotDownloaded)
+                .execute();
         }
     });
 }
@@ -311,7 +312,9 @@ const downloadNewSongs = async (
     let downloadCount = 0;
     let deadLinksSkipped = 0;
     const knownDeadIDs = new Set(
-        (await db.kmq("dead_links").select("vlink")).map((x) => x.vlink)
+        (await db.kmq2.selectFrom("dead_links").select("vlink").execute()).map(
+            (x) => x.vlink
+        )
     );
 
     const currentlyDownloadedFiles = await getCurrentlyDownloadedFiles();

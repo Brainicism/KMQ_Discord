@@ -38,23 +38,26 @@ const BOT_LISTING_SITES: { [siteName: string]: BotListing } = {
  * @param userID - The user's Discord ID
  */
 export async function userVoted(userID: string): Promise<void> {
-    const userVoterStatus = await dbContext
-        .kmq("top_gg_user_votes")
+    const userVoterStatus = await dbContext.kmq2
+        .selectFrom("top_gg_user_votes")
+        .select(["total_votes"])
         .where("user_id", "=", userID)
-        .first();
+        .executeTakeFirst();
 
     const currentVotes = userVoterStatus ? userVoterStatus["total_votes"] : 0;
-    await dbContext
-        .kmq("top_gg_user_votes")
-        .insert({
-            user_id: userID,
-            buff_expiry_date: new Date(
-                Date.now() + VOTE_BONUS_DURATION * 1000 * 60 * 60
-            ),
-            total_votes: currentVotes + 1,
-        })
-        .onConflict("user_id")
-        .merge();
+    const updatePayload = {
+        user_id: userID,
+        buff_expiry_date: new Date(
+            Date.now() + VOTE_BONUS_DURATION * 1000 * 60 * 60
+        ),
+        total_votes: currentVotes + 1,
+    };
+
+    await dbContext.kmq2
+        .insertInto("top_gg_user_votes")
+        .values(updatePayload)
+        .onDuplicateKeyUpdate(updatePayload)
+        .execute();
 
     logger.info(`uid: ${userID} | User vote recorded`);
 }

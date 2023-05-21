@@ -79,18 +79,18 @@ async function getProfileFields(
     requestedPlayer: Eris.User,
     guildID: string
 ): Promise<Array<Eris.EmbedField>> {
-    const playerStats = await dbContext
-        .kmq("player_stats")
-        .select(
+    const playerStats = await dbContext.kmq2
+        .selectFrom("player_stats")
+        .select([
             "songs_guessed",
             "games_played",
             "first_play",
             "last_active",
             "exp",
-            "level"
-        )
+            "level",
+        ])
         .where("player_id", "=", requestedPlayer.id)
-        .first();
+        .executeTakeFirst();
 
     if (!playerStats) {
         return [];
@@ -111,48 +111,50 @@ async function getProfileFields(
     const exp = playerStats["exp"];
     const level = playerStats["level"];
 
-    const totalPlayers = ((await dbContext
-        .kmq("player_stats")
-        .count("* as count")
-        .where("exp", ">", "0")
-        .first()) ?? {})["count"] as number;
+    const totalPlayers =
+        (
+            await dbContext.kmq2
+                .selectFrom("player_stats")
+                .select((eb) => eb.fn.countAll<number>().as("count"))
+                .where("exp", ">", 0)
+                .executeTakeFirst()
+        )?.["count"] ?? 0;
 
-    const relativeSongRank = Math.min(
-        (((await dbContext
-            .kmq("player_stats")
-            .count("* as count")
+    const relativeSongRank = (
+        await dbContext.kmq2
+            .selectFrom("player_stats")
+            .select((eb) => eb.fn.countAll<number>().as("count"))
             .where("songs_guessed", ">", songsGuessed)
-            .where("exp", ">", "0")
-            .first()) ?? {})["count"] as number) + 1,
-        totalPlayers
-    );
+            .where("exp", ">", 0)
+            .executeTakeFirst()
+    )?.["count"];
 
-    const relativeGamesPlayedRank = Math.min(
-        (((await dbContext
-            .kmq("player_stats")
-            .count("* as count")
+    const relativeGamesPlayedRank = (
+        await dbContext.kmq2
+            .selectFrom("player_stats")
+            .select((eb) => eb.fn.countAll<number>().as("count"))
             .where("games_played", ">", gamesPlayed)
-            .where("exp", ">", "0")
-            .first()) ?? {})["count"] as number) + 1,
-        totalPlayers
-    );
+            .where("exp", ">", 0)
+            .executeTakeFirst()
+    )?.["count"];
 
-    const relativeLevelRank = Math.min(
-        (((await dbContext
-            .kmq("player_stats")
-            .count("* as count")
+    const relativeLevelRank = (
+        await dbContext.kmq2
+            .selectFrom("player_stats")
+            .select((eb) => eb.fn.countAll<number>().as("count"))
             .where("exp", ">", exp)
-            .first()) ?? {})["count"] as number) + 1,
-        totalPlayers
-    );
+            .executeTakeFirst()
+    )?.["count"];
 
-    const timesVotedData = await dbContext
-        .kmq("top_gg_user_votes")
+    const timesVotedData = await dbContext.kmq2
+        .selectFrom("top_gg_user_votes")
         .select(["total_votes"])
         .where("user_id", "=", requestedPlayer.id)
-        .first();
+        .executeTakeFirst();
 
-    const timesVoted = timesVotedData ? timesVotedData["total_votes"] : 0;
+    const timesVoted = timesVotedData
+        ? (timesVotedData["total_votes"] as number)
+        : 0;
 
     const fields: Array<Eris.EmbedField> = [
         {
@@ -173,7 +175,7 @@ async function getProfileFields(
         {
             name: i18n.translate(guildID, "command.profile.overallRank"),
             value: `#${friendlyFormattedNumber(
-                relativeLevelRank
+                relativeLevelRank ? relativeLevelRank + 1 : totalPlayers
             )}/${friendlyFormattedNumber(totalPlayers)}`,
             inline: true,
         },
@@ -182,7 +184,7 @@ async function getProfileFields(
             value: `${friendlyFormattedNumber(
                 songsGuessed
             )} | #${friendlyFormattedNumber(
-                relativeSongRank
+                relativeSongRank ? relativeSongRank + 1 : totalPlayers
             )}/${friendlyFormattedNumber(totalPlayers)} `,
             inline: true,
         },
@@ -192,6 +194,8 @@ async function getProfileFields(
                 gamesPlayed
             )} | #${friendlyFormattedNumber(
                 relativeGamesPlayedRank
+                    ? relativeGamesPlayedRank + 1
+                    : totalPlayers
             )}/${friendlyFormattedNumber(totalPlayers)} `,
             inline: true,
         },
@@ -214,14 +218,13 @@ async function getProfileFields(
 
     // Optional fields
     const badges = (
-        await dbContext
-            .kmq("badges_players")
+        await dbContext.kmq2
+            .selectFrom("badges_players")
+            .innerJoin("badges", "badges_players.badge_id", "badges.id")
             .select(["badges.name as badge_name"])
             .where("user_id", "=", requestedPlayer.id)
-            .join("badges", function join() {
-                this.on("badges_players.badge_id", "=", "badges.id");
-            })
             .orderBy("badges.priority", "desc")
+            .execute()
     )
         .map((x) => x["badge_name"])
         .join("\n");

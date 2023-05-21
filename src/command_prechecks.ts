@@ -248,12 +248,12 @@ export default class CommandPrechecks {
             return true;
         }
 
-        const isModerator = await dbContext
-            .kmq("competition_moderators")
+        const isModerator = await dbContext.kmq2
+            .selectFrom("competition_moderators")
             .select("user_id")
             .where("guild_id", "=", gameSession.guildID)
-            .andWhere("user_id", "=", messageContext.author.id)
-            .first();
+            .where("user_id", "=", messageContext.author.id)
+            .executeTakeFirst();
 
         if (!isModerator) {
             logger.warn(

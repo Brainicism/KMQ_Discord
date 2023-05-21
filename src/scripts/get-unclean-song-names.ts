@@ -1,17 +1,15 @@
 import { IPCLogger } from "../logger";
+import SongSelector from "../structures/song_selector";
 import dbContext from "../database_context";
 import type QueriedSong from "../interfaces/queried_song";
 
 const logger = new IPCLogger("get-unclean-song-names");
 
 (async () => {
-    const songs: Array<QueriedSong> = await dbContext
-        .kmq("available_songs")
-        .select([
-            "song_name_en as songName",
-            "artist_name_en as artistName",
-            "link as youtubeLink",
-        ]);
+    const songs: Array<QueriedSong> = await dbContext.kmq2
+        .selectFrom("available_songs")
+        .select(SongSelector.QueriedSongFields)
+        .execute();
 
     const nonAsciiSongs = songs.filter(
         // eslint-disable-next-line no-control-regex

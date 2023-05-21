@@ -3,7 +3,6 @@ import AnswerType from "./enums/option_types/answer_type";
 import ArtistType from "./enums/option_types/artist_type";
 import ExpBonusModifier from "./enums/exp_bonus_modifier";
 import GameOption from "./enums/game_option_name";
-import Gender from "./enums/option_types/gender";
 import GuessModeType from "./enums/option_types/guess_mode_type";
 import LanguageType from "./enums/option_types/language_type";
 import LocaleType from "./enums/locale_type";
@@ -15,6 +14,7 @@ import ShuffleType from "./enums/option_types/shuffle_type";
 import SpecialType from "./enums/option_types/special_type";
 import SubunitsPreference from "./enums/option_types/subunit_preference";
 import path from "path";
+import type { AvailableGenders } from "./enums/option_types/gender";
 
 export class KmqImages {
     public static READING_BOOK =
@@ -49,7 +49,11 @@ export const DEFAULT_MULTIGUESS_TYPE = MultiGuessType.ON;
 export const DEFAULT_ANSWER_TYPE = AnswerType.MULTIPLE_CHOICE_MED;
 export const DEFAULT_SHUFFLE = ShuffleType.RANDOM;
 export const DEFAULT_SEEK = SeekType.RANDOM;
-export const DEFAULT_GENDER = [Gender.FEMALE, Gender.MALE, Gender.COED];
+export const DEFAULT_GENDER: Array<AvailableGenders> = [
+    "female",
+    "male",
+    "coed",
+];
 export const DEFAULT_LIMIT = 500;
 export const SONG_START_DELAY = 3000;
 

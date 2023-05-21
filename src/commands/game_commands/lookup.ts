@@ -48,7 +48,7 @@ import type QueriedSong from "../../interfaces/queried_song";
 
 const logger = new IPCLogger("lookup");
 
-const getDaisukiLink = (id: string, isMV: boolean): string => {
+const getDaisukiLink = (id: number, isMV: boolean): string => {
     if (isMV) {
         return `https://kpop.daisuki.com.br/mv.html?id=${id}`;
     }
@@ -62,16 +62,25 @@ async function lookupByYoutubeID(
     locale: LocaleType
 ): Promise<boolean> {
     const guildID = messageOrInteraction.guildID as string;
-    const kmqSongEntry: QueriedSong = await dbContext
-        .kmq("available_songs")
-        .select(SongSelector.getQueriedSongFields())
-        .where("link", videoID)
-        .first();
+    const kmqSongEntry: QueriedSong | undefined = await dbContext.kmq2
+        .selectFrom("available_songs")
+        .select(SongSelector.QueriedSongFields)
+        .where("link", "=", videoID)
+        .executeTakeFirst();
 
-    const daisukiEntry = await dbContext
-        .kpopVideos("app_kpop")
-        .where("vlink", videoID)
-        .first();
+    const daisukiEntry = await dbContext.kpopVideos2
+        .selectFrom("app_kpop")
+        .select([
+            "name",
+            "kname",
+            "publishedon",
+            "alias",
+            "views",
+            "id_artist",
+            "id",
+        ])
+        .where("vlink", "=", videoID)
+        .executeTakeFirst();
 
     if (!daisukiEntry) {
         // maybe it was falsely parsed as video ID? fallback to song name lookup
@@ -134,10 +143,11 @@ async function lookupByYoutubeID(
         publishDate = kmqSongEntry.publishDate;
 
         const durationInSeconds = (
-            await dbContext
-                .kmq("cached_song_duration")
-                .where("vlink", videoID)
-                .first()
+            await dbContext.kmq2
+                .selectFrom("cached_song_duration")
+                .select("duration")
+                .where("vlink", "=", videoID)
+                .executeTakeFirst()
         )?.duration;
 
         // duration in minutes and seconds
@@ -313,7 +323,7 @@ async function lookupBySongName(
 ): Promise<boolean> {
     let kmqSongEntriesQuery = dbContext
         .kmq("available_songs")
-        .select(SongSelector.getQueriedSongFields())
+        .select(SongSelector.QueriedSongFields)
         .limit(100);
 
     if (songName !== "") {

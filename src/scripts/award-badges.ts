@@ -31,7 +31,7 @@ async function getObjects(): Promise<[{ id: string }]> {
     });
 }
 
-async function getBadgeID(): Promise<string> {
+async function getBadgeID(): Promise<number> {
     const rl = createInterface({
         input: process.stdin,
         output: process.stdout,
@@ -40,7 +40,7 @@ async function getBadgeID(): Promise<string> {
     return new Promise((resolve) => {
         rl.question("Enter badge ID: ", (badgeName) => {
             rl.close();
-            resolve(badgeName);
+            resolve(parseInt(badgeName, 10));
         });
     });
 }
@@ -49,10 +49,11 @@ async function awardBadges(): Promise<void> {
     const badgesObj = await getObjects();
     const badgeID = await getBadgeID();
 
-    const badge = await dbContext
-        .kmq("badges")
+    const badge = await dbContext.kmq2
+        .selectFrom("badges")
+        .select("name")
         .where("id", "=", badgeID)
-        .first();
+        .executeTakeFirst();
 
     if (!badge) {
         logger.error(`Badge ID ${badgeID} doesn't exist`);
@@ -64,10 +65,11 @@ async function awardBadges(): Promise<void> {
 
     const playerIDsWithBadgeAlready = new Set(
         (
-            await dbContext
-                .kmq("badges_players")
+            await dbContext.kmq2
+                .selectFrom("badges_players")
                 .select("user_id")
                 .where("badge_id", "=", badgeID)
+                .execute()
         ).map((x) => x["user_id"])
     );
 
@@ -92,11 +94,11 @@ async function awardBadges(): Promise<void> {
         .filter((player) => !playerIDsWithBadgeAlready.has(player.id))
         .map((player) => ({ user_id: player.id, badge_id: badgeID }));
 
-    await dbContext.kmq.transaction(async (tx) => {
-        await dbContext
-            .kmq("badges_players")
-            .insert(playersToGiveBadge)
-            .transacting(tx);
+    await dbContext.kmq2.transaction().execute(async (trx) => {
+        await trx
+            .insertInto("badges_players")
+            .values(playersToGiveBadge)
+            .execute();
     });
 
     logger.info(

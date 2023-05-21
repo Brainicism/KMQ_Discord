@@ -48,6 +48,7 @@ import {
 import { IPCLogger } from "../logger";
 import { calculateTotalRoundExp } from "../commands/game_commands/exp";
 import { getRankNameByLevel } from "../commands/game_commands/profile";
+import { sql } from "kysely";
 import AnswerType from "../enums/option_types/answer_type";
 import EliminationPlayer from "./elimination_player";
 import EliminationScoreboard from "./elimination_scoreboard";
@@ -544,16 +545,20 @@ export default class GameSession extends Session {
                   (this.guessTimes.length * 1000)
                 : -1;
 
-        await dbContext.kmq("game_sessions").insert({
-            start_date: new Date(this.startedAt),
-            guild_id: this.guildID,
-            num_participants: this.scoreboard.getPlayers().map((x) => x.inVC)
-                .length,
-            avg_guess_time: averageGuessTime,
-            session_length: sessionLength,
-            rounds_played: this.roundsPlayed,
-            correct_guesses: this.correctGuesses,
-        });
+        await dbContext.kmq2
+            .insertInto("game_sessions")
+            .values({
+                start_date: new Date(this.startedAt),
+                guild_id: this.guildID,
+                num_participants: this.scoreboard
+                    .getPlayers()
+                    .map((x) => x.inVC).length,
+                avg_guess_time: averageGuessTime,
+                session_length: sessionLength,
+                rounds_played: this.roundsPlayed,
+                correct_guesses: this.correctGuesses,
+            })
+            .execute();
 
         // commit session's song plays and correct guesses
         if (!this.guildPreference.isMultipleChoiceMode()) {
@@ -616,10 +621,13 @@ export default class GameSession extends Session {
             this.stopGuessTimeout();
 
             // increment guild's song guess count
-            await dbContext
-                .kmq("guilds")
-                .where("guild_id", this.guildID)
-                .increment("songs_guessed", 1);
+            await dbContext.kmq2
+                .updateTable("guilds")
+                .where("guild_id", "=", this.guildID)
+                .set({
+                    songs_guessed: sql`songs_guessed + 1`,
+                })
+                .execute();
 
             await this.startRound(messageContext);
         } else if (this.guildPreference.isMultipleChoiceMode()) {
@@ -1121,24 +1129,24 @@ export default class GameSession extends Session {
      */
     private async ensurePlayerStat(userID: string): Promise<void> {
         const currentDateString = new Date();
-        await dbContext
-            .kmq("player_stats")
-            .insert({
+        await dbContext.kmq2
+            .insertInto("player_stats")
+            .values({
                 player_id: userID,
                 first_play: currentDateString,
                 last_active: currentDateString,
             })
-            .onConflict("player_id")
-            .ignore();
+            .ignore()
+            .execute();
 
-        await dbContext
-            .kmq("player_servers")
-            .insert({
+        await dbContext.kmq2
+            .insertInto("player_servers")
+            .values({
                 player_id: userID,
                 server_id: this.guildID,
             })
-            .onConflict(["player_id", "server_id"])
-            .ignore();
+            .ignore()
+            .execute();
     }
 
     /**
@@ -1150,13 +1158,14 @@ export default class GameSession extends Session {
         userID: string,
         score: number
     ): Promise<void> {
-        await dbContext
-            .kmq("player_stats")
+        await dbContext.kmq2
+            .updateTable("player_stats")
             .where("player_id", "=", userID)
-            .increment("songs_guessed", score)
-            .update({
+            .set({
+                songs_guessed: sql`songs_guessed + ${score}`,
                 last_active: new Date(),
-            });
+            })
+            .execute();
     }
 
     /**
@@ -1166,10 +1175,13 @@ export default class GameSession extends Session {
     private static async incrementPlayerGamesPlayed(
         userID: string
     ): Promise<void> {
-        await dbContext
-            .kmq("player_stats")
+        await dbContext.kmq2
+            .updateTable("player_stats")
             .where("player_id", "=", userID)
-            .increment("games_played", 1);
+            .set({
+                games_played: sql`games_played + 1`,
+            })
+            .execute();
     }
 
     /**
@@ -1180,11 +1192,18 @@ export default class GameSession extends Session {
         userID: string,
         expGain: number
     ): Promise<LevelUpResult | null> {
-        const { exp: currentExp, level } = await dbContext
-            .kmq("player_stats")
+        const playerStats = await dbContext.kmq2
+            .selectFrom("player_stats")
             .select(["exp", "level"])
             .where("player_id", "=", userID)
-            .first();
+            .executeTakeFirst();
+
+        if (!playerStats) {
+            logger.error(`Player stats unexpectedly null for ${userID}`);
+            return null;
+        }
+
+        const { exp: currentExp, level } = playerStats;
 
         const newExp = currentExp + expGain;
         let newLevel = level;
@@ -1195,10 +1214,11 @@ export default class GameSession extends Session {
         }
 
         // persist exp and level to data store
-        await dbContext
-            .kmq("player_stats")
-            .update({ exp: newExp, level: newLevel })
-            .where("player_id", "=", userID);
+        await dbContext.kmq2
+            .updateTable("player_stats")
+            .set({ exp: newExp, level: newLevel })
+            .where("player_id", "=", userID)
+            .execute();
 
         if (level !== newLevel) {
             logger.info(`${userID} has leveled from ${level} to ${newLevel}`);
@@ -1225,13 +1245,16 @@ export default class GameSession extends Session {
         expGain: number,
         levelsGained: number
     ): Promise<void> {
-        await dbContext.kmq("player_game_session_stats").insert({
-            player_id: userID,
-            date: new Date(),
-            songs_guessed: score,
-            exp_gained: expGain,
-            levels_gained: levelsGained,
-        });
+        await dbContext.kmq2
+            .insertInto("player_game_session_stats")
+            .values({
+                player_id: userID,
+                date: new Date(),
+                songs_guessed: score,
+                exp_gained: expGain,
+                levels_gained: levelsGained,
+            })
+            .execute();
     }
 
     /**
@@ -1282,41 +1305,34 @@ export default class GameSession extends Session {
     private async storeSongStats(): Promise<void> {
         await Promise.allSettled(
             Object.keys(this.songStats).map(async (vlink) => {
-                await dbContext
-                    .kmq("song_metadata")
-                    .insert({
+                await dbContext.kmq2
+                    .insertInto("song_metadata")
+                    .values({
                         vlink,
                         correct_guesses: 0,
+                        correct_guesses_legacy: 0,
+                        rounds_played_legacy: 0,
                         rounds_played: 0,
                         skip_count: 0,
                         hint_count: 0,
                         time_to_guess_ms: 0,
                         time_played_ms: 0,
                     })
-                    .onConflict("vlink")
-                    .ignore();
+                    .ignore()
+                    .execute();
 
-                await dbContext
-                    .kmq("song_metadata")
+                await dbContext.kmq2
+                    .updateTable("song_metadata")
                     .where("vlink", "=", vlink)
-                    .increment(
-                        "correct_guesses",
-                        this.songStats[vlink].correctGuesses
-                    )
-                    .increment(
-                        "rounds_played",
-                        this.songStats[vlink].roundsPlayed
-                    )
-                    .increment("skip_count", this.songStats[vlink].skipCount)
-                    .increment("hint_count", this.songStats[vlink].hintCount)
-                    .increment(
-                        "time_to_guess_ms",
-                        this.songStats[vlink].timeToGuess
-                    )
-                    .increment(
-                        "time_played_ms",
-                        this.songStats[vlink].timePlayed
-                    );
+                    .set({
+                        correct_guesses: sql`correct_guesses + ${this.songStats[vlink].correctGuesses}`,
+                        rounds_played: sql`rounds_played + ${this.songStats[vlink].roundsPlayed}`,
+                        skip_count: sql`skip_count + ${this.songStats[vlink].skipCount}`,
+                        hint_count: sql`hint_count + ${this.songStats[vlink].hintCount}`,
+                        time_to_guess_ms: sql`time_to_guess_ms + ${this.songStats[vlink].timeToGuess}`,
+                        time_played_ms: sql`time_played_ms + ${this.songStats[vlink].timePlayed}`,
+                    })
+                    .execute();
             })
         );
     }

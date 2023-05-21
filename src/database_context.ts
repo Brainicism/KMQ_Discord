@@ -34,7 +34,7 @@ function generateKnexContext(
 }
 
 function generateKysleyContext<T>(
-    databaseName: string,
+    databaseName: string | undefined,
     maxPoolSize: number
 ): Kysely<T> {
     return new Kysely<T>({
@@ -57,6 +57,7 @@ export class DatabaseContext {
     public kpopVideos2: Kysely<KpopVideosDB>;
     public kpopVideosValidation: Knex;
     public agnostic: Knex;
+    public agnostic2: Kysely<null>;
 
     constructor() {
         if (process.env.NODE_ENV === EnvType.TEST) {
@@ -81,6 +82,7 @@ export class DatabaseContext {
         }
 
         this.agnostic = knex(generateKnexContext(null, 0, 1));
+        this.agnostic2 = generateKysleyContext(undefined, 1);
         this.kpopVideosValidation = knex(
             generateKnexContext("kpop_videos_validation", 0, 1)
         );
@@ -91,12 +93,24 @@ export class DatabaseContext {
             await this.kmq.destroy();
         }
 
+        if (this.kmq2) {
+            await this.kmq2.destroy();
+        }
+
         if (this.kpopVideos) {
             await this.kpopVideos.destroy();
         }
 
+        if (this.kpopVideos2) {
+            await this.kpopVideos2.destroy();
+        }
+
         if (this.agnostic) {
             await this.agnostic.destroy();
+        }
+
+        if (this.agnostic2) {
+            await this.agnostic2.destroy();
         }
 
         if (this.kpopVideosValidation) {
