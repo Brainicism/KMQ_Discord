@@ -28,6 +28,7 @@
         "regenerate-test-db-dump": "NODE_ENV=test ts-node src/scripts/regenerate-test-db-dump",
         "test": "NODE_ENV=test mocha -r ts-node/register 'src/test/**/*.ts'",
         "test_ci": "NODE_ENV=test mocha -- --forbid-only -r ts-node/register 'src/test/**/*.ts'",
+        "prepare_schema": "bash src/scripts/prepare-kysely-schema.sh",
         "prettier": "prettier --write '**/*.{js,ts}'",
         "prettier_ci": "prettier --check '**/*.{js,ts}'"
     },
