@@ -15,7 +15,11 @@ import ShuffleType from "../enums/option_types/shuffle_type";
 import State from "../state";
 import SubunitsPreference from "../enums/option_types/subunit_preference";
 import dbContext from "../database_context";
-import type { AvailableGenders } from "../enums/option_types/gender";
+import type {
+    AvailableGenders,
+    GenderModeOptions,
+} from "../enums/option_types/gender";
+import type { Expression, SqlBool } from "kysely";
 import type { MatchedPlaylist } from "../helpers/spotify_manager";
 import type GuildPreference from "./guild_preference";
 import type QueriedSong from "../interfaces/queried_song";
@@ -57,7 +61,7 @@ export default class SongSelector {
     public uniqueSongsPlayed: Set<string>;
 
     /** The last gender played when gender is set to alternating, can be null (in not alternating mode), GENDER.MALE, or GENDER.FEMALE */
-    public lastAlternatingGender: AvailableGenders | null;
+    public lastAlternatingGender: GenderModeOptions | null;
 
     constructor() {
         this.filteredSongs = null;
@@ -162,7 +166,7 @@ export default class SongSelector {
     static selectRandomSong(
         filteredSongs: Set<QueriedSong>,
         ignoredSongs: Set<string>,
-        alternatingGender: AvailableGenders | null,
+        alternatingGender: GenderModeOptions | null,
         shuffleType = ShuffleType.RANDOM
     ): QueriedSong | null {
         let queriedSongList = [...filteredSongs];
@@ -267,8 +271,8 @@ export default class SongSelector {
     ): Promise<{ songs: Set<QueriedSong>; countBeforeLimit: number }> {
         const gameOptions = guildPreference.gameOptions;
         let result: Array<QueriedSong> = [];
-        let queryBuilder = dbContext
-            .kmq("available_songs")
+        let queryBuilder = dbContext.kmq2
+            .selectFrom("available_songs")
             .select(SongSelector.QueriedSongFields);
 
         if (gameOptions.forcePlaySongID) {
@@ -278,23 +282,24 @@ export default class SongSelector {
                 gameOptions.forcePlaySongID
             );
             return {
-                songs: new Set(await queryBuilder),
+                songs: new Set(await queryBuilder.execute()),
                 countBeforeLimit: 1,
             };
         }
 
         let subunits: Array<number> = [];
         let collabGroupContainingSubunit: Array<number> = [];
+        const selectedGroupIDs = guildPreference.getGroupIDs();
         if (gameOptions.subunitPreference === SubunitsPreference.INCLUDE) {
             let subunitsQueryBuilder = dbContext.kpopVideos
                 .selectFrom("app_kpop_group")
                 .select("id");
 
-            if (guildPreference.getGroupIDs().length) {
+            if (selectedGroupIDs.length) {
                 subunitsQueryBuilder = subunitsQueryBuilder.where(
                     "id_parentgroup",
                     "in",
-                    guildPreference.getGroupIDs()
+                    selectedGroupIDs
                 );
             }
 
@@ -334,90 +339,139 @@ export default class SongSelector {
             ).map((x) => x["id"]);
         }
 
-        queryBuilder = queryBuilder.where(function artistFilter() {
-            this.where(function includesInnerArtistFilter() {
+        queryBuilder = queryBuilder.where(({ or, cmpr, and }) => {
+            const includesInnerArtistFilterExpressions: Array<
+                Expression<SqlBool>
+            > = [];
+
+            const includesGroupIDs = guildPreference.getIncludesGroupIDs();
+            if (includesGroupIDs.length) {
                 if (!guildPreference.isGroupsMode()) {
                     if (
                         gameOptions.subunitPreference ===
                         SubunitsPreference.EXCLUDE
                     ) {
-                        this.whereIn(
-                            "id_artist",
-                            guildPreference.getIncludesGroupIDs()
+                        includesInnerArtistFilterExpressions.push(
+                            cmpr("id_artist", "in", includesGroupIDs)
                         );
                     } else {
-                        this.andWhere(function () {
-                            this.whereIn(
-                                "id_artist",
-                                guildPreference.getIncludesGroupIDs()
-                            ).orWhereIn(
-                                "id_parent_artist",
-                                guildPreference.getIncludesGroupIDs()
-                            );
-                        });
+                        includesInnerArtistFilterExpressions.push(
+                            or([
+                                cmpr("id_artist", "in", includesGroupIDs),
+                                cmpr(
+                                    "id_parent_artist",
+                                    "in",
+                                    includesGroupIDs
+                                ),
+                            ])
+                        );
                     }
                 }
-            }).orWhere(function mainInnerArtistFilter() {
-                this.whereNotIn(
-                    "id_artist",
-                    guildPreference.getExcludesGroupIDs()
+            }
+
+            const mainArtistFilterExpressions: Array<Expression<SqlBool>> = [];
+
+            if (guildPreference.getExcludesGroupIDs().length) {
+                mainArtistFilterExpressions.push(
+                    cmpr(
+                        "id_artist",
+                        "not in",
+                        guildPreference.getExcludesGroupIDs()
+                    )
                 );
-                if (!guildPreference.isGroupsMode()) {
-                    const gender = guildPreference.isGenderAlternating()
+            }
+
+            if (!guildPreference.isGroupsMode()) {
+                const gender: Array<AvailableGenders> =
+                    guildPreference.isGenderAlternating()
                         ? ["male", "female", "coed"]
-                        : gameOptions.gender;
+                        : (gameOptions.gender as Array<AvailableGenders>);
 
-                    this.whereIn("members", gender);
-
-                    // filter by artist type only in non-groups
-                    if (gameOptions.artistType !== ArtistType.BOTH) {
-                        this.andWhere(
+                mainArtistFilterExpressions.push(cmpr("members", "in", gender));
+                // filter by artist type only in non-groups
+                if (gameOptions.artistType !== ArtistType.BOTH) {
+                    mainArtistFilterExpressions.push(
+                        cmpr(
                             "issolo",
                             "=",
                             gameOptions.artistType === ArtistType.SOLOIST
                                 ? "y"
                                 : "n"
-                        );
-                    }
-                } else if (
-                    gameOptions.subunitPreference === SubunitsPreference.EXCLUDE
-                ) {
-                    this.whereIn("id_artist", guildPreference.getGroupIDs());
-                } else {
-                    this.andWhere(function () {
-                        this.whereIn(
-                            "id_artist",
-                            guildPreference.getGroupIDs()
-                        ).orWhere(function subunitFilter() {
-                            this.whereIn(
-                                "id_parent_artist",
-                                guildPreference.getGroupIDs()
-                            )
-                                .whereNotIn("id_artist", shadowBannedArtistIds)
-                                .orWhereIn(
-                                    "id_artist",
-                                    collabGroupContainingSubunit
-                                );
-                        });
-                    });
+                        )
+                    );
                 }
-            });
+            } else if (
+                gameOptions.subunitPreference === SubunitsPreference.EXCLUDE
+            ) {
+                if (selectedGroupIDs) {
+                    mainArtistFilterExpressions.push(
+                        cmpr("id_artist", "in", selectedGroupIDs)
+                    );
+                }
+            } else {
+                const mainArtistIdSearchExpressions = [];
+                if (selectedGroupIDs.length) {
+                    mainArtistIdSearchExpressions.push(
+                        ...[
+                            cmpr("id_artist", "in", selectedGroupIDs),
+                            cmpr("id_parent_artist", "in", selectedGroupIDs),
+                        ]
+                    );
+                }
+
+                if (collabGroupContainingSubunit.length) {
+                    mainArtistIdSearchExpressions.push(
+                        cmpr("id_artist", "in", collabGroupContainingSubunit)
+                    );
+                }
+
+                if (shadowBannedArtistIds.length) {
+                    mainArtistFilterExpressions.push(
+                        and([
+                            cmpr("id_artist", "not in", shadowBannedArtistIds),
+                            or(mainArtistIdSearchExpressions),
+                        ])
+                    );
+                } else {
+                    mainArtistFilterExpressions.push(
+                        or(mainArtistIdSearchExpressions)
+                    );
+                }
+            }
+
+            // Kyseley does not like it when you provide an empty array or array of size 1 to OR/AND
+            const finalExpressions = [];
+            if (includesInnerArtistFilterExpressions.length === 1) {
+                finalExpressions.push(includesInnerArtistFilterExpressions[0]);
+            } else if (includesInnerArtistFilterExpressions.length > 1) {
+                finalExpressions.push(
+                    and(includesInnerArtistFilterExpressions)
+                );
+            }
+
+            if (mainArtistFilterExpressions.length === 1) {
+                finalExpressions.push(mainArtistFilterExpressions[0]);
+            } else if (mainArtistFilterExpressions.length > 1) {
+                finalExpressions.push(and(mainArtistFilterExpressions));
+            }
+
+            return or(finalExpressions);
         });
 
         if (gameOptions.languageType === LanguageType.KOREAN) {
             for (const tag of FOREIGN_LANGUAGE_TAGS) {
                 queryBuilder = queryBuilder.where(
                     "tags",
-                    "NOT LIKE",
+                    "not like",
                     `%${tag}%`
                 );
             }
         }
 
         if (gameOptions.ostPreference === OstPreference.EXCLUDE) {
-            queryBuilder = queryBuilder.where("tags", "NOT LIKE", "%o%");
+            queryBuilder = queryBuilder.where("tags", "not like", "%o%");
         } else if (gameOptions.ostPreference === OstPreference.EXCLUSIVE) {
-            queryBuilder = queryBuilder.where("tags", "LIKE", "%o%");
+            queryBuilder = queryBuilder.where("tags", "like", "%o%");
         }
 
         if (gameOptions.releaseType === ReleaseType.OFFICIAL) {
@@ -425,26 +479,37 @@ export default class SongSelector {
             for (const tag of NON_OFFICIAL_VIDEO_TAGS) {
                 queryBuilder = queryBuilder.where(
                     "tags",
-                    "NOT LIKE",
+                    "not like",
                     `%${tag}%`
                 );
             }
         }
 
         queryBuilder = queryBuilder
-            .andWhere("publishedon", ">=", `${gameOptions.beginningYear}-01-01`)
-            .andWhere("publishedon", "<=", `${gameOptions.endYear}-12-31`)
-            .orderBy("views", "DESC");
+            .where(
+                "publishedon",
+                ">=",
+                new Date(`${gameOptions.beginningYear}-01-01`)
+            )
+            .where(
+                "publishedon",
+                "<=",
+                new Date(`${gameOptions.endYear}-12-31`)
+            )
+            .orderBy("views", "desc");
 
         queryBuilder = queryBuilder.where(
             "rank",
             "<=",
             premium
-                ? (process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST as string)
-                : (process.env.AUDIO_SONGS_PER_ARTIST as string)
+                ? parseInt(
+                      process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST as string,
+                      10
+                  )
+                : parseInt(process.env.AUDIO_SONGS_PER_ARTIST as string, 10)
         );
 
-        result = await queryBuilder;
+        result = await queryBuilder.execute();
 
         const count = result.length;
         result = result.slice(gameOptions.limitStart, gameOptions.limitEnd);

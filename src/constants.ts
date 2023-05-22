@@ -14,7 +14,7 @@ import ShuffleType from "./enums/option_types/shuffle_type";
 import SpecialType from "./enums/option_types/special_type";
 import SubunitsPreference from "./enums/option_types/subunit_preference";
 import path from "path";
-import type { AvailableGenders } from "./enums/option_types/gender";
+import type { GenderModeOptions } from "./enums/option_types/gender";
 
 export class KmqImages {
     public static READING_BOOK =
@@ -49,7 +49,7 @@ export const DEFAULT_MULTIGUESS_TYPE = MultiGuessType.ON;
 export const DEFAULT_ANSWER_TYPE = AnswerType.MULTIPLE_CHOICE_MED;
 export const DEFAULT_SHUFFLE = ShuffleType.RANDOM;
 export const DEFAULT_SEEK = SeekType.RANDOM;
-export const DEFAULT_GENDER: Array<AvailableGenders> = [
+export const DEFAULT_GENDER: Array<GenderModeOptions> = [
     "female",
     "male",
     "coed",

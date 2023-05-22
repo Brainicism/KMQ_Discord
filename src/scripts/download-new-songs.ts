@@ -6,13 +6,13 @@ import {
     retryJob,
 } from "../helpers/utils";
 import { getNewConnection } from "../database_context";
+import { sql } from "kysely";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import path from "path";
 import ytdl from "ytdl-core";
 import type { DatabaseContext } from "../database_context";
 import type QueriedSong from "../interfaces/queried_song";
-import { sql } from "kysely";
 
 const logger = new IPCLogger("download-new-songs");
 const TARGET_AVERAGE_VOLUME = -30;

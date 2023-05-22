@@ -24,7 +24,7 @@ import EnvType from "../enums/env_type";
 import GameOption from "../enums/game_option_name";
 import _ from "lodash";
 import dbContext from "../database_context";
-import type { AvailableGenders } from "../enums/option_types/gender";
+import type { GenderModeOptions } from "../enums/option_types/gender";
 import type { MutexInterface } from "async-mutex";
 import type { PlaylistMetadata } from "src/helpers/spotify_manager";
 import type ArtistType from "../enums/option_types/artist_type";
@@ -45,7 +45,7 @@ const logger = new IPCLogger("guild_preference");
 
 type GameOptionValue =
     | number
-    | Array<AvailableGenders>
+    | Array<GenderModeOptions>
     | SeekType
     | SpecialType
     | GuessModeType
@@ -667,7 +667,7 @@ export default class GuildPreference {
      * Sets the gender option value
      * @param genderArr - A list of GENDER enums
      */
-    async setGender(genderArr: Array<AvailableGenders>): Promise<void> {
+    async setGender(genderArr: Array<GenderModeOptions>): Promise<void> {
         this.gameOptions.gender = [...new Set(genderArr)];
         await this.updateGuildPreferences([
             { name: GameOptionInternal.GENDER, value: this.gameOptions.gender },

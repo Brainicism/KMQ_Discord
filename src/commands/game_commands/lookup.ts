@@ -327,36 +327,37 @@ async function lookupBySongName(
     locale: LocaleType,
     artistID?: number
 ): Promise<boolean> {
-    let kmqSongEntriesQuery = dbContext
-        .kmq("available_songs")
+    let kmqSongEntriesQuery = dbContext.kmq2
+        .selectFrom("available_songs")
         .select(SongSelector.QueriedSongFields)
         .limit(100);
 
     if (songName !== "") {
         kmqSongEntriesQuery = kmqSongEntriesQuery
-            .where((qb) => {
-                qb.whereILike("song_name_en", `%${songName}%`).orWhereILike(
-                    "song_name_ko",
-                    `%${songName}%`
-                );
-            })
-            .orderByRaw("CHAR_LENGTH(song_name_en) ASC")
-            .orderBy("views", "DESC");
+            .where(({ or, cmpr }) =>
+                or([
+                    cmpr("song_name_en", "like", `%${songName}%`),
+                    cmpr("song_name_ko", "like", `%${songName}%`),
+                ])
+            )
+            .orderBy((eb) => eb.fn("CHAR_LENGTH", ["song_name_en"]), "asc")
+            .orderBy("views", "desc");
     } else {
         kmqSongEntriesQuery = kmqSongEntriesQuery.orderBy(
             "publishedon",
-            "DESC"
+            "desc"
         );
     }
 
     if (artistID) {
-        kmqSongEntriesQuery = kmqSongEntriesQuery.andWhere(
+        kmqSongEntriesQuery = kmqSongEntriesQuery.where(
             "id_artist",
+            "=",
             artistID
         );
     }
 
-    const kmqSongEntries = await kmqSongEntriesQuery;
+    const kmqSongEntries = await kmqSongEntriesQuery.execute();
     if (kmqSongEntries.length === 0) {
         return false;
     }

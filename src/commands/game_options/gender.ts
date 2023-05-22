@@ -15,8 +15,8 @@ import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import i18n from "../../helpers/localization_manager";
-import type { AvailableGenders } from "../../enums/option_types/gender";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
+import type { GenderModeOptions } from "../../enums/option_types/gender";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -173,7 +173,7 @@ export default class GenderCommand implements BaseCommand {
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const selectedGenders =
-            parsedMessage.components as Array<AvailableGenders>;
+            parsedMessage.components as Array<GenderModeOptions>;
 
         await GenderCommand.updateOption(
             MessageContext.fromMessage(message),
@@ -184,7 +184,7 @@ export default class GenderCommand implements BaseCommand {
 
     static async updateOption(
         messageContext: MessageContext,
-        selectedGenders: Array<AvailableGenders>,
+        selectedGenders: Array<GenderModeOptions>,
         interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
@@ -309,7 +309,7 @@ export default class GenderCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
-        let selectedGenders: Array<AvailableGenders>;
+        let selectedGenders: Array<GenderModeOptions>;
 
         const action = interactionName as OptionAction;
         if (action === OptionAction.RESET) {

@@ -13,6 +13,7 @@ generate_database_type() {
   sed -i "s/export interface DB/export interface $3/" $OUT_FILE
 
   grep -qxF "export * from './$2';" ./node_modules/kysely-codegen/dist/index.d.ts || echo "export * from './$2';" >> ./node_modules/kysely-codegen/dist/index.d.ts
+  cp $OUT_FILE src/typings
 }
 
 
@@ -25,6 +26,7 @@ fi
 check_environment_variables
 
 echo Creating types via code-gen
+mkdir src/typings
 generate_database_type "kmq" "kmq_db.d.ts" "KmqDB"
 generate_database_type "kpop_videos" "kpop_videos_db.d.ts" "KpopVideosDB"
 generate_database_type "information_schema" "info_schema_db.d.ts" "InfoSchemaDB"

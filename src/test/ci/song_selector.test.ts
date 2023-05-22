@@ -15,7 +15,7 @@ import SubunitsPreference from "../../enums/option_types/subunit_preference";
 import _ from "lodash";
 import assert from "assert";
 import sinon from "sinon";
-import type { AvailableGenders } from "../../enums/option_types/gender";
+import type { GenderModeOptions } from "../../enums/option_types/gender";
 import type QueriedSong from "../../interfaces/queried_song";
 
 async function getMockGuildPreference(): Promise<GuildPreference> {
@@ -42,7 +42,7 @@ describe("song selector", () => {
                         "male",
                         "female",
                         "coed",
-                    ] as Array<AvailableGenders>) {
+                    ] as Array<GenderModeOptions>) {
                         await guildPreference.setGender([gender]);
                         const { songs } =
                             await SongSelector.getFilteredSongList(
@@ -50,6 +50,7 @@ describe("song selector", () => {
                                 true
                             );
 
+                        assert.strict(songs.size > 0);
                         assert.strictEqual(
                             Array.from(songs).every(
                                 (song) => song.members === gender
@@ -66,7 +67,7 @@ describe("song selector", () => {
                     const genderSetting = [
                         "male",
                         "female",
-                    ] as Array<AvailableGenders>;
+                    ] as Array<GenderModeOptions>;
 
                     await guildPreference.setGender(genderSetting);
                     const { songs } = await SongSelector.getFilteredSongList(
@@ -74,6 +75,7 @@ describe("song selector", () => {
                         true
                     );
 
+                    assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every((song) =>
                             ["male", "female"].includes(song.members)
@@ -98,6 +100,7 @@ describe("song selector", () => {
                         true
                     );
 
+                    assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every(
                             (song) => song.artistID === selectedArtist.id
@@ -121,6 +124,7 @@ describe("song selector", () => {
                         true
                     );
 
+                    assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every((song) =>
                             selectedArtists
@@ -149,6 +153,7 @@ describe("song selector", () => {
                         true
                     );
 
+                    assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every(
                             (song) =>
@@ -178,6 +183,7 @@ describe("song selector", () => {
                         true
                     );
 
+                    assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every(
                             (song) =>
@@ -201,6 +207,7 @@ describe("song selector", () => {
                         true
                     );
 
+                    assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every((song) => song.isSolo === "y"),
                         true
@@ -216,6 +223,7 @@ describe("song selector", () => {
                         true
                     );
 
+                    assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every((song) => song.isSolo === "n"),
                         true
@@ -233,6 +241,7 @@ describe("song selector", () => {
                         true
                     );
 
+                    assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every(
                             (song) => song.publishDate >= new Date("2016-01-01")
@@ -250,6 +259,7 @@ describe("song selector", () => {
                         true
                     );
 
+                    assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every(
                             (song) => song.publishDate < new Date("2016-01-01")
@@ -268,6 +278,7 @@ describe("song selector", () => {
                         true
                     );
 
+                    assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every(
                             (song) =>
@@ -288,6 +299,7 @@ describe("song selector", () => {
                         true
                     );
 
+                    assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every(
                             (song) =>
@@ -312,6 +324,7 @@ describe("song selector", () => {
                         true
                     );
 
+                    assert.strict(songs.size > 0);
                     assert.ok(
                         Array.from(songs).every(
                             (song) => song.selectionWeight === 1
@@ -391,6 +404,7 @@ describe("song selector", () => {
                         true
                     );
 
+                    assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every(
                             (song) => song.artistID === artists[0].id
@@ -414,6 +428,8 @@ describe("song selector", () => {
 
                     const expectedSubunitIds = [17, 43, 105, 248, 4531];
 
+                    assert.strict(songs.size > 0);
+
                     // all songs must be one of the artist, or the subunit's
                     assert.strictEqual(
                         Array.from(songs).every((song) =>
@@ -436,9 +452,9 @@ describe("song selector", () => {
 
             describe("include subunits with shadowbanned artist", () => {
                 it("should exclude the shadowbanned artist", async () => {
-                    await guildPreference.setGroups([
-                        { id: 288, name: "Stray Kids" },
-                    ]);
+                    const groups = [{ id: 288, name: "Stray Kids" }];
+
+                    await guildPreference.setGroups(groups);
 
                     const shadowbannedArtists = [1177];
 
@@ -451,6 +467,8 @@ describe("song selector", () => {
                         true,
                         shadowbannedArtists
                     );
+
+                    assert.strict(songs.size > 0);
 
                     // should not include shadow banned artist's songs
                     assert.strictEqual(
@@ -503,6 +521,7 @@ describe("song selector", () => {
                         true
                     );
 
+                    assert.strict(songs.size > 0);
                     assert.strictEqual(unmatchedGroups.length, 0);
 
                     assert.strictEqual(
@@ -528,6 +547,7 @@ describe("song selector", () => {
                         true
                     );
 
+                    assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every(
                             (song) => !song.tags!.includes("o")
@@ -570,6 +590,7 @@ describe("song selector", () => {
                         true
                     );
 
+                    assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every((song) =>
                             song.tags!.includes("o")
@@ -609,6 +630,8 @@ describe("song selector", () => {
                         true
                     );
 
+                    assert.strict(songs.size > 0);
+
                     // there are no songs with language tags
                     assert.strictEqual(
                         Array.from(songs).every(
@@ -631,6 +654,7 @@ describe("song selector", () => {
                         true
                     );
 
+                    assert.strict(songs.size > 0);
                     // there is at least one song of each language
                     assert.strictEqual(
                         FOREIGN_LANGUAGE_TAGS.every((languageTag) =>
@@ -653,6 +677,7 @@ describe("song selector", () => {
                         true
                     );
 
+                    assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every(
                             (song) => song.vtype === "main"
@@ -722,6 +747,7 @@ describe("song selector", () => {
                         isPremium
                     );
 
+                    assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every(
                             (song) =>
@@ -741,6 +767,7 @@ describe("song selector", () => {
                         isPremium
                     );
 
+                    assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every(
                             (song) =>
@@ -772,6 +799,7 @@ describe("song selector", () => {
                         )
                     ).songs;
 
+                    assert.strict(filteredSongs.size > 0);
                     for (let i = 0; i < 10; i++) {
                         femaleOrCoedSongs.push(
                             SongSelector.selectRandomSong(
@@ -802,6 +830,7 @@ describe("song selector", () => {
                         )
                     ).songs;
 
+                    assert.strict(filteredSongs.size > 0);
                     for (let i = 0; i < 10; i++) {
                         maleOrCoedSongs.push(
                             SongSelector.selectRandomSong(
@@ -835,6 +864,7 @@ describe("song selector", () => {
                         )
                     ).songs;
 
+                    assert.strict(filteredSongs.size > 0);
                     const ignoredSongs = new Set(
                         Array.from(filteredSongs).slice(0, numIgnored)
                     );

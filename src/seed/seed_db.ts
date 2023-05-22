@@ -21,7 +21,6 @@ import fs from "fs";
 import path from "path";
 import util from "util";
 import type { DatabaseContext } from "../database_context";
-import type { Knex } from "knex";
 
 const exec = util.promisify(cp.exec);
 
@@ -169,8 +168,8 @@ export async function generateKmqDataTables(
     db: DatabaseContext
 ): Promise<void> {
     logger.info("Re-creating KMQ data tables view...");
-    await db.kmq.raw(
-        `CALL CreateKmqDataTables(${process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST});`
+    await sql`CALL CreateKmqDataTables(${process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST});`.execute(
+        db.kmq2
     );
 }
 
@@ -182,7 +181,7 @@ export async function deduplicateGroupNames(
     db: DatabaseContext
 ): Promise<void> {
     logger.info("Deduplicating group names...");
-    await db.kmq.raw("CALL DeduplicateGroupNames();");
+    await sql`CALL DeduplicateGroupNames();`.execute(db.kmq2);
 }
 
 /**

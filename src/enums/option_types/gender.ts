@@ -5,4 +5,5 @@ export const availableGenders = [
     "alternating",
 ] as const;
 
-export type AvailableGenders = (typeof availableGenders)[number];
+export type GenderModeOptions = (typeof availableGenders)[number];
+export type AvailableGenders = Exclude<GenderModeOptions, "alternating">;

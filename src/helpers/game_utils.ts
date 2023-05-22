@@ -309,13 +309,14 @@ export async function getMultipleChoiceOptions(
             : "clean_song_name_en";
 
         easyNames = (
-            await dbContext
-                .kmq("available_songs")
-                .select("clean_song_name_en", "clean_song_name_ko")
+            await dbContext.kmq2
+                .selectFrom("available_songs")
+                .select(["clean_song_name_en", "clean_song_name_ko"])
                 .groupBy(songName)
-                .where("members", gender)
-                .andWhereNot(songName, answer)
-                .andWhereNot("id_artist", artistID)
+                .where("members", "=", gender)
+                .where(songName, "!=", answer)
+                .where("id_artist", "!=", artistID)
+                .execute()
         ).map((x) => pickNonEmpty(x));
         switch (answerType) {
             case AnswerType.MULTIPLE_CHOICE_EASY: {
@@ -328,25 +329,36 @@ export async function getMultipleChoiceOptions(
                 // Medium: MEDIUM_CHOICES - MEDIUM_SAME_ARIST_CHOICES from same gender as chosen artist, MEDIUM_SAME_ARIST_CHOICES from chosen artist
                 const sameArtistSongs = _.sampleSize(
                     (
-                        await dbContext
-                            .kmq("available_songs")
-                            .select("clean_song_name_en", "clean_song_name_ko")
+                        await dbContext.kmq2
+                            .selectFrom("available_songs")
+                            .select([
+                                "clean_song_name_en",
+                                "clean_song_name_ko",
+                            ])
                             .groupBy(songName)
-                            .where("id_artist", artistID)
-                            .andWhereNot(songName, answer)
+                            .where("id_artist", "=", artistID)
+                            .where(songName, "!=", answer)
+                            .execute()
                     ).map((x) => pickNonEmpty(x)),
                     MEDIUM_SAME_ARTIST_CHOICES
                 );
 
                 const sameGenderSongs = _.sampleSize(
                     (
-                        await dbContext
-                            .kmq("available_songs")
-                            .select("clean_song_name_en", "clean_song_name_ko")
+                        await dbContext.kmq2
+                            .selectFrom("available_songs")
+                            .select([
+                                "clean_song_name_en",
+                                "clean_song_name_ko",
+                            ])
                             .groupBy(songName)
-                            .where("members", gender)
-                            .whereNotIn(songName, [...sameArtistSongs, answer])
-                            .andWhereNot("id_artist", artistID)
+                            .where("members", "=", gender)
+                            .where(songName, "not in", [
+                                ...sameArtistSongs,
+                                answer,
+                            ])
+                            .where("id_artist", "=", artistID)
+                            .execute()
                     ).map((x) => pickNonEmpty(x)),
                     MEDIUM_CHOICES - MEDIUM_SAME_ARTIST_CHOICES
                 );
@@ -358,12 +370,13 @@ export async function getMultipleChoiceOptions(
             case AnswerType.MULTIPLE_CHOICE_HARD: {
                 // Hard: HARD_CHOICES from chosen artist
                 names = (
-                    await dbContext
-                        .kmq("available_songs")
-                        .select("clean_song_name_en", "clean_song_name_ko")
+                    await dbContext.kmq2
+                        .selectFrom("available_songs")
+                        .select(["clean_song_name_en", "clean_song_name_ko"])
                         .groupBy(songName)
-                        .where("id_artist", artistID)
-                        .andWhereNot(songName, answer)
+                        .where("id_artist", "=", artistID)
+                        .where(songName, "!=", answer)
+                        .execute()
                 ).map((x) => pickNonEmpty(x));
                 result = _.sampleSize(names, HARD_CHOICES);
                 break;
@@ -405,7 +418,7 @@ export async function getMultipleChoiceOptions(
     } else {
         const pickNonEmpty = (results: {
             artist_name_en: string;
-            artist_name_ko: string;
+            artist_name_ko: string | null;
         }): string => {
             if (
                 locale === LocaleType.KO &&
@@ -420,10 +433,11 @@ export async function getMultipleChoiceOptions(
 
         const artistName = useHangul ? "artist_name_ko" : "artist_name_en";
         easyNames = (
-            await dbContext
-                .kmq("available_songs")
-                .select("artist_name_en", "artist_name_ko")
-                .whereNot(artistName, answer)
+            await dbContext.kmq2
+                .selectFrom("available_songs")
+                .select(["artist_name_en", "artist_name_ko"])
+                .where(artistName, "!=", answer)
+                .execute()
         ).map((x) => pickNonEmpty(x));
         switch (answerType) {
             case AnswerType.MULTIPLE_CHOICE_EASY:
@@ -435,11 +449,12 @@ export async function getMultipleChoiceOptions(
                 // Medium: MEDIUM_CHOICES from same gender
                 // Hard: HARD_CHOICES from same gender
                 names = (
-                    await dbContext
-                        .kmq("available_songs")
-                        .select("artist_name_en", "artist_name_ko")
-                        .where("members", gender)
-                        .andWhereNot(artistName, answer)
+                    await dbContext.kmq2
+                        .selectFrom("available_songs")
+                        .select(["artist_name_en", "artist_name_ko"])
+                        .where("members", "=", gender)
+                        .where(artistName, "!=", answer)
+                        .execute()
                 ).map((x) => pickNonEmpty(x));
                 result = _.sampleSize(names, CHOICES_BY_DIFFICULTY[answerType]);
                 break;

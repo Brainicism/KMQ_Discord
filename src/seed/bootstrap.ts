@@ -142,9 +142,10 @@ async function bootstrapDatabases(): Promise<void> {
     }
 
     logger.info("Cleaning up stale data");
-    await db.kmq.raw(
-        "SELECT * FROM system_stats WHERE date < DATE(NOW() - INTERVAL 3 MONTH)"
-    );
+    await db.kmq2
+        .deleteFrom("system_stats")
+        .where("date", "<", sql`DATE(NOW() - INTERVAL 3 MONTH)`)
+        .execute();
 
     logger.info(`Bootstrapped in ${(Date.now() - startTime) / 1000}s`);
     await db.destroy();
