@@ -85,34 +85,37 @@ export async function tableExists(
     );
 }
 
-async function replaceBetterAudioSongs(database: Knex): Promise<void> {
-    const songsWithBetterAudioCounterpart = await database("app_kpop as a")
+async function replaceBetterAudioSongs(db: DatabaseContext): Promise<void> {
+    const songsWithBetterAudioCounterpart = await db.kpopVideosValidation
+        .selectFrom("app_kpop as a")
+        .leftJoin("app_kpop as b", "a.id_better_audio", "b.id")
         .select([
             "a.id as original_id",
             "a.original_name as original_name",
             "b.vlink as better_audio_link",
         ])
-        .leftJoin("app_kpop AS b", function join() {
-            this.on("a.id_better_audio", "=", "b.id");
-        })
-        .whereNotNull("b.vlink");
+        .where("b.vlink", "is not", null)
+        .execute();
 
     for (const betterAudioSong of songsWithBetterAudioCounterpart) {
-        logger.info(
-            `Replacing audio for ${betterAudioSong.original_name} with ${betterAudioSong.better_audio_link} for ${betterAudioSong.original_id}`
-        );
-
         // remove 'better' audio entry to not consume b-side limit
-        await database("app_kpop")
+        await db.kpopVideosValidation
+            .deleteFrom("app_kpop")
             .where("vlink", "=", betterAudioSong.better_audio_link)
-            .delete();
+            .execute();
 
         // replace main video with better audio entry
-        await database("app_kpop")
-            .where("id", "=", betterAudioSong.original_id)
-            .update({
-                vlink: betterAudioSong.better_audio_link,
-            });
+        if (betterAudioSong.better_audio_link) {
+            // TODO: this null check shouldn't be needed, but Kysely does not narrow types automatically
+            // can be removed when .$narrowType is available
+            await db.kpopVideosValidation
+                .updateTable("app_kpop")
+                .where("id", "=", betterAudioSong.original_id)
+                .set({
+                    vlink: betterAudioSong.better_audio_link,
+                })
+                .execute();
+        }
     }
 }
 
@@ -341,37 +344,31 @@ async function validateSqlDump(
             `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${mvSeedFilePath}`
         );
 
-        await replaceBetterAudioSongs(db.kpopVideosValidation);
+        await replaceBetterAudioSongs(db);
 
         logger.info("Validating MV song count");
-        const mvSongCount = (
-            (await db
-                .kpopVideosValidation("app_kpop")
-                .count("* as count")
-                .where("is_audio", "=", "n")
-                .first()) as any
-        ).count;
+        const mvSongCount = (await db.kpopVideosValidation
+            .selectFrom("app_kpop")
+            .select((eb) => eb.fn.countAll<number>().as("count"))
+            .where("is_audio", "=", "n")
+            .executeTakeFirst())!.count;
 
         logger.info(`Found ${mvSongCount} music videos`);
 
         logger.info("Validating audio-only song count");
-        const audioSongCount = (
-            (await db
-                .kpopVideosValidation("app_kpop")
-                .count("* as count")
-                .where("is_audio", "=", "y")
-                .first()) as any
-        ).count;
+        const audioSongCount = (await db.kpopVideosValidation
+            .selectFrom("app_kpop")
+            .select((eb) => eb.fn.countAll<number>().as("count"))
+            .where("is_audio", "=", "y")
+            .executeTakeFirst())!.count;
 
         logger.info(`Found ${audioSongCount} audio-only videos`);
 
         logger.info("Validating group count");
-        const artistCount = (
-            (await db
-                .kpopVideosValidation("app_kpop_group")
-                .count("* as count")
-                .first()) as any
-        ).count;
+        const artistCount = (await db.kpopVideosValidation
+            .selectFrom("app_kpop_group")
+            .select((eb) => eb.fn.countAll<number>().as("count"))
+            .executeTakeFirst())!.count;
 
         logger.info(`Found ${artistCount} artists`);
 
@@ -386,9 +383,9 @@ async function validateSqlDump(
         logger.info("Validating overrides");
         const overrideQueries = await getOverrideQueries(db);
 
-        await Promise.allSettled(
+        await Promise.all(
             overrideQueries.map(async (overrideQuery) => {
-                await db.kpopVideosValidation.raw(overrideQuery);
+                await sql.raw(overrideQuery).execute(db.kpopVideosValidation);
             })
         );
 
@@ -412,7 +409,9 @@ async function validateSqlDump(
                 `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${validationDedupGroupNamesSqlPath}`
             );
 
-            await db.kpopVideosValidation.raw("CALL DeduplicateGroupNames();");
+            await sql
+                .raw("CALL DeduplicateGroupNames();")
+                .execute(db.kpopVideosValidation);
 
             logger.info("Validating creation of data tables");
             const originalCreateKmqTablesProcedureSqlPath = path.join(
@@ -433,9 +432,11 @@ async function validateSqlDump(
                 `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${validationCreateKmqTablesProcedureSqlPath}`
             );
 
-            await db.kpopVideosValidation.raw(
-                `CALL CreateKmqDataTables(${process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST});`
-            );
+            await sql
+                .raw(
+                    `CALL CreateKmqDataTables(${process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST});`
+                )
+                .execute(db.kpopVideosValidation);
         }
     } catch (e) {
         throw new Error(
@@ -449,9 +450,9 @@ async function validateSqlDump(
         await validateDaisukiTableSchema(db, frozenSchema);
     }
 
-    await sql`DROP DATABASE IF EXISTS kpop_videos_validation;`.execute(
-        db.agnostic
-    );
+    // await sql`DROP DATABASE IF EXISTS kpop_videos_validation;`.execute(
+    //     db.agnostic
+    // );
     logger.info("SQL dump validated successfully");
 }
 
@@ -527,7 +528,7 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
     await sql`DROP DATABASE IF EXISTS kpop_videos_tmp;`.execute(db.agnostic);
 
     logger.info("Substituting songs with better audio");
-    await replaceBetterAudioSongs(db.kpopVideos);
+    await replaceBetterAudioSongs(db);
 
     // override queries
     logger.info("Performing data overrides");
@@ -535,18 +536,18 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
 
     // update collations of columns that have user-inputted queries
     logger.info("Updating collation overrides");
-    await db.kpopVideos.raw(
-        "ALTER TABLE app_kpop_group MODIFY name VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+    await sql`ALTER TABLE app_kpop_group MODIFY name VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`.execute(
+        db.kpopVideos2
     );
 
-    await db.kpopVideos.raw(
-        "ALTER TABLE app_kpop_group MODIFY kname VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+    await sql`ALTER TABLE app_kpop_group MODIFY kname VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`.execute(
+        db.kpopVideos2
     );
 
-    await Promise.allSettled(
-        overrideQueries.map(async (overrideQuery) => {
-            await db.kpopVideos.raw(overrideQuery);
-        })
+    await Promise.all(
+        overrideQueries.map(async (overrideQuery) =>
+            sql.raw(overrideQuery).execute(db.kpopVideos2)
+        )
     );
 
     logger.info(
@@ -625,11 +626,12 @@ async function updateKpopDatabase(
  * @param db - Database context
  */
 export async function updateGroupList(db: DatabaseContext): Promise<void> {
-    const result = await db
-        .kpopVideos("app_kpop_group")
+    const result = await db.kpopVideos2
+        .selectFrom("app_kpop_group")
         .select(["name", "members as gender"])
         .where("is_collab", "=", "n")
-        .orderBy("name", "ASC");
+        .orderBy("name", "asc")
+        .execute();
 
     await fs.promises.writeFile(
         DataFiles.GROUP_LIST,

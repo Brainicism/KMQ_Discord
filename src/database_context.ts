@@ -56,7 +56,7 @@ export class DatabaseContext {
     public kpopVideos: Knex;
     public kpopVideos2: Kysely<KpopVideosDB>;
     public infoSchema: Kysely<InfoSchemaDB>;
-    public kpopVideosValidation: Knex;
+    public kpopVideosValidation: Kysely<KpopVideosDB>;
     public agnostic: Kysely<null>;
 
     constructor() {
@@ -83,8 +83,9 @@ export class DatabaseContext {
 
         this.infoSchema = generateKysleyContext("information_schema", 1);
         this.agnostic = generateKysleyContext(undefined, 1);
-        this.kpopVideosValidation = knex(
-            generateKnexContext("kpop_videos_validation", 0, 1)
+        this.kpopVideosValidation = generateKysleyContext(
+            "kpop_videos_validation",
+            1
         );
     }
 

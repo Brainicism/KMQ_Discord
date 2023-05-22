@@ -191,35 +191,41 @@ async function lookupByYoutubeID(
                 ? daisukiEntry.kname
                 : daisukiEntry.name;
 
-        const artistNameQuery = await dbContext
-            .kpopVideos("app_kpop_group")
-            .select("name", "kname")
-            .where("id", daisukiEntry.id_artist)
-            .first();
+        const artistNameResult = await dbContext.kpopVideos2
+            .selectFrom("app_kpop_group")
+            .select(["name", "kname"])
+            .where("id", "=", daisukiEntry.id_artist)
+            .executeTakeFirst();
+
+        if (!artistNameResult) {
+            const errMsg = `Result of artist lookup in app_kpop_group unexpected null for artist: ${daisukiEntry.id_artist}`;
+            logger.error(errMsg);
+            throw new Error(errMsg);
+        }
 
         artistName =
-            artistNameQuery.kname && isKorean
-                ? artistNameQuery.kname
-                : artistNameQuery.name;
+            artistNameResult.kname && isKorean
+                ? artistNameResult.kname
+                : artistNameResult.name;
 
         if (daisukiEntry.alias) {
             songAliases.push(...daisukiEntry.alias.split(";"));
         }
 
         artistAliases.push(
-            ...(State.aliases.artist[artistNameQuery.name] ?? [])
+            ...(State.aliases.artist[artistNameResult.name] ?? [])
         );
 
         if (isKorean) {
             songAliases.push(daisukiEntry.name);
-            artistAliases.push(artistNameQuery.name);
+            artistAliases.push(artistNameResult.name);
         } else {
             if (daisukiEntry.kname) {
                 songAliases.push(daisukiEntry.kname);
             }
 
-            if (artistNameQuery.kname) {
-                artistAliases.push(artistNameQuery.kname);
+            if (artistNameResult.kname) {
+                artistAliases.push(artistNameResult.kname);
             }
         }
 
