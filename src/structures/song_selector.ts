@@ -283,32 +283,54 @@ export default class SongSelector {
             };
         }
 
-        let subunits: Array<String> = [];
-        let collabGroupContainingSubunit: Array<string> = [];
+        let subunits: Array<number> = [];
+        let collabGroupContainingSubunit: Array<number> = [];
         if (gameOptions.subunitPreference === SubunitsPreference.INCLUDE) {
-            subunits = (
-                await dbContext
-                    .kpopVideos("app_kpop_group")
-                    .select("id")
-                    .whereIn("id_parentgroup", guildPreference.getGroupIDs())
-                    .whereNotIn("id", shadowBannedArtistIds)
-            ).map((x) => x["id"]);
+            let subunitsQueryBuilder = dbContext.kpopVideos
+                .selectFrom("app_kpop_group")
+                .select("id");
+
+            if (guildPreference.getGroupIDs().length) {
+                subunitsQueryBuilder = subunitsQueryBuilder.where(
+                    "id_parentgroup",
+                    "in",
+                    guildPreference.getGroupIDs()
+                );
+            }
+
+            if (shadowBannedArtistIds.length) {
+                subunitsQueryBuilder = subunitsQueryBuilder.where(
+                    "id",
+                    "not in",
+                    shadowBannedArtistIds
+                );
+            }
+
+            subunits = (await subunitsQueryBuilder.execute()).map(
+                (x) => x["id"]
+            );
+
+            let collabGroupBuilder = dbContext.kpopVideos // collab matches
+                .selectFrom("app_kpop_agrelation")
+                .innerJoin(
+                    "app_kpop_group",
+                    "app_kpop_agrelation.id_subgroup",
+                    "app_kpop_group.id"
+                )
+                .select(["id", "name"])
+                .distinct()
+                .where("app_kpop_group.is_collab", "=", "y");
+
+            if (subunits.length) {
+                collabGroupBuilder = collabGroupBuilder.where(
+                    "app_kpop_agrelation.id_artist",
+                    "in",
+                    subunits
+                );
+            }
 
             collabGroupContainingSubunit = (
-                await dbContext
-                    // collab matches
-                    .kpopVideos("app_kpop_agrelation")
-                    .select(["id", "name"])
-                    .distinct("id", "name")
-                    .join("app_kpop_group", function join() {
-                        this.on(
-                            "app_kpop_agrelation.id_subgroup",
-                            "=",
-                            "app_kpop_group.id"
-                        );
-                    })
-                    .whereIn("app_kpop_agrelation.id_artist", subunits)
-                    .andWhere("app_kpop_group.is_collab", "y")
+                await collabGroupBuilder.execute()
             ).map((x) => x["id"]);
         }
 

@@ -176,7 +176,7 @@ export function getFact(guildID: string): string | null {
 async function recentMusicVideos(lng: LocaleType): Promise<string[]> {
     const oneMonthPriorDate = new Date();
     oneMonthPriorDate.setMonth(oneMonthPriorDate.getMonth() - 2);
-    const result = await dbContext.kpopVideos2
+    const result = await dbContext.kpopVideos
         .selectFrom("app_kpop")
         .innerJoin("app_kpop_group", "app_kpop_group.id", "app_kpop.id_artist")
         .select([
@@ -212,7 +212,7 @@ async function recentMusicVideos(lng: LocaleType): Promise<string[]> {
 async function recentMusicShowWin(lng: LocaleType): Promise<string[]> {
     const twoWeeksPriorDate = new Date();
     twoWeeksPriorDate.setDate(twoWeeksPriorDate.getDate() - 30);
-    const result = await dbContext.kpopVideos2
+    const result = await dbContext.kpopVideos
         .selectFrom("app_kpop_ms")
         .innerJoin(
             "app_kpop_group",
@@ -252,7 +252,7 @@ async function recentMusicShowWin(lng: LocaleType): Promise<string[]> {
 }
 
 async function musicShowWins(lng: LocaleType): Promise<string[]> {
-    const result = await dbContext.kpopVideos2
+    const result = await dbContext.kpopVideos
         .selectFrom("app_kpop_ms")
         .innerJoin(
             "app_kpop_group",
@@ -262,7 +262,7 @@ async function musicShowWins(lng: LocaleType): Promise<string[]> {
         .groupBy("app_kpop_ms.id_artist")
         .select(["app_kpop_group.name as artist_name"])
         .select((eb) => eb.fn.count("id_artist").as("count"))
-        .having(dbContext.kpopVideos2.fn.count("id_artist"), ">=", 5)
+        .having(dbContext.kpopVideos.fn.count("id_artist"), ">=", 5)
         .orderBy("count", "desc")
         .limit(25)
         .execute();
@@ -280,14 +280,12 @@ async function musicShowWins(lng: LocaleType): Promise<string[]> {
 }
 
 async function mostViewedGroups(lng: LocaleType): Promise<string[]> {
-    const result = await dbContext.kpopVideos2
+    const result = await dbContext.kpopVideos
         .selectFrom("app_kpop")
         .innerJoin("app_kpop_group", "app_kpop.id_artist", "app_kpop_group.id")
         .select(["app_kpop_group.name as artist_name"])
         .groupBy("app_kpop.id_artist")
-        .select(
-            dbContext.kpopVideos2.fn.sum("app_kpop.views").as("total_views")
-        )
+        .select(dbContext.kpopVideos.fn.sum("app_kpop.views").as("total_views"))
         .where("issolo", "=", "n")
         .orderBy("total_views", "desc")
         .limit(25)
@@ -308,14 +306,12 @@ async function mostViewedGroups(lng: LocaleType): Promise<string[]> {
 }
 
 async function mostLikedGroups(lng: LocaleType): Promise<string[]> {
-    const result = await dbContext.kpopVideos2
+    const result = await dbContext.kpopVideos
         .selectFrom("app_kpop")
         .innerJoin("app_kpop_group", "app_kpop.id_artist", "app_kpop_group.id")
         .select(["app_kpop_group.name as artist_name"])
         .groupBy("app_kpop.id_artist")
-        .select(
-            dbContext.kpopVideos2.fn.sum("app_kpop.likes").as("total_likes")
-        )
+        .select(dbContext.kpopVideos.fn.sum("app_kpop.likes").as("total_likes"))
         .where("issolo", "=", "n")
         .orderBy("total_likes", "desc")
         .limit(25)
@@ -336,7 +332,7 @@ async function mostLikedGroups(lng: LocaleType): Promise<string[]> {
 }
 
 async function mostViewedVideo(lng: LocaleType): Promise<string[]> {
-    const result = await dbContext.kpopVideos2
+    const result = await dbContext.kpopVideos
         .selectFrom("app_kpop")
         .innerJoin("app_kpop_group", "app_kpop.id_artist", "app_kpop_group.id")
         .select([
@@ -368,7 +364,7 @@ async function mostViewedVideo(lng: LocaleType): Promise<string[]> {
 }
 
 async function latestPak(lng: LocaleType): Promise<string[]> {
-    const result = await dbContext.kpopVideos2
+    const result = await dbContext.kpopVideos
         .selectFrom("app_kpop")
         .innerJoin("app_kpop_group", "app_kpop.id_artist", "app_kpop_group.id")
         .select([
@@ -400,7 +396,7 @@ async function latestPak(lng: LocaleType): Promise<string[]> {
 }
 
 async function mostLikedVideo(lng: LocaleType): Promise<string[]> {
-    const result = await dbContext.kpopVideos2
+    const result = await dbContext.kpopVideos
         .selectFrom("app_kpop")
         .innerJoin("app_kpop_group", "app_kpop.id_artist", "app_kpop_group.id")
         .select([
@@ -433,7 +429,7 @@ async function mostLikedVideo(lng: LocaleType): Promise<string[]> {
 async function mostViewedEntertainmentCompany(
     lng: LocaleType
 ): Promise<string[]> {
-    const result = await dbContext.kpopVideos2
+    const result = await dbContext.kpopVideos
         .selectFrom("app_kpop")
         .innerJoin("app_kpop_group", "app_kpop.id_artist", "app_kpop_group.id")
         .innerJoin(
@@ -463,7 +459,7 @@ async function mostViewedEntertainmentCompany(
 async function mostArtistsEntertainmentCompany(
     lng: LocaleType
 ): Promise<string[]> {
-    const result = await dbContext.kpopVideos2
+    const result = await dbContext.kpopVideos
         .selectFrom("app_kpop_group")
         .innerJoin(
             "app_kpop_company",
@@ -491,7 +487,7 @@ async function mostArtistsEntertainmentCompany(
 }
 
 async function mostMusicVideos(lng: LocaleType): Promise<string[]> {
-    const result = await dbContext.kpopVideos2
+    const result = await dbContext.kpopVideos
         .selectFrom("app_kpop")
         .innerJoin("app_kpop_group", "app_kpop.id_artist", "app_kpop_group.id")
         .select(["app_kpop_group.name as artist_name"])
@@ -515,7 +511,7 @@ async function mostMusicVideos(lng: LocaleType): Promise<string[]> {
 }
 
 async function yearWithMostDebuts(lng: LocaleType): Promise<string[]> {
-    const result = await dbContext.kpopVideos2
+    const result = await dbContext.kpopVideos
         .selectFrom("app_kpop_group")
         .select("app_kpop_group.formation as formation_year")
         .where("formation", "!=", 0)
@@ -538,7 +534,7 @@ async function yearWithMostDebuts(lng: LocaleType): Promise<string[]> {
 }
 
 async function yearWithMostReleases(lng: LocaleType): Promise<string[]> {
-    const result = await dbContext.kpopVideos2
+    const result = await dbContext.kpopVideos
         .selectFrom("app_kpop")
         .select((eb) => eb.fn("YEAR", ["publishedon"]).as("release_year"))
         .groupBy("release_year")
@@ -561,7 +557,7 @@ async function yearWithMostReleases(lng: LocaleType): Promise<string[]> {
 }
 
 async function viewsByGender(lng: LocaleType): Promise<string[]> {
-    const result = await dbContext.kpopVideos2
+    const result = await dbContext.kpopVideos
         .selectFrom("app_kpop")
         .innerJoin("app_kpop_group", "app_kpop.id_artist", "app_kpop_group.id")
         .select(["app_kpop_group.members as gender"])
@@ -603,7 +599,7 @@ async function viewsByGender(lng: LocaleType): Promise<string[]> {
 }
 
 async function mostViewedSoloArtist(lng: LocaleType): Promise<string[]> {
-    const result = await dbContext.kpopVideos2
+    const result = await dbContext.kpopVideos
         .selectFrom("app_kpop")
         .innerJoin("app_kpop_group", "app_kpop.id_artist", "app_kpop_group.id")
         .select(["app_kpop_group.name as artist_name"])
@@ -629,7 +625,7 @@ async function mostViewedSoloArtist(lng: LocaleType): Promise<string[]> {
 }
 
 async function viewsBySolo(lng: LocaleType): Promise<string[]> {
-    const result = await dbContext.kpopVideos2
+    const result = await dbContext.kpopVideos
         .selectFrom("app_kpop")
         .innerJoin("app_kpop_group", "app_kpop.id_artist", "app_kpop_group.id")
         .select(["app_kpop_group.issolo as issolo"])
@@ -720,7 +716,7 @@ async function songGuessRate(lng: LocaleType): Promise<string[]> {
 }
 
 async function bigThreeDominance(lng: LocaleType): Promise<string[]> {
-    const result = await dbContext.kpopVideos2
+    const result = await dbContext.kpopVideos
         .selectFrom("app_kpop")
         .innerJoin("app_kpop_group", "app_kpop.id_artist", "app_kpop_group.id")
         .select(["app_kpop_group.name as artist_name"])
@@ -730,7 +726,7 @@ async function bigThreeDominance(lng: LocaleType): Promise<string[]> {
         .orderBy("total_views", "desc")
         .execute();
 
-    const totalViewsResult = await dbContext.kpopVideos2
+    const totalViewsResult = await dbContext.kpopVideos
         .selectFrom("app_kpop")
         .select((eb) => eb.fn.sum("views").as("total_views"))
         .execute();
@@ -754,7 +750,7 @@ async function bigThreeDominance(lng: LocaleType): Promise<string[]> {
 }
 
 async function fanclubName(lng: LocaleType): Promise<Array<string>> {
-    const result = await dbContext.kpopVideos2
+    const result = await dbContext.kpopVideos
         .selectFrom("app_kpop_group")
         .select(["name", "fanclub"])
         .where("fanclub", "!=", "")
@@ -772,7 +768,7 @@ async function fanclubName(lng: LocaleType): Promise<Array<string>> {
 }
 
 async function closeBirthdays(lng: LocaleType): Promise<Array<string>> {
-    const result = await dbContext.kpopVideos2
+    const result = await dbContext.kpopVideos
         .selectFrom("app_kpop_group")
         .select(["name"])
         .select((eb) => eb.fn("MONTH", ["date_birth"]).as("birth_month"))
@@ -990,7 +986,7 @@ async function mostGamesPlayedPlayer(lng: LocaleType): Promise<string[]> {
 }
 
 async function mostGaonFirsts(lng: LocaleType): Promise<string[]> {
-    const result = await dbContext.kpopVideos2
+    const result = await dbContext.kpopVideos
         .selectFrom("app_kpop_group")
         .select(["name as artist_name", "gaondigital_firsts as firsts"])
         .orderBy("firsts", "desc")
@@ -1010,7 +1006,7 @@ async function mostGaonFirsts(lng: LocaleType): Promise<string[]> {
 }
 
 async function mostGaonAppearances(lng: LocaleType): Promise<string[]> {
-    const result = await dbContext.kpopVideos2
+    const result = await dbContext.kpopVideos
         .selectFrom("app_kpop_group")
         .select(["name as artist_name", "gaondigital_times as appearances"])
         .orderBy("appearances", "desc")
@@ -1030,7 +1026,7 @@ async function mostGaonAppearances(lng: LocaleType): Promise<string[]> {
 }
 
 async function mostAnnualAwardShowWins(lng: LocaleType): Promise<string[]> {
-    const result = await dbContext.kpopVideos2
+    const result = await dbContext.kpopVideos
         .selectFrom("app_kpop_group")
         .select(["name as artist_name", "yawards_total as wins"])
         .orderBy("wins", "desc")
@@ -1063,7 +1059,7 @@ async function historicalGaonWeekly(lng: LocaleType): Promise<Array<string>> {
         (value, key) => startYear + key
     );
 
-    const result = await dbContext.kpopVideos2
+    const result = await dbContext.kpopVideos
         .selectFrom("app_kpop_gaondigi")
         .select(["ranklist", "year", "week"])
         .where("week", "=", week)
@@ -1089,7 +1085,7 @@ async function historicalGaonWeekly(lng: LocaleType): Promise<Array<string>> {
 }
 
 async function recentGaonWeekly(lng: LocaleType): Promise<Array<string>> {
-    const result = await dbContext.kpopVideos2
+    const result = await dbContext.kpopVideos
         .selectFrom("app_kpop_gaondigi")
         .select(["ranklist", "year", "week"])
         .orderBy("year", "desc")
@@ -1143,7 +1139,7 @@ async function topLeveledPlayers(lng: LocaleType): Promise<Array<string>> {
 }
 
 async function upcomingReleases(lng: LocaleType): Promise<Array<string>> {
-    const result = await dbContext.kpopVideos2
+    const result = await dbContext.kpopVideos
         .selectFrom("app_upcoming")
         .innerJoin(
             "app_kpop_group",

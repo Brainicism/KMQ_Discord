@@ -110,7 +110,7 @@ before(async function () {
 });
 
 after(async function () {
-    this.timeout(20000);
+    this.timeout(30000);
     sandbox.restore();
     logger.info("Rolling back migrations...");
     await dbContext.kmq.migrate.rollback(

@@ -111,7 +111,7 @@ export default class UpcomingReleasesCommand implements BaseCommand {
         );
 
         const upcomingReleases: Array<UpcomingRelease> =
-            await dbContext.kpopVideos2
+            await dbContext.kpopVideos
                 .selectFrom("app_upcoming")
                 .innerJoin(
                     "app_kpop_group",

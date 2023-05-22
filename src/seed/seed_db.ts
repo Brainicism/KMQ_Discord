@@ -139,6 +139,7 @@ program
         "Force skip drop/create of kpop_videos database",
         false
     )
+    .option("-v, --skip-validate", "Skip test database validation", false)
     .option(
         "-d, --skip-download",
         "Skip download/encode of videos in database",
@@ -206,7 +207,7 @@ export async function loadStoredProcedures(): Promise<void> {
 export async function updateDaisukiSchemaTypings(
     db: DatabaseContext
 ): Promise<void> {
-    await db.kpopVideos2.schema
+    await db.kpopVideos.schema
         .alterTable("app_kpop_group")
         .modifyColumn("name", "varchar(255)", (cb) => cb.notNull())
         .execute();
@@ -479,7 +480,9 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
 
     logger.info(`Validating SQL dump (${path.basename(dbSeedFilePath)})`);
 
-    await validateSqlDump(db, dbSeedFilePath, bootstrap);
+    if (!options.skipValidate) {
+        await validateSqlDump(db, dbSeedFilePath, bootstrap);
+    }
 
     // importing dump into temporary database
     logger.info("Dropping K-Pop video temporary database");
@@ -515,7 +518,7 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
                 tableName
             )} TO old, kpop_videos_tmp.${sql.raw(
                 tableName
-            )} TO kpop_videos.${sql.raw(tableName)};`.execute(db.kpopVideos2);
+            )} TO kpop_videos.${sql.raw(tableName)};`.execute(db.kpopVideos);
         } else {
             logger.info(`Table '${tableName} doesn't exist, creating...`);
             await sql`ALTER TABLE kpop_videos_tmp.${tableName} RENAME kpop_videos.${tableName}`.execute(
@@ -537,16 +540,16 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
     // update collations of columns that have user-inputted queries
     logger.info("Updating collation overrides");
     await sql`ALTER TABLE app_kpop_group MODIFY name VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`.execute(
-        db.kpopVideos2
+        db.kpopVideos
     );
 
     await sql`ALTER TABLE app_kpop_group MODIFY kname VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`.execute(
-        db.kpopVideos2
+        db.kpopVideos
     );
 
     await Promise.all(
         overrideQueries.map(async (overrideQuery) =>
-            sql.raw(overrideQuery).execute(db.kpopVideos2)
+            sql.raw(overrideQuery).execute(db.kpopVideos)
         )
     );
 
@@ -626,7 +629,7 @@ async function updateKpopDatabase(
  * @param db - Database context
  */
 export async function updateGroupList(db: DatabaseContext): Promise<void> {
-    const result = await db.kpopVideos2
+    const result = await db.kpopVideos
         .selectFrom("app_kpop_group")
         .select(["name", "members as gender"])
         .where("is_collab", "=", "n")

@@ -22,6 +22,7 @@ import schedule from "node-schedule";
 import updatePremiumUsers from "./patreon_manager";
 import type LocaleType from "../enums/locale_type";
 import type MatchedArtist from "../interfaces/matched_artist";
+import { sql } from "kysely";
 
 const logger = new IPCLogger("management_utils");
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 3, 2, 1]);
@@ -276,18 +277,19 @@ export async function reloadBonusGroups(): Promise<void> {
     const bonusGroupCount = 10;
     const date = new Date();
     const artistNameQuery: string[] = (
-        await dbContext
-            .kpopVideos("app_kpop_group")
+        await dbContext.kpopVideos
+            .selectFrom("app_kpop_group")
             .select(["name"])
             .where("is_collab", "=", "n")
-            .orderByRaw(
-                `RAND(${
+            .orderBy(
+                sql`RAND(${
                     date.getFullYear() +
                     date.getMonth() * 997 +
                     date.getDate() * 37
                 })`
             )
             .limit(bonusGroupCount)
+            .execute()
     ).map((x) => x.name);
 
     State.bonusArtists = new Set(

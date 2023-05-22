@@ -12,6 +12,7 @@ import path from "path";
 import ytdl from "ytdl-core";
 import type { DatabaseContext } from "../database_context";
 import type QueriedSong from "../interfaces/queried_song";
+import { sql } from "kysely";
 
 const logger = new IPCLogger("download-new-songs");
 const TARGET_AVERAGE_VOLUME = -30;
@@ -214,63 +215,75 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
     });
 };
 
-async function getSongsFromDb(db: DatabaseContext): Promise<any> {
-    return db.kpopVideos
-        .with(
-            "rankedAudioSongs",
-            db.kpopVideos
-                .select([
-                    "app_kpop.name AS songName",
-                    "app_kpop_group.name AS artistName",
-                    "vlink AS youtubeLink",
-                    "app_kpop.views AS views",
-                    "app_kpop.tags AS tags",
-                    db.kpopVideos.raw(
-                        "RANK() OVER(PARTITION BY app_kpop.id_artist ORDER BY views DESC) AS rank"
-                    ),
-                ])
-                .from("app_kpop")
-                .join(
+async function getSongsFromDb(databaseContext: DatabaseContext): Promise<any> {
+    const deadLinks = (
+        await databaseContext.kmq2
+            .selectFrom("dead_links")
+            .select("vlink")
+            .execute()
+    ).map((x) => x.vlink);
+
+    let mvBuilder = databaseContext.kpopVideos
+        .selectFrom("app_kpop")
+        .innerJoin("app_kpop_group", "app_kpop.id_artist", "app_kpop_group.id")
+        .select([
+            "app_kpop.name as songName",
+            "app_kpop_group.name as artistName",
+            "app_kpop.vlink as youtubeLink",
+            "app_kpop.views as views",
+        ])
+        .where("vtype", "=", "main")
+        .where("is_audio", "=", "n")
+        .where("tags", "not like", "%c%");
+
+    if (deadLinks.length) {
+        mvBuilder = mvBuilder.where("vlink", "not in", deadLinks);
+    }
+
+    const avBuilder = databaseContext.kpopVideos.with(
+        "rankedAudioSongs",
+        (db) => {
+            let builder = db
+                .selectFrom("app_kpop")
+                .innerJoin(
                     "app_kpop_group",
-                    "kpop_videos.app_kpop.id_artist",
-                    "=",
-                    "kpop_videos.app_kpop_group.id"
+                    "app_kpop.id_artist",
+                    "app_kpop_group.id"
+                )
+                .select([
+                    "app_kpop.name as songName",
+                    "app_kpop_group.name as artistName",
+                    "vlink as youtubeLink",
+                    "app_kpop.views as views",
+                    "app_kpop.tags as tags",
+                ])
+                .select(
+                    sql`RANK() OVER(PARTITION BY app_kpop.id_artist ORDER BY views DESC)`.as(
+                        "rank"
+                    )
                 )
                 .where("is_audio", "=", "y")
-                .whereNotIn("vlink", function () {
-                    this.select("vlink").from("kmq.dead_links");
-                })
-                .andWhere("tags", "NOT LIKE", "%c%")
-        )
-        .select("songName", "artistName", "youtubeLink", "views")
-        .from("rankedAudioSongs")
+                .where("tags", "not like", "%c%");
+
+            if (deadLinks.length) {
+                builder = builder.where("vlink", "not in", deadLinks);
+            }
+
+            return builder;
+        }
+    );
+
+    return avBuilder
+        .selectFrom("rankedAudioSongs")
+        .select(["songName", "artistName", "youtubeLink", "views"])
         .where(
             "rank",
             "<=",
             process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST as string
         )
-        .union(function () {
-            this.select(
-                "app_kpop.name AS songName",
-                "app_kpop_group.name AS artistName",
-                "vlink AS youtubeLink",
-                "app_kpop.views AS views"
-            )
-                .from("app_kpop")
-                .join(
-                    "kpop_videos.app_kpop_group",
-                    "kpop_videos.app_kpop.id_artist",
-                    "=",
-                    "kpop_videos.app_kpop_group.id"
-                )
-                .whereNotIn("vlink", function () {
-                    this.select("vlink").from("kmq.dead_links");
-                })
-                .where("vtype", "=", "main")
-                .where("is_audio", "=", "n")
-                .andWhere("tags", "NOT LIKE", "%c%");
-        })
-        .orderBy("views", "DESC");
+        .unionAll(mvBuilder)
+        .orderBy("views", "desc")
+        .execute();
 }
 
 async function getCurrentlyDownloadedFiles(): Promise<Set<string>> {

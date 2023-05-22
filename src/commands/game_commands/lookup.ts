@@ -68,7 +68,7 @@ async function lookupByYoutubeID(
         .where("link", "=", videoID)
         .executeTakeFirst();
 
-    const daisukiEntry = await dbContext.kpopVideos2
+    const daisukiEntry = await dbContext.kpopVideos
         .selectFrom("app_kpop")
         .select([
             "name",
@@ -191,7 +191,7 @@ async function lookupByYoutubeID(
                 ? daisukiEntry.kname
                 : daisukiEntry.name;
 
-        const artistNameResult = await dbContext.kpopVideos2
+        const artistNameResult = await dbContext.kpopVideos
             .selectFrom("app_kpop_group")
             .select(["name", "kname"])
             .where("id", "=", daisukiEntry.id_artist)

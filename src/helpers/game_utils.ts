@@ -154,13 +154,18 @@ export async function getSimilarGroupNames(
     groupName: string,
     locale: LocaleType
 ): Promise<Array<string>> {
-    const similarGroups = await dbContext
-        .kpopVideos("app_kpop_group")
+    const similarGroups = await dbContext.kpopVideos
+        .selectFrom("app_kpop_group")
         .select(["id", "name", "kname"])
-        .whereILike("name", `%${groupName}%`)
-        .orWhereILike("kname", `%${groupName}%`)
-        .orderByRaw("CHAR_LENGTH(name) ASC")
-        .limit(5);
+        .where(({ or, cmpr }) =>
+            or([
+                cmpr("name", "like", `%${groupName}%`),
+                cmpr("kname", "like", `%${groupName}%`),
+            ])
+        )
+        .orderBy((eb) => eb.fn("CHAR_LENGTH", ["name"]), "asc")
+        .limit(5)
+        .execute();
 
     if (similarGroups.length === 0) return [];
     return similarGroups.map((x) =>
@@ -177,33 +182,37 @@ export async function getMatchingGroupNames(
     rawGroupNames: Array<string>,
     aliasApplied = false
 ): Promise<GroupMatchResults> {
-    const artistIDQuery = dbContext
-        .kpopVideos("app_kpop_group")
-        .select(["id"])
-        .whereIn("name", rawGroupNames);
+    const artistIds = (
+        await dbContext.kpopVideos
+            .selectFrom("app_kpop_group")
+            .select(["id"])
+            .where("name", "in", rawGroupNames)
+            .execute()
+    ).map((x) => x.id);
 
-    const matchingGroups = (
-        await dbContext
-            // collab matches
-            .kpopVideos("app_kpop_agrelation")
-            .select(["id", "name"])
-            .join("app_kpop_group", function join() {
-                this.on(
-                    "app_kpop_agrelation.id_subgroup",
-                    "=",
-                    "app_kpop_group.id"
-                );
-            })
-            .whereIn("app_kpop_agrelation.id_artist", [artistIDQuery])
-            .andWhere("app_kpop_group.is_collab", "y")
-            // artist matches
-            .union(function () {
-                this.select(["id", "name"])
-                    .from("app_kpop_group")
-                    .whereIn("app_kpop_group.id", artistIDQuery);
-            })
-            .orderBy("name", "ASC")
-    ).map((x) => ({ id: x.id, name: x.name }));
+    const matchingGroups = artistIds.length
+        ? (
+              await dbContext.kpopVideos // collab matches
+                  .selectFrom("app_kpop_agrelation")
+                  .innerJoin(
+                      "app_kpop_group",
+                      "app_kpop_agrelation.id_subgroup",
+                      "app_kpop_group.id"
+                  )
+                  .select(["id", "name"])
+                  .where("app_kpop_agrelation.id_artist", "in", artistIds)
+                  .where("app_kpop_group.is_collab", "=", "y")
+                  // artist matches
+                  .unionAll(
+                      dbContext.kpopVideos
+                          .selectFrom("app_kpop_group")
+                          .select(["id", "name"])
+                          .where("app_kpop_group.id", "in", artistIds)
+                  )
+                  .orderBy("name", "asc")
+                  .execute()
+          ).map((x) => ({ id: x.id, name: x.name }))
+        : [];
 
     const matchingGroupNames = matchingGroups.map((x) => x.name.toUpperCase());
     const unrecognizedGroups = rawGroupNames.filter(

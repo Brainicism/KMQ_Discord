@@ -53,8 +53,7 @@ function generateKysleyContext<T>(
 export class DatabaseContext {
     public kmq: Knex;
     public kmq2: Kysely<KmqDB>;
-    public kpopVideos: Knex;
-    public kpopVideos2: Kysely<KpopVideosDB>;
+    public kpopVideos: Kysely<KpopVideosDB>;
     public infoSchema: Kysely<InfoSchemaDB>;
     public kpopVideosValidation: Kysely<KpopVideosDB>;
     public agnostic: Kysely<null>;
@@ -63,19 +62,15 @@ export class DatabaseContext {
         if (process.env.NODE_ENV === EnvType.TEST) {
             this.kmq = knex(generateKnexContext("kmq_test", 0, 1));
             this.kmq2 = generateKysleyContext<KmqDB>("kmq_test", 1);
-            this.kpopVideos = knex(
-                generateKnexContext("kpop_videos_test", 0, 1)
-            );
 
-            this.kpopVideos2 = generateKysleyContext<KpopVideosDB>(
+            this.kpopVideos = generateKysleyContext<KpopVideosDB>(
                 "kpop_videos_test",
                 1
             );
         } else {
             this.kmq = knex(generateKnexContext("kmq", 0, 20));
             this.kmq2 = generateKysleyContext<KmqDB>("kmq", 20);
-            this.kpopVideos = knex(generateKnexContext("kpop_videos", 0, 5));
-            this.kpopVideos2 = generateKysleyContext<KpopVideosDB>(
+            this.kpopVideos = generateKysleyContext<KpopVideosDB>(
                 "kpop_videos",
                 5
             );
@@ -100,10 +95,6 @@ export class DatabaseContext {
 
         if (this.kpopVideos) {
             await this.kpopVideos.destroy();
-        }
-
-        if (this.kpopVideos2) {
-            await this.kpopVideos2.destroy();
         }
 
         if (this.agnostic) {
