@@ -38,6 +38,7 @@ FROM node:18-slim
 RUN apt-get update && apt-get install -y default-mysql-client \
     ffmpeg \
     curl \
+    unzip \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /app /app
