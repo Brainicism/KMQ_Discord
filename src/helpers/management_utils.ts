@@ -339,21 +339,22 @@ async function reloadArtists(): Promise<void> {
         }
     }
 
-    State.topArtists = await dbContext
-        .kmq("available_songs")
-        .select([
-            "id_artist AS id",
-            "artist_name_en AS name",
-            "artist_name_ko AS hangulName",
-        ])
-        .join(
+    State.topArtists = await dbContext.kmq2
+        .selectFrom("available_songs")
+        .innerJoin(
             "kpop_videos.app_kpop_group",
             "available_songs.id_artist",
-            "kpop_videos.app_kpop_group.id"
+            "app_kpop_group.id"
         )
-        .orderByRaw("SUM(views) DESC")
+        .select([
+            "id_artist as id",
+            "artist_name_en as name",
+            "artist_name_ko as hangulName",
+        ])
+        .orderBy((eb) => eb.fn("SUM", ["views"]), "desc")
+        .groupBy("id_artist")
         .limit(25)
-        .groupBy("id_artist");
+        .execute();
 }
 
 async function reloadSongs(): Promise<void> {

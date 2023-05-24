@@ -1836,7 +1836,7 @@ export function searchArtists(
  * @returns a list of group names
  */
 export function localizedAutocompleteFormat(
-    data: Array<{ name: string; hangulName?: string }>,
+    data: Array<{ name: string; hangulName?: string | null }>,
     showHangul: boolean
 ): Array<AutocompleteEntry> {
     return data

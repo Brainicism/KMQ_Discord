@@ -33,7 +33,7 @@ export default class State {
     static songLinkToEntry: {
         [songLink: string]: {
             name: string;
-            hangulName?: string;
+            hangulName: string | null;
             artistID: number;
             cleanName: string;
             hangulCleanName?: string;
