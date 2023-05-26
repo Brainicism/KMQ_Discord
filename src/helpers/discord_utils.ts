@@ -1916,7 +1916,8 @@ export async function sendDeprecatedTextCommandMessage(
 }
 
 /**
- * Fetches a map of app command names to their IDs
+ * Fetches slash command names associated with their Discord IDs
+ * @returns a map of app command names to their IDs
  */
 export const fetchAppCommandIDs = async (): Promise<{
     [commandName: string]: string;
@@ -1942,7 +1943,7 @@ export const fetchAppCommandIDs = async (): Promise<{
  */
 export const updateAppCommands = async (
     appCommandType = AppCommandsAction.RELOAD
-): Promise<{ [commandName: string]: string }> => {
+): Promise<void> => {
     const isProd = process.env.NODE_ENV === EnvType.PROD;
     const debugServer = State.client.guilds.get(
         process.env.DEBUG_SERVER_ID as string
@@ -2032,12 +2033,11 @@ export const updateAppCommands = async (
         commandStructures = [];
     }
 
-    let commands: Eris.AnyApplicationCommand<true>[] = [];
     if (isProd) {
-        commands = await State.client.bulkEditCommands(commandStructures);
+        await State.client.bulkEditCommands(commandStructures);
     } else {
         if (debugServer) {
-            commands = await State.client.bulkEditGuildCommands(
+            await State.client.bulkEditGuildCommands(
                 debugServer.id,
                 commandStructures
             );
@@ -2045,11 +2045,4 @@ export const updateAppCommands = async (
             logger.error("Debug server unexpectedly unavailable");
         }
     }
-
-    const commandToID: { [commandName: string]: string } = {};
-    for (const command of commands) {
-        commandToID[command.name] = command.id;
-    }
-
-    return commandToID;
 };

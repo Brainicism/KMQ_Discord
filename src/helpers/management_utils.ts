@@ -8,14 +8,13 @@ import {
     isPowerHour,
     normalizeArtistNameEntry,
 } from "./game_utils";
+import { normalizePunctuationInName } from "../structures/game_round";
+import { reloadFactCache } from "../fact_generator";
 import {
-    fetchAppCommandIDs,
     sendInfoMessage,
     sendPowerHourNotification,
     updateAppCommands,
 } from "./discord_utils";
-import { normalizePunctuationInName } from "../structures/game_round";
-import { reloadFactCache } from "../fact_generator";
 import KmqConfiguration from "../kmq_configuration";
 import MessageContext from "../structures/message_context";
 import State from "../state";
@@ -387,9 +386,9 @@ async function reloadLocales(): Promise<void> {
 
 async function reloadCommandIDs(): Promise<void> {
     if (cluster.isPrimary) {
-        State.commandToID = await updateAppCommands();
-    } else {
-        State.commandToID = await fetchAppCommandIDs();
+        logger.info("Updating app command IDs...");
+        await updateAppCommands();
+        await State.ipc.allClustersCommand("fetch_app_command_ids");
     }
 }
 
