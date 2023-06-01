@@ -152,9 +152,7 @@ async function getProfileFields(
         .where("user_id", "=", requestedPlayer.id)
         .executeTakeFirst();
 
-    const timesVoted = timesVotedData
-        ? (timesVotedData["total_votes"] as number)
-        : 0;
+    const timesVoted = timesVotedData ? timesVotedData["total_votes"] : 0;
 
     const fields: Array<Eris.EmbedField> = [
         {
