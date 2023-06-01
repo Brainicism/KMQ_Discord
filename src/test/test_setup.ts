@@ -1,12 +1,15 @@
 /* eslint-disable node/no-sync */
 import * as cp from "child_process";
-import { DATABASE_DOWNLOAD_DIR, TEST_DB_CACHED_EXPORT } from "../constants";
+import { DATABASE_DOWNLOAD_DIR } from "../constants";
 import { IPCLogger } from "../logger";
+import {
+    importCachedDump,
+    performMigrationDown,
+    performMigrations,
+} from "../seed/bootstrap";
 import { sql } from "kysely";
 import EnvType from "../enums/env_type";
 import dbContext, { getNewConnection } from "../database_context";
-import fs from "fs";
-import kmqKnexConfig from "../config/knexfile_kmq";
 import path from "path";
 import sinon from "sinon";
 
@@ -27,20 +30,14 @@ before(async function () {
     await sql`DROP DATABASE IF EXISTS kpop_videos_test;`.execute(db.agnostic);
     await sql`CREATE DATABASE kpop_videos_test;`.execute(db.agnostic);
 
-    if (fs.existsSync(TEST_DB_CACHED_EXPORT)) {
-        logger.info(
-            "Re-creating KMQ test database from cached export. Run 'regenerate-test-db-dump' if schema has been updated since."
-        );
+    logger.info(
+        "Re-creating KMQ test database from cached export. Run 'regenerate-test-db-dump' if schema has been updated since."
+    );
 
-        cp.execSync(
-            `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test < ${TEST_DB_CACHED_EXPORT}`
-        );
-    }
+    importCachedDump();
 
     logger.info("Performing migrations on KMQ database");
-    await db.kmq.migrate.latest({
-        directory: kmqKnexConfig.migrations.directory,
-    });
+    await performMigrations(db);
 
     logger.info("Setting up test Daisuki database");
     // import frozen db dump
@@ -113,15 +110,9 @@ after(async function () {
     this.timeout(60000);
     sandbox.restore();
     logger.info("Rolling back migrations...");
-    await dbContext.kmq.migrate.rollback(
-        {
-            directory: kmqKnexConfig.migrations.directory,
-        },
-        true
-    );
+    await performMigrationDown(dbContext);
+
     logger.info("Test re-applying migrations...");
-    await dbContext.kmq.migrate.latest({
-        directory: kmqKnexConfig.migrations.directory,
-    });
+    await performMigrations(dbContext);
     dbContext.destroy();
 });

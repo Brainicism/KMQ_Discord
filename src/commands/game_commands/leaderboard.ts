@@ -657,6 +657,7 @@ export default class LeaderboardCommand implements BaseCommand {
                                         .limit(LEADERBOARD_ENTRIES_PER_PAGE)
                                         .execute();
                                 }
+
                                 break;
                             case LeaderboardType.SONGS_GUESSED:
                                 if (permanentLb) {

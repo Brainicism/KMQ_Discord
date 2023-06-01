@@ -415,6 +415,53 @@ INSERT INTO `kpop_videos_sql_overrides` VALUES (1,'UPDATE app_kpop SET vtype = \
 UNLOCK TABLES;
 
 --
+-- Table structure for table `kysely_migration`
+--
+
+DROP TABLE IF EXISTS `kysely_migration`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `kysely_migration` (
+  `name` varchar(255) NOT NULL,
+  `timestamp` varchar(255) NOT NULL,
+  PRIMARY KEY (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `kysely_migration`
+--
+
+LOCK TABLES `kysely_migration` WRITE;
+/*!40000 ALTER TABLE `kysely_migration` DISABLE KEYS */;
+/*!40000 ALTER TABLE `kysely_migration` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `kysely_migration_lock`
+--
+
+DROP TABLE IF EXISTS `kysely_migration_lock`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `kysely_migration_lock` (
+  `id` varchar(255) NOT NULL,
+  `is_locked` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `kysely_migration_lock`
+--
+
+LOCK TABLES `kysely_migration_lock` WRITE;
+/*!40000 ALTER TABLE `kysely_migration_lock` DISABLE KEYS */;
+INSERT INTO `kysely_migration_lock` VALUES ('migration_lock',0);
+/*!40000 ALTER TABLE `kysely_migration_lock` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `leaderboard_enrollment`
 --
 
@@ -670,4 +717,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-05-20  3:20:02
+-- Dump completed on 2023-06-01  2:32:37

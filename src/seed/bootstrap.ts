@@ -1,5 +1,11 @@
+import * as cp from "child_process";
+import { FileMigrationProvider, Migrator, NO_MIGRATIONS, sql } from "kysely";
 import { IPCLogger } from "../logger";
-import { STANDBY_COOKIE, STATUS_COOKIE } from "../constants";
+import {
+    STANDBY_COOKIE,
+    STATUS_COOKIE,
+    TEST_DB_CACHED_EXPORT,
+} from "../constants";
 import { config } from "dotenv";
 import {
     databaseExists,
@@ -9,12 +15,10 @@ import {
     updateKpopDatabase,
 } from "./seed_db";
 import { getNewConnection } from "../database_context";
-import { sql } from "kysely";
 import EnvType from "../enums/env_type";
 import KmqConfiguration from "../kmq_configuration";
 import downloadAndConvertSongs from "../scripts/download-new-songs";
-import fs from "fs";
-import kmqKnexConfig from "../config/knexfile_kmq";
+import fs, { promises as fsp } from "fs";
 import path from "path";
 import type { DatabaseContext } from "../database_context";
 
@@ -83,31 +87,97 @@ async function songThresholdReached(db: DatabaseContext): Promise<boolean> {
     );
 }
 
-async function performMigrations(db: DatabaseContext): Promise<void> {
+/**
+ * Import cached dump
+ * @param db - the database context
+ */
+export function importCachedDump(): void {
+    // eslint-disable-next-line node/no-sync
+    cp.execSync(
+        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test < ${TEST_DB_CACHED_EXPORT}`
+    );
+}
+
+/**
+ * Perform migrations
+ * @param db - The database context
+ */
+export async function performMigrations(db: DatabaseContext): Promise<void> {
     logger.info("Performing migrations...");
-    const knexMigrationConfig = {
-        directory: kmqKnexConfig.migrations.directory,
-    };
+    const migrator = new Migrator({
+        db: db.kmq2,
+        provider: new FileMigrationProvider({
+            fs: fsp,
+            path,
+            // This needs to be an absolute path.
+            migrationFolder: path.join(__dirname, "../migrations"),
+        }),
+    });
 
-    const migrationList = await db.kmq.migrate.list(knexMigrationConfig);
-
-    const pendingMigrations: Array<any> = migrationList[1];
-    logger.info(
-        `Pending migrations: [${pendingMigrations.map((x) => x.file)}]`
+    const pendingMigrations = (await migrator.getMigrations()).filter(
+        (x) => !x.executedAt
     );
 
     if (pendingMigrations.length > 0) {
+        logger.info(
+            `Pending migrations: [${pendingMigrations.map((x) => x.name)}]`
+        );
         if (KmqConfiguration.Instance.disallowMigrations()) {
             logger.error("Migrations are disallowed.");
             process.exit(1);
         }
 
-        try {
-            await db.kmq.migrate.latest(knexMigrationConfig);
-        } catch (e) {
-            logger.error(`Migration failed: ${e}`);
+        const { error, results } = await migrator.migrateToLatest();
+        for (const result of results || []) {
+            if (result.status === "Success") {
+                logger.info(
+                    `Migration (up) "${result.migrationName}" was executed successfully`
+                );
+            } else if (result.status === "Error") {
+                logger.error(
+                    `Failed to execute migration: "${result.migrationName}"`
+                );
+            }
+        }
+
+        if (error) {
+            logger.error(`Failed to migrate, err: ${error}`);
             process.exit(1);
         }
+    }
+}
+
+/**
+ * Perform migrations
+ * @param db - The database context
+ */
+export async function performMigrationDown(db: DatabaseContext): Promise<void> {
+    logger.info("Performing migrations...");
+    const migrator = new Migrator({
+        db: db.kmq2,
+        provider: new FileMigrationProvider({
+            fs: fsp,
+            path,
+            // This needs to be an absolute path.
+            migrationFolder: path.join(__dirname, "../migrations"),
+        }),
+    });
+
+    const { error, results } = await migrator.migrateTo(NO_MIGRATIONS);
+    for (const result of results || []) {
+        if (result.status === "Success") {
+            logger.info(
+                `Migration (down) "${result.migrationName}" was executed successfully`
+            );
+        } else if (result.status === "Error") {
+            logger.error(
+                `Failed to execute migration: "${result.migrationName}"`
+            );
+        }
+    }
+
+    if (error) {
+        throw new Error(`Failed to migrate, err: ${error}`);
     }
 }
 

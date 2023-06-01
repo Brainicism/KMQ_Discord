@@ -1,37 +1,11 @@
 import { Kysely, MysqlDialect } from "kysely";
 import { config } from "dotenv";
 import { createPool } from "mysql2";
-import { knex } from "knex";
 import { resolve } from "path";
 import EnvType from "./enums/env_type";
 import type { InfoSchemaDB, KmqDB, KpopVideosDB } from "kysely-codegen";
-import type { Knex } from "knex";
 
 config({ path: resolve(__dirname, "../.env") });
-
-function generateKnexContext(
-    databaseName: string | null,
-    minPoolSize: number,
-    maxPoolSize: number
-): any {
-    return {
-        client: "mysql2",
-        connection: {
-            user: process.env.DB_USER,
-            password: process.env.DB_PASS,
-            database: databaseName,
-            host: process.env.DB_HOST,
-            charset: "utf8mb4",
-            port: parseInt(process.env.DB_PORT as string, 10),
-            decimalNumbers: true,
-            multipleStatements: true,
-        },
-        pool: {
-            min: minPoolSize,
-            max: maxPoolSize,
-        },
-    };
-}
 
 function generateKysleyContext<T>(
     databaseName: string | undefined,
@@ -51,7 +25,6 @@ function generateKysleyContext<T>(
 }
 
 export class DatabaseContext {
-    public kmq: Knex;
     public kmq2: Kysely<KmqDB>;
     public kpopVideos: Kysely<KpopVideosDB>;
     public infoSchema: Kysely<InfoSchemaDB>;
@@ -60,7 +33,6 @@ export class DatabaseContext {
 
     constructor() {
         if (process.env.NODE_ENV === EnvType.TEST) {
-            this.kmq = knex(generateKnexContext("kmq_test", 0, 1));
             this.kmq2 = generateKysleyContext<KmqDB>("kmq_test", 1);
 
             this.kpopVideos = generateKysleyContext<KpopVideosDB>(
@@ -68,7 +40,6 @@ export class DatabaseContext {
                 1
             );
         } else {
-            this.kmq = knex(generateKnexContext("kmq", 0, 20));
             this.kmq2 = generateKysleyContext<KmqDB>("kmq", 20);
             this.kpopVideos = generateKysleyContext<KpopVideosDB>(
                 "kpop_videos",
@@ -85,10 +56,6 @@ export class DatabaseContext {
     }
 
     async destroy(): Promise<void> {
-        if (this.kmq) {
-            await this.kmq.destroy();
-        }
-
         if (this.kmq2) {
             await this.kmq2.destroy();
         }
