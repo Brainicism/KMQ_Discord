@@ -103,7 +103,7 @@ export function importCachedDump(): void {
  * @param db - The database context
  */
 export async function performMigrations(db: DatabaseContext): Promise<void> {
-    logger.info("Performing migrations...");
+    logger.info("Performing migrations (up)...");
     const migrator = new Migrator({
         db: db.kmq,
         provider: new FileMigrationProvider({
@@ -152,7 +152,7 @@ export async function performMigrations(db: DatabaseContext): Promise<void> {
  * @param db - The database context
  */
 export async function performMigrationDown(db: DatabaseContext): Promise<void> {
-    logger.info("Performing migrations...");
+    logger.info("Performing migrations (down)...");
     const migrator = new Migrator({
         db: db.kmq,
         provider: new FileMigrationProvider({
@@ -188,6 +188,7 @@ async function bootstrapDatabases(): Promise<void> {
     if (!(await kmqDatabaseExists(db))) {
         logger.info("Performing migrations on KMQ database");
         await sql`CREATE DATABASE IF NOT EXISTS kmq;`.execute(db.agnostic);
+        importCachedDump();
         await sql`CREATE DATABASE IF NOT EXISTS kmq_test;`.execute(db.agnostic);
     }
 
