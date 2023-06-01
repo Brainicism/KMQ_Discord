@@ -175,7 +175,7 @@ export function getFact(guildID: string): string | null {
 
 async function recentMusicVideos(lng: LocaleType): Promise<string[]> {
     const oneMonthPriorDate = new Date();
-    oneMonthPriorDate.setMonth(oneMonthPriorDate.getMonth() - 2);
+    oneMonthPriorDate.setMonth(oneMonthPriorDate.getMonth() - 1);
     const result = await dbContext.kpopVideos
         .selectFrom("app_kpop")
         .innerJoin("app_kpop_group", "app_kpop_group.id", "app_kpop.id_artist")
@@ -211,7 +211,7 @@ async function recentMusicVideos(lng: LocaleType): Promise<string[]> {
 
 async function recentMusicShowWin(lng: LocaleType): Promise<string[]> {
     const twoWeeksPriorDate = new Date();
-    twoWeeksPriorDate.setDate(twoWeeksPriorDate.getDate() - 30);
+    twoWeeksPriorDate.setDate(twoWeeksPriorDate.getDate() - 14);
     const result = await dbContext.kpopVideos
         .selectFrom("app_kpop_ms")
         .innerJoin(
