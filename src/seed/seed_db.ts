@@ -519,10 +519,12 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
                 tableName
             )} TO kpop_videos.${sql.raw(tableName)};`.execute(db.kpopVideos);
         } else {
-            logger.info(`Table '${tableName} doesn't exist, creating...`);
-            await sql`ALTER TABLE kpop_videos_tmp.${tableName} RENAME kpop_videos.${tableName}`.execute(
-                db.agnostic
-            );
+            logger.info(`Table '${tableName}' doesn't exist, creating...`);
+            await sql
+                .raw(
+                    `ALTER TABLE kpop_videos_tmp.${tableName} RENAME kpop_videos.${tableName}`
+                )
+                .execute(db.agnostic);
         }
     }
 
