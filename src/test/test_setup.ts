@@ -34,7 +34,7 @@ before(async function () {
         "Re-creating KMQ test database from cached export. Run 'regenerate-test-db-dump' if schema has been updated since."
     );
 
-    importCachedDump();
+    importCachedDump("kmq_test");
 
     logger.info("Performing migrations on KMQ database");
     await performMigrations(db);

@@ -59,8 +59,7 @@ function hasRequiredEnvironmentVariables(): boolean {
 
 async function kmqDatabaseExists(db: DatabaseContext): Promise<boolean> {
     const kmqExists = await databaseExists(db, "kmq");
-    const kmqTestExists = await databaseExists(db, "kmq_test");
-    return kmqExists && kmqTestExists;
+    return kmqExists;
 }
 
 async function kpopDataDatabaseExists(db: DatabaseContext): Promise<boolean> {
@@ -89,12 +88,12 @@ async function songThresholdReached(db: DatabaseContext): Promise<boolean> {
 
 /**
  * Import cached dump
- * @param db - the database context
+ * @param databaseName - the database name
  */
-export function importCachedDump(): void {
+export function importCachedDump(databaseName: string): void {
     // eslint-disable-next-line node/no-sync
     cp.execSync(
-        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test < ${TEST_DB_CACHED_EXPORT}`
+        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} ${databaseName} < ${TEST_DB_CACHED_EXPORT}`
     );
 }
 
@@ -188,8 +187,7 @@ async function bootstrapDatabases(): Promise<void> {
     if (!(await kmqDatabaseExists(db))) {
         logger.info("Performing migrations on KMQ database");
         await sql`CREATE DATABASE IF NOT EXISTS kmq;`.execute(db.agnostic);
-        importCachedDump();
-        await sql`CREATE DATABASE IF NOT EXISTS kmq_test;`.execute(db.agnostic);
+        importCachedDump("kmq");
     }
 
     await performMigrations(db);

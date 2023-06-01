@@ -21,7 +21,7 @@ const logger = new IPCLogger("regenerate-test-db-dump");
         await sql`DROP DATABASE IF EXISTS kmq_test;`.execute(db.agnostic);
         await sql`CREATE DATABASE kmq_test;`.execute(db.agnostic);
 
-        importCachedDump();
+        importCachedDump("kmq_test");
         logger.info("Performing migrations on KMQ test database");
         await performMigrations(db);
 
