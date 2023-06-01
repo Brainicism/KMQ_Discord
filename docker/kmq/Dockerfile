@@ -25,6 +25,7 @@ RUN yarn install --frozen-lockfile
 COPY start.sh tsconfig.json ./
 COPY i18n/ i18n/
 COPY sql_dumps/daisuki/bootstrap.sql sql_dumps/daisuki/bootstrap.sql
+COPY sql_dumps/kmq-test-cached.sql sql_dumps/kmq-test-cached.sql
 COPY sql/ sql/
 COPY templates/ templates/
 
