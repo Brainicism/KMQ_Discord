@@ -25,7 +25,7 @@ function generateKysleyContext<T>(
 }
 
 export class DatabaseContext {
-    public kmq2: Kysely<KmqDB>;
+    public kmq: Kysely<KmqDB>;
     public kpopVideos: Kysely<KpopVideosDB>;
     public infoSchema: Kysely<InfoSchemaDB>;
     public kpopVideosValidation: Kysely<KpopVideosDB>;
@@ -33,14 +33,14 @@ export class DatabaseContext {
 
     constructor() {
         if (process.env.NODE_ENV === EnvType.TEST) {
-            this.kmq2 = generateKysleyContext<KmqDB>("kmq_test", 1);
+            this.kmq = generateKysleyContext<KmqDB>("kmq_test", 1);
 
             this.kpopVideos = generateKysleyContext<KpopVideosDB>(
                 "kpop_videos_test",
                 1
             );
         } else {
-            this.kmq2 = generateKysleyContext<KmqDB>("kmq", 20);
+            this.kmq = generateKysleyContext<KmqDB>("kmq", 20);
             this.kpopVideos = generateKysleyContext<KpopVideosDB>(
                 "kpop_videos",
                 5
@@ -56,8 +56,8 @@ export class DatabaseContext {
     }
 
     async destroy(): Promise<void> {
-        if (this.kmq2) {
-            await this.kmq2.destroy();
+        if (this.kmq) {
+            await this.kmq.destroy();
         }
 
         if (this.kpopVideos) {

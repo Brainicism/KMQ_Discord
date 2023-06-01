@@ -49,7 +49,7 @@ async function awardBadges(): Promise<void> {
     const badgesObj = await getObjects();
     const badgeID = await getBadgeID();
 
-    const badge = await dbContext.kmq2
+    const badge = await dbContext.kmq
         .selectFrom("badges")
         .select("name")
         .where("id", "=", badgeID)
@@ -65,7 +65,7 @@ async function awardBadges(): Promise<void> {
 
     const playerIDsWithBadgeAlready = new Set(
         (
-            await dbContext.kmq2
+            await dbContext.kmq
                 .selectFrom("badges_players")
                 .select("user_id")
                 .where("badge_id", "=", badgeID)
@@ -94,7 +94,7 @@ async function awardBadges(): Promise<void> {
         .filter((player) => !playerIDsWithBadgeAlready.has(player.id))
         .map((player) => ({ user_id: player.id, badge_id: badgeID }));
 
-    await dbContext.kmq2.transaction().execute(async (trx) => {
+    await dbContext.kmq.transaction().execute(async (trx) => {
         await trx
             .insertInto("badges_players")
             .values(playersToGiveBadge)

@@ -980,7 +980,7 @@ export default class PlayCommand implements BaseCommand {
             }
 
             if (gameType === GameType.COMPETITION) {
-                const isModerator = await dbContext.kmq2
+                const isModerator = await dbContext.kmq
                     .selectFrom("competition_moderators")
                     .select("user_id")
                     .where("guild_id", "=", guildID)

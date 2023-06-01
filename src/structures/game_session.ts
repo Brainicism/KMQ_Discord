@@ -545,7 +545,7 @@ export default class GameSession extends Session {
                   (this.guessTimes.length * 1000)
                 : -1;
 
-        await dbContext.kmq2
+        await dbContext.kmq
             .insertInto("game_sessions")
             .values({
                 start_date: new Date(this.startedAt),
@@ -621,7 +621,7 @@ export default class GameSession extends Session {
             this.stopGuessTimeout();
 
             // increment guild's song guess count
-            await dbContext.kmq2
+            await dbContext.kmq
                 .updateTable("guilds")
                 .where("guild_id", "=", this.guildID)
                 .set({
@@ -1129,7 +1129,7 @@ export default class GameSession extends Session {
      */
     private async ensurePlayerStat(userID: string): Promise<void> {
         const currentDateString = new Date();
-        await dbContext.kmq2
+        await dbContext.kmq
             .insertInto("player_stats")
             .values({
                 player_id: userID,
@@ -1139,7 +1139,7 @@ export default class GameSession extends Session {
             .ignore()
             .execute();
 
-        await dbContext.kmq2
+        await dbContext.kmq
             .insertInto("player_servers")
             .values({
                 player_id: userID,
@@ -1158,7 +1158,7 @@ export default class GameSession extends Session {
         userID: string,
         score: number
     ): Promise<void> {
-        await dbContext.kmq2
+        await dbContext.kmq
             .updateTable("player_stats")
             .where("player_id", "=", userID)
             .set({
@@ -1175,7 +1175,7 @@ export default class GameSession extends Session {
     private static async incrementPlayerGamesPlayed(
         userID: string
     ): Promise<void> {
-        await dbContext.kmq2
+        await dbContext.kmq
             .updateTable("player_stats")
             .where("player_id", "=", userID)
             .set({
@@ -1192,7 +1192,7 @@ export default class GameSession extends Session {
         userID: string,
         expGain: number
     ): Promise<LevelUpResult | null> {
-        const playerStats = await dbContext.kmq2
+        const playerStats = await dbContext.kmq
             .selectFrom("player_stats")
             .select(["exp", "level"])
             .where("player_id", "=", userID)
@@ -1214,7 +1214,7 @@ export default class GameSession extends Session {
         }
 
         // persist exp and level to data store
-        await dbContext.kmq2
+        await dbContext.kmq
             .updateTable("player_stats")
             .set({ exp: newExp, level: newLevel })
             .where("player_id", "=", userID)
@@ -1245,7 +1245,7 @@ export default class GameSession extends Session {
         expGain: number,
         levelsGained: number
     ): Promise<void> {
-        await dbContext.kmq2
+        await dbContext.kmq
             .insertInto("player_game_session_stats")
             .values({
                 player_id: userID,
@@ -1305,7 +1305,7 @@ export default class GameSession extends Session {
     private async storeSongStats(): Promise<void> {
         await Promise.allSettled(
             Object.keys(this.songStats).map(async (vlink) => {
-                await dbContext.kmq2
+                await dbContext.kmq
                     .insertInto("song_metadata")
                     .values({
                         vlink,
@@ -1321,7 +1321,7 @@ export default class GameSession extends Session {
                     .ignore()
                     .execute();
 
-                await dbContext.kmq2
+                await dbContext.kmq
                     .updateTable("song_metadata")
                     .where("vlink", "=", vlink)
                     .set({

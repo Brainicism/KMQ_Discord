@@ -203,7 +203,7 @@ export default class KmqWebServer {
             }
 
             const databaseLatency = await measureExecutionTime(
-                this.dbContext.kmq2
+                this.dbContext.kmq
                     .selectFrom("available_songs")
                     .select(sql`1`.as("x"))
                     .execute()

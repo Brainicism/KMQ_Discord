@@ -31,7 +31,7 @@ const koFile = JSON.parse(
                 logger.info(gameMessageTranslationKey);
                 logger.info(newMessageContent);
 
-                await dbContext.kmq2
+                await dbContext.kmq
                     .updateTable("game_messages")
                     .where("message", "=", gameMessageTranslationKey)
                     .set({

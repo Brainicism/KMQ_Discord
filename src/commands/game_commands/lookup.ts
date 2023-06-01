@@ -62,7 +62,7 @@ async function lookupByYoutubeID(
     locale: LocaleType
 ): Promise<boolean> {
     const guildID = messageOrInteraction.guildID as string;
-    const kmqSongEntry: QueriedSong | undefined = await dbContext.kmq2
+    const kmqSongEntry: QueriedSong | undefined = await dbContext.kmq
         .selectFrom("available_songs")
         .select(SongSelector.QueriedSongFields)
         .where("link", "=", videoID)
@@ -143,7 +143,7 @@ async function lookupByYoutubeID(
         publishDate = kmqSongEntry.publishDate;
 
         const durationInSeconds = (
-            await dbContext.kmq2
+            await dbContext.kmq
                 .selectFrom("cached_song_duration")
                 .select("duration")
                 .where("vlink", "=", videoID)
@@ -327,7 +327,7 @@ async function lookupBySongName(
     locale: LocaleType,
     artistID?: number
 ): Promise<boolean> {
-    let kmqSongEntriesQuery = dbContext.kmq2
+    let kmqSongEntriesQuery = dbContext.kmq
         .selectFrom("available_songs")
         .select(SongSelector.QueriedSongFields)
         .limit(100);

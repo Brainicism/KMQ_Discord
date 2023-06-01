@@ -79,7 +79,7 @@ async function getProfileFields(
     requestedPlayer: Eris.User,
     guildID: string
 ): Promise<Array<Eris.EmbedField>> {
-    const playerStats = await dbContext.kmq2
+    const playerStats = await dbContext.kmq
         .selectFrom("player_stats")
         .select([
             "songs_guessed",
@@ -113,7 +113,7 @@ async function getProfileFields(
 
     const totalPlayers =
         (
-            await dbContext.kmq2
+            await dbContext.kmq
                 .selectFrom("player_stats")
                 .select((eb) => eb.fn.countAll<number>().as("count"))
                 .where("exp", ">", 0)
@@ -121,7 +121,7 @@ async function getProfileFields(
         )?.["count"] ?? 0;
 
     const relativeSongRank = (
-        await dbContext.kmq2
+        await dbContext.kmq
             .selectFrom("player_stats")
             .select((eb) => eb.fn.countAll<number>().as("count"))
             .where("songs_guessed", ">", songsGuessed)
@@ -130,7 +130,7 @@ async function getProfileFields(
     )?.["count"];
 
     const relativeGamesPlayedRank = (
-        await dbContext.kmq2
+        await dbContext.kmq
             .selectFrom("player_stats")
             .select((eb) => eb.fn.countAll<number>().as("count"))
             .where("games_played", ">", gamesPlayed)
@@ -139,14 +139,14 @@ async function getProfileFields(
     )?.["count"];
 
     const relativeLevelRank = (
-        await dbContext.kmq2
+        await dbContext.kmq
             .selectFrom("player_stats")
             .select((eb) => eb.fn.countAll<number>().as("count"))
             .where("exp", ">", exp)
             .executeTakeFirst()
     )?.["count"];
 
-    const timesVotedData = await dbContext.kmq2
+    const timesVotedData = await dbContext.kmq
         .selectFrom("top_gg_user_votes")
         .select(["total_votes"])
         .where("user_id", "=", requestedPlayer.id)
@@ -218,7 +218,7 @@ async function getProfileFields(
 
     // Optional fields
     const badges = (
-        await dbContext.kmq2
+        await dbContext.kmq
             .selectFrom("badges_players")
             .innerJoin("badges", "badges_players.badge_id", "badges.id")
             .select(["badges.name as badge_name"])

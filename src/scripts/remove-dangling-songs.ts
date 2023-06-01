@@ -18,7 +18,7 @@ program.parse();
     const options = program.opts();
     const db = getNewConnection();
     const availableSongs = (
-        await db.kmq2.selectFrom("available_songs").select("link").execute()
+        await db.kmq.selectFrom("available_songs").select("link").execute()
     ).map((x) => x["link"]);
 
     const downloadedSongs = (

@@ -474,7 +474,7 @@ export default class LeaderboardCommand implements BaseCommand {
             ? "player_stats"
             : "player_game_session_stats";
 
-        let topPlayersQuery = dbContext.kmq2.selectFrom(dbTable);
+        let topPlayersQuery = dbContext.kmq.selectFrom(dbTable);
 
         const d = date || new Date();
         let resetDate: Date | null = null;
@@ -532,7 +532,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
         if (scope === LeaderboardScope.SERVER) {
             const serverPlayers = (
-                await dbContext.kmq2
+                await dbContext.kmq
                     .selectFrom("player_servers")
                     .select("player_id")
                     .where("server_id", "=", messageContext.guildID)
@@ -551,7 +551,7 @@ export default class LeaderboardCommand implements BaseCommand {
                 ].scoreboard.getPlayerIDs();
 
             const gamePlayers = (
-                await dbContext.kmq2
+                await dbContext.kmq
                     .selectFrom(dbTable)
                     .select("player_id")
                     .where("player_id", "in", participantIDs)
@@ -567,7 +567,9 @@ export default class LeaderboardCommand implements BaseCommand {
 
         const pageCount = Math.ceil(
             (((await topPlayersQuery
-                .select((eb) => eb.fn.count("player_id").distinct().as("count"))
+                .select((eb) =>
+                    eb.fn.count<number>("player_id").distinct().as("count")
+                )
                 .executeTakeFirst()) ?? {})["count"] as number) /
                 LEADERBOARD_ENTRIES_PER_PAGE
         );
@@ -708,7 +710,7 @@ export default class LeaderboardCommand implements BaseCommand {
                                     async (player, relativeRank) => {
                                         const rank = relativeRank + offset;
                                         const enrolledPlayer =
-                                            await dbContext.kmq2
+                                            await dbContext.kmq
                                                 .selectFrom(
                                                     "leaderboard_enrollment"
                                                 )
@@ -1012,7 +1014,7 @@ export default class LeaderboardCommand implements BaseCommand {
         messageContext: MessageContext,
         interaction?: Eris.CommandInteraction
     ): Promise<void> {
-        const alreadyEnrolled = !!(await dbContext.kmq2
+        const alreadyEnrolled = !!(await dbContext.kmq
             .selectFrom("leaderboard_enrollment")
             .where("player_id", "=", messageContext.author.id)
             .executeTakeFirst());
@@ -1035,7 +1037,7 @@ export default class LeaderboardCommand implements BaseCommand {
             return;
         }
 
-        await dbContext.kmq2
+        await dbContext.kmq
             .insertInto("leaderboard_enrollment")
             .values({
                 player_id: messageContext.author.id,
@@ -1066,7 +1068,7 @@ export default class LeaderboardCommand implements BaseCommand {
         messageContext: MessageContext,
         interaction?: Eris.CommandInteraction
     ): Promise<void> {
-        await dbContext.kmq2
+        await dbContext.kmq
             .deleteFrom("leaderboard_enrollment")
             .where("player_id", "=", messageContext.author.id)
             .execute();

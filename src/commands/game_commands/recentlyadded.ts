@@ -76,7 +76,7 @@ export default class RecentlyAddedCommand implements BaseCommand {
             messageOrInteraction.guildID as string
         );
 
-        const newSongs: Array<QueriedSong> = await dbContext.kmq2
+        const newSongs: Array<QueriedSong> = await dbContext.kmq
             .selectFrom("available_songs")
             .select(SongSelector.QueriedSongFields)
             .orderBy("publishedon", "desc")

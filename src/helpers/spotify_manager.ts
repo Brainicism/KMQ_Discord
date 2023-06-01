@@ -362,7 +362,7 @@ export default class SpotifyManager {
                 songNames.push(song.name);
             }
 
-            const query = dbContext.kmq2
+            const query = dbContext.kmq
                 .selectFrom("available_songs")
                 .innerJoin("kpop_videos.app_kpop_group", (jb) =>
                     jb.on(({ or, cmpr, ref }) =>

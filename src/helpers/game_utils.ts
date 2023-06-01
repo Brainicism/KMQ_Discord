@@ -123,7 +123,7 @@ export async function cleanupInactiveGameSessions(): Promise<void> {
  * @returns whether the player has bonus active
  */
 export async function userBonusIsActive(userId: string): Promise<boolean> {
-    return !!(await dbContext.kmq2
+    return !!(await dbContext.kmq
         .selectFrom("top_gg_user_votes")
         .select("buff_expiry_date")
         .where("user_id", "=", userId)
@@ -135,7 +135,7 @@ export async function userBonusIsActive(userId: string): Promise<boolean> {
  * @returns whether the player has bonus active
  */
 export async function activeBonusUsers(): Promise<Set<string>> {
-    const bonusUsers = await dbContext.kmq2
+    const bonusUsers = await dbContext.kmq
         .selectFrom("top_gg_user_votes")
         .select("user_id")
         .where("buff_expiry_date", ">", new Date())
@@ -309,7 +309,7 @@ export async function getMultipleChoiceOptions(
             : "clean_song_name_en";
 
         easyNames = (
-            await dbContext.kmq2
+            await dbContext.kmq
                 .selectFrom("available_songs")
                 .select(["clean_song_name_en", "clean_song_name_ko"])
                 .groupBy(songName)
@@ -329,7 +329,7 @@ export async function getMultipleChoiceOptions(
                 // Medium: MEDIUM_CHOICES - MEDIUM_SAME_ARIST_CHOICES from same gender as chosen artist, MEDIUM_SAME_ARIST_CHOICES from chosen artist
                 const sameArtistSongs = _.sampleSize(
                     (
-                        await dbContext.kmq2
+                        await dbContext.kmq
                             .selectFrom("available_songs")
                             .select([
                                 "clean_song_name_en",
@@ -345,7 +345,7 @@ export async function getMultipleChoiceOptions(
 
                 const sameGenderSongs = _.sampleSize(
                     (
-                        await dbContext.kmq2
+                        await dbContext.kmq
                             .selectFrom("available_songs")
                             .select([
                                 "clean_song_name_en",
@@ -370,7 +370,7 @@ export async function getMultipleChoiceOptions(
             case AnswerType.MULTIPLE_CHOICE_HARD: {
                 // Hard: HARD_CHOICES from chosen artist
                 names = (
-                    await dbContext.kmq2
+                    await dbContext.kmq
                         .selectFrom("available_songs")
                         .select(["clean_song_name_en", "clean_song_name_ko"])
                         .groupBy(songName)
@@ -433,7 +433,7 @@ export async function getMultipleChoiceOptions(
 
         const artistName = useHangul ? "artist_name_ko" : "artist_name_en";
         easyNames = (
-            await dbContext.kmq2
+            await dbContext.kmq
                 .selectFrom("available_songs")
                 .select(["artist_name_en", "artist_name_ko"])
                 .where(artistName, "!=", answer)
@@ -449,7 +449,7 @@ export async function getMultipleChoiceOptions(
                 // Medium: MEDIUM_CHOICES from same gender
                 // Hard: HARD_CHOICES from same gender
                 names = (
-                    await dbContext.kmq2
+                    await dbContext.kmq
                         .selectFrom("available_songs")
                         .select(["artist_name_en", "artist_name_ko"])
                         .where("members", "=", gender)
@@ -475,7 +475,7 @@ export async function getMultipleChoiceOptions(
 export async function areUsersPremium(
     userIDs: Array<string>
 ): Promise<boolean> {
-    return !!(await dbContext.kmq2
+    return !!(await dbContext.kmq
         .selectFrom("premium_users")
         .selectAll()
         .where("active", "=", 1)
@@ -509,7 +509,7 @@ export async function updatePremium(
 
     await Promise.all(
         activePatronsPayload.map(async (activePatronPayload) => {
-            await dbContext.kmq2
+            await dbContext.kmq
                 .insertInto("premium_users")
                 .values(activePatronPayload)
                 .onDuplicateKeyUpdate(activePatronPayload)
@@ -522,20 +522,20 @@ export async function updatePremium(
         badge_id: PATREON_SUPPORTER_BADGE_ID,
     }));
 
-    await dbContext.kmq2
+    await dbContext.kmq
         .insertInto("badges_players")
         .values(payload)
         .ignore()
         .execute();
 
     // Revoke premium
-    await dbContext.kmq2
+    await dbContext.kmq
         .updateTable("premium_users")
         .where("user_id", "in", inactiveUserIDs)
         .set({ active: 0 })
         .execute();
 
-    await dbContext.kmq2
+    await dbContext.kmq
         .deleteFrom("badges_players")
         .where("user_id", "in", inactiveUserIDs)
         .where("badge_id", "=", PATREON_SUPPORTER_BADGE_ID)
@@ -559,7 +559,7 @@ export async function isPremiumRequest(
  * @returns whether this is the user's first game played today
  */
 export async function isFirstGameOfDay(userID: string): Promise<boolean> {
-    const player = await dbContext.kmq2
+    const player = await dbContext.kmq
         .selectFrom("player_stats")
         .select(
             sql<number>`DAYOFYEAR(last_active) = DAYOFYEAR(CURDATE())`.as(

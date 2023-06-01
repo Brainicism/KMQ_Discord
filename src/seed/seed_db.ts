@@ -153,7 +153,7 @@ const options = program.opts();
 
 async function getOverrideQueries(db: DatabaseContext): Promise<Array<string>> {
     return (
-        await db.kmq2
+        await db.kmq
             .selectFrom("kpop_videos_sql_overrides")
             .select(["query"])
             .execute()
@@ -169,7 +169,7 @@ export async function generateKmqDataTables(
 ): Promise<void> {
     logger.info("Re-creating KMQ data tables view...");
     await sql`CALL CreateKmqDataTables(${process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST});`.execute(
-        db.kmq2
+        db.kmq
     );
 }
 
@@ -181,7 +181,7 @@ export async function deduplicateGroupNames(
     db: DatabaseContext
 ): Promise<void> {
     logger.info("Deduplicating group names...");
-    await sql`CALL DeduplicateGroupNames();`.execute(db.kmq2);
+    await sql`CALL DeduplicateGroupNames();`.execute(db.kmq);
 }
 
 /**

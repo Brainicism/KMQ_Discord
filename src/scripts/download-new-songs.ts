@@ -153,7 +153,7 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
 
             const { playabilityStatus }: any = infoResponse.player_response;
             if (playabilityStatus.status !== "OK") {
-                await db.kmq2
+                await db.kmq
                     .insertInto("dead_links")
                     .values({
                         vlink: id,
@@ -176,7 +176,7 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
             );
         } catch (e) {
             const errorMessage = `Failed to retrieve video metadata for '${id}'. error = ${e}`;
-            await db.kmq2
+            await db.kmq
                 .insertInto("dead_links")
                 .values({
                     vlink: id,
@@ -196,7 +196,7 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
                     cachedSongLocation
                 );
 
-                await db.kmq2
+                await db.kmq
                     .insertInto("cached_song_duration")
                     .values({ vlink: id, duration })
                     .onDuplicateKeyUpdate({ vlink: id, duration })
@@ -217,7 +217,7 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
 
 async function getSongsFromDb(databaseContext: DatabaseContext): Promise<any> {
     const deadLinks = (
-        await databaseContext.kmq2
+        await databaseContext.kmq
             .selectFrom("dead_links")
             .select("vlink")
             .execute()
@@ -305,7 +305,7 @@ async function updateNotDownloaded(
         .filter((x) => !currentlyDownloadedFiles.has(`${x.youtubeLink}.ogg`))
         .map((x) => ({ vlink: x.youtubeLink }));
 
-    await db.kmq2.transaction().execute(async (trx) => {
+    await db.kmq.transaction().execute(async (trx) => {
         await trx.deleteFrom("not_downloaded").execute();
         if (songIDsNotDownloaded.length > 0) {
             await trx
@@ -325,7 +325,7 @@ const downloadNewSongs = async (
     let downloadCount = 0;
     let deadLinksSkipped = 0;
     const knownDeadIDs = new Set(
-        (await db.kmq2.selectFrom("dead_links").select("vlink").execute()).map(
+        (await db.kmq.selectFrom("dead_links").select("vlink").execute()).map(
             (x) => x.vlink
         )
     );

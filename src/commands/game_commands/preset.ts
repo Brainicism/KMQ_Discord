@@ -575,7 +575,7 @@ export default class PresetCommand implements BaseCommand {
         if (presetName.startsWith("KMQ-")) {
             // User is loading a preset via UUID
             const presetUUID = presetName;
-            const existingPresetID = await dbContext.kmq2
+            const existingPresetID = await dbContext.kmq
                 .selectFrom("game_option_presets")
                 .select(["guild_id", "preset_name"])
                 .where("option_name", "=", "uuid")
@@ -890,7 +890,7 @@ export default class PresetCommand implements BaseCommand {
             return;
         }
 
-        const existingPresetID = await dbContext.kmq2
+        const existingPresetID = await dbContext.kmq
             .selectFrom("game_option_presets")
             .select(["guild_id", "preset_name"])
             .where("option_name", "=", "uuid")
@@ -922,14 +922,14 @@ export default class PresetCommand implements BaseCommand {
             return;
         }
 
-        const presetOptionsDb = await dbContext.kmq2
+        const presetOptionsDb = await dbContext.kmq
             .selectFrom("game_option_presets")
             .select(["option_name", "option_value"])
             .where("guild_id", "=", existingPresetID["guild_id"])
             .where("preset_name", "=", existingPresetID["preset_name"])
             .execute();
 
-        await dbContext.kmq2.transaction().execute(async (trx) => {
+        await dbContext.kmq.transaction().execute(async (trx) => {
             const presetOptionObjects = presetOptionsDb
                 .filter((option) => option["option_name"] !== "uuid")
                 .map((option) => ({

@@ -419,7 +419,7 @@ export default abstract class Session {
             await sendBookmarkedSongs(this.guildID, this.bookmarkedSongs);
 
             // Store bookmarked songs
-            await dbContext.kmq2.transaction().execute(async (trx) => {
+            await dbContext.kmq.transaction().execute(async (trx) => {
                 const idLinkPairs: {
                     user_id: string;
                     vlink: string;
@@ -444,7 +444,7 @@ export default abstract class Session {
         }
 
         // commit guild stats
-        await dbContext.kmq2
+        await dbContext.kmq
             .updateTable("guilds")
             .where("guild_id", "=", this.guildID)
             .set({
@@ -498,7 +498,7 @@ export default abstract class Session {
      */
     async lastActiveNow(): Promise<void> {
         this.lastActive = Date.now();
-        await dbContext.kmq2
+        await dbContext.kmq
             .updateTable("guilds")
             .where("guild_id", "=", this.guildID)
             .set({ last_active: new Date() })
@@ -700,7 +700,7 @@ export default abstract class Session {
             : this.guildPreference.gameOptions.seekType;
 
         let songDuration = (
-            await dbContext.kmq2
+            await dbContext.kmq
                 .selectFrom("cached_song_duration")
                 .select(["duration"])
                 .where("vlink", "=", round.song.youtubeLink)

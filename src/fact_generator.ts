@@ -261,8 +261,8 @@ async function musicShowWins(lng: LocaleType): Promise<string[]> {
         )
         .groupBy("app_kpop_ms.id_artist")
         .select(["app_kpop_group.name as artist_name"])
-        .select((eb) => eb.fn.count("id_artist").as("count"))
-        .having(dbContext.kpopVideos.fn.count("id_artist"), ">=", 5)
+        .select((eb) => eb.fn.count<number>("id_artist").as("count"))
+        .having(dbContext.kpopVideos.fn.count<number>("id_artist"), ">=", 5)
         .orderBy("count", "desc")
         .limit(25)
         .execute();
@@ -285,7 +285,11 @@ async function mostViewedGroups(lng: LocaleType): Promise<string[]> {
         .innerJoin("app_kpop_group", "app_kpop.id_artist", "app_kpop_group.id")
         .select(["app_kpop_group.name as artist_name"])
         .groupBy("app_kpop.id_artist")
-        .select(dbContext.kpopVideos.fn.sum("app_kpop.views").as("total_views"))
+        .select(
+            dbContext.kpopVideos.fn
+                .sum<number>("app_kpop.views")
+                .as("total_views")
+        )
         .where("issolo", "=", "n")
         .orderBy("total_views", "desc")
         .limit(25)
@@ -297,9 +301,7 @@ async function mostViewedGroups(lng: LocaleType): Promise<string[]> {
             ordinalNum: i18n.internalLocalizer.t(getOrdinalNum(idx + 1), {
                 lng,
             }),
-            views: friendlyFormattedNumber(
-                parseInt(x["total_views"] as string, 10)
-            ),
+            views: friendlyFormattedNumber(x["total_views"]),
             lng,
         })
     );
@@ -311,7 +313,11 @@ async function mostLikedGroups(lng: LocaleType): Promise<string[]> {
         .innerJoin("app_kpop_group", "app_kpop.id_artist", "app_kpop_group.id")
         .select(["app_kpop_group.name as artist_name"])
         .groupBy("app_kpop.id_artist")
-        .select(dbContext.kpopVideos.fn.sum("app_kpop.likes").as("total_likes"))
+        .select(
+            dbContext.kpopVideos.fn
+                .sum<number>("app_kpop.likes")
+                .as("total_likes")
+        )
         .where("issolo", "=", "n")
         .orderBy("total_likes", "desc")
         .limit(25)
@@ -323,9 +329,7 @@ async function mostLikedGroups(lng: LocaleType): Promise<string[]> {
             ordinalNum: i18n.internalLocalizer.t(getOrdinalNum(idx + 1), {
                 lng,
             }),
-            likes: friendlyFormattedNumber(
-                parseInt(x["total_likes"] as string, 10)
-            ),
+            likes: friendlyFormattedNumber(x["total_likes"]),
             lng,
         })
     );
@@ -439,7 +443,7 @@ async function mostViewedEntertainmentCompany(
         )
         .select(["app_kpop_company.name as name"])
         .groupBy("app_kpop_group.id_company")
-        .select((eb) => eb.fn.sum("app_kpop.views").as("views"))
+        .select((eb) => eb.fn.sum<number>("app_kpop.views").as("views"))
         .orderBy("views", "desc")
         .limit(15)
         .execute();
@@ -450,7 +454,7 @@ async function mostViewedEntertainmentCompany(
             ordinalNum: i18n.internalLocalizer.t(getOrdinalNum(idx + 1), {
                 lng,
             }),
-            views: friendlyFormattedNumber(parseInt(x["views"] as string, 10)),
+            views: friendlyFormattedNumber(x["views"]),
             lng,
         })
     );
@@ -469,7 +473,7 @@ async function mostArtistsEntertainmentCompany(
         .select(["app_kpop_company.name as name"])
         .where("is_collab", "=", "n")
         .groupBy("app_kpop_group.id_company")
-        .select((eb) => eb.fn.countAll().as("count"))
+        .select((eb) => eb.fn.countAll<number>().as("count"))
         .orderBy("count", "desc")
         .limit(15)
         .execute();
@@ -480,7 +484,7 @@ async function mostArtistsEntertainmentCompany(
             ordinalNum: i18n.internalLocalizer.t(getOrdinalNum(idx + 1), {
                 lng,
             }),
-            num: friendlyFormattedNumber(x["count"] as number),
+            num: friendlyFormattedNumber(x["count"]),
             lng,
         })
     );
@@ -493,7 +497,7 @@ async function mostMusicVideos(lng: LocaleType): Promise<string[]> {
         .select(["app_kpop_group.name as artist_name"])
         .where("vtype", "=", "main")
         .groupBy("id_artist")
-        .select((eb) => eb.fn.count("id_artist").as("count"))
+        .select((eb) => eb.fn.count<number>("id_artist").as("count"))
         .orderBy("count", "desc")
         .limit(25)
         .execute();
@@ -516,7 +520,7 @@ async function yearWithMostDebuts(lng: LocaleType): Promise<string[]> {
         .select("app_kpop_group.formation as formation_year")
         .where("formation", "!=", 0)
         .groupBy("formation")
-        .select((eb) => eb.fn.count("app_kpop_group.id").as("count"))
+        .select((eb) => eb.fn.count<number>("app_kpop_group.id").as("count"))
         .orderBy("count", "desc")
         .limit(15)
         .execute();
@@ -538,7 +542,7 @@ async function yearWithMostReleases(lng: LocaleType): Promise<string[]> {
         .selectFrom("app_kpop")
         .select((eb) => eb.fn("YEAR", ["publishedon"]).as("release_year"))
         .groupBy("release_year")
-        .select((eb) => eb.fn.countAll().as("count"))
+        .select((eb) => eb.fn.countAll<number>().as("count"))
         .where("app_kpop.vtype", "=", "main")
         .orderBy("count", "desc")
         .limit(15)
@@ -562,25 +566,20 @@ async function viewsByGender(lng: LocaleType): Promise<string[]> {
         .innerJoin("app_kpop_group", "app_kpop.id_artist", "app_kpop_group.id")
         .select(["app_kpop_group.members as gender"])
         .groupBy("app_kpop_group.members")
-        .select((eb) => eb.fn.sum("app_kpop.views").as("views"))
+        .select((eb) => eb.fn.sum<number>("app_kpop.views").as("views"))
         .limit(25)
         .execute();
 
     const data: any = {};
     let totalViews = 0;
     for (const genderViews of result) {
-        totalViews += parseInt(genderViews.views as string, 10);
+        totalViews += genderViews.views;
     }
 
     for (const genderViews of result) {
         data[genderViews.gender] = {
-            views: friendlyFormattedNumber(
-                parseInt(genderViews.views as string, 10)
-            ),
-            proportion: (
-                (100 * parseInt(genderViews.views as string, 10)) /
-                totalViews
-            ).toFixed(2),
+            views: friendlyFormattedNumber(genderViews.views),
+            proportion: ((100 * genderViews.views) / totalViews).toFixed(2),
         };
     }
 
@@ -604,7 +603,7 @@ async function mostViewedSoloArtist(lng: LocaleType): Promise<string[]> {
         .innerJoin("app_kpop_group", "app_kpop.id_artist", "app_kpop_group.id")
         .select(["app_kpop_group.name as artist_name"])
         .groupBy("app_kpop.id_artist")
-        .select((eb) => eb.fn.sum("app_kpop.views").as("total_views"))
+        .select((eb) => eb.fn.sum<number>("app_kpop.views").as("total_views"))
         .where("app_kpop_group.issolo", "=", "y")
         .orderBy("total_views", "desc")
         .limit(25)
@@ -616,9 +615,7 @@ async function mostViewedSoloArtist(lng: LocaleType): Promise<string[]> {
             ordinalNum: i18n.internalLocalizer.t(getOrdinalNum(idx + 1), {
                 lng,
             }),
-            views: friendlyFormattedNumber(
-                parseInt(x["total_views"] as string, 10)
-            ),
+            views: friendlyFormattedNumber(x["total_views"]),
             lng,
         })
     );
@@ -630,13 +627,13 @@ async function viewsBySolo(lng: LocaleType): Promise<string[]> {
         .innerJoin("app_kpop_group", "app_kpop.id_artist", "app_kpop_group.id")
         .select(["app_kpop_group.issolo as issolo"])
         .groupBy("issolo")
-        .select((eb) => eb.fn.sum("app_kpop.views").as("views"))
+        .select((eb) => eb.fn.sum<number>("app_kpop.views").as("views"))
         .orderBy("views", "desc")
         .limit(25)
         .execute();
 
-    const groupViews = parseInt(result[0].views as string, 10);
-    const soloViews = parseInt(result[1].views as string, 10);
+    const groupViews = result[0].views;
+    const soloViews = result[1].views;
     const totalViews = groupViews + soloViews;
     const data = {
         group: {
@@ -662,7 +659,7 @@ async function viewsBySolo(lng: LocaleType): Promise<string[]> {
 }
 
 async function songReleaseAnniversaries(lng: LocaleType): Promise<string[]> {
-    const result = await dbContext.kmq2
+    const result = await dbContext.kmq
         .selectFrom("available_songs")
         .select(["song_name_en", "artist_name_en", "link"])
         .select((eb) => eb.fn("YEAR", ["publishedon"]).as("publish_year"))
@@ -687,7 +684,7 @@ async function songReleaseAnniversaries(lng: LocaleType): Promise<string[]> {
 }
 
 async function songGuessRate(lng: LocaleType): Promise<string[]> {
-    const result = await dbContext.kmq2
+    const result = await dbContext.kmq
         .selectFrom("song_metadata")
         .innerJoin(
             "available_songs",
@@ -721,24 +718,22 @@ async function bigThreeDominance(lng: LocaleType): Promise<string[]> {
         .innerJoin("app_kpop_group", "app_kpop.id_artist", "app_kpop_group.id")
         .select(["app_kpop_group.name as artist_name"])
         .groupBy("app_kpop.id_artist")
-        .select((eb) => eb.fn.sum("app_kpop.views").as("total_views"))
+        .select((eb) => eb.fn.sum<number>("app_kpop.views").as("total_views"))
         .where("app_kpop_group.name", "in", ["Blackpink", "Twice", "BTS"])
         .orderBy("total_views", "desc")
         .execute();
 
     const totalViewsResult = await dbContext.kpopVideos
         .selectFrom("app_kpop")
-        .select((eb) => eb.fn.sum("views").as("total_views"))
+        .select((eb) => eb.fn.sum<number>("views").as("total_views"))
         .execute();
 
     const bigThreeViews = result.reduce(
-        (prev, current) => prev + parseInt(current.total_views as string, 10),
+        (prev, current) => prev + current.total_views,
         0
     );
 
-    const proportion =
-        (100 * bigThreeViews) /
-        parseInt(totalViewsResult[0].total_views as string, 10);
+    const proportion = (100 * bigThreeViews) / totalViewsResult[0].total_views;
 
     return [
         i18n.internalLocalizer.t("fact.fun.bigThreeDominance", {
@@ -788,7 +783,7 @@ async function closeBirthdays(lng: LocaleType): Promise<Array<string>> {
 }
 
 async function longestGame(lng: LocaleType): Promise<string[]> {
-    const result = await dbContext.kmq2
+    const result = await dbContext.kmq
         .selectFrom("game_sessions")
         .select([
             "rounds_played",
@@ -820,7 +815,7 @@ async function longestGame(lng: LocaleType): Promise<string[]> {
 }
 
 async function mostGames(lng: LocaleType): Promise<string[]> {
-    const result = await dbContext.kmq2
+    const result = await dbContext.kmq
         .selectFrom("guilds")
         .select(["games_played", "songs_guessed"])
         .orderBy("games_played", "desc")
@@ -843,7 +838,7 @@ async function mostGames(lng: LocaleType): Promise<string[]> {
 }
 
 async function mostCorrectGuessed(lng: LocaleType): Promise<string[]> {
-    const result = await dbContext.kmq2
+    const result = await dbContext.kmq
         .selectFrom("guilds")
         .select(["games_played", "songs_guessed"])
         .orderBy("songs_guessed", "desc")
@@ -866,13 +861,13 @@ async function mostCorrectGuessed(lng: LocaleType): Promise<string[]> {
 }
 
 async function globalTotalGames(lng: LocaleType): Promise<string[]> {
-    const result = await dbContext.kmq2
+    const result = await dbContext.kmq
         .selectFrom("game_sessions")
-        .select((eb) => eb.fn.countAll().as("count"))
+        .select((eb) => eb.fn.countAll<number>().as("count"))
         .execute();
 
     if (result.length === 0) return [];
-    const totalGamesPlayed = result[0].count as number;
+    const totalGamesPlayed = result[0].count;
     return [
         i18n.internalLocalizer.t("fact.kmq.totalGames", {
             totalGamesPlayed: friendlyFormattedNumber(totalGamesPlayed),
@@ -884,13 +879,13 @@ async function globalTotalGames(lng: LocaleType): Promise<string[]> {
 async function recentGameSessions(lng: LocaleType): Promise<string[]> {
     const oneWeeksPriorDate = new Date();
     oneWeeksPriorDate.setDate(oneWeeksPriorDate.getDate() - 7);
-    const result = await dbContext.kmq2
+    const result = await dbContext.kmq
         .selectFrom("game_sessions")
         .where("start_date", ">", oneWeeksPriorDate)
-        .select((eb) => eb.fn.countAll().as("count"))
+        .select((eb) => eb.fn.countAll<number>().as("count"))
         .executeTakeFirstOrThrow();
 
-    const recentSessions = (result!.count || 0) as number;
+    const recentSessions = result!.count || 0;
     return [
         i18n.internalLocalizer.t("fact.kmq.recentSessions", {
             recentSessions: friendlyFormattedNumber(recentSessions),
@@ -902,7 +897,7 @@ async function recentGameSessions(lng: LocaleType): Promise<string[]> {
 async function recentGameRounds(lng: LocaleType): Promise<string[]> {
     const oneWeekPriorDate = new Date();
     oneWeekPriorDate.setDate(oneWeekPriorDate.getDate() - 7);
-    const result = await dbContext.kmq2
+    const result = await dbContext.kmq
         .selectFrom("game_sessions")
         .where("start_date", ">", oneWeekPriorDate)
         .select((eb) => eb.fn.sum<number>("rounds_played").as("count"))
@@ -923,13 +918,13 @@ async function recentUniquePlayers(lng: LocaleType): Promise<string[]> {
         intervals.map(async (interval): Promise<string> => {
             const priorDate = new Date();
             priorDate.setDate(priorDate.getDate() - interval);
-            const result = await dbContext.kmq2
+            const result = await dbContext.kmq
                 .selectFrom("player_stats")
                 .where("last_active", ">", priorDate)
-                .select((eb) => eb.fn.countAll().as("count"))
+                .select((eb) => eb.fn.countAll<number>().as("count"))
                 .executeTakeFirst();
 
-            const recentActivePlayers = (result!.count || 0) as number;
+            const recentActivePlayers = result!.count || 0;
             const fact = i18n.internalLocalizer.t("fact.kmq.uniquePlayers", {
                 recentActivePlayers:
                     friendlyFormattedNumber(recentActivePlayers),
@@ -946,7 +941,7 @@ async function recentUniquePlayers(lng: LocaleType): Promise<string[]> {
 }
 
 async function mostSongsGuessedPlayer(lng: LocaleType): Promise<string[]> {
-    const result = await dbContext.kmq2
+    const result = await dbContext.kmq
         .selectFrom("player_stats")
         .select(["songs_guessed"])
         .orderBy("songs_guessed", "desc")
@@ -965,7 +960,7 @@ async function mostSongsGuessedPlayer(lng: LocaleType): Promise<string[]> {
 }
 
 async function mostGamesPlayedPlayer(lng: LocaleType): Promise<string[]> {
-    const result = await dbContext.kmq2
+    const result = await dbContext.kmq
         .selectFrom("player_stats")
         .select(["games_played"])
         .orderBy("games_played", "desc")
@@ -1112,7 +1107,7 @@ async function recentGaonWeekly(lng: LocaleType): Promise<Array<string>> {
 }
 
 async function topLeveledPlayers(lng: LocaleType): Promise<Array<string>> {
-    const result = await dbContext.kmq2
+    const result = await dbContext.kmq
         .selectFrom("player_stats")
         .select(["songs_guessed", "games_played", "level"])
         .orderBy("exp", "desc")

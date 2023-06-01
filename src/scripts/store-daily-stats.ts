@@ -7,25 +7,25 @@ const storeDailyStats = async (serverCount: number): Promise<void> => {
     const dateThreshold = new Date();
     dateThreshold.setHours(dateThreshold.getHours() - 24);
 
-    const recentGameSessions = (await dbContext.kmq2
+    const recentGameSessions = (await dbContext.kmq
         .selectFrom("game_sessions")
         .where("start_date", ">", dateThreshold)
         .select((eb) => eb.fn.countAll<number>().as("count"))
         .executeTakeFirst())!.count;
 
-    const recentRounds = (await dbContext.kmq2
+    const recentRounds = (await dbContext.kmq
         .selectFrom("game_sessions")
         .where("start_date", ">", dateThreshold)
         .select((eb) => eb.fn.sum<number>("rounds_played").as("total"))
         .executeTakeFirst())!.total;
 
-    const recentPlayers = (await dbContext.kmq2
+    const recentPlayers = (await dbContext.kmq
         .selectFrom("player_stats")
         .where("last_active", ">", dateThreshold)
         .select((eb) => eb.fn.countAll<number>().as("count"))
         .executeTakeFirst())!.count;
 
-    const newPlayers = (await dbContext.kmq2
+    const newPlayers = (await dbContext.kmq
         .selectFrom("player_stats")
         .where("first_play", ">=", dateThreshold)
         .select((eb) => eb.fn.countAll<number>().as("count"))
@@ -33,7 +33,7 @@ const storeDailyStats = async (serverCount: number): Promise<void> => {
 
     logger.info("Inserting today's stats into db...");
 
-    await dbContext.kmq2
+    await dbContext.kmq
         .insertInto("daily_stats")
         .values([
             {

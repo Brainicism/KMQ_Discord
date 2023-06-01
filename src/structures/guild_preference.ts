@@ -266,7 +266,7 @@ export default class GuildPreference {
                 return GuildPreference.guildPreferencesCache[guildID];
             }
 
-            const guildPreferences = await dbContext.kmq2
+            const guildPreferences = await dbContext.kmq
                 .selectFrom("guilds")
                 .select("guild_id")
                 .where("guild_id", "=", guildID)
@@ -274,7 +274,7 @@ export default class GuildPreference {
 
             if (!guildPreferences) {
                 const guildPreference = GuildPreference.fromGuild(guildID);
-                await dbContext.kmq2
+                await dbContext.kmq
                     .insertInto("guilds")
                     .values({ guild_id: guildID, join_date: new Date() })
                     .execute();
@@ -282,7 +282,7 @@ export default class GuildPreference {
             }
 
             const gameOptionPairs = (
-                await dbContext.kmq2
+                await dbContext.kmq
                     .selectFrom("game_options")
                     .select(["option_name", "option_value"])
                     .where("guild_id", "=", guildID)
@@ -330,7 +330,7 @@ export default class GuildPreference {
     /** @returns a list of saved game option presets by name */
     async listPresets(): Promise<string[]> {
         const presets = (
-            await dbContext.kmq2
+            await dbContext.kmq
                 .selectFrom("game_option_presets")
                 .select(["preset_name"])
                 .where("guild_id", "=", this.guildID)
@@ -352,7 +352,7 @@ export default class GuildPreference {
             return null;
         }
 
-        await dbContext.kmq2
+        await dbContext.kmq
             .deleteFrom("game_option_presets")
             .where("guild_id", "=", this.guildID)
             .where("preset_name", "=", presetName)
@@ -387,7 +387,7 @@ export default class GuildPreference {
                 option_value: JSON.stringify(oldUUID ?? `KMQ-${uuid.v4()}`),
             });
 
-            await dbContext.kmq2.transaction().execute(async (trx) => {
+            await dbContext.kmq.transaction().execute(async (trx) => {
                 await trx
                     .insertInto("game_option_presets")
                     .values(presetOptions)
@@ -409,7 +409,7 @@ export default class GuildPreference {
         guildID: string
     ): Promise<[boolean, Array<GameOption>]> {
         const preset: { [x: string]: any } = (
-            await dbContext.kmq2
+            await dbContext.kmq
                 .selectFrom("game_option_presets")
                 .select(["option_name", "option_value"])
                 .where("guild_id", "=", guildID)
@@ -456,7 +456,7 @@ export default class GuildPreference {
      * @returns whether the UUID of the given preset or null if the preset doesn't exist
      */
     async getPresetUUID(presetName: string): Promise<string | null> {
-        const presetID = await dbContext.kmq2
+        const presetID = await dbContext.kmq
             .selectFrom("game_option_presets")
             .select(["option_value"])
             .where("guild_id", "=", this.guildID)
@@ -953,7 +953,7 @@ export default class GuildPreference {
             });
         }
 
-        await dbContext.kmq2.transaction().execute(async (trx) => {
+        await dbContext.kmq.transaction().execute(async (trx) => {
             await Promise.all(
                 updatedOptions.map((x) =>
                     trx

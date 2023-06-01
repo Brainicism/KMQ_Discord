@@ -6,7 +6,7 @@ import type QueriedSong from "../interfaces/queried_song";
 const logger = new IPCLogger("get-unclean-song-names");
 
 (async () => {
-    const songs: Array<QueriedSong> = await dbContext.kmq2
+    const songs: Array<QueriedSong> = await dbContext.kmq
         .selectFrom("available_songs")
         .select(SongSelector.QueriedSongFields)
         .execute();

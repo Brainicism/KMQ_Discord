@@ -271,7 +271,7 @@ export default class SongSelector {
     ): Promise<{ songs: Set<QueriedSong>; countBeforeLimit: number }> {
         const gameOptions = guildPreference.gameOptions;
         let result: Array<QueriedSong> = [];
-        let queryBuilder = dbContext.kmq2
+        let queryBuilder = dbContext.kmq
             .selectFrom("available_songs")
             .select(SongSelector.QueriedSongFields);
 

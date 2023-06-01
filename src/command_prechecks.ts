@@ -248,7 +248,7 @@ export default class CommandPrechecks {
             return true;
         }
 
-        const isModerator = await dbContext.kmq2
+        const isModerator = await dbContext.kmq
             .selectFrom("competition_moderators")
             .select("user_id")
             .where("guild_id", "=", gameSession.guildID)

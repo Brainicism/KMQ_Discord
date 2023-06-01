@@ -1124,7 +1124,7 @@ export async function getGameInfoMessage(
     guildID: string
 ): Promise<GameInfoMessage | null> {
     const endGameMessage: GameInfoMessage = chooseWeightedRandom(
-        await dbContext.kmq2
+        await dbContext.kmq
             .selectFrom("game_messages")
             .select(["title", "message", "weight"])
             .execute()

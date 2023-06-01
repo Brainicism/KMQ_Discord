@@ -5,7 +5,7 @@ import type { DatabaseContext } from "../database_context";
 const logger = new IPCLogger("json-presets-to-new-format");
 
 async function exportJsonPresetsToNewTable(db: DatabaseContext): Promise<void> {
-    const jsonPresets = await db.kmq2
+    const jsonPresets = await db.kmq
         .selectFrom("game_option_presets_json")
         .select(["guild_id", "preset_name", "game_options"])
         .execute();
@@ -23,7 +23,7 @@ async function exportJsonPresetsToNewTable(db: DatabaseContext): Promise<void> {
                     option_value: JSON.stringify(option[1]),
                 }));
 
-                await db.kmq2.transaction().execute(async (trx) => {
+                await db.kmq.transaction().execute(async (trx) => {
                     await trx
                         .insertInto("game_option_presets")
                         .values(presetOptions)

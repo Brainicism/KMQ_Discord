@@ -79,7 +79,7 @@ async function songThresholdReached(db: DatabaseContext): Promise<boolean> {
 
     return (
         (
-            await db.kmq2
+            await db.kmq
                 .selectFrom("available_songs")
                 .select((eb) => eb.fn.countAll<number>().as("count"))
                 .executeTakeFirstOrThrow()
@@ -105,7 +105,7 @@ export function importCachedDump(): void {
 export async function performMigrations(db: DatabaseContext): Promise<void> {
     logger.info("Performing migrations...");
     const migrator = new Migrator({
-        db: db.kmq2,
+        db: db.kmq,
         provider: new FileMigrationProvider({
             fs: fsp,
             path,
@@ -154,7 +154,7 @@ export async function performMigrations(db: DatabaseContext): Promise<void> {
 export async function performMigrationDown(db: DatabaseContext): Promise<void> {
     logger.info("Performing migrations...");
     const migrator = new Migrator({
-        db: db.kmq2,
+        db: db.kmq,
         provider: new FileMigrationProvider({
             fs: fsp,
             path,
@@ -212,7 +212,7 @@ async function bootstrapDatabases(): Promise<void> {
     }
 
     logger.info("Cleaning up stale data");
-    await db.kmq2
+    await db.kmq
         .deleteFrom("system_stats")
         .where("date", "<", sql`DATE(NOW() - INTERVAL 3 MONTH)`)
         .execute();

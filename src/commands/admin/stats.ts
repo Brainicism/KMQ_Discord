@@ -87,65 +87,63 @@ export default class StatsCommand implements BaseCommand {
         dateThreshold.setHours(dateThreshold.getHours() - 24);
         const recentGameSessions =
             (
-                await dbContext.kmq2
+                await dbContext.kmq
                     .selectFrom("game_sessions")
-                    .select((eb) => eb.fn.countAll().as("count"))
+                    .select((eb) => eb.fn.countAll<number>().as("count"))
                     .where("start_date", ">", dateThreshold)
                     .executeTakeFirst()
             )?.count || 0;
 
         const totalGameSessions =
             (
-                await dbContext.kmq2
+                await dbContext.kmq
                     .selectFrom("game_sessions")
-                    .select((eb) => eb.fn.countAll().as("count"))
+                    .select((eb) => eb.fn.countAll<number>().as("count"))
                     .executeTakeFirst()
             )?.count || 0;
 
         const recentGameRounds =
-            parseInt(
-                (
-                    await dbContext.kmq2
-                        .selectFrom("game_sessions")
-                        .where("start_date", ">", dateThreshold)
-                        .select((eb) => eb.fn.sum("rounds_played").as("total"))
-                        .executeTakeFirst()
-                )?.total as string,
-                10
-            ) || 0;
+            (
+                await dbContext.kmq
+                    .selectFrom("game_sessions")
+                    .where("start_date", ">", dateThreshold)
+                    .select((eb) =>
+                        eb.fn.sum<number>("rounds_played").as("total")
+                    )
+                    .executeTakeFirst()
+            )?.total || 0;
 
         const totalGameRounds =
-            parseInt(
-                (
-                    await dbContext.kmq2
-                        .selectFrom("game_sessions")
-                        .select((eb) => eb.fn.sum("rounds_played").as("total"))
-                        .executeTakeFirst()
-                )?.total as string,
-                10
-            ) || 0;
+            (
+                await dbContext.kmq
+                    .selectFrom("game_sessions")
+                    .select((eb) =>
+                        eb.fn.sum<number>("rounds_played").as("total")
+                    )
+                    .executeTakeFirst()
+            )?.total || 0;
 
         const recentPlayers =
-            ((
-                await dbContext.kmq2
+            (
+                await dbContext.kmq
                     .selectFrom("player_stats")
                     .where("last_active", ">", dateThreshold)
-                    .select((eb) => eb.fn.countAll().as("count"))
+                    .select((eb) => eb.fn.countAll<number>().as("count"))
                     .executeTakeFirst()
-            )?.count as number) || 0;
+            )?.count || 0;
 
         const totalPlayers =
-            ((
-                await dbContext.kmq2
+            (
+                await dbContext.kmq
                     .selectFrom("player_stats")
-                    .select((eb) => eb.fn.countAll().as("count"))
+                    .select((eb) => eb.fn.countAll<number>().as("count"))
                     .where("exp", ">", 0)
                     .executeTakeFirst()
-            )?.count as number) || 0;
+            )?.count || 0;
 
         const latestAvailableSong = new Date(
             (
-                await dbContext.kmq2
+                await dbContext.kmq
                     .selectFrom("available_songs")
                     .select(["publishedon"])
                     .orderBy("publishedon", "desc")
@@ -154,14 +152,11 @@ export default class StatsCommand implements BaseCommand {
         );
 
         const mysqlLatency = await measureExecutionTime(
-            dbContext.kmq2
-                .selectFrom("available_songs")
-                .select(sql`1`.as("x"))
-                .execute()
+            sql`SELECT 1`.execute(dbContext.kmq)
         );
 
         const requestLatency = (
-            await dbContext.kmq2
+            await dbContext.kmq
                 .selectFrom("system_stats")
                 .select(["stat_value"])
                 .where("stat_name", "=", "request_latency")

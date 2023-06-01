@@ -23,7 +23,7 @@ async function cacheSongDuration(db: DatabaseContext): Promise<void> {
     for (const fileName of files) {
         const vlink = fileName.slice(0, -4);
         if (
-            !(await db.kmq2
+            !(await db.kmq
                 .selectFrom("cached_song_duration")
                 .select("vlink")
                 .where("vlink", "=", vlink)
@@ -34,7 +34,7 @@ async function cacheSongDuration(db: DatabaseContext): Promise<void> {
                 path.join(process.env.SONG_DOWNLOAD_DIR as string, fileName)
             );
 
-            await db.kmq2
+            await db.kmq
                 .insertInto("cached_song_duration")
                 .values({
                     vlink,

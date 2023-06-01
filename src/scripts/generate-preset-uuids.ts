@@ -6,14 +6,14 @@ const logger = new IPCLogger("generate_preset_uuids");
 
 async function generatePresetUUIDs(): Promise<void> {
     const db = getNewConnection();
-    const presetsWithUUID = await db.kmq2
+    const presetsWithUUID = await db.kmq
         .selectFrom("game_option_presets")
         .select(["guild_id", "preset_name"])
         .distinct()
         .where("option_name", "=", "uuid")
         .execute();
 
-    const presetsWithoutUUID = await db.kmq2
+    const presetsWithoutUUID = await db.kmq
         .selectFrom("game_option_presets")
         .select(["guild_id", "preset_name"])
         .distinct()
@@ -40,7 +40,7 @@ async function generatePresetUUIDs(): Promise<void> {
 
     await Promise.allSettled(
         presetsWithoutUUID.map(async (preset) => {
-            await db.kmq2
+            await db.kmq
                 .insertInto("game_option_presets")
                 .values({
                     guild_id: preset.guild_id,

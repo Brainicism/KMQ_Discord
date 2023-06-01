@@ -107,7 +107,7 @@ function registerGlobalIntervals(fleet: Fleet): void {
     // every minute
     schedule.scheduleJob("* * * * *", async () => {
         if (await isPrimaryInstance()) {
-            await dbContext.kmq2
+            await dbContext.kmq
                 .insertInto("system_stats")
                 .values({
                     stat_name: "request_latency",
