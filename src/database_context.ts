@@ -3,7 +3,9 @@ import { config } from "dotenv";
 import { createPool } from "mysql2";
 import { resolve } from "path";
 import EnvType from "./enums/env_type";
-import type { InfoSchemaDB, KmqDB, KpopVideosDB } from "kysely-codegen";
+import type { InfoSchemaDB } from "./typings/info_schema_db";
+import type { KmqDB } from "./typings/kmq_db";
+import type { KpopVideosDB } from "./typings/kpop_videos_db";
 
 config({ path: resolve(__dirname, "../.env") });
 

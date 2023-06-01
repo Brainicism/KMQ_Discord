@@ -205,6 +205,13 @@ export interface TopGgUserVotes {
 }
 
 export interface KmqDB {
+    "kpop_videos.app_kpop": AppKpop;
+    "kpop_videos.app_kpop_agrelation": AppKpopAgrelation;
+    "kpop_videos.app_kpop_company": AppKpopCompany;
+    "kpop_videos.app_kpop_gaondigi": AppKpopGaondigi;
+    "kpop_videos.app_kpop_group": AppKpopGroup;
+    "kpop_videos.app_kpop_ms": AppKpopMs;
+    "kpop_videos.app_upcoming": AppUpcoming;
     available_songs: AvailableSongs;
     badges: Badges;
     badges_players: BadgesPlayers;

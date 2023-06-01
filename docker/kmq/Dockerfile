@@ -29,7 +29,6 @@ COPY sql/ sql/
 COPY templates/ templates/
 
 COPY src/ src/
-RUN CACHED=true bash src/scripts/prepare-kysely-schema.sh
 RUN npx tsc
 
 # remove dev dependencies
