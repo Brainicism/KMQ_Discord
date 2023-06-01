@@ -551,10 +551,11 @@ export default class LeaderboardCommand implements BaseCommand {
                 ].scoreboard.getPlayerIDs();
 
             const gamePlayers = (
-                await dbContext
-                    .kmq(dbTable)
+                await dbContext.kmq2
+                    .selectFrom(dbTable)
                     .select("player_id")
-                    .whereIn("player_id", participantIDs)
+                    .where("player_id", "in", participantIDs)
+                    .execute()
             ).map((x) => x.player_id);
 
             topPlayersQuery = topPlayersQuery.where(

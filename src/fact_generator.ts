@@ -888,10 +888,9 @@ async function recentGameSessions(lng: LocaleType): Promise<string[]> {
         .selectFrom("game_sessions")
         .where("start_date", ">", oneWeeksPriorDate)
         .select((eb) => eb.fn.countAll().as("count"))
-        .execute();
+        .executeTakeFirstOrThrow();
 
-    if (result.length === 0) return [];
-    const recentSessions = result[0].count as number;
+    const recentSessions = (result!.count || 0) as number;
     return [
         i18n.internalLocalizer.t("fact.kmq.recentSessions", {
             recentSessions: friendlyFormattedNumber(recentSessions),
@@ -906,11 +905,10 @@ async function recentGameRounds(lng: LocaleType): Promise<string[]> {
     const result = await dbContext.kmq2
         .selectFrom("game_sessions")
         .where("start_date", ">", oneWeekPriorDate)
-        .select((eb) => eb.fn.sum("rounds_played").as("count"))
-        .execute();
+        .select((eb) => eb.fn.sum<number>("rounds_played").as("count"))
+        .executeTakeFirst();
 
-    if (result.length === 0) return [];
-    const recentGameCount = result[0].count as number;
+    const recentGameCount = (result!.count || 0) as number;
     return [
         i18n.internalLocalizer.t("fact.kmq.recentRounds", {
             recentGameCount: friendlyFormattedNumber(recentGameCount),
@@ -929,9 +927,9 @@ async function recentUniquePlayers(lng: LocaleType): Promise<string[]> {
                 .selectFrom("player_stats")
                 .where("last_active", ">", priorDate)
                 .select((eb) => eb.fn.countAll().as("count"))
-                .execute();
+                .executeTakeFirst();
 
-            const recentActivePlayers = result[0].count as number;
+            const recentActivePlayers = (result!.count || 0) as number;
             const fact = i18n.internalLocalizer.t("fact.kmq.uniquePlayers", {
                 recentActivePlayers:
                     friendlyFormattedNumber(recentActivePlayers),
