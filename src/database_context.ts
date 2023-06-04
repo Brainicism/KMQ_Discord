@@ -21,6 +21,7 @@ function generateKysleyContext<T>(
                 password: process.env.DB_PASS,
                 database: databaseName,
                 connectionLimit: maxPoolSize,
+                decimalNumbers: true,
             }),
         }),
     });
