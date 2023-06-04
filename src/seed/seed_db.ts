@@ -450,9 +450,6 @@ async function validateSqlDump(
         await validateDaisukiTableSchema(db, frozenSchema);
     }
 
-    // await sql`DROP DATABASE IF EXISTS kpop_videos_validation;`.execute(
-    //     db.agnostic
-    // );
     logger.info("SQL dump validated successfully");
 }
 
