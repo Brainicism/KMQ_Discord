@@ -150,7 +150,9 @@ function serverShutdown(
 
                 // promote standby to primary
                 console.log("Promoting standby to primary...");
-                cp.execSync(`docker exec ${appName} /bin/sh -c "rm standby"`);
+                cp.execSync(
+                    `docker exec ${appName} /bin/sh -c "mv standby promoted"`
+                );
             }, restartMinutes * 1000 * 60);
         }
     });
