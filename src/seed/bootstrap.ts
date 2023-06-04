@@ -1,5 +1,5 @@
 import { IPCLogger } from "../logger";
-import { STANDBY_COOKIE, STATUS_COOKIE } from "../constants";
+import { PROMOTED_COOKIE, STANDBY_COOKIE, STATUS_COOKIE } from "../constants";
 import { config } from "dotenv";
 import {
     databaseExists,
@@ -9,6 +9,7 @@ import {
     updateKpopDatabase,
 } from "./seed_db";
 import { getNewConnection } from "../database_context";
+import { pathExists } from "../helpers/utils";
 import EnvType from "../enums/env_type";
 import KmqConfiguration from "../kmq_configuration";
 import downloadAndConvertSongs from "../scripts/download-new-songs";
@@ -155,8 +156,11 @@ async function bootstrapDatabases(): Promise<void> {
         }
 
         if (process.env.IS_STANDBY === "true") {
-            logger.info("Preparing standby instance");
-            await fs.promises.writeFile(STANDBY_COOKIE, "starting");
+            const alreadyPromoted = await pathExists(PROMOTED_COOKIE);
+            if (!alreadyPromoted) {
+                logger.info("Preparing standby instance");
+                await fs.promises.writeFile(STANDBY_COOKIE, "starting");
+            }
         }
 
         await fs.promises.writeFile(STATUS_COOKIE, "starting");
