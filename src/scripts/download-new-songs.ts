@@ -255,7 +255,6 @@ async function getSongsFromDb(databaseContext: DatabaseContext): Promise<any> {
                     "app_kpop_group.name as artistName",
                     "vlink as youtubeLink",
                     "app_kpop.views as views",
-                    "app_kpop.tags as tags",
                 ])
                 .select(
                     sql`RANK() OVER(PARTITION BY app_kpop.id_artist ORDER BY views DESC)`.as(

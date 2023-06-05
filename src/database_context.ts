@@ -21,7 +21,10 @@ function generateKysleyContext<T>(
                 password: process.env.DB_PASS,
                 database: databaseName,
                 connectionLimit: maxPoolSize,
+                charset: "utf8mb4",
+                port: parseInt(process.env.DB_PORT as string, 10),
                 decimalNumbers: true,
+                multipleStatements: true,
             }),
         }),
     });

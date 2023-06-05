@@ -60,8 +60,7 @@ function hasRequiredEnvironmentVariables(): boolean {
 }
 
 async function kmqDatabaseExists(db: DatabaseContext): Promise<boolean> {
-    const kmqExists = await databaseExists(db, "kmq");
-    return kmqExists;
+    return databaseExists(db, "kmq");
 }
 
 async function kpopDataDatabaseExists(db: DatabaseContext): Promise<boolean> {

@@ -567,6 +567,7 @@ async function viewsByGender(lng: LocaleType): Promise<string[]> {
         .select(["app_kpop_group.members as gender"])
         .groupBy("app_kpop_group.members")
         .select((eb) => eb.fn.sum<number>("app_kpop.views").as("views"))
+        .orderBy("views", "desc")
         .limit(25)
         .execute();
 
@@ -694,6 +695,7 @@ async function songGuessRate(lng: LocaleType): Promise<string[]> {
         .select(["song_name_en", "artist_name_en", "link", "rounds_played"])
         .select(sql`ROUND(correct_guesses/rounds_played * 100, 2)`.as("c"))
         .where("rounds_played", ">", 2500)
+        .orderBy(sql`RAND()`)
         .limit(100)
         .execute();
 
