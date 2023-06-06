@@ -5,7 +5,11 @@ import type { DatabaseContext } from "../database_context";
 const logger = new IPCLogger("json-presets-to-new-format");
 
 async function exportJsonPresetsToNewTable(db: DatabaseContext): Promise<void> {
-    const jsonPresets = await db.kmq("game_option_presets_json").select("*");
+    const jsonPresets = await db.kmq
+        .selectFrom("game_option_presets_json")
+        .select(["guild_id", "preset_name", "game_options"])
+        .execute();
+
     await Promise.all(
         jsonPresets.map(async (preset) => {
             const guildID = preset["guild_id"];
@@ -19,11 +23,11 @@ async function exportJsonPresetsToNewTable(db: DatabaseContext): Promise<void> {
                     option_value: JSON.stringify(option[1]),
                 }));
 
-                await db.kmq.transaction(async (trx) => {
-                    await db
-                        .kmq("game_option_presets")
-                        .insert(presetOptions)
-                        .transacting(trx);
+                await db.kmq.transaction().execute(async (trx) => {
+                    await trx
+                        .insertInto("game_option_presets")
+                        .values(presetOptions)
+                        .execute();
                 });
             } catch (err) {
                 logger.error(

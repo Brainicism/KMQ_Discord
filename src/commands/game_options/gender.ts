@@ -1,5 +1,6 @@
 import { IPCLogger } from "../../logger";
 import { OptionAction } from "../../constants";
+import { availableGenders } from "../../enums/option_types/gender";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -9,13 +10,13 @@ import {
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
-import Gender from "../../enums/option_types/gender";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
+import type { GenderModeOptions } from "../../enums/option_types/gender";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -35,17 +36,17 @@ export default class GenderCommand implements BaseCommand {
             {
                 name: "gender_1",
                 type: "enum" as const,
-                enums: Object.values(Gender),
+                enums: Object.values(availableGenders),
             },
             {
                 name: "gender_2",
                 type: "enum" as const,
-                enums: Object.values(Gender).slice(0, 3),
+                enums: Object.values(availableGenders).slice(0, 3),
             },
             {
                 name: "gender_3",
                 type: "enum" as const,
-                enums: Object.values(Gender).slice(0, 3),
+                enums: Object.values(availableGenders).slice(0, 3),
             },
         ],
     };
@@ -56,9 +57,9 @@ export default class GenderCommand implements BaseCommand {
             guildID,
             "command.gender.help.description",
             {
-                male: `\`${Gender.MALE}\``,
-                female: `\`${Gender.FEMALE}\``,
-                coed: `\`${Gender.COED}\``,
+                male: "`male`",
+                female: "`female`",
+                coed: "`coed`",
                 genderAlternating: "`/gender alternating`",
             }
         ),
@@ -137,10 +138,9 @@ export default class GenderCommand implements BaseCommand {
                         },
                         type: Eris.Constants.ApplicationCommandOptionTypes
                             .STRING,
-                        choices: Object.values(Gender)
+                        choices: Object.values(availableGenders)
                             .filter(
-                                (gender) =>
-                                    x === 0 || gender !== Gender.ALTERNATING
+                                (gender) => x === 0 || gender !== "alternating"
                             )
                             .map((gender) => ({
                                 name: gender,
@@ -172,7 +172,9 @@ export default class GenderCommand implements BaseCommand {
     ];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const selectedGenders = parsedMessage.components as Array<Gender>;
+        const selectedGenders =
+            parsedMessage.components as Array<GenderModeOptions>;
+
         await GenderCommand.updateOption(
             MessageContext.fromMessage(message),
             selectedGenders,
@@ -182,7 +184,7 @@ export default class GenderCommand implements BaseCommand {
 
     static async updateOption(
         messageContext: MessageContext,
-        selectedGenders: Array<Gender>,
+        selectedGenders: Array<GenderModeOptions>,
         interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
@@ -209,13 +211,13 @@ export default class GenderCommand implements BaseCommand {
         }
 
         // ALTERNATING is mutually exclusive
-        if (selectedGenders.includes(Gender.ALTERNATING)) {
-            selectedGenders = [Gender.ALTERNATING];
+        if (selectedGenders.includes("alternating")) {
+            selectedGenders = ["alternating"];
         }
 
         if (guildPreference.isGroupsMode() && selectedGenders.length >= 1) {
             // Incompatibility between groups and gender doesn't exist in GENDER.ALTERNATING
-            if (selectedGenders[0] !== Gender.ALTERNATING) {
+            if (selectedGenders[0] !== "alternating") {
                 logger.warn(
                     `${getDebugLogHeader(
                         messageContext
@@ -245,7 +247,7 @@ export default class GenderCommand implements BaseCommand {
             }
         }
 
-        if (selectedGenders[0] === Gender.ALTERNATING) {
+        if (selectedGenders[0] === "alternating") {
             if (
                 guildPreference.isGroupsMode() &&
                 guildPreference.getGroupIDs().length === 1
@@ -307,7 +309,7 @@ export default class GenderCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
-        let selectedGenders: Array<Gender>;
+        let selectedGenders: Array<GenderModeOptions>;
 
         const action = interactionName as OptionAction;
         if (action === OptionAction.RESET) {

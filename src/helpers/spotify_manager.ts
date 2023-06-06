@@ -362,67 +362,94 @@ export default class SpotifyManager {
                 songNames.push(song.name);
             }
 
-            const query = dbContext
-                .kmq("available_songs")
-                .join("kpop_videos.app_kpop_group", function () {
-                    this.on(
-                        "available_songs.id_artist",
-                        "=",
-                        "kpop_videos.app_kpop_group.id"
-                    );
+            const query = dbContext.kmq
+                .selectFrom("available_songs")
+                .innerJoin("kpop_videos.app_kpop_group", (jb) =>
+                    jb.on(({ or, cmpr, ref }) =>
+                        or([
+                            cmpr(
+                                "kpop_videos.app_kpop_group.id",
+                                "=",
+                                ref("available_songs.id_artist")
+                            ),
+                            cmpr(
+                                "kpop_videos.app_kpop_group.id",
+                                "=",
+                                ref("available_songs.id_parent_artist")
+                            ),
+                        ])
+                    )
+                )
+                .select(SongSelector.QueriedSongFields)
+                .where(({ cmpr, or }) =>
+                    or(
+                        songNames.map((songName) =>
+                            cmpr(
+                                "available_songs.clean_song_name_alpha_numeric",
+                                "like",
+                                songName.replace(/[^0-9a-z]/gi, "")
+                            )
+                        )
+                    )
+                )
+                .where(({ or, cmpr, and }) => {
+                    const expressions = [
+                        cmpr(
+                            "available_songs.original_artist_name_en",
+                            "like",
+                            song.artists[0]
+                        ),
+                        and([
+                            cmpr(
+                                "available_songs.original_artist_name_en",
+                                "like",
+                                "%+%"
+                            ),
+                            cmpr(
+                                "available_songs.original_artist_name_en",
+                                "like",
+                                `%${song.artists[0]}%`
+                            ),
+                        ]),
+                        cmpr(
+                            "available_songs.previous_name_en",
+                            "like",
+                            song.artists[0]
+                        ),
+                        cmpr("artist_aliases", "like", `%${song.artists[0]}%`),
+                    ];
 
-                    this.orOn(
-                        "available_songs.id_parent_artist",
-                        "=",
-                        "kpop_videos.app_kpop_group.id"
-                    );
-                })
-                .select(SongSelector.getQueriedSongFields())
-                .where((qb) => {
-                    for (const songName of songNames) {
-                        // compare with non-alphanumeric characters removed
-                        qb = qb.orWhereRaw(
-                            "available_songs.clean_song_name_alpha_numeric LIKE ?",
-                            [songName.replace(/[^0-9a-z]/gi, "")]
+                    if (aliasIDs.length) {
+                        expressions.push(
+                            ...[
+                                cmpr("id_parentgroup", "in", aliasIDs),
+                                cmpr("id_artist", "in", aliasIDs),
+                                cmpr("id_parent_artist", "in", aliasIDs),
+                            ]
                         );
                     }
 
-                    return qb;
+                    return or(expressions);
                 })
-                .andWhere((qb) => {
-                    qb.whereRaw(
-                        "available_songs.original_artist_name_en LIKE ?",
-                        [song.artists[0]]
-                    )
-                        .orWhere((q) => {
-                            q.whereILike(
-                                "available_songs.original_artist_name_en",
-                                "%+%"
-                            ).andWhereILike(
-                                "available_songs.original_artist_name_en",
-                                `%${song.artists[0]}%`
-                            );
-                        })
-                        .orWhereRaw("available_songs.previous_name_en LIKE ?", [
-                            song.artists[0],
-                        ])
-                        .orWhereIn("id_artist", aliasIDs)
-                        .orWhereILike("artist_aliases", `%${song.artists[0]}%`)
-                        .orWhereIn("id_parentgroup", aliasIDs)
-                        .orWhereIn("id_parent_artist", aliasIDs);
-                })
-                .andWhere(
+
+                .where(
                     "rank",
                     "<=",
                     isPremium
-                        ? (process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST as string)
-                        : (process.env.AUDIO_SONGS_PER_ARTIST as string)
+                        ? parseInt(
+                              process.env
+                                  .PREMIUM_AUDIO_SONGS_PER_ARTIST as string,
+                              10
+                          )
+                        : parseInt(
+                              process.env.AUDIO_SONGS_PER_ARTIST as string,
+                              10
+                          )
                 )
-                .orderByRaw("CHAR_LENGTH(tags) ASC")
-                .orderBy("views", "DESC")
-                .first();
+                .orderBy((eb) => eb.fn("CHAR_LENGTH", ["tags"]), "asc")
+                .orderBy("views", "desc");
 
-            const result = (await query) as QueriedSong;
+            const result = (await query.executeTakeFirst()) as QueriedSong;
 
             if (result) {
                 resolve(result);

@@ -1,5 +1,6 @@
 import { IPCLogger } from "./logger";
 import { measureExecutionTime, standardDateFormat } from "./helpers/utils";
+import { sql } from "kysely";
 import { userVoted } from "./helpers/bot_listing_manager";
 import _ from "lodash";
 import ejs from "ejs";
@@ -202,7 +203,7 @@ export default class KmqWebServer {
             }
 
             const databaseLatency = await measureExecutionTime(
-                this.dbContext.kmq.raw("SELECT 1;")
+                sql`1`.execute(this.dbContext.agnostic)
             );
 
             let databaseLatencyHealthIndicator: HealthIndicator;

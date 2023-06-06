@@ -8,6 +8,7 @@ import {
     normalizePunctuationInName,
 } from "../structures/game_round";
 import { containsHangul, md5Hash } from "./utils";
+import { sql } from "kysely";
 import AnswerType from "../enums/option_types/answer_type";
 import GuessModeType from "../enums/option_types/guess_mode_type";
 import LocaleType from "../enums/locale_type";
@@ -15,8 +16,8 @@ import SongSelector from "../structures/song_selector";
 import State from "../state";
 import _ from "lodash";
 import dbContext from "../database_context";
+import type { AvailableGenders } from "../enums/option_types/gender";
 import type { PlaylistMetadata } from "./spotify_manager";
-import type Gender from "../enums/option_types/gender";
 import type GuildPreference from "../structures/guild_preference";
 import type MatchedArtist from "../interfaces/matched_artist";
 import type Patron from "../interfaces/patron";
@@ -122,20 +123,23 @@ export async function cleanupInactiveGameSessions(): Promise<void> {
  * @returns whether the player has bonus active
  */
 export async function userBonusIsActive(userId: string): Promise<boolean> {
-    return !!(await dbContext
-        .kmq("top_gg_user_votes")
+    return !!(await dbContext.kmq
+        .selectFrom("top_gg_user_votes")
+        .select("buff_expiry_date")
         .where("user_id", "=", userId)
         .where("buff_expiry_date", ">", new Date())
-        .first());
+        .executeTakeFirst());
 }
 
 /**
  * @returns whether the player has bonus active
  */
 export async function activeBonusUsers(): Promise<Set<string>> {
-    const bonusUsers = await dbContext
-        .kmq("top_gg_user_votes")
-        .where("buff_expiry_date", ">", new Date());
+    const bonusUsers = await dbContext.kmq
+        .selectFrom("top_gg_user_votes")
+        .select("user_id")
+        .where("buff_expiry_date", ">", new Date())
+        .execute();
 
     return new Set(bonusUsers.map((x) => x.user_id));
 }
@@ -150,13 +154,18 @@ export async function getSimilarGroupNames(
     groupName: string,
     locale: LocaleType
 ): Promise<Array<string>> {
-    const similarGroups = await dbContext
-        .kpopVideos("app_kpop_group")
+    const similarGroups = await dbContext.kpopVideos
+        .selectFrom("app_kpop_group")
         .select(["id", "name", "kname"])
-        .whereILike("name", `%${groupName}%`)
-        .orWhereILike("kname", `%${groupName}%`)
-        .orderByRaw("CHAR_LENGTH(name) ASC")
-        .limit(5);
+        .where(({ or, cmpr }) =>
+            or([
+                cmpr("name", "like", `%${groupName}%`),
+                cmpr("kname", "like", `%${groupName}%`),
+            ])
+        )
+        .orderBy((eb) => eb.fn("CHAR_LENGTH", ["name"]), "asc")
+        .limit(5)
+        .execute();
 
     if (similarGroups.length === 0) return [];
     return similarGroups.map((x) =>
@@ -173,33 +182,37 @@ export async function getMatchingGroupNames(
     rawGroupNames: Array<string>,
     aliasApplied = false
 ): Promise<GroupMatchResults> {
-    const artistIDQuery = dbContext
-        .kpopVideos("app_kpop_group")
-        .select(["id"])
-        .whereIn("name", rawGroupNames);
+    const artistIds = (
+        await dbContext.kpopVideos
+            .selectFrom("app_kpop_group")
+            .select(["id"])
+            .where("name", "in", rawGroupNames)
+            .execute()
+    ).map((x) => x.id);
 
-    const matchingGroups = (
-        await dbContext
-            // collab matches
-            .kpopVideos("app_kpop_agrelation")
-            .select(["id", "name"])
-            .join("app_kpop_group", function join() {
-                this.on(
-                    "app_kpop_agrelation.id_subgroup",
-                    "=",
-                    "app_kpop_group.id"
-                );
-            })
-            .whereIn("app_kpop_agrelation.id_artist", [artistIDQuery])
-            .andWhere("app_kpop_group.is_collab", "y")
-            // artist matches
-            .union(function () {
-                this.select(["id", "name"])
-                    .from("app_kpop_group")
-                    .whereIn("app_kpop_group.id", artistIDQuery);
-            })
-            .orderBy("name", "ASC")
-    ).map((x) => ({ id: x.id, name: x.name }));
+    const matchingGroups = artistIds.length
+        ? (
+              await dbContext.kpopVideos // collab matches
+                  .selectFrom("app_kpop_agrelation")
+                  .innerJoin(
+                      "app_kpop_group",
+                      "app_kpop_agrelation.id_subgroup",
+                      "app_kpop_group.id"
+                  )
+                  .select(["id", "name"])
+                  .where("app_kpop_agrelation.id_artist", "in", artistIds)
+                  .where("app_kpop_group.is_collab", "=", "y")
+                  // artist matches
+                  .unionAll(
+                      dbContext.kpopVideos
+                          .selectFrom("app_kpop_group")
+                          .select(["id", "name"])
+                          .where("app_kpop_group.id", "in", artistIds)
+                  )
+                  .orderBy("name", "asc")
+                  .execute()
+          ).map((x) => ({ id: x.id, name: x.name }))
+        : [];
 
     const matchingGroupNames = matchingGroups.map((x) => x.name.toUpperCase());
     const unrecognizedGroups = rawGroupNames.filter(
@@ -251,7 +264,7 @@ export async function getMatchingGroupNames(
 export async function getMultipleChoiceOptions(
     answerType: AnswerType,
     guessMode: GuessModeType,
-    gender: Gender,
+    gender: AvailableGenders,
     answer: string,
     artistID: number,
     locale: LocaleType
@@ -296,13 +309,14 @@ export async function getMultipleChoiceOptions(
             : "clean_song_name_en";
 
         easyNames = (
-            await dbContext
-                .kmq("available_songs")
-                .select("clean_song_name_en", "clean_song_name_ko")
+            await dbContext.kmq
+                .selectFrom("available_songs")
+                .select(["clean_song_name_en", "clean_song_name_ko"])
                 .groupBy(songName)
-                .where("members", gender)
-                .andWhereNot(songName, answer)
-                .andWhereNot("id_artist", artistID)
+                .where("members", "=", gender)
+                .where(songName, "!=", answer)
+                .where("id_artist", "!=", artistID)
+                .execute()
         ).map((x) => pickNonEmpty(x));
         switch (answerType) {
             case AnswerType.MULTIPLE_CHOICE_EASY: {
@@ -315,25 +329,36 @@ export async function getMultipleChoiceOptions(
                 // Medium: MEDIUM_CHOICES - MEDIUM_SAME_ARIST_CHOICES from same gender as chosen artist, MEDIUM_SAME_ARIST_CHOICES from chosen artist
                 const sameArtistSongs = _.sampleSize(
                     (
-                        await dbContext
-                            .kmq("available_songs")
-                            .select("clean_song_name_en", "clean_song_name_ko")
+                        await dbContext.kmq
+                            .selectFrom("available_songs")
+                            .select([
+                                "clean_song_name_en",
+                                "clean_song_name_ko",
+                            ])
                             .groupBy(songName)
-                            .where("id_artist", artistID)
-                            .andWhereNot(songName, answer)
+                            .where("id_artist", "=", artistID)
+                            .where(songName, "!=", answer)
+                            .execute()
                     ).map((x) => pickNonEmpty(x)),
                     MEDIUM_SAME_ARTIST_CHOICES
                 );
 
                 const sameGenderSongs = _.sampleSize(
                     (
-                        await dbContext
-                            .kmq("available_songs")
-                            .select("clean_song_name_en", "clean_song_name_ko")
+                        await dbContext.kmq
+                            .selectFrom("available_songs")
+                            .select([
+                                "clean_song_name_en",
+                                "clean_song_name_ko",
+                            ])
                             .groupBy(songName)
-                            .where("members", gender)
-                            .whereNotIn(songName, [...sameArtistSongs, answer])
-                            .andWhereNot("id_artist", artistID)
+                            .where("members", "=", gender)
+                            .where(songName, "not in", [
+                                ...sameArtistSongs,
+                                answer,
+                            ])
+                            .where("id_artist", "=", artistID)
+                            .execute()
                     ).map((x) => pickNonEmpty(x)),
                     MEDIUM_CHOICES - MEDIUM_SAME_ARTIST_CHOICES
                 );
@@ -345,12 +370,13 @@ export async function getMultipleChoiceOptions(
             case AnswerType.MULTIPLE_CHOICE_HARD: {
                 // Hard: HARD_CHOICES from chosen artist
                 names = (
-                    await dbContext
-                        .kmq("available_songs")
-                        .select("clean_song_name_en", "clean_song_name_ko")
+                    await dbContext.kmq
+                        .selectFrom("available_songs")
+                        .select(["clean_song_name_en", "clean_song_name_ko"])
                         .groupBy(songName)
-                        .where("id_artist", artistID)
-                        .andWhereNot(songName, answer)
+                        .where("id_artist", "=", artistID)
+                        .where(songName, "!=", answer)
+                        .execute()
                 ).map((x) => pickNonEmpty(x));
                 result = _.sampleSize(names, HARD_CHOICES);
                 break;
@@ -392,7 +418,7 @@ export async function getMultipleChoiceOptions(
     } else {
         const pickNonEmpty = (results: {
             artist_name_en: string;
-            artist_name_ko: string;
+            artist_name_ko: string | null;
         }): string => {
             if (
                 locale === LocaleType.KO &&
@@ -407,10 +433,11 @@ export async function getMultipleChoiceOptions(
 
         const artistName = useHangul ? "artist_name_ko" : "artist_name_en";
         easyNames = (
-            await dbContext
-                .kmq("available_songs")
-                .select("artist_name_en", "artist_name_ko")
-                .whereNot(artistName, answer)
+            await dbContext.kmq
+                .selectFrom("available_songs")
+                .select(["artist_name_en", "artist_name_ko"])
+                .where(artistName, "!=", answer)
+                .execute()
         ).map((x) => pickNonEmpty(x));
         switch (answerType) {
             case AnswerType.MULTIPLE_CHOICE_EASY:
@@ -422,11 +449,12 @@ export async function getMultipleChoiceOptions(
                 // Medium: MEDIUM_CHOICES from same gender
                 // Hard: HARD_CHOICES from same gender
                 names = (
-                    await dbContext
-                        .kmq("available_songs")
-                        .select("artist_name_en", "artist_name_ko")
-                        .where("members", gender)
-                        .andWhereNot(artistName, answer)
+                    await dbContext.kmq
+                        .selectFrom("available_songs")
+                        .select(["artist_name_en", "artist_name_ko"])
+                        .where("members", "=", gender)
+                        .where(artistName, "!=", answer)
+                        .execute()
                 ).map((x) => pickNonEmpty(x));
                 result = _.sampleSize(names, CHOICES_BY_DIFFICULTY[answerType]);
                 break;
@@ -447,11 +475,12 @@ export async function getMultipleChoiceOptions(
 export async function areUsersPremium(
     userIDs: Array<string>
 ): Promise<boolean> {
-    return !!(await dbContext
-        .kmq("premium_users")
-        .where("active", "=", true)
-        .whereIn("user_id", userIDs)
-        .first());
+    return !!(await dbContext.kmq
+        .selectFrom("premium_users")
+        .selectAll()
+        .where("active", "=", 1)
+        .where("user_id", "in", userIDs)
+        .executeTakeFirst());
 }
 
 /**
@@ -471,40 +500,46 @@ export async function updatePremium(
     inactiveUserIDs: string[]
 ): Promise<void> {
     // Grant premium
-    await dbContext
-        .kmq("premium_users")
-        .insert(
-            activePatrons.map((x) => ({
-                active: x.activePatron,
-                first_subscribed: x.firstSubscribed,
-                user_id: x.discordID,
-            }))
-        )
-        .onConflict("user_id")
-        .merge();
+    const activePatronsPayload = activePatrons.map((x) => ({
+        active: x.activePatron ? 1 : 0,
+        first_subscribed: x.firstSubscribed,
+        user_id: x.discordID,
+        source: "patreon" as const,
+    }));
 
-    await dbContext
-        .kmq("badges_players")
-        .insert(
-            activePatrons.map((x) => ({
-                user_id: x.discordID,
-                badge_id: PATREON_SUPPORTER_BADGE_ID,
-            }))
-        )
-        .onConflict(["user_id", "badge_name"])
-        .ignore();
+    await Promise.all(
+        activePatronsPayload.map(async (activePatronPayload) => {
+            await dbContext.kmq
+                .insertInto("premium_users")
+                .values(activePatronPayload)
+                .onDuplicateKeyUpdate(activePatronPayload)
+                .execute();
+        })
+    );
+
+    const payload = activePatrons.map((x) => ({
+        user_id: x.discordID,
+        badge_id: PATREON_SUPPORTER_BADGE_ID,
+    }));
+
+    await dbContext.kmq
+        .insertInto("badges_players")
+        .values(payload)
+        .ignore()
+        .execute();
 
     // Revoke premium
-    await dbContext
-        .kmq("premium_users")
-        .whereIn("user_id", inactiveUserIDs)
-        .update({ active: false });
+    await dbContext.kmq
+        .updateTable("premium_users")
+        .where("user_id", "in", inactiveUserIDs)
+        .set({ active: 0 })
+        .execute();
 
-    await dbContext
-        .kmq("badges_players")
-        .whereIn("user_id", inactiveUserIDs)
-        .andWhere("badge_id", "=", PATREON_SUPPORTER_BADGE_ID)
-        .del();
+    await dbContext.kmq
+        .deleteFrom("badges_players")
+        .where("user_id", "in", inactiveUserIDs)
+        .where("badge_id", "=", PATREON_SUPPORTER_BADGE_ID)
+        .execute();
 }
 
 /**
@@ -524,15 +559,15 @@ export async function isPremiumRequest(
  * @returns whether this is the user's first game played today
  */
 export async function isFirstGameOfDay(userID: string): Promise<boolean> {
-    const player = await dbContext
-        .kmq("player_stats")
+    const player = await dbContext.kmq
+        .selectFrom("player_stats")
         .select(
-            dbContext.kmq.raw(
-                "DAYOFYEAR(last_active) = DAYOFYEAR(CURDATE()) as firstGameOfDay"
+            sql<number>`DAYOFYEAR(last_active) = DAYOFYEAR(CURDATE())`.as(
+                "firstGameOfDay"
             )
         )
         .where("player_id", "=", userID)
-        .first();
+        .executeTakeFirst();
 
     if (!player) return true;
     return player["firstGameOfDay"] === 0;
@@ -569,7 +604,7 @@ export function getLocalizedSongName(
  * the artist's name otherwise
  */
 export function getLocalizedArtistName(
-    song: { artistName: string; hangulArtistName?: string },
+    song: { artistName: string; hangulArtistName: string | null },
     locale: LocaleType
 ): string {
     if (locale !== LocaleType.KO) {

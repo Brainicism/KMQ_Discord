@@ -1312,7 +1312,7 @@
             "mostActivePlayerSongsGuessed": "KMQ 사실: 가장 활동적인 플레이어는 2020년 11월 8일 이후로 {{songsGuessed}}곡을 추측했습니다!",
             "mostActiveServer": "KMQ 사실: 가장 활동적인 서버는 KMQ의 {{gamesPlayed}} 게임을 플레이했으며 총 {{songsGuessed}} 곡을 추측했습니다!",
             "mostCorrectGuessesServer": "KMQ 사실: KMQ를 가장 정확한 추측을 한 서버는 {{gamesPlayed}}번의 게임을 플레이했으며 총 {{songsGuessed}}곡이 추측되었습니다!",
-            "recentGameCount": "KMQ 사실: 지난 주에 KMQ의 총 {{recentGameCount}}번의 게임이 진행되었습니다!",
+            "recentRounds": "KMQ 사실: 지난 주에 KMQ의 총 {{recentGameCount}}라운드가 진행되었습니다!",
             "recentSessions": "KMQ 사실: 지난 주에 총 {{recentSessions}}개의 KMQ 게임이 진행되었습니다!",
             "totalGames": "KMQ 사실: KMQ의 총 {{totalGamesPlayed}}번의 게임이 플레이되었습니다!",
             "uniquePlayers": "KMQ 사실: {{recentActivePlayers}}명의 플레이어가 지난 {{xDays}} 동안 KMQ를 플레이했습니다!"

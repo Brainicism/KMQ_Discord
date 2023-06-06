@@ -24,6 +24,7 @@ import {
     tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
 import { getFact } from "../fact_generator";
+import { sql } from "kysely";
 import Eris from "eris";
 import GameRound from "./game_round";
 import GuessModeType from "../enums/option_types/guess_mode_type";
@@ -418,7 +419,7 @@ export default abstract class Session {
             await sendBookmarkedSongs(this.guildID, this.bookmarkedSongs);
 
             // Store bookmarked songs
-            await dbContext.kmq.transaction(async (trx) => {
+            await dbContext.kmq.transaction().execute(async (trx) => {
                 const idLinkPairs: {
                     user_id: string;
                     vlink: string;
@@ -435,18 +436,21 @@ export default abstract class Session {
                     }
                 }
 
-                await dbContext
-                    .kmq("bookmarked_songs")
-                    .insert(idLinkPairs)
-                    .transacting(trx);
+                await trx
+                    .insertInto("bookmarked_songs")
+                    .values(idLinkPairs)
+                    .execute();
             });
         }
 
         // commit guild stats
-        await dbContext
-            .kmq("guilds")
-            .where("guild_id", this.guildID)
-            .increment("games_played", 1);
+        await dbContext.kmq
+            .updateTable("guilds")
+            .where("guild_id", "=", this.guildID)
+            .set({
+                games_played: sql`games_played + 1`,
+            })
+            .execute();
     }
 
     /**
@@ -494,10 +498,11 @@ export default abstract class Session {
      */
     async lastActiveNow(): Promise<void> {
         this.lastActive = Date.now();
-        await dbContext
-            .kmq("guilds")
-            .where({ guild_id: this.guildID })
-            .update({ last_active: new Date() });
+        await dbContext.kmq
+            .updateTable("guilds")
+            .where("guild_id", "=", this.guildID)
+            .set({ last_active: new Date() })
+            .execute();
     }
 
     /**
@@ -694,13 +699,20 @@ export default abstract class Session {
             ? SeekType.BEGINNING
             : this.guildPreference.gameOptions.seekType;
 
-        const songDuration = (
-            await dbContext
-                .kmq("cached_song_duration")
+        let songDuration = (
+            await dbContext.kmq
+                .selectFrom("cached_song_duration")
                 .select(["duration"])
                 .where("vlink", "=", round.song.youtubeLink)
-                .first()
-        ).duration;
+                .executeTakeFirst()
+        )?.duration;
+
+        if (!songDuration) {
+            logger.error(
+                `Song duration for ${round.song.youtubeLink} unexpectly uncached. Defaulting to 60s`
+            );
+            songDuration = 60;
+        }
 
         if (seekType === SeekType.BEGINNING) {
             seekLocation = 0;

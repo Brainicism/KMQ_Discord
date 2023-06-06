@@ -6,6 +6,7 @@ import {
     retryJob,
 } from "../helpers/utils";
 import { getNewConnection } from "../database_context";
+import { sql } from "kysely";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import path from "path";
@@ -152,14 +153,14 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
 
             const { playabilityStatus }: any = infoResponse.player_response;
             if (playabilityStatus.status !== "OK") {
-                await db
-                    .kmq("dead_links")
-                    .insert({
+                await db.kmq
+                    .insertInto("dead_links")
+                    .values({
                         vlink: id,
                         reason: `Failed to load video: error = ${playabilityStatus.reason}`,
                     })
-                    .onConflict("vlink")
-                    .ignore();
+                    .ignore()
+                    .execute();
 
                 reject(
                     new Error(
@@ -175,14 +176,14 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
             );
         } catch (e) {
             const errorMessage = `Failed to retrieve video metadata for '${id}'. error = ${e}`;
-            await db
-                .kmq("dead_links")
-                .insert({
+            await db.kmq
+                .insertInto("dead_links")
+                .values({
                     vlink: id,
                     reason: errorMessage,
                 })
-                .onConflict("vlink")
-                .ignore();
+                .ignore()
+                .execute();
 
             reject(new Error(errorMessage));
             return;
@@ -195,11 +196,12 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
                     cachedSongLocation
                 );
 
-                await db
-                    .kmq("cached_song_duration")
-                    .insert({ vlink: id, duration })
-                    .onConflict(["vlink"])
-                    .merge();
+                await db.kmq
+                    .insertInto("cached_song_duration")
+                    .values({ vlink: id, duration })
+                    .onDuplicateKeyUpdate({ vlink: id, duration })
+                    .execute();
+
                 resolve();
             } catch (err) {
                 reject(
@@ -213,63 +215,74 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
     });
 };
 
-async function getSongsFromDb(db: DatabaseContext): Promise<any> {
-    return db.kpopVideos
-        .with(
-            "rankedAudioSongs",
-            db.kpopVideos
-                .select([
-                    "app_kpop.name AS songName",
-                    "app_kpop_group.name AS artistName",
-                    "vlink AS youtubeLink",
-                    "app_kpop.views AS views",
-                    "app_kpop.tags AS tags",
-                    db.kpopVideos.raw(
-                        "RANK() OVER(PARTITION BY app_kpop.id_artist ORDER BY views DESC) AS rank"
-                    ),
-                ])
-                .from("app_kpop")
-                .join(
+async function getSongsFromDb(databaseContext: DatabaseContext): Promise<any> {
+    const deadLinks = (
+        await databaseContext.kmq
+            .selectFrom("dead_links")
+            .select("vlink")
+            .execute()
+    ).map((x) => x.vlink);
+
+    let mvBuilder = databaseContext.kpopVideos
+        .selectFrom("app_kpop")
+        .innerJoin("app_kpop_group", "app_kpop.id_artist", "app_kpop_group.id")
+        .select([
+            "app_kpop.name as songName",
+            "app_kpop_group.name as artistName",
+            "app_kpop.vlink as youtubeLink",
+            "app_kpop.views as views",
+        ])
+        .where("vtype", "=", "main")
+        .where("is_audio", "=", "n")
+        .where("tags", "not like", "%c%");
+
+    if (deadLinks.length) {
+        mvBuilder = mvBuilder.where("vlink", "not in", deadLinks);
+    }
+
+    const avBuilder = databaseContext.kpopVideos.with(
+        "rankedAudioSongs",
+        (db) => {
+            let builder = db
+                .selectFrom("app_kpop")
+                .innerJoin(
                     "app_kpop_group",
-                    "kpop_videos.app_kpop.id_artist",
-                    "=",
-                    "kpop_videos.app_kpop_group.id"
+                    "app_kpop.id_artist",
+                    "app_kpop_group.id"
+                )
+                .select([
+                    "app_kpop.name as songName",
+                    "app_kpop_group.name as artistName",
+                    "vlink as youtubeLink",
+                    "app_kpop.views as views",
+                ])
+                .select(
+                    sql`RANK() OVER(PARTITION BY app_kpop.id_artist ORDER BY views DESC)`.as(
+                        "rank"
+                    )
                 )
                 .where("is_audio", "=", "y")
-                .whereNotIn("vlink", function () {
-                    this.select("vlink").from("kmq.dead_links");
-                })
-                .andWhere("tags", "NOT LIKE", "%c%")
-        )
-        .select("songName", "artistName", "youtubeLink", "views")
-        .from("rankedAudioSongs")
+                .where("tags", "not like", "%c%");
+
+            if (deadLinks.length) {
+                builder = builder.where("vlink", "not in", deadLinks);
+            }
+
+            return builder;
+        }
+    );
+
+    return avBuilder
+        .selectFrom("rankedAudioSongs")
+        .select(["songName", "artistName", "youtubeLink", "views"])
         .where(
             "rank",
             "<=",
             process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST as string
         )
-        .union(function () {
-            this.select(
-                "app_kpop.name AS songName",
-                "app_kpop_group.name AS artistName",
-                "vlink AS youtubeLink",
-                "app_kpop.views AS views"
-            )
-                .from("app_kpop")
-                .join(
-                    "kpop_videos.app_kpop_group",
-                    "kpop_videos.app_kpop.id_artist",
-                    "=",
-                    "kpop_videos.app_kpop_group.id"
-                )
-                .whereNotIn("vlink", function () {
-                    this.select("vlink").from("kmq.dead_links");
-                })
-                .where("vtype", "=", "main")
-                .where("is_audio", "=", "n")
-                .andWhere("tags", "NOT LIKE", "%c%");
-        })
-        .orderBy("views", "DESC");
+        .unionAll(mvBuilder)
+        .orderBy("views", "desc")
+        .execute();
 }
 
 async function getCurrentlyDownloadedFiles(): Promise<Set<string>> {
@@ -291,13 +304,13 @@ async function updateNotDownloaded(
         .filter((x) => !currentlyDownloadedFiles.has(`${x.youtubeLink}.ogg`))
         .map((x) => ({ vlink: x.youtubeLink }));
 
-    await db.kmq.transaction(async (trx) => {
-        await db.kmq("not_downloaded").del().transacting(trx);
+    await db.kmq.transaction().execute(async (trx) => {
+        await trx.deleteFrom("not_downloaded").execute();
         if (songIDsNotDownloaded.length > 0) {
-            await db
-                .kmq("not_downloaded")
-                .insert(songIDsNotDownloaded)
-                .transacting(trx);
+            await trx
+                .insertInto("not_downloaded")
+                .values(songIDsNotDownloaded)
+                .execute();
         }
     });
 }
@@ -311,7 +324,9 @@ const downloadNewSongs = async (
     let downloadCount = 0;
     let deadLinksSkipped = 0;
     const knownDeadIDs = new Set(
-        (await db.kmq("dead_links").select("vlink")).map((x) => x.vlink)
+        (await db.kmq.selectFrom("dead_links").select("vlink").execute()).map(
+            (x) => x.vlink
+        )
     );
 
     const currentlyDownloadedFiles = await getCurrentlyDownloadedFiles();

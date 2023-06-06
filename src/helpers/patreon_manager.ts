@@ -123,11 +123,12 @@ export default async function updatePremiumUsers(): Promise<void> {
     await updatePremium(
         patrons,
         (
-            await dbContext
-                .kmq("premium_users")
+            await dbContext.kmq
+                .selectFrom("premium_users")
                 .select("user_id")
-                .whereNotIn("user_id", activePatronIDs)
-                .whereNot("source", "=", "loyalty")
+                .where("user_id", "not in", activePatronIDs)
+                .where("source", "!=", "loyalty")
+                .execute()
         ).map((x) => x.user_id)
     );
 }

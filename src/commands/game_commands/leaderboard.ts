@@ -44,6 +44,17 @@ const leaderboardQuotes = [
     "command.leaderboard.quote.nextPage",
 ];
 
+interface TopPlayerBase {
+    player_id: string;
+    level: number;
+}
+
+type TopExpGainPlayer = TopPlayerBase & { exp: number };
+type TopGamesPlayedPlayer = TopPlayerBase & { game_count: number };
+type TopSongsGuessedPlayer = TopPlayerBase & {
+    songs_guessed: number;
+};
+
 export default class LeaderboardCommand implements BaseCommand {
     aliases = ["lb"];
 
@@ -474,9 +485,7 @@ export default class LeaderboardCommand implements BaseCommand {
             ? "player_stats"
             : "player_game_session_stats";
 
-        let topPlayersQuery = dbContext
-            .kmq(dbTable)
-            .where(permanentLb ? "exp" : "exp_gained", ">", 0);
+        let topPlayersQuery = dbContext.kmq.selectFrom(dbTable);
 
         const d = date || new Date();
         let resetDate: Date | null = null;
@@ -534,14 +543,16 @@ export default class LeaderboardCommand implements BaseCommand {
 
         if (scope === LeaderboardScope.SERVER) {
             const serverPlayers = (
-                await dbContext
-                    .kmq("player_servers")
+                await dbContext.kmq
+                    .selectFrom("player_servers")
                     .select("player_id")
                     .where("server_id", "=", messageContext.guildID)
+                    .execute()
             ).map((x) => x.player_id);
 
-            topPlayersQuery = topPlayersQuery.whereIn(
+            topPlayersQuery = topPlayersQuery.where(
                 "player_id",
+                "in",
                 serverPlayers
             );
         } else if (scope === LeaderboardScope.GAME) {
@@ -551,115 +562,138 @@ export default class LeaderboardCommand implements BaseCommand {
                 ].scoreboard.getPlayerIDs();
 
             const gamePlayers = (
-                await dbContext
-                    .kmq(dbTable)
+                await dbContext.kmq
+                    .selectFrom(dbTable)
                     .select("player_id")
-                    .whereIn("player_id", participantIDs)
+                    .where("player_id", "in", participantIDs)
+                    .execute()
             ).map((x) => x.player_id);
 
-            topPlayersQuery = topPlayersQuery.whereIn("player_id", gamePlayers);
+            topPlayersQuery = topPlayersQuery.where(
+                "player_id",
+                "in",
+                gamePlayers
+            );
         }
 
         const pageCount = Math.ceil(
             (((await topPlayersQuery
-                .clone()
-                .countDistinct("player_id AS count")
-                .first()) ?? {})["count"] as number) /
+                .select((eb) =>
+                    eb.fn.count<number>("player_id").distinct().as("count")
+                )
+                .executeTakeFirst()) ?? {})["count"] as number) /
                 LEADERBOARD_ENTRIES_PER_PAGE
         );
-
-        switch (type) {
-            case LeaderboardType.EXP:
-                if (permanentLb) {
-                    topPlayersQuery = topPlayersQuery.select([
-                        "exp",
-                        "level",
-                        "player_id",
-                    ]);
-                } else {
-                    topPlayersQuery = topPlayersQuery.select(["player_id"]);
-                    topPlayersQuery = topPlayersQuery
-                        .sum("exp_gained AS exp")
-                        .sum("levels_gained AS level")
-                        .groupBy("player_id");
-                }
-
-                break;
-            case LeaderboardType.GAMES_PLAYED:
-                if (permanentLb) {
-                    topPlayersQuery = topPlayersQuery.select([
-                        "player_id",
-                        "games_played AS game_count",
-                        "level",
-                    ]);
-                } else {
-                    topPlayersQuery = topPlayersQuery.count(
-                        "player_id AS game_count"
-                    );
-
-                    topPlayersQuery = topPlayersQuery.select(["player_id"]);
-                    topPlayersQuery = topPlayersQuery.sum(
-                        "levels_gained AS level"
-                    );
-
-                    topPlayersQuery = topPlayersQuery.groupBy("player_id");
-                }
-
-                break;
-            case LeaderboardType.SONGS_GUESSED:
-                if (permanentLb) {
-                    topPlayersQuery = topPlayersQuery.select([
-                        "songs_guessed",
-                        "player_id",
-                        "level",
-                    ]);
-                } else {
-                    topPlayersQuery = topPlayersQuery.select(["player_id"]);
-                    topPlayersQuery = topPlayersQuery.sum(
-                        "levels_gained AS level"
-                    );
-
-                    topPlayersQuery = topPlayersQuery
-                        .sum("songs_guessed AS songs_guessed")
-                        .groupBy("player_id");
-                }
-
-                break;
-            default:
-                break;
-        }
 
         for (let i = 0; i < pageCount; i++) {
             const offset = i * LEADERBOARD_ENTRIES_PER_PAGE;
             embedsFns.push(
+                // eslint-disable-next-line @typescript-eslint/no-loop-func
                 () =>
                     new Promise(async (resolve) => {
-                        let topPlayers: {
-                            player_id: string;
-                            level: number;
-                            exp: number;
-                            game_count: number;
-                            songs_guessed: number;
-                        }[];
+                        let topPlayers: (
+                            | TopExpGainPlayer
+                            | TopGamesPlayedPlayer
+                            | TopSongsGuessedPlayer
+                        )[];
 
                         switch (type) {
                             case LeaderboardType.EXP:
-                                topPlayers = await topPlayersQuery
-                                    .orderBy("exp", "DESC")
-                                    .offset(offset)
-                                    .limit(LEADERBOARD_ENTRIES_PER_PAGE);
+                                if (permanentLb) {
+                                    topPlayers = await topPlayersQuery
+                                        .select(["exp", "level", "player_id"])
+                                        .orderBy("exp", "desc")
+                                        .offset(offset)
+                                        .limit(LEADERBOARD_ENTRIES_PER_PAGE)
+                                        .execute();
+                                } else {
+                                    topPlayers = await topPlayersQuery
+                                        .select(["player_id"])
+                                        .select((eb) =>
+                                            eb.fn
+                                                .sum<number>("exp_gained")
+                                                .as("exp")
+                                        )
+                                        .select((eb) =>
+                                            eb.fn
+                                                .sum<number>("levels_gained")
+                                                .as("level")
+                                        )
+                                        .groupBy("player_id")
+                                        .orderBy("exp", "desc")
+                                        .offset(offset)
+                                        .limit(LEADERBOARD_ENTRIES_PER_PAGE)
+                                        .execute();
+                                }
+
                                 break;
                             case LeaderboardType.GAMES_PLAYED:
-                                topPlayers = await topPlayersQuery
-                                    .orderBy("game_count", "DESC")
-                                    .offset(offset)
-                                    .limit(LEADERBOARD_ENTRIES_PER_PAGE);
+                                if (permanentLb) {
+                                    topPlayers = await topPlayersQuery
+                                        .select([
+                                            "player_id",
+                                            "games_played as game_count",
+                                            "level",
+                                        ])
+                                        .orderBy("game_count", "desc")
+                                        .offset(offset)
+                                        .limit(LEADERBOARD_ENTRIES_PER_PAGE)
+                                        .execute();
+                                } else {
+                                    topPlayers = await topPlayersQuery
+                                        .select(["player_id"])
+                                        .select((eb) =>
+                                            eb.fn
+                                                .count<number>("player_id")
+                                                .as("game_count")
+                                        )
+                                        .select((eb) =>
+                                            eb.fn
+                                                .sum<number>("levels_gained")
+                                                .as("level")
+                                        )
+                                        .groupBy("player_id")
+                                        .orderBy("game_count", "desc")
+                                        .offset(offset)
+                                        .limit(LEADERBOARD_ENTRIES_PER_PAGE)
+                                        .execute();
+                                }
+
                                 break;
                             case LeaderboardType.SONGS_GUESSED:
-                                topPlayers = await topPlayersQuery
-                                    .orderBy("songs_guessed", "DESC")
-                                    .offset(offset)
-                                    .limit(LEADERBOARD_ENTRIES_PER_PAGE);
+                                if (permanentLb) {
+                                    topPlayers = await topPlayersQuery
+                                        .select([
+                                            "songs_guessed",
+                                            "player_id",
+                                            "level",
+                                            "exp",
+                                        ])
+                                        .orderBy("songs_guessed", "desc")
+                                        .offset(offset)
+                                        .limit(LEADERBOARD_ENTRIES_PER_PAGE)
+                                        .execute();
+                                } else {
+                                    topPlayers = await topPlayersQuery
+                                        .select(["player_id"])
+                                        .select((eb) =>
+                                            eb.fn
+                                                .sum<number>("levels_gained")
+                                                .as("level")
+                                        )
+                                        .select((eb) =>
+                                            eb.fn
+                                                .sum<number>("songs_guessed")
+                                                .as("songs_guessed")
+                                        )
+
+                                        .groupBy("player_id")
+                                        .orderBy("songs_guessed", "desc")
+                                        .offset(offset)
+                                        .limit(LEADERBOARD_ENTRIES_PER_PAGE)
+                                        .execute();
+                                }
+
                                 break;
                             default:
                                 topPlayers = [];
@@ -673,14 +707,15 @@ export default class LeaderboardCommand implements BaseCommand {
                             await Promise.all(
                                 topPlayers.map(async (player, relativeRank) => {
                                     const rank = relativeRank + offset;
-                                    const enrolledPlayer = await dbContext
-                                        .kmq("leaderboard_enrollment")
+                                    const enrolledPlayer = await dbContext.kmq
+                                        .selectFrom("leaderboard_enrollment")
+                                        .select(["display_name"])
                                         .where(
                                             "player_id",
                                             "=",
                                             player.player_id
                                         )
-                                        .first();
+                                        .executeTakeFirst();
 
                                     const displayedRank =
                                         ["🥇", "🥈", "🥉"][rank] ||
@@ -743,13 +778,15 @@ export default class LeaderboardCommand implements BaseCommand {
                                         case LeaderboardType.EXP:
                                             if (permanentLb) {
                                                 const exp = `${friendlyFormattedNumber(
-                                                    player.exp
+                                                    (player as TopExpGainPlayer)
+                                                        .exp
                                                 )} EXP`;
 
                                                 value = `${exp} | ${level}`;
                                             } else {
                                                 const expGained = `+${friendlyFormattedNumber(
-                                                    player.exp
+                                                    (player as TopExpGainPlayer)
+                                                        .exp
                                                 )} EXP`;
 
                                                 value = `${expGained} | ${level}`;
@@ -763,7 +800,9 @@ export default class LeaderboardCommand implements BaseCommand {
                                                 {
                                                     gameCount:
                                                         friendlyFormattedNumber(
-                                                            player.game_count
+                                                            (
+                                                                player as TopGamesPlayedPlayer
+                                                            ).game_count
                                                         ),
                                                 }
                                             );
@@ -779,7 +818,9 @@ export default class LeaderboardCommand implements BaseCommand {
                                                 {
                                                     songsGuessed:
                                                         friendlyFormattedNumber(
-                                                            player.songs_guessed
+                                                            (
+                                                                player as TopSongsGuessedPlayer
+                                                            ).songs_guessed
                                                         ),
                                                 }
                                             );
@@ -963,10 +1004,10 @@ export default class LeaderboardCommand implements BaseCommand {
         messageContext: MessageContext,
         interaction?: Eris.CommandInteraction
     ): Promise<void> {
-        const alreadyEnrolled = !!(await dbContext
-            .kmq("leaderboard_enrollment")
+        const alreadyEnrolled = !!(await dbContext.kmq
+            .selectFrom("leaderboard_enrollment")
             .where("player_id", "=", messageContext.author.id)
-            .first());
+            .executeTakeFirst());
 
         if (alreadyEnrolled) {
             sendErrorMessage(
@@ -986,10 +1027,13 @@ export default class LeaderboardCommand implements BaseCommand {
             return;
         }
 
-        await dbContext.kmq("leaderboard_enrollment").insert({
-            player_id: messageContext.author.id,
-            display_name: await getUserTag(messageContext.author.id),
-        });
+        await dbContext.kmq
+            .insertInto("leaderboard_enrollment")
+            .values({
+                player_id: messageContext.author.id,
+                display_name: await getUserTag(messageContext.author.id),
+            })
+            .execute();
 
         sendInfoMessage(
             messageContext,
@@ -1014,10 +1058,10 @@ export default class LeaderboardCommand implements BaseCommand {
         messageContext: MessageContext,
         interaction?: Eris.CommandInteraction
     ): Promise<void> {
-        await dbContext
-            .kmq("leaderboard_enrollment")
+        await dbContext.kmq
+            .deleteFrom("leaderboard_enrollment")
             .where("player_id", "=", messageContext.author.id)
-            .del();
+            .execute();
 
         sendInfoMessage(
             messageContext,

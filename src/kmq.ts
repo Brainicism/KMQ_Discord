@@ -107,11 +107,14 @@ function registerGlobalIntervals(fleet: Fleet): void {
     // every minute
     schedule.scheduleJob("* * * * *", async () => {
         if (await isPrimaryInstance()) {
-            await dbContext.kmq("system_stats").insert({
-                stat_name: "request_latency",
-                stat_value: fleet.eris.requestHandler.latencyRef.latency,
-                date: new Date(),
-            });
+            await dbContext.kmq
+                .insertInto("system_stats")
+                .values({
+                    stat_name: "request_latency",
+                    stat_value: fleet.eris.requestHandler.latencyRef.latency,
+                    date: new Date(),
+                })
+                .execute();
         }
     });
 }

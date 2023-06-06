@@ -1,7 +1,7 @@
+import type { GenderModeOptions } from "../enums/option_types/gender";
 import type { PlaylistMetadata } from "src/helpers/spotify_manager";
 import type AnswerType from "../enums/option_types/answer_type";
 import type ArtistType from "../enums/option_types/artist_type";
-import type Gender from "../enums/option_types/gender";
 import type GuessModeType from "../enums/option_types/guess_mode_type";
 import type LanguageType from "../enums/option_types/language_type";
 import type MatchedArtist from "./matched_artist";
@@ -16,7 +16,7 @@ import type SubunitsPreference from "../enums/option_types/subunit_preference";
 export default interface GameOptions {
     beginningYear: number;
     endYear: number;
-    gender: Array<Gender>;
+    gender: Array<GenderModeOptions>;
     limitStart: number;
     limitEnd: number;
     seekType: SeekType;

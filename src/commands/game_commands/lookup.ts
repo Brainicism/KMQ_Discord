@@ -48,7 +48,7 @@ import type QueriedSong from "../../interfaces/queried_song";
 
 const logger = new IPCLogger("lookup");
 
-const getDaisukiLink = (id: string, isMV: boolean): string => {
+const getDaisukiLink = (id: number, isMV: boolean): string => {
     if (isMV) {
         return `https://kpop.daisuki.com.br/mv.html?id=${id}`;
     }
@@ -62,16 +62,25 @@ async function lookupByYoutubeID(
     locale: LocaleType
 ): Promise<boolean> {
     const guildID = messageOrInteraction.guildID as string;
-    const kmqSongEntry: QueriedSong = await dbContext
-        .kmq("available_songs")
-        .select(SongSelector.getQueriedSongFields())
-        .where("link", videoID)
-        .first();
+    const kmqSongEntry: QueriedSong | undefined = await dbContext.kmq
+        .selectFrom("available_songs")
+        .select(SongSelector.QueriedSongFields)
+        .where("link", "=", videoID)
+        .executeTakeFirst();
 
-    const daisukiEntry = await dbContext
-        .kpopVideos("app_kpop")
-        .where("vlink", videoID)
-        .first();
+    const daisukiEntry = await dbContext.kpopVideos
+        .selectFrom("app_kpop")
+        .select([
+            "name",
+            "kname",
+            "publishedon",
+            "alias",
+            "views",
+            "id_artist",
+            "id",
+        ])
+        .where("vlink", "=", videoID)
+        .executeTakeFirst();
 
     if (!daisukiEntry) {
         // maybe it was falsely parsed as video ID? fallback to song name lookup
@@ -134,10 +143,11 @@ async function lookupByYoutubeID(
         publishDate = kmqSongEntry.publishDate;
 
         const durationInSeconds = (
-            await dbContext
-                .kmq("cached_song_duration")
-                .where("vlink", videoID)
-                .first()
+            await dbContext.kmq
+                .selectFrom("cached_song_duration")
+                .select("duration")
+                .where("vlink", "=", videoID)
+                .executeTakeFirst()
         )?.duration;
 
         // duration in minutes and seconds
@@ -181,35 +191,41 @@ async function lookupByYoutubeID(
                 ? daisukiEntry.kname
                 : daisukiEntry.name;
 
-        const artistNameQuery = await dbContext
-            .kpopVideos("app_kpop_group")
-            .select("name", "kname")
-            .where("id", daisukiEntry.id_artist)
-            .first();
+        const artistNameResult = await dbContext.kpopVideos
+            .selectFrom("app_kpop_group")
+            .select(["name", "kname"])
+            .where("id", "=", daisukiEntry.id_artist)
+            .executeTakeFirst();
+
+        if (!artistNameResult) {
+            const errMsg = `Result of artist lookup in app_kpop_group unexpected null for artist: ${daisukiEntry.id_artist}`;
+            logger.error(errMsg);
+            throw new Error(errMsg);
+        }
 
         artistName =
-            artistNameQuery.kname && isKorean
-                ? artistNameQuery.kname
-                : artistNameQuery.name;
+            artistNameResult.kname && isKorean
+                ? artistNameResult.kname
+                : artistNameResult.name;
 
         if (daisukiEntry.alias) {
             songAliases.push(...daisukiEntry.alias.split(";"));
         }
 
         artistAliases.push(
-            ...(State.aliases.artist[artistNameQuery.name] ?? [])
+            ...(State.aliases.artist[artistNameResult.name] ?? [])
         );
 
         if (isKorean) {
             songAliases.push(daisukiEntry.name);
-            artistAliases.push(artistNameQuery.name);
+            artistAliases.push(artistNameResult.name);
         } else {
             if (daisukiEntry.kname) {
                 songAliases.push(daisukiEntry.kname);
             }
 
-            if (artistNameQuery.kname) {
-                artistAliases.push(artistNameQuery.kname);
+            if (artistNameResult.kname) {
+                artistAliases.push(artistNameResult.kname);
             }
         }
 
@@ -311,36 +327,37 @@ async function lookupBySongName(
     locale: LocaleType,
     artistID?: number
 ): Promise<boolean> {
-    let kmqSongEntriesQuery = dbContext
-        .kmq("available_songs")
-        .select(SongSelector.getQueriedSongFields())
+    let kmqSongEntriesQuery = dbContext.kmq
+        .selectFrom("available_songs")
+        .select(SongSelector.QueriedSongFields)
         .limit(100);
 
     if (songName !== "") {
         kmqSongEntriesQuery = kmqSongEntriesQuery
-            .where((qb) => {
-                qb.whereILike("song_name_en", `%${songName}%`).orWhereILike(
-                    "song_name_ko",
-                    `%${songName}%`
-                );
-            })
-            .orderByRaw("CHAR_LENGTH(song_name_en) ASC")
-            .orderBy("views", "DESC");
+            .where(({ or, cmpr }) =>
+                or([
+                    cmpr("song_name_en", "like", `%${songName}%`),
+                    cmpr("song_name_ko", "like", `%${songName}%`),
+                ])
+            )
+            .orderBy((eb) => eb.fn("CHAR_LENGTH", ["song_name_en"]), "asc")
+            .orderBy("views", "desc");
     } else {
         kmqSongEntriesQuery = kmqSongEntriesQuery.orderBy(
             "publishedon",
-            "DESC"
+            "desc"
         );
     }
 
     if (artistID) {
-        kmqSongEntriesQuery = kmqSongEntriesQuery.andWhere(
+        kmqSongEntriesQuery = kmqSongEntriesQuery.where(
             "id_artist",
+            "=",
             artistID
         );
     }
 
-    const kmqSongEntries = await kmqSongEntriesQuery;
+    const kmqSongEntries = await kmqSongEntriesQuery.execute();
     if (kmqSongEntries.length === 0) {
         return false;
     }

@@ -1124,7 +1124,10 @@ export async function getGameInfoMessage(
     guildID: string
 ): Promise<GameInfoMessage | null> {
     const endGameMessage: GameInfoMessage = chooseWeightedRandom(
-        await dbContext.kmq("game_messages")
+        await dbContext.kmq
+            .selectFrom("game_messages")
+            .select(["title", "message", "weight"])
+            .execute()
     );
 
     if (!endGameMessage) return null;
@@ -1833,7 +1836,7 @@ export function searchArtists(
  * @returns a list of group names
  */
 export function localizedAutocompleteFormat(
-    data: Array<{ name: string; hangulName?: string }>,
+    data: Array<{ name: string; hangulName?: string | null }>,
     showHangul: boolean
 ): Array<AutocompleteEntry> {
     return data

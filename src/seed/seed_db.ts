@@ -12,6 +12,7 @@ import { getNewConnection } from "../database_context";
 import { parseJsonFile, pathExists } from "../helpers/utils";
 import { program } from "commander";
 import { sendDebugAlertWebhook } from "../helpers/discord_utils";
+import { sql } from "kysely";
 import Axios from "axios";
 import EnvType from "../enums/env_type";
 import _ from "lodash";
@@ -20,7 +21,6 @@ import fs from "fs";
 import path from "path";
 import util from "util";
 import type { DatabaseContext } from "../database_context";
-import type { Knex } from "knex";
 
 const exec = util.promisify(cp.exec);
 
@@ -33,11 +33,12 @@ const logger = new IPCLogger("seed_db");
 
 async function getDaisukiTableNames(db: DatabaseContext): Promise<string[]> {
     return (
-        await db
-            .agnostic("information_schema.tables")
-            .select("table_name")
-            .where("table_schema", "=", "kpop_videos")
-    ).map((x) => x["table_name"]);
+        await db.infoSchema
+            .selectFrom("TABLES")
+            .select("TABLE_NAME")
+            .where("TABLE_SCHEMA", "=", "kpop_videos")
+            .execute()
+    ).map((x) => x.TABLE_NAME);
 }
 
 /**
@@ -51,9 +52,11 @@ export async function databaseExists(
 ): Promise<boolean> {
     return (
         (
-            await db
-                .agnostic("information_schema.schemata")
-                .where("schema_name", "=", databaseName)
+            await db.infoSchema
+                .selectFrom("SCHEMATA")
+                .selectAll()
+                .where("SCHEMA_NAME", "=", databaseName)
+                .execute()
         ).length === 1
     );
 }
@@ -71,44 +74,47 @@ export async function tableExists(
 ): Promise<boolean> {
     return (
         (
-            (await db
-                .agnostic("information_schema.tables")
-                .where("table_schema", "=", databaseName)
-                .where("table_name", "=", tableName)
-                .count("* as count")
-                .first()) as any
+            await db.infoSchema
+                .selectFrom("TABLES")
+                .where("TABLE_SCHEMA", "=", databaseName)
+                .where("TABLE_NAME", "=", tableName)
+                .select((eb) => eb.fn.countAll<number>().as("count"))
+                .executeTakeFirstOrThrow()
         ).count === 1
     );
 }
 
-async function replaceBetterAudioSongs(database: Knex): Promise<void> {
-    const songsWithBetterAudioCounterpart = await database("app_kpop as a")
+async function replaceBetterAudioSongs(db: DatabaseContext): Promise<void> {
+    const songsWithBetterAudioCounterpart = await db.kpopVideosValidation
+        .selectFrom("app_kpop as a")
+        .leftJoin("app_kpop as b", "a.id_better_audio", "b.id")
         .select([
             "a.id as original_id",
             "a.original_name as original_name",
             "b.vlink as better_audio_link",
         ])
-        .leftJoin("app_kpop AS b", function join() {
-            this.on("a.id_better_audio", "=", "b.id");
-        })
-        .whereNotNull("b.vlink");
+        .where("b.vlink", "is not", null)
+        .execute();
 
     for (const betterAudioSong of songsWithBetterAudioCounterpart) {
-        logger.info(
-            `Replacing audio for ${betterAudioSong.original_name} with ${betterAudioSong.better_audio_link} for ${betterAudioSong.original_id}`
-        );
-
         // remove 'better' audio entry to not consume b-side limit
-        await database("app_kpop")
+        await db.kpopVideosValidation
+            .deleteFrom("app_kpop")
             .where("vlink", "=", betterAudioSong.better_audio_link)
-            .delete();
+            .execute();
 
         // replace main video with better audio entry
-        await database("app_kpop")
-            .where("id", "=", betterAudioSong.original_id)
-            .update({
-                vlink: betterAudioSong.better_audio_link,
-            });
+        if (betterAudioSong.better_audio_link) {
+            // TODO: this null check shouldn't be needed, but Kysely does not narrow types automatically
+            // can be removed when .$narrowType is available
+            await db.kpopVideosValidation
+                .updateTable("app_kpop")
+                .where("id", "=", betterAudioSong.original_id)
+                .set({
+                    vlink: betterAudioSong.better_audio_link,
+                })
+                .execute();
+        }
     }
 }
 
@@ -117,11 +123,12 @@ async function listTables(
     databaseName: string
 ): Promise<Array<string>> {
     return (
-        await db
-            .agnostic("information_schema.tables")
-            .where("table_schema", "=", databaseName)
-            .select("table_name")
-    ).map((x) => x["table_name"]);
+        await db.infoSchema
+            .selectFrom("TABLES")
+            .where("TABLE_SCHEMA", "=", databaseName)
+            .select("TABLE_NAME")
+            .execute()
+    ).map((x) => x["TABLE_NAME"]);
 }
 
 program
@@ -131,6 +138,7 @@ program
         "Force skip drop/create of kpop_videos database",
         false
     )
+    .option("-v, --skip-validate", "Skip test database validation", false)
     .option(
         "-d, --skip-download",
         "Skip download/encode of videos in database",
@@ -144,9 +152,12 @@ program.parse();
 const options = program.opts();
 
 async function getOverrideQueries(db: DatabaseContext): Promise<Array<string>> {
-    return (await db.kmq("kpop_videos_sql_overrides").select(["query"])).map(
-        (x) => x.query
-    );
+    return (
+        await db.kmq
+            .selectFrom("kpop_videos_sql_overrides")
+            .select(["query"])
+            .execute()
+    ).map((x) => x.query);
 }
 
 /**
@@ -157,8 +168,8 @@ export async function generateKmqDataTables(
     db: DatabaseContext
 ): Promise<void> {
     logger.info("Re-creating KMQ data tables view...");
-    await db.kmq.raw(
-        `CALL CreateKmqDataTables(${process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST});`
+    await sql`CALL CreateKmqDataTables(${process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST});`.execute(
+        db.kmq
     );
 }
 
@@ -170,7 +181,7 @@ export async function deduplicateGroupNames(
     db: DatabaseContext
 ): Promise<void> {
     logger.info("Deduplicating group names...");
-    await db.kmq.raw("CALL DeduplicateGroupNames();");
+    await sql`CALL DeduplicateGroupNames();`.execute(db.kmq);
 }
 
 /**
@@ -186,6 +197,23 @@ export async function loadStoredProcedures(): Promise<void> {
             `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq < ${storedProcedureDefinition}`
         );
     }
+}
+
+/**
+ * Update typings for Kyseley
+ * @param db - The database context
+ */
+export async function updateDaisukiSchemaTypings(
+    db: DatabaseContext
+): Promise<void> {
+    await db.kpopVideos.schema
+        .alterTable("app_kpop_group")
+        .modifyColumn("name", "varchar(255)", (cb) => cb.notNull())
+        .execute();
+
+    await exec(
+        `bash ${path.resolve(__dirname, "../scripts/prepare-kysely-schema.sh")}`
+    );
 }
 
 const downloadDb = async (): Promise<void> => {
@@ -225,10 +253,15 @@ async function recordDaisukiTableSchema(db: DatabaseContext): Promise<void> {
             await getDaisukiTableNames(db)
         ).map(async (table) => {
             const commaSeparatedColumnNames = (
-                await db.agnostic.raw(
-                    `SELECT group_concat(COLUMN_NAME) as x FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'kpop_videos' AND TABLE_NAME = '${table}';`
-                )
-            )[0][0]["x"];
+                await db.infoSchema
+                    .selectFrom("COLUMNS")
+                    .select((eb) =>
+                        eb.fn<string>("group_concat", ["COLUMN_NAME"]).as("x")
+                    )
+                    .where("TABLE_SCHEMA", "=", "kpop_videos")
+                    .where("TABLE_NAME", "=", table)
+                    .executeTakeFirstOrThrow()
+            ).x;
 
             const columnNames = _.sortBy(commaSeparatedColumnNames.split(","));
             frozenTableColumnNames[table] = columnNames;
@@ -251,10 +284,15 @@ async function validateDaisukiTableSchema(
             await getDaisukiTableNames(db)
         ).map(async (table) => {
             const commaSeparatedColumnNames = (
-                await db.agnostic.raw(
-                    `SELECT group_concat(COLUMN_NAME) as x FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'kpop_videos_validation' AND TABLE_NAME = '${table}';`
-                )
-            )[0][0]["x"];
+                await db.infoSchema
+                    .selectFrom("COLUMNS")
+                    .select((eb) =>
+                        eb.fn<string>("group_concat", ["COLUMN_NAME"]).as("x")
+                    )
+                    .where("TABLE_SCHEMA", "=", "kpop_videos_validation")
+                    .where("TABLE_NAME", "=", table)
+                    .executeTakeFirstOrThrow()
+            ).x;
 
             const columnNames = _.sortBy(commaSeparatedColumnNames.split(","));
             if (!_.isEqual(frozenSchema[table], columnNames)) {
@@ -296,45 +334,41 @@ async function validateSqlDump(
     bootstrap = false
 ): Promise<void> {
     try {
-        await db.agnostic.raw(
-            "DROP DATABASE IF EXISTS kpop_videos_validation;"
+        await sql`DROP DATABASE IF EXISTS kpop_videos_validation;`.execute(
+            db.agnostic
         );
-        await db.agnostic.raw("CREATE DATABASE kpop_videos_validation;");
+
+        await sql`CREATE DATABASE kpop_videos_validation;`.execute(db.agnostic);
+
         await exec(
             `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${mvSeedFilePath}`
         );
 
-        await replaceBetterAudioSongs(db.kpopVideosValidation);
+        await replaceBetterAudioSongs(db);
 
         logger.info("Validating MV song count");
-        const mvSongCount = (
-            (await db
-                .kpopVideosValidation("app_kpop")
-                .count("* as count")
-                .where("is_audio", "=", "n")
-                .first()) as any
-        ).count;
+        const mvSongCount = (await db.kpopVideosValidation
+            .selectFrom("app_kpop")
+            .select((eb) => eb.fn.countAll<number>().as("count"))
+            .where("is_audio", "=", "n")
+            .executeTakeFirst())!.count;
 
         logger.info(`Found ${mvSongCount} music videos`);
 
         logger.info("Validating audio-only song count");
-        const audioSongCount = (
-            (await db
-                .kpopVideosValidation("app_kpop")
-                .count("* as count")
-                .where("is_audio", "=", "y")
-                .first()) as any
-        ).count;
+        const audioSongCount = (await db.kpopVideosValidation
+            .selectFrom("app_kpop")
+            .select((eb) => eb.fn.countAll<number>().as("count"))
+            .where("is_audio", "=", "y")
+            .executeTakeFirst())!.count;
 
         logger.info(`Found ${audioSongCount} audio-only videos`);
 
         logger.info("Validating group count");
-        const artistCount = (
-            (await db
-                .kpopVideosValidation("app_kpop_group")
-                .count("* as count")
-                .first()) as any
-        ).count;
+        const artistCount = (await db.kpopVideosValidation
+            .selectFrom("app_kpop_group")
+            .select((eb) => eb.fn.countAll<number>().as("count"))
+            .executeTakeFirst())!.count;
 
         logger.info(`Found ${artistCount} artists`);
 
@@ -349,9 +383,9 @@ async function validateSqlDump(
         logger.info("Validating overrides");
         const overrideQueries = await getOverrideQueries(db);
 
-        await Promise.allSettled(
+        await Promise.all(
             overrideQueries.map(async (overrideQuery) => {
-                await db.kpopVideosValidation.raw(overrideQuery);
+                await sql.raw(overrideQuery).execute(db.kpopVideosValidation);
             })
         );
 
@@ -375,7 +409,9 @@ async function validateSqlDump(
                 `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${validationDedupGroupNamesSqlPath}`
             );
 
-            await db.kpopVideosValidation.raw("CALL DeduplicateGroupNames();");
+            await sql
+                .raw("CALL DeduplicateGroupNames();")
+                .execute(db.kpopVideosValidation);
 
             logger.info("Validating creation of data tables");
             const originalCreateKmqTablesProcedureSqlPath = path.join(
@@ -396,9 +432,11 @@ async function validateSqlDump(
                 `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${validationCreateKmqTablesProcedureSqlPath}`
             );
 
-            await db.kpopVideosValidation.raw(
-                `CALL CreateKmqDataTables(${process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST});`
-            );
+            await sql
+                .raw(
+                    `CALL CreateKmqDataTables(${process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST});`
+                )
+                .execute(db.kpopVideosValidation);
         }
     } catch (e) {
         throw new Error(
@@ -412,7 +450,6 @@ async function validateSqlDump(
         await validateDaisukiTableSchema(db, frozenSchema);
     }
 
-    await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_validation;");
     logger.info("SQL dump validated successfully");
 }
 
@@ -439,13 +476,15 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
 
     logger.info(`Validating SQL dump (${path.basename(dbSeedFilePath)})`);
 
-    await validateSqlDump(db, dbSeedFilePath, bootstrap);
+    if (!options.skipValidate) {
+        await validateSqlDump(db, dbSeedFilePath, bootstrap);
+    }
 
     // importing dump into temporary database
     logger.info("Dropping K-Pop video temporary database");
-    await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_tmp;");
+    await sql`DROP DATABASE IF EXISTS kpop_videos_tmp;`.execute(db.agnostic);
     logger.info("Creating K-Pop video temporary database");
-    await db.agnostic.raw("CREATE DATABASE kpop_videos_tmp;");
+    await sql`CREATE DATABASE kpop_videos_tmp;`.execute(db.agnostic);
     logger.info("Seeding K-Pop video temporary database");
     await exec(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_tmp < ${dbSeedFilePath}`
@@ -462,29 +501,35 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
 
         if (!(await databaseExists(db, "kpop_videos"))) {
             logger.info("Database 'kpop_videos' doesn't exist, creating...");
-            await db.agnostic.raw("CREATE DATABASE kpop_videos;");
+            await sql`CREATE DATABASE kpop_videos;`.execute(db.agnostic);
         }
 
         if (kpopVideoTableExists) {
             logger.info(`Table '${tableName}' exists, updating...`);
-            await db.kpopVideos.raw("DROP TABLE IF EXISTS kpop_videos.old;");
-            await db.kpopVideos.raw(
-                `RENAME TABLE kpop_videos.${tableName} TO old, kpop_videos_tmp.${tableName} TO kpop_videos.${tableName};`
+            await sql`DROP TABLE IF EXISTS kpop_videos.old`.execute(
+                db.agnostic
             );
-        } else {
-            logger.info(`Table '${tableName} doesn't exist, creating...`);
 
-            await db.agnostic.raw(
-                `ALTER TABLE kpop_videos_tmp.${tableName} RENAME kpop_videos.${tableName}`
-            );
+            await sql`RENAME TABLE kpop_videos.${sql.raw(
+                tableName
+            )} TO old, kpop_videos_tmp.${sql.raw(
+                tableName
+            )} TO kpop_videos.${sql.raw(tableName)};`.execute(db.kpopVideos);
+        } else {
+            logger.info(`Table '${tableName}' doesn't exist, creating...`);
+            await sql
+                .raw(
+                    `ALTER TABLE kpop_videos_tmp.${tableName} RENAME kpop_videos.${tableName}`
+                )
+                .execute(db.agnostic);
         }
     }
 
-    await db.kpopVideos.raw("DROP TABLE IF EXISTS kpop_videos.old;");
-    await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_tmp;");
+    await sql`DROP TABLE IF EXISTS kpop_videos.old;`.execute(db.agnostic);
+    await sql`DROP DATABASE IF EXISTS kpop_videos_tmp;`.execute(db.agnostic);
 
     logger.info("Substituting songs with better audio");
-    await replaceBetterAudioSongs(db.kpopVideos);
+    await replaceBetterAudioSongs(db);
 
     // override queries
     logger.info("Performing data overrides");
@@ -492,18 +537,18 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
 
     // update collations of columns that have user-inputted queries
     logger.info("Updating collation overrides");
-    await db.kpopVideos.raw(
-        "ALTER TABLE app_kpop_group MODIFY name VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+    await sql`ALTER TABLE app_kpop_group MODIFY name VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`.execute(
+        db.kpopVideos
     );
 
-    await db.kpopVideos.raw(
-        "ALTER TABLE app_kpop_group MODIFY kname VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+    await sql`ALTER TABLE app_kpop_group MODIFY kname VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`.execute(
+        db.kpopVideos
     );
 
-    await Promise.allSettled(
-        overrideQueries.map(async (overrideQuery) => {
-            await db.kpopVideos.raw(overrideQuery);
-        })
+    await Promise.all(
+        overrideQueries.map(async (overrideQuery) =>
+            sql.raw(overrideQuery).execute(db.kpopVideos)
+        )
     );
 
     logger.info(
@@ -582,11 +627,12 @@ async function updateKpopDatabase(
  * @param db - Database context
  */
 export async function updateGroupList(db: DatabaseContext): Promise<void> {
-    const result = await db
-        .kpopVideos("app_kpop_group")
+    const result = await db.kpopVideos
+        .selectFrom("app_kpop_group")
         .select(["name", "members as gender"])
         .where("is_collab", "=", "n")
-        .orderBy("name", "ASC");
+        .orderBy("name", "asc")
+        .execute();
 
     await fs.promises.writeFile(
         DataFiles.GROUP_LIST,
@@ -644,6 +690,10 @@ async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
         try {
             await loadStoredProcedures();
             await seedAndDownloadNewSongs(db);
+
+            if (process.env.NODE_ENV !== EnvType.PROD) {
+                await updateDaisukiSchemaTypings(db);
+            }
         } catch (e) {
             logger.error(e);
             process.exit(1);

@@ -54,15 +54,16 @@ export default class VoteCommand implements BaseCommand {
     ): Promise<void> {
         let voteStatusString = "";
         const boostActive = await userBonusIsActive(messageContext.author.id);
-        const userVoterStatus = await dbContext
-            .kmq("top_gg_user_votes")
+        const userVoterStatus = await dbContext.kmq
+            .selectFrom("top_gg_user_votes")
+            .select("buff_expiry_date")
             .where("user_id", "=", messageContext.author.id)
-            .first();
+            .executeTakeFirst();
 
-        if (boostActive) {
+        if (userVoterStatus && boostActive) {
             const timeRemaining =
                 new Date(
-                    userVoterStatus["buff_expiry_date"] - Date.now()
+                    userVoterStatus["buff_expiry_date"].getTime() - Date.now()
                 ).getTime() /
                 (1000 * 60);
 
