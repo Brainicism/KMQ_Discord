@@ -203,7 +203,7 @@ export default class KmqWebServer {
             }
 
             const databaseLatency = await measureExecutionTime(
-                sql`1`.execute(this.dbContext.agnostic)
+                sql`SELECT 1`.execute(this.dbContext.agnostic)
             );
 
             let databaseLatencyHealthIndicator: HealthIndicator;
