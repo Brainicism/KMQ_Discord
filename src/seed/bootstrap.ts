@@ -1,5 +1,12 @@
+import * as cp from "child_process";
+import { FileMigrationProvider, Migrator, NO_MIGRATIONS, sql } from "kysely";
 import { IPCLogger } from "../logger";
-import { STANDBY_COOKIE, STATUS_COOKIE } from "../constants";
+import {
+    PROMOTED_COOKIE,
+    STANDBY_COOKIE,
+    STATUS_COOKIE,
+    TEST_DB_CACHED_EXPORT,
+} from "../constants";
 import { config } from "dotenv";
 import {
     databaseExists,
@@ -9,11 +16,11 @@ import {
     updateKpopDatabase,
 } from "./seed_db";
 import { getNewConnection } from "../database_context";
+import { pathExists } from "../helpers/utils";
 import EnvType from "../enums/env_type";
 import KmqConfiguration from "../kmq_configuration";
 import downloadAndConvertSongs from "../scripts/download-new-songs";
-import fs from "fs";
-import kmqKnexConfig from "../config/knexfile_kmq";
+import fs, { promises as fsp } from "fs";
 import path from "path";
 import type { DatabaseContext } from "../database_context";
 
@@ -53,9 +60,7 @@ function hasRequiredEnvironmentVariables(): boolean {
 }
 
 async function kmqDatabaseExists(db: DatabaseContext): Promise<boolean> {
-    const kmqExists = await databaseExists(db, "kmq");
-    const kmqTestExists = await databaseExists(db, "kmq_test");
-    return kmqExists && kmqTestExists;
+    return databaseExists(db, "kmq");
 }
 
 async function kpopDataDatabaseExists(db: DatabaseContext): Promise<boolean> {
@@ -73,36 +78,106 @@ async function songThresholdReached(db: DatabaseContext): Promise<boolean> {
     if (!availableSongsTableExists) return false;
 
     return (
-        ((await db.kmq("available_songs").count("* as count").first()) as any)
-            .count >= SONG_DOWNLOAD_THRESHOLD
+        (
+            await db.kmq
+                .selectFrom("available_songs")
+                .select((eb) => eb.fn.countAll<number>().as("count"))
+                .executeTakeFirstOrThrow()
+        ).count >= SONG_DOWNLOAD_THRESHOLD
     );
 }
 
-async function performMigrations(db: DatabaseContext): Promise<void> {
-    logger.info("Performing migrations...");
-    const knexMigrationConfig = {
-        directory: kmqKnexConfig.migrations.directory,
-    };
+/**
+ * Import cached dump
+ * @param databaseName - the database name
+ */
+export function importCachedDump(databaseName: string): void {
+    // eslint-disable-next-line node/no-sync
+    cp.execSync(
+        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} ${databaseName} < ${TEST_DB_CACHED_EXPORT}`
+    );
+}
 
-    const migrationList = await db.kmq.migrate.list(knexMigrationConfig);
+/**
+ * Perform migrations
+ * @param db - The database context
+ */
+export async function performMigrations(db: DatabaseContext): Promise<void> {
+    logger.info("Performing migrations (up)...");
+    const migrator = new Migrator({
+        db: db.kmq,
+        provider: new FileMigrationProvider({
+            fs: fsp,
+            path,
+            // This needs to be an absolute path.
+            migrationFolder: path.join(__dirname, "../migrations"),
+        }),
+    });
 
-    const pendingMigrations: Array<any> = migrationList[1];
-    logger.info(
-        `Pending migrations: [${pendingMigrations.map((x) => x.file)}]`
+    const pendingMigrations = (await migrator.getMigrations()).filter(
+        (x) => !x.executedAt
     );
 
     if (pendingMigrations.length > 0) {
+        logger.info(
+            `Pending migrations: [${pendingMigrations.map((x) => x.name)}]`
+        );
         if (KmqConfiguration.Instance.disallowMigrations()) {
             logger.error("Migrations are disallowed.");
             process.exit(1);
         }
 
-        try {
-            await db.kmq.migrate.latest(knexMigrationConfig);
-        } catch (e) {
-            logger.error(`Migration failed: ${e}`);
+        const { error, results } = await migrator.migrateToLatest();
+        for (const result of results || []) {
+            if (result.status === "Success") {
+                logger.info(
+                    `Migration (up) "${result.migrationName}" was executed successfully`
+                );
+            } else if (result.status === "Error") {
+                logger.error(
+                    `Failed to execute migration: "${result.migrationName}"`
+                );
+            }
+        }
+
+        if (error) {
+            logger.error(`Failed to migrate, err: ${error}`);
             process.exit(1);
         }
+    }
+}
+
+/**
+ * Perform migrations
+ * @param db - The database context
+ */
+export async function performMigrationDown(db: DatabaseContext): Promise<void> {
+    logger.info("Performing migrations (down)...");
+    const migrator = new Migrator({
+        db: db.kmq,
+        provider: new FileMigrationProvider({
+            fs: fsp,
+            path,
+            // This needs to be an absolute path.
+            migrationFolder: path.join(__dirname, "../migrations"),
+        }),
+    });
+
+    const { error, results } = await migrator.migrateTo(NO_MIGRATIONS);
+    for (const result of results || []) {
+        if (result.status === "Success") {
+            logger.info(
+                `Migration (down) "${result.migrationName}" was executed successfully`
+            );
+        } else if (result.status === "Error") {
+            logger.error(
+                `Failed to execute migration: "${result.migrationName}"`
+            );
+        }
+    }
+
+    if (error) {
+        throw new Error(`Failed to migrate, err: ${error}`);
     }
 }
 
@@ -112,8 +187,8 @@ async function bootstrapDatabases(): Promise<void> {
 
     if (!(await kmqDatabaseExists(db))) {
         logger.info("Performing migrations on KMQ database");
-        await db.agnostic.raw("CREATE DATABASE IF NOT EXISTS kmq");
-        await db.agnostic.raw("CREATE DATABASE IF NOT EXISTS kmq_test");
+        await sql`CREATE DATABASE IF NOT EXISTS kmq;`.execute(db.agnostic);
+        importCachedDump("kmq");
     }
 
     await performMigrations(db);
@@ -137,9 +212,10 @@ async function bootstrapDatabases(): Promise<void> {
     }
 
     logger.info("Cleaning up stale data");
-    await db.kmq.raw(
-        "SELECT * FROM system_stats WHERE date < DATE(NOW() - INTERVAL 3 MONTH)"
-    );
+    await db.kmq
+        .deleteFrom("system_stats")
+        .where("date", "<", sql`DATE(NOW() - INTERVAL 3 MONTH)`)
+        .execute();
 
     logger.info(`Bootstrapped in ${(Date.now() - startTime) / 1000}s`);
     await db.destroy();
@@ -155,8 +231,11 @@ async function bootstrapDatabases(): Promise<void> {
         }
 
         if (process.env.IS_STANDBY === "true") {
-            logger.info("Preparing standby instance");
-            await fs.promises.writeFile(STANDBY_COOKIE, "starting");
+            const alreadyPromoted = await pathExists(PROMOTED_COOKIE);
+            if (!alreadyPromoted) {
+                logger.info("Preparing standby instance");
+                await fs.promises.writeFile(STANDBY_COOKIE, "starting");
+            }
         }
 
         await fs.promises.writeFile(STATUS_COOKIE, "starting");

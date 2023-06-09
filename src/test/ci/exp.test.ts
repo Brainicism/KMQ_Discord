@@ -13,7 +13,6 @@ import {
 import AnswerType from "../../enums/option_types/answer_type";
 import ExpBonusModifier from "../../enums/exp_bonus_modifier";
 import GameRound from "../../structures/game_round";
-import Gender from "../../enums/option_types/gender";
 import GuessModeType from "../../enums/option_types/guess_mode_type";
 import GuildPreference from "../../structures/guild_preference";
 import ShuffleType from "../../enums/option_types/shuffle_type";
@@ -402,7 +401,7 @@ describe("exp command", () => {
                     hangulArtistName: "x",
                     youtubeLink: "x",
                     publishDate: new Date(),
-                    members: Gender.FEMALE,
+                    members: "female",
                     artistID: 1,
                     isSolo: "y",
                     rank: 0,

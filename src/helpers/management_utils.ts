@@ -15,6 +15,7 @@ import {
     sendPowerHourNotification,
     updateAppCommands,
 } from "./discord_utils";
+import { sql } from "kysely";
 import KmqConfiguration from "../kmq_configuration";
 import MessageContext from "../structures/message_context";
 import State from "../state";
@@ -25,6 +26,7 @@ import i18n from "./localization_manager";
 import schedule from "node-schedule";
 import updatePremiumUsers from "./patreon_manager";
 import type LocaleType from "../enums/locale_type";
+import type MatchedArtist from "../interfaces/matched_artist";
 
 const logger = new IPCLogger("management_utils");
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 3, 2, 1]);
@@ -121,9 +123,15 @@ function clearInactiveVoiceConnections(): void {
                     `gid: ${existingVoiceChannelGuildID}, vid: ${voiceChannelID} | Disconnected inactive voice connection`
                 );
 
-                State.client.voiceConnections.leave(
-                    existingVoiceChannelGuildID
-                );
+                try {
+                    State.client.voiceConnections.leave(
+                        existingVoiceChannelGuildID
+                    );
+                } catch (e) {
+                    logger.error(
+                        `Failed to disconnect inactive voice connection for gid: ${existingVoiceChannelGuildID}. err = ${e}`
+                    );
+                }
             }
         }
     }
@@ -134,31 +142,40 @@ async function updateSystemStats(clusterID: number): Promise<void> {
     const { client } = State;
     const latencies = client.shards.map((x) => x.latency);
     const meanLatency = _.mean(latencies);
-    const maxLatency = _.max(latencies);
-    const minLatency = _.min(latencies);
+    const maxLatency = _.max(latencies) as number;
+    const minLatency = _.min(latencies) as number;
     if ([meanLatency, maxLatency, minLatency].some((x) => x === Infinity))
         return;
 
-    await dbContext.kmq("system_stats").insert({
-        cluster_id: clusterID,
-        stat_name: "mean_latency",
-        stat_value: meanLatency,
-        date: new Date(),
-    });
+    await dbContext.kmq
+        .insertInto("system_stats")
+        .values({
+            cluster_id: clusterID,
+            stat_name: "mean_latency",
+            stat_value: meanLatency,
+            date: new Date(),
+        })
+        .execute();
 
-    await dbContext.kmq("system_stats").insert({
-        cluster_id: clusterID,
-        stat_name: "min_latency",
-        stat_value: minLatency,
-        date: new Date(),
-    });
+    await dbContext.kmq
+        .insertInto("system_stats")
+        .values({
+            cluster_id: clusterID,
+            stat_name: "min_latency",
+            stat_value: minLatency,
+            date: new Date(),
+        })
+        .execute();
 
-    await dbContext.kmq("system_stats").insert({
-        cluster_id: clusterID,
-        stat_name: "max_latency",
-        stat_value: maxLatency,
-        date: new Date(),
-    });
+    await dbContext.kmq
+        .insertInto("system_stats")
+        .values({
+            cluster_id: clusterID,
+            stat_name: "max_latency",
+            stat_value: maxLatency,
+            date: new Date(),
+        })
+        .execute();
 }
 
 /** Updates the bot's song listening status */
@@ -181,10 +198,12 @@ export async function updateBotStatus(): Promise<void> {
         return;
     }
 
-    const randomPopularSongs = await dbContext
-        .kmq("available_songs")
-        .orderBy("publishedon", "DESC")
-        .limit(25);
+    const randomPopularSongs = await dbContext.kmq
+        .selectFrom("available_songs")
+        .select(["song_name_en", "artist_name_en", "link"])
+        .orderBy("publishedon", "desc")
+        .limit(25)
+        .execute();
 
     const randomPopularSong = chooseRandom(randomPopularSongs);
     if (!randomPopularSong) {
@@ -201,33 +220,34 @@ export async function updateBotStatus(): Promise<void> {
 
 /** Reload song/artist aliases */
 export async function reloadAliases(): Promise<void> {
-    const songAliasMapping = await dbContext
-        .kmq("available_songs")
+    const songAliasMapping = await dbContext.kmq
+        .selectFrom("available_songs")
         .select(["link", "song_aliases"])
-        .where("song_aliases", "<>", "");
+        .where("song_aliases", "<>", "")
+        .execute();
 
     const artistAliasMapping: {
         artist_name_en: string;
         artist_aliases: string;
-        previous_name_en: string;
-        previous_name_ko: string;
-    }[] = await dbContext
-        .kmq("available_songs")
-        .distinct([
-            "artist_name_en",
-            "artist_aliases",
-            "previous_name_en",
-            "previous_name_ko",
-        ])
+        previous_name_en: string | null;
+        previous_name_ko: string | null;
+    }[] = await dbContext.kmq
+        .selectFrom("available_songs")
         .select([
             "artist_name_en",
             "artist_aliases",
             "previous_name_en",
             "previous_name_ko",
         ])
-        .where("artist_aliases", "<>", "")
-        .orWhere("previous_name_en", "<>", "")
-        .orWhere("previous_name_ko", "<>", "");
+        .distinct()
+        .where(({ or, cmpr }) =>
+            or([
+                cmpr("artist_aliases", "<>", ""),
+                cmpr("previous_name_en", "<>", ""),
+                cmpr("previous_name_ko", "<>", ""),
+            ])
+        )
+        .execute();
 
     const songAliases: { [songName: string]: string[] } = {};
     for (const mapping of songAliasMapping) {
@@ -261,18 +281,19 @@ export async function reloadBonusGroups(): Promise<void> {
     const bonusGroupCount = 10;
     const date = new Date();
     const artistNameQuery: string[] = (
-        await dbContext
-            .kpopVideos("app_kpop_group")
+        await dbContext.kpopVideos
+            .selectFrom("app_kpop_group")
             .select(["name"])
             .where("is_collab", "=", "n")
-            .orderByRaw(
-                `RAND(${
+            .orderBy(
+                sql`RAND(${
                     date.getFullYear() +
                     date.getMonth() * 997 +
                     date.getDate() * 37
                 })`
             )
             .limit(bonusGroupCount)
+            .execute()
     ).map((x) => x.name);
 
     State.bonusArtists = new Set(
@@ -283,16 +304,17 @@ export async function reloadBonusGroups(): Promise<void> {
 }
 
 async function reloadArtists(): Promise<void> {
-    const artistAliasMapping = await dbContext
-        .kmq("available_songs")
-        .distinct(["artist_name_en", "artist_aliases"])
+    const artistAliasMapping = await dbContext.kmq
+        .selectFrom("available_songs")
         .select([
             "artist_name_en",
             "artist_name_ko",
             "artist_aliases",
             "id_artist",
         ])
-        .whereRaw("artist_name_en NOT LIKE ?", ["%+%"]);
+        .distinct()
+        .where("artist_name_en", "not like", "%+%")
+        .execute();
 
     for (const mapping of artistAliasMapping) {
         const aliases = mapping["artist_aliases"]
@@ -303,13 +325,15 @@ async function reloadArtists(): Promise<void> {
             name: mapping["artist_name_en"],
             hangulName: mapping["artist_name_ko"],
             id: mapping["id_artist"],
-        };
+        } as MatchedArtist;
 
         State.artistToEntry[
             normalizeArtistNameEntry(mapping["artist_name_en"])
         ] = artistEntry;
 
-        State.artistToEntry[mapping["artist_name_ko"]] = artistEntry;
+        if (mapping["artist_name_ko"]) {
+            State.artistToEntry[mapping["artist_name_ko"]] = artistEntry;
+        }
 
         for (const alias in aliases) {
             if (alias.length > 0) {
@@ -319,26 +343,27 @@ async function reloadArtists(): Promise<void> {
         }
     }
 
-    State.topArtists = await dbContext
-        .kmq("available_songs")
-        .select([
-            "id_artist AS id",
-            "artist_name_en AS name",
-            "artist_name_ko AS hangulName",
-        ])
-        .join(
+    State.topArtists = await dbContext.kmq
+        .selectFrom("available_songs")
+        .innerJoin(
             "kpop_videos.app_kpop_group",
             "available_songs.id_artist",
-            "kpop_videos.app_kpop_group.id"
+            "app_kpop_group.id"
         )
-        .orderByRaw("SUM(views) DESC")
+        .select([
+            "id_artist as id",
+            "artist_name_en as name",
+            "artist_name_ko as hangulName",
+        ])
+        .orderBy((eb) => eb.fn("SUM", ["views"]), "desc")
+        .groupBy("id_artist")
         .limit(25)
-        .groupBy("id_artist");
+        .execute();
 }
 
 async function reloadSongs(): Promise<void> {
-    const songMapping = await dbContext
-        .kmq("available_songs")
+    const songMapping = await dbContext.kmq
+        .selectFrom("available_songs")
         .select([
             "link",
             "song_name_en",
@@ -346,7 +371,8 @@ async function reloadSongs(): Promise<void> {
             "id_artist",
             "clean_song_name_en",
             "clean_song_name_ko",
-        ]);
+        ])
+        .execute();
 
     for (const mapping of songMapping) {
         const songEntry = {
@@ -365,20 +391,25 @@ async function reloadSongs(): Promise<void> {
         State.songLinkToEntry[songEntry.songLink] = songEntry;
     }
 
-    State.newSongs = await dbContext
-        .kmq("available_songs")
+    State.newSongs = await dbContext.kmq
+        .selectFrom("available_songs")
         .select([
-            "link AS songLink",
-            "song_name_en AS name",
-            "song_name_ko AS hangulName",
-            "id_artist AS artistID",
+            "link as songLink",
+            "song_name_en as name",
+            "song_name_ko as hangulName",
+            "id_artist as artistID",
         ])
-        .orderBy("publishedon", "DESC")
-        .limit(25);
+        .orderBy("publishedon", "desc")
+        .limit(25)
+        .execute();
 }
 
 async function reloadLocales(): Promise<void> {
-    const updatedLocales = await dbContext.kmq("locale").select("*");
+    const updatedLocales = await dbContext.kmq
+        .selectFrom("locale")
+        .select(["locale", "guild_id"])
+        .execute();
+
     for (const l of updatedLocales) {
         State.locales[l.guild_id] = l.locale as LocaleType;
     }

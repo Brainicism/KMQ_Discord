@@ -1,8 +1,9 @@
-enum Gender {
-    MALE = "male",
-    FEMALE = "female",
-    COED = "coed",
-    ALTERNATING = "alternating",
-}
+export const availableGenders = [
+    "male",
+    "female",
+    "coed",
+    "alternating",
+] as const;
 
-export default Gender;
+export type GenderModeOptions = (typeof availableGenders)[number];
+export type AvailableGenders = Exclude<GenderModeOptions, "alternating">;

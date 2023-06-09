@@ -4,7 +4,6 @@ import {
     chunkArray,
     discordDateFormat,
     friendlyFormattedNumber,
-    standardDateFormat,
 } from "../../helpers/utils";
 import {
     getDebugLogHeader,
@@ -18,6 +17,7 @@ import {
 import Eris from "eris";
 import KmqMember from "../../structures/kmq_member";
 import MessageContext from "../../structures/message_context";
+import SongSelector from "../../structures/song_selector";
 import State from "../../state";
 import dbContext from "../../database_context";
 import i18n from "../../helpers/localization_manager";
@@ -76,25 +76,16 @@ export default class RecentlyAddedCommand implements BaseCommand {
             messageOrInteraction.guildID as string
         );
 
-        const newSongs: Array<QueriedSong> = await dbContext
-            .kmq("available_songs")
-            .select([
-                "song_name_en AS originalSongName",
-                "song_name_ko AS originalHangulSongName",
-                "artist_name_en AS artistName",
-                "artist_name_ko AS hangulArtistName",
-                "link AS youtubeLink",
-                "publishedon AS publishDate",
-                "views",
-            ])
-            .orderBy("publishedon", "DESC")
+        const newSongs: Array<QueriedSong> = await dbContext.kmq
+            .selectFrom("available_songs")
+            .select(SongSelector.QueriedSongFields)
+            .orderBy("publishedon", "desc")
             .where(
                 "publishedon",
                 ">=",
-                standardDateFormat(
-                    new Date(Date.now() - 1000 * 60 * 60 * 24 * 14)
-                )
-            );
+                new Date(Date.now() - 1000 * 60 * 60 * 24 * 14)
+            )
+            .execute();
 
         if (newSongs.length === 0) {
             sendInfoMessage(

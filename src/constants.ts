@@ -3,7 +3,6 @@ import AnswerType from "./enums/option_types/answer_type";
 import ArtistType from "./enums/option_types/artist_type";
 import ExpBonusModifier from "./enums/exp_bonus_modifier";
 import GameOption from "./enums/game_option_name";
-import Gender from "./enums/option_types/gender";
 import GuessModeType from "./enums/option_types/guess_mode_type";
 import LanguageType from "./enums/option_types/language_type";
 import LocaleType from "./enums/locale_type";
@@ -15,6 +14,7 @@ import ShuffleType from "./enums/option_types/shuffle_type";
 import SpecialType from "./enums/option_types/special_type";
 import SubunitsPreference from "./enums/option_types/subunit_preference";
 import path from "path";
+import type { GenderModeOptions } from "./enums/option_types/gender";
 
 export class KmqImages {
     public static READING_BOOK =
@@ -49,7 +49,11 @@ export const DEFAULT_MULTIGUESS_TYPE = MultiGuessType.ON;
 export const DEFAULT_ANSWER_TYPE = AnswerType.MULTIPLE_CHOICE_MED;
 export const DEFAULT_SHUFFLE = ShuffleType.RANDOM;
 export const DEFAULT_SEEK = SeekType.RANDOM;
-export const DEFAULT_GENDER = [Gender.FEMALE, Gender.MALE, Gender.COED];
+export const DEFAULT_GENDER: Array<GenderModeOptions> = [
+    "female",
+    "male",
+    "coed",
+];
 export const DEFAULT_LIMIT = 500;
 export const SONG_START_DELAY = 3000;
 
@@ -241,6 +245,7 @@ export const DataFiles = {
 
 // ephermeral to the docker container, not mounted from host
 export const STANDBY_COOKIE = path.join(__dirname, "../standby");
+export const PROMOTED_COOKIE = path.join(__dirname, "../promoted");
 export const STATUS_COOKIE = path.join(__dirname, "../status");
 
 export const PERMISSIONS_LINK = "https://www.youtube.com/watch?v=87GW0SmF5LI";

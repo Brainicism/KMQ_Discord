@@ -1,55 +1,63 @@
+import { Kysely, MysqlDialect } from "kysely";
 import { config } from "dotenv";
-import { knex } from "knex";
+import { createPool } from "mysql2";
 import { resolve } from "path";
 import EnvType from "./enums/env_type";
-import type { Knex } from "knex";
+import type { InfoSchemaDB } from "./typings/info_schema_db";
+import type { KmqDB } from "./typings/kmq_db";
+import type { KpopVideosDB } from "./typings/kpop_videos_db";
 
 config({ path: resolve(__dirname, "../.env") });
 
-function generateKnexContext(
-    databaseName: string | null,
-    minPoolSize: number,
+function generateKysleyContext<T>(
+    databaseName: string | undefined,
     maxPoolSize: number
-): any {
-    return {
-        client: "mysql2",
-        connection: {
-            user: process.env.DB_USER,
-            password: process.env.DB_PASS,
-            database: databaseName,
-            host: process.env.DB_HOST,
-            charset: "utf8mb4",
-            port: parseInt(process.env.DB_PORT as string, 10),
-            decimalNumbers: true,
-            multipleStatements: true,
-        },
-        pool: {
-            min: minPoolSize,
-            max: maxPoolSize,
-        },
-    };
+): Kysely<T> {
+    return new Kysely<T>({
+        dialect: new MysqlDialect({
+            pool: createPool({
+                host: process.env.DB_HOST,
+                user: process.env.DB_USER,
+                password: process.env.DB_PASS,
+                database: databaseName,
+                connectionLimit: maxPoolSize,
+                charset: "utf8mb4",
+                port: parseInt(process.env.DB_PORT as string, 10),
+                decimalNumbers: true,
+                multipleStatements: true,
+            }),
+        }),
+    });
 }
 
 export class DatabaseContext {
-    public kmq: Knex;
-    public kpopVideos: Knex;
-    public kpopVideosValidation: Knex;
-    public agnostic: Knex;
+    public kmq: Kysely<KmqDB>;
+    public kpopVideos: Kysely<KpopVideosDB>;
+    public infoSchema: Kysely<InfoSchemaDB>;
+    public kpopVideosValidation: Kysely<KpopVideosDB>;
+    public agnostic: Kysely<null>;
 
     constructor() {
         if (process.env.NODE_ENV === EnvType.TEST) {
-            this.kmq = knex(generateKnexContext("kmq_test", 0, 1));
-            this.kpopVideos = knex(
-                generateKnexContext("kpop_videos_test", 0, 1)
+            this.kmq = generateKysleyContext<KmqDB>("kmq_test", 1);
+
+            this.kpopVideos = generateKysleyContext<KpopVideosDB>(
+                "kpop_videos_test",
+                1
             );
         } else {
-            this.kmq = knex(generateKnexContext("kmq", 0, 20));
-            this.kpopVideos = knex(generateKnexContext("kpop_videos", 0, 5));
+            this.kmq = generateKysleyContext<KmqDB>("kmq", 20);
+            this.kpopVideos = generateKysleyContext<KpopVideosDB>(
+                "kpop_videos",
+                5
+            );
         }
 
-        this.agnostic = knex(generateKnexContext(null, 0, 1));
-        this.kpopVideosValidation = knex(
-            generateKnexContext("kpop_videos_validation", 0, 1)
+        this.infoSchema = generateKysleyContext("information_schema", 1);
+        this.agnostic = generateKysleyContext(undefined, 1);
+        this.kpopVideosValidation = generateKysleyContext(
+            "kpop_videos_validation",
+            1
         );
     }
 
@@ -69,6 +77,8 @@ export class DatabaseContext {
         if (this.kpopVideosValidation) {
             await this.kpopVideosValidation.destroy();
         }
+
+        await this.infoSchema.destroy();
     }
 }
 

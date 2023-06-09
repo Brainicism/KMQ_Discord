@@ -8,7 +8,6 @@ import {
 import { IPCLogger } from "../logger";
 import { chooseWeightedRandom, setDifference } from "../helpers/utils";
 import ArtistType from "../enums/option_types/artist_type";
-import Gender from "../enums/option_types/gender";
 import LanguageType from "../enums/option_types/language_type";
 import OstPreference from "../enums/option_types/ost_preference";
 import ReleaseType from "../enums/option_types/release_type";
@@ -16,6 +15,11 @@ import ShuffleType from "../enums/option_types/shuffle_type";
 import State from "../state";
 import SubunitsPreference from "../enums/option_types/subunit_preference";
 import dbContext from "../database_context";
+import type {
+    AvailableGenders,
+    GenderModeOptions,
+} from "../enums/option_types/gender";
+import type { Expression, SqlBool } from "kysely";
 import type { MatchedPlaylist } from "../helpers/spotify_manager";
 import type GuildPreference from "./guild_preference";
 import type QueriedSong from "../interfaces/queried_song";
@@ -35,11 +39,29 @@ export default class SongSelector {
         countBeforeLimit: number;
     } | null;
 
+    public static QueriedSongFields = [
+        "available_songs.clean_song_name_en as songName",
+        "available_songs.song_name_en as originalSongName",
+        "available_songs.clean_song_name_ko as hangulSongName",
+        "available_songs.song_name_ko as originalHangulSongName",
+        "available_songs.artist_name_en as artistName",
+        "available_songs.artist_name_ko as hangulArtistName",
+        "available_songs.link as youtubeLink",
+        "available_songs.publishedon as publishDate",
+        "available_songs.members",
+        "available_songs.id_artist as artistID",
+        "available_songs.issolo as isSolo",
+        "available_songs.tags",
+        "available_songs.views",
+        "available_songs.rank",
+        "available_songs.vtype",
+    ] as const;
+
     /** List of songs played with /shuffle unique enabled */
     public uniqueSongsPlayed: Set<string>;
 
     /** The last gender played when gender is set to alternating, can be null (in not alternating mode), GENDER.MALE, or GENDER.FEMALE */
-    public lastAlternatingGender: Gender | null;
+    public lastAlternatingGender: GenderModeOptions | null;
 
     constructor() {
         this.filteredSongs = null;
@@ -93,12 +115,10 @@ export default class SongSelector {
         if (guildPreference.isGenderAlternating()) {
             if (this.lastAlternatingGender === null) {
                 this.lastAlternatingGender =
-                    Math.random() < 0.5 ? Gender.MALE : Gender.FEMALE;
+                    Math.random() < 0.5 ? "male" : "female";
             } else {
                 this.lastAlternatingGender =
-                    this.lastAlternatingGender === Gender.MALE
-                        ? Gender.FEMALE
-                        : Gender.MALE;
+                    this.lastAlternatingGender === "male" ? "female" : "male";
             }
         } else {
             this.lastAlternatingGender = null;
@@ -146,7 +166,7 @@ export default class SongSelector {
     static selectRandomSong(
         filteredSongs: Set<QueriedSong>,
         ignoredSongs: Set<string>,
-        alternatingGender: Gender | null,
+        alternatingGender: GenderModeOptions | null,
         shuffleType = ShuffleType.RANDOM
     ): QueriedSong | null {
         let queriedSongList = [...filteredSongs];
@@ -159,14 +179,13 @@ export default class SongSelector {
         if (
             alternatingGender &&
             queriedSongList.some(
-                (y) =>
-                    y.members === alternatingGender || y.members === Gender.COED
+                (y) => y.members === alternatingGender || y.members === "coed"
             )
         ) {
             queriedSongList = queriedSongList.filter(
                 (song) =>
                     song.members === alternatingGender ||
-                    song.members === Gender.COED
+                    song.members === "coed"
             );
         }
 
@@ -239,29 +258,6 @@ export default class SongSelector {
     }
 
     /**
-     * @returns the fields queried to generate the song list
-     */
-    static getQueriedSongFields(): Array<string> {
-        return [
-            "available_songs.clean_song_name_en as songName",
-            "available_songs.song_name_en as originalSongName",
-            "available_songs.clean_song_name_ko as hangulSongName",
-            "available_songs.song_name_ko as originalHangulSongName",
-            "available_songs.artist_name_en as artistName",
-            "available_songs.artist_name_ko as hangulArtistName",
-            "available_songs.link as youtubeLink",
-            "available_songs.publishedon as publishDate",
-            "available_songs.members",
-            "available_songs.id_artist as artistID",
-            "available_songs.issolo as isSolo",
-            "available_songs.tags",
-            "available_songs.views",
-            "available_songs.rank",
-            "available_songs.vtype",
-        ];
-    }
-
-    /**
      * Returns a list of songs from the data store, narrowed down by the specified game options
      * @param guildPreference - The GuildPreference
      * @param premium - Whether the game is premium
@@ -275,9 +271,9 @@ export default class SongSelector {
     ): Promise<{ songs: Set<QueriedSong>; countBeforeLimit: number }> {
         const gameOptions = guildPreference.gameOptions;
         let result: Array<QueriedSong> = [];
-        let queryBuilder = dbContext
-            .kmq("available_songs")
-            .select(SongSelector.getQueriedSongFields());
+        let queryBuilder = dbContext.kmq
+            .selectFrom("available_songs")
+            .select(SongSelector.QueriedSongFields);
 
         if (gameOptions.forcePlaySongID) {
             queryBuilder = queryBuilder.where(
@@ -286,124 +282,196 @@ export default class SongSelector {
                 gameOptions.forcePlaySongID
             );
             return {
-                songs: new Set(await queryBuilder),
+                songs: new Set(await queryBuilder.execute()),
                 countBeforeLimit: 1,
             };
         }
 
-        let subunits: Array<String> = [];
-        let collabGroupContainingSubunit: Array<string> = [];
+        let subunits: Array<number> = [];
+        let collabGroupContainingSubunit: Array<number> = [];
+        const selectedGroupIDs = guildPreference.getGroupIDs();
         if (gameOptions.subunitPreference === SubunitsPreference.INCLUDE) {
-            subunits = (
-                await dbContext
-                    .kpopVideos("app_kpop_group")
-                    .select("id")
-                    .whereIn("id_parentgroup", guildPreference.getGroupIDs())
-                    .whereNotIn("id", shadowBannedArtistIds)
-            ).map((x) => x["id"]);
+            let subunitsQueryBuilder = dbContext.kpopVideos
+                .selectFrom("app_kpop_group")
+                .select("id");
+
+            if (selectedGroupIDs.length) {
+                subunitsQueryBuilder = subunitsQueryBuilder.where(
+                    "id_parentgroup",
+                    "in",
+                    selectedGroupIDs
+                );
+            }
+
+            if (shadowBannedArtistIds.length) {
+                subunitsQueryBuilder = subunitsQueryBuilder.where(
+                    "id",
+                    "not in",
+                    shadowBannedArtistIds
+                );
+            }
+
+            subunits = (await subunitsQueryBuilder.execute()).map(
+                (x) => x["id"]
+            );
+
+            let collabGroupBuilder = dbContext.kpopVideos // collab matches
+                .selectFrom("app_kpop_agrelation")
+                .innerJoin(
+                    "app_kpop_group",
+                    "app_kpop_agrelation.id_subgroup",
+                    "app_kpop_group.id"
+                )
+                .select(["id", "name"])
+                .distinct()
+                .where("app_kpop_group.is_collab", "=", "y");
+
+            if (subunits.length) {
+                collabGroupBuilder = collabGroupBuilder.where(
+                    "app_kpop_agrelation.id_artist",
+                    "in",
+                    subunits
+                );
+            }
 
             collabGroupContainingSubunit = (
-                await dbContext
-                    // collab matches
-                    .kpopVideos("app_kpop_agrelation")
-                    .select(["id", "name"])
-                    .distinct("id", "name")
-                    .join("app_kpop_group", function join() {
-                        this.on(
-                            "app_kpop_agrelation.id_subgroup",
-                            "=",
-                            "app_kpop_group.id"
-                        );
-                    })
-                    .whereIn("app_kpop_agrelation.id_artist", subunits)
-                    .andWhere("app_kpop_group.is_collab", "y")
+                await collabGroupBuilder.execute()
             ).map((x) => x["id"]);
         }
 
-        queryBuilder = queryBuilder.where(function artistFilter() {
-            this.where(function includesInnerArtistFilter() {
+        queryBuilder = queryBuilder.where(({ or, cmpr, and }) => {
+            const includesInnerArtistFilterExpressions: Array<
+                Expression<SqlBool>
+            > = [];
+
+            const includesGroupIDs = guildPreference.getIncludesGroupIDs();
+            if (includesGroupIDs.length) {
                 if (!guildPreference.isGroupsMode()) {
                     if (
                         gameOptions.subunitPreference ===
                         SubunitsPreference.EXCLUDE
                     ) {
-                        this.whereIn(
-                            "id_artist",
-                            guildPreference.getIncludesGroupIDs()
+                        includesInnerArtistFilterExpressions.push(
+                            cmpr("id_artist", "in", includesGroupIDs)
                         );
                     } else {
-                        this.andWhere(function () {
-                            this.whereIn(
-                                "id_artist",
-                                guildPreference.getIncludesGroupIDs()
-                            ).orWhereIn(
-                                "id_parent_artist",
-                                guildPreference.getIncludesGroupIDs()
-                            );
-                        });
+                        includesInnerArtistFilterExpressions.push(
+                            or([
+                                cmpr("id_artist", "in", includesGroupIDs),
+                                cmpr(
+                                    "id_parent_artist",
+                                    "in",
+                                    includesGroupIDs
+                                ),
+                            ])
+                        );
                     }
                 }
-            }).orWhere(function mainInnerArtistFilter() {
-                this.whereNotIn(
-                    "id_artist",
-                    guildPreference.getExcludesGroupIDs()
+            }
+
+            const mainArtistFilterExpressions: Array<Expression<SqlBool>> = [];
+
+            if (guildPreference.getExcludesGroupIDs().length) {
+                mainArtistFilterExpressions.push(
+                    cmpr(
+                        "id_artist",
+                        "not in",
+                        guildPreference.getExcludesGroupIDs()
+                    )
                 );
-                if (!guildPreference.isGroupsMode()) {
-                    const gender = guildPreference.isGenderAlternating()
-                        ? [Gender.MALE, Gender.FEMALE, Gender.COED]
-                        : gameOptions.gender;
+            }
 
-                    this.whereIn("members", gender);
+            if (!guildPreference.isGroupsMode()) {
+                const gender: Array<AvailableGenders> =
+                    guildPreference.isGenderAlternating()
+                        ? ["male", "female", "coed"]
+                        : (gameOptions.gender as Array<AvailableGenders>);
 
-                    // filter by artist type only in non-groups
-                    if (gameOptions.artistType !== ArtistType.BOTH) {
-                        this.andWhere(
+                mainArtistFilterExpressions.push(cmpr("members", "in", gender));
+                // filter by artist type only in non-groups
+                if (gameOptions.artistType !== ArtistType.BOTH) {
+                    mainArtistFilterExpressions.push(
+                        cmpr(
                             "issolo",
                             "=",
                             gameOptions.artistType === ArtistType.SOLOIST
                                 ? "y"
                                 : "n"
-                        );
-                    }
-                } else if (
-                    gameOptions.subunitPreference === SubunitsPreference.EXCLUDE
-                ) {
-                    this.whereIn("id_artist", guildPreference.getGroupIDs());
-                } else {
-                    this.andWhere(function () {
-                        this.whereIn(
-                            "id_artist",
-                            guildPreference.getGroupIDs()
-                        ).orWhere(function subunitFilter() {
-                            this.whereIn(
-                                "id_parent_artist",
-                                guildPreference.getGroupIDs()
-                            )
-                                .whereNotIn("id_artist", shadowBannedArtistIds)
-                                .orWhereIn(
-                                    "id_artist",
-                                    collabGroupContainingSubunit
-                                );
-                        });
-                    });
+                        )
+                    );
                 }
-            });
+            } else if (
+                gameOptions.subunitPreference === SubunitsPreference.EXCLUDE
+            ) {
+                if (selectedGroupIDs) {
+                    mainArtistFilterExpressions.push(
+                        cmpr("id_artist", "in", selectedGroupIDs)
+                    );
+                }
+            } else {
+                const mainArtistIdSearchExpressions = [];
+                if (selectedGroupIDs.length) {
+                    mainArtistIdSearchExpressions.push(
+                        ...[
+                            cmpr("id_artist", "in", selectedGroupIDs),
+                            cmpr("id_parent_artist", "in", selectedGroupIDs),
+                        ]
+                    );
+                }
+
+                if (collabGroupContainingSubunit.length) {
+                    mainArtistIdSearchExpressions.push(
+                        cmpr("id_artist", "in", collabGroupContainingSubunit)
+                    );
+                }
+
+                if (shadowBannedArtistIds.length) {
+                    mainArtistFilterExpressions.push(
+                        and([
+                            cmpr("id_artist", "not in", shadowBannedArtistIds),
+                            or(mainArtistIdSearchExpressions),
+                        ])
+                    );
+                } else {
+                    mainArtistFilterExpressions.push(
+                        or(mainArtistIdSearchExpressions)
+                    );
+                }
+            }
+
+            // Kyseley does not like it when you provide an empty array or array of size 1 to OR/AND
+            const finalExpressions = [];
+            if (includesInnerArtistFilterExpressions.length === 1) {
+                finalExpressions.push(includesInnerArtistFilterExpressions[0]);
+            } else if (includesInnerArtistFilterExpressions.length > 1) {
+                finalExpressions.push(
+                    and(includesInnerArtistFilterExpressions)
+                );
+            }
+
+            if (mainArtistFilterExpressions.length === 1) {
+                finalExpressions.push(mainArtistFilterExpressions[0]);
+            } else if (mainArtistFilterExpressions.length > 1) {
+                finalExpressions.push(and(mainArtistFilterExpressions));
+            }
+
+            return or(finalExpressions);
         });
 
         if (gameOptions.languageType === LanguageType.KOREAN) {
             for (const tag of FOREIGN_LANGUAGE_TAGS) {
                 queryBuilder = queryBuilder.where(
                     "tags",
-                    "NOT LIKE",
+                    "not like",
                     `%${tag}%`
                 );
             }
         }
 
         if (gameOptions.ostPreference === OstPreference.EXCLUDE) {
-            queryBuilder = queryBuilder.where("tags", "NOT LIKE", "%o%");
+            queryBuilder = queryBuilder.where("tags", "not like", "%o%");
         } else if (gameOptions.ostPreference === OstPreference.EXCLUSIVE) {
-            queryBuilder = queryBuilder.where("tags", "LIKE", "%o%");
+            queryBuilder = queryBuilder.where("tags", "like", "%o%");
         }
 
         if (gameOptions.releaseType === ReleaseType.OFFICIAL) {
@@ -411,26 +479,37 @@ export default class SongSelector {
             for (const tag of NON_OFFICIAL_VIDEO_TAGS) {
                 queryBuilder = queryBuilder.where(
                     "tags",
-                    "NOT LIKE",
+                    "not like",
                     `%${tag}%`
                 );
             }
         }
 
         queryBuilder = queryBuilder
-            .andWhere("publishedon", ">=", `${gameOptions.beginningYear}-01-01`)
-            .andWhere("publishedon", "<=", `${gameOptions.endYear}-12-31`)
-            .orderBy("views", "DESC");
+            .where(
+                "publishedon",
+                ">=",
+                new Date(`${gameOptions.beginningYear}-01-01`)
+            )
+            .where(
+                "publishedon",
+                "<=",
+                new Date(`${gameOptions.endYear}-12-31`)
+            )
+            .orderBy("views", "desc");
 
         queryBuilder = queryBuilder.where(
             "rank",
             "<=",
             premium
-                ? (process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST as string)
-                : (process.env.AUDIO_SONGS_PER_ARTIST as string)
+                ? parseInt(
+                      process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST as string,
+                      10
+                  )
+                : parseInt(process.env.AUDIO_SONGS_PER_ARTIST as string, 10)
         );
 
-        result = await queryBuilder;
+        result = await queryBuilder.execute();
 
         const count = result.length;
         result = result.slice(gameOptions.limitStart, gameOptions.limitEnd);

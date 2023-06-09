@@ -1,10 +1,6 @@
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
-import {
-    chunkArray,
-    discordDateFormat,
-    standardDateFormat,
-} from "../../helpers/utils";
+import { chunkArray, discordDateFormat } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -34,8 +30,8 @@ const FIELDS_PER_EMBED = 9;
 interface UpcomingRelease {
     name: string;
     artistName: string;
-    hangulArtistName?: string;
-    releaseType: ReleaseType;
+    hangulArtistName: string | null;
+    releaseType: "album" | "ep" | "single" | "undefined";
     releaseDate: Date;
     artistID: number;
 }
@@ -114,25 +110,32 @@ export default class UpcomingReleasesCommand implements BaseCommand {
             messageOrInteraction.guildID as string
         );
 
-        const upcomingReleases: Array<UpcomingRelease> = await dbContext
-            .kpopVideos("app_upcoming")
-            .select([
-                "app_upcoming.name",
-                "app_kpop_group.name AS artistName",
-                "kname AS hangulArtistName",
-                "rtype AS releaseType",
-                "rdate AS releaseDate",
-            ])
-            .join("app_kpop_group", function join() {
-                this.on("app_upcoming.id_artist", "=", "app_kpop_group.id");
-            })
-            .orderBy("rdate", "ASC")
-            .where("rdate", ">=", standardDateFormat(new Date()))
-            .whereNot("app_upcoming.name", "")
-            .whereIn(
-                "rtype",
-                releaseType ? [releaseType] : Object.values(ReleaseType)
-            );
+        const upcomingReleases: Array<UpcomingRelease> =
+            await dbContext.kpopVideos
+                .selectFrom("app_upcoming")
+                .innerJoin(
+                    "app_kpop_group",
+                    "app_upcoming.id_artist",
+                    "app_kpop_group.id"
+                )
+                .select([
+                    "app_upcoming.name",
+                    "app_kpop_group.name as artistName",
+                    "app_kpop_group.id as artistID",
+                    "kname as hangulArtistName",
+                    "rtype as releaseType",
+                    "rdate as releaseDate",
+                ])
+                .orderBy("rdate", "asc")
+                .where("rdate", ">=", new Date())
+                .where("rtype", "!=", "undefined")
+                .where("app_upcoming.name", "!=", "")
+                .where(
+                    "rtype",
+                    "in",
+                    releaseType ? [releaseType] : Object.values(ReleaseType)
+                )
+                .execute();
 
         if (upcomingReleases.length === 0) {
             sendInfoMessage(
