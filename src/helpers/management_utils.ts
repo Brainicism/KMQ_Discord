@@ -13,14 +13,12 @@ import { reloadFactCache } from "../fact_generator";
 import {
     sendInfoMessage,
     sendPowerHourNotification,
-    updateAppCommands,
 } from "./discord_utils";
 import { sql } from "kysely";
 import KmqConfiguration from "../kmq_configuration";
 import MessageContext from "../structures/message_context";
 import State from "../state";
 import _ from "lodash";
-import cluster from "cluster";
 import dbContext from "../database_context";
 import i18n from "./localization_manager";
 import schedule from "node-schedule";
@@ -415,14 +413,6 @@ async function reloadLocales(): Promise<void> {
     }
 }
 
-async function reloadCommandIDs(): Promise<void> {
-    if (cluster.isPrimary) {
-        logger.info("Updating app command IDs...");
-        await updateAppCommands();
-        await State.ipc.allClustersCommand("fetch_app_command_ids");
-    }
-}
-
 function clearCachedPlaylists(): void {
     State.cachedPlaylists = {};
 }
@@ -508,5 +498,4 @@ export function reloadCaches(): void {
     reloadBonusGroups();
     reloadLocales();
     reloadSongs();
-    reloadCommandIDs();
 }
