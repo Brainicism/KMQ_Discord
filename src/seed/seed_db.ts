@@ -21,6 +21,8 @@ import fs from "fs";
 import path from "path";
 import util from "util";
 import type { DatabaseContext } from "../database_context";
+import type { KpopVideosDB } from "../typings/kpop_videos_db";
+import type { Kysely } from "kysely";
 
 const exec = util.promisify(cp.exec);
 
@@ -84,8 +86,10 @@ export async function tableExists(
     );
 }
 
-async function replaceBetterAudioSongs(db: DatabaseContext): Promise<void> {
-    const songsWithBetterAudioCounterpart = await db.kpopVideosValidation
+async function replaceBetterAudioSongs(
+    db: Kysely<KpopVideosDB>
+): Promise<void> {
+    const songsWithBetterAudioCounterpart = await db
         .selectFrom("app_kpop as a")
         .leftJoin("app_kpop as b", "a.id_better_audio", "b.id")
         .select([
@@ -98,7 +102,7 @@ async function replaceBetterAudioSongs(db: DatabaseContext): Promise<void> {
 
     for (const betterAudioSong of songsWithBetterAudioCounterpart) {
         // remove 'better' audio entry to not consume b-side limit
-        await db.kpopVideosValidation
+        await db
             .deleteFrom("app_kpop")
             .where("vlink", "=", betterAudioSong.better_audio_link)
             .execute();
@@ -107,7 +111,7 @@ async function replaceBetterAudioSongs(db: DatabaseContext): Promise<void> {
         if (betterAudioSong.better_audio_link) {
             // TODO: this null check shouldn't be needed, but Kysely does not narrow types automatically
             // can be removed when .$narrowType is available
-            await db.kpopVideosValidation
+            await db
                 .updateTable("app_kpop")
                 .where("id", "=", betterAudioSong.original_id)
                 .set({
@@ -344,7 +348,7 @@ async function validateSqlDump(
             `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${mvSeedFilePath}`
         );
 
-        await replaceBetterAudioSongs(db);
+        await replaceBetterAudioSongs(db.kpopVideosValidation);
 
         logger.info("Validating MV song count");
         const mvSongCount = (await db.kpopVideosValidation
@@ -529,7 +533,7 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
     await sql`DROP DATABASE IF EXISTS kpop_videos_tmp;`.execute(db.agnostic);
 
     logger.info("Substituting songs with better audio");
-    await replaceBetterAudioSongs(db);
+    await replaceBetterAudioSongs(db.kpopVideos);
 
     // override queries
     logger.info("Performing data overrides");
