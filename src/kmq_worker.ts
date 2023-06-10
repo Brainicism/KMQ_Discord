@@ -261,12 +261,9 @@ export default class BotWorker extends BaseClusterWorker {
         logger.info("Updating bot's status..");
         updateBotStatus();
         logger.info(
-            `Logged in as ${State.client.user.username}#${
-                State.client.user.discriminator
-            }! in '${process.env.NODE_ENV}' mode (${durationSeconds(
-                State.processStartTime,
-                Date.now()
-            )}s)`
+            `Logged in as '${State.client.user.username}'! in '${
+                process.env.NODE_ENV
+            }' mode (${durationSeconds(State.processStartTime, Date.now())}s)`
         );
     }
 }

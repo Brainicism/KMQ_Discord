@@ -21,6 +21,7 @@ export interface AppKpop {
     releasedate: Date;
     publishedon: Date;
     views: Generated<number>;
+    promotedviews_yc: Generated<number>;
     likes: Generated<number>;
     awards: Generated<number>;
     has_pak: Generated<"n" | "y">;
