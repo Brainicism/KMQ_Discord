@@ -16,3 +16,4 @@ data/
 *.test.sql
 .eslintcache
 .vscode/launch.json
+*.bak
