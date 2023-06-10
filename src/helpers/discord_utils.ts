@@ -1893,7 +1893,16 @@ export async function processGroupAutocompleteInteraction(
  */
 export async function getUserTag(userID: string): Promise<string> {
     const member = await fetchUser(userID);
-    return member ? `${member.username}#${member.discriminator}` : "";
+    if (!member) {
+        return "";
+    }
+
+    // remove once username migration is complete
+    if (member.discriminator !== "0") {
+        return `${member.username}#${member.discriminator}`;
+    }
+
+    return member.username;
 }
 
 /**
