@@ -1006,6 +1006,7 @@ export default class LeaderboardCommand implements BaseCommand {
     ): Promise<void> {
         const alreadyEnrolled = !!(await dbContext.kmq
             .selectFrom("leaderboard_enrollment")
+            .selectAll()
             .where("player_id", "=", messageContext.author.id)
             .executeTakeFirst());
 
