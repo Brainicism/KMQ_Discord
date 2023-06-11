@@ -10,10 +10,7 @@ import {
 } from "./game_utils";
 import { normalizePunctuationInName } from "../structures/game_round";
 import { reloadFactCache } from "../fact_generator";
-import {
-    sendInfoMessage,
-    sendPowerHourNotification,
-} from "./discord_utils";
+import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
 import { sql } from "kysely";
 import KmqConfiguration from "../kmq_configuration";
 import MessageContext from "../structures/message_context";

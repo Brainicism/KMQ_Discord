@@ -82,6 +82,11 @@ interface LevelUpResult {
     endLevel: number;
 }
 
+interface LastGuesser {
+    userID: string;
+    streak: number;
+}
+
 export default class GameSession extends Session {
     /** The GameType that the GameSession started in */
     public readonly gameType: GameType;
@@ -110,8 +115,8 @@ export default class GameSession extends Session {
         };
     };
 
-    /** Guessers mapped to their streak (concurrent streaks only possible in GameType.HIDDEN) */
-    private lastGuessers: { [userID: string]: number };
+    /** The most recent Guesser, including their current streak */
+    private lastGuesser: LastGuesser | null;
 
     private hiddenUpdateTimer: NodeJS.Timeout | null;
 
@@ -140,7 +145,7 @@ export default class GameSession extends Session {
         this.finished = false;
         this.round = null;
         this.songStats = {};
-        this.lastGuessers = {};
+        this.lastGuesser = null;
         this.hiddenUpdateTimer = null;
 
         switch (this.gameType) {
@@ -335,28 +340,18 @@ export default class GameSession extends Session {
         const timePlayed = Date.now() - round.startedAt;
         if (guessResult.correct) {
             // update guessing streaks
-            if (this.gameType === GameType.HIDDEN) {
-                const correctGuesserIDs = guessResult.correctGuessers!.map(
-                    (x) => x.id
-                );
-
-                for (const player of Object.keys(this.lastGuessers)) {
-                    // Remove players who didn't guess correctly
-                    if (!correctGuesserIDs.includes(player)) {
-                        delete this.lastGuessers[player];
-                    }
-                }
-
-                for (const guesser of guessResult.correctGuessers!) {
-                    // Increment streak for players who guessed correctly
-                    this.lastGuessers[guesser.id] =
-                        (this.lastGuessers[guesser.id] ?? 0) + 1;
-                }
-            } else {
-                const guesserID = guessResult.correctGuessers![0].id;
-                this.lastGuessers = {};
-                this.lastGuessers[guesserID] =
-                    this.lastGuessers[guesserID] ?? 1;
+            if (
+                guessResult.correctGuessers &&
+                (this.lastGuesser === null ||
+                    this.lastGuesser.userID !==
+                        guessResult.correctGuessers[0].id)
+            ) {
+                this.lastGuesser = {
+                    userID: guessResult.correctGuessers[0].id,
+                    streak: 1,
+                };
+            } else if (this.lastGuesser) {
+                this.lastGuesser.streak++;
             }
 
             this.guessTimes.push(timePlayed);
@@ -368,7 +363,7 @@ export default class GameSession extends Session {
                 messageContext
             );
         } else if (!guessResult.error) {
-            this.lastGuessers = {};
+            this.lastGuesser = null;
             if (this.gameType === GameType.ELIMINATION) {
                 const eliminationScoreboard = this
                     .scoreboard as EliminationScoreboard;
@@ -1440,23 +1435,24 @@ export default class GameSession extends Session {
         messageContext: MessageContext
     ): Promise<void> {
         // update scoreboard
+        const lastGuesserStreak = this.lastGuesser?.streak ?? 0;
         const playerRoundResults = await Promise.all(
             (guessResult.correctGuessers ?? []).map(
                 async (correctGuesser, idx) => {
-                    const streak = this.lastGuessers[correctGuesser.id] ?? 0;
                     const guessPosition = idx + 1;
                     const expGain = await calculateTotalRoundExp(
                         guildPreference,
                         round,
                         getNumParticipants(this.voiceChannelID),
-                        streak,
+                        lastGuesserStreak,
                         timePlayed,
-                        this.gameType !== GameType.HIDDEN ? guessPosition : 1,
+                        guessPosition,
                         await userBonusIsActive(correctGuesser.id),
                         correctGuesser.id
                     );
 
-                    if (idx === 0 || this.gameType === GameType.HIDDEN) {
+                    let streak = 0;
+                    if (idx === 0) {
                         logger.info(
                             `${getDebugLogHeader(messageContext)}, uid: ${
                                 correctGuesser.id
@@ -1465,6 +1461,7 @@ export default class GameSession extends Session {
                             }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
                         );
                     } else {
+                        streak = 0;
                         logger.info(
                             `${getDebugLogHeader(messageContext)}, uid: ${
                                 correctGuesser.id
@@ -1479,7 +1476,7 @@ export default class GameSession extends Session {
                     return {
                         player: correctGuesser,
                         pointsEarned:
-                            idx === 0 || this.gameType === GameType.HIDDEN
+                            idx === 0
                                 ? correctGuesser.pointsAwarded
                                 : correctGuesser.pointsAwarded / 2,
                         expGain,
