@@ -683,7 +683,7 @@ describe("game round", () => {
                     hangulArtistName: "예술가",
                     youtubeLink: "a1b2c3",
                     publishDate: new Date(2015, 0),
-                    members: Gender.MALE,
+                    members: "male",
                     artistID: 4,
                     isSolo: "n",
                     rank: 0,

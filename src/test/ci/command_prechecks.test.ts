@@ -619,4 +619,122 @@ describe("command prechecks", () => {
             });
         });
     });
+
+    describe("answerHiddenPrecheck", () => {
+        const GUILD_ID = "123";
+
+        const session = new GameSession(
+            new GuildPreference(GUILD_ID),
+            "123",
+            "1234",
+            GUILD_ID,
+            mockKmqMember,
+            GameType.HIDDEN,
+            false
+        );
+
+        describe("change to multiple choice during hidden game via default reset", () => {
+            it("should return false", () => {
+                assert.strictEqual(
+                    CommandPrechecks.answerHiddenPrecheck({
+                        session,
+                        messageContext,
+                        parsedMessage: {
+                            components: [],
+                            action: "",
+                            argument: "",
+                            message: "",
+                        },
+                    }),
+                    false
+                );
+            });
+        });
+
+        describe("change to multiple choice during hidden game via explicit multiple choice", () => {
+            it("should return false", () => {
+                assert.strictEqual(
+                    CommandPrechecks.answerHiddenPrecheck({
+                        session,
+                        messageContext,
+                        parsedMessage: {
+                            components: ["easy"],
+                            action: "",
+                            argument: "",
+                            message: "",
+                        },
+                    }),
+                    false
+                );
+            });
+        });
+
+        describe("change to typing typos", () => {
+            it("should return true", () => {
+                assert.strictEqual(
+                    CommandPrechecks.answerHiddenPrecheck({
+                        session,
+                        messageContext,
+                        parsedMessage: {
+                            components: ["typingtypos"],
+                            action: "",
+                            argument: "",
+                            message: "",
+                        },
+                    }),
+                    true
+                );
+            });
+        });
+    });
+
+    describe("timerHiddenPrecheck", () => {
+        const GUILD_ID = "123";
+
+        const session = new GameSession(
+            new GuildPreference(GUILD_ID),
+            "123",
+            "1234",
+            GUILD_ID,
+            mockKmqMember,
+            GameType.HIDDEN,
+            false
+        );
+
+        describe("change timer to another value", () => {
+            it("should return true", () => {
+                assert.strictEqual(
+                    CommandPrechecks.timerHiddenPrecheck({
+                        session,
+                        messageContext,
+                        parsedMessage: {
+                            components: ["5"],
+                            action: "",
+                            argument: "",
+                            message: "",
+                        },
+                    }),
+                    true
+                );
+            });
+        });
+
+        describe("disable timer", () => {
+            it("should return false", () => {
+                assert.strictEqual(
+                    CommandPrechecks.timerHiddenPrecheck({
+                        session,
+                        messageContext,
+                        parsedMessage: {
+                            components: [],
+                            action: "",
+                            argument: "",
+                            message: "",
+                        },
+                    }),
+                    false
+                );
+            });
+        });
+    });
 });

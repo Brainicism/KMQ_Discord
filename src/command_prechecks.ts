@@ -407,7 +407,6 @@ export default class CommandPrechecks {
 
         if (!precheckArgs.interaction) {
             if (
-                precheckArgs.parsedMessage!.components.length === 0 ||
                 [AnswerType.TYPING, AnswerType.TYPING_TYPOS].includes(
                     precheckArgs.parsedMessage!.components[0] as AnswerType
                 )
@@ -459,7 +458,7 @@ export default class CommandPrechecks {
             return true;
         }
 
-        // Allow /timer change during hidden, but prevent them from disabling it
+        // Allow /timer change during hidden, but prevent disabling it
         if (!precheckArgs.interaction) {
             if (precheckArgs.parsedMessage!.components.length > 0) {
                 return true;
@@ -470,7 +469,7 @@ export default class CommandPrechecks {
             );
 
             const action = interactionName as OptionAction;
-            if (action === OptionAction.RESET) {
+            if (action === OptionAction.SET) {
                 return true;
             }
         }
