@@ -351,7 +351,7 @@
                     }
                 },
                 "guessReceived": {
-                    "description:": "{{guess}}을(를) 맞혀주셨습니다",
+                    "description": "{{guess}}을(를) 맞혀주셨습니다",
                     "title": "받은 추측"
                 },
                 "name": "현재 노래에 대한 당신의 최고의 샷"

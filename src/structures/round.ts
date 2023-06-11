@@ -46,6 +46,9 @@ export default abstract class Round {
     /** The message containing this round's interactable components */
     public interactionMessage: Eris.Message<Eris.TextableChannel> | null;
 
+    /** Whether the data shown in the message has changed since it was last updated */
+    public interactionMessageNeedsUpdate: boolean;
+
     constructor(song: QueriedSong) {
         this.song = song;
         this.songAliases = State.aliases.song[song.youtubeLink] || [];
@@ -58,6 +61,7 @@ export default abstract class Round {
         this.timerStartedAt = Date.now();
         this.finished = false;
         this.interactionMessage = null;
+        this.interactionMessageNeedsUpdate = false;
         this.roundMessageID = null;
         this.skippers = new Set();
         this.skipAchieved = false;

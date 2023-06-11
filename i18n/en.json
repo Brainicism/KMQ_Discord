@@ -351,7 +351,7 @@
                     }
                 },
                 "guessReceived": {
-                    "description:": "You guessed {{guess}}",
+                    "description": "You guessed {{guess}}",
                     "title": "Guess Received"
                 },
                 "name": "Your best shot at the current song"

@@ -1086,7 +1086,13 @@ export default class GameSession extends Session {
 
     updateGuessedMembersMessage(): void {
         const round = this.round;
-        if (this.finished || !round || round.finished) return;
+        if (
+            this.finished ||
+            !round ||
+            round.finished ||
+            !round.interactionMessageNeedsUpdate
+        )
+            return;
         round.interactionMessage?.edit({
             embeds: [
                 {
@@ -1128,6 +1134,15 @@ export default class GameSession extends Session {
         if (!this.round) return 0;
         const round = this.round;
         if (multipleChoiceMode && round.incorrectGuessers.has(userID)) return 0;
+
+        if (
+            !round.correctGuessers.map((x) => x.id).includes(userID) &&
+            !round.incorrectGuessers.has(userID)
+        ) {
+            if (round.interactionMessage) {
+                round.interactionMessageNeedsUpdate = true;
+            }
+        }
 
         round.storeGuess(userID, guess, createdAt, guessModeType, typosAllowed);
 
