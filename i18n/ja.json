@@ -1,0 +1,1557 @@
+{
+  "10th": "10番目",
+  "11th": "11番目",
+  "12th": "12番目",
+  "13th": "13番目",
+  "14th": "14番目",
+  "15th": "15番目",
+  "16th": "16番目",
+  "17th": "17番目",
+  "18th": "18番目",
+  "19th": "19番目",
+  "1st": "1番目",
+  "20th": "20番目",
+  "21st": "21番目",
+  "22nd": "22番目",
+  "23rd": "23番目",
+  "24th": "24番目",
+  "25th": "25番目",
+  "2nd": "2番目",
+  "3rd": "3番目",
+  "4th": "4番目",
+  "5th": "5番目",
+  "6th": "6番目",
+  "7th": "7番目",
+  "8th": "8番目",
+  "9th": "9番目",
+  "command": {
+    "add": {
+      "failure": {
+        "unrecognizedGroups": {
+          "added": "追加されました"
+        }
+      },
+      "help": {
+        "description": "現在の{{groups}}、{{exclude}}、または{{include}}オプションに1つ以上のグループを追加します。",
+        "example": {
+          "exclude": "現在の{{exclude}}オプションに{{groupOne}}、{{groupTwo}}、および{{groupThree}}を追加します。",
+          "groups": "現在の{{groups}}オプションに{{groupOne}}と{{groupTwo}}を追加します。",
+          "include": "現在の{{include}}オプションに{{groupOne}}を追加します。"
+        },
+        "name": "追加"
+      }
+    },
+    "answer": {
+      "help": {
+        "description": "回答方法を選択してください：回答を入力するか、複数選択肢を通じて回答するか。オプションは以下のとおりです：`{{typing}}`、`{{typingtypos}}`、`{{easy}}`、`{{medium}}`、および`{{hard}}`。",
+        "example": {
+          "multipleChoice": "{{optionCount}}つの複数選択肢のうち、ボタンをクリックして推測してください。{{penalty}}のEXPペナルティが適用されます。",
+          "typing": "チャットに回答を入力して推測してください。",
+          "typingTypos": "チャットに回答を入力して推測してください。小さなタイプミスは正解としてマークされます。{{penalty}}のEXPペナルティが適用されます。"
+        },
+        "interaction": {
+          "answerOption": "ゲーム内での回答方法",
+          "description": "回答方法を選択してください：回答を入力するか、複数選択肢を通じて回答するか。"
+        },
+        "name": "回答"
+      }
+    },
+    "artisttype": {
+      "help": {
+        "description": "ソロ、グループ、または両方から聞きたいかどうかを選択してください。オプションは以下のとおりです：{{soloists}}、{{groups}}、および{{both}}。",
+        "example": {
+          "both": "ソロアーティストとグループの両方から曲を再生する",
+          "groups": "グループからの曲のみ再生する",
+          "reset": "アーティストタイプオプションをリセットする",
+          "soloists": "ソロアーティストからの曲のみ再生する"
+        },
+        "interaction": {
+          "artistTypeOption": "再生するアーティストのタイプ",
+          "description": "ソロアーティスト、グループ、または両方から聴きたいかどうかを選択してください"
+        },
+        "name": "アーティストタイプ"
+      }
+    },
+    "begin": {
+      "ignored": {
+        "noTeam": {
+          "description": "ゲームを開始する前に `{{join}} [チーム名]` を使用してチームを作成してください。"
+        },
+        "title": "無視されました"
+      }
+    },
+    "cutoff": {
+      "failure": {
+        "invalidEndYear": {
+          "description": "終了年は開始年と同じかそれ以降でなければなりません。",
+          "title": "無効な終了年"
+        }
+      },
+      "help": {
+        "description": "曲のカットオフ年を設定します。1つの値が指定された場合、その年以降の曲のみが再生されます。2つの値が指定された場合、その2つの年の間にある曲のみが再生されます。",
+        "example": {
+          "reset": "デフォルトのカットオフ年 {{defaultBeginningSearchYear}} から {{defaultEndSearchYear}} にリセットする",
+          "singleCutoff": "{{year}}年以降にリリースされた曲を再生する",
+          "twoCutoffs": "{{beginningYear}}年から{{endingYear}}年の間にリリースされた曲を再生する"
+        },
+        "interaction": {
+          "beginningYear": "含める最も古い年",
+          "description": "曲のカットオフ年を設定する",
+          "earliestOption": "[beginning_year]から始まるすべての年の曲を選択する",
+          "endingYear": "含める最も最近の年",
+          "rangeOption": "[beginning_year]から[ending_year]までのすべての年の曲を選択する"
+        },
+        "name": "カットオフ"
+      }
+    },
+    "debug": {
+      "description": "ボット開発者からこれを依頼された場合は、次のものを渡してください：\n{{debugID}}",
+      "title": "デバッグ詳細が送信されました！"
+    },
+    "duration": {
+      "failure": {
+        "removingDuration": {
+          "notSet": {
+            "description": "現在、期間は設定されていません。"
+          },
+          "title": "期間の削除中にエラーが発生しました",
+          "tooShort": {
+            "description": "期間は2分未満にすることはできません。"
+          }
+        }
+      },
+      "help": {
+        "description": "KMQゲームの最大時間を分単位で設定します。",
+        "example": {
+          "decrement": "現在のゲームの期間から{{duration}}分を削除します。",
+          "increment": "現在のゲームの期間に{{duration}}分を追加します。",
+          "reset": "期間を無効にします。",
+          "set": "{{duration}}分後にゲームが自動的に終了します。"
+        },
+        "name": "期間",
+        "usage": {
+          "minutes": "分"
+        }
+      },
+      "interaction": {
+        "durationAdd": "期間に追加する分数",
+        "durationRemove": "期間から削除する分数",
+        "durationSet": "ゲームを終了する前にKMQをプレイする分数"
+      }
+    },
+    "end": {
+      "help": {
+        "description": "現在のゲームを終了し、勝者を決定します。",
+        "name": "終了"
+      },
+      "interaction": {
+        "description": "楽しんでください！",
+        "title": "ゲーム終了中"
+      }
+    },
+    "exclude": {
+      "failure": {
+        "unrecognizedGroups": {
+          "excluded": "除外された"
+        }
+      },
+      "help": {
+        "description": "無視するグループを選択してください。グループ名のリストは[こちら]({{groupList}})で確認できます。",
+        "example": {
+          "multipleGroups": "{{groupOne}}、{{groupTwo}}、および{{groupThree}}からの曲を無視します。",
+          "reset": "除外オプションをリセットします。",
+          "singleGroup": "{{group}}からの曲を無視します。"
+        },
+        "interaction": {
+          "add": {
+            "description": "指定されたグループを除外ゲームオプションに追加します。",
+            "perGroupDescription": "追加する{{ordinalNum}}グループ"
+          },
+          "description": "指定されたグループの曲を再生しないようにします。",
+          "remove": {
+            "description": "指定されたグループを除外ゲームオプションから削除します。",
+            "perGroupDescription": "{{ordinalNum}} 番目のグループを削除する"
+          },
+          "reset": {
+            "description": "除外オプションをリセットする"
+          },
+          "set": {
+            "description": "ゲームオプションで指定されたグループから曲を除外する",
+            "perGroupDescription": "{{ordinalNum}} 番目のグループを除外する"
+          }
+        },
+        "name": "除外する"
+      }
+    },
+    "exp": {
+      "activeModifiers": "🚀 アクティブな修飾語 🚀",
+      "artistGroupGuessModePenalty": "アーティスト/グループ推測モードペナルティ",
+      "bonusArtists": "デイリーボーナスアーティストによる曲の推測",
+      "bonusArtistsTitle": "🎤 現在のボーナスアーティスト 🎤",
+      "bonusDescription": "以下の曲でボーナスEXPを獲得できます",
+      "bonusTitle": "EXPボーナスの取得方法",
+      "explanation": {
+        "bonusArtistGuess": "ボーナスアーティストを正しく推測する",
+        "firstGameOfDay": "1日目のゲーム",
+        "powerHour": "KMQパワーアワーや週末にプレイする",
+        "quickGuess": "素早く推測する",
+        "rareGuess": "レアな正解ボーナス",
+        "rareGuessRange": "{{rareGuessLowerBound}} から {{rareGuessUpperBound}}",
+        "streak": "5回以上の連続正解を持つ",
+        "voting": "投票"
+      },
+      "firstGameOfDayBonus": "1日目のゲームボーナス",
+      "help": {
+        "description": "現在のEXP修飾子と現在のボーナスEXPアーティストのリストを表示します。",
+        "name": "exp"
+      },
+      "lowSongCountPenalty": "曲数が少ないペナルティ",
+      "multipleChoicePenalty": "複数選択肢ペナルティ",
+      "powerHourBonus": "パワーアワーボーナス",
+      "shufflePopularityPenalty": "シャッフル人気ペナルティ",
+      "shuffleWeightedEasyPenalty": "シャッフル加重簡単ペナルティ",
+      "title": "EXPボーナス",
+      "totalModifier": "合計修飾子",
+      "typosAllowedPenalty": "タイプミス許容ペナルティ",
+      "voteBonus": "投票ボーナス"
+    },
+    "feedback": {
+      "help": {
+        "description": "KMQに関するフィードバックやバグ報告を送信する",
+        "name": "フィードバック"
+      },
+      "questions": {
+        "improveKMQ": {
+          "placeholder": "KMQはあまりにも中毒性があります。私の家族や友人が私を恋しく思っています。",
+          "question": "KMQで改善できることは何ですか？"
+        },
+        "likeKMQ": {
+          "placeholder": "KMQは私に新しい音楽やジャンルを発見するのを助けてくれます。",
+          "question": "KMQについて好きな点は何ですか？"
+        },
+        "title": "KMQフィードバック"
+      }
+    },
+    "forcehint": {
+      "failure": {
+        "notOwner": {
+          "description": "フォースヒントはゲームオーナー（{{mentionedUser}}）のみ使用できます。"
+        }
+      },
+      "help": {
+        "description": "投票を必要とせずに現在の曲に直接ヒントを受け取ることができます。",
+        "name": "forcehint"
+      },
+      "hintIgnored": "フォースヒントが無視されました"
+    },
+    "forceskip": {
+      "description": "オーナーがラウンドをスキップしました...",
+      "failure": {
+        "notOwner": {
+          "description": "投票を必要とせずに現在の曲を直接スキップすることができます。"
+        }
+      },
+      "help": {
+        "description": "Only the game owner ({{mentionedUser}}) can force-skip the current song.",
+        "name": "男性、女性、{{coed}}のアーティストの性別を選択してください。または、{{genderAlternating}}を使用して、ラウンドごとに男性と女性のアーティストを交互に切り替えることができます。"
+      },
+      "skipIgnored": "ラウンドごとに男性と女性のアーティストを交互に切り替える"
+    },
+    "gender": {
+      "help": {
+        "description": "男性と女性のメンバーがいるグループの曲のみ再生する",
+        "example": {
+          "alternating": "女性アーティストの曲のみ再生する",
+          "coed": "男性と女性のアーティストの曲を再生する",
+          "female": "男性、女性、{{coed}}のデフォルトの性別にリセットする",
+          "maleFemale": "聴きたいアーティストの性別を選択してください。",
+          "reset": "グループメンバーまたはソロアーティストの性別"
+        },
+        "interaction": {
+          "description": "性別",
+          "gender": "1つのグループのみを選択した場合、{{alternatingGenderCommand}}は正しく動作しない場合があります。正しく性別を交互に切り替えるには、より多くのグループを含めることを検討してください。"
+        },
+        "name": "ゲームオプションの警告"
+      },
+      "warning": {
+        "gameOption": {
+          "description": "現在{{elimination}}ゲームが進行中です。{{goal}}と{{elimination}}は互換性がありません。{{goal}}を使用するには{{classic}}または{{teams}}ゲームをプレイしてください。",
+          "title": "与えられた目標は最高得点を超えています。目標を上げるか、新しいゲームを開始してください。"
+        }
+      }
+    },
+    "goal": {
+      "failure": {
+        "gameOptionConflict": {
+          "description": "目標の適用中にエラーが発生しました"
+        },
+        "goalExceeded": {
+          "description": "最もポイントを獲得したプレイヤーが目標スコアに到達すると、ゲームが終了します。引数なしで呼び出すと、目標が無効になります。ゲームが進行中の場合、目標は最高得点を超える必要があります。",
+          "title": "目標を無効にする"
+        }
+      },
+      "help": {
+        "description": "最初に{{goal}}に到達したプレイヤーがゲームに勝利します",
+        "example": {
+          "reset": "最もポイントを獲得したプレイヤーが目標スコアに到達すると、ゲームが終了します。",
+          "set": "勝利に必要なポイント数"
+        },
+        "interaction": {
+          "description": "目標",
+          "score": "ポイント"
+        },
+        "name": "聞きたいグループを選択してください。グループ名のリストは[こちら]({{groupList}})にあります。",
+        "usage": {
+          "points": "{{groupOne}}、{{groupTwo}}、{{groupThree}}からの曲のみ再生します。"
+        }
+      }
+    },
+    "groups": {
+      "help": {
+        "description": "グループオプションをリセットする",
+        "example": {
+          "multipleGroups": "{{group}}からの曲のみ再生します。",
+          "reset": "ゲームオプションに指定されたグループを追加します",
+          "singleGroup": "追加する{{ordinalNum}}グループ"
+        },
+        "interaction": {
+          "add": {
+            "description": "専用に再生するアーティストを選択します",
+            "perGroupDescription": "ゲームオプションから指定されたグループを削除します"
+          },
+          "description": "{{ordinalNum}} 番目のグループを削除する",
+          "remove": {
+            "description": "グループオプションをリセットする",
+            "perGroupDescription": "指定されたグループから曲を再生する"
+          },
+          "reset": {
+            "description": "{{ordinalNum}} 番目のグループから曲を再生する"
+          },
+          "set": {
+            "description": "グループ",
+            "perGroupDescription": "曲名、アーティスト名、または両方で推測するかどうかを選択してください。"
+          }
+        },
+        "name": "ゲームラウンドを勝つためには、アーティスト名を正しく入力してください（0.2ポイント）または曲名を入力してください（1ポイント）"
+      }
+    },
+    "guessmode": {
+      "help": {
+        "description": "ゲームラウンドを勝つためには、曲名を正しく入力してください",
+        "example": {
+          "artist": "{{defaultGuessMode}}のデフォルトの推測モードにリセットする",
+          "both": "ゲームラウンドを勝つためには、曲名を正しく入力してください",
+          "reset": "推測モード",
+          "song": "有効な推測と見なされるもの"
+        },
+        "name": "コマンド"
+      },
+      "interaction": {
+        "guessMode": "チャットで{{play}}と入力すると、ボットがVCでランダムなK-pop曲を再生します。このゲームの目的は、チャットで曲名を最初に当てることです。\n{{options}}で現在のゲームオプションを確認できます。`{{help}} [{{command}}]`を使用して詳細を確認してください。"
+      }
+    },
+    "help": {
+      "command": "例",
+      "description": "申し訳ありませんが、{{action}}のドキュメントはありません。",
+      "examples": "ボットの機能に関するヘルプを取得する。",
+      "failure": {
+        "noDocs": "利用可能なすべてのコマンドと短い説明を表示する"
+      },
+      "help": {
+        "description": "cutoffコマンドの詳細な説明を表示する",
+        "example": {
+          "allCommands": "ヘルプ",
+          "sampleCommand": "ドキュメントを取得するコマンドの名前。"
+        },
+        "name": "{{kmq}}コマンドのヘルプ"
+      },
+      "interaction": {
+        "action": "アーティスト名"
+      },
+      "title": "ヒントをリクエストできるのは生存しているプレイヤーのみです。"
+    },
+    "hint": {
+      "artistName": "複数選択肢でプレイしている間はヒントをリクエストできません。",
+      "failure": {
+        "invalidHintRequest": {
+          "eliminated": {
+            "description": "曲が再生されているときにのみヒントをリクエストできます。"
+          },
+          "multipleChoice": {
+            "description": "無効なヒントリクエスト"
+          },
+          "noSongPlaying": {
+            "description": "現在再生中の曲にヒントを与えます。"
+          },
+          "title": "ヒント"
+        }
+      },
+      "help": {
+        "description": "{{hintCounter}}件のヒントリクエストがありました。",
+        "name": "ヒントリクエスト"
+      },
+      "request": {
+        "description": "曲名",
+        "title": "ヒント"
+      },
+      "songName": "含まれる",
+      "title": "無視するフィルター（{{gender}}、{{artisttype}}など）を無視して、強制的に含めるグループを選択します。グループ名のリストは[こちら]({{groupList}})から確認できます。"
+    },
+    "include": {
+      "failure": {
+        "unrecognizedGroups": {
+          "included": "{{groupOne}}、{{groupTwo}}、{{groupThree}}から強制的に曲を含めます。"
+        }
+      },
+      "help": {
+        "description": "含めるオプションをリセットします。",
+        "example": {
+          "multipleGroups": "{{group}}から強制的に曲を含めます。",
+          "reset": "指定されたグループを含めるオプションに追加します。",
+          "singleGroup": "追加する{{ordinalNum}}グループを選択します。"
+        },
+        "interaction": {
+          "add": {
+            "description": "強制的に含めるアーティストを選択します。",
+            "perGroupDescription": "指定されたグループを含めるオプションから削除します。"
+          },
+          "description": "削除する{{ordinalNum}}グループを選択します。",
+          "remove": {
+            "description": "含めるオプションをリセットします。",
+            "perGroupDescription": "指定されたグループから曲を含めるオプションを設定します。"
+          },
+          "reset": {
+            "description": "含める{{ordinalNum}}グループを選択します。"
+          },
+          "set": {
+            "description": "含める",
+            "perGroupDescription": "すでにこのチームのメンバーです。"
+          }
+        },
+        "name": "このサーバーにある絵文字のみを含めることができます。"
+      }
+    },
+    "join": {
+      "failure": {
+        "joinError": {
+          "alreadyInTeam": {
+            "description": "チーム名には無効な文字が含まれています。"
+          },
+          "badEmojis": {
+            "description": "無効なチーム名"
+          },
+          "invalidCharacters": {
+            "description": "チームを作成するにはチーム名を含めるか、既に存在する場合はそのチームに参加するために (`{{joinCommand}} [チーム名]`)"
+          },
+          "invalidTeamName": {
+            "title": "参加エラー"
+          },
+          "noTeamName": {
+            "description": "プレイヤーが参加しました"
+          },
+          "title": "{{mentionedUser}} は {{teamName}} を勝利に導く力を持っていると思っています！"
+        }
+      },
+      "playerJoined": {
+        "title": "全員がチームに参加したら、{{beginCommand}} ゲームを開始してください！"
+      },
+      "playerJoinedTeam": {
+        "afterGameStart": {
+          "description": "{{joiningUser}} が {{teamName}} に参加しました"
+        },
+        "beforeGameStart": {
+          "description": "{{mentionedUser}} と一緒に {{teamName}} に参加するには、 `{{joinCommand}} {{teamNameWithCleanEmojis}}` を入力してください。{{startGameInstructions}}"
+        },
+        "title": "新しいチームが作成されました"
+      },
+      "team": {
+        "join": "\n{{beginCommand}} でゲームを開始してください。",
+        "new": "再生される曲が韓国語のみであるかどうかを選択してください。",
+        "startGameInstructions": "利用可能なすべての曲を再生する"
+      }
+    },
+    "language": {
+      "help": {
+        "description": "韓国語の曲のみを再生します。英語、日本語、中国語などの外国語の曲は無視されます。",
+        "example": {
+          "all": "{{defaultLanguage}} のデフォルト言語にリセットします。",
+          "korean": "言語",
+          "reset": "再生する音楽の言語"
+        },
+        "name": "常時"
+      },
+      "interaction": {
+        "language": "毎日"
+      }
+    },
+    "leaderboard": {
+      "duration": {
+        "allTime": "毎月",
+        "daily": "毎週",
+        "monthly": "毎年",
+        "weekly": "あなたの名前がリーダーボードに表示されるようになりました。",
+        "yearly": "リーダーボード登録が完了しました"
+      },
+      "enrolled": {
+        "description": "すでにリーダーボードに表示されています。表示名を更新する場合は、登録を解除して再登録してください。",
+        "title": "プレイヤーはすでに登録されています"
+      },
+      "failure": {
+        "alreadyEnrolled": {
+          "description": "この時間帯には誰もEXPを獲得していません。今が1位を目指すチャンスです！",
+          "title": "リーダーボードが空です"
+        },
+        "empty": {
+          "description": "このコマンドを使用するには、誰かがポイントを獲得する必要があります。",
+          "title": "参加者がいません"
+        },
+        "game": {
+          "noParticipants": {
+            "description": "リーダーボードはこれ以上進みません。",
+            "title": "😐"
+          }
+        },
+        "outOfRange": {
+          "description": "{{gameCount}}ゲームがプレイされました",
+          "title": "KMQリーダーボードを表示します。"
+        }
+      },
+      "gamesPlayed": "あなたの名前をリーダーボードに表示することができます。",
+      "help": {
+        "description": "現在のゲームでポイントを獲得したプレイヤーを含む月間スコアボードの2ページ目を表示します。",
+        "example": {
+          "enroll": "グローバルリーダーボードを表示します。",
+          "gameMonthlyPage": "EXP獲得量による今週のリーダーボードの4ページ目を表示します。",
+          "global": "サーバーワイドリーダーボードを表示します。",
+          "globalPage": "合計曲数で推測したサーバーワイドリーダーボードの3ページ目を表示します。",
+          "globalWeeklyPage": "あなたの名前をリーダーボードから非表示にします。",
+          "server": "リーダーボード",
+          "serverSongsGuessedPage": "ページ番号",
+          "unenroll": "リーダーボードがどこまで遡るかを選択します。"
+        },
+        "name": "リーダーボードを表示する開始ページを選択します。",
+        "usage": {
+          "pageNumber": "リーダーボードに含めるプレイヤーを選択します。"
+        }
+      },
+      "interaction": {
+        "duration": "リーダーボードの順序を定義するものを選択します。",
+        "page": "{{level}} {{formattedNumber}} ({{rankName}})",
+        "scope": "{{formattedNumber}} {{levelPluralized}}獲得",
+        "type": "リーダーボードに名前を表示したいですか？{{command}}を参照してください。"
+      },
+      "levelEntry": {
+        "permanent": "リーダーボードの次のページを見たいですか？{{command}}を参照してください。",
+        "temporary": "ランク #{{rank}}"
+      },
+      "quote": {
+        "name": "リセット{{timestamp}}",
+        "nextPage": "現在のゲーム"
+      },
+      "rankNumber": "グローバル",
+      "resets": "サーバー",
+      "scope": {
+        "currentGame": "{{serverName}}の",
+        "global": "{{songsGuessed}}曲を推測しました",
+        "server": {
+          "noName": "{{leaderboardScope}} {{leaderboardDuration}} リーダーボード {{leaderboardType}}",
+          "withName": "プレイ回数別"
+        }
+      },
+      "songsGuessed": "推測曲数別",
+      "title": "リーダーボードから消えました。",
+      "type": {
+        "byGamesPlayed": "リーダーボードの登録解除が完了しました。",
+        "bySongsGuessed": "最初の引数には、次の有効な値のいずれかを指定する必要があります：（正の数、{{typeOrScopeOrDuration}}）"
+      },
+      "unenrolled": {
+        "description": "2番目の引数には、次の有効な値のいずれかを指定する必要があります：（正の数、{{argument}}）",
+        "title": "3番目の引数には正の数を指定する必要があります。"
+      },
+      "validation": {
+        "firstArg": "終了制限は開始制限よりも大きくする必要があります。",
+        "secondArg": "終了制限は0より大きくする必要があります。",
+        "thirdArg": "無効な終了制限"
+      }
+    },
+    "limit": {
+      "failure": {
+        "invalidLimit": {
+          "greaterThanStart": {
+            "description": "選択したフィルターに基づいて、曲のクエリで最大の結果数を設定します。これにより、「トップX曲」が効果的に設定されます。"
+          },
+          "greaterThanZero": {
+            "description": "デフォルトの制限にリセット{{defaultLimit}}"
+          },
+          "title": "現在選択されているオプションから最も聴かれた上位{{limit}}曲を再生します。"
+        }
+      },
+      "help": {
+        "description": "現在選択されているオプションから最も聴かれている曲の{{limitStart}}から{{limitEnd}}までを再生します",
+        "example": {
+          "reset": "曲のクエリで最大の結果数を設定します",
+          "singleLimit": "トップ[limit_start]から[limit_end]の曲を再生します",
+          "twoLimits": "トップ[limit]の曲を再生します"
+        },
+        "interaction": {
+          "description": "トップの曲をこの数だけ再生します",
+          "description_range": "開始リミットとこの値の間の曲を再生します",
+          "description_top": "最も聴かれている曲から、[limit_start]から再生を開始します",
+          "limit": "リミット",
+          "limit_end": "現在何も選択されていません",
+          "limit_start": "現在の{{optionListed}}の値"
+        },
+        "name": "Discordメッセージにリストするグループが多すぎます。添付ファイルを参照してください。"
+      }
+    },
+    "list": {
+      "currentValue": {
+        "nothingSelected": "Discordメッセージにリストするグループが多すぎます。ボットはグループリストファイルを送信するための{{attachFile}}権限が必要です。",
+        "title": "ファイルの送信エラー"
+      },
+      "failure": {
+        "groupsInFile": {
+          "description": "指定されたゲームオプションの現在選択されているグループを表示します。",
+          "noFilePermissions": {
+            "description": "現在の{{exclude}}オプションをリストします",
+            "title": "現在の{{groups}}オプションをリストします"
+          }
+        }
+      },
+      "help": {
+        "description": "現在の{{include}}オプションをリストします",
+        "example": {
+          "exclude": "リスト",
+          "groups": "現在設定されているグループ、含まれるグループ、除外されるグループを表示するかどうか",
+          "include": "現在のオプションから曲をストリーミングします。KMQプレミアムユーザーのみ利用可能です。"
+        },
+        "name": "音楽は現在のボイスチャンネルで再生されます。"
+      },
+      "interaction": {
+        "listType": "聴く"
+      }
+    },
+    "listen": {
+      "help": {
+        "description": "🔊 {{voiceChannelName}} で #{{textChannelName}} で音楽を再生します。",
+        "example": "ボットの言語を変更します。オプションは以下のとおりです：{{english}}、{{korean}}。",
+        "name": "ボットの言語を{{defaultLocale}}にリセットします。"
+      },
+      "musicStarting": "ボットの言語を{{english}}に変更します。"
+    },
+    "locale": {
+      "help": {
+        "description": "ボットの言語を{{korean}}に変更します。",
+        "example": {
+          "reset": "ボットの言語を変更します。",
+          "toEnglish": "変更する言語",
+          "toKorean": "ロケール"
+        },
+        "interaction": {
+          "description": "言語",
+          "language": "英語"
+        },
+        "name": "韓国語",
+        "usage": {
+          "language": "ボットの言語が `{{language}}` に更新されました。"
+        }
+      },
+      "language": {
+        "en": "指定されたYouTube動画がKMQのデータベースに含まれているか、現在のゲームオプションを確認します。",
+        "ko": "{{artist}}による{{song}}に関する情報を提供します。"
+      },
+      "updatedDescription": "YouTubeリンクから曲を検索します。"
+    },
+    "lookup": {
+      "help": {
+        "description": "曲のYouTubeリンク",
+        "example": {
+          "song": "曲名と/またはアーティストで曲をフィルタリングします。"
+        },
+        "interaction": {
+          "byLink": {
+            "description": "曲を作ったアーティスト",
+            "field": "曲の名前"
+          },
+          "byName": {
+            "description": "検索",
+            "field": {
+              "artist": "現在のゲームオプションに含まれていますか？",
+              "song": "この曲はKMQに含まれています！[Daisuki]({{link}})へのリンクはこちらです。"
+            }
+          }
+        },
+        "name": "KMQのDaisukiデータベースにリクエストされた曲が見つかりませんでした。したがって、KMQに含まれていません。"
+      },
+      "inCurrentGameOptions": "曲が見つかりません",
+      "inKMQ": "この曲には[Daisuki]({{link}})のエントリがありますが、KMQには含まれていません。",
+      "notFound": {
+        "description": "KMQプレミアムのみ？",
+        "title": "その名前の曲が見つかりませんでした"
+      },
+      "notInKMQ": "以下の曲がKMQで利用可能です：",
+      "premiumSong": "検索結果",
+      "songNameSearchResult": {
+        "notFoundDescription": "有効なYouTubeのIDまたはリンクを入力してください。",
+        "successDescription": "{{on}}の場合、複数の人が正しい答えを出すことができます。最初の正解が出た後、プレイヤーは1.5秒以内に回答を続けることができます。最初の回答は完全なEXPを受け取り、その後の正しい回答はEXPが減少します。",
+        "title": "最初に正解した人だけがポイントを獲得できます"
+      },
+      "validation": {
+        "invalidYouTubeID": "最初の正解から1.5秒の猶予時間を設けることができます。複数のプレイヤーが正解できます"
+      }
+    },
+    "multiguess": {
+      "help": {
+        "description": "{{defaultMultiguess}}のデフォルトのマルチゲスタイプにリセットします",
+        "example": {
+          "off": "複数の人が正しい答えを出すことができるかどうかを設定します",
+          "on": "複数の人が正しい答えを出すことができるかどうかを設定します",
+          "reset": "マルチゲス"
+        },
+        "interaction": {
+          "description": "KMQの最新のアップデートを表示します。",
+          "multiguess": "ニュース"
+        },
+        "name": "詳細なアップデートについては、公式KMQサーバーに参加してください！"
+      }
+    },
+    "news": {
+      "help": {
+        "description": "アップデート",
+        "name": "{{durationInMinutes}}分"
+      },
+      "updates": {
+        "footer": "現在のゲームオプションを表示します。",
+        "title": "オプション"
+      }
+    },
+    "options": {
+      "duration": "一部のオプションは再生中に利用できません",
+      "help": {
+        "description": "設定されていません",
+        "name": "現在、以下のオプションから利用可能な曲のうち、上位{{limit}}曲を再生しています："
+      },
+      "listeningSessionNotAvailable": "コマンドの使用方法についての情報をお探しですか？「{{helpCommand}} [command]」をチェックして、詳細を学びましょう。",
+      "notSet": "注：アクティブなゲームはプレミアムではありません",
+      "overview": "プリセット",
+      "perCommandHelp": "{{presetOrOption}}リセット",
+      "premiumOptionsNonPremiumGame": "現在、以下のオプションでSpotifyから{{songCount}}曲を再生しています：",
+      "preset": "{{timerInSeconds}}秒",
+      "reset": "オプション",
+      "spotify": "{{presetOrOption}}更新済み",
+      "timer": "OST曲を含めるかどうかを選択してください。",
+      "title": "OST曲を除外する",
+      "updated": "OST曲のみを再生する"
+    },
+    "ost": {
+      "help": {
+        "description": "OST曲を含める",
+        "example": {
+          "exclude": "デフォルトのオプション（{{defaultOst}}）にリセットする",
+          "exclusive": "ost",
+          "include": "OST曲を含めるか、OST曲のみを再生するか、OST曲を除外するかを選択してください",
+          "reset": "[投票]({{link}})でダブルEXPを獲得できます！"
+        },
+        "name": "投票方法については{{vote}}を参照してください。KMQをサポートしていただきありがとうございます！"
+      },
+      "interaction": {
+        "ost": "KMQ POWER HOURがアクティブです"
+      }
+    },
+    "play": {
+      "exp": {
+        "doubleExpForVoting": "ダブルEXPウィークエンドがアクティブです",
+        "howToVote": "既にゲームが進行中です",
+        "powerHour": "ボットは{{timeUntilRestart}}分後に再起動します。ボットが復帰するまでお待ちください！",
+        "weekend": "新しいゲームを開始できません"
+      },
+      "failure": {
+        "alreadyInSession": "このコマンドを使用する権限がありません。",
+        "botRestarting": {
+          "description": "非表示のゲームモード",
+          "title": "{{oldGameType}}ゲームを開始しようとした場合は、このゲームを{{end}}し、{{playOldGameType}}を呼び出し、{{gameSpecificInstructions}}を呼び出した後、{{begin}}を呼び出してください。"
+        },
+        "hiddenGameMode": {
+          "description": "`{{join}} [チーム名]` チームに参加する",
+          "title": "{{playOldGameType}}を無視する"
+        },
+        "overrideTeams": {
+          "description": "🔊 {{voiceChannelName}} で #{{textChannelName}} でゲームを開始する",
+          "teams": {
+            "join": "KMQのゲームを開始します。クラシック（デフォルト）、エリミネーションモード、チームモードから選択してください。"
+          },
+          "title": "KMQのクラシックモードを開始します（最初に答えを入力してポイントを獲得してください）"
+        }
+      },
+      "gameStarting": "KMQのエリミネーションモードを開始します。各プレイヤーは{{lives}}つのライフでスタートします",
+      "help": {
+        "description": "チームを分割して、勝利に必要な信頼できるメンバーを見つけましょう！",
+        "example": {
+          "classic": "各プレイヤーがスタートするライフの数を選択してください",
+          "elimination": "プレイ",
+          "teams": "ライフ"
+        },
+        "interaction": {
+          "lives": "KMQの「チーム」ゲームモードを開始します。`/play teams create`の後にのみ使用できます"
+        },
+        "name": "KMQの「チーム」ゲームモードの準備をします。",
+        "usage": {
+          "lives": "チームに参加します。`/play teams create`の後にのみ使用できます"
+        }
+      },
+      "interaction": {
+        "teams_begin": "参加するチームの名前",
+        "teams_create": "チームリーダーは、新しいチームを作成するには `{{join}} [チーム名]` と入力してください。ゲーム中にチームを変更すると、現在のスコアとEXPが失われます。",
+        "teams_join": "{{join}} チームに参加しましょう！",
+        "teams_join_team_name": "曲を聴いて答えを入力してください！"
+      },
+      "team": {
+        "joinTeam": {
+          "description": "ひそかに、投票してEXPをもっと稼ぎましょう（{{vote}}を参照）",
+          "title": "現在メンバーであるかどうかを含め、KMQプレミアムについて詳しく知るには、こちらをご覧ください。"
+        }
+      },
+      "typeGuess": "プレミアムステータスを表示します。",
+      "voteReminder": "プレミアム"
+    },
+    "premium": {
+      "help": {
+        "description": "このオプションは、プレミアムKMQサポーターのみが使用できます。",
+        "example": "このオプションは、プレミアムKMQサポーターまたは公式KMQサーバーでのみ使用できます。",
+        "name": "プレミアムオプション"
+      },
+      "option": {
+        "description": "あなたの特典を受け取るために、[ここ](https://www.patreon.com/settings/apps)でDiscordアカウントに接続してください。",
+        "description_kmq_server": "[KMQプレミアム](https://www.patreon.com/kmq)に登録してください。",
+        "title": "[KMQプレミアム](https://www.patreon.com/kmq)に登録済みです。"
+      },
+      "status": {
+        "description": {
+          "connectionReminder": "あなたのプロフィールに独占的なバッジを付けて、KMQへの献身をアピールしましょう。",
+          "nonPremium": "プレミアムサポーターバッジ！",
+          "premium": "すべてのアーティストのトップ50のB面にアクセスできます（10からアップ）。"
+        },
+        "perks": {
+          "badge": {
+            "description": "もっと多くの曲！",
+            "title": "どこでも曲の再生速度を変更できます！"
+          },
+          "moreSongs": {
+            "description": "どのサーバーでも`/special`が使えます！",
+            "title": "KMQプレミアムに登録してください！"
+          },
+          "special": {
+            "description": "KMQをサポートしてくれてありがとう！",
+            "title": "プリセット{{presetName}}を正常に削除しました。"
+          }
+        },
+        "title": {
+          "nonPremium": "プリセット削除",
+          "premium": "他のサーバーで新しいプリセットとして{{presetName}}をインポートするには、次を使用してください：\n`{{presetImport}} {{presetUUID}} [preset_name]`\n\nまたは、プリセットのオプションを直接ロードするには、次を使用してください：\n`{{presetLoad}} {{presetUUID}}`"
+        }
+      }
+    },
+    "preset": {
+      "deleted": {
+        "description": "プリセットエクスポート済み",
+        "title": "プリセット{{presetNameFormatted}}はすでに存在しています。古いものを`{{presetDelete}} {{presetName}}`で削除できます。"
+      },
+      "exported": {
+        "description": "プリセットはすでに存在します",
+        "title": "プリセット名は{{importPrefix}}で始めることはできません。"
+      },
+      "failure": {
+        "alreadyExists": {
+          "description": "プリセットエラー",
+          "title": "プリセット名は最大{{presetNameMaxLength}}文字でなければなりません。"
+        },
+        "illegalPrefix": {
+          "description": "プリセット名が長すぎます",
+          "title": "プリセットの識別子を指定する必要があります。`{{presetExport}} [preset_name]`を使用してプリセットの識別子を取得してください。"
+        },
+        "lengthyName": {
+          "description": "プリセット識別子がありません",
+          "title": "プリセット名を指定する必要があります。"
+        },
+        "missingIdentifier": {
+          "description": "プリセット{{presetName}}は存在しません。",
+          "title": "プリセット識別子{{presetUUID}}は存在しません。"
+        },
+        "missingName": {
+          "description": "そのようなプリセットはありません",
+          "title": "各ギルドは最大{{maxNumPresets}}のプリセットしか持てません。追加する前にいくつか削除してください。"
+        },
+        "noSuchPreset": {
+          "description": "プリセットが多すぎます",
+          "identifier": {
+            "description": "ゲームオプションのプリセットを保存/読み込むためのさまざまなアクション。プリセット名は1つの単語でなければなりません。"
+          },
+          "title": "指定されたプリセットを削除します"
+        },
+        "tooMany": {
+          "description": "指定されたプリセットを読み込むための一意の識別子を返します（{{exampleIdentifier}}で示されるように）",
+          "title": "エクスポートされたプリセット識別子を使用して新しいプリセットを作成します"
+        }
+      },
+      "help": {
+        "description": "サーバーのすべてのプリセットをリストします",
+        "example": {
+          "delete": "指定されたプリセットまたはプリセット識別子（{{exampleIdentifier}}）をゲームオプションに読み込みます",
+          "export": "指定されたプリセットのオプションを現在のゲームオプションで置き換えます",
+          "import": "現在のゲームオプションをプリセットとして保存します",
+          "list": "プリセット",
+          "load": "プリセット識別子",
+          "replace": "プリセット名",
+          "save": "`{{presetLoad}} {{presetName}}`を使用して新しくインポートしたプリセットをロードしてください。"
+        },
+        "name": "プリセットがインポートされました",
+        "usage": {
+          "presetIdentifier": "削除するプリセット",
+          "presetName": "エクスポートするプリセット"
+        }
+      },
+      "imported": {
+        "description": "インポートするプリセットのID",
+        "title": "インポートされたプリセットに付ける名前"
+      },
+      "interaction": {
+        "delete": {
+          "presetName": "ロードするプリセット"
+        },
+        "export": {
+          "presetName": "置き換えるプリセット"
+        },
+        "import": {
+          "exportedPresetID": "このプリセットの名前",
+          "presetName": "プリセットがありません。作成方法については{{presetHelp}}を参照してください。"
+        },
+        "load": {
+          "presetName": "{{presetLoad}} [プリセット名]でプリセットをロード"
+        },
+        "replace": {
+          "presetName": "利用可能なプリセット"
+        },
+        "save": {
+          "presetName": "プリセットが置き換えられました"
+        }
+      },
+      "list": {
+        "failure": {
+          "noPresets": {
+            "description": "プリセットが保存されました"
+          }
+        },
+        "loadInstructions": {
+          "footer": "後で{{presetLoad}}でこのプリセットをロードできます。"
+        },
+        "title": "バッジ"
+      },
+      "replaced": {
+        "title": "経験値"
+      },
+      "saved": {
+        "title": "このコマンドを正しく使用していることを確認してください。詳細については{{profileHelp}}を参照してください。"
+      },
+      "savedOrReplaced": {
+        "description": "指定されたユーザーIDが見つかりませんでした。詳細については{{profileHelp}}を参照してください。"
+      }
+    },
+    "profile": {
+      "badges": "プロフィールが見つかりません",
+      "experience": "最初にプレイした日",
+      "failure": {
+        "notFound": {
+          "badUsage": {
+            "description": "プレイしたゲーム数"
+          },
+          "description": "あなたのゲームの統計を表示します。",
+          "title": "Discord IDに基づいてプレイヤープロフィールを表示します"
+        }
+      },
+      "firstPlayed": "{{playerName}}のプレイヤープロフィールを表示します",
+      "gamesPlayed": "自分自身のプレイヤープロフィールを表示します",
+      "help": {
+        "description": "プロフィール",
+        "example": {
+          "otherPlayerID": "メンション",
+          "otherPlayerMention": "表示するプレイヤープロフィールのユーザーID",
+          "self": "プロフィールを表示するユーザーをメンションしてください"
+        },
+        "name": "最終アクティブ",
+        "usage": {
+          "mention": "総合ランク"
+        }
+      },
+      "interaction": {
+        "userID": "太陽系の全能の支配者",
+        "userMention": "年間アーティスト"
+      },
+      "lastActive": "地球の慈悲深い支配者",
+      "overallRank": "ボンサン賞受賞者",
+      "rank": {
+        "almighty": "KMQエンターテインメントのCEO",
+        "aoty": "大賞受賞者",
+        "benevolent": "星の神聖な支配者",
+        "bonsang": "銀河の啓蒙的な支配者",
+        "ceo": "不滅の宇宙の支配者",
+        "daesang": "新人賞",
+        "divine": "初心者",
+        "enlightened": "ヌグ",
+        "immortal": "全知全能の多元宇宙の支配者",
+        "newAoty": "デビュー前",
+        "novice": "韓国大統領",
+        "nugu": "南北朝鮮の再統一者",
+        "omniscient": "南北朝鮮の支配者",
+        "preDebut": "南北朝鮮の至高の支配者",
+        "president": "練習生",
+        "reuniter": "推測された曲数",
+        "ruler": "投票回数",
+        "supreme": "過去2週間にKMQに追加された曲：",
+        "trainee": "KMQが新しい曲を追加したかどうかを後で確認してください。"
+      },
+      "songsGuessed": "最近追加された曲はありません",
+      "timesVoted": "過去2週間にKMQに追加された曲を表示する"
+    },
+    "recentlyadded": {
+      "description": "最近追加された曲を表示する",
+      "failure": {
+        "noSongs": {
+          "description": "recentlyadded",
+          "title": "最近追加された曲"
+        }
+      },
+      "help": {
+        "description": "公式のミュージックビデオのみを含めるか、すべてのビデオ（B面、ダンスプラクティス、アコースティックバージョン、リミックスなど）を含めるかを選択してください。",
+        "example": "ダンスプラクティス、アコースティックバージョン、リミックスを含むすべての利用可能なビデオを再生します。",
+        "name": "公式のミュージックビデオのみを再生します（{{official}}）"
+      },
+      "title": "デフォルトのリリースタイプ（{{defaultRelease}}）にリセットします。"
+    },
+    "release": {
+      "help": {
+        "description": "公式のミュージックビデオのみを含めるか、すべてのビデオを含めるかを選択してください。",
+        "example": {
+          "all": "再生するリリースの種類",
+          "official": "リリース",
+          "reset": "現在選択されているグループはありません。"
+        },
+        "interaction": {
+          "description": "削除に失敗しました",
+          "release": "削除されました"
+        },
+        "name": "現在の{{groups}}、{{exclude}}、または{{include}}オプションから1つ以上のグループを削除します。"
+      }
+    },
+    "remove": {
+      "failure": {
+        "noGroupsSelected": {
+          "description": "現在の{{exclude}}オプションから{{groupOne}}、{{groupTwo}}、および{{groupThree}}を削除します。",
+          "title": "現在の{{groups}}オプションから{{groupOne}}と{{groupTwo}}を削除します。"
+        },
+        "unrecognizedGroups": {
+          "removed": "現在の{{include}}オプションから{{group}}を削除します。"
+        }
+      },
+      "help": {
+        "description": "削除",
+        "example": {
+          "exclude": "デフォルトのゲームオプションにリセットします。",
+          "groups": "デフォルトのゲームオプションにリセットします。",
+          "include": "リセット"
+        },
+        "name": "現在のゲームのスコアボードを見る。"
+      }
+    },
+    "reset": {
+      "help": {
+        "description": "スコア",
+        "example": {
+          "reset": "スコアボード"
+        },
+        "name": "各曲を最初から、中間から、またはランダムなポイントから再生するかどうかを選択します。"
+      }
+    },
+    "score": {
+      "help": {
+        "description": "曲は最初から再生されます。",
+        "name": "曲は中間点から再生されます。"
+      },
+      "scoreboardTitle": "曲は中間のランダムなポイントから再生されます。"
+    },
+    "seek": {
+      "help": {
+        "description": "デフォルトの{{defaultSeek}}にリセットします。",
+        "example": {
+          "beginning": "シーク",
+          "middle": "各曲の再生開始位置",
+          "random": "曲のシャッフル方法を選択します。",
+          "reset": "曲は人気順に再生されます。{{penalty}}のEXPペナルティが適用されます。"
+        },
+        "name": "曲はランダムに再生されます。"
+      },
+      "interaction": {
+        "seek": "デフォルトのシャッフルモードにリセットする：{{defaultShuffle}}"
+      }
+    },
+    "shuffle": {
+      "help": {
+        "description": "シャッフル",
+        "example": {
+          "popularity": "ゲーム内で使用する音楽シャッフルの種類",
+          "random": "無視された曲をスキップする",
+          "reset": "現在の曲をスキップするために投票してください。参加者の過半数がスキップを投票すると、曲がスキップされます。"
+        },
+        "name": "スキップ"
+      },
+      "interaction": {
+        "shuffle": "{{skipCounter}}回スキップされました、スキップしています..."
+      }
+    },
+    "skip": {
+      "failure": {
+        "skipIgnored": "{{skipCounter}}回のスキップリクエストが受信されました。"
+      },
+      "help": {
+        "description": "スキップリクエスト",
+        "name": "曲の再生速度を変更する"
+      },
+      "success": {
+        "description": "曲を速い速度で再生する"
+      },
+      "vote": {
+        "description": "曲をより速い速度で再生する",
+        "title": "曲を高いピッチで再生する"
+      }
+    },
+    "special": {
+      "help": {
+        "description": "曲を低いピッチで再生する",
+        "example": {
+          "fast": "曲のナイトコア編集を再生する",
+          "faster": "特別オプションをリセットする",
+          "highPitch": "曲を逆再生する",
+          "lowPitch": "曲を遅い速度で再生する",
+          "nightcore": "特別",
+          "reset": "各曲に対して行う変更の種類",
+          "reverse": "指定されたSpotifyプレイリストからの曲のみ再生する",
+          "slow": "プレイリストから曲を再生する"
+        },
+        "name": "プレイリストからの再生を停止する"
+      },
+      "interaction": {
+        "special": "曲を取得するプレイリスト"
+      }
+    },
+    "spotify": {
+      "help": {
+        "description": "Spotify",
+        "example": {
+          "playlistURL": "プレイリストへのリンクが無効です。Spotifyで「共有>プレイリストへのリンクをコピー」を使用して有効なリンクを取得してください。",
+          "reset": "無効なSpotifyプレイリストURL"
+        },
+        "interaction": {
+          "playlistURL": "{{matchedCount}}/{{totalCount}}曲が一致しました。"
+        },
+        "name": "Spotifyで「{{playlistName}}」を再生しています。"
+      },
+      "invalidURL": {
+        "description": "注意：プレイリストの処理に時間がかかりすぎて完了しませんでした。次回はより小さいプレイリストで再試行してください。",
+        "title": "曲が一つもマッチしませんでした。"
+      },
+      "matched": {
+        "description": "Spotifyから曲を取得できませんでした。",
+        "title": "Spotifyプレイリストの解析中...",
+        "truncated": "詳細なボットのステータス：{{link}}"
+      },
+      "noMatches": {
+        "description": "後でもう一度お試しください。",
+        "title": "統計情報の取得エラー"
+      },
+      "parsing": "「最近の」統計情報は過去24時間のデータを表します。"
+    },
+    "stats": {
+      "description": "アクティブなゲームセッション",
+      "failure": {
+        "description": "アクティブなプレイヤー",
+        "title": "最新の曲の更新"
+      },
+      "footer": "（最近の）ゲームラウンド",
+      "game": {
+        "activeGameSessions": "（最近の）ゲームセッション",
+        "activePlayers": "（最近の）プレイヤー",
+        "latestSongUpdate": "ゲームの統計情報",
+        "recentGameRounds": "さまざまな使用状況/システム統計情報。",
+        "recentGameSessions": "統計情報",
+        "recentPlayers": "APIレイテンシー",
+        "title": "データベースレイテンシー"
+      },
+      "help": {
+        "description": "システムの平均負荷",
+        "name": "プロセスのメモリ使用量"
+      },
+      "system": {
+        "apiLatency": "リクエストレイテンシー",
+        "databaseLatency": "システム統計情報",
+        "loadAverage": "稼働時間",
+        "memoryUsage": "ボットの統計情報",
+        "requestLatency": "{{groups}}を使用する場合、グループのサブユニットを自動的に含めるかどうかを選択してください。",
+        "title": "サブユニットを含めない",
+        "uptime": "サブユニットを自動的に含めます。たとえば、`{{groupCommand}} {{parentGroup}}`は、{{parentGroup}}、{{subunitOne}}、{{subunitTwo}}などの曲を含みます。"
+      },
+      "title": "デフォルトのオプション（{{defaultSubunit}}）にリセットする"
+    },
+    "subunits": {
+      "help": {
+        "description": "サブユニットを含めるかどうか",
+        "example": {
+          "exclude": "タイマーが切れる前に正しく推測してください！秒数を入力するか、引数を指定しない場合は無効になります。",
+          "include": "タイマーを無効にする",
+          "reset": "{{timer}}秒後に、誰も正解しなかった場合、ラウンドは自動的に終了し、次のラウンドが始まります"
+        },
+        "name": "タイマーが切れる前に正解を尽くしてください！"
+      },
+      "interaction": {
+        "subunits": "曲をスキップする前に再生する秒数は何秒ですか？"
+      }
+    },
+    "timer": {
+      "help": {
+        "description": "タイマー",
+        "example": {
+          "reset": "秒",
+          "set": "アルバム"
+        },
+        "interaction": {
+          "description": "以下の曲、アルバム、EPがリリース予定です：",
+          "timer": "EP"
+        },
+        "name": "後で新しいリリースが予定されているかどうかを確認してください。",
+        "usage": {
+          "seconds": "今後のリリースはありません"
+        }
+      }
+    },
+    "upcomingreleases": {
+      "album": "今後のアルバムリリースを表示する",
+      "description": "曲、アルバム、EPを含む今後のアーティストリリースを表示する",
+      "ep": "近日リリース予定の曲、アルバム、拡張プレイ（EP）を表示します。",
+      "failure": {
+        "noReleases": {
+          "description": "表示するリリースの種類",
+          "title": "upcomingreleases"
+        }
+      },
+      "help": {
+        "albumExample": "シングル",
+        "defaultExample": "今後のリリース",
+        "description": "今すぐ投票できます！",
+        "interaction": {
+          "releaseType": "ブーストアクティブ！"
+        },
+        "name": "ブースト非アクティブ"
+      },
+      "single": "[top.gg]({{voteLink}})でKMQに投票すると、1時間の間2倍のEXPを獲得できます！投票は{{voteResetDuration}}時間ごとに1回行えます。\n\n[レビュー]({{reviewLink}})も残していただけると幸いです。",
+      "title": "1時間の間2倍のEXPを獲得するための投票方法の説明を表示します。"
+    },
+    "vote": {
+      "available": "投票",
+      "boost": {
+        "active": "あと{{time}}",
+        "inactive": "**{{hours}}**時間後に投票できます。"
+      },
+      "description": "**{{minutes}}**分後に投票できます。",
+      "help": {
+        "description": "**{{seconds}}** 秒後に投票できます。",
+        "name": "知ってましたか？"
+      },
+      "timeLeft": "おもしろい事実：BTS、Blackpink、Twiceの合計YouTube再生回数は{{bigThreeViews}}回、つまり{{proportion}}％です！",
+      "unavailable": {
+        "hours": "おもしろい事実：{{name}}の誕生日は今月の{{formattedDate}}です！",
+        "minutes": "おもしろい事実：{{company}}は、{{num}}人のアーティスト（サブユニットやソロデビューを含む）を抱えるエンターテインメント会社の中で、{{ordinalNum}}番目に多い数です！",
+        "seconds": "おもしろい事実：{{name}}は、{{views}}回のYouTube再生回数で、{{ordinalNum}}番目に多く再生されたエンターテインメント会社です！"
+      }
+    }
+  },
+  "fact": {
+    "didYouKnow": "おもしろい事実：{{name}}のファンクラブ名は「{{fanclub}}」です！",
+    "fun": {
+      "bigThreeDominance": "おもしろい事実：{{year}}年の今週、{{songName}}がGAON週間チャートのトップにランクインしました！",
+      "birthday": "[{{artistName}}の「{{songName}}」]({{url}})",
+      "companyByArtistCount": "おもしろい事実：{{year}}年は、{{num}}組のグループがデビューしたK-Popの中で、{{ordinalNum}}番目に活発な年でした！",
+      "companyByArtistViews": "おもしろい事実：{{artistName}}は、{{wins}}回の年間賞を受賞し、{{ordinalNum}}番目に多い受賞回数です！",
+      "fanclubName": "おもしろい事実：{{year}}年は、{{num}}組のグループがデビューしたK-Popの中で、{{ordinalNum}}番目に多い数でした！",
+      "historicalGaonWeekly": "おもしろい事実：{{artistName}}は、{{appearances}}回GAONデジタル週間チャートにランクインし、{{ordinalNum}}番目に多い回数です！",
+      "hyperlinkGenerator": "おもしろい事実：{{artistName}}は{{firstPlaceCount}}回の1位獲得で、GAONデジタル週間チャートで{{ordinalNum}}回トップに輝いています！",
+      "mostActiveYear": "おもしろい事実：{{artist}}は{{likes}}のYouTube総いいね数で、{{ordinalNum}}位にランクインしています！",
+      "mostAnnualAwardShowWins": "おもしろい事実：{{likes}}のYouTube総いいね数で、{{ordinalNum}}位にランクインしている動画は{{hyperlink}}です！",
+      "mostDebuts": "おもしろい事実：{{artist}}はYouTubeに{{num}}本のミュージックビデオを公開しており、{{ordinalNum}}位にランクインしています！",
+      "mostGaonAppearances": "おもしろい事実：{{artist}}は{{num}}回の音楽番組優勝で、{{ordinalNum}}位にランクインしています！",
+      "mostGaonFirsts": "おもしろい事実：{{artist}}はYouTube総再生回数で、{{views}}回再生されており、{{ordinalNum}}位にランクインしています！",
+      "mostLikedGroup": "おもしろい事実：{{artist}}はYouTube総再生回数で、{{views}}回再生されており、{{ordinalNum}}位にランクインしています！",
+      "mostLikedVideo": "おもしろい事実：{{views}}回再生されている動画で、{{ordinalNum}}位にランクインしているのは{{hyperlink}}です！",
+      "mostMVs": "おもしろい事実：{{hyperlink}}は最近{{views}}回再生されました！",
+      "mostMusicShowWins": "新曲アラート：最近公開された{{hyperlink}}をチェックしてみてください！",
+      "mostViewedGroup": "おもしろい事実：{{year}}年の今週、{{hyperlink}}がリリースされました！",
+      "mostViewedSoloist": "おもしろい事実：{{songName}}は先週のGaon週間チャートで{{ordinalNum}}位にランクインしました！",
+      "mostViewedVideo": "おもしろい事実：{{hyperlink}}は最近{{winDate}}に{{musicShow}}で優勝しました！",
+      "mvViewMilestone": "おもしろい事実：{{hyperlink}}は最近PAK（Perfect All-Kill）を獲得した{{ordinalNum}}番目のミュージックビデオです！",
+      "newMV": "おもしろい事実：'{{artistName}}'の'{{releaseType}}'『{{releaseName}}』が{{dateString}}にリリースされます！",
+      "oldMV": "おもしろい事実：YouTube上のすべてのK-Popミュージックビデオの総視聴回数は{{totalViews}}回で、{{groupViews}}回（{{groupProportion}}％）がグループから、{{soloViews}}回（{{soloProportion}}％）がソロアーティストからです。",
+      "recentGaonWeekly": "おもしろい事実：YouTube上のすべてのK-Popミュージックビデオの総視聴回数は{{totalViews}}回で、{{maleViews}}回（{{maleProportion}}％）が男性グループから、{{femaleViews}}回（{{femaleProportion}}％）が女性グループから、残りの{{coedViews}}回（{{coedProportion}}％）が混合グループからです。",
+      "recentMusicShowWin": "おもしろい事実：{{hyperlink}}は{{roundsPlayed}}ラウンドで{{percentage}}％の当てる率を持っています！",
+      "recentPak": "おもしろい事実：KMQプレイヤーの中で{{level}}レベルが最も高く、{{gamesPlayed}}ゲームで{{songsGuessed}}曲を当てました！",
+      "upcomingReleases": "KMQの事実：現在の最長のKMQゲームは{{sessionLength}}分間続き、{{roundsPlayed}}曲が演奏され、平均推測時間は{{avgGuessTime}}秒で、{{numParticipants}}人の参加者がいました！あなたはそれを打ち破れますか？",
+      "viewsByArtistType": "KMQの事実：最も活発なプレイヤーは2020年11月8日以降{{gamesPlayed}}回のゲームをプレイしました！",
+      "viewsByGender": "KMQの事実：最も活発なプレイヤーは2020年11月8日以降{{songsGuessed}}曲を推測しました！"
+    },
+    "kmq": {
+      "guessRate": "KMQの事実：最も活発なサーバーは{{gamesPlayed}}回のKMQゲームをプレイし、{{songsGuessed}}曲を推測しました！",
+      "highestLeveledPlayerStats": "KMQの事実：最も正確な推測をしたサーバーは{{gamesPlayed}}回のKMQゲームをプレイし、{{songsGuessed}}曲を推測しました！",
+      "longestGame": "KMQの事実：過去1週間に{{recentGameCount}}回のKMQラウンドがプレイされました！",
+      "mostActivePlayerGamesPlayed": "KMQの事実：過去1週間に{{recentSessions}}回のKMQゲームがプレイされました！",
+      "mostActivePlayerSongsGuessed": "KMQの事実：合計{{totalGamesPlayed}}回のKMQゲームがプレイされました！",
+      "mostActiveServer": "KMQの事実：過去{{xDays}}日間に{{recentActivePlayers}}人のユニークなプレイヤーがKMQをプレイしました！",
+      "mostCorrectGuessesServer": "その他多数...",
+      "recentRounds": "アーティスト",
+      "recentSessions": "アーティストの別名",
+      "totalGames": "ブックマーク",
+      "uniquePlayers": "あなたのスコアは{{score}}です。"
+    }
+  },
+  "misc": {
+    "andManyOthers": "競合",
+    "artist": "期間",
+    "artistAliases": "あなたは{{lives}}回生きています。",
+    "bookmark": "非アクティブなボイスチャンネルにいないことを確認して、私の声が聞こえるようにしてください！",
+    "classic": {
+      "yourScore": "AFKボイスチャンネル"
+    },
+    "conflict": "このコマンドを実行中にエラーが発生しました。\nこれが継続的に発生する場合は、開発者に提供してください:\n{{debugId}}",
+    "duration": "コマンドの実行中にエラーが発生しました",
+    "elimination": {
+      "yourLives": "新しいコマンドではテキストコマンドはサポートされなくなりました。代わりに新しく改良されたスラッシュコマンドをお試しください！スラッシュコマンドがサーバーで表示されない場合は、KMQを再度サーバーに招待してください。"
+    },
+    "failure": {
+      "afkChannel": {
+        "description": "テキストコマンドは非推奨です",
+        "title": "エラー"
+      },
+      "command": {
+        "description": "ラウンドを再開してみてください。問題が解決しない場合は、公式KMQサーバーで報告してください。",
+        "title": "曲の選択中にエラーが発生しました"
+      },
+      "deprecatedTextCommand": {
+        "description": "現在ゲームは進行中ではありません。",
+        "title": "{{optionOne}}のゲームオプションが現在設定されています。{{optionTwo}}と{{optionOne}}は互換性がありません。{{optionOneCommand}}を入力して{{optionOne}}オプションを削除してください。"
+      },
+      "error": "ゲームオプションの競合",
+      "errorSelectingSong": {
+        "description": "彼らがプレイできるようにするために",
+        "title": "与えられた{{conflictingOptionOne}}の1つ以上はすでに{{conflictingOptionTwo}}に含まれています。\n以下のグループは{{conflictingOptionOne}}に追加されませんでした：\n {{groupsList}}\n{{solutionStepOne}}を使用して、{{solutionStepTwo}} {{allowOrPrevent}}してください。"
+      },
+      "game": {
+        "noneInProgress": {
+          "description": "プレイを防止するため",
+          "title": "グループと除外の競合"
+        }
+      },
+      "gameOptionConflict": {
+        "description": "あなたはすでにこのラウンドで敗退しています。",
+        "title": "ゲーム中には曲をブックマークできません。"
+      },
+      "groupsExcludeConflict": {
+        "allow": "あなたはこのラウンドで敗退しました。",
+        "description": "最近の{{BOOKMARK_MESSAGE_SIZE}}ラウンドで再生された曲のみブックマークできます。曲を含むボットからのメッセージをブックマークする必要があります。",
+        "prevent": "すでに完了したラウンドからオプションを選択しようとしています。",
+        "title": "KMQは現在メンテナンス中であり、新しいゲームを開始することはできません。後で再度確認してください！"
+      },
+      "interaction": {
+        "alreadyEliminated": "メンテナンスモード",
+        "bookmarkOutsideGame": "応答メッセージが長すぎます。このエラーをKMQヘルプサーバーに報告してください。",
+        "eliminated": "こんにちは！{{channelName}}チャンネルでメッセージを送信できません。ボットがこのチャンネルでメッセージを送信できるようにしてください。詳細については、以下のリンクを参照してください：{{permissionsLink}}。",
+        "invalidBookmark": "権限が不足しています",
+        "optionFromPreviousRound": "ボットに以下の権限があることを確認してください：{{missingPermissions}}\n\n詳細については、以下のリンクを参照してください：{{permissionsLink}}。まだ問題がある場合は、{{helpCommand}}で公式KMQサーバーに参加してください。"
+      },
+      "maintenanceMode": {
+        "description": "ボイスチャンネルにいるときに{{command}}を再度送信してください。",
+        "title": "ボイスチャンネルに参加する"
+      },
+      "messageTooLong": "しばらくしてから再試行するか、{{helpCommand}}で公式KMQサーバーにエラーを報告してください。",
+      "missingPermissions": {
+        "description": "曲データの取得エラー",
+        "title": "現在のラウンドは終了しました！次のラウンドを待ってください。"
+      },
+      "missingPermissionsText": "ラウンド終了",
+      "notInVC": {
+        "description": "3秒後に新しいラウンドを開始します...",
+        "title": "曲の再生エラー"
+      },
+      "retrievingSongData": {
+        "description": "この条件に一致する曲が見つかりませんでした。検索範囲を広げてみてください。",
+        "title": "曲クエリエラー"
+      },
+      "round": {
+        "noneInProgress": {
+          "description": "追加されました",
+          "title": "指定されたグループ名のうち1つ以上が認識されませんでした。一致したグループは{{matchedGroupsAction}}です。グループ名が{{helpGroups}}で提供されたリストと完全に一致することを確認してください。\n次のグループは**認識されませんでした**:\n {{unmatchedGroups}}\n{{solution}}"
+        }
+      },
+      "songPlaying": {
+        "description": "__次のように入力してみてください:__\n {{suggestions}}",
+        "title": "{{command}}を使用して一致しなかったグループを追加してください。"
+      },
+      "songQuery": {
+        "description": "不明なグループ名",
+        "title": "{{argument}}にtrue/falseの値が必要です。"
+      },
+      "unrecognizedGroups": {
+        "added": "{{argument}}に文字が必要です。",
+        "description": "以下の有効な{{argument}}の値の1つを入力してください: ({{validValues}})。",
+        "didYouMean": "引数の数が正しくありません。使用法については、`{{help}} {{command}}`を参照してください。",
+        "solution": "{{argument}}に{{max}}以下の値を入力してください。",
+        "title": "{{argument}}に対して{{min}}以上の値が必要です。"
+      },
+      "validation": {
+        "boolean": {
+          "notBoolean": "{{argument}}には数値を入力してください。"
+        },
+        "char": {
+          "notChar": "入力値が無効です。"
+        },
+        "enum": {
+          "notInEnum": "私が参加するために十分なボイスチャンネルの空き容量を確保してください。"
+        },
+        "numArguments": {
+          "incorrect": "ボイスチャンネルがいっぱいです。"
+        },
+        "number": {
+          "max": "何か問題が発生しました。しばらくしてからもう一度ゲームを開始してください。",
+          "min": "ボイスチャンネルに参加できませんでした。",
+          "notNumber": "{{limitStart}}から{{limitEnd}}まで（{{songCount}}曲）"
+        },
+        "title": "新しいゲームオーナーは{{newGameOwner}}です。彼らは{{forcehintCommand}}と{{forceskipCommand}}を管理します。"
+      },
+      "vcFull": {
+        "description": "ゲームオーナーが変更されました。",
+        "title": "エイリアス"
+      },
+      "vcJoin": {
+        "description": "ボーナスアーティストラウンド",
+        "title": "ボーナスEXP＆アーティストラウンド"
+      }
+    },
+    "formattedLimit": "ボーナスEXPラウンド",
+    "gameOwnerChanged": {
+      "description": "{{correctGuesser}}が正解しました（+{{expGain}} EXP）",
+      "title": "誰も正解しませんでした。"
+    },
+    "inGame": {
+      "aliases": "誰も勝ちませんでした。",
+      "bonusArtistRound": "準優勝者",
+      "bonusExpArtistRound": "{{songCount}}曲正解！",
+      "bonusExpRound": "{{uniqueSongCount}}曲再生されました。",
+      "correctGuess": "{{playerName}}が勝ちました！",
+      "noCorrectGuesses": "ゲーム終了時に{{songName}}へのリンクが直接メッセージで送信されます。",
+      "noWinners": "{{date}}に再生されました。",
+      "runnersUp": "ブックマークされた曲",
+      "songsCorrectlyGuessed": "曲がブックマークされました。",
+      "uniqueSongsPlayed": "よくある質問",
+      "winMessage": "グループの完全なリスト"
+    },
+    "interaction": {
+      "bookmarked": {
+        "description": "🤖",
+        "message": {
+          "playedOn": "作業中！",
+          "title": "{{songOrArtist}}を当てる"
+        },
+        "title": "遊び方"
+      },
+      "faq": "レビューを残す！",
+      "fullGroupsList": "公式KMQサーバー",
+      "genericProgress": {
+        "description": "そのユーザーにアクセスできません。{{profileUserID}}を使用してください。",
+        "title": "このユーザーは、統計情報を追跡する前に最初のゲームをプレイする必要があります。"
+      },
+      "guess": {
+        "title": "{{optionName}}オプションをリセットします。"
+      },
+      "howToPlay": "あれれ",
+      "leaveReview": "投票！",
+      "officialKmqServer": "レベル",
+      "profile": {
+        "inaccessible": "{{user}}は{{startLevel}}から{{endLevel}} ({{rank}})にレベルアップしました。",
+        "noStats": "🚀 パワーアップ！"
+      },
+      "resetOption": "グループのリスト",
+      "title": {
+        "failure": "いいえ"
+      },
+      "vote": "なし"
+    },
+    "level": "N/A",
+    "levelUp": {
+      "entry": "{{count}}日",
+      "title": "{{count}}日"
+    },
+    "listOfGroups": "{{count}}時間前",
+    "no": "{{count}}時間前",
+    "none": "{{count}}時間",
+    "notApplicable": "{{count}}時間",
+    "plural": {
+      "day_one": "レベル",
+      "day_other": "レベル",
+      "hourAgo_one": "{{count}}分前",
+      "hourAgo_other": "{{count}}分前",
+      "hour_one": "{{count}}分残り",
+      "hour_other": "{{count}}分残り",
+      "level_one": "{{count}}分",
+      "level_other": "{{count}}分",
+      "minuteAgo_one": "{{count}}プレイヤー",
+      "minuteAgo_other": "{{count}}プレイヤー",
+      "minuteRemaining_one": "{{count}}秒前",
+      "minuteRemaining_other": "{{count}}秒前",
+      "minute_one": "{{count}}秒",
+      "minute_other": "{{count}}秒",
+      "player_one": "{{count}}曲",
+      "player_other": "{{count}}曲",
+      "second_one": "このコマンドは、競技会の通常のユーザーには無効になっています。",
+      "second_other": "このチャンネルではそれを行うことはできません。",
+      "song_one": "このサーバーではそれを行うことはできません。",
+      "song_other": "このコマンドを使用するには、ボットと同じボイスチャンネルにいる必要があります。"
+    },
+    "preCheck": {
+      "competition": "ゲームセッション中にはそれを行うことはできません。",
+      "debugChannel": "リスニングセッション中にはそれを行うことはできません。",
+      "debugServer": "このコマンドを使用するには、KMQプレミアムが必要です（{{premium}}を参照）。",
+      "differentVC": "このオプションを変更するには、Spotifyから再生している場合は`/spotify reset`を使用してから変更してください。",
+      "notGameSession": "このコマンドは公式KMQサーバーまたはKMQプレミアムメンバーのみで動作します（{{premium}}を参照してください）。",
+      "notListeningSession": "待ってください...",
+      "notPremium": "リリース日",
+      "notSpotify": "ダウンタイムは数秒程度です。進行中のゲームを終了して進行状況が保存されるようにしてください！",
+      "premiumOrDebugServer": "{{timeUntilRestart}}分後に再起動が予定されています。",
+      "title": "{{players}}に{{songs}}を送信しています。\n\nゲーム中に曲をブックマークするには、曲のメッセージを右クリックして「アプリケーション > 曲をブックマーク」を選択してください。"
+    },
+    "releaseDate": "ブックマークされた曲を送信しています...",
+    "restart": {
+      "description_hard": "スキップ",
+      "title": "曲"
+    },
+    "sendingBookmarkedSongs": {
+      "description": "曲のエイリアス",
+      "title": "あなたのスコア：{{score}}"
+    },
+    "skip": "あなたのチームのスコア：{{teamScore}}",
+    "song": "時間切れ",
+    "songAliases": "すべての曲が再生されました。{{totalSongCount}}曲が再シャッフルされます。",
+    "team": {
+      "yourScore": "ユニークな曲をリセットしています",
+      "yourTeamScore": "使用法"
+    },
+    "timeFinished": "ビュー",
+    "uniqueSongsReset": {
+      "description": "{{command}} {{addOrRemove}}を使用するつもりでしたか？",
+      "title": "はい"
+    }
+  }
+}

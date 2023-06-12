@@ -25,11 +25,24 @@ enum LocaleArgument {
     KO = "ko",
     KR = "kr",
     KOREAN = "korean",
+
+    ES = "es",
+    SP = "sp",
+    SPANISH = "spanish",
+
+    FR = "fr",
+    FRENCH = "french",
+
+    JA = "ja",
+    JAPANESE = "japanese",
 }
 
 const LanguageNameToLocaleType = {
     English: LocaleType.EN,
     Korean: LocaleType.KO,
+    Spanish: LocaleType.ES,
+    French: LocaleType.FR,
+    Japanese: LocaleType.JA,
 };
 
 export default class LocaleTypeCommand implements BaseCommand {
@@ -139,6 +152,22 @@ export default class LocaleTypeCommand implements BaseCommand {
                 case LocaleArgument.KR:
                 case LocaleArgument.KOREAN:
                     localeType = LocaleType.KO;
+                    break;
+
+                case LocaleArgument.ES:
+                case LocaleArgument.SP:
+                case LocaleArgument.SPANISH:
+                    localeType = LocaleType.ES;
+                    break;
+
+                case LocaleArgument.FR:
+                case LocaleArgument.FRENCH:
+                    localeType = LocaleType.FR;
+                    break;
+
+                case LocaleArgument.JA:
+                case LocaleArgument.JAPANESE:
+                    localeType = LocaleType.JA;
                     break;
                 default:
                     return;
