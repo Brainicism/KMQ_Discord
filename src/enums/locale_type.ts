@@ -4,6 +4,7 @@ enum LocaleType {
     JA = "ja",
     ES = "es",
     FR = "fr",
+    ZH = "zh",
 }
 
 export default LocaleType;
