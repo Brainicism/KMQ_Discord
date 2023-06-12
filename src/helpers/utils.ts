@@ -3,6 +3,7 @@ import * as uuid from "uuid";
 import { DataFiles } from "../constants";
 import { IPCLogger } from "../logger";
 import { exec } from "child_process";
+import State from "../state";
 import _ from "lodash";
 import crypto from "crypto";
 import fs from "fs";
@@ -72,6 +73,23 @@ export function escapedFormatting(text: string): string {
     }
 
     return text;
+}
+
+/**
+ * @param commandName - The name of the slash command
+ * @param subcommandName - The subcommand within the command
+ * @returns a formatted version of the slash command, that allows users to click
+ */
+export function clickableSlashCommand(
+    commandName: string,
+    subcommandName?: string
+): string {
+    let commandAndSubcommand = commandName;
+    if (subcommandName) {
+        commandAndSubcommand = `${commandName} ${subcommandName}`;
+    }
+
+    return `</${commandAndSubcommand}:${State.commandToID[commandName]}>`;
 }
 
 /**
