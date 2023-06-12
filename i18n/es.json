@@ -902,7 +902,7 @@
           "list": "Enumera todos los preestablecidos del servidor",
           "load": "Carga el preestablecido o identificador de preestablecido mencionado ({{exampleIdentifier}}) en las opciones de juego",
           "replace": "Reemplaza las opciones del preestablecido mencionado con las opciones de juego actuales",
-          "save": "Guarda las opciones de juego actuales como un preestablecido",
+          "save": "Guarda las opciones de juego actuales como un preestablecido"
         },
         "name": "preset_identifier",
         "usage": {
