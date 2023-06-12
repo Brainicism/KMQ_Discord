@@ -1,72 +1,72 @@
 {
-  "10th": "10th",
-  "11th": "11th",
-  "12th": "12th",
-  "13th": "13th",
-  "14th": "14th",
-  "15th": "15th",
-  "16th": "16th",
-  "17th": "17th",
-  "18th": "18th",
-  "19th": "19th",
-  "1st": "1st",
-  "20th": "20th",
-  "21st": "21st",
-  "22nd": "22nd",
-  "23rd": "23rd",
-  "24th": "24th",
-  "25th": "25th",
-  "2nd": "2nd",
-  "3rd": "3rd",
-  "4th": "4th",
-  "5th": "5th",
-  "6th": "6th",
-  "7th": "7th",
-  "8th": "8th",
-  "9th": "9th",
+  "10th": "10º",
+  "11th": "11º",
+  "12th": "12º",
+  "13th": "13º",
+  "14th": "14º",
+  "15th": "15º",
+  "16th": "16º",
+  "17th": "17º",
+  "18th": "18º",
+  "19th": "19º",
+  "1st": "1º",
+  "20th": "20º",
+  "21st": "21º",
+  "22nd": "22º",
+  "23rd": "23º",
+  "24th": "24º",
+  "25th": "25º",
+  "2nd": "2º",
+  "3rd": "3º",
+  "4th": "4º",
+  "5th": "5º",
+  "6th": "6º",
+  "7th": "7º",
+  "8th": "8º",
+  "9th": "9º",
   "command": {
     "add": {
       "failure": {
         "unrecognizedGroups": {
-          "added": "added"
+          "added": "añadido"
         }
       },
       "help": {
-        "description": "Adds one or more groups to the current {{groups}}, {{exclude}}, or {{include}} options.",
+        "description": "Añade uno o más grupos a las opciones actuales de {{groups}}, {{exclude}}, o {{include}}.",
         "example": {
-          "exclude": "Adds {{groupOne}}, {{groupTwo}}, and {{groupThree}} to the current {{exclude}} option",
-          "groups": "Adds {{groupOne}} and {{groupTwo}} to the current {{groups}} option",
-          "include": "Adds {{groupOne}} to the current {{include}} option"
+          "exclude": "Añade {{groupOne}}, {{groupTwo}}, y {{groupThree}} a la opción actual de {{exclude}}",
+          "groups": "Añade {{groupOne}} y {{groupTwo}} a la opción actual de {{groups}}",
+          "include": "Añade {{groupOne}} a la opción actual de {{include}}"
         },
-        "name": "add"
+        "name": "añadir"
       }
     },
     "answer": {
       "help": {
-        "description": "Choose how to answer: by typing your answer, or via multiple choice. Options are the following: `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}`, and `{{hard}}`",
+        "description": "Elige cómo responder: escribiendo tu respuesta o mediante opciones múltiples. Las opciones son las siguientes: `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}` y `{{hard}}`",
         "example": {
-          "multipleChoice": "Click on the button from {{optionCount}} multiple choice options to guess. {{penalty}} EXP penalty will be applied",
-          "typing": "Type your answer in the chat to guess",
-          "typingTypos": "Type your answer in the chat to guess. Small typos will be marked as correct. {{penalty}} EXP penalty will be applied"
+          "multipleChoice": "Haz clic en el botón de una de las {{optionCount}} opciones de opciones múltiples para adivinar. Se aplicará una penalización de {{penalty}} EXP",
+          "typing": "Escribe tu respuesta en el chat para adivinar",
+          "typingTypos": "Escribe tu respuesta en el chat para adivinar. Se aceptarán pequeños errores de escritura. Se aplicará una penalización de {{penalty}} EXP"
         },
         "interaction": {
-          "answerOption": "How to answer in-game",
-          "description": "Choose how to answer: by typing your answer, or via multiple choice"
+          "answerOption": "Cómo responder en el juego",
+          "description": "Elige cómo responder: escribiendo tu respuesta o mediante opciones múltiples"
         },
-        "name": "answer"
+        "name": "respuesta"
       }
     },
     "artisttype": {
       "help": {
-        "description": "Choose whether you'd like to hear from soloists, groups, or both. Options are the following: {{soloists}}, {{groups}}, and {{both}}.",
+        "description": "Elige si quieres escuchar a solistas, grupos o ambos. Las opciones son las siguientes: {{soloists}}, {{groups}} y {{both}}.",
         "example": {
-          "both": "Reproduce canciones de solistas y grupos",
-          "groups": "Reproducir canciones solo de grupos",
+          "both": "Reproducir canciones de solistas y grupos",
+          "groups": "Reproducir solo canciones de grupos",
           "reset": "Restablecer la opción de tipo de artista",
-          "soloists": "Reproducir canciones solo de solistas"
+          "soloists": "Reproducir solo canciones de solistas"
         },
         "interaction": {
-          "artistTypeOption": "El tipo de artista del que reproducir",
+          "artistTypeOption": "Tipo de artista a reproducir",
           "description": "Elige si quieres escuchar solistas, grupos o ambos"
         },
         "name": "tipodeartista"
@@ -90,7 +90,7 @@
       "help": {
         "description": "Establece un rango de años límite para las canciones. Si se especifica un valor, solo se reproducirán canciones posteriores a ese año. Si se especifican dos valores, solo se reproducirán canciones ENTRE esos dos años.",
         "example": {
-          "reset": "Restablecer al rango de años límite predeterminado de {{defaultBeginningSearchYear}} a {{defaultEndSearchYear}}",
+          "reset": "Restablecer el rango de años límite predeterminado de {{defaultBeginningSearchYear}} a {{defaultEndSearchYear}}",
           "singleCutoff": "Reproducir canciones lanzadas después del año {{year}}",
           "twoCutoffs": "Reproducir canciones lanzadas entre los años {{beginningYear}}-{{endingYear}}"
         },
@@ -259,7 +259,7 @@
     },
     "gender": {
       "help": {
-        "description": "Elige el género de los artistas que te gustaría escuchar. Las opciones son las siguientes: {{male}}, {{female}} y {{coed}}. Alternativamente, usa {{genderAlternating}} para rotar entre artistas masculinos y femeninos en cada ronda.",
+        "description": "Elige el género de los artistas que te gustaría escuchar. Las opciones son las siguientes: {{male}} (masculino), {{female}} (femenino) y {{coed}} (mixto). Alternativamente, usa {{genderAlternating}} para alternar entre artistas masculinos y femeninos en cada ronda.",
         "example": {
           "alternating": "Alternar entre artistas masculinos y femeninos en cada ronda",
           "coed": "Reproducir canciones solo de grupos mixtos (grupos con miembros masculinos y femeninos)",
@@ -417,18 +417,18 @@
           },
           "description": "Selecciona artistas para incluir forzosamente",
           "remove": {
-            "description": "Elimina los grupos dados de la opción de inclusión del juego",
-            "perGroupDescription": "El {{ordinalNum}} grupo para eliminar"
+            "description": "Elimina los grupos seleccionados de la opción de inclusión del juego",
+            "perGroupDescription": "El {{ordinalNum}} grupo a eliminar"
           },
           "reset": {
             "description": "Restablece la opción de inclusión"
           },
           "set": {
-            "description": "Incluye canciones de los grupos dados en las opciones del juego",
-            "perGroupDescription": "El {{ordinalNum}} grupo para incluir"
+            "description": "Incluye canciones de los grupos seleccionados en las opciones del juego",
+            "perGroupDescription": "El {{ordinalNum}} grupo a incluir"
           }
         },
-        "name": "incluir"
+        "name": "Incluir"
       }
     },
     "join": {
@@ -441,7 +441,7 @@
             "description": "Solo puedes incluir emojis que estén en este servidor."
           },
           "invalidCharacters": {
-            "description": "El nombre de tu equipo solo contiene caracteres inválidos."
+            "description": "El nombre de tu equipo solo puede contener caracteres válidos."
           },
           "invalidTeamName": {
             "title": "Nombre de equipo inválido"
@@ -475,10 +475,10 @@
         "description": "Elige si las canciones que se reproducen deben ser exclusivamente en coreano.",
         "example": {
           "all": "Reproducir todas las canciones disponibles",
-          "korean": "Reproduce solo canciones en coreano. Ignora canciones en otros idiomas: inglés, japonés, chino",
+          "korean": "Reproducir solo canciones en coreano. Ignorar canciones en otros idiomas: inglés, japonés, chino",
           "reset": "Restablecer al idioma predeterminado de {{defaultLanguage}}"
         },
-        "name": "idioma"
+        "name": "Idioma"
       },
       "interaction": {
         "language": "El idioma de la música a reproducir"
@@ -529,9 +529,9 @@
           "serverSongsGuessedPage": "Muestra la tercera página de la tabla de clasificación de todo el servidor por el total de canciones adivinadas.",
           "unenroll": "Oculta tu nombre de la tabla de clasificación."
         },
-        "name": "tabla de clasificación",
+        "name": "Tabla de clasificación",
         "usage": {
-          "pageNumber": "número de página"
+          "pageNumber": "Número de página"
         }
       },
       "interaction": {
@@ -619,11 +619,11 @@
         }
       },
       "help": {
-        "description": "Muestra los grupos seleccionados actualmente para una opción de juego determinada.",
+        "description": "Mostrar los grupos seleccionados actualmente para una opción de juego determinada.",
         "example": {
-          "exclude": "Lista las opciones actuales de {{exclude}}",
-          "groups": "Lista las opciones actuales de {{groups}}",
-          "include": "Lista las opciones actuales de {{include}}"
+          "exclude": "Listar las opciones actuales de {{exclude}}",
+          "groups": "Listar las opciones actuales de {{groups}}",
+          "include": "Listar las opciones actuales de {{include}}"
         },
         "name": "lista"
       },
@@ -829,7 +829,7 @@
         "description": {
           "connectionReminder": "Asegúrate de conectar tu cuenta de Discord [aquí](https://www.patreon.com/settings/apps) para recibir tus beneficios.",
           "nonPremium": "Suscríbete a [KMQ Premium](https://www.patreon.com/kmq) aquí.",
-          "premium": "Tienes [KMQ Premium](https://www.patreon.com/kmq)."
+          "premium": "Ya tienes [KMQ Premium](https://www.patreon.com/kmq)."
         },
         "perks": {
           "badge": {
@@ -907,87 +907,87 @@
         "name": "preset_identifier",
         "usage": {
           "presetIdentifier": "preset_name",
-          "presetName": "Load the newly imported preset using `{{presetLoad}} {{presetName}}`."
+          "presetName": "Cargar el nuevo preset importado usando `{{presetLoad}} {{presetName}}`."
         }
       },
       "imported": {
-        "description": "Preset Imported",
-        "title": "The preset to delete"
+        "description": "Preset Importado",
+        "title": "El preset a eliminar"
       },
       "interaction": {
         "delete": {
-          "presetName": "The preset to export"
+          "presetName": "El preset a exportar"
         },
         "export": {
-          "presetName": "The ID of the preset to import"
+          "presetName": "El ID del preset a importar"
         },
         "import": {
-          "exportedPresetID": "The name to give the imported preset",
-          "presetName": "The preset to load"
+          "exportedPresetID": "El nombre para darle al preset importado",
+          "presetName": "El preset a cargar"
         },
         "load": {
-          "presetName": "The preset to replace"
+          "presetName": "El preset a reemplazar"
         },
         "replace": {
-          "presetName": "What to call this preset"
+          "presetName": "Cómo llamar a este preset"
         },
         "save": {
-          "presetName": "You have no presets. Refer to {{presetHelp}} to see how to create one."
+          "presetName": "No tienes presets. Consulta {{presetHelp}} para ver cómo crear uno."
         }
       },
       "list": {
         "failure": {
           "noPresets": {
-            "description": "Load a preset with {{presetLoad}} [preset_name]"
+            "description": "Cargar un preset con {{presetLoad}} [nombre_del_preset]"
           }
         },
         "loadInstructions": {
-          "footer": "Available Presets"
+          "footer": "Presets Disponibles"
         },
-        "title": "Preset Replaced"
+        "title": "Preset Reemplazado"
       },
       "replaced": {
-        "title": "Preset Saved"
+        "title": "Preset Guardado"
       },
       "saved": {
-        "title": "You can load this preset later with {{presetLoad}}."
+        "title": "Puedes cargar este preset más tarde con {{presetLoad}}."
       },
       "savedOrReplaced": {
-        "description": "Badges"
+        "description": "Insignias"
       }
     },
     "profile": {
-      "badges": "Experience",
-      "experience": "Make sure you're using this command correctly. See {{profileHelp}} for more details.",
+      "badges": "Experiencia",
+      "experience": "Asegúrate de estar usando este comando correctamente. Consulta {{profileHelp}} para obtener más detalles.",
       "failure": {
         "notFound": {
           "badUsage": {
-            "description": "Could not find the specified user ID. See {{profileHelp}} for details."
+            "description": "No se pudo encontrar el ID de usuario especificado. Consulta {{profileHelp}} para obtener detalles."
           },
-          "description": "No Profile Found",
-          "title": "First Played"
+          "description": "Perfil no encontrado",
+          "title": "Primera Partida"
         }
       },
-      "firstPlayed": "Games Played",
-      "gamesPlayed": "Shows your game stats.",
+      "firstPlayed": "Partidas Jugadas",
+      "gamesPlayed": "Muestra tus estadísticas de juego.",
       "help": {
-        "description": "Views a player profile based on their Discord ID",
+        "description": "Muestra el perfil de un jugador basado en su ID de Discord",
         "example": {
-          "otherPlayerID": "Views {{playerName}}'s player profile",
-          "otherPlayerMention": "View your own player profile",
-          "self": "profile"
+          "otherPlayerID": "Muestra el perfil del jugador {{playerName}}",
+          "otherPlayerMention": "Muestra tu propio perfil de jugador",
+          "self": "perfil"
         },
-        "name": "mention",
+        "name": "mención",
         "usage": {
-          "mention": "The user ID of the player whose profile to view"
+          "mention": "El ID de usuario del jugador cuyo perfil se desea ver"
         }
       },
       "interaction": {
-        "userID": "Mention the user whose profile to view",
-        "userMention": "Last Active"
+        "userID": "Menciona al usuario cuyo perfil se desea ver",
+        "userMention": "Última Actividad"
       },
-      "lastActive": "Overall Rank",
-      "overallRank": "Almighty Ruler of the Solar System",
+      "lastActive": "Rango General",
+      "overallRank": "Soberano Supremo del Sistema Solar",
       "rank": {
         "almighty": "Artista del Año",
         "aoty": "Gobernante Benevolente de la Tierra",
@@ -1031,12 +1031,12 @@
       "help": {
         "description": "Reproduce todos los videos disponibles, incluyendo prácticas de baile, versiones acústicas, remixes",
         "example": {
-          "all": "Reproduce solo videos musicales {{official}} oficiales",
+          "all": "Reproducir solo videos musicales {{official}} oficiales",
           "official": "Restablecer al tipo de lanzamiento predeterminado de {{defaultRelease}}",
           "reset": "Elige si quieres incluir solo videos musicales oficiales o todos los videos."
         },
         "interaction": {
-          "description": "El tipo de lanzamientos a reproducir desde",
+          "description": "Tipo de lanzamiento a reproducir desde",
           "release": "lanzamiento"
         },
         "name": "No hay grupos seleccionados actualmente."
@@ -1064,7 +1064,7 @@
     },
     "reset": {
       "help": {
-        "description": "Restablece las opciones de juego predeterminadas",
+        "description": "Restablecer las opciones de juego predeterminadas",
         "example": {
           "reset": "restablecer"
         },
@@ -1076,7 +1076,7 @@
         "description": "puntuación",
         "name": "Tabla de puntuación"
       },
-      "scoreboardTitle": "Elija si cada canción se reproduce desde el principio, el medio o un punto aleatorio."
+      "scoreboardTitle": "Elige si cada canción se reproduce desde el principio, el medio o un punto aleatorio."
     },
     "seek": {
       "help": {
@@ -1090,7 +1090,7 @@
         "name": "Dónde empezar a reproducir cada canción"
       },
       "interaction": {
-        "seek": "Elija cómo se mezclan las canciones."
+        "seek": "Elige cómo se mezclan las canciones."
       }
     },
     "shuffle": {
@@ -1125,15 +1125,15 @@
     },
     "special": {
       "help": {
-        "description": "Reproduce la canción a una velocidad rápida",
+        "description": "Reproducir la canción a una velocidad rápida",
         "example": {
-          "fast": "Reproduce la canción a una velocidad más rápida",
-          "faster": "Reproduce la canción a un tono alto",
-          "highPitch": "Reproduce la canción a un tono bajo",
-          "lowPitch": "Reproduce una edición de nightcore de la canción",
+          "fast": "Reproducir la canción a una velocidad más rápida",
+          "faster": "Reproducir la canción a un tono alto",
+          "highPitch": "Reproducir la canción a un tono bajo",
+          "lowPitch": "Reproducir una edición de nightcore de la canción",
           "nightcore": "Restablecer la opción especial",
-          "reset": "Reproduce la canción al revés",
-          "reverse": "Reproduce la canción a una velocidad lenta",
+          "reset": "Reproducir la canción al revés",
+          "reverse": "Reproducir la canción a una velocidad lenta",
           "slow": "especial"
         },
         "name": "El tipo de modificación a realizar en cada canción"
@@ -1283,20 +1283,20 @@
       "historicalGaonWeekly": "[\"{{songName}}\" de {{artistName}}]({{url}})",
       "hyperlinkGenerator": "Dato curioso: {{year}} fue el año con la {{ordinalNum}} mayor cantidad de lanzamientos de videos musicales en K-Pop con un total de {{num}}!",
       "mostActiveYear": "Dato curioso: {{artistName}} tiene el {{ordinalNum}} mayor número de victorias en ceremonias de premiación anuales con {{wins}}!",
-      "mostAnnualAwardShowWins": "Dato curioso: {{year}} tuvo la {{ordinalNum}} mayor cantidad de debuts con {{num}} grupos debutando!",
-      "mostDebuts": "Dato curioso: {{artistName}} ha aparecido en las listas semanales digitales de GAON la {{ordinalNum}} mayor cantidad de veces con {{appearances}} apariciones!",
-      "mostGaonAppearances": "Dato curioso: {{artistName}} ha encabezado las listas semanales digitales de GAON {{firstPlaceCount}} veces, ¡la {{ordinalNum}} más veces!",
-      "mostGaonFirsts": "Dato curioso: {{artist}} es el grupo con el {{ordinalNum}} lugar más gustado con un total de {{likes}} likes en YouTube!",
-      "mostLikedGroup": "Dato curioso: {{hyperlink}} es el video con el {{ordinalNum}} lugar más gustado con un total de {{likes}} likes en YouTube!",
-      "mostLikedVideo": "Dato curioso: {{artist}} tiene el {{ordinalNum}} mayor número de videos musicales con {{num}} en YouTube!",
-      "mostMVs": "Dato curioso: {{artist}} ha ganado el {{ordinalNum}} mayor número de shows musicales con {{num}} victorias!",
-      "mostMusicShowWins": "Dato curioso: {{artist}} es el grupo con el {{ordinalNum}} mayor número de vistas con un total de {{views}} vistas en YouTube!",
-      "mostViewedGroup": "Dato curioso: {{artist}} es el artista solista con el {{ordinalNum}} mayor número de vistas con un total de {{views}} vistas en YouTube!",
-      "mostViewedSoloist": "Dato curioso: {{hyperlink}} es el video con el {{ordinalNum}} mayor número de vistas con un total de {{views}} vistas en YouTube!",
+      "mostAnnualAwardShowWins": "Dato curioso: {{year}} tuvo la {{ordinalNum}}ª mayor cantidad de debuts con {{num}} grupos debutando!",
+      "mostDebuts": "Dato curioso: {{artistName}} ha aparecido en las listas semanales digitales de GAON la {{ordinalNum}}ª mayor cantidad de veces con {{appearances}} apariciones!",
+      "mostGaonAppearances": "Dato curioso: {{artistName}} ha encabezado las listas semanales digitales de GAON {{firstPlaceCount}} veces, ¡la {{ordinalNum}}ª más veces!",
+      "mostGaonFirsts": "Dato curioso: {{artist}} es el grupo con el {{ordinalNum}}º lugar más gustado con un total de {{likes}} likes en YouTube!",
+      "mostLikedGroup": "Dato curioso: {{hyperlink}} es el video con el {{ordinalNum}}º lugar más gustado con un total de {{likes}} likes en YouTube!",
+      "mostLikedVideo": "Dato curioso: {{artist}} tiene el {{ordinalNum}}º mayor número de videos musicales con {{num}} en YouTube!",
+      "mostMVs": "Dato curioso: {{artist}} ha ganado el {{ordinalNum}}º mayor número de shows musicales con {{num}} victorias!",
+      "mostMusicShowWins": "Dato curioso: {{artist}} es el grupo con el {{ordinalNum}}º mayor número de vistas con un total de {{views}} vistas en YouTube!",
+      "mostViewedGroup": "Dato curioso: {{artist}} es el artista solista con el {{ordinalNum}}º mayor número de vistas con un total de {{views}} vistas en YouTube!",
+      "mostViewedSoloist": "Dato curioso: {{hyperlink}} es el video con el {{ordinalNum}}º mayor número de vistas con un total de {{views}} vistas en YouTube!",
       "mostViewedVideo": "Dato curioso: {{hyperlink}} recientemente alcanzó {{views}} vistas en YouTube!",
       "mvViewMilestone": "¡Alerta de nueva canción! Echa un vistazo al video musical recién lanzado, {{hyperlink}}",
       "newMV": "Dato curioso: ¡{{hyperlink}} fue lanzado esta semana en {{year}}!",
-      "oldMV": "Dato curioso: ¡{{songName}} es la canción con el {{ordinalNum}} puesto más alto en las listas semanales de Gaon la semana pasada!",
+      "oldMV": "Dato curioso: ¡{{songName}} es la canción con el {{ordinalNum}}º puesto más alto en las listas semanales de Gaon la semana pasada!",
       "recentGaonWeekly": "Dato curioso: ¡{{hyperlink}} recientemente ganó en {{musicShow}} el {{winDate}}!",
       "recentMusicShowWin": "Dato curioso: ¡{{hyperlink}} es el video musical más reciente en recibir un PAK (Perfect All-Kill)!",
       "recentPak": "Dato curioso: '{{releaseName}}' ({{releaseType}}) de '{{artistName}}' se lanzará pronto el {{dateString}}!",
@@ -1338,7 +1338,7 @@
       },
       "command": {
         "description": "Error al Ejecutar Comando",
-        "title": "Los comandos de texto ya no son compatibles para nuevos comandos. ¡Prueba los nuevos y mejorados comandos de barra en su lugar! Si los comandos de barra no son visibles en el servidor, por favor vuelve a invitar a KMQ al servidor."
+        "title": "Los comandos de texto ya no son compatibles con los nuevos comandos. ¡Prueba los nuevos y mejorados comandos de barra en su lugar! Si los comandos de barra no son visibles en el servidor, por favor vuelve a invitar a KMQ al servidor."
       },
       "deprecatedTextCommand": {
         "description": "Comandos de Texto Obsoletos",
@@ -1360,7 +1360,7 @@
         "title": "para permitirles jugar"
       },
       "groupsExcludeConflict": {
-        "allow": "Una o más de las {{conflictingOptionOne}} dadas ya están incluidas en {{conflictingOptionTwo}}. \nLos siguientes grupos **no** fueron añadidos a {{conflictingOptionOne}}:\n {{groupsList}}\nUsa {{solutionStepOne}} y luego {{solutionStepTwo}} {{allowOrPrevent}}.",
+        "allow": "Una o más de las {{conflictingOptionOne}} opciones ya están incluidas en {{conflictingOptionTwo}}. \nLos siguientes grupos **no** fueron añadidos a {{conflictingOptionOne}}:\n {{groupsList}}\nUsa {{solutionStepOne}} y luego {{solutionStepTwo}} {{allowOrPrevent}}.",
         "description": "para evitar que jueguen",
         "prevent": "Grupos y Excluir Conflictos",
         "title": "Ya has sido eliminado en esta ronda."
