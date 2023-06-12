@@ -6,6 +6,7 @@ import type Eris from "eris";
 import {
     bold,
     chunkArray,
+    clickableSlashCommand,
     codeLine,
     delay,
     getOrdinalNum,
@@ -1538,7 +1539,7 @@ export default class GameSession extends Session {
             this.guildID,
             "misc.inGame.hiddenTimerInfo",
             {
-                guessButton: `</guess:${State.commandToID["guess"]}>`,
+                guessButton: clickableSlashCommand("guess"),
                 timestamp: `<t:${Math.floor(
                     (round.timerStartedAt +
                         this.guildPreference.gameOptions.guessTimeout! * 1000) /
