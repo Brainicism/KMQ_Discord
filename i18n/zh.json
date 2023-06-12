@@ -658,7 +658,11 @@
             },
             "language": {
                 "en": "英语",
-                "ko": "韩语"
+                "es": "西班牙语",
+                "fr": "法语",
+                "ja": "日语",
+                "ko": "韩语",
+                "zh": "中文"
             },
             "updatedDescription": "机器人的语言已更新为`{{language}}`。"
         },
@@ -1200,77 +1204,77 @@
             },
             "title": "机器人统计"
         },
-    "subunits": {
-        "help": {
-            "description": "选择是否在使用 {{groups}} 时自动包括组的子单元。",
-            "example": {
-                "exclude": "不包括子单元",
-                "include": "自动包括子单元。例如，`{{groupCommand}} {{parentGroup}}` 将包括 {{parentGroup}}，{{subunitOne}}，{{subunitTwo}} 等歌曲。",
-                "reset": "重置为默认选项 {{defaultSubunit}}。"
-            },
-            "name": "子单位"
-        },
-        "interaction": {
-            "subunits": "是否包括子单位"
-        }
-    },
-    "timer": {
-        "help": {
-            "description": "在计时器结束前尽力猜对！输入秒数以设定计时器，或不输入参数以禁用计时器。",
-            "example": {
-                "reset": "禁用计时器",
-                "set": "在{{timer}}秒内，如果没有用户猜对，本轮结束并自动开始下一轮。"
+        "subunits": {
+            "help": {
+                "description": "选择是否在使用 {{groups}} 时自动包括组的子单元。",
+                "example": {
+                    "exclude": "不包括子单元",
+                    "include": "自动包括子单元。例如，`{{groupCommand}} {{parentGroup}}` 将包括 {{parentGroup}}，{{subunitOne}}，{{subunitTwo}} 等歌曲。",
+                    "reset": "重置为默认选项 {{defaultSubunit}}。"
+                },
+                "name": "子单位"
             },
             "interaction": {
-                "description": "在计时器结束前尽力猜对！",
-                "timer": "每首歌曲播放多少秒后跳过"
-            },
-            "name": "计时器",
-            "usage": {
-                "seconds": "秒"
-            }
-        }
-    },
-    "upcomingreleases": {
-        "album": "专辑",
-        "description": "以下歌曲、专辑和EP将会发布：",
-        "ep": "EP",
-        "failure": {
-            "noReleases": {
-                "description": "请稍后查看是否有新的发布计划。",
-                "title": "没有即将发布的内容"
+                "subunits": "是否包括子单位"
             }
         },
-        "help": {
-            "albumExample": "显示即将发布的专辑",
-            "defaultExample": "显示即将发布的歌手作品，包括歌曲、专辑和EP",
-            "description": "查看即将发布的歌曲、专辑和EP。",
-            "interaction": {
-                "releaseType": "要显示的发布类型"
+        "timer": {
+            "help": {
+                "description": "在计时器结束前尽力猜对！输入秒数以设定计时器，或不输入参数以禁用计时器。",
+                "example": {
+                    "reset": "禁用计时器",
+                    "set": "在{{timer}}秒内，如果没有用户猜对，本轮结束并自动开始下一轮。"
+                },
+                "interaction": {
+                    "description": "在计时器结束前尽力猜对！",
+                    "timer": "每首歌曲播放多少秒后跳过"
+                },
+                "name": "计时器",
+                "usage": {
+                    "seconds": "秒"
+                }
+            }
+        },
+        "upcomingreleases": {
+            "album": "专辑",
+            "description": "以下歌曲、专辑和EP将会发布：",
+            "ep": "EP",
+            "failure": {
+                "noReleases": {
+                    "description": "请稍后查看是否有新的发布计划。",
+                    "title": "没有即将发布的内容"
+                }
             },
-            "name": "即将发布"
+            "help": {
+                "albumExample": "显示即将发布的专辑",
+                "defaultExample": "显示即将发布的歌手作品，包括歌曲、专辑和EP",
+                "description": "查看即将发布的歌曲、专辑和EP。",
+                "interaction": {
+                    "releaseType": "要显示的发布类型"
+                },
+                "name": "即将发布"
+            },
+            "single": "单曲",
+            "title": "即将发布的内容"
         },
-        "single": "单曲",
-        "title": "即将发布的内容"
-    },
-    "vote": {
-        "available": "您现在可以投票了！",
-        "boost": {
-            "active": "加速已激活！",
-            "inactive": "加速未激活"
-        },
-        "description": "在[top.gg]({{voteLink}})上为KMQ投票，您将获得1小时的2倍经验值！您每{{voteResetDuration}}小时可以投票一次。\n\n如果您能留下一份[评论]({{reviewLink}})，我们将不胜感激。",
-        "help": {
-            "description": "显示如何投票以获得1小时的2倍经验值。",
-            "name": "投票"
-        },
-        "timeLeft": "{{time}} 剩余时间。",
-        "unavailable": {
-            "hours": "你可以在 **{{hours}}** 内投票。",
-            "minutes": "你可以在 **{{minutes}}** 内投票。",
-            "seconds": "你可以在 **{{seconds}}** 内投票。"
+        "vote": {
+            "available": "您现在可以投票了！",
+            "boost": {
+                "active": "加速已激活！",
+                "inactive": "加速未激活"
+            },
+            "description": "在[top.gg]({{voteLink}})上为KMQ投票，您将获得1小时的2倍经验值！您每{{voteResetDuration}}小时可以投票一次。\n\n如果您能留下一份[评论]({{reviewLink}})，我们将不胜感激。",
+            "help": {
+                "description": "显示如何投票以获得1小时的2倍经验值。",
+                "name": "投票"
+            },
+            "timeLeft": "{{time}} 剩余时间。",
+            "unavailable": {
+                "hours": "你可以在 **{{hours}}** 内投票。",
+                "minutes": "你可以在 **{{minutes}}** 内投票。",
+                "seconds": "你可以在 **{{seconds}}** 内投票。"
+            }
         }
-    }
     },
     "fact": {
         "didYouKnow": "你知道吗？",
