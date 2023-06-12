@@ -1144,8 +1144,9 @@ export async function getGameInfoMessage(
         }
 
         const locale = State.getGuildLocale(guildID);
+        // TODO: support more languages here
         endGameMessage.message =
-            locale === LocaleType.EN
+            locale !== LocaleType.KO
                 ? gameInfoMessageContent.en
                 : gameInfoMessageContent.ko;
     } catch (e) {

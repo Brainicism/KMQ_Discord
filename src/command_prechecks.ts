@@ -10,7 +10,6 @@ import { isUserPremium } from "./helpers/game_utils";
 import GameType from "./enums/game_type";
 import GuildPreference from "./structures/guild_preference";
 import KmqConfiguration from "./kmq_configuration";
-import LocaleType from "./enums/locale_type";
 import dbContext from "./database_context";
 import i18n from "./helpers/localization_manager";
 import type EmbedPayload from "./interfaces/embed_payload";
@@ -29,11 +28,11 @@ export default class CommandPrechecks {
                 tryCreateInteractionErrorAcknowledgement(
                     interaction,
                     i18n.translate(
-                        LocaleType.EN,
+                        messageContext.guildID,
                         "misc.failure.game.noneInProgress.title"
                     ),
                     i18n.translate(
-                        LocaleType.EN,
+                        messageContext.guildID,
                         "misc.failure.game.noneInProgress.description"
                     )
                 );

@@ -169,7 +169,7 @@ export async function getSimilarGroupNames(
 
     if (similarGroups.length === 0) return [];
     return similarGroups.map((x) =>
-        locale === LocaleType.EN ? x["name"] : x["kname"] || x["name"]
+        locale !== LocaleType.KO ? x["name"] : x["kname"] || x["name"]
     );
 }
 
