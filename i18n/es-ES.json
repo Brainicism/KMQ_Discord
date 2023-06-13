@@ -628,7 +628,7 @@
                 "name": "lista"
             },
             "interaction": {
-                "listType": "Si se deben imprimir los grupos actualmente establecidos, los grupos incluidos o los grupos excluidos"
+                "listType": "Si se deben imprimir los grupos establecidos, los grupos incluidos o los grupos excluidos"
             }
         },
         "listen": {
@@ -658,17 +658,17 @@
             },
             "language": {
                 "en": "Inglés",
-                "es": "Español",
+                "es-ES": "Español",
                 "fr": "Francés",
                 "ja": "Japonés",
                 "ko": "Coreano",
-                "zh": "Chino"
+                "zh-CN": "Chino"
             },
             "updatedDescription": "El idioma del bot se ha actualizado a `{{language}}`."
         },
         "lookup": {
             "help": {
-                "description": "Comprueba si un video de YouTube dado está incluido en la base de datos de KMQ y las opciones de juego actuales.",
+                "description": "Comprueba si un video de YouTube dado está incluido en la base de datos de KMQ y las opciones.",
                 "example": {
                     "song": "Proporciona información sobre {{song}} de {{artist}}."
                 },
@@ -789,7 +789,7 @@
             },
             "gameStarting": "Juego comenzando en #{{textChannelName}} en 🔊 {{voiceChannelName}}",
             "help": {
-                "description": "Comienza un juego de KMQ. Elija entre el modo clásico (predeterminado), modo de eliminación y modo de equipos.",
+                "description": "Comienza un juego de KMQ. Elija entre el modo clásico, modo de eliminación y modo de equipos.",
                 "example": {
                     "classic": "Comienza un juego clásico de KMQ (escribe tu respuesta primero para obtener un punto)",
                     "elimination": "Comienza un juego de eliminación de KMQ donde cada jugador comienza con {{lives}} vidas",
@@ -857,104 +857,104 @@
         },
         "preset": {
             "deleted": {
-                "description": "Preajuste {{presetName}} eliminado con éxito.",
-                "title": "Preajuste Eliminado"
+                "description": "Preestablecido {{presetName}} eliminado exitosamente.",
+                "title": "Preestablecido Eliminado"
             },
             "exported": {
-                "description": "Importa {{presetName}} como un nuevo preajuste en otros servidores usando:\n`{{presetImport}} {{presetUUID}} [nombre_preajuste]`\n\nAlternativamente, carga las opciones del preajuste directamente usando:\n`{{presetLoad}} {{presetUUID}}`",
-                "title": "Preajuste Exportado"
+                "description": "Importa {{presetName}} como un nuevo preestablecido en otros servidores usando:\n`{{presetImport}} {{presetUUID}} [nombre_preset]`\n\nAlternativamente, carga las opciones del preestablecido directamente usando:\n`{{presetLoad}} {{presetUUID}}`",
+                "title": "Preestablecido Exportado"
             },
             "failure": {
                 "alreadyExists": {
-                    "description": "El preajuste {{presetNameFormatted}} ya existe. Puedes eliminar el antiguo con `{{presetDelete}} {{presetName}}`.",
-                    "title": "El preestablecido ya existe"
+                    "description": "El preestablecido {{presetNameFormatted}} ya existe. Puedes eliminar el antiguo con `{{presetDelete}} {{presetName}}`.",
+                    "title": "Preestablecido Ya Existe"
                 },
                 "illegalPrefix": {
                     "description": "El nombre del preestablecido no puede comenzar con {{importPrefix}}.",
-                    "title": "Error de preestablecido"
+                    "title": "Error de Preestablecido"
                 },
                 "lengthyName": {
-                    "description": "El nombre del preajuste debe tener como máximo {{presetNameMaxLength}} caracteres.",
-                    "title": "Nombre del preestablecido demasiado largo"
+                    "description": "El nombre del preestablecido debe tener como máximo {{presetNameMaxLength}} caracteres.",
+                    "title": "Nombre de preestablecido demasiado largo"
                 },
                 "missingIdentifier": {
-                    "description": "Debe especificar un identificador de preestablecido. Use `{{presetExport}} [nombre_del_preajuste]` para obtener el identificador de un preestablecido.",
-                    "title": "Falta el identificador del preestablecido"
+                    "description": "Debe especificar un identificador de preestablecido. Use `{{presetExport}} [nombre_preset]` para obtener el identificador de un preestablecido.",
+                    "title": "Falta el identificador de preestablecido"
                 },
                 "missingName": {
                     "description": "Debe especificar un nombre de preestablecido.",
-                    "title": "El preestablecido {{presetName}} no existe."
+                    "title": "Falta el nombre de preestablecido"
                 },
                 "noSuchPreset": {
-                    "description": "El identificador del preestablecido {{presetUUID}} no existe.",
+                    "description": "El preestablecido {{presetName}} no existe.",
                     "identifier": {
-                        "description": "No existe tal preestablecido"
+                        "description": "El identificador de preestablecido {{presetUUID}} no existe."
                     },
-                    "title": "Cada servidor solo puede tener hasta {{maxNumPresets}} preestablecidos. Por favor, elimine algunos antes de agregar más."
+                    "title": "No existe tal preestablecido"
                 },
                 "tooMany": {
-                    "description": "Demasiados preestablecido",
-                    "title": "Varias acciones para guardar/cargar opciones de juego preestablecidas. El nombre del preestablecido debe ser de una sola palabra."
+                    "description": "Cada gremio solo puede tener hasta {{maxNumPresets}} presets. Por favor, elimine algunos antes de agregar más.",
+                    "title": "Demasiados presets"
                 }
             },
             "help": {
-                "description": "Varias acciones para guardar/cargar ajustes preestablecidos de opciones de juego. El nombre preestablecido debe tener una palabra de longitud.",
+                "description": "Acciones para opciones de juego preestablecidas. El nombre del preset debe ser de una sola palabra",
                 "example": {
-                    "delete": "Elimina el preajuste mencionado",
+                    "delete": "Elimina el preestablecido mencionado",
                     "export": "Devuelve un identificador único que se puede usar para cargar/importar el preestablecido mencionado",
                     "import": "Crea un nuevo preestablecido usando un identificador de preestablecido exportado",
-                    "list": "Enumera todos los preestablecidos del servidor",
-                    "load": "Carga el preestablecido o identificador de preestablecido mencionado ({{exampleIdentifier}}) en las opciones de juego",
-                    "replace": "Reemplaza las opciones del preestablecido mencionado con las opciones de juego actuales",
-                    "save": "Guarda las opciones de juego actuales como un preestablecido"
+                    "list": "Lista todos los presets del servidor",
+                    "load": "Carga el preestablecido o identificador de preestablecido ({{exampleIdentifier}}) en las opciones",
+                    "replace": "Reemplaza las opciones del preestablecido mencionado con las opciones actuales del juego",
+                    "save": "Guarda las opciones actuales del juego como un preestablecido"
                 },
-                "name": "preajuste",
+                "name": "preestablecido",
                 "usage": {
-                    "presetIdentifier": "preajuste_identificador",
-                    "presetName": "Cargar el nuevo preajuste importado usando `{{presetLoad}} {{presetName}}`."
+                    "presetIdentifier": "identificador_de_preset",
+                    "presetName": "nombre_de_preset"
                 }
             },
             "imported": {
-                "description": "Carga el nuevo preset importado usando `{{presetLoad}} {{presetName}}`.",
-                "title": "Preajuste Importado"
+                "description": "Carga el preestablecido recién importado usando `{{presetLoad}} {{presetName}}`.",
+                "title": "Preestablecido Importado"
             },
             "interaction": {
                 "delete": {
-                    "presetName": "El preajuste a eliminar"
+                    "presetName": "El preestablecido a eliminar"
                 },
                 "export": {
-                    "presetName": "El preajuste a exportar"
+                    "presetName": "El preestablecido a exportar"
                 },
                 "import": {
-                    "exportedPresetID": "El ID del preajuste a importar",
-                    "presetName": "El nombre para darle al preajuste importado"
+                    "exportedPresetID": "El ID del preestablecido a importar",
+                    "presetName": "El nombre a dar al preestablecido importado"
                 },
                 "load": {
-                    "presetName": "El preajuste a cargar"
+                    "presetName": "El preestablecido a cargar"
                 },
                 "replace": {
-                    "presetName": "El preajuste a reemplazar"
+                    "presetName": "El preestablecido a reemplazar"
                 },
                 "save": {
-                    "presetName": "Cómo llamar a este preajuste"
+                    "presetName": "Cómo llamar a este preestablecido"
                 }
             },
             "list": {
                 "failure": {
                     "noPresets": {
-                        "description": "No tienes preestablecidos. Consulta {{presetHelp}} para ver cómo crear uno."
+                        "description": "No tienes presets. Consulta {{presetHelp}} para ver cómo crear uno."
                     }
                 },
                 "loadInstructions": {
-                    "footer": "Cargue un ajuste preestablecido con {{presetLoad}} [preajuste_nombre]"
+                    "footer": "Cargar un preestablecido con {{presetLoad}} [nombre_preset]"
                 },
-                "title": "Preestablecidos Disponibles"
+                "title": "Presets disponibles"
             },
             "replaced": {
-                "title": "Preestablecido Reemplazado"
+                "title": "Preestablecido reemplazado"
             },
             "saved": {
-                "title": "Preestablecido Guardado"
+                "title": "Preestablecido guardado"
             },
             "savedOrReplaced": {
                 "description": "Puedes cargar este preestablecido más tarde con {{presetLoad}}."
@@ -1116,7 +1116,7 @@
                 "skipIgnored": "Saltar ignorado"
             },
             "help": {
-                "description": "Votar para saltar la canción actual. Una canción se salta cuando la mayoría de los participantes votan para saltarla.",
+                "description": "Votar para saltar la canción actual. Mayoría de los participantes votan para saltarla.",
                 "name": "saltar"
             },
             "success": {
@@ -1235,47 +1235,46 @@
                 }
             }
         },
-  "upcomingreleases": {
-    "album": "Álbum",
-    "description": "Las siguientes canciones, álbumes y EPs están programados para ser lanzados:",
-    "ep": "EP",
-    "failure": {
-      "noReleases": {
-        "description": "Vuelve más tarde para ver si hay nuevos lanzamientos programados.",
-        "title": "No hay lanzamientos próximos"
-      }
-    },
-    "help": {
-      "albumExample": "Mostrar próximos lanzamientos de álbumes",
-      "defaultExample": "Mostrar próximos lanzamientos de artistas, incluyendo canciones, álbumes y EPs",
-      "description": "Ver canciones, álbumes y extended plays (EPs) que están programados para lanzarse pronto.",
-      "interaction": {
-        "releaseType": "El tipo de lanzamiento a mostrar"
-      },
-      "name": "lanzamientospróximos"
-    },
-    "single": "Sencillo",
-    "title": "Lanzamientos próximos"
-  },
-  "vote": {
-    "available": "¡Puedes votar ahora!",
-    "boost": {
-      "active": "¡Impulso activo!",
-      "inactive": "Impulso inactivo"
-    },
-    "description": "¡Vota por KMQ en [top.gg]({{voteLink}}) y recibirás 2x EXP durante una hora! Puedes votar una vez cada {{voteResetDuration}} horas.\n\nAgradeceríamos si también pudieras dejar una [reseña]({{reviewLink}}).",
-    "help": {
-      "description": "Muestra instrucciones sobre cómo votar para recibir 2x EXP durante una hora.",
-      "name": "votar"
-    },
-    "timeLeft": "{{time}} restante.",
-    "unavailable": {
-      "hours": "Puedes votar en **{{hours}}**.",
-      "minutes": "Puedes votar en **{{minutes}}**.",
-      "seconds": "Puedes votar en **{{seconds}}**."
-    }
-  }
-
+        "upcomingreleases": {
+            "album": "Álbum",
+            "description": "Las siguientes canciones, álbumes y EPs están programados para ser lanzados:",
+            "ep": "EP",
+            "failure": {
+                "noReleases": {
+                    "description": "Vuelve más tarde para ver si hay nuevos lanzamientos programados.",
+                    "title": "No hay lanzamientos próximos"
+                }
+            },
+            "help": {
+                "albumExample": "Mostrar próximos lanzamientos de álbumes",
+                "defaultExample": "Mostrar próximos lanzamientos de artistas, incluyendo canciones, álbumes y EPs",
+                "description": "Ver canciones, álbumes y extended plays (EPs) que están programados para lanzarse pronto.",
+                "interaction": {
+                    "releaseType": "El tipo de lanzamiento a mostrar"
+                },
+                "name": "lanzamientospróximos"
+            },
+            "single": "Sencillo",
+            "title": "Lanzamientos próximos"
+        },
+        "vote": {
+            "available": "¡Puedes votar ahora!",
+            "boost": {
+                "active": "¡Impulso activo!",
+                "inactive": "Impulso inactivo"
+            },
+            "description": "¡Vota por KMQ en [top.gg]({{voteLink}}) y recibirás 2x EXP durante una hora! Puedes votar una vez cada {{voteResetDuration}} horas.\n\nAgradeceríamos si también pudieras dejar una [reseña]({{reviewLink}}).",
+            "help": {
+                "description": "Muestra instrucciones sobre cómo votar para recibir 2x EXP durante una hora.",
+                "name": "votar"
+            },
+            "timeLeft": "{{time}} restante.",
+            "unavailable": {
+                "hours": "Puedes votar en **{{hours}}**.",
+                "minutes": "Puedes votar en **{{minutes}}**.",
+                "seconds": "Puedes votar en **{{seconds}}**."
+            }
+        }
     },
     "fact": {
         "didYouKnow": "¿Sabías que?",

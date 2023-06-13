@@ -116,12 +116,19 @@ export default class GenderCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.gender.help.interaction.description"
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.gender.help.interaction.description"
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.gender.help.interaction.description"
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [...Array(4).keys()].map((x) => ({
@@ -130,12 +137,19 @@ export default class GenderCommand implements BaseCommand {
                             LocaleType.EN,
                             "command.gender.help.interaction.gender"
                         ),
-                        description_localizations: {
-                            [LocaleType.KO]: i18n.translate(
-                                LocaleType.KO,
-                                "command.gender.help.interaction.gender"
+                        description_localizations: Object.values(LocaleType)
+                            .filter((y) => y !== LocaleType.EN)
+                            .reduce(
+                                (acc, locale) => ({
+                                    ...acc,
+                                    [locale]: i18n.translate(
+                                        locale,
+                                        "command.gender.help.interaction.gender"
+                                    ),
+                                }),
+                                {}
                             ),
-                        },
+
                         type: Eris.Constants.ApplicationCommandOptionTypes
                             .STRING,
                         choices: Object.values(availableGenders)
@@ -156,13 +170,20 @@ export default class GenderCommand implements BaseCommand {
                         "misc.interaction.resetOption",
                         { optionName: "gender" }
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "misc.interaction.resetOption",
-                            { optionName: "gender" }
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "misc.interaction.resetOption",
+                                    { optionName: "gender" }
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [],

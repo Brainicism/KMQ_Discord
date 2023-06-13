@@ -121,12 +121,19 @@ export default class LocaleTypeCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.locale.help.interaction.language"
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.locale.help.interaction.language"
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.locale.help.interaction.language"
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: true,
                     choices: Object.keys(LanguageNameToLocaleType).map(

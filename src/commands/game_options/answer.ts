@@ -135,12 +135,19 @@ export default class AnswerCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.answer.help.interaction.description"
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.answer.help.interaction.description"
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.answer.help.interaction.description"
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -150,12 +157,19 @@ export default class AnswerCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.answer.help.interaction.answerOption"
                             ),
-                            description_localizations: {
-                                [LocaleType.KO]: i18n.translate(
-                                    LocaleType.KO,
-                                    "command.answer.help.interaction.answerOption"
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.answer.help.interaction.answerOption"
+                                        ),
+                                    }),
+                                    {}
                                 ),
-                            },
+
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             required: true,
@@ -175,13 +189,20 @@ export default class AnswerCommand implements BaseCommand {
                         "misc.interaction.resetOption",
                         { optionName: "answer" }
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "misc.interaction.resetOption",
-                            { optionName: "answer" }
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "misc.interaction.resetOption",
+                                    { optionName: "answer" }
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [],

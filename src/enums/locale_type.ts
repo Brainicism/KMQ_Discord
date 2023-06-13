@@ -2,9 +2,9 @@ enum LocaleType {
     EN = "en",
     KO = "ko",
     JA = "ja",
-    ES = "es",
+    ES = "es-ES",
     FR = "fr",
-    ZH = "zh",
+    ZH = "zh-CN",
 }
 
 export default LocaleType;

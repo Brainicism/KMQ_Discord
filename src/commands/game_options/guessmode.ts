@@ -96,12 +96,19 @@ export default class GuessModeCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.guessmode.help.description"
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.guessmode.help.description"
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.guessmode.help.description"
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -111,12 +118,19 @@ export default class GuessModeCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.guessmode.interaction.guessMode"
                             ),
-                            description_localizations: {
-                                [LocaleType.KO]: i18n.translate(
-                                    LocaleType.KO,
-                                    "command.guessmode.interaction.guessMode"
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.guessmode.interaction.guessMode"
+                                        ),
+                                    }),
+                                    {}
                                 ),
-                            },
+
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             required: true,
@@ -136,13 +150,20 @@ export default class GuessModeCommand implements BaseCommand {
                         "misc.interaction.resetOption",
                         { optionName: "guess mode" }
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "misc.interaction.resetOption",
-                            { optionName: "guess mode" }
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "misc.interaction.resetOption",
+                                    { optionName: "guess mode" }
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [],

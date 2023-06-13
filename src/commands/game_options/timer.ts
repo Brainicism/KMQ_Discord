@@ -81,12 +81,19 @@ export default class GuessTimeoutCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.timer.help.interaction.description"
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.timer.help.interaction.description"
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.timer.help.interaction.description"
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -96,12 +103,19 @@ export default class GuessTimeoutCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.timer.help.interaction.timer"
                             ),
-                            description_localizations: {
-                                [LocaleType.KO]: i18n.translate(
-                                    LocaleType.KO,
-                                    "command.timer.help.interaction.timer"
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.timer.help.interaction.timer"
+                                        ),
+                                    }),
+                                    {}
                                 ),
-                            },
+
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .INTEGER,
                             required: true,
@@ -117,13 +131,20 @@ export default class GuessTimeoutCommand implements BaseCommand {
                         "misc.interaction.resetOption",
                         { optionName: "timer" }
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "misc.interaction.resetOption",
-                            { optionName: "timer" }
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "misc.interaction.resetOption",
+                                    { optionName: "timer" }
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [],

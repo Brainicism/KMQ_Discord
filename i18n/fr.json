@@ -658,11 +658,11 @@
             },
             "language": {
                 "en": "Anglais",
-                "es": "Espagnol",
+                "es-ES": "Espagnol",
                 "fr": "Français",
                 "ja": "Japonais",
                 "ko": "Coréen",
-                "zh": "Chinois"
+                "zh-CN": "Chinois"
             },
             "updatedDescription": "La langue du bot a été mise à jour en `{{language}}`."
         },

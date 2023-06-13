@@ -85,12 +85,19 @@ export default class MultiGuessCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.multiguess.help.interaction.description"
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.multiguess.help.interaction.description"
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.multiguess.help.interaction.description"
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -100,12 +107,19 @@ export default class MultiGuessCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.multiguess.help.interaction.multiguess"
                             ),
-                            description_localizations: {
-                                [LocaleType.KO]: i18n.translate(
-                                    LocaleType.KO,
-                                    "command.multiguess.help.interaction.multiguess"
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.multiguess.help.interaction.multiguess"
+                                        ),
+                                    }),
+                                    {}
                                 ),
-                            },
+
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             required: true,
@@ -125,13 +139,20 @@ export default class MultiGuessCommand implements BaseCommand {
                         "misc.interaction.resetOption",
                         { optionName: "multiguess" }
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "misc.interaction.resetOption",
-                            { optionName: "multiguess" }
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "misc.interaction.resetOption",
+                                    { optionName: "multiguess" }
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [],

@@ -103,12 +103,19 @@ export default class LimitCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.limit.help.interaction.description"
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.limit.help.interaction.description"
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.limit.help.interaction.description"
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND_GROUP,
                     options: [
@@ -118,12 +125,20 @@ export default class LimitCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.limit.help.interaction.description_top"
                             ),
-                            description_localizations: {
-                                [LocaleType.KO]: i18n.translate(
-                                    LocaleType.KO,
-                                    "command.limit.help.interaction.description_top"
+
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.limit.help.interaction.description_top"
+                                        ),
+                                    }),
+                                    {}
                                 ),
-                            },
+
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .SUB_COMMAND,
                             options: [
@@ -133,12 +148,22 @@ export default class LimitCommand implements BaseCommand {
                                         LocaleType.EN,
                                         "command.limit.help.interaction.limit"
                                     ),
-                                    description_localizations: {
-                                        [LocaleType.KO]: i18n.translate(
-                                            LocaleType.KO,
-                                            "command.limit.help.interaction.limit"
+
+                                    description_localizations: Object.values(
+                                        LocaleType
+                                    )
+                                        .filter((x) => x !== LocaleType.EN)
+                                        .reduce(
+                                            (acc, locale) => ({
+                                                ...acc,
+                                                [locale]: i18n.translate(
+                                                    locale,
+                                                    "command.limit.help.interaction.limit"
+                                                ),
+                                            }),
+                                            {}
                                         ),
-                                    },
+
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,
                                     required: true,
@@ -153,12 +178,20 @@ export default class LimitCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.limit.help.interaction.description_range"
                             ),
-                            description_localizations: {
-                                [LocaleType.KO]: i18n.translate(
-                                    LocaleType.KO,
-                                    "command.limit.help.interaction.description_range"
+
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.limit.help.interaction.description_range"
+                                        ),
+                                    }),
+                                    {}
                                 ),
-                            },
+
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .SUB_COMMAND,
                             options: [
@@ -168,12 +201,22 @@ export default class LimitCommand implements BaseCommand {
                                         LocaleType.EN,
                                         "command.limit.help.interaction.limit_start"
                                     ),
-                                    description_localizations: {
-                                        [LocaleType.KO]: i18n.translate(
-                                            LocaleType.KO,
-                                            "command.limit.help.interaction.limit_start"
+
+                                    description_localizations: Object.values(
+                                        LocaleType
+                                    )
+                                        .filter((x) => x !== LocaleType.EN)
+                                        .reduce(
+                                            (acc, locale) => ({
+                                                ...acc,
+                                                [locale]: i18n.translate(
+                                                    locale,
+                                                    "command.limit.help.interaction.limit_start"
+                                                ),
+                                            }),
+                                            {}
                                         ),
-                                    },
+
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,
                                     required: true,
@@ -186,12 +229,21 @@ export default class LimitCommand implements BaseCommand {
                                         LocaleType.EN,
                                         "command.limit.help.interaction.limit_end"
                                     ),
-                                    description_localizations: {
-                                        [LocaleType.KO]: i18n.translate(
-                                            LocaleType.KO,
-                                            "command.limit.help.interaction.limit_end"
+                                    description_localizations: Object.values(
+                                        LocaleType
+                                    )
+                                        .filter((x) => x !== LocaleType.EN)
+                                        .reduce(
+                                            (acc, locale) => ({
+                                                ...acc,
+                                                [locale]: i18n.translate(
+                                                    locale,
+                                                    "command.limit.help.interaction.limit_end"
+                                                ),
+                                            }),
+                                            {}
                                         ),
-                                    },
+
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,
                                     required: true,
@@ -209,13 +261,20 @@ export default class LimitCommand implements BaseCommand {
                         "command.limit.help.example.reset",
                         { defaultLimit: String(DEFAULT_LIMIT) }
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.limit.help.example.reset",
-                            { defaultLimit: String(DEFAULT_LIMIT) }
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.limit.help.example.reset",
+                                    { defaultLimit: String(DEFAULT_LIMIT) }
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
                 },
             ],
