@@ -65,12 +65,18 @@ export default class HelpCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.help.interaction.action"
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.help.interaction.action"
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.help.interaction.action"
+                                ),
+                            }),
+                            {}
                         ),
-                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: false,
                     autocomplete: true,

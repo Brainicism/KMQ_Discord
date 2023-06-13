@@ -77,6 +77,10 @@ const MAX_INTERACTION_RESPONSE_TIME = 3 * 1000;
 interface GameMessageMultiLocaleContent {
     en: string;
     ko: string;
+    fr: string;
+    es: string;
+    ja: string;
+    zh: string;
 }
 
 /**
@@ -1132,22 +1136,39 @@ export async function getGameInfoMessage(
 
     if (!endGameMessage) return null;
 
+    const locale = State.getGuildLocale(guildID);
     try {
         const gameInfoMessageContent: GameMessageMultiLocaleContent =
             JSON.parse(endGameMessage.message);
 
-        if (!gameInfoMessageContent.en || !gameInfoMessageContent.ko) {
+        if (Object.values(gameInfoMessageContent).some((v) => !v)) {
             logger.error(
-                `Message's Game info message content is missing content. en = ${gameInfoMessageContent.en}, ko = ${gameInfoMessageContent.ko}`
+                `Message's Game info message content is missing content. ${gameInfoMessageContent}`
             );
             return null;
         }
 
-        const locale = State.getGuildLocale(guildID);
-        endGameMessage.message =
-            locale === LocaleType.EN
-                ? gameInfoMessageContent.en
-                : gameInfoMessageContent.ko;
+        switch (locale) {
+            case LocaleType.EN:
+                endGameMessage.message = gameInfoMessageContent.en;
+                break;
+            case LocaleType.KO:
+                endGameMessage.message = gameInfoMessageContent.ko;
+                break;
+            case LocaleType.ES:
+                endGameMessage.message = gameInfoMessageContent.es;
+                break;
+            case LocaleType.FR:
+                endGameMessage.message = gameInfoMessageContent.fr;
+                break;
+            case LocaleType.JA:
+                endGameMessage.message = gameInfoMessageContent.ja;
+                break;
+            case LocaleType.ZH:
+                endGameMessage.message = gameInfoMessageContent.zh;
+                break;
+            default:
+        }
     } catch (e) {
         logger.error(
             `Error parsing message's game info message content, invalid JSON? message = ${endGameMessage.message}`
@@ -1158,18 +1179,34 @@ export async function getGameInfoMessage(
         const gameInfoMessageContent: GameMessageMultiLocaleContent =
             JSON.parse(endGameMessage.title);
 
-        if (!gameInfoMessageContent.en || !gameInfoMessageContent.ko) {
+        if (Object.values(gameInfoMessageContent).some((v) => !v)) {
             logger.error(
-                `Title's game info message content is missing content. en = ${gameInfoMessageContent.en}, ko = ${gameInfoMessageContent.ko}`
+                `Title's game info message content is missing content. ${gameInfoMessageContent}`
             );
             return null;
         }
 
-        const locale = State.getGuildLocale(guildID);
-        endGameMessage.title =
-            locale === LocaleType.EN
-                ? gameInfoMessageContent.en
-                : gameInfoMessageContent.ko;
+        switch (locale) {
+            case LocaleType.EN:
+                endGameMessage.title = gameInfoMessageContent.en;
+                break;
+            case LocaleType.KO:
+                endGameMessage.title = gameInfoMessageContent.ko;
+                break;
+            case LocaleType.ES:
+                endGameMessage.title = gameInfoMessageContent.es;
+                break;
+            case LocaleType.FR:
+                endGameMessage.title = gameInfoMessageContent.fr;
+                break;
+            case LocaleType.JA:
+                endGameMessage.title = gameInfoMessageContent.ja;
+                break;
+            case LocaleType.ZH:
+                endGameMessage.title = gameInfoMessageContent.zh;
+                break;
+            default:
+        }
     } catch (e) {
         logger.error(
             `Error parsing title's game info message content, invalid JSON? title = ${endGameMessage.title}`

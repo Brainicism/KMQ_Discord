@@ -12,6 +12,7 @@ import Eris from "eris";
 import GameType from "../../enums/game_type";
 import GuessModeType from "../../enums/option_types/guess_mode_type";
 import GuildPreference from "../../structures/guild_preference";
+import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
@@ -24,7 +25,6 @@ import type EmbedPayload from "../../interfaces/embed_payload";
 import type GameRound from "../../structures/game_round";
 import type GameSession from "../../structures/game_session";
 import type HelpDocumentation from "../../interfaces/help";
-import type LocaleType from "../../enums/locale_type";
 
 const logger = new IPCLogger("hint");
 
@@ -228,14 +228,22 @@ export function generateHint(
             return `${i18n.translate(
                 guildID,
                 "command.hint.artistName"
-            )}: ${codeLine(gameRound.hints.artistHint[locale])}`;
+            )}: ${codeLine(
+                gameRound.hints.artistHint[
+                    locale === LocaleType.KO ? LocaleType.KO : LocaleType.EN
+                ]
+            )}`;
         case GuessModeType.SONG_NAME:
         case GuessModeType.BOTH:
         default:
             return `${i18n.translate(
                 guildID,
                 "command.hint.songName"
-            )}: ${codeLine(gameRound.hints.songHint[locale])}`;
+            )}: ${codeLine(
+                gameRound.hints.songHint[
+                    locale === LocaleType.KO ? LocaleType.KO : LocaleType.EN
+                ]
+            )}`;
     }
 }
 

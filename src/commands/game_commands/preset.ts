@@ -251,12 +251,19 @@ export default class PresetCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.preset.help.example.list"
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.preset.help.example.list"
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.preset.help.example.list"
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                 },
@@ -266,12 +273,19 @@ export default class PresetCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.preset.help.example.save"
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.preset.help.example.save"
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.preset.help.example.save"
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -281,12 +295,19 @@ export default class PresetCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.preset.interaction.save.presetName"
                             ),
-                            description_localizations: {
-                                [LocaleType.KO]: i18n.translate(
-                                    LocaleType.KO,
-                                    "command.preset.interaction.save.presetName"
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.preset.interaction.save.presetName"
+                                        ),
+                                    }),
+                                    {}
                                 ),
-                            },
+
                             required: true,
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
@@ -300,13 +321,20 @@ export default class PresetCommand implements BaseCommand {
                         "command.preset.help.example.load",
                         { exampleIdentifier: "KMQ-XXXXX-..." }
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.preset.help.example.load",
-                            { exampleIdentifier: "KMQ-XXXXX-..." }
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.preset.help.example.load",
+                                    { exampleIdentifier: "KMQ-XXXXX-..." }
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -316,12 +344,19 @@ export default class PresetCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.preset.interaction.load.presetName"
                             ),
-                            description_localizations: {
-                                [LocaleType.KO]: i18n.translate(
-                                    LocaleType.KO,
-                                    "command.preset.interaction.load.presetName"
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.preset.interaction.load.presetName"
+                                        ),
+                                    }),
+                                    {}
                                 ),
-                            },
+
                             required: true,
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
@@ -335,12 +370,19 @@ export default class PresetCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.preset.help.example.delete"
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.preset.help.example.delete"
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.preset.help.example.delete"
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -350,12 +392,19 @@ export default class PresetCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.preset.interaction.delete.presetName"
                             ),
-                            description_localizations: {
-                                [LocaleType.KO]: i18n.translate(
-                                    LocaleType.KO,
-                                    "command.preset.interaction.delete.presetName"
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.preset.interaction.delete.presetName"
+                                        ),
+                                    }),
+                                    {}
                                 ),
-                            },
+
                             required: true,
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
@@ -369,12 +418,19 @@ export default class PresetCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.preset.help.example.replace"
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.preset.help.example.replace"
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.preset.help.example.replace"
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -384,12 +440,19 @@ export default class PresetCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.preset.interaction.replace.presetName"
                             ),
-                            description_localizations: {
-                                [LocaleType.KO]: i18n.translate(
-                                    LocaleType.KO,
-                                    "command.preset.interaction.replace.presetName"
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.preset.interaction.replace.presetName"
+                                        ),
+                                    }),
+                                    {}
                                 ),
-                            },
+
                             required: true,
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
@@ -403,12 +466,19 @@ export default class PresetCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.preset.help.example.export"
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.preset.help.example.export"
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.preset.help.example.export"
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -418,12 +488,19 @@ export default class PresetCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.preset.interaction.export.presetName"
                             ),
-                            description_localizations: {
-                                [LocaleType.KO]: i18n.translate(
-                                    LocaleType.KO,
-                                    "command.preset.interaction.export.presetName"
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.preset.interaction.export.presetName"
+                                        ),
+                                    }),
+                                    {}
                                 ),
-                            },
+
                             required: true,
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
@@ -437,12 +514,19 @@ export default class PresetCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.preset.help.example.import"
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.preset.help.example.import"
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.preset.help.example.import"
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -452,12 +536,19 @@ export default class PresetCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.preset.interaction.import.exportedPresetID"
                             ),
-                            description_localizations: {
-                                [LocaleType.KO]: i18n.translate(
-                                    LocaleType.KO,
-                                    "command.preset.interaction.import.exportedPresetID"
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.preset.interaction.import.exportedPresetID"
+                                        ),
+                                    }),
+                                    {}
                                 ),
-                            },
+
                             required: true,
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
@@ -468,12 +559,19 @@ export default class PresetCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.preset.interaction.import.presetName"
                             ),
-                            description_localizations: {
-                                [LocaleType.KO]: i18n.translate(
-                                    LocaleType.KO,
-                                    "command.preset.interaction.import.presetName"
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.preset.interaction.import.presetName"
+                                        ),
+                                    }),
+                                    {}
                                 ),
-                            },
+
                             required: true,
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,

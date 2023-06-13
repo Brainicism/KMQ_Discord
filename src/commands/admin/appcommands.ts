@@ -107,12 +107,21 @@ export default class AppCommandsCommand implements BaseCommand {
                             );
                         }
 
-                        cmd.nameLocalizations = cmd.nameLocalizations ?? {
-                            [LocaleType.KO]: i18n.translate(
-                                LocaleType.KO,
-                                `command.${commandName}.help.name`
-                            ),
-                        };
+                        cmd.nameLocalizations =
+                            cmd.nameLocalizations ??
+                            Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            `command.${commandName}.help.name`
+                                        ),
+                                    }),
+                                    {}
+                                );
+
                         if (
                             cmd.type ===
                             Eris.Constants.ApplicationCommandTypes.CHAT_INPUT
@@ -135,12 +144,20 @@ export default class AppCommandsCommand implements BaseCommand {
                                     translationKey
                                 );
 
-                                cmd.descriptionLocalizations = {
-                                    [LocaleType.KO]: i18n.translate(
-                                        LocaleType.KO,
-                                        translationKey
-                                    ),
-                                };
+                                cmd.descriptionLocalizations = Object.values(
+                                    LocaleType
+                                )
+                                    .filter((x) => x !== LocaleType.EN)
+                                    .reduce(
+                                        (acc, locale) => ({
+                                            ...acc,
+                                            [locale]: i18n.translate(
+                                                locale,
+                                                translationKey
+                                            ),
+                                        }),
+                                        {}
+                                    );
                             }
                         }
 

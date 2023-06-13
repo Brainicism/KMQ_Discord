@@ -658,7 +658,11 @@
             },
             "language": {
                 "en": "English",
-                "ko": "Korean"
+                "es-ES": "Spanish",
+                "fr": "French",
+                "ja": "Japanese",
+                "ko": "Korean",
+                "zh-CN": "Chinese"
             },
             "updatedDescription": "The bot's language has been updated to `{{language}}`."
         },

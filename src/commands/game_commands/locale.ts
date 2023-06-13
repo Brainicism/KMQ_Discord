@@ -25,11 +25,28 @@ enum LocaleArgument {
     KO = "ko",
     KR = "kr",
     KOREAN = "korean",
+
+    ES = "es",
+    SP = "sp",
+    SPANISH = "spanish",
+
+    FR = "fr",
+    FRENCH = "french",
+
+    JA = "ja",
+    JAPANESE = "japanese",
+
+    ZH = "zh",
+    CHINESE = "chinese",
 }
 
 const LanguageNameToLocaleType = {
     English: LocaleType.EN,
     Korean: LocaleType.KO,
+    Spanish: LocaleType.ES,
+    French: LocaleType.FR,
+    Japanese: LocaleType.JA,
+    Chinese: LocaleType.ZH,
 };
 
 export default class LocaleTypeCommand implements BaseCommand {
@@ -104,12 +121,19 @@ export default class LocaleTypeCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.locale.help.interaction.language"
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.locale.help.interaction.language"
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.locale.help.interaction.language"
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: true,
                     choices: Object.keys(LanguageNameToLocaleType).map(
@@ -135,11 +159,34 @@ export default class LocaleTypeCommand implements BaseCommand {
                 case LocaleArgument.ENGLISH:
                     localeType = LocaleType.EN;
                     break;
+
                 case LocaleArgument.KO:
                 case LocaleArgument.KR:
                 case LocaleArgument.KOREAN:
                     localeType = LocaleType.KO;
                     break;
+
+                case LocaleArgument.ES:
+                case LocaleArgument.SP:
+                case LocaleArgument.SPANISH:
+                    localeType = LocaleType.ES;
+                    break;
+
+                case LocaleArgument.FR:
+                case LocaleArgument.FRENCH:
+                    localeType = LocaleType.FR;
+                    break;
+
+                case LocaleArgument.JA:
+                case LocaleArgument.JAPANESE:
+                    localeType = LocaleType.JA;
+                    break;
+
+                case LocaleArgument.ZH:
+                case LocaleArgument.CHINESE:
+                    localeType = LocaleType.ZH;
+                    break;
+
                 default:
                     return;
             }
