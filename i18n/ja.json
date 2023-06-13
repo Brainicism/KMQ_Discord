@@ -756,7 +756,7 @@
                     "include": "OST曲を含める",
                     "reset": "デフォルトの{{defaultOst}}にリセットする"
                 },
-                "name": "OST"
+                "name": "ost"
             },
             "interaction": {
                 "ost": "OST曲を含めるか、排他的に再生するか、除外するかを選択してください"
@@ -1156,7 +1156,7 @@
                 "interaction": {
                     "playlistURL": "曲を取得するプレイリスト"
                 },
-                "name": "Spotify"
+                "name": "spotify"
             },
             "invalidURL": {
                 "description": "プレイリストへのリンクが無効です。有効なリンクを取得するには、Spotifyの「共有>プレイリストへのリンクをコピー」を使用してください。",

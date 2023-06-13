@@ -344,7 +344,7 @@
                     "reset": "Restablecer el modo de adivinanza predeterminado de {{defaultGuessMode}}",
                     "song": "Escriba el nombre correcto de la canción para ganar una ronda del juego"
                 },
-                "name": "modo de adivinanza"
+                "name": "mododeadivinanza"
             },
             "interaction": {
                 "guessMode": "Lo que se considera una adivinanza válida"
@@ -428,7 +428,7 @@
                         "perGroupDescription": "El {{ordinalNum}} grupo a incluir"
                     }
                 },
-                "name": "Incluir"
+                "name": "incluir"
             }
         },
         "join": {
@@ -478,7 +478,7 @@
                     "korean": "Reproducir solo canciones en coreano. Ignorar canciones en otros idiomas: inglés, japonés, chino",
                     "reset": "Restablecer al idioma predeterminado de {{defaultLanguage}}"
                 },
-                "name": "Idioma"
+                "name": "idioma"
             },
             "interaction": {
                 "language": "El idioma de la música a reproducir"
@@ -529,7 +529,7 @@
                     "serverSongsGuessedPage": "Muestra la tercera página de la tabla de clasificación de todo el servidor por el total de canciones adivinadas.",
                     "unenroll": "Oculta tu nombre de la tabla de clasificación."
                 },
-                "name": "Tabla de clasificación",
+                "name": "tabladeclasificación",
                 "usage": {
                     "pageNumber": "Número de página"
                 }
@@ -874,11 +874,11 @@
                     "title": "Error de preestablecido"
                 },
                 "lengthyName": {
-                    "description": "El nombre del Preset debe tener como máximo {{presetNameMaxLength}} caracteres.",
+                    "description": "El nombre del preajuste debe tener como máximo {{presetNameMaxLength}} caracteres.",
                     "title": "Nombre del preestablecido demasiado largo"
                 },
                 "missingIdentifier": {
-                    "description": "Debe especificar un identificador de preestablecido. Use `{{presetExport}} [nombre_del_preset]` para obtener el identificador de un preestablecido.",
+                    "description": "Debe especificar un identificador de preestablecido. Use `{{presetExport}} [nombre_del_preajuste]` para obtener el identificador de un preestablecido.",
                     "title": "Falta el identificador del preestablecido"
                 },
                 "missingName": {
@@ -900,7 +900,7 @@
             "help": {
                 "description": "Varias acciones para guardar/cargar ajustes preestablecidos de opciones de juego. El nombre preestablecido debe tener una palabra de longitud.",
                 "example": {
-                    "delete": "Elimina el preset mencionado",
+                    "delete": "Elimina el preajuste mencionado",
                     "export": "Devuelve un identificador único que se puede usar para cargar/importar el preestablecido mencionado",
                     "import": "Crea un nuevo preestablecido usando un identificador de preestablecido exportado",
                     "list": "Enumera todos los preestablecidos del servidor",
@@ -908,35 +908,35 @@
                     "replace": "Reemplaza las opciones del preestablecido mencionado con las opciones de juego actuales",
                     "save": "Guarda las opciones de juego actuales como un preestablecido"
                 },
-                "name": "preset_identifier",
+                "name": "preajuste",
                 "usage": {
-                    "presetIdentifier": "preset_name",
-                    "presetName": "Cargar el nuevo preset importado usando `{{presetLoad}} {{presetName}}`."
+                    "presetIdentifier": "preajuste_identificador",
+                    "presetName": "Cargar el nuevo preajuste importado usando `{{presetLoad}} {{presetName}}`."
                 }
             },
             "imported": {
                 "description": "Carga el nuevo preset importado usando `{{presetLoad}} {{presetName}}`.",
-                "title": "Preset Importado"
+                "title": "Preajuste Importado"
             },
             "interaction": {
                 "delete": {
-                    "presetName": "El preset a eliminar"
+                    "presetName": "El preajuste a eliminar"
                 },
                 "export": {
-                    "presetName": "El preset a exportar"
+                    "presetName": "El preajuste a exportar"
                 },
                 "import": {
-                    "exportedPresetID": "El ID del preset a importar",
-                    "presetName": "El nombre para darle al preset importado"
+                    "exportedPresetID": "El ID del preajuste a importar",
+                    "presetName": "El nombre para darle al preajuste importado"
                 },
                 "load": {
-                    "presetName": "El preset a cargar"
+                    "presetName": "El preajuste a cargar"
                 },
                 "replace": {
-                    "presetName": "El preset a reemplazar"
+                    "presetName": "El preajuste a reemplazar"
                 },
                 "save": {
-                    "presetName": "Cómo llamar a este preset"
+                    "presetName": "Cómo llamar a este preajuste"
                 }
             },
             "list": {
@@ -946,7 +946,7 @@
                     }
                 },
                 "loadInstructions": {
-                    "footer": "Cargue un ajuste preestablecido con {{presetLoad}} [preset_name]"
+                    "footer": "Cargue un ajuste preestablecido con {{presetLoad}} [preajuste_nombre]"
                 },
                 "title": "Preestablecidos Disponibles"
             },
@@ -1235,53 +1235,54 @@
                 }
             }
         },
-        "upcomingreleases": {
-            "album": "Álbum",
-            "description": "Las siguientes canciones, álbumes y EPs están programados para ser lanzados:",
-            "ep": "EP",
-            "failure": {
-                "noReleases": {
-                    "description": "Vuelve más tarde para ver si hay nuevos lanzamientos programados.",
-                    "title": "No Upcoming Releases"
-                }
-            },
-            "help": {
-                "albumExample": "Show upcoming album releases",
-                "defaultExample": "Show upcoming artist releases, including songs, albums, and EPs",
-                "description": "View songs, albums, and extended plays (EPs) that are scheduled to release soon.",
-                "interaction": {
-                    "releaseType": "The type of release to show"
-                },
-                "name": "upcomingreleases"
-            },
-            "single": "Single",
-            "title": "Upcoming Releases"
-        },
-        "vote": {
-            "available": "You can vote now!",
-            "boost": {
-                "active": "Boost active!",
-                "inactive": "Boost Inactive"
-            },
-            "description": "Vote for KMQ on [top.gg]({{voteLink}}) and you'll receive 2x EXP for an hour! You can vote once every {{voteResetDuration}} hours.\n\nWe'd appreciate it if you could also leave a [review]({{reviewLink}}).",
-            "help": {
-                "description": "Shows instructions on how to vote to receive 2x EXP for an hour.",
-                "name": "vote"
-            },
-            "timeLeft": "{{time}} left.",
-            "unavailable": {
-                "hours": "You can vote in **{{hours}}**.",
-                "minutes": "You can vote in **{{minutes}}**.",
-                "seconds": "You can vote in **{{seconds}}**."
-            }
-        }
+  "upcomingreleases": {
+    "album": "Álbum",
+    "description": "Las siguientes canciones, álbumes y EPs están programados para ser lanzados:",
+    "ep": "EP",
+    "failure": {
+      "noReleases": {
+        "description": "Vuelve más tarde para ver si hay nuevos lanzamientos programados.",
+        "title": "No hay lanzamientos próximos"
+      }
+    },
+    "help": {
+      "albumExample": "Mostrar próximos lanzamientos de álbumes",
+      "defaultExample": "Mostrar próximos lanzamientos de artistas, incluyendo canciones, álbumes y EPs",
+      "description": "Ver canciones, álbumes y extended plays (EPs) que están programados para lanzarse pronto.",
+      "interaction": {
+        "releaseType": "El tipo de lanzamiento a mostrar"
+      },
+      "name": "lanzamientospróximos"
+    },
+    "single": "Sencillo",
+    "title": "Lanzamientos próximos"
+  },
+  "vote": {
+    "available": "¡Puedes votar ahora!",
+    "boost": {
+      "active": "¡Impulso activo!",
+      "inactive": "Impulso inactivo"
+    },
+    "description": "¡Vota por KMQ en [top.gg]({{voteLink}}) y recibirás 2x EXP durante una hora! Puedes votar una vez cada {{voteResetDuration}} horas.\n\nAgradeceríamos si también pudieras dejar una [reseña]({{reviewLink}}).",
+    "help": {
+      "description": "Muestra instrucciones sobre cómo votar para recibir 2x EXP durante una hora.",
+      "name": "votar"
+    },
+    "timeLeft": "{{time}} restante.",
+    "unavailable": {
+      "hours": "Puedes votar en **{{hours}}**.",
+      "minutes": "Puedes votar en **{{minutes}}**.",
+      "seconds": "Puedes votar en **{{seconds}}**."
+    }
+  }
+
     },
     "fact": {
-        "didYouKnow": "Did you know?",
+        "didYouKnow": "¿Sabías que?",
         "fun": {
-            "bigThreeDominance": "Fun Fact: BTS, Blackpink and Twice combined account for {{bigThreeViews}} YouTube views, or {{proportion}}%!",
-            "birthday": "Fun Fact: {{name}}'s birthday is this month on {{formattedDate}}!",
-            "companyByArtistCount": "Fun Fact: {{company}} is the entertainment company with the {{ordinalNum}} most artists (including subunits and solo debuts) at {{num}} total!",
+            "bigThreeDominance": "Dato curioso: BTS, Blackpink y Twice juntos representan {{bigThreeViews}} vistas en YouTube, ¡o el {{proportion}}%!",
+            "birthday": "Dato curioso: El cumpleaños de {{name}} es este mes el día {{formattedDate}}!",
+            "companyByArtistCount": "Dato curioso: {{company}} es la compañía de entretenimiento con el {{ordinalNum}} mayor número de artistas (incluyendo subunidades y debuts en solitario) con un total de {{num}}.",
             "companyByArtistViews": "Dato curioso: ¡{{name}} es la {{ordinalNum}} empresa de entretenimiento más vista con un total de {{views}} vistas en YouTube!",
             "fanclubName": "Dato curioso: El nombre del club de fans de {{name}} es '{{fanclub}}'!",
             "historicalGaonWeekly": "Dato curioso: En esta semana de {{year}}, la canción '{{songName}}' fue la más popular en las listas semanales de GAON!",

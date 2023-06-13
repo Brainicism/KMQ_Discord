@@ -756,7 +756,7 @@
                     "include": "包括原声带歌曲",
                     "reset": "重置为默认选项{{defaultOst}}"
                 },
-                "name": "OST"
+                "name": "ost"
             },
             "interaction": {
                 "ost": "是否包含、独家播放或排除OST歌曲"
@@ -1156,7 +1156,7 @@
                 "interaction": {
                     "playlistURL": "检索歌曲的播放列表"
                 },
-                "name": "Spotify"
+                "name": "spotify"
             },
             "invalidURL": {
                 "description": "播放列表链接无效。请在 Spotify 中使用“分享>复制播放列表链接”来检索有效链接。",
@@ -1173,37 +1173,39 @@
             },
             "parsing": "正在解析 Spotify 播放列表..."
         },
-        "stats": {
-            "description": "详细的机器人状态：{{link}}",
-            "failure": {
-                "description": "请稍后再试。",
-                "title": "检索统计数据时出错。"
-            },
-            "footer": "“最近”统计数据表示最近 24 小时的数据。",
-            "game": {
-                "activeGameSessions": "活跃游戏会话",
-                "activePlayers": "活跃玩家",
-                "latestSongUpdate": "最新歌曲更新",
-                "recentGameRounds": "(最近的) 游戏回合",
-                "recentGameSessions": "(最近的) 玩家",
-                "recentPlayers": "游戏统计数据",
-                "title": "包括各种使用/系统统计数据。"
-            },
-            "help": {
-                "description": "统计数据",
-                "name": "API 延迟"
-            },
-            "system": {
-                "apiLatency": "数据库延迟",
-                "databaseLatency": "系统平均负载",
-                "loadAverage": "进程内存使用情况",
-                "memoryUsage": "请求延迟",
-                "requestLatency": "系统统计数据",
-                "title": "运行时间",
-                "uptime": "机器人统计数据"
-            },
-            "title": "机器人统计"
-        },
+
+  "stats": {
+    "description": "详细的机器人状态: {{link}}",
+    "failure": {
+      "description": "请稍后再试。",
+      "title": "检索统计数据时出错"
+    },
+    "footer": "“最近”的统计数据表示最近 24 小时的数据。",
+    "game": {
+      "activeGameSessions": "活跃的游戏会话",
+      "activePlayers": "活跃的玩家",
+      "latestSongUpdate": "最新的歌曲更新",
+      "recentGameRounds": "（最近）游戏回合",
+      "recentGameSessions": "（最近）游戏会话",
+      "recentPlayers": "（最近）玩家",
+      "title": "游戏统计数据"
+    },
+    "help": {
+      "description": "各种使用/系统统计数据。",
+      "name": "统计"
+    },
+    "system": {
+      "apiLatency": "API 延迟",
+      "databaseLatency": "数据库延迟",
+      "loadAverage": "系统平均负载",
+      "memoryUsage": "进程内存使用情况",
+      "requestLatency": "请求延迟",
+      "title": "系统统计数据",
+      "uptime": "运行时间"
+    },
+    "title": "机器人统计数据"
+  }
+,
         "subunits": {
             "help": {
                 "description": "选择是否在使用 {{groups}} 时自动包括组的子单元。",

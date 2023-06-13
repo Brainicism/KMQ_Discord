@@ -51,7 +51,7 @@
                 },
                 "interaction": {
                     "answerOption": "Comment répondre en jeu",
-                    "description": "Choisissez comment répondre : en tapant votre réponse ou en choisissant parmi les options à choix multiples."
+                    "description": "Choisissez comment répondre: en tapant votre réponse ou en choisissant à choix multiples"
                 },
                 "name": "réponse"
             }
@@ -101,7 +101,7 @@
                     "endingYear": "La dernière année à inclure",
                     "rangeOption": "Choisir des chansons pour chaque année entre [beginning_year] et [ending_year]"
                 },
-                "name": "plage de dates"
+                "name": "plagededates"
             }
         },
         "debug": {
@@ -344,7 +344,7 @@
                     "reset": "Réinitialiser le mode de devinette par défaut de {{defaultGuessMode}}",
                     "song": "Tapez le nom correct de la chanson pour gagner une manche de jeu"
                 },
-                "name": "mode de devinette"
+                "name": "modededevinette"
             },
             "interaction": {
                 "guessMode": "Ce qui est considéré comme une réponse valide"
@@ -628,12 +628,12 @@
                 "name": "liste"
             },
             "interaction": {
-                "listType": "Indique s'il faut imprimer les groupes actuellement définis, les groupes inclus ou les groupes exclus."
+                "listType": "Indique s'il faut imprimer les groupes actuellement, les groupes inclus ou les groupes exclus."
             }
         },
         "listen": {
             "help": {
-                "description": "Diffusez des chansons à partir des options actuelles. Disponible uniquement pour les utilisateurs Premium de KMQ.",
+                "description": "Diffusez des chansons à partir des options actuelles. Réservé aux utilisateurs Premium de KMQ.",
                 "example": "La musique commencera à jouer dans le canal vocal actuel.",
                 "name": "écouter"
             },
@@ -668,7 +668,7 @@
         },
         "lookup": {
             "help": {
-                "description": "Vérifiez si une vidéo YouTube donnée est incluse dans la base de données de KMQ et les options de jeu actuelles.",
+                "description": "Vérifiez si une vidéo YouTube donnée est incluse dans la base de données de KMQ et les options.",
                 "example": {
                     "song": "Fournit des informations sur {{song}} de {{artist}}."
                 },
@@ -789,11 +789,11 @@
             },
             "gameStarting": "Début du jeu dans #{{textChannelName}} en 🔊 {{voiceChannelName}}",
             "help": {
-                "description": "Démarre une partie de KMQ. Choisissez entre le mode classique (par défaut), le mode élimination et le mode équipes.",
+                "description": "Démarre une partie de KMQ. Choisissez entre le mode classique, le mode élimination ou mode équipes",
                 "example": {
                     "classic": "Démarrez une partie classique de KMQ (tapez d'abord votre réponse pour obtenir un point)",
                     "elimination": "Démarrez une partie d'élimination de KMQ où chaque joueur commence avec {{lives}} vies",
-                    "teams": "Divisez-vous en autant d'équipes que vous le souhaitez et voyez sur qui vous pouvez compter pour vous aider à gagner!"
+                    "teams": "Divisez-vous en d'équipes et voyez sur qui vous pouvez compter pour vous aider à gagner!"
                 },
                 "interaction": {
                     "lives": "Choisissez le nombre de vies avec lequel chaque joueur commence"
@@ -898,13 +898,13 @@
                 }
             },
             "help": {
-                "description": "Diverses actions pour enregistrer/charger des préréglages d'options de jeu. Le nom du préréglage doit être composé d'un seul mot.",
+                "description": "Actions pour préréglages d'options de jeu. Le nom du préréglage doit être composé d'un seul mot.",
                 "example": {
                     "delete": "Supprime le préréglage mentionné",
                     "export": "Retourne un identifiant unique qui peut être utilisé pour charger/importer le préréglage mentionné",
                     "import": "Crée un nouveau préréglage en utilisant un identifiant de préréglage exporté",
                     "list": "Liste tous les préréglages du serveur",
-                    "load": "Charge le préréglage ou l'identifiant de préréglage mentionné ({{exampleIdentifier}}) dans les options de jeu",
+                    "load": "Charge le préréglage ou l'identifiant de préréglage mentionné ({{exampleIdentifier}}) dans options",
                     "replace": "Remplace les options du préréglage mentionné par les options de jeu actuelles",
                     "save": "Enregistre les options de jeu actuelles en tant que préréglage"
                 },
@@ -1027,7 +1027,7 @@
             "help": {
                 "description": "Voir les chansons ajoutées à KMQ au cours des deux dernières semaines.",
                 "example": "Afficher les chansons récemment ajoutées",
-                "name": "récemment ajouté"
+                "name": "récemmentajouté"
             },
             "title": "Chansons récemment ajoutées"
         },
@@ -1040,7 +1040,7 @@
                     "reset": "Réinitialise le type de sortie par défaut de {{defaultRelease}}"
                 },
                 "interaction": {
-                    "description": "Choisissez si vous souhaitez inclure uniquement les vidéos musicales officielles ou toutes les vidéos.",
+                    "description": "Choisissez entre les vidéos musicales officielles et toutes les vidéos.",
                     "release": "Le type de sorties à lire"
                 },
                 "name": "sortie"
@@ -1116,7 +1116,7 @@
                 "skipIgnored": "Ignorer les chansons ignorées"
             },
             "help": {
-                "description": "Voter pour passer la chanson en cours. Une chanson est sautée lorsque la majorité des participants vote pour la sauter.",
+                "description": "Votez pour passer la chanson en cours. Sautée si majorité vote pour.",
                 "name": "sauter"
             },
             "success": {
@@ -1206,13 +1206,13 @@
         },
         "subunits": {
             "help": {
-                "description": "Choisissez si vous souhaitez inclure automatiquement les sous-unités d'un groupe lors de l'utilisation de {{groups}}.",
+                "description": "Choisissez si vous souhaitez inclure les sous-unités d'un groupe lors de l'utilisation de {{groups}}.",
                 "example": {
                     "exclude": "Ne pas inclure les sous-unités",
                     "include": "Inclure automatiquement les sous-unités. Par exemple, `{{groupCommand}} {{parentGroup}}` inclurait les chansons de {{parentGroup}}, {{subunitOne}}, {{subunitTwo}}, etc.",
                     "reset": "Réinitialiser à l'option par défaut de {{defaultSubunit}}"
                 },
-                "name": "sous-unités"
+                "name": "sousunités"
             },
             "interaction": {
                 "subunits": "Inclure les sous-unités"
