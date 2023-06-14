@@ -271,8 +271,8 @@ describe("game utils", () => {
 
                     describe("one alias match, one non-match", () => {
                         it("should have one match, and one non-match", async () => {
-                            const artistName = "Kwon Eunbi";
-                            const artistAlias = "Eunbi alias";
+                            const artistName = "Minseung";
+                            const artistAlias = "Minseung alias";
                             State.aliases.artist[artistName] = [artistAlias];
                             const nonMatchArtist = "Weee";
                             const matchResults = await getMatchingGroupNames([

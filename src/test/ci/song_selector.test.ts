@@ -448,6 +448,34 @@ describe("song selector", () => {
                         true
                     );
                 });
+
+                it("should not include any subunits if group has no subunits", async () => {
+                    const group = {
+                        id: 4897,
+                        name: "AP Alchemy",
+                    };
+
+                    await guildPreference.setGroups([group]);
+
+                    await guildPreference.setSubunitPreference(
+                        SubunitsPreference.INCLUDE
+                    );
+
+                    const { songs } = await SongSelector.getFilteredSongList(
+                        guildPreference,
+                        true
+                    );
+
+                    assert.strict(songs.size > 0);
+
+                    // all songs must be one of the artist
+                    assert.strictEqual(
+                        Array.from(songs).every(
+                            (song) => song.artistID === group.id
+                        ),
+                        true
+                    );
+                });
             });
 
             describe("include subunits with shadowbanned artist", () => {
