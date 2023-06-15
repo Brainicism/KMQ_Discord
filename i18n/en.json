@@ -641,11 +641,10 @@
         },
         "locale": {
             "help": {
-                "description": "Change the language of the bot. Options are the following: {{english}}, {{korean}}.",
+                "description": "Change the language of the bot.",
                 "example": {
                     "reset": "Reset the bot's language to {{defaultLocale}}",
-                    "toEnglish": "Change the bot's language to {{english}}",
-                    "toKorean": "Change the bot's language to {{korean}}"
+                    "toLanguage": "Change the bot's language to {{language}}"
                 },
                 "interaction": {
                     "description": "Change the language of the bot.",

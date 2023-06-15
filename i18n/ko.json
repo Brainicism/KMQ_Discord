@@ -641,11 +641,10 @@
         },
         "locale": {
             "help": {
-                "description": "봇의 언어를 변경합니다. 옵션은 다음과 같습니다: {{english}}, {{korean}}.",
+                "description": "봇의 언어를 변경합니다.",
                 "example": {
                     "reset": "봇의 언어를 {{defaultLocale}}으(로) 재설정합니다.",
-                    "toEnglish": "봇의 언어를 {{english}}으(로) 변경합니다..",
-                    "toKorean": "봇의 언어를 {{korean}}으(로) 변경합니다."
+                    "toLanguage": "봇의 언어를 {{language}}으(로) 변경합니다."
                 },
                 "interaction": {
                     "description": "봇의 언어를 변경합니다.",
