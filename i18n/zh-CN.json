@@ -641,11 +641,10 @@
         },
         "locale": {
             "help": {
-                "description": "更改机器人的语言。选项如下：{{english}}，{{korean}}。",
+                "description": "更改机器人的语言。",
                 "example": {
                     "reset": "重置机器人的语言为{{defaultLocale}}。",
-                    "toEnglish": "将机器人的语言更改为{{english}}。",
-                    "toKorean": "将机器人的语言更改为{{korean}}。"
+                    "toLanguage": "将机器人的语言更改为{{language}}。"
                 },
                 "interaction": {
                     "description": "更改机器人的语言。",

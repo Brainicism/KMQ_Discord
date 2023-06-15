@@ -641,11 +641,10 @@
         },
         "locale": {
             "help": {
-                "description": "ボットの言語を変更します。以下のオプションがあります：{{english}}、{{korean}}。",
+                "description": "ボットの言語を変更します。",
                 "example": {
                     "reset": "ボットの言語を{{defaultLocale}}にリセットします。",
-                    "toEnglish": "ボットの言語を{{english}}に変更します。",
-                    "toKorean": "ボットの言語を{{korean}}に変更します。"
+                    "toLanguage": "ボットの言語を{{language}}に変更します。"
                 },
                 "interaction": {
                     "description": "ボットの言語を変更します。",

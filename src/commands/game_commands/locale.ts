@@ -66,14 +66,7 @@ export default class LocaleTypeCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "locale",
-        description: i18n.translate(
-            guildID,
-            "command.locale.help.description",
-            {
-                english: `\`${LocaleArgument.ENGLISH}\``,
-                korean: `\`${LocaleArgument.KOREAN}\``,
-            }
-        ),
+        description: i18n.translate(guildID, "command.locale.help.description"),
         usage: `/locale language:[${i18n.translate(
             guildID,
             "command.locale.help.usage.language"
@@ -83,9 +76,9 @@ export default class LocaleTypeCommand implements BaseCommand {
                 example: "`/locale language:English`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.locale.help.example.toEnglish",
+                    "command.locale.help.example.toLanguage",
                     {
-                        english: i18n.translate(
+                        language: i18n.translate(
                             guildID,
                             "command.locale.language.en"
                         ),
@@ -96,11 +89,63 @@ export default class LocaleTypeCommand implements BaseCommand {
                 example: "`/locale language:Korean`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.locale.help.example.toKorean",
+                    "command.locale.help.example.toLanguage",
                     {
-                        korean: i18n.translate(
+                        language: i18n.translate(
                             guildID,
                             "command.locale.language.ko"
+                        ),
+                    }
+                ),
+            },
+            {
+                example: "`/locale language:Spanish`",
+                explanation: i18n.translate(
+                    guildID,
+                    "command.locale.help.example.toLanguage",
+                    {
+                        language: i18n.translate(
+                            guildID,
+                            "command.locale.language.es-ES"
+                        ),
+                    }
+                ),
+            },
+            {
+                example: "`/locale language:French`",
+                explanation: i18n.translate(
+                    guildID,
+                    "command.locale.help.example.toLanguage",
+                    {
+                        language: i18n.translate(
+                            guildID,
+                            "command.locale.language.fr"
+                        ),
+                    }
+                ),
+            },
+            {
+                example: "`/locale language:Chinese`",
+                explanation: i18n.translate(
+                    guildID,
+                    "command.locale.help.example.toLanguage",
+                    {
+                        language: i18n.translate(
+                            guildID,
+                            "command.locale.language.zh-CN"
+                        ),
+                    }
+                ),
+            },
+            {
+                example: "`/locale language:Japanese`",
+                explanation: i18n.translate(
+                    guildID,
+                    "command.locale.help.example.toLanguage",
+                    {
+                        language: i18n.translate(
+                            guildID,
+                            "command.locale.language.ja"
                         ),
                     }
                 ),
