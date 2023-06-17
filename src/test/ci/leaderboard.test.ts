@@ -127,7 +127,8 @@ describe("leaderboard command", () => {
                             messageContext,
                             LeaderboardType.EXP,
                             LeaderboardScope.GLOBAL,
-                            LeaderboardDuration.ALL_TIME
+                            LeaderboardDuration.ALL_TIME,
+                            "1"
                         );
 
                     const fields = await getNumberOfFields(embeds);
@@ -152,7 +153,8 @@ describe("leaderboard command", () => {
                             messageContext,
                             LeaderboardType.EXP,
                             LeaderboardScope.GLOBAL,
-                            LeaderboardDuration.ALL_TIME
+                            LeaderboardDuration.ALL_TIME,
+                            "1"
                         );
 
                     const fields = await getNumberOfFields(embeds);
@@ -177,7 +179,8 @@ describe("leaderboard command", () => {
                             messageContext,
                             LeaderboardType.EXP,
                             LeaderboardScope.GLOBAL,
-                            LeaderboardDuration.ALL_TIME
+                            LeaderboardDuration.ALL_TIME,
+                            "1"
                         );
 
                     const fields = await getNumberOfFields(embeds);
@@ -188,6 +191,46 @@ describe("leaderboard command", () => {
                     );
                     assert.strictEqual(fields, totalEntries);
                 });
+            });
+        });
+
+        describe("invoker indicator", () => {
+            beforeEach(async () => {
+                await dbContext.kmq.deleteFrom("player_stats").execute();
+            });
+
+            it("should show the invoker indicator", async () => {
+                await dbContext.kmq
+                    .insertInto("player_stats")
+                    .values(generatePlayerStats(INITIAL_TOTAL_ENTRIES))
+                    .execute();
+
+                // invoker's position
+                const invokerPosition = 3;
+
+                const { embeds } =
+                    await LeaderboardCommand.getLeaderboardEmbeds(
+                        messageContext,
+                        LeaderboardType.EXP,
+                        LeaderboardScope.GLOBAL,
+                        LeaderboardDuration.ALL_TIME,
+                        String(INITIAL_TOTAL_ENTRIES - invokerPosition)
+                    );
+
+                const generatedEmbeds = await Promise.all(
+                    embeds.map((x) => x())
+                );
+
+                // invoker has an indicator, every other entry doesn't
+                assert.strict(
+                    generatedEmbeds[0].fields!.every((field, idx) => {
+                        if (idx === invokerPosition - 1) {
+                            return field.name.includes("\\➡");
+                        }
+
+                        return !field.name.includes("\\➡");
+                    })
+                );
             });
         });
 
@@ -208,7 +251,8 @@ describe("leaderboard command", () => {
                             messageContext,
                             LeaderboardType.EXP,
                             LeaderboardScope.GLOBAL,
-                            LeaderboardDuration.ALL_TIME
+                            LeaderboardDuration.ALL_TIME,
+                            "1"
                         );
 
                     const fields = await getNumberOfFields(embeds);
@@ -264,7 +308,8 @@ describe("leaderboard command", () => {
                             messageContext,
                             LeaderboardType.EXP,
                             LeaderboardScope.SERVER,
-                            LeaderboardDuration.ALL_TIME
+                            LeaderboardDuration.ALL_TIME,
+                            "1"
                         );
 
                     const fields = await getNumberOfFields(embeds);
@@ -335,7 +380,8 @@ describe("leaderboard command", () => {
                             messageContext,
                             LeaderboardType.EXP,
                             LeaderboardScope.GAME,
-                            LeaderboardDuration.ALL_TIME
+                            LeaderboardDuration.ALL_TIME,
+                            "1"
                         );
 
                     const fields = await getNumberOfFields(embeds);
@@ -366,7 +412,8 @@ describe("leaderboard command", () => {
                             messageContext,
                             LeaderboardType.GAMES_PLAYED,
                             LeaderboardScope.GLOBAL,
-                            LeaderboardDuration.ALL_TIME
+                            LeaderboardDuration.ALL_TIME,
+                            "1"
                         );
 
                     const fields = await getNumberOfFields(embeds);
@@ -397,7 +444,8 @@ describe("leaderboard command", () => {
                             messageContext,
                             LeaderboardType.SONGS_GUESSED,
                             LeaderboardScope.GLOBAL,
-                            LeaderboardDuration.ALL_TIME
+                            LeaderboardDuration.ALL_TIME,
+                            "1"
                         );
 
                     const fields = await getNumberOfFields(embeds);
@@ -493,6 +541,7 @@ describe("leaderboard command", () => {
                                 LeaderboardType.EXP,
                                 LeaderboardScope.GLOBAL,
                                 LeaderboardDuration.DAILY,
+                                "1",
                                 date
                             );
 
@@ -518,6 +567,7 @@ describe("leaderboard command", () => {
                                 LeaderboardType.EXP,
                                 LeaderboardScope.GLOBAL,
                                 LeaderboardDuration.WEEKLY,
+                                "1",
                                 date
                             );
 
@@ -543,6 +593,7 @@ describe("leaderboard command", () => {
                                 LeaderboardType.EXP,
                                 LeaderboardScope.GLOBAL,
                                 LeaderboardDuration.MONTHLY,
+                                "1",
                                 date
                             );
 
@@ -591,6 +642,7 @@ describe("leaderboard command", () => {
                                 LeaderboardType.EXP,
                                 LeaderboardScope.SERVER,
                                 LeaderboardDuration.DAILY,
+                                "1",
                                 date
                             );
 
@@ -618,6 +670,7 @@ describe("leaderboard command", () => {
                                 LeaderboardType.EXP,
                                 LeaderboardScope.SERVER,
                                 LeaderboardDuration.WEEKLY,
+                                "1",
                                 date
                             );
 
@@ -644,6 +697,7 @@ describe("leaderboard command", () => {
                                 LeaderboardType.EXP,
                                 LeaderboardScope.SERVER,
                                 LeaderboardDuration.MONTHLY,
+                                "1",
                                 date
                             );
 
@@ -708,6 +762,7 @@ describe("leaderboard command", () => {
                                 LeaderboardType.EXP,
                                 LeaderboardScope.GAME,
                                 LeaderboardDuration.DAILY,
+                                "1",
                                 date
                             );
 
@@ -735,6 +790,7 @@ describe("leaderboard command", () => {
                                 LeaderboardType.EXP,
                                 LeaderboardScope.GAME,
                                 LeaderboardDuration.WEEKLY,
+                                "1",
                                 date
                             );
 
@@ -761,6 +817,7 @@ describe("leaderboard command", () => {
                                 LeaderboardType.EXP,
                                 LeaderboardScope.GAME,
                                 LeaderboardDuration.MONTHLY,
+                                "1",
                                 date
                             );
 
@@ -805,6 +862,7 @@ describe("leaderboard command", () => {
                             LeaderboardType.GAMES_PLAYED,
                             LeaderboardScope.GLOBAL,
                             LeaderboardDuration.MONTHLY,
+                            "1",
                             date
                         );
 
@@ -848,6 +906,7 @@ describe("leaderboard command", () => {
                             LeaderboardType.GAMES_PLAYED,
                             LeaderboardScope.GLOBAL,
                             LeaderboardDuration.MONTHLY,
+                            "1",
                             date
                         );
 
