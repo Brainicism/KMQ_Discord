@@ -526,6 +526,7 @@ export default class LeaderboardCommand implements BaseCommand {
         type: LeaderboardType,
         scope: LeaderboardScope,
         duration: LeaderboardDuration,
+        invokerId: string,
         date?: Date
     ): Promise<{ embeds: Array<EmbedGenerator>; pageCount: number }> {
         const embedsFns: Array<EmbedGenerator> = [];
@@ -887,7 +888,11 @@ export default class LeaderboardCommand implements BaseCommand {
                                     }
 
                                     return {
-                                        name: `${displayedRank} ${displayName}`,
+                                        name: `${
+                                            invokerId === player.player_id
+                                                ? "\\➡"
+                                                : ""
+                                        }${displayedRank} ${displayName}`,
                                         value,
                                     };
                                 })
@@ -1199,7 +1204,8 @@ export default class LeaderboardCommand implements BaseCommand {
                 messageContext,
                 type,
                 scope,
-                duration
+                duration,
+                messageContext.author.id
             );
 
         if (pageCount === 0) {
