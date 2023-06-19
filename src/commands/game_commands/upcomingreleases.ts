@@ -83,12 +83,19 @@ export default class UpcomingReleasesCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.upcomingreleases.help.interaction.releaseType"
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.upcomingreleases.help.interaction.releaseType"
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.upcomingreleases.help.interaction.releaseType"
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     required: false,
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     choices: Object.values(ReleaseType).map((releaseType) => ({

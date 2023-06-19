@@ -53,12 +53,19 @@ export default class ReleaseCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.release.help.interaction.description"
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.release.help.interaction.description"
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.release.help.interaction.description"
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -68,12 +75,18 @@ export default class ReleaseCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.release.help.interaction.release"
                             ),
-                            description_localizations: {
-                                [LocaleType.KO]: i18n.translate(
-                                    LocaleType.KO,
-                                    "command.release.help.interaction.release"
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.release.help.interaction.release"
+                                        ),
+                                    }),
+                                    {}
                                 ),
-                            },
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             required: true,
@@ -93,13 +106,20 @@ export default class ReleaseCommand implements BaseCommand {
                         "misc.interaction.resetOption",
                         { optionName: "release" }
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "misc.interaction.resetOption",
-                            { optionName: "release" }
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "misc.interaction.resetOption",
+                                    { optionName: "release" }
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [],

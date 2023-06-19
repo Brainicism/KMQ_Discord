@@ -124,12 +124,19 @@ export default class IncludeCommand implements BaseCommand {
                     LocaleType.EN,
                     `command.include.help.interaction.${action}.description`
                 ),
-                description_localizations: {
-                    [LocaleType.KO]: i18n.translate(
-                        LocaleType.KO,
-                        `command.include.help.interaction.${action}.description`
+                description_localizations: Object.values(LocaleType)
+                    .filter((x) => x !== LocaleType.EN)
+                    .reduce(
+                        (acc, locale) => ({
+                            ...acc,
+                            [locale]: i18n.translate(
+                                locale,
+                                `command.include.help.interaction.${action}.description`
+                            ),
+                        }),
+                        {}
                     ),
-                },
+
                 type: Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
                 options:
                     action === GroupAction.RESET
@@ -141,13 +148,26 @@ export default class IncludeCommand implements BaseCommand {
                                   `command.include.help.interaction.${action}.perGroupDescription`,
                                   { ordinalNum: getOrdinalNum(x + 1) }
                               ),
-                              description_localizations: {
-                                  [LocaleType.KO]: i18n.translate(
-                                      LocaleType.KO,
-                                      `command.include.help.interaction.${action}.perGroupDescription`,
-                                      { ordinalNum: getOrdinalNum(x + 1) }
+                              description_localizations: Object.values(
+                                  LocaleType
+                              )
+                                  .filter((y) => y !== LocaleType.EN)
+                                  .reduce(
+                                      (acc, locale) => ({
+                                          ...acc,
+                                          [locale]: i18n.translate(
+                                              locale,
+                                              `command.include.help.interaction.${action}.perGroupDescription`,
+                                              {
+                                                  ordinalNum: getOrdinalNum(
+                                                      x + 1
+                                                  ),
+                                              }
+                                          ),
+                                      }),
+                                      {}
                                   ),
-                              },
+
                               type: Eris.Constants.ApplicationCommandOptionTypes
                                   .STRING,
                               autocomplete: true,

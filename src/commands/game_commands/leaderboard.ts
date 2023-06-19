@@ -149,12 +149,19 @@ export default class LeaderboardCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.leaderboard.help.example.enroll"
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.leaderboard.help.example.enroll"
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.leaderboard.help.example.enroll"
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                 },
@@ -164,12 +171,19 @@ export default class LeaderboardCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.leaderboard.help.example.unenroll"
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.leaderboard.help.example.unenroll"
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.leaderboard.help.example.unenroll"
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                 },
@@ -179,12 +193,19 @@ export default class LeaderboardCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.leaderboard.help.description"
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.leaderboard.help.description"
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.leaderboard.help.description"
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -194,12 +215,19 @@ export default class LeaderboardCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.leaderboard.interaction.type"
                             ),
-                            description_localizations: {
-                                [LocaleType.KO]: i18n.translate(
-                                    LocaleType.KO,
-                                    "command.leaderboard.interaction.type"
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.leaderboard.interaction.type"
+                                        ),
+                                    }),
+                                    {}
                                 ),
-                            },
+
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             choices: Object.values(LeaderboardType).map(
@@ -216,12 +244,19 @@ export default class LeaderboardCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.leaderboard.interaction.duration"
                             ),
-                            description_localizations: {
-                                [LocaleType.KO]: i18n.translate(
-                                    LocaleType.KO,
-                                    "command.leaderboard.interaction.duration"
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.leaderboard.interaction.duration"
+                                        ),
+                                    }),
+                                    {}
                                 ),
-                            },
+
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             choices: [
@@ -243,12 +278,19 @@ export default class LeaderboardCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.leaderboard.interaction.scope"
                             ),
-                            description_localizations: {
-                                [LocaleType.KO]: i18n.translate(
-                                    LocaleType.KO,
-                                    "command.leaderboard.interaction.scope"
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.leaderboard.interaction.scope"
+                                        ),
+                                    }),
+                                    {}
                                 ),
-                            },
+
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
                             choices: Object.values(LeaderboardScope).map(
@@ -265,12 +307,19 @@ export default class LeaderboardCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.leaderboard.interaction.page"
                             ),
-                            description_localizations: {
-                                [LocaleType.KO]: i18n.translate(
-                                    LocaleType.KO,
-                                    "command.leaderboard.interaction.page"
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.leaderboard.interaction.page"
+                                        ),
+                                    }),
+                                    {}
                                 ),
-                            },
+
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .INTEGER,
                         },
@@ -477,6 +526,7 @@ export default class LeaderboardCommand implements BaseCommand {
         type: LeaderboardType,
         scope: LeaderboardScope,
         duration: LeaderboardDuration,
+        invokerId: string,
         date?: Date
     ): Promise<{ embeds: Array<EmbedGenerator>; pageCount: number }> {
         const embedsFns: Array<EmbedGenerator> = [];
@@ -838,7 +888,11 @@ export default class LeaderboardCommand implements BaseCommand {
                                     }
 
                                     return {
-                                        name: `${displayedRank} ${displayName}`,
+                                        name: `${
+                                            invokerId === player.player_id
+                                                ? "\\➡"
+                                                : ""
+                                        }${displayedRank} ${displayName}`,
                                         value,
                                     };
                                 })
@@ -1150,7 +1204,8 @@ export default class LeaderboardCommand implements BaseCommand {
                 messageContext,
                 type,
                 scope,
-                duration
+                duration,
+                messageContext.author.id
             );
 
         if (pageCount === 0) {

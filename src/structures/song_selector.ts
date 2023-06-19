@@ -315,28 +315,28 @@ export default class SongSelector {
                 (x) => x["id"]
             );
 
-            let collabGroupBuilder = dbContext.kpopVideos // collab matches
-                .selectFrom("app_kpop_agrelation")
-                .innerJoin(
-                    "app_kpop_group",
-                    "app_kpop_agrelation.id_subgroup",
-                    "app_kpop_group.id"
-                )
-                .select(["id", "name"])
-                .distinct()
-                .where("app_kpop_group.is_collab", "=", "y");
-
             if (subunits.length) {
+                let collabGroupBuilder = dbContext.kpopVideos // collab matches
+                    .selectFrom("app_kpop_agrelation")
+                    .innerJoin(
+                        "app_kpop_group",
+                        "app_kpop_agrelation.id_subgroup",
+                        "app_kpop_group.id"
+                    )
+                    .select(["id", "name"])
+                    .distinct()
+                    .where("app_kpop_group.is_collab", "=", "y");
+
                 collabGroupBuilder = collabGroupBuilder.where(
                     "app_kpop_agrelation.id_artist",
                     "in",
                     subunits
                 );
-            }
 
-            collabGroupContainingSubunit = (
-                await collabGroupBuilder.execute()
-            ).map((x) => x["id"]);
+                collabGroupContainingSubunit = (
+                    await collabGroupBuilder.execute()
+                ).map((x) => x["id"]);
+            }
         }
 
         queryBuilder = queryBuilder.where(({ or, cmpr, and }) => {

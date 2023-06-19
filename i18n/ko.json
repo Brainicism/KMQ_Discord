@@ -663,11 +663,10 @@
         },
         "locale": {
             "help": {
-                "description": "봇의 언어를 변경합니다. 옵션은 다음과 같습니다: {{english}}, {{korean}}.",
+                "description": "봇의 언어를 변경합니다.",
                 "example": {
                     "reset": "봇의 언어를 {{defaultLocale}}으(로) 재설정합니다.",
-                    "toEnglish": "봇의 언어를 {{english}}으(로) 변경합니다..",
-                    "toKorean": "봇의 언어를 {{korean}}으(로) 변경합니다."
+                    "toLanguage": "봇의 언어를 {{language}}으(로) 변경합니다."
                 },
                 "interaction": {
                     "description": "봇의 언어를 변경합니다.",
@@ -680,7 +679,11 @@
             },
             "language": {
                 "en": "영어",
-                "ko": "한국어"
+                "es-ES": "스페인어",
+                "fr": "프랑스어",
+                "ja": "일본어",
+                "ko": "한국어",
+                "zh-CN": "중국어"
             },
             "updatedDescription": "봇의 언어가 `{{language}}`으(로) 업데이트되었습니다."
         },

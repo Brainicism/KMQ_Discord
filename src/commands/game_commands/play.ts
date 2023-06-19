@@ -251,12 +251,18 @@ export default class PlayCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.play.help.example.classic"
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.play.help.example.classic"
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.play.help.example.classic"
+                                ),
+                            }),
+                            {}
                         ),
-                    },
                     type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
                 },
                 {
@@ -282,15 +288,19 @@ export default class PlayCommand implements BaseCommand {
                             lives: `${ELIMINATION_DEFAULT_LIVES}`,
                         }
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.play.help.example.elimination",
-                            {
-                                lives: `${ELIMINATION_DEFAULT_LIVES}`,
-                            }
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.play.help.example.elimination",
+                                    { lives: `${ELIMINATION_DEFAULT_LIVES}` }
+                                ),
+                            }),
+                            {}
                         ),
-                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -300,12 +310,18 @@ export default class PlayCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.play.help.interaction.lives"
                             ),
-                            description_localizations: {
-                                [LocaleType.KO]: i18n.translate(
-                                    LocaleType.KO,
-                                    "command.play.help.interaction.lives"
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.play.help.interaction.lives"
+                                        ),
+                                    }),
+                                    {}
                                 ),
-                            },
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .INTEGER,
                             min_value: ELIMINATION_MIN_LIVES,
@@ -319,12 +335,18 @@ export default class PlayCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.play.help.example.teams"
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.play.help.example.teams"
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.play.help.example.teams"
+                                ),
+                            }),
+                            {}
                         ),
-                    },
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND_GROUP,
                     options: [
@@ -334,12 +356,18 @@ export default class PlayCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.play.interaction.teams_create"
                             ),
-                            description_localizations: {
-                                [LocaleType.KO]: i18n.translate(
-                                    LocaleType.KO,
-                                    "command.play.interaction.teams_create"
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.play.interaction.teams_create"
+                                        ),
+                                    }),
+                                    {}
                                 ),
-                            },
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .SUB_COMMAND,
                         },
@@ -349,12 +377,18 @@ export default class PlayCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.play.interaction.teams_begin"
                             ),
-                            description_localizations: {
-                                [LocaleType.KO]: i18n.translate(
-                                    LocaleType.KO,
-                                    "command.play.interaction.teams_begin"
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.play.interaction.teams_begin"
+                                        ),
+                                    }),
+                                    {}
                                 ),
-                            },
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .SUB_COMMAND,
                         },
@@ -364,12 +398,18 @@ export default class PlayCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.play.interaction.teams_join"
                             ),
-                            description_localizations: {
-                                [LocaleType.KO]: i18n.translate(
-                                    LocaleType.KO,
-                                    "command.play.interaction.teams_join"
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.play.interaction.teams_join"
+                                        ),
+                                    }),
+                                    {}
                                 ),
-                            },
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .SUB_COMMAND,
                             options: [
@@ -379,12 +419,20 @@ export default class PlayCommand implements BaseCommand {
                                         LocaleType.EN,
                                         "command.play.interaction.teams_join_team_name"
                                     ),
-                                    description_localizations: {
-                                        [LocaleType.KO]: i18n.translate(
-                                            LocaleType.KO,
-                                            "command.play.interaction.teams_join_team_name"
+                                    description_localizations: Object.values(
+                                        LocaleType
+                                    )
+                                        .filter((x) => x !== LocaleType.EN)
+                                        .reduce(
+                                            (acc, locale) => ({
+                                                ...acc,
+                                                [locale]: i18n.translate(
+                                                    locale,
+                                                    "command.play.interaction.teams_join_team_name"
+                                                ),
+                                            }),
+                                            {}
                                         ),
-                                    },
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.STRING,
                                     required: true,

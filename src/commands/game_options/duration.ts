@@ -127,13 +127,20 @@ export default class DurationCommand implements BaseCommand {
                         "command.duration.help.example.set",
                         { duration: "[duration]" }
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.duration.help.example.set",
-                            { duration: "[duration]" }
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.duration.help.example.set",
+                                    { duration: "[duration]" }
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -143,12 +150,19 @@ export default class DurationCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.duration.interaction.durationSet"
                             ),
-                            description_localizations: {
-                                [LocaleType.KO]: i18n.translate(
-                                    LocaleType.KO,
-                                    "command.duration.interaction.durationSet"
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.duration.interaction.durationSet"
+                                        ),
+                                    }),
+                                    {}
                                 ),
-                            },
+
                             required: true,
                             min_value: DURATION_DELTA_MIN,
                             max_value: DURATION_DELTA_MAX,
@@ -164,13 +178,20 @@ export default class DurationCommand implements BaseCommand {
                         "command.duration.help.example.increment",
                         { duration: "[duration]" }
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.duration.help.example.increment",
-                            { duration: "[duration]" }
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.duration.help.example.increment",
+                                    { duration: "[duration]" }
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -180,12 +201,19 @@ export default class DurationCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.duration.interaction.durationAdd"
                             ),
-                            description_localizations: {
-                                [LocaleType.KO]: i18n.translate(
-                                    LocaleType.KO,
-                                    "command.duration.interaction.durationAdd"
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.duration.interaction.durationAdd"
+                                        ),
+                                    }),
+                                    {}
                                 ),
-                            },
+
                             required: true,
                             min_value: DURATION_DELTA_MIN,
                             max_value: DURATION_DELTA_MAX,
@@ -201,13 +229,20 @@ export default class DurationCommand implements BaseCommand {
                         "command.duration.help.example.decrement",
                         { duration: "[duration]" }
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.duration.help.example.decrement",
-                            { duration: "[duration]" }
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.duration.help.example.decrement",
+                                    { duration: "[duration]" }
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [
@@ -217,12 +252,19 @@ export default class DurationCommand implements BaseCommand {
                                 LocaleType.EN,
                                 "command.duration.interaction.durationRemove"
                             ),
-                            description_localizations: {
-                                [LocaleType.KO]: i18n.translate(
-                                    LocaleType.KO,
-                                    "command.duration.interaction.durationRemove"
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.duration.interaction.durationRemove"
+                                        ),
+                                    }),
+                                    {}
                                 ),
-                            },
+
                             required: true,
                             min_value: DURATION_DELTA_MIN,
                             max_value: DURATION_DELTA_MAX,
@@ -238,13 +280,20 @@ export default class DurationCommand implements BaseCommand {
                         "misc.interaction.resetOption",
                         { optionName: "duration" }
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "misc.interaction.resetOption",
-                            { optionName: "duration" }
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "misc.interaction.resetOption",
+                                    { optionName: "duration" }
+                                ),
+                            }),
+                            {}
                         ),
-                    },
+
                     type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
                 },
             ],
