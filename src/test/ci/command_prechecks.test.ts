@@ -641,7 +641,7 @@ describe("command prechecks", () => {
                         messageContext,
                         parsedMessage: {
                             components: [],
-                            action: "",
+                            action: "answer",
                             argument: "",
                             message: "",
                         },
@@ -659,7 +659,7 @@ describe("command prechecks", () => {
                         messageContext,
                         parsedMessage: {
                             components: ["easy"],
-                            action: "",
+                            action: "answer",
                             argument: "",
                             message: "",
                         },
@@ -677,7 +677,25 @@ describe("command prechecks", () => {
                         messageContext,
                         parsedMessage: {
                             components: ["typingtypos"],
-                            action: "",
+                            action: "answer",
+                            argument: "",
+                            message: "",
+                        },
+                    }),
+                    true
+                );
+            });
+        });
+
+        describe("changing non-answer option", () => {
+            it("should return true", () => {
+                assert.strictEqual(
+                    CommandPrechecks.answerHiddenPrecheck({
+                        session,
+                        messageContext,
+                        parsedMessage: {
+                            components: [],
+                            action: "timer",
                             argument: "",
                             message: "",
                         },
@@ -733,6 +751,24 @@ describe("command prechecks", () => {
                         },
                     }),
                     false
+                );
+            });
+        });
+
+        describe("changing non-timer option", () => {
+            it("should return true", () => {
+                assert.strictEqual(
+                    CommandPrechecks.timerHiddenPrecheck({
+                        session,
+                        messageContext,
+                        parsedMessage: {
+                            components: [],
+                            action: "answer",
+                            argument: "",
+                            message: "",
+                        },
+                    }),
+                    true
                 );
             });
         });

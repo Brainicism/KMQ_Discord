@@ -406,6 +406,10 @@ export default class CommandPrechecks {
         }
 
         if (!precheckArgs.interaction) {
+            if (precheckArgs.parsedMessage!.action !== "answer") {
+                return true;
+            }
+
             if (
                 [AnswerType.TYPING, AnswerType.TYPING_TYPOS].includes(
                     precheckArgs.parsedMessage!.components[0] as AnswerType
@@ -415,6 +419,10 @@ export default class CommandPrechecks {
                 return true;
             }
         } else {
+            if (precheckArgs.interaction!.data.name !== "answer") {
+                return true;
+            }
+
             const { interactionName, interactionOptions } = getInteractionValue(
                 precheckArgs.interaction
             );
@@ -460,10 +468,18 @@ export default class CommandPrechecks {
 
         // Allow /timer change during hidden, but prevent disabling it
         if (!precheckArgs.interaction) {
+            if (precheckArgs.parsedMessage!.action !== "timer") {
+                return true;
+            }
+
             if (precheckArgs.parsedMessage!.components.length > 0) {
                 return true;
             }
         } else {
+            if (precheckArgs.interaction!.data.name !== "timer") {
+                return true;
+            }
+
             const { interactionName } = getInteractionValue(
                 precheckArgs.interaction
             );
