@@ -1050,18 +1050,14 @@ export default class PlayCommand implements BaseCommand {
         }
 
         State.gameSessions[guildID] = gameSession;
-        if (
-            gameType === GameType.HIDDEN &&
-            guildPreference.isMultipleChoiceMode()
-        ) {
-            await guildPreference.setAnswerType(AnswerType.TYPING);
-        }
+        if (gameType === GameType.HIDDEN) {
+            if (guildPreference.isMultipleChoiceMode()) {
+                await guildPreference.setAnswerType(AnswerType.TYPING);
+            }
 
-        if (
-            gameType === GameType.HIDDEN &&
-            !guildPreference.isGuessTimeoutSet()
-        ) {
-            await guildPreference.setGuessTimeout(HIDDEN_DEFAULT_TIMER);
+            if (!guildPreference.isGuessTimeoutSet()) {
+                await guildPreference.setGuessTimeout(HIDDEN_DEFAULT_TIMER);
+            }
         }
 
         if (gameType !== GameType.TEAMS) {
