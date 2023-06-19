@@ -727,7 +727,7 @@ describe("command prechecks", () => {
                         messageContext,
                         parsedMessage: {
                             components: ["5"],
-                            action: "",
+                            action: "timer",
                             argument: "",
                             message: "",
                         },
@@ -745,7 +745,7 @@ describe("command prechecks", () => {
                         messageContext,
                         parsedMessage: {
                             components: [],
-                            action: "",
+                            action: "timer",
                             argument: "",
                             message: "",
                         },
