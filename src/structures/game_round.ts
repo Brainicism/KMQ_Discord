@@ -445,7 +445,7 @@ export default class GameRound extends Round {
         }
 
         const correctGuess = playerRoundResults.length > 0;
-        if (gameType === GameType.HIDDEN && correctGuess) {
+        if (gameType === GameType.HIDDEN) {
             for (const entry of Object.entries(this.guesses)
                 .sort((a, b) => a[1].createdAt - b[1].createdAt)
                 .slice(0, ROUND_MAX_RUNNERS_UP)) {
