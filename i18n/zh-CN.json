@@ -335,6 +335,28 @@
                 "name": "组"
             }
         },
+        "guess": {
+            "help": {
+                "description": "在 /play hidden 期间提交您对当前歌曲的答案。",
+                "example": {
+                    "song": "使用 {{name}} 作为您对当前歌曲的猜测"
+                },
+                "name": "猜测"
+            },
+            "interaction": {
+                "failure": {
+                    "notHidden": {
+                        "description": "`/guess` 只能在 `/play hidden` 期间使用。",
+                        "title": "猜测被忽略"
+                    }
+                },
+                "guessReceived": {
+                    "description": "您猜测了 {{guess}}",
+                    "title": "猜测已接收"
+                },
+                "name": "您对当前歌曲的最佳猜测"
+            }
+        },
         "guessmode": {
             "help": {
                 "description": "选择是否通过歌曲标题、艺术家名称或两者都猜测。",
@@ -792,6 +814,7 @@
                 "example": {
                     "classic": "开始一场经典模式的 KMQ 游戏(首先输入你的猜测以获得一分)",
                     "elimination": "开始一场淘汰模式的 KMQ 游戏，每个玩家都有 {{lives}} 条命",
+                    "hidden": "开始一个KMQ的隐藏游戏，玩家只能用/guess命令回答问题。",
                     "teams": "分成尽可能多的团队，看看谁可以帮助你赢得胜利！"
                 },
                 "interaction": {
@@ -1172,39 +1195,37 @@
             },
             "parsing": "正在解析 Spotify 播放列表..."
         },
-
-  "stats": {
-    "description": "详细的机器人状态: {{link}}",
-    "failure": {
-      "description": "请稍后再试。",
-      "title": "检索统计数据时出错"
-    },
-    "footer": "“最近”的统计数据表示最近 24 小时的数据。",
-    "game": {
-      "activeGameSessions": "活跃的游戏会话",
-      "activePlayers": "活跃的玩家",
-      "latestSongUpdate": "最新的歌曲更新",
-      "recentGameRounds": "（最近）游戏回合",
-      "recentGameSessions": "（最近）游戏会话",
-      "recentPlayers": "（最近）玩家",
-      "title": "游戏统计数据"
-    },
-    "help": {
-      "description": "各种使用/系统统计数据。",
-      "name": "统计"
-    },
-    "system": {
-      "apiLatency": "API 延迟",
-      "databaseLatency": "数据库延迟",
-      "loadAverage": "系统平均负载",
-      "memoryUsage": "进程内存使用情况",
-      "requestLatency": "请求延迟",
-      "title": "系统统计数据",
-      "uptime": "运行时间"
-    },
-    "title": "机器人统计数据"
-  }
-,
+        "stats": {
+            "description": "详细的机器人状态: {{link}}",
+            "failure": {
+                "description": "请稍后再试。",
+                "title": "检索统计数据时出错"
+            },
+            "footer": "“最近”的统计数据表示最近 24 小时的数据。",
+            "game": {
+                "activeGameSessions": "活跃的游戏会话",
+                "activePlayers": "活跃的玩家",
+                "latestSongUpdate": "最新的歌曲更新",
+                "recentGameRounds": "（最近）游戏回合",
+                "recentGameSessions": "（最近）游戏会话",
+                "recentPlayers": "（最近）玩家",
+                "title": "游戏统计数据"
+            },
+            "help": {
+                "description": "各种使用/系统统计数据。",
+                "name": "统计"
+            },
+            "system": {
+                "apiLatency": "API 延迟",
+                "databaseLatency": "数据库延迟",
+                "loadAverage": "系统平均负载",
+                "memoryUsage": "进程内存使用情况",
+                "requestLatency": "请求延迟",
+                "title": "系统统计数据",
+                "uptime": "运行时间"
+            },
+            "title": "机器人统计数据"
+        },
         "subunits": {
             "help": {
                 "description": "选择是否在使用 {{groups}} 时自动包括组的子单元。",
@@ -1456,6 +1477,8 @@
             "bonusExpArtistRound": "额外经验和艺术家回合",
             "bonusExpRound": "额外经验回合",
             "correctGuess": "{{correctGuesser}} 猜对了 (+{{expGain}} 经验)",
+            "hiddenRemainingPlayers": "等待中",
+            "hiddenTimerInfo": "{{guessButton}}在回合结束前{{timestamp}}之前点击！",
             "noCorrectGuesses": "没有人猜中。",
             "noWinners": "没有获胜者",
             "runnersUp": "亚军",
@@ -1531,6 +1554,7 @@
             "debugServer": "您不能在此服务器进行此操作。",
             "differentVC": "您必须与机器人在同一个语音频道中才能使用此命令。",
             "notGameSession": "您不能在游戏会话中进行此操作。",
+            "notHidden": "在隐藏游戏期间无法进行该操作。",
             "notListeningSession": "您不能在听歌会话中进行此操作。",
             "notPremium": "您需要 KMQ Premium 才能使用此命令(请参见{{premium}})。",
             "notSpotify": "您不能在从 Spotify 播放时更改该选项。请在更改此选项之前使用 `/spotify reset`。",

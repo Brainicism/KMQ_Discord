@@ -335,6 +335,28 @@
                 "name": "grupos"
             }
         },
+        "guess": {
+            "help": {
+                "description": "Envía tu respuesta para la canción actual durante /play hidden.",
+                "example": {
+                    "song": "Usa {{name}} como tu respuesta para la canción actual"
+                },
+                "name": "respuesta"
+            },
+            "interaction": {
+                "failure": {
+                    "notHidden": {
+                        "description": "`/guess` solo puede ser usado durante `/play hidden`.",
+                        "title": "Respuesta ignorada"
+                    }
+                },
+                "guessReceived": {
+                    "description": "Has respondido {{guess}}",
+                    "title": "Respuesta recibida"
+                },
+                "name": "Tu mejor intento para la canción actual"
+            }
+        },
         "guessmode": {
             "help": {
                 "description": "Elija si adivinar por el título de la canción, el nombre del artista o ambos.",
@@ -792,6 +814,7 @@
                 "example": {
                     "classic": "Comienza un juego clásico de KMQ (escribe tu respuesta primero para obtener un punto)",
                     "elimination": "Comienza un juego de eliminación de KMQ donde cada jugador comienza con {{lives}} vidas",
+                    "hidden": "Comienza un juego oculto de KMQ, donde los jugadores solo pueden responder con /guess",
                     "teams": "Divídete en tantos equipos como quieras y ve quién puede ayudarte a ganar!"
                 },
                 "interaction": {
@@ -1454,6 +1477,8 @@
             "bonusExpArtistRound": "RONDA DE EXP Y ARTISTA BONUS",
             "bonusExpRound": "RONDA DE EXP BONUS",
             "correctGuess": "{{correctGuesser}} adivinó correctamente (+{{expGain}} EXP)",
+            "hiddenRemainingPlayers": "Esperando a",
+            "hiddenTimerInfo": "{{guessButton}} antes de que termine la ronda {{timestamp}}!",
             "noCorrectGuesses": "Nadie lo adivinó.",
             "noWinners": "Nadie ganó",
             "runnersUp": "Finalistas",
@@ -1529,6 +1554,7 @@
             "debugServer": "No puedes hacer eso en este servidor.",
             "differentVC": "Debes estar en el mismo canal de voz que el bot para usar este comando.",
             "notGameSession": "No puedes hacer eso mientras estás en una sesión de juego.",
+            "notHidden": "No puedes hacer eso durante un juego oculto.",
             "notListeningSession": "No puedes hacer eso mientras estás en una sesión de escucha.",
             "notPremium": "Necesitas KMQ Premium para usar este comando (ver {{premium}}).",
             "notSpotify": "No puedes cambiar esa opción cuando estás reproduciendo desde Spotify. Usa `/spotify reset` antes de cambiar esta opción.",
