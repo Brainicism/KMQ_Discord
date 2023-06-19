@@ -180,10 +180,12 @@ export default class GuessTimeoutCommand implements BaseCommand {
         }
 
         if (session && session.round && session.connection?.playing) {
+            const round = session.round;
             // Timer can start mid-song, starting when the user enters the command
             session.stopGuessTimeout();
             session.startGuessTimeout(messageContext);
-            session.round.timerStartedAt = Date.now();
+            round.timerStartedAt = Date.now();
+            round.interactionMessageNeedsUpdate = true;
         }
 
         await sendOptionsMessage(
