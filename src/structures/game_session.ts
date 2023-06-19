@@ -321,17 +321,16 @@ export default class GameSession extends Session {
         }
 
         const round = this.round;
-        this.stopHiddenUpdateTimer();
-        if (
-            this.gameType === GameType.HIDDEN &&
-            !guessResult.correct &&
-            round.correctGuessers.length > 0
-        ) {
-            // At least one person guessed correctly, but someone didn't guess
-            guessResult = {
-                correct: true,
-                correctGuessers: round.correctGuessers,
-            };
+        if (this.gameType === GameType.HIDDEN) {
+            this.stopHiddenUpdateTimer();
+
+            if (!guessResult.correct && round.correctGuessers.length > 0) {
+                // At least one person guessed correctly, but someone didn't guess
+                guessResult = {
+                    correct: true,
+                    correctGuessers: round.correctGuessers,
+                };
+            }
         }
 
         await super.endRound(messageContext);
@@ -627,21 +626,24 @@ export default class GameSession extends Session {
             this.guildPreference.typosAllowed()
         );
 
-        if (
-            this.gameType === GameType.HIDDEN &&
-            this.scoreboard.getRemainingPlayers(
-                round.correctGuessers,
-                round.incorrectGuessers
-            ).length > 0
-        ) {
-            return;
-        }
-
         if (this.gameType === GameType.HIDDEN) {
-            this.stopHiddenUpdateTimer();
+            if (
+                this.scoreboard.getRemainingPlayers(
+                    round.correctGuessers,
+                    round.incorrectGuessers
+                ).length > 0
+            ) {
+                return;
+            } else {
+                this.stopHiddenUpdateTimer();
+            }
         }
 
-        if (pointsEarned > 0) {
+        if (
+            pointsEarned > 0 ||
+            (this.gameType === GameType.HIDDEN &&
+                round.correctGuessers.length > 0)
+        ) {
             if (round.finished) {
                 return;
             }
