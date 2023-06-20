@@ -810,7 +810,7 @@
             },
             "gameStarting": "游戏将在 #{{textChannelName}} 🔊 {{voiceChannelName}} 中开始",
             "help": {
-                "description": "开始一场 KMQ 游戏。选择经典模式(默认)、淘汰模式或团队模式。",
+                "description": "开始一场 KMQ 游戏。",
                 "example": {
                     "classic": "开始一场经典模式的 KMQ 游戏(首先输入你的猜测以获得一分)",
                     "elimination": "开始一场淘汰模式的 KMQ 游戏，每个玩家都有 {{lives}} 条命",

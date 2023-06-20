@@ -810,7 +810,7 @@
             },
             "gameStarting": "🔊 {{voiceChannelName}} で #{{textChannelName}} でゲームが始まります",
             "help": {
-                "description": "KMQのゲームを開始します。クラシック（デフォルト）、エリミネーションモード、チームモードのいずれかを選択してください。",
+                "description": "KMQのゲームを開始します。",
                 "example": {
                     "classic": "クラシックなKMQゲームを開始します（最初に推測してポイントを獲得してください）",
                     "elimination": "エリミネーションモードのKMQゲームを開始します。各プレイヤーは{{lives}}つのライフでスタートします",

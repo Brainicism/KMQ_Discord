@@ -810,7 +810,7 @@
             },
             "gameStarting": "Juego comenzando en #{{textChannelName}} en 🔊 {{voiceChannelName}}",
             "help": {
-                "description": "Comienza un juego de KMQ. Elija entre el modo clásico, modo de eliminación y modo de equipos.",
+                "description": "Comienza un juego de KMQ.",
                 "example": {
                     "classic": "Comienza un juego clásico de KMQ (escribe tu respuesta primero para obtener un punto)",
                     "elimination": "Comienza un juego de eliminación de KMQ donde cada jugador comienza con {{lives}} vidas",
