@@ -199,7 +199,7 @@ export default class PlayCommand implements BaseCommand {
         usage: `/play classic\n\n/play elimination\nlives:{${i18n.translate(
             guildID,
             "command.play.help.usage.lives"
-        )}}\n\n/play teams create\n\n/play teams join`,
+        )}}\n\n/play teams create\n\n/play teams join\n\n/play hidden`,
         priority: 1050,
         examples: [
             {
@@ -234,6 +234,13 @@ export default class PlayCommand implements BaseCommand {
                 explanation: i18n.translate(
                     guildID,
                     "command.play.help.example.teams"
+                ),
+            },
+            {
+                example: "`/play hidden`",
+                explanation: i18n.translate(
+                    guildID,
+                    "command.play.help.example.hidden"
                 ),
             },
         ],
