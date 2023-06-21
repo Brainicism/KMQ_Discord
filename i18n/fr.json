@@ -1502,7 +1502,7 @@
                 "title": "Je travaille dessus !"
             },
             "guess": {
-                "title": "Devinez le {{songOrArtist}}"
+                "title": "Devinez le {{songOrArtist}}!"
             },
             "howToPlay": "Comment jouer",
             "leaveReview": "Laissez un commentaire !",

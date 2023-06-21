@@ -1502,7 +1502,7 @@
                 "title": "作業中！"
             },
             "guess": {
-                "title": "{{songOrArtist}}を当ててください。"
+                "title": "{{songOrArtist}}を当ててください！"
             },
             "howToPlay": "遊び方",
             "leaveReview": "レビューを残す！",

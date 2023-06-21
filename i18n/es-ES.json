@@ -1502,7 +1502,7 @@
                 "title": "¡Estoy trabajando en ello!"
             },
             "guess": {
-                "title": "Adivina el {{songOrArtist}}"
+                "title": "Adivina el {{songOrArtist}}!"
             },
             "howToPlay": "Cómo jugar",
             "leaveReview": "¡Deja una reseña!",

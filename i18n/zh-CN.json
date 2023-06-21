@@ -1502,7 +1502,7 @@
                 "title": "正在处理中！"
             },
             "guess": {
-                "title": "猜 {{songOrArtist}}"
+                "title": "猜 {{songOrArtist}}！"
             },
             "howToPlay": "如何玩",
             "leaveReview": "留下评论！",
