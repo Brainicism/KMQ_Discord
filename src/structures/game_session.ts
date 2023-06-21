@@ -195,6 +195,7 @@ export default class GameSession extends Session {
         }
 
         if (this.gameType === GameType.HIDDEN) {
+            // Show players that haven't guessed and a button to guess
             round.interactionMessage = await sendInfoMessage(
                 new MessageContext(this.textChannelID, null, this.guildID),
                 this.generateRemainingPlayersMessage(round)
@@ -627,14 +628,17 @@ export default class GameSession extends Session {
         );
 
         if (this.gameType === GameType.HIDDEN) {
+            // Determine whether to wait for more guesses
             if (
                 this.scoreboard.getRemainingPlayers(
                     round.correctGuessers,
                     round.incorrectGuessers
                 ).length > 0
             ) {
+                // If there are still players who haven't guessed correctly, don't end the round
                 return;
             } else {
+                // Everyone guessed, end the round
                 this.stopHiddenUpdateTimer();
             }
         }
@@ -644,6 +648,8 @@ export default class GameSession extends Session {
             (this.gameType === GameType.HIDDEN &&
                 round.correctGuessers.length > 0)
         ) {
+            // If not hidden, someone guessed correctly
+            // If hidden, everyone guessed and at least one person was right
             if (round.finished) {
                 return;
             }
@@ -681,6 +687,7 @@ export default class GameSession extends Session {
             this.guildPreference.isMultipleChoiceMode() ||
             this.gameType === GameType.HIDDEN
         ) {
+            // If hidden or multiple choice, everyone guessed and no one was right
             if (
                 setDifference(
                     [
@@ -1094,8 +1101,11 @@ export default class GameSession extends Session {
             !round ||
             round.finished ||
             !round.interactionMessageNeedsUpdate
-        )
+        ) {
             return;
+        }
+
+        round.interactionMessageNeedsUpdate = false;
         round.interactionMessage?.edit({
             embeds: [
                 {
