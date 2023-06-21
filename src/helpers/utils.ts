@@ -3,6 +3,7 @@ import * as uuid from "uuid";
 import { DataFiles } from "../constants";
 import { IPCLogger } from "../logger";
 import { exec } from "child_process";
+import State from "../state";
 import _ from "lodash";
 import crypto from "crypto";
 import fs from "fs";
@@ -25,8 +26,8 @@ export function delay(delayDuration: number): Promise<void> {
  * @param text - Text to bold
  * @returns bolded text
  */
-export function bold(text: string): string {
-    return `**${text.split("*").join("\\*")}**`;
+export function bold(text: string | number): string {
+    return `**${String(text).split("*").join("\\*")}**`;
 }
 
 /**
@@ -72,6 +73,23 @@ export function escapedFormatting(text: string): string {
     }
 
     return text;
+}
+
+/**
+ * @param commandName - The name of the slash command
+ * @param subcommandName - The subcommand within the command
+ * @returns a formatted version of the slash command, that allows users to click
+ */
+export function clickableSlashCommand(
+    commandName: string,
+    subcommandName?: string
+): string {
+    let commandAndSubcommand = commandName;
+    if (subcommandName) {
+        commandAndSubcommand = `${commandName} ${subcommandName}`;
+    }
+
+    return `</${commandAndSubcommand}:${State.commandToID[commandName]}>`;
 }
 
 /**
@@ -532,4 +550,14 @@ export function mapTo<T, S extends T, K extends keyof T>(
     key: K
 ): void {
     target[key] = source[key];
+}
+
+/**
+ * Get the number of seconds between two timestamps
+ * @param startTime - the beginning timestamp
+ * @param endTime - the ending timestamp
+ * @returns the number of seconds between the two timestamps
+ */
+export function durationSeconds(startTime: number, endTime: number): number {
+    return (endTime - startTime) / 1000;
 }

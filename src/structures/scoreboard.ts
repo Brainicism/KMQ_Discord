@@ -258,6 +258,19 @@ export default class Scoreboard {
             }));
     }
 
+    getRemainingPlayers(
+        correctGuessers: Array<{ id: string }>,
+        incorrectGuessers: Set<string>
+    ): Array<Player> {
+        return this.getPlayers()
+            .filter((player) => player.inVC)
+            .filter(
+                (player) =>
+                    !incorrectGuessers.has(player.id) &&
+                    !correctGuessers.map((x) => x.id).includes(player.id)
+            );
+    }
+
     /**
      * Separates scoreboard players into two fields for large games
      * @param guildID - The guild ID

@@ -241,6 +241,7 @@ Use `/help action:[command_name]` for more details about the following commands:
 -   `/locale`: Change the language of the bot
 -   `/lookup`: Get information about the given song (whether it's available in KMQ, aliases, etc.)
 -   `/upcomingreleases`: See a list of confirmed songs, albums, and EPs planned for release in the future
+-   `/guess`: Guess the name of the current song or artist when using `/play hidden`
 
 ## Game Option Commands
 

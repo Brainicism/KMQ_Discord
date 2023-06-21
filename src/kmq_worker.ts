@@ -2,6 +2,8 @@
 import { BaseClusterWorker } from "eris-fleet";
 import { IPCLogger } from "./logger";
 import { config } from "dotenv";
+import { durationSeconds } from "./helpers/utils";
+import { fetchAppCommandIDs } from "./helpers/discord_utils";
 import {
     registerIntervals,
     reloadCaches,
@@ -119,6 +121,10 @@ export default class BotWorker extends BaseClusterWorker {
             case "activate":
                 logger.info("Registering interactive client events");
                 this.registerInteractiveClientEvents(State.client);
+                return null;
+            case "fetch_app_command_ids":
+                logger.info("Fetching app command IDs");
+                State.commandToID = await fetchAppCommandIDs();
                 return null;
             default:
                 return null;
@@ -257,7 +263,7 @@ export default class BotWorker extends BaseClusterWorker {
         logger.info(
             `Logged in as '${State.client.user.username}'! in '${
                 process.env.NODE_ENV
-            }' mode (${(Date.now() - State.processStartTime) / 1000}s)`
+            }' mode (${durationSeconds(State.processStartTime, Date.now())}s)`
         );
     }
 }

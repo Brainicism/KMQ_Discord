@@ -456,7 +456,6 @@ export default abstract class Session {
     /**
      * Sets a timeout for guessing in timer mode
      * @param messageContext - An object containing relevant parts of Eris.Message
-     * @param guildPreference - The GuildPreference
      */
     startGuessTimeout(messageContext: MessageContext): void {
         if (

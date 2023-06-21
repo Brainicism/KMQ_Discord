@@ -6,6 +6,7 @@ import type Eris from "eris";
 import {
     bold,
     chunkArray,
+    clickableSlashCommand,
     codeLine,
     delay,
     getOrdinalNum,
@@ -72,6 +73,7 @@ import type Round from "./round";
 import type SuccessfulGuessResult from "../interfaces/success_guess_result";
 
 const MULTIGUESS_DELAY = 1500;
+const HIDDEN_UPDATE_INTERVAL = 2000;
 
 const logger = new IPCLogger("game_session");
 
@@ -117,6 +119,8 @@ export default class GameSession extends Session {
     /** The most recent Guesser, including their current streak */
     private lastGuesser: LastGuesser | null;
 
+    private hiddenUpdateTimer: NodeJS.Timeout | null;
+
     constructor(
         guildPreference: GuildPreference,
         textChannelID: string,
@@ -143,6 +147,7 @@ export default class GameSession extends Session {
         this.round = null;
         this.songStats = {};
         this.lastGuesser = null;
+        this.hiddenUpdateTimer = null;
 
         switch (this.gameType) {
             case GameType.TEAMS:
@@ -187,6 +192,16 @@ export default class GameSession extends Session {
 
         if (!round) {
             return null;
+        }
+
+        if (this.gameType === GameType.HIDDEN) {
+            // Show players that haven't guessed and a button to guess
+            round.interactionMessage = await sendInfoMessage(
+                new MessageContext(this.textChannelID, null, this.guildID),
+                this.generateRemainingPlayersMessage(round)
+            );
+
+            this.startHiddenUpdateTimer();
         }
 
         if (this.guildPreference.isMultipleChoiceMode()) {
@@ -307,6 +322,18 @@ export default class GameSession extends Session {
         }
 
         const round = this.round;
+        if (this.gameType === GameType.HIDDEN) {
+            this.stopHiddenUpdateTimer();
+
+            if (!guessResult.correct && round.correctGuessers.length > 0) {
+                // At least one person guessed correctly, but someone didn't guess
+                guessResult = {
+                    correct: true,
+                    correctGuessers: round.correctGuessers,
+                };
+            }
+        }
+
         await super.endRound(messageContext);
 
         round.interactionMarkAnswers(guessResult.correctGuessers?.length ?? 0);
@@ -396,7 +423,8 @@ export default class GameSession extends Session {
             const description = `${round.getEndRoundDescription(
                 messageContext,
                 this.songSelector.getUniqueSongCounter(this.guildPreference),
-                playerRoundResults
+                playerRoundResults,
+                this.gameType
             )}${scoreboardTitle}`;
 
             const correctGuess = playerRoundResults.length > 0;
@@ -577,10 +605,12 @@ export default class GameSession extends Session {
      * Process a message to see if it is a valid and correct guess
      * @param messageContext - The context of the message to check
      * @param guess - the content of the message to check
+     * @param createdAt - the time the guess was made
      */
     async guessSong(
         messageContext: MessageContext,
-        guess: string
+        guess: string,
+        createdAt: number
     ): Promise<void> {
         if (!this.connection) return;
         if (this.connection.listenerCount("end") === 0) return;
@@ -591,12 +621,35 @@ export default class GameSession extends Session {
         const pointsEarned = this.checkGuess(
             messageContext.author.id,
             guess,
+            createdAt,
             this.guildPreference.gameOptions.guessModeType,
             this.guildPreference.isMultipleChoiceMode(),
             this.guildPreference.typosAllowed()
         );
 
-        if (pointsEarned > 0) {
+        if (this.gameType === GameType.HIDDEN) {
+            // Determine whether to wait for more guesses
+            if (
+                this.scoreboard.getRemainingPlayers(
+                    round.correctGuessers,
+                    round.incorrectGuessers
+                ).length > 0
+            ) {
+                // If there are still players who haven't guessed correctly, don't end the round
+                return;
+            } else {
+                // Everyone guessed, end the round
+                this.stopHiddenUpdateTimer();
+            }
+        }
+
+        if (
+            pointsEarned > 0 ||
+            (this.gameType === GameType.HIDDEN &&
+                round.correctGuessers.length > 0)
+        ) {
+            // If not hidden, someone guessed correctly
+            // If hidden, everyone guessed and at least one person was right
             if (round.finished) {
                 return;
             }
@@ -630,7 +683,11 @@ export default class GameSession extends Session {
                 .execute();
 
             await this.startRound(messageContext);
-        } else if (this.guildPreference.isMultipleChoiceMode()) {
+        } else if (
+            this.guildPreference.isMultipleChoiceMode() ||
+            this.gameType === GameType.HIDDEN
+        ) {
+            // If hidden or multiple choice, everyone guessed and no one was right
             if (
                 setDifference(
                     [
@@ -640,7 +697,7 @@ export default class GameSession extends Session {
                             )
                         ),
                     ],
-                    [...round.incorrectMCGuessers]
+                    [...round.incorrectGuessers]
                 ).size === 0
             ) {
                 await this.endRound(
@@ -705,7 +762,7 @@ export default class GameSession extends Session {
         const round = this.round;
 
         if (
-            round.incorrectMCGuessers.has(interaction.member!.id) ||
+            round.incorrectGuessers.has(interaction.member!.id) ||
             !this.guessEligible(messageContext)
         ) {
             tryCreateInteractionErrorAcknowledgement(
@@ -729,11 +786,11 @@ export default class GameSession extends Session {
                 )
             );
 
-            round.incorrectMCGuessers.add(interaction.member!.id);
+            round.incorrectGuessers.add(interaction.member!.id);
             round.interactionIncorrectAnswerUUIDs[interaction.data.custom_id]++;
 
             // Add the user as a participant
-            this.guessSong(messageContext, "");
+            this.guessSong(messageContext, "", interaction.createdAt);
             return;
         }
 
@@ -747,7 +804,8 @@ export default class GameSession extends Session {
             messageContext,
             guildPreference.gameOptions.guessModeType !== GuessModeType.ARTIST
                 ? round.song.songName
-                : round.song.artistName
+                : round.song.artistName,
+            interaction.createdAt
         );
     }
 
@@ -1036,6 +1094,28 @@ export default class GameSession extends Session {
         }
     }
 
+    updateGuessedMembersMessage(): void {
+        const round = this.round;
+        if (
+            this.finished ||
+            !round ||
+            round.finished ||
+            !round.interactionMessageNeedsUpdate
+        ) {
+            return;
+        }
+
+        round.interactionMessageNeedsUpdate = false;
+        round.interactionMessage?.edit({
+            embeds: [
+                {
+                    ...this.generateRemainingPlayersMessage(round),
+                    thumbnail: { url: KmqImages.THUMBS_UP },
+                },
+            ],
+        });
+    }
+
     /**
      * Prepares a new GameRound
      * @param randomSong - The queried song
@@ -1050,6 +1130,7 @@ export default class GameSession extends Session {
      *
      * @param userID - The user ID of the user guessing
      * @param guess - The user's guess
+     * @param createdAt - The time the guess was made
      * @param guessModeType - The guessing mode type to evaluate the guess against
      * @param multipleChoiceMode - Whether the answer type is set to multiple choice
      * @param typosAllowed - Whether minor typos are allowed
@@ -1058,14 +1139,25 @@ export default class GameSession extends Session {
     private checkGuess(
         userID: string,
         guess: string,
+        createdAt: number,
         guessModeType: GuessModeType,
         multipleChoiceMode: boolean,
         typosAllowed = false
     ): number {
         if (!this.round) return 0;
         const round = this.round;
-        if (multipleChoiceMode && round.incorrectMCGuessers.has(userID))
-            return 0;
+        if (multipleChoiceMode && round.incorrectGuessers.has(userID)) return 0;
+
+        if (
+            !round.correctGuessers.map((x) => x.id).includes(userID) &&
+            !round.incorrectGuessers.has(userID)
+        ) {
+            if (round.interactionMessage) {
+                round.interactionMessageNeedsUpdate = true;
+            }
+        }
+
+        round.storeGuess(userID, guess, createdAt, guessModeType, typosAllowed);
 
         const pointsAwarded = round.checkGuess(
             guess,
@@ -1355,9 +1447,11 @@ export default class GameSession extends Session {
 
     private multiguessDelayIsActive(guildPreference: GuildPreference): boolean {
         const playerIsAlone = getNumParticipants(this.voiceChannelID) === 1;
+        const isHiddenGameType = this.gameType === GameType.HIDDEN;
         return (
             guildPreference.gameOptions.multiGuessType === MultiGuessType.ON &&
-            !playerIsAlone
+            !playerIsAlone &&
+            !isHiddenGameType
         );
     }
 
@@ -1387,7 +1481,6 @@ export default class GameSession extends Session {
 
                     let streak = 0;
                     if (idx === 0) {
-                        streak = lastGuesserStreak;
                         logger.info(
                             `${getDebugLogHeader(messageContext)}, uid: ${
                                 correctGuesser.id
@@ -1430,5 +1523,66 @@ export default class GameSession extends Session {
             }));
 
         this.scoreboard.update(scoreboardUpdatePayload);
+    }
+
+    private startHiddenUpdateTimer(): void {
+        this.hiddenUpdateTimer = setInterval(() => {
+            this.updateGuessedMembersMessage();
+        }, HIDDEN_UPDATE_INTERVAL);
+    }
+
+    private stopHiddenUpdateTimer(): void {
+        if (this.hiddenUpdateTimer) {
+            clearInterval(this.hiddenUpdateTimer);
+            const round = this.round;
+            round?.interactionMessage?.delete();
+            if (round) {
+                round.interactionMessage = null;
+            }
+        }
+    }
+
+    private generateRemainingPlayersMessage(round: GameRound): {
+        title: string;
+        description: string;
+        thumbnailUrl: string;
+    } {
+        const hiddenTimerInfo = i18n.translate(
+            this.guildID,
+            "misc.inGame.hiddenTimerInfo",
+            {
+                guessButton: clickableSlashCommand("guess"),
+                timestamp: `<t:${Math.floor(
+                    (round.timerStartedAt +
+                        this.guildPreference.gameOptions.guessTimeout! * 1000) /
+                        1000
+                )}:R>`,
+            }
+        );
+
+        const waitingFor = `${bold(
+            i18n.translate(this.guildID, "misc.inGame.hiddenRemainingPlayers")
+        )}:`;
+
+        const remainingPlayers = this.scoreboard
+            .getRemainingPlayers(round.correctGuessers, round.incorrectGuessers)
+            .map((player) => player.username)
+            .join("\n");
+
+        return {
+            title: i18n.translate(
+                this.guildID,
+                "misc.interaction.guess.title",
+                {
+                    songOrArtist:
+                        this.guildPreference.gameOptions.guessModeType ===
+                        GuessModeType.ARTIST
+                            ? i18n.translate(this.guildID, "misc.artist")
+                            : i18n.translate(this.guildID, "misc.song"),
+                }
+            ),
+            description: `${hiddenTimerInfo}\n\n${waitingFor}\n${remainingPlayers}`,
+            thumbnailUrl: KmqImages.THUMBS_UP,
+        };
     }
 }

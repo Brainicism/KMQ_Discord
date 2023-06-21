@@ -16,7 +16,7 @@ export const GameOptionCommand: { [option: string]: string } = {
     [GameOption.ANSWER_TYPE]: "answer",
     [GameOption.RELEASE_TYPE]: "release",
     [GameOption.LANGUAGE_TYPE]: "language",
-    [GameOption.SUBUNIT_PREFERENCE]: "subunit",
+    [GameOption.SUBUNIT_PREFERENCE]: "subunits",
     [GameOption.OST_PREFERENCE]: "ost",
     [GameOption.MULTIGUESS]: "multiguess",
     [GameOption.SHUFFLE_TYPE]: "shuffle",

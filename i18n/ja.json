@@ -335,6 +335,28 @@
                 "name": "グループ"
             }
         },
+        "guess": {
+            "help": {
+                "description": "現在の曲に対する回答を /play hidden 中に送信してください。",
+                "example": {
+                    "song": "現在の曲の推測に {{name}} を使用してください"
+                },
+                "name": "推測"
+            },
+            "interaction": {
+                "failure": {
+                    "notHidden": {
+                        "description": "`/guess` は `/play hidden` 中にのみ使用できます。",
+                        "title": "推測が無視されました"
+                    }
+                },
+                "guessReceived": {
+                    "description": "{{guess}} と推測しました",
+                    "title": "推測が受け取られました"
+                },
+                "name": "現在の曲に対するあなたの最善の一手"
+            }
+        },
         "guessmode": {
             "help": {
                 "description": "曲名、アーティスト名、または両方で推測するかどうかを選択してください。",
@@ -788,10 +810,11 @@
             },
             "gameStarting": "🔊 {{voiceChannelName}} で #{{textChannelName}} でゲームが始まります",
             "help": {
-                "description": "KMQのゲームを開始します。クラシック（デフォルト）、エリミネーションモード、チームモードのいずれかを選択してください。",
+                "description": "KMQのゲームを開始します。",
                 "example": {
                     "classic": "クラシックなKMQゲームを開始します（最初に推測してポイントを獲得してください）",
                     "elimination": "エリミネーションモードのKMQゲームを開始します。各プレイヤーは{{lives}}つのライフでスタートします",
+                    "hidden": "KMQの非公開ゲームを開始し、プレイヤーは/guessでしか回答できません",
                     "teams": "チームを分割し、勝利に役立つ人物を見つけましょう！"
                 },
                 "interaction": {
@@ -1453,7 +1476,9 @@
             "bonusArtistRound": "ボーナスアーティストラウンド",
             "bonusExpArtistRound": "ボーナスEXPとアーティストラウンド",
             "bonusExpRound": "ボーナスEXPラウンド",
-            "correctGuess": "{{correctGuesser}}が正解しました（+{{expGain}} EXP）",
+            "correctGuess": "{{correctGuesser}}が正解しました（+{{expGain}} EXP）（+{{timeToGuess}}代）",
+            "hiddenRemainingPlayers": "待機中",
+            "hiddenTimerInfo": "{{guessButton}}を{{timestamp}}までに押してください！",
             "noCorrectGuesses": "誰も正解しませんでした。",
             "noWinners": "誰も勝ちませんでした。",
             "runnersUp": "準優勝者",
@@ -1477,7 +1502,7 @@
                 "title": "作業中！"
             },
             "guess": {
-                "title": "{{songOrArtist}}を当ててください。"
+                "title": "{{songOrArtist}}を当ててください！"
             },
             "howToPlay": "遊び方",
             "leaveReview": "レビューを残す！",
@@ -1529,6 +1554,7 @@
             "debugServer": "このサーバーではそれはできません。",
             "differentVC": "このコマンドを使用するには、ボットと同じボイスチャンネルにいる必要があります。",
             "notGameSession": "ゲームセッション中にはそれはできません。",
+            "notHidden": "非公開ゲーム中はその操作はできません。",
             "notListeningSession": "リスニングセッション中にはそれはできません。",
             "notPremium": "このコマンドを使用するには、KMQプレミアムが必要です（{{premium}}を参照）。",
             "notSpotify": "Spotifyから再生している場合は、このオプションを変更できません。このオプションを変更する前に、`/spotify reset`を使用してください。",

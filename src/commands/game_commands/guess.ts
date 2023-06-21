@@ -1,0 +1,141 @@
+import { IPCLogger } from "../../logger";
+import {
+    getInteractionValue,
+    sendDeprecatedTextCommandMessage,
+    tryCreateInteractionErrorAcknowledgement,
+    tryCreateInteractionSuccessAcknowledgement,
+} from "../../helpers/discord_utils";
+import Eris from "eris";
+import GameType from "../../enums/game_type";
+import LocaleType from "../../enums/locale_type";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import i18n from "../../helpers/localization_manager";
+import type { CommandInteraction } from "eris";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
+
+const logger = new IPCLogger("guess");
+
+export default class GuessCommand implements BaseCommand {
+    aliases = [];
+    validations = {
+        minArgCount: 1,
+        arguments: [],
+    };
+
+    help = (guildID: string): HelpDocumentation => ({
+        name: "guess",
+        description: i18n.translate(guildID, "command.guess.help.description"),
+        usage: "/guess name:[name]",
+        examples: [
+            {
+                example: "`/guess name:madness`",
+                explanation: i18n.translate(
+                    guildID,
+                    "command.guess.help.example.song",
+                    { song: "madness" }
+                ),
+            },
+        ],
+        priority: 40,
+    });
+
+    slashCommands = (): Array<
+        DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
+    > => [
+        {
+            type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+            options: [
+                {
+                    name: "name",
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "command.guess.interaction.name"
+                    ),
+                    description_localizations: {
+                        [LocaleType.KO]: i18n.translate(
+                            LocaleType.KO,
+                            "command.guess.interaction.name"
+                        ),
+                    },
+                    type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
+                    required: true,
+                },
+            ],
+        },
+    ];
+
+    call = async ({ message }: CommandArgs): Promise<void> => {
+        logger.warn("Text-based command not supported for guess");
+        await sendDeprecatedTextCommandMessage(
+            MessageContext.fromMessage(message)
+        );
+    };
+
+    /**
+     * @param interaction - The interaction
+     * @param messageContext - The message context
+     */
+    async processChatInputInteraction(
+        interaction: CommandInteraction,
+        messageContext: MessageContext
+    ): Promise<void> {
+        const interactionData = getInteractionValue(interaction);
+        const session = Session.getSession(interaction.guildID as string);
+        if (!session) {
+            await tryCreateInteractionErrorAcknowledgement(
+                interaction,
+                i18n.translate(
+                    messageContext.guildID,
+                    "misc.failure.game.noneInProgress.title"
+                ),
+                i18n.translate(
+                    messageContext.guildID,
+                    "misc.failure.game.noneInProgress.description"
+                )
+            );
+        }
+
+        if (session && session.isGameSession()) {
+            if (session.gameType !== GameType.HIDDEN) {
+                await tryCreateInteractionErrorAcknowledgement(
+                    interaction,
+                    i18n.translate(
+                        messageContext.guildID,
+                        "command.guess.interaction.failure.notHidden.title"
+                    ),
+                    i18n.translate(
+                        messageContext.guildID,
+                        "command.guess.interaction.failure.notHidden.description"
+                    )
+                );
+                return;
+            }
+
+            await tryCreateInteractionSuccessAcknowledgement(
+                interaction,
+                i18n.translate(
+                    messageContext.guildID,
+                    "command.guess.interaction.guessReceived.title"
+                ),
+                i18n.translate(
+                    messageContext.guildID,
+                    "command.guess.interaction.guessReceived.description",
+                    {
+                        guess: `\`\`${interactionData.interactionOptions["name"]}\`\``,
+                    }
+                ),
+                true
+            );
+
+            await session.guessSong(
+                messageContext,
+                interactionData.interactionOptions["name"],
+                interaction.createdAt
+            );
+        }
+    }
+}

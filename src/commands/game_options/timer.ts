@@ -27,6 +27,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
         { checkFn: CommandPrechecks.notListeningPrecheck },
+        { checkFn: CommandPrechecks.timerHiddenPrecheck },
     ];
 
     validations = {
@@ -200,9 +201,12 @@ export default class GuessTimeoutCommand implements BaseCommand {
         }
 
         if (session && session.round && session.connection?.playing) {
+            const round = session.round;
             // Timer can start mid-song, starting when the user enters the command
             session.stopGuessTimeout();
             session.startGuessTimeout(messageContext);
+            round.timerStartedAt = Date.now();
+            round.interactionMessageNeedsUpdate = true;
         }
 
         await sendOptionsMessage(

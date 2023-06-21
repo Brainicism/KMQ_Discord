@@ -53,6 +53,7 @@ export default class State {
         [spotifySnapshotID: string]: Array<SpotifyTrack>;
     } = {};
 
+    static commandToID: { [commandName: string]: string } = {};
     static getGuildLocale(guildID: string): LocaleType {
         return State.locales[guildID] ?? DEFAULT_LOCALE;
     }

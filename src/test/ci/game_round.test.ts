@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import { ExpBonusModifierValues } from "../../constants";
+import { delay } from "../../helpers/utils";
 import ExpBonusModifier from "../../enums/exp_bonus_modifier";
 import GameRound, {
     cleanArtistName,
@@ -667,6 +668,101 @@ describe("game round", () => {
                     exp * ExpBonusModifierValues[ExpBonusModifier.TYPO]
                 );
             });
+        });
+    });
+
+    describe("storeGuess", () => {
+        beforeEach(() => {
+            gameRound = new GameRound(
+                {
+                    songName: "dalla dalla",
+                    originalSongName: "dalla dalla",
+                    hangulSongName: "매우 시원한 노래",
+                    originalHangulSongName: "매우 시원한 노래",
+                    artistName: "artist",
+                    hangulArtistName: "예술가",
+                    youtubeLink: "a1b2c3",
+                    publishDate: new Date(2015, 0),
+                    members: "male",
+                    artistID: 4,
+                    isSolo: "n",
+                    rank: 0,
+                    views: 3141592653589,
+                    tags: "",
+                    vtype: "main",
+                    selectionWeight: 1,
+                },
+                5
+            );
+        });
+
+        it("should keep track of a player's first guess", () => {
+            const guess = "dalla dalla";
+            const playerID = "123";
+            const createdAt = Date.now();
+            const guessModeType = GuessModeType.SONG_NAME;
+            const typosAllowed = false;
+            gameRound.storeGuess(
+                playerID,
+                guess,
+                createdAt,
+                guessModeType,
+                typosAllowed
+            );
+
+            assert.deepStrictEqual(gameRound.getGuesses(), {
+                [playerID]: { guess, createdAt },
+            });
+            assert.strictEqual(gameRound.correctGuessers.length, 1);
+            assert.strictEqual(gameRound.incorrectGuessers.size, 0);
+            assert.strictEqual(gameRound.correctGuessers[0].id, playerID);
+        });
+
+        it("should allow users to overwrite their guesses", async () => {
+            const guessModeType = GuessModeType.SONG_NAME;
+            const typosAllowed = false;
+            const playerID = "123";
+
+            const firstGuessCreatedAt = Date.now();
+            const firstGuess = "icy";
+            gameRound.storeGuess(
+                playerID,
+                firstGuess,
+                firstGuessCreatedAt,
+                guessModeType,
+                typosAllowed
+            );
+
+            assert.deepStrictEqual(gameRound.getGuesses(), {
+                [playerID]: {
+                    guess: firstGuess,
+                    createdAt: firstGuessCreatedAt,
+                },
+            });
+            assert.strictEqual(gameRound.correctGuessers.length, 0);
+            assert.strictEqual(gameRound.incorrectGuessers.size, 1);
+            await delay(10);
+
+            const secondGuess = "dalla dalla";
+            const secondGuessCreatedAt = Date.now();
+
+            gameRound.storeGuess(
+                playerID,
+                secondGuess,
+                secondGuessCreatedAt,
+                guessModeType,
+                typosAllowed
+            );
+
+            assert.deepStrictEqual(gameRound.getGuesses(), {
+                [playerID]: {
+                    guess: secondGuess,
+                    createdAt: secondGuessCreatedAt,
+                },
+            });
+            assert.strictEqual(gameRound.correctGuessers.length, 1);
+            assert.strictEqual(gameRound.incorrectGuessers.size, 0);
+            assert.strictEqual(gameRound.correctGuessers[0].id, playerID);
         });
     });
 });

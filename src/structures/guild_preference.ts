@@ -22,6 +22,8 @@ import { mapTo } from "../helpers/utils";
 import AnswerType from "../enums/option_types/answer_type";
 import EnvType from "../enums/env_type";
 import GameOption from "../enums/game_option_name";
+import GameType from "../enums/game_type";
+import Session from "./session";
 import _ from "lodash";
 import dbContext from "../database_context";
 import type { GenderModeOptions } from "../enums/option_types/gender";
@@ -983,6 +985,14 @@ export default class GuildPreference {
 
         // do not reset answerType
         this.gameOptions["answerType"] = oldOptions.answerType;
+
+        const session = Session.getSession(this.guildID);
+        if (session && session.isGameSession()) {
+            if (session.gameType === GameType.HIDDEN) {
+                // do not reset timer if hidden (a timer must always be set)
+                this.gameOptions["guessTimeout"] = oldOptions.guessTimeout;
+            }
+        }
 
         const options = Object.entries(this.gameOptions).map((x) => {
             const optionName = x[0];

@@ -1,12 +1,19 @@
 import {
+    CORRECT_GUESS_EMOJI,
     EMBED_ERROR_COLOR,
     EMBED_SUCCESS_BONUS_COLOR,
     EMBED_SUCCESS_COLOR,
     ExpBonusModifierValues,
+    INCORRECT_GUESS_EMOJI,
     ROUND_MAX_RUNNERS_UP,
 } from "../constants";
-import { friendlyFormattedNumber, getMention } from "../helpers/utils";
+import {
+    durationSeconds,
+    friendlyFormattedNumber,
+    getMention,
+} from "../helpers/utils";
 import ExpBonusModifier from "../enums/exp_bonus_modifier";
+import GameType from "../enums/game_type";
 import GuessModeType from "../enums/option_types/guess_mode_type";
 import KmqMember from "./kmq_member";
 import LocaleType from "../enums/locale_type";
@@ -140,13 +147,18 @@ export default class GameRound extends Round {
     public interactionIncorrectAnswerUUIDs: { [uuid: string]: number };
 
     /** List of players who incorrectly guessed in the multiple choice */
-    public incorrectMCGuessers: Set<string>;
+    public incorrectGuessers: Set<string>;
 
     /** Info about the players that won this GameRound */
     public playerRoundResults: Array<PlayerRoundResult>;
 
     /** The base EXP for this GameRound */
     private baseExp: number;
+
+    /** Each player's guess */
+    private guesses: {
+        [playerID: string]: { guess: string; createdAt: number };
+    };
 
     constructor(song: QueriedSong, baseExp: number) {
         super(song);
@@ -185,7 +197,7 @@ export default class GameRound extends Round {
         };
         this.interactionCorrectAnswerUUID = null;
         this.interactionIncorrectAnswerUUIDs = {};
-        this.incorrectMCGuessers = new Set();
+        this.incorrectGuessers = new Set();
         this.interactionMessage = null;
         this.playerRoundResults = [];
         this.bonusModifier =
@@ -205,6 +217,7 @@ export default class GameRound extends Round {
                       ],
                   ]) as number)
                 : 1;
+        this.guesses = {};
     }
 
     /**
@@ -280,6 +293,48 @@ export default class GameRound extends Round {
         }
 
         return this.hintUsed ? pointReward / 2 : pointReward;
+    }
+
+    /**
+     * Stores a player's guess
+     * @param playerID - The player's id
+     * @param guess - The player's guess
+     * @param createdAt - The time the guess was made
+     * @param guessModeType - The guessing mode
+     * @param typosAllowed - Whether to allow minor typos
+     */
+    storeGuess(
+        playerID: string,
+        guess: string,
+        createdAt: number,
+        guessModeType: GuessModeType,
+        typosAllowed = false
+    ): void {
+        this.guesses[playerID] = { guess, createdAt };
+        const pointsAwarded = this.checkGuess(
+            guess,
+            guessModeType,
+            typosAllowed
+        );
+
+        if (
+            pointsAwarded &&
+            !this.correctGuessers.map((x) => x.id).includes(playerID)
+        ) {
+            this.incorrectGuessers.delete(playerID);
+            this.correctGuessers.push(new KmqMember(playerID, pointsAwarded));
+        } else if (pointsAwarded === 0) {
+            this.incorrectGuessers.add(playerID);
+        }
+    }
+
+    /**
+     * @returns the guesses made in the round so far
+     */
+    getGuesses(): {
+        [playerID: string]: { guess: string; createdAt: number };
+    } {
+        return this.guesses;
     }
 
     /**
@@ -363,7 +418,8 @@ export default class GameRound extends Round {
     getEndRoundDescription(
         messageContext: MessageContext,
         uniqueSongCounter: UniqueSongCounter,
-        playerRoundResults: Array<PlayerRoundResult>
+        playerRoundResults: Array<PlayerRoundResult>,
+        gameType: GameType
     ): string {
         let correctDescription = "";
         if (this.bonusModifier > 1 || this.isBonusArtist()) {
@@ -389,7 +445,46 @@ export default class GameRound extends Round {
         }
 
         const correctGuess = playerRoundResults.length > 0;
-        if (correctGuess) {
+        if (gameType === GameType.HIDDEN) {
+            for (const entry of Object.entries(this.guesses)
+                .sort((a, b) => a[1].createdAt - b[1].createdAt)
+                .slice(0, ROUND_MAX_RUNNERS_UP)) {
+                const userID = entry[0];
+                const { guess, createdAt } = entry[1];
+                const playerResult = playerRoundResults.find(
+                    (x) => x.player.id === userID
+                );
+
+                const streak =
+                    playerResult && playerResult.streak >= 5
+                        ? ` (🔥 ${friendlyFormattedNumber(
+                              playerRoundResults[0].streak
+                          )}) `
+                        : " ";
+
+                const expGain = playerResult
+                    ? ` (+${friendlyFormattedNumber(playerResult.expGain)} EXP)`
+                    : "";
+
+                correctDescription += `\n${
+                    !this.incorrectGuessers.has(userID)
+                        ? CORRECT_GUESS_EMOJI
+                        : INCORRECT_GUESS_EMOJI
+                } ${getMention(
+                    userID
+                )}: \`\`${guess}\`\`${streak}(${durationSeconds(
+                    this.startedAt,
+                    createdAt
+                )}s)${expGain}`;
+            }
+
+            if (Object.keys(this.guesses).length >= ROUND_MAX_RUNNERS_UP) {
+                correctDescription += `\n${i18n.translate(
+                    messageContext.guildID,
+                    "misc.andManyOthers"
+                )}`;
+            }
+        } else if (correctGuess) {
             const correctGuesser = `${getMention(
                 playerRoundResults[0].player.id
             )} ${
@@ -408,6 +503,13 @@ export default class GameRound extends Round {
                     expGain: friendlyFormattedNumber(
                         playerRoundResults[0].expGain
                     ),
+                    timeToGuess: String(
+                        durationSeconds(
+                            this.startedAt,
+                            this.guesses[playerRoundResults[0].player.id]
+                                .createdAt
+                        )
+                    ),
                 }
             );
             if (playerRoundResults.length > 1) {
@@ -417,7 +519,12 @@ export default class GameRound extends Round {
                         (x) =>
                             `${getMention(
                                 x.player.id
-                            )} (+${friendlyFormattedNumber(x.expGain)} EXP)`
+                            )} (+${friendlyFormattedNumber(
+                                x.expGain
+                            )} EXP) (${durationSeconds(
+                                this.startedAt,
+                                this.guesses[x.player.id].createdAt
+                            )}s)`
                     )
                     .slice(0, ROUND_MAX_RUNNERS_UP)
                     .join("\n");
@@ -434,9 +541,7 @@ export default class GameRound extends Round {
                     "misc.inGame.runnersUp"
                 )}**\n${runnersUpDescription}`;
             }
-        }
-
-        if (!correctGuess) {
+        } else {
             correctDescription = i18n.translate(
                 messageContext.guildID,
                 "misc.inGame.noCorrectGuesses"
@@ -508,7 +613,7 @@ export default class GameRound extends Round {
     }
 
     /**
-     * Checks whether the artist guess matches the GameRound's aritst
+     * Checks whether the artist guess matches the GameRound's artist
      * @param message - The Message that contains the guess
      * @returns whether or not the guess was correct
      */

@@ -3,6 +3,7 @@ import State from "../state";
 import i18n from "../helpers/localization_manager";
 import type { ButtonActionRow } from "../types";
 import type Eris from "eris";
+import type GameType from "../enums/game_type";
 import type MessageContext from "./message_context";
 import type PlayerRoundResult from "../interfaces/player_round_result";
 import type QueriedSong from "../interfaces/queried_song";
@@ -24,6 +25,9 @@ export default abstract class Round {
     /** Timestamp of the last time the Round was interacted with in epoch milliseconds */
     public lastActive: number;
 
+    /** Timestamp of when the round's timer started in epoch milliseconds */
+    public timerStartedAt: number;
+
     /**  Whether the round has ended */
     public finished: boolean;
 
@@ -42,6 +46,9 @@ export default abstract class Round {
     /** The message containing this round's interactable components */
     public interactionMessage: Eris.Message<Eris.TextableChannel> | null;
 
+    /** Whether the data shown in the message has changed since it was last updated */
+    public interactionMessageNeedsUpdate: boolean;
+
     constructor(song: QueriedSong) {
         this.song = song;
         this.songAliases = State.aliases.song[song.youtubeLink] || [];
@@ -51,8 +58,10 @@ export default abstract class Round {
         );
         this.startedAt = Date.now();
         this.lastActive = Date.now();
+        this.timerStartedAt = Date.now();
         this.finished = false;
         this.interactionMessage = null;
+        this.interactionMessageNeedsUpdate = false;
         this.roundMessageID = null;
         this.skippers = new Set();
         this.skipAchieved = false;
@@ -62,7 +71,8 @@ export default abstract class Round {
     abstract getEndRoundDescription(
         messageContext: MessageContext,
         uniqueSongCounter: UniqueSongCounter,
-        playerRoundResults: Array<PlayerRoundResult>
+        playerRoundResults: Array<PlayerRoundResult>,
+        gameType?: GameType
     ): string;
 
     abstract getEndRoundColor(

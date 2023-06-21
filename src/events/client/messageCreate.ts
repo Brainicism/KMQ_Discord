@@ -6,6 +6,7 @@ import {
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import Eris from "eris";
+import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
@@ -112,6 +113,7 @@ export default async function messageCreateHandler(
                             messageContext,
                             session,
                             errorMessage: precheck.errorMessage,
+                            parsedMessage,
                         }))
                     ) {
                         return;
@@ -167,7 +169,10 @@ export default async function messageCreateHandler(
                 }
             }
         }
-    } else if (session?.isGameSession()) {
-        session.guessSong(messageContext, message.content);
+    } else if (
+        session?.isGameSession() &&
+        session.gameType !== GameType.HIDDEN
+    ) {
+        session.guessSong(messageContext, message.content, message.createdAt);
     }
 }
