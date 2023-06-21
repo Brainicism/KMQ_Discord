@@ -1476,7 +1476,7 @@
             "bonusArtistRound": "额外艺术家回合",
             "bonusExpArtistRound": "额外经验和艺术家回合",
             "bonusExpRound": "额外经验回合",
-            "correctGuess": "{{correctGuesser}} 猜对了 (+{{expGain}} 经验)",
+            "correctGuess": "{{correctGuesser}} 猜对了 (+{{expGain}} 经验) ({{timeToGuess}}秒)",
             "hiddenRemainingPlayers": "等待中",
             "hiddenTimerInfo": "{{guessButton}}在回合结束前{{timestamp}}之前点击！",
             "noCorrectGuesses": "没有人猜中。",

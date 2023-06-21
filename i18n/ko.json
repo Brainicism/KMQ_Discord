@@ -1476,7 +1476,7 @@
             "bonusArtistRound": "보너스 아티스트 라운드",
             "bonusExpArtistRound": "보너스 경험치 및 아티스트 라운드",
             "bonusExpRound": "보너스 경험치 라운드",
-            "correctGuess": "{{correctGuesser}}(이)가 올바르게 추측하였습니다 (+{{expGain}} 경험치) ({{timeToGuess}}s)",
+            "correctGuess": "{{correctGuesser}}(이)가 올바르게 추측하였습니다 (+{{expGain}} 경험치) ({{timeToGuess}}초)",
             "hiddenRemainingPlayers": "기다리는 중",
             "hiddenTimerInfo": "{{guessButton}} 라운드 종료 전 {{timestamp}}!",
             "noCorrectGuesses": "아무도 그것을 얻지 못했습니다.",

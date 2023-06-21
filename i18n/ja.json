@@ -1476,7 +1476,7 @@
             "bonusArtistRound": "ボーナスアーティストラウンド",
             "bonusExpArtistRound": "ボーナスEXPとアーティストラウンド",
             "bonusExpRound": "ボーナスEXPラウンド",
-            "correctGuess": "{{correctGuesser}}が正解しました（+{{expGain}} EXP）",
+            "correctGuess": "{{correctGuesser}}が正解しました（+{{expGain}} EXP）（+{{timeToGuess}}代）",
             "hiddenRemainingPlayers": "待機中",
             "hiddenTimerInfo": "{{guessButton}}を{{timestamp}}までに押してください！",
             "noCorrectGuesses": "誰も正解しませんでした。",

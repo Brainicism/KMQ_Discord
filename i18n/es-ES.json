@@ -1476,7 +1476,7 @@
             "bonusArtistRound": "RONDA DE ARTISTA BONUS",
             "bonusExpArtistRound": "RONDA DE EXP Y ARTISTA BONUS",
             "bonusExpRound": "RONDA DE EXP BONUS",
-            "correctGuess": "{{correctGuesser}} adivinó correctamente (+{{expGain}} EXP)",
+            "correctGuess": "{{correctGuesser}} adivinó correctamente (+{{expGain}} EXP) ({{timeToGuess}}s)",
             "hiddenRemainingPlayers": "Esperando a",
             "hiddenTimerInfo": "{{guessButton}} antes de que termine la ronda {{timestamp}}!",
             "noCorrectGuesses": "Nadie lo adivinó.",

@@ -1476,7 +1476,7 @@
             "bonusArtistRound": "TOUR ARTISTE BONUS",
             "bonusExpArtistRound": "TOUR EXP ET ARTISTE BONUS",
             "bonusExpRound": "TOUR EXP BONUS",
-            "correctGuess": "{{correctGuesser}} a deviné correctement (+{{expGain}} EXP)",
+            "correctGuess": "{{correctGuesser}} a deviné correctement (+{{expGain}} EXP) ({{timeToGuess}}s)",
             "hiddenRemainingPlayers": "En attente de",
             "hiddenTimerInfo": "{{guessButton}} avant la fin du tour {{timestamp}}!",
             "noCorrectGuesses": "Personne n'a trouvé.",
