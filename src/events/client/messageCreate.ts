@@ -174,6 +174,5 @@ export default async function messageCreateHandler(
         session.gameType !== GameType.HIDDEN
     ) {
         session.guessSong(messageContext, message.content, message.createdAt);
-        session.updateGuessedMembersMessage();
     }
 }
