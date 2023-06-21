@@ -199,7 +199,7 @@ List all the server's presets.
 
 # Game Modes
 
-Getting tired of classic KMQ? Try out elimination and teams mode!
+Getting tired of classic KMQ? Try out elimination, teams, and hidden mode!
 
 ## /play elimination
 
@@ -214,6 +214,10 @@ Team up with your friends and crush the competition with teams mode! Split up in
 To keep the game fair, switching teams mid-game forfeits your current points and EXP.
 
 ![teams](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/teams.png)
+
+## /play hidden
+
+Instead of guessing in chat, `/guess` directly to the bot. Everyone can take their time to think out what song is playing before the timer ends.
 
 # Full Command List
 

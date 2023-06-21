@@ -19,6 +19,9 @@ import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("guess");
 
+const MIN_GUESS_LENGTH = 1;
+const MAX_GUESS_LENGTH = 500;
+
 export default class GuessCommand implements BaseCommand {
     aliases = [];
     validations = {
@@ -63,6 +66,8 @@ export default class GuessCommand implements BaseCommand {
                     },
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: true,
+                    min_length: MIN_GUESS_LENGTH,
+                    max_length: MAX_GUESS_LENGTH,
                 },
             ],
         },
