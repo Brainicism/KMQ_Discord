@@ -36,6 +36,8 @@ const CHARACTER_REPLACEMENTS = [
     { pattern: /&/g, replacement: "and" },
 ];
 
+const MAX_DISPLAYED_GUESS_LENGTH = 50;
+
 interface GuessCorrectness {
     exact: boolean;
     similar: boolean;
@@ -450,7 +452,15 @@ export default class GameRound extends Round {
                 .sort((a, b) => a[1].createdAt - b[1].createdAt)
                 .slice(0, ROUND_MAX_RUNNERS_UP)) {
                 const userID = entry[0];
-                const { guess, createdAt } = entry[1];
+                const createdAt = entry[1].createdAt;
+                let displayedGuess = entry[1].guess;
+                if (displayedGuess.length > MAX_DISPLAYED_GUESS_LENGTH) {
+                    displayedGuess = `${displayedGuess.substring(
+                        0,
+                        MAX_DISPLAYED_GUESS_LENGTH
+                    )}...`;
+                }
+
                 const playerResult = playerRoundResults.find(
                     (x) => x.player.id === userID
                 );
@@ -472,7 +482,7 @@ export default class GameRound extends Round {
                         : INCORRECT_GUESS_EMOJI
                 } ${getMention(
                     userID
-                )}: \`\`${guess}\`\`${streak}(${durationSeconds(
+                )}: \`\`${displayedGuess}\`\`${streak}(${durationSeconds(
                     this.startedAt,
                     createdAt
                 )}s)${expGain}`;
