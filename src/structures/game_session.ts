@@ -1481,6 +1481,7 @@ export default class GameSession extends Session {
 
                     let streak = 0;
                     if (idx === 0) {
+                        streak = lastGuesserStreak;
                         logger.info(
                             `${getDebugLogHeader(messageContext)}, uid: ${
                                 correctGuesser.id
