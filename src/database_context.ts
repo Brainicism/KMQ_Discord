@@ -2,6 +2,7 @@ import { Kysely, MysqlDialect } from "kysely";
 import { config } from "dotenv";
 import { createPool } from "mysql2";
 import { resolve } from "path";
+import EmptyWhereInPlugin from "./kysely/plugins/empty-where-in-plugin/plugin";
 import EnvType from "./enums/env_type";
 import type { InfoSchemaDB } from "./typings/info_schema_db";
 import type { KmqDB } from "./typings/kmq_db";
@@ -27,6 +28,7 @@ function generateKysleyContext<T>(
                 multipleStatements: true,
             }),
         }),
+        plugins: [new EmptyWhereInPlugin()],
     });
 }
 
