@@ -1851,7 +1851,7 @@ export function getMatchedArtists(enteredNames: Array<string>): {
     const matchedGroups: Array<MatchedArtist> = [];
     const unmatchedGroups: Array<string> = [];
     for (const artistName of enteredNames) {
-        const match = State.artistToEntry[artistName.toLowerCase()];
+        const match = State.artistToEntry[normalizeArtistNameEntry(artistName)];
         if (match) {
             matchedGroups.push(match);
         } else {
