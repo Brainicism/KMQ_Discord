@@ -190,29 +190,27 @@ export async function getMatchingGroupNames(
             .execute()
     ).map((x) => x.id);
 
-    const matchingGroups = artistIds.length
-        ? (
-              await dbContext.kpopVideos // collab matches
-                  .selectFrom("app_kpop_agrelation")
-                  .innerJoin(
-                      "app_kpop_group",
-                      "app_kpop_agrelation.id_subgroup",
-                      "app_kpop_group.id"
-                  )
-                  .select(["id", "name"])
-                  .where("app_kpop_agrelation.id_artist", "in", artistIds)
-                  .where("app_kpop_group.is_collab", "=", "y")
-                  // artist matches
-                  .unionAll(
-                      dbContext.kpopVideos
-                          .selectFrom("app_kpop_group")
-                          .select(["id", "name"])
-                          .where("app_kpop_group.id", "in", artistIds)
-                  )
-                  .orderBy("name", "asc")
-                  .execute()
-          ).map((x) => ({ id: x.id, name: x.name }))
-        : [];
+    const matchingGroups = (
+        await dbContext.kpopVideos // collab matches
+            .selectFrom("app_kpop_agrelation")
+            .innerJoin(
+                "app_kpop_group",
+                "app_kpop_agrelation.id_subgroup",
+                "app_kpop_group.id"
+            )
+            .select(["id", "name"])
+            .where("app_kpop_agrelation.id_artist", "in", artistIds)
+            .where("app_kpop_group.is_collab", "=", "y")
+            // artist matches
+            .unionAll(
+                dbContext.kpopVideos
+                    .selectFrom("app_kpop_group")
+                    .select(["id", "name"])
+                    .where("app_kpop_group.id", "in", artistIds)
+            )
+            .orderBy("name", "asc")
+            .execute()
+    ).map((x) => ({ id: x.id, name: x.name }));
 
     const matchingGroupNames = matchingGroups.map((x) => x.name.toUpperCase());
     const unrecognizedGroups = rawGroupNames.filter(

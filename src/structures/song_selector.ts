@@ -295,21 +295,17 @@ export default class SongSelector {
                 .selectFrom("app_kpop_group")
                 .select("id");
 
-            if (selectedGroupIDs.length) {
-                subunitsQueryBuilder = subunitsQueryBuilder.where(
-                    "id_parentgroup",
-                    "in",
-                    selectedGroupIDs
-                );
-            }
+            subunitsQueryBuilder = subunitsQueryBuilder.where(
+                "id_parentgroup",
+                "in",
+                selectedGroupIDs
+            );
 
-            if (shadowBannedArtistIds.length) {
-                subunitsQueryBuilder = subunitsQueryBuilder.where(
-                    "id",
-                    "not in",
-                    shadowBannedArtistIds
-                );
-            }
+            subunitsQueryBuilder = subunitsQueryBuilder.where(
+                "id",
+                "not in",
+                shadowBannedArtistIds
+            );
 
             subunits = (await subunitsQueryBuilder.execute()).map(
                 (x) => x["id"]
@@ -371,15 +367,13 @@ export default class SongSelector {
 
             const mainArtistFilterExpressions: Array<Expression<SqlBool>> = [];
 
-            if (guildPreference.getExcludesGroupIDs().length) {
-                mainArtistFilterExpressions.push(
-                    cmpr(
-                        "id_artist",
-                        "not in",
-                        guildPreference.getExcludesGroupIDs()
-                    )
-                );
-            }
+            mainArtistFilterExpressions.push(
+                cmpr(
+                    "id_artist",
+                    "not in",
+                    guildPreference.getExcludesGroupIDs()
+                )
+            );
 
             if (!guildPreference.isGroupsMode()) {
                 const gender: Array<AvailableGenders> =
@@ -403,40 +397,28 @@ export default class SongSelector {
             } else if (
                 gameOptions.subunitPreference === SubunitsPreference.EXCLUDE
             ) {
-                if (selectedGroupIDs) {
-                    mainArtistFilterExpressions.push(
-                        cmpr("id_artist", "in", selectedGroupIDs)
-                    );
-                }
+                mainArtistFilterExpressions.push(
+                    cmpr("id_artist", "in", selectedGroupIDs)
+                );
             } else {
                 const mainArtistIdSearchExpressions = [];
-                if (selectedGroupIDs.length) {
-                    mainArtistIdSearchExpressions.push(
-                        ...[
-                            cmpr("id_artist", "in", selectedGroupIDs),
-                            cmpr("id_parent_artist", "in", selectedGroupIDs),
-                        ]
-                    );
-                }
+                mainArtistIdSearchExpressions.push(
+                    ...[
+                        cmpr("id_artist", "in", selectedGroupIDs),
+                        cmpr("id_parent_artist", "in", selectedGroupIDs),
+                    ]
+                );
 
-                if (collabGroupContainingSubunit.length) {
-                    mainArtistIdSearchExpressions.push(
-                        cmpr("id_artist", "in", collabGroupContainingSubunit)
-                    );
-                }
+                mainArtistIdSearchExpressions.push(
+                    cmpr("id_artist", "in", collabGroupContainingSubunit)
+                );
 
-                if (shadowBannedArtistIds.length) {
-                    mainArtistFilterExpressions.push(
-                        and([
-                            cmpr("id_artist", "not in", shadowBannedArtistIds),
-                            or(mainArtistIdSearchExpressions),
-                        ])
-                    );
-                } else {
-                    mainArtistFilterExpressions.push(
-                        or(mainArtistIdSearchExpressions)
-                    );
-                }
+                mainArtistFilterExpressions.push(
+                    and([
+                        cmpr("id_artist", "not in", shadowBannedArtistIds),
+                        or(mainArtistIdSearchExpressions),
+                    ])
+                );
             }
 
             // Kyseley does not like it when you provide an empty array or array of size 1 to OR/AND

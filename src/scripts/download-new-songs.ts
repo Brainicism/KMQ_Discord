@@ -236,9 +236,7 @@ async function getSongsFromDb(databaseContext: DatabaseContext): Promise<any> {
         .where("is_audio", "=", "n")
         .where("tags", "not like", "%c%");
 
-    if (deadLinks.length) {
-        mvBuilder = mvBuilder.where("vlink", "not in", deadLinks);
-    }
+    mvBuilder = mvBuilder.where("vlink", "not in", deadLinks);
 
     const avBuilder = databaseContext.kpopVideos.with(
         "rankedAudioSongs",
