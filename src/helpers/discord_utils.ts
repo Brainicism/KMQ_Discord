@@ -1147,7 +1147,7 @@ export async function sendOptionsMessage(
  * @returns a random GameInfoMessage
  */
 export async function getGameInfoMessage(
-    guildID: string
+    guildID?: string
 ): Promise<GameInfoMessage | null> {
     const endGameMessage: GameInfoMessage = chooseWeightedRandom(
         await dbContext.kmq
@@ -1158,7 +1158,7 @@ export async function getGameInfoMessage(
 
     if (!endGameMessage) return null;
 
-    const locale = State.getGuildLocale(guildID);
+    const locale = guildID ? State.getGuildLocale(guildID) : LocaleType.EN;
     try {
         const gameInfoMessageContent: GameMessageMultiLocaleContent =
             JSON.parse(endGameMessage.message);
