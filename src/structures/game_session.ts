@@ -1020,7 +1020,7 @@ export default class GameSession extends Session {
                 this.guildID
             );
 
-            let endGameMessage = await getGameInfoMessage(this.guildID);
+            const endGameMessage = await getGameInfoMessage(this.guildID);
 
             if (
                 endGameMessage &&
@@ -1036,20 +1036,10 @@ export default class GameSession extends Session {
                 logger.error(
                     `Failed fetching end game message. guildID = ${
                         this.guildID
-                    }. locale = ${State.getGuildLocale(this.guildID)}`
+                    }. locale = ${State.getGuildLocale(
+                        this.guildID
+                    )} endGameMessage =${!!endGameMessage}, endGameMessage.title=${!!endGameMessage?.title}, endGameMessage.message=${!!endGameMessage?.message}`
                 );
-                endGameMessage = await getGameInfoMessage();
-                if (
-                    endGameMessage &&
-                    endGameMessage.title &&
-                    endGameMessage.message
-                ) {
-                    fields.push({
-                        name: endGameMessage.title,
-                        value: endGameMessage.message,
-                        inline: false,
-                    });
-                }
             }
 
             await sendInfoMessage(
