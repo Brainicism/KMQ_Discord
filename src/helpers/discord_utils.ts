@@ -1171,9 +1171,6 @@ export async function getGameInfoMessage(
         }
 
         switch (locale) {
-            case LocaleType.EN:
-                endGameMessage.message = gameInfoMessageContent.en;
-                break;
             case LocaleType.KO:
                 endGameMessage.message = gameInfoMessageContent.ko;
                 break;
@@ -1189,7 +1186,10 @@ export async function getGameInfoMessage(
             case LocaleType.ZH:
                 endGameMessage.message = gameInfoMessageContent.zh;
                 break;
+            case LocaleType.EN:
             default:
+                endGameMessage.message = gameInfoMessageContent.en;
+                break;
         }
     } catch (e) {
         logger.error(
