@@ -34,9 +34,11 @@ enum LocaleArgument {
     FRENCH = "french",
 
     JA = "ja",
+    JP = "jp",
     JAPANESE = "japanese",
 
     ZH = "zh",
+    CH = "ch",
     CHINESE = "chinese",
 }
 
@@ -223,11 +225,13 @@ export default class LocaleTypeCommand implements BaseCommand {
                     break;
 
                 case LocaleArgument.JA:
+                case LocaleArgument.JP:
                 case LocaleArgument.JAPANESE:
                     localeType = LocaleType.JA;
                     break;
 
                 case LocaleArgument.ZH:
+                case LocaleArgument.CH:
                 case LocaleArgument.CHINESE:
                     localeType = LocaleType.ZH;
                     break;
