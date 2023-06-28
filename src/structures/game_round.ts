@@ -467,6 +467,7 @@ export default class GameRound extends Round {
                         const mostRecentGuessTime = Number(
                             Object.keys(x[1]).pop()
                         );
+
                         const mostRecentGuess = Object.values(x[1]).pop()!;
                         return [
                             playerID,
@@ -535,10 +536,12 @@ export default class GameRound extends Round {
             const playerIDToEarliestCorrectTimestamp: {
                 [playerID: string]: number;
             } = {};
+
             for (const [playerID, guesses] of Object.entries(this.guesses)) {
                 const earliestGuess = Object.entries(guesses).find(
                     (y) => y[1].correct
                 );
+
                 if (earliestGuess) {
                     playerIDToEarliestCorrectTimestamp[playerID] = Number(
                         earliestGuess[0]
