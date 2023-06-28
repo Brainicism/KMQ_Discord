@@ -711,7 +711,7 @@ describe("game round", () => {
             );
 
             assert.deepStrictEqual(gameRound.getGuesses(), {
-                [playerID]: { guess, createdAt },
+                [playerID]: { [createdAt]: { guess, correct: true } },
             });
             assert.strictEqual(gameRound.correctGuessers.length, 1);
             assert.strictEqual(gameRound.incorrectGuessers.size, 0);
@@ -735,8 +735,10 @@ describe("game round", () => {
 
             assert.deepStrictEqual(gameRound.getGuesses(), {
                 [playerID]: {
-                    guess: firstGuess,
-                    createdAt: firstGuessCreatedAt,
+                    [firstGuessCreatedAt]: {
+                        guess: firstGuess,
+                        correct: false,
+                    },
                 },
             });
             assert.strictEqual(gameRound.correctGuessers.length, 0);
@@ -756,8 +758,14 @@ describe("game round", () => {
 
             assert.deepStrictEqual(gameRound.getGuesses(), {
                 [playerID]: {
-                    guess: secondGuess,
-                    createdAt: secondGuessCreatedAt,
+                    [firstGuessCreatedAt]: {
+                        guess: firstGuess,
+                        correct: false,
+                    },
+                    [secondGuessCreatedAt]: {
+                        guess: secondGuess,
+                        correct: true,
+                    },
                 },
             });
             assert.strictEqual(gameRound.correctGuessers.length, 1);
