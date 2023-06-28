@@ -44,9 +44,11 @@ interface GuessCorrectness {
 }
 
 type PlayerToGuesses = {
-    [playerID: string]: {
-        [createdAt: number]: { guess: string; correct: boolean };
-    };
+    [playerID: string]: Array<{
+        createdAt: number;
+        guess: string;
+        correct: boolean;
+    }>;
 };
 
 /**
@@ -322,11 +324,12 @@ export default class GameRound extends Round {
             typosAllowed
         );
 
-        this.guesses[playerID] = this.guesses[playerID] || {};
-        this.guesses[playerID][createdAt] = {
+        this.guesses[playerID] = this.guesses[playerID] || [];
+        this.guesses[playerID].push({
+            createdAt,
             guess,
             correct: pointsAwarded > 0,
-        };
+        });
 
         if (
             pointsAwarded > 0 &&
@@ -464,18 +467,11 @@ export default class GameRound extends Round {
                         { createdAt: number; guess: string; correct: boolean }
                     ] => {
                         const playerID = x[0];
-                        const mostRecentGuessTime = Number(
-                            Object.keys(x[1]).pop()
-                        );
+                        const mostRecentGuess = x[1]
+                            .sort((a, b) => a.createdAt - b.createdAt)
+                            .pop()!;
 
-                        const mostRecentGuess = Object.values(x[1]).pop()!;
-                        return [
-                            playerID,
-                            {
-                                createdAt: mostRecentGuessTime,
-                                ...mostRecentGuess,
-                            },
-                        ];
+                        return [playerID, mostRecentGuess];
                     }
                 )
                 .sort((a, b) => a[1].createdAt - b[1].createdAt)
@@ -538,13 +534,13 @@ export default class GameRound extends Round {
             } = {};
 
             for (const [playerID, guesses] of Object.entries(this.guesses)) {
-                const earliestGuess = Object.entries(guesses).find(
-                    (y) => y[1].correct
-                );
+                const earliestGuess = guesses
+                    .sort((a, b) => a.createdAt - b.createdAt)
+                    .find((x) => x.correct);
 
                 if (earliestGuess) {
                     playerIDToEarliestCorrectTimestamp[playerID] = Number(
-                        earliestGuess[0]
+                        earliestGuess.createdAt
                     );
                 }
             }
