@@ -43,12 +43,14 @@ interface GuessCorrectness {
     similar: boolean;
 }
 
+type GuessResult = {
+    createdAt: number;
+    guess: string;
+    correct: boolean;
+};
+
 type PlayerToGuesses = {
-    [playerID: string]: Array<{
-        createdAt: number;
-        guess: string;
-        correct: boolean;
-    }>;
+    [playerID: string]: Array<GuessResult>;
 };
 
 /**
@@ -457,23 +459,21 @@ export default class GameRound extends Round {
         }
 
         const correctGuess = playerRoundResults.length > 0;
-        if (gameType === GameType.HIDDEN) {
-            for (const entry of Object.entries(this.guesses)
-                .map(
-                    (
-                        x
-                    ): [
-                        string,
-                        { createdAt: number; guess: string; correct: boolean }
-                    ] => {
-                        const playerID = x[0];
-                        const mostRecentGuess = x[1]
-                            .sort((a, b) => a.createdAt - b.createdAt)
-                            .pop()!;
+        const sortedGuesses = Object.entries(this.guesses).map(
+            (x): [string, Array<GuessResult>] => [
+                x[0],
+                x[1].sort((a, b) => a.createdAt - b.createdAt),
+            ]
+        );
 
-                        return [playerID, mostRecentGuess];
-                    }
-                )
+        if (gameType === GameType.HIDDEN) {
+            for (const entry of sortedGuesses
+                .map((x): [string, GuessResult] => {
+                    const playerID = x[0];
+                    const mostRecentGuess = x[1].pop()!;
+
+                    return [playerID, mostRecentGuess];
+                })
                 .sort((a, b) => a[1].createdAt - b[1].createdAt)
                 .slice(0, ROUND_MAX_RUNNERS_UP)) {
                 const userID = entry[0];
@@ -533,10 +533,8 @@ export default class GameRound extends Round {
                 [playerID: string]: number;
             } = {};
 
-            for (const [playerID, guesses] of Object.entries(this.guesses)) {
-                const earliestGuess = guesses
-                    .sort((a, b) => a.createdAt - b.createdAt)
-                    .find((x) => x.correct);
+            for (const [playerID, guesses] of sortedGuesses) {
+                const earliestGuess = guesses.find((x) => x.correct);
 
                 if (earliestGuess) {
                     playerIDToEarliestCorrectTimestamp[playerID] = Number(
