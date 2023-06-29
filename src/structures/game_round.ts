@@ -43,6 +43,16 @@ interface GuessCorrectness {
     similar: boolean;
 }
 
+type GuessResult = {
+    createdAt: number;
+    guess: string;
+    correct: boolean;
+};
+
+type PlayerToGuesses = {
+    [playerID: string]: Array<GuessResult>;
+};
+
 /**
  * Takes in a song name and removes the characters in the predefined list
  * @param name - the song name
@@ -158,9 +168,7 @@ export default class GameRound extends Round {
     private baseExp: number;
 
     /** Each player's guess */
-    private guesses: {
-        [playerID: string]: { guess: string; createdAt: number };
-    };
+    private guesses: PlayerToGuesses;
 
     constructor(song: QueriedSong, baseExp: number) {
         super(song);
@@ -312,15 +320,21 @@ export default class GameRound extends Round {
         guessModeType: GuessModeType,
         typosAllowed = false
     ): void {
-        this.guesses[playerID] = { guess, createdAt };
         const pointsAwarded = this.checkGuess(
             guess,
             guessModeType,
             typosAllowed
         );
 
+        this.guesses[playerID] = this.guesses[playerID] || [];
+        this.guesses[playerID].push({
+            createdAt,
+            guess,
+            correct: pointsAwarded > 0,
+        });
+
         if (
-            pointsAwarded &&
+            pointsAwarded > 0 &&
             !this.correctGuessers.map((x) => x.id).includes(playerID)
         ) {
             this.incorrectGuessers.delete(playerID);
@@ -333,9 +347,7 @@ export default class GameRound extends Round {
     /**
      * @returns the guesses made in the round so far
      */
-    getGuesses(): {
-        [playerID: string]: { guess: string; createdAt: number };
-    } {
+    getGuesses(): PlayerToGuesses {
         return this.guesses;
     }
 
@@ -447,12 +459,26 @@ export default class GameRound extends Round {
         }
 
         const correctGuess = playerRoundResults.length > 0;
+        const sortedGuesses = Object.entries(this.guesses).map(
+            (x): [string, Array<GuessResult>] => [
+                x[0],
+                x[1].sort((a, b) => a.createdAt - b.createdAt),
+            ]
+        );
+
         if (gameType === GameType.HIDDEN) {
-            for (const entry of Object.entries(this.guesses)
+            for (const entry of sortedGuesses
+                .map((x): [string, GuessResult] => {
+                    const playerID = x[0];
+                    const mostRecentGuess = x[1].pop()!;
+
+                    return [playerID, mostRecentGuess];
+                })
                 .sort((a, b) => a[1].createdAt - b[1].createdAt)
                 .slice(0, ROUND_MAX_RUNNERS_UP)) {
                 const userID = entry[0];
                 const createdAt = entry[1].createdAt;
+                const isCorrect = entry[1].correct;
                 let displayedGuess = entry[1].guess;
                 if (displayedGuess.length > MAX_DISPLAYED_GUESS_LENGTH) {
                     displayedGuess = `${displayedGuess.substring(
@@ -477,9 +503,7 @@ export default class GameRound extends Round {
                     : "";
 
                 correctDescription += `\n${
-                    !this.incorrectGuessers.has(userID)
-                        ? CORRECT_GUESS_EMOJI
-                        : INCORRECT_GUESS_EMOJI
+                    isCorrect ? CORRECT_GUESS_EMOJI : INCORRECT_GUESS_EMOJI
                 } ${getMention(
                     userID
                 )}: \`\`${displayedGuess}\`\`${streak}(${durationSeconds(
@@ -505,6 +529,20 @@ export default class GameRound extends Round {
                     : ""
             }`;
 
+            const playerIDToEarliestCorrectTimestamp: {
+                [playerID: string]: number;
+            } = {};
+
+            for (const [playerID, guesses] of sortedGuesses) {
+                const earliestGuess = guesses.find((x) => x.correct);
+
+                if (earliestGuess) {
+                    playerIDToEarliestCorrectTimestamp[playerID] = Number(
+                        earliestGuess.createdAt
+                    );
+                }
+            }
+
             correctDescription += i18n.translate(
                 messageContext.guildID,
                 "misc.inGame.correctGuess",
@@ -516,8 +554,9 @@ export default class GameRound extends Round {
                     timeToGuess: String(
                         durationSeconds(
                             this.startedAt,
-                            this.guesses[playerRoundResults[0].player.id]
-                                .createdAt
+                            playerIDToEarliestCorrectTimestamp[
+                                playerRoundResults[0].player.id
+                            ]
                         )
                     ),
                 }
@@ -533,7 +572,7 @@ export default class GameRound extends Round {
                                 x.expGain
                             )} EXP) (${durationSeconds(
                                 this.startedAt,
-                                this.guesses[x.player.id].createdAt
+                                playerIDToEarliestCorrectTimestamp[x.player.id]
                             )}s)`
                     )
                     .slice(0, ROUND_MAX_RUNNERS_UP)
