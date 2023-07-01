@@ -28,7 +28,7 @@ export const GameOptionCommand: { [option: string]: string } = {
     [GameOption.DURATION]: "duration",
     [GameOption.EXCLUDE]: "exclude",
     [GameOption.INCLUDE]: "include",
-    [GameOption.SPOTIFY_PLAYLIST_METADATA]: "spotify",
+    [GameOption.SPOTIFY_PLAYLIST_ID]: "spotify",
 };
 
 export const PriorityGameOption: Array<GameOption> = [
@@ -37,7 +37,7 @@ export const PriorityGameOption: Array<GameOption> = [
     GameOption.GENDER,
     GameOption.ANSWER_TYPE,
     GameOption.CUTOFF,
-    GameOption.SPOTIFY_PLAYLIST_METADATA,
+    GameOption.SPOTIFY_PLAYLIST_ID,
 ];
 
 export const ConflictingGameOptions: { [option: string]: Array<GameOption> } = {

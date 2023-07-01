@@ -22,10 +22,9 @@ import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import SongSelector from "../../structures/song_selector";
-import State from "../../state";
 import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type { MatchedPlaylist } from "../../helpers/spotify_manager";
+import type { MatchedPlaylist } from "../../interfaces/matched_playlist";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -198,18 +197,18 @@ export default class SpotifyCommand implements BaseCommand {
             guildID
         );
 
-        const gameSession = State.gameSessions[guildID];
+        const session = Session.getSession(guildID);
         if (reset) {
-            await guildPreference.reset(GameOption.SPOTIFY_PLAYLIST_METADATA);
+            await guildPreference.reset(GameOption.SPOTIFY_PLAYLIST_ID);
             logger.info(
                 `${getDebugLogHeader(messageContext)} | Spotify playlist reset.`
             );
 
             await sendOptionsMessage(
-                Session.getSession(guildID),
+                session,
                 messageContext,
                 guildPreference,
-                [{ option: GameOption.SPOTIFY_PLAYLIST_METADATA, reset }],
+                [{ option: GameOption.SPOTIFY_PLAYLIST_ID, reset }],
                 false,
                 undefined,
                 undefined,
@@ -233,7 +232,7 @@ export default class SpotifyCommand implements BaseCommand {
             }
 
             const premiumRequest = await isPremiumRequest(
-                gameSession,
+                session,
                 messageContext.author.id
             );
 
@@ -256,8 +255,8 @@ export default class SpotifyCommand implements BaseCommand {
             }
 
             let matchedPlaylist: MatchedPlaylist;
-            if (gameSession) {
-                matchedPlaylist = (await gameSession.songSelector.reloadSongs(
+            if (session) {
+                matchedPlaylist = (await session.songSelector.reloadSongs(
                     guildPreference,
                     premiumRequest,
                     playlistID
@@ -294,9 +293,7 @@ export default class SpotifyCommand implements BaseCommand {
                 return;
             }
 
-            await guildPreference.setSpotifyPlaylistMetadata(
-                matchedPlaylist.metadata
-            );
+            await guildPreference.setSpotifyPlaylistID(playlistID);
 
             await LimitCommand.updateOption(
                 messageContext,
@@ -363,10 +360,10 @@ export default class SpotifyCommand implements BaseCommand {
         }
 
         await sendOptionsMessage(
-            Session.getSession(guildID),
+            session,
             messageContext,
             guildPreference,
-            [{ option: GameOption.SPOTIFY_PLAYLIST_METADATA, reset }],
+            [{ option: GameOption.SPOTIFY_PLAYLIST_ID, reset }],
             false,
             undefined,
             undefined,

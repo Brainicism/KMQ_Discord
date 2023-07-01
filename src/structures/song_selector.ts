@@ -20,7 +20,7 @@ import type {
     GenderModeOptions,
 } from "../enums/option_types/gender";
 import type { Expression, SqlBool } from "kysely";
-import type { MatchedPlaylist } from "../helpers/spotify_manager";
+import type { MatchedPlaylist } from "../interfaces/matched_playlist";
 import type GuildPreference from "./guild_preference";
 import type QueriedSong from "../interfaces/queried_song";
 import type UniqueSongCounter from "../interfaces/unique_song_counter";

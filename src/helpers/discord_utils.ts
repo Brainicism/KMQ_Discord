@@ -782,10 +782,6 @@ export async function generateOptionsMessage(
     optionStrings[GameOption.SEEK_TYPE] = gameOptions.seekType;
     optionStrings[GameOption.GUESS_MODE_TYPE] = gameOptions.guessModeType;
     optionStrings[GameOption.SPECIAL_TYPE] = gameOptions.specialType;
-    optionStrings[GameOption.SPOTIFY_PLAYLIST_METADATA] =
-        gameOptions.spotifyPlaylistMetadata
-            ? `[${gameOptions.spotifyPlaylistMetadata.playlistName}](${SPOTIFY_BASE_URL}${gameOptions.spotifyPlaylistMetadata.playlistID})`
-            : null;
 
     optionStrings[GameOption.TIMER] = guildPreference.isGuessTimeoutSet()
         ? i18n.translate(guildID, "command.options.timer", {
@@ -806,6 +802,24 @@ export async function generateOptionsMessage(
     optionStrings[GameOption.INCLUDE] = guildPreference.isIncludesMode()
         ? guildPreference.getDisplayedIncludesGroupNames()
         : null;
+
+    const spotifyPlaylistID = gameOptions.spotifyPlaylistID;
+    let thumbnailUrl: string | undefined;
+    if (spotifyPlaylistID) {
+        const matchedPlaylist =
+            await State.spotifyManager.getMatchedSpotifySongs(
+                spotifyPlaylistID,
+                premiumRequest
+            );
+
+        optionStrings[
+            GameOption.SPOTIFY_PLAYLIST_ID
+        ] = `[${matchedPlaylist.metadata.playlistName}](${SPOTIFY_BASE_URL}${matchedPlaylist.metadata.playlistID})`;
+
+        thumbnailUrl = matchedPlaylist.metadata.thumbnailUrl;
+    } else {
+        optionStrings[GameOption.SPOTIFY_PLAYLIST_ID] = null;
+    }
 
     const conflictString = i18n.translate(guildID, "misc.conflict");
 
@@ -978,7 +992,7 @@ export async function generateOptionsMessage(
     if (isSpotify) {
         priorityOptions = "";
         fieldOptions.unshift(GameOption.ANSWER_TYPE);
-        fieldOptions.unshift(GameOption.SPOTIFY_PLAYLIST_METADATA);
+        fieldOptions.unshift(GameOption.SPOTIFY_PLAYLIST_ID);
     }
 
     const ZERO_WIDTH_SPACE = "​";
@@ -1092,6 +1106,7 @@ export async function generateOptionsMessage(
         description,
         fields,
         footerText,
+        thumbnailUrl,
     };
 }
 

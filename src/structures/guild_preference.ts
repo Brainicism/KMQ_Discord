@@ -28,7 +28,6 @@ import _ from "lodash";
 import dbContext from "../database_context";
 import type { GenderModeOptions } from "../enums/option_types/gender";
 import type { MutexInterface } from "async-mutex";
-import type { PlaylistMetadata } from "src/helpers/spotify_manager";
 import type ArtistType from "../enums/option_types/artist_type";
 import type GameOptions from "../interfaces/game_options";
 import type GuessModeType from "../enums/option_types/guess_mode_type";
@@ -60,7 +59,6 @@ type GameOptionValue =
     | MultiGuessType
     | SubunitsPreference
     | OstPreference
-    | PlaylistMetadata
     | string
     | null;
 
@@ -161,9 +159,9 @@ export default class GuildPreference {
             default: [null],
             setter: this.setForcePlaySong,
         },
-        [GameOption.SPOTIFY_PLAYLIST_METADATA]: {
+        [GameOption.SPOTIFY_PLAYLIST_ID]: {
             default: [null],
-            setter: this.setSpotifyPlaylistMetadata,
+            setter: this.setSpotifyPlaylistID,
         },
     };
 
@@ -191,7 +189,7 @@ export default class GuildPreference {
         subunitPreference: DEFAULT_SUBUNIT_PREFERENCE,
         ostPreference: DEFAULT_OST_PREFERENCE,
         forcePlaySongID: null,
-        spotifyPlaylistMetadata: null,
+        spotifyPlaylistID: null,
     };
 
     /** The GuildPreference's respective GameOptions */
@@ -892,30 +890,28 @@ export default class GuildPreference {
 
     /**
      * Sets the Spotify playlist option value
-     * @param playlistMetadata - Spotify playlist ID, length, name
+     * @param playlistID - Spotify playlist ID
      */
-    async setSpotifyPlaylistMetadata(
-        playlistMetadata: PlaylistMetadata | null
-    ): Promise<void> {
-        this.gameOptions.spotifyPlaylistMetadata = playlistMetadata;
+    async setSpotifyPlaylistID(playlistID: string | null): Promise<void> {
+        this.gameOptions.spotifyPlaylistID = playlistID;
         await this.updateGuildPreferences([
             {
-                name: GameOptionInternal.SPOTIFY_PLAYLIST_METADATA,
-                value: playlistMetadata,
+                name: GameOptionInternal.SPOTIFY_PLAYLIST_ID,
+                value: playlistID,
             },
         ]);
     }
 
     /** @returns the ID of the playlist to retrieve songs from */
-    getSpotifyPlaylistMetadata(): PlaylistMetadata | null {
-        return this.gameOptions.spotifyPlaylistMetadata;
+    getSpotifyPlaylistID(): string | null {
+        return this.gameOptions.spotifyPlaylistID;
     }
 
     /**
      * @returns whether the spotify playing option is set
      */
     isSpotifyPlaylist(): boolean {
-        return this.gameOptions.spotifyPlaylistMetadata !== null;
+        return this.gameOptions.spotifyPlaylistID !== null;
     }
 
     /**

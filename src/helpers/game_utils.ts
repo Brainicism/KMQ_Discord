@@ -17,7 +17,7 @@ import State from "../state";
 import _ from "lodash";
 import dbContext from "../database_context";
 import type { AvailableGenders } from "../enums/option_types/gender";
-import type { PlaylistMetadata } from "./spotify_manager";
+import type { MatchedPlaylist } from "../interfaces/matched_playlist";
 import type GuildPreference from "../structures/guild_preference";
 import type MatchedArtist from "../interfaces/matched_artist";
 import type Patron from "../interfaces/patron";
@@ -61,12 +61,29 @@ export async function getAvailableSongCount(
 }> {
     try {
         if (guildPreference.isSpotifyPlaylist()) {
-            const spotifyMetadata =
-                guildPreference.getSpotifyPlaylistMetadata() as PlaylistMetadata;
+            const playlistID = guildPreference.getSpotifyPlaylistID()!;
+            const session =
+                State.gameSessions[guildPreference.guildID] ??
+                State.listeningSessions[guildPreference.guildID];
+
+            let matchedPlaylist: MatchedPlaylist;
+            if (session) {
+                matchedPlaylist = (await session.songSelector.reloadSongs(
+                    guildPreference,
+                    isPremium,
+                    playlistID
+                )) as MatchedPlaylist;
+            } else {
+                matchedPlaylist = (await new SongSelector().reloadSongs(
+                    guildPreference,
+                    isPremium,
+                    playlistID
+                )) as MatchedPlaylist;
+            }
 
             return {
-                count: spotifyMetadata.matchedSongsLength,
-                countBeforeLimit: spotifyMetadata.matchedSongsLength,
+                count: matchedPlaylist.metadata.matchedSongsLength,
+                countBeforeLimit: matchedPlaylist.metadata.matchedSongsLength,
             };
         }
 

@@ -588,12 +588,7 @@ describe("command prechecks", () => {
 
         describe("spotify playlist set", () => {
             it("should return false", async () => {
-                await guildPreference.setSpotifyPlaylistMetadata({
-                    playlistID: "id",
-                    playlistName: "playlist",
-                    playlistLength: 4,
-                    matchedSongsLength: 2,
-                });
+                await guildPreference.setSpotifyPlaylistID("id");
 
                 assert.strictEqual(
                     await CommandPrechecks.notSpotifyPrecheck({
@@ -607,7 +602,7 @@ describe("command prechecks", () => {
 
         describe("spotify playlist not set", () => {
             it("should return true", async () => {
-                await guildPreference.setSpotifyPlaylistMetadata(null);
+                await guildPreference.setSpotifyPlaylistID(null);
 
                 assert.strictEqual(
                     await CommandPrechecks.notSpotifyPrecheck({
