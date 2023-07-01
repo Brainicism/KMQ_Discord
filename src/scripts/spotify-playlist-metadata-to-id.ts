@@ -28,7 +28,7 @@ import type { PlaylistMetadata } from "../interfaces/playlist_metadata";
                     playlistIDs.push({
                         guild_id: metadata.guild_id,
                         option_name: "spotifyPlaylistID",
-                        option_value: playlistID,
+                        option_value: JSON.stringify(playlistID),
                         client_id: metadata.client_id,
                     });
                 }
@@ -71,7 +71,7 @@ import type { PlaylistMetadata } from "../interfaces/playlist_metadata";
                         guild_id: metadata.guild_id,
                         preset_name: metadata.preset_name,
                         option_name: "spotifyPlaylistID",
-                        option_value: playlistID,
+                        option_value: JSON.stringify(playlistID),
                     });
                 }
             }

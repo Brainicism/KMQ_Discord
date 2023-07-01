@@ -232,12 +232,17 @@ export default class SpotifyManager {
             thumbnailUrl: spotifyMetadata.thumbnailUrl as string,
         };
 
-        State.cachedSpotifyPlaylists[playlistID] = {
-            snapshotID: spotifyMetadata.snapshotID,
-            metadata,
-            matchedSongs,
-            truncated,
-        };
+        if (
+            !cachedPlaylist ||
+            cachedPlaylist.snapshotID !== spotifyMetadata.snapshotID
+        ) {
+            State.cachedSpotifyPlaylists[playlistID] = {
+                snapshotID: spotifyMetadata.snapshotID,
+                metadata,
+                matchedSongs,
+                truncated,
+            };
+        }
 
         return {
             matchedSongs,
