@@ -17,26 +17,13 @@ import dbContext from "../database_context";
 import fs from "fs";
 import path from "path";
 import type { AxiosResponse } from "axios";
+import type { MatchedPlaylist } from "../interfaces/matched_playlist";
 import type QueriedSong from "../interfaces/queried_song";
 import type SpotifyTrack from "../interfaces/spotify_track";
 
 const logger = new IPCLogger("spotify_manager");
 
 const BASE_URL = "https://api.spotify.com/v1";
-
-export interface PlaylistMetadata {
-    playlistID: string;
-    playlistName: string;
-    playlistLength: number;
-    matchedSongsLength: number;
-    thumbnailUrl?: string;
-}
-
-export interface MatchedPlaylist {
-    matchedSongs: Array<QueriedSong>;
-    metadata: PlaylistMetadata;
-    truncated: boolean;
-}
 
 const SONG_MATCH_TIMEOUT_MS = 15000;
 
@@ -93,12 +80,18 @@ export default class SpotifyManager {
             };
         }
 
-        let spotifySongs: Array<SpotifyTrack> = [];
+        let matchedSongs: Array<QueriedSong> = [];
+        let truncated = false;
 
-        if (State.cachedPlaylists[spotifyMetadata.snapshotID]) {
+        const cachedPlaylist = State.cachedSpotifyPlaylists[playlistID];
+        if (
+            cachedPlaylist &&
+            cachedPlaylist.snapshotID === spotifyMetadata.snapshotID
+        ) {
             logger.info(`Using cached playlist for ${playlistID}`);
-            spotifySongs = State.cachedPlaylists[spotifyMetadata.snapshotID];
+            ({ matchedSongs, truncated } = cachedPlaylist);
         } else {
+            const spotifySongs: Array<SpotifyTrack> = [];
             const start = Date.now();
             logger.info(`Using Spotify API for playlist ${playlistID}`);
 
@@ -144,104 +137,111 @@ export default class SpotifyManager {
                 }ms`
             );
 
-            State.cachedPlaylists[spotifyMetadata.snapshotID] = spotifySongs;
-        }
+            const unmatchedSongs: Array<String> = [];
 
-        let matchedSongs: Array<QueriedSong> = [];
-        const unmatchedSongs: Array<String> = [];
+            logger.info(
+                `Starting to parse playlist: ${playlistID}, number of songs: ${spotifySongs.length}`
+            );
 
-        logger.info(
-            `Starting to parse playlist: ${playlistID}, number of songs: ${spotifySongs.length}`
-        );
+            const songMatchStartTime = Date.now();
+            for await (const queryOutput of asyncPool(
+                4,
+                spotifySongs,
+                (x: SpotifyTrack) =>
+                    this.generateSongMatchingPromise(x, isPremium)
+            )) {
+                if (typeof queryOutput === "string") {
+                    unmatchedSongs.push(queryOutput);
+                } else {
+                    matchedSongs.push(queryOutput);
+                }
 
-        let truncated = false;
-        const songMatchStartTime = Date.now();
-        for await (const queryOutput of asyncPool(
-            4,
-            spotifySongs,
-            (x: SpotifyTrack) => this.generateSongMatchingPromise(x, isPremium)
-        )) {
-            if (typeof queryOutput === "string") {
-                unmatchedSongs.push(queryOutput);
-            } else {
-                matchedSongs.push(queryOutput);
+                const processedSongCount =
+                    unmatchedSongs.length + matchedSongs.length;
+
+                if (
+                    processedSongCount % 100 === 0 ||
+                    processedSongCount === 1 ||
+                    processedSongCount === spotifySongs.length
+                ) {
+                    logger.info(
+                        `Processed ${processedSongCount}/${spotifySongs.length} for playlist ${playlistID}`
+                    );
+                }
+
+                if (Date.now() - songMatchStartTime > SONG_MATCH_TIMEOUT_MS) {
+                    logger.warn(
+                        `Playlist '${playlistID}' exceeded song match timeout of ${SONG_MATCH_TIMEOUT_MS}ms after processing ${processedSongCount}/${spotifySongs.length}`
+                    );
+                    truncated = true;
+                    break;
+                }
             }
 
-            const processedSongCount =
-                unmatchedSongs.length + matchedSongs.length;
+            logger.info(
+                `Finished parsing playlist: ${playlistID} after ${
+                    Date.now() - songMatchStartTime
+                }ms.`
+            );
 
-            if (
-                processedSongCount % 100 === 0 ||
-                processedSongCount === 1 ||
-                processedSongCount === spotifySongs.length
-            ) {
-                logger.info(
-                    `Processed ${processedSongCount}/${spotifySongs.length} for playlist ${playlistID}`
-                );
-            }
-
-            if (Date.now() - songMatchStartTime > SONG_MATCH_TIMEOUT_MS) {
-                logger.warn(
-                    `Playlist '${playlistID}' exceeded song match timeout of ${SONG_MATCH_TIMEOUT_MS}ms after processing ${processedSongCount}/${spotifySongs.length}`
-                );
-                truncated = true;
-                break;
-            }
-        }
-
-        logger.info(
-            `Finished parsing playlist: ${playlistID} after ${
-                Date.now() - songMatchStartTime
-            }ms.`
-        );
-
-        const SPOTIFY_PLAYLIST_UNMATCHED_SONGS_DIR = path.join(
-            __dirname,
-            "../../data/spotify_unmatched_playlists"
-        );
-
-        if (unmatchedSongs.length) {
-            if (!(await pathExists(SPOTIFY_PLAYLIST_UNMATCHED_SONGS_DIR))) {
-                await fs.promises.mkdir(SPOTIFY_PLAYLIST_UNMATCHED_SONGS_DIR);
-            }
-
-            const playlistUnmatchedSongsPath = path.resolve(
+            const SPOTIFY_PLAYLIST_UNMATCHED_SONGS_DIR = path.join(
                 __dirname,
-                SPOTIFY_PLAYLIST_UNMATCHED_SONGS_DIR,
-                `${playlistID}-${standardDateFormat(new Date())}.txt`
+                "../../data/spotify_unmatched_playlists"
             );
 
-            await fs.promises.writeFile(
-                playlistUnmatchedSongsPath,
-                unmatchedSongs.join("\n")
-            );
-        }
+            if (unmatchedSongs.length) {
+                if (!(await pathExists(SPOTIFY_PLAYLIST_UNMATCHED_SONGS_DIR))) {
+                    await fs.promises.mkdir(
+                        SPOTIFY_PLAYLIST_UNMATCHED_SONGS_DIR
+                    );
+                }
 
-        if (KmqConfiguration.Instance.persistMatchedSpotifySongs()) {
-            await fs.promises.writeFile(
-                path.resolve(
+                const playlistUnmatchedSongsPath = path.resolve(
+                    __dirname,
                     SPOTIFY_PLAYLIST_UNMATCHED_SONGS_DIR,
-                    `${playlistID}-${standardDateFormat(
-                        new Date()
-                    )}.matched.txt`
-                ),
-                matchedSongs
-                    .map((x) => `${x.songName} - ${x.artistName}`)
-                    .join("\n")
-            );
+                    `${playlistID}-${standardDateFormat(new Date())}.txt`
+                );
+
+                await fs.promises.writeFile(
+                    playlistUnmatchedSongsPath,
+                    unmatchedSongs.join("\n")
+                );
+            }
+
+            if (KmqConfiguration.Instance.persistMatchedSpotifySongs()) {
+                await fs.promises.writeFile(
+                    path.resolve(
+                        SPOTIFY_PLAYLIST_UNMATCHED_SONGS_DIR,
+                        `${playlistID}-${standardDateFormat(
+                            new Date()
+                        )}.matched.txt`
+                    ),
+                    matchedSongs
+                        .map((x) => `${x.songName} - ${x.artistName}`)
+                        .join("\n")
+                );
+            }
         }
 
         matchedSongs = _.uniqBy(matchedSongs, "youtubeLink");
+        const metadata = {
+            playlistID,
+            playlistLength: spotifyMetadata.songCount,
+            playlistName: spotifyMetadata.playlistName,
+            matchedSongsLength: matchedSongs.length,
+            thumbnailUrl: spotifyMetadata.thumbnailUrl as string,
+        };
+
+        State.cachedSpotifyPlaylists[playlistID] = {
+            snapshotID: spotifyMetadata.snapshotID,
+            metadata,
+            matchedSongs,
+            truncated,
+        };
 
         return {
             matchedSongs,
-            metadata: {
-                playlistID,
-                playlistLength: spotifySongs.length,
-                playlistName: spotifyMetadata.playlistName,
-                matchedSongsLength: matchedSongs.length,
-                thumbnailUrl: spotifyMetadata.thumbnailUrl as string,
-            },
+            metadata,
             truncated,
         };
     };

@@ -411,7 +411,7 @@ async function reloadLocales(): Promise<void> {
 }
 
 function clearCachedPlaylists(): void {
-    State.cachedPlaylists = {};
+    State.cachedSpotifyPlaylists = {};
 }
 
 /**

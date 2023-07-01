@@ -136,7 +136,7 @@ export default abstract class Session {
             await this.songSelector.reloadSongs(
                 this.guildPreference,
                 this.isPremium,
-                this.guildPreference.getSpotifyPlaylistMetadata()?.playlistID
+                this.guildPreference.getSpotifyPlaylistID() ?? undefined
             );
         };
     }
@@ -193,8 +193,7 @@ export default abstract class Session {
                 await this.songSelector.reloadSongs(
                     this.guildPreference,
                     this.isPremium,
-                    this.guildPreference.getSpotifyPlaylistMetadata()
-                        ?.playlistID
+                    this.guildPreference.getSpotifyPlaylistID() ?? undefined
                 );
             } catch (err) {
                 await sendErrorMessage(messageContext, {
@@ -640,7 +639,7 @@ export default abstract class Session {
         await this.songSelector.reloadSongs(
             this.guildPreference,
             isPremium,
-            this.guildPreference.getSpotifyPlaylistMetadata()?.playlistID
+            this.guildPreference.getSpotifyPlaylistID() ?? undefined
         );
 
         if (!isPremium) {

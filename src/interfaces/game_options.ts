@@ -1,5 +1,4 @@
 import type { GenderModeOptions } from "../enums/option_types/gender";
-import type { PlaylistMetadata } from "src/helpers/spotify_manager";
 import type AnswerType from "../enums/option_types/answer_type";
 import type ArtistType from "../enums/option_types/artist_type";
 import type GuessModeType from "../enums/option_types/guess_mode_type";
@@ -37,5 +36,5 @@ export default interface GameOptions {
     subunitPreference: SubunitsPreference;
     ostPreference: OstPreference;
     forcePlaySongID: string | null;
-    spotifyPlaylistMetadata: PlaylistMetadata | null;
+    spotifyPlaylistID: string | null;
 }
