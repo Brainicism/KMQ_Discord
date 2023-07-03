@@ -1,4 +1,5 @@
 import {
+    DataFiles,
     ELIMINATION_DEFAULT_LIVES,
     ELIMINATION_MAX_LIVES,
     ELIMINATION_MIN_LIVES,
@@ -15,7 +16,12 @@ import {
     isPremiumRequest,
     isUserPremium,
 } from "../../helpers/game_utils";
-import { bold, getMention, isWeekend } from "../../helpers/utils";
+import {
+    bold,
+    clickableSlashCommand,
+    getMention,
+    isWeekend,
+} from "../../helpers/utils";
 import {
     fetchChannel,
     fetchUser,
@@ -44,6 +50,7 @@ import Player from "../../structures/player";
 import Session from "../../structures/session";
 import State from "../../state";
 import dbContext from "../../database_context";
+import fs from "fs";
 import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
@@ -167,12 +174,32 @@ export async function sendBeginGameSessionMessage(
         );
     }
 
+    const additionalPayloads = [optionsEmbedPayload];
+
+    let newsData = "";
+    try {
+        newsData = (await fs.promises.readFile(DataFiles.NEWS)).toString();
+        newsData = newsData.split("\n\n")[0];
+    } catch (e) {
+        logger.error("News file does not exist");
+    }
+
+    if (newsData && Math.random() < 0.05) {
+        const recentUpdatePayload = {
+            title: clickableSlashCommand("news"),
+            description: newsData,
+            footerText: i18n.translate(guildID, "command.news.updates.footer"),
+        };
+
+        additionalPayloads.push(recentUpdatePayload);
+    }
+
     await sendInfoMessage(
         messageContext,
         startGamePayload,
         false,
         undefined,
-        [optionsEmbedPayload],
+        additionalPayloads,
         interaction
     );
 }
