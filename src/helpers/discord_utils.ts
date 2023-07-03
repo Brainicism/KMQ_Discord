@@ -952,26 +952,12 @@ export async function generateOptionsMessage(
     priorityOptions = PriorityGameOption.filter(
         (option) => optionStrings[option]
     )
-        .map((option) => {
-            let slashCommand = clickableSlashCommand(
-                GameOptionCommand[option],
-                "set"
-            );
-
-            if (option === GameOption.LIMIT) {
-                slashCommand = clickableSlashCommand(
-                    GameOptionCommand[option],
-                    "set top"
-                );
-            } else if (option === GameOption.CUTOFF) {
-                slashCommand = clickableSlashCommand(
-                    GameOptionCommand[option],
-                    "set earliest"
-                );
-            }
-
-            return `${slashCommand}: ${optionStrings[option]}`;
-        })
+        .map(
+            (option) =>
+                `${clickableSlashCommand(GameOptionCommand[option])}: ${
+                    optionStrings[option]
+                }`
+        )
         .join("\n");
 
     let nonPremiumGameWarning = "";
@@ -1005,10 +991,9 @@ export async function generateOptionsMessage(
                 .slice(0, Math.ceil(fieldOptions.length / 3))
                 .map(
                     (option) =>
-                        `${clickableSlashCommand(
-                            GameOptionCommand[option],
-                            "set"
-                        )}: ${optionStrings[option]}`
+                        `${clickableSlashCommand(GameOptionCommand[option])}: ${
+                            optionStrings[option]
+                        }`
                 )
                 .join("\n"),
             inline: true,
@@ -1022,10 +1007,9 @@ export async function generateOptionsMessage(
                 )
                 .map(
                     (option) =>
-                        `${clickableSlashCommand(
-                            GameOptionCommand[option],
-                            "set"
-                        )}: ${optionStrings[option]}`
+                        `${clickableSlashCommand(GameOptionCommand[option])}: ${
+                            optionStrings[option]
+                        }`
                 )
                 .join("\n"),
             inline: true,
@@ -1036,10 +1020,9 @@ export async function generateOptionsMessage(
                 .slice(Math.ceil((2 * fieldOptions.length) / 3))
                 .map(
                     (option) =>
-                        `${clickableSlashCommand(
-                            GameOptionCommand[option],
-                            "set"
-                        )}: ${optionStrings[option]}`
+                        `${clickableSlashCommand(GameOptionCommand[option])}: ${
+                            optionStrings[option]
+                        }`
                 )
                 .join("\n"),
             inline: true,
