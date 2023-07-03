@@ -374,7 +374,7 @@
         },
         "help": {
             "command": "command",
-            "description": "Type {{play}} in chat and the bot will play a random k-pop song in VC. The goal of this game is to be the first person to guess the song name in chat.\nSee your current game options with {{options}}. Use `{{help}} [{{command}}]` to get more details ",
+            "description": "Type {{play}} in chat and the bot will play a random k-pop song in VC. The goal of this game is to be the first person to guess the song name in chat.\nSee your current game options with {{options}}. Use {{help}} `[{{command}}]` to get more details ",
             "examples": "Examples",
             "failure": {
                 "noDocs": "Sorry, there is no documentation on {{action}}."

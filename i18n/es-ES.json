@@ -374,7 +374,7 @@
         },
         "help": {
             "command": "comando",
-            "description": "Escriba {{play}} en el chat y el bot reproducirá una canción de k-pop aleatoria en VC. El objetivo de este juego es ser la primera persona en adivinar el nombre de la canción en el chat.\nVea sus opciones de juego actuales con {{options}}. Use `{{help}} [{{command}}]` para obtener más detalles.",
+            "description": "Escriba {{play}} en el chat y el bot reproducirá una canción de k-pop aleatoria en VC. El objetivo de este juego es ser la primera persona en adivinar el nombre de la canción en el chat.\nVea sus opciones de juego actuales con {{options}}. Use {{help}} `[{{command}}]` para obtener más detalles.",
             "examples": "Ejemplos",
             "failure": {
                 "noDocs": "Lo siento, no hay documentación sobre {{action}}."

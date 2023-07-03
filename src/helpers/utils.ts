@@ -1,8 +1,10 @@
 /* eslint-disable tsdoc/syntax */
 import * as uuid from "uuid";
 import { DataFiles } from "../constants";
+import { GameOptionCommand } from "../types";
 import { IPCLogger } from "../logger";
 import { exec } from "child_process";
+import GameOption from "../enums/game_option_name";
 import State from "../state";
 import _ from "lodash";
 import crypto from "crypto";
@@ -77,14 +79,43 @@ export function escapedFormatting(text: string): string {
 
 /**
  * @param commandName - The name of the slash command
- * @param subcommandName - The subcommand within the command
  * @returns a formatted version of the slash command, that allows users to click
  */
-export function clickableSlashCommand(
-    commandName: string,
-    subcommandName?: string
-): string {
+export function clickableSlashCommand(commandName: string): string {
     let commandAndSubcommand = commandName;
+    let subcommandName = "";
+
+    if (Object.values(GameOptionCommand).includes(commandName)) {
+        subcommandName = "set";
+        if (commandName === GameOptionCommand[GameOption.LIMIT]) {
+            subcommandName = "set top";
+        } else if (commandName === GameOptionCommand[GameOption.CUTOFF]) {
+            subcommandName = "set earliest";
+        }
+    }
+
+    switch (commandName) {
+        case "play":
+            subcommandName = "classic";
+            break;
+        case "add":
+        case "remove":
+            subcommandName = commandName;
+            commandName = "groups";
+            break;
+        case "preset":
+            subcommandName = "list";
+            break;
+        case "leaderboard":
+            subcommandName = "show";
+            break;
+        case "lookup":
+            subcommandName = "song_name";
+            break;
+        default:
+            break;
+    }
+
     if (subcommandName) {
         commandAndSubcommand = `${commandName} ${subcommandName}`;
     }
