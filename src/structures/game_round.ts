@@ -310,7 +310,7 @@ export default class GameRound extends Round {
     }
 
     /**
-     * Warns a user their guess would have been accepted if they had typosAllowed
+     * Returns true if the guess is similar to the song/artist name
      * @param guess - The user's guess
      * @param guessModeType - The guessing mode
      * @returns whether the user would have been correct if typos were allowed
