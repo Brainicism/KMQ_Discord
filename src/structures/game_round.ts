@@ -164,6 +164,9 @@ export default class GameRound extends Round {
     /** Info about the players that won this GameRound */
     public playerRoundResults: Array<PlayerRoundResult>;
 
+    /** Let players know their guess would have been accepted if they were using /answer typingtypos */
+    public warnTypoReceived: boolean;
+
     /** The base EXP for this GameRound */
     private baseExp: number;
 
@@ -210,6 +213,7 @@ export default class GameRound extends Round {
         this.incorrectGuessers = new Set();
         this.interactionMessage = null;
         this.playerRoundResults = [];
+        this.warnTypoReceived = false;
         this.bonusModifier =
             Math.random() < 0.01
                 ? (_.sample([
@@ -303,6 +307,30 @@ export default class GameRound extends Round {
         }
 
         return this.hintUsed ? pointReward / 2 : pointReward;
+    }
+
+    /**
+     * Returns true if the guess is similar to the song/artist name
+     * @param guess - The user's guess
+     * @param guessModeType - The guessing mode
+     * @returns whether the user would have been correct if typos were allowed
+     */
+    isSimilarGuess(guess: string, guessModeType: GuessModeType): boolean {
+        const songGuessResult = this.checkSongGuess(guess);
+        const artistGuessResult = this.checkArtistGuess(guess);
+        if (
+            guessModeType === GuessModeType.SONG_NAME &&
+            songGuessResult.similar
+        )
+            return true;
+        if (guessModeType === GuessModeType.ARTIST && artistGuessResult.similar)
+            return true;
+        if (
+            guessModeType === GuessModeType.BOTH &&
+            (songGuessResult.similar || artistGuessResult.similar)
+        )
+            return true;
+        return false;
     }
 
     /**
