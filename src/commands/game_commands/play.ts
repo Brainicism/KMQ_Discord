@@ -177,14 +177,19 @@ export async function sendBeginGameSessionMessage(
     const additionalPayloads = [optionsEmbedPayload];
 
     let newsData = "";
+    let withinLastMonth = false;
     try {
         newsData = (await fs.promises.readFile(DataFiles.NEWS)).toString();
         newsData = newsData.split("\n\n")[0];
+        const mostRecentUpdate = new Date(newsData.split("\n")[0]);
+        withinLastMonth =
+            Math.abs(Date.now() - mostRecentUpdate.getTime()) <
+            30 * 24 * 60 * 60 * 1000;
     } catch (e) {
         logger.error("News file does not exist");
     }
 
-    if (newsData && Math.random() < 0.05) {
+    if (newsData && Math.random() < 0.05 && withinLastMonth) {
         const recentUpdatePayload = {
             title: clickableSlashCommand("news"),
             description: newsData,
