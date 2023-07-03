@@ -19,6 +19,7 @@ import {
 import {
     bold,
     clickableSlashCommand,
+    durationDays,
     getMention,
     isWeekend,
 } from "../../helpers/utils";
@@ -177,7 +178,7 @@ export async function sendBeginGameSessionMessage(
     const additionalPayloads = [optionsEmbedPayload];
 
     let newsData: string | null = null;
-    let withinLastMonth = false;
+    let recencyShowUpdate = 0;
     let mostRecentUpdate: Date | null = null;
     try {
         newsData = (await fs.promises.readFile(DataFiles.NEWS)).toString();
@@ -188,14 +189,17 @@ export async function sendBeginGameSessionMessage(
     }
 
     if (mostRecentUpdate && !Number.isNaN(mostRecentUpdate.getTime())) {
-        withinLastMonth =
-            Math.abs(Date.now() - mostRecentUpdate.getTime()) <
-            30 * 24 * 60 * 60 * 1000;
+        const daysSinceUpdate = durationDays(
+            mostRecentUpdate.getTime(),
+            Date.now()
+        );
+
+        recencyShowUpdate = (30 - daysSinceUpdate) / 30;
     } else {
         logger.error("Error parsing date in news file");
     }
 
-    if (newsData && Math.random() < 0.05 && withinLastMonth) {
+    if (newsData && Math.random() < recencyShowUpdate) {
         const recentUpdatePayload = {
             title: clickableSlashCommand("news"),
             description: newsData,
