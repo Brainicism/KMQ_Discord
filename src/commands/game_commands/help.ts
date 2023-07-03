@@ -1,6 +1,6 @@
 import { IPCLogger } from "../../logger";
 import { KmqImages, MAX_AUTOCOMPLETE_FIELDS } from "../../constants";
-import { chunkArray } from "../../helpers/utils";
+import { chunkArray, clickableSlashCommand } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -222,9 +222,9 @@ export default class HelpCommand implements BaseCommand {
                 messageContext.guildID,
                 "command.help.description",
                 {
-                    play: "`/play`",
-                    options: "`/options`",
-                    help: "/help",
+                    play: clickableSlashCommand("play"),
+                    options: clickableSlashCommand("options"),
+                    help: clickableSlashCommand("help"),
                     command: i18n.translate(
                         messageContext.guildID,
                         "command.help.command"
@@ -235,7 +235,7 @@ export default class HelpCommand implements BaseCommand {
             embedFields = commandsWithHelp.map((command) => {
                 const helpManual = command.help!(messageContext.guildID);
                 return {
-                    name: `/${helpManual.name}`,
+                    name: clickableSlashCommand(helpManual.name),
                     value: helpManual.description,
                 };
             });

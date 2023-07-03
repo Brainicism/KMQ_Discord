@@ -953,21 +953,12 @@ export async function generateOptionsMessage(
         (option) => optionStrings[option]
     )
         .map((option) => {
-            let slashCommand = clickableSlashCommand(
-                GameOptionCommand[option],
-                "set"
-            );
+            let slashCommand = clickableSlashCommand(GameOptionCommand[option]);
 
             if (option === GameOption.LIMIT) {
-                slashCommand = clickableSlashCommand(
-                    GameOptionCommand[option],
-                    "set top"
-                );
+                slashCommand = clickableSlashCommand(GameOptionCommand[option]);
             } else if (option === GameOption.CUTOFF) {
-                slashCommand = clickableSlashCommand(
-                    GameOptionCommand[option],
-                    "set earliest"
-                );
+                slashCommand = clickableSlashCommand(GameOptionCommand[option]);
             }
 
             return `${slashCommand}: ${optionStrings[option]}`;
@@ -1005,10 +996,9 @@ export async function generateOptionsMessage(
                 .slice(0, Math.ceil(fieldOptions.length / 3))
                 .map(
                     (option) =>
-                        `${clickableSlashCommand(
-                            GameOptionCommand[option],
-                            "set"
-                        )}: ${optionStrings[option]}`
+                        `${clickableSlashCommand(GameOptionCommand[option])}: ${
+                            optionStrings[option]
+                        }`
                 )
                 .join("\n"),
             inline: true,
@@ -1022,10 +1012,9 @@ export async function generateOptionsMessage(
                 )
                 .map(
                     (option) =>
-                        `${clickableSlashCommand(
-                            GameOptionCommand[option],
-                            "set"
-                        )}: ${optionStrings[option]}`
+                        `${clickableSlashCommand(GameOptionCommand[option])}: ${
+                            optionStrings[option]
+                        }`
                 )
                 .join("\n"),
             inline: true,
@@ -1036,10 +1025,9 @@ export async function generateOptionsMessage(
                 .slice(Math.ceil((2 * fieldOptions.length) / 3))
                 .map(
                     (option) =>
-                        `${clickableSlashCommand(
-                            GameOptionCommand[option],
-                            "set"
-                        )}: ${optionStrings[option]}`
+                        `${clickableSlashCommand(GameOptionCommand[option])}: ${
+                            optionStrings[option]
+                        }`
                 )
                 .join("\n"),
             inline: true,
