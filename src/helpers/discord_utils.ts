@@ -952,17 +952,12 @@ export async function generateOptionsMessage(
     priorityOptions = PriorityGameOption.filter(
         (option) => optionStrings[option]
     )
-        .map((option) => {
-            let slashCommand = clickableSlashCommand(GameOptionCommand[option]);
-
-            if (option === GameOption.LIMIT) {
-                slashCommand = clickableSlashCommand(GameOptionCommand[option]);
-            } else if (option === GameOption.CUTOFF) {
-                slashCommand = clickableSlashCommand(GameOptionCommand[option]);
-            }
-
-            return `${slashCommand}: ${optionStrings[option]}`;
-        })
+        .map(
+            (option) =>
+                `${clickableSlashCommand(GameOptionCommand[option])}: ${
+                    optionStrings[option]
+                }`
+        )
         .join("\n");
 
     let nonPremiumGameWarning = "";
