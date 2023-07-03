@@ -338,9 +338,9 @@ async function sendMessageExceptionHandler(
             case 50035: {
                 // Invalid Form Body
                 logger.error(
-                    `Error sending message. Invalid form body. textChannelID = ${channelID}. msg_content = ${JSON.stringify(
-                        messageContent
-                    )}`
+                    `Error sending message. Invalid form body. textChannelID = ${channelID}. e.message = ${
+                        e.message
+                    }. msg_content = ${JSON.stringify(messageContent)}`
                 );
                 break;
             }
