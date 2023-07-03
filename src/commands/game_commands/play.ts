@@ -1,4 +1,5 @@
 import {
+    DataFiles,
     ELIMINATION_DEFAULT_LIVES,
     ELIMINATION_MAX_LIVES,
     ELIMINATION_MIN_LIVES,
@@ -15,7 +16,13 @@ import {
     isPremiumRequest,
     isUserPremium,
 } from "../../helpers/game_utils";
-import { bold, getMention, isWeekend } from "../../helpers/utils";
+import {
+    bold,
+    clickableSlashCommand,
+    durationDays,
+    getMention,
+    isWeekend,
+} from "../../helpers/utils";
 import {
     fetchChannel,
     fetchUser,
@@ -44,6 +51,7 @@ import Player from "../../structures/player";
 import Session from "../../structures/session";
 import State from "../../state";
 import dbContext from "../../database_context";
+import fs from "fs";
 import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
@@ -167,12 +175,46 @@ export async function sendBeginGameSessionMessage(
         );
     }
 
+    const additionalPayloads = [optionsEmbedPayload];
+
+    let newsData: string | null = null;
+    let recencyShowUpdate = 0;
+    let mostRecentUpdate: Date | null = null;
+    try {
+        newsData = (await fs.promises.readFile(DataFiles.NEWS)).toString();
+        newsData = newsData.split("\n\n")[0];
+        mostRecentUpdate = new Date(newsData.split("\n")[0]);
+    } catch (e) {
+        logger.error(`News file does not exist or is empty. error = ${e}`);
+    }
+
+    if (mostRecentUpdate && !Number.isNaN(mostRecentUpdate.getTime())) {
+        const daysSinceUpdate = durationDays(
+            mostRecentUpdate.getTime(),
+            Date.now()
+        );
+
+        recencyShowUpdate = (30 - daysSinceUpdate) / 30;
+    } else {
+        logger.error("Error parsing date in news file");
+    }
+
+    if (newsData && Math.random() < recencyShowUpdate) {
+        const recentUpdatePayload = {
+            title: clickableSlashCommand("news"),
+            description: newsData,
+            footerText: i18n.translate(guildID, "command.news.updates.footer"),
+        };
+
+        additionalPayloads.push(recentUpdatePayload);
+    }
+
     await sendInfoMessage(
         messageContext,
         startGamePayload,
         false,
         undefined,
-        [optionsEmbedPayload],
+        additionalPayloads,
         interaction
     );
 }
