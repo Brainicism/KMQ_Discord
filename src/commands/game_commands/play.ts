@@ -181,12 +181,17 @@ export async function sendBeginGameSessionMessage(
     try {
         newsData = (await fs.promises.readFile(DataFiles.NEWS)).toString();
         newsData = newsData.split("\n\n")[0];
+    } catch (e) {
+        logger.error(`News file does not exist or is empty. error = ${e}`);
+    }
+
+    try {
         const mostRecentUpdate = new Date(newsData.split("\n")[0]);
         withinLastMonth =
             Math.abs(Date.now() - mostRecentUpdate.getTime()) <
             30 * 24 * 60 * 60 * 1000;
     } catch (e) {
-        logger.error("News file does not exist");
+        logger.error(`Error parsing date. error = ${e}`);
     }
 
     if (newsData && Math.random() < 0.05 && withinLastMonth) {
