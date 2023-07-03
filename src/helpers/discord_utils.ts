@@ -1189,6 +1189,10 @@ export async function getGameInfoMessage(
                 endGameMessage.message = gameInfoMessageContent.en;
                 break;
         }
+
+        if (!endGameMessage.message) {
+            endGameMessage.message = gameInfoMessageContent.en;
+        }
     } catch (e) {
         logger.error(
             `Error parsing message's game info message content, invalid JSON? message = ${endGameMessage.message}`
@@ -1226,6 +1230,10 @@ export async function getGameInfoMessage(
                 endGameMessage.title = gameInfoMessageContent.zh;
                 break;
             default:
+        }
+
+        if (!endGameMessage.title) {
+            endGameMessage.title = gameInfoMessageContent.en;
         }
     } catch (e) {
         logger.error(
