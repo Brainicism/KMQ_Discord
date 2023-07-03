@@ -938,9 +938,16 @@ export default abstract class Session {
             [views, aliases].every((x) => x.length > 0)
         );
 
-        const footerText = `${views}${aliases}${duration}`;
+        let footerText = `${views}${aliases}${duration}`;
         const thumbnailUrl = `https://img.youtube.com/vi/${round.song.youtubeLink}/hqdefault.jpg`;
         if (round instanceof GameRound) {
+            if (round.warnTypoReceived) {
+                footerText += `\n/${i18n.translate(
+                    locale,
+                    "command.answer.help.name"
+                )} set typingtypos?`;
+            }
+
             if (
                 this.guildPreference.isMultipleChoiceMode() &&
                 round.interactionMessage
@@ -952,9 +959,7 @@ export default abstract class Session {
                 });
                 return round.interactionMessage;
             }
-        }
-
-        if (round instanceof ListeningRound) {
+        } else if (round instanceof ListeningRound) {
             const buttons: Array<Eris.InteractionButton> = [];
             round.interactionSkipUUID = uuid.v4() as string;
             buttons.push({

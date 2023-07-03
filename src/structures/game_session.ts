@@ -1177,6 +1177,14 @@ export default class GameSession extends Session {
             typosAllowed
         );
 
+        if (
+            !typosAllowed &&
+            pointsAwarded === 0 &&
+            round.isSimilarGuess(guess, guessModeType)
+        ) {
+            round.warnTypoReceived = true;
+        }
+
         if (pointsAwarded) {
             round.userCorrect(userID, pointsAwarded);
         }
