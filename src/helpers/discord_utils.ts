@@ -737,7 +737,6 @@ export async function generateOptionsMessage(
 
     if (spotifyPlaylistID) {
         if (!State.cachedSpotifyPlaylists[spotifyPlaylistID]) {
-            logger.info("uncached");
             // Let the user know the playlist is being fetched by acking their interaction
             // Send the options once the playlist is fetched via followup message
             await sendInfoMessage(
