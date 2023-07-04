@@ -977,7 +977,10 @@ export async function generateOptionsMessage(
     // Remove priority options; emplace /spotify / /answer at the start of options
     if (isSpotify) {
         priorityOptions = "";
-        fieldOptions.unshift(GameOption.ANSWER_TYPE);
+        if (!session?.isListeningSession()) {
+            fieldOptions.unshift(GameOption.ANSWER_TYPE);
+        }
+
         fieldOptions.unshift(GameOption.SPOTIFY_PLAYLIST_ID);
     }
 
