@@ -80,12 +80,12 @@ const REQUIRED_VOICE_PERMISSIONS = [
 const MAX_INTERACTION_RESPONSE_TIME = 3 * 1000;
 
 interface GameMessageMultiLocaleContent {
-    en: string;
-    ko: string;
-    fr: string;
-    es: string;
-    ja: string;
-    zh: string;
+    [LocaleType.EN]: string;
+    [LocaleType.KO]: string;
+    [LocaleType.FR]: string;
+    [LocaleType.ES]: string;
+    [LocaleType.JA]: string;
+    [LocaleType.ZH]: string;
 }
 
 /**
@@ -1168,27 +1168,7 @@ export async function getGameInfoMessage(
             return null;
         }
 
-        switch (locale) {
-            case LocaleType.KO:
-                endGameMessage.message = gameInfoMessageContent.ko;
-                break;
-            case LocaleType.ES:
-                endGameMessage.message = gameInfoMessageContent.es;
-                break;
-            case LocaleType.FR:
-                endGameMessage.message = gameInfoMessageContent.fr;
-                break;
-            case LocaleType.JA:
-                endGameMessage.message = gameInfoMessageContent.ja;
-                break;
-            case LocaleType.ZH:
-                endGameMessage.message = gameInfoMessageContent.zh;
-                break;
-            case LocaleType.EN:
-            default:
-                endGameMessage.message = gameInfoMessageContent.en;
-                break;
-        }
+        endGameMessage.message = gameInfoMessageContent[locale];
 
         if (!endGameMessage.message) {
             endGameMessage.message = gameInfoMessageContent.en;
@@ -1210,27 +1190,7 @@ export async function getGameInfoMessage(
             return null;
         }
 
-        switch (locale) {
-            case LocaleType.EN:
-                endGameMessage.title = gameInfoMessageContent.en;
-                break;
-            case LocaleType.KO:
-                endGameMessage.title = gameInfoMessageContent.ko;
-                break;
-            case LocaleType.ES:
-                endGameMessage.title = gameInfoMessageContent.es;
-                break;
-            case LocaleType.FR:
-                endGameMessage.title = gameInfoMessageContent.fr;
-                break;
-            case LocaleType.JA:
-                endGameMessage.title = gameInfoMessageContent.ja;
-                break;
-            case LocaleType.ZH:
-                endGameMessage.title = gameInfoMessageContent.zh;
-                break;
-            default:
-        }
+        endGameMessage.title = gameInfoMessageContent[locale];
 
         if (!endGameMessage.title) {
             endGameMessage.title = gameInfoMessageContent.en;
