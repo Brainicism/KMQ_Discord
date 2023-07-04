@@ -15,6 +15,7 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type GameOption from "../../enums/game_option_name";
 import type HelpDocumentation from "../../interfaces/help";
+import _ from "lodash";
 
 const logger = new IPCLogger("reset");
 
@@ -74,10 +75,10 @@ export default class ResetCommand implements BaseCommand {
             Session.getSession(messageContext.guildID),
             messageContext,
             guildPreference,
-            resetOptions.map((x) => ({
+            _.uniqBy(resetOptions.map((x) => ({
                 option: GameOptionInternalToGameOption[x] as GameOption,
                 reset: true,
-            })),
+            })), "option"),
             false,
             true,
             undefined,
