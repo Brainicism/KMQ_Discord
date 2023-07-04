@@ -48,9 +48,7 @@ export default class ListeningSession extends Session {
             return;
         }
 
-        const voiceMembers = getCurrentVoiceMembers(this.voiceChannelID).filter(
-            (x) => x.id !== process.env.BOT_CLIENT_ID
-        );
+        const voiceMembers = this.getVoiceMembers();
 
         const voiceMemberIDs = new Set(voiceMembers.map((x) => x.id));
         if (voiceMemberIDs.has(this.owner.id) || voiceMemberIDs.size === 0) {
@@ -68,6 +66,12 @@ export default class ListeningSession extends Session {
 
     sessionName(): string {
         return "Listening Session";
+    }
+
+    getVoiceMembers(): Eris.Member[] {
+        return getCurrentVoiceMembers(this.voiceChannelID).filter(
+            (x) => x.id !== process.env.BOT_CLIENT_ID
+        );
     }
 
     /**

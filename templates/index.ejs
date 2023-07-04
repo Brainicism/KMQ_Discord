@@ -433,6 +433,10 @@
               Total Active Game Sessions: <%= overallStatsData.totalActiveGameSessions %>
                 | Total Active Players: <%= overallStatsData.totalActivePlayers %>
             </div>
+            <div class="mdl-card__actions" style="padding-top:10px; padding-bottom: 10px;">
+              Total Active Listening Sessions: <%= overallStatsData.totalActiveListeningSessions %>
+                | Total Active Listeners: <%= overallStatsData.totalActiveListeners %>
+            </div>
           </div>
         </section>
 
@@ -467,11 +471,15 @@
                 | Memory Usage: <%= clusterData[i].ram %> MB
                   | Voice Connections: <%= clusterData[i].voiceConnections %>
                     | Uptime: <%= clusterData[i].uptime %>
+                      | Version: <%= clusterData[i].version %>
             </div>
             <div class="mdl-card__actions" style="padding-top:10px; padding-bottom: 10px;">
               Active Game Sessions: <%= clusterData[i].activeGameSessions %>
                 | Active Players: <%= clusterData[i].activePlayers %>
-                  | Version: <%= clusterData[i].version %>
+            </div>
+            <div class="mdl-card__actions" style="padding-top:10px; padding-bottom: 10px;">
+              Active Listening Sessions: <%= clusterData[i].activeListeningSessions %>
+                | Active Listeners: <%= clusterData[i].activeListeners %>
             </div>
           </section>
         </div>
