@@ -55,7 +55,8 @@ describe("listening session", () => {
                 "123",
                 "123",
                 "123",
-                new KmqMember("123")
+                new KmqMember("123"),
+                true
             );
 
             sandbox

@@ -655,7 +655,7 @@
         },
         "listen": {
             "help": {
-                "description": "Diffusez des chansons à partir des options actuelles. Réservé aux utilisateurs Premium de KMQ.",
+                "description": "Diffusez des chansons à partir des options actuelles.",
                 "example": "La musique commencera à jouer dans le canal vocal actuel.",
                 "name": "écouter"
             },

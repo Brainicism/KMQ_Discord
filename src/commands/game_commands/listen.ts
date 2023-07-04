@@ -1,7 +1,9 @@
 import { EMBED_SUCCESS_BONUS_COLOR, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { areUsersPremium } from "../../helpers/game_utils";
 import {
     generateOptionsMessage,
+    getCurrentVoiceMembers,
     getDebugLogHeader,
     getGameInfoMessage,
     getUserVoiceChannel,
@@ -91,7 +93,6 @@ export async function sendBeginListeningSessionMessage(
 export default class ListenCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.notRestartingPrecheck },
-        { checkFn: CommandPrechecks.premiumPrecheck },
         { checkFn: CommandPrechecks.maintenancePrecheck },
         { checkFn: CommandPrechecks.notListeningPrecheck },
         { checkFn: CommandPrechecks.notInGamePrecheck },
@@ -128,24 +129,6 @@ export default class ListenCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
         },
     ];
-
-    resetPremium = async (guildPreference: GuildPreference): Promise<void> => {
-        const guildID = guildPreference.guildID;
-        const session = Session.getSession(guildID);
-        if (!session || session.isGameSession()) {
-            return;
-        }
-
-        if (!session.isPremium) {
-            logger.info(
-                `gid: ${guildID} | Listening session ending, no longer premium.`
-            );
-
-            await session.endSession(
-                "Listening session end due to no premium users"
-            );
-        }
-    };
 
     call = async ({ message }: CommandArgs): Promise<void> => {
         await ListenCommand.startListening(MessageContext.fromMessage(message));
@@ -195,15 +178,37 @@ export default class ListenCommand implements BaseCommand {
             return;
         }
 
+        const isPremium = await areUsersPremium(
+            getCurrentVoiceMembers(voiceChannel.id).map((x) => x.id)
+        );
+
         const listeningSession = new ListeningSession(
             guildPreference,
             textChannel.id,
             voiceChannel.id,
             guildID,
-            gameOwner
+            gameOwner,
+            isPremium
         );
 
         State.listeningSessions[guildID] = listeningSession;
+
+        if (!isPremium) {
+            for (const [commandName, command] of Object.entries(
+                State.client.commands
+            )) {
+                if (command.isUsingPremiumOption) {
+                    if (command.isUsingPremiumOption(guildPreference)) {
+                        logger.info(
+                            `Session started by non-premium request, clearing premium option: ${commandName}`
+                        );
+                        // eslint-disable-next-line no-await-in-loop
+                        await command.resetPremium!(guildPreference);
+                    }
+                }
+            }
+        }
+
         await sendBeginListeningSessionMessage(
             textChannel.name,
             voiceChannel.name,
