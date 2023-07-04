@@ -79,41 +79,46 @@ export function escapedFormatting(text: string): string {
 
 /**
  * @param commandName - The name of the slash command
+ * @param subcommandName - The suboption of the slash command
  * @returns a formatted version of the slash command, that allows users to click
  */
-export function clickableSlashCommand(commandName: string): string {
+export function clickableSlashCommand(
+    commandName: string,
+    subcommandName?: string
+): string {
     let commandAndSubcommand = commandName;
-    let subcommandName = "";
 
-    if (Object.values(GameOptionCommand).includes(commandName)) {
-        subcommandName = "set";
-        if (commandName === GameOptionCommand[GameOption.LIMIT]) {
-            subcommandName = "set top";
-        } else if (commandName === GameOptionCommand[GameOption.CUTOFF]) {
-            subcommandName = "set earliest";
+    if (!subcommandName) {
+        if (Object.values(GameOptionCommand).includes(commandName)) {
+            subcommandName = "set";
+            if (commandName === GameOptionCommand[GameOption.LIMIT]) {
+                subcommandName = "set top";
+            } else if (commandName === GameOptionCommand[GameOption.CUTOFF]) {
+                subcommandName = "set earliest";
+            }
         }
-    }
 
-    switch (commandName) {
-        case "play":
-            subcommandName = "classic";
-            break;
-        case "add":
-        case "remove":
-            subcommandName = commandName;
-            commandName = "groups";
-            break;
-        case "preset":
-            subcommandName = "list";
-            break;
-        case "leaderboard":
-            subcommandName = "show";
-            break;
-        case "lookup":
-            subcommandName = "song_name";
-            break;
-        default:
-            break;
+        switch (commandName) {
+            case "play":
+                subcommandName = "classic";
+                break;
+            case "add":
+            case "remove":
+                subcommandName = commandName;
+                commandName = "groups";
+                break;
+            case "preset":
+                subcommandName = "list";
+                break;
+            case "leaderboard":
+                subcommandName = "show";
+                break;
+            case "lookup":
+                subcommandName = "song_name";
+                break;
+            default:
+                break;
+        }
     }
 
     if (subcommandName) {
