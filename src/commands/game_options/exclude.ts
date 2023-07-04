@@ -246,13 +246,13 @@ export default class ExcludeCommand implements BaseCommand {
                 enteredGroupNames,
                 interaction
             );
-        } else if (action === GroupAction.RESET) {
+        } else {
             await ExcludeCommand.updateOption(
                 messageContext,
                 matchedGroups,
                 unmatchedGroups,
                 interaction,
-                true
+                action === GroupAction.RESET
             );
         }
     }
