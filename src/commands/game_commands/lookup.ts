@@ -775,9 +775,9 @@ export default class LookupCommand implements BaseCommand {
                             Object.values(State.songLinkToEntry).filter(
                                 (x) =>
                                     (!artistID || artistID === x.artistID) &&
-                                    ((showHangul && x.hangulName) || x.name)
-                                        .toLowerCase()
-                                        .startsWith(lowercaseUserInput)
+                                    normalizePunctuationInName(
+                                        (showHangul && x.hangulName) || x.name
+                                    ).startsWith(lowercaseUserInput)
                             ),
                             (x) => x.name.trim().toLowerCase()
                         ),
