@@ -21,6 +21,8 @@ interface ClusterData {
     voiceConnections: number;
     activeGameSessions: number;
     activePlayers: number;
+    activeListeningSessions: number;
+    activeListeners: number;
     shardData: Array<ShardData>;
 }
 
@@ -198,6 +200,9 @@ export default class KmqWebServer {
                     voiceConnections: fleetCluster.voice,
                     activeGameSessions: gameplayStats.get(i).activeGameSessions,
                     activePlayers: gameplayStats.get(i).activePlayers,
+                    activeListeningSessions:
+                        gameplayStats.get(i).activeListeningSessions,
+                    activeListeners: gameplayStats.get(i).activeListeners,
                     shardData,
                 });
             }
@@ -257,6 +262,14 @@ export default class KmqWebServer {
                 ),
                 totalActivePlayers: clusterData.reduce(
                     (x, y) => x + y.activePlayers,
+                    0
+                ),
+                totalActiveListeningSessions: clusterData.reduce(
+                    (x, y) => x + y.activeListeningSessions,
+                    0
+                ),
+                totalActiveListeners: clusterData.reduce(
+                    (x, y) => x + y.activeListeners,
                     0
                 ),
             };
