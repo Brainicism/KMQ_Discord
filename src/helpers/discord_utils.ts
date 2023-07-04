@@ -981,50 +981,65 @@ export async function generateOptionsMessage(
         fieldOptions.unshift(GameOption.SPOTIFY_PLAYLIST_ID);
     }
 
+    // Split non-priority options into three fields
+    let firstNonPriorityOptions = fieldOptions
+        .slice(0, Math.ceil(fieldOptions.length / 3))
+        .map(
+            (option) =>
+                `${clickableSlashCommand(GameOptionCommand[option])}: ${
+                    optionStrings[option]
+                }`
+        )
+        .join("\n");
+
+    firstNonPriorityOptions += "\n\n";
+    firstNonPriorityOptions += clickableSlashCommand("preset", "save");
+
+    let secondNonPriorityOptions = fieldOptions
+        .slice(
+            Math.ceil(fieldOptions.length / 3),
+            Math.ceil((2 * fieldOptions.length) / 3)
+        )
+        .map(
+            (option) =>
+                `${clickableSlashCommand(GameOptionCommand[option])}: ${
+                    optionStrings[option]
+                }`
+        )
+        .join("\n");
+
+    secondNonPriorityOptions += "\n\n";
+    secondNonPriorityOptions += clickableSlashCommand("preset", "load");
+
+    let thirdNonPriorityOptions = fieldOptions
+        .slice(Math.ceil((2 * fieldOptions.length) / 3))
+        .map(
+            (option) =>
+                `${clickableSlashCommand(GameOptionCommand[option])}: ${
+                    optionStrings[option]
+                }`
+        )
+        .join("\n");
+
+    thirdNonPriorityOptions += "\n\n";
+    thirdNonPriorityOptions += clickableSlashCommand("reset");
+
     const ZERO_WIDTH_SPACE = "​";
 
-    // Split non-priority options into three fields
     const fields = [
         {
             name: ZERO_WIDTH_SPACE,
-            value: fieldOptions
-                .slice(0, Math.ceil(fieldOptions.length / 3))
-                .map(
-                    (option) =>
-                        `${clickableSlashCommand(GameOptionCommand[option])}: ${
-                            optionStrings[option]
-                        }`
-                )
-                .join("\n"),
+            value: firstNonPriorityOptions,
             inline: true,
         },
         {
             name: ZERO_WIDTH_SPACE,
-            value: fieldOptions
-                .slice(
-                    Math.ceil(fieldOptions.length / 3),
-                    Math.ceil((2 * fieldOptions.length) / 3)
-                )
-                .map(
-                    (option) =>
-                        `${clickableSlashCommand(GameOptionCommand[option])}: ${
-                            optionStrings[option]
-                        }`
-                )
-                .join("\n"),
+            value: secondNonPriorityOptions,
             inline: true,
         },
         {
             name: ZERO_WIDTH_SPACE,
-            value: fieldOptions
-                .slice(Math.ceil((2 * fieldOptions.length) / 3))
-                .map(
-                    (option) =>
-                        `${clickableSlashCommand(GameOptionCommand[option])}: ${
-                            optionStrings[option]
-                        }`
-                )
-                .join("\n"),
+            value: thirdNonPriorityOptions,
             inline: true,
         },
     ];
