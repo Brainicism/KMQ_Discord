@@ -655,7 +655,7 @@
         },
         "listen": {
             "help": {
-                "description": "Transmitir canciones desde las opciones actuales. Solo disponible para usuarios premium de KMQ.",
+                "description": "Transmitir canciones desde las opciones actuales.",
                 "example": "La música comenzará a reproducirse en el canal de voz actual.",
                 "name": "escuchar"
             },

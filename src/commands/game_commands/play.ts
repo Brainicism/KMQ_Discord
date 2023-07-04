@@ -13,7 +13,6 @@ import {
     areUsersPremium,
     isFirstGameOfDay,
     isPowerHour,
-    isPremiumRequest,
     isUserPremium,
 } from "../../helpers/game_utils";
 import {
@@ -934,28 +933,6 @@ export default class PlayCommand implements BaseCommand {
 
         const gameSessions = State.gameSessions;
 
-        // check for invalid premium game options
-        const premiumRequest = await isPremiumRequest(
-            gameSessions[guildID],
-            messageContext.author.id
-        );
-
-        if (!premiumRequest) {
-            for (const [commandName, command] of Object.entries(
-                State.client.commands
-            )) {
-                if (command.isUsingPremiumOption) {
-                    if (command.isUsingPremiumOption(guildPreference)) {
-                        logger.info(
-                            `Session started by non-premium request, clearing premium option: ${commandName}`
-                        );
-                        // eslint-disable-next-line no-await-in-loop
-                        await command.resetPremium!(guildPreference);
-                    }
-                }
-            }
-        }
-
         if (gameSessions[guildID]) {
             if (gameSessions[guildID]?.sessionInitialized) {
                 logger.warn(
@@ -1154,6 +1131,22 @@ export default class PlayCommand implements BaseCommand {
 
             if (!guildPreference.isGuessTimeoutSet()) {
                 await guildPreference.setGuessTimeout(HIDDEN_DEFAULT_TIMER);
+            }
+        }
+
+        if (!isPremium) {
+            for (const [commandName, command] of Object.entries(
+                State.client.commands
+            )) {
+                if (command.isUsingPremiumOption) {
+                    if (command.isUsingPremiumOption(guildPreference)) {
+                        logger.info(
+                            `Session started by non-premium request, clearing premium option: ${commandName}`
+                        );
+                        // eslint-disable-next-line no-await-in-loop
+                        await command.resetPremium!(guildPreference);
+                    }
+                }
             }
         }
 

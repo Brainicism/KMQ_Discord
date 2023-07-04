@@ -59,7 +59,8 @@ describe("command prechecks", () => {
                 "123",
                 "1234",
                 "12345",
-                mockKmqMember
+                mockKmqMember,
+                true
             );
 
             describe("user and bot are in the same vc", () => {
@@ -221,7 +222,8 @@ describe("command prechecks", () => {
             "123",
             "1234",
             "1235",
-            mockKmqMember
+            mockKmqMember,
+            false
         );
 
         const gameSession = new GameSession(

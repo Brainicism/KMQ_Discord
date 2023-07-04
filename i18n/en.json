@@ -655,7 +655,7 @@
         },
         "listen": {
             "help": {
-                "description": "Stream songs from the current options. Only available to KMQ Premium users.",
+                "description": "Stream songs from the current options.",
                 "example": "Music will start playing in the current voice channel.",
                 "name": "listen"
             },

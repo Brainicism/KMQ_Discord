@@ -655,7 +655,7 @@
         },
         "listen": {
             "help": {
-                "description": "从当前选项中播放歌曲。仅限于KMQ高级用户。",
+                "description": "从当前选项中播放歌曲。",
                 "example": "音乐将在当前语音频道中开始播放。",
                 "name": "听"
             },
