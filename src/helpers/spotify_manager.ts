@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import { IPCLogger } from "../logger";
-import { normalizeArtistNameEntry } from "./game_utils";
+import { normalizePunctuationInName } from "../structures/game_round";
 import {
     pathExists,
     retryJob,
@@ -333,7 +333,7 @@ export default class SpotifyManager {
         return new Promise(async (resolve) => {
             const aliasIDs: Array<number> = [];
             for (const artist of song.artists) {
-                const lowercaseArtist = normalizeArtistNameEntry(artist);
+                const lowercaseArtist = normalizePunctuationInName(artist);
                 const artistMapping = State.artistToEntry[lowercaseArtist];
                 if (artistMapping) {
                     aliasIDs.push(artistMapping.id);
@@ -342,7 +342,7 @@ export default class SpotifyManager {
                             lowercaseArtist
                         ]) {
                             const lowercaseAlias =
-                                normalizeArtistNameEntry(alias);
+                                normalizePunctuationInName(alias);
 
                             if (lowercaseAlias in State.artistToEntry) {
                                 aliasIDs.push(

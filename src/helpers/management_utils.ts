@@ -6,7 +6,6 @@ import {
     cleanupInactiveGameSessions,
     getMatchingGroupNames,
     isPowerHour,
-    normalizeArtistNameEntry,
 } from "./game_utils";
 import { normalizePunctuationInName } from "../structures/game_round";
 import { reloadFactCache } from "../fact_generator";
@@ -323,7 +322,7 @@ async function reloadArtists(): Promise<void> {
         } as MatchedArtist;
 
         State.artistToEntry[
-            normalizeArtistNameEntry(mapping["artist_name_en"])
+            normalizePunctuationInName(mapping["artist_name_en"])
         ] = artistEntry;
 
         if (mapping["artist_name_ko"]) {
@@ -332,7 +331,7 @@ async function reloadArtists(): Promise<void> {
 
         for (const alias in aliases) {
             if (alias.length > 0) {
-                State.artistToEntry[normalizeArtistNameEntry(alias)] =
+                State.artistToEntry[normalizePunctuationInName(alias)] =
                     artistEntry;
             }
         }

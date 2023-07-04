@@ -36,9 +36,9 @@ import {
     getLocalizedArtistName,
     getLocalizedSongName,
     isPremiumRequest,
-    normalizeArtistNameEntry,
     userBonusIsActive,
 } from "./game_utils";
+import { normalizePunctuationInName } from "../structures/game_round";
 import AppCommandsAction from "../enums/app_command_action";
 import EmbedPaginator from "eris-pagination";
 import EnvType from "../enums/env_type";
@@ -1861,7 +1861,9 @@ export function getMatchedArtists(enteredNames: Array<string>): {
     const matchedGroups: Array<MatchedArtist> = [];
     const unmatchedGroups: Array<string> = [];
     for (const artistName of enteredNames) {
-        const match = State.artistToEntry[normalizeArtistNameEntry(artistName)];
+        const match =
+            State.artistToEntry[normalizePunctuationInName(artistName)];
+
         if (match) {
             matchedGroups.push(match);
         } else {
@@ -1935,7 +1937,7 @@ export async function processGroupAutocompleteInteraction(
     }
 
     const focusedVal = interactionData.interactionOptions[focusedKey];
-    const lowercaseUserInput = normalizeArtistNameEntry(focusedVal);
+    const lowercaseUserInput = normalizePunctuationInName(focusedVal);
 
     const previouslyEnteredArtists = getMatchedArtists(
         Object.entries(interactionData.interactionOptions)

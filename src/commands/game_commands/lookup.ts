@@ -21,7 +21,6 @@ import {
     getLocalizedArtistName,
     getLocalizedSongName,
     isPremiumRequest,
-    normalizeArtistNameEntry,
 } from "../../helpers/game_utils";
 import { getVideoID, validateID } from "ytdl-core";
 import { normalizePunctuationInName } from "../../structures/game_round";
@@ -703,7 +702,7 @@ export default class LookupCommand implements BaseCommand {
             let artistID: number | undefined;
             if (artistName) {
                 const matchingArtist =
-                    State.artistToEntry[normalizeArtistNameEntry(artistName)];
+                    State.artistToEntry[normalizePunctuationInName(artistName)];
 
                 if (matchingArtist) {
                     artistID = matchingArtist.id;
@@ -733,7 +732,7 @@ export default class LookupCommand implements BaseCommand {
 
         const focusedVal = interactionData.interactionOptions[focusedKey];
 
-        const lowercaseUserInput = normalizeArtistNameEntry(focusedVal);
+        const lowercaseUserInput = normalizePunctuationInName(focusedVal);
         const showHangul =
             containsHangul(lowercaseUserInput) ||
             State.getGuildLocale(interaction.guildID as string) ===
@@ -746,7 +745,7 @@ export default class LookupCommand implements BaseCommand {
             let artistID: number | undefined;
             if (artistName) {
                 artistID =
-                    State.artistToEntry[normalizeArtistNameEntry(artistName)]
+                    State.artistToEntry[normalizePunctuationInName(artistName)]
                         ?.id;
             }
 
