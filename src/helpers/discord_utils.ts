@@ -699,6 +699,7 @@ function getFormattedLimit(
  * @param preset - Specifies whether the GameOptions were modified by a preset
  * @param allReset - Specifies whether all GameOptions were reset
  * @param footerText - The footer text
+ * @param interaction - The interaction
  *  @returns an embed of current game options
  */
 export async function generateOptionsMessage(
@@ -708,7 +709,8 @@ export async function generateOptionsMessage(
     updatedOptions: { option: GameOption; reset: boolean }[],
     preset = false,
     allReset = false,
-    footerText?: string
+    footerText?: string,
+    interaction?: Eris.CommandInteraction
 ): Promise<EmbedPayload | null> {
     if (guildPreference.gameOptions.forcePlaySongID) {
         return {
@@ -724,6 +726,45 @@ export async function generateOptionsMessage(
         session,
         messageContext.author.id
     );
+
+    // Store the VALUE of ,[option]: [VALUE] into optionStrings
+    // Null optionStrings values are set to "Not set" below
+    const optionStrings: { [option: string]: string | null } = {};
+
+    const gameOptions = guildPreference.gameOptions;
+    const spotifyPlaylistID = gameOptions.spotifyPlaylistID;
+    let thumbnailUrl: string | undefined;
+
+    if (spotifyPlaylistID) {
+        if (!State.cachedSpotifyPlaylists[spotifyPlaylistID]) {
+            // Let the user know the playlist is being fetched by acking their interaction
+            // Send the options once the playlist is fetched via followup message
+            await sendInfoMessage(
+                messageContext,
+                {
+                    title: i18n.translate(guildID, "command.spotify.parsing"),
+                },
+                false,
+                undefined,
+                [],
+                interaction
+            );
+        }
+
+        const matchedPlaylist =
+            await State.spotifyManager.getMatchedSpotifySongs(
+                spotifyPlaylistID,
+                premiumRequest
+            );
+
+        optionStrings[
+            GameOption.SPOTIFY_PLAYLIST_ID
+        ] = `[${matchedPlaylist.metadata.playlistName}](${SPOTIFY_BASE_URL}${matchedPlaylist.metadata.playlistID})`;
+
+        thumbnailUrl = matchedPlaylist.metadata.thumbnailUrl;
+    } else {
+        optionStrings[GameOption.SPOTIFY_PLAYLIST_ID] = null;
+    }
 
     const totalSongs = await getAvailableSongCount(
         guildPreference,
@@ -748,7 +789,6 @@ export async function generateOptionsMessage(
         return null;
     }
 
-    const gameOptions = guildPreference.gameOptions;
     const limit = getFormattedLimit(
         guildID,
         gameOptions,
@@ -756,9 +796,6 @@ export async function generateOptionsMessage(
         totalSongs.countBeforeLimit
     );
 
-    // Store the VALUE of ,[option]: [VALUE] into optionStrings
-    // Null optionStrings values are set to "Not set" below
-    const optionStrings: { [option: string]: string | null } = {};
     optionStrings[GameOption.LIMIT] = `${limit} / ${friendlyFormattedNumber(
         totalSongs.countBeforeLimit
     )}`;
@@ -802,24 +839,6 @@ export async function generateOptionsMessage(
     optionStrings[GameOption.INCLUDE] = guildPreference.isIncludesMode()
         ? guildPreference.getDisplayedIncludesGroupNames()
         : null;
-
-    const spotifyPlaylistID = gameOptions.spotifyPlaylistID;
-    let thumbnailUrl: string | undefined;
-    if (spotifyPlaylistID) {
-        const matchedPlaylist =
-            await State.spotifyManager.getMatchedSpotifySongs(
-                spotifyPlaylistID,
-                premiumRequest
-            );
-
-        optionStrings[
-            GameOption.SPOTIFY_PLAYLIST_ID
-        ] = `[${matchedPlaylist.metadata.playlistName}](${SPOTIFY_BASE_URL}${matchedPlaylist.metadata.playlistID})`;
-
-        thumbnailUrl = matchedPlaylist.metadata.thumbnailUrl;
-    } else {
-        optionStrings[GameOption.SPOTIFY_PLAYLIST_ID] = null;
-    }
 
     const conflictString = i18n.translate(guildID, "misc.conflict");
 
@@ -1139,7 +1158,8 @@ export async function sendOptionsMessage(
         updatedOptions,
         preset,
         allReset,
-        footerText
+        footerText,
+        interaction
     );
 
     if (!optionsEmbed) {
@@ -1148,14 +1168,20 @@ export async function sendOptionsMessage(
         );
     }
 
-    await sendInfoMessage(
-        messageContext,
-        optionsEmbed,
-        true,
-        undefined,
-        [],
-        interaction
-    );
+    if (interaction?.acknowledged) {
+        await interaction.createFollowup({
+            embeds: [generateEmbed(messageContext, optionsEmbed)],
+        });
+    } else {
+        await sendInfoMessage(
+            messageContext,
+            optionsEmbed,
+            true,
+            undefined,
+            [],
+            interaction
+        );
+    }
 }
 
 /**
