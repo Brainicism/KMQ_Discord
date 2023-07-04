@@ -638,7 +638,8 @@ export default class PlayCommand implements BaseCommand {
                 voiceChannel!.name ?? "unknown",
                 messageContext,
                 participantIDs,
-                guildPreference
+                guildPreference,
+                interaction
             );
 
             gameSession.startRound(messageContext);
