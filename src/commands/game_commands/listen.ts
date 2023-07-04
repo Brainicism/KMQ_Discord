@@ -198,7 +198,6 @@ export default class ListenCommand implements BaseCommand {
                 State.client.commands
             )) {
                 if (command.isUsingPremiumOption) {
-                    logger.info("isUsingPremiumOption");
                     if (command.isUsingPremiumOption(guildPreference)) {
                         logger.info(
                             `Session started by non-premium request, clearing premium option: ${commandName}`
