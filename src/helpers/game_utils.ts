@@ -647,11 +647,3 @@ export function isPowerHour(): boolean {
         (powerHour) => currentHour >= powerHour && currentHour <= powerHour + 1
     );
 }
-
-/**
- * @param artistName - the artist name
- * @returns the normalized artist name for state entry
- */
-export function normalizeArtistNameEntry(artistName: string): string {
-    return normalizePunctuationInName(artistName.toLowerCase());
-}
