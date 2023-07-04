@@ -9,13 +9,13 @@ import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import _ from "lodash";
 import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type GameOption from "../../enums/game_option_name";
 import type HelpDocumentation from "../../interfaces/help";
-import _ from "lodash";
 
 const logger = new IPCLogger("reset");
 
@@ -75,10 +75,13 @@ export default class ResetCommand implements BaseCommand {
             Session.getSession(messageContext.guildID),
             messageContext,
             guildPreference,
-            _.uniqBy(resetOptions.map((x) => ({
-                option: GameOptionInternalToGameOption[x] as GameOption,
-                reset: true,
-            })), "option"),
+            _.uniqBy(
+                resetOptions.map((x) => ({
+                    option: GameOptionInternalToGameOption[x] as GameOption,
+                    reset: true,
+                })),
+                "option"
+            ),
             false,
             true,
             undefined,
