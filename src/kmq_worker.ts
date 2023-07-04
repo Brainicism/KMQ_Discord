@@ -103,9 +103,22 @@ export default class BotWorker extends BaseClusterWorker {
                     State.gameSessions
                 ).length;
 
+                const activeListeningSessions = Object.keys(
+                    State.listeningSessions
+                ).length;
+
+                const activeListeners = Object.values(
+                    State.listeningSessions
+                ).reduce(
+                    (total, curr) => total + curr.getVoiceMembers().length,
+                    0
+                );
+
                 return {
                     activePlayers,
                     activeGameSessions,
+                    activeListeningSessions,
+                    activeListeners,
                 };
             }
 
