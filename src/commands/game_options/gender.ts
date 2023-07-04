@@ -131,7 +131,7 @@ export default class GenderCommand implements BaseCommand {
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
-                    options: [...Array(4).keys()].map((x) => ({
+                    options: [...Array(3).keys()].map((x) => ({
                         name: `gender_${x + 1}`,
                         description: i18n.translate(
                             LocaleType.EN,
