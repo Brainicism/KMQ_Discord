@@ -120,31 +120,34 @@ async function getProfileFields(
                 .executeTakeFirst()
         )?.["count"] ?? 0;
 
-    const relativeSongRank = (
-        await dbContext.kmq
-            .selectFrom("player_stats")
-            .select((eb) => eb.fn.countAll<number>().as("count"))
-            .where("songs_guessed", ">", songsGuessed)
-            .where("exp", ">", 0)
-            .executeTakeFirst()
-    )?.["count"];
+    const relativeSongRank =
+        (
+            await dbContext.kmq
+                .selectFrom("player_stats")
+                .select((eb) => eb.fn.countAll<number>().as("count"))
+                .where("songs_guessed", ">", songsGuessed)
+                .where("exp", ">", 0)
+                .executeTakeFirst()
+        )?.["count"] ?? totalPlayers;
 
-    const relativeGamesPlayedRank = (
-        await dbContext.kmq
-            .selectFrom("player_stats")
-            .select((eb) => eb.fn.countAll<number>().as("count"))
-            .where("games_played", ">", gamesPlayed)
-            .where("exp", ">", 0)
-            .executeTakeFirst()
-    )?.["count"];
+    const relativeGamesPlayedRank =
+        (
+            await dbContext.kmq
+                .selectFrom("player_stats")
+                .select((eb) => eb.fn.countAll<number>().as("count"))
+                .where("games_played", ">", gamesPlayed)
+                .where("exp", ">", 0)
+                .executeTakeFirst()
+        )?.["count"] ?? totalPlayers;
 
-    const relativeLevelRank = (
-        await dbContext.kmq
-            .selectFrom("player_stats")
-            .select((eb) => eb.fn.countAll<number>().as("count"))
-            .where("exp", ">", exp)
-            .executeTakeFirst()
-    )?.["count"];
+    const relativeLevelRank =
+        (
+            await dbContext.kmq
+                .selectFrom("player_stats")
+                .select((eb) => eb.fn.countAll<number>().as("count"))
+                .where("exp", ">", exp)
+                .executeTakeFirst()
+        )?.["count"] ?? totalPlayers;
 
     const timesVotedData = await dbContext.kmq
         .selectFrom("top_gg_user_votes")
@@ -173,7 +176,7 @@ async function getProfileFields(
         {
             name: i18n.translate(guildID, "command.profile.overallRank"),
             value: `#${friendlyFormattedNumber(
-                relativeLevelRank ? relativeLevelRank + 1 : totalPlayers
+                relativeLevelRank + 1
             )}/${friendlyFormattedNumber(totalPlayers)}`,
             inline: true,
         },
@@ -182,7 +185,7 @@ async function getProfileFields(
             value: `${friendlyFormattedNumber(
                 songsGuessed
             )} | #${friendlyFormattedNumber(
-                relativeSongRank ? relativeSongRank + 1 : totalPlayers
+                relativeSongRank + 1
             )}/${friendlyFormattedNumber(totalPlayers)} `,
             inline: true,
         },
@@ -191,9 +194,7 @@ async function getProfileFields(
             value: `${friendlyFormattedNumber(
                 gamesPlayed
             )} | #${friendlyFormattedNumber(
-                relativeGamesPlayedRank
-                    ? relativeGamesPlayedRank + 1
-                    : totalPlayers
+                relativeGamesPlayedRank + 1
             )}/${friendlyFormattedNumber(totalPlayers)} `,
             inline: true,
         },
