@@ -410,11 +410,11 @@ async function reloadLocales(): Promise<void> {
 }
 
 function clearCachedSpotifyPlaylists(): void {
-    State.spotifyManager.cachedSpotifyPlaylists = {};
+    State.spotifyManager.cachedPlaylists = {};
 }
 
 function clearCachedSpotifyMetadata(): void {
-    State.spotifyManager.cachedSpotifyMetadata = {};
+    State.spotifyManager.cachedMetadata = {};
 }
 
 /**

@@ -37,7 +37,7 @@ interface SpotifyMetadata {
 }
 
 export default class SpotifyManager {
-    public cachedSpotifyPlaylists: {
+    public cachedPlaylists: {
         [playlistID: string]: {
             snapshotID: string;
             metadata: PlaylistMetadata;
@@ -46,7 +46,7 @@ export default class SpotifyManager {
         };
     } = {};
 
-    public cachedSpotifyMetadata: {
+    public cachedMetadata: {
         [playlistID: string]: SpotifyMetadata;
     } = {};
 
@@ -105,7 +105,7 @@ export default class SpotifyManager {
         let matchedSongs: Array<QueriedSong> = [];
         let truncated = false;
 
-        const cachedPlaylist = this.cachedSpotifyPlaylists[playlistID];
+        const cachedPlaylist = this.cachedPlaylists[playlistID];
         if (
             cachedPlaylist &&
             cachedPlaylist.snapshotID === spotifyMetadata.snapshotID
@@ -254,7 +254,7 @@ export default class SpotifyManager {
             thumbnailUrl: spotifyMetadata.thumbnailUrl as string,
         };
 
-        this.cachedSpotifyPlaylists[playlistID] = {
+        this.cachedPlaylists[playlistID] = {
             snapshotID: spotifyMetadata.snapshotID,
             metadata,
             matchedSongs,
@@ -527,8 +527,8 @@ export default class SpotifyManager {
     private async getPlaylistMetadata(
         playlistID: string
     ): Promise<SpotifyMetadata | null> {
-        if (this.cachedSpotifyMetadata[playlistID]) {
-            return this.cachedSpotifyMetadata[playlistID];
+        if (this.cachedMetadata[playlistID]) {
+            return this.cachedMetadata[playlistID];
         }
 
         const requestURL = `${BASE_URL}/playlists/${playlistID}`;
@@ -561,7 +561,7 @@ export default class SpotifyManager {
                 songCount,
             };
 
-            this.cachedSpotifyMetadata[playlistID] = metadata;
+            this.cachedMetadata[playlistID] = metadata;
             return metadata;
         } catch (err) {
             if (err.response?.status === 404) {
