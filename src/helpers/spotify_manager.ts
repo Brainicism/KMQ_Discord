@@ -18,6 +18,7 @@ import fs from "fs";
 import path from "path";
 import type { AxiosResponse } from "axios";
 import type { MatchedPlaylist } from "../interfaces/matched_playlist";
+import type { PlaylistMetadata } from "../interfaces/playlist_metadata";
 import type QueriedSong from "../interfaces/queried_song";
 import type SpotifyTrack from "../interfaces/spotify_track";
 
@@ -27,7 +28,28 @@ const BASE_URL = "https://api.spotify.com/v1";
 
 const SONG_MATCH_TIMEOUT_MS = 15000;
 
+interface SpotifyMetadata {
+    playlistName: string;
+    thumbnailUrl: string | null;
+    snapshotID: string;
+    limit: number;
+    songCount: number;
+}
+
 export default class SpotifyManager {
+    public cachedSpotifyPlaylists: {
+        [playlistID: string]: {
+            snapshotID: string;
+            metadata: PlaylistMetadata;
+            matchedSongs: Array<QueriedSong>;
+            truncated: boolean;
+        };
+    } = {};
+
+    public cachedSpotifyMetadata: {
+        [playlistID: string]: SpotifyMetadata;
+    } = {};
+
     private accessToken: string | undefined;
 
     async start(): Promise<void> {
@@ -83,7 +105,7 @@ export default class SpotifyManager {
         let matchedSongs: Array<QueriedSong> = [];
         let truncated = false;
 
-        const cachedPlaylist = State.cachedSpotifyPlaylists[playlistID];
+        const cachedPlaylist = this.cachedSpotifyPlaylists[playlistID];
         if (
             cachedPlaylist &&
             cachedPlaylist.snapshotID === spotifyMetadata.snapshotID
@@ -232,7 +254,7 @@ export default class SpotifyManager {
             thumbnailUrl: spotifyMetadata.thumbnailUrl as string,
         };
 
-        State.cachedSpotifyPlaylists[playlistID] = {
+        this.cachedSpotifyPlaylists[playlistID] = {
             snapshotID: spotifyMetadata.snapshotID,
             metadata,
             matchedSongs,
@@ -502,13 +524,13 @@ export default class SpotifyManager {
         }
     };
 
-    private async getPlaylistMetadata(playlistID: string): Promise<{
-        playlistName: string;
-        thumbnailUrl: string | null;
-        snapshotID: string;
-        limit: number;
-        songCount: number;
-    } | null> {
+    private async getPlaylistMetadata(
+        playlistID: string
+    ): Promise<SpotifyMetadata | null> {
+        if (this.cachedSpotifyMetadata[playlistID]) {
+            return this.cachedSpotifyMetadata[playlistID];
+        }
+
         const requestURL = `${BASE_URL}/playlists/${playlistID}`;
 
         try {
@@ -531,13 +553,16 @@ export default class SpotifyManager {
             const limit = response.tracks.limit;
             const songCount = response.tracks.total;
 
-            return {
+            const metadata = {
                 playlistName,
                 thumbnailUrl,
                 snapshotID,
                 limit,
                 songCount,
             };
+
+            this.cachedSpotifyMetadata[playlistID] = metadata;
+            return metadata;
         } catch (err) {
             if (err.response?.status === 404) {
                 logger.warn(

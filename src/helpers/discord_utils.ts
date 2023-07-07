@@ -736,7 +736,7 @@ export async function generateOptionsMessage(
     let thumbnailUrl: string | undefined;
 
     if (spotifyPlaylistID) {
-        if (!State.cachedSpotifyPlaylists[spotifyPlaylistID]) {
+        if (!State.spotifyManager.cachedSpotifyPlaylists[spotifyPlaylistID]) {
             // Let the user know the playlist is being fetched by acking their interaction
             // Send the options once the playlist is fetched via followup message
             await sendInfoMessage(

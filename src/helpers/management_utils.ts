@@ -409,8 +409,12 @@ async function reloadLocales(): Promise<void> {
     }
 }
 
-function clearCachedPlaylists(): void {
-    State.cachedSpotifyPlaylists = {};
+function clearCachedSpotifyPlaylists(): void {
+    State.spotifyManager.cachedSpotifyPlaylists = {};
+}
+
+function clearCachedSpotifyMetadata(): void {
+    State.spotifyManager.cachedSpotifyMetadata = {};
 }
 
 /**
@@ -436,7 +440,7 @@ export function registerIntervals(clusterID: number): void {
         // Songs used for autocomplete
         reloadSongs();
         // Removed cached Spotify playlists
-        clearCachedPlaylists();
+        clearCachedSpotifyPlaylists();
     });
 
     // Every hour
@@ -454,6 +458,8 @@ export function registerIntervals(clusterID: number): void {
         cleanupInactiveGameSessions();
         // Change bot's status (song playing, power hour, etc.)
         updateBotStatus();
+        // Clear cached Spotify metadata
+        clearCachedSpotifyMetadata();
     });
 
     // Every 5 minutes
