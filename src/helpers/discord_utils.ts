@@ -736,7 +736,7 @@ export async function generateOptionsMessage(
     let thumbnailUrl: string | undefined;
 
     if (spotifyPlaylistID) {
-        if (!State.cachedSpotifyPlaylists[spotifyPlaylistID]) {
+        if (!State.spotifyManager.cachedPlaylists[spotifyPlaylistID]) {
             // Let the user know the playlist is being fetched by acking their interaction
             // Send the options once the playlist is fetched via followup message
             await sendInfoMessage(
@@ -754,14 +754,15 @@ export async function generateOptionsMessage(
         const matchedPlaylist =
             await State.spotifyManager.getMatchedSpotifySongs(
                 spotifyPlaylistID,
-                premiumRequest
+                premiumRequest,
+                false
             );
 
         optionStrings[
             GameOption.SPOTIFY_PLAYLIST_ID
-        ] = `[${matchedPlaylist.metadata.playlistName}](${SPOTIFY_BASE_URL}${matchedPlaylist.metadata.playlistID})`;
+        ] = `[${matchedPlaylist.metadata.playlistName}](${SPOTIFY_BASE_URL}${spotifyPlaylistID})`;
 
-        thumbnailUrl = matchedPlaylist.metadata.thumbnailUrl;
+        thumbnailUrl = matchedPlaylist.metadata.thumbnailUrl ?? undefined;
     } else {
         optionStrings[GameOption.SPOTIFY_PLAYLIST_ID] = null;
     }

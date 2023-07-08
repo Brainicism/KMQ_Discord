@@ -409,8 +409,8 @@ async function reloadLocales(): Promise<void> {
     }
 }
 
-function clearCachedPlaylists(): void {
-    State.cachedSpotifyPlaylists = {};
+function clearCachedSpotifyPlaylists(): void {
+    State.spotifyManager.cachedPlaylists = {};
 }
 
 /**
@@ -436,7 +436,7 @@ export function registerIntervals(clusterID: number): void {
         // Songs used for autocomplete
         reloadSongs();
         // Removed cached Spotify playlists
-        clearCachedPlaylists();
+        clearCachedSpotifyPlaylists();
     });
 
     // Every hour

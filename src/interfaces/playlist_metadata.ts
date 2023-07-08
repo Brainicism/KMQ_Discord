@@ -3,5 +3,7 @@ export interface PlaylistMetadata {
     playlistName: string;
     playlistLength: number;
     matchedSongsLength: number;
-    thumbnailUrl?: string;
+    limit: number;
+    snapshotID: string;
+    thumbnailUrl: string | null;
 }
