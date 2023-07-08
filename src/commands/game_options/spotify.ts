@@ -259,13 +259,15 @@ export default class SpotifyCommand implements BaseCommand {
                 matchedPlaylist = (await session.songSelector.reloadSongs(
                     guildPreference,
                     premiumRequest,
-                    playlistID
+                    playlistID,
+                    true
                 )) as MatchedPlaylist;
             } else {
                 matchedPlaylist = (await new SongSelector().reloadSongs(
                     guildPreference,
                     premiumRequest,
-                    playlistID
+                    playlistID,
+                    true
                 )) as MatchedPlaylist;
             }
 
@@ -339,7 +341,8 @@ export default class SpotifyCommand implements BaseCommand {
                 ),
                 description: matchedDescription,
                 url: playlistURL,
-                thumbnailUrl: matchedPlaylist.metadata.thumbnailUrl,
+                thumbnailUrl:
+                    matchedPlaylist.metadata.thumbnailUrl ?? undefined,
             });
         } else {
             sendErrorMessage(

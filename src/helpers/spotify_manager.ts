@@ -28,26 +28,13 @@ const BASE_URL = "https://api.spotify.com/v1";
 
 const SONG_MATCH_TIMEOUT_MS = 15000;
 
-interface SpotifyMetadata {
-    playlistName: string;
-    thumbnailUrl: string | null;
-    snapshotID: string;
-    limit: number;
-    songCount: number;
-}
-
 export default class SpotifyManager {
     public cachedPlaylists: {
         [playlistID: string]: {
-            snapshotID: string;
             metadata: PlaylistMetadata;
             matchedSongs: Array<QueriedSong>;
             truncated: boolean;
         };
-    } = {};
-
-    public cachedMetadata: {
-        [playlistID: string]: SpotifyMetadata;
     } = {};
 
     private accessToken: string | undefined;
@@ -63,11 +50,13 @@ export default class SpotifyManager {
     /**
      * @param playlistID - The playlist to retrieve songs from
      * @param isPremium - Whether the user is premium or not
+     * @param forceRefreshMetadata - Whether to request new metadata
      *
      */
     getMatchedSpotifySongs = async (
         playlistID: string,
-        isPremium: boolean
+        isPremium: boolean,
+        forceRefreshMetadata: boolean
     ): Promise<MatchedPlaylist> => {
         if (
             !process.env.SPOTIFY_CLIENT_ID ||
@@ -82,13 +71,26 @@ export default class SpotifyManager {
                     playlistName: "",
                     playlistLength: 0,
                     matchedSongsLength: 0,
+                    limit: 0,
+                    snapshotID: "",
+                    thumbnailUrl: null,
                 },
                 matchedSongs: [],
                 truncated: false,
             };
         }
 
-        const spotifyMetadata = await this.getPlaylistMetadata(playlistID);
+        const cachedPlaylist = this.cachedPlaylists[playlistID];
+        let spotifyMetadata: PlaylistMetadata | null;
+        if (forceRefreshMetadata || !cachedPlaylist) {
+            spotifyMetadata = await this.getPlaylistMetadata(playlistID);
+            logger.info(
+                `Refreshing Spotify metadata. forceRefreshMetadata: ${forceRefreshMetadata}, cachedPlaylist: ${!!cachedPlaylist}`
+            );
+        } else {
+            spotifyMetadata = cachedPlaylist.metadata;
+        }
+
         if (!spotifyMetadata) {
             return {
                 metadata: {
@@ -96,6 +98,9 @@ export default class SpotifyManager {
                     playlistName: "",
                     playlistLength: 0,
                     matchedSongsLength: 0,
+                    limit: 0,
+                    snapshotID: "",
+                    thumbnailUrl: null,
                 },
                 matchedSongs: [],
                 truncated: false,
@@ -105,10 +110,9 @@ export default class SpotifyManager {
         let matchedSongs: Array<QueriedSong> = [];
         let truncated = false;
 
-        const cachedPlaylist = this.cachedPlaylists[playlistID];
         if (
             cachedPlaylist &&
-            cachedPlaylist.snapshotID === spotifyMetadata.snapshotID
+            cachedPlaylist.metadata.snapshotID === spotifyMetadata.snapshotID
         ) {
             logger.info(`Using cached playlist for ${playlistID}`);
             ({ matchedSongs, truncated } = cachedPlaylist);
@@ -118,15 +122,15 @@ export default class SpotifyManager {
             logger.info(`Using Spotify API for playlist ${playlistID}`);
 
             const numPlaylistPages = Math.ceil(
-                spotifyMetadata.songCount / spotifyMetadata.limit
+                spotifyMetadata.playlistLength / spotifyMetadata.limit
             );
 
             const requestURLs = [...Array(numPlaylistPages).keys()].map(
                 (n) =>
                     `${BASE_URL}/playlists/${playlistID}/tracks?${encodeURI(
                         `market=US&fields=items(track(name,artists(name))),next&limit=${
-                            spotifyMetadata.limit
-                        }&offset=${n * spotifyMetadata.limit}`
+                            spotifyMetadata!.limit
+                        }&offset=${n * spotifyMetadata!.limit}`
                     )}`
             );
 
@@ -245,25 +249,18 @@ export default class SpotifyManager {
             }
         }
 
+        spotifyMetadata.matchedSongsLength = matchedSongs.length;
         matchedSongs = _.uniqBy(matchedSongs, "youtubeLink");
-        const metadata = {
-            playlistID,
-            playlistLength: spotifyMetadata.songCount,
-            playlistName: spotifyMetadata.playlistName,
-            matchedSongsLength: matchedSongs.length,
-            thumbnailUrl: spotifyMetadata.thumbnailUrl as string,
-        };
 
         this.cachedPlaylists[playlistID] = {
-            snapshotID: spotifyMetadata.snapshotID,
-            metadata,
+            metadata: spotifyMetadata,
             matchedSongs,
             truncated,
         };
 
         return {
             matchedSongs,
-            metadata,
+            metadata: spotifyMetadata,
             truncated,
         };
     };
@@ -526,11 +523,7 @@ export default class SpotifyManager {
 
     private async getPlaylistMetadata(
         playlistID: string
-    ): Promise<SpotifyMetadata | null> {
-        if (this.cachedMetadata[playlistID]) {
-            return this.cachedMetadata[playlistID];
-        }
-
+    ): Promise<PlaylistMetadata | null> {
         const requestURL = `${BASE_URL}/playlists/${playlistID}`;
 
         try {
@@ -553,16 +546,15 @@ export default class SpotifyManager {
             const limit = response.tracks.limit;
             const songCount = response.tracks.total;
 
-            const metadata = {
+            return {
+                playlistID,
                 playlistName,
                 thumbnailUrl,
                 snapshotID,
                 limit,
-                songCount,
+                playlistLength: songCount,
+                matchedSongsLength: 0,
             };
-
-            this.cachedMetadata[playlistID] = metadata;
-            return metadata;
         } catch (err) {
             if (err.response?.status === 404) {
                 logger.warn(

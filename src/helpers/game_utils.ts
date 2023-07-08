@@ -71,7 +71,8 @@ export async function getAvailableSongCount(
                 matchedPlaylist = (await session.songSelector.reloadSongs(
                     guildPreference,
                     isPremium,
-                    playlistID
+                    playlistID,
+                    !session.sessionInitialized
                 )) as MatchedPlaylist;
             } else {
                 matchedPlaylist = (await new SongSelector().reloadSongs(

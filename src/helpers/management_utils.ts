@@ -413,10 +413,6 @@ function clearCachedSpotifyPlaylists(): void {
     State.spotifyManager.cachedPlaylists = {};
 }
 
-function clearCachedSpotifyMetadata(): void {
-    State.spotifyManager.cachedMetadata = {};
-}
-
 /**
  * Clears any existing restart timers
  */
@@ -458,8 +454,6 @@ export function registerIntervals(clusterID: number): void {
         cleanupInactiveGameSessions();
         // Change bot's status (song playing, power hour, etc.)
         updateBotStatus();
-        // Clear cached Spotify metadata
-        clearCachedSpotifyMetadata();
     });
 
     // Every 5 minutes

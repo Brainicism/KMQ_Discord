@@ -193,7 +193,8 @@ export default abstract class Session {
                 await this.songSelector.reloadSongs(
                     this.guildPreference,
                     this.isPremium,
-                    this.guildPreference.getSpotifyPlaylistID() ?? undefined
+                    this.guildPreference.getSpotifyPlaylistID() ?? undefined,
+                    !this.sessionInitialized
                 );
             } catch (err) {
                 await sendErrorMessage(messageContext, {
