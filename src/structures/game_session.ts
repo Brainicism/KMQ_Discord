@@ -360,7 +360,6 @@ export default class GameSession extends Session {
                 round,
                 guessResult,
                 this.guildPreference,
-                timePlayed,
                 messageContext
             );
         } else if (!guessResult.error) {
@@ -1480,7 +1479,6 @@ export default class GameSession extends Session {
         round: GameRound,
         guessResult: GuessResult,
         guildPreference: GuildPreference,
-        timePlayed: number,
         messageContext: MessageContext
     ): Promise<void> {
         // update scoreboard
@@ -1489,12 +1487,20 @@ export default class GameSession extends Session {
             (guessResult.correctGuessers ?? []).map(
                 async (correctGuesser, idx) => {
                     const guessPosition = idx + 1;
+                    const timeToGuess =
+                        Math.min(
+                            ...round
+                                .getGuesses()
+                                [correctGuesser.id].filter((x) => x.correct)
+                                .map((x) => x.createdAt)
+                        ) - round.startedAt;
+
                     const expGain = await calculateTotalRoundExp(
                         guildPreference,
                         round,
                         getNumParticipants(this.voiceChannelID),
                         lastGuesserStreak,
-                        timePlayed,
+                        timeToGuess,
                         guessPosition,
                         await userBonusIsActive(correctGuesser.id),
                         correctGuesser.id
