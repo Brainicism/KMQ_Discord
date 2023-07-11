@@ -5,6 +5,8 @@ import {
     EMBED_SUCCESS_COLOR,
     ExpBonusModifierValues,
     INCORRECT_GUESS_EMOJI,
+    QUICK_GUESS_EMOJI,
+    QUICK_GUESS_MS,
     ROUND_MAX_RUNNERS_UP,
 } from "../constants";
 import {
@@ -530,14 +532,15 @@ export default class GameRound extends Round {
                     ? ` (+${friendlyFormattedNumber(playerResult.expGain)} EXP)`
                     : "";
 
+                const timeToGuess = durationSeconds(this.startedAt, createdAt);
+
                 correctDescription += `\n${
                     isCorrect ? CORRECT_GUESS_EMOJI : INCORRECT_GUESS_EMOJI
-                } ${getMention(
-                    userID
-                )}: \`\`${displayedGuess}\`\`${streak}(${durationSeconds(
-                    this.startedAt,
-                    createdAt
-                )}s)${expGain}`;
+                } ${getMention(userID)}: \`\`${displayedGuess}\`\`${streak}(${
+                    timeToGuess * 1000 <= QUICK_GUESS_MS
+                        ? QUICK_GUESS_EMOJI
+                        : ""
+                }${timeToGuess}s)${expGain}`;
             }
 
             if (Object.keys(this.guesses).length >= ROUND_MAX_RUNNERS_UP) {
@@ -571,6 +574,13 @@ export default class GameRound extends Round {
                 }
             }
 
+            const timeToGuess = durationSeconds(
+                this.startedAt,
+                playerIDToEarliestCorrectTimestamp[
+                    playerRoundResults[0].player.id
+                ]
+            );
+
             correctDescription += i18n.translate(
                 messageContext.guildID,
                 "misc.inGame.correctGuess",
@@ -579,14 +589,11 @@ export default class GameRound extends Round {
                     expGain: friendlyFormattedNumber(
                         playerRoundResults[0].expGain
                     ),
-                    timeToGuess: String(
-                        durationSeconds(
-                            this.startedAt,
-                            playerIDToEarliestCorrectTimestamp[
-                                playerRoundResults[0].player.id
-                            ]
-                        )
-                    ),
+                    timeToGuess: `${
+                        timeToGuess * 1000 <= QUICK_GUESS_MS
+                            ? QUICK_GUESS_EMOJI
+                            : ""
+                    }${timeToGuess}`,
                 }
             );
             if (playerRoundResults.length > 1) {
