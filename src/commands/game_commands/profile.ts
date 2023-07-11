@@ -14,6 +14,7 @@ import {
     friendlyFormattedDate,
     friendlyFormattedNumber,
     romanize,
+    visualProgressBar,
 } from "../../helpers/utils";
 import Eris from "eris";
 import LocaleType from "../../enums/locale_type";
@@ -170,6 +171,9 @@ async function getProfileFields(
             name: i18n.translate(guildID, "command.profile.experience"),
             value: `${friendlyFormattedNumber(exp)}/${friendlyFormattedNumber(
                 CUM_EXP_TABLE[level + 1]
+            )}\n${visualProgressBar(
+                exp - CUM_EXP_TABLE[level],
+                CUM_EXP_TABLE[level + 1] - CUM_EXP_TABLE[level]
             )}`,
             inline: true,
         },

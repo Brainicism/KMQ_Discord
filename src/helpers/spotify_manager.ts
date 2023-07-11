@@ -6,7 +6,9 @@ import {
     retryJob,
     retryWithExponentialBackoff,
     standardDateFormat,
+    visualProgressBar,
 } from "./utils";
+import { sendInfoMessage } from "./discord_utils";
 import Axios from "axios";
 import KmqConfiguration from "../kmq_configuration";
 import SongSelector from "../structures/song_selector";
@@ -15,10 +17,13 @@ import _ from "lodash";
 import asyncPool from "tiny-async-pool";
 import dbContext from "../database_context";
 import fs from "fs";
+import i18n from "./localization_manager";
 import path from "path";
 import type { AxiosResponse } from "axios";
 import type { MatchedPlaylist } from "../interfaces/matched_playlist";
 import type { PlaylistMetadata } from "../interfaces/playlist_metadata";
+import type Eris from "eris";
+import type MessageContext from "../structures/message_context";
 import type QueriedSong from "../interfaces/queried_song";
 import type SpotifyTrack from "../interfaces/spotify_track";
 
@@ -26,7 +31,7 @@ const logger = new IPCLogger("spotify_manager");
 
 const BASE_URL = "https://api.spotify.com/v1";
 
-const SONG_MATCH_TIMEOUT_MS = 15000;
+const SONG_MATCH_TIMEOUT_MS = 30000;
 
 export default class SpotifyManager {
     public cachedPlaylists: {
@@ -51,12 +56,15 @@ export default class SpotifyManager {
      * @param playlistID - The playlist to retrieve songs from
      * @param isPremium - Whether the user is premium or not
      * @param forceRefreshMetadata - Whether to request new metadata
-     *
+     * @param messageContext - The message context
+     * @param interaction - The interaction
      */
     getMatchedSpotifySongs = async (
         playlistID: string,
         isPremium: boolean,
-        forceRefreshMetadata: boolean
+        forceRefreshMetadata: boolean,
+        messageContext: MessageContext,
+        interaction?: Eris.CommandInteraction
     ): Promise<MatchedPlaylist> => {
         if (
             !process.env.SPOTIFY_CLIENT_ID ||
@@ -117,6 +125,10 @@ export default class SpotifyManager {
             logger.info(`Using cached playlist for ${playlistID}`);
             ({ matchedSongs, truncated } = cachedPlaylist);
         } else {
+            if (interaction) {
+                await interaction.acknowledge();
+            }
+
             const spotifySongs: Array<SpotifyTrack> = [];
             const start = Date.now();
             logger.info(`Using Spotify API for playlist ${playlistID}`);
@@ -169,6 +181,45 @@ export default class SpotifyManager {
                 `Starting to parse playlist: ${playlistID}, number of songs: ${spotifySongs.length}`
             );
 
+            const parsingTitle = i18n.translate(
+                messageContext.guildID,
+                "command.spotify.parsing"
+            );
+
+            let message: Eris.Message | null;
+            if (interaction?.acknowledged) {
+                message = await interaction.createFollowup({
+                    embeds: [
+                        {
+                            title: parsingTitle,
+                            description: visualProgressBar(
+                                0,
+                                spotifySongs.length
+                            ),
+                        },
+                    ],
+                });
+            } else {
+                message = await sendInfoMessage(messageContext, {
+                    title: parsingTitle,
+                    description: visualProgressBar(0, spotifySongs.length),
+                });
+            }
+
+            const updateParsing = setInterval(() => {
+                message?.edit({
+                    embeds: [
+                        {
+                            title: parsingTitle,
+                            description: visualProgressBar(
+                                unmatchedSongs.length + matchedSongs.length,
+                                spotifySongs.length
+                            ),
+                        },
+                    ],
+                });
+            }, 2000);
+
             const songMatchStartTime = Date.now();
             for await (const queryOutput of asyncPool(
                 4,
@@ -209,6 +260,19 @@ export default class SpotifyManager {
                     Date.now() - songMatchStartTime
                 }ms.`
             );
+
+            clearInterval(updateParsing);
+            message?.edit({
+                embeds: [
+                    {
+                        title: parsingTitle,
+                        description: visualProgressBar(
+                            unmatchedSongs.length + matchedSongs.length,
+                            spotifySongs.length
+                        ),
+                    },
+                ],
+            });
 
             const SPOTIFY_PLAYLIST_UNMATCHED_SONGS_DIR = path.join(
                 __dirname,

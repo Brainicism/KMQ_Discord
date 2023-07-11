@@ -21,7 +21,9 @@ import type {
 } from "../enums/option_types/gender";
 import type { Expression, SqlBool } from "kysely";
 import type { MatchedPlaylist } from "../interfaces/matched_playlist";
+import type Eris from "eris";
 import type GuildPreference from "./guild_preference";
+import type MessageContext from "./message_context";
 import type QueriedSong from "../interfaces/queried_song";
 import type UniqueSongCounter from "../interfaces/unique_song_counter";
 
@@ -237,7 +239,9 @@ export default class SongSelector {
         guildPreference: GuildPreference,
         isPremium: boolean,
         playlistID?: string,
-        forceRefreshMetadata?: boolean
+        forceRefreshMetadata?: boolean,
+        messageContext?: MessageContext,
+        interaction?: Eris.CommandInteraction
     ): Promise<MatchedPlaylist | null> {
         if (!playlistID) {
             this.filteredSongs = await SongSelector.getFilteredSongList(
@@ -252,7 +256,9 @@ export default class SongSelector {
         const playlist = await SongSelector.getSpotifySongList(
             isPremium,
             playlistID,
-            forceRefreshMetadata || false
+            forceRefreshMetadata || false,
+            messageContext!,
+            interaction!
         );
 
         this.filteredSongs = playlist as QueriedSongList;
@@ -531,13 +537,17 @@ export default class SongSelector {
     static async getSpotifySongList(
         isPremium: boolean,
         playlistID: string,
-        forceRefreshMetadata: boolean
+        forceRefreshMetadata: boolean,
+        messageContext: MessageContext,
+        interaction: Eris.CommandInteraction
     ): Promise<QueriedSongList & MatchedPlaylist> {
         const { matchedSongs, metadata, truncated } =
             await State.spotifyManager.getMatchedSpotifySongs(
                 playlistID,
                 isPremium,
-                forceRefreshMetadata
+                forceRefreshMetadata,
+                messageContext,
+                interaction
             );
 
         const result = new Set(

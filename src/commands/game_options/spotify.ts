@@ -6,6 +6,8 @@ import {
     italicize,
 } from "../../helpers/utils";
 import {
+    generateEmbed,
+    generateOptionsMessage,
     getDebugLogHeader,
     getInteractionValue,
     sendErrorMessage,
@@ -188,10 +190,9 @@ export default class SpotifyCommand implements BaseCommand {
     static async updateOption(
         messageContext: MessageContext,
         playlistURL?: string,
-        origInteraction?: Eris.CommandInteraction,
+        interaction?: Eris.CommandInteraction,
         reset = false
     ): Promise<void> {
-        let interaction: Eris.CommandInteraction | undefined = origInteraction;
         const guildID = messageContext.guildID;
         const guildPreference = await GuildPreference.getGuildPreference(
             guildID
@@ -236,38 +237,24 @@ export default class SpotifyCommand implements BaseCommand {
                 messageContext.author.id
             );
 
-            if (interaction) {
-                await sendInfoMessage(
-                    messageContext,
-                    {
-                        title: i18n.translate(
-                            guildID,
-                            "command.spotify.parsing"
-                        ),
-                    },
-                    false,
-                    undefined,
-                    [],
-                    interaction
-                );
-
-                interaction = undefined;
-            }
-
             let matchedPlaylist: MatchedPlaylist;
             if (session) {
                 matchedPlaylist = (await session.songSelector.reloadSongs(
                     guildPreference,
                     premiumRequest,
                     playlistID,
-                    true
+                    true,
+                    messageContext,
+                    interaction
                 )) as MatchedPlaylist;
             } else {
                 matchedPlaylist = (await new SongSelector().reloadSongs(
                     guildPreference,
                     premiumRequest,
                     playlistID,
-                    true
+                    true,
+                    messageContext,
+                    interaction
                 )) as MatchedPlaylist;
             }
 
@@ -362,16 +349,33 @@ export default class SpotifyCommand implements BaseCommand {
             return;
         }
 
-        await sendOptionsMessage(
-            session,
-            messageContext,
-            guildPreference,
-            [{ option: GameOption.SPOTIFY_PLAYLIST_ID, reset }],
-            false,
-            undefined,
-            undefined,
-            interaction
-        );
+        if (interaction?.acknowledged) {
+            const optionsEmbed = await generateOptionsMessage(
+                session,
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.SPOTIFY_PLAYLIST_ID, reset }],
+                false,
+                undefined,
+                undefined,
+                interaction
+            );
+
+            await interaction.createFollowup({
+                embeds: [generateEmbed(messageContext, optionsEmbed!)],
+            });
+        } else {
+            await sendOptionsMessage(
+                session,
+                messageContext,
+                guildPreference,
+                [{ option: GameOption.SPOTIFY_PLAYLIST_ID, reset }],
+                false,
+                undefined,
+                undefined,
+                interaction
+            );
+        }
     }
 
     /**
