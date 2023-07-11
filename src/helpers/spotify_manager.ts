@@ -220,48 +220,54 @@ export default class SpotifyManager {
                 });
             }, 2000);
 
-            const songMatchStartTime = Date.now();
-            for await (const queryOutput of asyncPool(
-                4,
-                spotifySongs,
-                (x: SpotifyTrack) =>
-                    this.generateSongMatchingPromise(x, isPremium)
-            )) {
-                if (typeof queryOutput === "string") {
-                    unmatchedSongs.push(queryOutput);
-                } else {
-                    matchedSongs.push(queryOutput);
+            try {
+                const songMatchStartTime = Date.now();
+                for await (const queryOutput of asyncPool(
+                    4,
+                    spotifySongs,
+                    (x: SpotifyTrack) =>
+                        this.generateSongMatchingPromise(x, isPremium)
+                )) {
+                    if (typeof queryOutput === "string") {
+                        unmatchedSongs.push(queryOutput);
+                    } else {
+                        matchedSongs.push(queryOutput);
+                    }
+
+                    const processedSongCount =
+                        unmatchedSongs.length + matchedSongs.length;
+
+                    if (
+                        processedSongCount % 100 === 0 ||
+                        processedSongCount === 1 ||
+                        processedSongCount === spotifySongs.length
+                    ) {
+                        logger.info(
+                            `Processed ${processedSongCount}/${spotifySongs.length} for playlist ${playlistID}`
+                        );
+                    }
+
+                    if (
+                        Date.now() - songMatchStartTime >
+                        SONG_MATCH_TIMEOUT_MS
+                    ) {
+                        logger.warn(
+                            `Playlist '${playlistID}' exceeded song match timeout of ${SONG_MATCH_TIMEOUT_MS}ms after processing ${processedSongCount}/${spotifySongs.length}`
+                        );
+                        truncated = true;
+                        break;
+                    }
                 }
 
-                const processedSongCount =
-                    unmatchedSongs.length + matchedSongs.length;
-
-                if (
-                    processedSongCount % 100 === 0 ||
-                    processedSongCount === 1 ||
-                    processedSongCount === spotifySongs.length
-                ) {
-                    logger.info(
-                        `Processed ${processedSongCount}/${spotifySongs.length} for playlist ${playlistID}`
-                    );
-                }
-
-                if (Date.now() - songMatchStartTime > SONG_MATCH_TIMEOUT_MS) {
-                    logger.warn(
-                        `Playlist '${playlistID}' exceeded song match timeout of ${SONG_MATCH_TIMEOUT_MS}ms after processing ${processedSongCount}/${spotifySongs.length}`
-                    );
-                    truncated = true;
-                    break;
-                }
+                logger.info(
+                    `Finished parsing playlist: ${playlistID} after ${
+                        Date.now() - songMatchStartTime
+                    }ms.`
+                );
+            } finally {
+                clearInterval(updateParsing);
             }
 
-            logger.info(
-                `Finished parsing playlist: ${playlistID} after ${
-                    Date.now() - songMatchStartTime
-                }ms.`
-            );
-
-            clearInterval(updateParsing);
             message?.edit({
                 embeds: [
                     {
