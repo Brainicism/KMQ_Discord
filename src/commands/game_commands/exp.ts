@@ -420,7 +420,7 @@ export default class ExpCommand implements BaseCommand {
                 "command.exp.explanation.streak"
             )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.GUESS_STREAK
-            ].toFixed(2)}x 📈`,
+            ].toFixed(2)}x 🔥`,
             `\`${i18n.translate(
                 messageContext.guildID,
                 "command.exp.explanation.quickGuess"

@@ -540,7 +540,7 @@ export default class GameRound extends Round {
                     timeToGuess * 1000 <= QUICK_GUESS_MS
                         ? QUICK_GUESS_EMOJI
                         : ""
-                }${timeToGuess}s)${expGain}`;
+                } ${timeToGuess}s)${expGain}`;
             }
 
             if (Object.keys(this.guesses).length >= ROUND_MAX_RUNNERS_UP) {
@@ -560,26 +560,26 @@ export default class GameRound extends Round {
                     : ""
             }`;
 
-            const playerIDToEarliestCorrectTimestamp: {
-                [playerID: string]: number;
+            const playerIDToTimeToGuess: {
+                [playerID: string]: string;
             } = {};
 
             for (const [playerID, guesses] of sortedGuesses) {
                 const earliestGuess = guesses.find((x) => x.correct);
 
                 if (earliestGuess) {
-                    playerIDToEarliestCorrectTimestamp[playerID] = Number(
+                    const timeToGuess = durationSeconds(
+                        this.startedAt,
                         earliestGuess.createdAt
                     );
+
+                    playerIDToTimeToGuess[playerID] = `${
+                        timeToGuess * 1000 <= QUICK_GUESS_MS
+                            ? QUICK_GUESS_EMOJI
+                            : ""
+                    } ${timeToGuess}`;
                 }
             }
-
-            const timeToGuess = durationSeconds(
-                this.startedAt,
-                playerIDToEarliestCorrectTimestamp[
-                    playerRoundResults[0].player.id
-                ]
-            );
 
             correctDescription += i18n.translate(
                 messageContext.guildID,
@@ -589,11 +589,8 @@ export default class GameRound extends Round {
                     expGain: friendlyFormattedNumber(
                         playerRoundResults[0].expGain
                     ),
-                    timeToGuess: `${
-                        timeToGuess * 1000 <= QUICK_GUESS_MS
-                            ? QUICK_GUESS_EMOJI
-                            : ""
-                    }${timeToGuess}`,
+                    timeToGuess:
+                        playerIDToTimeToGuess[playerRoundResults[0].player.id],
                 }
             );
             if (playerRoundResults.length > 1) {
@@ -603,12 +600,9 @@ export default class GameRound extends Round {
                         (x) =>
                             `${getMention(
                                 x.player.id
-                            )} (+${friendlyFormattedNumber(
-                                x.expGain
-                            )} EXP) (${durationSeconds(
-                                this.startedAt,
-                                playerIDToEarliestCorrectTimestamp[x.player.id]
-                            )}s)`
+                            )} (+${friendlyFormattedNumber(x.expGain)} EXP) (${
+                                playerIDToTimeToGuess[x.player.id]
+                            }s)`
                     )
                     .slice(0, ROUND_MAX_RUNNERS_UP)
                     .join("\n");
