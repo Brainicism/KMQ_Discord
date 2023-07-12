@@ -492,7 +492,9 @@ export default class GameRound extends Round {
         const sortedGuesses = Object.entries(this.guesses).map(
             (x): [string, Array<GuessResult>] => [
                 x[0],
-                x[1].sort((a, b) => a.timeToGuessSeconds - b.timeToGuessSeconds),
+                x[1].sort(
+                    (a, b) => a.timeToGuessSeconds - b.timeToGuessSeconds
+                ),
             ]
         );
 
@@ -504,7 +506,9 @@ export default class GameRound extends Round {
 
                     return [playerID, mostRecentGuess];
                 })
-                .sort((a, b) => a[1].timeToGuessSeconds - b[1].timeToGuessSeconds)
+                .sort(
+                    (a, b) => a[1].timeToGuessSeconds - b[1].timeToGuessSeconds
+                )
                 .slice(0, ROUND_MAX_RUNNERS_UP)) {
                 const userID = entry[0];
                 const timeToGuess = entry[1].timeToGuessSeconds;
