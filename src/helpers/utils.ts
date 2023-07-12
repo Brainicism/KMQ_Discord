@@ -595,7 +595,7 @@ export function mapTo<T, S extends T, K extends keyof T>(
  * @returns the number of seconds between the two timestamps
  */
 export function durationSeconds(startTime: number, endTime: number): number {
-    return (endTime - startTime) / 1000;
+    return Math.abs(endTime - startTime) / 1000;
 }
 
 /**

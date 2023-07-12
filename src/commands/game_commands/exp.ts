@@ -420,13 +420,13 @@ export default class ExpCommand implements BaseCommand {
                 "command.exp.explanation.streak"
             )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.GUESS_STREAK
-            ].toFixed(2)}x 🔥`,
+            ].toFixed(2)}x 📈`,
             `\`${i18n.translate(
                 messageContext.guildID,
                 "command.exp.explanation.quickGuess"
             )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.QUICK_GUESS
-            ].toFixed(2)}x ${QUICK_GUESS_EMOJI} `,
+            ].toFixed(2)}x 📈`,
             `\`${i18n.translate(
                 messageContext.guildID,
                 "command.exp.explanation.bonusArtistGuess"
