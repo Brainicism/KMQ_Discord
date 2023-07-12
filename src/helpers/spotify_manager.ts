@@ -1,5 +1,10 @@
 /* eslint-disable no-await-in-loop */
 import { IPCLogger } from "../logger";
+import {
+    getDebugLogHeader,
+    sendErrorMessage,
+    sendInfoMessage,
+} from "./discord_utils";
 import { normalizePunctuationInName } from "../structures/game_round";
 import {
     pathExists,
@@ -8,7 +13,6 @@ import {
     standardDateFormat,
     visualProgressBar,
 } from "./utils";
-import { sendInfoMessage } from "./discord_utils";
 import Axios from "axios";
 import KmqConfiguration from "../kmq_configuration";
 import SongSelector from "../structures/song_selector";
@@ -43,6 +47,7 @@ export default class SpotifyManager {
     } = {};
 
     private accessToken: string | undefined;
+    private guildsParseInProgress: Set<string> = new Set();
 
     async start(): Promise<void> {
         await this.refreshToken();
@@ -50,6 +55,14 @@ export default class SpotifyManager {
         setInterval(async () => {
             await this.refreshToken();
         }, 3600000 * 0.8);
+    }
+
+    /**
+     * @param guildID - The guild to check for
+     * @returns whether a playlist is being parsed for the given guild
+     */
+    isParseInProgress(guildID: string): boolean {
+        return this.guildsParseInProgress.has(guildID);
     }
 
     /**
@@ -66,6 +79,20 @@ export default class SpotifyManager {
         messageContext: MessageContext,
         interaction?: Eris.CommandInteraction
     ): Promise<MatchedPlaylist> => {
+        const UNMATCHED_PLAYLIST = {
+            metadata: {
+                playlistID,
+                playlistName: "",
+                playlistLength: 0,
+                matchedSongsLength: 0,
+                limit: 0,
+                snapshotID: "",
+                thumbnailUrl: null,
+            },
+            matchedSongs: [],
+            truncated: false,
+        };
+
         if (
             !process.env.SPOTIFY_CLIENT_ID ||
             !process.env.SPOTIFY_CLIENT_SECRET
@@ -73,19 +100,7 @@ export default class SpotifyManager {
             logger.warn(
                 "No songs matched due to missing Spotify client ID or secret"
             );
-            return {
-                metadata: {
-                    playlistID,
-                    playlistName: "",
-                    playlistLength: 0,
-                    matchedSongsLength: 0,
-                    limit: 0,
-                    snapshotID: "",
-                    thumbnailUrl: null,
-                },
-                matchedSongs: [],
-                truncated: false,
-            };
+            return UNMATCHED_PLAYLIST;
         }
 
         const cachedPlaylist = this.cachedPlaylists[playlistID];
@@ -100,19 +115,7 @@ export default class SpotifyManager {
         }
 
         if (!spotifyMetadata) {
-            return {
-                metadata: {
-                    playlistID,
-                    playlistName: "",
-                    playlistLength: 0,
-                    matchedSongsLength: 0,
-                    limit: 0,
-                    snapshotID: "",
-                    thumbnailUrl: null,
-                },
-                matchedSongs: [],
-                truncated: false,
-            };
+            return UNMATCHED_PLAYLIST;
         }
 
         let matchedSongs: Array<QueriedSong> = [];
@@ -125,6 +128,33 @@ export default class SpotifyManager {
             logger.info(`Using cached playlist for ${playlistID}`);
             ({ matchedSongs, truncated } = cachedPlaylist);
         } else {
+            if (this.isParseInProgress(messageContext.guildID)) {
+                logger.warn(
+                    `${getDebugLogHeader(
+                        messageContext
+                    )} | Skipping parsing due to another parse in progress. playlistID = ${playlistID}`
+                );
+
+                await sendErrorMessage(
+                    messageContext,
+                    {
+                        title: i18n.translate(
+                            messageContext.guildID,
+                            "command.spotify.parsingAlreadyInProgress.title"
+                        ),
+                        description: i18n.translate(
+                            messageContext.guildID,
+                            "command.spotify.parsingAlreadyInProgress.description"
+                        ),
+                    },
+                    interaction
+                );
+
+                return UNMATCHED_PLAYLIST;
+            } else {
+                this.guildsParseInProgress.add(messageContext.guildID);
+            }
+
             if (interaction) {
                 await interaction.acknowledge();
             }
@@ -151,7 +181,10 @@ export default class SpotifyManager {
                 10,
                 requestURLs,
                 (requestURL: string) =>
-                    this.generateSpotifyResponsePromise(requestURL)
+                    this.generateSpotifyResponsePromise(
+                        requestURL,
+                        messageContext.guildID
+                    )
             )) {
                 numProcessedPlaylistPages++;
                 if (
@@ -266,6 +299,7 @@ export default class SpotifyManager {
                 );
             } finally {
                 clearInterval(updateParsing);
+                this.guildsParseInProgress.delete(messageContext.guildID);
             }
 
             message?.edit({
@@ -336,7 +370,8 @@ export default class SpotifyManager {
     };
 
     private generateSpotifyResponsePromise(
-        requestURL: string
+        requestURL: string,
+        guildID: string
     ): Promise<Array<SpotifyTrack>> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -410,6 +445,7 @@ export default class SpotifyManager {
                     logger.error(err.response.status);
                 }
 
+                this.guildsParseInProgress.delete(guildID);
                 reject(err);
             }
         });
