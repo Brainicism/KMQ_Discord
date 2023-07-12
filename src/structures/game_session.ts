@@ -1487,13 +1487,14 @@ export default class GameSession extends Session {
             (guessResult.correctGuessers ?? []).map(
                 async (correctGuesser, idx) => {
                     const guessPosition = idx + 1;
-                    const timeToGuess =
-                        Math.min(
-                            ...round
-                                .getGuesses()
-                                [correctGuesser.id].filter((x) => x.correct)
-                                .map((x) => x.createdAt)
-                        ) - round.startedAt;
+                    const timeToGuess = (
+                        this.gameType === GameType.HIDDEN ? Math.max : Math.min
+                    )(
+                        ...round
+                            .getGuesses()
+                            [correctGuesser.id].filter((x) => x.correct)
+                            .map((x) => x.timeToGuessSeconds)
+                    );
 
                     const expGain = await calculateTotalRoundExp(
                         guildPreference,

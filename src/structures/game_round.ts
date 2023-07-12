@@ -5,6 +5,8 @@ import {
     EMBED_SUCCESS_COLOR,
     ExpBonusModifierValues,
     INCORRECT_GUESS_EMOJI,
+    QUICK_GUESS_EMOJI,
+    QUICK_GUESS_MS,
     ROUND_MAX_RUNNERS_UP,
 } from "../constants";
 import {
@@ -44,7 +46,7 @@ interface GuessCorrectness {
 }
 
 type GuessResult = {
-    createdAt: number;
+    timeToGuessSeconds: number;
     guess: string;
     correct: boolean;
 };
@@ -356,7 +358,7 @@ export default class GameRound extends Round {
 
         this.guesses[playerID] = this.guesses[playerID] || [];
         this.guesses[playerID].push({
-            createdAt,
+            timeToGuessSeconds: durationSeconds(this.startedAt, createdAt),
             guess,
             correct: pointsAwarded > 0,
         });
@@ -490,7 +492,9 @@ export default class GameRound extends Round {
         const sortedGuesses = Object.entries(this.guesses).map(
             (x): [string, Array<GuessResult>] => [
                 x[0],
-                x[1].sort((a, b) => a.createdAt - b.createdAt),
+                x[1].sort(
+                    (a, b) => a.timeToGuessSeconds - b.timeToGuessSeconds
+                ),
             ]
         );
 
@@ -502,10 +506,12 @@ export default class GameRound extends Round {
 
                     return [playerID, mostRecentGuess];
                 })
-                .sort((a, b) => a[1].createdAt - b[1].createdAt)
+                .sort(
+                    (a, b) => a[1].timeToGuessSeconds - b[1].timeToGuessSeconds
+                )
                 .slice(0, ROUND_MAX_RUNNERS_UP)) {
                 const userID = entry[0];
-                const createdAt = entry[1].createdAt;
+                const timeToGuess = entry[1].timeToGuessSeconds;
                 const isCorrect = entry[1].correct;
                 let displayedGuess = entry[1].guess;
                 if (displayedGuess.length > MAX_DISPLAYED_GUESS_LENGTH) {
@@ -521,7 +527,7 @@ export default class GameRound extends Round {
 
                 const streak =
                     playerResult && playerResult.streak >= 5
-                        ? ` (🔥 ${friendlyFormattedNumber(
+                        ? ` (🔥${friendlyFormattedNumber(
                               playerRoundResults[0].streak
                           )}) `
                         : " ";
@@ -532,12 +538,11 @@ export default class GameRound extends Round {
 
                 correctDescription += `\n${
                     isCorrect ? CORRECT_GUESS_EMOJI : INCORRECT_GUESS_EMOJI
-                } ${getMention(
-                    userID
-                )}: \`\`${displayedGuess}\`\`${streak}(${durationSeconds(
-                    this.startedAt,
-                    createdAt
-                )}s)${expGain}`;
+                } ${getMention(userID)}: \`\`${displayedGuess}\`\`${streak}(${
+                    timeToGuess * 1000 <= QUICK_GUESS_MS
+                        ? QUICK_GUESS_EMOJI
+                        : ""
+                }${timeToGuess}s)${expGain}`;
             }
 
             if (Object.keys(this.guesses).length >= ROUND_MAX_RUNNERS_UP) {
@@ -551,23 +556,27 @@ export default class GameRound extends Round {
                 playerRoundResults[0].player.id
             )} ${
                 playerRoundResults[0].streak >= 5
-                    ? `(🔥 ${friendlyFormattedNumber(
+                    ? `(🔥${friendlyFormattedNumber(
                           playerRoundResults[0].streak
                       )})`
                     : ""
             }`;
 
-            const playerIDToEarliestCorrectTimestamp: {
-                [playerID: string]: number;
+            const playerIDToTimeToGuess: {
+                [playerID: string]: string;
             } = {};
 
             for (const [playerID, guesses] of sortedGuesses) {
                 const earliestGuess = guesses.find((x) => x.correct);
 
                 if (earliestGuess) {
-                    playerIDToEarliestCorrectTimestamp[playerID] = Number(
-                        earliestGuess.createdAt
-                    );
+                    const timeToGuess = earliestGuess.timeToGuessSeconds;
+
+                    playerIDToTimeToGuess[playerID] = `${
+                        timeToGuess * 1000 <= QUICK_GUESS_MS
+                            ? QUICK_GUESS_EMOJI
+                            : ""
+                    }${timeToGuess}`;
                 }
             }
 
@@ -579,14 +588,8 @@ export default class GameRound extends Round {
                     expGain: friendlyFormattedNumber(
                         playerRoundResults[0].expGain
                     ),
-                    timeToGuess: String(
-                        durationSeconds(
-                            this.startedAt,
-                            playerIDToEarliestCorrectTimestamp[
-                                playerRoundResults[0].player.id
-                            ]
-                        )
-                    ),
+                    timeToGuess:
+                        playerIDToTimeToGuess[playerRoundResults[0].player.id],
                 }
             );
             if (playerRoundResults.length > 1) {
@@ -596,12 +599,9 @@ export default class GameRound extends Round {
                         (x) =>
                             `${getMention(
                                 x.player.id
-                            )} (+${friendlyFormattedNumber(
-                                x.expGain
-                            )} EXP) (${durationSeconds(
-                                this.startedAt,
-                                playerIDToEarliestCorrectTimestamp[x.player.id]
-                            )}s)`
+                            )} (+${friendlyFormattedNumber(x.expGain)} EXP) (${
+                                playerIDToTimeToGuess[x.player.id]
+                            }s)`
                     )
                     .slice(0, ROUND_MAX_RUNNERS_UP)
                     .join("\n");

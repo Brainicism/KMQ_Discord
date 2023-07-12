@@ -4,6 +4,7 @@ import {
     GUESS_STREAK_THRESHOLD,
     KmqImages,
     PARTICIPANT_MODIFIER_MAX_PARTICIPANTS,
+    QUICK_GUESS_MS,
 } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
@@ -243,7 +244,7 @@ export function calculateRoundExpMultiplier(
     // incentivize for number of participants from 1x to 1.5x
     expModifier *= participantExpScalingModifier(numParticipants);
     // bonus for quick guess
-    if (guessSpeed < 3500) {
+    if (guessSpeed < QUICK_GUESS_MS) {
         expModifier *= ExpBonusModifierValues[ExpBonusModifier.QUICK_GUESS];
     }
 
@@ -424,7 +425,7 @@ export default class ExpCommand implements BaseCommand {
                 "command.exp.explanation.quickGuess"
             )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.QUICK_GUESS
-            ].toFixed(2)}x 📈 `,
+            ].toFixed(2)}x 📈`,
             `\`${i18n.translate(
                 messageContext.guildID,
                 "command.exp.explanation.bonusArtistGuess"
