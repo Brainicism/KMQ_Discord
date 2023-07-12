@@ -2,6 +2,7 @@ import { IPCLogger } from "../../logger";
 import { getDebugChannel, sendInfoMessage } from "../../helpers/discord_utils";
 import Eris from "eris";
 import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("guildDelete");
 
@@ -63,4 +64,6 @@ export default async function guildDeleteHandler(
             }
         );
     }
+
+    await Session.getSession(guild.id)?.endSession("Guild left");
 }
