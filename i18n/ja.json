@@ -1193,7 +1193,11 @@
                 "description": "曲がマッチしませんでした。",
                 "title": "Spotifyから曲を取得できませんでした。"
             },
-            "parsing": "Spotifyプレイリストを解析中..."
+            "parsing": "Spotifyプレイリストを読み込み中...",
+            "parsingAlreadyInProgress": {
+                "description": "新しい読み込みを開始する前に、現在のプレイリストの読み込みが終了するのを待ってください。",
+                "title": "すでにプレイリストを読み込み中です"
+            }
         },
         "stats": {
             "description": "詳細なボットの状態：{{link}}",

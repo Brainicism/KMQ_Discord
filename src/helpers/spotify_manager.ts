@@ -1,11 +1,17 @@
 /* eslint-disable no-await-in-loop */
 import { IPCLogger } from "../logger";
+import {
+    getDebugLogHeader,
+    sendErrorMessage,
+    sendInfoMessage,
+} from "./discord_utils";
 import { normalizePunctuationInName } from "../structures/game_round";
 import {
     pathExists,
     retryJob,
     retryWithExponentialBackoff,
     standardDateFormat,
+    visualProgressBar,
 } from "./utils";
 import Axios from "axios";
 import KmqConfiguration from "../kmq_configuration";
@@ -15,10 +21,13 @@ import _ from "lodash";
 import asyncPool from "tiny-async-pool";
 import dbContext from "../database_context";
 import fs from "fs";
+import i18n from "./localization_manager";
 import path from "path";
 import type { AxiosResponse } from "axios";
 import type { MatchedPlaylist } from "../interfaces/matched_playlist";
 import type { PlaylistMetadata } from "../interfaces/playlist_metadata";
+import type Eris from "eris";
+import type MessageContext from "../structures/message_context";
 import type QueriedSong from "../interfaces/queried_song";
 import type SpotifyTrack from "../interfaces/spotify_track";
 
@@ -26,7 +35,7 @@ const logger = new IPCLogger("spotify_manager");
 
 const BASE_URL = "https://api.spotify.com/v1";
 
-const SONG_MATCH_TIMEOUT_MS = 15000;
+const SONG_MATCH_TIMEOUT_MS = 30000;
 
 export default class SpotifyManager {
     public cachedPlaylists: {
@@ -38,6 +47,7 @@ export default class SpotifyManager {
     } = {};
 
     private accessToken: string | undefined;
+    private guildsParseInProgress: Set<string> = new Set();
 
     async start(): Promise<void> {
         await this.refreshToken();
@@ -48,16 +58,41 @@ export default class SpotifyManager {
     }
 
     /**
+     * @param guildID - The guild to check for
+     * @returns whether a playlist is being parsed for the given guild
+     */
+    isParseInProgress(guildID: string): boolean {
+        return this.guildsParseInProgress.has(guildID);
+    }
+
+    /**
      * @param playlistID - The playlist to retrieve songs from
      * @param isPremium - Whether the user is premium or not
      * @param forceRefreshMetadata - Whether to request new metadata
-     *
+     * @param messageContext - The message context
+     * @param interaction - The interaction
      */
     getMatchedSpotifySongs = async (
         playlistID: string,
         isPremium: boolean,
-        forceRefreshMetadata: boolean
+        forceRefreshMetadata: boolean,
+        messageContext: MessageContext,
+        interaction?: Eris.CommandInteraction
     ): Promise<MatchedPlaylist> => {
+        const UNMATCHED_PLAYLIST = {
+            metadata: {
+                playlistID,
+                playlistName: "",
+                playlistLength: 0,
+                matchedSongsLength: 0,
+                limit: 0,
+                snapshotID: "",
+                thumbnailUrl: null,
+            },
+            matchedSongs: [],
+            truncated: false,
+        };
+
         if (
             !process.env.SPOTIFY_CLIENT_ID ||
             !process.env.SPOTIFY_CLIENT_SECRET
@@ -65,19 +100,7 @@ export default class SpotifyManager {
             logger.warn(
                 "No songs matched due to missing Spotify client ID or secret"
             );
-            return {
-                metadata: {
-                    playlistID,
-                    playlistName: "",
-                    playlistLength: 0,
-                    matchedSongsLength: 0,
-                    limit: 0,
-                    snapshotID: "",
-                    thumbnailUrl: null,
-                },
-                matchedSongs: [],
-                truncated: false,
-            };
+            return UNMATCHED_PLAYLIST;
         }
 
         const cachedPlaylist = this.cachedPlaylists[playlistID];
@@ -92,19 +115,7 @@ export default class SpotifyManager {
         }
 
         if (!spotifyMetadata) {
-            return {
-                metadata: {
-                    playlistID,
-                    playlistName: "",
-                    playlistLength: 0,
-                    matchedSongsLength: 0,
-                    limit: 0,
-                    snapshotID: "",
-                    thumbnailUrl: null,
-                },
-                matchedSongs: [],
-                truncated: false,
-            };
+            return UNMATCHED_PLAYLIST;
         }
 
         let matchedSongs: Array<QueriedSong> = [];
@@ -117,6 +128,37 @@ export default class SpotifyManager {
             logger.info(`Using cached playlist for ${playlistID}`);
             ({ matchedSongs, truncated } = cachedPlaylist);
         } else {
+            if (this.isParseInProgress(messageContext.guildID)) {
+                logger.warn(
+                    `${getDebugLogHeader(
+                        messageContext
+                    )} | Skipping parsing due to another parse in progress. playlistID = ${playlistID}`
+                );
+
+                await sendErrorMessage(
+                    messageContext,
+                    {
+                        title: i18n.translate(
+                            messageContext.guildID,
+                            "command.spotify.parsingAlreadyInProgress.title"
+                        ),
+                        description: i18n.translate(
+                            messageContext.guildID,
+                            "command.spotify.parsingAlreadyInProgress.description"
+                        ),
+                    },
+                    interaction
+                );
+
+                return UNMATCHED_PLAYLIST;
+            } else {
+                this.guildsParseInProgress.add(messageContext.guildID);
+            }
+
+            if (interaction) {
+                await interaction.acknowledge();
+            }
+
             const spotifySongs: Array<SpotifyTrack> = [];
             const start = Date.now();
             logger.info(`Using Spotify API for playlist ${playlistID}`);
@@ -139,7 +181,10 @@ export default class SpotifyManager {
                 10,
                 requestURLs,
                 (requestURL: string) =>
-                    this.generateSpotifyResponsePromise(requestURL)
+                    this.generateSpotifyResponsePromise(
+                        requestURL,
+                        messageContext.guildID
+                    )
             )) {
                 numProcessedPlaylistPages++;
                 if (
@@ -169,46 +214,105 @@ export default class SpotifyManager {
                 `Starting to parse playlist: ${playlistID}, number of songs: ${spotifySongs.length}`
             );
 
-            const songMatchStartTime = Date.now();
-            for await (const queryOutput of asyncPool(
-                4,
-                spotifySongs,
-                (x: SpotifyTrack) =>
-                    this.generateSongMatchingPromise(x, isPremium)
-            )) {
-                if (typeof queryOutput === "string") {
-                    unmatchedSongs.push(queryOutput);
-                } else {
-                    matchedSongs.push(queryOutput);
-                }
+            const parsingTitle = i18n.translate(
+                messageContext.guildID,
+                "command.spotify.parsing"
+            );
 
-                const processedSongCount =
-                    unmatchedSongs.length + matchedSongs.length;
-
-                if (
-                    processedSongCount % 100 === 0 ||
-                    processedSongCount === 1 ||
-                    processedSongCount === spotifySongs.length
-                ) {
-                    logger.info(
-                        `Processed ${processedSongCount}/${spotifySongs.length} for playlist ${playlistID}`
-                    );
-                }
-
-                if (Date.now() - songMatchStartTime > SONG_MATCH_TIMEOUT_MS) {
-                    logger.warn(
-                        `Playlist '${playlistID}' exceeded song match timeout of ${SONG_MATCH_TIMEOUT_MS}ms after processing ${processedSongCount}/${spotifySongs.length}`
-                    );
-                    truncated = true;
-                    break;
-                }
+            let message: Eris.Message | null;
+            if (interaction?.acknowledged) {
+                message = await interaction.createFollowup({
+                    embeds: [
+                        {
+                            title: parsingTitle,
+                            description: visualProgressBar(
+                                0,
+                                spotifySongs.length
+                            ),
+                        },
+                    ],
+                });
+            } else {
+                message = await sendInfoMessage(messageContext, {
+                    title: parsingTitle,
+                    description: visualProgressBar(0, spotifySongs.length),
+                });
             }
 
-            logger.info(
-                `Finished parsing playlist: ${playlistID} after ${
-                    Date.now() - songMatchStartTime
-                }ms.`
-            );
+            const updateParsing = setInterval(() => {
+                message?.edit({
+                    embeds: [
+                        {
+                            title: parsingTitle,
+                            description: visualProgressBar(
+                                unmatchedSongs.length + matchedSongs.length,
+                                spotifySongs.length
+                            ),
+                        },
+                    ],
+                });
+            }, 2000);
+
+            try {
+                const songMatchStartTime = Date.now();
+                for await (const queryOutput of asyncPool(
+                    4,
+                    spotifySongs,
+                    (x: SpotifyTrack) =>
+                        this.generateSongMatchingPromise(x, isPremium)
+                )) {
+                    if (typeof queryOutput === "string") {
+                        unmatchedSongs.push(queryOutput);
+                    } else {
+                        matchedSongs.push(queryOutput);
+                    }
+
+                    const processedSongCount =
+                        unmatchedSongs.length + matchedSongs.length;
+
+                    if (
+                        processedSongCount % 100 === 0 ||
+                        processedSongCount === 1 ||
+                        processedSongCount === spotifySongs.length
+                    ) {
+                        logger.info(
+                            `Processed ${processedSongCount}/${spotifySongs.length} for playlist ${playlistID}`
+                        );
+                    }
+
+                    if (
+                        Date.now() - songMatchStartTime >
+                        SONG_MATCH_TIMEOUT_MS
+                    ) {
+                        logger.warn(
+                            `Playlist '${playlistID}' exceeded song match timeout of ${SONG_MATCH_TIMEOUT_MS}ms after processing ${processedSongCount}/${spotifySongs.length}`
+                        );
+                        truncated = true;
+                        break;
+                    }
+                }
+
+                logger.info(
+                    `Finished parsing playlist: ${playlistID} after ${
+                        Date.now() - songMatchStartTime
+                    }ms.`
+                );
+            } finally {
+                clearInterval(updateParsing);
+                this.guildsParseInProgress.delete(messageContext.guildID);
+            }
+
+            message?.edit({
+                embeds: [
+                    {
+                        title: parsingTitle,
+                        description: visualProgressBar(
+                            unmatchedSongs.length + matchedSongs.length,
+                            spotifySongs.length
+                        ),
+                    },
+                ],
+            });
 
             const SPOTIFY_PLAYLIST_UNMATCHED_SONGS_DIR = path.join(
                 __dirname,
@@ -266,7 +370,8 @@ export default class SpotifyManager {
     };
 
     private generateSpotifyResponsePromise(
-        requestURL: string
+        requestURL: string,
+        guildID: string
     ): Promise<Array<SpotifyTrack>> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -340,6 +445,7 @@ export default class SpotifyManager {
                     logger.error(err.response.status);
                 }
 
+                this.guildsParseInProgress.delete(guildID);
                 reject(err);
             }
         });

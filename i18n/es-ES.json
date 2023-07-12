@@ -1193,7 +1193,11 @@
                 "description": "No se encontraron canciones.",
                 "title": "Error al obtener canciones de Spotify"
             },
-            "parsing": "Analizando la lista de reproducción de Spotify..."
+            "parsing": "Cargando lista de reproducción de Spotify...",
+            "parsingAlreadyInProgress": {
+                "description": "Por favor, espera a que termine de cargar la lista de reproducción actual antes de iniciar una nueva.",
+                "title": "Ya se está cargando la lista de reproducción"
+            }
         },
         "stats": {
             "description": "Estado detallado del bot: {{link}}",

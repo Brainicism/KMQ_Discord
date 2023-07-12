@@ -1193,7 +1193,11 @@
                 "description": "일치하는 노래가 없습니다.",
                 "title": "Spotify에서 노래를 가져오지 못했습니다."
             },
-            "parsing": "Spotify 재생목록 파싱 중..."
+            "parsing": "Spotify 플레이리스트를 불러오는 중...",
+            "parsingAlreadyInProgress": {
+                "description": "새로운 작업을 시작하기 전에 현재의 플레이리스트 로딩이 완료될 때까지 기다려 주세요.",
+                "title": "이미 플레이리스트를 불러오는 중입니다"
+            }
         },
         "stats": {
             "description": "자세한 봇 상태: {{link}}",

@@ -1193,7 +1193,11 @@
                 "description": "No songs were matched.",
                 "title": "Failed to fetch songs from Spotify"
             },
-            "parsing": "Parsing Spotify playlist..."
+            "parsing": "Loading Spotify playlist...",
+            "parsingAlreadyInProgress": {
+                "description": "Please wait for the current playlist to finish loading before starting a new one.",
+                "title": "Already Loading Playlist"
+            }
         },
         "stats": {
             "description": "Detailed bot status: {{link}}",

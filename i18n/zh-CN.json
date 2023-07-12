@@ -1193,7 +1193,11 @@
                 "description": "未匹配到任何歌曲。",
                 "title": "无法从 Spotify 检索歌曲。"
             },
-            "parsing": "正在解析 Spotify 播放列表..."
+            "parsing": "正在加载Spotify播放列表...",
+            "parsingAlreadyInProgress": {
+                "description": "请等待当前播放列表加载完成后再开始新的加载。",
+                "title": "播放列表已在加载中"
+            }
         },
         "stats": {
             "description": "详细的机器人状态: {{link}}",
