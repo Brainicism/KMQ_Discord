@@ -736,26 +736,13 @@ export async function generateOptionsMessage(
     let thumbnailUrl: string | undefined;
 
     if (spotifyPlaylistID) {
-        if (!State.spotifyManager.cachedPlaylists[spotifyPlaylistID]) {
-            // Let the user know the playlist is being fetched by acking their interaction
-            // Send the options once the playlist is fetched via followup message
-            await sendInfoMessage(
-                messageContext,
-                {
-                    title: i18n.translate(guildID, "command.spotify.parsing"),
-                },
-                false,
-                undefined,
-                [],
-                interaction
-            );
-        }
-
         const matchedPlaylist =
             await State.spotifyManager.getMatchedSpotifySongs(
                 spotifyPlaylistID,
                 premiumRequest,
-                false
+                false,
+                messageContext,
+                interaction
             );
 
         optionStrings[

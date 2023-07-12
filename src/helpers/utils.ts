@@ -607,3 +607,24 @@ export function durationSeconds(startTime: number, endTime: number): number {
 export function durationDays(startTime: number, endTime: number): number {
     return (endTime - startTime) / (1000 * 60 * 60 * 24);
 }
+
+/**
+ * Generate a formatted progress bar
+ * @param current - the current value
+ * @param total - the total value
+ * @param barLength - the length of the bar
+ * @returns a formatted progress bar
+ */
+export function visualProgressBar(
+    current: number,
+    total: number,
+    barLength = 10
+): string {
+    // Ensure the ratio is between 0 and 1
+    const ratio = Math.max(0, Math.min(1, current / total));
+
+    const completedBlocks = Math.floor(ratio * barLength);
+    const remainingBlocks = barLength - completedBlocks;
+
+    return "▓".repeat(completedBlocks) + "░".repeat(remainingBlocks);
+}
