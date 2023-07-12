@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import { ExpBonusModifierValues } from "../../constants";
-import { delay , durationSeconds } from "../../helpers/utils";
+import { delay, durationSeconds } from "../../helpers/utils";
 import ExpBonusModifier from "../../enums/exp_bonus_modifier";
 import GameRound, {
     cleanArtistName,
