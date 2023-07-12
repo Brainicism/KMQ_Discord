@@ -4,7 +4,6 @@ import {
     GUESS_STREAK_THRESHOLD,
     KmqImages,
     PARTICIPANT_MODIFIER_MAX_PARTICIPANTS,
-    QUICK_GUESS_EMOJI,
     QUICK_GUESS_MS,
 } from "../../constants";
 import { IPCLogger } from "../../logger";
