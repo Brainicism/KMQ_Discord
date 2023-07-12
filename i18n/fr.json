@@ -1195,8 +1195,8 @@
             },
             "parsing": "Chargement de la playlist Spotify...",
             "parsingAlreadyInProgress": {
-                "title": "Chargement de la playlist déjà en cours",
-                "description": "Veuillez attendre que le chargement de la playlist en cours soit terminé avant de commencer un nouveau."
+                "description": "Veuillez attendre que le chargement de la playlist en cours soit terminé avant de commencer un nouveau.",
+                "title": "Chargement de la playlist déjà en cours"
             }
         },
         "stats": {

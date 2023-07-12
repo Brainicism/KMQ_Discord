@@ -1195,8 +1195,8 @@
             },
             "parsing": "Cargando lista de reproducción de Spotify...",
             "parsingAlreadyInProgress": {
-                "title": "Ya se está cargando la lista de reproducción",
-                "description": "Por favor, espera a que termine de cargar la lista de reproducción actual antes de iniciar una nueva."
+                "description": "Por favor, espera a que termine de cargar la lista de reproducción actual antes de iniciar una nueva.",
+                "title": "Ya se está cargando la lista de reproducción"
             }
         },
         "stats": {

@@ -1195,8 +1195,8 @@
             },
             "parsing": "Loading Spotify playlist...",
             "parsingAlreadyInProgress": {
-                "title": "Already Loading Playlist",
-                "description": "Please wait for the current playlist to finish loading before starting a new one."
+                "description": "Please wait for the current playlist to finish loading before starting a new one.",
+                "title": "Already Loading Playlist"
             }
         },
         "stats": {

@@ -1195,8 +1195,8 @@
             },
             "parsing": "正在加载Spotify播放列表...",
             "parsingAlreadyInProgress": {
-                "title": "播放列表已在加载中",
-                "description": "请等待当前播放列表加载完成后再开始新的加载。"
+                "description": "请等待当前播放列表加载完成后再开始新的加载。",
+                "title": "播放列表已在加载中"
             }
         },
         "stats": {
