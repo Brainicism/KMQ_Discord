@@ -390,6 +390,90 @@ describe("song selector", () => {
             });
         });
 
+        describe("shuffle mode chronological", () => {
+            describe("chronological shuffle mode", () => {
+                it("should chronologically go through months, selecting randomly in each month", async () => {
+                    await guildPreference.setLimit(0, 10000);
+                    await guildPreference.setShuffleType(
+                        ShuffleType.CHRONOLOGICAL
+                    );
+                    const { songs } = await SongSelector.getFilteredSongList(
+                        guildPreference,
+                        true
+                    );
+
+                    assert.strict(songs.size > 0);
+
+                    // Months are increasing
+                    assert.ok(
+                        [...songs]
+                            .map(
+                                (x) =>
+                                    new Date(
+                                        x.publishDate.getFullYear(),
+                                        x.publishDate.getMonth()
+                                    )
+                            )
+                            .every(
+                                (value, i, arr) =>
+                                    i === 0 || value >= arr[i - 1]
+                            )
+                    );
+
+                    // Months are random within each month
+                    assert.notDeepStrictEqual(
+                        [...songs].sort(
+                            (a, b) =>
+                                a.publishDate.getTime() -
+                                b.publishDate.getTime()
+                        ),
+                        [...songs]
+                    );
+                });
+            });
+
+            describe("reverse chronological shuffle mode", () => {
+                it("should reverse-chronologically go through months, selecting randomly in each month", async () => {
+                    await guildPreference.setLimit(0, 10000);
+                    await guildPreference.setShuffleType(
+                        ShuffleType.REVERSE_CHRONOLOGICAL
+                    );
+                    const { songs } = await SongSelector.getFilteredSongList(
+                        guildPreference,
+                        true
+                    );
+
+                    assert.strict(songs.size > 0);
+
+                    // Months are decreasing
+                    assert.ok(
+                        [...songs]
+                            .map(
+                                (x) =>
+                                    new Date(
+                                        x.publishDate.getFullYear(),
+                                        x.publishDate.getMonth()
+                                    )
+                            )
+                            .every(
+                                (value, i, arr) =>
+                                    i === 0 || value <= arr[i - 1]
+                            )
+                    );
+
+                    // Months are random within each month
+                    assert.notDeepStrictEqual(
+                        [...songs].sort(
+                            (a, b) =>
+                                b.publishDate.getTime() -
+                                a.publishDate.getTime()
+                        ),
+                        [...songs]
+                    );
+                });
+            });
+        });
+
         describe("subunits", () => {
             const artists = [{ id: 16, name: "AOA" }];
 
