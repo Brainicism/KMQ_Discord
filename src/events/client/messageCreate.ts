@@ -171,7 +171,8 @@ export default async function messageCreateHandler(
         }
     } else if (
         session?.isGameSession() &&
-        session.gameType !== GameType.HIDDEN
+        session.gameType !== GameType.HIDDEN &&
+        !session.isMultipleChoiceMode()
     ) {
         session.guessSong(messageContext, message.content, message.createdAt);
     }
