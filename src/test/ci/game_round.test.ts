@@ -699,7 +699,7 @@ describe("game round", () => {
         it("should keep track of a player's first guess", () => {
             const guess = "dalla dalla";
             const playerID = "123";
-            const createdAt = Date.now();
+            const createdAt = gameRound.startedAt + 1000;
             const guessModeType = GuessModeType.SONG_NAME;
             const typosAllowed = false;
             gameRound.storeGuess(
@@ -732,7 +732,7 @@ describe("game round", () => {
             const typosAllowed = false;
             const playerID = "123";
 
-            const firstGuessCreatedAt = Date.now();
+            const firstGuessCreatedAt = gameRound.startedAt + 1000;
             const firstGuess = "icy";
             gameRound.storeGuess(
                 playerID,
@@ -745,8 +745,10 @@ describe("game round", () => {
             assert.deepStrictEqual(gameRound.getGuesses(), {
                 [playerID]: [
                     {
-                        timeToGuessSeconds:
-                            firstGuessCreatedAt - gameRound.startedAt,
+                        timeToGuessSeconds: durationSeconds(
+                            gameRound.startedAt,
+                            firstGuessCreatedAt
+                        ),
                         guess: firstGuess,
                         correct: false,
                     },
@@ -757,7 +759,7 @@ describe("game round", () => {
             await delay(10);
 
             const secondGuess = "dalla dalla";
-            const secondGuessCreatedAt = Date.now();
+            const secondGuessCreatedAt = gameRound.startedAt + 2000;
 
             gameRound.storeGuess(
                 playerID,
