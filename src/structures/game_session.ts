@@ -1127,6 +1127,11 @@ export default class GameSession extends Session {
         });
     }
 
+    /** @returns if multiple choice mode is active */
+    isMultipleChoiceMode(): boolean {
+        return this.guildPreference.isMultipleChoiceMode();
+    }
+
     /**
      * Prepares a new GameRound
      * @param randomSong - The queried song
