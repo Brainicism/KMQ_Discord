@@ -56,7 +56,7 @@ export async function sendBeginListeningSessionMessage(
     const fields: Eris.EmbedField[] = [];
     if (gameInfoMessage) {
         fields.push({
-            name: i18n.translate(messageContext.guildID, gameInfoMessage.title),
+            name: gameInfoMessage.title,
             value: gameInfoMessage.message,
             inline: false,
         });
