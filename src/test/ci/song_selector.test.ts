@@ -420,7 +420,7 @@ describe("song selector", () => {
                             )
                     );
 
-                    // Months are random within each month
+                    // Songs are random within each month
                     assert.notDeepStrictEqual(
                         [...songs].sort(
                             (a, b) =>
@@ -461,7 +461,7 @@ describe("song selector", () => {
                             )
                     );
 
-                    // Months are random within each month
+                    // Songs are random within each month
                     assert.notDeepStrictEqual(
                         [...songs].sort(
                             (a, b) =>
