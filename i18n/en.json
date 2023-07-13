@@ -208,6 +208,7 @@
             "lowSongCountPenalty": "Low Song Count Penalty",
             "multipleChoicePenalty": "Multiple Choice Penalty",
             "powerHourBonus": "Power Hour Bonus",
+            "shuffleChronologicalPenalty": "Shuffle Chronological Penalty",
             "shufflePopularityPenalty": "Shuffle Popularity Penalty",
             "shuffleWeightedEasyPenalty": "Shuffle Weighted Easy Penalty",
             "title": "EXP Bonuses",
@@ -1123,6 +1124,7 @@
             "help": {
                 "description": "Choose how songs are shuffled.",
                 "example": {
+                    "chronological": "Songs will play in the order they were released, with some randomness. {{penalty}} EXP penalty will be applied",
                     "popularity": "Songs will play based on descending popularity. {{penalty}} EXP penalty will be applied",
                     "random": "Songs will play randomly",
                     "reset": "Reset to the default shuffle mode of {{defaultShuffle}}"

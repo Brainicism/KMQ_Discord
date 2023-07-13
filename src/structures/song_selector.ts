@@ -7,6 +7,7 @@ import {
 } from "../constants";
 import { IPCLogger } from "../logger";
 import { chooseWeightedRandom, setDifference } from "../helpers/utils";
+import { sql } from "kysely";
 import ArtistType from "../enums/option_types/artist_type";
 import LanguageType from "../enums/option_types/language_type";
 import OstPreference from "../enums/option_types/ost_preference";
@@ -197,6 +198,8 @@ export default class SongSelector {
 
         switch (shuffleType) {
             case ShuffleType.POPULARITY:
+            case ShuffleType.CHRONOLOGICAL:
+            case ShuffleType.REVERSE_CHRONOLOGICAL:
                 return queriedSongList[0];
             case ShuffleType.WEIGHTED_EASY:
             case ShuffleType.WEIGHTED_HARD:
@@ -485,8 +488,24 @@ export default class SongSelector {
                 "publishedon",
                 "<=",
                 new Date(`${gameOptions.endYear}-12-31`)
-            )
-            .orderBy("views", "desc");
+            );
+
+        const shuffleType = gameOptions.shuffleType;
+        if (
+            [
+                ShuffleType.CHRONOLOGICAL,
+                ShuffleType.REVERSE_CHRONOLOGICAL,
+            ].includes(shuffleType)
+        ) {
+            queryBuilder = queryBuilder
+                .orderBy(
+                    sql`SUBSTRING(publishedon, 1, ${"YYYY-MM".length})`,
+                    shuffleType === ShuffleType.CHRONOLOGICAL ? "asc" : "desc"
+                )
+                .orderBy(sql`RAND()`);
+        } else {
+            queryBuilder = queryBuilder.orderBy("views", "desc");
+        }
 
         queryBuilder = queryBuilder.where(
             "rank",
@@ -503,7 +522,6 @@ export default class SongSelector {
 
         const count = result.length;
         result = result.slice(gameOptions.limitStart, gameOptions.limitEnd);
-        const shuffleType = gameOptions.shuffleType;
         let selectionWeightValues: Array<number>;
 
         switch (shuffleType) {

@@ -208,6 +208,7 @@
             "lowSongCountPenalty": "曲数が少ないとペナルティがある",
             "multipleChoicePenalty": "複数選択肢のペナルティ",
             "powerHourBonus": "パワーアワーボーナス",
+            "shuffleChronologicalPenalty": "シャッフルの時系列ペナルティ",
             "shufflePopularityPenalty": "シャッフル人気ペナルティ",
             "shuffleWeightedEasyPenalty": "シャッフル加重イージーペナルティ",
             "title": "EXPボーナス",
@@ -1123,6 +1124,7 @@
             "help": {
                 "description": "曲のシャッフル方法を選択してください。",
                 "example": {
+                    "chronological": "曲はリリースされた順番で再生され、一部ランダム性があります。{{penalty}} EXPのペナルティが適用されます",
                     "popularity": "曲は人気順に再生されます。{{penalty}} EXPのペナルティが適用されます。",
                     "random": "曲はランダムに再生されます。",
                     "reset": "デフォルトのシャッフルモードにリセットする（{{defaultShuffle}}）"

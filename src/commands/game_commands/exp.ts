@@ -123,6 +123,19 @@ export async function calculateOptionsExpMultiplierInternal(
             name: ExpBonusModifier.SHUFFLE_WEIGHTED_EASY,
             isPenalty: true,
         });
+    } else if (
+        [ShuffleType.CHRONOLOGICAL, ShuffleType.REVERSE_CHRONOLOGICAL].includes(
+            guildPreference.gameOptions.shuffleType
+        )
+    ) {
+        modifiers.push({
+            displayName: i18n.translate(
+                guildPreference.guildID,
+                "command.exp.shuffleChronologicalPenalty"
+            ),
+            name: ExpBonusModifier.SHUFFLE_CHRONOLOGICAL,
+            isPenalty: true,
+        });
     }
 
     if (guildPreference.isMultipleChoiceMode()) {

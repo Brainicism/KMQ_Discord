@@ -59,7 +59,7 @@ export default class ShuffleCommand implements BaseCommand {
                 random: `\`${ShuffleType.RANDOM}\``,
             }
         ),
-        usage: "/shuffle set\nshuffle:[random | popularity | weighted_easy | weighted_hard]\n\n/shuffle reset",
+        usage: "/shuffle set\nshuffle:[random | popularity | weighted_easy | weighted_hard | chronological | reversechronological]\n\n/shuffle reset",
         examples: [
             {
                 example: "`/shuffle set shuffle:random`",
@@ -77,6 +77,20 @@ export default class ShuffleCommand implements BaseCommand {
                         penalty: `${
                             ExpBonusModifierValues[
                                 ExpBonusModifier.SHUFFLE_POPULARITY
+                            ]
+                        }x`,
+                    }
+                ),
+            },
+            {
+                example: "`/shuffle set shuffle:chronological`",
+                explanation: i18n.translate(
+                    guildID,
+                    "command.shuffle.help.example.chronological",
+                    {
+                        penalty: `${
+                            ExpBonusModifierValues[
+                                ExpBonusModifier.SHUFFLE_CHRONOLOGICAL
                             ]
                         }x`,
                     }
