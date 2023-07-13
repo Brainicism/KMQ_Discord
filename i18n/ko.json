@@ -208,6 +208,7 @@
             "lowSongCountPenalty": "낮은 노래 횟수 패널티",
             "multipleChoicePenalty": "객관식 패널티",
             "powerHourBonus": "Power Hour 보너스",
+            "shuffleChronologicalPenalty": "셔플 시간순 패널티",
             "shufflePopularityPenalty": "셔플 인기 패널티",
             "shuffleWeightedEasyPenalty": "Shuffle Weighted Easy Penalty",
             "title": "경험치 보너스",
@@ -1123,6 +1124,7 @@
             "help": {
                 "description": "노래를 섞는 방법을 선택합니다.",
                 "example": {
+                    "chronological": "곡들은 출시된 순서로 재생되며, 약간의 무작위성이 있습니다. {{penalty}} EXP 패널티가 적용됩니다",
                     "popularity": "인기도에 따라 노래가 재생됩니다. {{penalty}} 경험치 패널티가 적용됩니다.",
                     "random": "노래가 무작위로 재생됩니다.",
                     "reset": "{{defaultShuffle}}의 기본 셔플 모드로 재설정합니다."

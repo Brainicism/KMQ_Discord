@@ -208,6 +208,7 @@
             "lowSongCountPenalty": "低歌曲数量惩罚",
             "multipleChoicePenalty": "多选惩罚",
             "powerHourBonus": "Power Hour奖励",
+            "shuffleChronologicalPenalty": "乱序播放的时间顺序惩罚",
             "shufflePopularityPenalty": "随机播放惩罚",
             "shuffleWeightedEasyPenalty": "随机加权易错惩罚",
             "title": "经验值奖励",
@@ -1123,6 +1124,7 @@
             "help": {
                 "description": "选择歌曲的随机方式",
                 "example": {
+                    "chronological": "歌曲将按照发布的顺序播放，其中会有一些随机性。将会应用{{penalty}} EXP的惩罚",
                     "popularity": "歌曲将根据流行度降序播放。将会施加{{penalty}}经验值惩罚",
                     "random": "歌曲将随机播放",
                     "reset": "重置为默认的{{defaultShuffle}}随机模式"

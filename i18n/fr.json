@@ -208,6 +208,7 @@
             "lowSongCountPenalty": "Pénalité pour faible nombre de chansons",
             "multipleChoicePenalty": "Pénalité pour choix multiples",
             "powerHourBonus": "Bonus Power Hour",
+            "shuffleChronologicalPenalty": "Pénalité chronologique de mélange",
             "shufflePopularityPenalty": "Pénalité pour popularité de Shuffle",
             "shuffleWeightedEasyPenalty": "Pénalité pondérée pour Shuffle facile",
             "title": "Bonus EXP",
@@ -1123,6 +1124,7 @@
             "help": {
                 "description": "Choisissez comment les chansons sont mélangées.",
                 "example": {
+                    "chronological": "Les chansons seront jouées dans l'ordre de leur sortie, avec une certaine aléatoire. Une pénalité de {{penalty}} EXP sera appliquée",
                     "popularity": "Les chansons seront jouées en fonction de leur popularité décroissante. Une pénalité de {{penalty}} EXP sera appliquée",
                     "random": "Les chansons seront jouées au hasard",
                     "reset": "Réinitialiser au mode de mélange par défaut de {{defaultShuffle}}"

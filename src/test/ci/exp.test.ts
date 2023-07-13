@@ -118,7 +118,7 @@ describe("exp command", () => {
                 });
 
                 describe("shuffle popularity penalty", () => {
-                    it("should return vote bonus modifier", async () => {
+                    it("should return shuffle popularity modifier", async () => {
                         await guildPreference.setShuffleType(
                             ShuffleType.POPULARITY
                         );
@@ -139,7 +139,7 @@ describe("exp command", () => {
                 });
 
                 describe("shuffle weighted easy penalty", () => {
-                    it("should return vote bonus modifier", async () => {
+                    it("should return shuffle weighted easy modifier", async () => {
                         await guildPreference.setShuffleType(
                             ShuffleType.WEIGHTED_EASY
                         );
@@ -155,6 +155,48 @@ describe("exp command", () => {
                         assert.strictEqual(
                             modifiers[0].name,
                             ExpBonusModifier.SHUFFLE_WEIGHTED_EASY
+                        );
+                    });
+                });
+
+                describe("shuffle chronological penalty", () => {
+                    it("should return shuffle chronological modifier", async () => {
+                        await guildPreference.setShuffleType(
+                            ShuffleType.CHRONOLOGICAL
+                        );
+
+                        const modifiers =
+                            await calculateOptionsExpMultiplierInternal(
+                                guildPreference,
+                                false,
+                                "dummy"
+                            );
+
+                        assert.strictEqual(modifiers.length, 1);
+                        assert.strictEqual(
+                            modifiers[0].name,
+                            ExpBonusModifier.SHUFFLE_CHRONOLOGICAL
+                        );
+                    });
+                });
+
+                describe("shuffle reverse chronological penalty", () => {
+                    it("should return shuffle chronological modifier", async () => {
+                        await guildPreference.setShuffleType(
+                            ShuffleType.REVERSE_CHRONOLOGICAL
+                        );
+
+                        const modifiers =
+                            await calculateOptionsExpMultiplierInternal(
+                                guildPreference,
+                                false,
+                                "dummy"
+                            );
+
+                        assert.strictEqual(modifiers.length, 1);
+                        assert.strictEqual(
+                            modifiers[0].name,
+                            ExpBonusModifier.SHUFFLE_CHRONOLOGICAL
                         );
                     });
                 });
