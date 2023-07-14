@@ -268,16 +268,20 @@ export default class SpotifyCommand implements BaseCommand {
             );
 
             if (matchedPlaylist.matchedSongs.length === 0) {
-                sendErrorMessage(messageContext, {
-                    title: i18n.translate(
-                        guildID,
-                        "command.spotify.noMatches.title"
-                    ),
-                    description: i18n.translate(
-                        guildID,
-                        "command.spotify.noMatches.description"
-                    ),
-                });
+                sendErrorMessage(
+                    messageContext,
+                    {
+                        title: i18n.translate(
+                            guildID,
+                            "command.spotify.noMatches.title"
+                        ),
+                        description: i18n.translate(
+                            guildID,
+                            "command.spotify.noMatches.description"
+                        ),
+                    },
+                    interaction
+                );
 
                 return;
             }
@@ -394,7 +398,7 @@ export default class SpotifyCommand implements BaseCommand {
         if (action === OptionAction.RESET) {
             playlistURL = undefined;
         } else if (action === OptionAction.SET) {
-            playlistURL = interactionOptions["playlist_url"];
+            playlistURL = encodeURI(interactionOptions["playlist_url"]);
         }
 
         await SpotifyCommand.updateOption(
