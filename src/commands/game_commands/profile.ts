@@ -2,6 +2,12 @@
 import { CUM_EXP_TABLE, EPHEMERAL_MESSAGE_FLAG } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
+    discordDateFormat,
+    friendlyFormattedNumber,
+    romanize,
+    visualProgressBar,
+} from "../../helpers/utils";
+import {
     fetchUser,
     getDebugLogHeader,
     getInteractionValue,
@@ -10,12 +16,6 @@ import {
     sendInfoMessage,
     tryCreateInteractionErrorAcknowledgement,
 } from "../../helpers/discord_utils";
-import {
-    friendlyFormattedDate,
-    friendlyFormattedNumber,
-    romanize,
-    visualProgressBar,
-} from "../../helpers/utils";
 import Eris from "eris";
 import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
@@ -99,14 +99,14 @@ async function getProfileFields(
 
     const songsGuessed = playerStats["songs_guessed"];
     const gamesPlayed = playerStats["games_played"];
-    const firstPlayDateString = friendlyFormattedDate(
+    const firstPlayDateString = discordDateFormat(
         new Date(playerStats["first_play"]),
-        guildID
+        "d"
     );
 
-    const lastActiveDateString = friendlyFormattedDate(
+    const lastActiveDateString = discordDateFormat(
         new Date(playerStats["last_active"]),
-        guildID
+        "R"
     );
 
     const exp = playerStats["exp"];
