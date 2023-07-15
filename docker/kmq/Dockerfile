@@ -40,6 +40,8 @@ RUN apt-get update && apt-get install -y default-mysql-client \
     ffmpeg \
     curl \
     unzip \
+    less \
+    vim \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /app /app
