@@ -224,7 +224,7 @@ export async function sendBeginGameSessionMessage(
             const recencyShowUpdate =
                 (staleUpdateThreshold - latestUpdate) / staleUpdateThreshold;
 
-            if (newsData && Math.random() < recencyShowUpdate) {
+            if (Math.random() < recencyShowUpdate) {
                 const recentUpdatePayload = {
                     title: clickableSlashCommand("news"),
                     description: newsData.map((x) => x.entry).join("\n"),
