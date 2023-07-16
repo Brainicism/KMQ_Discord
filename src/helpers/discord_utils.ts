@@ -738,6 +738,7 @@ export async function generateOptionsMessage(
     if (spotifyPlaylistID) {
         const matchedPlaylist =
             await State.spotifyManager.getMatchedSpotifySongs(
+                guildID,
                 spotifyPlaylistID,
                 premiumRequest,
                 false,
@@ -756,7 +757,9 @@ export async function generateOptionsMessage(
 
     const totalSongs = await getAvailableSongCount(
         guildPreference,
-        premiumRequest
+        premiumRequest,
+        messageContext,
+        interaction
     );
 
     if (

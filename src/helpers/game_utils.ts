@@ -18,8 +18,10 @@ import _ from "lodash";
 import dbContext from "../database_context";
 import type { AvailableGenders } from "../enums/option_types/gender";
 import type { MatchedPlaylist } from "../interfaces/matched_playlist";
+import type Eris from "eris";
 import type GuildPreference from "../structures/guild_preference";
 import type MatchedArtist from "../interfaces/matched_artist";
+import type MessageContext from "../structures/message_context";
 import type Patron from "../interfaces/patron";
 import type QueriedSong from "../interfaces/queried_song";
 import type Session from "../structures/session";
@@ -50,11 +52,15 @@ export async function ensureVoiceConnection(session: Session): Promise<void> {
 /**
  * @param guildPreference - The GuildPreference
  * @param isPremium - Whether to include premium songs
+ * @param messageContext - The message which triggered the song count checkb
+ * @param interaction - The interaction that triggered the song count check
  * @returns an object containing the total number of available songs before and after limit based on the GameOptions
  */
 export async function getAvailableSongCount(
     guildPreference: GuildPreference,
-    isPremium: boolean
+    isPremium: boolean,
+    messageContext?: MessageContext,
+    interaction?: Eris.CommandInteraction
 ): Promise<{
     count: number | undefined;
     countBeforeLimit: number | undefined;
@@ -72,13 +78,18 @@ export async function getAvailableSongCount(
                     guildPreference,
                     isPremium,
                     playlistID,
-                    !session.sessionInitialized
+                    !session.sessionInitialized,
+                    messageContext,
+                    interaction
                 )) as MatchedPlaylist;
             } else {
                 matchedPlaylist = (await new SongSelector().reloadSongs(
                     guildPreference,
                     isPremium,
-                    playlistID
+                    playlistID,
+                    false,
+                    messageContext,
+                    interaction
                 )) as MatchedPlaylist;
             }
 

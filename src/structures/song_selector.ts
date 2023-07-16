@@ -257,10 +257,11 @@ export default class SongSelector {
         }
 
         const playlist = await SongSelector.getSpotifySongList(
+            guildPreference.guildID,
             isPremium,
             playlistID,
             forceRefreshMetadata || false,
-            messageContext!,
+            messageContext,
             interaction!
         );
 
@@ -553,14 +554,16 @@ export default class SongSelector {
     }
 
     static async getSpotifySongList(
+        guildID: string,
         isPremium: boolean,
         playlistID: string,
         forceRefreshMetadata: boolean,
-        messageContext: MessageContext,
-        interaction: Eris.CommandInteraction
+        messageContext?: MessageContext,
+        interaction?: Eris.CommandInteraction
     ): Promise<QueriedSongList & MatchedPlaylist> {
         const { matchedSongs, metadata, truncated } =
             await State.spotifyManager.getMatchedSpotifySongs(
+                guildID,
                 playlistID,
                 isPremium,
                 forceRefreshMetadata,
