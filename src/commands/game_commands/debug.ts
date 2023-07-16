@@ -34,10 +34,12 @@ export default class DebugCommand implements BaseCommand {
             message.guildID
         );
 
+        const messageContext = MessageContext.fromMessage(message);
         const session = Session.getSession(message.guildID);
         const { count, countBeforeLimit } = await getAvailableSongCount(
             guildPreference,
-            await isPremiumRequest(session, message.author.id)
+            await isPremiumRequest(session, message.author.id),
+            messageContext
         );
 
         const fields: Array<Eris.EmbedField> = [];
@@ -69,9 +71,7 @@ export default class DebugCommand implements BaseCommand {
             inline: false,
         });
 
-        const voiceChannel = getUserVoiceChannel(
-            MessageContext.fromMessage(message)
-        );
+        const voiceChannel = getUserVoiceChannel(messageContext);
 
         if (voiceChannel) {
             fields.push({
@@ -86,7 +86,7 @@ export default class DebugCommand implements BaseCommand {
         }
 
         const debugID = uuid.v4();
-        await sendInfoMessage(MessageContext.fromMessage(message), {
+        await sendInfoMessage(messageContext, {
             title: i18n.translate(message.guildID, "command.debug.title"),
             description: i18n.translate(
                 message.guildID,

@@ -66,6 +66,7 @@ export default class SpotifyManager {
     }
 
     /**
+     * @param guildID - The guild to retrieve songs for
      * @param playlistID - The playlist to retrieve songs from
      * @param isPremium - Whether the user is premium or not
      * @param forceRefreshMetadata - Whether to request new metadata
@@ -73,10 +74,11 @@ export default class SpotifyManager {
      * @param interaction - The interaction
      */
     getMatchedSpotifySongs = async (
+        guildID: string,
         playlistID: string,
         isPremium: boolean,
         forceRefreshMetadata: boolean,
-        messageContext: MessageContext,
+        messageContext?: MessageContext,
         interaction?: Eris.CommandInteraction
     ): Promise<MatchedPlaylist> => {
         const UNMATCHED_PLAYLIST = {
@@ -128,36 +130,36 @@ export default class SpotifyManager {
             logger.info(`Using cached playlist for ${playlistID}`);
             ({ matchedSongs, truncated } = cachedPlaylist);
         } else {
-            if (this.isParseInProgress(messageContext.guildID)) {
-                logger.warn(
-                    `${getDebugLogHeader(
-                        messageContext
-                    )} | Skipping parsing due to another parse in progress. playlistID = ${playlistID}`
-                );
+            if (this.isParseInProgress(guildID)) {
+                if (messageContext) {
+                    logger.warn(
+                        `${getDebugLogHeader(
+                            messageContext
+                        )} | Skipping parsing due to another parse in progress. playlistID = ${playlistID}`
+                    );
 
-                await sendErrorMessage(
-                    messageContext,
-                    {
-                        title: i18n.translate(
-                            messageContext.guildID,
-                            "command.spotify.parsingAlreadyInProgress.title"
-                        ),
-                        description: i18n.translate(
-                            messageContext.guildID,
-                            "command.spotify.parsingAlreadyInProgress.description"
-                        ),
-                    },
-                    interaction
-                );
+                    await sendErrorMessage(
+                        messageContext,
+                        {
+                            title: i18n.translate(
+                                messageContext.guildID,
+                                "command.spotify.parsingAlreadyInProgress.title"
+                            ),
+                            description: i18n.translate(
+                                messageContext.guildID,
+                                "command.spotify.parsingAlreadyInProgress.description"
+                            ),
+                        },
+                        interaction
+                    );
+                }
 
                 return UNMATCHED_PLAYLIST;
             } else {
-                this.guildsParseInProgress.add(messageContext.guildID);
+                this.guildsParseInProgress.add(guildID);
             }
 
-            if (interaction) {
-                await interaction.acknowledge();
-            }
+            await interaction?.acknowledge();
 
             const spotifySongs: Array<SpotifyTrack> = [];
             const start = Date.now();
@@ -181,10 +183,7 @@ export default class SpotifyManager {
                 10,
                 requestURLs,
                 (requestURL: string) =>
-                    this.generateSpotifyResponsePromise(
-                        requestURL,
-                        messageContext.guildID
-                    )
+                    this.generateSpotifyResponsePromise(requestURL, guildID)
             )) {
                 numProcessedPlaylistPages++;
                 if (
@@ -215,11 +214,11 @@ export default class SpotifyManager {
             );
 
             const parsingTitle = i18n.translate(
-                messageContext.guildID,
+                guildID,
                 "command.spotify.parsing"
             );
 
-            let message: Eris.Message | null;
+            let message: Eris.Message | null = null;
             if (interaction?.acknowledged) {
                 message = await interaction.createFollowup({
                     embeds: [
@@ -232,7 +231,7 @@ export default class SpotifyManager {
                         },
                     ],
                 });
-            } else {
+            } else if (messageContext) {
                 message = await sendInfoMessage(messageContext, {
                     title: parsingTitle,
                     description: visualProgressBar(0, spotifySongs.length),
@@ -299,7 +298,7 @@ export default class SpotifyManager {
                 );
             } finally {
                 clearInterval(updateParsing);
-                this.guildsParseInProgress.delete(messageContext.guildID);
+                this.guildsParseInProgress.delete(guildID);
             }
 
             message?.edit({
