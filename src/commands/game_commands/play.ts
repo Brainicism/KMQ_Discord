@@ -176,36 +176,67 @@ export async function sendBeginGameSessionMessage(
 
     const additionalPayloads = [optionsEmbedPayload];
 
-    let newsData: string | null = null;
-    let recencyShowUpdate = 0;
-    let mostRecentUpdate: Date | null = null;
+    let newsFileContent: string | undefined;
     try {
-        newsData = (await fs.promises.readFile(DataFiles.NEWS)).toString();
-        newsData = newsData.split("\n\n")[0];
-        mostRecentUpdate = new Date(newsData.split("\n")[0]);
+        newsFileContent = (
+            await fs.promises.readFile(DataFiles.NEWS)
+        ).toString();
     } catch (e) {
         logger.error(`News file does not exist or is empty. error = ${e}`);
     }
 
-    if (mostRecentUpdate && !Number.isNaN(mostRecentUpdate.getTime())) {
-        const daysSinceUpdate = durationDays(
-            mostRecentUpdate.getTime(),
-            Date.now()
-        );
+    if (newsFileContent) {
+        const staleUpdateThreshold = 30;
+        const newsData: Array<{ updateTime: Date; entry: string }> =
+            newsFileContent
+                .split("\n\n")
+                .filter((x) => x)
+                .map((x) => ({
+                    updateTime: new Date(x.split("\n")[0].replaceAll("*", "")),
+                    entry: x,
+                }))
+                .filter((x) => {
+                    if (Number.isNaN(x.updateTime.getTime())) {
+                        logger.error(
+                            `Error parsing update time for ${x.entry}`
+                        );
+                        return false;
+                    }
 
-        recencyShowUpdate = (30 - daysSinceUpdate) / 30;
-    } else {
-        logger.error("Error parsing date in news file");
-    }
+                    const updateAge = durationDays(
+                        x.updateTime.getTime(),
+                        Date.now()
+                    );
 
-    if (newsData && Math.random() < recencyShowUpdate) {
-        const recentUpdatePayload = {
-            title: clickableSlashCommand("news"),
-            description: newsData,
-            footerText: i18n.translate(guildID, "command.news.updates.footer"),
-        };
+                    if (updateAge > staleUpdateThreshold) {
+                        return false;
+                    }
 
-        additionalPayloads.push(recentUpdatePayload);
+                    return true;
+                });
+
+        if (newsData.length > 0) {
+            const latestUpdate = durationDays(
+                newsData[0].updateTime.getTime(),
+                Date.now()
+            );
+
+            const recencyShowUpdate =
+                (staleUpdateThreshold - latestUpdate) / staleUpdateThreshold;
+
+            if (Math.random() < recencyShowUpdate) {
+                const recentUpdatePayload = {
+                    title: clickableSlashCommand("news"),
+                    description: newsData.map((x) => x.entry).join("\n"),
+                    footerText: i18n.translate(
+                        guildID,
+                        "command.news.updates.footer"
+                    ),
+                };
+
+                additionalPayloads.push(recentUpdatePayload);
+            }
+        }
     }
 
     await sendInfoMessage(
