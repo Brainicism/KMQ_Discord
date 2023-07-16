@@ -190,7 +190,7 @@ export async function sendBeginGameSessionMessage(
         const newsData: Array<{ updateTime: Date; entry: string }> =
             newsFileContent
                 .split("\n\n")
-                .map((x) => x)
+                .filter((x) => x)
                 .map((x) => ({
                     updateTime: new Date(x.split("\n")[0].replaceAll("*", "")),
                     entry: x,
