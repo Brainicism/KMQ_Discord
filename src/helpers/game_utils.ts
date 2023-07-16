@@ -52,7 +52,7 @@ export async function ensureVoiceConnection(session: Session): Promise<void> {
 /**
  * @param guildPreference - The GuildPreference
  * @param isPremium - Whether to include premium songs
- * @param messageContext - The message which triggered the song count checkb
+ * @param messageContext - The message which triggered the song count check
  * @param interaction - The interaction that triggered the song count check
  * @returns an object containing the total number of available songs before and after limit based on the GameOptions
  */
@@ -112,7 +112,7 @@ export async function getAvailableSongCount(
         };
     } catch (e) {
         logger.error(
-            `gid: ${guildPreference.guildID} | Error retrieving song count ${e}`
+            `gid: ${guildPreference.guildID} | Error retrieving song count ${e.stack}`
         );
         return {
             count: undefined,
