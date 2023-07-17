@@ -9,11 +9,7 @@ import {
     QUICK_GUESS_MS,
     ROUND_MAX_RUNNERS_UP,
 } from "../constants";
-import {
-    durationSeconds,
-    friendlyFormattedNumber,
-    getMention,
-} from "../helpers/utils";
+import { friendlyFormattedNumber, getMention } from "../helpers/utils";
 import ExpBonusModifier from "../enums/exp_bonus_modifier";
 import GameType from "../enums/game_type";
 import GuessModeType from "../enums/option_types/guess_mode_type";
@@ -46,7 +42,7 @@ interface GuessCorrectness {
 }
 
 type GuessResult = {
-    timeToGuessSeconds: number;
+    timeToGuessMs: number;
     guess: string;
     correct: boolean;
 };
@@ -358,7 +354,7 @@ export default class GameRound extends Round {
 
         this.guesses[playerID] = this.guesses[playerID] || [];
         this.guesses[playerID].push({
-            timeToGuessSeconds: durationSeconds(this.startedAt, createdAt),
+            timeToGuessMs: createdAt - this.startedAt,
             guess,
             correct: pointsAwarded > 0,
         });
@@ -492,9 +488,7 @@ export default class GameRound extends Round {
         const sortedGuesses = Object.entries(this.guesses).map(
             (x): [string, Array<GuessResult>] => [
                 x[0],
-                x[1].sort(
-                    (a, b) => a.timeToGuessSeconds - b.timeToGuessSeconds
-                ),
+                x[1].sort((a, b) => a.timeToGuessMs - b.timeToGuessMs),
             ]
         );
 
@@ -506,12 +500,10 @@ export default class GameRound extends Round {
 
                     return [playerID, mostRecentGuess];
                 })
-                .sort(
-                    (a, b) => a[1].timeToGuessSeconds - b[1].timeToGuessSeconds
-                )
+                .sort((a, b) => a[1].timeToGuessMs - b[1].timeToGuessMs)
                 .slice(0, ROUND_MAX_RUNNERS_UP)) {
                 const userID = entry[0];
-                const timeToGuess = entry[1].timeToGuessSeconds;
+                const timeToGuessMs = entry[1].timeToGuessMs;
                 const isCorrect = entry[1].correct;
                 let displayedGuess = entry[1].guess;
                 if (displayedGuess.length > MAX_DISPLAYED_GUESS_LENGTH) {
@@ -539,10 +531,8 @@ export default class GameRound extends Round {
                 correctDescription += `\n${
                     isCorrect ? CORRECT_GUESS_EMOJI : INCORRECT_GUESS_EMOJI
                 } ${getMention(userID)}: \`\`${displayedGuess}\`\`${streak}(${
-                    timeToGuess * 1000 <= QUICK_GUESS_MS
-                        ? QUICK_GUESS_EMOJI
-                        : ""
-                }${timeToGuess}s)${expGain}`;
+                    timeToGuessMs <= QUICK_GUESS_MS ? QUICK_GUESS_EMOJI : ""
+                }${timeToGuessMs / 1000}s)${expGain}`;
             }
 
             if (Object.keys(this.guesses).length >= ROUND_MAX_RUNNERS_UP) {
@@ -570,13 +560,11 @@ export default class GameRound extends Round {
                 const earliestGuess = guesses.find((x) => x.correct);
 
                 if (earliestGuess) {
-                    const timeToGuess = earliestGuess.timeToGuessSeconds;
-
                     playerIDToTimeToGuess[playerID] = `${
-                        timeToGuess * 1000 <= QUICK_GUESS_MS
+                        earliestGuess.timeToGuessMs <= QUICK_GUESS_MS
                             ? QUICK_GUESS_EMOJI
                             : ""
-                    }${timeToGuess}`;
+                    }${earliestGuess.timeToGuessMs / 1000}`;
                 }
             }
 

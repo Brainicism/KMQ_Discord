@@ -246,7 +246,7 @@ export function participantExpScalingModifier(numParticipants: number): number {
  * @param gameRound - The game round
  * @param numParticipants - The number of participants
  * @param streak - The current guessing streak
- * @param guessSpeed - The guess speed
+ * @param guessSpeedMs - The guess speed, in milliseconds
  * @param place - The place of the guess
  * @returns The round's total EXP modifier
  */
@@ -254,7 +254,7 @@ export function calculateRoundExpMultiplier(
     gameRound: GameRound,
     numParticipants: number,
     streak: number,
-    guessSpeed: number,
+    guessSpeedMs: number,
     place: number
 ): number {
     let expModifier = 1;
@@ -262,7 +262,7 @@ export function calculateRoundExpMultiplier(
     // incentivize for number of participants from 1x to 1.5x
     expModifier *= participantExpScalingModifier(numParticipants);
     // bonus for quick guess
-    if (guessSpeed < QUICK_GUESS_MS) {
+    if (guessSpeedMs < QUICK_GUESS_MS) {
         expModifier *= ExpBonusModifierValues[ExpBonusModifier.QUICK_GUESS];
     }
 
@@ -290,7 +290,7 @@ export function calculateRoundExpMultiplier(
  * @param gameRound - The game round
  * @param numParticipants - The number of participants
  * @param streak - The current guessing streak
- * @param guessSpeed - The guess speed
+ * @param guessSpeedMs - The guess speed, in milliseconds
  * @param place - The place of the guess
  * @param voteBonusExp - Whether bonus EXP should be applied to the modifier
  * @param playerID - the player's ID
@@ -301,7 +301,7 @@ export async function calculateTotalRoundExp(
     gameRound: GameRound,
     numParticipants: number,
     streak: number,
-    guessSpeed: number,
+    guessSpeedMs: number,
     place: number,
     voteBonusExp: boolean,
     playerID: string
@@ -316,7 +316,7 @@ export async function calculateTotalRoundExp(
         gameRound,
         numParticipants,
         streak,
-        guessSpeed,
+        guessSpeedMs,
         place
     );
 
