@@ -10,7 +10,6 @@ import {
     ROUND_MAX_RUNNERS_UP,
 } from "../constants";
 import {
-    durationSeconds,
     friendlyFormattedNumber,
     getMention,
 } from "../helpers/utils";
@@ -492,7 +491,9 @@ export default class GameRound extends Round {
         const sortedGuesses = Object.entries(this.guesses).map(
             (x): [string, Array<GuessResult>] => [
                 x[0],
-                x[1].sort((a, b) => a.timeToGuessMs - b.timeToGuessMs),
+                x[1].sort(
+                    (a, b) => a.timeToGuessMs - b.timeToGuessMs
+                ),
             ]
         );
 
@@ -504,7 +505,9 @@ export default class GameRound extends Round {
 
                     return [playerID, mostRecentGuess];
                 })
-                .sort((a, b) => a[1].timeToGuessMs - b[1].timeToGuessMs)
+                .sort(
+                    (a, b) => a[1].timeToGuessMs - b[1].timeToGuessMs
+                )
                 .slice(0, ROUND_MAX_RUNNERS_UP)) {
                 const userID = entry[0];
                 const timeToGuessMs = entry[1].timeToGuessMs;
@@ -535,7 +538,9 @@ export default class GameRound extends Round {
                 correctDescription += `\n${
                     isCorrect ? CORRECT_GUESS_EMOJI : INCORRECT_GUESS_EMOJI
                 } ${getMention(userID)}: \`\`${displayedGuess}\`\`${streak}(${
-                    timeToGuessMs <= QUICK_GUESS_MS ? QUICK_GUESS_EMOJI : ""
+                    timeToGuessMs <= QUICK_GUESS_MS
+                        ? QUICK_GUESS_EMOJI
+                        : ""
                 }${timeToGuessMs / 1000}s)${expGain}`;
             }
 
