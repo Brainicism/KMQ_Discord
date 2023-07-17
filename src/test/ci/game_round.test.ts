@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import { ExpBonusModifierValues } from "../../constants";
-import { delay, durationSeconds } from "../../helpers/utils";
+import { delay } from "../../helpers/utils";
 import ExpBonusModifier from "../../enums/exp_bonus_modifier";
 import GameRound, {
     cleanArtistName,
@@ -713,10 +713,7 @@ describe("game round", () => {
             assert.deepStrictEqual(gameRound.getGuesses(), {
                 [playerID]: [
                     {
-                        timeToGuessSeconds: durationSeconds(
-                            gameRound.startedAt,
-                            createdAt
-                        ),
+                        timeToGuessMs: createdAt - gameRound.startedAt,
                         guess,
                         correct: true,
                     },
@@ -745,10 +742,8 @@ describe("game round", () => {
             assert.deepStrictEqual(gameRound.getGuesses(), {
                 [playerID]: [
                     {
-                        timeToGuessSeconds: durationSeconds(
-                            gameRound.startedAt,
-                            firstGuessCreatedAt
-                        ),
+                        timeToGuessMs:
+                            firstGuessCreatedAt - gameRound.startedAt,
                         guess: firstGuess,
                         correct: false,
                     },
@@ -772,18 +767,14 @@ describe("game round", () => {
             assert.deepStrictEqual(gameRound.getGuesses(), {
                 [playerID]: [
                     {
-                        timeToGuessSeconds: durationSeconds(
-                            gameRound.startedAt,
-                            firstGuessCreatedAt
-                        ),
+                        timeToGuessMs:
+                            firstGuessCreatedAt - gameRound.startedAt,
                         guess: firstGuess,
                         correct: false,
                     },
                     {
-                        timeToGuessSeconds: durationSeconds(
-                            gameRound.startedAt,
-                            secondGuessCreatedAt
-                        ),
+                        timeToGuessMs:
+                            secondGuessCreatedAt - gameRound.startedAt,
                         guess: secondGuess,
                         correct: true,
                     },
