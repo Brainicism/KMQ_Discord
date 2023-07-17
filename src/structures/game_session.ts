@@ -1492,13 +1492,13 @@ export default class GameSession extends Session {
             (guessResult.correctGuessers ?? []).map(
                 async (correctGuesser, idx) => {
                     const guessPosition = idx + 1;
-                    const timeToGuess = (
+                    const timeToGuessMs = (
                         this.gameType === GameType.HIDDEN ? Math.max : Math.min
                     )(
                         ...round
                             .getGuesses()
                             [correctGuesser.id].filter((x) => x.correct)
-                            .map((x) => x.timeToGuessSeconds)
+                            .map((x) => x.timeToGuessMs)
                     );
 
                     const expGain = await calculateTotalRoundExp(
@@ -1506,7 +1506,7 @@ export default class GameSession extends Session {
                         round,
                         getNumParticipants(this.voiceChannelID),
                         lastGuesserStreak,
-                        timeToGuess,
+                        timeToGuessMs,
                         guessPosition,
                         await userBonusIsActive(correctGuesser.id),
                         correctGuesser.id
