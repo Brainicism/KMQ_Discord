@@ -1401,6 +1401,7 @@
                 "alreadyEliminated": "あなたはすでにこのラウンドで敗退しています。",
                 "bookmarkOutsideGame": "ゲーム中には曲をブックマークできません。",
                 "eliminated": "あなたはこのラウンドで敗退しました。",
+                "guildOnly": "KMQはサーバーでのみ使用できます。",
                 "invalidBookmark": "最近の{{BOOKMARK_MESSAGE_SIZE}}ラウンドで再生された曲のみブックマークできます。ボットから送信されたメッセージに含まれる曲をブックマークする必要があります。",
                 "optionFromPreviousRound": "すでに完了したラウンドからオプションを選択しようとしています。"
             },

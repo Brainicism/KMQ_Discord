@@ -245,7 +245,10 @@ async function recentMusicShowWin(lng: LocaleType): Promise<string[]> {
                 x["link"]
             ),
             musicShow: musicShows[x["music_show"] as keyof typeof musicShows],
-            winDate: x["win_date"].toISOString().substring(0, 10),
+            winDate: discordDateFormat(
+                new Date(x["win_date"].toISOString().substring(0, 10)),
+                "d"
+            ),
             lng,
         })
     );

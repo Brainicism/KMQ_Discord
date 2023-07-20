@@ -1733,9 +1733,9 @@ export async function tryCreateInteractionErrorAcknowledgement(
             embeds: [
                 {
                     color: EMBED_ERROR_COLOR,
-                    author: {
-                        name: interaction.member!.username,
-                        icon_url: interaction.member!.avatarURL,
+                    author: interaction.member && {
+                        name: interaction.member.username,
+                        icon_url: interaction.member.avatarURL,
                     },
                     title:
                         title ||
