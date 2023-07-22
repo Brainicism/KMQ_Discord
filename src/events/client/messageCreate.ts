@@ -1,8 +1,7 @@
-import * as uuid from "uuid";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
-    sendErrorMessage,
+    notifyCommandError,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import Eris from "eris";
@@ -11,7 +10,6 @@ import GuildPreference from "../../structures/guild_preference";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
-import i18n from "../../helpers/localization_manager";
 import validate from "../../helpers/validate";
 import type { GuildTextableMessage } from "../../types";
 import type ParsedMessage from "../../interfaces/parsed_message";
@@ -134,32 +132,11 @@ export default async function messageCreateHandler(
                     parsedMessage,
                 });
             } catch (err) {
-                const debugId = uuid.v4();
-
-                if (err instanceof Error) {
-                    logger.error(
-                        `Error while invoking command (${parsedMessage.action}) | ${debugId} | Exception Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}}`
-                    );
-                } else {
-                    logger.error(
-                        `Error while invoking command (${
-                            parsedMessage.action
-                        }) | ${debugId} | Error: ${JSON.stringify(err)}`
-                    );
-                }
-
-                sendErrorMessage(messageContext, {
-                    title: i18n.translate(
-                        message.guildID,
-                        "misc.failure.command.title"
-                    ),
-                    description: i18n.translate(
-                        message.guildID,
-                        "misc.failure.command.description",
-                        { debugId }
-                    ),
-                });
-
+                await notifyCommandError(
+                    messageContext,
+                    parsedMessage.action,
+                    err
+                );
                 const newSession = Session.getSession(message.guildID);
 
                 if (newSession) {

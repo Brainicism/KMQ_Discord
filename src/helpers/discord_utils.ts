@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
+import * as uuid from "uuid";
 import {
     BOOKMARK_COMMAND_NAME,
     EMBED_ERROR_COLOR,
@@ -1154,9 +1155,18 @@ export async function sendOptionsMessage(
     );
 
     if (!optionsEmbed) {
-        throw new Error(
-            "Unexpectedly unable to generate options embed in sendOptionsMessage"
+        logger.error(
+            `${getDebugLogHeader(
+                messageContext
+            )} | Unexpectedly unable to generate options embed in sendOptionsMessage. session = ${!!session}. updatedOptions = ${JSON.stringify(
+                updatedOptions
+            )}. preset = ${preset}. allReset = ${allReset}. interaction = ${!!interaction}`
         );
+        if (interaction && !interaction.acknowledged) {
+            await interaction.acknowledge();
+        }
+
+        return;
     }
 
     if (interaction?.acknowledged) {
@@ -2132,3 +2142,47 @@ export const updateAppCommands = async (
         }
     }
 };
+
+/**
+ * Sends a message to the user that the command failed
+ * @param messageContext - the message context
+ * @param commandName - the name of the command that failed
+ * @param err - the error that occurred
+ */
+export async function notifyCommandError(
+    messageContext: MessageContext,
+    commandName: string,
+    err: any
+): Promise<void> {
+    const debugId = uuid.v4();
+
+    if (err instanceof Error) {
+        logger.error(
+            `${getDebugLogHeader(
+                messageContext
+            )} | Error while invoking command (${commandName}) | ${debugId} | Exception Name: ${
+                err.name
+            }. Reason: ${err.message}. Trace: ${err.stack}}`
+        );
+    } else {
+        logger.error(
+            `${getDebugLogHeader(
+                messageContext
+            )} | Error while invoking command (${commandName}) | ${debugId} | Error: ${JSON.stringify(
+                err
+            )}`
+        );
+    }
+
+    await sendErrorMessage(messageContext, {
+        title: i18n.translate(
+            messageContext.guildID,
+            "misc.failure.command.title"
+        ),
+        description: i18n.translate(
+            messageContext.guildID,
+            "misc.failure.command.description",
+            { debugId }
+        ),
+    });
+}
