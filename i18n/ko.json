@@ -1401,6 +1401,7 @@
                 "alreadyEliminated": "당신은 이미 이번 라운드에서 탈락했습니다.",
                 "bookmarkOutsideGame": "게임 중에만 노래를 북마크할 수 있습니다.",
                 "eliminated": "당신은 이번 라운드에서 탈락했습니다.",
+                "guildOnly": "KMQ는 서버에서만 사용할 수 있습니다.",
                 "invalidBookmark": "최근 {{BOOKMARK_MESSAGE_SIZE}} 라운드에서 재생한 노래만 북마크에 추가할 수 있습니다. 노래가 포함된 봇이 보낸 메시지를 북마크해야 합니다.",
                 "optionFromPreviousRound": "이미 완료된 라운드에서 옵션을 선택하려고 합니다."
             },

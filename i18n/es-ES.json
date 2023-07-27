@@ -1401,6 +1401,7 @@
                 "alreadyEliminated": "Ya has sido eliminado en esta ronda.",
                 "bookmarkOutsideGame": "Solo puedes marcar canciones durante un juego.",
                 "eliminated": "Has sido eliminado en esta ronda.",
+                "guildOnly": "KMQ sólo puede ser utilizado en servidores.",
                 "invalidBookmark": "Solo puedes marcar canciones que hayan sido reproducidas en las últimas {{BOOKMARK_MESSAGE_SIZE}} rondas. Debes marcar el mensaje enviado por el bot que contiene la canción.",
                 "optionFromPreviousRound": "Estás intentando elegir una opción de una ronda que ya ha sido completada."
             },

@@ -1401,6 +1401,7 @@
                 "alreadyEliminated": "Vous avez déjà été éliminé(e) ce tour.",
                 "bookmarkOutsideGame": "Vous ne pouvez marquer des chansons que pendant une partie.",
                 "eliminated": "Vous avez été éliminé(e) ce tour.",
+                "guildOnly": "KMQ ne peut être utilisé que dans les serveurs.",
                 "invalidBookmark": "Vous ne pouvez marquer que les chansons récemment jouées dans les {{BOOKMARK_MESSAGE_SIZE}} derniers tours. Vous devez marquer le message envoyé par le bot contenant la chanson.",
                 "optionFromPreviousRound": "Vous essayez de choisir une option d'un tour déjà terminé."
             },
