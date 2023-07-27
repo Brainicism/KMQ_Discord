@@ -10,7 +10,7 @@ import {
     generateOptionsMessage,
     getDebugLogHeader,
     getInteractionValue,
-    notifyCommandError,
+    notifyOptionsGenerationError,
     sendErrorMessage,
     sendInfoMessage,
     sendOptionsMessage,
@@ -368,14 +368,10 @@ export default class SpotifyCommand implements BaseCommand {
 
             if (optionsEmbed) {
                 await interaction.createFollowup({
-                    embeds: [generateEmbed(messageContext, optionsEmbed!)],
+                    embeds: [generateEmbed(messageContext, optionsEmbed)],
                 });
             } else {
-                await notifyCommandError(
-                    messageContext,
-                    "spotify",
-                    "Error generating options embed payload"
-                );
+                await notifyOptionsGenerationError(messageContext, "spotify");
             }
         } else {
             await sendOptionsMessage(

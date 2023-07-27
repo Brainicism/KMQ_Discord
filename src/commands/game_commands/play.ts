@@ -32,7 +32,7 @@ import {
     getInteractionValue,
     getUserTag,
     getUserVoiceChannel,
-    notifyCommandError,
+    notifyOptionsGenerationError,
     sendErrorMessage,
     sendInfoMessage,
     tryCreateInteractionSuccessAcknowledgement,
@@ -175,11 +175,7 @@ export async function sendBeginGameSessionMessage(
 
         additionalPayloads.push(optionsEmbedPayload);
     } else {
-        await notifyCommandError(
-            messageContext,
-            "play",
-            "Error generating options embed payload"
-        );
+        await notifyOptionsGenerationError(messageContext, "play");
     }
 
     let newsFileContent: string | undefined;

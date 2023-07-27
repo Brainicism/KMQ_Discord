@@ -10,7 +10,7 @@ import {
     getDebugLogHeader,
     getInteractionValue,
     getMatchedArtists,
-    notifyCommandError,
+    notifyOptionsGenerationError,
     processGroupAutocompleteInteraction,
     sendErrorMessage,
     sendInfoMessage,
@@ -397,11 +397,7 @@ export default class IncludeCommand implements BaseCommand {
                 interaction
             );
         } else {
-            await notifyCommandError(
-                messageContext,
-                "include",
-                "Error generating options embed payload"
-            );
+            await notifyOptionsGenerationError(messageContext, "include");
         }
     }
 

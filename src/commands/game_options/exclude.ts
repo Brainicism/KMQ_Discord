@@ -10,7 +10,7 @@ import {
     getDebugLogHeader,
     getInteractionValue,
     getMatchedArtists,
-    notifyCommandError,
+    notifyOptionsGenerationError,
     processGroupAutocompleteInteraction,
     sendErrorMessage,
     sendInfoMessage,
@@ -463,11 +463,7 @@ export default class ExcludeCommand implements BaseCommand {
                 interaction
             );
         } else {
-            await notifyCommandError(
-                messageContext,
-                "exclude",
-                "Error generating options embed payload"
-            );
+            await notifyOptionsGenerationError(messageContext, "exclude");
         }
     }
 

@@ -3,7 +3,7 @@ import { IPCLogger } from "../../logger";
 import {
     generateOptionsMessage,
     getDebugLogHeader,
-    notifyCommandError,
+    notifyOptionsGenerationError,
     sendErrorMessage,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
@@ -443,11 +443,7 @@ export default class AddCommand implements BaseCommand {
                 interaction
             );
         } else {
-            await notifyCommandError(
-                messageContext,
-                "add",
-                "Error generating options embed payload"
-            );
+            await notifyOptionsGenerationError(messageContext, "add");
         }
     }
 }

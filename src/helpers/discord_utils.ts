@@ -767,7 +767,7 @@ export async function generateOptionsMessage(
         totalSongs.count === undefined ||
         totalSongs.countBeforeLimit === undefined
     ) {
-        sendErrorMessage(messageContext, {
+        await sendErrorMessage(messageContext, {
             title: i18n.translate(
                 guildID,
                 "misc.failure.retrievingSongData.title"
@@ -2149,40 +2149,27 @@ export const updateAppCommands = async (
  * @param commandName - the name of the command that failed
  * @param err - the error that occurred
  */
-export async function notifyCommandError(
+export async function notifyOptionsGenerationError(
     messageContext: MessageContext,
-    commandName: string,
-    err: any
+    commandName: string
 ): Promise<void> {
     const debugId = uuid.v4();
 
-    if (err instanceof Error) {
-        logger.error(
-            `${getDebugLogHeader(
-                messageContext
-            )} | Error while invoking command (${commandName}) | ${debugId} | Exception Name: ${
-                err.name
-            }. Reason: ${err.message}. Trace: ${err.stack}}`
-        );
-    } else {
-        logger.error(
-            `${getDebugLogHeader(
-                messageContext
-            )} | Error while invoking command (${commandName}) | ${debugId} | Error: ${JSON.stringify(
-                err
-            )}`
-        );
-    }
+    logger.error(
+        `${getDebugLogHeader(
+            messageContext
+        )} | Error generating options embed payload in ${commandName}. debugId = ${debugId}`
+    );
 
     await sendErrorMessage(messageContext, {
         title: i18n.translate(
             messageContext.guildID,
-            "misc.failure.command.title"
+            "misc.failure.optionsGeneration.title"
         ),
         description: i18n.translate(
             messageContext.guildID,
-            "misc.failure.command.description",
-            { debugId }
+            "misc.failure.optionsGeneration.description",
+            { resetCommand: "`/reset`", helpCommand: "`/help`", debugId }
         ),
     });
 }

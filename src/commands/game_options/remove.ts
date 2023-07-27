@@ -3,7 +3,7 @@ import { IPCLogger } from "../../logger";
 import {
     generateOptionsMessage,
     getDebugLogHeader,
-    notifyCommandError,
+    notifyOptionsGenerationError,
     sendErrorMessage,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
@@ -326,11 +326,7 @@ export default class RemoveCommand implements BaseCommand {
                 interaction
             );
         } else {
-            await notifyCommandError(
-                messageContext,
-                "remove",
-                "Error generating options embed payload"
-            );
+            await notifyOptionsGenerationError(messageContext, "remove");
         }
     }
 }

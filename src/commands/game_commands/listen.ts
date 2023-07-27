@@ -7,7 +7,7 @@ import {
     getDebugLogHeader,
     getGameInfoMessage,
     getUserVoiceChannel,
-    notifyCommandError,
+    notifyOptionsGenerationError,
     sendErrorMessage,
     sendInfoMessage,
     voicePermissionsCheck,
@@ -76,11 +76,7 @@ export async function sendBeginListeningSessionMessage(
     if (optionsEmbedPayload) {
         additionalPayloads.push(optionsEmbedPayload);
     } else {
-        await notifyCommandError(
-            messageContext,
-            "listen",
-            "Error generating options embed payload"
-        );
+        await notifyOptionsGenerationError(messageContext, "listen");
     }
 
     await sendInfoMessage(

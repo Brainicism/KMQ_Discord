@@ -1,7 +1,8 @@
+import * as uuid from "uuid";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
-    notifyCommandError,
+    sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import Eris from "eris";
@@ -10,6 +11,7 @@ import GuildPreference from "../../structures/guild_preference";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
+import i18n from "../../helpers/localization_manager";
 import validate from "../../helpers/validate";
 import type { GuildTextableMessage } from "../../types";
 import type ParsedMessage from "../../interfaces/parsed_message";
@@ -132,11 +134,29 @@ export default async function messageCreateHandler(
                     parsedMessage,
                 });
             } catch (err) {
-                await notifyCommandError(
-                    messageContext,
-                    parsedMessage.action,
-                    err
+                const debugId = uuid.v4();
+
+                logger.error(
+                    `${getDebugLogHeader(
+                        messageContext
+                    )} | Error while invoking command (${
+                        parsedMessage.action
+                    }) | ${debugId} | Exception Name: ${err.name}. Reason: ${
+                        err.message
+                    }. Trace: ${err.stack}}`
                 );
+
+                await sendErrorMessage(messageContext, {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "misc.failure.command.title"
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "misc.failure.command.description",
+                        { debugId }
+                    ),
+                });
                 const newSession = Session.getSession(message.guildID);
 
                 if (newSession) {
