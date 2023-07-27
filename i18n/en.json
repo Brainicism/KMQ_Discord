@@ -1418,6 +1418,10 @@
                 "description": "Send {{command}} again when you are in a voice channel.",
                 "title": "Join a Voice Channel"
             },
+            "optionsGeneration": {
+                "description": "Failed sending options to the channel. Use {{resetCommand}} and try again. If the issue persists, report it in the official KMQ server found in {{helpCommand}} and provide the following ID to a developer:\n{{debugId}}",
+                "title": "Error Sending Options"
+            },
             "retrievingSongData": {
                 "description": "Try again in a bit, or report this error to the official KMQ server found in {{helpCommand}}.",
                 "title": "Error Retrieving Song Data"

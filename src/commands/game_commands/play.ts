@@ -32,6 +32,7 @@ import {
     getInteractionValue,
     getUserTag,
     getUserVoiceChannel,
+    notifyOptionsGenerationError,
     sendErrorMessage,
     sendInfoMessage,
     tryCreateInteractionSuccessAcknowledgement,
@@ -160,21 +161,22 @@ export async function sendBeginGameSessionMessage(
         []
     );
 
-    if (!optionsEmbedPayload) {
-        throw new Error("Error generating options embed payload");
-    }
+    const additionalPayloads = [];
+    if (optionsEmbedPayload) {
+        if (!isBonus && Math.random() < 0.5) {
+            optionsEmbedPayload.footerText = i18n.translate(
+                messageContext.guildID,
+                "command.play.voteReminder",
+                {
+                    vote: "/vote",
+                }
+            );
+        }
 
-    if (!isBonus && Math.random() < 0.5) {
-        optionsEmbedPayload.footerText = i18n.translate(
-            messageContext.guildID,
-            "command.play.voteReminder",
-            {
-                vote: "/vote",
-            }
-        );
+        additionalPayloads.push(optionsEmbedPayload);
+    } else {
+        await notifyOptionsGenerationError(messageContext, "play");
     }
-
-    const additionalPayloads = [optionsEmbedPayload];
 
     let newsFileContent: string | undefined;
     try {

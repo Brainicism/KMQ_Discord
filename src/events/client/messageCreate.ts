@@ -136,30 +136,27 @@ export default async function messageCreateHandler(
             } catch (err) {
                 const debugId = uuid.v4();
 
-                if (err instanceof Error) {
-                    logger.error(
-                        `Error while invoking command (${parsedMessage.action}) | ${debugId} | Exception Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}}`
-                    );
-                } else {
-                    logger.error(
-                        `Error while invoking command (${
-                            parsedMessage.action
-                        }) | ${debugId} | Error: ${JSON.stringify(err)}`
-                    );
-                }
+                logger.error(
+                    `${getDebugLogHeader(
+                        messageContext
+                    )} | Error while invoking command (${
+                        parsedMessage.action
+                    }) | ${debugId} | Exception Name: ${err.name}. Reason: ${
+                        err.message
+                    }. Trace: ${err.stack}}`
+                );
 
-                sendErrorMessage(messageContext, {
+                await sendErrorMessage(messageContext, {
                     title: i18n.translate(
-                        message.guildID,
+                        messageContext.guildID,
                         "misc.failure.command.title"
                     ),
                     description: i18n.translate(
-                        message.guildID,
+                        messageContext.guildID,
                         "misc.failure.command.description",
                         { debugId }
                     ),
                 });
-
                 const newSession = Session.getSession(message.guildID);
 
                 if (newSession) {

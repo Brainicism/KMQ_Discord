@@ -1418,6 +1418,10 @@
                 "description": "Envía {{command}} de nuevo cuando estés en un canal de voz.",
                 "title": "Únete a un canal de voz"
             },
+            "optionsGeneration": {
+                "description": "Error al enviar opciones al canal. Usa {{resetCommand}} e inténtalo de nuevo. Si el problema persiste, informa en el servidor oficial de KMQ que se encuentra en {{helpCommand}} y proporciona la siguiente ID a un desarrollador:\n{{debugId}}",
+                "title": "Error al enviar opciones"
+            },
             "retrievingSongData": {
                 "description": "Inténtalo de nuevo más tarde o reporta este error al servidor oficial de KMQ que se encuentra en {{helpCommand}}.",
                 "title": "Error al recuperar los datos de la canción"

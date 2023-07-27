@@ -1418,6 +1418,10 @@
                 "description": "当您在语音频道中时，请再次发送{{command}}。",
                 "title": "加入语音频道"
             },
+            "optionsGeneration": {
+                "description": "向频道发送选项失败。使用{{resetCommand}}并尝试再次。如果问题仍然存在，请在{{helpCommand}}中找到的官方KMQ服务器中报告，并向开发者提供以下ID：\n{{debugId}}",
+                "title": "发送选项错误"
+            },
             "retrievingSongData": {
                 "description": "稍后再试，或将此错误报告给{{helpCommand}}中的官方KMQ服务器。",
                 "title": "检索歌曲数据时出错"

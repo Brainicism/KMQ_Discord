@@ -1418,6 +1418,10 @@
                 "description": "ボイスチャンネルに参加してから{{command}}を再度送信してください。",
                 "title": "ボイスチャンネルに参加する"
             },
+            "optionsGeneration": {
+                "description": "チャンネルへのオプションの送信に失敗しました。{{resetCommand}}を使用して再試行してください。問題が続く場合は、{{helpCommand}}で見つかる公式のKMQサーバーに報告し、以下のIDを開発者に提供してください:\n{{debugId}}",
+                "title": "オプション送信エラー"
+            },
             "retrievingSongData": {
                 "description": "しばらくしてから再試行するか、{{helpCommand}}で公式KMQサーバーにエラーを報告してください。",
                 "title": "曲データの取得エラー"

@@ -10,6 +10,7 @@ import {
     getDebugLogHeader,
     getInteractionValue,
     getMatchedArtists,
+    notifyOptionsGenerationError,
     processGroupAutocompleteInteraction,
     sendErrorMessage,
     sendInfoMessage,
@@ -452,18 +453,18 @@ export default class ExcludeCommand implements BaseCommand {
             undefined
         );
 
-        if (!optionsMessage) {
-            throw new Error("Error generating options embed payload");
+        if (optionsMessage) {
+            await sendInfoMessage(
+                messageContext,
+                optionsMessage,
+                true,
+                undefined,
+                embeds,
+                interaction
+            );
+        } else {
+            await notifyOptionsGenerationError(messageContext, "exclude");
         }
-
-        await sendInfoMessage(
-            messageContext,
-            optionsMessage,
-            true,
-            undefined,
-            embeds,
-            interaction
-        );
     }
 
     /**
