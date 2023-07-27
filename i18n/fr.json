@@ -1419,6 +1419,10 @@
                 "description": "Envoyez {{command}} à nouveau lorsque vous êtes dans un canal vocal.",
                 "title": "Rejoindre un canal vocal"
             },
+            "optionsGeneration": {
+                "description": "Échec de l'envoi des options au canal. Utilisez {{resetCommand}} et réessayez. Si le problème persiste, signalez-le dans le serveur officiel KMQ trouvé dans {{helpCommand}} et fournissez l'ID suivant à un développeur:\n{{debugId}}",
+                "title": "Erreur d'envoi des options"
+            },
             "retrievingSongData": {
                 "description": "Réessayez dans un instant ou signalez cette erreur au serveur KMQ officiel trouvé dans {{helpCommand}}.",
                 "title": "Erreur lors de la récupération des données de la chanson"

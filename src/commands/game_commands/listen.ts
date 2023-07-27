@@ -7,6 +7,7 @@ import {
     getDebugLogHeader,
     getGameInfoMessage,
     getUserVoiceChannel,
+    notifyOptionsGenerationError,
     sendErrorMessage,
     sendInfoMessage,
     voicePermissionsCheck,
@@ -71,8 +72,11 @@ export async function sendBeginListeningSessionMessage(
         false
     );
 
-    if (!optionsEmbedPayload) {
-        throw new Error("Error generating options embed payload");
+    const additionalPayloads = [];
+    if (optionsEmbedPayload) {
+        additionalPayloads.push(optionsEmbedPayload);
+    } else {
+        await notifyOptionsGenerationError(messageContext, "listen");
     }
 
     await sendInfoMessage(
@@ -85,7 +89,7 @@ export async function sendBeginListeningSessionMessage(
         },
         false,
         undefined,
-        [optionsEmbedPayload],
+        additionalPayloads,
         interaction
     );
 }
