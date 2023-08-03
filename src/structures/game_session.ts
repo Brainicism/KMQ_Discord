@@ -1488,64 +1488,72 @@ export default class GameSession extends Session {
     ): Promise<void> {
         // update scoreboard
         const lastGuesserStreak = this.lastGuesser?.streak ?? 0;
+        const getTimeToGuessMs = (guesser: { id: string }): number => {
+            const correctGuessTimes = round
+                .getGuesses()
+                [guesser.id].filter((x) => x.correct)
+                .map((x) => x.timeToGuessMs);
+
+            if (this.gameType === GameType.HIDDEN) {
+                // Use the most recent guess time for hidden games, since they can be overwritten
+                return Math.max(...correctGuessTimes);
+            }
+
+            // Use the fastest guess time for normal games
+            return Math.min(...correctGuessTimes);
+        };
+
+        const sortedCorrectGuessers = (guessResult.correctGuessers ?? []).sort(
+            (a, b) => getTimeToGuessMs(a) - getTimeToGuessMs(b)
+        );
+
         const playerRoundResults = await Promise.all(
-            (guessResult.correctGuessers ?? []).map(
-                async (correctGuesser, idx) => {
-                    const guessPosition = idx + 1;
-                    const timeToGuessMs = (
-                        this.gameType === GameType.HIDDEN ? Math.max : Math.min
-                    )(
-                        ...round
-                            .getGuesses()
-                            [correctGuesser.id].filter((x) => x.correct)
-                            .map((x) => x.timeToGuessMs)
+            sortedCorrectGuessers.map(async (correctGuesser, idx) => {
+                const guessPosition = idx + 1;
+                const expGain = await calculateTotalRoundExp(
+                    guildPreference,
+                    round,
+                    getNumParticipants(this.voiceChannelID),
+                    lastGuesserStreak,
+                    getTimeToGuessMs(correctGuesser),
+                    guessPosition,
+                    await userBonusIsActive(correctGuesser.id),
+                    correctGuesser.id
+                );
+
+                let streak = 0;
+                if (idx === 0) {
+                    streak = lastGuesserStreak;
+                    logger.info(
+                        `${getDebugLogHeader(messageContext)}, uid: ${
+                            correctGuesser.id
+                        } | Song correctly guessed. song = ${
+                            round.song.songName
+                        }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
                     );
-
-                    const expGain = await calculateTotalRoundExp(
-                        guildPreference,
-                        round,
-                        getNumParticipants(this.voiceChannelID),
-                        lastGuesserStreak,
-                        timeToGuessMs,
-                        guessPosition,
-                        await userBonusIsActive(correctGuesser.id),
-                        correctGuesser.id
+                } else {
+                    streak = 0;
+                    logger.info(
+                        `${getDebugLogHeader(messageContext)}, uid: ${
+                            correctGuesser.id
+                        } | Song correctly guessed ${getOrdinalNum(
+                            guessPosition
+                        )}. song = ${
+                            round.song.songName
+                        }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
                     );
-
-                    let streak = 0;
-                    if (idx === 0) {
-                        streak = lastGuesserStreak;
-                        logger.info(
-                            `${getDebugLogHeader(messageContext)}, uid: ${
-                                correctGuesser.id
-                            } | Song correctly guessed. song = ${
-                                round.song.songName
-                            }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
-                        );
-                    } else {
-                        streak = 0;
-                        logger.info(
-                            `${getDebugLogHeader(messageContext)}, uid: ${
-                                correctGuesser.id
-                            } | Song correctly guessed ${getOrdinalNum(
-                                guessPosition
-                            )}. song = ${
-                                round.song.songName
-                            }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
-                        );
-                    }
-
-                    return {
-                        player: correctGuesser,
-                        pointsEarned:
-                            idx === 0
-                                ? correctGuesser.pointsAwarded
-                                : correctGuesser.pointsAwarded / 2,
-                        expGain,
-                        streak,
-                    };
                 }
-            )
+
+                return {
+                    player: correctGuesser,
+                    pointsEarned:
+                        idx === 0
+                            ? correctGuesser.pointsAwarded
+                            : correctGuesser.pointsAwarded / 2,
+                    expGain,
+                    streak,
+                };
+            })
         );
 
         round.playerRoundResults = playerRoundResults;
