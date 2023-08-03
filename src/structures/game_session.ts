@@ -1488,13 +1488,20 @@ export default class GameSession extends Session {
     ): Promise<void> {
         // update scoreboard
         const lastGuesserStreak = this.lastGuesser?.streak ?? 0;
-        const getTimeToGuessMs = (guesser: { id: string }): number =>
-            (this.gameType === GameType.HIDDEN ? Math.max : Math.min)(
-                ...round
-                    .getGuesses()
-                    [guesser.id].filter((x) => x.correct)
-                    .map((x) => x.timeToGuessMs)
-            );
+        const getTimeToGuessMs = (guesser: { id: string }): number => {
+            const correctGuessTimes = round
+                .getGuesses()
+                [guesser.id].filter((x) => x.correct)
+                .map((x) => x.timeToGuessMs);
+
+            if (this.gameType === GameType.HIDDEN) {
+                // Use the most recent guess time for hidden games, since they can be overwritten
+                return Math.max(...correctGuessTimes);
+            }
+
+            // Use the fastest guess time for normal games
+            return Math.min(...correctGuessTimes);
+        };
 
         const sortedCorrectGuessers = (guessResult.correctGuessers ?? []).sort(
             (a, b) => getTimeToGuessMs(a) - getTimeToGuessMs(b)
