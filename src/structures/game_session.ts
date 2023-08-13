@@ -341,7 +341,7 @@ export default class GameSession extends Session {
                 // which led to the timer ending and guessResult.correct being false
                 guessResult = {
                     correct: true,
-                    correctGuessers: (round.correctGuessers ?? []).sort(
+                    correctGuessers: round.correctGuessers.sort(
                         (a, b) =>
                             getTimeToGuessMs(a, round, this.gameType) -
                             getTimeToGuessMs(b, round, this.gameType)
