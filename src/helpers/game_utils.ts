@@ -10,6 +10,7 @@ import {
 import { containsHangul, md5Hash } from "./utils";
 import { sql } from "kysely";
 import AnswerType from "../enums/option_types/answer_type";
+import GameType from "../enums/game_type";
 import GuessModeType from "../enums/option_types/guess_mode_type";
 import LocaleType from "../enums/locale_type";
 import SongSelector from "../structures/song_selector";
@@ -19,6 +20,7 @@ import dbContext from "../database_context";
 import type { AvailableGenders } from "../enums/option_types/gender";
 import type { MatchedPlaylist } from "../interfaces/matched_playlist";
 import type Eris from "eris";
+import type GameRound from "../structures/game_round";
 import type GuildPreference from "../structures/guild_preference";
 import type MatchedArtist from "../interfaces/matched_artist";
 import type MessageContext from "../structures/message_context";
@@ -658,4 +660,29 @@ export function isPowerHour(): boolean {
     return powerHours.some(
         (powerHour) => currentHour >= powerHour && currentHour <= powerHour + 1
     );
+}
+
+/**
+ * @param guesser - The user to retrieve the time to guess for
+ * @param round - The finished game round
+ * @param gameType - The game type
+ * @returns the milliseconds it took for a player to enter their guess
+ */
+export function getTimeToGuessMs(
+    guesser: { id: string },
+    round: GameRound,
+    gameType: GameType
+): number {
+    const correctGuessTimes = round
+        .getGuesses()
+        [guesser.id].filter((x) => x.correct)
+        .map((x) => x.timeToGuessMs);
+
+    if (gameType === GameType.HIDDEN) {
+        // Use the most recent guess time for hidden games, since they can be overwritten
+        return Math.max(...correctGuessTimes);
+    }
+
+    // Use the fastest guess time for normal games
+    return Math.min(...correctGuessTimes);
 }

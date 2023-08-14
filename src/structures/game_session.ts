@@ -28,6 +28,7 @@ import {
     getLocalizedArtistName,
     getLocalizedSongName,
     getMultipleChoiceOptions,
+    getTimeToGuessMs,
     isFirstGameOfDay,
     isUserPremium,
     userBonusIsActive,
@@ -322,14 +323,29 @@ export default class GameSession extends Session {
         }
 
         const round = this.round;
+        if (guessResult.correct) {
+            guessResult.correctGuessers = (
+                guessResult.correctGuessers ?? []
+            ).sort(
+                (a, b) =>
+                    getTimeToGuessMs(a, round, this.gameType) -
+                    getTimeToGuessMs(b, round, this.gameType)
+            );
+        }
+
         if (this.gameType === GameType.HIDDEN) {
             this.stopHiddenUpdateTimer();
 
             if (!guessResult.correct && round.correctGuessers.length > 0) {
-                // At least one person guessed correctly, but someone didn't guess
+                // At least one person guessed correctly but someone didn't submit a /guess,
+                // which led to the timer ending and guessResult.correct being false
                 guessResult = {
                     correct: true,
-                    correctGuessers: round.correctGuessers,
+                    correctGuessers: round.correctGuessers.sort(
+                        (a, b) =>
+                            getTimeToGuessMs(a, round, this.gameType) -
+                            getTimeToGuessMs(b, round, this.gameType)
+                    ),
                 };
             }
         }
@@ -1488,72 +1504,56 @@ export default class GameSession extends Session {
     ): Promise<void> {
         // update scoreboard
         const lastGuesserStreak = this.lastGuesser?.streak ?? 0;
-        const getTimeToGuessMs = (guesser: { id: string }): number => {
-            const correctGuessTimes = round
-                .getGuesses()
-                [guesser.id].filter((x) => x.correct)
-                .map((x) => x.timeToGuessMs);
-
-            if (this.gameType === GameType.HIDDEN) {
-                // Use the most recent guess time for hidden games, since they can be overwritten
-                return Math.max(...correctGuessTimes);
-            }
-
-            // Use the fastest guess time for normal games
-            return Math.min(...correctGuessTimes);
-        };
-
-        const sortedCorrectGuessers = (guessResult.correctGuessers ?? []).sort(
-            (a, b) => getTimeToGuessMs(a) - getTimeToGuessMs(b)
-        );
 
         const playerRoundResults = await Promise.all(
-            sortedCorrectGuessers.map(async (correctGuesser, idx) => {
-                const guessPosition = idx + 1;
-                const expGain = await calculateTotalRoundExp(
-                    guildPreference,
-                    round,
-                    getNumParticipants(this.voiceChannelID),
-                    lastGuesserStreak,
-                    getTimeToGuessMs(correctGuesser),
-                    guessPosition,
-                    await userBonusIsActive(correctGuesser.id),
-                    correctGuesser.id
-                );
+            (guessResult.correctGuessers ?? []).map(
+                async (correctGuesser, idx) => {
+                    const guessPosition = idx + 1;
+                    const expGain = await calculateTotalRoundExp(
+                        guildPreference,
+                        round,
+                        getNumParticipants(this.voiceChannelID),
+                        lastGuesserStreak,
+                        getTimeToGuessMs(correctGuesser, round, this.gameType),
+                        guessPosition,
+                        await userBonusIsActive(correctGuesser.id),
+                        correctGuesser.id
+                    );
 
-                let streak = 0;
-                if (idx === 0) {
-                    streak = lastGuesserStreak;
-                    logger.info(
-                        `${getDebugLogHeader(messageContext)}, uid: ${
-                            correctGuesser.id
-                        } | Song correctly guessed. song = ${
-                            round.song.songName
-                        }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
-                    );
-                } else {
-                    streak = 0;
-                    logger.info(
-                        `${getDebugLogHeader(messageContext)}, uid: ${
-                            correctGuesser.id
-                        } | Song correctly guessed ${getOrdinalNum(
-                            guessPosition
-                        )}. song = ${
-                            round.song.songName
-                        }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
-                    );
+                    let streak = 0;
+                    if (idx === 0) {
+                        streak = lastGuesserStreak;
+                        logger.info(
+                            `${getDebugLogHeader(messageContext)}, uid: ${
+                                correctGuesser.id
+                            } | Song correctly guessed. song = ${
+                                round.song.songName
+                            }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
+                        );
+                    } else {
+                        streak = 0;
+                        logger.info(
+                            `${getDebugLogHeader(messageContext)}, uid: ${
+                                correctGuesser.id
+                            } | Song correctly guessed ${getOrdinalNum(
+                                guessPosition
+                            )}. song = ${
+                                round.song.songName
+                            }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
+                        );
+                    }
+
+                    return {
+                        player: correctGuesser,
+                        pointsEarned:
+                            idx === 0
+                                ? correctGuesser.pointsAwarded
+                                : correctGuesser.pointsAwarded / 2,
+                        expGain,
+                        streak,
+                    };
                 }
-
-                return {
-                    player: correctGuesser,
-                    pointsEarned:
-                        idx === 0
-                            ? correctGuesser.pointsAwarded
-                            : correctGuesser.pointsAwarded / 2,
-                    expGain,
-                    streak,
-                };
-            })
+            )
         );
 
         round.playerRoundResults = playerRoundResults;
