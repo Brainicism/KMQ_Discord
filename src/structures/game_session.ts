@@ -28,6 +28,7 @@ import {
     getLocalizedArtistName,
     getLocalizedSongName,
     getMultipleChoiceOptions,
+    getTimeToGuessMs,
     isFirstGameOfDay,
     isUserPremium,
     userBonusIsActive,
@@ -322,14 +323,29 @@ export default class GameSession extends Session {
         }
 
         const round = this.round;
+        if (guessResult.correct) {
+            guessResult.correctGuessers = (
+                guessResult.correctGuessers ?? []
+            ).sort(
+                (a, b) =>
+                    getTimeToGuessMs(a, round, this.gameType) -
+                    getTimeToGuessMs(b, round, this.gameType)
+            );
+        }
+
         if (this.gameType === GameType.HIDDEN) {
             this.stopHiddenUpdateTimer();
 
             if (!guessResult.correct && round.correctGuessers.length > 0) {
-                // At least one person guessed correctly, but someone didn't guess
+                // At least one person guessed correctly but someone didn't submit a /guess,
+                // which led to the timer ending and guessResult.correct being false
                 guessResult = {
                     correct: true,
-                    correctGuessers: round.correctGuessers,
+                    correctGuessers: round.correctGuessers.sort(
+                        (a, b) =>
+                            getTimeToGuessMs(a, round, this.gameType) -
+                            getTimeToGuessMs(b, round, this.gameType)
+                    ),
                 };
             }
         }
@@ -1488,25 +1504,17 @@ export default class GameSession extends Session {
     ): Promise<void> {
         // update scoreboard
         const lastGuesserStreak = this.lastGuesser?.streak ?? 0;
+
         const playerRoundResults = await Promise.all(
             (guessResult.correctGuessers ?? []).map(
                 async (correctGuesser, idx) => {
                     const guessPosition = idx + 1;
-                    const timeToGuessMs = (
-                        this.gameType === GameType.HIDDEN ? Math.max : Math.min
-                    )(
-                        ...round
-                            .getGuesses()
-                            [correctGuesser.id].filter((x) => x.correct)
-                            .map((x) => x.timeToGuessMs)
-                    );
-
                     const expGain = await calculateTotalRoundExp(
                         guildPreference,
                         round,
                         getNumParticipants(this.voiceChannelID),
                         lastGuesserStreak,
-                        timeToGuessMs,
+                        getTimeToGuessMs(correctGuesser, round, this.gameType),
                         guessPosition,
                         await userBonusIsActive(correctGuesser.id),
                         correctGuesser.id

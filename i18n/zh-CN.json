@@ -1401,6 +1401,7 @@
                 "alreadyEliminated": "你已经在本轮比赛中被淘汰了。",
                 "bookmarkOutsideGame": "你只能在游戏期间收藏歌曲。",
                 "eliminated": "你已经在本轮比赛中被淘汰了。",
+                "guildOnly": "KMQ只能在服务器中使用。",
                 "invalidBookmark": "你只能收藏最近播放的{{BOOKMARK_MESSAGE_SIZE}}轮歌曲。你必须收藏机器人发送的包含歌曲的消息。",
                 "optionFromPreviousRound": "您正在尝试从已经完成的回合中选择选项。"
             },
@@ -1417,6 +1418,10 @@
             "notInVC": {
                 "description": "当您在语音频道中时，请再次发送{{command}}。",
                 "title": "加入语音频道"
+            },
+            "optionsGeneration": {
+                "description": "向频道发送选项失败。使用{{resetCommand}}并尝试再次。如果问题仍然存在，请在{{helpCommand}}中找到的官方KMQ服务器中报告，并向开发者提供以下ID：\n{{debugId}}",
+                "title": "发送选项错误"
             },
             "retrievingSongData": {
                 "description": "稍后再试，或将此错误报告给{{helpCommand}}中的官方KMQ服务器。",

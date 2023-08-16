@@ -13,6 +13,7 @@ import GroupsCommand from "../../commands/game_options/groups";
 import HelpCommand from "../../commands/game_commands/help";
 import IncludeCommand from "../../commands/game_options/include";
 import KmqMember from "../../structures/kmq_member";
+import LocaleType from "../../enums/locale_type";
 import LookupCommand from "../../commands/game_commands/lookup";
 import MessageContext from "../../structures/message_context";
 import PresetCommand from "../../commands/game_commands/preset";
@@ -55,6 +56,24 @@ export default async function interactionCreateHandler(
         | Eris.AutocompleteInteraction
         | Eris.ModalSubmitInteraction
 ): Promise<void> {
+    if (!interaction.guildID) {
+        if (
+            interaction instanceof Eris.ComponentInteraction ||
+            interaction instanceof Eris.CommandInteraction
+        ) {
+            tryCreateInteractionErrorAcknowledgement(
+                interaction,
+                i18n.translate(LocaleType.EN, "misc.interaction.title.failure"),
+                i18n.translate(
+                    LocaleType.EN,
+                    "misc.failure.interaction.guildOnly"
+                )
+            );
+        }
+
+        return;
+    }
+
     const member = new KmqMember(interaction.member!.id);
     const messageContext = new MessageContext(
         interaction.channel.id,

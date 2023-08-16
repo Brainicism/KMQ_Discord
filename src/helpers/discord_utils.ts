@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
+import * as uuid from "uuid";
 import {
     BOOKMARK_COMMAND_NAME,
     EMBED_ERROR_COLOR,
@@ -766,7 +767,7 @@ export async function generateOptionsMessage(
         totalSongs.count === undefined ||
         totalSongs.countBeforeLimit === undefined
     ) {
-        sendErrorMessage(messageContext, {
+        await sendErrorMessage(messageContext, {
             title: i18n.translate(
                 guildID,
                 "misc.failure.retrievingSongData.title"
@@ -1154,9 +1155,18 @@ export async function sendOptionsMessage(
     );
 
     if (!optionsEmbed) {
-        throw new Error(
-            "Unexpectedly unable to generate options embed in sendOptionsMessage"
+        logger.error(
+            `${getDebugLogHeader(
+                messageContext
+            )} | Unexpectedly unable to generate options embed in sendOptionsMessage. session = ${!!session}. updatedOptions = ${JSON.stringify(
+                updatedOptions
+            )}. preset = ${preset}. allReset = ${allReset}. interaction = ${!!interaction}`
         );
+        if (interaction && !interaction.acknowledged) {
+            await interaction.acknowledge();
+        }
+
+        return;
     }
 
     if (interaction?.acknowledged) {
@@ -1733,9 +1743,9 @@ export async function tryCreateInteractionErrorAcknowledgement(
             embeds: [
                 {
                     color: EMBED_ERROR_COLOR,
-                    author: {
-                        name: interaction.member!.username,
-                        icon_url: interaction.member!.avatarURL,
+                    author: interaction.member && {
+                        name: interaction.member.username,
+                        icon_url: interaction.member.avatarURL,
                     },
                     title:
                         title ||
@@ -2132,3 +2142,34 @@ export const updateAppCommands = async (
         }
     }
 };
+
+/**
+ * Sends a message to the user that the command failed
+ * @param messageContext - the message context
+ * @param commandName - the name of the command that failed
+ * @param err - the error that occurred
+ */
+export async function notifyOptionsGenerationError(
+    messageContext: MessageContext,
+    commandName: string
+): Promise<void> {
+    const debugId = uuid.v4();
+
+    logger.error(
+        `${getDebugLogHeader(
+            messageContext
+        )} | Error generating options embed payload in ${commandName}. debugId = ${debugId}`
+    );
+
+    await sendErrorMessage(messageContext, {
+        title: i18n.translate(
+            messageContext.guildID,
+            "misc.failure.optionsGeneration.title"
+        ),
+        description: i18n.translate(
+            messageContext.guildID,
+            "misc.failure.optionsGeneration.description",
+            { resetCommand: "`/reset`", helpCommand: "`/help`", debugId }
+        ),
+    });
+}

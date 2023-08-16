@@ -1401,6 +1401,7 @@
                 "alreadyEliminated": "당신은 이미 이번 라운드에서 탈락했습니다.",
                 "bookmarkOutsideGame": "게임 중에만 노래를 북마크할 수 있습니다.",
                 "eliminated": "당신은 이번 라운드에서 탈락했습니다.",
+                "guildOnly": "KMQ는 서버에서만 사용할 수 있습니다.",
                 "invalidBookmark": "최근 {{BOOKMARK_MESSAGE_SIZE}} 라운드에서 재생한 노래만 북마크에 추가할 수 있습니다. 노래가 포함된 봇이 보낸 메시지를 북마크해야 합니다.",
                 "optionFromPreviousRound": "이미 완료된 라운드에서 옵션을 선택하려고 합니다."
             },
@@ -1417,6 +1418,10 @@
             "notInVC": {
                 "description": "음성 채널에 있을 때 {{command}}를 다시 보냅니다.",
                 "title": "음성 채널 가입"
+            },
+            "optionsGeneration": {
+                "description": "채널에 옵션을 보내는 데 실패했습니다. {{resetCommand}}를 사용하고 다시 시도하십시오. 문제가 계속되면 {{helpCommand}}에서 찾을 수 있는 공식 KMQ 서버에 보고하고 다음 ID를 개발자에게 제공하십시오:\n{{debugId}}",
+                "title": "옵션 보내기 오류"
             },
             "retrievingSongData": {
                 "description": "잠시 후 다시 시도하거나 {{helpCommand}}에 있는 공식 KMQ 서버에 이 오류를 보고하세요.",

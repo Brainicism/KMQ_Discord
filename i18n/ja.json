@@ -1401,6 +1401,7 @@
                 "alreadyEliminated": "あなたはすでにこのラウンドで敗退しています。",
                 "bookmarkOutsideGame": "ゲーム中には曲をブックマークできません。",
                 "eliminated": "あなたはこのラウンドで敗退しました。",
+                "guildOnly": "KMQはサーバーでのみ使用できます。",
                 "invalidBookmark": "最近の{{BOOKMARK_MESSAGE_SIZE}}ラウンドで再生された曲のみブックマークできます。ボットから送信されたメッセージに含まれる曲をブックマークする必要があります。",
                 "optionFromPreviousRound": "すでに完了したラウンドからオプションを選択しようとしています。"
             },
@@ -1417,6 +1418,10 @@
             "notInVC": {
                 "description": "ボイスチャンネルに参加してから{{command}}を再度送信してください。",
                 "title": "ボイスチャンネルに参加する"
+            },
+            "optionsGeneration": {
+                "description": "チャンネルへのオプションの送信に失敗しました。{{resetCommand}}を使用して再試行してください。問題が続く場合は、{{helpCommand}}で見つかる公式のKMQサーバーに報告し、以下のIDを開発者に提供してください:\n{{debugId}}",
+                "title": "オプション送信エラー"
             },
             "retrievingSongData": {
                 "description": "しばらくしてから再試行するか、{{helpCommand}}で公式KMQサーバーにエラーを報告してください。",

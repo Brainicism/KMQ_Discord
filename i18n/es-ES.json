@@ -1401,6 +1401,7 @@
                 "alreadyEliminated": "Ya has sido eliminado en esta ronda.",
                 "bookmarkOutsideGame": "Solo puedes marcar canciones durante un juego.",
                 "eliminated": "Has sido eliminado en esta ronda.",
+                "guildOnly": "KMQ sólo puede ser utilizado en servidores.",
                 "invalidBookmark": "Solo puedes marcar canciones que hayan sido reproducidas en las últimas {{BOOKMARK_MESSAGE_SIZE}} rondas. Debes marcar el mensaje enviado por el bot que contiene la canción.",
                 "optionFromPreviousRound": "Estás intentando elegir una opción de una ronda que ya ha sido completada."
             },
@@ -1417,6 +1418,10 @@
             "notInVC": {
                 "description": "Envía {{command}} de nuevo cuando estés en un canal de voz.",
                 "title": "Únete a un canal de voz"
+            },
+            "optionsGeneration": {
+                "description": "Error al enviar opciones al canal. Usa {{resetCommand}} e inténtalo de nuevo. Si el problema persiste, informa en el servidor oficial de KMQ que se encuentra en {{helpCommand}} y proporciona la siguiente ID a un desarrollador:\n{{debugId}}",
+                "title": "Error al enviar opciones"
             },
             "retrievingSongData": {
                 "description": "Inténtalo de nuevo más tarde o reporta este error al servidor oficial de KMQ que se encuentra en {{helpCommand}}.",
