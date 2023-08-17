@@ -498,18 +498,19 @@ export async function getMultipleChoiceOptions(
 }
 
 /**
- * @param userIDs - A list of user IDs to check
+ * @param _userIDs - A list of user IDs to check
  * @returns whether at least one player has premium status
  */
 export async function areUsersPremium(
-    userIDs: Array<string>
+    _userIDs: Array<string>
 ): Promise<boolean> {
-    return !!(await dbContext.kmq
-        .selectFrom("premium_users")
-        .selectAll()
-        .where("active", "=", 1)
-        .where("user_id", "in", userIDs)
-        .executeTakeFirst());
+    return Promise.resolve(true);
+    // return !!(await dbContext.kmq
+    //     .selectFrom("premium_users")
+    //     .selectAll()
+    //     .where("active", "=", 1)
+    //     .where("user_id", "in", userIDs)
+    //     .executeTakeFirst());
 }
 
 /**
