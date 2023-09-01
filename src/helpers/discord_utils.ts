@@ -30,6 +30,7 @@ import {
     italicize,
     standardDateFormat,
     strikethrough,
+    truncatedString,
     underline,
 } from "./utils";
 import {
@@ -555,7 +556,7 @@ export async function sendErrorMessage(
                 messageContext
             )} | Title was too long. title = ${embedPayload.title}`
         );
-        embedPayload.title = `${embedPayload.title.substring(0, 253)}...`;
+        embedPayload.title = truncatedString(embedPayload.title, 256);
     }
 
     return sendMessage(
@@ -674,7 +675,7 @@ export async function sendInfoMessage(
                     messageContext
                 )} | Title was too long. title = ${embed.title}`
             );
-            embeds[i].title = `${embedPayload.title.substring(0, 253)}...`;
+            embeds[i].title = truncatedString(embedPayload.title, 256);
         }
     }
 

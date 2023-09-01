@@ -10,6 +10,7 @@ import {
 import {
     friendlyFormattedNumber,
     getMention,
+    truncatedString,
     underline,
 } from "../helpers/utils";
 import {
@@ -909,11 +910,14 @@ export default abstract class Session {
         }
 
         const locale = State.getGuildLocale(messageContext.guildID);
+        const song = getLocalizedSongName(round.song, locale);
 
-        const songAndArtist = `"${getLocalizedSongName(
-            round.song,
-            locale
-        )}" - ${getLocalizedArtistName(round.song, locale)}`.substring(0, 230);
+        const artist = truncatedString(
+            getLocalizedArtistName(round.song, locale),
+            100
+        );
+
+        const songAndArtist = `"${song}" - ${artist}`;
 
         const embed: EmbedPayload = {
             color: embedColor,
