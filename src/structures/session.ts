@@ -913,7 +913,7 @@ export default abstract class Session {
         const songAndArtist = `"${getLocalizedSongName(
             round.song,
             locale
-        )}" - ${getLocalizedArtistName(round.song, locale)}`.substring(0, 256);
+        )}" - ${getLocalizedArtistName(round.song, locale)}`.substring(0, 230);
 
         const embed: EmbedPayload = {
             color: embedColor,
