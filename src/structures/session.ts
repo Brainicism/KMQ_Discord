@@ -914,7 +914,7 @@ export default abstract class Session {
 
         const artist = truncatedString(
             getLocalizedArtistName(round.song, locale),
-            100
+            50
         );
 
         const songAndArtist = `"${song}" - ${artist}`;
