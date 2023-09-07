@@ -30,6 +30,7 @@ import {
     italicize,
     standardDateFormat,
     strikethrough,
+    truncatedString,
     underline,
 } from "./utils";
 import {
@@ -532,6 +533,32 @@ export async function sendErrorMessage(
             ? embedPayload.author
             : messageContext.author;
 
+    if (embedPayload.description && embedPayload.description.length > 2048) {
+        logger.error(
+            `${getDebugLogHeader(
+                messageContext
+            )} | Message was too long. description = ${
+                embedPayload.description
+            }`
+        );
+        return sendErrorMessage(messageContext, {
+            title: i18n.translate(messageContext.guildID, "misc.failure.error"),
+            description: i18n.translate(
+                messageContext.guildID,
+                "misc.failure.messageTooLong"
+            ),
+        });
+    }
+
+    if (embedPayload.title.length > 256) {
+        logger.error(
+            `${getDebugLogHeader(
+                messageContext
+            )} | Title was too long. title = ${embedPayload.title}`
+        );
+        embedPayload.title = truncatedString(embedPayload.title, 256);
+    }
+
     return sendMessage(
         messageContext.textChannelID,
         {
@@ -620,30 +647,42 @@ export async function sendInfoMessage(
     additionalEmbeds: Array<EmbedPayload> = [],
     interaction?: Eris.CommandInteraction
 ): Promise<Eris.Message<Eris.TextableChannel> | null> {
-    if (embedPayload.description && embedPayload.description.length > 2048) {
-        logger.error(
-            `Message was too long. message = ${embedPayload.description}`
-        );
-        return sendErrorMessage(messageContext, {
-            title: i18n.translate(messageContext.guildID, "misc.failure.error"),
-            description: i18n.translate(
-                messageContext.guildID,
-                "misc.failure.messageTooLong"
-            ),
-        });
+    const embeds = [embedPayload, ...additionalEmbeds];
+    for (const embed of embeds) {
+        if (embed.description && embed.description.length > 2048) {
+            logger.error(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Message was too long. description = ${embed.description}`
+            );
+            return sendErrorMessage(messageContext, {
+                title: i18n.translate(
+                    messageContext.guildID,
+                    "misc.failure.error"
+                ),
+                description: i18n.translate(
+                    messageContext.guildID,
+                    "misc.failure.messageTooLong"
+                ),
+            });
+        }
     }
 
-    const embed = generateEmbed(messageContext, embedPayload);
+    for (const [i, embed] of embeds.entries()) {
+        if (embed.title.length > 256) {
+            logger.error(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | Title was too long. title = ${embed.title}`
+            );
+            embeds[i].title = truncatedString(embedPayload.title, 256);
+        }
+    }
 
     return sendMessage(
         messageContext.textChannelID,
         {
-            embeds: [
-                embed,
-                ...additionalEmbeds.map((x) =>
-                    generateEmbed(messageContext, x)
-                ),
-            ],
+            embeds: embeds.map((x) => generateEmbed(messageContext, x)),
             messageReference:
                 reply && messageContext.referencedMessageID
                     ? {

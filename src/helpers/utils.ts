@@ -628,3 +628,16 @@ export function visualProgressBar(
 
     return "▓".repeat(completedBlocks) + "░".repeat(remainingBlocks);
 }
+
+/**
+ * @param input - the input string
+ * @param maxLength - the maximum length of the string
+ * @returns the input string, truncated to the given length
+ */
+export function truncatedString(input: string, maxLength: number): string {
+    if (input.length <= maxLength) {
+        return input;
+    }
+
+    return `${input.substring(0, maxLength - 3)}...`;
+}
