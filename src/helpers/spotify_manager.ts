@@ -401,6 +401,12 @@ export default class SpotifyManager {
                     );
                 }
 
+                if (!response.data.items) {
+                    throw new Error(
+                        `Received unexpected response from Spotify. responseCode = ${response.status}. response.data = ${response.data}`
+                    );
+                }
+
                 resolve(
                     response.data.items.reduce(
                         (
