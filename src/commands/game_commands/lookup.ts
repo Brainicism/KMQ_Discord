@@ -22,7 +22,7 @@ import {
     getLocalizedSongName,
     isPremiumRequest,
 } from "../../helpers/game_utils";
-import { getVideoID, validateID } from "@distube/ytdl-core";
+import { getVideoID, validateID } from "ytdl-core";
 import { normalizePunctuationInName } from "../../structures/game_round";
 import { sendValidationErrorMessage } from "../../helpers/validate";
 import Eris from "eris";

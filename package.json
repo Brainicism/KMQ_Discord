@@ -36,7 +36,6 @@
     "license": "GPL-3.0",
     "dependencies": {
         "@discordjs/opus": "^0.9.0",
-        "@distube/ytdl-core": "https://github.com/distubejs/ytdl-core",
         "@fastify/view": "^7.4.1",
         "@swc/core": "^1.3.44",
         "@types/damerau-levenshtein": "^1.0.0",
@@ -82,6 +81,7 @@
         "uuid": "^9.0.0",
         "winston": "^3.8.2",
         "winston-daily-rotate-file": "^4.7.1",
+        "ytdl-core": "https://github.com/distubejs/ytdl-core",
         "zlib-sync": "^0.1.8"
     },
     "devDependencies": {
