@@ -7,6 +7,7 @@ import type MatchedArtist from "./matched_artist";
 import type MultiGuessType from "../enums/option_types/multiguess_type";
 import type OstPreference from "../enums/option_types/ost_preference";
 import type ReleaseType from "../enums/option_types/release_type";
+import type RemixPreference from "../enums/option_types/remix_preference";
 import type SeekType from "../enums/option_types/seek_type";
 import type ShuffleType from "../enums/option_types/shuffle_type";
 import type SpecialType from "../enums/option_types/special_type";
@@ -37,4 +38,5 @@ export default interface GameOptions {
     ostPreference: OstPreference;
     forcePlaySongID: string | null;
     spotifyPlaylistID: string | null;
+    remixPreference: RemixPreference;
 }

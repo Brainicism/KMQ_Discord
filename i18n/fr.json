@@ -1069,6 +1069,20 @@
                 "name": "sortie"
             }
         },
+        "remix": {
+            "help": {
+                "description": "Choisissez si vous souhaitez inclure des chansons remixées.",
+                "example": {
+                    "exclude": "Exclure les remixes",
+                    "include": "Inclure les remixes",
+                    "reset": "Réinitialiser à l'option par défaut de {{defaultRemix}}"
+                },
+                "name": "remix"
+            },
+            "interaction": {
+                "remix": "Que ce soit pour inclure ou exclure des chansons remixées"
+            }
+        },
         "remove": {
             "failure": {
                 "noGroupsSelected": {
