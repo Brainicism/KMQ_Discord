@@ -9,6 +9,7 @@ enum GameOption {
     LANGUAGE_TYPE = "Language Type",
     SUBUNIT_PREFERENCE = "Subunit Preference",
     OST_PREFERENCE = "OST Preference",
+    REMIX_PREFERENCE = "Remix Preference",
     MULTIGUESS = "Multiguess",
     SHUFFLE_TYPE = "Shuffle",
     SEEK_TYPE = "Seek Type",

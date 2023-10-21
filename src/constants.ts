@@ -9,6 +9,7 @@ import LocaleType from "./enums/locale_type";
 import MultiGuessType from "./enums/option_types/multiguess_type";
 import OstPreference from "./enums/option_types/ost_preference";
 import ReleaseType from "./enums/option_types/release_type";
+import RemixPreference from "./enums/option_types/remix_preference";
 import SeekType from "./enums/option_types/seek_type";
 import ShuffleType from "./enums/option_types/shuffle_type";
 import SpecialType from "./enums/option_types/special_type";
@@ -54,6 +55,7 @@ export const DEFAULT_GENDER: Array<GenderModeOptions> = [
     "male",
     "coed",
 ];
+export const DEFAULT_REMIX_PREFERENCE = RemixPreference.EXCLUDE;
 export const DEFAULT_LIMIT = 500;
 export const SONG_START_DELAY = 3000;
 
@@ -185,6 +187,7 @@ export const enum GameOptionInternal {
     OST_PREFERENCE = "ostPreference",
     FORCE_PLAY_SONG = "forcePlaySongID",
     SPOTIFY_PLAYLIST_ID = "spotifyPlaylistID",
+    REMIX_PREFERENCE = "remixPreference",
 }
 
 export const GameOptionInternalToGameOption: { [option: string]: string } = {
