@@ -12,6 +12,7 @@ import ArtistType from "../enums/option_types/artist_type";
 import LanguageType from "../enums/option_types/language_type";
 import OstPreference from "../enums/option_types/ost_preference";
 import ReleaseType from "../enums/option_types/release_type";
+import RemixPreference from "../enums/option_types/remix_preference";
 import ShuffleType from "../enums/option_types/shuffle_type";
 import State from "../state";
 import SubunitsPreference from "../enums/option_types/subunit_preference";
@@ -466,6 +467,12 @@ export default class SongSelector {
             queryBuilder = queryBuilder.where("tags", "not like", "%o%");
         } else if (gameOptions.ostPreference === OstPreference.EXCLUSIVE) {
             queryBuilder = queryBuilder.where("tags", "like", "%o%");
+        }
+
+        if (gameOptions.remixPreference === RemixPreference.EXCLUDE) {
+            queryBuilder = queryBuilder.where("tags", "not like", "%x%");
+        } else if (gameOptions.remixPreference === RemixPreference.EXCLUSIVE) {
+            queryBuilder = queryBuilder.where("tags", "like", "%x%");
         }
 
         if (gameOptions.releaseType === ReleaseType.OFFICIAL) {

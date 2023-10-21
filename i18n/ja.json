@@ -1069,6 +1069,21 @@
                 "name": "リリース"
             }
         },
+        "remix": {
+            "help": {
+                "description": "リミックスされた曲を含めるかどうかを選択してください。",
+                "example": {
+                    "exclude": "リミックスを除外",
+                    "exclusive": "リミックスのみを再生",
+                    "include": "リミックスを含める",
+                    "reset": "デフォルトのオプション{{defaultRemix}}にリセット"
+                },
+                "name": "リミックス"
+            },
+            "interaction": {
+                "remix": "リミックスされた曲を含めるか、専用で再生するか、または除外するか"
+            }
+        },
         "remove": {
             "failure": {
                 "noGroupsSelected": {

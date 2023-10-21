@@ -1069,6 +1069,21 @@
                 "name": "릴리즈"
             }
         },
+        "remix": {
+            "help": {
+                "description": "리믹스 된 노래를 포함할지 선택하세요.",
+                "example": {
+                    "exclude": "리믹스 제외",
+                    "exclusive": "리믹스만 재생",
+                    "include": "리믹스 포함",
+                    "reset": "기본 옵션 {{defaultRemix}}로 재설정"
+                },
+                "name": "리믹스"
+            },
+            "interaction": {
+                "remix": "리믹스 된 노래를 포함하거나, 독점적으로 재생하거나, 제외할지 여부"
+            }
+        },
         "remove": {
             "failure": {
                 "noGroupsSelected": {

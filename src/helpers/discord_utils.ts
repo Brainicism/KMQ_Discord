@@ -845,6 +845,7 @@ export async function generateOptionsMessage(
     optionStrings[GameOption.SUBUNIT_PREFERENCE] =
         gameOptions.subunitPreference;
     optionStrings[GameOption.OST_PREFERENCE] = gameOptions.ostPreference;
+    optionStrings[GameOption.REMIX_PREFERENCE] = gameOptions.remixPreference;
     optionStrings[GameOption.MULTIGUESS] = gameOptions.multiGuessType;
     optionStrings[GameOption.SHUFFLE_TYPE] = gameOptions.shuffleType;
     optionStrings[GameOption.SEEK_TYPE] = gameOptions.seekType;
@@ -966,6 +967,7 @@ export async function generateOptionsMessage(
             GameOption.LANGUAGE_TYPE,
             GameOption.SUBUNIT_PREFERENCE,
             GameOption.OST_PREFERENCE,
+            GameOption.REMIX_PREFERENCE,
             GameOption.EXCLUDE,
             GameOption.INCLUDE,
         ];
