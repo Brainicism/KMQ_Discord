@@ -3,6 +3,7 @@ import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
     getInteractionValue,
+    sendDeprecatedTextCommandMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
@@ -160,20 +161,10 @@ export default class RemixCommand implements BaseCommand {
         },
     ];
 
-    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        let remixPreference: RemixPreference | null;
-
-        if (parsedMessage.components.length === 0) {
-            remixPreference = null;
-        } else {
-            remixPreference =
-                parsedMessage.components[0].toLowerCase() as RemixPreference;
-        }
-
-        await RemixCommand.updateOption(
-            MessageContext.fromMessage(message),
-            remixPreference,
-            undefined
+    call = async ({ message }: CommandArgs): Promise<void> => {
+        logger.warn("Text-based command not supported for remix");
+        await sendDeprecatedTextCommandMessage(
+            MessageContext.fromMessage(message)
         );
     };
 
