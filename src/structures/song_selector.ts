@@ -471,8 +471,6 @@ export default class SongSelector {
 
         if (gameOptions.remixPreference === RemixPreference.EXCLUDE) {
             queryBuilder = queryBuilder.where("tags", "not like", "%x%");
-        } else if (gameOptions.remixPreference === RemixPreference.EXCLUSIVE) {
-            queryBuilder = queryBuilder.where("tags", "like", "%x%");
         }
 
         if (gameOptions.releaseType === ReleaseType.OFFICIAL) {

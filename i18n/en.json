@@ -1074,14 +1074,13 @@
                 "description": "Choose whether to include remixed songs.",
                 "example": {
                     "exclude": "Exclude remixes",
-                    "exclusive": "Exclusively play remixes",
                     "include": "Include remixes",
                     "reset": "Reset to the default option of {{defaultRemix}}"
                 },
                 "name": "remix"
             },
             "interaction": {
-                "remix": "Whether to include, exclusively play, or exclude remixed songs"
+                "remix": "Whether to include or exclude remixed songs"
             }
         },
         "remove": {

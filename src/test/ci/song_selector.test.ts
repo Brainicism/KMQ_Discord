@@ -758,26 +758,6 @@ describe("song selector", () => {
                     );
                 });
             });
-
-            describe("exclusive remixes", () => {
-                it("should only return songs which are exclusively remixes", async () => {
-                    await guildPreference.setRemixPreference(
-                        RemixPreference.EXCLUSIVE
-                    );
-                    const { songs } = await SongSelector.getFilteredSongList(
-                        guildPreference,
-                        true
-                    );
-
-                    assert.strict(songs.size > 0);
-                    assert.strictEqual(
-                        Array.from(songs).every((song) =>
-                            song.tags!.includes("x")
-                        ),
-                        true
-                    );
-                });
-            });
         });
 
         describe("limit", () => {

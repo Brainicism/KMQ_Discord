@@ -262,7 +262,7 @@ Use `/help action:[command_name]` for more details about the following commands:
 -   `/language`: Choose whether to include Japanese/English/Chinese songs, or only Korean songs
 -   `/subunits`: Choose whether to automatically include a group's subunits when using `/groups`
 -   `/ost`: Include, exclude, or exclusively play OST music videos
--   `/remix`: Include, exclude, or exclusively play remixed songs
+-   `/remix`: Include or exclude remixed songs
 -   `/multiguess`: Choose whether to allow multiple players to guess correctly in a round
 -   `/shuffle`: Choose whether songs should play in random order, or based on popularity
 -   `/seek`: Choose whether each song starts from the beginning, middle, or a random point

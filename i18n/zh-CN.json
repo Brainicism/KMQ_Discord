@@ -1074,14 +1074,13 @@
                 "description": "选择是否包括混音歌曲。",
                 "example": {
                     "exclude": "排除混音",
-                    "exclusive": "仅播放混音",
                     "include": "包括混音",
                     "reset": "重置为默认选项{{defaultRemix}}"
                 },
                 "name": "混音"
             },
             "interaction": {
-                "remix": "是否包括、独家播放或排除混音歌曲"
+                "remix": "是否包括或排除混音歌曲"
             }
         },
         "remove": {

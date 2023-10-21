@@ -1074,14 +1074,13 @@
                 "description": "Elige si incluir canciones remezcladas.",
                 "example": {
                     "exclude": "Excluir remezclas",
-                    "exclusive": "Reproducir solo remezclas",
                     "include": "Incluir remezclas",
                     "reset": "Restablecer a la opción predeterminada de {{defaultRemix}}"
                 },
                 "name": "remezcla"
             },
             "interaction": {
-                "remix": "Si incluir, reproducir exclusivamente o excluir canciones remezcladas"
+                "remix": "Si incluir o excluir canciones remezcladas"
             }
         },
         "remove": {

@@ -44,7 +44,7 @@ export default class RemixCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "remix",
         description: i18n.translate(guildID, "command.remix.help.description"),
-        usage: "/remix set\nremix:[include | exclude | exclusive]\n\n/remix reset",
+        usage: "/remix set\nremix:[include | exclude]\n\n/remix reset",
         examples: [
             {
                 example: "`/remix set remix:include`",
@@ -58,13 +58,6 @@ export default class RemixCommand implements BaseCommand {
                 explanation: i18n.translate(
                     guildID,
                     "command.remix.help.example.exclude"
-                ),
-            },
-            {
-                example: "`/remix set remix:exclusive`",
-                explanation: i18n.translate(
-                    guildID,
-                    "command.remix.help.example.exclusive"
                 ),
             },
             {
