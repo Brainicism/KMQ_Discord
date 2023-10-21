@@ -508,7 +508,7 @@ export default class GameSession extends Session {
                 if (playerScore > 0) {
                     await GameSession.incrementPlayerSongsGuessed(
                         participant,
-                        playerScore
+                        1
                     );
                 }
 
