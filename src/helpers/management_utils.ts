@@ -413,6 +413,10 @@ function clearCachedSpotifyPlaylists(): void {
     State.spotifyManager.cachedPlaylists = {};
 }
 
+function cleanupSpotifyParsingLocks(): void {
+    State.spotifyManager.cleanupSpotifyParsingLocks();
+}
+
 /**
  * Clears any existing restart timers
  */
@@ -454,6 +458,8 @@ export function registerIntervals(clusterID: number): void {
         cleanupInactiveGameSessions();
         // Change bot's status (song playing, power hour, etc.)
         updateBotStatus();
+        // Clear any guilds stuck in parsing Spotify state
+        cleanupSpotifyParsingLocks();
     });
 
     // Every 5 minutes
