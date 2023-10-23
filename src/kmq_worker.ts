@@ -9,6 +9,7 @@ import {
     reloadCaches,
     updateBotStatus,
 } from "./helpers/management_utils";
+import AppCommandsAction from "./enums/app_command_action";
 import EnvType from "./enums/env_type";
 import EvalCommand from "./commands/admin/eval";
 import ReloadCommand from "./commands/admin/reload";
@@ -42,7 +43,6 @@ import voiceChannelSwitchHandler from "./events/client/voiceChannelSwitch";
 import warnHandler from "./events/client/warn";
 import type { Setup } from "eris-fleet/dist/clusters/BaseClusterWorker";
 import type KmqClient from "./kmq_client";
-import AppCommandsAction from "./enums/app_command_action";
 
 const logger = new IPCLogger("kmq");
 config({ path: path.resolve(__dirname, "../.env") });
