@@ -2066,9 +2066,6 @@ export const updateAppCommands = async (
     appCommandType = AppCommandsAction.RELOAD
 ): Promise<void> => {
     const isProd = process.env.NODE_ENV === EnvType.PROD;
-    const debugServer = State.client.guilds.get(
-        process.env.DEBUG_SERVER_ID as string
-    );
 
     let commandStructures: Eris.ApplicationCommandStructure[] = [];
 
@@ -2173,6 +2170,10 @@ export const updateAppCommands = async (
     if (isProd) {
         await State.client.bulkEditCommands(commandStructures);
     } else {
+        const debugServer = State.client.guilds.get(
+            process.env.DEBUG_SERVER_ID as string
+        );
+
         if (debugServer) {
             await State.client.bulkEditGuildCommands(
                 debugServer.id,
@@ -2182,6 +2183,8 @@ export const updateAppCommands = async (
             logger.error("Debug server unexpectedly unavailable");
         }
     }
+
+    await State.ipc.allClustersCommand("fetch_app_command_ids");
 };
 
 /**

@@ -3,7 +3,7 @@ import { BaseClusterWorker } from "eris-fleet";
 import { IPCLogger } from "./logger";
 import { config } from "dotenv";
 import { durationSeconds } from "./helpers/utils";
-import { fetchAppCommandIDs } from "./helpers/discord_utils";
+import { fetchAppCommandIDs, updateAppCommands } from "./helpers/discord_utils";
 import {
     registerIntervals,
     reloadCaches,
@@ -42,6 +42,7 @@ import voiceChannelSwitchHandler from "./events/client/voiceChannelSwitch";
 import warnHandler from "./events/client/warn";
 import type { Setup } from "eris-fleet/dist/clusters/BaseClusterWorker";
 import type KmqClient from "./kmq_client";
+import AppCommandsAction from "./enums/app_command_action";
 
 const logger = new IPCLogger("kmq");
 config({ path: path.resolve(__dirname, "../.env") });
@@ -278,5 +279,8 @@ export default class BotWorker extends BaseClusterWorker {
                 process.env.NODE_ENV
             }' mode (${durationSeconds(State.processStartTime, Date.now())}s)`
         );
+
+        logger.info("Reloading app commands");
+        updateAppCommands(AppCommandsAction.RELOAD);
     }
 }
