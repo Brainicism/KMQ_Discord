@@ -1,9 +1,9 @@
 import { IPCLogger } from "../logger";
 import { updatePremium } from "./game_utils";
 import Axios from "axios";
+import KmqConfiguration from "../kmq_configuration";
 import dbContext from "../database_context";
 import type Patron from "../interfaces/patron";
-import KmqConfiguration from "../kmq_configuration";
 
 const logger = new IPCLogger("patreon_manager");
 
