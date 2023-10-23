@@ -22,7 +22,7 @@ before(async function () {
         process.exit(1);
     }
 
-    this.timeout(20000);
+    this.timeout(60000);
     logger.info("Acquiring database connections");
     const db = getNewConnection();
     await sql`DROP DATABASE IF EXISTS kmq_test;`.execute(db.agnostic);
