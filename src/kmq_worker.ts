@@ -3,12 +3,13 @@ import { BaseClusterWorker } from "eris-fleet";
 import { IPCLogger } from "./logger";
 import { config } from "dotenv";
 import { durationSeconds } from "./helpers/utils";
-import { fetchAppCommandIDs } from "./helpers/discord_utils";
+import { fetchAppCommandIDs, updateAppCommands } from "./helpers/discord_utils";
 import {
     registerIntervals,
     reloadCaches,
     updateBotStatus,
 } from "./helpers/management_utils";
+import AppCommandsAction from "./enums/app_command_action";
 import EnvType from "./enums/env_type";
 import EvalCommand from "./commands/admin/eval";
 import ReloadCommand from "./commands/admin/reload";
@@ -278,5 +279,8 @@ export default class BotWorker extends BaseClusterWorker {
                 process.env.NODE_ENV
             }' mode (${durationSeconds(State.processStartTime, Date.now())}s)`
         );
+
+        logger.info("Reloading app commands");
+        updateAppCommands(AppCommandsAction.RELOAD);
     }
 }
