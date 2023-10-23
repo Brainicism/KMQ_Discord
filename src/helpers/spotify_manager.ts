@@ -460,131 +460,146 @@ export default class SpotifyManager {
         song: SpotifyTrack,
         isPremium: boolean
     ): Promise<QueriedSong | string> {
-        return new Promise(async (resolve) => {
-            const aliasIDs: Array<number> = [];
-            for (const artist of song.artists) {
-                const lowercaseArtist = normalizePunctuationInName(artist);
-                const artistMapping = State.artistToEntry[lowercaseArtist];
-                if (artistMapping) {
-                    aliasIDs.push(artistMapping.id);
-                    if (State.aliases.artist[lowercaseArtist]) {
-                        for (const alias of State.aliases.artist[
-                            lowercaseArtist
-                        ]) {
-                            const lowercaseAlias =
-                                normalizePunctuationInName(alias);
+        return new Promise(async (resolve, reject) => {
+            try {
+                const aliasIDs: Array<number> = [];
+                for (const artist of song.artists) {
+                    const lowercaseArtist = normalizePunctuationInName(artist);
+                    const artistMapping = State.artistToEntry[lowercaseArtist];
+                    if (artistMapping) {
+                        aliasIDs.push(artistMapping.id);
+                        if (State.aliases.artist[lowercaseArtist]) {
+                            for (const alias of State.aliases.artist[
+                                lowercaseArtist
+                            ]) {
+                                const lowercaseAlias =
+                                    normalizePunctuationInName(alias);
 
-                            if (lowercaseAlias in State.artistToEntry) {
-                                aliasIDs.push(
-                                    State.artistToEntry[lowercaseAlias].id
-                                );
+                                if (lowercaseAlias in State.artistToEntry) {
+                                    aliasIDs.push(
+                                        State.artistToEntry[lowercaseAlias].id
+                                    );
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            // handle songs with brackets in name, consider all components separately
-            const songNameBracketComponents = song.name.split("(");
-            const songNames = [songNameBracketComponents[0]];
-            if (songNameBracketComponents.length > 1) {
-                songNames.push(songNameBracketComponents[1].replace(")", ""));
-                songNames.push(song.name);
-            }
+                // handle songs with brackets in name, consider all components separately
+                const songNameBracketComponents = song.name.split("(");
+                const songNames = [songNameBracketComponents[0]];
+                if (songNameBracketComponents.length > 1) {
+                    songNames.push(
+                        songNameBracketComponents[1].replace(")", "")
+                    );
+                    songNames.push(song.name);
+                }
 
-            const query = dbContext.kmq
-                .selectFrom("available_songs")
-                .innerJoin("kpop_videos.app_kpop_group", (jb) =>
-                    jb.on(({ or, eb, ref }) =>
-                        or([
-                            eb(
-                                "kpop_videos.app_kpop_group.id",
-                                "=",
-                                ref("available_songs.id_artist")
-                            ),
-                            eb(
-                                "kpop_videos.app_kpop_group.id",
-                                "=",
-                                ref("available_songs.id_parent_artist")
-                            ),
-                        ])
+                const query = dbContext.kmq
+                    .selectFrom("available_songs")
+                    .innerJoin("kpop_videos.app_kpop_group", (jb) =>
+                        jb.on(({ or, eb, ref }) =>
+                            or([
+                                eb(
+                                    "kpop_videos.app_kpop_group.id",
+                                    "=",
+                                    ref("available_songs.id_artist")
+                                ),
+                                eb(
+                                    "kpop_videos.app_kpop_group.id",
+                                    "=",
+                                    ref("available_songs.id_parent_artist")
+                                ),
+                            ])
+                        )
                     )
-                )
-                .select(SongSelector.QueriedSongFields)
-                .where(({ eb, or }) =>
-                    or(
-                        songNames.map((songName) =>
-                            eb(
-                                "available_songs.clean_song_name_alpha_numeric",
-                                "like",
-                                songName.replace(/[^0-9a-z]/gi, "")
+                    .select(SongSelector.QueriedSongFields)
+                    .where(({ eb, or }) =>
+                        or(
+                            songNames.map((songName) =>
+                                eb(
+                                    "available_songs.clean_song_name_alpha_numeric",
+                                    "like",
+                                    songName.replace(/[^0-9a-z]/gi, "")
+                                )
                             )
                         )
                     )
-                )
-                .where(({ or, eb, and }) => {
-                    const expressions = [
-                        eb(
-                            "available_songs.original_artist_name_en",
-                            "like",
-                            song.artists[0]
-                        ),
-                        and([
+                    .where(({ or, eb, and }) => {
+                        const expressions = [
                             eb(
                                 "available_songs.original_artist_name_en",
                                 "like",
-                                "%+%"
+                                song.artists[0]
+                            ),
+                            and([
+                                eb(
+                                    "available_songs.original_artist_name_en",
+                                    "like",
+                                    "%+%"
+                                ),
+                                eb(
+                                    "available_songs.original_artist_name_en",
+                                    "like",
+                                    `%${song.artists[0]}%`
+                                ),
+                            ]),
+                            eb(
+                                "available_songs.previous_name_en",
+                                "like",
+                                song.artists[0]
                             ),
                             eb(
-                                "available_songs.original_artist_name_en",
+                                "artist_aliases",
                                 "like",
                                 `%${song.artists[0]}%`
                             ),
-                        ]),
-                        eb(
-                            "available_songs.previous_name_en",
-                            "like",
-                            song.artists[0]
-                        ),
-                        eb("artist_aliases", "like", `%${song.artists[0]}%`),
-                    ];
+                        ];
 
-                    if (aliasIDs.length) {
-                        expressions.push(
-                            ...[
-                                eb("id_parentgroup", "in", aliasIDs),
-                                eb("id_artist", "in", aliasIDs),
-                                eb("id_parent_artist", "in", aliasIDs),
-                            ]
-                        );
-                    }
+                        if (aliasIDs.length) {
+                            expressions.push(
+                                ...[
+                                    eb("id_parentgroup", "in", aliasIDs),
+                                    eb("id_artist", "in", aliasIDs),
+                                    eb("id_parent_artist", "in", aliasIDs),
+                                ]
+                            );
+                        }
 
-                    return or(expressions);
-                })
+                        return or(expressions);
+                    })
 
-                .where(
-                    "rank",
-                    "<=",
-                    isPremium
-                        ? parseInt(
-                              process.env
-                                  .PREMIUM_AUDIO_SONGS_PER_ARTIST as string,
-                              10
-                          )
-                        : parseInt(
-                              process.env.AUDIO_SONGS_PER_ARTIST as string,
-                              10
-                          )
-                )
-                .orderBy((eb) => eb.fn("CHAR_LENGTH", ["tags"]), "asc")
-                .orderBy("views", "desc");
+                    .where(
+                        "rank",
+                        "<=",
+                        isPremium
+                            ? parseInt(
+                                  process.env
+                                      .PREMIUM_AUDIO_SONGS_PER_ARTIST as string,
+                                  10
+                              )
+                            : parseInt(
+                                  process.env.AUDIO_SONGS_PER_ARTIST as string,
+                                  10
+                              )
+                    )
+                    .orderBy((eb) => eb.fn("CHAR_LENGTH", ["tags"]), "asc")
+                    .orderBy("views", "desc");
 
-            const result = (await query.executeTakeFirst()) as QueriedSong;
+                const result = (await query.executeTakeFirst()) as QueriedSong;
 
-            if (result) {
-                resolve(result);
-            } else {
-                resolve(`${song.name} - ${song.artists[0]}`);
+                if (result) {
+                    resolve(result);
+                } else {
+                    resolve(`${song.name} - ${song.artists[0]}`);
+                }
+            } catch (err) {
+                logger.error(
+                    `Failed matching Spotify song. song = ${JSON.stringify(
+                        song
+                    )}. err = ${err}`
+                );
+                reject(err);
             }
         });
     }
