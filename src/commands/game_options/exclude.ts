@@ -194,9 +194,8 @@ export default class ExcludeCommand implements BaseCommand {
             .split(",")
             .map((groupName) => groupName.trim());
 
-        const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames(
-            groupNames
-        );
+        const { matchedGroups, unmatchedGroups } =
+            await getMatchingGroupNames(groupNames);
 
         await ExcludeCommand.updateOption(
             MessageContext.fromMessage(message),

@@ -195,9 +195,8 @@ export default class SpotifyCommand implements BaseCommand {
         reset = false
     ): Promise<void> {
         const guildID = messageContext.guildID;
-        const guildPreference = await GuildPreference.getGuildPreference(
-            guildID
-        );
+        const guildPreference =
+            await GuildPreference.getGuildPreference(guildID);
 
         const session = Session.getSession(guildID);
         if (reset) {

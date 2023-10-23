@@ -194,9 +194,8 @@ export default class IncludeCommand implements BaseCommand {
             .split(",")
             .map((groupName) => groupName.trim());
 
-        const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames(
-            groupNames
-        );
+        const { matchedGroups, unmatchedGroups } =
+            await getMatchingGroupNames(groupNames);
 
         await IncludeCommand.updateOption(
             MessageContext.fromMessage(message),

@@ -92,9 +92,8 @@ export default class BotListingManager {
                     process.env.BOT_CLIENT_ID as string
                 ),
                 {
-                    [botListing.payloadKeyName]: (
-                        await this.ipc.getStats()
-                    ).guilds,
+                    [botListing.payloadKeyName]: (await this.ipc.getStats())
+                        .guilds,
                 },
                 {
                     headers: {

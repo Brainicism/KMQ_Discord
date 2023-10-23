@@ -197,9 +197,8 @@ export default class RemoveCommand implements BaseCommand {
             return;
         }
 
-        const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames(
-            rawGroupsToRemove
-        );
+        const { matchedGroups, unmatchedGroups } =
+            await getMatchingGroupNames(rawGroupsToRemove);
 
         const remainingGroups = currentMatchedArtists.filter(
             (group) => !matchedGroups.some((x) => x.id === group.id)
