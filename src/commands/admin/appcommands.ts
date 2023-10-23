@@ -50,7 +50,6 @@ export default class AppCommandsCommand implements BaseCommand {
         }
 
         await updateAppCommands(appCommandType);
-        await State.ipc.allClustersCommand("fetch_app_command_ids");
         await sendInfoMessage(MessageContext.fromMessage(message), {
             title: "Commands Updated",
         });
