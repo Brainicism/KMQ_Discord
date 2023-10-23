@@ -348,7 +348,7 @@ export default class SongSelector {
             }
         }
 
-        queryBuilder = queryBuilder.where(({ or, cmpr, and }) => {
+        queryBuilder = queryBuilder.where(({ or, eb, and }) => {
             const includesInnerArtistFilterExpressions: Array<
                 Expression<SqlBool>
             > = [];
@@ -361,17 +361,13 @@ export default class SongSelector {
                         SubunitsPreference.EXCLUDE
                     ) {
                         includesInnerArtistFilterExpressions.push(
-                            cmpr("id_artist", "in", includesGroupIDs)
+                            eb("id_artist", "in", includesGroupIDs)
                         );
                     } else {
                         includesInnerArtistFilterExpressions.push(
                             or([
-                                cmpr("id_artist", "in", includesGroupIDs),
-                                cmpr(
-                                    "id_parent_artist",
-                                    "in",
-                                    includesGroupIDs
-                                ),
+                                eb("id_artist", "in", includesGroupIDs),
+                                eb("id_parent_artist", "in", includesGroupIDs),
                             ])
                         );
                     }
@@ -381,11 +377,7 @@ export default class SongSelector {
             const mainArtistFilterExpressions: Array<Expression<SqlBool>> = [];
 
             mainArtistFilterExpressions.push(
-                cmpr(
-                    "id_artist",
-                    "not in",
-                    guildPreference.getExcludesGroupIDs()
-                )
+                eb("id_artist", "not in", guildPreference.getExcludesGroupIDs())
             );
 
             if (!guildPreference.isGroupsMode()) {
@@ -394,11 +386,11 @@ export default class SongSelector {
                         ? ["male", "female", "coed"]
                         : (gameOptions.gender as Array<AvailableGenders>);
 
-                mainArtistFilterExpressions.push(cmpr("members", "in", gender));
+                mainArtistFilterExpressions.push(eb("members", "in", gender));
                 // filter by artist type only in non-groups
                 if (gameOptions.artistType !== ArtistType.BOTH) {
                     mainArtistFilterExpressions.push(
-                        cmpr(
+                        eb(
                             "issolo",
                             "=",
                             gameOptions.artistType === ArtistType.SOLOIST
@@ -411,24 +403,24 @@ export default class SongSelector {
                 gameOptions.subunitPreference === SubunitsPreference.EXCLUDE
             ) {
                 mainArtistFilterExpressions.push(
-                    cmpr("id_artist", "in", selectedGroupIDs)
+                    eb("id_artist", "in", selectedGroupIDs)
                 );
             } else {
                 const mainArtistIdSearchExpressions = [];
                 mainArtistIdSearchExpressions.push(
                     ...[
-                        cmpr("id_artist", "in", selectedGroupIDs),
-                        cmpr("id_parent_artist", "in", selectedGroupIDs),
+                        eb("id_artist", "in", selectedGroupIDs),
+                        eb("id_parent_artist", "in", selectedGroupIDs),
                     ]
                 );
 
                 mainArtistIdSearchExpressions.push(
-                    cmpr("id_artist", "in", collabGroupContainingSubunit)
+                    eb("id_artist", "in", collabGroupContainingSubunit)
                 );
 
                 mainArtistFilterExpressions.push(
                     and([
-                        cmpr("id_artist", "not in", shadowBannedArtistIds),
+                        eb("id_artist", "not in", shadowBannedArtistIds),
                         or(mainArtistIdSearchExpressions),
                     ])
                 );
