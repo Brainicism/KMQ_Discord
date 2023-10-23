@@ -253,9 +253,7 @@ async function extractDb(): Promise<void> {
 async function recordDaisukiTableSchema(db: DatabaseContext): Promise<void> {
     const frozenTableColumnNames: { [table: string]: string[] } = {};
     await Promise.allSettled(
-        (
-            await getDaisukiTableNames(db)
-        ).map(async (table) => {
+        (await getDaisukiTableNames(db)).map(async (table) => {
             const commaSeparatedColumnNames = (
                 await db.infoSchema
                     .selectFrom("COLUMNS")
@@ -284,9 +282,7 @@ async function validateDaisukiTableSchema(
 ): Promise<void> {
     const outputMessages: Array<string> = [];
     await Promise.allSettled(
-        (
-            await getDaisukiTableNames(db)
-        ).map(async (table) => {
+        (await getDaisukiTableNames(db)).map(async (table) => {
             const commaSeparatedColumnNames = (
                 await db.infoSchema
                     .selectFrom("COLUMNS")

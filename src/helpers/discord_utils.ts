@@ -1882,10 +1882,13 @@ export function getInteractionValue(
         interactionKey: keys.join("."),
         interactionOptions: (
             options as Eris.InteractionDataOptionsWithValue[]
-        ).reduce((result, filter: Eris.InteractionDataOptionsWithValue) => {
-            result[filter.name] = filter.value;
-            return result;
-        }, {} as { [name: string]: string | number | boolean }),
+        ).reduce(
+            (result, filter: Eris.InteractionDataOptionsWithValue) => {
+                result[filter.name] = filter.value;
+                return result;
+            },
+            {} as { [name: string]: string | number | boolean }
+        ),
         interactionName: parentInteractionDataName,
         focusedKey: options.find((x) => x["focused"])?.name ?? null,
     };

@@ -932,9 +932,8 @@ export default class PlayCommand implements BaseCommand {
         interaction?: Eris.CommandInteraction
     ): Promise<void> {
         const guildID = messageContext.guildID;
-        const guildPreference = await GuildPreference.getGuildPreference(
-            guildID
-        );
+        const guildPreference =
+            await GuildPreference.getGuildPreference(guildID);
 
         const voiceChannel = getUserVoiceChannel(messageContext);
 

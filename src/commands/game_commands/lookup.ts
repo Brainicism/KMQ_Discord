@@ -333,10 +333,10 @@ async function lookupBySongName(
 
     if (songName !== "") {
         kmqSongEntriesQuery = kmqSongEntriesQuery
-            .where(({ or, cmpr }) =>
+            .where(({ or, eb }) =>
                 or([
-                    cmpr("song_name_en", "like", `%${songName}%`),
-                    cmpr("song_name_ko", "like", `%${songName}%`),
+                    eb("song_name_en", "like", `%${songName}%`),
+                    eb("song_name_ko", "like", `%${songName}%`),
                 ])
             )
             .orderBy((eb) => eb.fn("CHAR_LENGTH", ["song_name_en"]), "asc")

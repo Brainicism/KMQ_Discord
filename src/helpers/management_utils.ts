@@ -234,11 +234,11 @@ export async function reloadAliases(): Promise<void> {
             "previous_name_ko",
         ])
         .distinct()
-        .where(({ or, cmpr }) =>
+        .where(({ or, eb }) =>
             or([
-                cmpr("artist_aliases", "<>", ""),
-                cmpr("previous_name_en", "<>", ""),
-                cmpr("previous_name_ko", "<>", ""),
+                eb("artist_aliases", "<>", ""),
+                eb("previous_name_en", "<>", ""),
+                eb("previous_name_ko", "<>", ""),
             ])
         )
         .execute();

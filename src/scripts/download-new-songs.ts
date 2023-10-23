@@ -192,9 +192,8 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
         cacheStream.once("finish", async () => {
             try {
                 await fs.promises.rename(tempLocation, cachedSongLocation);
-                const duration = await getAudioDurationInSeconds(
-                    cachedSongLocation
-                );
+                const duration =
+                    await getAudioDurationInSeconds(cachedSongLocation);
 
                 await db.kmq
                     .insertInto("cached_song_duration")

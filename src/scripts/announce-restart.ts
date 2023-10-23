@@ -94,10 +94,13 @@ function serverShutdown(
             restartDate.setMinutes(restartDate.getMinutes() + restartMinutes);
             await announceRestart(restartMinutes, restartDate, restart);
 
-            setTimeout(() => {
-                console.log("Stopping KMQ...");
-                cp.execSync(`APP_NAME=${appName} npm run docker-stop`);
-            }, restartMinutes * 1000 * 60);
+            setTimeout(
+                () => {
+                    console.log("Stopping KMQ...");
+                    cp.execSync(`APP_NAME=${appName} npm run docker-stop`);
+                },
+                restartMinutes * 1000 * 60
+            );
         } else {
             const oldAppName = `${appName}-old`;
             console.log("Upgrading KMQ...");
@@ -143,17 +146,20 @@ function serverShutdown(
             restartDate.setMinutes(restartDate.getMinutes() + restartMinutes);
             await announceRestart(restartMinutes, restartDate, restart);
 
-            setTimeout(() => {
-                // drop old primary
-                console.log("Dropping old primary...");
-                cp.execSync(`docker rm -f ${oldAppName}`);
+            setTimeout(
+                () => {
+                    // drop old primary
+                    console.log("Dropping old primary...");
+                    cp.execSync(`docker rm -f ${oldAppName}`);
 
-                // promote standby to primary
-                console.log("Promoting standby to primary...");
-                cp.execSync(
-                    `docker exec ${appName} /bin/sh -c "mv standby promoted"`
-                );
-            }, restartMinutes * 1000 * 60);
+                    // promote standby to primary
+                    console.log("Promoting standby to primary...");
+                    cp.execSync(
+                        `docker exec ${appName} /bin/sh -c "mv standby promoted"`
+                    );
+                },
+                restartMinutes * 1000 * 60
+            );
         }
     });
 }

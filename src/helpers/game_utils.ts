@@ -188,10 +188,10 @@ export async function getSimilarGroupNames(
     const similarGroups = await dbContext.kpopVideos
         .selectFrom("app_kpop_group")
         .select(["id", "name", "kname"])
-        .where(({ or, cmpr }) =>
+        .where(({ or, eb }) =>
             or([
-                cmpr("name", "like", `%${groupName}%`),
-                cmpr("kname", "like", `%${groupName}%`),
+                eb("name", "like", `%${groupName}%`),
+                eb("kname", "like", `%${groupName}%`),
             ])
         )
         .orderBy((eb) => eb.fn("CHAR_LENGTH", ["name"]), "asc")

@@ -495,14 +495,14 @@ export default class SpotifyManager {
             const query = dbContext.kmq
                 .selectFrom("available_songs")
                 .innerJoin("kpop_videos.app_kpop_group", (jb) =>
-                    jb.on(({ or, cmpr, ref }) =>
+                    jb.on(({ or, eb, ref }) =>
                         or([
-                            cmpr(
+                            eb(
                                 "kpop_videos.app_kpop_group.id",
                                 "=",
                                 ref("available_songs.id_artist")
                             ),
-                            cmpr(
+                            eb(
                                 "kpop_videos.app_kpop_group.id",
                                 "=",
                                 ref("available_songs.id_parent_artist")
@@ -511,10 +511,10 @@ export default class SpotifyManager {
                     )
                 )
                 .select(SongSelector.QueriedSongFields)
-                .where(({ cmpr, or }) =>
+                .where(({ eb, or }) =>
                     or(
                         songNames.map((songName) =>
-                            cmpr(
+                            eb(
                                 "available_songs.clean_song_name_alpha_numeric",
                                 "like",
                                 songName.replace(/[^0-9a-z]/gi, "")
@@ -522,39 +522,39 @@ export default class SpotifyManager {
                         )
                     )
                 )
-                .where(({ or, cmpr, and }) => {
+                .where(({ or, eb, and }) => {
                     const expressions = [
-                        cmpr(
+                        eb(
                             "available_songs.original_artist_name_en",
                             "like",
                             song.artists[0]
                         ),
                         and([
-                            cmpr(
+                            eb(
                                 "available_songs.original_artist_name_en",
                                 "like",
                                 "%+%"
                             ),
-                            cmpr(
+                            eb(
                                 "available_songs.original_artist_name_en",
                                 "like",
                                 `%${song.artists[0]}%`
                             ),
                         ]),
-                        cmpr(
+                        eb(
                             "available_songs.previous_name_en",
                             "like",
                             song.artists[0]
                         ),
-                        cmpr("artist_aliases", "like", `%${song.artists[0]}%`),
+                        eb("artist_aliases", "like", `%${song.artists[0]}%`),
                     ];
 
                     if (aliasIDs.length) {
                         expressions.push(
                             ...[
-                                cmpr("id_parentgroup", "in", aliasIDs),
-                                cmpr("id_artist", "in", aliasIDs),
-                                cmpr("id_parent_artist", "in", aliasIDs),
+                                eb("id_parentgroup", "in", aliasIDs),
+                                eb("id_artist", "in", aliasIDs),
+                                eb("id_parent_artist", "in", aliasIDs),
                             ]
                         );
                     }
