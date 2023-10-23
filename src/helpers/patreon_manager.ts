@@ -1,6 +1,7 @@
 import { IPCLogger } from "../logger";
 import { updatePremium } from "./game_utils";
 import Axios from "axios";
+import KmqConfiguration from "../kmq_configuration";
 import dbContext from "../database_context";
 import type Patron from "../interfaces/patron";
 
@@ -84,6 +85,10 @@ function parsePatreonResponse(patreonResponse: PatreonResponse): Array<Patron> {
  * Fetch up-to-date Patreon members and update Premium members accordingly
  */
 export default async function updatePremiumUsers(): Promise<void> {
+    if (!KmqConfiguration.Instance.patreonFetchingEnabled()) {
+        return;
+    }
+
     if (
         !process.env.PATREON_CREATOR_ACCESS_TOKEN ||
         !process.env.PATREON_CAMPAIGN_ID
