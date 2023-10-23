@@ -20,6 +20,7 @@ RUN wget "https://azcopyvnext.azureedge.net/release20230331/azcopy_linux_${TARGE
 
 WORKDIR /app
 COPY yarn.lock package.json ./
+RUN yarn global add node-gyp@9.4.0
 RUN yarn install --frozen-lockfile
 
 COPY start.sh tsconfig.json ./
