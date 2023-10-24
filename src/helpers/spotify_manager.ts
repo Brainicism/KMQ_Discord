@@ -35,7 +35,7 @@ const logger = new IPCLogger("spotify_manager");
 
 const BASE_URL = "https://api.spotify.com/v1";
 
-const SONG_MATCH_TIMEOUT_MS = 30000;
+const SONG_MATCH_TIMEOUT_MS = 90000;
 
 export default class SpotifyManager {
     public cachedPlaylists: {
