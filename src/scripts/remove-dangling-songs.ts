@@ -28,7 +28,7 @@ program.parse();
         .map((x) => x.replace(".ogg", ""));
 
     const danglingSongs = _.difference(downloadedSongs, availableSongs).map(
-        (x) => path.join(process.env.SONG_DOWNLOAD_DIR as string, `${x}.ogg`)
+        (x) => path.join(process.env.SONG_DOWNLOAD_DIR as string, `${x}.ogg`),
     );
 
     let totalSize = 0;
@@ -44,7 +44,7 @@ program.parse();
             `${danglingSongs.length} songs (${(
                 totalSize /
                 (1024 * 1024)
-            ).toFixed(2)} MB) to be deleted. Re-run with --delete to remove.`
+            ).toFixed(2)} MB) to be deleted. Re-run with --delete to remove.`,
         );
         return;
     }
@@ -52,7 +52,7 @@ program.parse();
     await Promise.all(danglingSongs.map((song) => fs.promises.unlink(song)));
     logger.info(
         `${danglingSongs.length} songs (${(totalSize / (1024 * 1024)).toFixed(
-            2
-        )} MB) removed`
+            2,
+        )} MB) removed`,
     );
 })();

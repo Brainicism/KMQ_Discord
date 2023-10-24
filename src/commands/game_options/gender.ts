@@ -61,7 +61,7 @@ export default class GenderCommand implements BaseCommand {
                 female: "`female`",
                 coed: "`coed`",
                 genderAlternating: "`/gender alternating`",
-            }
+            },
         ),
         usage: "/gender set\ngender_1:[gender]\ngender_2:{gender}\ngender_3:{gender}\n\n/gender reset",
         examples: [
@@ -69,35 +69,35 @@ export default class GenderCommand implements BaseCommand {
                 example: "`/gender set female`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.gender.help.example.female"
+                    "command.gender.help.example.female",
                 ),
             },
             {
                 example: "`/gender set gender_1:male gender_2:female`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.gender.help.example.maleFemale"
+                    "command.gender.help.example.maleFemale",
                 ),
             },
             {
                 example: "`/gender set gender_1:coed`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.gender.help.example.coed"
+                    "command.gender.help.example.coed",
                 ),
             },
             {
                 example: "`/gender set gender_1:alternating`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.gender.help.example.alternating"
+                    "command.gender.help.example.alternating",
                 ),
             },
             {
                 example: "`/gender reset`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.gender.help.example.reset"
+                    "command.gender.help.example.reset",
                 ),
             },
         ],
@@ -114,7 +114,7 @@ export default class GenderCommand implements BaseCommand {
                     name: OptionAction.SET,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.gender.help.interaction.description"
+                        "command.gender.help.interaction.description",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -123,10 +123,10 @@ export default class GenderCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.gender.help.interaction.description"
+                                    "command.gender.help.interaction.description",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -135,7 +135,7 @@ export default class GenderCommand implements BaseCommand {
                         name: `gender_${x + 1}`,
                         description: i18n.translate(
                             LocaleType.EN,
-                            "command.gender.help.interaction.gender"
+                            "command.gender.help.interaction.gender",
                         ),
                         description_localizations: Object.values(LocaleType)
                             .filter((y) => y !== LocaleType.EN)
@@ -144,17 +144,17 @@ export default class GenderCommand implements BaseCommand {
                                     ...acc,
                                     [locale]: i18n.translate(
                                         locale,
-                                        "command.gender.help.interaction.gender"
+                                        "command.gender.help.interaction.gender",
                                     ),
                                 }),
-                                {}
+                                {},
                             ),
 
                         type: Eris.Constants.ApplicationCommandOptionTypes
                             .STRING,
                         choices: Object.values(availableGenders)
                             .filter(
-                                (gender) => x === 0 || gender !== "alternating"
+                                (gender) => x === 0 || gender !== "alternating",
                             )
                             .map((gender) => ({
                                 name: gender,
@@ -168,7 +168,7 @@ export default class GenderCommand implements BaseCommand {
                     description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
-                        { optionName: "gender" }
+                        { optionName: "gender" },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -178,10 +178,10 @@ export default class GenderCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "misc.interaction.resetOption",
-                                    { optionName: "gender" }
+                                    { optionName: "gender" },
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -199,17 +199,17 @@ export default class GenderCommand implements BaseCommand {
         await GenderCommand.updateOption(
             MessageContext.fromMessage(message),
             selectedGenders,
-            undefined
+            undefined,
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         selectedGenders: Array<GenderModeOptions>,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         const reset = selectedGenders.length === 0;
@@ -224,7 +224,7 @@ export default class GenderCommand implements BaseCommand {
                 false,
                 undefined,
                 undefined,
-                interaction
+                interaction,
             );
 
             logger.info(`${getDebugLogHeader(messageContext)} | Gender reset.`);
@@ -241,8 +241,8 @@ export default class GenderCommand implements BaseCommand {
             if (selectedGenders[0] !== "alternating") {
                 logger.warn(
                     `${getDebugLogHeader(
-                        messageContext
-                    )} | Game option conflict between gender and groups.`
+                        messageContext,
+                    )} | Game option conflict between gender and groups.`,
                 );
 
                 sendErrorMessage(
@@ -250,7 +250,7 @@ export default class GenderCommand implements BaseCommand {
                     {
                         title: i18n.translate(
                             messageContext.guildID,
-                            "misc.failure.gameOptionConflict.title"
+                            "misc.failure.gameOptionConflict.title",
                         ),
                         description: i18n.translate(
                             messageContext.guildID,
@@ -259,10 +259,10 @@ export default class GenderCommand implements BaseCommand {
                                 optionOne: "`groups`",
                                 optionTwo: "`gender`",
                                 optionOneCommand: "`/groups reset`",
-                            }
+                            },
                         ),
                     },
-                    interaction
+                    interaction,
                 );
                 return;
             }
@@ -278,7 +278,7 @@ export default class GenderCommand implements BaseCommand {
                     {
                         title: i18n.translate(
                             messageContext.guildID,
-                            "command.gender.warning.gameOption.title"
+                            "command.gender.warning.gameOption.title",
                         ),
                         description: i18n.translate(
                             messageContext.guildID,
@@ -286,10 +286,10 @@ export default class GenderCommand implements BaseCommand {
                             {
                                 alternatingGenderCommand:
                                     "`/gender alternating`",
-                            }
+                            },
                         ),
                     },
-                    interaction
+                    interaction,
                 );
                 return;
             }
@@ -307,15 +307,15 @@ export default class GenderCommand implements BaseCommand {
             false,
             undefined,
             undefined,
-            interaction
+            interaction,
         );
 
         logger.info(
             `${getDebugLogHeader(
-                messageContext
+                messageContext,
             )} | Genders set to ${guildPreference.gameOptions.gender.join(
-                ", "
-            )}`
+                ", ",
+            )}`,
         );
     }
 
@@ -325,7 +325,7 @@ export default class GenderCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
@@ -345,7 +345,7 @@ export default class GenderCommand implements BaseCommand {
         await GenderCommand.updateOption(
             messageContext,
             selectedGenders,
-            interaction
+            interaction,
         );
     }
 }

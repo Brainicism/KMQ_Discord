@@ -49,7 +49,7 @@ export default class UpcomingReleasesCommand implements BaseCommand {
         name: "upcomingreleases",
         description: i18n.translate(
             guildID,
-            "command.upcomingreleases.help.description"
+            "command.upcomingreleases.help.description",
         ),
         usage: "/upcomingreleases release:[single | album | ep]",
         examples: [
@@ -57,14 +57,14 @@ export default class UpcomingReleasesCommand implements BaseCommand {
                 example: "`/upcomingreleases`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.upcomingreleases.help.defaultExample"
+                    "command.upcomingreleases.help.defaultExample",
                 ),
             },
             {
                 example: "`/upcomingreleases release:album`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.upcomingreleases.help.albumExample"
+                    "command.upcomingreleases.help.albumExample",
                 ),
             },
         ],
@@ -81,7 +81,7 @@ export default class UpcomingReleasesCommand implements BaseCommand {
                     name: "release",
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.upcomingreleases.help.interaction.releaseType"
+                        "command.upcomingreleases.help.interaction.releaseType",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -90,10 +90,10 @@ export default class UpcomingReleasesCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.upcomingreleases.help.interaction.releaseType"
+                                    "command.upcomingreleases.help.interaction.releaseType",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     required: false,
@@ -109,12 +109,12 @@ export default class UpcomingReleasesCommand implements BaseCommand {
 
     static async showUpcomingReleases(
         messageOrInteraction: GuildTextableMessage | CommandInteraction,
-        releaseType?: ReleaseType
+        releaseType?: ReleaseType,
     ): Promise<void> {
         const messageContext = new MessageContext(
             messageOrInteraction.channel.id,
             new KmqMember(messageOrInteraction.member!.id),
-            messageOrInteraction.guildID as string
+            messageOrInteraction.guildID as string,
         );
 
         const upcomingReleases: Array<UpcomingRelease> =
@@ -123,7 +123,7 @@ export default class UpcomingReleasesCommand implements BaseCommand {
                 .innerJoin(
                     "app_kpop_group",
                     "app_upcoming.id_artist",
-                    "app_kpop_group.id"
+                    "app_kpop_group.id",
                 )
                 .select([
                     "app_upcoming.name",
@@ -140,7 +140,7 @@ export default class UpcomingReleasesCommand implements BaseCommand {
                 .where(
                     "rtype",
                     "in",
-                    releaseType ? [releaseType] : Object.values(ReleaseType)
+                    releaseType ? [releaseType] : Object.values(ReleaseType),
                 )
                 .execute();
 
@@ -150,11 +150,11 @@ export default class UpcomingReleasesCommand implements BaseCommand {
                 {
                     title: i18n.translate(
                         messageContext.guildID,
-                        "command.upcomingreleases.failure.noReleases.title"
+                        "command.upcomingreleases.failure.noReleases.title",
                     ),
                     description: i18n.translate(
                         messageContext.guildID,
-                        "command.upcomingreleases.failure.noReleases.description"
+                        "command.upcomingreleases.failure.noReleases.description",
                     ),
                     thumbnailUrl: KmqImages.NOT_IMPRESSED,
                 },
@@ -163,7 +163,7 @@ export default class UpcomingReleasesCommand implements BaseCommand {
                 [],
                 messageOrInteraction instanceof Eris.CommandInteraction
                     ? messageOrInteraction
-                    : undefined
+                    : undefined,
             );
             return;
         }
@@ -172,14 +172,14 @@ export default class UpcomingReleasesCommand implements BaseCommand {
         const fields = upcomingReleases.map((release) => ({
             name: `"${release.name}" - ${getLocalizedArtistName(
                 release,
-                locale
+                locale,
             )}`,
             value: `${discordDateFormat(
                 release.releaseDate,
-                "d"
+                "d",
             )}\n${i18n.translate(
                 messageContext.guildID,
-                `command.upcomingreleases.${release.releaseType}`
+                `command.upcomingreleases.${release.releaseType}`,
             )}`,
             inline: true,
         }));
@@ -189,21 +189,21 @@ export default class UpcomingReleasesCommand implements BaseCommand {
             (embedFieldsSubset) => ({
                 title: i18n.translate(
                     messageContext.guildID,
-                    "command.upcomingreleases.title"
+                    "command.upcomingreleases.title",
                 ),
                 description: i18n.translate(
                     messageContext.guildID,
-                    "command.upcomingreleases.description"
+                    "command.upcomingreleases.description",
                 ),
                 fields: embedFieldsSubset,
-            })
+            }),
         );
 
         await sendPaginationedEmbed(messageOrInteraction, embeds, undefined);
         logger.info(
             `${getDebugLogHeader(
-                messageContext
-            )} | Upcoming releases retrieved.`
+                messageContext,
+            )} | Upcoming releases retrieved.`,
         );
     }
 
@@ -213,19 +213,19 @@ export default class UpcomingReleasesCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        _messageContext: MessageContext
+        _messageContext: MessageContext,
     ): Promise<void> {
         const { interactionOptions } = getInteractionValue(interaction);
         await UpcomingReleasesCommand.showUpcomingReleases(
             interaction,
-            interactionOptions["release"] as ReleaseType
+            interactionOptions["release"] as ReleaseType,
         );
     }
 
     call = async ({ message }: CommandArgs): Promise<void> => {
         logger.warn("Text-based command not supported for upcomingreleases");
         await sendDeprecatedTextCommandMessage(
-            MessageContext.fromMessage(message)
+            MessageContext.fromMessage(message),
         );
     };
 }

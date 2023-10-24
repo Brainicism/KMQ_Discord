@@ -46,12 +46,12 @@ describe("game utils", () => {
                     // first result is exact artist match
                     assert.strictEqual(
                         matchResults.matchedGroups[0].name,
-                        artistName
+                        artistName,
                     );
 
                     assert.strictEqual(
                         matchResults.matchedGroups.length > 1,
-                        true
+                        true,
                     );
 
                     // all results (including collabs) include the artist
@@ -60,10 +60,10 @@ describe("game utils", () => {
                             .map((x) =>
                                 x.name
                                     .split("+")
-                                    .some((y) => y.trim() === artistName)
+                                    .some((y) => y.trim() === artistName),
                             )
                             .every((z) => z),
-                        true
+                        true,
                     );
 
                     assert.strictEqual(matchResults.unmatchedGroups.length, 0);
@@ -81,7 +81,7 @@ describe("game utils", () => {
 
                     assert.deepStrictEqual(
                         matchResults.matchedGroups.map((x) => x.name),
-                        artistNames
+                        artistNames,
                     );
                     assert.strictEqual(matchResults.unmatchedGroups.length, 0);
                 });
@@ -98,12 +98,12 @@ describe("game utils", () => {
 
                     assert.deepStrictEqual(
                         matchResults.matchedGroups.map((x) => x.name),
-                        artistNames
+                        artistNames,
                     );
 
                     assert.deepStrictEqual(
                         matchResults.unmatchedGroups,
-                        fakeNames
+                        fakeNames,
                     );
                 });
             });
@@ -116,12 +116,12 @@ describe("game utils", () => {
 
                     assert.deepStrictEqual(
                         matchResults.matchedGroups.length,
-                        0
+                        0,
                     );
 
                     assert.deepStrictEqual(
                         matchResults.unmatchedGroups,
-                        fakeNames
+                        fakeNames,
                     );
                 });
             });
@@ -141,12 +141,12 @@ describe("game utils", () => {
 
                         assert.deepStrictEqual(
                             matchResults.matchedGroups.map((x) => x.name),
-                            [conflictingName]
+                            [conflictingName],
                         );
 
                         assert.deepStrictEqual(
                             matchResults.unmatchedGroups.length,
-                            0
+                            0,
                         );
                     });
                 });
@@ -161,7 +161,7 @@ describe("game utils", () => {
 
                         assert.deepStrictEqual(
                             matchResults.matchedGroups.length,
-                            0
+                            0,
                         );
 
                         assert.deepStrictEqual(matchResults.unmatchedGroups, [
@@ -188,12 +188,12 @@ describe("game utils", () => {
 
                             assert.deepStrictEqual(
                                 matchResults.matchedGroups.map((x) => x.name),
-                                [conflictingName]
+                                [conflictingName],
                             );
 
                             assert.deepStrictEqual(
                                 matchResults.unmatchedGroups.length,
-                                0
+                                0,
                             );
                         });
                     });
@@ -215,12 +215,12 @@ describe("game utils", () => {
 
                             assert.deepStrictEqual(
                                 matchResults.matchedGroups.map((x) => x.name),
-                                [artistNameAliasMatch, artistNameExactMatch]
+                                [artistNameAliasMatch, artistNameExactMatch],
                             );
 
                             assert.deepStrictEqual(
                                 matchResults.unmatchedGroups.length,
-                                0
+                                0,
                             );
                         });
                     });
@@ -236,12 +236,12 @@ describe("game utils", () => {
 
                             assert.deepStrictEqual(
                                 matchResults.matchedGroups.map((x) => x.name),
-                                [artistName]
+                                [artistName],
                             );
 
                             assert.deepStrictEqual(
                                 matchResults.unmatchedGroups.length,
-                                0
+                                0,
                             );
                         });
                     });
@@ -259,12 +259,12 @@ describe("game utils", () => {
 
                             assert.deepStrictEqual(
                                 matchResults.matchedGroups.map((x) => x.name),
-                                [artistName]
+                                [artistName],
                             );
 
                             assert.deepStrictEqual(
                                 matchResults.unmatchedGroups.length,
-                                0
+                                0,
                             );
                         });
                     });
@@ -282,12 +282,12 @@ describe("game utils", () => {
 
                             assert.deepStrictEqual(
                                 matchResults.matchedGroups.map((x) => x.name),
-                                [artistName]
+                                [artistName],
                             );
 
                             assert.deepStrictEqual(
                                 matchResults.unmatchedGroups,
-                                [nonMatchArtist]
+                                [nonMatchArtist],
                             );
                         });
                     });
@@ -301,7 +301,7 @@ describe("game utils", () => {
                 await guildPreference.setLimit(0, limit);
                 const songCount = await getAvailableSongCount(
                     guildPreference,
-                    true
+                    true,
                 );
 
                 assert(songCount.count);
@@ -324,7 +324,7 @@ describe("game utils", () => {
                 guildId,
                 new KmqMember("id"),
                 GameType.CLASSIC,
-                false
+                false,
             );
 
             sandbox.restore();
@@ -345,7 +345,7 @@ describe("game utils", () => {
                     await cleanupInactiveGameSessions();
                     assert.strictEqual(
                         State.gameSessions[guildId],
-                        gameSession
+                        gameSession,
                     );
                     sinon.assert.notCalled(endSessionStub);
                 });

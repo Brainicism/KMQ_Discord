@@ -57,7 +57,7 @@ export default class ListCommand implements BaseCommand {
                 explanation: i18n.translate(
                     guildID,
                     "command.list.help.example.groups",
-                    { groups: "`/groups`" }
+                    { groups: "`/groups`" },
                 ),
             },
             {
@@ -65,7 +65,7 @@ export default class ListCommand implements BaseCommand {
                 explanation: i18n.translate(
                     guildID,
                     "command.list.help.example.exclude",
-                    { exclude: "`/exclude`" }
+                    { exclude: "`/exclude`" },
                 ),
             },
             {
@@ -73,7 +73,7 @@ export default class ListCommand implements BaseCommand {
                 explanation: i18n.translate(
                     guildID,
                     "command.list.help.example.include",
-                    { include: "`/include`" }
+                    { include: "`/include`" },
                 ),
             },
         ],
@@ -90,7 +90,7 @@ export default class ListCommand implements BaseCommand {
                     name: "type",
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.list.interaction.listType"
+                        "command.list.interaction.listType",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -99,10 +99,10 @@ export default class ListCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.list.interaction.listType"
+                                    "command.list.interaction.listType",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
@@ -124,17 +124,17 @@ export default class ListCommand implements BaseCommand {
         const listType = parsedMessage.components[0] as ListType;
         await ListCommand.listGroups(
             MessageContext.fromMessage(message),
-            listType
+            listType,
         );
     };
 
     static async listGroups(
         messageContext: MessageContext,
         listType: ListType,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         let optionValue: string | null;
@@ -163,7 +163,7 @@ export default class ListCommand implements BaseCommand {
             optionValue ||
             i18n.translate(
                 messageContext.guildID,
-                "command.list.currentValue.nothingSelected"
+                "command.list.currentValue.nothingSelected",
             );
 
         if (optionValue.length > 2000) {
@@ -173,7 +173,7 @@ export default class ListCommand implements BaseCommand {
                     {
                         content: i18n.translate(
                             messageContext.guildID,
-                            "command.list.failure.groupsInFile.description"
+                            "command.list.failure.groupsInFile.description",
                         ),
                         attachments: [
                             {
@@ -183,13 +183,13 @@ export default class ListCommand implements BaseCommand {
                         ],
                     },
                     undefined,
-                    interaction
+                    interaction,
                 );
             } catch (e) {
                 logger.warn(
                     `${getDebugLogHeader(
-                        messageContext
-                    )} | Missing ATTACH_FILE permissions`
+                        messageContext,
+                    )} | Missing ATTACH_FILE permissions`,
                 );
 
                 await sendErrorMessage(
@@ -197,15 +197,15 @@ export default class ListCommand implements BaseCommand {
                     {
                         title: i18n.translate(
                             messageContext.guildID,
-                            "command.list.failure.groupsInFile.noFilePermissions.title"
+                            "command.list.failure.groupsInFile.noFilePermissions.title",
                         ),
                         description: i18n.translate(
                             messageContext.guildID,
                             "command.list.failure.groupsInFile.noFilePermissions.description",
-                            { attachFile: "ATTACH_FILE" }
+                            { attachFile: "ATTACH_FILE" },
                         ),
                     },
-                    interaction
+                    interaction,
                 );
                 return;
             }
@@ -218,21 +218,21 @@ export default class ListCommand implements BaseCommand {
                         "command.list.currentValue.title",
                         {
                             optionListed: `\`${listType}\``,
-                        }
+                        },
                     ),
                     description: optionValue,
                 },
                 false,
                 undefined,
                 [],
-                interaction
+                interaction,
             );
         }
 
         logger.info(
             `${getDebugLogHeader(
-                messageContext
-            )} | List '${listType}' retrieved`
+                messageContext,
+            )} | List '${listType}' retrieved`,
         );
     }
 
@@ -242,7 +242,7 @@ export default class ListCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionOptions } = getInteractionValue(interaction);
         const artistType = interactionOptions["type"] as ListType;

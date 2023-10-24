@@ -5,7 +5,7 @@ exports.up = function (knex) {
     execSync(
         "npx ts-node",
         [path.join(__dirname, "../scripts/json-presets-to-new-format.ts")],
-        { stdio: "inherit" }
+        { stdio: "inherit" },
     );
     return knex.schema.table("guild_preferences", function (table) {
         table.dropColumn("guild_preference");

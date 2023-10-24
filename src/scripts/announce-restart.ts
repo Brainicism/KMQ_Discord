@@ -12,14 +12,14 @@ config({ path: path.resolve(__dirname, "../../.env") });
 program
     .option(
         "--no-restart",
-        "Automatically restart process when countdown is over"
+        "Automatically restart process when countdown is over",
     )
     .option("--docker-image <docker_image>", "Docker image")
     .option(
         "--timer <minutes>",
         "Countdown duration",
         (x) => parseInt(x, 10),
-        5
+        5,
     );
 program.parse();
 
@@ -32,14 +32,14 @@ async function abortRestart(): Promise<void> {
             headers: {
                 "Content-Type": "application/json",
             },
-        }
+        },
     );
 }
 
 async function announceRestart(
     restartMinutes: number,
     restartDate: Date,
-    restart: boolean
+    restart: boolean,
 ): Promise<void> {
     try {
         await Axios.post(
@@ -51,7 +51,7 @@ async function announceRestart(
                 headers: {
                     "Content-Type": "application/json",
                 },
-            }
+            },
         );
 
         const timer = setInterval(() => {
@@ -61,15 +61,15 @@ async function announceRestart(
 
             console.log(
                 `Restarting in ${Math.floor(
-                    (restartDate.getTime() - Date.now()) / 1000
-                )} seconds`
+                    (restartDate.getTime() - Date.now()) / 1000,
+                )} seconds`,
             );
         }, 1000 * 10).unref();
 
         console.log(
             `Next ${
                 restart ? "restart" : "shutdown"
-            } scheduled at ${restartDate}`
+            } scheduled at ${restartDate}`,
         );
     } catch (e) {
         console.error(`KMQ might not be up? ${e}`);
@@ -84,7 +84,7 @@ const delay = (time: number): Promise<void> =>
 function serverShutdown(
     restartMinutes: number,
     restart: boolean,
-    dockerImage: string
+    dockerImage: string,
 ): Promise<void> {
     return new Promise(async () => {
         // if stopping server, inform immediately
@@ -99,7 +99,7 @@ function serverShutdown(
                     console.log("Stopping KMQ...");
                     cp.execSync(`APP_NAME=${appName} npm run docker-stop`);
                 },
-                restartMinutes * 1000 * 60
+                restartMinutes * 1000 * 60,
             );
         } else {
             const oldAppName = `${appName}-old`;
@@ -113,7 +113,7 @@ function serverShutdown(
             console.log("Provisioning standby container with new image...");
 
             cp.execSync(
-                `APP_NAME=${appName} IMAGE_NAME=${dockerImage} IS_STANDBY=true npm run docker-run`
+                `APP_NAME=${appName} IMAGE_NAME=${dockerImage} IS_STANDBY=true npm run docker-run`,
             );
 
             let standbyProvisioning = true;
@@ -121,13 +121,13 @@ function serverShutdown(
             while (standbyProvisioning) {
                 const standbyStdout = cp
                     .execSync(
-                        `docker exec ${appName} /bin/sh -c "if [ -f "standby" ]; then cat standby; fi"`
+                        `docker exec ${appName} /bin/sh -c "if [ -f "standby" ]; then cat standby; fi"`,
                     )
                     .toString()
                     .trim();
 
                 console.log(
-                    `Standby Status: ${standbyStdout || "bootstrapping"}`
+                    `Standby Status: ${standbyStdout || "bootstrapping"}`,
                 );
 
                 if (standbyStdout === "ready") {
@@ -155,10 +155,10 @@ function serverShutdown(
                     // promote standby to primary
                     console.log("Promoting standby to primary...");
                     cp.execSync(
-                        `docker exec ${appName} /bin/sh -c "mv standby promoted"`
+                        `docker exec ${appName} /bin/sh -c "mv standby promoted"`,
                     );
                 },
-                restartMinutes * 1000 * 60
+                restartMinutes * 1000 * 60,
             );
         }
     });

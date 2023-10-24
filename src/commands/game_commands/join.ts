@@ -26,12 +26,12 @@ export default class JoinCommand implements BaseCommand {
             sendErrorMessage(MessageContext.fromMessage(message), {
                 title: i18n.translate(
                     message.guildID,
-                    "command.join.failure.joinError.title"
+                    "command.join.failure.joinError.title",
                 ),
                 description: i18n.translate(
                     message.guildID,
                     "command.join.failure.joinError.noTeamName.description",
-                    { joinCommand: "/play teams join" }
+                    { joinCommand: "/play teams join" },
                 ),
             });
             return;
@@ -45,7 +45,7 @@ export default class JoinCommand implements BaseCommand {
 
         await PlayCommand.joinTeamsGame(
             MessageContext.fromMessage(message),
-            teamName
+            teamName,
         );
     };
 }

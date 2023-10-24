@@ -21,7 +21,7 @@ import type { PlaylistMetadata } from "../interfaces/playlist_metadata";
             for (const metadata of metadataList) {
                 if (metadata.option_value) {
                     const optionValue: PlaylistMetadata = JSON.parse(
-                        metadata.option_value
+                        metadata.option_value,
                     );
 
                     const playlistID = optionValue.playlistID;
@@ -63,7 +63,7 @@ import type { PlaylistMetadata } from "../interfaces/playlist_metadata";
             for (const metadata of metadataList) {
                 if (metadata.option_value) {
                     const optionValue: PlaylistMetadata = JSON.parse(
-                        metadata.option_value
+                        metadata.option_value,
                     );
 
                     const playlistID = optionValue.playlistID;

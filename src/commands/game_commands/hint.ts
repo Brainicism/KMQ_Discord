@@ -30,7 +30,7 @@ const logger = new IPCLogger("hint");
 
 function isHintMajority(
     messageContext: MessageContext,
-    gameSession: GameSession
+    gameSession: GameSession,
 ): boolean {
     if (!gameSession.round) {
         return false;
@@ -54,7 +54,7 @@ function isHintMajority(
 
 function isHintAvailable(
     messageContext: MessageContext,
-    gameSession: GameSession
+    gameSession: GameSession,
 ): boolean {
     if (!gameSession.round) return false;
     return (
@@ -66,7 +66,7 @@ function isHintAvailable(
 async function sendHintNotification(
     messageContext: MessageContext,
     gameSession: GameSession,
-    interaction?: Eris.CommandInteraction
+    interaction?: Eris.CommandInteraction,
 ): Promise<void> {
     if (!gameSession.round) return;
     if (gameSession.gameType === GameType.ELIMINATION) {
@@ -78,7 +78,7 @@ async function sendHintNotification(
             {
                 title: i18n.translate(
                     messageContext.guildID,
-                    "command.hint.request.title"
+                    "command.hint.request.title",
                 ),
                 description: i18n.translate(
                     messageContext.guildID,
@@ -87,16 +87,16 @@ async function sendHintNotification(
                         hintCounter: `${gameSession.round.getHintRequests()}/${
                             Math.floor(
                                 eliminationScoreboard.getAlivePlayersCount() *
-                                    0.5
+                                    0.5,
                             ) + 1
                         }`,
-                    }
+                    },
                 ),
             },
             true,
             undefined,
             [],
-            interaction
+            interaction,
         );
     } else {
         await sendInfoMessage(
@@ -104,22 +104,22 @@ async function sendHintNotification(
             {
                 title: i18n.translate(
                     messageContext.guildID,
-                    "command.hint.request.title"
+                    "command.hint.request.title",
                 ),
                 description: i18n.translate(
                     messageContext.guildID,
                     "command.hint.request.description",
                     {
                         hintCounter: `${gameSession.round.getHintRequests()}/${getMajorityCount(
-                            messageContext.guildID
+                            messageContext.guildID,
                         )}`,
-                    }
+                    },
                 ),
             },
             true,
             undefined,
             [],
-            interaction
+            interaction,
         );
     }
 }
@@ -137,11 +137,11 @@ export function validHintCheck(
     guildPreference: GuildPreference,
     gameRound: GameRound | null,
     messageContext: MessageContext,
-    interaction?: Eris.CommandInteraction
+    interaction?: Eris.CommandInteraction,
 ): gameRound is GameRound {
     if (!gameSession || !gameRound) {
         logger.warn(
-            `${getDebugLogHeader(messageContext)} | No active game session`
+            `${getDebugLogHeader(messageContext)} | No active game session`,
         );
 
         sendErrorMessage(
@@ -149,15 +149,15 @@ export function validHintCheck(
             {
                 title: i18n.translate(
                     messageContext.guildID,
-                    "command.hint.failure.invalidHintRequest.title"
+                    "command.hint.failure.invalidHintRequest.title",
                 ),
                 description: i18n.translate(
                     messageContext.guildID,
-                    "command.hint.failure.invalidHintRequest.noSongPlaying.description"
+                    "command.hint.failure.invalidHintRequest.noSongPlaying.description",
                 ),
                 thumbnailUrl: KmqImages.NOT_IMPRESSED,
             },
-            interaction
+            interaction,
         );
         return false;
     }
@@ -174,15 +174,15 @@ export function validHintCheck(
                 {
                     title: i18n.translate(
                         messageContext.guildID,
-                        "command.hint.failure.invalidHintRequest.title"
+                        "command.hint.failure.invalidHintRequest.title",
                     ),
                     description: i18n.translate(
                         messageContext.guildID,
-                        "command.hint.failure.invalidHintRequest.eliminated.description"
+                        "command.hint.failure.invalidHintRequest.eliminated.description",
                     ),
                     thumbnailUrl: KmqImages.NOT_IMPRESSED,
                 },
-                interaction
+                interaction,
             );
             return false;
         }
@@ -194,15 +194,15 @@ export function validHintCheck(
             {
                 title: i18n.translate(
                     messageContext.guildID,
-                    "command.hint.failure.invalidHintRequest.title"
+                    "command.hint.failure.invalidHintRequest.title",
                 ),
                 description: i18n.translate(
                     messageContext.guildID,
-                    "command.hint.failure.invalidHintRequest.multipleChoice.description"
+                    "command.hint.failure.invalidHintRequest.multipleChoice.description",
                 ),
                 thumbnailUrl: KmqImages.NOT_IMPRESSED,
             },
-            interaction
+            interaction,
         );
         return false;
     }
@@ -221,28 +221,28 @@ export function generateHint(
     guildID: string,
     guessMode: GuessModeType,
     gameRound: GameRound,
-    locale: LocaleType
+    locale: LocaleType,
 ): string {
     switch (guessMode) {
         case GuessModeType.ARTIST:
             return `${i18n.translate(
                 guildID,
-                "command.hint.artistName"
+                "command.hint.artistName",
             )}: ${codeLine(
                 gameRound.hints.artistHint[
                     locale === LocaleType.KO ? LocaleType.KO : LocaleType.EN
-                ]
+                ],
             )}`;
         case GuessModeType.SONG_NAME:
         case GuessModeType.BOTH:
         default:
             return `${i18n.translate(
                 guildID,
-                "command.hint.songName"
+                "command.hint.songName",
             )}: ${codeLine(
                 gameRound.hints.songHint[
                     locale === LocaleType.KO ? LocaleType.KO : LocaleType.EN
-                ]
+                ],
             )}`;
     }
 }
@@ -278,15 +278,15 @@ export default class HintCommand implements BaseCommand {
 
     static sendHint = async (
         messageContext: MessageContext,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> => {
         const gameSession = Session.getSession(
-            messageContext.guildID
+            messageContext.guildID,
         ) as GameSession;
 
         const gameRound = gameSession?.round;
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         if (
@@ -295,7 +295,7 @@ export default class HintCommand implements BaseCommand {
                 guildPreference,
                 gameRound,
                 messageContext,
-                interaction
+                interaction,
             )
         )
             return;
@@ -307,13 +307,13 @@ export default class HintCommand implements BaseCommand {
             const embedPayload: EmbedPayload = {
                 title: i18n.translate(
                     messageContext.guildID,
-                    "command.hint.title"
+                    "command.hint.title",
                 ),
                 description: generateHint(
                     messageContext.guildID,
                     guildPreference.gameOptions.guessModeType,
                     gameRound,
-                    State.getGuildLocale(messageContext.guildID)
+                    State.getGuildLocale(messageContext.guildID),
                 ),
                 thumbnailUrl: KmqImages.READING_BOOK,
             };
@@ -324,21 +324,23 @@ export default class HintCommand implements BaseCommand {
                 false,
                 undefined,
                 undefined,
-                interaction
+                interaction,
             );
 
             logger.info(
-                `${getDebugLogHeader(messageContext)} | Hint majority received.`
+                `${getDebugLogHeader(
+                    messageContext,
+                )} | Hint majority received.`,
             );
         } else {
             await sendHintNotification(
                 messageContext,
                 gameSession,
-                interaction
+                interaction,
             );
 
             logger.info(
-                `${getDebugLogHeader(messageContext)} | Hint request received.`
+                `${getDebugLogHeader(messageContext)} | Hint request received.`,
             );
         }
     };
@@ -349,7 +351,7 @@ export default class HintCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         await HintCommand.sendHint(messageContext, interaction);
     }

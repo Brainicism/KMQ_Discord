@@ -19,7 +19,7 @@ function getMockGuildPreference(): GuildPreference {
 const mockMessageContext = new MessageContext(
     "dummy",
     new KmqMember("dummy"),
-    "dummy"
+    "dummy",
 );
 
 describe("begin command", () => {
@@ -32,9 +32,9 @@ describe("begin command", () => {
                 assert.strictEqual(
                     PlayCommand.canStartTeamsGame(
                         null,
-                        new MessageContext("", gameStarter, "dummy")
+                        new MessageContext("", gameStarter, "dummy"),
                     ),
-                    false
+                    false,
                 );
             });
         });
@@ -51,7 +51,7 @@ describe("begin command", () => {
                 "dummy",
                 gameStarter,
                 GameType.CLASSIC,
-                false
+                false,
             );
 
             sandbox.restore();
@@ -60,17 +60,17 @@ describe("begin command", () => {
                 assert.strictEqual(
                     PlayCommand.canStartTeamsGame(
                         gameSession,
-                        new MessageContext("", gameStarter, "dummy")
+                        new MessageContext("", gameStarter, "dummy"),
                     ),
-                    false
+                    false,
                 );
 
                 assert.strictEqual(
                     PlayCommand.canStartTeamsGame(
                         gameSession,
-                        new MessageContext("", gameStarter, "dummy")
+                        new MessageContext("", gameStarter, "dummy"),
                     ),
-                    false
+                    false,
                 );
             });
         });
@@ -86,7 +86,7 @@ describe("begin command", () => {
                 "dummy",
                 gameStarter,
                 GameType.TEAMS,
-                true
+                true,
             );
 
             sandbox.restore();
@@ -96,9 +96,9 @@ describe("begin command", () => {
                     assert.strictEqual(
                         PlayCommand.canStartTeamsGame(
                             gameSession,
-                            new MessageContext("", gameStarter, "dummy")
+                            new MessageContext("", gameStarter, "dummy"),
                         ),
-                        false
+                        false,
                     );
                 });
             });
@@ -109,29 +109,29 @@ describe("begin command", () => {
                     scoreboard.addTeam(
                         "Loona",
                         new Player("dummy", "dummy", "dummy", 0, "dummy"),
-                        "dummy"
+                        "dummy",
                     );
 
                     assert.strictEqual(
                         PlayCommand.canStartTeamsGame(
                             gameSession,
-                            mockMessageContext
+                            mockMessageContext,
                         ),
-                        true
+                        true,
                     );
 
                     scoreboard.addTeam(
                         "Loona2",
                         new Player("dummy", "dummy", "dummy", 0, "dummy"),
-                        "dummy"
+                        "dummy",
                     );
 
                     assert.strictEqual(
                         PlayCommand.canStartTeamsGame(
                             gameSession,
-                            mockMessageContext
+                            mockMessageContext,
                         ),
-                        true
+                        true,
                     );
                 });
             });

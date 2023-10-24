@@ -15,7 +15,7 @@ import sinon from "sinon";
 const mockMessageContext = new MessageContext(
     "dummy",
     new KmqMember("dummy"),
-    "dummy"
+    "dummy",
 );
 
 function getMockGuildPreference(): GuildPreference {
@@ -56,7 +56,7 @@ describe("listening session", () => {
                 "123",
                 "123",
                 new KmqMember("123"),
-                true
+                true,
             );
 
             sandbox
@@ -65,12 +65,12 @@ describe("listening session", () => {
 
             prepareRoundSpy = sandbox.spy(
                 listeningSession,
-                <any>"prepareRound"
+                <any>"prepareRound",
             );
             playSongSpy = sandbox.stub(listeningSession, <any>"playSong");
             ensureVoiceConnectionSpy = sandbox.spy(
                 game_utils,
-                "ensureVoiceConnection"
+                "ensureVoiceConnection",
             );
 
             endSessionStub = sandbox.stub(listeningSession, "endSession");
@@ -90,7 +90,7 @@ describe("listening session", () => {
                 assert.ok(endSessionStub.notCalled);
                 assert.ok(
                     listeningSession.songSelector.getSongs().countBeforeLimit >
-                        0
+                        0,
                 );
             });
         });

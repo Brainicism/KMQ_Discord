@@ -66,10 +66,10 @@ export default class AddCommand implements BaseCommand {
         }),
         usage: `/groups add [${i18n.translate(
             guildID,
-            "misc.listOfGroups"
+            "misc.listOfGroups",
         )}]\n\n/include add [${i18n.translate(
             guildID,
-            "misc.listOfGroups"
+            "misc.listOfGroups",
         )}]\n\n/exclude add [${i18n.translate(guildID, "misc.listOfGroups")}]`,
         examples: [
             {
@@ -81,7 +81,7 @@ export default class AddCommand implements BaseCommand {
                         groupOne: "Twice",
                         groupTwo: "Red Velvet",
                         groups: "`/groups`",
-                    }
+                    },
                 ),
             },
             {
@@ -95,7 +95,7 @@ export default class AddCommand implements BaseCommand {
                         groupTwo: "Dia",
                         groupThree: "IKON",
                         exclude: "`/exclude`",
-                    }
+                    },
                 ),
             },
             {
@@ -106,7 +106,7 @@ export default class AddCommand implements BaseCommand {
                     {
                         groupOne: "EXO",
                         include: "`/include`",
-                    }
+                    },
                 ),
             },
         ],
@@ -117,7 +117,7 @@ export default class AddCommand implements BaseCommand {
                 url: GROUP_LIST_URL,
                 label: i18n.translate(
                     guildID,
-                    "misc.interaction.fullGroupsList"
+                    "misc.interaction.fullGroupsList",
                 ),
             },
         ],
@@ -136,7 +136,7 @@ export default class AddCommand implements BaseCommand {
         await AddCommand.updateOption(
             MessageContext.fromMessage(message),
             addType,
-            newGroupNames
+            newGroupNames,
         );
     };
 
@@ -144,10 +144,10 @@ export default class AddCommand implements BaseCommand {
         messageContext: MessageContext,
         addType: AddType,
         newGroupNames: Array<string>,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         const embeds: Array<EmbedPayload> = [];
@@ -181,7 +181,7 @@ export default class AddCommand implements BaseCommand {
             : groupNamesString.split(",");
 
         const groups = await getMatchingGroupNames(
-            currentGroupNames.concat(newGroupNames)
+            currentGroupNames.concat(newGroupNames),
         );
 
         let { matchedGroups } = groups;
@@ -189,17 +189,17 @@ export default class AddCommand implements BaseCommand {
         if (unmatchedGroups.length) {
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
+                    messageContext,
                 )} | Attempted to set unknown groups. groups = ${unmatchedGroups.join(
-                    ", "
-                )}`
+                    ", ",
+                )}`,
             );
 
             let suggestionsText: string | undefined;
             if (unmatchedGroups.length === 1) {
                 const suggestions = await getSimilarGroupNames(
                     unmatchedGroups[0],
-                    State.getGuildLocale(messageContext.guildID)
+                    State.getGuildLocale(messageContext.guildID),
                 );
 
                 if (suggestions.length > 0) {
@@ -208,7 +208,7 @@ export default class AddCommand implements BaseCommand {
                         "misc.failure.unrecognizedGroups.didYouMean",
                         {
                             suggestions: suggestions.join("\n"),
-                        }
+                        },
                     );
                 }
             }
@@ -219,12 +219,12 @@ export default class AddCommand implements BaseCommand {
                 {
                     matchedGroupsAction: i18n.translate(
                         messageContext.guildID,
-                        "misc.failure.unrecognizedGroups.added"
+                        "misc.failure.unrecognizedGroups.added",
                     ),
                     helpGroups: "`/help groups`",
                     unmatchedGroups: unmatchedGroups.join(", "),
                     solution: "",
-                }
+                },
             );
 
             embeds.push({
@@ -232,7 +232,7 @@ export default class AddCommand implements BaseCommand {
                 author: messageContext.author,
                 title: i18n.translate(
                     messageContext.guildID,
-                    "misc.failure.unrecognizedGroups.title"
+                    "misc.failure.unrecognizedGroups.title",
                 ),
                 description: `${descriptionText}\n\n${suggestionsText ?? ""}`,
                 thumbnailUrl: KmqImages.DEAD,
@@ -248,7 +248,7 @@ export default class AddCommand implements BaseCommand {
                     false,
                     undefined,
                     embeds.slice(1),
-                    interaction
+                    interaction,
                 );
             }
 
@@ -264,11 +264,11 @@ export default class AddCommand implements BaseCommand {
                 gameOption = GameOption.GROUPS;
                 const intersection = setIntersection(
                     matchedGroups.map((x) => x.name),
-                    guildPreference.getExcludesGroupNames()
+                    guildPreference.getExcludesGroupNames(),
                 );
 
                 matchedGroups = matchedGroups.filter(
-                    (x) => !intersection.has(x.name)
+                    (x) => !intersection.has(x.name),
                 );
                 if (intersection.size > 0) {
                     embeds.push({
@@ -276,7 +276,7 @@ export default class AddCommand implements BaseCommand {
                         author: messageContext.author,
                         title: i18n.translate(
                             messageContext.guildID,
-                            "misc.failure.groupsExcludeConflict.title"
+                            "misc.failure.groupsExcludeConflict.title",
                         ),
                         description: i18n.translate(
                             messageContext.guildID,
@@ -291,9 +291,9 @@ export default class AddCommand implements BaseCommand {
                                 solutionStepTwo: "`/groups add`",
                                 allowOrPrevent: i18n.translate(
                                     messageContext.guildID,
-                                    "misc.failure.groupsExcludeConflict.allow"
+                                    "misc.failure.groupsExcludeConflict.allow",
                                 ),
-                            }
+                            },
                         ),
                         thumbnailUrl: KmqImages.DEAD,
                     });
@@ -307,7 +307,7 @@ export default class AddCommand implements BaseCommand {
                             false,
                             undefined,
                             embeds.slice(1),
-                            interaction
+                            interaction,
                         );
                     }
 
@@ -324,8 +324,8 @@ export default class AddCommand implements BaseCommand {
                 if (guildPreference.isGroupsMode()) {
                     logger.warn(
                         `${getDebugLogHeader(
-                            messageContext
-                        )} | Game option conflict between include and groups.`
+                            messageContext,
+                        )} | Game option conflict between include and groups.`,
                     );
 
                     sendErrorMessage(
@@ -333,7 +333,7 @@ export default class AddCommand implements BaseCommand {
                         {
                             title: i18n.translate(
                                 messageContext.guildID,
-                                "misc.failure.gameOptionConflict.title"
+                                "misc.failure.gameOptionConflict.title",
                             ),
                             description: i18n.translate(
                                 messageContext.guildID,
@@ -342,10 +342,10 @@ export default class AddCommand implements BaseCommand {
                                     optionOne: "`groups`",
                                     optionTwo: "`include`",
                                     optionOneCommand: "`/groups reset`",
-                                }
+                                },
                             ),
                         },
-                        interaction
+                        interaction,
                     );
 
                     return;
@@ -358,11 +358,11 @@ export default class AddCommand implements BaseCommand {
                 gameOption = GameOption.EXCLUDE;
                 const intersection = setIntersection(
                     matchedGroups.map((x) => x.name),
-                    guildPreference.getGroupNames()
+                    guildPreference.getGroupNames(),
                 );
 
                 matchedGroups = matchedGroups.filter(
-                    (x) => !intersection.has(x.name)
+                    (x) => !intersection.has(x.name),
                 );
                 if (intersection.size > 0) {
                     embeds.push({
@@ -370,7 +370,7 @@ export default class AddCommand implements BaseCommand {
                         author: messageContext.author,
                         title: i18n.translate(
                             messageContext.guildID,
-                            "misc.failure.groupsExcludeConflict.title"
+                            "misc.failure.groupsExcludeConflict.title",
                         ),
                         description: i18n.translate(
                             messageContext.guildID,
@@ -385,9 +385,9 @@ export default class AddCommand implements BaseCommand {
                                 solutionStepTwo: "`/exclude add`",
                                 allowOrPrevent: i18n.translate(
                                     messageContext.guildID,
-                                    "misc.failure.groupsExcludeConflict.prevent"
+                                    "misc.failure.groupsExcludeConflict.prevent",
                                 ),
-                            }
+                            },
                         ),
                         thumbnailUrl: KmqImages.DEAD,
                     });
@@ -401,7 +401,7 @@ export default class AddCommand implements BaseCommand {
                             false,
                             undefined,
                             embeds.slice(1),
-                            interaction
+                            interaction,
                         );
                     }
 
@@ -419,8 +419,8 @@ export default class AddCommand implements BaseCommand {
 
         logger.info(
             `${getDebugLogHeader(
-                messageContext
-            )} | ${gameOption} added: ${guildPreference.getDisplayedGroupNames()}`
+                messageContext,
+            )} | ${gameOption} added: ${guildPreference.getDisplayedGroupNames()}`,
         );
 
         const optionsMessage = await generateOptionsMessage(
@@ -430,7 +430,7 @@ export default class AddCommand implements BaseCommand {
             [{ option: gameOption, reset: false }],
             false,
             undefined,
-            undefined
+            undefined,
         );
 
         if (optionsMessage) {
@@ -440,7 +440,7 @@ export default class AddCommand implements BaseCommand {
                 true,
                 undefined,
                 embeds,
-                interaction
+                interaction,
             );
         } else {
             await notifyOptionsGenerationError(messageContext, "add");

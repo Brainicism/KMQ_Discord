@@ -22,8 +22,8 @@ describe("management utils", () => {
                 assert.ok(
                     setIntersection(
                         State.aliases.song[videoID],
-                        expectedAliases
-                    ).size === expectedAliases.length
+                        expectedAliases,
+                    ).size === expectedAliases.length,
                 );
             });
         });
@@ -43,8 +43,8 @@ describe("management utils", () => {
                 assert.ok(
                     setIntersection(
                         State.aliases.artist[artistName],
-                        expectedAliases
-                    ).size === expectedAliases.length
+                        expectedAliases,
+                    ).size === expectedAliases.length,
                 );
             });
         });

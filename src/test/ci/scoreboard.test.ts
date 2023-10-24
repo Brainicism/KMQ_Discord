@@ -12,7 +12,7 @@ describe("scoreboard", () => {
     beforeEach(() => {
         scoreboard = new Scoreboard();
         userIDs.map((x) =>
-            scoreboard.addPlayer(new Player(x, guildID, avatarURL, 0, x))
+            scoreboard.addPlayer(new Player(x, guildID, avatarURL, 0, x)),
         );
     });
 
@@ -33,12 +33,12 @@ describe("scoreboard", () => {
 
                         assert.strictEqual(
                             scoreboard.getPlayerScore(userIDs[0]),
-                            i + 1
+                            i + 1,
                         );
 
                         assert.strictEqual(
                             scoreboard.getPlayerExpGain(userIDs[0]),
-                            50 * (i + 1)
+                            50 * (i + 1),
                         );
                     }
                 });
@@ -48,12 +48,12 @@ describe("scoreboard", () => {
                 it("should not increment the user's score/EXP", () => {
                     assert.strictEqual(
                         scoreboard.getPlayerScore(userIDs[0]),
-                        0
+                        0,
                     );
 
                     assert.strictEqual(
                         scoreboard.getPlayerExpGain(userIDs[0]),
-                        0
+                        0,
                     );
                 });
             });
@@ -83,22 +83,22 @@ describe("scoreboard", () => {
 
                     assert.strictEqual(
                         scoreboard.getPlayerScore(userIDs[0]),
-                        20
+                        20,
                     );
 
                     assert.strictEqual(
                         scoreboard.getPlayerExpGain(userIDs[0]),
-                        1000
+                        1000,
                     );
 
                     assert.strictEqual(
                         scoreboard.getPlayerScore(userIDs[1]),
-                        10
+                        10,
                     );
 
                     assert.strictEqual(
                         scoreboard.getPlayerExpGain(userIDs[1]),
-                        500
+                        500,
                     );
                 });
             });
@@ -107,22 +107,22 @@ describe("scoreboard", () => {
                 it("should not increment each user's score", () => {
                     assert.strictEqual(
                         scoreboard.getPlayerScore(userIDs[0]),
-                        0
+                        0,
                     );
 
                     assert.strictEqual(
                         scoreboard.getPlayerExpGain(userIDs[0]),
-                        0
+                        0,
                     );
 
                     assert.strictEqual(
                         scoreboard.getPlayerScore(userIDs[1]),
-                        0
+                        0,
                     );
 
                     assert.strictEqual(
                         scoreboard.getPlayerExpGain(userIDs[1]),
-                        0
+                        0,
                     );
                 });
             });
@@ -216,19 +216,19 @@ describe("scoreboard", () => {
                         "guildID",
                         avatarURL,
                         0,
-                        "ohmi"
+                        "ohmi",
                     );
 
                     winningPlayer.setPreviousRanking(
-                        previousRanking.indexOf("ohmiID")
+                        previousRanking.indexOf("ohmiID"),
                     );
 
                     assert.strictEqual(
                         winningPlayer.getRankingPrefix(
                             newRanking.indexOf("ohmiID"),
-                            true
+                            true,
                         ),
-                        "↑ 1."
+                        "↑ 1.",
                     );
                 });
             });
@@ -240,19 +240,19 @@ describe("scoreboard", () => {
                         "guildID",
                         avatarURL,
                         0,
-                        "cool"
+                        "cool",
                     );
 
                     losingPlayer.setPreviousRanking(
-                        previousRanking.indexOf("12345")
+                        previousRanking.indexOf("12345"),
                     );
 
                     assert.strictEqual(
                         losingPlayer.getRankingPrefix(
                             newRanking.indexOf("12345"),
-                            true
+                            true,
                         ),
-                        "↓ 3."
+                        "↓ 3.",
                     );
                 });
             });
@@ -264,19 +264,19 @@ describe("scoreboard", () => {
                         "guildID",
                         avatarURL,
                         0,
-                        "jisoo"
+                        "jisoo",
                     );
 
                     samePlayer.setPreviousRanking(
-                        previousRanking.indexOf("jisooID")
+                        previousRanking.indexOf("jisooID"),
                     );
 
                     assert.strictEqual(
                         samePlayer.getRankingPrefix(
                             newRanking.indexOf("jisooID"),
-                            true
+                            true,
                         ),
-                        "2."
+                        "2.",
                     );
                 });
             });
@@ -288,19 +288,19 @@ describe("scoreboard", () => {
                         "guildID",
                         avatarURL,
                         0,
-                        "ohmi"
+                        "ohmi",
                     );
 
                     winningPlayer.setPreviousRanking(
-                        previousRanking.indexOf("ohmiID")
+                        previousRanking.indexOf("ohmiID"),
                     );
 
                     assert.strictEqual(
                         winningPlayer.getRankingPrefix(
                             newRanking.indexOf("ohmiID"),
-                            false
+                            false,
                         ),
-                        "1."
+                        "1.",
                     );
                 });
             });
@@ -353,7 +353,7 @@ describe("scoreboard", () => {
                 assert.strictEqual(scoreboard.getWinners().length, 2);
                 assert.deepStrictEqual(
                     scoreboard.getWinners().map((x) => x.id),
-                    [userIDs[1], userIDs[2]]
+                    [userIDs[1], userIDs[2]],
                 );
             });
         });
@@ -370,7 +370,7 @@ describe("scoreboard", () => {
                 await guildPreference.reset(GameOption.GOAL);
                 assert.strictEqual(
                     scoreboard.gameFinished(guildPreference),
-                    false
+                    false,
                 );
             });
         });
@@ -380,7 +380,7 @@ describe("scoreboard", () => {
                 it("should return false", () => {
                     assert.strictEqual(
                         scoreboard.gameFinished(guildPreference),
-                        false
+                        false,
                     );
                 });
             });
@@ -397,7 +397,7 @@ describe("scoreboard", () => {
 
                     assert.strictEqual(
                         scoreboard.gameFinished(guildPreference),
-                        false
+                        false,
                     );
                 });
             });
@@ -414,7 +414,7 @@ describe("scoreboard", () => {
 
                     assert.strictEqual(
                         scoreboard.gameFinished(guildPreference),
-                        true
+                        true,
                     );
                 });
             });

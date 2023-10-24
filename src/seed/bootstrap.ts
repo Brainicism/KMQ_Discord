@@ -50,7 +50,7 @@ function hasRequiredEnvironmentVariables(): boolean {
     for (const requiredEnvVariable of requiredEnvVariables) {
         if (!process.env[requiredEnvVariable]) {
             logger.error(
-                `Missing required environment variable '${requiredEnvVariable}'`
+                `Missing required environment variable '${requiredEnvVariable}'`,
             );
             return false;
         }
@@ -72,7 +72,7 @@ async function songThresholdReached(db: DatabaseContext): Promise<boolean> {
     const availableSongsTableExists = await tableExists(
         db,
         "kmq",
-        "available_songs"
+        "available_songs",
     );
 
     if (!availableSongsTableExists) return false;
@@ -94,7 +94,7 @@ async function songThresholdReached(db: DatabaseContext): Promise<boolean> {
 export function importCachedDump(databaseName: string): void {
     // eslint-disable-next-line node/no-sync
     cp.execSync(
-        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} ${databaseName} < ${TEST_DB_CACHED_EXPORT}`
+        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} ${databaseName} < ${TEST_DB_CACHED_EXPORT}`,
     );
 }
 
@@ -115,12 +115,12 @@ export async function performMigrations(db: DatabaseContext): Promise<void> {
     });
 
     const pendingMigrations = (await migrator.getMigrations()).filter(
-        (x) => !x.executedAt
+        (x) => !x.executedAt,
     );
 
     if (pendingMigrations.length > 0) {
         logger.info(
-            `Pending migrations: [${pendingMigrations.map((x) => x.name)}]`
+            `Pending migrations: [${pendingMigrations.map((x) => x.name)}]`,
         );
         if (KmqConfiguration.Instance.disallowMigrations()) {
             logger.error("Migrations are disallowed.");
@@ -131,11 +131,11 @@ export async function performMigrations(db: DatabaseContext): Promise<void> {
         for (const result of results || []) {
             if (result.status === "Success") {
                 logger.info(
-                    `Migration (up) "${result.migrationName}" was executed successfully`
+                    `Migration (up) "${result.migrationName}" was executed successfully`,
                 );
             } else if (result.status === "Error") {
                 logger.error(
-                    `Failed to execute migration: "${result.migrationName}"`
+                    `Failed to execute migration: "${result.migrationName}"`,
                 );
             }
         }
@@ -167,11 +167,11 @@ export async function performMigrationDown(db: DatabaseContext): Promise<void> {
     for (const result of results || []) {
         if (result.status === "Success") {
             logger.info(
-                `Migration (down) "${result.migrationName}" was executed successfully`
+                `Migration (down) "${result.migrationName}" was executed successfully`,
             );
         } else if (result.status === "Error") {
             logger.error(
-                `Failed to execute migration: "${result.migrationName}"`
+                `Failed to execute migration: "${result.migrationName}"`,
             );
         }
     }
@@ -201,7 +201,7 @@ async function bootstrapDatabases(): Promise<void> {
 
     if (!(await songThresholdReached(db))) {
         logger.info(
-            `Downloading minimum threshold (${SONG_DOWNLOAD_THRESHOLD}) songs`
+            `Downloading minimum threshold (${SONG_DOWNLOAD_THRESHOLD}) songs`,
         );
         await downloadAndConvertSongs(SONG_DOWNLOAD_THRESHOLD);
         await generateKmqDataTables(db);

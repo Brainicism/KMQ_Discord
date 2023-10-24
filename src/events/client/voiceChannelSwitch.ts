@@ -11,7 +11,7 @@ import type Eris from "eris";
 export default async function voiceChannelSwitchHandler(
     member: Eris.Member,
     newChannel: Eris.VoiceChannel,
-    oldChannel: Eris.VoiceChannel
+    oldChannel: Eris.VoiceChannel,
 ): Promise<void> {
     const guildID = oldChannel.guild.id;
     const session = Session.getSession(guildID);
@@ -28,7 +28,7 @@ export default async function voiceChannelSwitchHandler(
 
     if (checkBotIsAlone(guildID)) {
         session.endSession(
-            "Voice channel is empty, during voice channel switch"
+            "Voice channel is empty, during voice channel switch",
         );
         return;
     }
@@ -37,7 +37,7 @@ export default async function voiceChannelSwitchHandler(
         if (member.id !== process.env.BOT_CLIENT_ID) {
             await session.setPlayerInVC(
                 member.id,
-                newChannel.id === session.voiceChannelID
+                newChannel.id === session.voiceChannelID,
             );
         } else {
             // Bot was moved to another VC

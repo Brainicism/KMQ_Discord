@@ -68,25 +68,25 @@ export default class LeaderboardCommand implements BaseCommand {
         name: "leaderboard",
         description: i18n.translate(
             guildID,
-            "command.leaderboard.help.description"
+            "command.leaderboard.help.description",
         ),
         usage: `/leaderboard show\ntype:{gamesplayed | songsguessed | exp}\nscope:{server | game | global}\nduration:{daily | weekly | monthly | yearly}\npage:{${i18n.translate(
             guildID,
-            "command.leaderboard.help.usage.pageNumber"
+            "command.leaderboard.help.usage.pageNumber",
         )}}\n\n/leaderboard enroll\n\n/leaderboard unenroll`,
         examples: [
             {
                 example: "`/leaderboard show`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.leaderboard.help.example.global"
+                    "command.leaderboard.help.example.global",
                 ),
             },
             {
                 example: "`/leaderboard show page:3`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.leaderboard.help.example.globalPage"
+                    "command.leaderboard.help.example.globalPage",
                 ),
             },
             {
@@ -94,7 +94,7 @@ export default class LeaderboardCommand implements BaseCommand {
                     "`/leaderboard show scope:game duration:monthly page:2`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.leaderboard.help.example.gameMonthlyPage"
+                    "command.leaderboard.help.example.gameMonthlyPage",
                 ),
             },
             {
@@ -102,35 +102,35 @@ export default class LeaderboardCommand implements BaseCommand {
                     "`/leaderboard show type:songsguessed scope:server page:3`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.leaderboard.help.example.serverSongsGuessedPage"
+                    "command.leaderboard.help.example.serverSongsGuessedPage",
                 ),
             },
             {
                 example: "`/leaderboard enroll`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.leaderboard.help.example.enroll"
+                    "command.leaderboard.help.example.enroll",
                 ),
             },
             {
                 example: "`/leaderboard unenroll`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.leaderboard.help.example.unenroll"
+                    "command.leaderboard.help.example.unenroll",
                 ),
             },
             {
                 example: "`/leaderboard scope:server`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.leaderboard.help.example.server"
+                    "command.leaderboard.help.example.server",
                 ),
             },
             {
                 example: "`/leaderboard duration:weekly page:4`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.leaderboard.help.example.globalWeeklyPage"
+                    "command.leaderboard.help.example.globalWeeklyPage",
                 ),
             },
         ],
@@ -147,7 +147,7 @@ export default class LeaderboardCommand implements BaseCommand {
                     name: LeaderboardAction.ENROLL,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.leaderboard.help.example.enroll"
+                        "command.leaderboard.help.example.enroll",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -156,10 +156,10 @@ export default class LeaderboardCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.leaderboard.help.example.enroll"
+                                    "command.leaderboard.help.example.enroll",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -169,7 +169,7 @@ export default class LeaderboardCommand implements BaseCommand {
                     name: LeaderboardAction.UNENROLL,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.leaderboard.help.example.unenroll"
+                        "command.leaderboard.help.example.unenroll",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -178,10 +178,10 @@ export default class LeaderboardCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.leaderboard.help.example.unenroll"
+                                    "command.leaderboard.help.example.unenroll",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -191,7 +191,7 @@ export default class LeaderboardCommand implements BaseCommand {
                     name: "show",
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.leaderboard.help.description"
+                        "command.leaderboard.help.description",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -200,10 +200,10 @@ export default class LeaderboardCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.leaderboard.help.description"
+                                    "command.leaderboard.help.description",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -213,7 +213,7 @@ export default class LeaderboardCommand implements BaseCommand {
                             name: "type",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.leaderboard.interaction.type"
+                                "command.leaderboard.interaction.type",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -222,10 +222,10 @@ export default class LeaderboardCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.leaderboard.interaction.type"
+                                            "command.leaderboard.interaction.type",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -235,14 +235,14 @@ export default class LeaderboardCommand implements BaseCommand {
                                     name: type,
                                     value: type,
                                     default: type === LeaderboardType.EXP,
-                                })
+                                }),
                             ),
                         },
                         {
                             name: "duration",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.leaderboard.interaction.duration"
+                                "command.leaderboard.interaction.duration",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -251,10 +251,10 @@ export default class LeaderboardCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.leaderboard.interaction.duration"
+                                            "command.leaderboard.interaction.duration",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -276,7 +276,7 @@ export default class LeaderboardCommand implements BaseCommand {
                             name: "scope",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.leaderboard.interaction.scope"
+                                "command.leaderboard.interaction.scope",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -285,10 +285,10 @@ export default class LeaderboardCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.leaderboard.interaction.scope"
+                                            "command.leaderboard.interaction.scope",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -298,14 +298,14 @@ export default class LeaderboardCommand implements BaseCommand {
                                     name: scope,
                                     value: scope,
                                     default: scope === LeaderboardScope.GLOBAL,
-                                })
+                                }),
                             ),
                         },
                         {
                             name: "page",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.leaderboard.interaction.page"
+                                "command.leaderboard.interaction.page",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -314,10 +314,10 @@ export default class LeaderboardCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.leaderboard.interaction.page"
+                                            "command.leaderboard.interaction.page",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -331,7 +331,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionOptions, interactionName } =
             getInteractionValue(interaction);
@@ -346,7 +346,7 @@ export default class LeaderboardCommand implements BaseCommand {
                 interactionOptions["type"],
                 interactionOptions["scope"],
                 interactionOptions["duration"],
-                interactionOptions["page"]
+                interactionOptions["page"],
             );
         }
     }
@@ -357,7 +357,7 @@ export default class LeaderboardCommand implements BaseCommand {
                 message,
                 LeaderboardType.EXP,
                 LeaderboardScope.GLOBAL,
-                LeaderboardDuration.ALL_TIME
+                LeaderboardDuration.ALL_TIME,
             );
             return;
         }
@@ -398,7 +398,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
         if (
             Object.values(LeaderboardDuration).includes(
-                arg as LeaderboardDuration
+                arg as LeaderboardDuration,
             )
         ) {
             duration = arg as LeaderboardDuration;
@@ -416,10 +416,10 @@ export default class LeaderboardCommand implements BaseCommand {
                             ...Object.values(LeaderboardScope),
                             ...Object.values(LeaderboardDuration),
                         ]),
-                    }
+                    },
                 ),
                 arg,
-                this.help(message.guildID).usage
+                this.help(message.guildID).usage,
             );
             return;
         }
@@ -430,7 +430,7 @@ export default class LeaderboardCommand implements BaseCommand {
                 type,
                 scope,
                 duration,
-                pageOffset
+                pageOffset,
             );
             return;
         }
@@ -440,7 +440,7 @@ export default class LeaderboardCommand implements BaseCommand {
             scope = arg as LeaderboardScope;
         } else if (
             Object.values(LeaderboardDuration).includes(
-                arg as LeaderboardDuration
+                arg as LeaderboardDuration,
             )
         ) {
             duration = arg as LeaderboardDuration;
@@ -455,10 +455,10 @@ export default class LeaderboardCommand implements BaseCommand {
                             ...Object.values(LeaderboardScope),
                             ...Object.values(LeaderboardDuration),
                         ]),
-                    }
+                    },
                 ),
                 arg,
-                this.help(message.guildID).usage
+                this.help(message.guildID).usage,
             );
             return;
         }
@@ -469,7 +469,7 @@ export default class LeaderboardCommand implements BaseCommand {
                 type,
                 scope,
                 duration,
-                pageOffset
+                pageOffset,
             );
             return;
         }
@@ -477,7 +477,7 @@ export default class LeaderboardCommand implements BaseCommand {
         arg = parsedMessage.components[2];
         if (
             Object.values(LeaderboardDuration).includes(
-                arg as LeaderboardDuration
+                arg as LeaderboardDuration,
             )
         ) {
             duration = arg as LeaderboardDuration;
@@ -489,12 +489,12 @@ export default class LeaderboardCommand implements BaseCommand {
                     "command.leaderboard.validation.secondArg",
                     {
                         argument: arrayToString(
-                            Object.values(LeaderboardDuration)
+                            Object.values(LeaderboardDuration),
                         ),
-                    }
+                    },
                 ),
                 arg,
-                this.help(message.guildID).usage
+                this.help(message.guildID).usage,
             );
             return;
         }
@@ -504,10 +504,10 @@ export default class LeaderboardCommand implements BaseCommand {
                 messageContext,
                 i18n.translate(
                     message.guildID,
-                    "command.leaderboard.validation.thirdArg"
+                    "command.leaderboard.validation.thirdArg",
                 ),
                 arg,
-                this.help(message.guildID).usage
+                this.help(message.guildID).usage,
             );
             return;
         }
@@ -517,7 +517,7 @@ export default class LeaderboardCommand implements BaseCommand {
             type,
             scope,
             duration,
-            pageOffset
+            pageOffset,
         );
     };
 
@@ -527,7 +527,7 @@ export default class LeaderboardCommand implements BaseCommand {
         scope: LeaderboardScope,
         duration: LeaderboardDuration,
         invokerId: string,
-        date?: Date
+        date?: Date,
     ): Promise<{ embeds: Array<EmbedGenerator>; pageCount: number }> {
         const embedsFns: Array<EmbedGenerator> = [];
         const permanentLb = duration === LeaderboardDuration.ALL_TIME;
@@ -546,13 +546,13 @@ export default class LeaderboardCommand implements BaseCommand {
                 resetDate = new Date(
                     d.getFullYear(),
                     d.getMonth(),
-                    d.getDate()
+                    d.getDate(),
                 );
 
                 futureResetDate = new Date(
                     d.getFullYear(),
                     d.getMonth(),
-                    d.getDate() + 1
+                    d.getDate() + 1,
                 );
                 topPlayersQuery = topPlayersQuery.where("date", ">", resetDate);
                 break;
@@ -561,13 +561,13 @@ export default class LeaderboardCommand implements BaseCommand {
                 resetDate = new Date(
                     d.getFullYear(),
                     d.getMonth(),
-                    d.getDate() - d.getDay()
+                    d.getDate() - d.getDay(),
                 );
 
                 futureResetDate = new Date(
                     d.getFullYear(),
                     d.getMonth(),
-                    d.getDate() - d.getDay() + 7
+                    d.getDate() - d.getDay() + 7,
                 );
 
                 topPlayersQuery = topPlayersQuery.where("date", ">", resetDate);
@@ -603,7 +603,7 @@ export default class LeaderboardCommand implements BaseCommand {
             topPlayersQuery = topPlayersQuery.where(
                 "player_id",
                 "in",
-                serverPlayers
+                serverPlayers,
             );
         } else if (scope === LeaderboardScope.GAME) {
             const participantIDs =
@@ -622,17 +622,17 @@ export default class LeaderboardCommand implements BaseCommand {
             topPlayersQuery = topPlayersQuery.where(
                 "player_id",
                 "in",
-                gamePlayers
+                gamePlayers,
             );
         }
 
         const pageCount = Math.ceil(
             (((await topPlayersQuery
                 .select((eb) =>
-                    eb.fn.count<number>("player_id").distinct().as("count")
+                    eb.fn.count<number>("player_id").distinct().as("count"),
                 )
                 .executeTakeFirst()) ?? {})["count"] as number) /
-                LEADERBOARD_ENTRIES_PER_PAGE
+                LEADERBOARD_ENTRIES_PER_PAGE,
         );
 
         for (let i = 0; i < pageCount; i++) {
@@ -662,12 +662,12 @@ export default class LeaderboardCommand implements BaseCommand {
                                         .select((eb) =>
                                             eb.fn
                                                 .sum<number>("exp_gained")
-                                                .as("exp")
+                                                .as("exp"),
                                         )
                                         .select((eb) =>
                                             eb.fn
                                                 .sum<number>("levels_gained")
-                                                .as("level")
+                                                .as("level"),
                                         )
                                         .groupBy("player_id")
                                         .orderBy("exp", "desc")
@@ -695,12 +695,12 @@ export default class LeaderboardCommand implements BaseCommand {
                                         .select((eb) =>
                                             eb.fn
                                                 .count<number>("player_id")
-                                                .as("game_count")
+                                                .as("game_count"),
                                         )
                                         .select((eb) =>
                                             eb.fn
                                                 .sum<number>("levels_gained")
-                                                .as("level")
+                                                .as("level"),
                                         )
                                         .groupBy("player_id")
                                         .orderBy("game_count", "desc")
@@ -729,12 +729,12 @@ export default class LeaderboardCommand implements BaseCommand {
                                         .select((eb) =>
                                             eb.fn
                                                 .sum<number>("levels_gained")
-                                                .as("level")
+                                                .as("level"),
                                         )
                                         .select((eb) =>
                                             eb.fn
                                                 .sum<number>("songs_guessed")
-                                                .as("songs_guessed")
+                                                .as("songs_guessed"),
                                         )
 
                                         .groupBy("player_id")
@@ -748,7 +748,7 @@ export default class LeaderboardCommand implements BaseCommand {
                             default:
                                 topPlayers = [];
                                 logger.error(
-                                    `Unexpected leaderboard type: ${type}`
+                                    `Unexpected leaderboard type: ${type}`,
                                 );
                                 break;
                         }
@@ -763,7 +763,7 @@ export default class LeaderboardCommand implements BaseCommand {
                                         .where(
                                             "player_id",
                                             "=",
-                                            player.player_id
+                                            player.player_id,
                                         )
                                         .executeTakeFirst();
 
@@ -778,9 +778,9 @@ export default class LeaderboardCommand implements BaseCommand {
                                               "command.leaderboard.rankNumber",
                                               {
                                                   rank: friendlyFormattedNumber(
-                                                      rank + 1
+                                                      rank + 1,
                                                   ),
-                                              }
+                                              },
                                           );
 
                                     let level: string;
@@ -791,23 +791,23 @@ export default class LeaderboardCommand implements BaseCommand {
                                             {
                                                 level: i18n.translate(
                                                     messageContext.guildID,
-                                                    "misc.level"
+                                                    "misc.level",
                                                 ),
                                                 formattedNumber:
                                                     friendlyFormattedNumber(
-                                                        player.level
+                                                        player.level,
                                                     ),
                                                 rankName: getRankNameByLevel(
                                                     player.level,
-                                                    messageContext.guildID
+                                                    messageContext.guildID,
                                                 ),
-                                            }
+                                            },
                                         );
                                     } else {
                                         const levelPluralized = i18n.translateN(
                                             messageContext.guildID,
                                             "misc.plural.level",
-                                            player.level
+                                            player.level,
                                         );
 
                                         level = i18n.translate(
@@ -816,10 +816,10 @@ export default class LeaderboardCommand implements BaseCommand {
                                             {
                                                 formattedNumber:
                                                     friendlyFormattedNumber(
-                                                        player.level
+                                                        player.level,
                                                     ),
                                                 levelPluralized,
-                                            }
+                                            },
                                         );
                                     }
 
@@ -829,14 +829,14 @@ export default class LeaderboardCommand implements BaseCommand {
                                             if (permanentLb) {
                                                 const exp = `${friendlyFormattedNumber(
                                                     (player as TopExpGainPlayer)
-                                                        .exp
+                                                        .exp,
                                                 )} EXP`;
 
                                                 value = `${exp} | ${level}`;
                                             } else {
                                                 const expGained = `+${friendlyFormattedNumber(
                                                     (player as TopExpGainPlayer)
-                                                        .exp
+                                                        .exp,
                                                 )} EXP`;
 
                                                 value = `${expGained} | ${level}`;
@@ -852,9 +852,9 @@ export default class LeaderboardCommand implements BaseCommand {
                                                         friendlyFormattedNumber(
                                                             (
                                                                 player as TopGamesPlayedPlayer
-                                                            ).game_count
+                                                            ).game_count,
                                                         ),
-                                                }
+                                                },
                                             );
 
                                             value = `${games} | ${level}`;
@@ -870,9 +870,9 @@ export default class LeaderboardCommand implements BaseCommand {
                                                         friendlyFormattedNumber(
                                                             (
                                                                 player as TopSongsGuessedPlayer
-                                                            ).songs_guessed
+                                                            ).songs_guessed,
                                                         ),
-                                                }
+                                                },
                                             );
 
                                             value = `${guesses} | ${level}`;
@@ -881,7 +881,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
                                         default:
                                             logger.error(
-                                                `Unexpected leaderboardType = ${type}`
+                                                `Unexpected leaderboardType = ${type}`,
                                             );
                                             value = "null";
                                             break;
@@ -895,7 +895,7 @@ export default class LeaderboardCommand implements BaseCommand {
                                         }${displayedRank} ${displayName}`,
                                         value,
                                     };
-                                })
+                                }),
                             );
 
                         let leaderboardScope: string;
@@ -903,7 +903,7 @@ export default class LeaderboardCommand implements BaseCommand {
                             case LeaderboardScope.GLOBAL:
                                 leaderboardScope = i18n.translate(
                                     messageContext.guildID,
-                                    "command.leaderboard.scope.global"
+                                    "command.leaderboard.scope.global",
                                 );
                                 break;
                             case LeaderboardScope.SERVER:
@@ -913,14 +913,14 @@ export default class LeaderboardCommand implements BaseCommand {
                                         "command.leaderboard.scope.server.withName",
                                         {
                                             serverName: State.client.guilds.get(
-                                                messageContext.guildID
+                                                messageContext.guildID,
                                             )!.name,
-                                        }
+                                        },
                                     );
                                 } else {
                                     leaderboardScope = i18n.translate(
                                         messageContext.guildID,
-                                        "command.leaderboard.scope.server.noName"
+                                        "command.leaderboard.scope.server.noName",
                                     );
                                 }
 
@@ -928,12 +928,12 @@ export default class LeaderboardCommand implements BaseCommand {
                             case LeaderboardScope.GAME:
                                 leaderboardScope = i18n.translate(
                                     messageContext.guildID,
-                                    "command.leaderboard.scope.currentGame"
+                                    "command.leaderboard.scope.currentGame",
                                 );
                                 break;
                             default:
                                 logger.error(
-                                    `Unexpected leaderboardScope = ${scope}`
+                                    `Unexpected leaderboardScope = ${scope}`,
                                 );
                                 leaderboardScope = "invalid";
                                 break;
@@ -945,40 +945,40 @@ export default class LeaderboardCommand implements BaseCommand {
                             case LeaderboardDuration.DAILY:
                                 leaderboardDuration = i18n.translate(
                                     messageContext.guildID,
-                                    "command.leaderboard.duration.daily"
+                                    "command.leaderboard.duration.daily",
                                 );
                                 break;
                             case LeaderboardDuration.WEEK:
                             case LeaderboardDuration.WEEKLY:
                                 leaderboardDuration = i18n.translate(
                                     messageContext.guildID,
-                                    "command.leaderboard.duration.weekly"
+                                    "command.leaderboard.duration.weekly",
                                 );
                                 break;
                             case LeaderboardDuration.MONTH:
                             case LeaderboardDuration.MONTHLY:
                                 leaderboardDuration = i18n.translate(
                                     messageContext.guildID,
-                                    "command.leaderboard.duration.monthly"
+                                    "command.leaderboard.duration.monthly",
                                 );
                                 break;
                             case LeaderboardDuration.YEAR:
                             case LeaderboardDuration.YEARLY:
                                 leaderboardDuration = i18n.translate(
                                     messageContext.guildID,
-                                    "command.leaderboard.duration.yearly"
+                                    "command.leaderboard.duration.yearly",
                                 );
                                 break;
                             case LeaderboardDuration.ALL_TIME:
                                 leaderboardDuration = i18n.translate(
                                     messageContext.guildID,
-                                    "command.leaderboard.duration.allTime"
+                                    "command.leaderboard.duration.allTime",
                                 );
                                 break;
                             default:
                                 leaderboardDuration = "invalid";
                                 logger.error(
-                                    `Unexpected leaderboardDuration = ${duration}`
+                                    `Unexpected leaderboardDuration = ${duration}`,
                                 );
                                 break;
                         }
@@ -991,18 +991,18 @@ export default class LeaderboardCommand implements BaseCommand {
                             case LeaderboardType.GAMES_PLAYED:
                                 leaderboardType = `(${i18n.translate(
                                     messageContext.guildID,
-                                    "command.leaderboard.type.byGamesPlayed"
+                                    "command.leaderboard.type.byGamesPlayed",
                                 )})`;
                                 break;
                             case LeaderboardType.SONGS_GUESSED:
                                 leaderboardType = `(${i18n.translate(
                                     messageContext.guildID,
-                                    "command.leaderboard.type.bySongsGuessed"
+                                    "command.leaderboard.type.bySongsGuessed",
                                 )})`;
                                 break;
                             default:
                                 logger.error(
-                                    `Unexpected leaderboardType = ${type}`
+                                    `Unexpected leaderboardType = ${type}`,
                                 );
                                 leaderboardType = "invalid";
                                 break;
@@ -1015,9 +1015,9 @@ export default class LeaderboardCommand implements BaseCommand {
                                 "command.leaderboard.resets",
                                 {
                                     timestamp: `<t:${Math.floor(
-                                        futureResetDate.getTime() / 1000
+                                        futureResetDate.getTime() / 1000,
                                     )}:R>`,
-                                }
+                                },
                             );
                         }
 
@@ -1030,7 +1030,7 @@ export default class LeaderboardCommand implements BaseCommand {
                                         leaderboardScope,
                                         leaderboardDuration,
                                         leaderboardType,
-                                    }
+                                    },
                                 )
                                 .trimEnd(),
                             description,
@@ -1043,11 +1043,11 @@ export default class LeaderboardCommand implements BaseCommand {
                                     chooseRandom(leaderboardQuotes),
                                     {
                                         command: "/help leaderboard",
-                                    }
+                                    },
                                 ),
                             },
                         });
-                    })
+                    }),
             );
         }
 
@@ -1056,7 +1056,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
     private static async enrollLeaderboard(
         messageContext: MessageContext,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const alreadyEnrolled = !!(await dbContext.kmq
             .selectFrom("leaderboard_enrollment")
@@ -1070,14 +1070,14 @@ export default class LeaderboardCommand implements BaseCommand {
                 {
                     title: i18n.translate(
                         messageContext.guildID,
-                        "command.leaderboard.failure.alreadyEnrolled.title"
+                        "command.leaderboard.failure.alreadyEnrolled.title",
                     ),
                     description: i18n.translate(
                         messageContext.guildID,
-                        "command.leaderboard.failure.alreadyEnrolled.description"
+                        "command.leaderboard.failure.alreadyEnrolled.description",
                     ),
                 },
-                interaction
+                interaction,
             );
             return;
         }
@@ -1095,23 +1095,23 @@ export default class LeaderboardCommand implements BaseCommand {
             {
                 title: i18n.translate(
                     messageContext.guildID,
-                    "command.leaderboard.enrolled.title"
+                    "command.leaderboard.enrolled.title",
                 ),
                 description: i18n.translate(
                     messageContext.guildID,
-                    "command.leaderboard.enrolled.description"
+                    "command.leaderboard.enrolled.description",
                 ),
             },
             false,
             undefined,
             [],
-            interaction
+            interaction,
         );
     }
 
     private static async unenrollLeaderboard(
         messageContext: MessageContext,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         await dbContext.kmq
             .deleteFrom("leaderboard_enrollment")
@@ -1123,17 +1123,17 @@ export default class LeaderboardCommand implements BaseCommand {
             {
                 title: i18n.translate(
                     messageContext.guildID,
-                    "command.leaderboard.unenrolled.title"
+                    "command.leaderboard.unenrolled.title",
                 ),
                 description: i18n.translate(
                     messageContext.guildID,
-                    "command.leaderboard.unenrolled.description"
+                    "command.leaderboard.unenrolled.description",
                 ),
             },
             false,
             undefined,
             [],
-            interaction
+            interaction,
         );
     }
 
@@ -1142,12 +1142,12 @@ export default class LeaderboardCommand implements BaseCommand {
         type: LeaderboardType = LeaderboardType.EXP,
         scope: LeaderboardScope = LeaderboardScope.GLOBAL,
         duration: LeaderboardDuration = LeaderboardDuration.ALL_TIME,
-        pageOffset: number = 0
+        pageOffset: number = 0,
     ): Promise<void> {
         const messageContext = new MessageContext(
             messageOrInteraction.channel.id,
             new KmqMember(messageOrInteraction.member!.id),
-            messageOrInteraction.guildID as string
+            messageOrInteraction.guildID as string,
         );
 
         if (scope === LeaderboardScope.GAME) {
@@ -1157,17 +1157,17 @@ export default class LeaderboardCommand implements BaseCommand {
                     {
                         title: i18n.translate(
                             messageContext.guildID,
-                            "misc.failure.game.noneInProgress.title"
+                            "misc.failure.game.noneInProgress.title",
                         ),
                         description: i18n.translate(
                             messageContext.guildID,
-                            "misc.failure.game.noneInProgress.description"
+                            "misc.failure.game.noneInProgress.description",
                         ),
                         thumbnailUrl: KmqImages.NOT_IMPRESSED,
                     },
                     messageOrInteraction instanceof Eris.CommandInteraction
                         ? messageOrInteraction
-                        : undefined
+                        : undefined,
                 );
                 return;
             }
@@ -1183,17 +1183,17 @@ export default class LeaderboardCommand implements BaseCommand {
                     {
                         title: i18n.translate(
                             messageContext.guildID,
-                            "command.leaderboard.failure.game.noParticipants.title"
+                            "command.leaderboard.failure.game.noParticipants.title",
                         ),
                         description: i18n.translate(
                             messageContext.guildID,
-                            "command.leaderboard.failure.game.noParticipants.description"
+                            "command.leaderboard.failure.game.noParticipants.description",
                         ),
                         thumbnailUrl: KmqImages.NOT_IMPRESSED,
                     },
                     messageOrInteraction instanceof Eris.CommandInteraction
                         ? messageOrInteraction
-                        : undefined
+                        : undefined,
                 );
                 return;
             }
@@ -1205,7 +1205,7 @@ export default class LeaderboardCommand implements BaseCommand {
                 type,
                 scope,
                 duration,
-                messageContext.author.id
+                messageContext.author.id,
             );
 
         if (pageCount === 0) {
@@ -1214,17 +1214,17 @@ export default class LeaderboardCommand implements BaseCommand {
                 {
                     title: i18n.translate(
                         messageContext.guildID,
-                        "command.leaderboard.failure.empty.title"
+                        "command.leaderboard.failure.empty.title",
                     ),
                     description: i18n.translate(
                         messageContext.guildID,
-                        "command.leaderboard.failure.empty.description"
+                        "command.leaderboard.failure.empty.description",
                     ),
                     thumbnailUrl: KmqImages.DEAD,
                 },
                 messageOrInteraction instanceof Eris.CommandInteraction
                     ? messageOrInteraction
-                    : undefined
+                    : undefined,
             );
             return;
         }
@@ -1235,17 +1235,17 @@ export default class LeaderboardCommand implements BaseCommand {
                 {
                     title: i18n.translate(
                         messageContext.guildID,
-                        "command.leaderboard.failure.outOfRange.title"
+                        "command.leaderboard.failure.outOfRange.title",
                     ),
                     description: i18n.translate(
                         messageContext.guildID,
-                        "command.leaderboard.failure.outOfRange.description"
+                        "command.leaderboard.failure.outOfRange.description",
                     ),
                     thumbnailUrl: KmqImages.NOT_IMPRESSED,
                 },
                 messageOrInteraction instanceof Eris.CommandInteraction
                     ? messageOrInteraction
-                    : undefined
+                    : undefined,
             );
             return;
         }
@@ -1254,13 +1254,13 @@ export default class LeaderboardCommand implements BaseCommand {
             messageOrInteraction,
             embeds,
             undefined,
-            pageOffset
+            pageOffset,
         );
 
         logger.info(
             `${getDebugLogHeader(
-                messageOrInteraction
-            )} | Leaderboard retrieved (${scope})`
+                messageOrInteraction,
+            )} | Leaderboard retrieved (${scope})`,
         );
     }
 }

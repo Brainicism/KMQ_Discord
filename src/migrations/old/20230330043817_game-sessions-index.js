@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
     return knex.raw(
-        "ALTER TABLE game_sessions ADD INDEX game_sessions_start_date_index(start_date);"
+        "ALTER TABLE game_sessions ADD INDEX game_sessions_start_date_index(start_date);",
     );
 };
 

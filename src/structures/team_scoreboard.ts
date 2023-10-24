@@ -51,7 +51,7 @@ export default class TeamScoreboard extends Scoreboard {
         }
 
         const correctGuesserTeam = this.getTeamOfPlayer(
-            firstGuessResult.userID
+            firstGuessResult.userID,
         );
 
         if (correctGuesserTeam) {
@@ -127,7 +127,7 @@ export default class TeamScoreboard extends Scoreboard {
     getTeamOfPlayer(userID: string): Team | null {
         return (
             Object.values(this.players).find((t: Team) =>
-                t.hasPlayer(userID)
+                t.hasPlayer(userID),
             ) || null
         );
     }
@@ -159,14 +159,14 @@ export default class TeamScoreboard extends Scoreboard {
             if (this.firstPlace.length === 0) {
                 const highestScore = Math.max(
                     ...Object.values(this.players).map((x: Team) =>
-                        x.getScore()
+                        x.getScore(),
                     ),
-                    0
+                    0,
                 );
 
                 if (highestScore === 0) return;
                 this.firstPlace = Object.values(this.players).filter(
-                    (t: Team) => t.getScore() === highestScore
+                    (t: Team) => t.getScore() === highestScore,
                 );
             }
         }
@@ -195,7 +195,7 @@ export default class TeamScoreboard extends Scoreboard {
 
         if (!team) {
             logger.error(
-                `getPlayerExpGain | Player ${player.id}  unexpectedly not part of a team`
+                `getPlayerExpGain | Player ${player.id}  unexpectedly not part of a team`,
             );
             return 0;
         }

@@ -63,7 +63,7 @@ export function getRankNameByLevel(level: number, guildID: string): string {
         // add roman numeral suffix for every 5 levels above max rank title
         const stepsAboveMaxRank = Math.floor(levelsPastMaxRank / 5) + 1;
         return `${i18n.translate(guildID, highestRankTitle.title)} ${romanize(
-            stepsAboveMaxRank + 1
+            stepsAboveMaxRank + 1,
         )}`;
     }
 
@@ -78,7 +78,7 @@ export function getRankNameByLevel(level: number, guildID: string): string {
 
 async function getProfileFields(
     requestedPlayer: Eris.User,
-    guildID: string
+    guildID: string,
 ): Promise<Array<Eris.EmbedField>> {
     const playerStats = await dbContext.kmq
         .selectFrom("player_stats")
@@ -101,12 +101,12 @@ async function getProfileFields(
     const gamesPlayed = playerStats["games_played"];
     const firstPlayDateString = discordDateFormat(
         new Date(playerStats["first_play"]),
-        "d"
+        "d",
     );
 
     const lastActiveDateString = discordDateFormat(
         new Date(playerStats["last_active"]),
-        "R"
+        "R",
     );
 
     const exp = playerStats["exp"];
@@ -163,42 +163,42 @@ async function getProfileFields(
             name: i18n.translate(guildID, "misc.level"),
             value: `${friendlyFormattedNumber(level)} (${getRankNameByLevel(
                 level,
-                guildID
+                guildID,
             )})`,
             inline: true,
         },
         {
             name: i18n.translate(guildID, "command.profile.experience"),
             value: `${friendlyFormattedNumber(exp)}/${friendlyFormattedNumber(
-                CUM_EXP_TABLE[level + 1]
+                CUM_EXP_TABLE[level + 1],
             )}\n${visualProgressBar(
                 exp - CUM_EXP_TABLE[level],
-                CUM_EXP_TABLE[level + 1] - CUM_EXP_TABLE[level]
+                CUM_EXP_TABLE[level + 1] - CUM_EXP_TABLE[level],
             )}`,
             inline: true,
         },
         {
             name: i18n.translate(guildID, "command.profile.overallRank"),
             value: `#${friendlyFormattedNumber(
-                relativeLevelRank + 1
+                relativeLevelRank + 1,
             )}/${friendlyFormattedNumber(totalPlayers)}`,
             inline: true,
         },
         {
             name: i18n.translate(guildID, "command.profile.songsGuessed"),
             value: `${friendlyFormattedNumber(
-                songsGuessed
+                songsGuessed,
             )} | #${friendlyFormattedNumber(
-                relativeSongRank + 1
+                relativeSongRank + 1,
             )}/${friendlyFormattedNumber(totalPlayers)} `,
             inline: true,
         },
         {
             name: i18n.translate(guildID, "command.profile.gamesPlayed"),
             value: `${friendlyFormattedNumber(
-                gamesPlayed
+                gamesPlayed,
             )} | #${friendlyFormattedNumber(
-                relativeGamesPlayedRank + 1
+                relativeGamesPlayedRank + 1,
             )}/${friendlyFormattedNumber(totalPlayers)} `,
             inline: true,
         },
@@ -248,18 +248,18 @@ export default class ProfileCommand implements BaseCommand {
         name: "profile",
         description: i18n.translate(
             guildID,
-            "command.profile.help.description"
+            "command.profile.help.description",
         ),
         usage: `/profile user_mention:{@${i18n.translate(
             guildID,
-            "command.profile.help.usage.mention"
+            "command.profile.help.usage.mention",
         )}}\n\n/profile user_id:{user_id}`,
         examples: [
             {
                 example: "`/profile`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.profile.help.example.self"
+                    "command.profile.help.example.self",
                 ),
             },
             {
@@ -269,14 +269,14 @@ export default class ProfileCommand implements BaseCommand {
                     "command.profile.help.example.otherPlayerMention",
                     {
                         playerName: "FortnitePlayer",
-                    }
+                    },
                 ),
             },
             {
                 example: "`/profile user_id:141734249702096896`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.profile.help.example.otherPlayerID"
+                    "command.profile.help.example.otherPlayerID",
                 ),
             },
         ],
@@ -293,7 +293,7 @@ export default class ProfileCommand implements BaseCommand {
                     name: "user_mention",
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.profile.interaction.userMention"
+                        "command.profile.interaction.userMention",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -302,10 +302,10 @@ export default class ProfileCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.profile.interaction.userMention"
+                                    "command.profile.interaction.userMention",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -316,7 +316,7 @@ export default class ProfileCommand implements BaseCommand {
                     name: "user_id",
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.profile.interaction.userID"
+                        "command.profile.interaction.userID",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -325,10 +325,10 @@ export default class ProfileCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.profile.interaction.userID"
+                                    "command.profile.interaction.userID",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
@@ -349,7 +349,7 @@ export default class ProfileCommand implements BaseCommand {
                 try {
                     requestedPlayer = await fetchUser(
                         parsedMessage.argument,
-                        true
+                        true,
                     );
                 } catch (e) {
                     requestedPlayer = null;
@@ -359,14 +359,14 @@ export default class ProfileCommand implements BaseCommand {
                     sendErrorMessage(MessageContext.fromMessage(message), {
                         title: i18n.translate(
                             message.guildID,
-                            "command.profile.failure.notFound.title"
+                            "command.profile.failure.notFound.title",
                         ),
                         description: i18n.translate(
                             message.guildID,
                             "command.profile.failure.notFound.description",
                             {
                                 profileHelp: "`/help profile`",
-                            }
+                            },
                         ),
                     });
                     return;
@@ -376,12 +376,12 @@ export default class ProfileCommand implements BaseCommand {
             sendErrorMessage(MessageContext.fromMessage(message), {
                 title: i18n.translate(
                     message.guildID,
-                    "command.profile.failure.notFound.title"
+                    "command.profile.failure.notFound.title",
                 ),
                 description: i18n.translate(
                     message.guildID,
                     "command.profile.failure.notFound.badUsage.description",
-                    { profileHelp: "`/help profile`" }
+                    { profileHelp: "`/help profile`" },
                 ),
             });
             return;
@@ -393,11 +393,11 @@ export default class ProfileCommand implements BaseCommand {
             sendInfoMessage(MessageContext.fromMessage(message), {
                 title: i18n.translate(
                     message.guildID,
-                    "command.profile.failure.notFound.title"
+                    "command.profile.failure.notFound.title",
                 ),
                 description: i18n.translate(
                     message.guildID,
-                    "misc.interaction.profile.noStats"
+                    "misc.interaction.profile.noStats",
                 ),
             });
             return;
@@ -405,8 +405,8 @@ export default class ProfileCommand implements BaseCommand {
 
         logger.info(
             `${getDebugLogHeader(
-                MessageContext.fromMessage(message)
-            )} | Profile retrieved`
+                MessageContext.fromMessage(message),
+            )} | Profile retrieved`,
         );
 
         sendInfoMessage(MessageContext.fromMessage(message), {
@@ -426,7 +426,7 @@ export default class ProfileCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionOptions } = getInteractionValue(interaction);
 
@@ -437,13 +437,13 @@ export default class ProfileCommand implements BaseCommand {
             await ProfileCommand.handleProfileInteraction(
                 interaction,
                 userOverride,
-                false
+                false,
             );
         } else {
             await ProfileCommand.handleProfileInteraction(
                 interaction,
                 messageContext.author.id,
-                false
+                false,
             );
         }
     }
@@ -457,7 +457,7 @@ export default class ProfileCommand implements BaseCommand {
     static async handleProfileInteraction(
         interaction: Eris.CommandInteraction,
         userId: string,
-        ephemeral: boolean
+        ephemeral: boolean,
     ): Promise<void> {
         const user = await State.ipc.fetchUser(userId);
         if (!user) {
@@ -465,28 +465,28 @@ export default class ProfileCommand implements BaseCommand {
                 interaction,
                 i18n.translate(
                     interaction.guildID as string,
-                    "command.profile.failure.notFound.title"
+                    "command.profile.failure.notFound.title",
                 ),
                 i18n.translate(
                     interaction.guildID as string,
                     "misc.interaction.profile.inaccessible",
                     {
                         profileUserID: `\`/profile ${userId}\``,
-                    }
-                )
+                    },
+                ),
             );
 
             logger.info(
                 `${getDebugLogHeader(
-                    interaction
-                )} | Failed retrieving profile on inaccessible player via interaction`
+                    interaction,
+                )} | Failed retrieving profile on inaccessible player via interaction`,
             );
             return;
         }
 
         const fields = await getProfileFields(
             user,
-            interaction.guildID as string
+            interaction.guildID as string,
         );
 
         if (fields.length === 0) {
@@ -494,18 +494,18 @@ export default class ProfileCommand implements BaseCommand {
                 interaction,
                 i18n.translate(
                     interaction.guildID as string,
-                    "command.profile.failure.notFound.title"
+                    "command.profile.failure.notFound.title",
                 ),
                 i18n.translate(
                     interaction.guildID as string,
-                    "misc.interaction.profile.noStats"
-                )
+                    "misc.interaction.profile.noStats",
+                ),
             );
 
             logger.info(
                 `${getDebugLogHeader(
-                    interaction
-                )} | Empty profile retrieved via interaction`
+                    interaction,
+                )} | Empty profile retrieved via interaction`,
             );
             return;
         }
@@ -524,14 +524,14 @@ export default class ProfileCommand implements BaseCommand {
 
             logger.info(
                 `${getDebugLogHeader(
-                    interaction
-                )} | Profile retrieved via interaction`
+                    interaction,
+                )} | Profile retrieved via interaction`,
             );
         } catch (err) {
             logger.error(
                 `${getDebugLogHeader(
-                    interaction
-                )} | Interaction acknowledge failed. err = ${err.stack}`
+                    interaction,
+                )} | Interaction acknowledge failed. err = ${err.stack}`,
             );
         }
     }

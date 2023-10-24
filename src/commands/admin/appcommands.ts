@@ -32,7 +32,7 @@ export default class AppCommandsCommand implements BaseCommand {
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const isProd = process.env.NODE_ENV === EnvType.PROD;
         const debugServer = State.client.guilds.get(
-            process.env.DEBUG_SERVER_ID as string
+            process.env.DEBUG_SERVER_ID as string,
         );
 
         const commandModificationScope = isProd ? "global" : "guild";
@@ -41,11 +41,11 @@ export default class AppCommandsCommand implements BaseCommand {
         const appCommandType = parsedMessage.components[0] as AppCommandsAction;
         if (appCommandType === AppCommandsAction.RELOAD) {
             logger.info(
-                `Creating ${commandModificationScope} application commands...`
+                `Creating ${commandModificationScope} application commands...`,
             );
         } else {
             logger.info(
-                `Deleting ${commandModificationScope} application commands`
+                `Deleting ${commandModificationScope} application commands`,
             );
         }
 

@@ -12,10 +12,10 @@ const logger = new IPCLogger("guildCreate");
  * @param guild - The Guild object
  */
 export default async function guildCreateHandler(
-    guild: Eris.Guild
+    guild: Eris.Guild,
 ): Promise<void> {
     logger.info(
-        `New server joined: ${guild.id} with ${guild.memberCount} users`
+        `New server joined: ${guild.id} with ${guild.memberCount} users`,
     );
 
     if (guild.preferredLocale === "ko") {
@@ -55,8 +55,8 @@ export default async function guildCreateHandler(
             footerText: `gid: ${
                 guild.id
             } | Joined at: ${joinDate.toLocaleDateString(
-                "en-US"
+                "en-US",
             )} ${joinDate.toLocaleTimeString("en-US")}`,
-        }
+        },
     );
 }

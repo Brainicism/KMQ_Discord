@@ -27,7 +27,7 @@ describe("command prechecks", () => {
     const messageContext = new MessageContext(
         "faketextchannelid",
         new KmqMember("fakeuserid"),
-        "fakeguildid"
+        "fakeguildid",
     );
 
     const mockGameSession = new GameSession(
@@ -37,7 +37,7 @@ describe("command prechecks", () => {
         "dummy",
         new KmqMember("dummy"),
         GameType.CLASSIC,
-        false
+        false,
     );
 
     describe("inSessionCommandPrecheck", () => {
@@ -48,7 +48,7 @@ describe("command prechecks", () => {
                         session: null,
                         messageContext,
                     }),
-                    false
+                    false,
                 );
             });
         });
@@ -60,7 +60,7 @@ describe("command prechecks", () => {
                 "1234",
                 "12345",
                 mockKmqMember,
-                true
+                true,
             );
 
             describe("user and bot are in the same vc", () => {
@@ -74,7 +74,7 @@ describe("command prechecks", () => {
                             session: listeningSession,
                             messageContext,
                         }),
-                        true
+                        true,
                     );
                 });
             });
@@ -90,7 +90,7 @@ describe("command prechecks", () => {
                             session: listeningSession,
                             messageContext,
                         }),
-                        false
+                        false,
                     );
                 });
             });
@@ -104,7 +104,7 @@ describe("command prechecks", () => {
                 "1234",
                 mockKmqMember,
                 GameType.ELIMINATION,
-                true
+                true,
             );
 
             const teamGameSession = new GameSession(
@@ -114,7 +114,7 @@ describe("command prechecks", () => {
                 "1234",
                 mockKmqMember,
                 GameType.TEAMS,
-                false
+                false,
             );
 
             const classicGameSession = new GameSession(
@@ -124,7 +124,7 @@ describe("command prechecks", () => {
                 "1234",
                 mockKmqMember,
                 GameType.CLASSIC,
-                true
+                true,
             );
 
             describe("in the same voice channel", () => {
@@ -142,7 +142,7 @@ describe("command prechecks", () => {
                                 session,
                                 messageContext,
                             }),
-                            true
+                            true,
                         );
                     }
                 });
@@ -165,7 +165,7 @@ describe("command prechecks", () => {
                                     session: eliminationGameSession,
                                     messageContext,
                                 }),
-                                false
+                                false,
                             );
 
                             assert.equal(
@@ -173,7 +173,7 @@ describe("command prechecks", () => {
                                     session: teamGameSession,
                                     messageContext,
                                 }),
-                                false
+                                false,
                             );
                         });
                     });
@@ -187,7 +187,7 @@ describe("command prechecks", () => {
                                     session: eliminationGameSession,
                                     messageContext,
                                 }),
-                                true
+                                true,
                             );
 
                             assert.equal(
@@ -195,7 +195,7 @@ describe("command prechecks", () => {
                                     session: teamGameSession,
                                     messageContext,
                                 }),
-                                true
+                                true,
                             );
                         });
                     });
@@ -208,7 +208,7 @@ describe("command prechecks", () => {
                                 session: classicGameSession,
                                 messageContext,
                             }),
-                            false
+                            false,
                         );
                     });
                 });
@@ -223,7 +223,7 @@ describe("command prechecks", () => {
             "1234",
             "1235",
             mockKmqMember,
-            false
+            false,
         );
 
         const gameSession = new GameSession(
@@ -233,7 +233,7 @@ describe("command prechecks", () => {
             "1235",
             mockKmqMember,
             GameType.CLASSIC,
-            true
+            true,
         );
 
         describe("session is null", () => {
@@ -243,7 +243,7 @@ describe("command prechecks", () => {
                         session: mockGameSession,
                         messageContext,
                     }),
-                    true
+                    true,
                 );
             });
         });
@@ -255,7 +255,7 @@ describe("command prechecks", () => {
                         session: listeningSession,
                         messageContext,
                     }),
-                    false
+                    false,
                 );
             });
         });
@@ -267,7 +267,7 @@ describe("command prechecks", () => {
                         session: gameSession,
                         messageContext,
                     }),
-                    true
+                    true,
                 );
             });
         });
@@ -282,7 +282,7 @@ describe("command prechecks", () => {
             debugServerId,
             mockKmqMember,
             GameType.CLASSIC,
-            false
+            false,
         );
 
         afterEach(() => {
@@ -301,7 +301,7 @@ describe("command prechecks", () => {
                             guildID: debugServerId,
                         },
                     }),
-                    true
+                    true,
                 );
             });
         });
@@ -314,7 +314,7 @@ describe("command prechecks", () => {
                         session: gameSession,
                         messageContext,
                     }),
-                    false
+                    false,
                 );
             });
         });
@@ -338,7 +338,7 @@ describe("command prechecks", () => {
                         session: mockGameSession,
                         messageContext,
                     }),
-                    false
+                    false,
                 );
             });
         });
@@ -360,7 +360,7 @@ describe("command prechecks", () => {
                         session: mockGameSession,
                         messageContext,
                     }),
-                    true
+                    true,
                 );
             });
         });
@@ -375,7 +375,7 @@ describe("command prechecks", () => {
             "12345",
             mockKmqMember,
             GameType.CLASSIC,
-            true
+            true,
         );
 
         afterEach(() => {
@@ -394,7 +394,7 @@ describe("command prechecks", () => {
                             textChannelID: debugChannelId,
                         },
                     }),
-                    true
+                    true,
                 );
             });
         });
@@ -408,7 +408,7 @@ describe("command prechecks", () => {
                         session: gameSession,
                         messageContext,
                     }),
-                    false
+                    false,
                 );
             });
         });
@@ -422,7 +422,7 @@ describe("command prechecks", () => {
             "12345",
             mockKmqMember,
             GameType.CLASSIC,
-            true
+            true,
         );
 
         describe("restart is scheduled", () => {
@@ -436,7 +436,7 @@ describe("command prechecks", () => {
                         messageContext,
                         session: gameSession,
                     }),
-                    false
+                    false,
                 );
             });
         });
@@ -452,7 +452,7 @@ describe("command prechecks", () => {
                         messageContext,
                         session: gameSession,
                     }),
-                    true
+                    true,
                 );
             });
         });
@@ -466,7 +466,7 @@ describe("command prechecks", () => {
             "12345",
             mockKmqMember,
             GameType.CLASSIC,
-            false
+            false,
         );
 
         describe("user is premium", () => {
@@ -480,7 +480,7 @@ describe("command prechecks", () => {
                         messageContext,
                         session: gameSession,
                     }),
-                    true
+                    true,
                 );
             });
         });
@@ -496,7 +496,7 @@ describe("command prechecks", () => {
                         messageContext,
                         session: gameSession,
                     }),
-                    false
+                    false,
                 );
             });
         });
@@ -511,7 +511,7 @@ describe("command prechecks", () => {
             "12345",
             mockKmqMember,
             GameType.CLASSIC,
-            false
+            false,
         );
 
         afterEach(() => {
@@ -529,7 +529,7 @@ describe("command prechecks", () => {
                         messageContext,
                         session: gameSession,
                     }),
-                    true
+                    true,
                 );
             });
         });
@@ -546,7 +546,7 @@ describe("command prechecks", () => {
                             guildID: debugServerId,
                         },
                     }),
-                    true
+                    true,
                 );
             });
         });
@@ -563,7 +563,7 @@ describe("command prechecks", () => {
                         session: gameSession,
                         messageContext,
                     }),
-                    false
+                    false,
                 );
             });
         });
@@ -585,7 +585,7 @@ describe("command prechecks", () => {
             GUILD_ID,
             mockKmqMember,
             GameType.CLASSIC,
-            false
+            false,
         );
 
         describe("spotify playlist set", () => {
@@ -597,7 +597,7 @@ describe("command prechecks", () => {
                         messageContext,
                         session,
                     }),
-                    false
+                    false,
                 );
             });
         });
@@ -611,7 +611,7 @@ describe("command prechecks", () => {
                         session,
                         messageContext,
                     }),
-                    true
+                    true,
                 );
             });
         });
@@ -628,7 +628,7 @@ describe("command prechecks", () => {
                 GUILD_ID,
                 mockKmqMember,
                 GameType.HIDDEN,
-                false
+                false,
             );
 
             describe("change to multiple choice during hidden game via default reset", () => {
@@ -644,7 +644,7 @@ describe("command prechecks", () => {
                                 message: "",
                             },
                         }),
-                        false
+                        false,
                     );
                 });
             });
@@ -662,7 +662,7 @@ describe("command prechecks", () => {
                                 message: "",
                             },
                         }),
-                        false
+                        false,
                     );
                 });
             });
@@ -680,7 +680,7 @@ describe("command prechecks", () => {
                                 message: "",
                             },
                         }),
-                        true
+                        true,
                     );
                 });
             });
@@ -698,7 +698,7 @@ describe("command prechecks", () => {
                                 message: "",
                             },
                         }),
-                        true
+                        true,
                     );
                 });
             });
@@ -712,7 +712,7 @@ describe("command prechecks", () => {
                 GUILD_ID,
                 mockKmqMember,
                 GameType.CLASSIC,
-                false
+                false,
             );
 
             describe("change to multiple choice via default reset", () => {
@@ -728,7 +728,7 @@ describe("command prechecks", () => {
                                 message: "",
                             },
                         }),
-                        true
+                        true,
                     );
                 });
             });
@@ -746,7 +746,7 @@ describe("command prechecks", () => {
                                 message: "",
                             },
                         }),
-                        true
+                        true,
                     );
                 });
             });
@@ -764,7 +764,7 @@ describe("command prechecks", () => {
                                 message: "",
                             },
                         }),
-                        true
+                        true,
                     );
                 });
             });
@@ -782,7 +782,7 @@ describe("command prechecks", () => {
                                 message: "",
                             },
                         }),
-                        true
+                        true,
                     );
                 });
             });
@@ -800,7 +800,7 @@ describe("command prechecks", () => {
                 GUILD_ID,
                 mockKmqMember,
                 GameType.HIDDEN,
-                false
+                false,
             );
 
             describe("change timer to another value", () => {
@@ -816,7 +816,7 @@ describe("command prechecks", () => {
                                 message: "",
                             },
                         }),
-                        true
+                        true,
                     );
                 });
             });
@@ -834,7 +834,7 @@ describe("command prechecks", () => {
                                 message: "",
                             },
                         }),
-                        false
+                        false,
                     );
                 });
             });
@@ -852,7 +852,7 @@ describe("command prechecks", () => {
                                 message: "",
                             },
                         }),
-                        true
+                        true,
                     );
                 });
             });
@@ -866,7 +866,7 @@ describe("command prechecks", () => {
                 GUILD_ID,
                 mockKmqMember,
                 GameType.TEAMS,
-                false
+                false,
             );
 
             describe("change timer to another value", () => {
@@ -882,7 +882,7 @@ describe("command prechecks", () => {
                                 message: "",
                             },
                         }),
-                        true
+                        true,
                     );
                 });
             });
@@ -900,7 +900,7 @@ describe("command prechecks", () => {
                                 message: "",
                             },
                         }),
-                        true
+                        true,
                     );
                 });
             });
@@ -918,7 +918,7 @@ describe("command prechecks", () => {
                                 message: "",
                             },
                         }),
-                        true
+                        true,
                     );
                 });
             });

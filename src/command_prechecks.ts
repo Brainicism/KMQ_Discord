@@ -32,12 +32,12 @@ export default class CommandPrechecks {
                     interaction,
                     i18n.translate(
                         messageContext.guildID,
-                        "misc.failure.game.noneInProgress.title"
+                        "misc.failure.game.noneInProgress.title",
                     ),
                     i18n.translate(
                         messageContext.guildID,
-                        "misc.failure.game.noneInProgress.description"
-                    )
+                        "misc.failure.game.noneInProgress.description",
+                    ),
                 );
             }
 
@@ -46,7 +46,7 @@ export default class CommandPrechecks {
 
         const userAndBotInSameChannel = areUserAndBotInSameVoiceChannel(
             messageContext.author.id,
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         if (session.isListeningSession() && interaction) {
@@ -55,12 +55,12 @@ export default class CommandPrechecks {
                     interaction,
                     i18n.translate(
                         messageContext.guildID,
-                        "misc.preCheck.title"
+                        "misc.preCheck.title",
                     ),
                     i18n.translate(
                         messageContext.guildID,
-                        errorMessage ?? "misc.preCheck.differentVC"
-                    )
+                        errorMessage ?? "misc.preCheck.differentVC",
+                    ),
                 );
 
                 return false;
@@ -84,18 +84,18 @@ export default class CommandPrechecks {
 
             logger.warn(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | User and bot are not in the same voice connection`
+                    messageContext,
+                )} | User and bot are not in the same voice connection`,
             );
 
             const embedPayload: EmbedPayload = {
                 title: i18n.translate(
                     messageContext.guildID,
-                    "misc.preCheck.title"
+                    "misc.preCheck.title",
                 ),
                 description: i18n.translate(
                     messageContext.guildID,
-                    errorMessage ?? "misc.preCheck.differentVC"
+                    errorMessage ?? "misc.preCheck.differentVC",
                 ),
             };
 
@@ -113,11 +113,11 @@ export default class CommandPrechecks {
             const embedPayload: EmbedPayload = {
                 title: i18n.translate(
                     messageContext.guildID,
-                    "misc.preCheck.title"
+                    "misc.preCheck.title",
                 ),
                 description: i18n.translate(
                     messageContext.guildID,
-                    "misc.preCheck.notListeningSession"
+                    "misc.preCheck.notListeningSession",
                 ),
             };
 
@@ -135,11 +135,11 @@ export default class CommandPrechecks {
             const embedPayload: EmbedPayload = {
                 title: i18n.translate(
                     messageContext.guildID,
-                    "misc.preCheck.title"
+                    "misc.preCheck.title",
                 ),
                 description: i18n.translate(
                     messageContext.guildID,
-                    "misc.preCheck.notGameSession"
+                    "misc.preCheck.notGameSession",
                 ),
             };
 
@@ -159,18 +159,18 @@ export default class CommandPrechecks {
         if (!isDebugServer) {
             logger.warn(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | User attempted to use a command only usable in the debug server`
+                    messageContext,
+                )} | User attempted to use a command only usable in the debug server`,
             );
 
             const embedPayload: EmbedPayload = {
                 title: i18n.translate(
                     messageContext.guildID,
-                    "misc.preCheck.title"
+                    "misc.preCheck.title",
                 ),
                 description: i18n.translate(
                     messageContext.guildID,
-                    errorMessage ?? "misc.preCheck.debugServer"
+                    errorMessage ?? "misc.preCheck.debugServer",
                 ),
             };
 
@@ -188,11 +188,11 @@ export default class CommandPrechecks {
             const embedPayload: EmbedPayload = {
                 title: i18n.translate(
                     messageContext.guildID,
-                    "misc.failure.maintenanceMode.title"
+                    "misc.failure.maintenanceMode.title",
                 ),
                 description: i18n.translate(
                     messageContext.guildID,
-                    "misc.failure.maintenanceMode.description"
+                    "misc.failure.maintenanceMode.description",
                 ),
             };
 
@@ -212,18 +212,18 @@ export default class CommandPrechecks {
         if (!isDebugChannel) {
             logger.warn(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | User attempted to use a command only usable in the debug channel`
+                    messageContext,
+                )} | User attempted to use a command only usable in the debug channel`,
             );
 
             const embedPayload: EmbedPayload = {
                 title: i18n.translate(
                     messageContext.guildID,
-                    "misc.preCheck.title"
+                    "misc.preCheck.title",
                 ),
                 description: i18n.translate(
                     messageContext.guildID,
-                    errorMessage ?? "misc.preCheck.debugChannel"
+                    errorMessage ?? "misc.preCheck.debugChannel",
                 ),
             };
 
@@ -236,7 +236,7 @@ export default class CommandPrechecks {
     }
 
     static async competitionPrecheck(
-        precheckArgs: PrecheckArgs
+        precheckArgs: PrecheckArgs,
     ): Promise<boolean> {
         const { messageContext, session, errorMessage, interaction } =
             precheckArgs;
@@ -260,18 +260,18 @@ export default class CommandPrechecks {
         if (!isModerator) {
             logger.warn(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | User attempted to use a command only available to moderators in a competition`
+                    messageContext,
+                )} | User attempted to use a command only available to moderators in a competition`,
             );
 
             const embedPayload: EmbedPayload = {
                 title: i18n.translate(
                     messageContext.guildID,
-                    "misc.preCheck.title"
+                    "misc.preCheck.title",
                 ),
                 description: i18n.translate(
                     messageContext.guildID,
-                    errorMessage ?? "misc.preCheck.competition"
+                    errorMessage ?? "misc.preCheck.competition",
                 ),
             };
 
@@ -284,7 +284,7 @@ export default class CommandPrechecks {
     }
 
     static async notRestartingPrecheck(
-        precheckArgs: PrecheckArgs
+        precheckArgs: PrecheckArgs,
     ): Promise<boolean> {
         const timeUntilRestart = getTimeUntilRestart();
         if (timeUntilRestart !== null) {
@@ -292,12 +292,12 @@ export default class CommandPrechecks {
             const embedPayload: EmbedPayload = {
                 title: i18n.translate(
                     messageContext.guildID,
-                    "command.play.failure.botRestarting.title"
+                    "command.play.failure.botRestarting.title",
                 ),
                 description: i18n.translate(
                     messageContext.guildID,
                     "command.play.failure.botRestarting.description",
-                    { timeUntilRestart: `\`${timeUntilRestart}\`` }
+                    { timeUntilRestart: `\`${timeUntilRestart}\`` },
                 ),
             };
 
@@ -319,12 +319,12 @@ export default class CommandPrechecks {
         const embedPayload: EmbedPayload = {
             title: i18n.translate(
                 messageContext.guildID,
-                "misc.preCheck.title"
+                "misc.preCheck.title",
             ),
             description: i18n.translate(
                 messageContext.guildID,
                 "misc.preCheck.notPremium",
-                { premium: "`/premium`" }
+                { premium: "`/premium`" },
             ),
         };
 
@@ -334,7 +334,7 @@ export default class CommandPrechecks {
     }
 
     static async premiumOrDebugServerPrecheck(
-        precheckArgs: PrecheckArgs
+        precheckArgs: PrecheckArgs,
     ): Promise<boolean> {
         const { messageContext, interaction } = precheckArgs;
         const premium = await isUserPremium(messageContext.author.id);
@@ -347,19 +347,19 @@ export default class CommandPrechecks {
 
         logger.warn(
             `${getDebugLogHeader(
-                messageContext
-            )} | User attempted to use a command only usable in the debug server/for premium users`
+                messageContext,
+            )} | User attempted to use a command only usable in the debug server/for premium users`,
         );
 
         const embedPayload: EmbedPayload = {
             title: i18n.translate(
                 messageContext.guildID,
-                "misc.preCheck.title"
+                "misc.preCheck.title",
             ),
             description: i18n.translate(
                 messageContext.guildID,
                 "misc.preCheck.premiumOrDebugServer",
-                { premium: "`/premium`" }
+                { premium: "`/premium`" },
             ),
         };
 
@@ -369,22 +369,22 @@ export default class CommandPrechecks {
     }
 
     static async notSpotifyPrecheck(
-        precheckArgs: PrecheckArgs
+        precheckArgs: PrecheckArgs,
     ): Promise<boolean> {
         const { messageContext, interaction } = precheckArgs;
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         if (guildPreference.isSpotifyPlaylist()) {
             const embedPayload: EmbedPayload = {
                 title: i18n.translate(
                     messageContext.guildID,
-                    "misc.preCheck.title"
+                    "misc.preCheck.title",
                 ),
                 description: i18n.translate(
                     messageContext.guildID,
-                    "misc.preCheck.notSpotify"
+                    "misc.preCheck.notSpotify",
                 ),
             };
 
@@ -411,7 +411,7 @@ export default class CommandPrechecks {
 
             if (
                 [AnswerType.TYPING, AnswerType.TYPING_TYPOS].includes(
-                    precheckArgs.parsedMessage!.components[0] as AnswerType
+                    precheckArgs.parsedMessage!.components[0] as AnswerType,
                 )
             ) {
                 // Allow /answer change to different typing modes during hidden
@@ -423,14 +423,14 @@ export default class CommandPrechecks {
             }
 
             const { interactionName, interactionOptions } = getInteractionValue(
-                precheckArgs.interaction
+                precheckArgs.interaction,
             );
 
             const action = interactionName as OptionAction;
             if (
                 action === OptionAction.SET &&
                 [AnswerType.TYPING, AnswerType.TYPING_TYPOS].includes(
-                    interactionOptions["answer"] as AnswerType
+                    interactionOptions["answer"] as AnswerType,
                 )
             ) {
                 return true;
@@ -440,18 +440,18 @@ export default class CommandPrechecks {
         const embedPayload: EmbedPayload = {
             title: i18n.translate(
                 precheckArgs.messageContext.guildID,
-                "misc.preCheck.title"
+                "misc.preCheck.title",
             ),
             description: i18n.translate(
                 precheckArgs.messageContext.guildID,
-                "misc.preCheck.notHidden"
+                "misc.preCheck.notHidden",
             ),
         };
 
         sendErrorMessage(
             precheckArgs.messageContext,
             embedPayload,
-            precheckArgs.interaction
+            precheckArgs.interaction,
         );
         return false;
     }
@@ -480,7 +480,7 @@ export default class CommandPrechecks {
             }
 
             const { interactionName } = getInteractionValue(
-                precheckArgs.interaction
+                precheckArgs.interaction,
             );
 
             const action = interactionName as OptionAction;
@@ -492,18 +492,18 @@ export default class CommandPrechecks {
         const embedPayload: EmbedPayload = {
             title: i18n.translate(
                 precheckArgs.messageContext.guildID,
-                "misc.preCheck.title"
+                "misc.preCheck.title",
             ),
             description: i18n.translate(
                 precheckArgs.messageContext.guildID,
-                "misc.preCheck.notHidden"
+                "misc.preCheck.notHidden",
             ),
         };
 
         sendErrorMessage(
             precheckArgs.messageContext,
             embedPayload,
-            precheckArgs.interaction
+            precheckArgs.interaction,
         );
         return false;
     }

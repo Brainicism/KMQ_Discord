@@ -46,7 +46,7 @@ export default class GoalCommand implements BaseCommand {
         description: i18n.translate(guildID, "command.goal.help.description"),
         usage: `/goal set\nscore:[${i18n.translate(
             guildID,
-            "command.goal.help.usage.points"
+            "command.goal.help.usage.points",
         )}]\n\n/goal reset`,
         examples: [
             {
@@ -54,14 +54,14 @@ export default class GoalCommand implements BaseCommand {
                 explanation: i18n.translate(
                     guildID,
                     "command.goal.help.example.set",
-                    { goal: String(30) }
+                    { goal: String(30) },
                 ),
             },
             {
                 example: "`/goal reset`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.goal.help.example.reset"
+                    "command.goal.help.example.reset",
                 ),
             },
         ],
@@ -78,7 +78,7 @@ export default class GoalCommand implements BaseCommand {
                     name: OptionAction.SET,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.goal.help.interaction.description"
+                        "command.goal.help.interaction.description",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -87,10 +87,10 @@ export default class GoalCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.goal.help.interaction.description"
+                                    "command.goal.help.interaction.description",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -100,7 +100,7 @@ export default class GoalCommand implements BaseCommand {
                             name: "score",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.goal.help.interaction.score"
+                                "command.goal.help.interaction.score",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -109,10 +109,10 @@ export default class GoalCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.goal.help.interaction.score"
+                                            "command.goal.help.interaction.score",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -127,7 +127,7 @@ export default class GoalCommand implements BaseCommand {
                     description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
-                        { optionName: "goal" }
+                        { optionName: "goal" },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -137,10 +137,10 @@ export default class GoalCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "misc.interaction.resetOption",
-                                    { optionName: "goal" }
+                                    { optionName: "goal" },
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -162,21 +162,21 @@ export default class GoalCommand implements BaseCommand {
         await GoalCommand.updateOption(
             MessageContext.fromMessage(message),
             userGoal,
-            undefined
+            undefined,
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         userGoal: number | null,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         const gameSession = Session.getSession(
-            messageContext.guildID
+            messageContext.guildID,
         ) as GameSession;
 
         if (gameSession) {
@@ -187,8 +187,8 @@ export default class GoalCommand implements BaseCommand {
             ) {
                 logger.info(
                     `${getDebugLogHeader(
-                        messageContext
-                    )} | Goal update ignored.`
+                        messageContext,
+                    )} | Goal update ignored.`,
                 );
 
                 sendErrorMessage(
@@ -196,14 +196,14 @@ export default class GoalCommand implements BaseCommand {
                     {
                         title: i18n.translate(
                             messageContext.guildID,
-                            "command.goal.failure.goalExceeded.title"
+                            "command.goal.failure.goalExceeded.title",
                         ),
                         description: i18n.translate(
                             messageContext.guildID,
-                            "command.goal.failure.goalExceeded.description"
+                            "command.goal.failure.goalExceeded.description",
                         ),
                     },
-                    interaction
+                    interaction,
                 );
                 return;
             }
@@ -211,10 +211,10 @@ export default class GoalCommand implements BaseCommand {
             if (gameSession.gameType === GameType.ELIMINATION) {
                 logger.warn(
                     `${getDebugLogHeader(
-                        messageContext
+                        messageContext,
                     )} | Game option conflict between goal and ${
                         gameSession.gameType
-                    } gameType.`
+                    } gameType.`,
                 );
 
                 sendErrorMessage(
@@ -222,7 +222,7 @@ export default class GoalCommand implements BaseCommand {
                     {
                         title: i18n.translate(
                             messageContext.guildID,
-                            "misc.failure.gameOptionConflict.title"
+                            "misc.failure.gameOptionConflict.title",
                         ),
                         description: i18n.translate(
                             messageContext.guildID,
@@ -232,10 +232,10 @@ export default class GoalCommand implements BaseCommand {
                                 goal: "`goal`",
                                 classic: `\`${GameType.CLASSIC}\``,
                                 teams: `\`${GameType.TEAMS}\``,
-                            }
+                            },
                         ),
                     },
-                    interaction
+                    interaction,
                 );
 
                 return;
@@ -246,14 +246,14 @@ export default class GoalCommand implements BaseCommand {
         if (reset) {
             await guildPreference.reset(GameOption.GOAL);
             logger.info(
-                `${getDebugLogHeader(messageContext)} | Goal disabled.`
+                `${getDebugLogHeader(messageContext)} | Goal disabled.`,
             );
         } else {
             await guildPreference.setGoal(userGoal);
             logger.info(
                 `${getDebugLogHeader(messageContext)} | Goal set to ${
                     guildPreference.gameOptions.goal
-                }`
+                }`,
             );
         }
 
@@ -265,7 +265,7 @@ export default class GoalCommand implements BaseCommand {
             false,
             undefined,
             undefined,
-            interaction
+            interaction,
         );
     }
 
@@ -275,7 +275,7 @@ export default class GoalCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);

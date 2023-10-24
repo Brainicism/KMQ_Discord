@@ -47,7 +47,7 @@ describe("game session", () => {
             State.client.user = sandbox.createStubInstance(Eris.ExtendedUser);
             State.client.user.id = "5";
             State.client.voiceConnections = sandbox.createStubInstance(
-                Eris.VoiceConnectionManager
+                Eris.VoiceConnectionManager,
             );
 
             sandbox
@@ -65,7 +65,7 @@ describe("game session", () => {
                 "123",
                 new KmqMember("123"),
                 GameType.CLASSIC,
-                true
+                true,
             );
 
             sandbox.stub(Session, "getSession").callsFake(() => gameSession);
@@ -76,7 +76,7 @@ describe("game session", () => {
             playSongSpy = sandbox.stub(gameSession, <any>"playSong");
             ensureVoiceConnectionSpy = sandbox.spy(
                 game_utils,
-                "ensureVoiceConnection"
+                "ensureVoiceConnection",
             );
 
             endSessionSpy = sandbox.spy(gameSession, "endSession");
@@ -93,7 +93,7 @@ describe("game session", () => {
                 voiceChannelStub.voiceMembers.add({ id: "1" } as any);
 
                 await gameSession.startRound(
-                    new MessageContext("id", null, "guild_id")
+                    new MessageContext("id", null, "guild_id"),
                 );
                 gameSession.connection = voiceConnection;
                 assert.ok(prepareRoundSpy.called);
@@ -102,7 +102,7 @@ describe("game session", () => {
                 assert.ok(endSessionSpy.notCalled);
                 assert.ok(endRoundStub.notCalled);
                 assert.ok(
-                    gameSession.songSelector.getSongs().countBeforeLimit > 0
+                    gameSession.songSelector.getSongs().countBeforeLimit > 0,
                 );
                 assert(gameSession.round);
 
@@ -112,7 +112,7 @@ describe("game session", () => {
                     "",
                     gameStarter,
                     "123",
-                    ""
+                    "",
                 );
 
                 // incorrect guesses
@@ -120,7 +120,7 @@ describe("game session", () => {
                     await gameSession.guessSong(
                         messageContext,
                         `badguess${i}`,
-                        Date.now()
+                        Date.now(),
                     );
                     assert.ok(endRoundStub.notCalled);
                 }
@@ -129,20 +129,20 @@ describe("game session", () => {
                 await gameSession.guessSong(
                     messageContext,
                     correctGuess,
-                    Date.now()
+                    Date.now(),
                 );
 
                 assert.ok(
                     endRoundStub.calledWith(messageContext, {
                         correct: true,
                         correctGuessers: gameSession.round.correctGuessers,
-                    })
+                    }),
                 );
 
                 // end session
                 const sendEndGameMessageStub = sandbox.stub(
                     gameSession,
-                    "sendEndGameMessage"
+                    "sendEndGameMessage",
                 );
 
                 await gameSession.endSession("Initiated by test");

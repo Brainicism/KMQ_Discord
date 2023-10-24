@@ -9,7 +9,7 @@ import type { BinaryOperationNode } from "kysely";
 
 export default class EmptyWhereInTransformer extends OperationNodeTransformer {
     protected transformBinaryOperation(
-        node: BinaryOperationNode
+        node: BinaryOperationNode,
     ): BinaryOperationNode {
         const isWhereInOperator =
             OperatorNode.is(node.operator) &&
@@ -27,7 +27,7 @@ export default class EmptyWhereInTransformer extends OperationNodeTransformer {
                     leftOperand: ValueNode.createImmediate("0"),
                     operator: OperatorNode.create("="),
                     rightOperand: ValueNode.createImmediate(
-                        node.operator.operator === "in" ? "1" : "0"
+                        node.operator.operator === "in" ? "1" : "0",
                     ),
                 };
             }

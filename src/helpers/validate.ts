@@ -22,23 +22,23 @@ export async function sendValidationErrorMessage(
     warning: string,
     arg: string | Array<string>,
     usage?: string,
-    interaction?: Eris.CommandInteraction
+    interaction?: Eris.CommandInteraction,
 ): Promise<void> {
     await sendErrorMessage(
         messageContext,
         {
             title: i18n.translate(
                 messageContext.guildID,
-                "misc.failure.validation.title"
+                "misc.failure.validation.title",
             ),
             description: warning,
             footerText: usage,
         },
-        interaction
+        interaction,
     );
 
     logger.warn(
-        `${getDebugLogHeader(messageContext)} | ${warning}. val = ${arg}`
+        `${getDebugLogHeader(messageContext)} | ${warning}. val = ${arg}`,
     );
 }
 
@@ -46,7 +46,7 @@ export default (
     message: GuildTextableMessage,
     parsedMessage: ParsedMessage,
     validations: CommandValidations | null,
-    usage?: string
+    usage?: string,
 ): boolean => {
     if (!validations) return true;
     const args = parsedMessage.components;
@@ -63,10 +63,10 @@ export default (
                 {
                     help: "/help",
                     command: parsedMessage.action,
-                }
+                },
             ),
             args,
-            usage
+            usage,
         );
         return false;
     }
@@ -84,10 +84,10 @@ export default (
                         i18n.translate(
                             message.guildID,
                             "misc.failure.validation.number.notNumber",
-                            { argument: `\`${validation.name}\`` }
+                            { argument: `\`${validation.name}\`` },
                         ),
                         arg,
-                        usage
+                        usage,
                     );
                     return false;
                 }
@@ -106,10 +106,10 @@ export default (
                             {
                                 min: `\`${validation.minValue}\``,
                                 argument: `\`${validation.name}\``,
-                            }
+                            },
                         ),
                         arg,
-                        usage
+                        usage,
                     );
                     return false;
                 }
@@ -126,10 +126,10 @@ export default (
                             {
                                 max: `\`${validation.maxValue}\``,
                                 argument: `\`${validation.name}\``,
-                            }
+                            },
                         ),
                         arg,
-                        usage
+                        usage,
                     );
                     return false;
                 }
@@ -145,10 +145,10 @@ export default (
                         i18n.translate(
                             message.guildID,
                             "misc.failure.validation.boolean.notBoolean",
-                            { argument: `\`${validation.name}\`` }
+                            { argument: `\`${validation.name}\`` },
                         ),
                         arg,
-                        usage
+                        usage,
                     );
                     return false;
                 }
@@ -169,10 +169,10 @@ export default (
                                 {
                                     argument: `\`${validation.name}\``,
                                     validValues: arrayToString(enums),
-                                }
+                                },
                             ),
                             arg,
-                            usage
+                            usage,
                         );
                         return false;
                     }
@@ -189,10 +189,10 @@ export default (
                         i18n.translate(
                             message.guildID,
                             "misc.failure.validation.char.notChar",
-                            { argument: `\`${validation.name}\`` }
+                            { argument: `\`${validation.name}\`` },
                         ),
                         arg,
-                        usage
+                        usage,
                     );
                     return false;
                 }

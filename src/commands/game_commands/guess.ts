@@ -39,7 +39,7 @@ export default class GuessCommand implements BaseCommand {
                 explanation: i18n.translate(
                     guildID,
                     "command.guess.help.example.song",
-                    { song: "madness" }
+                    { song: "madness" },
                 ),
             },
         ],
@@ -56,12 +56,12 @@ export default class GuessCommand implements BaseCommand {
                     name: "name",
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.guess.interaction.name"
+                        "command.guess.interaction.name",
                     ),
                     description_localizations: {
                         [LocaleType.KO]: i18n.translate(
                             LocaleType.KO,
-                            "command.guess.interaction.name"
+                            "command.guess.interaction.name",
                         ),
                     },
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
@@ -76,7 +76,7 @@ export default class GuessCommand implements BaseCommand {
     call = async ({ message }: CommandArgs): Promise<void> => {
         logger.warn("Text-based command not supported for guess");
         await sendDeprecatedTextCommandMessage(
-            MessageContext.fromMessage(message)
+            MessageContext.fromMessage(message),
         );
     };
 
@@ -86,7 +86,7 @@ export default class GuessCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const interactionData = getInteractionValue(interaction);
         const session = Session.getSession(interaction.guildID as string);
@@ -95,12 +95,12 @@ export default class GuessCommand implements BaseCommand {
                 interaction,
                 i18n.translate(
                     messageContext.guildID,
-                    "misc.failure.game.noneInProgress.title"
+                    "misc.failure.game.noneInProgress.title",
                 ),
                 i18n.translate(
                     messageContext.guildID,
-                    "misc.failure.game.noneInProgress.description"
-                )
+                    "misc.failure.game.noneInProgress.description",
+                ),
             );
         }
 
@@ -110,12 +110,12 @@ export default class GuessCommand implements BaseCommand {
                     interaction,
                     i18n.translate(
                         messageContext.guildID,
-                        "command.guess.interaction.failure.notHidden.title"
+                        "command.guess.interaction.failure.notHidden.title",
                     ),
                     i18n.translate(
                         messageContext.guildID,
-                        "command.guess.interaction.failure.notHidden.description"
-                    )
+                        "command.guess.interaction.failure.notHidden.description",
+                    ),
                 );
                 return;
             }
@@ -124,22 +124,22 @@ export default class GuessCommand implements BaseCommand {
                 interaction,
                 i18n.translate(
                     messageContext.guildID,
-                    "command.guess.interaction.guessReceived.title"
+                    "command.guess.interaction.guessReceived.title",
                 ),
                 i18n.translate(
                     messageContext.guildID,
                     "command.guess.interaction.guessReceived.description",
                     {
                         guess: `\`\`${interactionData.interactionOptions["name"]}\`\``,
-                    }
+                    },
                 ),
-                true
+                true,
             );
 
             await session.guessSong(
                 messageContext,
                 interactionData.interactionOptions["name"],
-                interaction.createdAt
+                interaction.createdAt,
             );
         }
     }

@@ -31,7 +31,7 @@ before(async function () {
     await sql`CREATE DATABASE kpop_videos_test;`.execute(db.agnostic);
 
     logger.info(
-        "Re-creating KMQ test database from cached export. Run 'regenerate-test-db-dump' if schema has been updated since."
+        "Re-creating KMQ test database from cached export. Run 'regenerate-test-db-dump' if schema has been updated since.",
     );
 
     importCachedDump("kmq_test");
@@ -45,61 +45,61 @@ before(async function () {
 
     logger.info("Importing Daisuki seed file");
     cp.execSync(
-        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_test < ${dbSeedFilePath}`
+        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_test < ${dbSeedFilePath}`,
     );
 
     // simulate cached song duration table, so that available_songs table can be created
     await sql`INSERT IGNORE INTO kmq_test.cached_song_duration SELECT vlink, 1 FROM kpop_videos_test.app_kpop;`.execute(
-        db.agnostic
+        db.agnostic,
     );
 
     // create dedup group name procedure
     const originalDedupGroupNamesSqlPath = path.join(
         __dirname,
-        "../../sql/procedures/deduplicate_app_kpop_group_names.sql"
+        "../../sql/procedures/deduplicate_app_kpop_group_names.sql",
     );
 
     const testDedupGroupNamesSqlPath = path.join(
         __dirname,
-        "../../sql/deduplicate_app_kpop_group_names.validation.sql"
+        "../../sql/deduplicate_app_kpop_group_names.validation.sql",
     );
 
     cp.execSync(
-        `sed 's/kpop_videos/kpop_videos_test/g;s/kmq/kmq_test/g' ${originalDedupGroupNamesSqlPath} > ${testDedupGroupNamesSqlPath}`
+        `sed 's/kpop_videos/kpop_videos_test/g;s/kmq/kmq_test/g' ${originalDedupGroupNamesSqlPath} > ${testDedupGroupNamesSqlPath}`,
     );
 
     cp.execSync(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test < ${testDedupGroupNamesSqlPath}`,
-        { stdio: "inherit" }
+        { stdio: "inherit" },
     );
 
     cp.execSync(
-        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test -e "CALL DeduplicateGroupNames()"`
+        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test -e "CALL DeduplicateGroupNames()"`,
     );
 
     // create kmq data generation procedure
     const originalCreateKmqTablesProcedureSqlPath = path.join(
         __dirname,
-        "../../sql/procedures/create_kmq_data_tables_procedure.sql"
+        "../../sql/procedures/create_kmq_data_tables_procedure.sql",
     );
 
     const testCreateKmqTablesProcedureSqlPath = path.join(
         __dirname,
-        "../../sql/create_kmq_data_tables_procedure.test.sql"
+        "../../sql/create_kmq_data_tables_procedure.test.sql",
     );
 
     cp.execSync(
-        `sed 's/kpop_videos/kpop_videos_test/g;s/kmq/kmq_test/g' ${originalCreateKmqTablesProcedureSqlPath} > ${testCreateKmqTablesProcedureSqlPath}`
+        `sed 's/kpop_videos/kpop_videos_test/g;s/kmq/kmq_test/g' ${originalCreateKmqTablesProcedureSqlPath} > ${testCreateKmqTablesProcedureSqlPath}`,
     );
 
     logger.info("Creating KMQ data tables");
     cp.execSync(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test < ${testCreateKmqTablesProcedureSqlPath}`,
-        { stdio: "inherit" }
+        { stdio: "inherit" },
     );
 
     cp.execSync(
-        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test -e "CALL CreateKmqDataTables(1)"`
+        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test -e "CALL CreateKmqDataTables(1)"`,
     );
 
     await db.destroy();

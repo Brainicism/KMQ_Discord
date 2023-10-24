@@ -52,7 +52,7 @@ export default class BotWorker extends BaseClusterWorker {
         logger.debug(`Received cluster command: ${commandName}`);
         if (commandName.startsWith("eval")) {
             const evalString = commandName.substring(
-                commandName.indexOf("|") + 1
+                commandName.indexOf("|") + 1,
             );
 
             const evalResult = await EvalCommand.eval(evalString);
@@ -74,8 +74,8 @@ export default class BotWorker extends BaseClusterWorker {
 
             logger.info(
                 `Received restart notification: ${JSON.stringify(
-                    State.restartNotification
-                )}`
+                    State.restartNotification,
+                )}`,
             );
 
             return null;
@@ -97,22 +97,22 @@ export default class BotWorker extends BaseClusterWorker {
                             .getPlayers()
                             .filter((x) => x.inVC)
                             .map((x) => x.id).length,
-                    0
+                    0,
                 );
 
                 const activeGameSessions = Object.keys(
-                    State.gameSessions
+                    State.gameSessions,
                 ).length;
 
                 const activeListeningSessions = Object.keys(
-                    State.listeningSessions
+                    State.listeningSessions,
                 ).length;
 
                 const activeListeners = Object.values(
-                    State.listeningSessions
+                    State.listeningSessions,
                 ).reduce(
                     (total, curr) => total + curr.getVoiceMembers().length,
-                    0
+                    0,
                 );
 
                 return {
@@ -199,7 +199,7 @@ export default class BotWorker extends BaseClusterWorker {
                 const session = Session.getSession(guildID);
                 logger.debug(`gid: ${guildID} | Forcing session end`);
                 await session.endSession("KMQ shutting down");
-            }
+            },
         );
 
         await Promise.allSettled(endSessionPromises);
@@ -221,14 +221,14 @@ export default class BotWorker extends BaseClusterWorker {
             JSON.parse(
                 fs
                     .readFileSync(path.resolve(__dirname, "../package.json"))
-                    .toString()
+                    .toString(),
             )["version"]
         }`;
 
         this.ipc.register("softRestartPending", (timeRemaining) => {
             const restartDate = new Date();
             restartDate.setMinutes(
-                restartDate.getMinutes() + timeRemaining / (1000 * 60)
+                restartDate.getMinutes() + timeRemaining / (1000 * 60),
             );
 
             State.restartNotification = {
@@ -237,13 +237,13 @@ export default class BotWorker extends BaseClusterWorker {
 
             logger.info(
                 `Soft restart ready to proceed: ${JSON.stringify(
-                    State.restartNotification
-                )}`
+                    State.restartNotification,
+                )}`,
             );
         });
 
         logger.info(
-            `Started worker ID: ${this.workerID} on cluster ID: ${this.clusterID}`
+            `Started worker ID: ${this.workerID} on cluster ID: ${this.clusterID}`,
         );
 
         logger.info("Registering cron tasks...");
@@ -261,7 +261,7 @@ export default class BotWorker extends BaseClusterWorker {
 
         if (
             [EnvType.CI, EnvType.DRY_RUN].includes(
-                process.env.NODE_ENV as EnvType
+                process.env.NODE_ENV as EnvType,
             )
         ) {
             logger.info("Dry run finished successfully.");
@@ -277,7 +277,7 @@ export default class BotWorker extends BaseClusterWorker {
         logger.info(
             `Logged in as '${State.client.user.username}'! in '${
                 process.env.NODE_ENV
-            }' mode (${durationSeconds(State.processStartTime, Date.now())}s)`
+            }' mode (${durationSeconds(State.processStartTime, Date.now())}s)`,
         );
 
         logger.info("Reloading app commands");

@@ -41,7 +41,7 @@ export async function sendBeginListeningSessionMessage(
     voiceChannelName: string,
     messageContext: MessageContext,
     guildPreference: GuildPreference,
-    interaction?: Eris.CommandInteraction
+    interaction?: Eris.CommandInteraction,
 ): Promise<void> {
     const startTitle = i18n.translate(
         messageContext.guildID,
@@ -49,7 +49,7 @@ export async function sendBeginListeningSessionMessage(
         {
             textChannelName,
             voiceChannelName,
-        }
+        },
     );
 
     const gameInfoMessage = await getGameInfoMessage(messageContext.guildID);
@@ -69,7 +69,7 @@ export async function sendBeginListeningSessionMessage(
         guildPreference,
         [],
         false,
-        false
+        false,
     );
 
     const additionalPayloads = [];
@@ -90,7 +90,7 @@ export async function sendBeginListeningSessionMessage(
         false,
         undefined,
         additionalPayloads,
-        interaction
+        interaction,
     );
 }
 
@@ -120,7 +120,7 @@ export default class ListenCommand implements BaseCommand {
                 example: "`/listen`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.listen.help.example"
+                    "command.listen.help.example",
                 ),
             },
         ],
@@ -140,15 +140,15 @@ export default class ListenCommand implements BaseCommand {
 
     static startListening = async (
         messageContext: MessageContext,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> => {
         const guildID = messageContext.guildID;
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         const textChannel = State.client.getChannel(
-            messageContext.textChannelID
+            messageContext.textChannelID,
         ) as Eris.TextChannel;
 
         const gameOwner = new KmqMember(messageContext.author.id);
@@ -159,21 +159,21 @@ export default class ListenCommand implements BaseCommand {
                 {
                     title: i18n.translate(
                         messageContext.guildID,
-                        "misc.failure.notInVC.title"
+                        "misc.failure.notInVC.title",
                     ),
                     description: i18n.translate(
                         messageContext.guildID,
                         "misc.failure.notInVC.description",
-                        { command: "`/listen`" }
+                        { command: "`/listen`" },
                     ),
                 },
-                interaction
+                interaction,
             );
 
             logger.warn(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | User not in voice channel`
+                    messageContext,
+                )} | User not in voice channel`,
             );
             return;
         }
@@ -183,7 +183,7 @@ export default class ListenCommand implements BaseCommand {
         }
 
         const isPremium = await areUsersPremium(
-            getCurrentVoiceMembers(voiceChannel.id).map((x) => x.id)
+            getCurrentVoiceMembers(voiceChannel.id).map((x) => x.id),
         );
 
         const listeningSession = new ListeningSession(
@@ -192,19 +192,19 @@ export default class ListenCommand implements BaseCommand {
             voiceChannel.id,
             guildID,
             gameOwner,
-            isPremium
+            isPremium,
         );
 
         State.listeningSessions[guildID] = listeningSession;
 
         if (!isPremium) {
             for (const [commandName, command] of Object.entries(
-                State.client.commands
+                State.client.commands,
             )) {
                 if (command.isUsingPremiumOption) {
                     if (command.isUsingPremiumOption(guildPreference)) {
                         logger.info(
-                            `Session started by non-premium request, clearing premium option: ${commandName}`
+                            `Session started by non-premium request, clearing premium option: ${commandName}`,
                         );
                         // eslint-disable-next-line no-await-in-loop
                         await command.resetPremium!(guildPreference);
@@ -218,7 +218,7 @@ export default class ListenCommand implements BaseCommand {
             voiceChannel.name,
             messageContext,
             guildPreference,
-            interaction
+            interaction,
         );
 
         listeningSession.startRound(messageContext);
@@ -230,7 +230,7 @@ export default class ListenCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         await ListenCommand.startListening(messageContext, interaction);
     }

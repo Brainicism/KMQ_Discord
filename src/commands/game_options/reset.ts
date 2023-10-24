@@ -37,7 +37,7 @@ export default class ResetCommand implements BaseCommand {
                 example: "`/reset`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.reset.help.example.reset"
+                    "command.reset.help.example.reset",
                 ),
             },
         ],
@@ -58,17 +58,17 @@ export default class ResetCommand implements BaseCommand {
 
     static async updateOption(
         messageContext: MessageContext,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         const resetOptions = await guildPreference.resetToDefault();
         logger.info(
             `${getDebugLogHeader(
-                messageContext
-            )} | Reset to default guild preferences`
+                messageContext,
+            )} | Reset to default guild preferences`,
         );
 
         await sendOptionsMessage(
@@ -80,12 +80,12 @@ export default class ResetCommand implements BaseCommand {
                     option: GameOptionInternalToGameOption[x] as GameOption,
                     reset: true,
                 })),
-                "option"
+                "option",
             ),
             false,
             true,
             undefined,
-            interaction
+            interaction,
         );
     }
 
@@ -95,7 +95,7 @@ export default class ResetCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         await ResetCommand.updateOption(messageContext, interaction);
     }

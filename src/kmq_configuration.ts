@@ -32,7 +32,7 @@ export default class KmqConfiguration {
         let featureSwitches: any;
         try {
             featureSwitches = await parseJsonFile(
-                DataFiles.FEATURE_SWITCH_CONFIG
+                DataFiles.FEATURE_SWITCH_CONFIG,
             );
         } catch (e) {
             logger.error(`Error reading feature switch file. err = ${e}`);
@@ -40,11 +40,11 @@ export default class KmqConfiguration {
         }
 
         for (const [featureSwitchName, value] of Object.entries(
-            featureSwitches
+            featureSwitches,
         )) {
             if (typeof value !== "boolean") {
                 logger.warn(
-                    `Attempted to read feature switch ${featureSwitchName}, invalid value ${value}`
+                    `Attempted to read feature switch ${featureSwitchName}, invalid value ${value}`,
                 );
             }
 

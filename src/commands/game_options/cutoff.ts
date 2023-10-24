@@ -68,7 +68,7 @@ export default class CutoffCommand implements BaseCommand {
                     "command.cutoff.help.example.singleCutoff",
                     {
                         year: String(2015),
-                    }
+                    },
                 ),
             },
             {
@@ -80,7 +80,7 @@ export default class CutoffCommand implements BaseCommand {
                     {
                         beginningYear: String(2015),
                         endingYear: String(2018),
-                    }
+                    },
                 ),
             },
             {
@@ -90,12 +90,12 @@ export default class CutoffCommand implements BaseCommand {
                     "command.cutoff.help.example.reset",
                     {
                         defaultBeginningSearchYear: String(
-                            DEFAULT_BEGINNING_SEARCH_YEAR
+                            DEFAULT_BEGINNING_SEARCH_YEAR,
                         ),
                         defaultEndSearchYear: String(
-                            DEFAULT_ENDING_SEARCH_YEAR
+                            DEFAULT_ENDING_SEARCH_YEAR,
                         ),
-                    }
+                    },
                 ),
             },
         ],
@@ -112,7 +112,7 @@ export default class CutoffCommand implements BaseCommand {
                     name: OptionAction.SET,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.cutoff.help.interaction.description"
+                        "command.cutoff.help.interaction.description",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -121,10 +121,10 @@ export default class CutoffCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.cutoff.help.interaction.description"
+                                    "command.cutoff.help.interaction.description",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND_GROUP,
@@ -133,7 +133,7 @@ export default class CutoffCommand implements BaseCommand {
                             name: CutoffAppCommandAction.EARLIEST,
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.cutoff.help.interaction.earliestOption"
+                                "command.cutoff.help.interaction.earliestOption",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -142,10 +142,10 @@ export default class CutoffCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.cutoff.help.interaction.earliestOption"
+                                            "command.cutoff.help.interaction.earliestOption",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .SUB_COMMAND,
@@ -154,10 +154,10 @@ export default class CutoffCommand implements BaseCommand {
                                     name: "beginning_year",
                                     description: i18n.translate(
                                         LocaleType.EN,
-                                        "command.cutoff.help.interaction.beginningYear"
+                                        "command.cutoff.help.interaction.beginningYear",
                                     ),
                                     description_localizations: Object.values(
-                                        LocaleType
+                                        LocaleType,
                                     )
                                         .filter((x) => x !== LocaleType.EN)
                                         .reduce(
@@ -165,10 +165,10 @@ export default class CutoffCommand implements BaseCommand {
                                                 ...acc,
                                                 [locale]: i18n.translate(
                                                     locale,
-                                                    "command.cutoff.help.interaction.beginningYear"
+                                                    "command.cutoff.help.interaction.beginningYear",
                                                 ),
                                             }),
-                                            {}
+                                            {},
                                         ),
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,
@@ -182,7 +182,7 @@ export default class CutoffCommand implements BaseCommand {
                             name: CutoffAppCommandAction.RANGE,
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.cutoff.help.interaction.rangeOption"
+                                "command.cutoff.help.interaction.rangeOption",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -191,10 +191,10 @@ export default class CutoffCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.cutoff.help.interaction.rangeOption"
+                                            "command.cutoff.help.interaction.rangeOption",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .SUB_COMMAND,
@@ -203,10 +203,10 @@ export default class CutoffCommand implements BaseCommand {
                                     name: "beginning_year",
                                     description: i18n.translate(
                                         LocaleType.EN,
-                                        "command.cutoff.help.interaction.beginningYear"
+                                        "command.cutoff.help.interaction.beginningYear",
                                     ),
                                     description_localizations: Object.values(
-                                        LocaleType
+                                        LocaleType,
                                     )
                                         .filter((x) => x !== LocaleType.EN)
                                         .reduce(
@@ -214,10 +214,10 @@ export default class CutoffCommand implements BaseCommand {
                                                 ...acc,
                                                 [locale]: i18n.translate(
                                                     locale,
-                                                    "command.cutoff.help.interaction.beginningYear"
+                                                    "command.cutoff.help.interaction.beginningYear",
                                                 ),
                                             }),
-                                            {}
+                                            {},
                                         ),
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,
@@ -229,10 +229,10 @@ export default class CutoffCommand implements BaseCommand {
                                     name: "ending_year",
                                     description: i18n.translate(
                                         LocaleType.EN,
-                                        "command.cutoff.help.interaction.endingYear"
+                                        "command.cutoff.help.interaction.endingYear",
                                     ),
                                     description_localizations: Object.values(
-                                        LocaleType
+                                        LocaleType,
                                     )
                                         .filter((x) => x !== LocaleType.EN)
                                         .reduce(
@@ -240,10 +240,10 @@ export default class CutoffCommand implements BaseCommand {
                                                 ...acc,
                                                 [locale]: i18n.translate(
                                                     locale,
-                                                    "command.cutoff.help.interaction.endingYear"
+                                                    "command.cutoff.help.interaction.endingYear",
                                                 ),
                                             }),
-                                            {}
+                                            {},
                                         ),
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,
@@ -260,7 +260,7 @@ export default class CutoffCommand implements BaseCommand {
                     description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
-                        { optionName: "cutoff" }
+                        { optionName: "cutoff" },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -270,10 +270,10 @@ export default class CutoffCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "misc.interaction.resetOption",
-                                    { optionName: "cutoff" }
+                                    { optionName: "cutoff" },
                                 ),
                             }),
-                            {}
+                            {},
                         ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
@@ -301,7 +301,7 @@ export default class CutoffCommand implements BaseCommand {
             MessageContext.fromMessage(message),
             beginningYear,
             endingYear,
-            undefined
+            undefined,
         );
     };
 
@@ -309,17 +309,17 @@ export default class CutoffCommand implements BaseCommand {
         messageContext: MessageContext,
         beginningYear: number | null,
         endingYear: number | null,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         const reset = beginningYear == null && endingYear == null;
 
         if (reset) {
             await guildPreference.setBeginningCutoffYear(
-                DEFAULT_BEGINNING_SEARCH_YEAR
+                DEFAULT_BEGINNING_SEARCH_YEAR,
             );
             await guildPreference.setEndCutoffYear(DEFAULT_ENDING_SEARCH_YEAR);
             await sendOptionsMessage(
@@ -330,13 +330,13 @@ export default class CutoffCommand implements BaseCommand {
                 false,
                 undefined,
                 undefined,
-                interaction
+                interaction,
             );
 
             logger.info(
                 `${getDebugLogHeader(messageContext)} | Cutoff set to ${
                     guildPreference.gameOptions.beginningYear
-                } - ${guildPreference.gameOptions.endYear}`
+                } - ${guildPreference.gameOptions.endYear}`,
             );
 
             return;
@@ -348,7 +348,7 @@ export default class CutoffCommand implements BaseCommand {
         } else {
             if (beginningYear === null || endingYear === null) {
                 logger.error(
-                    `Unexpected null beginningYear or ending year: ${beginningYear} ${endingYear}`
+                    `Unexpected null beginningYear or ending year: ${beginningYear} ${endingYear}`,
                 );
                 return;
             }
@@ -359,14 +359,14 @@ export default class CutoffCommand implements BaseCommand {
                     {
                         title: i18n.translate(
                             messageContext.guildID,
-                            "command.cutoff.failure.invalidEndYear.title"
+                            "command.cutoff.failure.invalidEndYear.title",
                         ),
                         description: i18n.translate(
                             messageContext.guildID,
-                            "command.cutoff.failure.invalidEndYear.description"
+                            "command.cutoff.failure.invalidEndYear.description",
                         ),
                     },
-                    interaction
+                    interaction,
                 );
                 return;
             }
@@ -383,13 +383,13 @@ export default class CutoffCommand implements BaseCommand {
             false,
             undefined,
             undefined,
-            interaction
+            interaction,
         );
 
         logger.info(
             `${getDebugLogHeader(messageContext)} | Cutoff set to ${
                 guildPreference.gameOptions.beginningYear
-            } - ${guildPreference.gameOptions.endYear}`
+            } - ${guildPreference.gameOptions.endYear}`,
         );
     }
 
@@ -399,7 +399,7 @@ export default class CutoffCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
@@ -425,7 +425,7 @@ export default class CutoffCommand implements BaseCommand {
             messageContext,
             beginningYear,
             endingYear,
-            interaction
+            interaction,
         );
     }
 }

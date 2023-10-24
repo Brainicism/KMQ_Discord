@@ -51,11 +51,11 @@ function getNodeKeys(node: Node): void {
     if (node.kind === SyntaxKind.CallExpression) {
         const expression = node as CallExpression;
         const interfaceTranslation = translationInterfaceFunctions.some(
-            (x) => expression.expression.getText() === x
+            (x) => expression.expression.getText() === x,
         );
 
         const internalTranslation = translationInternalFunctions.some(
-            (x) => expression.expression.getText() === x
+            (x) => expression.expression.getText() === x,
         );
 
         if (interfaceTranslation || internalTranslation) {
@@ -95,7 +95,7 @@ function getNodeKeys(node: Node): void {
             }
 
             logger.info(
-                `    - ${SyntaxKind[translationKeyNode.kind]} | ${keyText}`
+                `    - ${SyntaxKind[translationKeyNode.kind]} | ${keyText}`,
             );
         }
     }
@@ -121,18 +121,18 @@ function getNodeKeys(node: Node): void {
     }
 
     const missingKeys = Array.from(translationKeys).filter(
-        (key) => !i18n.hasKey(key)
+        (key) => !i18n.hasKey(key),
     );
 
     for (const missingKey of missingKeys) {
         logger.error(
-            `(!) "${missingKey}" is missing from the translation file.`
+            `(!) "${missingKey}" is missing from the translation file.`,
         );
     }
 
     for (const missingKey of dynamicTranslationKeys) {
         logger.error(
-            `(?) "${missingKey}" is not in the dynamic allow list. Manually verify that the translations are present, then add them to the allow-list.`
+            `(?) "${missingKey}" is not in the dynamic allow list. Manually verify that the translations are present, then add them to the allow-list.`,
         );
     }
 

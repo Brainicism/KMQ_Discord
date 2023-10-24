@@ -62,7 +62,7 @@ export async function getAvailableSongCount(
     guildPreference: GuildPreference,
     isPremium: boolean,
     messageContext?: MessageContext,
-    interaction?: Eris.CommandInteraction
+    interaction?: Eris.CommandInteraction,
 ): Promise<{
     count: number | undefined;
     countBeforeLimit: number | undefined;
@@ -82,7 +82,7 @@ export async function getAvailableSongCount(
                     playlistID,
                     !session.sessionInitialized,
                     messageContext,
-                    interaction
+                    interaction,
                 )) as MatchedPlaylist;
             } else {
                 matchedPlaylist = (await new SongSelector().reloadSongs(
@@ -91,7 +91,7 @@ export async function getAvailableSongCount(
                     playlistID,
                     false,
                     messageContext,
-                    interaction
+                    interaction,
                 )) as MatchedPlaylist;
             }
 
@@ -105,7 +105,7 @@ export async function getAvailableSongCount(
             await SongSelector.getFilteredSongList(
                 guildPreference,
                 isPremium,
-                SHADOW_BANNED_ARTIST_IDS
+                SHADOW_BANNED_ARTIST_IDS,
             );
 
         return {
@@ -114,7 +114,7 @@ export async function getAvailableSongCount(
         };
     } catch (e) {
         logger.error(
-            `gid: ${guildPreference.guildID} | Error retrieving song count ${e.stack}`
+            `gid: ${guildPreference.guildID} | Error retrieving song count ${e.stack}`,
         );
         return {
             count: undefined,
@@ -139,12 +139,12 @@ export async function cleanupInactiveGameSessions(): Promise<void> {
                 inactiveSessions++;
                 await gameSessions[guildID].endSession("Inactive game session");
             }
-        })
+        }),
     );
 
     if (inactiveSessions > 0) {
         logger.info(
-            `Ended ${inactiveSessions} inactive game sessions out of ${totalSessions}`
+            `Ended ${inactiveSessions} inactive game sessions out of ${totalSessions}`,
         );
     }
 }
@@ -161,12 +161,12 @@ export async function cleanupInactiveListeningSessions(): Promise<void> {
                 await listeningSession.endSession("Empty listening session");
                 inactiveSessions++;
             }
-        })
+        }),
     );
 
     if (inactiveSessions > 0) {
         logger.warn(
-            `Ended ${inactiveSessions} inactive listening sessions out of ${totalSessions}`
+            `Ended ${inactiveSessions} inactive listening sessions out of ${totalSessions}`,
         );
     }
 }
@@ -205,7 +205,7 @@ export async function activeBonusUsers(): Promise<Set<string>> {
  */
 export async function getSimilarGroupNames(
     groupName: string,
-    locale: LocaleType
+    locale: LocaleType,
 ): Promise<Array<string>> {
     const similarGroups = await dbContext.kpopVideos
         .selectFrom("app_kpop_group")
@@ -214,7 +214,7 @@ export async function getSimilarGroupNames(
             or([
                 eb("name", "like", `%${groupName}%`),
                 eb("kname", "like", `%${groupName}%`),
-            ])
+            ]),
         )
         .orderBy((eb) => eb.fn("CHAR_LENGTH", ["name"]), "asc")
         .limit(5)
@@ -222,7 +222,7 @@ export async function getSimilarGroupNames(
 
     if (similarGroups.length === 0) return [];
     return similarGroups.map((x) =>
-        locale !== LocaleType.KO ? x["name"] : x["kname"] || x["name"]
+        locale !== LocaleType.KO ? x["name"] : x["kname"] || x["name"],
     );
 }
 
@@ -233,7 +233,7 @@ export async function getSimilarGroupNames(
  */
 export async function getMatchingGroupNames(
     rawGroupNames: Array<string>,
-    aliasApplied = false
+    aliasApplied = false,
 ): Promise<GroupMatchResults> {
     const artistIds = (
         await dbContext.kpopVideos
@@ -249,7 +249,7 @@ export async function getMatchingGroupNames(
             .innerJoin(
                 "app_kpop_group",
                 "app_kpop_agrelation.id_subgroup",
-                "app_kpop_group.id"
+                "app_kpop_group.id",
             )
             .select(["id", "name"])
             .where("app_kpop_agrelation.id_artist", "in", artistIds)
@@ -259,7 +259,7 @@ export async function getMatchingGroupNames(
                 dbContext.kpopVideos
                     .selectFrom("app_kpop_group")
                     .select(["id", "name"])
-                    .where("app_kpop_group.id", "in", artistIds)
+                    .where("app_kpop_group.id", "in", artistIds),
             )
             .orderBy("name", "asc")
             .execute()
@@ -267,7 +267,7 @@ export async function getMatchingGroupNames(
 
     const matchingGroupNames = matchingGroups.map((x) => x.name.toUpperCase());
     const unrecognizedGroups = rawGroupNames.filter(
-        (x) => !matchingGroupNames.includes(x.toUpperCase())
+        (x) => !matchingGroupNames.includes(x.toUpperCase()),
     );
 
     const result: GroupMatchResults = {
@@ -284,7 +284,7 @@ export async function getMatchingGroupNames(
                 (artistAliasTuple) =>
                     artistAliasTuple[1]
                         .map((x) => cleanArtistName(x))
-                        .includes(cleanArtistName(groupName))
+                        .includes(cleanArtistName(groupName)),
             );
 
             if (matchingAlias) {
@@ -318,7 +318,7 @@ export async function getMultipleChoiceOptions(
     gender: AvailableGenders,
     answer: string,
     artistID: number,
-    locale: LocaleType
+    locale: LocaleType,
 ): Promise<string[]> {
     const useHangul = locale === LocaleType.KO && containsHangul(answer);
     let easyNames: string[];
@@ -391,7 +391,7 @@ export async function getMultipleChoiceOptions(
                             .where(songName, "!=", answer)
                             .execute()
                     ).map((x) => pickNonEmpty(x)),
-                    MEDIUM_SAME_ARTIST_CHOICES
+                    MEDIUM_SAME_ARTIST_CHOICES,
                 );
 
                 const sameGenderSongs = _.sampleSize(
@@ -411,7 +411,7 @@ export async function getMultipleChoiceOptions(
                             .where("id_artist", "=", artistID)
                             .execute()
                     ).map((x) => pickNonEmpty(x)),
-                    MEDIUM_CHOICES - MEDIUM_SAME_ARTIST_CHOICES
+                    MEDIUM_CHOICES - MEDIUM_SAME_ARTIST_CHOICES,
                 );
 
                 result = [...sameArtistSongs, ...sameGenderSongs];
@@ -461,7 +461,7 @@ export async function getMultipleChoiceOptions(
             easyNames = _.difference(easyNames, result, removedResults);
             for (const choice of _.sampleSize(
                 easyNames,
-                numChoices - result.length
+                numChoices - result.length,
             )) {
                 result.push(choice);
             }
@@ -524,7 +524,7 @@ export async function getMultipleChoiceOptions(
  * @returns whether at least one player has premium status
  */
 export async function areUsersPremium(
-    _userIDs: Array<string>
+    _userIDs: Array<string>,
 ): Promise<boolean> {
     return Promise.resolve(true);
     // return !!(await dbContext.kmq
@@ -549,7 +549,7 @@ export async function isUserPremium(userID: string): Promise<boolean> {
  */
 export async function updatePremium(
     activePatrons: Array<Patron>,
-    inactiveUserIDs: string[]
+    inactiveUserIDs: string[],
 ): Promise<void> {
     // Grant premium
     const activePatronsPayload = activePatrons.map((x) => ({
@@ -566,7 +566,7 @@ export async function updatePremium(
                 .values(activePatronPayload)
                 .onDuplicateKeyUpdate(activePatronPayload)
                 .execute();
-        })
+        }),
     );
 
     const payload = activePatrons.map((x) => ({
@@ -601,7 +601,7 @@ export async function updatePremium(
  */
 export async function isPremiumRequest(
     session: Session,
-    playerID: string
+    playerID: string,
 ): Promise<boolean> {
     return session?.isPremium || (await isUserPremium(playerID));
 }
@@ -615,8 +615,8 @@ export async function isFirstGameOfDay(userID: string): Promise<boolean> {
         .selectFrom("player_stats")
         .select(
             sql<number>`DAYOFYEAR(last_active) = DAYOFYEAR(CURDATE())`.as(
-                "firstGameOfDay"
-            )
+                "firstGameOfDay",
+            ),
         )
         .where("player_id", "=", userID)
         .executeTakeFirst();
@@ -635,7 +635,7 @@ export async function isFirstGameOfDay(userID: string): Promise<boolean> {
 export function getLocalizedSongName(
     song: QueriedSong,
     locale: LocaleType,
-    original = true
+    original = true,
 ): string {
     const songName = original ? song.originalSongName : song.songName;
     if (locale !== LocaleType.KO) {
@@ -657,7 +657,7 @@ export function getLocalizedSongName(
  */
 export function getLocalizedArtistName(
     song: { artistName: string; hangulArtistName: string | null },
-    locale: LocaleType
+    locale: LocaleType,
 ): string {
     if (locale !== LocaleType.KO) {
         return song.artistName;
@@ -681,7 +681,7 @@ export function isPowerHour(): boolean {
 
     const currentHour = date.getHours();
     return powerHours.some(
-        (powerHour) => currentHour >= powerHour && currentHour <= powerHour + 1
+        (powerHour) => currentHour >= powerHour && currentHour <= powerHour + 1,
     );
 }
 
@@ -694,7 +694,7 @@ export function isPowerHour(): boolean {
 export function getTimeToGuessMs(
     guesser: { id: string },
     round: GameRound,
-    gameType: GameType
+    gameType: GameType,
 ): number {
     const correctGuessTimes = round
         .getGuesses()

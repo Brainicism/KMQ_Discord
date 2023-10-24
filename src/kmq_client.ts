@@ -33,13 +33,13 @@ export default class KmqClient extends Eris.Client {
                 files = files.concat(
                     (
                         await fs.promises.readdir(
-                            path.resolve(__dirname, "./commands", category)
+                            path.resolve(__dirname, "./commands", category),
                         )
                     )
                         .filter((x) => x.endsWith(".ts") || x.endsWith(".js"))
                         .map((x) =>
-                            path.resolve(__dirname, "./commands", category, x)
-                        )
+                            path.resolve(__dirname, "./commands", category, x),
+                        ),
                 );
             }
 
@@ -47,7 +47,7 @@ export default class KmqClient extends Eris.Client {
                 const commandFilePath = path.resolve(
                     __dirname,
                     "./commands",
-                    commandFile
+                    commandFile,
                 );
 
                 if (shouldReload) {
@@ -63,7 +63,7 @@ export default class KmqClient extends Eris.Client {
                     commandMap[commandName] = new command.default();
                 } catch (e) {
                     throw new Error(
-                        `Failed to load file: ${commandFilePath}. ${e}`
+                        `Failed to load file: ${commandFilePath}. ${e}`,
                     );
                 }
             }
@@ -104,7 +104,7 @@ export default class KmqClient extends Eris.Client {
         logger.info(
             `Registered ${successfulCommands}/${
                 Object.keys(commandFiles).length
-            } commands.`
+            } commands.`,
         );
     }
 
@@ -116,11 +116,11 @@ export default class KmqClient extends Eris.Client {
      */
     private registerCommand(
         command: BaseCommand,
-        commandName: string
+        commandName: string,
     ): boolean {
         if (commandName in this.commands) {
             logger.error(
-                `Command \`${commandName}\` already exists. Possible conflict?`
+                `Command \`${commandName}\` already exists. Possible conflict?`,
             );
             return false;
         }

@@ -16,7 +16,7 @@ describe("team", () => {
             "guildID",
             "kpop_pfp",
             0,
-            "kpopper"
+            "kpopper",
         );
         team = new Team("kmq", goodPlayer, "dummy");
     });
@@ -35,7 +35,7 @@ describe("team", () => {
                 assert.strictEqual(team.hasPlayer(subparPlayer.id), true);
                 assert.strictEqual(
                     team.hasPlayer(firstOnLeaderboardPlayer.id),
-                    false
+                    false,
                 );
             });
         });
@@ -66,7 +66,7 @@ describe("team", () => {
                 assert.strictEqual(team.getScore(), numIncrements);
                 assert.strictEqual(
                     team.getScore(),
-                    team.getPlayer(goodPlayer.id).getScore()
+                    team.getPlayer(goodPlayer.id).getScore(),
                 );
             });
         });
@@ -86,7 +86,7 @@ describe("team", () => {
 
                 assert.strictEqual(
                     team.getScore(),
-                    numIncrements + numIncrements / 5
+                    numIncrements + numIncrements / 5,
                 );
             });
         });

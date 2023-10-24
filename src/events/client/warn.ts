@@ -10,7 +10,7 @@ const logger = new IPCLogger("warn");
  */
 export default function warnHandler(
     message: string | Error,
-    shardID: number
+    shardID: number,
 ): void {
     // ignore warnings meant for the library developers
     if (

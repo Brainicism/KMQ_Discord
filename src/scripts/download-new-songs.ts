@@ -29,7 +29,7 @@ async function clearPartiallyCachedSongs(): Promise<void> {
     let files: Array<string>;
     try {
         files = await fs.promises.readdir(
-            process.env.SONG_DOWNLOAD_DIR as string as string
+            process.env.SONG_DOWNLOAD_DIR as string as string,
         );
     } catch (err) {
         logger.error(err);
@@ -43,12 +43,12 @@ async function clearPartiallyCachedSongs(): Promise<void> {
         partFiles.map(async (partFile) => {
             try {
                 await fs.promises.unlink(
-                    `${process.env.SONG_DOWNLOAD_DIR as string}/${partFile}`
+                    `${process.env.SONG_DOWNLOAD_DIR as string}/${partFile}`,
                 );
             } catch (err) {
                 logger.error(err);
             }
-        })
+        }),
     );
 
     if (partFiles.length) {
@@ -63,14 +63,14 @@ function getAverageVolume(mp3File: string): Promise<number> {
             (err, stdout, stderr) => {
                 if (!stdout || stderr) {
                     logger.error(
-                        `Error getting average volume: path = ${mp3File}, err = ${stderr}`
+                        `Error getting average volume: path = ${mp3File}, err = ${stderr}`,
                     );
                     reject();
                     return;
                 }
 
                 resolve(parseFloat(stdout));
-            }
+            },
         );
     });
 }
@@ -78,7 +78,7 @@ function getAverageVolume(mp3File: string): Promise<number> {
 async function ffmpegOpusJob(id: string): Promise<void> {
     const mp3File = path.join(
         process.env.SONG_DOWNLOAD_DIR as string,
-        `${id}.mp3`
+        `${id}.mp3`,
     );
 
     return new Promise(async (resolve, reject) => {
@@ -104,23 +104,23 @@ async function ffmpegOpusJob(id: string): Promise<void> {
                     await fs.promises.unlink(
                         path.join(
                             process.env.SONG_DOWNLOAD_DIR as string,
-                            path.basename(mp3File)
-                        )
+                            path.basename(mp3File),
+                        ),
                     );
                     resolve();
                 } catch (err) {
                     if (!(await pathExists(oggFileWithPath))) {
                         reject(
                             new Error(
-                                `File ${oggFileWithPath} wasn't created. err = ${err}`
-                            )
+                                `File ${oggFileWithPath} wasn't created. err = ${err}`,
+                            ),
                         );
                     }
 
                     reject(
                         new Error(
-                            `File ${oggFileWithPath} might have duplicate entries in db. err = ${err}`
-                        )
+                            `File ${oggFileWithPath} might have duplicate entries in db. err = ${err}`,
+                        ),
                     );
                 }
             })
@@ -134,7 +134,7 @@ async function ffmpegOpusJob(id: string): Promise<void> {
 const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
     const cachedSongLocation = path.join(
         process.env.SONG_DOWNLOAD_DIR as string,
-        `${id}.mp3`
+        `${id}.mp3`,
     );
 
     const tempLocation = `${cachedSongLocation}.part`;
@@ -148,7 +148,7 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
         try {
             // check to see if the video is downloadable
             const infoResponse = await ytdl.getBasicInfo(
-                `https://www.youtube.com/watch?v=${id}`
+                `https://www.youtube.com/watch?v=${id}`,
             );
 
             const { playabilityStatus }: any = infoResponse.player_response;
@@ -164,15 +164,15 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
 
                 reject(
                     new Error(
-                        `Failed to load video: error = ${playabilityStatus.reason}`
-                    )
+                        `Failed to load video: error = ${playabilityStatus.reason}`,
+                    ),
                 );
                 return;
             }
 
             // download video
             ytdl(`https://www.youtube.com/watch?v=${id}`, ytdlOptions).pipe(
-                cacheStream
+                cacheStream,
             );
         } catch (e) {
             const errorMessage = `Failed to retrieve video metadata for '${id}'. error = ${e}`;
@@ -205,8 +205,8 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
             } catch (err) {
                 reject(
                     new Error(
-                        `Error renaming temp song file from ${tempLocation} to ${cachedSongLocation}. err = ${err}`
-                    )
+                        `Error renaming temp song file from ${tempLocation} to ${cachedSongLocation}. err = ${err}`,
+                    ),
                 );
             }
         });
@@ -245,7 +245,7 @@ async function getSongsFromDb(databaseContext: DatabaseContext): Promise<any> {
                 .innerJoin(
                     "app_kpop_group",
                     "app_kpop.id_artist",
-                    "app_kpop_group.id"
+                    "app_kpop_group.id",
                 )
                 .select([
                     "app_kpop.name as songName",
@@ -255,8 +255,8 @@ async function getSongsFromDb(databaseContext: DatabaseContext): Promise<any> {
                 ])
                 .select(
                     sql`RANK() OVER(PARTITION BY app_kpop.id_artist ORDER BY views DESC)`.as(
-                        "rank"
-                    )
+                        "rank",
+                    ),
                 )
                 .where("is_audio", "=", "y")
                 .where("tags", "not like", "%c%");
@@ -266,7 +266,7 @@ async function getSongsFromDb(databaseContext: DatabaseContext): Promise<any> {
             }
 
             return builder;
-        }
+        },
     );
 
     return avBuilder
@@ -275,7 +275,7 @@ async function getSongsFromDb(databaseContext: DatabaseContext): Promise<any> {
         .where(
             "rank",
             "<=",
-            process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST as string
+            process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST as string,
         )
         .unionAll(mvBuilder)
         .orderBy("views", "desc")
@@ -286,13 +286,13 @@ async function getCurrentlyDownloadedFiles(): Promise<Set<string>> {
     return new Set(
         (
             await fs.promises.readdir(process.env.SONG_DOWNLOAD_DIR as string)
-        ).filter((file) => file.endsWith(".ogg"))
+        ).filter((file) => file.endsWith(".ogg")),
     );
 }
 
 async function updateNotDownloaded(
     db: DatabaseContext,
-    songs: Array<QueriedSong>
+    songs: Array<QueriedSong>,
 ): Promise<void> {
     // update list of non-downloaded songs
     const currentlyDownloadedFiles = await getCurrentlyDownloadedFiles();
@@ -314,7 +314,7 @@ async function updateNotDownloaded(
 
 const downloadNewSongs = async (
     db: DatabaseContext,
-    limit?: number
+    limit?: number,
 ): Promise<number> => {
     const allSongs: Array<QueriedSong> = await getSongsFromDb(db);
     let songsToDownload = limit ? allSongs.slice(0, limit) : allSongs.slice();
@@ -322,19 +322,19 @@ const downloadNewSongs = async (
     let deadLinksSkipped = 0;
     const knownDeadIDs = new Set(
         (await db.kmq.selectFrom("dead_links").select("vlink").execute()).map(
-            (x) => x.vlink
-        )
+            (x) => x.vlink,
+        ),
     );
 
     const currentlyDownloadedFiles = await getCurrentlyDownloadedFiles();
 
     logger.info(`Total songs in database: ${allSongs.length}`);
     songsToDownload = songsToDownload.filter(
-        (x) => !currentlyDownloadedFiles.has(`${x.youtubeLink}.ogg`)
+        (x) => !currentlyDownloadedFiles.has(`${x.youtubeLink}.ogg`),
     );
 
     songsToDownload = songsToDownload.filter(
-        (x) => !knownDeadIDs.has(x.youtubeLink)
+        (x) => !knownDeadIDs.has(x.youtubeLink),
     );
     logger.info(`Total songs to be downloaded: ${songsToDownload.length}`);
 
@@ -345,14 +345,14 @@ const downloadNewSongs = async (
         logger.info(
             `Downloading song: '${song.songName}' by ${song.artistName} | ${
                 song.youtubeLink
-            } (${downloadCount + 1}/${songsToDownload.length})`
+            } (${downloadCount + 1}/${songsToDownload.length})`,
         );
         try {
             // eslint-disable-next-line no-await-in-loop
             await retryJob(downloadSong, [db, song.youtubeLink], 1, true, 5000);
         } catch (err) {
             logger.error(
-                `Error downloading song ${song.youtubeLink}, skipping... err = ${err}`
+                `Error downloading song ${song.youtubeLink}, skipping... err = ${err}`,
             );
             deadLinksSkipped++;
             try {
@@ -360,11 +360,11 @@ const downloadNewSongs = async (
                 await fs.promises.unlink(
                     `${process.env.SONG_DOWNLOAD_DIR as string}/${
                         song.youtubeLink
-                    }.mp3.part`
+                    }.mp3.part`,
                 );
             } catch (tempErr) {
                 logger.error(
-                    `Error deleting temp file ${song.youtubeLink}.mp3.part, err = ${tempErr}`
+                    `Error deleting temp file ${song.youtubeLink}.mp3.part, err = ${tempErr}`,
                 );
             }
 
@@ -372,14 +372,14 @@ const downloadNewSongs = async (
         }
 
         logger.info(
-            `Encoding song: '${song.songName}' by ${song.artistName} | ${song.youtubeLink}`
+            `Encoding song: '${song.songName}' by ${song.artistName} | ${song.youtubeLink}`,
         );
         try {
             // eslint-disable-next-line no-await-in-loop
             await retryJob(ffmpegOpusJob, [song.youtubeLink], 1, true, 5000);
         } catch (err) {
             logger.error(
-                `Error encoding song ${song.youtubeLink}, exiting... err = ${err}`
+                `Error encoding song ${song.youtubeLink}, exiting... err = ${err}`,
             );
             break;
         }
@@ -390,7 +390,7 @@ const downloadNewSongs = async (
     // update final list of non-downloaded songs
     await updateNotDownloaded(db, allSongs);
     logger.info(
-        `Total songs downloaded: ${downloadCount}, (${deadLinksSkipped} dead links skipped)`
+        `Total songs downloaded: ${downloadCount}, (${deadLinksSkipped} dead links skipped)`,
     );
     return downloadCount;
 };
@@ -400,7 +400,7 @@ const downloadNewSongs = async (
  * @returns - the number of songs downloaded
  */
 export default async function downloadAndConvertSongs(
-    limit?: number
+    limit?: number,
 ): Promise<number> {
     const db = getNewConnection();
     try {

@@ -51,7 +51,7 @@ export default class ReleaseCommand implements BaseCommand {
                     name: OptionAction.SET,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.release.help.interaction.description"
+                        "command.release.help.interaction.description",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -60,10 +60,10 @@ export default class ReleaseCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.release.help.interaction.description"
+                                    "command.release.help.interaction.description",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -73,7 +73,7 @@ export default class ReleaseCommand implements BaseCommand {
                             name: "release",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.release.help.interaction.release"
+                                "command.release.help.interaction.release",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -82,10 +82,10 @@ export default class ReleaseCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.release.help.interaction.release"
+                                            "command.release.help.interaction.release",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .STRING,
@@ -94,7 +94,7 @@ export default class ReleaseCommand implements BaseCommand {
                                 (releaseType) => ({
                                     name: releaseType,
                                     value: releaseType,
-                                })
+                                }),
                             ),
                         },
                     ],
@@ -104,7 +104,7 @@ export default class ReleaseCommand implements BaseCommand {
                     description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
-                        { optionName: "release" }
+                        { optionName: "release" },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -114,10 +114,10 @@ export default class ReleaseCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "misc.interaction.resetOption",
-                                    { optionName: "release" }
+                                    { optionName: "release" },
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -132,7 +132,7 @@ export default class ReleaseCommand implements BaseCommand {
         name: "release",
         description: i18n.translate(
             guildID,
-            "command.release.help.description"
+            "command.release.help.description",
         ),
         usage: "/release set\nrelease:[official | all]\n\n/release reset",
         examples: [
@@ -141,14 +141,14 @@ export default class ReleaseCommand implements BaseCommand {
                 explanation: i18n.translate(
                     guildID,
                     "command.release.help.example.official",
-                    { official: `\`${ReleaseType.OFFICIAL}\`` }
+                    { official: `\`${ReleaseType.OFFICIAL}\`` },
                 ),
             },
             {
                 example: "`/release set release:all`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.release.help.example.all"
+                    "command.release.help.example.all",
                 ),
             },
             {
@@ -156,7 +156,7 @@ export default class ReleaseCommand implements BaseCommand {
                 explanation: i18n.translate(
                     guildID,
                     "command.release.help.example.reset",
-                    { defaultRelease: `\`${DEFAULT_RELEASE_TYPE}\`` }
+                    { defaultRelease: `\`${DEFAULT_RELEASE_TYPE}\`` },
                 ),
             },
         ],
@@ -175,31 +175,31 @@ export default class ReleaseCommand implements BaseCommand {
         await ReleaseCommand.updateOption(
             MessageContext.fromMessage(message),
             releaseType,
-            undefined
+            undefined,
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         releaseType: ReleaseType | null,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         const reset = releaseType == null;
         if (reset) {
             await guildPreference.reset(GameOption.RELEASE_TYPE);
             logger.info(
-                `${getDebugLogHeader(messageContext)} | Release type reset.`
+                `${getDebugLogHeader(messageContext)} | Release type reset.`,
             );
         } else {
             await guildPreference.setReleaseType(releaseType);
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Release type set to ${releaseType}`
+                    messageContext,
+                )} | Release type set to ${releaseType}`,
             );
         }
 
@@ -211,7 +211,7 @@ export default class ReleaseCommand implements BaseCommand {
             false,
             undefined,
             undefined,
-            interaction
+            interaction,
         );
     }
 
@@ -221,7 +221,7 @@ export default class ReleaseCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
@@ -241,7 +241,7 @@ export default class ReleaseCommand implements BaseCommand {
         await ReleaseCommand.updateOption(
             messageContext,
             releaseValue,
-            interaction
+            interaction,
         );
     }
 }

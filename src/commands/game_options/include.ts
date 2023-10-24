@@ -58,17 +58,17 @@ export default class IncludeCommand implements BaseCommand {
                 gender: "`gender`",
                 artisttype: "`artisttype`",
                 groupList: GROUP_LIST_URL,
-            }
+            },
         ),
         usage: `/include set [${i18n.translate(
             guildID,
-            "misc.listOfGroups"
+            "misc.listOfGroups",
         )}]\n\n/include add [${i18n.translate(
             guildID,
-            "misc.listOfGroups"
+            "misc.listOfGroups",
         )}]\n\n/include remove [${i18n.translate(
             guildID,
-            "misc.listOfGroups"
+            "misc.listOfGroups",
         )}]\n\n/include reset`,
         examples: [
             {
@@ -76,7 +76,7 @@ export default class IncludeCommand implements BaseCommand {
                 explanation: i18n.translate(
                     guildID,
                     "command.include.help.example.singleGroup",
-                    { group: "Blackpink" }
+                    { group: "Blackpink" },
                 ),
             },
             {
@@ -89,14 +89,14 @@ export default class IncludeCommand implements BaseCommand {
                         groupOne: "Blackpink",
                         groupTwo: "BTS",
                         groupThree: "Red Velvet",
-                    }
+                    },
                 ),
             },
             {
                 example: "`/include reset`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.include.help.example.reset"
+                    "command.include.help.example.reset",
                 ),
             },
         ],
@@ -107,7 +107,7 @@ export default class IncludeCommand implements BaseCommand {
                 url: GROUP_LIST_URL,
                 label: i18n.translate(
                     guildID,
-                    "misc.interaction.fullGroupsList"
+                    "misc.interaction.fullGroupsList",
                 ),
             },
         ],
@@ -123,7 +123,7 @@ export default class IncludeCommand implements BaseCommand {
                 name: action,
                 description: i18n.translate(
                     LocaleType.EN,
-                    `command.include.help.interaction.${action}.description`
+                    `command.include.help.interaction.${action}.description`,
                 ),
                 description_localizations: Object.values(LocaleType)
                     .filter((x) => x !== LocaleType.EN)
@@ -132,10 +132,10 @@ export default class IncludeCommand implements BaseCommand {
                             ...acc,
                             [locale]: i18n.translate(
                                 locale,
-                                `command.include.help.interaction.${action}.description`
+                                `command.include.help.interaction.${action}.description`,
                             ),
                         }),
-                        {}
+                        {},
                     ),
 
                 type: Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
@@ -147,10 +147,10 @@ export default class IncludeCommand implements BaseCommand {
                               description: i18n.translate(
                                   LocaleType.EN,
                                   `command.include.help.interaction.${action}.perGroupDescription`,
-                                  { ordinalNum: getOrdinalNum(x + 1) }
+                                  { ordinalNum: getOrdinalNum(x + 1) },
                               ),
                               description_localizations: Object.values(
-                                  LocaleType
+                                  LocaleType,
                               )
                                   .filter((y) => y !== LocaleType.EN)
                                   .reduce(
@@ -161,12 +161,12 @@ export default class IncludeCommand implements BaseCommand {
                                               `command.include.help.interaction.${action}.perGroupDescription`,
                                               {
                                                   ordinalNum: getOrdinalNum(
-                                                      x + 1
+                                                      x + 1,
                                                   ),
-                                              }
+                                              },
                                           ),
                                       }),
-                                      {}
+                                      {},
                                   ),
 
                               type: Eris.Constants.ApplicationCommandOptionTypes
@@ -185,7 +185,7 @@ export default class IncludeCommand implements BaseCommand {
                 [],
                 [],
                 undefined,
-                true
+                true,
             );
             return;
         }
@@ -200,7 +200,7 @@ export default class IncludeCommand implements BaseCommand {
         await IncludeCommand.updateOption(
             MessageContext.fromMessage(message),
             matchedGroups,
-            unmatchedGroups
+            unmatchedGroups,
         );
     };
 
@@ -209,16 +209,16 @@ export default class IncludeCommand implements BaseCommand {
         matchedGroups: MatchedArtist[],
         unmatchedGroups: string[],
         interaction?: Eris.CommandInteraction,
-        reset = false
+        reset = false,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         if (reset) {
             await guildPreference.reset(GameOption.INCLUDE);
             logger.info(
-                `${getDebugLogHeader(messageContext)} | Include reset.`
+                `${getDebugLogHeader(messageContext)} | Include reset.`,
             );
 
             await sendOptionsMessage(
@@ -229,7 +229,7 @@ export default class IncludeCommand implements BaseCommand {
                 false,
                 undefined,
                 undefined,
-                interaction
+                interaction,
             );
 
             return;
@@ -238,8 +238,8 @@ export default class IncludeCommand implements BaseCommand {
         if (guildPreference.isGroupsMode()) {
             logger.warn(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Game option conflict between include and groups.`
+                    messageContext,
+                )} | Game option conflict between include and groups.`,
             );
 
             sendErrorMessage(
@@ -247,7 +247,7 @@ export default class IncludeCommand implements BaseCommand {
                 {
                     title: i18n.translate(
                         messageContext.guildID,
-                        "misc.failure.gameOptionConflict.title"
+                        "misc.failure.gameOptionConflict.title",
                     ),
                     description: i18n.translate(
                         messageContext.guildID,
@@ -256,10 +256,10 @@ export default class IncludeCommand implements BaseCommand {
                             optionOne: "`groups`",
                             optionTwo: "`include`",
                             optionOneCommand: "`/groups reset`",
-                        }
+                        },
                     ),
                 },
-                interaction
+                interaction,
             );
 
             return;
@@ -271,10 +271,10 @@ export default class IncludeCommand implements BaseCommand {
         if (unmatchedGroups.length) {
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
+                    messageContext,
                 )} | Attempted to set unknown include. include = ${unmatchedGroups.join(
-                    ", "
-                )}`
+                    ", ",
+                )}`,
             );
 
             if (
@@ -291,7 +291,7 @@ export default class IncludeCommand implements BaseCommand {
                     {
                         command: "/include",
                         addOrRemove: misplacedPrefix,
-                    }
+                    },
                 );
             }
 
@@ -299,7 +299,7 @@ export default class IncludeCommand implements BaseCommand {
             if (unmatchedGroups.length === 1) {
                 const suggestions = await getSimilarGroupNames(
                     unmatchedGroups[0],
-                    State.getGuildLocale(messageContext.guildID)
+                    State.getGuildLocale(messageContext.guildID),
                 );
 
                 if (suggestions.length > 0) {
@@ -308,17 +308,17 @@ export default class IncludeCommand implements BaseCommand {
                         "misc.failure.unrecognizedGroups.didYouMean",
                         {
                             suggestions: suggestions.join("\n"),
-                        }
+                        },
                     );
                 }
             }
 
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
+                    messageContext,
                 )} | Attempted to set unknown include. include = ${unmatchedGroups.join(
-                    ", "
-                )}`
+                    ", ",
+                )}`,
             );
 
             const descriptionText = i18n.translate(
@@ -327,7 +327,7 @@ export default class IncludeCommand implements BaseCommand {
                 {
                     matchedGroupsAction: i18n.translate(
                         messageContext.guildID,
-                        "command.include.failure.unrecognizedGroups.included"
+                        "command.include.failure.unrecognizedGroups.included",
                     ),
                     helpGroups: "`/help groups`",
                     unmatchedGroups: unmatchedGroups.join(", "),
@@ -336,9 +336,9 @@ export default class IncludeCommand implements BaseCommand {
                         "misc.failure.unrecognizedGroups.solution",
                         {
                             command: "`/include add`",
-                        }
+                        },
                     ),
-                }
+                },
             );
 
             embeds.push({
@@ -346,7 +346,7 @@ export default class IncludeCommand implements BaseCommand {
                 author: messageContext.author,
                 title: i18n.translate(
                     messageContext.guildID,
-                    "misc.failure.unrecognizedGroups.title"
+                    "misc.failure.unrecognizedGroups.title",
                 ),
                 description: `${descriptionText}\n\n${suggestionsText || ""}`,
                 footerText: includeWarning,
@@ -362,7 +362,7 @@ export default class IncludeCommand implements BaseCommand {
                     false,
                     undefined,
                     embeds.slice(1),
-                    interaction
+                    interaction,
                 );
             }
 
@@ -372,8 +372,8 @@ export default class IncludeCommand implements BaseCommand {
         await guildPreference.setIncludes(matchedGroups);
         logger.info(
             `${getDebugLogHeader(
-                messageContext
-            )} | Include set to ${guildPreference.getDisplayedIncludesGroupNames()}`
+                messageContext,
+            )} | Include set to ${guildPreference.getDisplayedIncludesGroupNames()}`,
         );
 
         const optionsMessage = await generateOptionsMessage(
@@ -383,7 +383,7 @@ export default class IncludeCommand implements BaseCommand {
             [{ option: GameOption.INCLUDE, reset: false }],
             false,
             undefined,
-            undefined
+            undefined,
         );
 
         if (optionsMessage) {
@@ -393,7 +393,7 @@ export default class IncludeCommand implements BaseCommand {
                 true,
                 undefined,
                 embeds,
-                interaction
+                interaction,
             );
         } else {
             await notifyOptionsGenerationError(messageContext, "include");
@@ -406,7 +406,7 @@ export default class IncludeCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
@@ -421,14 +421,14 @@ export default class IncludeCommand implements BaseCommand {
                 messageContext,
                 AddType.INCLUDE,
                 enteredGroupNames,
-                interaction
+                interaction,
             );
         } else if (action === GroupAction.REMOVE) {
             await RemoveCommand.updateOption(
                 messageContext,
                 RemoveType.INCLUDE,
                 enteredGroupNames,
-                interaction
+                interaction,
             );
         } else {
             await IncludeCommand.updateOption(
@@ -436,7 +436,7 @@ export default class IncludeCommand implements BaseCommand {
                 matchedGroups,
                 unmatchedGroups,
                 interaction,
-                action === GroupAction.RESET
+                action === GroupAction.RESET,
             );
         }
     }
@@ -446,7 +446,7 @@ export default class IncludeCommand implements BaseCommand {
      * @param interaction - The interaction with intermediate typing state
      */
     static async processAutocompleteInteraction(
-        interaction: Eris.AutocompleteInteraction
+        interaction: Eris.AutocompleteInteraction,
     ): Promise<void> {
         return processGroupAutocompleteInteraction(interaction);
     }

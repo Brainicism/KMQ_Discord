@@ -48,7 +48,7 @@ export async function userVoted(userID: string): Promise<void> {
     const updatePayload = {
         user_id: userID,
         buff_expiry_date: new Date(
-            Date.now() + VOTE_BONUS_DURATION * 1000 * 60 * 60
+            Date.now() + VOTE_BONUS_DURATION * 1000 * 60 * 60,
         ),
         total_votes: currentVotes + 1,
     };
@@ -77,7 +77,7 @@ export default class BotListingManager {
 
     private postStats(): void {
         for (const siteConfigKeyName of Object.keys(BOT_LISTING_SITES).filter(
-            (x) => x in process.env
+            (x) => x in process.env,
         )) {
             this.postStat(siteConfigKeyName);
         }
@@ -89,7 +89,7 @@ export default class BotListingManager {
             await Axios.post(
                 botListing.endpoint.replace(
                     "%d",
-                    process.env.BOT_CLIENT_ID as string
+                    process.env.BOT_CLIENT_ID as string,
                 ),
                 {
                     [botListing.payloadKeyName]: (await this.ipc.getStats())
@@ -99,12 +99,12 @@ export default class BotListingManager {
                     headers: {
                         Authorization: process.env[siteConfigKeyName] as string,
                     },
-                }
+                },
             );
             logger.info(`${botListing.name} server count posted`);
         } catch (e) {
             logger.error(
-                `Error updating ${botListing.name} server count. error = ${e}`
+                `Error updating ${botListing.name} server count. error = ${e}`,
             );
         }
     }

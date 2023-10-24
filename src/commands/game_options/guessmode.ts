@@ -45,7 +45,7 @@ export default class GuessModeCommand implements BaseCommand {
         name: "guessmode",
         description: i18n.translate(
             guildID,
-            "command.guessmode.help.description"
+            "command.guessmode.help.description",
         ),
         usage: "/guessmode set\nguessmode:[song | artist | both]\n\n/guessmode reset",
         examples: [
@@ -53,21 +53,21 @@ export default class GuessModeCommand implements BaseCommand {
                 example: "`/guessmode set guessmode:song`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.guessmode.help.example.song"
+                    "command.guessmode.help.example.song",
                 ),
             },
             {
                 example: "`/guessmode set guessmode:artist`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.guessmode.help.example.artist"
+                    "command.guessmode.help.example.artist",
                 ),
             },
             {
                 example: "`/guessmode set guessmode:both`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.guessmode.help.example.both"
+                    "command.guessmode.help.example.both",
                 ),
             },
             {
@@ -77,7 +77,7 @@ export default class GuessModeCommand implements BaseCommand {
                     "command.guessmode.help.example.reset",
                     {
                         defaultGuessMode: DEFAULT_GUESS_MODE,
-                    }
+                    },
                 ),
             },
         ],
@@ -94,7 +94,7 @@ export default class GuessModeCommand implements BaseCommand {
                     name: OptionAction.SET,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.guessmode.help.description"
+                        "command.guessmode.help.description",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -103,10 +103,10 @@ export default class GuessModeCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.guessmode.help.description"
+                                    "command.guessmode.help.description",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -116,7 +116,7 @@ export default class GuessModeCommand implements BaseCommand {
                             name: "guessmode",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.guessmode.interaction.guessMode"
+                                "command.guessmode.interaction.guessMode",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -125,10 +125,10 @@ export default class GuessModeCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.guessmode.interaction.guessMode"
+                                            "command.guessmode.interaction.guessMode",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -138,7 +138,7 @@ export default class GuessModeCommand implements BaseCommand {
                                 (guessModeType) => ({
                                     name: guessModeType,
                                     value: guessModeType,
-                                })
+                                }),
                             ),
                         },
                     ],
@@ -148,7 +148,7 @@ export default class GuessModeCommand implements BaseCommand {
                     description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
-                        { optionName: "guess mode" }
+                        { optionName: "guess mode" },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -158,10 +158,10 @@ export default class GuessModeCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "misc.interaction.resetOption",
-                                    { optionName: "guess mode" }
+                                    { optionName: "guess mode" },
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -185,17 +185,17 @@ export default class GuessModeCommand implements BaseCommand {
         await GuessModeCommand.updateOption(
             MessageContext.fromMessage(message),
             guessModeType,
-            undefined
+            undefined,
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         guessModeType: GuessModeType | null,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         const reset = guessModeType == null;
@@ -203,14 +203,14 @@ export default class GuessModeCommand implements BaseCommand {
         if (reset) {
             await guildPreference.reset(GameOption.GUESS_MODE_TYPE);
             logger.info(
-                `${getDebugLogHeader(messageContext)} | Guess mode type reset.`
+                `${getDebugLogHeader(messageContext)} | Guess mode type reset.`,
             );
         } else {
             await guildPreference.setGuessModeType(guessModeType);
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Guess mode type set to ${guessModeType}`
+                    messageContext,
+                )} | Guess mode type set to ${guessModeType}`,
             );
         }
 
@@ -222,7 +222,7 @@ export default class GuessModeCommand implements BaseCommand {
             false,
             undefined,
             undefined,
-            interaction
+            interaction,
         );
     }
 
@@ -232,7 +232,7 @@ export default class GuessModeCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
@@ -252,7 +252,7 @@ export default class GuessModeCommand implements BaseCommand {
         await GuessModeCommand.updateOption(
             messageContext,
             guessModeValue,
-            interaction
+            interaction,
         );
     }
 }

@@ -18,17 +18,17 @@ export default class ListeningRound extends Round {
     getEndRoundDescription(
         messageContext: MessageContext,
         uniqueSongCounter: UniqueSongCounter,
-        _playerRoundResults: Array<PlayerRoundResult>
+        _playerRoundResults: Array<PlayerRoundResult>,
     ): string {
         return this.getUniqueSongCounterMessage(
             messageContext,
-            uniqueSongCounter
+            uniqueSongCounter,
         );
     }
 
     getEndRoundColor(
         _correctGuess: boolean,
-        userBonusActive: boolean
+        userBonusActive: boolean,
     ): number | null {
         if (userBonusActive) {
             return EMBED_SUCCESS_BONUS_COLOR;

@@ -72,14 +72,14 @@ export default class EliminationScoreboard extends Scoreboard {
         // Game ends if
         // (1) all players are eliminated that round or
         const allEliminated = Object.values(this.players).every((player) =>
-            player.isEliminated()
+            player.isEliminated(),
         );
 
         // (2) there is one player left in a game that started with multiple players
         const oneLeft =
             Object.values(this.players).length > 1 &&
             Object.values(this.players).filter(
-                (player) => !player.isEliminated()
+                (player) => !player.isEliminated(),
             ).length === 1;
 
         return allEliminated || oneLeft;
@@ -98,7 +98,7 @@ export default class EliminationScoreboard extends Scoreboard {
         const minimumLives = Object.values(this.players)
             .filter((x) => x.getLives() > 0)
             .reduce((prev, curr) =>
-                prev.getLives() < curr.getLives() ? prev : curr
+                prev.getLives() < curr.getLives() ? prev : curr,
             )
             .getLives();
 
@@ -108,7 +108,7 @@ export default class EliminationScoreboard extends Scoreboard {
     /** @returns the number of players that are alive */
     getAlivePlayersCount(): number {
         return Object.values(this.players).filter(
-            (player) => !player.isEliminated()
+            (player) => !player.isEliminated(),
         ).length;
     }
 }

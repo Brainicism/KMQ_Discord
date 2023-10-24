@@ -27,6 +27,6 @@ export default interface BaseCommand {
     >;
     processChatInputInteraction?: (
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ) => Promise<void>;
 }

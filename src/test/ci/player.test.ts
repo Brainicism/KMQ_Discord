@@ -44,7 +44,7 @@ describe("player", () => {
                     "someurl",
                     0,
                     "ohmi",
-                    true
+                    true,
                 );
             });
 
@@ -61,7 +61,7 @@ describe("player", () => {
                             ExpBonusModifier.FIRST_GAME_OF_DAY
                         ] *
                             numIncrements *
-                            10
+                            10,
                     );
                 });
             });

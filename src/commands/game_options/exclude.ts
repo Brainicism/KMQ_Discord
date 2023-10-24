@@ -56,17 +56,17 @@ export default class ExcludeCommand implements BaseCommand {
             "command.exclude.help.description",
             {
                 groupList: GROUP_LIST_URL,
-            }
+            },
         ),
         usage: `/exclude set [${i18n.translate(
             guildID,
-            "misc.listOfGroups"
+            "misc.listOfGroups",
         )}]\n\n/exclude add [${i18n.translate(
             guildID,
-            "misc.listOfGroups"
+            "misc.listOfGroups",
         )}]\n\n/exclude remove [${i18n.translate(
             guildID,
-            "misc.listOfGroups"
+            "misc.listOfGroups",
         )}]\n\n/exclude reset`,
         examples: [
             {
@@ -76,7 +76,7 @@ export default class ExcludeCommand implements BaseCommand {
                     "command.exclude.help.example.singleGroup",
                     {
                         group: "Blackpink",
-                    }
+                    },
                 ),
             },
             {
@@ -89,14 +89,14 @@ export default class ExcludeCommand implements BaseCommand {
                         groupOne: "Blackpink",
                         groupTwo: "BTS",
                         groupThree: "Red Velvet",
-                    }
+                    },
                 ),
             },
             {
                 example: "`/exclude reset`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.exclude.help.example.reset"
+                    "command.exclude.help.example.reset",
                 ),
             },
         ],
@@ -107,7 +107,7 @@ export default class ExcludeCommand implements BaseCommand {
                 url: GROUP_LIST_URL,
                 label: i18n.translate(
                     guildID,
-                    "misc.interaction.fullGroupsList"
+                    "misc.interaction.fullGroupsList",
                 ),
             },
         ],
@@ -123,7 +123,7 @@ export default class ExcludeCommand implements BaseCommand {
                 name: action,
                 description: i18n.translate(
                     LocaleType.EN,
-                    `command.exclude.help.interaction.${action}.description`
+                    `command.exclude.help.interaction.${action}.description`,
                 ),
                 description_localizations: Object.values(LocaleType)
                     .filter((x) => x !== LocaleType.EN)
@@ -132,10 +132,10 @@ export default class ExcludeCommand implements BaseCommand {
                             ...acc,
                             [locale]: i18n.translate(
                                 locale,
-                                `command.exclude.help.interaction.${action}.description`
+                                `command.exclude.help.interaction.${action}.description`,
                             ),
                         }),
-                        {}
+                        {},
                     ),
 
                 type: Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
@@ -147,10 +147,10 @@ export default class ExcludeCommand implements BaseCommand {
                               description: i18n.translate(
                                   LocaleType.EN,
                                   `command.exclude.help.interaction.${action}.perGroupDescription`,
-                                  { ordinalNum: getOrdinalNum(x + 1) }
+                                  { ordinalNum: getOrdinalNum(x + 1) },
                               ),
                               description_localizations: Object.values(
-                                  LocaleType
+                                  LocaleType,
                               )
                                   .filter((y) => y !== LocaleType.EN)
                                   .reduce(
@@ -161,12 +161,12 @@ export default class ExcludeCommand implements BaseCommand {
                                               `command.exclude.help.interaction.${action}.perGroupDescription`,
                                               {
                                                   ordinalNum: getOrdinalNum(
-                                                      x + 1
+                                                      x + 1,
                                                   ),
-                                              }
+                                              },
                                           ),
                                       }),
-                                      {}
+                                      {},
                                   ),
 
                               type: Eris.Constants.ApplicationCommandOptionTypes
@@ -185,7 +185,7 @@ export default class ExcludeCommand implements BaseCommand {
                 [],
                 [],
                 undefined,
-                true
+                true,
             );
             return;
         }
@@ -202,7 +202,7 @@ export default class ExcludeCommand implements BaseCommand {
             matchedGroups,
             unmatchedGroups,
             undefined,
-            false
+            false,
         );
     };
 
@@ -212,7 +212,7 @@ export default class ExcludeCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
@@ -237,14 +237,14 @@ export default class ExcludeCommand implements BaseCommand {
                 messageContext,
                 AddType.EXCLUDE,
                 enteredGroupNames,
-                interaction
+                interaction,
             );
         } else if (action === GroupAction.REMOVE) {
             await RemoveCommand.updateOption(
                 messageContext,
                 RemoveType.EXCLUDE,
                 enteredGroupNames,
-                interaction
+                interaction,
             );
         } else {
             await ExcludeCommand.updateOption(
@@ -252,7 +252,7 @@ export default class ExcludeCommand implements BaseCommand {
                 matchedGroups,
                 unmatchedGroups,
                 interaction,
-                action === GroupAction.RESET
+                action === GroupAction.RESET,
             );
         }
     }
@@ -262,16 +262,16 @@ export default class ExcludeCommand implements BaseCommand {
         matchedGroups: MatchedArtist[],
         unmatchedGroups: string[],
         interaction?: Eris.CommandInteraction,
-        reset = false
+        reset = false,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         if (reset) {
             await guildPreference.reset(GameOption.EXCLUDE);
             logger.info(
-                `${getDebugLogHeader(messageContext)} | Exclude reset.`
+                `${getDebugLogHeader(messageContext)} | Exclude reset.`,
             );
 
             await sendOptionsMessage(
@@ -282,7 +282,7 @@ export default class ExcludeCommand implements BaseCommand {
                 false,
                 undefined,
                 undefined,
-                interaction
+                interaction,
             );
 
             return;
@@ -291,11 +291,11 @@ export default class ExcludeCommand implements BaseCommand {
         if (guildPreference.isGroupsMode()) {
             const intersection = setIntersection(
                 matchedGroups.map((x) => x.name),
-                guildPreference.getGroupNames()
+                guildPreference.getGroupNames(),
             );
 
             matchedGroups = matchedGroups.filter(
-                (x) => !intersection.has(x.name)
+                (x) => !intersection.has(x.name),
             );
 
             if (intersection.size > 0) {
@@ -304,7 +304,7 @@ export default class ExcludeCommand implements BaseCommand {
                     {
                         title: i18n.translate(
                             messageContext.guildID,
-                            "misc.failure.groupsExcludeConflict.title"
+                            "misc.failure.groupsExcludeConflict.title",
                         ),
                         description: i18n.translate(
                             messageContext.guildID,
@@ -319,12 +319,12 @@ export default class ExcludeCommand implements BaseCommand {
                                 solutionStepTwo: "`/exclude`",
                                 allowOrPrevent: i18n.translate(
                                     messageContext.guildID,
-                                    "misc.failure.groupsExcludeConflict.prevent"
+                                    "misc.failure.groupsExcludeConflict.prevent",
                                 ),
-                            }
+                            },
                         ),
                     },
-                    interaction
+                    interaction,
                 );
 
                 return;
@@ -337,10 +337,10 @@ export default class ExcludeCommand implements BaseCommand {
         if (unmatchedGroups.length) {
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
+                    messageContext,
                 )} | Attempted to set unknown exclude. exclude = ${unmatchedGroups.join(
-                    ", "
-                )}`
+                    ", ",
+                )}`,
             );
 
             if (
@@ -357,7 +357,7 @@ export default class ExcludeCommand implements BaseCommand {
                     {
                         command: "/exclude",
                         addOrRemove: misplacedPrefix,
-                    }
+                    },
                 );
             }
 
@@ -365,7 +365,7 @@ export default class ExcludeCommand implements BaseCommand {
             if (unmatchedGroups.length === 1) {
                 const suggestions = await getSimilarGroupNames(
                     unmatchedGroups[0],
-                    State.getGuildLocale(messageContext.guildID)
+                    State.getGuildLocale(messageContext.guildID),
                 );
 
                 if (suggestions.length > 0) {
@@ -374,17 +374,17 @@ export default class ExcludeCommand implements BaseCommand {
                         "misc.failure.unrecognizedGroups.didYouMean",
                         {
                             suggestions: suggestions.join("\n"),
-                        }
+                        },
                     );
                 }
             }
 
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
+                    messageContext,
                 )} | Attempted to set unknown exclude. exclude = ${unmatchedGroups.join(
-                    ", "
-                )}`
+                    ", ",
+                )}`,
             );
 
             const descriptionText = i18n.translate(
@@ -393,7 +393,7 @@ export default class ExcludeCommand implements BaseCommand {
                 {
                     matchedGroupsAction: i18n.translate(
                         messageContext.guildID,
-                        "command.exclude.failure.unrecognizedGroups.excluded"
+                        "command.exclude.failure.unrecognizedGroups.excluded",
                     ),
                     helpGroups: "`/help groups`",
                     unmatchedGroups: `${unmatchedGroups.join(", ")}`,
@@ -402,9 +402,9 @@ export default class ExcludeCommand implements BaseCommand {
                         "misc.failure.unrecognizedGroups.solution",
                         {
                             command: "`/exclude add`",
-                        }
+                        },
                     ),
-                }
+                },
             );
 
             embeds.push({
@@ -412,7 +412,7 @@ export default class ExcludeCommand implements BaseCommand {
                 author: messageContext.author,
                 title: i18n.translate(
                     messageContext.guildID,
-                    "misc.failure.unrecognizedGroups.title"
+                    "misc.failure.unrecognizedGroups.title",
                 ),
                 description: `${descriptionText}\n\n${suggestionsText || ""}`,
                 footerText: excludeWarning,
@@ -428,7 +428,7 @@ export default class ExcludeCommand implements BaseCommand {
                     false,
                     undefined,
                     embeds.slice(1),
-                    interaction
+                    interaction,
                 );
             }
 
@@ -438,8 +438,8 @@ export default class ExcludeCommand implements BaseCommand {
         await guildPreference.setExcludes(matchedGroups);
         logger.info(
             `${getDebugLogHeader(
-                messageContext
-            )} | Exclude set to ${guildPreference.getDisplayedExcludesGroupNames()}`
+                messageContext,
+            )} | Exclude set to ${guildPreference.getDisplayedExcludesGroupNames()}`,
         );
 
         const optionsMessage = await generateOptionsMessage(
@@ -449,7 +449,7 @@ export default class ExcludeCommand implements BaseCommand {
             [{ option: GameOption.EXCLUDE, reset: false }],
             false,
             undefined,
-            undefined
+            undefined,
         );
 
         if (optionsMessage) {
@@ -459,7 +459,7 @@ export default class ExcludeCommand implements BaseCommand {
                 true,
                 undefined,
                 embeds,
-                interaction
+                interaction,
             );
         } else {
             await notifyOptionsGenerationError(messageContext, "exclude");
@@ -471,7 +471,7 @@ export default class ExcludeCommand implements BaseCommand {
      * @param interaction - The interaction with intermediate typing state
      */
     static async processAutocompleteInteraction(
-        interaction: Eris.AutocompleteInteraction
+        interaction: Eris.AutocompleteInteraction,
     ): Promise<void> {
         return processGroupAutocompleteInteraction(interaction);
     }

@@ -41,7 +41,7 @@ export default class NewsCommand implements BaseCommand {
 
     static sendNews = async (
         messageContext: MessageContext,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> => {
         let newsData: string;
         try {
@@ -56,13 +56,13 @@ export default class NewsCommand implements BaseCommand {
             {
                 title: i18n.translate(
                     messageContext.guildID,
-                    "command.news.updates.title"
+                    "command.news.updates.title",
                 ),
                 description: newsData,
                 thumbnailUrl: KmqImages.READING_BOOK,
                 footerText: `${State.version} | ${i18n.translate(
                     messageContext.guildID,
-                    "command.news.updates.footer"
+                    "command.news.updates.footer",
                 )}`,
                 components: [
                     {
@@ -75,7 +75,7 @@ export default class NewsCommand implements BaseCommand {
                                 emoji: { name: "🎵", id: null },
                                 label: i18n.translate(
                                     messageContext.guildID,
-                                    "misc.interaction.officialKmqServer"
+                                    "misc.interaction.officialKmqServer",
                                 ),
                             },
                         ],
@@ -85,7 +85,7 @@ export default class NewsCommand implements BaseCommand {
             false,
             undefined,
             [],
-            interaction
+            interaction,
         );
 
         logger.info(`${getDebugLogHeader(messageContext)} | News retrieved.`);
@@ -97,7 +97,7 @@ export default class NewsCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         await NewsCommand.sendNews(messageContext, interaction);
     }

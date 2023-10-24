@@ -19,7 +19,7 @@ import type ParsedMessage from "../../interfaces/parsed_message";
 const logger = new IPCLogger("messageCreate");
 
 function isGuildMessage(
-    message: Eris.Message
+    message: Eris.Message,
 ): message is GuildTextableMessage {
     return (
         message.channel instanceof Eris.TextChannel ||
@@ -46,7 +46,7 @@ const parseMessage = (message: string): ParsedMessage | null => {
  * @param message - The original message
  */
 export default async function messageCreateHandler(
-    message: Eris.Message
+    message: Eris.Message,
 ): Promise<void> {
     if (message.author.id === process.env.BOT_CLIENT_ID || message.author.bot)
         return;
@@ -65,14 +65,14 @@ export default async function messageCreateHandler(
     ) {
         // Any message that mentions the bot sends the current options
         const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
+            message.guildID,
         );
 
         sendOptionsMessage(
             Session.getSession(message.guildID),
             messageContext,
             guildPreference,
-            []
+            [],
         );
         return;
     }
@@ -89,8 +89,8 @@ export default async function messageCreateHandler(
                 `User ${
                     message.author.id
                 } is being rate limited. ${State.rateLimiter.timeRemaining(
-                    message.author.id
-                )}ms remaining.`
+                    message.author.id,
+                )}ms remaining.`,
             );
             return;
         }
@@ -102,7 +102,7 @@ export default async function messageCreateHandler(
                 invokedCommand.validations ?? null,
                 typeof invokedCommand.help === "function"
                     ? invokedCommand.help(message.guildID).usage
-                    : undefined
+                    : undefined,
             )
         ) {
             if (invokedCommand.preRunChecks) {
@@ -124,7 +124,7 @@ export default async function messageCreateHandler(
             logger.info(
                 `${getDebugLogHeader(message)} | Invoked command '${
                     parsedMessage.action
-                }'.`
+                }'.`,
             );
 
             try {
@@ -138,30 +138,30 @@ export default async function messageCreateHandler(
 
                 logger.error(
                     `${getDebugLogHeader(
-                        messageContext
+                        messageContext,
                     )} | Error while invoking command (${
                         parsedMessage.action
                     }) | ${debugId} | Exception Name: ${err.name}. Reason: ${
                         err.message
-                    }. Trace: ${err.stack}}`
+                    }. Trace: ${err.stack}}`,
                 );
 
                 await sendErrorMessage(messageContext, {
                     title: i18n.translate(
                         messageContext.guildID,
-                        "misc.failure.command.title"
+                        "misc.failure.command.title",
                     ),
                     description: i18n.translate(
                         messageContext.guildID,
                         "misc.failure.command.description",
-                        { debugId }
+                        { debugId },
                     ),
                 });
                 const newSession = Session.getSession(message.guildID);
 
                 if (newSession) {
                     await newSession.endSession(
-                        "Unknown error during command invocation, cleaning up"
+                        "Unknown error during command invocation, cleaning up",
                     );
                 }
             }

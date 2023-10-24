@@ -9,7 +9,7 @@ import type Eris from "eris";
  */
 export default async function voiceChannelLeaveHandler(
     member: Eris.Member,
-    oldChannel: Eris.VoiceChannel
+    oldChannel: Eris.VoiceChannel,
 ): Promise<void> {
     const guildID = oldChannel.guild.id;
     const session = Session.getSession(guildID);
@@ -27,7 +27,7 @@ export default async function voiceChannelLeaveHandler(
 
     if (checkBotIsAlone(guildID)) {
         session.endSession(
-            "Voice channel is empty, during voice channel leave"
+            "Voice channel is empty, during voice channel leave",
         );
         return;
     }

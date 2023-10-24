@@ -34,7 +34,7 @@ describe("game round", () => {
                         vtype: "main",
                         selectionWeight: 1,
                     },
-                    5
+                    5,
                 );
 
                 assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
@@ -70,7 +70,7 @@ describe("game round", () => {
                         vtype: "main",
                         selectionWeight: 1,
                     },
-                    5
+                    5,
                 );
 
                 assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
@@ -103,7 +103,7 @@ describe("game round", () => {
                         vtype: "main",
                         selectionWeight: 1,
                     },
-                    5
+                    5,
                 );
 
                 assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
@@ -148,7 +148,7 @@ describe("game round", () => {
                                 vtype: "main",
                                 selectionWeight: 1,
                             },
-                            5
+                            5,
                         );
 
                         assert.deepStrictEqual(gameRound.acceptedSongAnswers, [
@@ -188,12 +188,12 @@ describe("game round", () => {
                                 vtype: "main",
                                 selectionWeight: 1,
                             },
-                            5
+                            5,
                         );
 
                         assert.deepStrictEqual(
                             gameRound.acceptedArtistAnswers,
-                            ["Person2", "2인칭", "Person Two", "Person Too"]
+                            ["Person2", "2인칭", "Person Two", "Person Too"],
                         );
                     });
                 });
@@ -206,7 +206,7 @@ describe("game round", () => {
             it("converts to full lower case", () => {
                 assert.strictEqual(
                     normalizePunctuationInName("BLahBLah"),
-                    "blahblah"
+                    "blahblah",
                 );
                 assert.strictEqual(cleanArtistName("ClaHClaH"), "clahclah");
             });
@@ -216,12 +216,12 @@ describe("game round", () => {
             it("removes the whitespace", () => {
                 assert.strictEqual(
                     normalizePunctuationInName("       blahblah          "),
-                    "blahblah"
+                    "blahblah",
                 );
 
                 assert.strictEqual(
                     cleanArtistName("       clahclah          "),
-                    "clahclah"
+                    "clahclah",
                 );
             });
         });
@@ -230,7 +230,7 @@ describe("game round", () => {
             it("removes the specified list of removed punctuation", () => {
                 assert.strictEqual(
                     normalizePunctuationInName("!bl:ah blah?"),
-                    "blahblah"
+                    "blahblah",
                 );
                 assert.strictEqual(cleanArtistName("!cl:ah clah?"), "clahclah");
             });
@@ -240,12 +240,12 @@ describe("game round", () => {
             it("replaces the punctuation with the correct replacement", () => {
                 assert.strictEqual(
                     normalizePunctuationInName("blah & blah"),
-                    "blahandblah"
+                    "blahandblah",
                 );
 
                 assert.strictEqual(
                     cleanArtistName("clah & clah"),
-                    "clahandclah"
+                    "clahandclah",
                 );
             });
         });
@@ -255,7 +255,7 @@ describe("game round", () => {
                 it("does not ignore the sections in the brackets", () => {
                     assert.strictEqual(
                         cleanArtistName("cla(hclah)"),
-                        "clahclah"
+                        "clahclah",
                     );
                 });
             });
@@ -283,7 +283,7 @@ describe("game round", () => {
                     vtype: "main",
                     selectionWeight: 1,
                 },
-                5
+                5,
             );
         });
 
@@ -346,7 +346,7 @@ describe("game round", () => {
                     vtype: "main",
                     selectionWeight: 1,
                 },
-                5
+                5,
             );
         });
 
@@ -354,17 +354,17 @@ describe("game round", () => {
             it("should return 0 points", () => {
                 assert.strictEqual(
                     gameRound.checkGuess("wrong_song", GuessModeType.SONG_NAME),
-                    0
+                    0,
                 );
 
                 assert.strictEqual(
                     gameRound.checkGuess("wrong_artist", GuessModeType.ARTIST),
-                    0
+                    0,
                 );
 
                 assert.strictEqual(
                     gameRound.checkGuess("wrong_both", GuessModeType.BOTH),
-                    0
+                    0,
                 );
             });
         });
@@ -376,9 +376,9 @@ describe("game round", () => {
                     assert.strictEqual(
                         gameRound.checkGuess(
                             "very cool song",
-                            GuessModeType.SONG_NAME
+                            GuessModeType.SONG_NAME,
                         ),
-                        0.5
+                        0.5,
                     );
                 });
             });
@@ -388,9 +388,9 @@ describe("game round", () => {
                     assert.strictEqual(
                         gameRound.checkGuess(
                             "very cool song",
-                            GuessModeType.SONG_NAME
+                            GuessModeType.SONG_NAME,
                         ),
-                        1
+                        1,
                     );
                 });
             });
@@ -399,7 +399,7 @@ describe("game round", () => {
                 it("should return 1 point", () => {
                     assert.strictEqual(
                         gameRound.checkGuess("artist", GuessModeType.ARTIST),
-                        1
+                        1,
                     );
                 });
             });
@@ -410,9 +410,9 @@ describe("game round", () => {
                         assert.strictEqual(
                             gameRound.checkGuess(
                                 "very cool song",
-                                GuessModeType.BOTH
+                                GuessModeType.BOTH,
                             ),
-                            1
+                            1,
                         );
                     });
                 });
@@ -421,7 +421,7 @@ describe("game round", () => {
                     it("should return 0.2 points", () => {
                         assert.strictEqual(
                             gameRound.checkGuess("artist", GuessModeType.BOTH),
-                            0.2
+                            0.2,
                         );
                     });
                 });
@@ -452,32 +452,32 @@ describe("game round", () => {
                 it("should return true", () => {
                     // 1 transposition error (distance = 1)
                     assert.ok(
-                        GameRound.similarityCheck("abcdegf", ["abcdefg"])
+                        GameRound.similarityCheck("abcdegf", ["abcdefg"]),
                     );
 
                     // 2 transposition errors (distance = 2)
                     assert.ok(
-                        GameRound.similarityCheck("bacdegf", ["abcdefg"])
+                        GameRound.similarityCheck("bacdegf", ["abcdefg"]),
                     );
 
                     // 1 removal required (distance = 1)
                     assert.ok(
-                        GameRound.similarityCheck("abcdefgh", ["abcdefg"])
+                        GameRound.similarityCheck("abcdefgh", ["abcdefg"]),
                     );
 
                     // 1 removal, one transposition error (distance = 2)
                     assert.ok(
-                        GameRound.similarityCheck("bacdefgh", ["abcdefg"])
+                        GameRound.similarityCheck("bacdefgh", ["abcdefg"]),
                     );
 
                     // 1 insertion required (distance = 1)
                     assert.ok(
-                        GameRound.similarityCheck("abcdefg", ["abcdefgh"])
+                        GameRound.similarityCheck("abcdefg", ["abcdefgh"]),
                     );
 
                     // 1 insertion required, one transposition error (distance = 2)
                     assert.ok(
-                        GameRound.similarityCheck("abcdegf", ["abcdefgh"])
+                        GameRound.similarityCheck("abcdegf", ["abcdefgh"]),
                     );
                 });
             });
@@ -512,32 +512,32 @@ describe("game round", () => {
                 it("should return false", () => {
                     // 3 transposition errors (distance = 3)
                     assert.ok(
-                        !GameRound.similarityCheck("badcegf", ["abcdefg"])
+                        !GameRound.similarityCheck("badcegf", ["abcdefg"]),
                     );
 
                     // 2 removals required (2 removals not allowed)
                     assert.ok(
-                        !GameRound.similarityCheck("abcdefghi", ["abcdefg"])
+                        !GameRound.similarityCheck("abcdefghi", ["abcdefg"]),
                     );
 
                     // 2 insertions required (2 insertions not allowed)
                     assert.ok(
-                        !GameRound.similarityCheck("abcdefg", ["abcdefghi"])
+                        !GameRound.similarityCheck("abcdefg", ["abcdefghi"]),
                     );
 
                     // 1 removal, 2 transposition error (distance = 3)
                     assert.ok(
-                        !GameRound.similarityCheck("badcefgh", ["abcdefg"])
+                        !GameRound.similarityCheck("badcefgh", ["abcdefg"]),
                     );
 
                     // 1 insertion, 2 transposition error (distance = 3)
                     assert.ok(
-                        !GameRound.similarityCheck("badcef", ["abcdefg"])
+                        !GameRound.similarityCheck("badcef", ["abcdefg"]),
                     );
 
                     // 1 insertion, 1 removal, 1 transposition error (distance = 3)
                     assert.ok(
-                        !GameRound.similarityCheck("bacdegh", ["abcdefg"])
+                        !GameRound.similarityCheck("bacdegh", ["abcdefg"]),
                     );
                 });
             });
@@ -551,7 +551,7 @@ describe("game round", () => {
                             "..........",
                             "eleven",
                             "12345",
-                        ])
+                        ]),
                     );
                 });
             });
@@ -564,7 +564,7 @@ describe("game round", () => {
                             "1234567",
                             "abcdefg",
                             "5454544545",
-                        ])
+                        ]),
                     );
 
                     // 2 transposition errors
@@ -573,7 +573,7 @@ describe("game round", () => {
                             "1234567",
                             "abcdefg",
                             "5454544545",
-                        ])
+                        ]),
                     );
 
                     // 1 removal required
@@ -582,7 +582,7 @@ describe("game round", () => {
                             "1234567",
                             "abcdefg",
                             "5454544545",
-                        ])
+                        ]),
                     );
 
                     // 1 removal, one transposition error
@@ -591,7 +591,7 @@ describe("game round", () => {
                             "1234567",
                             "abcdefg",
                             "5454544545",
-                        ])
+                        ]),
                     );
 
                     // 1 insertion required
@@ -600,7 +600,7 @@ describe("game round", () => {
                             "1234567",
                             "abcdefg",
                             "5454544545",
-                        ])
+                        ]),
                     );
 
                     // 1 insertion required, one transposition error
@@ -609,7 +609,7 @@ describe("game round", () => {
                             "1234567",
                             "abcdefg",
                             "5454544545",
-                        ])
+                        ]),
                     );
                 });
             });
@@ -638,7 +638,7 @@ describe("game round", () => {
                     vtype: "main",
                     selectionWeight: 1,
                 },
-                5
+                5,
             );
         });
 
@@ -655,7 +655,7 @@ describe("game round", () => {
                 gameRound.hintUsed = true;
                 assert.strictEqual(
                     gameRound.getExpReward(),
-                    exp * ExpBonusModifierValues[ExpBonusModifier.HINT_USED]
+                    exp * ExpBonusModifierValues[ExpBonusModifier.HINT_USED],
                 );
             });
         });
@@ -665,7 +665,7 @@ describe("game round", () => {
                 gameRound.setBaseExpReward(exp);
                 assert.strictEqual(
                     gameRound.getExpReward(true),
-                    exp * ExpBonusModifierValues[ExpBonusModifier.TYPO]
+                    exp * ExpBonusModifierValues[ExpBonusModifier.TYPO],
                 );
             });
         });
@@ -692,7 +692,7 @@ describe("game round", () => {
                     vtype: "main",
                     selectionWeight: 1,
                 },
-                5
+                5,
             );
         });
 
@@ -707,7 +707,7 @@ describe("game round", () => {
                 guess,
                 createdAt,
                 guessModeType,
-                typosAllowed
+                typosAllowed,
             );
 
             assert.deepStrictEqual(gameRound.getGuesses(), {
@@ -736,7 +736,7 @@ describe("game round", () => {
                 firstGuess,
                 firstGuessCreatedAt,
                 guessModeType,
-                typosAllowed
+                typosAllowed,
             );
 
             assert.deepStrictEqual(gameRound.getGuesses(), {
@@ -761,7 +761,7 @@ describe("game round", () => {
                 secondGuess,
                 secondGuessCreatedAt,
                 guessModeType,
-                typosAllowed
+                typosAllowed,
             );
 
             assert.deepStrictEqual(gameRound.getGuesses(), {

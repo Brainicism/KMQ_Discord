@@ -44,15 +44,15 @@ export default class ScoreCommand implements BaseCommand {
     };
 
     static async showScore(
-        messageOrInteraction: GuildTextableMessage | CommandInteraction
+        messageOrInteraction: GuildTextableMessage | CommandInteraction,
     ): Promise<void> {
         const gameSession = Session.getSession(
-            messageOrInteraction.guildID as string
+            messageOrInteraction.guildID as string,
         ) as GameSession;
 
         await gameSession.sendScoreboardMessage(messageOrInteraction);
         logger.info(
-            `${getDebugLogHeader(messageOrInteraction)} | Score retrieved`
+            `${getDebugLogHeader(messageOrInteraction)} | Score retrieved`,
         );
     }
 
@@ -62,7 +62,7 @@ export default class ScoreCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        _messageContext: MessageContext
+        _messageContext: MessageContext,
     ): Promise<void> {
         await ScoreCommand.showScore(interaction);
     }

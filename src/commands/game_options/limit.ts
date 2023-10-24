@@ -68,7 +68,7 @@ export default class LimitCommand implements BaseCommand {
                     "command.limit.help.example.singleLimit",
                     {
                         limit: String(250),
-                    }
+                    },
                 ),
             },
             {
@@ -76,7 +76,7 @@ export default class LimitCommand implements BaseCommand {
                 explanation: i18n.translate(
                     guildID,
                     "command.limit.help.example.twoLimits",
-                    { limitStart: String(250), limitEnd: String(500) }
+                    { limitStart: String(250), limitEnd: String(500) },
                 ),
             },
             {
@@ -84,7 +84,7 @@ export default class LimitCommand implements BaseCommand {
                 explanation: i18n.translate(
                     guildID,
                     "command.limit.help.example.reset",
-                    { defaultLimit: `\`${DEFAULT_LIMIT}\`` }
+                    { defaultLimit: `\`${DEFAULT_LIMIT}\`` },
                 ),
             },
         ],
@@ -101,7 +101,7 @@ export default class LimitCommand implements BaseCommand {
                     name: OptionAction.SET,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.limit.help.interaction.description"
+                        "command.limit.help.interaction.description",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -110,10 +110,10 @@ export default class LimitCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.limit.help.interaction.description"
+                                    "command.limit.help.interaction.description",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -123,7 +123,7 @@ export default class LimitCommand implements BaseCommand {
                             name: LimitAppCommandAction.TOP,
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.limit.help.interaction.description_top"
+                                "command.limit.help.interaction.description_top",
                             ),
 
                             description_localizations: Object.values(LocaleType)
@@ -133,10 +133,10 @@ export default class LimitCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.limit.help.interaction.description_top"
+                                            "command.limit.help.interaction.description_top",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -146,11 +146,11 @@ export default class LimitCommand implements BaseCommand {
                                     name: "limit",
                                     description: i18n.translate(
                                         LocaleType.EN,
-                                        "command.limit.help.interaction.limit"
+                                        "command.limit.help.interaction.limit",
                                     ),
 
                                     description_localizations: Object.values(
-                                        LocaleType
+                                        LocaleType,
                                     )
                                         .filter((x) => x !== LocaleType.EN)
                                         .reduce(
@@ -158,10 +158,10 @@ export default class LimitCommand implements BaseCommand {
                                                 ...acc,
                                                 [locale]: i18n.translate(
                                                     locale,
-                                                    "command.limit.help.interaction.limit"
+                                                    "command.limit.help.interaction.limit",
                                                 ),
                                             }),
-                                            {}
+                                            {},
                                         ),
 
                                     type: Eris.Constants
@@ -176,7 +176,7 @@ export default class LimitCommand implements BaseCommand {
                             name: LimitAppCommandAction.RANGE,
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.limit.help.interaction.description_range"
+                                "command.limit.help.interaction.description_range",
                             ),
 
                             description_localizations: Object.values(LocaleType)
@@ -186,10 +186,10 @@ export default class LimitCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.limit.help.interaction.description_range"
+                                            "command.limit.help.interaction.description_range",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -199,11 +199,11 @@ export default class LimitCommand implements BaseCommand {
                                     name: "limit_start",
                                     description: i18n.translate(
                                         LocaleType.EN,
-                                        "command.limit.help.interaction.limit_start"
+                                        "command.limit.help.interaction.limit_start",
                                     ),
 
                                     description_localizations: Object.values(
-                                        LocaleType
+                                        LocaleType,
                                     )
                                         .filter((x) => x !== LocaleType.EN)
                                         .reduce(
@@ -211,10 +211,10 @@ export default class LimitCommand implements BaseCommand {
                                                 ...acc,
                                                 [locale]: i18n.translate(
                                                     locale,
-                                                    "command.limit.help.interaction.limit_start"
+                                                    "command.limit.help.interaction.limit_start",
                                                 ),
                                             }),
-                                            {}
+                                            {},
                                         ),
 
                                     type: Eris.Constants
@@ -227,10 +227,10 @@ export default class LimitCommand implements BaseCommand {
                                     name: "limit_end",
                                     description: i18n.translate(
                                         LocaleType.EN,
-                                        "command.limit.help.interaction.limit_end"
+                                        "command.limit.help.interaction.limit_end",
                                     ),
                                     description_localizations: Object.values(
-                                        LocaleType
+                                        LocaleType,
                                     )
                                         .filter((x) => x !== LocaleType.EN)
                                         .reduce(
@@ -238,10 +238,10 @@ export default class LimitCommand implements BaseCommand {
                                                 ...acc,
                                                 [locale]: i18n.translate(
                                                     locale,
-                                                    "command.limit.help.interaction.limit_end"
+                                                    "command.limit.help.interaction.limit_end",
                                                 ),
                                             }),
-                                            {}
+                                            {},
                                         ),
 
                                     type: Eris.Constants
@@ -259,7 +259,7 @@ export default class LimitCommand implements BaseCommand {
                     description: i18n.translate(
                         LocaleType.EN,
                         "command.limit.help.example.reset",
-                        { defaultLimit: String(DEFAULT_LIMIT) }
+                        { defaultLimit: String(DEFAULT_LIMIT) },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -269,10 +269,10 @@ export default class LimitCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "command.limit.help.example.reset",
-                                    { defaultLimit: String(DEFAULT_LIMIT) }
+                                    { defaultLimit: String(DEFAULT_LIMIT) },
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
@@ -301,7 +301,7 @@ export default class LimitCommand implements BaseCommand {
             limitStart,
             limitEnd,
             undefined,
-            true
+            true,
         );
     };
 
@@ -310,10 +310,10 @@ export default class LimitCommand implements BaseCommand {
         limitStart: number | null,
         limitEnd: number | null,
         interaction?: Eris.CommandInteraction,
-        optionsOnUpdate = true
+        optionsOnUpdate = true,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         const reset = limitStart == null && limitEnd == null;
@@ -327,21 +327,21 @@ export default class LimitCommand implements BaseCommand {
                     {
                         title: i18n.translate(
                             messageContext.guildID,
-                            "command.limit.failure.invalidLimit.title"
+                            "command.limit.failure.invalidLimit.title",
                         ),
                         description: i18n.translate(
                             messageContext.guildID,
-                            "command.limit.failure.invalidLimit.greaterThanZero.description"
+                            "command.limit.failure.invalidLimit.greaterThanZero.description",
                         ),
                     },
-                    interaction
+                    interaction,
                 );
                 return;
             }
 
             if (limitStart === null || limitEnd === null) {
                 logger.error(
-                    `Unexpected null limitStart/limitEnd: ${limitStart} ${limitEnd}`
+                    `Unexpected null limitStart/limitEnd: ${limitStart} ${limitEnd}`,
                 );
                 return;
             }
@@ -352,14 +352,14 @@ export default class LimitCommand implements BaseCommand {
                     {
                         title: i18n.translate(
                             messageContext.guildID,
-                            "command.limit.failure.invalidLimit.title"
+                            "command.limit.failure.invalidLimit.title",
                         ),
                         description: i18n.translate(
                             messageContext.guildID,
-                            "command.limit.failure.invalidLimit.greaterThanStart.description"
+                            "command.limit.failure.invalidLimit.greaterThanStart.description",
                         ),
                     },
-                    interaction
+                    interaction,
                 );
                 return;
             }
@@ -369,7 +369,7 @@ export default class LimitCommand implements BaseCommand {
             logger.info(
                 `${getDebugLogHeader(messageContext)} | Limit set to ${
                     guildPreference.gameOptions.limitStart
-                } - ${guildPreference.gameOptions.limitEnd}`
+                } - ${guildPreference.gameOptions.limitEnd}`,
             );
         }
 
@@ -382,7 +382,7 @@ export default class LimitCommand implements BaseCommand {
                 false,
                 undefined,
                 undefined,
-                interaction
+                interaction,
             );
         }
     }
@@ -393,7 +393,7 @@ export default class LimitCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
@@ -421,7 +421,7 @@ export default class LimitCommand implements BaseCommand {
             limitStart,
             limitEnd,
             interaction,
-            true
+            true,
         );
     }
 }

@@ -49,16 +49,16 @@ describe("song selector", () => {
                         const { songs } =
                             await SongSelector.getFilteredSongList(
                                 guildPreference,
-                                true
+                                true,
                             );
 
                         assert.strict(songs.size > 0);
                         assert.strictEqual(
                             Array.from(songs).every(
-                                (song) => song.members === gender
+                                (song) => song.members === gender,
                             ),
                             true,
-                            `Gender query (${gender}) does not match with actual gender count`
+                            `Gender query (${gender}) does not match with actual gender count`,
                         );
                     }
                 });
@@ -74,15 +74,15 @@ describe("song selector", () => {
                     await guildPreference.setGender(genderSetting);
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every((song) =>
-                            ["male", "female"].includes(song.members)
+                            ["male", "female"].includes(song.members),
                         ),
-                        true
+                        true,
                     );
                 });
             });
@@ -99,15 +99,15 @@ describe("song selector", () => {
                     await guildPreference.setGroups([selectedArtist]);
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every(
-                            (song) => song.artistID === selectedArtist.id
+                            (song) => song.artistID === selectedArtist.id,
                         ),
-                        true
+                        true,
                     );
                 });
             });
@@ -123,7 +123,7 @@ describe("song selector", () => {
                     await guildPreference.setGroups(selectedArtists);
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strict(songs.size > 0);
@@ -131,9 +131,9 @@ describe("song selector", () => {
                         Array.from(songs).every((song) =>
                             selectedArtists
                                 .map((x) => x.id)
-                                .includes(song.artistID)
+                                .includes(song.artistID),
                         ),
-                        true
+                        true,
                     );
                 });
             });
@@ -152,7 +152,7 @@ describe("song selector", () => {
                     await guildPreference.setIncludes(includedArtists);
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strict(songs.size > 0);
@@ -162,9 +162,9 @@ describe("song selector", () => {
                                 song.members === "female" ||
                                 includedArtists
                                     .map((x) => x.id)
-                                    .includes(song.artistID)
+                                    .includes(song.artistID),
                         ),
-                        true
+                        true,
                     );
                 });
             });
@@ -182,7 +182,7 @@ describe("song selector", () => {
                     await guildPreference.setExcludes(excludeArtists);
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strict(songs.size > 0);
@@ -192,9 +192,9 @@ describe("song selector", () => {
                                 song.members === "female" &&
                                 excludeArtists
                                     .map((x) => x.id)
-                                    .every((x) => x !== song.artistID)
+                                    .every((x) => x !== song.artistID),
                         ),
-                        true
+                        true,
                     );
                 });
             });
@@ -206,13 +206,13 @@ describe("song selector", () => {
                     await guildPreference.setArtistType(ArtistType.SOLOIST);
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every((song) => song.isSolo === "y"),
-                        true
+                        true,
                     );
                 });
             });
@@ -222,13 +222,13 @@ describe("song selector", () => {
                     await guildPreference.setArtistType(ArtistType.GROUP);
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every((song) => song.isSolo === "n"),
-                        true
+                        true,
                     );
                 });
             });
@@ -240,15 +240,16 @@ describe("song selector", () => {
                     await guildPreference.setBeginningCutoffYear(2016);
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every(
-                            (song) => song.publishDate >= new Date("2016-01-01")
+                            (song) =>
+                                song.publishDate >= new Date("2016-01-01"),
                         ),
-                        true
+                        true,
                     );
                 });
             });
@@ -258,15 +259,15 @@ describe("song selector", () => {
                     await guildPreference.setEndCutoffYear(2015);
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every(
-                            (song) => song.publishDate < new Date("2016-01-01")
+                            (song) => song.publishDate < new Date("2016-01-01"),
                         ),
-                        true
+                        true,
                     );
                 });
             });
@@ -277,7 +278,7 @@ describe("song selector", () => {
                     await guildPreference.setEndCutoffYear(2018);
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strict(songs.size > 0);
@@ -285,9 +286,9 @@ describe("song selector", () => {
                         Array.from(songs).every(
                             (song) =>
                                 song.publishDate >= new Date("2008-01-01") &&
-                                song.publishDate < new Date("2019-01-01")
+                                song.publishDate < new Date("2019-01-01"),
                         ),
-                        true
+                        true,
                     );
                 });
             });
@@ -298,7 +299,7 @@ describe("song selector", () => {
                     await guildPreference.setEndCutoffYear(2017);
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strict(songs.size > 0);
@@ -306,9 +307,9 @@ describe("song selector", () => {
                         Array.from(songs).every(
                             (song) =>
                                 song.publishDate >= new Date("2017-01-01") &&
-                                song.publishDate < new Date("2018-01-01")
+                                song.publishDate < new Date("2018-01-01"),
                         ),
-                        true
+                        true,
                     );
                 });
             });
@@ -323,14 +324,14 @@ describe("song selector", () => {
                 it("should have all songs with equal weight", async () => {
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strict(songs.size > 0);
                     assert.ok(
                         Array.from(songs).every(
-                            (song) => song.selectionWeight === 1
-                        )
+                            (song) => song.selectionWeight === 1,
+                        ),
                     );
                 });
             });
@@ -339,25 +340,25 @@ describe("song selector", () => {
                 describe("weighted easy", () => {
                     it("should have decreasing weight values", async () => {
                         await guildPreference.setShuffleType(
-                            ShuffleType.WEIGHTED_EASY
+                            ShuffleType.WEIGHTED_EASY,
                         );
                         const { songs } =
                             await SongSelector.getFilteredSongList(
                                 guildPreference,
-                                true
+                                true,
                             );
 
                         const songsArray = Array.from(songs);
                         assert.ok(
                             songsArray[0].selectionWeight! >
                                 songsArray[songsArray.length - 1]
-                                    .selectionWeight!
+                                    .selectionWeight!,
                         );
 
                         for (let i = 1; i < songsArray.length - 1; i++) {
                             assert.ok(
                                 songsArray[i - 1].selectionWeight! >=
-                                    songsArray[i].selectionWeight!
+                                    songsArray[i].selectionWeight!,
                             );
                         }
                     });
@@ -366,25 +367,25 @@ describe("song selector", () => {
                 describe("weighted hard", () => {
                     it("should have increasing weight values", async () => {
                         await guildPreference.setShuffleType(
-                            ShuffleType.WEIGHTED_HARD
+                            ShuffleType.WEIGHTED_HARD,
                         );
                         const { songs } =
                             await SongSelector.getFilteredSongList(
                                 guildPreference,
-                                true
+                                true,
                             );
 
                         const songsArray = Array.from(songs);
                         assert.ok(
                             songsArray[0].selectionWeight! <
                                 songsArray[songsArray.length - 1]
-                                    .selectionWeight!
+                                    .selectionWeight!,
                         );
 
                         for (let i = 1; i < songsArray.length - 1; i++) {
                             assert.ok(
                                 songsArray[i - 1].selectionWeight! <=
-                                    songsArray[i].selectionWeight!
+                                    songsArray[i].selectionWeight!,
                             );
                         }
                     });
@@ -397,11 +398,11 @@ describe("song selector", () => {
                 it("should chronologically go through months, selecting randomly in each month", async () => {
                     await guildPreference.setLimit(0, 10000);
                     await guildPreference.setShuffleType(
-                        ShuffleType.CHRONOLOGICAL
+                        ShuffleType.CHRONOLOGICAL,
                     );
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strict(songs.size > 0);
@@ -413,13 +414,13 @@ describe("song selector", () => {
                                 (x) =>
                                     new Date(
                                         x.publishDate.getFullYear(),
-                                        x.publishDate.getMonth()
-                                    )
+                                        x.publishDate.getMonth(),
+                                    ),
                             )
                             .every(
                                 (value, i, arr) =>
-                                    i === 0 || value >= arr[i - 1]
-                            )
+                                    i === 0 || value >= arr[i - 1],
+                            ),
                     );
 
                     // Songs are random within each month
@@ -427,9 +428,9 @@ describe("song selector", () => {
                         [...songs].sort(
                             (a, b) =>
                                 a.publishDate.getTime() -
-                                b.publishDate.getTime()
+                                b.publishDate.getTime(),
                         ),
-                        [...songs]
+                        [...songs],
                     );
                 });
             });
@@ -438,11 +439,11 @@ describe("song selector", () => {
                 it("should reverse-chronologically go through months, selecting randomly in each month", async () => {
                     await guildPreference.setLimit(0, 10000);
                     await guildPreference.setShuffleType(
-                        ShuffleType.REVERSE_CHRONOLOGICAL
+                        ShuffleType.REVERSE_CHRONOLOGICAL,
                     );
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strict(songs.size > 0);
@@ -454,13 +455,13 @@ describe("song selector", () => {
                                 (x) =>
                                     new Date(
                                         x.publishDate.getFullYear(),
-                                        x.publishDate.getMonth()
-                                    )
+                                        x.publishDate.getMonth(),
+                                    ),
                             )
                             .every(
                                 (value, i, arr) =>
-                                    i === 0 || value <= arr[i - 1]
-                            )
+                                    i === 0 || value <= arr[i - 1],
+                            ),
                     );
 
                     // Songs are random within each month
@@ -468,9 +469,9 @@ describe("song selector", () => {
                         [...songs].sort(
                             (a, b) =>
                                 b.publishDate.getTime() -
-                                a.publishDate.getTime()
+                                a.publishDate.getTime(),
                         ),
-                        [...songs]
+                        [...songs],
                     );
                 });
             });
@@ -483,19 +484,19 @@ describe("song selector", () => {
                 it("should only return the songs by the specified group, excluding subunits", async () => {
                     await guildPreference.setGroups(artists);
                     await guildPreference.setSubunitPreference(
-                        SubunitsPreference.EXCLUDE
+                        SubunitsPreference.EXCLUDE,
                     );
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every(
-                            (song) => song.artistID === artists[0].id
+                            (song) => song.artistID === artists[0].id,
                         ),
-                        true
+                        true,
                     );
                 });
             });
@@ -504,12 +505,12 @@ describe("song selector", () => {
                 it("should only return the songs by the specified group, including subunits", async () => {
                     await guildPreference.setGroups(artists);
                     await guildPreference.setSubunitPreference(
-                        SubunitsPreference.INCLUDE
+                        SubunitsPreference.INCLUDE,
                     );
 
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     const expectedSubunitIds = [17, 43, 105, 248, 4531];
@@ -520,10 +521,10 @@ describe("song selector", () => {
                     assert.strictEqual(
                         Array.from(songs).every((song) =>
                             [...expectedSubunitIds, artists[0].id].includes(
-                                song.artistID
-                            )
+                                song.artistID,
+                            ),
                         ),
-                        true
+                        true,
                     );
 
                     // should have song from each one of the expected artists/subunits
@@ -531,7 +532,7 @@ describe("song selector", () => {
                         new Set(Array.from(songs).map((song) => song.artistID))
                             .size ===
                             expectedSubunitIds.length + 1,
-                        true
+                        true,
                     );
                 });
 
@@ -544,12 +545,12 @@ describe("song selector", () => {
                     await guildPreference.setGroups([group]);
 
                     await guildPreference.setSubunitPreference(
-                        SubunitsPreference.INCLUDE
+                        SubunitsPreference.INCLUDE,
                     );
 
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strict(songs.size > 0);
@@ -557,9 +558,9 @@ describe("song selector", () => {
                     // all songs must be one of the artist
                     assert.strictEqual(
                         Array.from(songs).every(
-                            (song) => song.artistID === group.id
+                            (song) => song.artistID === group.id,
                         ),
-                        true
+                        true,
                     );
                 });
             });
@@ -573,13 +574,13 @@ describe("song selector", () => {
                     const shadowbannedArtists = [1177];
 
                     await guildPreference.setSubunitPreference(
-                        SubunitsPreference.INCLUDE
+                        SubunitsPreference.INCLUDE,
                     );
 
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
                         true,
-                        shadowbannedArtists
+                        shadowbannedArtists,
                     );
 
                     assert.strict(songs.size > 0);
@@ -588,9 +589,9 @@ describe("song selector", () => {
                     assert.strictEqual(
                         Array.from(songs).every(
                             (song) =>
-                                !shadowbannedArtists.includes(song.artistID)
+                                !shadowbannedArtists.includes(song.artistID),
                         ),
-                        true
+                        true,
                     );
                 });
             });
@@ -627,12 +628,12 @@ describe("song selector", () => {
 
                     await guildPreference.setGroups(matchedGroups);
                     await guildPreference.setSubunitPreference(
-                        SubunitsPreference.INCLUDE
+                        SubunitsPreference.INCLUDE,
                     );
 
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strict(songs.size > 0);
@@ -641,10 +642,10 @@ describe("song selector", () => {
                     assert.strictEqual(
                         expectedIds.every((artistId) =>
                             Array.from(songs).some(
-                                (song) => song.artistID === artistId
-                            )
+                                (song) => song.artistID === artistId,
+                            ),
                         ),
-                        true
+                        true,
                     );
                 });
             });
@@ -654,19 +655,19 @@ describe("song selector", () => {
             describe("exclude OSTs", () => {
                 it("should only return songs, not including OSTs", async () => {
                     await guildPreference.setOstPreference(
-                        OstPreference.EXCLUDE
+                        OstPreference.EXCLUDE,
                     );
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every(
-                            (song) => !song.tags!.includes("o")
+                            (song) => !song.tags!.includes("o"),
                         ),
-                        true
+                        true,
                     );
                 });
             });
@@ -674,22 +675,22 @@ describe("song selector", () => {
             describe("include OSTs", () => {
                 it("should only return songs including OSTs", async () => {
                     await guildPreference.setOstPreference(
-                        OstPreference.INCLUDE
+                        OstPreference.INCLUDE,
                     );
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     // should have both non osts and osts
                     assert.strictEqual(
                         Array.from(songs).filter((song) =>
-                            song.tags!.includes("o")
+                            song.tags!.includes("o"),
                         ).length > 0 &&
                             Array.from(songs).filter(
-                                (song) => !song.tags!.includes("o")
+                                (song) => !song.tags!.includes("o"),
                             ).length > 0,
-                        true
+                        true,
                     );
                 });
             });
@@ -697,19 +698,19 @@ describe("song selector", () => {
             describe("exclusive OSTs", () => {
                 it("should only return songs which are exclusively OSTs", async () => {
                     await guildPreference.setOstPreference(
-                        OstPreference.EXCLUSIVE
+                        OstPreference.EXCLUSIVE,
                     );
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every((song) =>
-                            song.tags!.includes("o")
+                            song.tags!.includes("o"),
                         ),
-                        true
+                        true,
                     );
                 });
             });
@@ -719,19 +720,19 @@ describe("song selector", () => {
             describe("exclude remixes", () => {
                 it("should only return songs, not including remixes", async () => {
                     await guildPreference.setRemixPreference(
-                        RemixPreference.EXCLUDE
+                        RemixPreference.EXCLUDE,
                     );
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every(
-                            (song) => !song.tags!.includes("x")
+                            (song) => !song.tags!.includes("x"),
                         ),
-                        true
+                        true,
                     );
                 });
             });
@@ -739,22 +740,22 @@ describe("song selector", () => {
             describe("include remixes", () => {
                 it("should only return songs including remixes", async () => {
                     await guildPreference.setRemixPreference(
-                        RemixPreference.INCLUDE
+                        RemixPreference.INCLUDE,
                     );
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     // should have both non remixes and remixes
                     assert.strictEqual(
                         Array.from(songs).filter((song) =>
-                            song.tags!.includes("x")
+                            song.tags!.includes("x"),
                         ).length > 0 &&
                             Array.from(songs).filter(
-                                (song) => !song.tags!.includes("x")
+                                (song) => !song.tags!.includes("x"),
                             ).length > 0,
-                        true
+                        true,
                     );
                 });
             });
@@ -772,7 +773,7 @@ describe("song selector", () => {
                     await guildPreference.setLimit(0, limit);
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strictEqual(songs.size, expectedSongCount);
@@ -786,7 +787,7 @@ describe("song selector", () => {
                     await guildPreference.setLanguageType(LanguageType.KOREAN);
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strict(songs.size > 0);
@@ -797,10 +798,10 @@ describe("song selector", () => {
                             (song) =>
                                 _.intersection(
                                     song.tags!.split(""),
-                                    FOREIGN_LANGUAGE_TAGS
-                                ).length === 0
+                                    FOREIGN_LANGUAGE_TAGS,
+                                ).length === 0,
                         ),
-                        true
+                        true,
                     );
                 });
             });
@@ -810,7 +811,7 @@ describe("song selector", () => {
                     await guildPreference.setLanguageType(LanguageType.ALL);
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strict(songs.size > 0);
@@ -818,10 +819,10 @@ describe("song selector", () => {
                     assert.strictEqual(
                         FOREIGN_LANGUAGE_TAGS.every((languageTag) =>
                             Array.from(songs).some((song) =>
-                                song.tags!.split("").includes(languageTag)
-                            )
+                                song.tags!.split("").includes(languageTag),
+                            ),
                         ),
-                        true
+                        true,
                     );
                 });
             });
@@ -833,15 +834,15 @@ describe("song selector", () => {
                     await guildPreference.setReleaseType(ReleaseType.OFFICIAL);
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every(
-                            (song) => song.vtype === "main"
+                            (song) => song.vtype === "main",
                         ),
-                        true
+                        true,
                     );
                 });
             });
@@ -851,17 +852,17 @@ describe("song selector", () => {
                     await guildPreference.setReleaseType(ReleaseType.ALL);
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strictEqual(
                         Array.from(songs).filter(
-                            (song) => song.vtype === "main"
+                            (song) => song.vtype === "main",
                         ).length > 0 &&
                             Array.from(songs).filter(
-                                (song) => song.vtype === "audio"
+                                (song) => song.vtype === "audio",
                             ).length > 0,
-                        true
+                        true,
                     );
                 });
             });
@@ -874,7 +875,7 @@ describe("song selector", () => {
                     await guildPreference.setForcePlaySong(songLink);
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strictEqual(songs.size, 1);
@@ -885,11 +886,11 @@ describe("song selector", () => {
             describe("forced song does not exist", () => {
                 it("should not match anything", async () => {
                     await guildPreference.setForcePlaySong(
-                        "oppa gangnam style"
+                        "oppa gangnam style",
                     );
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        true
+                        true,
                     );
 
                     assert.strictEqual(songs.size, 0);
@@ -903,7 +904,7 @@ describe("song selector", () => {
                     const isPremium = false;
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        isPremium
+                        isPremium,
                     );
 
                     assert.strict(songs.size > 0);
@@ -911,9 +912,9 @@ describe("song selector", () => {
                         Array.from(songs).every(
                             (song) =>
                                 song.rank <=
-                                Number(process.env.AUDIO_SONGS_PER_ARTIST)
+                                Number(process.env.AUDIO_SONGS_PER_ARTIST),
                         ),
-                        true
+                        true,
                     );
                 });
             });
@@ -923,7 +924,7 @@ describe("song selector", () => {
                     const isPremium = true;
                     const { songs } = await SongSelector.getFilteredSongList(
                         guildPreference,
-                        isPremium
+                        isPremium,
                     );
 
                     assert.strict(songs.size > 0);
@@ -932,10 +933,10 @@ describe("song selector", () => {
                             (song) =>
                                 song.rank <=
                                 Number(
-                                    process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST
-                                )
+                                    process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST,
+                                ),
                         ),
-                        true
+                        true,
                     );
                 });
             });
@@ -954,7 +955,7 @@ describe("song selector", () => {
                     const filteredSongs = (
                         await SongSelector.getFilteredSongList(
                             guildPreference,
-                            true
+                            true,
                         )
                     ).songs;
 
@@ -964,17 +965,17 @@ describe("song selector", () => {
                             SongSelector.selectRandomSong(
                                 filteredSongs,
                                 new Set(
-                                    femaleOrCoedSongs.map((x) => x.youtubeLink)
+                                    femaleOrCoedSongs.map((x) => x.youtubeLink),
                                 ),
-                                "female"
-                            ) as QueriedSong
+                                "female",
+                            ) as QueriedSong,
                         );
                     }
 
                     assert.ok(
                         femaleOrCoedSongs.every((song) =>
-                            ["female", "coed"].includes(song.members)
-                        )
+                            ["female", "coed"].includes(song.members),
+                        ),
                     );
                 });
             });
@@ -985,7 +986,7 @@ describe("song selector", () => {
                     const filteredSongs = (
                         await SongSelector.getFilteredSongList(
                             guildPreference,
-                            true
+                            true,
                         )
                     ).songs;
 
@@ -995,17 +996,17 @@ describe("song selector", () => {
                             SongSelector.selectRandomSong(
                                 filteredSongs,
                                 new Set(
-                                    maleOrCoedSongs.map((x) => x.youtubeLink)
+                                    maleOrCoedSongs.map((x) => x.youtubeLink),
                                 ),
-                                "male"
-                            ) as QueriedSong
+                                "male",
+                            ) as QueriedSong,
                         );
                     }
 
                     assert.ok(
                         maleOrCoedSongs.every((song) =>
-                            ["male", "coed"].includes(song.members)
-                        )
+                            ["male", "coed"].includes(song.members),
+                        ),
                     );
                 });
             });
@@ -1019,13 +1020,13 @@ describe("song selector", () => {
                     const filteredSongs = (
                         await SongSelector.getFilteredSongList(
                             guildPreference,
-                            true
+                            true,
                         )
                     ).songs;
 
                     assert.strict(filteredSongs.size > 0);
                     const ignoredSongs = new Set(
-                        Array.from(filteredSongs).slice(0, numIgnored)
+                        Array.from(filteredSongs).slice(0, numIgnored),
                     );
 
                     const selectedSongs: Array<QueriedSong> = [];
@@ -1035,21 +1036,21 @@ describe("song selector", () => {
                                 filteredSongs,
                                 new Set(
                                     [...ignoredSongs, ...selectedSongs].map(
-                                        (x) => x.youtubeLink
-                                    )
+                                        (x) => x.youtubeLink,
+                                    ),
                                 ),
-                                null
-                            ) as QueriedSong
+                                null,
+                            ) as QueriedSong,
                         );
                     }
 
                     assert.strictEqual(
                         selectedSongs.length,
-                        filteredSongs.size - numIgnored
+                        filteredSongs.size - numIgnored,
                     );
 
                     assert.ok(
-                        selectedSongs.every((song) => !ignoredSongs.has(song))
+                        selectedSongs.every((song) => !ignoredSongs.has(song)),
                     );
                 });
             });
@@ -1090,7 +1091,7 @@ describe("song selector", () => {
                 assert.strictEqual(songSelector.uniqueSongsPlayed.size, 1);
                 assert.strictEqual(
                     [...songSelector.uniqueSongsPlayed][0],
-                    song.youtubeLink
+                    song.youtubeLink,
                 );
             });
         });
@@ -1106,8 +1107,8 @@ describe("song selector", () => {
                 for (let i = 0; i < limit; i++) {
                     songs.push(
                         songSelector.queryRandomSong(
-                            guildPreference
-                        ) as QueriedSong
+                            guildPreference,
+                        ) as QueriedSong,
                     );
                 }
 
@@ -1138,7 +1139,7 @@ describe("song selector", () => {
                     it("should not reset the unique song queue", async () => {
                         const numberSongs = 5;
                         await guildPreference.setShuffleType(
-                            ShuffleType.RANDOM
+                            ShuffleType.RANDOM,
                         );
                         await guildPreference.setLimit(0, numberSongs);
                         await songSelector.reloadSongs(guildPreference, true);
@@ -1146,12 +1147,12 @@ describe("song selector", () => {
                         // play all songs but one
                         for (let i = 0; i < numberSongs - 1; i++) {
                             assert(
-                                songSelector.queryRandomSong(guildPreference)
+                                songSelector.queryRandomSong(guildPreference),
                             );
 
                             assert.strictEqual(
                                 songSelector.checkUniqueSongQueue(),
-                                false
+                                false,
                             );
                         }
 
@@ -1164,20 +1165,20 @@ describe("song selector", () => {
                         it("should reset the unique song queue, queryRandomSong should not return null ", async () => {
                             const numberSongs = LAST_PLAYED_SONG_QUEUE_SIZE + 1;
                             await guildPreference.setShuffleType(
-                                ShuffleType.RANDOM
+                                ShuffleType.RANDOM,
                             );
                             await guildPreference.setLimit(0, numberSongs);
                             await songSelector.reloadSongs(
                                 guildPreference,
-                                true
+                                true,
                             );
 
                             // play all songs
                             for (let i = 0; i < numberSongs; i++) {
                                 assert(
                                     songSelector.queryRandomSong(
-                                        guildPreference
-                                    )
+                                        guildPreference,
+                                    ),
                                 );
                             }
 
@@ -1185,13 +1186,13 @@ describe("song selector", () => {
 
                             assert.strictEqual(
                                 songSelector.checkUniqueSongQueue(),
-                                true
+                                true,
                             );
 
                             assert.strictEqual(resetSpy.called, true);
                             // play the first song after reset
                             assert(
-                                songSelector.queryRandomSong(guildPreference)
+                                songSelector.queryRandomSong(guildPreference),
                             );
                         });
                     });
@@ -1200,37 +1201,37 @@ describe("song selector", () => {
                         it("should reset the unique song queue", async () => {
                             const numberSongs = 5;
                             await guildPreference.setShuffleType(
-                                ShuffleType.RANDOM
+                                ShuffleType.RANDOM,
                             );
                             await guildPreference.setLimit(0, numberSongs);
                             await songSelector.reloadSongs(
                                 guildPreference,
-                                true
+                                true,
                             );
 
                             // play all songs but one
                             for (let i = 0; i < numberSongs - 1; i++) {
                                 assert(
                                     songSelector.queryRandomSong(
-                                        guildPreference
-                                    )
+                                        guildPreference,
+                                    ),
                                 );
 
                                 assert.strictEqual(
                                     songSelector.checkUniqueSongQueue(),
-                                    false
+                                    false,
                                 );
                             }
 
                             assert.strictEqual(resetSpy.called, false);
                             // play the last song
                             assert(
-                                songSelector.queryRandomSong(guildPreference)
+                                songSelector.queryRandomSong(guildPreference),
                             );
 
                             assert.strictEqual(
                                 songSelector.checkUniqueSongQueue(),
-                                true
+                                true,
                             );
                             assert.strictEqual(resetSpy.called, true);
                         });
@@ -1242,7 +1243,7 @@ describe("song selector", () => {
                         const numberSongs = 5;
                         const numberOfResets = 50;
                         await guildPreference.setShuffleType(
-                            ShuffleType.RANDOM
+                            ShuffleType.RANDOM,
                         );
                         await guildPreference.setLimit(0, numberSongs);
                         await songSelector.reloadSongs(guildPreference, true);
@@ -1250,17 +1251,17 @@ describe("song selector", () => {
                         // play all songs but one
                         for (let i = 0; i < numberSongs * numberOfResets; i++) {
                             assert(
-                                songSelector.queryRandomSong(guildPreference)
+                                songSelector.queryRandomSong(guildPreference),
                             );
                             if (i > 0 && (i + 1) % numberSongs === 0) {
                                 assert.strictEqual(
                                     songSelector.checkUniqueSongQueue(),
-                                    true
+                                    true,
                                 );
                             } else {
                                 assert.strictEqual(
                                     songSelector.checkUniqueSongQueue(),
-                                    false
+                                    false,
                                 );
                             }
                         }
@@ -1276,7 +1277,7 @@ describe("song selector", () => {
                         const numberSongs = 10;
                         const newNumberSongs = numberSongs / 2;
                         await guildPreference.setShuffleType(
-                            ShuffleType.RANDOM
+                            ShuffleType.RANDOM,
                         );
                         await guildPreference.setLimit(0, numberSongs);
                         await songSelector.reloadSongs(guildPreference, true);
@@ -1289,7 +1290,7 @@ describe("song selector", () => {
                         songSelector.uniqueSongsPlayed = new Set(songs);
                         assert.strictEqual(
                             songSelector.checkUniqueSongQueue(),
-                            false
+                            false,
                         );
                         assert.strictEqual(resetSpy.called, false);
 
@@ -1300,7 +1301,7 @@ describe("song selector", () => {
                         // expect unique song queue to have been reset
                         assert.strictEqual(
                             songSelector.checkUniqueSongQueue(),
-                            true
+                            true,
                         );
                         assert.strictEqual(resetSpy.called, true);
                     });
@@ -1311,22 +1312,22 @@ describe("song selector", () => {
                         const numberSongs = 10;
                         const newNumberSongs = numberSongs + 1;
                         await guildPreference.setShuffleType(
-                            ShuffleType.RANDOM
+                            ShuffleType.RANDOM,
                         );
                         await guildPreference.setLimit(0, numberSongs);
                         await songSelector.reloadSongs(guildPreference, true);
                         let songs = [...songSelector.getSongs().songs].map(
-                            (x) => x.youtubeLink
+                            (x) => x.youtubeLink,
                         );
 
                         // play all but one of the songs
                         songSelector.uniqueSongsPlayed = new Set(
-                            songs.slice(0, -1)
+                            songs.slice(0, -1),
                         );
 
                         assert.strictEqual(
                             songSelector.checkUniqueSongQueue(),
-                            false
+                            false,
                         );
 
                         // update to superset song set
@@ -1334,20 +1335,20 @@ describe("song selector", () => {
                         await songSelector.reloadSongs(guildPreference, true);
                         assert.strictEqual(
                             songSelector.checkUniqueSongQueue(),
-                            false
+                            false,
                         );
                         assert.strictEqual(resetSpy.called, false);
 
                         // play remaining two songs
                         songs = [...songSelector.getSongs().songs].map(
-                            (x) => x.youtubeLink
+                            (x) => x.youtubeLink,
                         );
                         songSelector.uniqueSongsPlayed = new Set(songs);
 
                         // expect unique song queue to have been reset
                         assert.strictEqual(
                             songSelector.checkUniqueSongQueue(),
-                            true
+                            true,
                         );
                         assert.strictEqual(resetSpy.called, true);
                     });
@@ -1357,12 +1358,12 @@ describe("song selector", () => {
                     it("should reset the unique song queue", async () => {
                         const numberSongs = 10;
                         await guildPreference.setShuffleType(
-                            ShuffleType.RANDOM
+                            ShuffleType.RANDOM,
                         );
                         await guildPreference.setLimit(0, numberSongs);
                         await songSelector.reloadSongs(guildPreference, true);
                         const songs = [...songSelector.getSongs().songs].map(
-                            (x) => x.youtubeLink
+                            (x) => x.youtubeLink,
                         );
 
                         const songsNotInSet = ["AAAAAAA", "BBBBBB", "CCCCCCCC"];
@@ -1371,23 +1372,23 @@ describe("song selector", () => {
                         songSelector.uniqueSongsPlayed = new Set(
                             songs
                                 .slice(0, numberSongs - songsNotInSet.length)
-                                .concat(songsNotInSet)
+                                .concat(songsNotInSet),
                         );
 
                         assert.strictEqual(
                             songSelector.checkUniqueSongQueue(),
-                            false
+                            false,
                         );
                         assert.strictEqual(resetSpy.called, false);
 
                         // play songs in set (enough to reset)
                         songSelector.uniqueSongsPlayed = new Set(
-                            songs.slice(0, numberSongs).concat(songsNotInSet)
+                            songs.slice(0, numberSongs).concat(songsNotInSet),
                         );
 
                         assert.strictEqual(
                             songSelector.checkUniqueSongQueue(),
-                            true
+                            true,
                         );
                         assert.strictEqual(resetSpy.called, true);
                     });
@@ -1430,7 +1431,7 @@ describe("song selector", () => {
                         songSelector.checkAlternatingGender(guildPreference);
                         assert.strictEqual(
                             songSelector.lastAlternatingGender,
-                            "female"
+                            "female",
                         );
                     });
                 });
@@ -1441,7 +1442,7 @@ describe("song selector", () => {
                         songSelector.checkAlternatingGender(guildPreference);
                         assert.strictEqual(
                             songSelector.lastAlternatingGender,
-                            "male"
+                            "male",
                         );
                     });
                 });

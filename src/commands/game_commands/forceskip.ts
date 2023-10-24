@@ -31,7 +31,7 @@ export default class ForceSkipCommand implements BaseCommand {
         name: "forceskip",
         description: i18n.translate(
             guildID,
-            "command.forceskip.help.description"
+            "command.forceskip.help.description",
         ),
         usage: "/forceskip",
         examples: [],
@@ -48,18 +48,18 @@ export default class ForceSkipCommand implements BaseCommand {
 
     call = async ({ message }: CommandArgs): Promise<void> => {
         await ForceSkipCommand.executeForceSkip(
-            MessageContext.fromMessage(message)
+            MessageContext.fromMessage(message),
         );
     };
 
     static async executeForceSkip(
         messageContext: MessageContext,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         if (
             !areUserAndBotInSameVoiceChannel(
                 messageContext.author.id,
-                messageContext.guildID
+                messageContext.guildID,
             )
         ) {
             await sendErrorMessage(
@@ -67,20 +67,20 @@ export default class ForceSkipCommand implements BaseCommand {
                 {
                     title: i18n.translate(
                         messageContext.guildID,
-                        "command.forceskip.skipIgnored"
+                        "command.forceskip.skipIgnored",
                     ),
                     description: i18n.translate(
                         messageContext.guildID,
-                        "misc.preCheck.differentVC"
+                        "misc.preCheck.differentVC",
                     ),
                 },
-                interaction
+                interaction,
             );
 
             logger.warn(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Invalid forceskip. User and bot are not in the same voice channel.`
+                    messageContext,
+                )} | Invalid forceskip. User and bot are not in the same voice channel.`,
             );
             return;
         }
@@ -96,15 +96,15 @@ export default class ForceSkipCommand implements BaseCommand {
                 {
                     title: i18n.translate(
                         messageContext.guildID,
-                        "misc.failure.round.noneInProgress.title"
+                        "misc.failure.round.noneInProgress.title",
                     ),
                     description: i18n.translate(
                         messageContext.guildID,
-                        "misc.failure.round.noneInProgress.description"
+                        "misc.failure.round.noneInProgress.description",
                     ),
                     thumbnailUrl: KmqImages.NOT_IMPRESSED,
                 },
-                interaction
+                interaction,
             );
             return;
         }
@@ -115,15 +115,15 @@ export default class ForceSkipCommand implements BaseCommand {
                 {
                     title: i18n.translate(
                         messageContext.guildID,
-                        "command.forceskip.skipIgnored"
+                        "command.forceskip.skipIgnored",
                     ),
                     description: i18n.translate(
                         messageContext.guildID,
                         "command.forceskip.failure.notOwner.description",
-                        { mentionedUser: getMention(session.owner.id) }
+                        { mentionedUser: getMention(session.owner.id) },
                     ),
                 },
-                interaction
+                interaction,
             );
             return;
         }
@@ -136,14 +136,14 @@ export default class ForceSkipCommand implements BaseCommand {
                 title: i18n.translate(messageContext.guildID, "misc.skip"),
                 description: i18n.translate(
                     messageContext.guildID,
-                    "command.forceskip.description"
+                    "command.forceskip.description",
                 ),
                 thumbnailUrl: KmqImages.NOT_IMPRESSED,
             },
             true,
             undefined,
             [],
-            interaction
+            interaction,
         );
 
         await session.endRound(messageContext, {
@@ -153,7 +153,7 @@ export default class ForceSkipCommand implements BaseCommand {
         await session.startRound(messageContext);
         session.lastActiveNow();
         logger.info(
-            `${getDebugLogHeader(messageContext)} | Owner force-skipped.`
+            `${getDebugLogHeader(messageContext)} | Owner force-skipped.`,
         );
     }
 
@@ -163,7 +163,7 @@ export default class ForceSkipCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         await ForceSkipCommand.executeForceSkip(messageContext, interaction);
     }

@@ -84,7 +84,7 @@ export function escapedFormatting(text: string): string {
  */
 export function clickableSlashCommand(
     commandName: string,
-    subcommandName?: string
+    subcommandName?: string,
 ): string {
     let commandAndSubcommand = commandName;
 
@@ -136,13 +136,13 @@ export function clickableSlashCommand(
  */
 export function chunkArray<T>(
     array: Array<T>,
-    chunkSize: number
+    chunkSize: number,
 ): Array<Array<T>> {
     const chunkedArrays: Array<Array<T>> = [];
     for (let i = 0; i < array.length; i += chunkSize) {
         const embedFieldsSubset: Array<T> = array.slice(
             i,
-            Math.min(i + chunkSize, array.length)
+            Math.min(i + chunkSize, array.length),
         );
 
         chunkedArrays.push(embedFieldsSubset);
@@ -162,14 +162,14 @@ export function getAudioDurationInSeconds(songPath: string): Promise<number> {
             (_err, stdout, stderr) => {
                 if (!stdout || stderr) {
                     logger.error(
-                        `Error getting audio duration: path = ${songPath}, err = ${stderr}`
+                        `Error getting audio duration: path = ${songPath}, err = ${stderr}`,
                     );
                     resolve(0);
                     return;
                 }
 
                 resolve(parseInt(stdout, 10));
-            }
+            },
         );
     });
 }
@@ -217,7 +217,7 @@ export function weekOfYear(dateObj?: Date): number {
             ((date.getTime() - week1.getTime()) / (1000 * 60 * 60 * 24) -
                 3 +
                 ((week1.getDay() + 6) % 7)) /
-                7
+                7,
         )
     );
 }
@@ -241,7 +241,7 @@ export function chooseRandom<T>(list: Array<T>): T {
  */
 export function chooseWeightedRandom(
     list: Array<any>,
-    weightKey = "weight"
+    weightKey = "weight",
 ): any {
     const weights: Array<number> = [];
     for (let i = 0; i < list.length; i++) {
@@ -278,7 +278,7 @@ export function standardDateFormat(date: Date): string {
  */
 export function discordDateFormat(
     date: Date,
-    format: "t" | "T" | "d" | "D" | "f" | "F" | "R"
+    format: "t" | "T" | "d" | "D" | "f" | "F" | "R",
 ): string {
     return `<t:${Math.floor(date.getTime() / 1000)}:${format}>`;
 }
@@ -295,7 +295,7 @@ export function friendlyFormattedDate(date: Date, guildID: string): string {
         return i18n.translateN(
             guildID,
             "misc.plural.minuteAgo",
-            Math.ceil(timeDiffMinutes)
+            Math.ceil(timeDiffMinutes),
         );
     }
 
@@ -304,7 +304,7 @@ export function friendlyFormattedDate(date: Date, guildID: string): string {
         return i18n.translateN(
             guildID,
             "misc.plural.hourAgo",
-            Math.ceil(timeDiffHours)
+            Math.ceil(timeDiffHours),
         );
     }
 
@@ -324,7 +324,7 @@ export async function retryJob<Type>(
     jobArgs: Array<any>,
     maxRetries: number,
     firstTry: boolean,
-    delayDuration?: number
+    delayDuration?: number,
 ): Promise<Type> {
     if (!firstTry && delayDuration) {
         await delay(delayDuration);
@@ -351,10 +351,10 @@ export function retryWithExponentialBackoff<T>(
     func: () => Promise<T>,
     description: string | undefined,
     maxRetries = 5,
-    initialDelayMs = 1000
+    initialDelayMs = 1000,
 ): Promise<T> {
     logger.info(
-        `Executing retry with exponential backoff for ${uuid.v4()}}. ${description}`
+        `Executing retry with exponential backoff for ${uuid.v4()}}. ${description}`,
     );
     return new Promise((resolve, reject) => {
         let retryCount = 0;
@@ -365,14 +365,14 @@ export function retryWithExponentialBackoff<T>(
                 logger.info(
                     `Executing retry with exponential backoff for ${uuid.v4()}}. Retries remaining: ${
                         maxRetries - retryCount
-                    }/${maxRetries}`
+                    }/${maxRetries}`,
                 );
                 const result = await func();
                 resolve(result);
             } catch (error) {
                 if (retryCount >= maxRetries) {
                     logger.info(
-                        `Retry with exponential backoff for ${uuid.v4()}} failed. after ${maxRetries} retries`
+                        `Retry with exponential backoff for ${uuid.v4()}} failed. after ${maxRetries} retries`,
                     );
                     reject(error);
                     return;
@@ -514,7 +514,7 @@ export function setIntersection<Type>(...args: Array<Array<Type>>): Set<Type> {
  * @returns - The execution time in ms
  */
 export async function measureExecutionTime(
-    promise: Promise<any>
+    promise: Promise<any>,
 ): Promise<number> {
     const hrstart = process.hrtime();
     await promise;
@@ -528,7 +528,7 @@ export async function measureExecutionTime(
  */
 export function containsHangul(s: string): boolean {
     return /[\uac00-\ud7af]|[\u1100-\u11ff]|[\u3130-\u318f]|[\ua960-\ua97f]|[\ud7b0-\ud7ff]/giu.test(
-        s
+        s,
     );
 }
 
@@ -583,7 +583,7 @@ export function isValidURL(url: string): boolean {
 export function mapTo<T, S extends T, K extends keyof T>(
     target: T,
     source: S,
-    key: K
+    key: K,
 ): void {
     target[key] = source[key];
 }
@@ -618,7 +618,7 @@ export function durationDays(startTime: number, endTime: number): number {
 export function visualProgressBar(
     current: number,
     total: number,
-    barLength = 10
+    barLength = 10,
 ): string {
     // Ensure the ratio is between 0 and 1
     const ratio = Math.max(0, Math.min(1, current / total));

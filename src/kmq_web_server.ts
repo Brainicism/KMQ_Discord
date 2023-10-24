@@ -71,7 +71,7 @@ export default class KmqWebServer {
             ] as number;
 
             await fleet.ipc.allClustersCommand(
-                `announce_restart|${restartMinutes}`
+                `announce_restart|${restartMinutes}`,
             );
             reply.code(200).send();
         });
@@ -91,7 +91,7 @@ export default class KmqWebServer {
             const requestAuthorizationToken = request.headers["authorization"];
             if (requestAuthorizationToken !== process.env.TOP_GG_WEBHOOK_AUTH) {
                 logger.warn(
-                    "Webhook received with non-matching authorization token"
+                    "Webhook received with non-matching authorization token",
                 );
                 reply.code(401).send();
                 return;
@@ -125,7 +125,7 @@ export default class KmqWebServer {
                         reply.code(400).send(`Error: ${e.message}`);
                     }
                 }).call(fleet.eris.requestHandler, query);
-            }
+            },
         );
 
         httpServer.get("/ping", async (request, reply) => {
@@ -149,18 +149,18 @@ export default class KmqWebServer {
             try {
                 gameplayStats = (await fleet.ipc.allClustersCommand(
                     "game_session_stats",
-                    true
+                    true,
                 )) as Map<number, any>;
 
                 workerVersions = (await fleet.ipc.allClustersCommand(
                     "worker_version",
-                    true
+                    true,
                 )) as Map<number, any>;
 
                 fleetStats = await fleet.collectStats();
             } catch (e) {
                 logger.error(
-                    `Error fetching stats for status page. err = ${e}`
+                    `Error fetching stats for status page. err = ${e}`,
                 );
                 return "Couldn't retrieve status information. Please try again later.";
             }
@@ -184,17 +184,17 @@ export default class KmqWebServer {
                             guilds: rawShardData.guilds.toLocaleString(),
                             healthIndicator,
                         };
-                    }
+                    },
                 );
 
                 clusterData.push({
                     id: fleetCluster.id,
                     ram: Math.ceil(fleetCluster.ram).toLocaleString(),
                     apiLatency: _.mean(
-                        fleetCluster.shards.map((x) => x.latency)
+                        fleetCluster.shards.map((x) => x.latency),
                     ).toLocaleString(),
                     uptime: standardDateFormat(
-                        new Date(Date.now() - fleetCluster.uptime)
+                        new Date(Date.now() - fleetCluster.uptime),
                     ),
                     version: workerVersions.get(i) as string,
                     voiceConnections: fleetCluster.voice,
@@ -208,7 +208,7 @@ export default class KmqWebServer {
             }
 
             const databaseLatency = await measureExecutionTime(
-                sql`SELECT 1`.execute(this.dbContext.agnostic)
+                sql`SELECT 1`.execute(this.dbContext.agnostic),
             );
 
             let databaseLatencyHealthIndicator: HealthIndicator;
@@ -258,19 +258,19 @@ export default class KmqWebServer {
                 shardCount: fleetStats.shardCount,
                 totalActiveGameSessions: clusterData.reduce(
                     (x, y) => x + y.activeGameSessions,
-                    0
+                    0,
                 ),
                 totalActivePlayers: clusterData.reduce(
                     (x, y) => x + y.activePlayers,
-                    0
+                    0,
                 ),
                 totalActiveListeningSessions: clusterData.reduce(
                     (x, y) => x + y.activeListeningSessions,
-                    0
+                    0,
                 ),
                 totalActiveListeners: clusterData.reduce(
                     (x, y) => x + y.activeListeners,
-                    0
+                    0,
                 ),
             };
 
@@ -283,7 +283,7 @@ export default class KmqWebServer {
         try {
             if (!process.env.WEB_SERVER_PORT) {
                 logger.warn(
-                    "WEB_SERVER_PORT not specified, not starting web server"
+                    "WEB_SERVER_PORT not specified, not starting web server",
                 );
             } else {
                 await httpServer.listen({

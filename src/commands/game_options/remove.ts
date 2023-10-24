@@ -66,17 +66,17 @@ export default class RemoveCommand implements BaseCommand {
                 groups: "`/groups`",
                 exclude: "`/exclude`",
                 include: "`/include`",
-            }
+            },
         ),
         usage: `/groups remove [${i18n.translate(
             guildID,
-            "misc.listOfGroups"
+            "misc.listOfGroups",
         )}]\n\n/include remove [${i18n.translate(
             guildID,
-            "misc.listOfGroups"
+            "misc.listOfGroups",
         )}]\n\n/exclude remove [${i18n.translate(
             guildID,
-            "misc.listOfGroups"
+            "misc.listOfGroups",
         )}]`,
         examples: [
             {
@@ -88,7 +88,7 @@ export default class RemoveCommand implements BaseCommand {
                         groupOne: "Twice",
                         groupTwo: "Red Velvet",
                         groups: "`/groups`",
-                    }
+                    },
                 ),
             },
             {
@@ -102,7 +102,7 @@ export default class RemoveCommand implements BaseCommand {
                         groupTwo: "Dia",
                         groupThree: "iKON",
                         exclude: "`/exclude`",
-                    }
+                    },
                 ),
             },
             {
@@ -113,7 +113,7 @@ export default class RemoveCommand implements BaseCommand {
                     {
                         group: "exo",
                         include: "`/include`",
-                    }
+                    },
                 ),
             },
         ],
@@ -124,7 +124,7 @@ export default class RemoveCommand implements BaseCommand {
                 url: GROUP_LIST_URL,
                 label: i18n.translate(
                     guildID,
-                    "misc.interaction.fullGroupsList"
+                    "misc.interaction.fullGroupsList",
                 ),
             },
         ],
@@ -144,7 +144,7 @@ export default class RemoveCommand implements BaseCommand {
         await RemoveCommand.updateOption(
             MessageContext.fromMessage(message),
             removeType,
-            rawGroupsToRemove
+            rawGroupsToRemove,
         );
     };
 
@@ -152,10 +152,10 @@ export default class RemoveCommand implements BaseCommand {
         messageContext: MessageContext,
         removeType: RemoveType,
         rawGroupsToRemove: Array<string>,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         let currentMatchedArtists: MatchedArtist[] | null;
@@ -185,14 +185,14 @@ export default class RemoveCommand implements BaseCommand {
                 {
                     title: i18n.translate(
                         messageContext.guildID,
-                        "command.remove.failure.noGroupsSelected.title"
+                        "command.remove.failure.noGroupsSelected.title",
                     ),
                     description: i18n.translate(
                         messageContext.guildID,
-                        "command.remove.failure.noGroupsSelected.description"
+                        "command.remove.failure.noGroupsSelected.description",
                     ),
                 },
-                interaction
+                interaction,
             );
             return;
         }
@@ -201,7 +201,7 @@ export default class RemoveCommand implements BaseCommand {
             await getMatchingGroupNames(rawGroupsToRemove);
 
         const remainingGroups = currentMatchedArtists.filter(
-            (group) => !matchedGroups.some((x) => x.id === group.id)
+            (group) => !matchedGroups.some((x) => x.id === group.id),
         );
 
         const embeds: Array<EmbedPayload> = [];
@@ -209,17 +209,17 @@ export default class RemoveCommand implements BaseCommand {
         if (unmatchedGroups.length) {
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
+                    messageContext,
                 )} | Attempted to set unknown groups. groups = ${unmatchedGroups.join(
-                    ", "
-                )}`
+                    ", ",
+                )}`,
             );
 
             let suggestionsText: string | undefined;
             if (unmatchedGroups.length === 1) {
                 const suggestions = await getSimilarGroupNames(
                     unmatchedGroups[0],
-                    State.getGuildLocale(messageContext.guildID)
+                    State.getGuildLocale(messageContext.guildID),
                 );
 
                 if (suggestions.length > 0) {
@@ -228,7 +228,7 @@ export default class RemoveCommand implements BaseCommand {
                         "misc.failure.unrecognizedGroups.didYouMean",
                         {
                             suggestions: suggestions.join("\n"),
-                        }
+                        },
                     );
                 }
             }
@@ -239,12 +239,12 @@ export default class RemoveCommand implements BaseCommand {
                 {
                     matchedGroupsAction: i18n.translate(
                         messageContext.guildID,
-                        "command.remove.failure.unrecognizedGroups.removed"
+                        "command.remove.failure.unrecognizedGroups.removed",
                     ),
                     helpGroups: "/help groups",
                     unmatchedGroups: unmatchedGroups.join(", "),
                     solution: "",
-                }
+                },
             );
 
             embeds.push({
@@ -252,7 +252,7 @@ export default class RemoveCommand implements BaseCommand {
                 author: messageContext.author,
                 title: i18n.translate(
                     messageContext.guildID,
-                    "misc.failure.unrecognizedGroups.title"
+                    "misc.failure.unrecognizedGroups.title",
                 ),
                 description: `${descriptionText}\n\n${suggestionsText || ""}`,
                 thumbnailUrl: KmqImages.DEAD,
@@ -268,7 +268,7 @@ export default class RemoveCommand implements BaseCommand {
                     false,
                     undefined,
                     embeds.slice(1),
-                    interaction
+                    interaction,
                 );
             }
 
@@ -301,8 +301,8 @@ export default class RemoveCommand implements BaseCommand {
 
         logger.info(
             `${getDebugLogHeader(
-                messageContext
-            )} | ${gameOption} removed: ${rawGroupsToRemove}`
+                messageContext,
+            )} | ${gameOption} removed: ${rawGroupsToRemove}`,
         );
 
         const optionsMessage = await generateOptionsMessage(
@@ -312,7 +312,7 @@ export default class RemoveCommand implements BaseCommand {
             [{ option: gameOption, reset: false }],
             false,
             undefined,
-            undefined
+            undefined,
         );
 
         if (optionsMessage) {
@@ -322,7 +322,7 @@ export default class RemoveCommand implements BaseCommand {
                 true,
                 undefined,
                 embeds,
-                interaction
+                interaction,
             );
         } else {
             await notifyOptionsGenerationError(messageContext, "remove");

@@ -48,7 +48,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
         description: i18n.translate(guildID, "command.timer.help.description"),
         usage: `/timer set\ntimer:[${i18n.translate(
             guildID,
-            "command.timer.help.usage.seconds"
+            "command.timer.help.usage.seconds",
         )}]\n\n/timer reset`,
         examples: [
             {
@@ -56,14 +56,14 @@ export default class GuessTimeoutCommand implements BaseCommand {
                 explanation: i18n.translate(
                     guildID,
                     "command.timer.help.example.set",
-                    { timer: String(15) }
+                    { timer: String(15) },
                 ),
             },
             {
                 example: "`/timer reset`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.timer.help.example.reset"
+                    "command.timer.help.example.reset",
                 ),
             },
         ],
@@ -80,7 +80,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
                     name: OptionAction.SET,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.timer.help.interaction.description"
+                        "command.timer.help.interaction.description",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -89,10 +89,10 @@ export default class GuessTimeoutCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.timer.help.interaction.description"
+                                    "command.timer.help.interaction.description",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -102,7 +102,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
                             name: "timer",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.timer.help.interaction.timer"
+                                "command.timer.help.interaction.timer",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -111,10 +111,10 @@ export default class GuessTimeoutCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.timer.help.interaction.timer"
+                                            "command.timer.help.interaction.timer",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -130,7 +130,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
                     description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
-                        { optionName: "timer" }
+                        { optionName: "timer" },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -140,10 +140,10 @@ export default class GuessTimeoutCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "misc.interaction.resetOption",
-                                    { optionName: "timer" }
+                                    { optionName: "timer" },
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -165,17 +165,17 @@ export default class GuessTimeoutCommand implements BaseCommand {
         await GuessTimeoutCommand.updateOption(
             MessageContext.fromMessage(message),
             timer,
-            undefined
+            undefined,
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         timer: number | null,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         const session = Session.getSession(messageContext.guildID);
@@ -188,7 +188,9 @@ export default class GuessTimeoutCommand implements BaseCommand {
             }
 
             logger.info(
-                `${getDebugLogHeader(messageContext)} | Guess timeout disabled.`
+                `${getDebugLogHeader(
+                    messageContext,
+                )} | Guess timeout disabled.`,
             );
         } else {
             await guildPreference.setGuessTimeout(timer);
@@ -196,7 +198,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
             logger.info(
                 `${getDebugLogHeader(messageContext)} | Guess timeout set to ${
                     guildPreference.gameOptions.guessTimeout
-                }`
+                }`,
             );
         }
 
@@ -217,7 +219,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
             false,
             undefined,
             undefined,
-            interaction
+            interaction,
         );
     }
 
@@ -227,7 +229,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
@@ -247,7 +249,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
         await GuessTimeoutCommand.updateOption(
             messageContext,
             timerValue,
-            interaction
+            interaction,
         );
     }
 }

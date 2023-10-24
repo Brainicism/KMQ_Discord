@@ -8,7 +8,7 @@ const logger = new IPCLogger("unavailableGuildCreate");
  * @param guild - the guild object
  */
 export default function unavailableGuildCreateHandler(
-    guild: Eris.UnavailableGuild
+    guild: Eris.UnavailableGuild,
 ): void {
     logger.info(`Guild now unavailable. gid = ${guild.id}`);
 }

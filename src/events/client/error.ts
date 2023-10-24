@@ -9,6 +9,6 @@ const logger = new IPCLogger("error");
  */
 export default function errorHandler(err: Error, shardID: number): void {
     logger.error(
-        `Shard #${shardID} encountered error | Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}}`
+        `Shard #${shardID} encountered error | Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}}`,
     );
 }

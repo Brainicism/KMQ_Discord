@@ -20,12 +20,12 @@ async function generatePresetUUIDs(): Promise<void> {
         .where(
             "guild_id",
             "not in",
-            presetsWithUUID.map((x) => x.guild_id)
+            presetsWithUUID.map((x) => x.guild_id),
         )
         .where(
             "preset_name",
             "not in",
-            presetsWithUUID.map((x) => x.preset_name)
+            presetsWithUUID.map((x) => x.preset_name),
         )
         .execute();
 
@@ -35,7 +35,7 @@ async function generatePresetUUIDs(): Promise<void> {
     }
 
     logger.info(
-        `${presetsWithUUID.length} presets with UUID. Generating presets for ${presetsWithoutUUID.length} presets.`
+        `${presetsWithUUID.length} presets with UUID. Generating presets for ${presetsWithoutUUID.length} presets.`,
     );
 
     await Promise.allSettled(
@@ -49,7 +49,7 @@ async function generatePresetUUIDs(): Promise<void> {
                     option_value: JSON.stringify(`KMQ-${uuid.v4()}`),
                 })
                 .execute();
-        })
+        }),
     );
 }
 

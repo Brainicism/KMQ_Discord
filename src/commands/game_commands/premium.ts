@@ -20,14 +20,14 @@ export default class PremiumCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         description: i18n.translate(
             guildID,
-            "command.premium.help.description"
+            "command.premium.help.description",
         ),
         examples: [
             {
                 example: "`/premium`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.premium.help.example"
+                    "command.premium.help.example",
                 ),
             },
         ],
@@ -46,13 +46,13 @@ export default class PremiumCommand implements BaseCommand {
 
     call = async ({ message }: CommandArgs): Promise<void> => {
         await PremiumCommand.sendPremiumMessage(
-            MessageContext.fromMessage(message)
+            MessageContext.fromMessage(message),
         );
     };
 
     static sendPremiumMessage = async (
         messageContext: MessageContext,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> => {
         if (!KmqConfiguration.Instance.premiumCommandEnabled()) return;
         const premiumMember = await isUserPremium(messageContext.author.id);
@@ -64,40 +64,40 @@ export default class PremiumCommand implements BaseCommand {
                     messageContext.guildID,
                     premiumMember
                         ? "command.premium.status.description.premium"
-                        : "command.premium.status.description.nonPremium"
+                        : "command.premium.status.description.nonPremium",
                 )}\n\n${i18n.translate(
                     messageContext.guildID,
-                    "command.premium.status.description.connectionReminder"
+                    "command.premium.status.description.connectionReminder",
                 )}`,
                 fields: [
                     {
                         name: i18n.translate(
                             messageContext.guildID,
-                            "command.premium.status.perks.moreSongs.title"
+                            "command.premium.status.perks.moreSongs.title",
                         ),
                         value: i18n.translate(
                             messageContext.guildID,
-                            "command.premium.status.perks.moreSongs.description"
+                            "command.premium.status.perks.moreSongs.description",
                         ),
                     },
                     {
                         name: i18n.translate(
                             messageContext.guildID,
-                            "command.premium.status.perks.special.title"
+                            "command.premium.status.perks.special.title",
                         ),
                         value: i18n.translate(
                             messageContext.guildID,
-                            "command.premium.status.perks.special.description"
+                            "command.premium.status.perks.special.description",
                         ),
                     },
                     {
                         name: i18n.translate(
                             messageContext.guildID,
-                            "command.premium.status.perks.badge.title"
+                            "command.premium.status.perks.badge.title",
                         ),
                         value: i18n.translate(
                             messageContext.guildID,
-                            "command.premium.status.perks.badge.description"
+                            "command.premium.status.perks.badge.description",
                         ),
                     },
                 ],
@@ -106,13 +106,13 @@ export default class PremiumCommand implements BaseCommand {
                     messageContext.guildID,
                     premiumMember
                         ? "command.premium.status.title.premium"
-                        : "command.premium.status.title.nonPremium"
+                        : "command.premium.status.title.nonPremium",
                 ),
             },
             false,
             undefined,
             [],
-            interaction
+            interaction,
         );
     };
 
@@ -122,7 +122,7 @@ export default class PremiumCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         await PremiumCommand.sendPremiumMessage(messageContext, interaction);
     }

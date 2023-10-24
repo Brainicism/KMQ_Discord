@@ -51,17 +51,17 @@ export default class GroupsCommand implements BaseCommand {
             "command.groups.help.description",
             {
                 groupList: GROUP_LIST_URL,
-            }
+            },
         ),
         usage: `/groups set [${i18n.translate(
             guildID,
-            "misc.listOfGroups"
+            "misc.listOfGroups",
         )}]\n\n/groups add [${i18n.translate(
             guildID,
-            "misc.listOfGroups"
+            "misc.listOfGroups",
         )}]\n\n/groups remove [${i18n.translate(
             guildID,
-            "misc.listOfGroups"
+            "misc.listOfGroups",
         )}]\n\n/groups reset`,
         examples: [
             {
@@ -71,7 +71,7 @@ export default class GroupsCommand implements BaseCommand {
                     "command.groups.help.example.singleGroup",
                     {
                         group: "Blackpink",
-                    }
+                    },
                 ),
             },
             {
@@ -84,14 +84,14 @@ export default class GroupsCommand implements BaseCommand {
                         groupOne: "Blackpink",
                         groupTwo: "BTS",
                         groupThree: "Red Velvet",
-                    }
+                    },
                 ),
             },
             {
                 example: "`/groups reset`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.groups.help.example.reset"
+                    "command.groups.help.example.reset",
                 ),
             },
         ],
@@ -102,7 +102,7 @@ export default class GroupsCommand implements BaseCommand {
                 url: GROUP_LIST_URL,
                 label: i18n.translate(
                     guildID,
-                    "misc.interaction.fullGroupsList"
+                    "misc.interaction.fullGroupsList",
                 ),
             },
         ],
@@ -118,7 +118,7 @@ export default class GroupsCommand implements BaseCommand {
                 name: action,
                 description: i18n.translate(
                     LocaleType.EN,
-                    `command.groups.help.interaction.${action}.description`
+                    `command.groups.help.interaction.${action}.description`,
                 ),
                 description_localizations: Object.values(LocaleType)
                     .filter((x) => x !== LocaleType.EN)
@@ -127,10 +127,10 @@ export default class GroupsCommand implements BaseCommand {
                             ...acc,
                             [locale]: i18n.translate(
                                 locale,
-                                `command.groups.help.interaction.${action}.description`
+                                `command.groups.help.interaction.${action}.description`,
                             ),
                         }),
-                        {}
+                        {},
                     ),
 
                 type: Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
@@ -142,10 +142,10 @@ export default class GroupsCommand implements BaseCommand {
                               description: i18n.translate(
                                   LocaleType.EN,
                                   `command.groups.help.interaction.${action}.perGroupDescription`,
-                                  { ordinalNum: getOrdinalNum(x + 1) }
+                                  { ordinalNum: getOrdinalNum(x + 1) },
                               ),
                               description_localizations: Object.values(
-                                  LocaleType
+                                  LocaleType,
                               )
                                   .filter((y) => y !== LocaleType.EN)
                                   .reduce(
@@ -156,12 +156,12 @@ export default class GroupsCommand implements BaseCommand {
                                               `command.groups.help.interaction.${action}.perGroupDescription`,
                                               {
                                                   ordinalNum: getOrdinalNum(
-                                                      x + 1
+                                                      x + 1,
                                                   ),
-                                              }
+                                              },
                                           ),
                                       }),
-                                      {}
+                                      {},
                                   ),
 
                               type: Eris.Constants.ApplicationCommandOptionTypes
@@ -180,7 +180,7 @@ export default class GroupsCommand implements BaseCommand {
                 [],
                 [],
                 undefined,
-                true
+                true,
             );
             return;
         }
@@ -195,7 +195,7 @@ export default class GroupsCommand implements BaseCommand {
         await GroupsCommand.updateOption(
             MessageContext.fromMessage(message),
             matchedGroups,
-            unmatchedGroups
+            unmatchedGroups,
         );
     };
 
@@ -204,10 +204,10 @@ export default class GroupsCommand implements BaseCommand {
         matchedGroups: MatchedArtist[],
         unmatchedGroups: string[],
         interaction?: Eris.CommandInteraction,
-        reset = false
+        reset = false,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         if (reset) {
@@ -221,7 +221,7 @@ export default class GroupsCommand implements BaseCommand {
                 false,
                 undefined,
                 undefined,
-                interaction
+                interaction,
             );
 
             return;
@@ -230,11 +230,11 @@ export default class GroupsCommand implements BaseCommand {
         if (guildPreference.isExcludesMode()) {
             const intersection = setIntersection(
                 matchedGroups.map((x) => x.name),
-                guildPreference.getExcludesGroupNames()
+                guildPreference.getExcludesGroupNames(),
             );
 
             matchedGroups = matchedGroups.filter(
-                (x) => !intersection.has(x.name)
+                (x) => !intersection.has(x.name),
             );
             if (intersection.size > 0) {
                 sendErrorMessage(
@@ -242,7 +242,7 @@ export default class GroupsCommand implements BaseCommand {
                     {
                         title: i18n.translate(
                             messageContext.guildID,
-                            "misc.failure.groupsExcludeConflict.title"
+                            "misc.failure.groupsExcludeConflict.title",
                         ),
                         description: i18n.translate(
                             messageContext.guildID,
@@ -257,12 +257,12 @@ export default class GroupsCommand implements BaseCommand {
                                 solutionStepTwo: "`/groups`",
                                 allowOrPrevent: i18n.translate(
                                     messageContext.guildID,
-                                    "misc.failure.groupsExcludeConflict.allow"
+                                    "misc.failure.groupsExcludeConflict.allow",
                                 ),
-                            }
+                            },
                         ),
                     },
-                    interaction
+                    interaction,
                 );
 
                 return;
@@ -275,10 +275,10 @@ export default class GroupsCommand implements BaseCommand {
         if (unmatchedGroups.length) {
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
+                    messageContext,
                 )} | Attempted to set unknown groups. groups = ${unmatchedGroups.join(
-                    ", "
-                )}`
+                    ", ",
+                )}`,
             );
 
             if (
@@ -295,7 +295,7 @@ export default class GroupsCommand implements BaseCommand {
                     {
                         command: "/groups",
                         addOrRemove: misplacedPrefix,
-                    }
+                    },
                 );
             }
 
@@ -303,7 +303,7 @@ export default class GroupsCommand implements BaseCommand {
             if (unmatchedGroups.length === 1) {
                 const suggestions = await getSimilarGroupNames(
                     unmatchedGroups[0],
-                    State.getGuildLocale(messageContext.guildID)
+                    State.getGuildLocale(messageContext.guildID),
                 );
 
                 if (suggestions.length > 0) {
@@ -312,7 +312,7 @@ export default class GroupsCommand implements BaseCommand {
                         "misc.failure.unrecognizedGroups.didYouMean",
                         {
                             suggestions: suggestions.join("\n"),
-                        }
+                        },
                     );
                 }
             }
@@ -323,7 +323,7 @@ export default class GroupsCommand implements BaseCommand {
                 {
                     matchedGroupsAction: i18n.translate(
                         messageContext.guildID,
-                        "misc.failure.unrecognizedGroups.added"
+                        "misc.failure.unrecognizedGroups.added",
                     ),
                     helpGroups: "`/help groups`",
                     unmatchedGroups: unmatchedGroups.join(", "),
@@ -332,15 +332,15 @@ export default class GroupsCommand implements BaseCommand {
                         "misc.failure.unrecognizedGroups.solution",
                         {
                             command: "`/groups add`",
-                        }
+                        },
                     ),
-                }
+                },
             );
 
             embeds.push({
                 title: i18n.translate(
                     messageContext.guildID,
-                    "misc.failure.unrecognizedGroups.title"
+                    "misc.failure.unrecognizedGroups.title",
                 ),
                 description: `${descriptionText}\n\n${suggestionsText || ""}`,
                 footerText: groupsWarning,
@@ -355,7 +355,7 @@ export default class GroupsCommand implements BaseCommand {
                     false,
                     undefined,
                     embeds.slice(1),
-                    interaction
+                    interaction,
                 );
             }
 
@@ -365,8 +365,8 @@ export default class GroupsCommand implements BaseCommand {
         await guildPreference.setGroups(matchedGroups);
         logger.info(
             `${getDebugLogHeader(
-                messageContext
-            )} | Groups set to ${guildPreference.getDisplayedGroupNames()}`
+                messageContext,
+            )} | Groups set to ${guildPreference.getDisplayedGroupNames()}`,
         );
 
         const optionsMessage = await generateOptionsMessage(
@@ -376,7 +376,7 @@ export default class GroupsCommand implements BaseCommand {
             [{ option: GameOption.GROUPS, reset: false }],
             false,
             undefined,
-            undefined
+            undefined,
         );
 
         if (optionsMessage) {
@@ -386,7 +386,7 @@ export default class GroupsCommand implements BaseCommand {
                 true,
                 undefined,
                 embeds,
-                interaction
+                interaction,
             );
         } else {
             await notifyOptionsGenerationError(messageContext, "groups");
@@ -399,7 +399,7 @@ export default class GroupsCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
@@ -414,14 +414,14 @@ export default class GroupsCommand implements BaseCommand {
                 messageContext,
                 AddType.GROUPS,
                 enteredGroupNames,
-                interaction
+                interaction,
             );
         } else if (action === GroupAction.REMOVE) {
             await RemoveCommand.updateOption(
                 messageContext,
                 RemoveType.GROUPS,
                 enteredGroupNames,
-                interaction
+                interaction,
             );
         } else {
             await GroupsCommand.updateOption(
@@ -429,7 +429,7 @@ export default class GroupsCommand implements BaseCommand {
                 matchedGroups,
                 unmatchedGroups,
                 interaction,
-                action === GroupAction.RESET
+                action === GroupAction.RESET,
             );
         }
     }
@@ -439,7 +439,7 @@ export default class GroupsCommand implements BaseCommand {
      * @param interaction - The interaction with intermediate typing state
      */
     static async processAutocompleteInteraction(
-        interaction: Eris.AutocompleteInteraction
+        interaction: Eris.AutocompleteInteraction,
     ): Promise<void> {
         return processGroupAutocompleteInteraction(interaction);
     }

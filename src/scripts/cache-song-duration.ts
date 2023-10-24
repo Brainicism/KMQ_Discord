@@ -12,7 +12,7 @@ async function cacheSongDuration(db: DatabaseContext): Promise<void> {
     let files: Array<string>;
     try {
         files = await fs.promises.readdir(
-            process.env.SONG_DOWNLOAD_DIR as string
+            process.env.SONG_DOWNLOAD_DIR as string,
         );
     } catch (err) {
         logger.error(err);
@@ -31,7 +31,7 @@ async function cacheSongDuration(db: DatabaseContext): Promise<void> {
         ) {
             // uncached song
             const songDuration = await getAudioDurationInSeconds(
-                path.join(process.env.SONG_DOWNLOAD_DIR as string, fileName)
+                path.join(process.env.SONG_DOWNLOAD_DIR as string, fileName),
             );
 
             await db.kmq
@@ -44,7 +44,7 @@ async function cacheSongDuration(db: DatabaseContext): Promise<void> {
             cachedSongs++;
             if (cachedSongs % 100 === 0) {
                 logger.info(
-                    `${cachedSongs} song durations were cached so far.`
+                    `${cachedSongs} song durations were cached so far.`,
                 );
             }
         }

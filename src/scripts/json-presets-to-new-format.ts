@@ -31,10 +31,10 @@ async function exportJsonPresetsToNewTable(db: DatabaseContext): Promise<void> {
                 });
             } catch (err) {
                 logger.error(
-                    `Migration of preset ${presetName} of ${guildID} failed, err = ${err}`
+                    `Migration of preset ${presetName} of ${guildID} failed, err = ${err}`,
                 );
             }
-        })
+        }),
     );
 }
 

@@ -18,7 +18,7 @@ export default class RateLimiter {
         const previousRequestDates = this.limitMap[userID];
         return Math.max(
             previousRequestDates[0] + this.queueExpiryTime * 1000 - Date.now(),
-            0
+            0,
         );
     }
 

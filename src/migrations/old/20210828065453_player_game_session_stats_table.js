@@ -8,7 +8,7 @@ exports.up = function (knex) {
             table.integer("exp_gained").defaultTo(0);
             table.integer("levels_gained").defaultTo(0);
             table.unique(["player_id", "date"]);
-        }
+        },
     );
 };
 

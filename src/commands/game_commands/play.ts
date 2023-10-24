@@ -76,27 +76,27 @@ export async function sendBeginGameSessionMessage(
     messageContext: MessageContext,
     participantIDs: Array<string>,
     guildPreference: GuildPreference,
-    interaction?: Eris.CommandInteraction
+    interaction?: Eris.CommandInteraction,
 ): Promise<void> {
     const guildID = messageContext.guildID;
     let gameInstructions = i18n.translate(guildID, "command.play.typeGuess");
 
     const bonusUsers = await activeBonusUsers();
     const bonusUserParticipantIDs = participantIDs.filter((x) =>
-        bonusUsers.has(x)
+        bonusUsers.has(x),
     );
 
     const isBonus = bonusUserParticipantIDs.length > 0;
 
     if (isBonus) {
         let bonusUserMentions = bonusUserParticipantIDs.map((x) =>
-            getMention(x)
+            getMention(x),
         );
 
         if (bonusUserMentions.length > 10) {
             bonusUserMentions = bonusUserMentions.slice(0, 10);
             bonusUserMentions.push(
-                i18n.translate(guildID, "misc.andManyOthers")
+                i18n.translate(guildID, "misc.andManyOthers"),
             );
         }
 
@@ -106,26 +106,26 @@ export async function sendBeginGameSessionMessage(
             "command.play.exp.doubleExpForVoting",
             {
                 link: "https://top.gg/bot/508759831755096074/vote",
-            }
+            },
         );
 
         gameInstructions += " ";
         gameInstructions += i18n.translate(
             guildID,
             "command.play.exp.howToVote",
-            { vote: "`/vote`" }
+            { vote: "`/vote`" },
         );
     }
 
     if (isWeekend()) {
         gameInstructions += `\n\n**⬆️ ${i18n.translate(
             guildID,
-            "command.play.exp.weekend"
+            "command.play.exp.weekend",
         )} ⬆️**`;
     } else if (isPowerHour()) {
         gameInstructions += `\n\n**⬆️ ${i18n.translate(
             guildID,
-            "command.play.exp.powerHour"
+            "command.play.exp.powerHour",
         )} ⬆️**`;
     }
 
@@ -158,7 +158,7 @@ export async function sendBeginGameSessionMessage(
         Session.getSession(guildID),
         messageContext,
         guildPreference,
-        []
+        [],
     );
 
     const additionalPayloads = [];
@@ -169,7 +169,7 @@ export async function sendBeginGameSessionMessage(
                 "command.play.voteReminder",
                 {
                     vote: "/vote",
-                }
+                },
             );
         }
 
@@ -200,14 +200,14 @@ export async function sendBeginGameSessionMessage(
                 .filter((x) => {
                     if (Number.isNaN(x.updateTime.getTime())) {
                         logger.error(
-                            `Error parsing update time for ${x.entry}`
+                            `Error parsing update time for ${x.entry}`,
                         );
                         return false;
                     }
 
                     const updateAge = durationDays(
                         x.updateTime.getTime(),
-                        Date.now()
+                        Date.now(),
                     );
 
                     if (updateAge > staleUpdateThreshold) {
@@ -220,7 +220,7 @@ export async function sendBeginGameSessionMessage(
         if (newsData.length > 0) {
             const latestUpdate = durationDays(
                 newsData[0].updateTime.getTime(),
-                Date.now()
+                Date.now(),
             );
 
             const recencyShowUpdate =
@@ -232,7 +232,7 @@ export async function sendBeginGameSessionMessage(
                     description: newsData.map((x) => x.entry).join("\n"),
                     footerText: i18n.translate(
                         guildID,
-                        "command.news.updates.footer"
+                        "command.news.updates.footer",
                     ),
                 };
 
@@ -247,7 +247,7 @@ export async function sendBeginGameSessionMessage(
         false,
         undefined,
         additionalPayloads,
-        interaction
+        interaction,
     );
 }
 
@@ -272,7 +272,7 @@ export default class PlayCommand implements BaseCommand {
         description: i18n.translate(guildID, "command.play.help.description"),
         usage: `/play classic\n\n/play elimination\nlives:{${i18n.translate(
             guildID,
-            "command.play.help.usage.lives"
+            "command.play.help.usage.lives",
         )}}\n\n/play teams create\n\n/play teams join\n\n/play hidden`,
         priority: 1050,
         examples: [
@@ -280,7 +280,7 @@ export default class PlayCommand implements BaseCommand {
                 example: "`/play classic`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.play.help.example.classic"
+                    "command.play.help.example.classic",
                 ),
             },
             {
@@ -290,7 +290,7 @@ export default class PlayCommand implements BaseCommand {
                     "command.play.help.example.elimination",
                     {
                         lives: "`5`",
-                    }
+                    },
                 ),
             },
             {
@@ -300,21 +300,21 @@ export default class PlayCommand implements BaseCommand {
                     "command.play.help.example.elimination",
                     {
                         lives: `\`${ELIMINATION_DEFAULT_LIVES}\``,
-                    }
+                    },
                 ),
             },
             {
                 example: "`/play teams create`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.play.help.example.teams"
+                    "command.play.help.example.teams",
                 ),
             },
             {
                 example: "`/play hidden`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.play.help.example.hidden"
+                    "command.play.help.example.hidden",
                 ),
             },
         ],
@@ -330,7 +330,7 @@ export default class PlayCommand implements BaseCommand {
                     name: GameType.CLASSIC,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.play.help.example.classic"
+                        "command.play.help.example.classic",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -339,10 +339,10 @@ export default class PlayCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.play.help.example.classic"
+                                    "command.play.help.example.classic",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
                     type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
                 },
@@ -350,12 +350,12 @@ export default class PlayCommand implements BaseCommand {
                     name: GameType.HIDDEN,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.play.help.example.hidden"
+                        "command.play.help.example.hidden",
                     ),
                     description_localizations: {
                         [LocaleType.KO]: i18n.translate(
                             LocaleType.KO,
-                            "command.play.help.example.hidden"
+                            "command.play.help.example.hidden",
                         ),
                     },
                     type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
@@ -367,7 +367,7 @@ export default class PlayCommand implements BaseCommand {
                         "command.play.help.example.elimination",
                         {
                             lives: `${ELIMINATION_DEFAULT_LIVES}`,
-                        }
+                        },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -377,10 +377,10 @@ export default class PlayCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "command.play.help.example.elimination",
-                                    { lives: `${ELIMINATION_DEFAULT_LIVES}` }
+                                    { lives: `${ELIMINATION_DEFAULT_LIVES}` },
                                 ),
                             }),
-                            {}
+                            {},
                         ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
@@ -389,7 +389,7 @@ export default class PlayCommand implements BaseCommand {
                             name: "lives",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.play.help.interaction.lives"
+                                "command.play.help.interaction.lives",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -398,10 +398,10 @@ export default class PlayCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.play.help.interaction.lives"
+                                            "command.play.help.interaction.lives",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .INTEGER,
@@ -414,7 +414,7 @@ export default class PlayCommand implements BaseCommand {
                     name: GameType.TEAMS,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.play.help.example.teams"
+                        "command.play.help.example.teams",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -423,10 +423,10 @@ export default class PlayCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.play.help.example.teams"
+                                    "command.play.help.example.teams",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND_GROUP,
@@ -435,7 +435,7 @@ export default class PlayCommand implements BaseCommand {
                             name: "create",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.play.interaction.teams_create"
+                                "command.play.interaction.teams_create",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -444,10 +444,10 @@ export default class PlayCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.play.interaction.teams_create"
+                                            "command.play.interaction.teams_create",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .SUB_COMMAND,
@@ -456,7 +456,7 @@ export default class PlayCommand implements BaseCommand {
                             name: "begin",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.play.interaction.teams_begin"
+                                "command.play.interaction.teams_begin",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -465,10 +465,10 @@ export default class PlayCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.play.interaction.teams_begin"
+                                            "command.play.interaction.teams_begin",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .SUB_COMMAND,
@@ -477,7 +477,7 @@ export default class PlayCommand implements BaseCommand {
                             name: "join",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.play.interaction.teams_join"
+                                "command.play.interaction.teams_join",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -486,10 +486,10 @@ export default class PlayCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.play.interaction.teams_join"
+                                            "command.play.interaction.teams_join",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .SUB_COMMAND,
@@ -498,10 +498,10 @@ export default class PlayCommand implements BaseCommand {
                                     name: "team_name",
                                     description: i18n.translate(
                                         LocaleType.EN,
-                                        "command.play.interaction.teams_join_team_name"
+                                        "command.play.interaction.teams_join_team_name",
                                     ),
                                     description_localizations: Object.values(
-                                        LocaleType
+                                        LocaleType,
                                     )
                                         .filter((x) => x !== LocaleType.EN)
                                         .reduce(
@@ -509,10 +509,10 @@ export default class PlayCommand implements BaseCommand {
                                                 ...acc,
                                                 [locale]: i18n.translate(
                                                     locale,
-                                                    "command.play.interaction.teams_join_team_name"
+                                                    "command.play.interaction.teams_join_team_name",
                                                 ),
                                             }),
-                                            {}
+                                            {},
                                         ),
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.STRING,
@@ -528,14 +528,14 @@ export default class PlayCommand implements BaseCommand {
 
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionKey, interactionOptions } =
             getInteractionValue(interaction);
 
         if (interactionKey === null) {
             logger.error(
-                "interactionKey unexpectedly null in processChatInputInteraction"
+                "interactionKey unexpectedly null in processChatInputInteraction",
             );
             return;
         }
@@ -547,14 +547,14 @@ export default class PlayCommand implements BaseCommand {
             await PlayCommand.joinTeamsGame(
                 messageContext,
                 interactionOptions["team_name"],
-                interaction
+                interaction,
             );
         } else {
             await PlayCommand.startGame(
                 messageContext,
                 gameType,
                 interactionOptions["lives"],
-                interaction
+                interaction,
             );
         }
     }
@@ -576,14 +576,14 @@ export default class PlayCommand implements BaseCommand {
             gameType,
             parsedMessage.components.length <= 1
                 ? null
-                : parsedMessage.components[1]
+                : parsedMessage.components[1],
         );
     };
 
     static canStartTeamsGame(
         gameSession: GameSession | null,
         messageContext: MessageContext,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): boolean {
         if (!gameSession || gameSession.gameType !== GameType.TEAMS) {
             sendErrorMessage(
@@ -591,15 +591,15 @@ export default class PlayCommand implements BaseCommand {
                 {
                     title: i18n.translate(
                         messageContext.guildID,
-                        "misc.failure.game.noneInProgress.title"
+                        "misc.failure.game.noneInProgress.title",
                     ),
                     description: i18n.translate(
                         messageContext.guildID,
-                        "misc.failure.game.noneInProgress.description"
+                        "misc.failure.game.noneInProgress.description",
                     ),
                     thumbnailUrl: KmqImages.NOT_IMPRESSED,
                 },
-                interaction
+                interaction,
             );
             return false;
         }
@@ -611,15 +611,15 @@ export default class PlayCommand implements BaseCommand {
                 {
                     title: i18n.translate(
                         messageContext.guildID,
-                        "command.begin.ignored.title"
+                        "command.begin.ignored.title",
                     ),
                     description: i18n.translate(
                         messageContext.guildID,
                         "command.begin.ignored.noTeam.description",
-                        { join: "/play teams join" }
+                        { join: "/play teams join" },
                     ),
                 },
-                interaction
+                interaction,
             );
             return false;
         }
@@ -629,24 +629,24 @@ export default class PlayCommand implements BaseCommand {
 
     static async beginTeamsGame(
         messageContext: MessageContext,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const gameSession = Session.getSession(
-            messageContext.guildID
+            messageContext.guildID,
         ) as GameSession;
 
         if (
             !PlayCommand.canStartTeamsGame(
                 gameSession,
                 messageContext,
-                interaction
+                interaction,
             )
         ) {
             return;
         }
 
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         if (!gameSession.sessionInitialized) {
@@ -656,7 +656,7 @@ export default class PlayCommand implements BaseCommand {
                 .map((player) => player.id);
 
             const channel = State.client.getChannel(
-                messageContext.textChannelID
+                messageContext.textChannelID,
             ) as Eris.TextChannel;
 
             const voiceChannel = getUserVoiceChannel(messageContext);
@@ -671,15 +671,15 @@ export default class PlayCommand implements BaseCommand {
                 messageContext,
                 participantIDs,
                 guildPreference,
-                interaction
+                interaction,
             );
 
             gameSession.startRound(messageContext);
 
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Teams game session starting`
+                    messageContext,
+                )} | Teams game session starting`,
             );
         }
     }
@@ -687,10 +687,10 @@ export default class PlayCommand implements BaseCommand {
     static async joinTeamsGame(
         messageContext: MessageContext,
         teamName: string,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const gameSession = Session.getSession(
-            messageContext.guildID
+            messageContext.guildID,
         ) as GameSession;
 
         if (!gameSession || gameSession.gameType !== GameType.TEAMS) {
@@ -699,15 +699,15 @@ export default class PlayCommand implements BaseCommand {
                 {
                     title: i18n.translate(
                         messageContext.guildID,
-                        "misc.failure.game.noneInProgress.title"
+                        "misc.failure.game.noneInProgress.title",
                     ),
                     description: i18n.translate(
                         messageContext.guildID,
-                        "misc.failure.game.noneInProgress.description"
+                        "misc.failure.game.noneInProgress.description",
                     ),
                     thumbnailUrl: KmqImages.NOT_IMPRESSED,
                 },
-                interaction
+                interaction,
             );
             return;
         }
@@ -731,20 +731,20 @@ export default class PlayCommand implements BaseCommand {
                     {
                         title: i18n.translate(
                             messageContext.guildID,
-                            "command.join.failure.joinError.invalidTeamName.title"
+                            "command.join.failure.joinError.invalidTeamName.title",
                         ),
                         description: i18n.translate(
                             messageContext.guildID,
-                            "command.join.failure.joinError.badEmojis.description"
+                            "command.join.failure.joinError.badEmojis.description",
                         ),
                     },
-                    interaction
+                    interaction,
                 );
 
                 logger.warn(
                     `${getDebugLogHeader(
-                        messageContext
-                    )} | Team name contains unsupported characters.`
+                        messageContext,
+                    )} | Team name contains unsupported characters.`,
                 );
                 return;
             }
@@ -753,8 +753,8 @@ export default class PlayCommand implements BaseCommand {
         if (teamName.length === 0) {
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Team name contains unsupported characters.`
+                    messageContext,
+                )} | Team name contains unsupported characters.`,
             );
 
             sendErrorMessage(
@@ -762,14 +762,14 @@ export default class PlayCommand implements BaseCommand {
                 {
                     title: i18n.translate(
                         messageContext.guildID,
-                        "command.join.failure.joinError.title"
+                        "command.join.failure.joinError.title",
                     ),
                     description: i18n.translate(
                         messageContext.guildID,
-                        "command.join.failure.joinError.invalidCharacters.description"
+                        "command.join.failure.joinError.invalidCharacters.description",
                     ),
                 },
-                interaction
+                interaction,
             );
             return;
         }
@@ -777,7 +777,7 @@ export default class PlayCommand implements BaseCommand {
         const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
         if (!teamScoreboard.hasTeam(teamName)) {
             const user = (await fetchUser(
-                messageContext.author.id
+                messageContext.author.id,
             )) as Eris.User;
 
             teamScoreboard.addTeam(
@@ -787,13 +787,13 @@ export default class PlayCommand implements BaseCommand {
                     messageContext.guildID,
                     0,
                     await isFirstGameOfDay(messageContext.author.id),
-                    await isUserPremium(messageContext.author.id)
+                    await isUserPremium(messageContext.author.id),
                 ),
-                messageContext.guildID
+                messageContext.guildID,
             );
             const teamNameWithCleanEmojis = teamName.replace(
                 /(<a?)(:[a-zA-Z0-9]+:)([0-9]+>)/gm,
-                (_p1, _p2, p3) => p3
+                (_p1, _p2, p3) => p3,
             );
 
             sendInfoMessage(
@@ -801,7 +801,7 @@ export default class PlayCommand implements BaseCommand {
                 {
                     title: i18n.translate(
                         messageContext.guildID,
-                        "command.join.team.new"
+                        "command.join.team.new",
                     ),
                     description: i18n.translate(
                         messageContext.guildID,
@@ -819,23 +819,23 @@ export default class PlayCommand implements BaseCommand {
                                           {
                                               beginCommand:
                                                   "`/play teams begin`",
-                                          }
+                                          },
                                       )
                                     : "",
-                        }
+                        },
                     ),
                     thumbnailUrl: KmqImages.READING_BOOK,
                 },
                 false,
                 undefined,
                 [],
-                interaction
+                interaction,
             );
 
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Team '${teamName}' created.`
+                    messageContext,
+                )} | Team '${teamName}' created.`,
             );
         } else {
             const team = teamScoreboard.getTeam(teamName);
@@ -845,26 +845,26 @@ export default class PlayCommand implements BaseCommand {
                     {
                         title: i18n.translate(
                             messageContext.guildID,
-                            "command.join.failure.joinError.title"
+                            "command.join.failure.joinError.title",
                         ),
                         description: i18n.translate(
                             messageContext.guildID,
-                            "command.join.failure.joinError.alreadyInTeam.description"
+                            "command.join.failure.joinError.alreadyInTeam.description",
                         ),
                     },
-                    interaction
+                    interaction,
                 );
 
                 logger.info(
                     `${getDebugLogHeader(
-                        messageContext
-                    )} | Already joined team '${teamName}'.`
+                        messageContext,
+                    )} | Already joined team '${teamName}'.`,
                 );
                 return;
             }
 
             const player = (await fetchUser(
-                messageContext.author.id
+                messageContext.author.id,
             )) as Eris.User;
 
             teamScoreboard.addTeamPlayer(
@@ -874,8 +874,8 @@ export default class PlayCommand implements BaseCommand {
                     messageContext.guildID,
                     0,
                     await isFirstGameOfDay(messageContext.author.id),
-                    await isUserPremium(messageContext.author.id)
-                )
+                    await isUserPremium(messageContext.author.id),
+                ),
             );
 
             sendInfoMessage(
@@ -886,10 +886,10 @@ export default class PlayCommand implements BaseCommand {
                         "command.join.playerJoinedTeam.title",
                         {
                             joiningUser: await getUserTag(
-                                messageContext.author.id
+                                messageContext.author.id,
                             ),
                             teamName: team.getName(),
-                        }
+                        },
                     ),
                     description: !gameSession.sessionInitialized
                         ? i18n.translate(
@@ -897,30 +897,30 @@ export default class PlayCommand implements BaseCommand {
                               "command.join.playerJoinedTeam.beforeGameStart.description",
                               {
                                   beginCommand: "`/play teams begin`",
-                              }
+                              },
                           )
                         : i18n.translate(
                               messageContext.guildID,
                               "command.join.playerJoinedTeam.afterGameStart.description",
                               {
                                   mentionedUser: getMention(
-                                      messageContext.author.id
+                                      messageContext.author.id,
                                   ),
                                   teamName: bold(team.getName()),
-                              }
+                              },
                           ),
                     thumbnailUrl: KmqImages.LISTENING,
                 },
                 false,
                 undefined,
                 [],
-                interaction
+                interaction,
             );
 
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Successfully joined team '${team.getName()}'.`
+                    messageContext,
+                )} | Successfully joined team '${team.getName()}'.`,
             );
         }
     }
@@ -929,7 +929,7 @@ export default class PlayCommand implements BaseCommand {
         messageContext: MessageContext,
         gameType: GameType,
         livesArg: string | null,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const guildID = messageContext.guildID;
         const guildPreference =
@@ -943,19 +943,19 @@ export default class PlayCommand implements BaseCommand {
             const description = i18n.translate(
                 guildID,
                 "misc.failure.notInVC.description",
-                { command: "`/play`" }
+                { command: "`/play`" },
             );
 
             await sendErrorMessage(
                 messageContext,
                 { title, description },
-                interaction
+                interaction,
             );
 
             logger.warn(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | User not in voice channel`
+                    messageContext,
+                )} | User not in voice channel`,
             );
             return;
         }
@@ -970,13 +970,13 @@ export default class PlayCommand implements BaseCommand {
             if (gameSessions[guildID]?.sessionInitialized) {
                 logger.warn(
                     `${getDebugLogHeader(
-                        messageContext
-                    )} | Attempted to start a game while one is already in progress.`
+                        messageContext,
+                    )} | Attempted to start a game while one is already in progress.`,
                 );
 
                 const title = i18n.translate(
                     guildID,
-                    "command.play.failure.alreadyInSession"
+                    "command.play.failure.alreadyInSession",
                 );
 
                 await sendErrorMessage(messageContext, { title }, interaction);
@@ -991,8 +991,8 @@ export default class PlayCommand implements BaseCommand {
                 Session.deleteSession(guildID);
                 logger.info(
                     `${getDebugLogHeader(
-                        messageContext
-                    )} | Teams game session was in progress, has been reset.`
+                        messageContext,
+                    )} | Teams game session was in progress, has been reset.`,
                 );
             }
         }
@@ -1000,13 +1000,13 @@ export default class PlayCommand implements BaseCommand {
         // (1) No game session exists yet (create ELIMINATION, TEAMS, CLASSIC, or COMPETITION game), or
         // (2) User attempting to ,play after a ,play teams that didn't start, start CLASSIC game
         const textChannel = (await fetchChannel(
-            messageContext.textChannelID
+            messageContext.textChannelID,
         )) as Eris.TextChannel;
 
         const gameOwner = new KmqMember(messageContext.author.id);
         let gameSession: GameSession;
         const isPremium = await areUsersPremium(
-            getCurrentVoiceMembers(voiceChannel.id).map((x) => x.id)
+            getCurrentVoiceMembers(voiceChannel.id).map((x) => x.id),
         );
 
         if (gameType === GameType.TEAMS) {
@@ -1016,13 +1016,13 @@ export default class PlayCommand implements BaseCommand {
                 "command.play.team.joinTeam.title",
                 {
                     join: "`/play teams join`",
-                }
+                },
             );
 
             const gameInstructions = i18n.translate(
                 guildID,
                 "command.play.team.joinTeam.description",
-                { join: "/play teams join" }
+                { join: "/play teams join" },
             );
 
             gameSession = new GameSession(
@@ -1032,20 +1032,20 @@ export default class PlayCommand implements BaseCommand {
                 textChannel.guild.id,
                 gameOwner,
                 gameType,
-                isPremium
+                isPremium,
             );
 
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Team game session created.`
+                    messageContext,
+                )} | Team game session created.`,
             );
 
             if (interaction) {
                 await tryCreateInteractionSuccessAcknowledgement(
                     interaction,
                     startTitle,
-                    gameInstructions
+                    gameInstructions,
                 );
             } else {
                 await sendInfoMessage(messageContext, {
@@ -1062,7 +1062,7 @@ export default class PlayCommand implements BaseCommand {
                 const ignoringOldGameTypeTitle = i18n.translate(
                     guildID,
                     "command.play.failure.overrideTeams.title",
-                    { playOldGameType: `\`/play ${oldGameType}\`` }
+                    { playOldGameType: `\`/play ${oldGameType}\`` },
                 );
 
                 const gameSpecificInstructions = i18n.translate(
@@ -1070,7 +1070,7 @@ export default class PlayCommand implements BaseCommand {
                     "command.play.failure.overrideTeams.teams.join",
                     {
                         join: "/play teams join",
-                    }
+                    },
                 );
 
                 const oldGameTypeInstructions = i18n.translate(
@@ -1082,13 +1082,13 @@ export default class PlayCommand implements BaseCommand {
                         playOldGameType: `\`/play ${oldGameType}\``,
                         gameSpecificInstructions,
                         begin: "`/begin`",
-                    }
+                    },
                 );
 
                 logger.warn(
                     `${getDebugLogHeader(
-                        messageContext
-                    )} | User attempted /play on a mode that requires player joins.`
+                        messageContext,
+                    )} | User attempted /play on a mode that requires player joins.`,
                 );
 
                 await sendErrorMessage(
@@ -1098,7 +1098,7 @@ export default class PlayCommand implements BaseCommand {
                         description: oldGameTypeInstructions,
                         thumbnailUrl: KmqImages.DEAD,
                     },
-                    interaction
+                    interaction,
                 );
             }
 
@@ -1114,11 +1114,11 @@ export default class PlayCommand implements BaseCommand {
                     sendErrorMessage(messageContext, {
                         title: i18n.translate(
                             guildID,
-                            "command.play.failure.hiddenGameMode.title"
+                            "command.play.failure.hiddenGameMode.title",
                         ),
                         description: i18n.translate(
                             guildID,
-                            "command.play.failure.hiddenGameMode.description"
+                            "command.play.failure.hiddenGameMode.description",
                         ),
                         thumbnailUrl: KmqImages.DEAD,
                     });
@@ -1147,7 +1147,7 @@ export default class PlayCommand implements BaseCommand {
                 gameOwner,
                 gameType,
                 isPremium,
-                lives
+                lives,
             );
         }
 
@@ -1169,12 +1169,12 @@ export default class PlayCommand implements BaseCommand {
 
         if (!isPremium) {
             for (const [commandName, command] of Object.entries(
-                State.client.commands
+                State.client.commands,
             )) {
                 if (command.isUsingPremiumOption) {
                     if (command.isUsingPremiumOption(guildPreference)) {
                         logger.info(
-                            `Session started by non-premium request, clearing premium option: ${commandName}`
+                            `Session started by non-premium request, clearing premium option: ${commandName}`,
                         );
                         // eslint-disable-next-line no-await-in-loop
                         await command.resetPremium!(guildPreference);
@@ -1190,7 +1190,7 @@ export default class PlayCommand implements BaseCommand {
                 messageContext,
                 getCurrentVoiceMembers(voiceChannel.id).map((x) => x.id),
                 guildPreference,
-                interaction
+                interaction,
             );
 
             await gameSession.startRound(messageContext);

@@ -48,21 +48,21 @@ export default class SeekCommand implements BaseCommand {
                 example: "`/seek set seek:random`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.seek.help.example.random"
+                    "command.seek.help.example.random",
                 ),
             },
             {
                 example: "`/seek set seek:middle`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.seek.help.example.middle"
+                    "command.seek.help.example.middle",
                 ),
             },
             {
                 example: "`/seek set seek:beginning`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.seek.help.example.beginning"
+                    "command.seek.help.example.beginning",
                 ),
             },
             {
@@ -72,7 +72,7 @@ export default class SeekCommand implements BaseCommand {
                     "command.seek.help.example.reset",
                     {
                         defaultSeek: DEFAULT_SEEK,
-                    }
+                    },
                 ),
             },
         ],
@@ -89,7 +89,7 @@ export default class SeekCommand implements BaseCommand {
                     name: OptionAction.SET,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.seek.help.description"
+                        "command.seek.help.description",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -98,10 +98,10 @@ export default class SeekCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.seek.help.description"
+                                    "command.seek.help.description",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -111,7 +111,7 @@ export default class SeekCommand implements BaseCommand {
                             name: "seek",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.seek.interaction.seek"
+                                "command.seek.interaction.seek",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -120,10 +120,10 @@ export default class SeekCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.seek.interaction.seek"
+                                            "command.seek.interaction.seek",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -133,7 +133,7 @@ export default class SeekCommand implements BaseCommand {
                                 (seekType) => ({
                                     name: seekType,
                                     value: seekType,
-                                })
+                                }),
                             ),
                         },
                     ],
@@ -143,7 +143,7 @@ export default class SeekCommand implements BaseCommand {
                     description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
-                        { optionName: "seek" }
+                        { optionName: "seek" },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -153,10 +153,10 @@ export default class SeekCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "misc.interaction.resetOption",
-                                    { optionName: "seek" }
+                                    { optionName: "seek" },
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -179,31 +179,31 @@ export default class SeekCommand implements BaseCommand {
         await SeekCommand.updateOption(
             MessageContext.fromMessage(message),
             seekType,
-            undefined
+            undefined,
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         seekType: SeekType | null,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         const reset = seekType == null;
         if (reset) {
             await guildPreference.reset(GameOption.SEEK_TYPE);
             logger.info(
-                `${getDebugLogHeader(messageContext)} | Seek type reset.`
+                `${getDebugLogHeader(messageContext)} | Seek type reset.`,
             );
         } else {
             await guildPreference.setSeekType(seekType);
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Seek type set to ${seekType}`
+                    messageContext,
+                )} | Seek type set to ${seekType}`,
             );
         }
 
@@ -215,7 +215,7 @@ export default class SeekCommand implements BaseCommand {
             false,
             undefined,
             undefined,
-            interaction
+            interaction,
         );
     }
 
@@ -225,7 +225,7 @@ export default class SeekCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);

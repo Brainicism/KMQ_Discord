@@ -6,7 +6,7 @@ exports.up = function (knex) {
         .table("badges_players", function (table) {
             table.dropUnique(
                 ["user_id", "badge_name"],
-                "badges_user_id_badge_name_unique"
+                "badges_user_id_badge_name_unique",
             );
             table
                 .integer("badge_id")
@@ -28,7 +28,7 @@ exports.down = function (knex) {
             table.dropPrimary(["user_id", "badge_id"]);
             table.unique(
                 ["user_id", "badge_name"],
-                "badges_user_id_badge_name_unique"
+                "badges_user_id_badge_name_unique",
             );
         })
         .table("badges", function (table) {

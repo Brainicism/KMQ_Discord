@@ -12,7 +12,7 @@ config({ path: resolve(__dirname, "../.env") });
 
 function generateKysleyContext<T>(
     databaseName: string | undefined,
-    maxPoolSize: number
+    maxPoolSize: number,
 ): Kysely<T> {
     return new Kysely<T>({
         dialect: new MysqlDialect({
@@ -45,13 +45,13 @@ export class DatabaseContext {
 
             this.kpopVideos = generateKysleyContext<KpopVideosDB>(
                 "kpop_videos_test",
-                1
+                1,
             );
         } else {
             this.kmq = generateKysleyContext<KmqDB>("kmq", 20);
             this.kpopVideos = generateKysleyContext<KpopVideosDB>(
                 "kpop_videos",
-                5
+                5,
             );
         }
 
@@ -59,7 +59,7 @@ export class DatabaseContext {
         this.agnostic = generateKysleyContext(undefined, 1);
         this.kpopVideosValidation = generateKysleyContext(
             "kpop_videos_validation",
-            1
+            1,
         );
     }
 

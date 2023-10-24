@@ -58,7 +58,7 @@ const getDaisukiLink = (id: number, isMV: boolean): string => {
 async function lookupByYoutubeID(
     messageOrInteraction: GuildTextableMessage | CommandInteraction,
     videoID: string,
-    locale: LocaleType
+    locale: LocaleType,
 ): Promise<boolean> {
     const guildID = messageOrInteraction.guildID as string;
     const kmqSongEntry: QueriedSong | undefined = await dbContext.kmq
@@ -87,12 +87,12 @@ async function lookupByYoutubeID(
         const found = await lookupBySongName(
             messageOrInteraction,
             videoID,
-            locale
+            locale,
         );
 
         if (found) {
             logger.info(
-                `Lookup succeeded through fallback lookup for: ${videoID}`
+                `Lookup succeeded through fallback lookup for: ${videoID}`,
             );
             return true;
         }
@@ -122,7 +122,7 @@ async function lookupByYoutubeID(
         artistName = getLocalizedArtistName(kmqSongEntry, locale);
         songAliases.push(...(State.aliases.song[videoID] ?? []));
         artistAliases.push(
-            ...(State.aliases.artist[kmqSongEntry.artistName] ?? [])
+            ...(State.aliases.artist[kmqSongEntry.artistName] ?? []),
         );
 
         if (isKorean) {
@@ -163,9 +163,9 @@ async function lookupByYoutubeID(
                     await GuildPreference.getGuildPreference(guildID),
                     await isPremiumRequest(
                         session,
-                        messageOrInteraction.member!.id
+                        messageOrInteraction.member!.id,
                     ),
-                    SHADOW_BANNED_ARTIST_IDS
+                    SHADOW_BANNED_ARTIST_IDS,
                 )
             ).songs,
         ]
@@ -177,8 +177,8 @@ async function lookupByYoutubeID(
 
         logger.info(
             `${getDebugLogHeader(
-                messageOrInteraction
-            )} | KMQ song lookup. videoID = ${videoID}. Included in options = ${includedInOptions}.`
+                messageOrInteraction,
+            )} | KMQ song lookup. videoID = ${videoID}. Included in options = ${includedInOptions}.`,
         );
     } else {
         description = i18n.translate(guildID, "command.lookup.notInKMQ", {
@@ -212,7 +212,7 @@ async function lookupByYoutubeID(
         }
 
         artistAliases.push(
-            ...(State.aliases.artist[artistNameResult.name] ?? [])
+            ...(State.aliases.artist[artistNameResult.name] ?? []),
         );
 
         if (isKorean) {
@@ -233,8 +233,8 @@ async function lookupByYoutubeID(
 
         logger.info(
             `${getDebugLogHeader(
-                messageOrInteraction
-            )} | Non-KMQ song lookup. videoID = ${videoID}.`
+                messageOrInteraction,
+            )} | Non-KMQ song lookup. videoID = ${videoID}.`,
         );
     }
 
@@ -273,27 +273,27 @@ async function lookupByYoutubeID(
             {
                 name: i18n.translate(
                     guildID,
-                    "command.lookup.inCurrentGameOptions"
+                    "command.lookup.inCurrentGameOptions",
                 ),
                 value: i18n.translate(
                     guildID,
-                    includedInOptions ? "misc.yes" : "misc.no"
+                    includedInOptions ? "misc.yes" : "misc.no",
                 ),
             },
             {
                 name: i18n.translate(guildID, "command.lookup.premiumSong"),
                 value: i18n.translate(
                     guildID,
-                    premiumSong ? "misc.yes" : "misc.no"
+                    premiumSong ? "misc.yes" : "misc.no",
                 ),
-            }
+            },
         );
     }
 
     const messageContext = new MessageContext(
         messageOrInteraction.channel.id,
         new KmqMember(messageOrInteraction.member!.id),
-        messageOrInteraction.guildID as string
+        messageOrInteraction.guildID as string,
     );
 
     sendInfoMessage(
@@ -314,7 +314,7 @@ async function lookupByYoutubeID(
         [],
         messageOrInteraction instanceof Eris.CommandInteraction
             ? messageOrInteraction
-            : undefined
+            : undefined,
     );
 
     return true;
@@ -324,7 +324,7 @@ async function lookupBySongName(
     messageOrInteraction: GuildTextableMessage | CommandInteraction,
     songName: string,
     locale: LocaleType,
-    artistID?: number
+    artistID?: number,
 ): Promise<boolean> {
     let kmqSongEntriesQuery = dbContext.kmq
         .selectFrom("available_songs")
@@ -337,14 +337,14 @@ async function lookupBySongName(
                 or([
                     eb("song_name_en", "like", `%${songName}%`),
                     eb("song_name_ko", "like", `%${songName}%`),
-                ])
+                ]),
             )
             .orderBy((eb) => eb.fn("CHAR_LENGTH", ["song_name_en"]), "asc")
             .orderBy("views", "desc");
     } else {
         kmqSongEntriesQuery = kmqSongEntriesQuery.orderBy(
             "publishedon",
-            "desc"
+            "desc",
         );
     }
 
@@ -352,7 +352,7 @@ async function lookupBySongName(
         kmqSongEntriesQuery = kmqSongEntriesQuery.where(
             "id_artist",
             "=",
-            artistID
+            artistID,
         );
     }
 
@@ -365,14 +365,14 @@ async function lookupBySongName(
         return lookupByYoutubeID(
             messageOrInteraction,
             kmqSongEntries[0].youtubeLink,
-            locale
+            locale,
         );
     }
 
     const songEmbeds = kmqSongEntries.map((entry) => ({
         name: `**"${getLocalizedSongName(
             entry,
-            locale
+            locale,
         )}"** - ${getLocalizedArtistName(entry, locale)}`,
         value: `https://youtu.be/${entry.youtubeLink}`,
     }));
@@ -382,14 +382,14 @@ async function lookupBySongName(
         (embedFieldsSubset) => ({
             title: i18n.translate(
                 messageOrInteraction.guildID as string,
-                "command.lookup.songNameSearchResult.title"
+                "command.lookup.songNameSearchResult.title",
             ),
             description: i18n.translate(
                 messageOrInteraction.guildID as string,
-                "command.lookup.songNameSearchResult.successDescription"
+                "command.lookup.songNameSearchResult.successDescription",
             ),
             fields: embedFieldsSubset,
-        })
+        }),
     );
 
     await sendPaginationedEmbed(messageOrInteraction, embeds);
@@ -413,7 +413,7 @@ export default class LookupCommand implements BaseCommand {
                 explanation: i18n.translate(
                     guildID,
                     "command.lookup.help.example.song",
-                    { song: "Love Dive", artist: "IVE" }
+                    { song: "Love Dive", artist: "IVE" },
                 ),
             },
             {
@@ -422,7 +422,7 @@ export default class LookupCommand implements BaseCommand {
                 explanation: i18n.translate(
                     guildID,
                     "command.lookup.help.example.song",
-                    { song: "Next Level", artist: "Aespa" }
+                    { song: "Next Level", artist: "Aespa" },
                 ),
             },
         ],
@@ -439,7 +439,7 @@ export default class LookupCommand implements BaseCommand {
                     name: "song_name",
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.lookup.help.interaction.byName.description"
+                        "command.lookup.help.interaction.byName.description",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -448,10 +448,10 @@ export default class LookupCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.lookup.help.interaction.byName.description"
+                                    "command.lookup.help.interaction.byName.description",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -461,7 +461,7 @@ export default class LookupCommand implements BaseCommand {
                             name: "song_name",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.lookup.help.interaction.byName.field.song"
+                                "command.lookup.help.interaction.byName.field.song",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -470,10 +470,10 @@ export default class LookupCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.lookup.help.interaction.byName.field.song"
+                                            "command.lookup.help.interaction.byName.field.song",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -484,7 +484,7 @@ export default class LookupCommand implements BaseCommand {
                             name: "artist_name",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.lookup.help.interaction.byName.field.artist"
+                                "command.lookup.help.interaction.byName.field.artist",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -493,10 +493,10 @@ export default class LookupCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.lookup.help.interaction.byName.field.artist"
+                                            "command.lookup.help.interaction.byName.field.artist",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -509,7 +509,7 @@ export default class LookupCommand implements BaseCommand {
                     name: "song_link",
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.lookup.help.interaction.byLink.description"
+                        "command.lookup.help.interaction.byLink.description",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -518,10 +518,10 @@ export default class LookupCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.lookup.help.interaction.byLink.description"
+                                    "command.lookup.help.interaction.byLink.description",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -531,7 +531,7 @@ export default class LookupCommand implements BaseCommand {
                             name: "song_link",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.lookup.help.interaction.byLink.field"
+                                "command.lookup.help.interaction.byLink.field",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -540,10 +540,10 @@ export default class LookupCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.lookup.help.interaction.byLink.field"
+                                            "command.lookup.help.interaction.byLink.field",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -563,7 +563,7 @@ export default class LookupCommand implements BaseCommand {
     async lookupSong(
         messageOrInteraction: GuildTextableMessage | CommandInteraction,
         arg: string,
-        artistID?: number
+        artistID?: number,
     ): Promise<void> {
         let linkOrName = arg ?? "";
         if (linkOrName.startsWith("<") && linkOrName.endsWith(">")) {
@@ -583,7 +583,7 @@ export default class LookupCommand implements BaseCommand {
         const messageContext = new MessageContext(
             messageOrInteraction.channel.id,
             new KmqMember(messageOrInteraction.member!.id),
-            messageOrInteraction.guildID as string
+            messageOrInteraction.guildID as string,
         );
 
         const locale = State.getGuildLocale(guildID as string);
@@ -599,16 +599,16 @@ export default class LookupCommand implements BaseCommand {
                     messageContext,
                     i18n.translate(
                         guildID,
-                        "command.lookup.validation.invalidYouTubeID"
+                        "command.lookup.validation.invalidYouTubeID",
                     ),
                     arg,
-                    this.help(guildID).usage
+                    this.help(guildID).usage,
                 );
 
                 logger.info(
                     `${getDebugLogHeader(
-                        messageContext
-                    )} | Invalid YouTube ID passed. arg = ${linkOrName}.`
+                        messageContext,
+                    )} | Invalid YouTube ID passed. arg = ${linkOrName}.`,
                 );
                 return;
             }
@@ -617,7 +617,7 @@ export default class LookupCommand implements BaseCommand {
                 !(await lookupByYoutubeID(
                     messageOrInteraction,
                     videoID,
-                    locale
+                    locale,
                 ))
             ) {
                 await sendErrorMessage(
@@ -625,23 +625,23 @@ export default class LookupCommand implements BaseCommand {
                     {
                         title: i18n.translate(
                             guildID,
-                            "command.lookup.notFound.title"
+                            "command.lookup.notFound.title",
                         ),
                         description: i18n.translate(
                             guildID,
-                            "command.lookup.notFound.description"
+                            "command.lookup.notFound.description",
                         ),
                         thumbnailUrl: KmqImages.DEAD,
                     },
                     messageOrInteraction instanceof Eris.CommandInteraction
                         ? messageOrInteraction
-                        : undefined
+                        : undefined,
                 );
 
                 logger.info(
                     `${getDebugLogHeader(
-                        messageContext
-                    )} | Could not find song by videoID. videoID = ${videoID}.`
+                        messageContext,
+                    )} | Could not find song by videoID. videoID = ${videoID}.`,
                 );
             }
         } else if (
@@ -650,7 +650,7 @@ export default class LookupCommand implements BaseCommand {
                 messageOrInteraction,
                 linkOrName,
                 locale,
-                artistID
+                artistID,
             ))
         ) {
             await sendInfoMessage(
@@ -658,11 +658,11 @@ export default class LookupCommand implements BaseCommand {
                 {
                     title: i18n.translate(
                         guildID,
-                        "command.lookup.songNameSearchResult.title"
+                        "command.lookup.songNameSearchResult.title",
                     ),
                     description: i18n.translate(
                         guildID,
-                        "command.lookup.songNameSearchResult.notFoundDescription"
+                        "command.lookup.songNameSearchResult.notFoundDescription",
                     ),
                 },
                 false,
@@ -670,11 +670,11 @@ export default class LookupCommand implements BaseCommand {
                 [],
                 messageOrInteraction instanceof Eris.CommandInteraction
                     ? messageOrInteraction
-                    : undefined
+                    : undefined,
             );
 
             logger.info(
-                `Could not find song by song name. songName = ${linkOrName}`
+                `Could not find song by song name. songName = ${linkOrName}`,
             );
         }
     }
@@ -685,13 +685,13 @@ export default class LookupCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: CommandInteraction,
-        _messageContext: MessageContext
+        _messageContext: MessageContext,
     ): Promise<void> {
         const interactionData = getInteractionValue(interaction);
         if (interactionData.interactionName === "song_link") {
             await this.lookupSong(
                 interaction,
-                interactionData.interactionOptions["song_link"]
+                interactionData.interactionOptions["song_link"],
             );
         } else if (interactionData.interactionName === "song_name") {
             const songName = interactionData.interactionOptions["song_name"];
@@ -718,13 +718,13 @@ export default class LookupCommand implements BaseCommand {
      * @param interaction - The interaction with intermediate typing state
      */
     static async processAutocompleteInteraction(
-        interaction: Eris.AutocompleteInteraction
+        interaction: Eris.AutocompleteInteraction,
     ): Promise<void> {
         const interactionData = getInteractionValue(interaction);
         const focusedKey = interactionData.focusedKey;
         if (focusedKey === null) {
             logger.error(
-                "focusedKey unexpectedly null in processGroupAutocompleteInteraction"
+                "focusedKey unexpectedly null in processGroupAutocompleteInteraction",
             );
 
             return;
@@ -757,14 +757,14 @@ export default class LookupCommand implements BaseCommand {
                             Object.values(
                                 artistID
                                     ? State.songLinkToEntry
-                                    : State.newSongs
+                                    : State.newSongs,
                             ).filter(
-                                (x) => !artistID || artistID === x.artistID
+                                (x) => !artistID || artistID === x.artistID,
                             ),
-                            (x) => x.name.trim().toLowerCase()
+                            (x) => x.name.trim().toLowerCase(),
                         ),
-                        showHangul
-                    )
+                        showHangul,
+                    ),
                 );
             } else {
                 await tryAutocompleteInteractionAcknowledge(
@@ -775,13 +775,13 @@ export default class LookupCommand implements BaseCommand {
                                 (x) =>
                                     (!artistID || artistID === x.artistID) &&
                                     normalizePunctuationInName(
-                                        (showHangul && x.hangulName) || x.name
-                                    ).startsWith(lowercaseUserInput)
+                                        (showHangul && x.hangulName) || x.name,
+                                    ).startsWith(lowercaseUserInput),
                             ),
-                            (x) => x.name.trim().toLowerCase()
+                            (x) => x.name.trim().toLowerCase(),
                         ),
-                        showHangul
-                    )
+                        showHangul,
+                    ),
                 );
             }
         } else if (focusedKey === "artist_name") {
@@ -797,15 +797,15 @@ export default class LookupCommand implements BaseCommand {
                     normalizePunctuationInName(enteredSongName);
 
                 const matchingSongs = Object.values(
-                    State.songLinkToEntry
+                    State.songLinkToEntry,
                 ).filter(
                     (x) =>
                         x.cleanName.startsWith(cleanEnteredSongName) ||
-                        x.hangulCleanName?.startsWith(cleanEnteredSongName)
+                        x.hangulCleanName?.startsWith(cleanEnteredSongName),
                 );
 
                 const matchingSongArtistIDs = matchingSongs.map(
-                    (x) => x.artistID
+                    (x) => x.artistID,
                 );
 
                 matchingArtists = _.uniq(
@@ -814,14 +814,14 @@ export default class LookupCommand implements BaseCommand {
                         .filter((x) =>
                             (showHangul && x.hangulName ? x.hangulName : x.name)
                                 .toLowerCase()
-                                .startsWith(lowercaseUserInput)
-                        )
+                                .startsWith(lowercaseUserInput),
+                        ),
                 );
             }
 
             await tryAutocompleteInteractionAcknowledge(
                 interaction,
-                localizedAutocompleteFormat(matchingArtists, showHangul)
+                localizedAutocompleteFormat(matchingArtists, showHangul),
             );
         }
     }

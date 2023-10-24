@@ -26,7 +26,7 @@ const logger = new IPCLogger("regenerate-test-db-dump");
         await performMigrations(db);
 
         cp.execSync(
-            `mysqldump -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test > ${TEST_DB_CACHED_EXPORT}`
+            `mysqldump -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test > ${TEST_DB_CACHED_EXPORT}`,
         );
 
         await db.destroy();

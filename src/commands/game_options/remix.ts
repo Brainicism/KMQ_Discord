@@ -51,14 +51,14 @@ export default class RemixCommand implements BaseCommand {
                 example: "`/remix set remix:include`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.remix.help.example.include"
+                    "command.remix.help.example.include",
                 ),
             },
             {
                 example: "`/remix set remix:exclude`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.remix.help.example.exclude"
+                    "command.remix.help.example.exclude",
                 ),
             },
             {
@@ -66,7 +66,7 @@ export default class RemixCommand implements BaseCommand {
                 explanation: i18n.translate(
                     guildID,
                     "command.remix.help.example.reset",
-                    { defaultRemix: `\`${DEFAULT_REMIX_PREFERENCE}\`` }
+                    { defaultRemix: `\`${DEFAULT_REMIX_PREFERENCE}\`` },
                 ),
             },
         ],
@@ -83,7 +83,7 @@ export default class RemixCommand implements BaseCommand {
                     name: OptionAction.SET,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.remix.help.description"
+                        "command.remix.help.description",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -92,10 +92,10 @@ export default class RemixCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.remix.help.description"
+                                    "command.remix.help.description",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -105,7 +105,7 @@ export default class RemixCommand implements BaseCommand {
                             name: "remix",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.remix.interaction.remix"
+                                "command.remix.interaction.remix",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -114,10 +114,10 @@ export default class RemixCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.remix.interaction.remix"
+                                            "command.remix.interaction.remix",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -127,7 +127,7 @@ export default class RemixCommand implements BaseCommand {
                                 (remixPreference) => ({
                                     name: remixPreference,
                                     value: remixPreference,
-                                })
+                                }),
                             ),
                         },
                     ],
@@ -137,7 +137,7 @@ export default class RemixCommand implements BaseCommand {
                     description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
-                        { optionName: "remix" }
+                        { optionName: "remix" },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -147,10 +147,10 @@ export default class RemixCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "misc.interaction.resetOption",
-                                    { optionName: "remix" }
+                                    { optionName: "remix" },
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -164,31 +164,33 @@ export default class RemixCommand implements BaseCommand {
     call = async ({ message }: CommandArgs): Promise<void> => {
         logger.warn("Text-based command not supported for remix");
         await sendDeprecatedTextCommandMessage(
-            MessageContext.fromMessage(message)
+            MessageContext.fromMessage(message),
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         remixPreference: RemixPreference | null,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         const reset = remixPreference == null;
         if (reset) {
             await guildPreference.reset(GameOption.REMIX_PREFERENCE);
             logger.info(
-                `${getDebugLogHeader(messageContext)} | Remix preference reset.`
+                `${getDebugLogHeader(
+                    messageContext,
+                )} | Remix preference reset.`,
             );
         } else {
             await guildPreference.setRemixPreference(remixPreference);
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Remix preference set to ${remixPreference}`
+                    messageContext,
+                )} | Remix preference set to ${remixPreference}`,
             );
         }
 
@@ -200,7 +202,7 @@ export default class RemixCommand implements BaseCommand {
             false,
             undefined,
             undefined,
-            interaction
+            interaction,
         );
     }
 
@@ -210,7 +212,7 @@ export default class RemixCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
@@ -230,7 +232,7 @@ export default class RemixCommand implements BaseCommand {
         await RemixCommand.updateOption(
             messageContext,
             remixValue,
-            interaction
+            interaction,
         );
     }
 }

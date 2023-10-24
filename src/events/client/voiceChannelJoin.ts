@@ -7,7 +7,7 @@ import type Eris from "eris";
  */
 export default async function voiceChannelJoinHandler(
     member: Eris.Member,
-    newChannel: Eris.VoiceChannel
+    newChannel: Eris.VoiceChannel,
 ): Promise<void> {
     const session = Session.getSession(newChannel.guild.id);
     if (!session || session.finished) {

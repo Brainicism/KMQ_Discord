@@ -54,7 +54,7 @@ export default abstract class Round {
         this.songAliases = State.aliases.song[song.youtubeLink] || [];
         const artistNames = song.artistName.split("+").map((x) => x.trim());
         this.artistAliases = artistNames.flatMap(
-            (x) => State.aliases.artist[x] || []
+            (x) => State.aliases.artist[x] || [],
         );
         this.startedAt = Date.now();
         this.lastActive = Date.now();
@@ -72,12 +72,12 @@ export default abstract class Round {
         messageContext: MessageContext,
         uniqueSongCounter: UniqueSongCounter,
         playerRoundResults: Array<PlayerRoundResult>,
-        gameType?: GameType
+        gameType?: GameType,
     ): string;
 
     abstract getEndRoundColor(
         correctGuess: boolean,
-        userBonusActive: boolean
+        userBonusActive: boolean,
     ): number | null;
 
     abstract isValidInteraction(interactionUUID: string): boolean;
@@ -100,7 +100,7 @@ export default abstract class Round {
 
     protected getUniqueSongCounterMessage(
         messageContext: MessageContext,
-        uniqueSongCounter: UniqueSongCounter
+        uniqueSongCounter: UniqueSongCounter,
     ): string {
         if (!uniqueSongCounter || uniqueSongCounter.uniqueSongsPlayed === 0) {
             return "";
@@ -112,10 +112,12 @@ export default abstract class Round {
             {
                 uniqueSongCount: codeLine(
                     `${friendlyFormattedNumber(
-                        uniqueSongCounter.uniqueSongsPlayed
-                    )}/${friendlyFormattedNumber(uniqueSongCounter.totalSongs)}`
+                        uniqueSongCounter.uniqueSongsPlayed,
+                    )}/${friendlyFormattedNumber(
+                        uniqueSongCounter.totalSongs,
+                    )}`,
                 ),
-            }
+            },
         );
 
         return `\n${uniqueSongMessage}`;

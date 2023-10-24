@@ -32,21 +32,21 @@ export default class HelpCommand implements BaseCommand {
         description: i18n.translate(guildID, "command.help.help.description"),
         usage: `/help\naction:[${i18n.translate(
             guildID,
-            "command.help.command"
+            "command.help.command",
         )}]`,
         examples: [
             {
                 example: "`/help`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.help.help.example.allCommands"
+                    "command.help.help.example.allCommands",
                 ),
             },
             {
                 example: "`/help action:cutoff`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.help.help.example.sampleCommand"
+                    "command.help.help.example.sampleCommand",
                 ),
             },
         ],
@@ -63,7 +63,7 @@ export default class HelpCommand implements BaseCommand {
                     name: "action",
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.help.interaction.action"
+                        "command.help.interaction.action",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -72,10 +72,10 @@ export default class HelpCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.help.interaction.action"
+                                    "command.help.interaction.action",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: false,
@@ -87,7 +87,7 @@ export default class HelpCommand implements BaseCommand {
 
     static async helpMessage(
         messageOrInteraction: GuildTextableMessage | Eris.CommandInteraction,
-        action: string
+        action: string,
     ): Promise<void> {
         let embedTitle = "";
         let embedDesc = "";
@@ -103,7 +103,7 @@ export default class HelpCommand implements BaseCommand {
         const messageContext = new MessageContext(
             messageOrInteraction.channel.id,
             new KmqMember(messageOrInteraction.member!.id),
-            messageOrInteraction.guildID as string
+            messageOrInteraction.guildID as string,
         );
 
         const commandFilesWithAliases: { [commandName: string]: BaseCommand } =
@@ -111,7 +111,7 @@ export default class HelpCommand implements BaseCommand {
 
         Object.assign(commandFilesWithAliases, commandFiles);
         const commandNamesWithAliases = Object.keys(commandFiles).filter(
-            (commandName) => commandFiles[commandName].aliases
+            (commandName) => commandFiles[commandName].aliases,
         );
 
         for (const commandName of commandNamesWithAliases) {
@@ -124,21 +124,21 @@ export default class HelpCommand implements BaseCommand {
         let embedFooter: { text: string } | undefined;
         if (action) {
             const commandNamesWithHelp = Object.keys(
-                commandFilesWithAliases
+                commandFilesWithAliases,
             ).filter(
-                (commandName) => commandFilesWithAliases[commandName].help
+                (commandName) => commandFilesWithAliases[commandName].help,
             );
 
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Getting help documentation for: ${action}`
+                    messageContext,
+                )} | Getting help documentation for: ${action}`,
             );
             if (!commandNamesWithHelp.includes(action)) {
                 logger.warn(
                     `${getDebugLogHeader(
-                        messageContext
-                    )} | Missing documentation: ${action}`
+                        messageContext,
+                    )} | Missing documentation: ${action}`,
                 );
 
                 await sendErrorMessage(
@@ -149,17 +149,17 @@ export default class HelpCommand implements BaseCommand {
                             "command.help.title",
                             {
                                 kmq: "K-pop Music Quiz",
-                            }
+                            },
                         ),
                         description: i18n.translate(
                             messageContext.guildID,
                             "command.help.failure.noDocs",
-                            { action }
+                            { action },
                         ),
                     },
                     messageOrInteraction instanceof Eris.CommandInteraction
                         ? messageOrInteraction
-                        : undefined
+                        : undefined,
                 );
                 return;
             }
@@ -178,7 +178,7 @@ export default class HelpCommand implements BaseCommand {
             if (helpManual.examples.length > 0) {
                 embedDesc += `\n\n**${i18n.translate(
                     messageContext.guildID,
-                    "command.help.examples"
+                    "command.help.examples",
                 )}**\n`;
             }
 
@@ -192,22 +192,22 @@ export default class HelpCommand implements BaseCommand {
                 embedFooter = {
                     text: `${i18n.translate(
                         messageContext.guildID,
-                        "misc.inGame.aliases"
+                        "misc.inGame.aliases",
                     )}: ${aliases.join(", ")}`,
                 };
             }
         } else {
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Getting full help documentation`
+                    messageContext,
+                )} | Getting full help documentation`,
             );
             const commandsWithHelp = Object.values(commandFiles).filter(
-                (command) => command.help
+                (command) => command.help,
             );
 
             commandsWithHelp.sort(
-                (x, y) => y.help!("").priority - x.help!("").priority
+                (x, y) => y.help!("").priority - x.help!("").priority,
             );
 
             embedTitle = i18n.translate(
@@ -215,7 +215,7 @@ export default class HelpCommand implements BaseCommand {
                 "command.help.title",
                 {
                     kmq: "K-pop Music Quiz",
-                }
+                },
             );
 
             embedDesc = i18n.translate(
@@ -227,9 +227,9 @@ export default class HelpCommand implements BaseCommand {
                     help: clickableSlashCommand("help"),
                     command: i18n.translate(
                         messageContext.guildID,
-                        "command.help.command"
+                        "command.help.command",
                     ),
-                }
+                },
             );
 
             embedFields = commandsWithHelp.map((command) => {
@@ -247,7 +247,7 @@ export default class HelpCommand implements BaseCommand {
                     type: 2,
                     label: i18n.translate(
                         messageContext.guildID,
-                        "misc.interaction.officialKmqServer"
+                        "misc.interaction.officialKmqServer",
                     ),
                 },
                 {
@@ -256,7 +256,7 @@ export default class HelpCommand implements BaseCommand {
                     type: 2,
                     label: i18n.translate(
                         messageContext.guildID,
-                        "misc.interaction.howToPlay"
+                        "misc.interaction.howToPlay",
                     ),
                 },
                 {
@@ -265,7 +265,7 @@ export default class HelpCommand implements BaseCommand {
                     type: 2,
                     label: i18n.translate(
                         messageContext.guildID,
-                        "misc.interaction.faq"
+                        "misc.interaction.faq",
                     ),
                 },
             ];
@@ -282,7 +282,7 @@ export default class HelpCommand implements BaseCommand {
                     thumbnail: {
                         url: KmqImages.READING_BOOK,
                     },
-                })
+                }),
             );
 
             await sendPaginationedEmbed(
@@ -290,7 +290,7 @@ export default class HelpCommand implements BaseCommand {
                 embeds,
                 embedActionRowComponents
                     ? [{ type: 1, components: embedActionRowComponents }]
-                    : undefined
+                    : undefined,
             );
         } else {
             await sendInfoMessage(
@@ -309,7 +309,7 @@ export default class HelpCommand implements BaseCommand {
                 [],
                 messageOrInteraction instanceof Eris.CommandInteraction
                     ? messageOrInteraction
-                    : undefined
+                    : undefined,
             );
         }
     }
@@ -317,7 +317,7 @@ export default class HelpCommand implements BaseCommand {
     call = async ({ parsedMessage, message }: CommandArgs): Promise<void> => {
         await HelpCommand.helpMessage(message, parsedMessage.argument);
         logger.info(
-            `${getDebugLogHeader(message)} | Help documentation retrieved.`
+            `${getDebugLogHeader(message)} | Help documentation retrieved.`,
         );
     };
 
@@ -325,13 +325,13 @@ export default class HelpCommand implements BaseCommand {
      * @param interaction - The interaction
      */
     async processChatInputInteraction(
-        interaction: Eris.CommandInteraction
+        interaction: Eris.CommandInteraction,
     ): Promise<void> {
         const { interactionOptions } = getInteractionValue(interaction);
 
         await HelpCommand.helpMessage(
             interaction,
-            interactionOptions["action"]
+            interactionOptions["action"],
         );
     }
 
@@ -340,13 +340,13 @@ export default class HelpCommand implements BaseCommand {
      * @param interaction - The interaction with intermediate typing state
      */
     static async processAutocompleteInteraction(
-        interaction: Eris.AutocompleteInteraction
+        interaction: Eris.AutocompleteInteraction,
     ): Promise<void> {
         const interactionData = getInteractionValue(interaction);
         const focusedKey = interactionData.focusedKey;
         if (focusedKey === null) {
             logger.error(
-                "focusedKey unexpectedly null in processGroupAutocompleteInteraction"
+                "focusedKey unexpectedly null in processGroupAutocompleteInteraction",
             );
 
             return;
@@ -365,7 +365,7 @@ export default class HelpCommand implements BaseCommand {
                 interaction,
                 commands
                     .map((x) => ({ name: x.name, value: x.name }))
-                    .slice(0, MAX_AUTOCOMPLETE_FIELDS)
+                    .slice(0, MAX_AUTOCOMPLETE_FIELDS),
             );
         } else {
             await tryAutocompleteInteractionAcknowledge(
@@ -373,7 +373,7 @@ export default class HelpCommand implements BaseCommand {
                 commands
                     .filter((x) => x.name.startsWith(lowercaseUserInput))
                     .map((x) => ({ name: x.name, value: x.name }))
-                    .slice(0, MAX_AUTOCOMPLETE_FIELDS)
+                    .slice(0, MAX_AUTOCOMPLETE_FIELDS),
             );
         }
     }

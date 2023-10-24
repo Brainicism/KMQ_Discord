@@ -102,16 +102,16 @@ export async function reloadFactCache(): Promise<void> {
     await Promise.allSettled(
         Object.values(LocaleType).map(async (locale) => {
             await generateFacts(locale);
-        })
+        }),
     );
 }
 
 async function resolveFactPromises(
-    promises: Promise<string[]>[]
+    promises: Promise<string[]>[],
 ): Promise<string[][]> {
     const settledPromises = await Promise.allSettled(promises);
     const rejectedPromises = settledPromises.filter(
-        (x) => x["status"] === "rejected"
+        (x) => x["status"] === "rejected",
     ) as PromiseRejectedResult[];
 
     for (const rejectedPromise of rejectedPromises) {
@@ -119,7 +119,7 @@ async function resolveFactPromises(
     }
 
     const resolvedPromises = settledPromises.filter(
-        (x) => x["status"] === "fulfilled"
+        (x) => x["status"] === "fulfilled",
     ) as PromiseFulfilledResult<string[]>[];
 
     return resolvedPromises.map((x) => x["value"]);
@@ -139,7 +139,7 @@ async function generateFacts(locale: LocaleType): Promise<void> {
 
 function parseGaonWeeklyRankList(
     ranklist: string,
-    year: number
+    year: number,
 ): Array<GaonWeeklyEntry> {
     return JSON.parse(ranklist).map((x: string[]) => {
         const songName = x[0];
@@ -202,10 +202,10 @@ async function recentMusicVideos(lng: LocaleType): Promise<string[]> {
                 lng,
                 x["name"] as string,
                 x["artist"] as string,
-                x["youtubeLink"] as string
+                x["youtubeLink"] as string,
             ),
             lng,
-        })
+        }),
     );
 }
 
@@ -217,7 +217,7 @@ async function recentMusicShowWin(lng: LocaleType): Promise<string[]> {
         .innerJoin(
             "app_kpop_group",
             "app_kpop_ms.id_artist",
-            "app_kpop_group.id"
+            "app_kpop_group.id",
         )
         .innerJoin("app_kpop", "app_kpop_ms.id_musicvideo", "app_kpop.id")
         .select([
@@ -242,12 +242,12 @@ async function recentMusicShowWin(lng: LocaleType): Promise<string[]> {
                 lng,
                 x["winning_song"],
                 x["artist_name"] as string,
-                x["link"]
+                x["link"],
             ),
             musicShow: musicShows[x["music_show"] as keyof typeof musicShows],
             winDate: x["win_date"].toISOString().substring(0, 10),
             lng,
-        })
+        }),
     );
 }
 
@@ -257,7 +257,7 @@ async function musicShowWins(lng: LocaleType): Promise<string[]> {
         .innerJoin(
             "app_kpop_group",
             "app_kpop_ms.id_artist",
-            "app_kpop_group.id"
+            "app_kpop_group.id",
         )
         .groupBy("app_kpop_ms.id_artist")
         .select(["app_kpop_group.name as artist_name"])
@@ -275,7 +275,7 @@ async function musicShowWins(lng: LocaleType): Promise<string[]> {
             }),
             num: x["count"],
             lng,
-        })
+        }),
     );
 }
 
@@ -288,7 +288,7 @@ async function mostViewedGroups(lng: LocaleType): Promise<string[]> {
         .select(
             dbContext.kpopVideos.fn
                 .sum<number>("app_kpop.views")
-                .as("total_views")
+                .as("total_views"),
         )
         .where("issolo", "=", "n")
         .orderBy("total_views", "desc")
@@ -303,7 +303,7 @@ async function mostViewedGroups(lng: LocaleType): Promise<string[]> {
             }),
             views: friendlyFormattedNumber(x["total_views"]),
             lng,
-        })
+        }),
     );
 }
 
@@ -316,7 +316,7 @@ async function mostLikedGroups(lng: LocaleType): Promise<string[]> {
         .select(
             dbContext.kpopVideos.fn
                 .sum<number>("app_kpop.likes")
-                .as("total_likes")
+                .as("total_likes"),
         )
         .where("issolo", "=", "n")
         .orderBy("total_likes", "desc")
@@ -331,7 +331,7 @@ async function mostLikedGroups(lng: LocaleType): Promise<string[]> {
             }),
             likes: friendlyFormattedNumber(x["total_likes"]),
             lng,
-        })
+        }),
     );
 }
 
@@ -356,14 +356,14 @@ async function mostViewedVideo(lng: LocaleType): Promise<string[]> {
                 lng,
                 x["song_name"],
                 x["artist_name"] as string,
-                x["link"] as string
+                x["link"] as string,
             ),
             ordinalNum: i18n.internalLocalizer.t(getOrdinalNum(idx + 1), {
                 lng,
             }),
             views: friendlyFormattedNumber(x["views"]),
             lng,
-        })
+        }),
     );
 }
 
@@ -388,14 +388,14 @@ async function latestPak(lng: LocaleType): Promise<string[]> {
                 lng,
                 x["song_name"],
                 x["artist_name"] as string,
-                x["link"]
+                x["link"],
             ),
             ordinalNum: i18n.internalLocalizer.t(getOrdinalNum(idx + 1), {
                 lng,
             }),
             releasedate: x["releasedate"],
             lng,
-        })
+        }),
     );
 }
 
@@ -419,19 +419,19 @@ async function mostLikedVideo(lng: LocaleType): Promise<string[]> {
                 lng,
                 x["song_name"],
                 x["artist_name"] as string,
-                x["link"]
+                x["link"],
             ),
             ordinalNum: i18n.internalLocalizer.t(getOrdinalNum(idx + 1), {
                 lng,
             }),
             likes: friendlyFormattedNumber(x["likes"]),
             lng,
-        })
+        }),
     );
 }
 
 async function mostViewedEntertainmentCompany(
-    lng: LocaleType
+    lng: LocaleType,
 ): Promise<string[]> {
     const result = await dbContext.kpopVideos
         .selectFrom("app_kpop")
@@ -439,7 +439,7 @@ async function mostViewedEntertainmentCompany(
         .innerJoin(
             "app_kpop_company",
             "app_kpop_company.id",
-            "app_kpop_group.id_company"
+            "app_kpop_group.id_company",
         )
         .select(["app_kpop_company.name as name"])
         .groupBy("app_kpop_group.id_company")
@@ -456,19 +456,19 @@ async function mostViewedEntertainmentCompany(
             }),
             views: friendlyFormattedNumber(x["views"]),
             lng,
-        })
+        }),
     );
 }
 
 async function mostArtistsEntertainmentCompany(
-    lng: LocaleType
+    lng: LocaleType,
 ): Promise<string[]> {
     const result = await dbContext.kpopVideos
         .selectFrom("app_kpop_group")
         .innerJoin(
             "app_kpop_company",
             "app_kpop_company.id",
-            "app_kpop_group.id_company"
+            "app_kpop_group.id_company",
         )
         .select(["app_kpop_company.name as name"])
         .where("is_collab", "=", "n")
@@ -486,7 +486,7 @@ async function mostArtistsEntertainmentCompany(
             }),
             num: friendlyFormattedNumber(x["count"]),
             lng,
-        })
+        }),
     );
 }
 
@@ -510,7 +510,7 @@ async function mostMusicVideos(lng: LocaleType): Promise<string[]> {
             }),
             num: x["count"],
             lng,
-        })
+        }),
     );
 }
 
@@ -533,7 +533,7 @@ async function yearWithMostDebuts(lng: LocaleType): Promise<string[]> {
             }),
             num: x["count"],
             lng,
-        })
+        }),
     );
 }
 
@@ -556,7 +556,7 @@ async function yearWithMostReleases(lng: LocaleType): Promise<string[]> {
             }),
             num: String(x["count"]),
             lng,
-        })
+        }),
     );
 }
 
@@ -618,7 +618,7 @@ async function mostViewedSoloArtist(lng: LocaleType): Promise<string[]> {
             }),
             views: friendlyFormattedNumber(x["total_views"]),
             lng,
-        })
+        }),
     );
 }
 
@@ -676,11 +676,11 @@ async function songReleaseAnniversaries(lng: LocaleType): Promise<string[]> {
                 lng,
                 x["song_name_en"],
                 x["artist_name_en"],
-                x["link"]
+                x["link"],
             ),
             year: String(x["publish_year"]),
             lng,
-        })
+        }),
     );
 }
 
@@ -690,7 +690,7 @@ async function songGuessRate(lng: LocaleType): Promise<string[]> {
         .innerJoin(
             "available_songs",
             "available_songs.link",
-            "song_metadata.vlink"
+            "song_metadata.vlink",
         )
         .select(["song_name_en", "artist_name_en", "link", "rounds_played"])
         .select(sql`ROUND(correct_guesses/rounds_played * 100, 2)`.as("c"))
@@ -705,12 +705,12 @@ async function songGuessRate(lng: LocaleType): Promise<string[]> {
                 lng,
                 x["song_name_en"],
                 x["artist_name_en"],
-                x["link"]
+                x["link"],
             ),
             percentage: x["c"],
             roundsPlayed: x["rounds_played"],
             lng,
-        })
+        }),
     );
 }
 
@@ -732,7 +732,7 @@ async function bigThreeDominance(lng: LocaleType): Promise<string[]> {
 
     const bigThreeViews = result.reduce(
         (prev, current) => prev + current.total_views,
-        0
+        0,
     );
 
     const proportion = (100 * bigThreeViews) / totalViewsResult[0].total_views;
@@ -760,7 +760,7 @@ async function fanclubName(lng: LocaleType): Promise<Array<string>> {
             name: x["name"],
             fanclub: x["fanclub"],
             lng,
-        })
+        }),
     );
 }
 
@@ -780,7 +780,7 @@ async function closeBirthdays(lng: LocaleType): Promise<Array<string>> {
             name: x["name"],
             formattedDate: x["formatted_bday"],
             lng,
-        })
+        }),
     );
 }
 
@@ -802,14 +802,14 @@ async function longestGame(lng: LocaleType): Promise<string[]> {
     return [
         i18n.internalLocalizer.t("fact.kmq.longestGame", {
             sessionLength: friendlyFormattedNumber(
-                longestKmqGame.session_length
+                longestKmqGame.session_length,
             ),
             roundsPlayed: friendlyFormattedNumber(longestKmqGame.rounds_played),
             avgGuessTime: friendlyFormattedNumber(
-                longestKmqGame.avg_guess_time
+                longestKmqGame.avg_guess_time,
             ),
             numParticipants: friendlyFormattedNumber(
-                longestKmqGame.num_participants
+                longestKmqGame.num_participants,
             ),
             lng,
         }),
@@ -829,10 +829,10 @@ async function mostGames(lng: LocaleType): Promise<string[]> {
     return [
         i18n.internalLocalizer.t("fact.kmq.mostActiveServer", {
             gamesPlayed: friendlyFormattedNumber(
-                mostGamesPlayed.games_played as number
+                mostGamesPlayed.games_played as number,
             ),
             songsGuessed: friendlyFormattedNumber(
-                mostGamesPlayed.songs_guessed as number
+                mostGamesPlayed.songs_guessed as number,
             ),
             lng,
         }),
@@ -852,10 +852,10 @@ async function mostCorrectGuessed(lng: LocaleType): Promise<string[]> {
     return [
         i18n.internalLocalizer.t("fact.kmq.mostCorrectGuessesServer", {
             gamesPlayed: friendlyFormattedNumber(
-                mostGamesPlayed.games_played as number
+                mostGamesPlayed.games_played as number,
             ),
             songsGuessed: friendlyFormattedNumber(
-                mostGamesPlayed.songs_guessed as number
+                mostGamesPlayed.songs_guessed as number,
             ),
             lng,
         }),
@@ -938,7 +938,7 @@ async function recentUniquePlayers(lng: LocaleType): Promise<string[]> {
             });
 
             return fact;
-        })
+        }),
     );
 }
 
@@ -954,7 +954,7 @@ async function mostSongsGuessedPlayer(lng: LocaleType): Promise<string[]> {
     return [
         i18n.internalLocalizer.t("fact.kmq.mostActivePlayerSongsGuessed", {
             songsGuessed: friendlyFormattedNumber(
-                result[0].songs_guessed as number
+                result[0].songs_guessed as number,
             ),
             lng,
         }),
@@ -973,7 +973,7 @@ async function mostGamesPlayedPlayer(lng: LocaleType): Promise<string[]> {
     return [
         i18n.internalLocalizer.t("fact.kmq.mostActivePlayerGamesPlayed", {
             gamesPlayed: friendlyFormattedNumber(
-                result[0].games_played as number
+                result[0].games_played as number,
             ),
             lng,
         }),
@@ -996,7 +996,7 @@ async function mostGaonFirsts(lng: LocaleType): Promise<string[]> {
             }),
             firstPlaceCount: x["firsts"],
             lng,
-        })
+        }),
     );
 }
 
@@ -1016,7 +1016,7 @@ async function mostGaonAppearances(lng: LocaleType): Promise<string[]> {
             }),
             appearances: x["appearances"],
             lng,
-        })
+        }),
     );
 }
 
@@ -1036,7 +1036,7 @@ async function mostAnnualAwardShowWins(lng: LocaleType): Promise<string[]> {
             }),
             wins: x["wins"],
             lng,
-        })
+        }),
     );
 }
 
@@ -1051,7 +1051,7 @@ async function historicalGaonWeekly(lng: LocaleType): Promise<Array<string>> {
     week = week === 53 ? 52 : week;
     const yearRange = Array.from(
         { length: endYear - startYear + 1 },
-        (value, key) => startYear + key
+        (value, key) => startYear + key,
     );
 
     const result = await dbContext.kpopVideos
@@ -1063,7 +1063,7 @@ async function historicalGaonWeekly(lng: LocaleType): Promise<Array<string>> {
         .execute();
 
     const parsedResults = result.map((x) =>
-        parseGaonWeeklyRankList(x["ranklist"], x["year"])
+        parseGaonWeeklyRankList(x["ranklist"], x["year"]),
     );
 
     return parsedResults.map((x) =>
@@ -1072,10 +1072,10 @@ async function historicalGaonWeekly(lng: LocaleType): Promise<Array<string>> {
             songName: generateSongArtistHyperlink(
                 lng,
                 x[0].songName,
-                x[0].artistName
+                x[0].artistName,
             ),
             lng,
-        })
+        }),
     );
 }
 
@@ -1090,7 +1090,7 @@ async function recentGaonWeekly(lng: LocaleType): Promise<Array<string>> {
 
     const parsedResult = parseGaonWeeklyRankList(
         result[0].ranklist,
-        result[0].year
+        result[0].year,
     );
 
     return parsedResult.slice(0, 10).map((x, idx) =>
@@ -1098,13 +1098,13 @@ async function recentGaonWeekly(lng: LocaleType): Promise<Array<string>> {
             songName: generateSongArtistHyperlink(
                 lng,
                 x["songName"],
-                x["artistName"]
+                x["artistName"],
             ),
             ordinalNum: i18n.internalLocalizer.t(getOrdinalNum(idx + 1), {
                 lng,
             }),
             lng,
-        })
+        }),
     );
 }
 
@@ -1123,13 +1123,13 @@ async function topLeveledPlayers(lng: LocaleType): Promise<Array<string>> {
             }),
             level: `\`${x["level"]}\``,
             songsGuessed: `\`${friendlyFormattedNumber(
-                x["songs_guessed"] as number
+                x["songs_guessed"] as number,
             )}\``,
             gamesPlayed: `\`${friendlyFormattedNumber(
-                x["games_played"] as number
+                x["games_played"] as number,
             )}\``,
             lng,
-        })
+        }),
     );
 }
 
@@ -1139,7 +1139,7 @@ async function upcomingReleases(lng: LocaleType): Promise<Array<string>> {
         .innerJoin(
             "app_kpop_group",
             "app_upcoming.id_artist",
-            "app_kpop_group.id"
+            "app_kpop_group.id",
         )
         .select([
             "app_upcoming.rdate as release_date",
@@ -1160,10 +1160,10 @@ async function upcomingReleases(lng: LocaleType): Promise<Array<string>> {
             releaseType: x["release_type"],
             dateString: `${discordDateFormat(
                 x["release_date"],
-                "d"
+                "d",
             )} (${discordDateFormat(x["release_date"], "R")})`,
             lng,
-        })
+        }),
     );
 }
 
@@ -1171,7 +1171,7 @@ function generateSongArtistHyperlink(
     lng: LocaleType,
     songName: string,
     artistName: string,
-    videoId?: string
+    videoId?: string,
 ): string {
     let url: string;
     if (videoId) {
@@ -1180,7 +1180,7 @@ function generateSongArtistHyperlink(
         const searchUrl = new URL("https://youtube.com/results");
         searchUrl.searchParams.append(
             "search_query",
-            `${songName} ${artistName}`
+            `${songName} ${artistName}`,
         );
         url = searchUrl.toString();
     }

@@ -47,7 +47,7 @@ export default class SpecialCommand implements BaseCommand {
         name: "special",
         description: i18n.translate(
             guildID,
-            "command.special.help.description"
+            "command.special.help.description",
         ),
         usage: "/special set\nspecial:[reverse | slow | fast | faster | lowpitch | highpitch | nightcore]\n\n/special reset",
         examples: [
@@ -55,56 +55,56 @@ export default class SpecialCommand implements BaseCommand {
                 example: "`/special set special:reverse`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.special.help.example.reverse"
+                    "command.special.help.example.reverse",
                 ),
             },
             {
                 example: "`/special set special:slow`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.special.help.example.slow"
+                    "command.special.help.example.slow",
                 ),
             },
             {
                 example: "`/special set special:fast`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.special.help.example.fast"
+                    "command.special.help.example.fast",
                 ),
             },
             {
                 example: "`/special set special:faster`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.special.help.example.faster"
+                    "command.special.help.example.faster",
                 ),
             },
             {
                 example: "`/special set special:lowpitch`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.special.help.example.lowPitch"
+                    "command.special.help.example.lowPitch",
                 ),
             },
             {
                 example: "`/special set special:highpitch`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.special.help.example.highPitch"
+                    "command.special.help.example.highPitch",
                 ),
             },
             {
                 example: "`/special set special:nightcore`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.special.help.example.nightcore"
+                    "command.special.help.example.nightcore",
                 ),
             },
             {
                 example: "`/special reset`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.special.help.example.reset"
+                    "command.special.help.example.reset",
                 ),
             },
         ],
@@ -121,7 +121,7 @@ export default class SpecialCommand implements BaseCommand {
                     name: OptionAction.SET,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.special.help.description"
+                        "command.special.help.description",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -130,10 +130,10 @@ export default class SpecialCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.special.help.description"
+                                    "command.special.help.description",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -143,7 +143,7 @@ export default class SpecialCommand implements BaseCommand {
                             name: "special",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.special.interaction.special"
+                                "command.special.interaction.special",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -152,10 +152,10 @@ export default class SpecialCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.special.interaction.special"
+                                            "command.special.interaction.special",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -165,7 +165,7 @@ export default class SpecialCommand implements BaseCommand {
                                 (specialType) => ({
                                     name: specialType,
                                     value: specialType,
-                                })
+                                }),
                             ),
                         },
                     ],
@@ -175,7 +175,7 @@ export default class SpecialCommand implements BaseCommand {
                     description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
-                        { optionName: "special" }
+                        { optionName: "special" },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -185,10 +185,10 @@ export default class SpecialCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "misc.interaction.resetOption",
-                                    { optionName: "special" }
+                                    { optionName: "special" },
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -210,17 +210,17 @@ export default class SpecialCommand implements BaseCommand {
         await SpecialCommand.updateOption(
             MessageContext.fromMessage(message),
             specialType,
-            undefined
+            undefined,
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         specialType: SpecialType | null,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         if (
@@ -229,18 +229,18 @@ export default class SpecialCommand implements BaseCommand {
         ) {
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Non-premium user attempted to use premium special option`
+                    messageContext,
+                )} | Non-premium user attempted to use premium special option`,
             );
 
             const embedPayload: EmbedPayload = {
                 description: i18n.translate(
                     messageContext.guildID,
-                    "command.premium.option.description_kmq_server"
+                    "command.premium.option.description_kmq_server",
                 ),
                 title: i18n.translate(
                     messageContext.guildID,
-                    "command.premium.option.title"
+                    "command.premium.option.title",
                 ),
                 color: EMBED_ERROR_COLOR,
             };
@@ -254,14 +254,14 @@ export default class SpecialCommand implements BaseCommand {
         if (reset) {
             await guildPreference.reset(GameOption.SPECIAL_TYPE);
             logger.info(
-                `${getDebugLogHeader(messageContext)} | Special type reset.`
+                `${getDebugLogHeader(messageContext)} | Special type reset.`,
             );
         } else {
             await guildPreference.setSpecialType(specialType);
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Special type set to ${specialType}`
+                    messageContext,
+                )} | Special type set to ${specialType}`,
             );
         }
 
@@ -273,7 +273,7 @@ export default class SpecialCommand implements BaseCommand {
             false,
             undefined,
             undefined,
-            interaction
+            interaction,
         );
     }
 
@@ -283,7 +283,7 @@ export default class SpecialCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
@@ -303,7 +303,7 @@ export default class SpecialCommand implements BaseCommand {
         await SpecialCommand.updateOption(
             messageContext,
             specialValue,
-            interaction
+            interaction,
         );
     }
 

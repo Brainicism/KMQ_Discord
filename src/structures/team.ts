@@ -14,7 +14,7 @@ export default class Team extends Player {
     getScore(): number {
         return this.getPlayers().reduce(
             (totalScore, player) => totalScore + player.getScore(),
-            0
+            0,
         );
     }
 
@@ -32,7 +32,7 @@ export default class Team extends Player {
     getDisplayedName(
         first: boolean,
         _wonRound: boolean,
-        _mention: boolean
+        _mention: boolean,
     ): string {
         let name = `Team ${escapedFormatting(this.getName())}`;
         if (first) {
@@ -93,8 +93,8 @@ export default class Team extends Player {
         return Math.floor(
             Object.values(this.players).reduce(
                 (total, curr) => total + curr.getExpGain(),
-                0
-            )
+                0,
+            ),
         );
     }
 
@@ -102,7 +102,7 @@ export default class Team extends Player {
     getAvatarURL(): string {
         return (
             chooseRandom(
-                Object.values(this.players).map((x) => x.getAvatarURL())
+                Object.values(this.players).map((x) => x.getAvatarURL()),
             ) ?? ""
         );
     }

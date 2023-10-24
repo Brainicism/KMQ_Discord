@@ -12,7 +12,7 @@ async function getObjects(): Promise<[{ id: string }]> {
 
     return new Promise((resolve, reject) => {
         logger.info(
-            "Enter a stringified JSON array of objects where each object has an 'id' and 'name' property, then Ctrl-d:"
+            "Enter a stringified JSON array of objects where each object has an 'id' and 'name' property, then Ctrl-d:",
         );
         rl.prompt();
         let jsonInput = "";
@@ -70,7 +70,7 @@ async function awardBadges(): Promise<void> {
                 .select("user_id")
                 .where("badge_id", "=", badgeID)
                 .execute()
-        ).map((x) => x["user_id"])
+        ).map((x) => x["user_id"]),
     );
 
     const playerNamesWithBadgeAlready = badgesObj
@@ -80,8 +80,8 @@ async function awardBadges(): Promise<void> {
     if (playerNamesWithBadgeAlready.length > 0) {
         logger.info(
             `Players ${playerNamesWithBadgeAlready.join(
-                ", "
-            )} already have the badge.`
+                ", ",
+            )} already have the badge.`,
         );
     }
 
@@ -102,7 +102,7 @@ async function awardBadges(): Promise<void> {
     });
 
     logger.info(
-        `Awarded badge '${badgeName}' to ${playersToGiveBadge.length} players.`
+        `Awarded badge '${badgeName}' to ${playersToGiveBadge.length} players.`,
     );
 }
 

@@ -100,7 +100,7 @@ export function getDebugLogHeader(
         | Eris.Message
         | Eris.ComponentInteraction
         | Eris.CommandInteraction
-        | Eris.AutocompleteInteraction
+        | Eris.AutocompleteInteraction,
 ): string {
     let header: string;
     if (context instanceof Eris.Message) {
@@ -125,7 +125,7 @@ export function getDebugLogHeader(
  */
 function missingPermissionsText(
     guildID: string,
-    missingPermissions: string[]
+    missingPermissions: string[],
 ): string {
     return i18n.translate(guildID, "misc.failure.missingPermissionsText", {
         missingPermissions: missingPermissions.join(", "),
@@ -142,7 +142,7 @@ function missingPermissionsText(
  */
 export async function fetchUser(
     userID: string,
-    silentErrors = false
+    silentErrors = false,
 ): Promise<Eris.User | null> {
     let user: Eris.User | undefined;
     const { client, ipc } = State;
@@ -166,7 +166,7 @@ export async function fetchUser(
         } catch (err) {
             if (!silentErrors)
                 logger.warn(
-                    `Could not fetch user: ${userID}. err: ${err.code}. msg: ${err.message}`
+                    `Could not fetch user: ${userID}. err: ${err.code}. msg: ${err.message}`,
                 );
             return null;
         }
@@ -188,7 +188,7 @@ export async function fetchUser(
  * @returns an instance of the TextChannel
  */
 export async function fetchChannel(
-    textChannelID: string
+    textChannelID: string,
 ): Promise<Eris.TextChannel | null> {
     let channel: Eris.TextChannel | null = null;
     const { client, ipc } = State;
@@ -199,7 +199,7 @@ export async function fetchChannel(
     // fetch via IPC from other clusters
     if (!channel) {
         logger.debug(
-            `Text channel not in cache, attempting to fetch via IPC: ${textChannelID}`
+            `Text channel not in cache, attempting to fetch via IPC: ${textChannelID}`,
         );
         channel = await ipc.fetchChannel(textChannelID);
     }
@@ -208,15 +208,15 @@ export async function fetchChannel(
     if (!channel) {
         try {
             channel = (await client.getRESTChannel(
-                textChannelID
+                textChannelID,
             )) as Eris.TextChannel;
 
             logger.debug(
-                `Text channel not in cache, fetched via REST: ${textChannelID}`
+                `Text channel not in cache, fetched via REST: ${textChannelID}`,
             );
         } catch (err) {
             logger.warn(
-                `Could not fetch text channel: ${textChannelID}. err: ${err.code}. msg: ${err.message}`
+                `Could not fetch text channel: ${textChannelID}. err: ${err.code}. msg: ${err.message}`,
             );
             return null;
         }
@@ -252,7 +252,7 @@ export async function textPermissionsCheck(
     authorID: string,
     permissions: Array<
         keyof Eris.Constants["Permissions"]
-    > = REQUIRED_TEXT_PERMISSIONS
+    > = REQUIRED_TEXT_PERMISSIONS,
 ): Promise<boolean> {
     const messageContext = new MessageContext(textChannelID, null, guildID);
     const channel = await fetchChannel(textChannelID);
@@ -264,13 +264,13 @@ export async function textPermissionsCheck(
     ) {
         logger.warn(
             `${getDebugLogHeader(
-                messageContext
-            )} | Missing SEND_MESSAGES permissions`
+                messageContext,
+            )} | Missing SEND_MESSAGES permissions`,
         );
         const embed: Eris.EmbedOptions = {
             title: i18n.translate(
                 guildID,
-                "misc.failure.missingPermissions.title"
+                "misc.failure.missingPermissions.title",
             ),
             description: i18n.translate(
                 guildID,
@@ -278,7 +278,7 @@ export async function textPermissionsCheck(
                 {
                     channelName: `#${channel.name}`,
                     permissionsLink: PERMISSIONS_LINK,
-                }
+                },
             ),
             url: PERMISSIONS_LINK,
         };
@@ -291,16 +291,16 @@ export async function textPermissionsCheck(
         (permission) =>
             !channel
                 .permissionsOf(process.env.BOT_CLIENT_ID as string)
-                .has(permission)
+                .has(permission),
     );
 
     if (missingPermissions.length > 0) {
         logger.warn(
             `${getDebugLogHeader(
-                messageContext
+                messageContext,
             )} | Missing Text Channel [${missingPermissions.join(
-                ", "
-            )}] permissions`
+                ", ",
+            )}] permissions`,
         );
 
         sendMessage(channel.id, {
@@ -317,13 +317,13 @@ async function sendMessageExceptionHandler(
     channelID: string,
     guildID: string | undefined,
     authorID: string | undefined,
-    messageContent: Eris.AdvancedMessageContent
+    messageContent: Eris.AdvancedMessageContent,
 ): Promise<void> {
     if (typeof e === "string") {
         if (e.startsWith("Request timed out")) {
             // Request Timeout
             logger.error(
-                `Error sending message. Request timed out. textChannelID = ${channelID}.`
+                `Error sending message. Request timed out. textChannelID = ${channelID}.`,
             );
         }
     } else if (e.code) {
@@ -332,7 +332,7 @@ async function sendMessageExceptionHandler(
             case 500: {
                 // Internal Server Error
                 logger.error(
-                    `Error sending message. 500 Internal Server Error. textChannelID = ${channelID}.`
+                    `Error sending message. 500 Internal Server Error. textChannelID = ${channelID}.`,
                 );
                 break;
             }
@@ -342,7 +342,7 @@ async function sendMessageExceptionHandler(
                 logger.error(
                     `Error sending message. Invalid form body. textChannelID = ${channelID}. e.message = ${
                         e.message
-                    }. msg_content = ${JSON.stringify(messageContent)}`
+                    }. msg_content = ${JSON.stringify(messageContent)}`,
                 );
                 break;
             }
@@ -350,7 +350,7 @@ async function sendMessageExceptionHandler(
             case 50001: {
                 // Missing Access
                 logger.warn(
-                    `Error sending message. Missing Access. textChannelID = ${channelID}`
+                    `Error sending message. Missing Access. textChannelID = ${channelID}`,
                 );
                 break;
             }
@@ -358,19 +358,19 @@ async function sendMessageExceptionHandler(
             case 50013: {
                 // Missing Permissions
                 logger.warn(
-                    `Error sending message. Missing text permissions. textChannelID = ${channelID}.`
+                    `Error sending message. Missing text permissions. textChannelID = ${channelID}.`,
                 );
 
                 if (!guildID) {
                     logger.error(
-                        "Unexpected null guildID in missing text permissions check"
+                        "Unexpected null guildID in missing text permissions check",
                     );
                     break;
                 }
 
                 if (!authorID) {
                     logger.error(
-                        "Unexpected null authorID in missing text permissions check"
+                        "Unexpected null authorID in missing text permissions check",
                     );
                     break;
                 }
@@ -382,7 +382,7 @@ async function sendMessageExceptionHandler(
             case 10003: {
                 // Unknown channel
                 logger.error(
-                    `Error sending message. Unknown channel. textChannelID = ${channelID}.`
+                    `Error sending message. Unknown channel. textChannelID = ${channelID}.`,
                 );
                 break;
             }
@@ -390,7 +390,7 @@ async function sendMessageExceptionHandler(
             case 50007: {
                 // Cannot send messages to this user
                 logger.warn(
-                    `Error sending message. Cannot send messages to this user. userID = ${authorID}.`
+                    `Error sending message. Cannot send messages to this user. userID = ${authorID}.`,
                 );
                 break;
             }
@@ -398,7 +398,7 @@ async function sendMessageExceptionHandler(
             default: {
                 // Unknown error code
                 logger.error(
-                    `Error sending message. Unknown error code ${errCode}. textChannelID = ${channelID}. msg = ${e.message}.`
+                    `Error sending message. Unknown error code ${errCode}. textChannelID = ${channelID}. msg = ${e.message}.`,
                 );
                 break;
             }
@@ -406,8 +406,8 @@ async function sendMessageExceptionHandler(
     } else {
         logger.error(
             `Error sending message. Unknown error. textChannelID = ${channelID}. err = ${JSON.stringify(
-                e
-            )}.body = ${JSON.stringify(messageContent)}`
+                e,
+            )}.body = ${JSON.stringify(messageContent)}`,
         );
     }
 }
@@ -424,7 +424,7 @@ export async function sendMessage(
     textChannelID: string | null,
     messageContent: Eris.AdvancedMessageContent,
     authorID?: string,
-    interaction?: Eris.ComponentInteraction | Eris.CommandInteraction
+    interaction?: Eris.ComponentInteraction | Eris.CommandInteraction,
 ): Promise<Eris.Message | null> {
     if (interaction) {
         if (!withinInteractionInterval(interaction)) {
@@ -442,7 +442,7 @@ export async function sendMessage(
 
     if (!textChannelID) {
         logger.error(
-            `Unexpected null textChannelID in sendMessage. authorID = ${authorID}`
+            `Unexpected null textChannelID in sendMessage. authorID = ${authorID}`,
         );
 
         return null;
@@ -467,7 +467,7 @@ export async function sendMessage(
     } catch (e) {
         if (!channel) {
             logger.warn(
-                `Error sending message, and channel not cached. textChannelID = ${textChannelID}`
+                `Error sending message, and channel not cached. textChannelID = ${textChannelID}`,
             );
         } else {
             await sendMessageExceptionHandler(
@@ -475,7 +475,7 @@ export async function sendMessage(
                 channel.id,
                 channel.guild.id,
                 authorID,
-                messageContent
+                messageContent,
             );
         }
 
@@ -490,7 +490,7 @@ export async function sendMessage(
  */
 async function sendDmMessage(
     userID: string,
-    messageContent: Eris.AdvancedMessageContent
+    messageContent: Eris.AdvancedMessageContent,
 ): Promise<Eris.Message | null> {
     const { client } = State;
     let dmChannel: Eris.PrivateChannel;
@@ -498,7 +498,7 @@ async function sendDmMessage(
         dmChannel = await client.getDMChannel(userID);
     } catch (e) {
         logger.warn(
-            `Error sending message. Could not get DM channel. userID = ${userID}`
+            `Error sending message. Could not get DM channel. userID = ${userID}`,
         );
         return null;
     }
@@ -511,7 +511,7 @@ async function sendDmMessage(
             dmChannel.id,
             undefined,
             userID,
-            messageContent
+            messageContent,
         );
         return null;
     }
@@ -526,7 +526,7 @@ async function sendDmMessage(
 export async function sendErrorMessage(
     messageContext: MessageContext,
     embedPayload: EmbedPayload,
-    interaction?: Eris.CommandInteraction
+    interaction?: Eris.CommandInteraction,
 ): Promise<Eris.Message<Eris.TextableChannel> | null> {
     const author =
         embedPayload.author == null || embedPayload.author
@@ -536,16 +536,16 @@ export async function sendErrorMessage(
     if (embedPayload.description && embedPayload.description.length > 2048) {
         logger.error(
             `${getDebugLogHeader(
-                messageContext
+                messageContext,
             )} | Message was too long. description = ${
                 embedPayload.description
-            }`
+            }`,
         );
         return sendErrorMessage(messageContext, {
             title: i18n.translate(messageContext.guildID, "misc.failure.error"),
             description: i18n.translate(
                 messageContext.guildID,
-                "misc.failure.messageTooLong"
+                "misc.failure.messageTooLong",
             ),
         });
     }
@@ -553,8 +553,8 @@ export async function sendErrorMessage(
     if (embedPayload.title.length > 256) {
         logger.error(
             `${getDebugLogHeader(
-                messageContext
-            )} | Title was too long. title = ${embedPayload.title}`
+                messageContext,
+            )} | Title was too long. title = ${embedPayload.title}`,
         );
         embedPayload.title = truncatedString(embedPayload.title, 256);
     }
@@ -587,7 +587,7 @@ export async function sendErrorMessage(
             components: embedPayload.components,
         },
         messageContext.author.id,
-        interaction
+        interaction,
     );
 }
 
@@ -599,7 +599,7 @@ export async function sendErrorMessage(
  */
 export function generateEmbed(
     messageContext: MessageContext,
-    embedPayload: EmbedPayload
+    embedPayload: EmbedPayload,
 ): Eris.EmbedOptions {
     const author =
         embedPayload.author == null || embedPayload.author
@@ -645,24 +645,24 @@ export async function sendInfoMessage(
     reply = false,
     content?: string,
     additionalEmbeds: Array<EmbedPayload> = [],
-    interaction?: Eris.CommandInteraction
+    interaction?: Eris.CommandInteraction,
 ): Promise<Eris.Message<Eris.TextableChannel> | null> {
     const embeds = [embedPayload, ...additionalEmbeds];
     for (const embed of embeds) {
         if (embed.description && embed.description.length > 2048) {
             logger.error(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Message was too long. description = ${embed.description}`
+                    messageContext,
+                )} | Message was too long. description = ${embed.description}`,
             );
             return sendErrorMessage(messageContext, {
                 title: i18n.translate(
                     messageContext.guildID,
-                    "misc.failure.error"
+                    "misc.failure.error",
                 ),
                 description: i18n.translate(
                     messageContext.guildID,
-                    "misc.failure.messageTooLong"
+                    "misc.failure.messageTooLong",
                 ),
             });
         }
@@ -672,8 +672,8 @@ export async function sendInfoMessage(
         if (embed.title.length > 256) {
             logger.error(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Title was too long. title = ${embed.title}`
+                    messageContext,
+                )} | Title was too long. title = ${embed.title}`,
             );
             embeds[i].title = truncatedString(embedPayload.title, 256);
         }
@@ -694,7 +694,7 @@ export async function sendInfoMessage(
             content: content || undefined,
         },
         messageContext.author.id,
-        interaction
+        interaction,
     );
 }
 
@@ -710,13 +710,13 @@ function getFormattedLimit(
     guildID: string,
     gameOptions: GameOptions,
     count: number,
-    countBeforeLimit: number
+    countBeforeLimit: number,
 ): string {
     const visibleLimitEnd = Math.min(countBeforeLimit, gameOptions.limitEnd);
 
     const visibleLimitStart = Math.min(
         countBeforeLimit,
-        gameOptions.limitStart
+        gameOptions.limitStart,
     );
 
     if (gameOptions.limitStart === 0) {
@@ -750,7 +750,7 @@ export async function generateOptionsMessage(
     preset = false,
     allReset = false,
     footerText?: string,
-    interaction?: Eris.CommandInteraction
+    interaction?: Eris.CommandInteraction,
 ): Promise<EmbedPayload | null> {
     if (guildPreference.gameOptions.forcePlaySongID) {
         return {
@@ -764,7 +764,7 @@ export async function generateOptionsMessage(
     const guildID = messageContext.guildID;
     const premiumRequest = await isPremiumRequest(
         session,
-        messageContext.author.id
+        messageContext.author.id,
     );
 
     // Store the VALUE of ,[option]: [VALUE] into optionStrings
@@ -783,7 +783,7 @@ export async function generateOptionsMessage(
                 premiumRequest,
                 false,
                 messageContext,
-                interaction
+                interaction,
             );
 
         optionStrings[
@@ -799,7 +799,7 @@ export async function generateOptionsMessage(
         guildPreference,
         premiumRequest,
         messageContext,
-        interaction
+        interaction,
     );
 
     if (
@@ -809,12 +809,12 @@ export async function generateOptionsMessage(
         await sendErrorMessage(messageContext, {
             title: i18n.translate(
                 guildID,
-                "misc.failure.retrievingSongData.title"
+                "misc.failure.retrievingSongData.title",
             ),
             description: i18n.translate(
                 guildID,
                 "misc.failure.retrievingSongData.description",
-                { helpCommand: "`/help`" }
+                { helpCommand: "`/help`" },
             ),
         });
         return null;
@@ -824,11 +824,11 @@ export async function generateOptionsMessage(
         guildID,
         gameOptions,
         totalSongs.count,
-        totalSongs.countBeforeLimit
+        totalSongs.countBeforeLimit,
     );
 
     optionStrings[GameOption.LIMIT] = `${limit} / ${friendlyFormattedNumber(
-        totalSongs.countBeforeLimit
+        totalSongs.countBeforeLimit,
     )}`;
 
     optionStrings[GameOption.GROUPS] = guildPreference.isGroupsMode()
@@ -876,10 +876,10 @@ export async function generateOptionsMessage(
 
     const generateConflictingCommandEntry = (
         commandValue: string,
-        conflictingOption: string
+        conflictingOption: string,
     ): string =>
         `${strikethrough(commandValue)} (\`/${conflictingOption}\` ${italicize(
-            conflictString
+            conflictString,
         )})`;
 
     const isEliminationMode =
@@ -891,7 +891,7 @@ export async function generateOptionsMessage(
         if (isEliminationMode) {
             optionStrings[GameOption.GOAL] = generateConflictingCommandEntry(
                 optionStrings[GameOption.GOAL] as string,
-                `play ${GameType.ELIMINATION}`
+                `play ${GameType.ELIMINATION}`,
             );
         }
     }
@@ -914,7 +914,7 @@ export async function generateOptionsMessage(
                 if (optionString && !optionString.includes(conflictString)) {
                     optionStrings[option] = generateConflictingCommandEntry(
                         optionString,
-                        GameOptionCommand[gameOptionConflictCheck.gameOption]
+                        GameOptionCommand[gameOptionConflictCheck.gameOption],
                     );
                 }
             }
@@ -985,9 +985,9 @@ export async function generateOptionsMessage(
             {
                 limit: bold(limit),
                 totalSongs: bold(
-                    friendlyFormattedNumber(totalSongs.countBeforeLimit)
+                    friendlyFormattedNumber(totalSongs.countBeforeLimit),
                 ),
-            }
+            },
         );
     } else {
         optionsOverview = i18n.translate(
@@ -995,20 +995,20 @@ export async function generateOptionsMessage(
             "command.options.spotify",
             {
                 songCount: bold(limit),
-            }
+            },
         );
     }
 
     // Options excluded from embed fields since they are of higher importance (shown above them as part of the embed description)
     let priorityOptions: string;
     priorityOptions = PriorityGameOption.filter(
-        (option) => optionStrings[option]
+        (option) => optionStrings[option],
     )
         .map(
             (option) =>
                 `${clickableSlashCommand(GameOptionCommand[option])}: ${
                     optionStrings[option]
-                }`
+                }`,
         )
         .join("\n");
 
@@ -1017,8 +1017,8 @@ export async function generateOptionsMessage(
         nonPremiumGameWarning = italicize(
             i18n.translate(
                 messageContext.guildID,
-                "command.options.premiumOptionsNonPremiumGame"
-            )
+                "command.options.premiumOptionsNonPremiumGame",
+            ),
         );
     }
 
@@ -1043,7 +1043,7 @@ export async function generateOptionsMessage(
             (option) =>
                 `${clickableSlashCommand(GameOptionCommand[option])}: ${
                     optionStrings[option]
-                }`
+                }`,
         )
         .join("\n");
 
@@ -1053,13 +1053,13 @@ export async function generateOptionsMessage(
     let secondNonPriorityOptions = fieldOptions
         .slice(
             Math.ceil(fieldOptions.length / 3),
-            Math.ceil((2 * fieldOptions.length) / 3)
+            Math.ceil((2 * fieldOptions.length) / 3),
         )
         .map(
             (option) =>
                 `${clickableSlashCommand(GameOptionCommand[option])}: ${
                     optionStrings[option]
-                }`
+                }`,
         )
         .join("\n");
 
@@ -1072,7 +1072,7 @@ export async function generateOptionsMessage(
             (option) =>
                 `${clickableSlashCommand(GameOptionCommand[option])}: ${
                     optionStrings[option]
-                }`
+                }`,
         )
         .join("\n");
 
@@ -1108,12 +1108,12 @@ export async function generateOptionsMessage(
         footerText = i18n.translate(
             messageContext.guildID,
             "command.options.perCommandHelp",
-            { helpCommand: "/help" }
+            { helpCommand: "/help" },
         );
     } else if (session?.isListeningSession()) {
         footerText = i18n.translate(
             messageContext.guildID,
-            "command.options.listeningSessionNotAvailable"
+            "command.options.listeningSessionNotAvailable",
         );
     }
 
@@ -1124,7 +1124,7 @@ export async function generateOptionsMessage(
         if (preset) {
             title = i18n.translate(
                 messageContext.guildID,
-                "command.options.preset"
+                "command.options.preset",
             );
         } else {
             title = updatedOptions[0].option;
@@ -1135,12 +1135,12 @@ export async function generateOptionsMessage(
                 ? i18n.translate(
                       messageContext.guildID,
                       "command.options.reset",
-                      { presetOrOption: title }
+                      { presetOrOption: title },
                   )
                 : i18n.translate(
                       messageContext.guildID,
                       "command.options.updated",
-                      { presetOrOption: title }
+                      { presetOrOption: title },
                   );
     }
 
@@ -1182,7 +1182,7 @@ export async function sendOptionsMessage(
     preset = false,
     allReset = false,
     footerText?: string,
-    interaction?: Eris.CommandInteraction
+    interaction?: Eris.CommandInteraction,
 ): Promise<void> {
     const optionsEmbed = await generateOptionsMessage(
         session,
@@ -1192,16 +1192,16 @@ export async function sendOptionsMessage(
         preset,
         allReset,
         footerText,
-        interaction
+        interaction,
     );
 
     if (!optionsEmbed) {
         logger.error(
             `${getDebugLogHeader(
-                messageContext
+                messageContext,
             )} | Unexpectedly unable to generate options embed in sendOptionsMessage. session = ${!!session}. updatedOptions = ${JSON.stringify(
-                updatedOptions
-            )}. preset = ${preset}. allReset = ${allReset}. interaction = ${!!interaction}`
+                updatedOptions,
+            )}. preset = ${preset}. allReset = ${allReset}. interaction = ${!!interaction}`,
         );
         if (interaction && !interaction.acknowledged) {
             await interaction.acknowledge();
@@ -1221,7 +1221,7 @@ export async function sendOptionsMessage(
             true,
             undefined,
             [],
-            interaction
+            interaction,
         );
     }
 }
@@ -1231,13 +1231,13 @@ export async function sendOptionsMessage(
  * @returns a random GameInfoMessage
  */
 export async function getGameInfoMessage(
-    guildID: string
+    guildID: string,
 ): Promise<GameInfoMessage | null> {
     const endGameMessage: GameInfoMessage = chooseWeightedRandom(
         await dbContext.kmq
             .selectFrom("game_messages")
             .select(["title", "message", "weight"])
-            .execute()
+            .execute(),
     );
 
     if (!endGameMessage) return null;
@@ -1249,7 +1249,7 @@ export async function getGameInfoMessage(
 
         if (Object.values(gameInfoMessageContent).some((v) => !v)) {
             logger.error(
-                `Message's Game info message content is missing content. ${gameInfoMessageContent}`
+                `Message's Game info message content is missing content. ${gameInfoMessageContent}`,
             );
             return null;
         }
@@ -1261,7 +1261,7 @@ export async function getGameInfoMessage(
         }
     } catch (e) {
         logger.error(
-            `Error parsing message's game info message content, invalid JSON? message = ${endGameMessage.message}`
+            `Error parsing message's game info message content, invalid JSON? message = ${endGameMessage.message}`,
         );
     }
 
@@ -1271,7 +1271,7 @@ export async function getGameInfoMessage(
 
         if (Object.values(gameInfoMessageContent).some((v) => !v)) {
             logger.error(
-                `Title's game info message content is missing content. ${gameInfoMessageContent}`
+                `Title's game info message content is missing content. ${gameInfoMessageContent}`,
             );
             return null;
         }
@@ -1283,7 +1283,7 @@ export async function getGameInfoMessage(
         }
     } catch (e) {
         logger.error(
-            `Error parsing title's game info message content, invalid JSON? title = ${endGameMessage.title}`
+            `Error parsing title's game info message content, invalid JSON? title = ${endGameMessage.title}`,
         );
     }
 
@@ -1301,7 +1301,7 @@ export async function sendPaginationedEmbed(
     messageOrInteraction: GuildTextableMessage | Eris.CommandInteraction,
     embeds: Array<Eris.EmbedOptions> | Array<EmbedGenerator>,
     components?: Array<Eris.ActionRow>,
-    startPage = 1
+    startPage = 1,
 ): Promise<Eris.Message | null> {
     if (embeds.length > 1) {
         if (
@@ -1309,7 +1309,7 @@ export async function sendPaginationedEmbed(
                 messageOrInteraction.channel.id,
                 messageOrInteraction.guildID as string,
                 messageOrInteraction.member!.id,
-                [...REQUIRED_TEXT_PERMISSIONS, "readMessageHistory"]
+                [...REQUIRED_TEXT_PERMISSIONS, "readMessageHistory"],
             )
         ) {
             return EmbedPaginator.createPaginationEmbed(
@@ -1320,7 +1320,7 @@ export async function sendPaginationedEmbed(
                 components,
                 messageOrInteraction instanceof Eris.CommandInteraction
                     ? messageOrInteraction
-                    : undefined
+                    : undefined,
             );
         }
 
@@ -1340,7 +1340,7 @@ export async function sendPaginationedEmbed(
         messageOrInteraction.member?.id,
         messageOrInteraction instanceof Eris.CommandInteraction
             ? messageOrInteraction
-            : undefined
+            : undefined,
     );
 }
 
@@ -1359,7 +1359,7 @@ export function disconnectVoiceConnection(message: GuildTextableMessage): void {
  */
 export function areUserAndBotInSameVoiceChannel(
     userID: string,
-    guildID: string
+    guildID: string,
 ): boolean {
     const member = State.client.guilds.get(guildID)?.members.get(userID);
     const botVoiceConnection = State.client.voiceConnections.get(guildID);
@@ -1376,7 +1376,7 @@ export function areUserAndBotInSameVoiceChannel(
  * @returns the voice channel that the message's author is in
  */
 export function getUserVoiceChannel(
-    messageContext: MessageContext
+    messageContext: MessageContext,
 ): Eris.VoiceChannel | null {
     const member = State.client.guilds
         .get(messageContext.guildID)
@@ -1395,7 +1395,7 @@ export function getUserVoiceChannel(
  */
 export function getVoiceChannel(voiceChannelID: string): Eris.VoiceChannel {
     const voiceChannel = State.client.getChannel(
-        voiceChannelID
+        voiceChannelID,
     ) as Eris.VoiceChannel;
 
     return voiceChannel;
@@ -1406,7 +1406,7 @@ export function getVoiceChannel(voiceChannelID: string): Eris.VoiceChannel {
  * @returns the users in the voice channel, excluding bots
  */
 export function getCurrentVoiceMembers(
-    voiceChannelID: string
+    voiceChannelID: string,
 ): Array<Eris.Member> {
     const voiceChannel = getVoiceChannel(voiceChannelID);
     if (!voiceChannel) {
@@ -1432,7 +1432,7 @@ export function getNumParticipants(voiceChannelID: string): number {
  */
 export function voicePermissionsCheck(
     messageContext: MessageContext,
-    interaction?: Eris.CommandInteraction
+    interaction?: Eris.CommandInteraction,
 ): boolean {
     const voiceChannel = getUserVoiceChannel(messageContext);
 
@@ -1445,16 +1445,16 @@ export function voicePermissionsCheck(
         (permission) =>
             !voiceChannel
                 .permissionsOf(process.env.BOT_CLIENT_ID as string)
-                .has(permission)
+                .has(permission),
     );
 
     if (missingPermissions.length > 0) {
         logger.warn(
             `${getDebugLogHeader(
-                messageContext
+                messageContext,
             )} | Missing Voice Channel [${missingPermissions.join(
-                ", "
-            )}] permissions`
+                ", ",
+            )}] permissions`,
         );
 
         sendErrorMessage(
@@ -1462,15 +1462,15 @@ export function voicePermissionsCheck(
             {
                 title: i18n.translate(
                     messageContext.guildID,
-                    "misc.failure.missingPermissions.title"
+                    "misc.failure.missingPermissions.title",
                 ),
                 description: missingPermissionsText(
                     messageContext.guildID,
-                    missingPermissions
+                    missingPermissions,
                 ),
                 url: PERMISSIONS_LINK,
             },
-            interaction
+            interaction,
         );
         return false;
     }
@@ -1484,11 +1484,11 @@ export function voicePermissionsCheck(
         sendInfoMessage(messageContext, {
             title: i18n.translate(
                 messageContext.guildID,
-                "misc.failure.vcFull.title"
+                "misc.failure.vcFull.title",
             ),
             description: i18n.translate(
                 messageContext.guildID,
-                "misc.failure.vcFull.description"
+                "misc.failure.vcFull.description",
             ),
         });
         return false;
@@ -1498,18 +1498,18 @@ export function voicePermissionsCheck(
     if (afkChannel) {
         logger.warn(
             `${getDebugLogHeader(
-                messageContext
-            )} | Attempted to start game in AFK voice channel`
+                messageContext,
+            )} | Attempted to start game in AFK voice channel`,
         );
 
         sendInfoMessage(messageContext, {
             title: i18n.translate(
                 messageContext.guildID,
-                "misc.failure.afkChannel.title"
+                "misc.failure.afkChannel.title",
             ),
             description: i18n.translate(
                 messageContext.guildID,
-                "misc.failure.afkChannel.description"
+                "misc.failure.afkChannel.description",
             ),
         });
         return false;
@@ -1526,7 +1526,7 @@ export function checkBotIsAlone(guildID: string): boolean {
     const voiceConnection = State.client.voiceConnections.get(guildID);
     if (!voiceConnection || !voiceConnection.channelID) return true;
     const channel = State.client.getChannel(
-        voiceConnection.channelID
+        voiceConnection.channelID,
     ) as Eris.VoiceChannel;
 
     if (channel.voiceMembers.size === 0) return true;
@@ -1575,7 +1575,7 @@ export async function sendDebugAlertWebhook(
     title: string,
     description: string,
     color: number,
-    avatarUrl: string
+    avatarUrl: string,
 ): Promise<void> {
     if (!process.env.ALERT_WEBHOOK_URL) return;
     await axios.post(process.env.ALERT_WEBHOOK_URL, {
@@ -1601,7 +1601,7 @@ export async function sendBookmarkedSongs(
     guildID: string,
     bookmarkedSongs: {
         [userID: string]: Map<string, BookmarkedSong>;
-    }
+    },
 ): Promise<void> {
     const locale = State.getGuildLocale(guildID);
     for (const [userID, songs] of Object.entries(bookmarkedSongs)) {
@@ -1613,11 +1613,14 @@ export async function sendBookmarkedSongs(
             name: `${bold(
                 `"${getLocalizedSongName(
                     bookmarkedSong[1].song,
-                    locale
-                )}" - ${getLocalizedArtistName(bookmarkedSong[1].song, locale)}`
+                    locale,
+                )}" - ${getLocalizedArtistName(
+                    bookmarkedSong[1].song,
+                    locale,
+                )}`,
             )} (${standardDateFormat(bookmarkedSong[1].song.publishDate)})`,
             value: `[${friendlyFormattedNumber(
-                bookmarkedSong[1].song.views
+                bookmarkedSong[1].song.views,
             )} ${i18n.translate(guildID, "misc.views")}](https://youtu.be/${
                 bookmarkedSong[1].song.youtubeLink
             })`,
@@ -1632,14 +1635,14 @@ export async function sendBookmarkedSongs(
                 },
                 title: i18n.translate(
                     guildID,
-                    "misc.interaction.bookmarked.message.title"
+                    "misc.interaction.bookmarked.message.title",
                 ),
                 fields,
                 footer: {
                     text: i18n.translate(
                         guildID,
                         "misc.interaction.bookmarked.message.playedOn",
-                        { date: standardDateFormat(new Date()) }
+                        { date: standardDateFormat(new Date()) },
                     ),
                 },
             };
@@ -1656,7 +1659,7 @@ function withinInteractionInterval(
     interaction:
         | Eris.ComponentInteraction
         | Eris.CommandInteraction
-        | Eris.AutocompleteInteraction
+        | Eris.AutocompleteInteraction,
 ): boolean {
     return (
         new Date().getTime() - interaction.createdAt <=
@@ -1669,21 +1672,21 @@ function interactionRejectionHandler(
         | Eris.ComponentInteraction
         | Eris.CommandInteraction
         | Eris.AutocompleteInteraction,
-    err: Error & { code: number }
+    err: Error & { code: number },
 ): void {
     if (err.code === 10062) {
         logger.warn(
             `${getDebugLogHeader(
-                interaction
-            )} | Interaction acknowledge (unknown interaction)`
+                interaction,
+            )} | Interaction acknowledge (unknown interaction)`,
         );
     } else {
         logger.error(
             `${getDebugLogHeader(
-                interaction
+                interaction,
             )} | Interaction acknowledge (failure message) failed. err.code = ${
                 err.code
-            } err = ${JSON.stringify(err)}`
+            } err = ${JSON.stringify(err)}`,
         );
     }
 }
@@ -1693,7 +1696,7 @@ function interactionRejectionHandler(
  * @param interaction - The originating interaction
  */
 export async function tryInteractionAcknowledge(
-    interaction: Eris.ComponentInteraction | Eris.CommandInteraction
+    interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
 ): Promise<void> {
     if (!withinInteractionInterval(interaction)) {
         return;
@@ -1713,7 +1716,7 @@ export async function tryInteractionAcknowledge(
  */
 export async function tryAutocompleteInteractionAcknowledge(
     interaction: Eris.AutocompleteInteraction,
-    response: Array<{ name: string; value: string }>
+    response: Array<{ name: string; value: string }>,
 ): Promise<void> {
     if (!withinInteractionInterval(interaction)) {
         return;
@@ -1737,7 +1740,7 @@ export async function tryCreateInteractionSuccessAcknowledgement(
     interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
     title: string,
     description: string,
-    ephemeral: boolean = false
+    ephemeral: boolean = false,
 ): Promise<void> {
     await sendMessage(
         null,
@@ -1745,7 +1748,7 @@ export async function tryCreateInteractionSuccessAcknowledgement(
             embeds: [
                 {
                     color: (await userBonusIsActive(
-                        interaction.member?.id as string
+                        interaction.member?.id as string,
                     ))
                         ? EMBED_SUCCESS_BONUS_COLOR
                         : EMBED_SUCCESS_COLOR,
@@ -1761,7 +1764,7 @@ export async function tryCreateInteractionSuccessAcknowledgement(
             flags: ephemeral ? EPHEMERAL_MESSAGE_FLAG : undefined,
         },
         undefined,
-        interaction
+        interaction,
     );
 }
 
@@ -1776,7 +1779,7 @@ export async function tryCreateInteractionErrorAcknowledgement(
     interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
     title: string | null,
     description: string,
-    ephemeral: boolean = true
+    ephemeral: boolean = true,
 ): Promise<void> {
     await sendMessage(
         null,
@@ -1792,7 +1795,7 @@ export async function tryCreateInteractionErrorAcknowledgement(
                         title ||
                         i18n.translate(
                             interaction.guildID as string,
-                            "misc.interaction.title.failure"
+                            "misc.interaction.title.failure",
                         ),
                     description,
                     thumbnail: { url: KmqImages.DEAD },
@@ -1801,7 +1804,7 @@ export async function tryCreateInteractionErrorAcknowledgement(
             flags: ephemeral ? EPHEMERAL_MESSAGE_FLAG : undefined,
         },
         undefined,
-        interaction
+        interaction,
     );
 }
 
@@ -1821,7 +1824,7 @@ export function sendPowerHourNotification(): void {
         new MessageContext(
             process.env.POWER_HOUR_NOTIFICATION_CHANNEL_ID,
             null,
-            ""
+            "",
         ),
         {
             title: "⬆️ KMQ Power Hour Starts Now! ⬆️",
@@ -1829,7 +1832,7 @@ export function sendPowerHourNotification(): void {
             thumbnailUrl: KmqImages.LISTENING,
         },
         false,
-        `<@&${process.env.POWER_HOUR_NOTIFICATION_ROLE_ID}>`
+        `<@&${process.env.POWER_HOUR_NOTIFICATION_ROLE_ID}>`,
     );
 }
 
@@ -1838,7 +1841,7 @@ export function sendPowerHourNotification(): void {
  * @returns the interaction key and value
  */
 export function getInteractionValue(
-    interaction: Eris.CommandInteraction | Eris.AutocompleteInteraction
+    interaction: Eris.CommandInteraction | Eris.AutocompleteInteraction,
 ): {
     interactionKey: string | null;
     interactionOptions: {
@@ -1887,7 +1890,7 @@ export function getInteractionValue(
                 result[filter.name] = filter.value;
                 return result;
             },
-            {} as { [name: string]: string | number | boolean }
+            {} as { [name: string]: string | number | boolean },
         ),
         interactionName: parentInteractionDataName,
         focusedKey: options.find((x) => x["focused"])?.name ?? null,
@@ -1930,11 +1933,11 @@ export function getMatchedArtists(enteredNames: Array<string>): {
  */
 export function searchArtists(
     lowercaseUserInput: string,
-    excludedArtistNames: Array<string>
+    excludedArtistNames: Array<string>,
 ): Array<MatchedArtist> {
     if (lowercaseUserInput === "") {
         return Object.values(State.topArtists).filter(
-            (x) => !excludedArtistNames.includes(x.name)
+            (x) => !excludedArtistNames.includes(x.name),
         );
     }
 
@@ -1953,7 +1956,7 @@ export function searchArtists(
  */
 export function localizedAutocompleteFormat(
     data: Array<{ name: string; hangulName?: string | null }>,
-    showHangul: boolean
+    showHangul: boolean,
 ): Array<AutocompleteEntry> {
     return data
         .map((x) => ({
@@ -1968,14 +1971,14 @@ export function localizedAutocompleteFormat(
  * @param interaction - The interaction with intermediate typing state
  */
 export async function processGroupAutocompleteInteraction(
-    interaction: Eris.AutocompleteInteraction
+    interaction: Eris.AutocompleteInteraction,
 ): Promise<void> {
     const interactionData = getInteractionValue(interaction);
     const focusedKey = interactionData.focusedKey;
 
     if (focusedKey === null) {
         logger.error(
-            "focusedKey unexpectedly null in processGroupAutocompleteInteraction"
+            "focusedKey unexpectedly null in processGroupAutocompleteInteraction",
         );
 
         return;
@@ -1987,7 +1990,7 @@ export async function processGroupAutocompleteInteraction(
     const previouslyEnteredArtists = getMatchedArtists(
         Object.entries(interactionData.interactionOptions)
             .filter((x) => x[0] !== focusedKey)
-            .map((x) => x[1])
+            .map((x) => x[1]),
     ).matchedGroups.map((x) => x.name);
 
     const showHangul =
@@ -1998,8 +2001,8 @@ export async function processGroupAutocompleteInteraction(
         interaction,
         localizedAutocompleteFormat(
             searchArtists(lowercaseUserInput, previouslyEnteredArtists),
-            showHangul
-        )
+            showHangul,
+        ),
     );
 }
 
@@ -2025,16 +2028,16 @@ export async function getUserTag(userID: string): Promise<string> {
  * @param messageContext - the messager context
  */
 export async function sendDeprecatedTextCommandMessage(
-    messageContext: MessageContext
+    messageContext: MessageContext,
 ): Promise<Eris.Message<Eris.TextableChannel> | null> {
     return sendErrorMessage(messageContext, {
         title: i18n.translate(
             messageContext.guildID,
-            "misc.failure.deprecatedTextCommand.title"
+            "misc.failure.deprecatedTextCommand.title",
         ),
         description: i18n.translate(
             messageContext.guildID,
-            "misc.failure.deprecatedTextCommand.description"
+            "misc.failure.deprecatedTextCommand.description",
         ),
     });
 }
@@ -2050,7 +2053,7 @@ export const fetchAppCommandIDs = async (): Promise<{
         process.env.NODE_ENV === EnvType.PROD
             ? await State.client.getCommands()
             : await State.client.getGuildCommands(
-                  process.env.DEBUG_SERVER_ID as string
+                  process.env.DEBUG_SERVER_ID as string,
               );
 
     const commandToID: { [commandName: string]: string } = {};
@@ -2066,7 +2069,7 @@ export const fetchAppCommandIDs = async (): Promise<{
  * @param appCommandType - Whether to reload or delete app commands
  */
 export const updateAppCommands = async (
-    appCommandType = AppCommandsAction.RELOAD
+    appCommandType = AppCommandsAction.RELOAD,
 ): Promise<void> => {
     const isProd = process.env.NODE_ENV === EnvType.PROD;
 
@@ -2099,13 +2102,13 @@ export const updateAppCommands = async (
                     if (!cmd.name) {
                         if (!i18n.hasKey(`command.${commandName}.help.name`)) {
                             throw new Error(
-                                `Missing slash command name: command.${commandName}.help.name`
+                                `Missing slash command name: command.${commandName}.help.name`,
                             );
                         }
 
                         cmd.name = i18n.translate(
                             LocaleType.EN,
-                            `command.${commandName}.help.name`
+                            `command.${commandName}.help.name`,
                         );
                     }
 
@@ -2118,10 +2121,10 @@ export const updateAppCommands = async (
                                     ...acc,
                                     [locale]: i18n.translate(
                                         locale,
-                                        `command.${commandName}.help.name`
+                                        `command.${commandName}.help.name`,
                                     ),
                                 }),
-                                {}
+                                {},
                             );
                     if (
                         cmd.type ===
@@ -2133,7 +2136,7 @@ export const updateAppCommands = async (
                             if (!i18n.hasKey(translationKey)) {
                                 if (!i18n.hasKey(fallbackTranslationKey)) {
                                     throw new Error(
-                                        `Missing slash command description: ${translationKey} or ${fallbackTranslationKey}`
+                                        `Missing slash command description: ${translationKey} or ${fallbackTranslationKey}`,
                                     );
                                 }
 
@@ -2142,11 +2145,11 @@ export const updateAppCommands = async (
 
                             cmd.description = i18n.translate(
                                 LocaleType.EN,
-                                translationKey
+                                translationKey,
                             );
 
                             cmd.descriptionLocalizations = Object.values(
-                                LocaleType
+                                LocaleType,
                             )
                                 .filter((x) => x !== LocaleType.EN)
                                 .reduce(
@@ -2154,10 +2157,10 @@ export const updateAppCommands = async (
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            translationKey
+                                            translationKey,
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 );
                         }
                     }
@@ -2174,13 +2177,13 @@ export const updateAppCommands = async (
         await State.client.bulkEditCommands(commandStructures);
     } else {
         const debugServer = State.client.guilds.get(
-            process.env.DEBUG_SERVER_ID as string
+            process.env.DEBUG_SERVER_ID as string,
         );
 
         if (debugServer) {
             await State.client.bulkEditGuildCommands(
                 debugServer.id,
-                commandStructures
+                commandStructures,
             );
         } else {
             logger.error("Debug server unexpectedly unavailable");
@@ -2198,25 +2201,25 @@ export const updateAppCommands = async (
  */
 export async function notifyOptionsGenerationError(
     messageContext: MessageContext,
-    commandName: string
+    commandName: string,
 ): Promise<void> {
     const debugId = uuid.v4();
 
     logger.error(
         `${getDebugLogHeader(
-            messageContext
-        )} | Error generating options embed payload in ${commandName}. debugId = ${debugId}`
+            messageContext,
+        )} | Error generating options embed payload in ${commandName}. debugId = ${debugId}`,
     );
 
     await sendErrorMessage(messageContext, {
         title: i18n.translate(
             messageContext.guildID,
-            "misc.failure.optionsGeneration.title"
+            "misc.failure.optionsGeneration.title",
         ),
         description: i18n.translate(
             messageContext.guildID,
             "misc.failure.optionsGeneration.description",
-            { resetCommand: "`/reset`", helpCommand: "`/help`", debugId }
+            { resetCommand: "`/reset`", helpCommand: "`/help`", debugId },
         ),
     });
 }

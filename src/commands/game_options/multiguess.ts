@@ -43,7 +43,7 @@ export default class MultiGuessCommand implements BaseCommand {
         description: i18n.translate(
             guildID,
             "command.multiguess.help.description",
-            { on: `\`${MultiGuessType.ON}\`` }
+            { on: `\`${MultiGuessType.ON}\`` },
         ),
         usage: "/multiguess set\nmultiguess:[on | off]\n\n/multiguess reset",
         examples: [
@@ -51,14 +51,14 @@ export default class MultiGuessCommand implements BaseCommand {
                 example: "`/multiguess set multiguess:on`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.multiguess.help.example.on"
+                    "command.multiguess.help.example.on",
                 ),
             },
             {
                 example: "`/multiguess set multiguess:off`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.multiguess.help.example.off"
+                    "command.multiguess.help.example.off",
                 ),
             },
             {
@@ -66,7 +66,7 @@ export default class MultiGuessCommand implements BaseCommand {
                 explanation: i18n.translate(
                     guildID,
                     "command.multiguess.help.example.reset",
-                    { defaultMultiguess: `\`${DEFAULT_MULTIGUESS_TYPE}\`` }
+                    { defaultMultiguess: `\`${DEFAULT_MULTIGUESS_TYPE}\`` },
                 ),
             },
         ],
@@ -83,7 +83,7 @@ export default class MultiGuessCommand implements BaseCommand {
                     name: OptionAction.SET,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.multiguess.help.interaction.description"
+                        "command.multiguess.help.interaction.description",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -92,10 +92,10 @@ export default class MultiGuessCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.multiguess.help.interaction.description"
+                                    "command.multiguess.help.interaction.description",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -105,7 +105,7 @@ export default class MultiGuessCommand implements BaseCommand {
                             name: "multiguess",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.multiguess.help.interaction.multiguess"
+                                "command.multiguess.help.interaction.multiguess",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -114,10 +114,10 @@ export default class MultiGuessCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.multiguess.help.interaction.multiguess"
+                                            "command.multiguess.help.interaction.multiguess",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -127,7 +127,7 @@ export default class MultiGuessCommand implements BaseCommand {
                                 (multiguessType) => ({
                                     name: multiguessType,
                                     value: multiguessType,
-                                })
+                                }),
                             ),
                         },
                     ],
@@ -137,7 +137,7 @@ export default class MultiGuessCommand implements BaseCommand {
                     description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
-                        { optionName: "multiguess" }
+                        { optionName: "multiguess" },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -147,10 +147,10 @@ export default class MultiGuessCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "misc.interaction.resetOption",
-                                    { optionName: "multiguess" }
+                                    { optionName: "multiguess" },
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -174,17 +174,17 @@ export default class MultiGuessCommand implements BaseCommand {
         await MultiGuessCommand.updateOption(
             MessageContext.fromMessage(message),
             multiGuessType,
-            undefined
+            undefined,
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         multiguessType: MultiGuessType | null,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         const reset = multiguessType == null;
@@ -192,14 +192,14 @@ export default class MultiGuessCommand implements BaseCommand {
         if (reset) {
             await guildPreference.reset(GameOption.MULTIGUESS);
             logger.info(
-                `${getDebugLogHeader(messageContext)} | Multiguess type reset.`
+                `${getDebugLogHeader(messageContext)} | Multiguess type reset.`,
             );
         } else {
             await guildPreference.setMultiGuessType(multiguessType);
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Multiguess type set to ${multiguessType}`
+                    messageContext,
+                )} | Multiguess type set to ${multiguessType}`,
             );
         }
 
@@ -211,7 +211,7 @@ export default class MultiGuessCommand implements BaseCommand {
             false,
             undefined,
             undefined,
-            interaction
+            interaction,
         );
     }
 
@@ -221,7 +221,7 @@ export default class MultiGuessCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
@@ -243,7 +243,7 @@ export default class MultiGuessCommand implements BaseCommand {
         await MultiGuessCommand.updateOption(
             messageContext,
             multiguessValue,
-            interaction
+            interaction,
         );
     }
 }

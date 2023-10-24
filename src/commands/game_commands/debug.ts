@@ -31,7 +31,7 @@ export default class DebugCommand implements BaseCommand {
         }
 
         const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
+            message.guildID,
         );
 
         const messageContext = MessageContext.fromMessage(message);
@@ -39,7 +39,7 @@ export default class DebugCommand implements BaseCommand {
         const { count, countBeforeLimit } = await getAvailableSongCount(
             guildPreference,
             await isPremiumRequest(session, message.author.id),
-            messageContext
+            messageContext,
         );
 
         const fields: Array<Eris.EmbedField> = [];
@@ -60,7 +60,7 @@ export default class DebugCommand implements BaseCommand {
         fields.push({
             name: "Text Permissions",
             value: JSON.stringify(
-                channel.permissionsOf(process.env.BOT_CLIENT_ID as string).json
+                channel.permissionsOf(process.env.BOT_CLIENT_ID as string).json,
             ),
             inline: false,
         });
@@ -78,8 +78,8 @@ export default class DebugCommand implements BaseCommand {
                 name: "Voice Permissions",
                 value: JSON.stringify(
                     voiceChannel.permissionsOf(
-                        process.env.BOT_CLIENT_ID as string
-                    ).json
+                        process.env.BOT_CLIENT_ID as string,
+                    ).json,
                 ),
                 inline: false,
             });
@@ -93,7 +93,7 @@ export default class DebugCommand implements BaseCommand {
                 "command.debug.description",
                 {
                     debugID: `\`${debugID}\``,
-                }
+                },
             ),
             thumbnailUrl: KmqImages.READING_BOOK,
         });
@@ -105,7 +105,7 @@ export default class DebugCommand implements BaseCommand {
                 footerText: debugID,
                 fields,
                 timestamp: new Date(),
-            }
+            },
         );
 
         logger.info(`${getDebugLogHeader(message)} | Debug info retrieved.`);

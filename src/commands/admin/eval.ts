@@ -17,11 +17,11 @@ export default class EvalCommand implements BaseCommand {
         logger.info(`Executing command: ${evalString}`);
         const results = (await State.ipc.allClustersCommand(
             `eval|${evalString}`,
-            true
+            true,
         )) as Map<number, any>;
 
         const clusterResultFields: Array<Eris.EmbedField> = Array.from(
-            results.entries()
+            results.entries(),
         ).map(([clusterID, result]) => ({
             name: `Cluster #${clusterID}`,
             value: JSON.stringify(result),

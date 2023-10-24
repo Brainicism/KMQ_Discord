@@ -44,7 +44,7 @@ export default class StatsCommand implements BaseCommand {
     static sendStatsMessage = async (
         messageContext: MessageContext,
         guildID: string,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> => {
         const fleetStats = await State.ipc.getStats();
         let gameSessionStats;
@@ -54,20 +54,20 @@ export default class StatsCommand implements BaseCommand {
                     (await State.ipc.allClustersCommand(
                         "game_session_stats",
                         true,
-                        5000
+                        5000,
                     )) as Map<number, any>
-                ).values()
+                ).values(),
             );
         } catch (e) {
             logger.error(`Error retrieving stats via IPC. err = ${e}`);
             sendErrorMessage(messageContext, {
                 title: i18n.translate(
                     messageContext.guildID,
-                    "command.stats.failure.title"
+                    "command.stats.failure.title",
                 ),
                 description: i18n.translate(
                     messageContext.guildID,
-                    "command.stats.failure.description"
+                    "command.stats.failure.description",
                 ),
             });
             return;
@@ -75,12 +75,12 @@ export default class StatsCommand implements BaseCommand {
 
         const activeGameSessions = gameSessionStats.reduce(
             (x, y) => x + y.activeGameSessions,
-            0
+            0,
         );
 
         const activePlayers = gameSessionStats.reduce(
             (x, y) => x + y.activePlayers,
-            0
+            0,
         );
 
         const dateThreshold = new Date();
@@ -108,7 +108,7 @@ export default class StatsCommand implements BaseCommand {
                     .selectFrom("game_sessions")
                     .where("start_date", ">", dateThreshold)
                     .select((eb) =>
-                        eb.fn.sum<number>("rounds_played").as("total")
+                        eb.fn.sum<number>("rounds_played").as("total"),
                     )
                     .executeTakeFirst()
             )?.total || 0;
@@ -118,7 +118,7 @@ export default class StatsCommand implements BaseCommand {
                 await dbContext.kmq
                     .selectFrom("game_sessions")
                     .select((eb) =>
-                        eb.fn.sum<number>("rounds_played").as("total")
+                        eb.fn.sum<number>("rounds_played").as("total"),
                     )
                     .executeTakeFirst()
             )?.total || 0;
@@ -148,11 +148,11 @@ export default class StatsCommand implements BaseCommand {
                     .select(["publishedon"])
                     .orderBy("publishedon", "desc")
                     .executeTakeFirst()
-            )?.publishedon as Date
+            )?.publishedon as Date,
         );
 
         const mysqlLatency = await measureExecutionTime(
-            sql`SELECT 1`.execute(dbContext.kmq)
+            sql`SELECT 1`.execute(dbContext.kmq),
         );
 
         const requestLatency = (
@@ -167,36 +167,36 @@ export default class StatsCommand implements BaseCommand {
         const gameStatistics = {
             [i18n.translate(
                 messageContext.guildID,
-                "command.stats.game.activeGameSessions"
+                "command.stats.game.activeGameSessions",
             )]: activeGameSessions,
             [i18n.translate(
                 messageContext.guildID,
-                "command.stats.game.activePlayers"
+                "command.stats.game.activePlayers",
             )]: activePlayers,
             [i18n.translate(
                 messageContext.guildID,
-                "command.stats.game.recentGameSessions"
+                "command.stats.game.recentGameSessions",
             )]: `${friendlyFormattedNumber(
-                Number(recentGameSessions)
+                Number(recentGameSessions),
             )} | ${friendlyFormattedNumber(Number(totalGameSessions))}`,
             [i18n.translate(
                 messageContext.guildID,
-                "command.stats.game.recentGameRounds"
+                "command.stats.game.recentGameRounds",
             )]: `${friendlyFormattedNumber(
-                recentGameRounds
+                recentGameRounds,
             )} | ${friendlyFormattedNumber(totalGameRounds)}`,
             [i18n.translate(
                 messageContext.guildID,
-                "command.stats.game.recentPlayers"
+                "command.stats.game.recentPlayers",
             )]: `${friendlyFormattedNumber(
-                Number(recentPlayers)
+                Number(recentPlayers),
             )} | ${friendlyFormattedNumber(Number(totalPlayers))}`,
             [i18n.translate(
                 messageContext.guildID,
-                "command.stats.game.latestSongUpdate"
+                "command.stats.game.latestSongUpdate",
             )]: friendlyFormattedDate(
                 latestAvailableSong,
-                messageContext.guildID
+                messageContext.guildID,
             ),
         };
 
@@ -205,18 +205,18 @@ export default class StatsCommand implements BaseCommand {
         const systemStatistics = {
             [i18n.translate(
                 messageContext.guildID,
-                "command.stats.system.loadAverage"
+                "command.stats.system.loadAverage",
             )]: os
                 .loadavg()
                 .map((x) => x.toFixed(2))
                 .toString(),
             [i18n.translate(
                 messageContext.guildID,
-                "command.stats.system.memoryUsage"
+                "command.stats.system.memoryUsage",
             )]: `${fleetStats.totalRam.toFixed(2)} MB`,
             [i18n.translate(
                 messageContext.guildID,
-                "command.stats.system.apiLatency"
+                "command.stats.system.apiLatency",
             )]: `${
                 !Number.isFinite(guild.shard.latency)
                     ? "?"
@@ -224,19 +224,19 @@ export default class StatsCommand implements BaseCommand {
             } ms`,
             [i18n.translate(
                 messageContext.guildID,
-                "command.stats.system.requestLatency"
+                "command.stats.system.requestLatency",
             )]: `${requestLatency} ms`,
             [i18n.translate(
                 messageContext.guildID,
-                "command.stats.system.databaseLatency"
+                "command.stats.system.databaseLatency",
             )]: `${mysqlLatency.toFixed(2)} ms`,
             [i18n.translate(
                 messageContext.guildID,
-                "command.stats.system.uptime"
+                "command.stats.system.uptime",
             )]: i18n.translateN(
                 messageContext.guildID,
                 "misc.plural.hour",
-                Number((process.uptime() / (60 * 60)).toFixed(2))
+                Number((process.uptime() / (60 * 60)).toFixed(2)),
             ),
         };
 
@@ -244,7 +244,7 @@ export default class StatsCommand implements BaseCommand {
             {
                 name: i18n.translate(
                     messageContext.guildID,
-                    "command.stats.game.title"
+                    "command.stats.game.title",
                 ),
                 value: `\`\`\`\n${Object.entries(gameStatistics)
                     .map((stat) => `${stat[0]}: ${stat[1]}`)
@@ -253,7 +253,7 @@ export default class StatsCommand implements BaseCommand {
             {
                 name: i18n.translate(
                     messageContext.guildID,
-                    "command.stats.system.title"
+                    "command.stats.system.title",
                 ),
                 value: `\`\`\`\n${Object.entries(systemStatistics)
                     .map((stat) => `${stat[0]}: ${stat[1]}`)
@@ -266,19 +266,19 @@ export default class StatsCommand implements BaseCommand {
         const embedPayload = {
             title: i18n.translate(
                 messageContext.guildID,
-                "command.stats.title"
+                "command.stats.title",
             ),
             description: i18n.translate(
                 messageContext.guildID,
                 "command.stats.description",
                 {
                     link: "https://kmq.kpop.gg/status",
-                }
+                },
             ),
             fields,
             footerText: `${State.version} | ${i18n.translate(
                 messageContext.guildID,
-                "command.stats.footer"
+                "command.stats.footer",
             )}`,
             timestamp: new Date(),
             thumbnailUrl: KmqImages.READING_BOOK,
@@ -290,14 +290,14 @@ export default class StatsCommand implements BaseCommand {
             false,
             undefined,
             undefined,
-            interaction
+            interaction,
         );
     };
 
     call = async ({ message }: CommandArgs): Promise<void> => {
         await StatsCommand.sendStatsMessage(
             MessageContext.fromMessage(message),
-            message.guildID
+            message.guildID,
         );
     };
 
@@ -307,12 +307,12 @@ export default class StatsCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         await StatsCommand.sendStatsMessage(
             messageContext,
             interaction.guildID as string,
-            interaction
+            interaction,
         );
     }
 }

@@ -50,7 +50,7 @@ export default class ArtistTypeCommand implements BaseCommand {
                 soloists: `\`${ArtistType.SOLOIST}\``,
                 groups: `\`${ArtistType.GROUP}\``,
                 both: `\`${ArtistType.BOTH}\``,
-            }
+            },
         ),
         usage: "/artisttype set\nartisttype:[soloists | groups | both]\n\n/artisttype reset",
         examples: [
@@ -58,28 +58,28 @@ export default class ArtistTypeCommand implements BaseCommand {
                 example: "`/artisttype set artisttype:soloists`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.artisttype.help.example.soloists"
+                    "command.artisttype.help.example.soloists",
                 ),
             },
             {
                 example: "`/artisttype set artisttype:groups`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.artisttype.help.example.groups"
+                    "command.artisttype.help.example.groups",
                 ),
             },
             {
                 example: "`/artisttype set artisttype:both`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.artisttype.help.example.both"
+                    "command.artisttype.help.example.both",
                 ),
             },
             {
                 example: "`/artisttype reset`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.artisttype.help.example.reset"
+                    "command.artisttype.help.example.reset",
                 ),
             },
         ],
@@ -96,7 +96,7 @@ export default class ArtistTypeCommand implements BaseCommand {
                     name: OptionAction.SET,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.artisttype.help.interaction.description"
+                        "command.artisttype.help.interaction.description",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -105,10 +105,10 @@ export default class ArtistTypeCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.artisttype.help.interaction.description"
+                                    "command.artisttype.help.interaction.description",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -118,7 +118,7 @@ export default class ArtistTypeCommand implements BaseCommand {
                             name: "artisttype",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.artisttype.help.interaction.artistTypeOption"
+                                "command.artisttype.help.interaction.artistTypeOption",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -127,10 +127,10 @@ export default class ArtistTypeCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.artisttype.help.interaction.artistTypeOption"
+                                            "command.artisttype.help.interaction.artistTypeOption",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -140,7 +140,7 @@ export default class ArtistTypeCommand implements BaseCommand {
                                 (artistType) => ({
                                     name: artistType,
                                     value: artistType,
-                                })
+                                }),
                             ),
                         },
                     ],
@@ -150,7 +150,7 @@ export default class ArtistTypeCommand implements BaseCommand {
                     description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
-                        { optionName: "artist type" }
+                        { optionName: "artist type" },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -160,10 +160,10 @@ export default class ArtistTypeCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "misc.interaction.resetOption",
-                                    { optionName: "artist type" }
+                                    { optionName: "artist type" },
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -187,45 +187,45 @@ export default class ArtistTypeCommand implements BaseCommand {
         await ArtistTypeCommand.updateOption(
             MessageContext.fromMessage(message),
             artistType,
-            undefined
+            undefined,
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         artistType: ArtistType | null,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         const reset = artistType == null;
         if (reset) {
             await guildPreference.reset(GameOption.ARTIST_TYPE);
             logger.info(
-                `${getDebugLogHeader(messageContext)} | Artist type reset.`
+                `${getDebugLogHeader(messageContext)} | Artist type reset.`,
             );
         } else {
             await guildPreference.setArtistType(artistType);
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Artist type set to ${artistType}`
+                    messageContext,
+                )} | Artist type set to ${artistType}`,
             );
         }
 
         if (guildPreference.isGroupsMode()) {
             logger.warn(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Game option conflict between artist type and groups.`
+                    messageContext,
+                )} | Game option conflict between artist type and groups.`,
             );
 
             const embedPayload: EmbedPayload = {
                 title: i18n.translate(
                     messageContext.guildID,
-                    "misc.failure.gameOptionConflict.title"
+                    "misc.failure.gameOptionConflict.title",
                 ),
                 description: i18n.translate(
                     messageContext.guildID,
@@ -234,7 +234,7 @@ export default class ArtistTypeCommand implements BaseCommand {
                         optionOne: "`groups`",
                         optionTwo: "`artisttype`",
                         optionOneCommand: "`/groups reset`",
-                    }
+                    },
                 ),
                 color: EMBED_ERROR_COLOR,
             };
@@ -252,7 +252,7 @@ export default class ArtistTypeCommand implements BaseCommand {
             false,
             undefined,
             undefined,
-            interaction
+            interaction,
         );
     }
 
@@ -262,7 +262,7 @@ export default class ArtistTypeCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
@@ -282,7 +282,7 @@ export default class ArtistTypeCommand implements BaseCommand {
         await ArtistTypeCommand.updateOption(
             messageContext,
             artistTypeValue,
-            interaction
+            interaction,
         );
     }
 }

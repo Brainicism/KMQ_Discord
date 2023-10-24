@@ -74,7 +74,7 @@ type GameOptionValue =
 function getGroupNamesString(
     groups: MatchedArtist[],
     truncate = true,
-    spaceDelimiter = true
+    spaceDelimiter = true,
 ): string {
     let displayedGroupNames = groups
         .map((x) => x.name)
@@ -84,7 +84,7 @@ function getGroupNamesString(
     if (truncate && displayedGroupNames.length > 200) {
         displayedGroupNames = `${displayedGroupNames.substring(
             0,
-            200
+            200,
         )} and many others...`;
     }
 
@@ -233,7 +233,7 @@ export default class GuildPreference {
                 mapTo(
                     validatedGameOptions,
                     GuildPreference.DEFAULT_OPTIONS,
-                    defaultOption as keyof typeof validatedGameOptions
+                    defaultOption as keyof typeof validatedGameOptions,
                 );
 
                 newDefaultOptionsAdded++;
@@ -258,7 +258,7 @@ export default class GuildPreference {
             process.env.NODE_ENV !== EnvType.TEST
         ) {
             logger.info(
-                `gid: ${this.guildID} | validateGameOptions: options modified during validation (+${newDefaultOptionsAdded} | -${extraneousKeysRemoved})`
+                `gid: ${this.guildID} | validateGameOptions: options modified during validation (+${newDefaultOptionsAdded} | -${extraneousKeysRemoved})`,
             );
             this.updateGuildPreferences();
         }
@@ -297,7 +297,7 @@ export default class GuildPreference {
                     .where(
                         "client_id",
                         "=",
-                        process.env.BOT_CLIENT_ID as string
+                        process.env.BOT_CLIENT_ID as string,
                     )
                     .execute()
             )
@@ -308,7 +308,7 @@ export default class GuildPreference {
 
             const guildPreference = GuildPreference.fromGuild(
                 guildPreferences.guild_id,
-                gameOptionPairs
+                gameOptionPairs,
             );
 
             GuildPreference.guildPreferencesCache[guildID] = guildPreference;
@@ -324,7 +324,7 @@ export default class GuildPreference {
      */
     static fromGuild(
         guildID: string,
-        gameOptionsJson?: Object
+        gameOptionsJson?: Object,
     ): GuildPreference {
         if (!gameOptionsJson) {
             return new GuildPreference(guildID, {
@@ -376,7 +376,7 @@ export default class GuildPreference {
      */
     async savePreset(
         presetName: string,
-        oldUUID: string | null
+        oldUUID: string | null,
     ): Promise<boolean> {
         try {
             const presetOptions = Object.entries(this.gameOptions).map(
@@ -385,7 +385,7 @@ export default class GuildPreference {
                     preset_name: presetName,
                     option_name: option[0],
                     option_value: JSON.stringify(option[1]),
-                })
+                }),
             );
 
             presetOptions.push({
@@ -414,7 +414,7 @@ export default class GuildPreference {
      */
     async loadPreset(
         presetName: string,
-        guildID: string
+        guildID: string,
     ): Promise<[boolean, Array<GameOption>]> {
         const preset: { [x: string]: any } = (
             await dbContext.kmq
@@ -440,8 +440,8 @@ export default class GuildPreference {
             (option) =>
                 !_.isEqual(
                     oldOptions[option[0] as keyof typeof oldOptions],
-                    option[1]
-                )
+                    option[1],
+                ),
         );
 
         if (updatedOptions.length === 0) {
@@ -561,15 +561,15 @@ export default class GuildPreference {
         if (original) {
             return getGroupNamesString(
                 this.gameOptions.groups.filter(
-                    (group) => !group.name.includes("+")
+                    (group) => !group.name.includes("+"),
                 ),
                 false,
-                false
+                false,
             );
         }
 
         const displayedGroupNames = getGroupNamesString(
-            this.gameOptions.groups
+            this.gameOptions.groups,
         );
 
         return displayedGroupNames;
@@ -612,15 +612,15 @@ export default class GuildPreference {
         if (original) {
             return getGroupNamesString(
                 this.gameOptions.excludes.filter(
-                    (group) => !group.name.includes("+")
+                    (group) => !group.name.includes("+"),
                 ),
                 false,
-                false
+                false,
             );
         }
 
         const displayedGroupNames = getGroupNamesString(
-            this.gameOptions.excludes
+            this.gameOptions.excludes,
         );
 
         return displayedGroupNames;
@@ -657,15 +657,15 @@ export default class GuildPreference {
         if (original) {
             return getGroupNamesString(
                 this.gameOptions.includes.filter(
-                    (group) => !group.name.includes("+")
+                    (group) => !group.name.includes("+"),
                 ),
                 false,
-                false
+                false,
             );
         }
 
         const displayedGroupNames = getGroupNamesString(
-            this.gameOptions.includes
+            this.gameOptions.includes,
         );
 
         return displayedGroupNames;
@@ -741,7 +741,7 @@ export default class GuildPreference {
     /** @returns if multiple choice mode is active */
     isMultipleChoiceMode(): boolean {
         return ![AnswerType.TYPING, AnswerType.TYPING_TYPOS].includes(
-            this.gameOptions.answerType
+            this.gameOptions.answerType,
         );
     }
 
@@ -750,7 +750,7 @@ export default class GuildPreference {
      * @param subunitPreference - The SubunitsPreference
      */
     async setSubunitPreference(
-        subunitPreference: SubunitsPreference
+        subunitPreference: SubunitsPreference,
     ): Promise<void> {
         this.gameOptions.subunitPreference = subunitPreference;
         await this.updateGuildPreferences([
@@ -941,7 +941,7 @@ export default class GuildPreference {
      * @param updatedOptionsObjects - An array of objects containing the names and values of updated options
      */
     async updateGuildPreferences(
-        updatedOptionsObjects?: Array<{ name: string; value: GameOptionValue }>
+        updatedOptionsObjects?: Array<{ name: string; value: GameOptionValue }>,
     ): Promise<void> {
         interface GameOptionDatabaseEntry {
             guild_id: string;
@@ -958,7 +958,7 @@ export default class GuildPreference {
                     client_id: process.env.BOT_CLIENT_ID as string,
                     option_name: option.name,
                     option_value: JSON.stringify(option.value),
-                })
+                }),
             );
         } else {
             updatedOptions = Object.entries(this.gameOptions).map((x) => {
@@ -980,8 +980,8 @@ export default class GuildPreference {
                         .insertInto("game_options")
                         .values(x)
                         .onDuplicateKeyUpdate(x)
-                        .execute()
-                )
+                        .execute(),
+                ),
             );
         });
 
@@ -990,7 +990,7 @@ export default class GuildPreference {
                 await this.reloadSongCallback();
             } catch (e) {
                 logger.error(
-                    `gid: ${this.guildID} | reloadSongCallback unexpectedly failed, session might not exist?`
+                    `gid: ${this.guildID} | reloadSongCallback unexpectedly failed, session might not exist?`,
                 );
             }
         }
@@ -1024,8 +1024,8 @@ export default class GuildPreference {
             (option) =>
                 !_.isEqual(
                     oldOptions[option[0] as keyof typeof oldOptions],
-                    option[1]
-                )
+                    option[1],
+                ),
         );
 
         return _.uniq(updatedOptions.map((x) => x[0] as GameOption));

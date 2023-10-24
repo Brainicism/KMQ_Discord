@@ -60,7 +60,7 @@ export default class SpotifyCommand implements BaseCommand {
                     name: OptionAction.SET,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.spotify.help.description"
+                        "command.spotify.help.description",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -69,10 +69,10 @@ export default class SpotifyCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.spotify.help.description"
+                                    "command.spotify.help.description",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -82,7 +82,7 @@ export default class SpotifyCommand implements BaseCommand {
                             name: "playlist_url",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.spotify.help.interaction.playlistURL"
+                                "command.spotify.help.interaction.playlistURL",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -91,10 +91,10 @@ export default class SpotifyCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.spotify.help.interaction.playlistURL"
+                                            "command.spotify.help.interaction.playlistURL",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -108,7 +108,7 @@ export default class SpotifyCommand implements BaseCommand {
                     description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
-                        { optionName: "spotify" }
+                        { optionName: "spotify" },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -118,10 +118,10 @@ export default class SpotifyCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "misc.interaction.resetOption",
-                                    { optionName: "spotify" }
+                                    { optionName: "spotify" },
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -136,7 +136,7 @@ export default class SpotifyCommand implements BaseCommand {
         name: "spotify",
         description: i18n.translate(
             guildID,
-            "command.spotify.help.description"
+            "command.spotify.help.description",
         ),
         usage: "/spotify set\nplaylist_url:{playlist_url}\n\n/spotify reset",
         examples: [
@@ -144,14 +144,14 @@ export default class SpotifyCommand implements BaseCommand {
                 example: `\`/spotify playlist_url:${SPOTIFY_BASE_URL}...\``,
                 explanation: i18n.translate(
                     guildID,
-                    "command.spotify.help.example.playlistURL"
+                    "command.spotify.help.example.playlistURL",
                 ),
             },
             {
                 example: "`/spotify`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.spotify.help.example.reset"
+                    "command.spotify.help.example.reset",
                 ),
             },
         ],
@@ -172,17 +172,17 @@ export default class SpotifyCommand implements BaseCommand {
                 MessageContext.fromMessage(message),
                 playlistURL,
                 undefined,
-                playlistURL == null
+                playlistURL == null,
             );
         } else {
             sendErrorMessage(MessageContext.fromMessage(message), {
                 title: i18n.translate(
                     message.guildID,
-                    "command.spotify.invalidURL.title"
+                    "command.spotify.invalidURL.title",
                 ),
                 description: i18n.translate(
                     message.guildID,
-                    "command.spotify.invalidURL.description"
+                    "command.spotify.invalidURL.description",
                 ),
             });
         }
@@ -192,7 +192,7 @@ export default class SpotifyCommand implements BaseCommand {
         messageContext: MessageContext,
         playlistURL?: string,
         interaction?: Eris.CommandInteraction,
-        reset = false
+        reset = false,
     ): Promise<void> {
         const guildID = messageContext.guildID;
         const guildPreference =
@@ -202,7 +202,9 @@ export default class SpotifyCommand implements BaseCommand {
         if (reset) {
             await guildPreference.reset(GameOption.SPOTIFY_PLAYLIST_ID);
             logger.info(
-                `${getDebugLogHeader(messageContext)} | Spotify playlist reset.`
+                `${getDebugLogHeader(
+                    messageContext,
+                )} | Spotify playlist reset.`,
             );
 
             await sendOptionsMessage(
@@ -213,7 +215,7 @@ export default class SpotifyCommand implements BaseCommand {
                 false,
                 undefined,
                 undefined,
-                interaction
+                interaction,
             );
             return;
         }
@@ -234,7 +236,7 @@ export default class SpotifyCommand implements BaseCommand {
 
             const premiumRequest = await isPremiumRequest(
                 session,
-                messageContext.author.id
+                messageContext.author.id,
             );
 
             let matchedPlaylist: MatchedPlaylist;
@@ -245,7 +247,7 @@ export default class SpotifyCommand implements BaseCommand {
                     playlistID,
                     true,
                     messageContext,
-                    interaction
+                    interaction,
                 )) as MatchedPlaylist;
             } else {
                 matchedPlaylist = (await new SongSelector().reloadSongs(
@@ -254,7 +256,7 @@ export default class SpotifyCommand implements BaseCommand {
                     playlistID,
                     true,
                     messageContext,
-                    interaction
+                    interaction,
                 )) as MatchedPlaylist;
             }
 
@@ -264,7 +266,7 @@ export default class SpotifyCommand implements BaseCommand {
                 }/${matchedPlaylist.metadata.playlistLength} (${(
                     (100.0 * matchedPlaylist.metadata.matchedSongsLength) /
                     matchedPlaylist.metadata.playlistLength
-                ).toFixed(2)}%) Spotify songs`
+                ).toFixed(2)}%) Spotify songs`,
             );
 
             if (matchedPlaylist.matchedSongs.length === 0) {
@@ -273,14 +275,14 @@ export default class SpotifyCommand implements BaseCommand {
                     {
                         title: i18n.translate(
                             guildID,
-                            "command.spotify.noMatches.title"
+                            "command.spotify.noMatches.title",
                         ),
                         description: i18n.translate(
                             guildID,
-                            "command.spotify.noMatches.description"
+                            "command.spotify.noMatches.description",
                         ),
                     },
-                    interaction
+                    interaction,
                 );
 
                 return;
@@ -293,13 +295,13 @@ export default class SpotifyCommand implements BaseCommand {
                 0,
                 matchedPlaylist.metadata.matchedSongsLength,
                 undefined,
-                false
+                false,
             );
 
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Spotify playlist set to ${playlistID}`
+                    messageContext,
+                )} | Spotify playlist set to ${playlistID}`,
             );
 
             let matchedDescription = i18n.translate(
@@ -307,18 +309,21 @@ export default class SpotifyCommand implements BaseCommand {
                 "command.spotify.matched.description",
                 {
                     matchedCount: friendlyFormattedNumber(
-                        matchedPlaylist.matchedSongs.length
+                        matchedPlaylist.matchedSongs.length,
                     ),
                     totalCount: friendlyFormattedNumber(
-                        matchedPlaylist.metadata.playlistLength
+                        matchedPlaylist.metadata.playlistLength,
                     ),
-                }
+                },
             );
 
             if (matchedPlaylist.truncated) {
                 matchedDescription += "\n\n";
                 matchedDescription += italicize(
-                    i18n.translate(guildID, "command.spotify.matched.truncated")
+                    i18n.translate(
+                        guildID,
+                        "command.spotify.matched.truncated",
+                    ),
                 );
             }
 
@@ -328,7 +333,7 @@ export default class SpotifyCommand implements BaseCommand {
                     "command.spotify.matched.title",
                     {
                         playlistName: matchedPlaylist.metadata.playlistName,
-                    }
+                    },
                 ),
                 description: matchedDescription,
                 url: playlistURL,
@@ -341,14 +346,14 @@ export default class SpotifyCommand implements BaseCommand {
                 {
                     title: i18n.translate(
                         messageContext.guildID,
-                        "command.spotify.invalidURL.title"
+                        "command.spotify.invalidURL.title",
                     ),
                     description: i18n.translate(
                         messageContext.guildID,
-                        "command.spotify.invalidURL.description"
+                        "command.spotify.invalidURL.description",
                     ),
                 },
-                interaction
+                interaction,
             );
             return;
         }
@@ -362,7 +367,7 @@ export default class SpotifyCommand implements BaseCommand {
                 false,
                 undefined,
                 undefined,
-                interaction
+                interaction,
             );
 
             if (optionsEmbed) {
@@ -381,7 +386,7 @@ export default class SpotifyCommand implements BaseCommand {
                 false,
                 undefined,
                 undefined,
-                interaction
+                interaction,
             );
         }
     }
@@ -392,7 +397,7 @@ export default class SpotifyCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
@@ -409,7 +414,7 @@ export default class SpotifyCommand implements BaseCommand {
             messageContext,
             playlistURL,
             interaction,
-            playlistURL == null
+            playlistURL == null,
         );
     }
 }

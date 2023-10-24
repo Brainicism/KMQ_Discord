@@ -60,17 +60,17 @@ export default class DurationCommand implements BaseCommand {
         name: "duration",
         description: i18n.translate(
             guildID,
-            "command.duration.help.description"
+            "command.duration.help.description",
         ),
         usage: `/duration set\nduration:[${i18n.translate(
             guildID,
-            "command.duration.help.usage.minutes"
+            "command.duration.help.usage.minutes",
         )}]\n\n/duration add\nduration:[${i18n.translate(
             guildID,
-            "command.duration.help.usage.minutes"
+            "command.duration.help.usage.minutes",
         )}]\n\n/duration remove\nduration:[${i18n.translate(
             guildID,
-            "command.duration.help.usage.minutes"
+            "command.duration.help.usage.minutes",
         )}]\n\n/duration reset`,
         examples: [
             {
@@ -80,7 +80,7 @@ export default class DurationCommand implements BaseCommand {
                     "command.duration.help.example.set",
                     {
                         duration: String(15),
-                    }
+                    },
                 ),
             },
             {
@@ -90,7 +90,7 @@ export default class DurationCommand implements BaseCommand {
                     "command.duration.help.example.increment",
                     {
                         duration: String(5),
-                    }
+                    },
                 ),
             },
             {
@@ -100,14 +100,14 @@ export default class DurationCommand implements BaseCommand {
                     "command.duration.help.example.decrement",
                     {
                         duration: String(5),
-                    }
+                    },
                 ),
             },
             {
                 example: "`/duration reset`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.duration.help.example.reset"
+                    "command.duration.help.example.reset",
                 ),
             },
         ],
@@ -125,7 +125,7 @@ export default class DurationCommand implements BaseCommand {
                     description: i18n.translate(
                         LocaleType.EN,
                         "command.duration.help.example.set",
-                        { duration: "[duration]" }
+                        { duration: "[duration]" },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -135,10 +135,10 @@ export default class DurationCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "command.duration.help.example.set",
-                                    { duration: "[duration]" }
+                                    { duration: "[duration]" },
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -148,7 +148,7 @@ export default class DurationCommand implements BaseCommand {
                             name: "duration",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.duration.interaction.durationSet"
+                                "command.duration.interaction.durationSet",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -157,10 +157,10 @@ export default class DurationCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.duration.interaction.durationSet"
+                                            "command.duration.interaction.durationSet",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             required: true,
@@ -176,7 +176,7 @@ export default class DurationCommand implements BaseCommand {
                     description: i18n.translate(
                         LocaleType.EN,
                         "command.duration.help.example.increment",
-                        { duration: "[duration]" }
+                        { duration: "[duration]" },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -186,10 +186,10 @@ export default class DurationCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "command.duration.help.example.increment",
-                                    { duration: "[duration]" }
+                                    { duration: "[duration]" },
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -199,7 +199,7 @@ export default class DurationCommand implements BaseCommand {
                             name: "duration",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.duration.interaction.durationAdd"
+                                "command.duration.interaction.durationAdd",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -208,10 +208,10 @@ export default class DurationCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.duration.interaction.durationAdd"
+                                            "command.duration.interaction.durationAdd",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             required: true,
@@ -227,7 +227,7 @@ export default class DurationCommand implements BaseCommand {
                     description: i18n.translate(
                         LocaleType.EN,
                         "command.duration.help.example.decrement",
-                        { duration: "[duration]" }
+                        { duration: "[duration]" },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -237,10 +237,10 @@ export default class DurationCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "command.duration.help.example.decrement",
-                                    { duration: "[duration]" }
+                                    { duration: "[duration]" },
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -250,7 +250,7 @@ export default class DurationCommand implements BaseCommand {
                             name: "duration",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.duration.interaction.durationRemove"
+                                "command.duration.interaction.durationRemove",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -259,10 +259,10 @@ export default class DurationCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.duration.interaction.durationRemove"
+                                            "command.duration.interaction.durationRemove",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             required: true,
@@ -278,7 +278,7 @@ export default class DurationCommand implements BaseCommand {
                     description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
-                        { optionName: "duration" }
+                        { optionName: "duration" },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -288,10 +288,10 @@ export default class DurationCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "misc.interaction.resetOption",
-                                    { optionName: "duration" }
+                                    { optionName: "duration" },
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
@@ -317,7 +317,7 @@ export default class DurationCommand implements BaseCommand {
             MessageContext.fromMessage(message),
             durationActionInternal,
             durationValue,
-            undefined
+            undefined,
         );
     };
 
@@ -325,10 +325,10 @@ export default class DurationCommand implements BaseCommand {
         messageContext: MessageContext,
         action: DurationActionInternal,
         durationValue?: number,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         let finalDuration: number;
@@ -336,7 +336,7 @@ export default class DurationCommand implements BaseCommand {
         if (reset) {
             await guildPreference.reset(GameOption.DURATION);
             logger.info(
-                `${getDebugLogHeader(messageContext)} | Duration disabled.`
+                `${getDebugLogHeader(messageContext)} | Duration disabled.`,
             );
 
             await sendOptionsMessage(
@@ -347,7 +347,7 @@ export default class DurationCommand implements BaseCommand {
                 false,
                 undefined,
                 undefined,
-                interaction
+                interaction,
             );
             return;
         } else {
@@ -369,14 +369,14 @@ export default class DurationCommand implements BaseCommand {
                         {
                             title: i18n.translate(
                                 messageContext.guildID,
-                                "command.duration.failure.removingDuration.title"
+                                "command.duration.failure.removingDuration.title",
                             ),
                             description: i18n.translate(
                                 messageContext.guildID,
-                                "command.duration.failure.removingDuration.notSet.description"
+                                "command.duration.failure.removingDuration.notSet.description",
                             ),
                         },
-                        interaction
+                        interaction,
                     );
                     return;
                 }
@@ -388,14 +388,14 @@ export default class DurationCommand implements BaseCommand {
                         {
                             title: i18n.translate(
                                 messageContext.guildID,
-                                "command.duration.failure.removingDuration.title"
+                                "command.duration.failure.removingDuration.title",
                             ),
                             description: i18n.translate(
                                 messageContext.guildID,
-                                "command.duration.failure.removingDuration.tooShort.description"
+                                "command.duration.failure.removingDuration.tooShort.description",
                             ),
                         },
-                        interaction
+                        interaction,
                     );
                     return;
                 }
@@ -409,7 +409,7 @@ export default class DurationCommand implements BaseCommand {
             logger.info(
                 `${getDebugLogHeader(messageContext)} | Duration set to ${
                     guildPreference.gameOptions.duration
-                }`
+                }`,
             );
         }
 
@@ -422,13 +422,13 @@ export default class DurationCommand implements BaseCommand {
             false,
             undefined,
             undefined,
-            interaction
+            interaction,
         );
     }
 
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
@@ -455,7 +455,7 @@ export default class DurationCommand implements BaseCommand {
             messageContext,
             action,
             durationValue,
-            interaction
+            interaction,
         );
     }
 }

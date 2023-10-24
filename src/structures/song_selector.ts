@@ -82,7 +82,7 @@ export default class SongSelector {
         }
 
         const filteredSongs = new Set(
-            [...this.filteredSongs.songs].map((x) => x.youtubeLink)
+            [...this.filteredSongs.songs].map((x) => x.youtubeLink),
         );
 
         return {
@@ -93,7 +93,7 @@ export default class SongSelector {
             totalSongs: Math.min(
                 this.filteredSongs.countBeforeLimit,
                 guildPreference.gameOptions.limitEnd -
-                    guildPreference.gameOptions.limitStart
+                    guildPreference.gameOptions.limitStart,
             ),
         };
     }
@@ -101,7 +101,7 @@ export default class SongSelector {
     checkUniqueSongQueue(): boolean {
         const selectedSongs = this.getSongs().songs;
         const filteredSongs = new Set(
-            [...selectedSongs].map((x) => x.youtubeLink)
+            [...selectedSongs].map((x) => x.youtubeLink),
         );
 
         if (
@@ -139,14 +139,14 @@ export default class SongSelector {
                 selectedSongs,
                 ignoredSongs,
                 this.lastAlternatingGender,
-                guildPreference.gameOptions.shuffleType
+                guildPreference.gameOptions.shuffleType,
             );
         } else {
             randomSong = SongSelector.selectRandomSong(
                 selectedSongs,
                 ignoredSongs,
                 null,
-                guildPreference.gameOptions.shuffleType
+                guildPreference.gameOptions.shuffleType,
             );
         }
 
@@ -171,25 +171,25 @@ export default class SongSelector {
         filteredSongs: Set<QueriedSong>,
         ignoredSongs: Set<string>,
         alternatingGender: GenderModeOptions | null,
-        shuffleType = ShuffleType.RANDOM
+        shuffleType = ShuffleType.RANDOM,
     ): QueriedSong | null {
         let queriedSongList = [...filteredSongs];
         if (ignoredSongs) {
             queriedSongList = queriedSongList.filter(
-                (x) => !ignoredSongs.has(x.youtubeLink)
+                (x) => !ignoredSongs.has(x.youtubeLink),
             );
         }
 
         if (
             alternatingGender &&
             queriedSongList.some(
-                (y) => y.members === alternatingGender || y.members === "coed"
+                (y) => y.members === alternatingGender || y.members === "coed",
             )
         ) {
             queriedSongList = queriedSongList.filter(
                 (song) =>
                     song.members === alternatingGender ||
-                    song.members === "coed"
+                    song.members === "coed",
             );
         }
 
@@ -245,13 +245,13 @@ export default class SongSelector {
         playlistID?: string,
         forceRefreshMetadata?: boolean,
         messageContext?: MessageContext,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<MatchedPlaylist | null> {
         if (!playlistID) {
             this.filteredSongs = await SongSelector.getFilteredSongList(
                 guildPreference,
                 isPremium,
-                SHADOW_BANNED_ARTIST_IDS
+                SHADOW_BANNED_ARTIST_IDS,
             );
 
             return null;
@@ -263,7 +263,7 @@ export default class SongSelector {
             playlistID,
             forceRefreshMetadata || false,
             messageContext,
-            interaction!
+            interaction!,
         );
 
         this.filteredSongs = playlist as QueriedSongList;
@@ -280,7 +280,7 @@ export default class SongSelector {
     static async getFilteredSongList(
         guildPreference: GuildPreference,
         premium: boolean = false,
-        shadowBannedArtistIds: Array<number> = []
+        shadowBannedArtistIds: Array<number> = [],
     ): Promise<{ songs: Set<QueriedSong>; countBeforeLimit: number }> {
         const gameOptions = guildPreference.gameOptions;
         let result: Array<QueriedSong> = [];
@@ -292,7 +292,7 @@ export default class SongSelector {
             queryBuilder = queryBuilder.where(
                 "link",
                 "=",
-                gameOptions.forcePlaySongID
+                gameOptions.forcePlaySongID,
             );
             return {
                 songs: new Set(await queryBuilder.execute()),
@@ -311,17 +311,17 @@ export default class SongSelector {
             subunitsQueryBuilder = subunitsQueryBuilder.where(
                 "id_parentgroup",
                 "in",
-                selectedGroupIDs
+                selectedGroupIDs,
             );
 
             subunitsQueryBuilder = subunitsQueryBuilder.where(
                 "id",
                 "not in",
-                shadowBannedArtistIds
+                shadowBannedArtistIds,
             );
 
             subunits = (await subunitsQueryBuilder.execute()).map(
-                (x) => x["id"]
+                (x) => x["id"],
             );
 
             if (subunits.length) {
@@ -330,7 +330,7 @@ export default class SongSelector {
                     .innerJoin(
                         "app_kpop_group",
                         "app_kpop_agrelation.id_subgroup",
-                        "app_kpop_group.id"
+                        "app_kpop_group.id",
                     )
                     .select(["id", "name"])
                     .distinct()
@@ -339,7 +339,7 @@ export default class SongSelector {
                 collabGroupBuilder = collabGroupBuilder.where(
                     "app_kpop_agrelation.id_artist",
                     "in",
-                    subunits
+                    subunits,
                 );
 
                 collabGroupContainingSubunit = (
@@ -361,14 +361,14 @@ export default class SongSelector {
                         SubunitsPreference.EXCLUDE
                     ) {
                         includesInnerArtistFilterExpressions.push(
-                            eb("id_artist", "in", includesGroupIDs)
+                            eb("id_artist", "in", includesGroupIDs),
                         );
                     } else {
                         includesInnerArtistFilterExpressions.push(
                             or([
                                 eb("id_artist", "in", includesGroupIDs),
                                 eb("id_parent_artist", "in", includesGroupIDs),
-                            ])
+                            ]),
                         );
                     }
                 }
@@ -377,7 +377,11 @@ export default class SongSelector {
             const mainArtistFilterExpressions: Array<Expression<SqlBool>> = [];
 
             mainArtistFilterExpressions.push(
-                eb("id_artist", "not in", guildPreference.getExcludesGroupIDs())
+                eb(
+                    "id_artist",
+                    "not in",
+                    guildPreference.getExcludesGroupIDs(),
+                ),
             );
 
             if (!guildPreference.isGroupsMode()) {
@@ -395,15 +399,15 @@ export default class SongSelector {
                             "=",
                             gameOptions.artistType === ArtistType.SOLOIST
                                 ? "y"
-                                : "n"
-                        )
+                                : "n",
+                        ),
                     );
                 }
             } else if (
                 gameOptions.subunitPreference === SubunitsPreference.EXCLUDE
             ) {
                 mainArtistFilterExpressions.push(
-                    eb("id_artist", "in", selectedGroupIDs)
+                    eb("id_artist", "in", selectedGroupIDs),
                 );
             } else {
                 const mainArtistIdSearchExpressions = [];
@@ -411,18 +415,18 @@ export default class SongSelector {
                     ...[
                         eb("id_artist", "in", selectedGroupIDs),
                         eb("id_parent_artist", "in", selectedGroupIDs),
-                    ]
+                    ],
                 );
 
                 mainArtistIdSearchExpressions.push(
-                    eb("id_artist", "in", collabGroupContainingSubunit)
+                    eb("id_artist", "in", collabGroupContainingSubunit),
                 );
 
                 mainArtistFilterExpressions.push(
                     and([
                         eb("id_artist", "not in", shadowBannedArtistIds),
                         or(mainArtistIdSearchExpressions),
-                    ])
+                    ]),
                 );
             }
 
@@ -432,7 +436,7 @@ export default class SongSelector {
                 finalExpressions.push(includesInnerArtistFilterExpressions[0]);
             } else if (includesInnerArtistFilterExpressions.length > 1) {
                 finalExpressions.push(
-                    and(includesInnerArtistFilterExpressions)
+                    and(includesInnerArtistFilterExpressions),
                 );
             }
 
@@ -450,7 +454,7 @@ export default class SongSelector {
                 queryBuilder = queryBuilder.where(
                     "tags",
                     "not like",
-                    `%${tag}%`
+                    `%${tag}%`,
                 );
             }
         }
@@ -471,7 +475,7 @@ export default class SongSelector {
                 queryBuilder = queryBuilder.where(
                     "tags",
                     "not like",
-                    `%${tag}%`
+                    `%${tag}%`,
                 );
             }
         }
@@ -480,12 +484,12 @@ export default class SongSelector {
             .where(
                 "publishedon",
                 ">=",
-                new Date(`${gameOptions.beginningYear}-01-01`)
+                new Date(`${gameOptions.beginningYear}-01-01`),
             )
             .where(
                 "publishedon",
                 "<=",
-                new Date(`${gameOptions.endYear}-12-31`)
+                new Date(`${gameOptions.endYear}-12-31`),
             );
 
         const shuffleType = gameOptions.shuffleType;
@@ -498,7 +502,7 @@ export default class SongSelector {
             queryBuilder = queryBuilder
                 .orderBy(
                     sql`SUBSTRING(publishedon, 1, ${"YYYY-MM".length})`,
-                    shuffleType === ShuffleType.CHRONOLOGICAL ? "asc" : "desc"
+                    shuffleType === ShuffleType.CHRONOLOGICAL ? "asc" : "desc",
                 )
                 .orderBy(sql`RAND()`);
         } else {
@@ -511,9 +515,9 @@ export default class SongSelector {
             premium
                 ? parseInt(
                       process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST as string,
-                      10
+                      10,
                   )
-                : parseInt(process.env.AUDIO_SONGS_PER_ARTIST as string, 10)
+                : parseInt(process.env.AUDIO_SONGS_PER_ARTIST as string, 10),
         );
 
         result = await queryBuilder.execute();
@@ -539,7 +543,7 @@ export default class SongSelector {
             selectionWeight:
                 selectionWeightValues[
                     Math.floor(
-                        (index / result.length) * selectionWeightValues.length
+                        (index / result.length) * selectionWeightValues.length,
                     )
                 ],
         }));
@@ -556,7 +560,7 @@ export default class SongSelector {
         playlistID: string,
         forceRefreshMetadata: boolean,
         messageContext?: MessageContext,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<QueriedSongList & MatchedPlaylist> {
         const { matchedSongs, metadata, truncated } =
             await State.spotifyManager.getMatchedSpotifySongs(
@@ -565,7 +569,7 @@ export default class SongSelector {
                 isPremium,
                 forceRefreshMetadata,
                 messageContext,
-                interaction
+                interaction,
             );
 
         const result = new Set(
@@ -575,9 +579,9 @@ export default class SongSelector {
                     Number(
                         isPremium
                             ? process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST
-                            : process.env.AUDIO_SONGS_PER_ARTIST
-                    )
-            )
+                            : process.env.AUDIO_SONGS_PER_ARTIST,
+                    ),
+            ),
         );
 
         return {

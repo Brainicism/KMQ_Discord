@@ -36,7 +36,7 @@ export function getTimeUntilRestart(): number | null {
         State.restartNotification.restartDate.getTime();
 
     return Math.ceil(
-        (restartNotificationTime - new Date().getTime()) / (1000 * 60)
+        (restartNotificationTime - new Date().getTime()) / (1000 * 60),
     );
 }
 
@@ -45,7 +45,7 @@ export function getTimeUntilRestart(): number | null {
  * @param timeUntilRestart - time until the restart
  */
 export async function warnServersImpendingRestart(
-    timeUntilRestart: number
+    timeUntilRestart: number,
 ): Promise<void> {
     let serversWarned = 0;
     if (RESTART_WARNING_INTERVALS.has(timeUntilRestart)) {
@@ -56,7 +56,7 @@ export async function warnServersImpendingRestart(
                 new MessageContext(
                     gameSession.textChannelID,
                     null,
-                    gameSession.guildID
+                    gameSession.guildID,
                 ),
                 {
                     title: i18n.translate(
@@ -64,16 +64,16 @@ export async function warnServersImpendingRestart(
                         "misc.restart.title",
                         {
                             timeUntilRestart: String(timeUntilRestart),
-                        }
+                        },
                     ),
                     description: i18n.translate(
                         gameSession.guildID,
                         "misc.restart.description_hard",
                         {
                             downtimeMinutes: String(5),
-                        }
+                        },
                     ),
-                }
+                },
             );
             // eslint-disable-next-line no-await-in-loop
             await delay(200);
@@ -81,7 +81,7 @@ export async function warnServersImpendingRestart(
         }
 
         logger.info(
-            `Impending bot restart in ${timeUntilRestart} minutes. ${serversWarned} servers warned.`
+            `Impending bot restart in ${timeUntilRestart} minutes. ${serversWarned} servers warned.`,
         );
     }
 }
@@ -89,42 +89,42 @@ export async function warnServersImpendingRestart(
 /** Clear inactive voice connections */
 function clearInactiveVoiceConnections(): void {
     const existingVoiceChannelGuildIDs = Array.from(
-        State.client.voiceConnections.keys()
+        State.client.voiceConnections.keys(),
     ) as Array<string>;
 
     const activeGameVoiceChannelGuildIDs = new Set(
-        Object.values(State.gameSessions).map((x) => x.guildID)
+        Object.values(State.gameSessions).map((x) => x.guildID),
     );
 
     const activeListeningVoiceChannelGuildIDs = new Set(
-        Object.values(State.listeningSessions).map((x) => x.guildID)
+        Object.values(State.listeningSessions).map((x) => x.guildID),
     );
 
     for (const existingVoiceChannelGuildID of existingVoiceChannelGuildIDs) {
         if (
             !activeGameVoiceChannelGuildIDs.has(existingVoiceChannelGuildID) &&
             !activeListeningVoiceChannelGuildIDs.has(
-                existingVoiceChannelGuildID
+                existingVoiceChannelGuildID,
             )
         ) {
             const voiceConnection = State.client.voiceConnections.get(
-                existingVoiceChannelGuildID
+                existingVoiceChannelGuildID,
             );
 
             if (voiceConnection) {
                 const voiceChannelID = voiceConnection.channelID;
 
                 logger.info(
-                    `gid: ${existingVoiceChannelGuildID}, vid: ${voiceChannelID} | Disconnected inactive voice connection`
+                    `gid: ${existingVoiceChannelGuildID}, vid: ${voiceChannelID} | Disconnected inactive voice connection`,
                 );
 
                 try {
                     State.client.voiceConnections.leave(
-                        existingVoiceChannelGuildID
+                        existingVoiceChannelGuildID,
                     );
                 } catch (e) {
                     logger.error(
-                        `Failed to disconnect inactive voice connection for gid: ${existingVoiceChannelGuildID}. err = ${e}`
+                        `Failed to disconnect inactive voice connection for gid: ${existingVoiceChannelGuildID}. err = ${e}`,
                     );
                 }
             }
@@ -240,7 +240,7 @@ export async function reloadAliases(): Promise<void> {
                 eb("artist_aliases", "<>", ""),
                 eb("previous_name_en", "<>", ""),
                 eb("previous_name_ko", "<>", ""),
-            ])
+            ]),
         )
         .execute();
 
@@ -285,7 +285,7 @@ export async function reloadBonusGroups(): Promise<void> {
                     date.getFullYear() +
                     date.getMonth() * 997 +
                     date.getDate() * 37
-                })`
+                })`,
             )
             .limit(bonusGroupCount)
             .execute()
@@ -293,8 +293,8 @@ export async function reloadBonusGroups(): Promise<void> {
 
     State.bonusArtists = new Set(
         (await getMatchingGroupNames(artistNameQuery)).matchedGroups.map(
-            (x) => x.name
-        )
+            (x) => x.name,
+        ),
     );
 }
 
@@ -343,7 +343,7 @@ async function reloadArtists(): Promise<void> {
         .innerJoin(
             "kpop_videos.app_kpop_group",
             "available_songs.id_artist",
-            "app_kpop_group.id"
+            "app_kpop_group.id",
         )
         .select([
             "id_artist as id",
@@ -376,10 +376,10 @@ async function reloadSongs(): Promise<void> {
             artistID: mapping["id_artist"],
             songLink: mapping["link"],
             cleanName: normalizePunctuationInName(
-                mapping["clean_song_name_en"]
+                mapping["clean_song_name_en"],
             ),
             hangulCleanName: normalizePunctuationInName(
-                mapping["clean_song_name_ko"]
+                mapping["clean_song_name_ko"],
             ),
         };
 

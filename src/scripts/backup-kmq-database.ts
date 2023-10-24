@@ -27,7 +27,7 @@ async function backupKmqDatabase(): Promise<void> {
     }
 
     await exec(
-        `find ${databaseBackupDir} -mindepth 1 -name "*kmq_backup_*" -mtime +${BACKUP_TTL} -delete`
+        `find ${databaseBackupDir} -mindepth 1 -name "*kmq_backup_*" -mtime +${BACKUP_TTL} -delete`,
     );
 
     const backupSqlFileName = `kmq_backup_${new Date().toISOString()}.sql`;
@@ -36,17 +36,17 @@ async function backupKmqDatabase(): Promise<void> {
     try {
         logger.info("Dumping database...");
         await exec(
-            `mysqldump -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} --routines kmq > ${databaseBackupDir}/${backupSqlFileName}`
+            `mysqldump -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} --routines kmq > ${databaseBackupDir}/${backupSqlFileName}`,
         );
 
         logger.info("Compressing output...");
         await exec(
-            `tar -C ${databaseBackupDir} -czvf ${databaseBackupDir}/${backupGzipFileName} ${backupSqlFileName}`
+            `tar -C ${databaseBackupDir} -czvf ${databaseBackupDir}/${backupGzipFileName} ${backupSqlFileName}`,
         );
 
         if (process.env.AZURE_STORAGE_SAS_TOKEN) {
             await exec(
-                `azcopy copy "${databaseBackupDir}/${backupGzipFileName}" "${process.env.AZURE_STORAGE_SAS_TOKEN}"`
+                `azcopy copy "${databaseBackupDir}/${backupGzipFileName}" "${process.env.AZURE_STORAGE_SAS_TOKEN}"`,
             );
         }
 
@@ -65,7 +65,7 @@ function importKmqDatabase(fileWithPath: string): void {
 
     logger.info(`Beginning import of ${fileWithPath}`);
     cp.execSync(
-        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT}  kmq < ${fileWithPath}`
+        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT}  kmq < ${fileWithPath}`,
     );
     logger.info("Finished import");
 }

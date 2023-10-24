@@ -9,7 +9,7 @@ describe("guild preference", () => {
                 const guildPreference = GuildPreference.fromGuild("123");
                 assert.deepStrictEqual(
                     GuildPreference.DEFAULT_OPTIONS,
-                    guildPreference.gameOptions
+                    guildPreference.gameOptions,
                 );
             });
         });
@@ -25,12 +25,12 @@ describe("guild preference", () => {
                 it("should return a guild preference with the missing game options as their default values", () => {
                     const guildPreference = GuildPreference.fromGuild(
                         "123",
-                        filledGameOptions
+                        filledGameOptions,
                     );
 
                     assert.deepStrictEqual(
                         filledGameOptions,
-                        guildPreference.gameOptions
+                        guildPreference.gameOptions,
                     );
                 });
             });
@@ -46,12 +46,12 @@ describe("guild preference", () => {
                     ];
                     const guildPreference = GuildPreference.fromGuild(
                         "123",
-                        gameOptionsWithMissingLanguageType
+                        gameOptionsWithMissingLanguageType,
                     );
 
                     assert.deepStrictEqual(
                         GuildPreference.DEFAULT_OPTIONS,
-                        guildPreference.gameOptions
+                        guildPreference.gameOptions,
                     );
                 });
             });
@@ -68,12 +68,12 @@ describe("guild preference", () => {
                     gameOptionsWithExtraValues[nonExistentOption] = 58;
                     const guildPreference = GuildPreference.fromGuild(
                         "123",
-                        gameOptionsWithExtraValues
+                        gameOptionsWithExtraValues,
                     );
 
                     assert.strictEqual(
                         nonExistentOption in guildPreference.gameOptions,
-                        false
+                        false,
                     );
                 });
             });
@@ -113,7 +113,7 @@ describe("guild preference", () => {
                 await guildPreference.loadPreset(TEST_PRESET_NAME, "123");
                 assert.deepStrictEqual(
                     guildPreference.gameOptions,
-                    filledGameOptions
+                    filledGameOptions,
                 );
             });
         });

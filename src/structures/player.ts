@@ -42,7 +42,7 @@ export default class Player {
         points: number,
         username: string,
         firstGameOfTheDay = false,
-        premium = false
+        premium = false,
     ) {
         this.id = id;
         this.guildID = guildID;
@@ -61,7 +61,7 @@ export default class Player {
         guildID: string,
         score = 0,
         firstGameOfDay = false,
-        premium = false
+        premium = false,
     ): Player {
         return new Player(
             user.id,
@@ -70,7 +70,7 @@ export default class Player {
             score,
             user.username,
             firstGameOfDay,
-            premium
+            premium,
         );
     }
 
@@ -85,7 +85,7 @@ export default class Player {
     getDisplayedName(
         first: boolean,
         wonRound: boolean,
-        mention: boolean
+        mention: boolean,
     ): string {
         let name: string;
         if (mention && this.inVC) {

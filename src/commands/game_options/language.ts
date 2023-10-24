@@ -43,7 +43,7 @@ export default class LanguageCommand implements BaseCommand {
         name: "language",
         description: i18n.translate(
             guildID,
-            "command.language.help.description"
+            "command.language.help.description",
         ),
         usage: "/language set\nlanguage:[korean | all]\n\n/language reset",
         examples: [
@@ -51,14 +51,14 @@ export default class LanguageCommand implements BaseCommand {
                 example: "`/language set language:korean`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.language.help.example.korean"
+                    "command.language.help.example.korean",
                 ),
             },
             {
                 example: "`/language set language:all`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.language.help.example.all"
+                    "command.language.help.example.all",
                 ),
             },
             {
@@ -66,7 +66,7 @@ export default class LanguageCommand implements BaseCommand {
                 explanation: i18n.translate(
                     guildID,
                     "command.language.help.example.reset",
-                    { defaultLanguage: `\`${LanguageType.ALL}\`` }
+                    { defaultLanguage: `\`${LanguageType.ALL}\`` },
                 ),
             },
         ],
@@ -83,7 +83,7 @@ export default class LanguageCommand implements BaseCommand {
                     name: OptionAction.SET,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.language.help.description"
+                        "command.language.help.description",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -92,10 +92,10 @@ export default class LanguageCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.language.help.description"
+                                    "command.language.help.description",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -105,7 +105,7 @@ export default class LanguageCommand implements BaseCommand {
                             name: "language",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.language.interaction.language"
+                                "command.language.interaction.language",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -114,10 +114,10 @@ export default class LanguageCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.language.interaction.language"
+                                            "command.language.interaction.language",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -127,7 +127,7 @@ export default class LanguageCommand implements BaseCommand {
                                 (languageType) => ({
                                     name: languageType,
                                     value: languageType,
-                                })
+                                }),
                             ),
                         },
                     ],
@@ -137,7 +137,7 @@ export default class LanguageCommand implements BaseCommand {
                     description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
-                        { optionName: "language" }
+                        { optionName: "language" },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -147,10 +147,10 @@ export default class LanguageCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "misc.interaction.resetOption",
-                                    { optionName: "language" }
+                                    { optionName: "language" },
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -172,31 +172,31 @@ export default class LanguageCommand implements BaseCommand {
         await LanguageCommand.updateOption(
             MessageContext.fromMessage(message),
             languageType,
-            undefined
+            undefined,
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         languageType: LanguageType | null,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         const reset = languageType == null;
         if (reset) {
             await guildPreference.reset(GameOption.LANGUAGE_TYPE);
             logger.info(
-                `${getDebugLogHeader(messageContext)} | Language type reset.`
+                `${getDebugLogHeader(messageContext)} | Language type reset.`,
             );
         } else {
             await guildPreference.setLanguageType(languageType);
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Language type set to ${languageType}`
+                    messageContext,
+                )} | Language type set to ${languageType}`,
             );
         }
 
@@ -208,7 +208,7 @@ export default class LanguageCommand implements BaseCommand {
             false,
             undefined,
             undefined,
-            interaction
+            interaction,
         );
     }
 
@@ -218,7 +218,7 @@ export default class LanguageCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
@@ -238,7 +238,7 @@ export default class LanguageCommand implements BaseCommand {
         await LanguageCommand.updateOption(
             messageContext,
             languageValue,
-            interaction
+            interaction,
         );
     }
 }

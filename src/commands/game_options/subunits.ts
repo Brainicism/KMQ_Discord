@@ -46,7 +46,7 @@ export default class SubunitsCommand implements BaseCommand {
         description: i18n.translate(
             guildID,
             "command.subunits.help.description",
-            { groups: "`/groups`" }
+            { groups: "`/groups`" },
         ),
         usage: "/subunits set\nsubunits:[include | exclude]\n\n/subunits reset",
         examples: [
@@ -60,14 +60,14 @@ export default class SubunitsCommand implements BaseCommand {
                         parentGroup: "BTS",
                         subunitOne: "J-Hope",
                         subunitTwo: "RM",
-                    }
+                    },
                 ),
             },
             {
                 example: "`/subunits set subunits:exclude`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.subunits.help.example.exclude"
+                    "command.subunits.help.example.exclude",
                 ),
             },
             {
@@ -75,7 +75,7 @@ export default class SubunitsCommand implements BaseCommand {
                 explanation: i18n.translate(
                     guildID,
                     "command.subunits.help.example.reset",
-                    { defaultSubunit: `\`${DEFAULT_SUBUNIT_PREFERENCE}\`` }
+                    { defaultSubunit: `\`${DEFAULT_SUBUNIT_PREFERENCE}\`` },
                 ),
             },
         ],
@@ -90,13 +90,13 @@ export default class SubunitsCommand implements BaseCommand {
             description: i18n.translate(
                 LocaleType.EN,
                 "command.subunits.help.description",
-                { groups: "`/groups`" }
+                { groups: "`/groups`" },
             ),
             descriptionLocalizations: {
                 [LocaleType.KO]: i18n.translate(
                     LocaleType.KO,
                     "command.subunits.help.description",
-                    { groups: "`/groups`" }
+                    { groups: "`/groups`" },
                 ),
             },
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
@@ -108,7 +108,7 @@ export default class SubunitsCommand implements BaseCommand {
                         "command.subunits.help.description",
                         {
                             groups: "`/groups`",
-                        }
+                        },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -120,10 +120,10 @@ export default class SubunitsCommand implements BaseCommand {
                                     "command.subunits.help.description",
                                     {
                                         groups: "`/groups`",
-                                    }
+                                    },
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -133,7 +133,7 @@ export default class SubunitsCommand implements BaseCommand {
                             name: "subunits",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.subunits.interaction.subunits"
+                                "command.subunits.interaction.subunits",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -142,10 +142,10 @@ export default class SubunitsCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.subunits.interaction.subunits"
+                                            "command.subunits.interaction.subunits",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -155,7 +155,7 @@ export default class SubunitsCommand implements BaseCommand {
                                 (subunitPreference) => ({
                                     name: subunitPreference,
                                     value: subunitPreference,
-                                })
+                                }),
                             ),
                         },
                     ],
@@ -165,7 +165,7 @@ export default class SubunitsCommand implements BaseCommand {
                     description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
-                        { optionName: "subunits" }
+                        { optionName: "subunits" },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -175,10 +175,10 @@ export default class SubunitsCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "misc.interaction.resetOption",
-                                    { optionName: "subunits" }
+                                    { optionName: "subunits" },
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -202,17 +202,17 @@ export default class SubunitsCommand implements BaseCommand {
         await SubunitsCommand.updateOption(
             MessageContext.fromMessage(message),
             subunitsPreference,
-            undefined
+            undefined,
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         subunitsPreference: SubunitsPreference | null,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         const reset = subunitsPreference == null;
@@ -220,15 +220,15 @@ export default class SubunitsCommand implements BaseCommand {
             await guildPreference.reset(GameOption.SUBUNIT_PREFERENCE);
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Subunit preference reset.`
+                    messageContext,
+                )} | Subunit preference reset.`,
             );
         } else {
             await guildPreference.setSubunitPreference(subunitsPreference);
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Subunit preference set to ${subunitsPreference}`
+                    messageContext,
+                )} | Subunit preference set to ${subunitsPreference}`,
             );
         }
 
@@ -240,7 +240,7 @@ export default class SubunitsCommand implements BaseCommand {
             false,
             undefined,
             undefined,
-            interaction
+            interaction,
         );
     }
 
@@ -250,7 +250,7 @@ export default class SubunitsCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
@@ -272,7 +272,7 @@ export default class SubunitsCommand implements BaseCommand {
         await SubunitsCommand.updateOption(
             messageContext,
             subunitsValue,
-            interaction
+            interaction,
         );
     }
 }

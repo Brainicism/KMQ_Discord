@@ -130,7 +130,7 @@ export default class GameSession extends Session {
         gameSessionCreator: KmqMember,
         gameType: GameType,
         isPremium: boolean,
-        eliminationLives?: number
+        eliminationLives?: number,
     ) {
         super(
             guildPreference,
@@ -138,7 +138,7 @@ export default class GameSession extends Session {
             voiceChannelID,
             guildID,
             gameSessionCreator,
-            isPremium
+            isPremium,
         );
         this.gameType = gameType;
         this.sessionInitialized = false;
@@ -156,7 +156,7 @@ export default class GameSession extends Session {
                 break;
             case GameType.ELIMINATION:
                 this.scoreboard = new EliminationScoreboard(
-                    eliminationLives || ELIMINATION_DEFAULT_LIVES
+                    eliminationLives || ELIMINATION_DEFAULT_LIVES,
                 );
                 break;
             default:
@@ -181,7 +181,7 @@ export default class GameSession extends Session {
             await delay(
                 this.multiguessDelayIsActive(this.guildPreference)
                     ? SONG_START_DELAY - MULTIGUESS_DELAY
-                    : SONG_START_DELAY
+                    : SONG_START_DELAY,
             );
         }
 
@@ -199,7 +199,7 @@ export default class GameSession extends Session {
             // Show players that haven't guessed and a button to guess
             round.interactionMessage = await sendInfoMessage(
                 new MessageContext(this.textChannelID, null, this.guildID),
-                this.generateRemainingPlayersMessage(round)
+                this.generateRemainingPlayersMessage(round),
             );
 
             this.startHiddenUpdateTimer();
@@ -220,7 +220,7 @@ export default class GameSession extends Session {
                 randomSong.members,
                 correctChoice,
                 randomSong.artistID,
-                locale
+                locale,
             );
 
             let buttons: Array<Eris.InteractionButton> = [];
@@ -269,7 +269,7 @@ export default class GameSession extends Session {
                     break;
                 default:
                     logger.error(
-                        `Unexpected answerType: ${this.guildPreference.gameOptions.answerType}`
+                        `Unexpected answerType: ${this.guildPreference.gameOptions.answerType}`,
                     );
 
                     actionRows = [
@@ -295,14 +295,14 @@ export default class GameSession extends Session {
                                     .guessModeType === GuessModeType.ARTIST
                                     ? i18n.translate(
                                           this.guildID,
-                                          "misc.artist"
+                                          "misc.artist",
                                       )
                                     : i18n.translate(this.guildID, "misc.song"),
-                        }
+                        },
                     ),
                     components: actionRows,
                     thumbnailUrl: KmqImages.LISTENING,
-                }
+                },
             );
         }
 
@@ -316,7 +316,7 @@ export default class GameSession extends Session {
      */
     async endRound(
         messageContext: MessageContext,
-        guessResult: GuessResult
+        guessResult: GuessResult,
     ): Promise<void> {
         if (this.round === null) {
             return;
@@ -329,7 +329,7 @@ export default class GameSession extends Session {
             ).sort(
                 (a, b) =>
                     getTimeToGuessMs(a, round, this.gameType) -
-                    getTimeToGuessMs(b, round, this.gameType)
+                    getTimeToGuessMs(b, round, this.gameType),
             );
         }
 
@@ -344,7 +344,7 @@ export default class GameSession extends Session {
                     correctGuessers: round.correctGuessers.sort(
                         (a, b) =>
                             getTimeToGuessMs(a, round, this.gameType) -
-                            getTimeToGuessMs(b, round, this.gameType)
+                            getTimeToGuessMs(b, round, this.gameType),
                     ),
                 };
             }
@@ -376,7 +376,7 @@ export default class GameSession extends Session {
                 round,
                 guessResult,
                 this.guildPreference,
-                messageContext
+                messageContext,
             );
         } else if (!guessResult.error) {
             this.lastGuesser = null;
@@ -393,11 +393,11 @@ export default class GameSession extends Session {
             guessResult.correct,
             round.skipAchieved,
             round.hintUsed,
-            timePlayed
+            timePlayed,
         );
 
         const remainingDuration = this.getRemainingDuration(
-            this.guildPreference
+            this.guildPreference,
         );
 
         if (messageContext) {
@@ -407,7 +407,7 @@ export default class GameSession extends Session {
             if (this.scoreboard instanceof TeamScoreboard) {
                 const teamScoreboard = this.scoreboard as TeamScoreboard;
                 roundResultIDs = playerRoundResults.map(
-                    (x) => teamScoreboard.getTeamOfPlayer(x.player.id)!.id
+                    (x) => teamScoreboard.getTeamOfPlayer(x.player.id)!.id,
                 );
             } else {
                 roundResultIDs = playerRoundResults.map((x) => x.player.id);
@@ -421,7 +421,7 @@ export default class GameSession extends Session {
                     false,
                     true,
                     messageContext.guildID,
-                    roundResultIDs
+                    roundResultIDs,
                 );
 
             let scoreboardTitle = "";
@@ -430,8 +430,8 @@ export default class GameSession extends Session {
                 scoreboardTitle += bold(
                     i18n.translate(
                         messageContext.guildID,
-                        "command.score.scoreboardTitle"
-                    )
+                        "command.score.scoreboardTitle",
+                    ),
                 );
             }
 
@@ -439,15 +439,16 @@ export default class GameSession extends Session {
                 messageContext,
                 this.songSelector.getUniqueSongCounter(this.guildPreference),
                 playerRoundResults,
-                this.gameType
+                this.gameType,
             )}${scoreboardTitle}`;
 
             const correctGuess = playerRoundResults.length > 0;
             const embedColor = round.getEndRoundColor(
                 correctGuess,
                 await userBonusIsActive(
-                    playerRoundResults[0]?.player.id ?? messageContext.author.id
-                )
+                    playerRoundResults[0]?.player.id ??
+                        messageContext.author.id,
+                ),
             );
 
             const endRoundMessage = await this.sendRoundMessage(
@@ -457,7 +458,7 @@ export default class GameSession extends Session {
                 description,
                 embedColor,
                 correctGuess && !this.guildPreference.isMultipleChoiceMode(),
-                remainingDuration
+                remainingDuration,
             );
 
             round.roundMessageID = endRoundMessage?.id as string;
@@ -492,8 +493,8 @@ export default class GameSession extends Session {
                             name: x.getName(),
                             id: x.id,
                             score: x.getDisplayedScore(),
-                        }))
-                )
+                        })),
+                ),
             );
         }
 
@@ -508,7 +509,7 @@ export default class GameSession extends Session {
                 if (playerScore > 0) {
                     await GameSession.incrementPlayerSongsGuessed(
                         participant,
-                        1
+                        1,
                     );
                 }
 
@@ -519,7 +520,7 @@ export default class GameSession extends Session {
                 if (playerExpGain > 0) {
                     levelUpResult = await GameSession.incrementPlayerExp(
                         participant,
-                        playerExpGain
+                        playerExpGain,
                     );
                     if (levelUpResult) {
                         leveledUpPlayers.push(levelUpResult);
@@ -532,9 +533,9 @@ export default class GameSession extends Session {
                     playerExpGain,
                     levelUpResult
                         ? levelUpResult.endLevel - levelUpResult.startLevel
-                        : 0
+                        : 0,
                 );
-            })
+            }),
         );
 
         // send level up message
@@ -543,30 +544,30 @@ export default class GameSession extends Session {
                 .sort((a, b) => b.endLevel - a.endLevel)
                 .sort(
                     (a, b) =>
-                        b.endLevel - b.startLevel - (a.endLevel - a.startLevel)
+                        b.endLevel - b.startLevel - (a.endLevel - a.startLevel),
                 )
                 .map((leveledUpPlayer) =>
                     i18n.translate(this.guildID, "misc.levelUp.entry", {
                         user: this.scoreboard.getPlayerDisplayedName(
-                            leveledUpPlayer.userID
+                            leveledUpPlayer.userID,
                         ),
                         startLevel: codeLine(
-                            String(leveledUpPlayer.startLevel)
+                            String(leveledUpPlayer.startLevel),
                         ),
                         endLevel: codeLine(String(leveledUpPlayer.endLevel)),
                         rank: codeLine(
                             getRankNameByLevel(
                                 leveledUpPlayer.endLevel,
-                                this.guildID
-                            )
+                                this.guildID,
+                            ),
                         ),
-                    })
+                    }),
                 )
                 .slice(0, 10);
 
             if (leveledUpPlayers.length > 10) {
                 levelUpMessages.push(
-                    i18n.translate(this.guildID, "misc.andManyOthers")
+                    i18n.translate(this.guildID, "misc.andManyOthers"),
                 );
             }
 
@@ -576,7 +577,7 @@ export default class GameSession extends Session {
                     title: i18n.translate(this.guildID, "misc.levelUp.title"),
                     description: levelUpMessages.join("\n"),
                     thumbnailUrl: KmqImages.THUMBS_UP,
-                }
+                },
             );
         }
 
@@ -612,7 +613,7 @@ export default class GameSession extends Session {
         await this.sendEndGameMessage();
 
         logger.info(
-            `gid: ${this.guildID} | Game session ended. rounds_played = ${this.roundsPlayed}. session_length = ${sessionLength}. gameType = ${this.gameType}`
+            `gid: ${this.guildID} | Game session ended. rounds_played = ${this.roundsPlayed}. session_length = ${sessionLength}. gameType = ${this.gameType}`,
         );
     }
 
@@ -625,7 +626,7 @@ export default class GameSession extends Session {
     async guessSong(
         messageContext: MessageContext,
         guess: string,
-        createdAt: number
+        createdAt: number,
     ): Promise<void> {
         if (!this.connection) return;
         if (this.connection.listenerCount("end") === 0) return;
@@ -639,7 +640,7 @@ export default class GameSession extends Session {
             createdAt,
             this.guildPreference.gameOptions.guessModeType,
             this.guildPreference.isMultipleChoiceMode(),
-            this.guildPreference.typosAllowed()
+            this.guildPreference.typosAllowed(),
         );
 
         if (this.gameType === GameType.HIDDEN) {
@@ -647,7 +648,7 @@ export default class GameSession extends Session {
             if (
                 this.scoreboard.getRemainingPlayers(
                     round.correctGuessers,
-                    round.incorrectGuessers
+                    round.incorrectGuessers,
                 ).length > 0
             ) {
                 // If there are still players who haven't guessed correctly, don't end the round
@@ -673,7 +674,7 @@ export default class GameSession extends Session {
             await delay(
                 this.multiguessDelayIsActive(this.guildPreference)
                     ? MULTIGUESS_DELAY
-                    : 0
+                    : 0,
             );
 
             // mark round as complete, so no more guesses can go through
@@ -708,16 +709,16 @@ export default class GameSession extends Session {
                     [
                         ...new Set(
                             getCurrentVoiceMembers(this.voiceChannelID).map(
-                                (x) => x.id
-                            )
+                                (x) => x.id,
+                            ),
                         ),
                     ],
-                    [...round.incorrectGuessers]
+                    [...round.incorrectGuessers],
                 ).size === 0
             ) {
                 await this.endRound(
                     new MessageContext(this.textChannelID, null, this.guildID),
-                    { correct: false }
+                    { correct: false },
                 );
 
                 await this.startRound(messageContext);
@@ -740,7 +741,7 @@ export default class GameSession extends Session {
         }
 
         const voiceMembers = getCurrentVoiceMembers(this.voiceChannelID).filter(
-            (x) => x.id !== process.env.BOT_CLIENT_ID
+            (x) => x.id !== process.env.BOT_CLIENT_ID,
         );
 
         const voiceMemberIDs = new Set(voiceMembers.map((x) => x.id));
@@ -762,13 +763,13 @@ export default class GameSession extends Session {
 
     async handleComponentInteraction(
         interaction: Eris.ComponentInteraction<Eris.TextableChannel>,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         if (!this.round) return;
         if (
             !this.handleInSessionInteractionFailures(
                 interaction,
-                messageContext
+                messageContext,
             )
         ) {
             return;
@@ -785,8 +786,8 @@ export default class GameSession extends Session {
                 null,
                 i18n.translate(
                     this.guildID,
-                    "misc.failure.interaction.alreadyEliminated"
-                )
+                    "misc.failure.interaction.alreadyEliminated",
+                ),
             );
             return;
         }
@@ -797,8 +798,8 @@ export default class GameSession extends Session {
                 null,
                 i18n.translate(
                     this.guildID,
-                    "misc.failure.interaction.eliminated"
-                )
+                    "misc.failure.interaction.eliminated",
+                ),
             );
 
             round.incorrectGuessers.add(interaction.member!.id);
@@ -812,7 +813,7 @@ export default class GameSession extends Session {
         tryInteractionAcknowledge(interaction);
 
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         this.guessSong(
@@ -820,7 +821,7 @@ export default class GameSession extends Session {
             guildPreference.gameOptions.guessModeType !== GuessModeType.ARTIST
                 ? round.song.songName
                 : round.song.artistName,
-            interaction.createdAt
+            interaction.createdAt,
         );
     }
 
@@ -849,15 +850,15 @@ export default class GameSession extends Session {
                               this.scoreboard as EliminationScoreboard
                           ).getLivesOfWeakestPlayer(),
                           await isFirstGameOfDay(userID),
-                          await isUserPremium(userID)
+                          await isUserPremium(userID),
                       )
                     : Player.fromUser(
                           user as Eris.User,
                           this.guildID,
                           0,
                           await isFirstGameOfDay(userID),
-                          await isUserPremium(userID)
-                      )
+                          await isUserPremium(userID),
+                      ),
             );
         }
 
@@ -869,7 +870,7 @@ export default class GameSession extends Session {
      */
     async syncAllVoiceMembers(): Promise<void> {
         const currentVoiceMemberIds = getCurrentVoiceMembers(
-            this.voiceChannelID
+            this.voiceChannelID,
         ).map((x) => x.id);
 
         await Promise.allSettled(
@@ -878,7 +879,7 @@ export default class GameSession extends Session {
                 .filter((x) => !currentVoiceMemberIds.includes(x))
                 .map(async (player) => {
                     await this.setPlayerInVC(player, false);
-                })
+                }),
         );
 
         if (this.gameType === GameType.TEAMS) {
@@ -901,17 +902,17 @@ export default class GameSession extends Session {
                                   (this.scoreboard as EliminationScoreboard)
                                       .startingLives,
                                   firstGameOfDay,
-                                  premium
+                                  premium,
                               )
                             : Player.fromUser(
                                   player,
                                   this.guildID,
                                   0,
                                   firstGameOfDay,
-                                  premium
-                              )
+                                  premium,
+                              ),
                     );
-                })
+                }),
         );
     }
 
@@ -921,11 +922,11 @@ export default class GameSession extends Session {
      * @returns the message
      */
     sendScoreboardMessage(
-        messageOrInteraction: GuildTextableMessage | CommandInteraction
+        messageOrInteraction: GuildTextableMessage | CommandInteraction,
     ): Promise<Eris.Message | null> {
         const winnersFieldSubsets = chunkArray(
             this.scoreboard.getScoreboardEmbedSingleColumn(true, true),
-            EMBED_FIELDS_PER_PAGE
+            EMBED_FIELDS_PER_PAGE,
         );
 
         let footerText = i18n.translate(
@@ -935,10 +936,10 @@ export default class GameSession extends Session {
                 score: String(
                     this.scoreboard.getPlayerDisplayedScore(
                         messageOrInteraction.member!.id,
-                        false
-                    )
+                        false,
+                    ),
                 ),
-            }
+            },
         );
 
         if (this.gameType === GameType.ELIMINATION) {
@@ -951,10 +952,10 @@ export default class GameSession extends Session {
                 {
                     lives: String(
                         eliminationScoreboard.getPlayerLives(
-                            messageOrInteraction.member!.id
-                        )
+                            messageOrInteraction.member!.id,
+                        ),
                     ),
-                }
+                },
             );
         } else if (this.gameType === GameType.TEAMS) {
             const teamScoreboard = this.scoreboard as TeamScoreboard;
@@ -965,9 +966,9 @@ export default class GameSession extends Session {
                     teamScore: String(
                         teamScoreboard
                             .getTeamOfPlayer(messageOrInteraction.member!.id)
-                            ?.getScore()
+                            ?.getScore(),
                     ),
-                }
+                },
             );
             footerText += "\n";
             footerText += i18n.translate(
@@ -976,10 +977,10 @@ export default class GameSession extends Session {
                 {
                     score: String(
                         teamScoreboard.getPlayerScore(
-                            messageOrInteraction.member!.id
-                        )
+                            messageOrInteraction.member!.id,
+                        ),
                     ),
-                }
+                },
             );
         }
 
@@ -988,13 +989,13 @@ export default class GameSession extends Session {
                 color: EMBED_SUCCESS_COLOR,
                 title: i18n.translate(
                     messageOrInteraction.guildID as string,
-                    "command.score.scoreboardTitle"
+                    "command.score.scoreboardTitle",
                 ),
                 fields: winnersFieldSubset,
                 footer: {
                     text: footerText,
                 },
-            })
+            }),
         );
 
         return sendPaginationedEmbed(messageOrInteraction, embeds);
@@ -1009,7 +1010,7 @@ export default class GameSession extends Session {
             "misc.inGame.songsCorrectlyGuessed",
             {
                 songCount: `${this.getCorrectGuesses()}/${this.getRoundsPlayed()}`,
-            }
+            },
         );
 
         if (this.scoreboard.getWinners().length === 0) {
@@ -1018,11 +1019,11 @@ export default class GameSession extends Session {
                 {
                     title: i18n.translate(
                         this.guildID,
-                        "misc.inGame.noWinners"
+                        "misc.inGame.noWinners",
                     ),
                     footerText,
                     thumbnailUrl: KmqImages.NOT_IMPRESSED,
-                }
+                },
             );
         } else {
             const winners = this.scoreboard.getWinners();
@@ -1032,7 +1033,7 @@ export default class GameSession extends Session {
             const fields = this.scoreboard.getScoreboardEmbedFields(
                 this.gameType !== GameType.TEAMS,
                 false,
-                this.guildID
+                this.guildID,
             );
 
             const endGameMessage = await getGameInfoMessage(this.guildID);
@@ -1052,8 +1053,8 @@ export default class GameSession extends Session {
                     `Failed fetching end game message. guildID = ${
                         this.guildID
                     }. locale = ${State.getGuildLocale(
-                        this.guildID
-                    )} endGameMessage =${!!endGameMessage}, endGameMessage.title=${!!endGameMessage?.title}, endGameMessage.message=${!!endGameMessage?.message}`
+                        this.guildID,
+                    )} endGameMessage =${!!endGameMessage}, endGameMessage.title=${!!endGameMessage?.title}, endGameMessage.message=${!!endGameMessage?.message}`,
                 );
             }
 
@@ -1069,13 +1070,13 @@ export default class GameSession extends Session {
                         ? bold(
                               i18n.translate(
                                   this.guildID,
-                                  "command.score.scoreboardTitle"
-                              )
+                                  "command.score.scoreboardTitle",
+                              ),
                           )
                         : undefined,
                     thumbnailUrl: winners[0].getAvatarURL(),
                     title: `🎉 ${this.scoreboard.getWinnerMessage(
-                        this.guildID
+                        this.guildID,
                     )} 🎉`,
                     fields,
                     footerText,
@@ -1090,7 +1091,7 @@ export default class GameSession extends Session {
                                     emoji: { name: "✅", id: null },
                                     label: i18n.translate(
                                         this.guildID,
-                                        "misc.interaction.vote"
+                                        "misc.interaction.vote",
                                     ),
                                 },
                                 {
@@ -1100,7 +1101,7 @@ export default class GameSession extends Session {
                                     emoji: { name: "📖", id: null },
                                     label: i18n.translate(
                                         this.guildID,
-                                        "misc.interaction.leaveReview"
+                                        "misc.interaction.leaveReview",
                                     ),
                                 },
                                 {
@@ -1110,13 +1111,13 @@ export default class GameSession extends Session {
                                     emoji: { name: "🎵", id: null },
                                     label: i18n.translate(
                                         this.guildID,
-                                        "misc.interaction.officialKmqServer"
+                                        "misc.interaction.officialKmqServer",
                                     ),
                                 },
                             ],
                         },
                     ],
-                }
+                },
             );
         }
     }
@@ -1174,7 +1175,7 @@ export default class GameSession extends Session {
         createdAt: number,
         guessModeType: GuessModeType,
         multipleChoiceMode: boolean,
-        typosAllowed = false
+        typosAllowed = false,
     ): number {
         if (!this.round) return 0;
         const round = this.round;
@@ -1194,7 +1195,7 @@ export default class GameSession extends Session {
         const pointsAwarded = round.checkGuess(
             guess,
             guessModeType,
-            typosAllowed
+            typosAllowed,
         );
 
         if (
@@ -1241,7 +1242,7 @@ export default class GameSession extends Session {
                     .getPlayerIDs()
                     .includes(messageContext.author.id) ||
                 eliminationScoreboard.isPlayerEliminated(
-                    messageContext.author.id
+                    messageContext.author.id,
                 )
             ) {
                 return false;
@@ -1289,7 +1290,7 @@ export default class GameSession extends Session {
      */
     private static async incrementPlayerSongsGuessed(
         userID: string,
-        score: number
+        score: number,
     ): Promise<void> {
         await dbContext.kmq
             .updateTable("player_stats")
@@ -1306,7 +1307,7 @@ export default class GameSession extends Session {
      * @param userID - The player's Discord user ID
      */
     private static async incrementPlayerGamesPlayed(
-        userID: string
+        userID: string,
     ): Promise<void> {
         await dbContext.kmq
             .updateTable("player_stats")
@@ -1323,7 +1324,7 @@ export default class GameSession extends Session {
      */
     private static async incrementPlayerExp(
         userID: string,
-        expGain: number
+        expGain: number,
     ): Promise<LevelUpResult | null> {
         const playerStats = await dbContext.kmq
             .selectFrom("player_stats")
@@ -1376,7 +1377,7 @@ export default class GameSession extends Session {
         userID: string,
         score: number,
         expGain: number,
-        levelsGained: number
+        levelsGained: number,
     ): Promise<void> {
         await dbContext.kmq
             .insertInto("player_game_session_stats")
@@ -1403,7 +1404,7 @@ export default class GameSession extends Session {
         correct: boolean,
         skipped: boolean,
         hintRequested: boolean,
-        timePlayed: number
+        timePlayed: number,
     ): void {
         if (!(vlink in this.songStats)) {
             this.songStats[vlink] = {
@@ -1466,7 +1467,7 @@ export default class GameSession extends Session {
                         time_played_ms: sql`time_played_ms + ${this.songStats[vlink].timePlayed}`,
                     })
                     .execute();
-            })
+            }),
         );
     }
 
@@ -1500,7 +1501,7 @@ export default class GameSession extends Session {
         round: GameRound,
         guessResult: GuessResult,
         guildPreference: GuildPreference,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         // update scoreboard
         const lastGuesserStreak = this.lastGuesser?.streak ?? 0;
@@ -1517,7 +1518,7 @@ export default class GameSession extends Session {
                         getTimeToGuessMs(correctGuesser, round, this.gameType),
                         guessPosition,
                         await userBonusIsActive(correctGuesser.id),
-                        correctGuesser.id
+                        correctGuesser.id,
                     );
 
                     let streak = 0;
@@ -1528,7 +1529,7 @@ export default class GameSession extends Session {
                                 correctGuesser.id
                             } | Song correctly guessed. song = ${
                                 round.song.songName
-                            }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
+                            }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`,
                         );
                     } else {
                         streak = 0;
@@ -1536,10 +1537,10 @@ export default class GameSession extends Session {
                             `${getDebugLogHeader(messageContext)}, uid: ${
                                 correctGuesser.id
                             } | Song correctly guessed ${getOrdinalNum(
-                                guessPosition
+                                guessPosition,
                             )}. song = ${
                                 round.song.songName
-                            }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
+                            }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`,
                         );
                     }
 
@@ -1552,8 +1553,8 @@ export default class GameSession extends Session {
                         expGain,
                         streak,
                     };
-                }
-            )
+                },
+            ),
         );
 
         round.playerRoundResults = playerRoundResults;
@@ -1597,13 +1598,13 @@ export default class GameSession extends Session {
                 timestamp: `<t:${Math.floor(
                     (round.timerStartedAt +
                         this.guildPreference.gameOptions.guessTimeout! * 1000) /
-                        1000
+                        1000,
                 )}:R>`,
-            }
+            },
         );
 
         const waitingFor = `${bold(
-            i18n.translate(this.guildID, "misc.inGame.hiddenRemainingPlayers")
+            i18n.translate(this.guildID, "misc.inGame.hiddenRemainingPlayers"),
         )}:`;
 
         const remainingPlayers = this.scoreboard
@@ -1621,7 +1622,7 @@ export default class GameSession extends Session {
                         GuessModeType.ARTIST
                             ? i18n.translate(this.guildID, "misc.artist")
                             : i18n.translate(this.guildID, "misc.song"),
-                }
+                },
             ),
             description: `${hiddenTimerInfo}\n\n${waitingFor}\n${remainingPlayers}`,
             thumbnailUrl: KmqImages.THUMBS_UP,

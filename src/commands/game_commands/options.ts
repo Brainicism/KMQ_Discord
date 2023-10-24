@@ -22,7 +22,7 @@ export default class OptionsCommand implements BaseCommand {
         name: "options",
         description: i18n.translate(
             guildID,
-            "command.options.help.description"
+            "command.options.help.description",
         ),
         usage: "/options",
         examples: [],
@@ -39,16 +39,16 @@ export default class OptionsCommand implements BaseCommand {
 
     call = async ({ message }: CommandArgs): Promise<void> => {
         await OptionsCommand.sendOptionsMessage(
-            MessageContext.fromMessage(message)
+            MessageContext.fromMessage(message),
         );
     };
 
     static sendOptionsMessage = async (
         messageContext: MessageContext,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> => {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         await sendOptionsMessage(
@@ -59,7 +59,7 @@ export default class OptionsCommand implements BaseCommand {
             false,
             false,
             undefined,
-            interaction
+            interaction,
         );
 
         logger.info(`${getDebugLogHeader(messageContext)} | Options retrieved`);
@@ -71,7 +71,7 @@ export default class OptionsCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         await OptionsCommand.sendOptionsMessage(messageContext, interaction);
     }

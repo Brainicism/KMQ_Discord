@@ -11,7 +11,7 @@ const logger = new IPCLogger("guildDelete");
  * @param guild - The Guild object
  */
 export default async function guildDeleteHandler(
-    guild: Eris.Guild | { id: string }
+    guild: Eris.Guild | { id: string },
 ): Promise<void> {
     logger.info(`Server left: ${guild.id}`);
     const kmqDebugChannel = await getDebugChannel();
@@ -21,7 +21,7 @@ export default async function guildDeleteHandler(
     const footerText = `gid: ${
         guild.id
     } | Left at: ${leaveDate.toLocaleDateString(
-        "en-US"
+        "en-US",
     )} ${leaveDate.toLocaleTimeString("en-US")}`;
 
     if (guild instanceof Eris.Guild) {
@@ -29,7 +29,7 @@ export default async function guildDeleteHandler(
             new MessageContext(
                 kmqDebugChannel.id,
                 null,
-                kmqDebugChannel.guild.id
+                kmqDebugChannel.guild.id,
             ),
             {
                 author: {
@@ -49,19 +49,19 @@ export default async function guildDeleteHandler(
                     },
                 ],
                 footerText,
-            }
+            },
         );
     } else {
         await sendInfoMessage(
             new MessageContext(
                 kmqDebugChannel.id,
                 null,
-                kmqDebugChannel.guild.id
+                kmqDebugChannel.guild.id,
             ),
             {
                 title,
                 footerText,
-            }
+            },
         );
     }
 

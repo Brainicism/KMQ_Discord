@@ -26,7 +26,7 @@ export default class EmptyWhereInPlugin implements KyselyPlugin {
     }
 
     transformResult(
-        args: PluginTransformResultArgs
+        args: PluginTransformResultArgs,
     ): Promise<QueryResult<UnknownRow>> {
         return Promise.resolve(args.result);
     }

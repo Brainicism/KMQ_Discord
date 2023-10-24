@@ -35,7 +35,7 @@ export default class ForceHintCommand implements BaseCommand {
         name: "forcehint",
         description: i18n.translate(
             guildID,
-            "command.forcehint.help.description"
+            "command.forcehint.help.description",
         ),
         usage: "/forcehint",
         examples: [],
@@ -52,21 +52,21 @@ export default class ForceHintCommand implements BaseCommand {
 
     call = async ({ message }: CommandArgs): Promise<void> => {
         await ForceHintCommand.sendForceHint(
-            MessageContext.fromMessage(message)
+            MessageContext.fromMessage(message),
         );
     };
 
     static sendForceHint = async (
         messageContext: MessageContext,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> => {
         const gameSession = Session.getSession(
-            messageContext.guildID
+            messageContext.guildID,
         ) as GameSession;
 
         const gameRound = gameSession?.round;
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         if (
@@ -75,7 +75,7 @@ export default class ForceHintCommand implements BaseCommand {
                 guildPreference,
                 gameRound,
                 messageContext,
-                interaction
+                interaction,
             )
         ) {
             return;
@@ -87,15 +87,15 @@ export default class ForceHintCommand implements BaseCommand {
                 {
                     title: i18n.translate(
                         messageContext.guildID,
-                        "command.forcehint.hintIgnored"
+                        "command.forcehint.hintIgnored",
                     ),
                     description: i18n.translate(
                         messageContext.guildID,
                         "command.forcehint.failure.notOwner.description",
-                        { mentionedUser: getMention(gameSession.owner.id) }
+                        { mentionedUser: getMention(gameSession.owner.id) },
                     ),
                 },
-                interaction
+                interaction,
             );
             return;
         }
@@ -107,24 +107,24 @@ export default class ForceHintCommand implements BaseCommand {
             {
                 title: i18n.translate(
                     messageContext.guildID,
-                    "command.hint.title"
+                    "command.hint.title",
                 ),
                 description: generateHint(
                     messageContext.guildID,
                     guildPreference.gameOptions.guessModeType,
                     gameRound,
-                    State.getGuildLocale(messageContext.guildID)
+                    State.getGuildLocale(messageContext.guildID),
                 ),
                 thumbnailUrl: KmqImages.READING_BOOK,
             },
             false,
             undefined,
             [],
-            interaction
+            interaction,
         );
 
         logger.info(
-            `${getDebugLogHeader(messageContext)} | Owner force-hinted.`
+            `${getDebugLogHeader(messageContext)} | Owner force-hinted.`,
         );
     };
 
@@ -134,7 +134,7 @@ export default class ForceHintCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         await ForceHintCommand.sendForceHint(messageContext, interaction);
     }

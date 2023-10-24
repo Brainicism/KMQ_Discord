@@ -13,14 +13,14 @@ const logger = new IPCLogger("get-unclean-song-names");
 
     const nonAsciiSongs = songs.filter(
         // eslint-disable-next-line no-control-regex
-        (x) => !/^[\x00-\x7F’]*$/.test(x.songName.split("(")[0].trim())
+        (x) => !/^[\x00-\x7F’]*$/.test(x.songName.split("(")[0].trim()),
     );
 
     if (nonAsciiSongs.length) {
         logger.info(
             nonAsciiSongs
                 .map((x) => `${x.youtubeLink}, ${x.songName}`)
-                .join("\n")
+                .join("\n"),
         );
     } else {
         logger.info("Nothing found");

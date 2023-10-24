@@ -46,7 +46,10 @@ describe("exp command", () => {
                     sandbox
                         .stub(game_utils, "getAvailableSongCount")
                         .callsFake(() =>
-                            Promise.resolve({ count: 1, countBeforeLimit: 200 })
+                            Promise.resolve({
+                                count: 1,
+                                countBeforeLimit: 200,
+                            }),
                         );
 
                     sandbox
@@ -59,13 +62,13 @@ describe("exp command", () => {
                         await calculateOptionsExpMultiplierInternal(
                             guildPreference,
                             false,
-                            "dummy"
+                            "dummy",
                         );
 
                     assert.strictEqual(modifiers.length, 1);
                     assert.strictEqual(
                         modifiers[0].name,
-                        ExpBonusModifier.BELOW_SONG_COUNT_THRESHOLD
+                        ExpBonusModifier.BELOW_SONG_COUNT_THRESHOLD,
                     );
                 });
             });
@@ -79,7 +82,7 @@ describe("exp command", () => {
                             Promise.resolve({
                                 count: 200,
                                 countBeforeLimit: 200,
-                            })
+                            }),
                         );
 
                     sandbox
@@ -93,7 +96,7 @@ describe("exp command", () => {
                             await calculateOptionsExpMultiplierInternal(
                                 guildPreference,
                                 false,
-                                "dummy"
+                                "dummy",
                             );
 
                         assert.strictEqual(modifiers.length, 0);
@@ -106,13 +109,13 @@ describe("exp command", () => {
                             await calculateOptionsExpMultiplierInternal(
                                 guildPreference,
                                 true,
-                                "dummy"
+                                "dummy",
                             );
 
                         assert.strictEqual(modifiers.length, 1);
                         assert.strictEqual(
                             modifiers[0].name,
-                            ExpBonusModifier.VOTE
+                            ExpBonusModifier.VOTE,
                         );
                     });
                 });
@@ -120,20 +123,20 @@ describe("exp command", () => {
                 describe("shuffle popularity penalty", () => {
                     it("should return shuffle popularity modifier", async () => {
                         await guildPreference.setShuffleType(
-                            ShuffleType.POPULARITY
+                            ShuffleType.POPULARITY,
                         );
 
                         const modifiers =
                             await calculateOptionsExpMultiplierInternal(
                                 guildPreference,
                                 false,
-                                "dummy"
+                                "dummy",
                             );
 
                         assert.strictEqual(modifiers.length, 1);
                         assert.strictEqual(
                             modifiers[0].name,
-                            ExpBonusModifier.SHUFFLE_POPULARITY
+                            ExpBonusModifier.SHUFFLE_POPULARITY,
                         );
                     });
                 });
@@ -141,20 +144,20 @@ describe("exp command", () => {
                 describe("shuffle weighted easy penalty", () => {
                     it("should return shuffle weighted easy modifier", async () => {
                         await guildPreference.setShuffleType(
-                            ShuffleType.WEIGHTED_EASY
+                            ShuffleType.WEIGHTED_EASY,
                         );
 
                         const modifiers =
                             await calculateOptionsExpMultiplierInternal(
                                 guildPreference,
                                 false,
-                                "dummy"
+                                "dummy",
                             );
 
                         assert.strictEqual(modifiers.length, 1);
                         assert.strictEqual(
                             modifiers[0].name,
-                            ExpBonusModifier.SHUFFLE_WEIGHTED_EASY
+                            ExpBonusModifier.SHUFFLE_WEIGHTED_EASY,
                         );
                     });
                 });
@@ -162,20 +165,20 @@ describe("exp command", () => {
                 describe("shuffle chronological penalty", () => {
                     it("should return shuffle chronological modifier", async () => {
                         await guildPreference.setShuffleType(
-                            ShuffleType.CHRONOLOGICAL
+                            ShuffleType.CHRONOLOGICAL,
                         );
 
                         const modifiers =
                             await calculateOptionsExpMultiplierInternal(
                                 guildPreference,
                                 false,
-                                "dummy"
+                                "dummy",
                             );
 
                         assert.strictEqual(modifiers.length, 1);
                         assert.strictEqual(
                             modifiers[0].name,
-                            ExpBonusModifier.SHUFFLE_CHRONOLOGICAL
+                            ExpBonusModifier.SHUFFLE_CHRONOLOGICAL,
                         );
                     });
                 });
@@ -183,20 +186,20 @@ describe("exp command", () => {
                 describe("shuffle reverse chronological penalty", () => {
                     it("should return shuffle chronological modifier", async () => {
                         await guildPreference.setShuffleType(
-                            ShuffleType.REVERSE_CHRONOLOGICAL
+                            ShuffleType.REVERSE_CHRONOLOGICAL,
                         );
 
                         const modifiers =
                             await calculateOptionsExpMultiplierInternal(
                                 guildPreference,
                                 false,
-                                "dummy"
+                                "dummy",
                             );
 
                         assert.strictEqual(modifiers.length, 1);
                         assert.strictEqual(
                             modifiers[0].name,
-                            ExpBonusModifier.SHUFFLE_CHRONOLOGICAL
+                            ExpBonusModifier.SHUFFLE_CHRONOLOGICAL,
                         );
                     });
                 });
@@ -214,24 +217,24 @@ describe("exp command", () => {
                     };
 
                     for (const answerType of Object.keys(
-                        multipleChoicePenaltyMap
+                        multipleChoicePenaltyMap,
                     )) {
                         // eslint-disable-next-line @typescript-eslint/no-loop-func
                         it(`should return corresponding multiple choice penalty (${answerType})`, async () => {
                             guildPreference.setAnswerType(
-                                answerType as AnswerType
+                                answerType as AnswerType,
                             );
                             const modifiers =
                                 await calculateOptionsExpMultiplierInternal(
                                     guildPreference,
                                     false,
-                                    "dummy"
+                                    "dummy",
                                 );
 
                             assert.strictEqual(modifiers.length, 1);
                             assert.strictEqual(
                                 modifiers[0].name,
-                                multipleChoicePenaltyMap[answerType]
+                                multipleChoicePenaltyMap[answerType],
                             );
                         });
                     }
@@ -241,19 +244,19 @@ describe("exp command", () => {
                     describe("artist guess mode", () => {
                         it("should return artist guess penalty", async () => {
                             await guildPreference.setGuessModeType(
-                                GuessModeType.ARTIST
+                                GuessModeType.ARTIST,
                             );
                             const modifiers =
                                 await calculateOptionsExpMultiplierInternal(
                                     guildPreference,
                                     false,
-                                    "dummy"
+                                    "dummy",
                                 );
 
                             assert.strictEqual(modifiers.length, 1);
                             assert.strictEqual(
                                 modifiers[0].name,
-                                ExpBonusModifier.ARTIST_GUESS
+                                ExpBonusModifier.ARTIST_GUESS,
                             );
                         });
                     });
@@ -261,19 +264,19 @@ describe("exp command", () => {
                     describe("'both' guess mode", () => {
                         it("should return artist guess penalty", async () => {
                             await guildPreference.setGuessModeType(
-                                GuessModeType.BOTH
+                                GuessModeType.BOTH,
                             );
                             const modifiers =
                                 await calculateOptionsExpMultiplierInternal(
                                     guildPreference,
                                     false,
-                                    "dummy"
+                                    "dummy",
                                 );
 
                             assert.strictEqual(modifiers.length, 1);
                             assert.strictEqual(
                                 modifiers[0].name,
-                                ExpBonusModifier.ARTIST_GUESS
+                                ExpBonusModifier.ARTIST_GUESS,
                             );
                         });
                     });
@@ -281,7 +284,7 @@ describe("exp command", () => {
                     describe("groups mode also selected", () => {
                         it("should return artist guess + groups mode penalty", async () => {
                             await guildPreference.setGuessModeType(
-                                GuessModeType.BOTH
+                                GuessModeType.BOTH,
                             );
 
                             await guildPreference.setGroups([
@@ -291,13 +294,13 @@ describe("exp command", () => {
                                 await calculateOptionsExpMultiplierInternal(
                                     guildPreference,
                                     false,
-                                    "dummy"
+                                    "dummy",
                                 );
 
                             assert.strictEqual(modifiers.length, 1);
                             assert.strictEqual(
                                 modifiers[0].name,
-                                ExpBonusModifier.ARTIST_GUESS_GROUPS_SELECTED
+                                ExpBonusModifier.ARTIST_GUESS_GROUPS_SELECTED,
                             );
                         });
                     });
@@ -310,7 +313,7 @@ describe("exp command", () => {
                 sandbox
                     .stub(game_utils, "getAvailableSongCount")
                     .callsFake(() =>
-                        Promise.resolve({ count: 200, countBeforeLimit: 200 })
+                        Promise.resolve({ count: 200, countBeforeLimit: 200 }),
                     );
 
                 sandbox
@@ -325,13 +328,13 @@ describe("exp command", () => {
                         await calculateOptionsExpMultiplierInternal(
                             guildPreference,
                             false,
-                            "dummy"
+                            "dummy",
                         );
 
                     assert.strictEqual(modifiers.length, 1);
                     assert.strictEqual(
                         modifiers[0].name,
-                        ExpBonusModifier.POWER_HOUR
+                        ExpBonusModifier.POWER_HOUR,
                     );
                 });
             });
@@ -345,13 +348,13 @@ describe("exp command", () => {
                         await calculateOptionsExpMultiplierInternal(
                             guildPreference,
                             false,
-                            "dummy"
+                            "dummy",
                         );
 
                     assert.strictEqual(modifiers.length, 1);
                     assert.strictEqual(
                         modifiers[0].name,
-                        ExpBonusModifier.POWER_HOUR
+                        ExpBonusModifier.POWER_HOUR,
                     );
                 });
             });
@@ -372,13 +375,13 @@ describe("exp command", () => {
                 const modifiers = await calculateOptionsExpMultiplierInternal(
                     guildPreference,
                     false,
-                    "dummy"
+                    "dummy",
                 );
 
                 assert.strictEqual(modifiers.length, 1);
                 assert.strictEqual(
                     modifiers[0].name,
-                    ExpBonusModifier.FIRST_GAME_OF_DAY
+                    ExpBonusModifier.FIRST_GAME_OF_DAY,
                 );
             });
         });
@@ -390,7 +393,7 @@ describe("exp command", () => {
                 sandbox
                     .stub(game_utils, "getAvailableSongCount")
                     .callsFake(() =>
-                        Promise.resolve({ count: 1, countBeforeLimit: 200 })
+                        Promise.resolve({ count: 1, countBeforeLimit: 200 }),
                     );
 
                 sandbox
@@ -408,7 +411,7 @@ describe("exp command", () => {
                 const modifiers = await calculateOptionsExpMultiplierInternal(
                     guildPreference,
                     true,
-                    "dummy"
+                    "dummy",
                 );
 
                 const expectedModifiers = [
@@ -424,7 +427,7 @@ describe("exp command", () => {
                 assert.ok(
                     modifiers
                         .map((x) => x.name)
-                        .every((x) => expectedModifiers.includes(x))
+                        .every((x) => expectedModifiers.includes(x)),
                 );
             });
         });
@@ -452,7 +455,7 @@ describe("exp command", () => {
                     vtype: "main",
                     selectionWeight: 1,
                 },
-                5
+                5,
             );
             gameRound.bonusModifier = 1;
             guildPreference = GuildPreference.fromGuild("123");
@@ -470,7 +473,7 @@ describe("exp command", () => {
                     1,
                     0,
                     1000,
-                    1
+                    1,
                 );
 
                 for (
@@ -483,7 +486,7 @@ describe("exp command", () => {
                         i,
                         0,
                         1000,
-                        1
+                        1,
                     );
 
                     assert.ok(newRoundExp > roundExp);
@@ -495,7 +498,7 @@ describe("exp command", () => {
                     PARTICIPANT_MODIFIER_MAX_PARTICIPANTS + 1,
                     0,
                     1000,
-                    1
+                    1,
                 );
 
                 assert.strictEqual(finalRoundExp, roundExp);
@@ -509,7 +512,7 @@ describe("exp command", () => {
                     1,
                     0,
                     10000,
-                    1
+                    1,
                 );
 
                 const fastGuessExp = calculateRoundExpMultiplier(
@@ -517,13 +520,13 @@ describe("exp command", () => {
                     1,
                     0,
                     50,
-                    1
+                    1,
                 );
 
                 assert.strictEqual(
                     fastGuessExp,
                     slowGuessExp *
-                        ExpBonusModifierValues[ExpBonusModifier.QUICK_GUESS]
+                        ExpBonusModifierValues[ExpBonusModifier.QUICK_GUESS],
                 );
             });
         });
@@ -535,7 +538,7 @@ describe("exp command", () => {
                     1,
                     0,
                     1000,
-                    1
+                    1,
                 );
 
                 for (let i = 2; i < GUESS_STREAK_THRESHOLD; i++) {
@@ -544,7 +547,7 @@ describe("exp command", () => {
                         1,
                         i,
                         1000,
-                        1
+                        1,
                     );
 
                     assert.strictEqual(newRoundExp, roundExp);
@@ -556,13 +559,13 @@ describe("exp command", () => {
                     1,
                     GUESS_STREAK_THRESHOLD,
                     1000,
-                    1
+                    1,
                 );
 
                 assert.strictEqual(
                     finalRoundExp,
                     roundExp *
-                        ExpBonusModifierValues[ExpBonusModifier.GUESS_STREAK]
+                        ExpBonusModifierValues[ExpBonusModifier.GUESS_STREAK],
                 );
             });
         });
@@ -574,7 +577,7 @@ describe("exp command", () => {
                     1,
                     0,
                     1000,
-                    1
+                    1,
                 );
 
                 sandbox.stub(gameRound, "isBonusArtist").callsFake(() => true);
@@ -583,13 +586,13 @@ describe("exp command", () => {
                     1,
                     0,
                     1000,
-                    1
+                    1,
                 );
 
                 assert.strictEqual(
                     bonusArtistExp,
                     regularExp *
-                        ExpBonusModifierValues[ExpBonusModifier.BONUS_ARTIST]
+                        ExpBonusModifierValues[ExpBonusModifier.BONUS_ARTIST],
                 );
             });
         });
@@ -602,7 +605,7 @@ describe("exp command", () => {
                     1,
                     0,
                     1000,
-                    1
+                    1,
                 );
 
                 gameRound.bonusModifier = roundBonus;
@@ -611,7 +614,7 @@ describe("exp command", () => {
                     1,
                     0,
                     1000,
-                    1
+                    1,
                 );
 
                 assert.strictEqual(bonusArtistExp, regularExp * roundBonus);
@@ -626,7 +629,7 @@ describe("exp command", () => {
                     1,
                     0,
                     1000,
-                    1
+                    1,
                 );
 
                 const lowerPlacementExp = calculateRoundExpMultiplier(
@@ -634,7 +637,7 @@ describe("exp command", () => {
                     1,
                     0,
                     1000,
-                    place
+                    place,
                 );
 
                 assert.strictEqual(lowerPlacementExp, regularExp / place);
@@ -656,7 +659,7 @@ describe("exp command", () => {
                     numParticipants,
                     guessStreak,
                     50,
-                    place
+                    place,
                 );
 
                 assert.strictEqual(
@@ -666,7 +669,7 @@ describe("exp command", () => {
                         ExpBonusModifierValues[ExpBonusModifier.GUESS_STREAK] *
                         ExpBonusModifierValues[ExpBonusModifier.BONUS_ARTIST] *
                         roundBonus) /
-                        place
+                        place,
                 );
             });
         });

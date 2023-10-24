@@ -19,7 +19,7 @@ export default class MessageContext {
         textChannelID: string,
         author: KmqMember | null,
         guildID: string,
-        referencedMessageID?: string
+        referencedMessageID?: string,
     ) {
         this.textChannelID = textChannelID;
         this.author = author ?? new KmqMember(State.client.user.id);
@@ -36,7 +36,7 @@ export default class MessageContext {
             message.channel.id,
             new KmqMember(message.author.id),
             message.guildID as string,
-            message.id
+            message.id,
         );
     }
 }

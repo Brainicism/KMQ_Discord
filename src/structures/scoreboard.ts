@@ -43,7 +43,7 @@ export default class Scoreboard {
                 playerName: this.firstPlace[0].getDisplayedName(
                     false,
                     false,
-                    false
+                    false,
                 ),
             });
         }
@@ -70,13 +70,13 @@ export default class Scoreboard {
         showExp: boolean,
         inProgress: boolean,
         guildID: string,
-        roundWinnerIDs?: Array<string>
+        roundWinnerIDs?: Array<string>,
     ): Array<{ name: string; value: string; inline: boolean }> {
         if (!this.shouldUseLargerScoreboard()) {
             return this.getScoreboardEmbedSingleColumn(
                 showExp,
                 inProgress,
-                roundWinnerIDs
+                roundWinnerIDs,
             );
         }
 
@@ -84,7 +84,7 @@ export default class Scoreboard {
             guildID,
             showExp,
             inProgress,
-            roundWinnerIDs
+            roundWinnerIDs,
         );
     }
 
@@ -100,7 +100,7 @@ export default class Scoreboard {
 
         for (const guessResult of guessResults) {
             this.players[guessResult.userID].incrementScore(
-                guessResult.pointsEarned
+                guessResult.pointsEarned,
             );
 
             this.players[guessResult.userID].incrementExp(guessResult.expGain);
@@ -234,7 +234,7 @@ export default class Scoreboard {
     getScoreboardEmbedSingleColumn(
         showExp: boolean,
         inProgress: boolean,
-        roundWinnerIDs: Array<string> = []
+        roundWinnerIDs: Array<string> = [],
     ): Array<{ name: string; value: string; inline: boolean }> {
         const currentRanking = this.getScoreToRankingMap();
         return Object.values(this.players)
@@ -243,11 +243,11 @@ export default class Scoreboard {
             .map((x) => ({
                 name: `${x.getRankingPrefix(
                     currentRanking[x.getScore()],
-                    inProgress
+                    inProgress,
                 )} ${x.getDisplayedName(
                     roundWinnerIDs && roundWinnerIDs[0] === x.id,
                     roundWinnerIDs?.includes(x.id),
-                    false
+                    false,
                 )}`,
                 value: `${x.getDisplayedScore()}${
                     showExp
@@ -260,14 +260,14 @@ export default class Scoreboard {
 
     getRemainingPlayers(
         correctGuessers: Array<{ id: string }>,
-        incorrectGuessers: Set<string>
+        incorrectGuessers: Set<string>,
     ): Array<Player> {
         return this.getPlayers()
             .filter((player) => player.inVC)
             .filter(
                 (player) =>
                     !incorrectGuessers.has(player.id) &&
-                    !correctGuessers.map((x) => x.id).includes(player.id)
+                    !correctGuessers.map((x) => x.id).includes(player.id),
             );
     }
 
@@ -283,7 +283,7 @@ export default class Scoreboard {
         guildID: string,
         showExp: boolean,
         inProgress: boolean,
-        roundWinnerIDs: Array<string> = []
+        roundWinnerIDs: Array<string> = [],
     ): Array<{ name: string; value: string; inline: boolean }> {
         const ZERO_WIDTH_SPACE = "​";
         const currentRanking = this.getScoreToRankingMap();
@@ -296,19 +296,19 @@ export default class Scoreboard {
                     `${bold(
                         x.getRankingPrefix(
                             currentRanking[x.getScore()],
-                            inProgress
-                        )
+                            inProgress,
+                        ),
                     )} ${x.getDisplayedName(
                         roundWinnerIDs && roundWinnerIDs[0] === x.id,
                         roundWinnerIDs?.includes(x.id),
-                        true
+                        true,
                     )}: ${x.getDisplayedScore()}${
                         showExp
                             ? ` (+${friendlyFormattedNumber(
-                                  x.getExpGain()
+                                  x.getExpGain(),
                               )} EXP)`
                             : ""
-                    }`
+                    }`,
             );
 
         if (this.getNumPlayers() > ROUND_MAX_SCOREBOARD_PLAYERS) {
@@ -318,7 +318,7 @@ export default class Scoreboard {
         return [
             {
                 name: bold(
-                    i18n.translate(guildID, "command.score.scoreboardTitle")
+                    i18n.translate(guildID, "command.score.scoreboardTitle"),
                 ),
                 value: players
                     .slice(0, Math.ceil(players.length / 3))
@@ -330,7 +330,7 @@ export default class Scoreboard {
                 value: players
                     .slice(
                         Math.ceil(players.length / 3),
-                        Math.ceil((2 * players.length) / 3)
+                        Math.ceil((2 * players.length) / 3),
                     )
                     .join("\n"),
                 inline: true,

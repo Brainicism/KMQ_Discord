@@ -42,7 +42,7 @@ const options: Options = {
                 __dirname,
                 process.env.NODE_ENV === EnvType.DEV_TS_NODE
                     ? "./kmq_service.ts"
-                    : "./kmq_service.js"
+                    : "./kmq_service.js",
             ),
         },
     ],
@@ -50,7 +50,7 @@ const options: Options = {
         __dirname,
         process.env.NODE_ENV === EnvType.DEV_TS_NODE
             ? "./kmq_worker.ts"
-            : "./kmq_worker.js"
+            : "./kmq_worker.js",
     ),
     token: process.env.BOT_TOKEN as string,
     clientOptions: {
@@ -122,13 +122,13 @@ function registerGlobalIntervals(fleet: Fleet): void {
 function registerProcessEvents(fleet: Fleet): void {
     process.on("unhandledRejection", (err: Error) => {
         logger.error(
-            `Admiral Unhandled Rejection | Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}}`
+            `Admiral Unhandled Rejection | Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}}`,
         );
     });
 
     process.on("uncaughtException", (err: Error) => {
         logger.error(
-            `Admiral Uncaught Exception | Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}}`
+            `Admiral Uncaught Exception | Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}}`,
         );
     });
 
@@ -197,7 +197,7 @@ function registerProcessEvents(fleet: Fleet): void {
                 "Bot started successfully",
                 "Shards have connected!",
                 EMBED_SUCCESS_COLOR,
-                KmqImages.HAPPY
+                KmqImages.HAPPY,
             );
 
             logger.info("Starting web server...");

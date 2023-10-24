@@ -57,12 +57,12 @@ function parsePatreonResponse(patreonResponse: PatreonResponse): Array<Patron> {
 
         const patreonMemberID = userData.relationships.user.data.id;
         const matchedPatreonUser = patreonResponse.included.find(
-            (x) => x.type === "user" && x.id === patreonMemberID
+            (x) => x.type === "user" && x.id === patreonMemberID,
         );
 
         if (!matchedPatreonUser) {
             logger.error(
-                `Couldn't find corresponding Patreon user for ${patreonMemberID}`
+                `Couldn't find corresponding Patreon user for ${patreonMemberID}`,
             );
             continue;
         }
@@ -73,7 +73,7 @@ function parsePatreonResponse(patreonResponse: PatreonResponse): Array<Patron> {
             activePatron:
                 userData.attributes.patron_status === PatronState.ACTIVE,
             firstSubscribed: new Date(
-                userData.attributes.pledge_relationship_start as string
+                userData.attributes.pledge_relationship_start as string,
             ),
         });
     }
@@ -103,13 +103,13 @@ export default async function updatePremiumUsers(): Promise<void> {
                 `https://www.patreon.com/api/oauth2/v2/campaigns/${
                     process.env.PATREON_CAMPAIGN_ID
                 }/members${encodeURI(
-                    "?include=user,currently_entitled_tiers&fields[member]=patron_status,pledge_relationship_start&fields[user]=social_connections"
+                    "?include=user,currently_entitled_tiers&fields[member]=patron_status,pledge_relationship_start&fields[user]=social_connections",
                 )}`,
                 {
                     headers: {
                         Authorization: `Bearer ${process.env.PATREON_CREATOR_ACCESS_TOKEN}`,
                     },
-                }
+                },
             )
         ).data;
 
@@ -134,6 +134,6 @@ export default async function updatePremiumUsers(): Promise<void> {
                 .where("user_id", "not in", activePatronIDs)
                 .where("source", "!=", "loyalty")
                 .execute()
-        ).map((x) => x.user_id)
+        ).map((x) => x.user_id),
     );
 }

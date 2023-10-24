@@ -7,7 +7,7 @@ const DEFAULT_LIVES = 10;
 
 function getMockEliminationPlayer(
     id: string,
-    lives = DEFAULT_LIVES
+    lives = DEFAULT_LIVES,
 ): EliminationPlayer {
     return new EliminationPlayer(id, "dummy", "dummy", lives, "dummy");
 }
@@ -21,19 +21,19 @@ describe("elimination scoreboard", () => {
     describe("score/exp updating", () => {
         beforeEach(() => {
             scoreboard.addPlayer(
-                getMockEliminationPlayer(userIDs[0], DEFAULT_LIVES)
+                getMockEliminationPlayer(userIDs[0], DEFAULT_LIVES),
             );
 
             scoreboard.addPlayer(
-                getMockEliminationPlayer(userIDs[1], DEFAULT_LIVES)
+                getMockEliminationPlayer(userIDs[1], DEFAULT_LIVES),
             );
 
             scoreboard.addPlayer(
-                getMockEliminationPlayer(userIDs[2], DEFAULT_LIVES)
+                getMockEliminationPlayer(userIDs[2], DEFAULT_LIVES),
             );
 
             scoreboard.addPlayer(
-                getMockEliminationPlayer(userIDs[3], DEFAULT_LIVES)
+                getMockEliminationPlayer(userIDs[3], DEFAULT_LIVES),
             );
         });
 
@@ -47,7 +47,7 @@ describe("elimination scoreboard", () => {
 
                         assert.strictEqual(
                             scoreboard.getPlayerLives(userIDs[0]),
-                            10
+                            10,
                         );
                     }
                 });
@@ -69,17 +69,17 @@ describe("elimination scoreboard", () => {
 
                     assert.strictEqual(
                         scoreboard.getPlayerLives(userIDs[0]),
-                        DEFAULT_LIVES
+                        DEFAULT_LIVES,
                     );
 
                     assert.strictEqual(
                         scoreboard.getPlayerLives(userIDs[1]),
-                        DEFAULT_LIVES - 5
+                        DEFAULT_LIVES - 5,
                     );
 
                     assert.strictEqual(
                         scoreboard.getPlayerLives(userIDs[2]),
-                        DEFAULT_LIVES - 5
+                        DEFAULT_LIVES - 5,
                     );
                 });
             });
@@ -112,17 +112,17 @@ describe("elimination scoreboard", () => {
 
                     assert.strictEqual(
                         scoreboard.getPlayerLives(userIDs[0]),
-                        DEFAULT_LIVES - 4
+                        DEFAULT_LIVES - 4,
                     );
 
                     assert.strictEqual(
                         scoreboard.getPlayerLives(userIDs[1]),
-                        DEFAULT_LIVES - 3
+                        DEFAULT_LIVES - 3,
                     );
 
                     assert.strictEqual(
                         scoreboard.getPlayerLives(userIDs[2]),
-                        DEFAULT_LIVES - 5
+                        DEFAULT_LIVES - 5,
                     );
                 });
             });
@@ -139,22 +139,22 @@ describe("elimination scoreboard", () => {
             it("should decrement the lives of everyone except for the ones who guessed", () => {
                 assert.strictEqual(
                     scoreboard.getPlayerLives(userIDs[0]),
-                    DEFAULT_LIVES
+                    DEFAULT_LIVES,
                 );
 
                 assert.strictEqual(
                     scoreboard.getPlayerLives(userIDs[1]),
-                    DEFAULT_LIVES
+                    DEFAULT_LIVES,
                 );
 
                 assert.strictEqual(
                     scoreboard.getPlayerLives(userIDs[2]),
-                    DEFAULT_LIVES - 1
+                    DEFAULT_LIVES - 1,
                 );
 
                 assert.strictEqual(
                     scoreboard.getPlayerLives(userIDs[3]),
-                    DEFAULT_LIVES - 1
+                    DEFAULT_LIVES - 1,
                 );
             });
 
@@ -168,15 +168,15 @@ describe("elimination scoreboard", () => {
     describe("winner detection", () => {
         beforeEach(() => {
             scoreboard.addPlayer(
-                getMockEliminationPlayer(userIDs[0], DEFAULT_LIVES)
+                getMockEliminationPlayer(userIDs[0], DEFAULT_LIVES),
             );
 
             scoreboard.addPlayer(
-                getMockEliminationPlayer(userIDs[1], DEFAULT_LIVES)
+                getMockEliminationPlayer(userIDs[1], DEFAULT_LIVES),
             );
 
             scoreboard.addPlayer(
-                getMockEliminationPlayer(userIDs[2], DEFAULT_LIVES)
+                getMockEliminationPlayer(userIDs[2], DEFAULT_LIVES),
             );
         });
 
@@ -238,7 +238,7 @@ describe("elimination scoreboard", () => {
                 assert.strictEqual(scoreboard.getWinners().length, 2);
                 assert.deepStrictEqual(
                     scoreboard.getWinners().map((x) => x.id),
-                    [userIDs[1], userIDs[2]]
+                    [userIDs[1], userIDs[2]],
                 );
             });
         });
@@ -306,7 +306,7 @@ describe("elimination scoreboard", () => {
                 scoreboard.addPlayer(getMockEliminationPlayer(userIDs[0]));
                 assert.strictEqual(
                     scoreboard.getPlayerLives(userIDs[0]),
-                    DEFAULT_LIVES
+                    DEFAULT_LIVES,
                 );
             });
         });

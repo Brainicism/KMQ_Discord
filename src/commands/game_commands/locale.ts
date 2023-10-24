@@ -71,7 +71,7 @@ export default class LocaleTypeCommand implements BaseCommand {
         description: i18n.translate(guildID, "command.locale.help.description"),
         usage: `/locale language:[${i18n.translate(
             guildID,
-            "command.locale.help.usage.language"
+            "command.locale.help.usage.language",
         )}]`,
         examples: [
             {
@@ -82,9 +82,9 @@ export default class LocaleTypeCommand implements BaseCommand {
                     {
                         language: i18n.translate(
                             guildID,
-                            "command.locale.language.en"
+                            "command.locale.language.en",
                         ),
-                    }
+                    },
                 ),
             },
             {
@@ -95,9 +95,9 @@ export default class LocaleTypeCommand implements BaseCommand {
                     {
                         language: i18n.translate(
                             guildID,
-                            "command.locale.language.ko"
+                            "command.locale.language.ko",
                         ),
-                    }
+                    },
                 ),
             },
             {
@@ -108,9 +108,9 @@ export default class LocaleTypeCommand implements BaseCommand {
                     {
                         language: i18n.translate(
                             guildID,
-                            "command.locale.language.es-ES"
+                            "command.locale.language.es-ES",
                         ),
-                    }
+                    },
                 ),
             },
             {
@@ -121,9 +121,9 @@ export default class LocaleTypeCommand implements BaseCommand {
                     {
                         language: i18n.translate(
                             guildID,
-                            "command.locale.language.fr"
+                            "command.locale.language.fr",
                         ),
-                    }
+                    },
                 ),
             },
             {
@@ -134,9 +134,9 @@ export default class LocaleTypeCommand implements BaseCommand {
                     {
                         language: i18n.translate(
                             guildID,
-                            "command.locale.language.zh-CN"
+                            "command.locale.language.zh-CN",
                         ),
-                    }
+                    },
                 ),
             },
             {
@@ -147,9 +147,9 @@ export default class LocaleTypeCommand implements BaseCommand {
                     {
                         language: i18n.translate(
                             guildID,
-                            "command.locale.language.ja"
+                            "command.locale.language.ja",
                         ),
-                    }
+                    },
                 ),
             },
         ],
@@ -166,7 +166,7 @@ export default class LocaleTypeCommand implements BaseCommand {
                     name: "language",
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.locale.help.interaction.language"
+                        "command.locale.help.interaction.language",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -175,10 +175,10 @@ export default class LocaleTypeCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.locale.help.interaction.language"
+                                    "command.locale.help.interaction.language",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
@@ -187,7 +187,7 @@ export default class LocaleTypeCommand implements BaseCommand {
                         (languageName) => ({
                             name: languageName,
                             value: languageName,
-                        })
+                        }),
                     ),
                 },
             ],
@@ -243,13 +243,13 @@ export default class LocaleTypeCommand implements BaseCommand {
 
         await LocaleTypeCommand.updateLocaleMessage(
             MessageContext.fromMessage(message),
-            localeType
+            localeType,
         );
     };
 
     static async updateLocale(
         guildID: string,
-        locale: LocaleType
+        locale: LocaleType,
     ): Promise<void> {
         if (locale !== DEFAULT_LOCALE) {
             State.locales[guildID] = locale;
@@ -270,11 +270,11 @@ export default class LocaleTypeCommand implements BaseCommand {
     static async updateLocaleMessage(
         messageContext: MessageContext,
         localeType: LocaleType,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         await LocaleTypeCommand.updateLocale(
             messageContext.guildID,
-            localeType
+            localeType,
         );
 
         sendInfoMessage(
@@ -283,7 +283,7 @@ export default class LocaleTypeCommand implements BaseCommand {
                 title: i18n.translate(
                     messageContext.guildID,
                     "command.options.updated",
-                    { presetOrOption: "Locale" }
+                    { presetOrOption: "Locale" },
                 ),
                 description: i18n.translate(
                     messageContext.guildID,
@@ -291,22 +291,22 @@ export default class LocaleTypeCommand implements BaseCommand {
                     {
                         language: i18n.translate(
                             messageContext.guildID,
-                            `command.locale.language.${localeType}`
+                            `command.locale.language.${localeType}`,
                         ),
-                    }
+                    },
                 ),
                 thumbnailUrl: KmqImages.THUMBS_UP,
             },
             false,
             undefined,
             [],
-            interaction
+            interaction,
         );
 
         logger.info(
             `${getDebugLogHeader(
-                messageContext
-            )} | Changed locale to ${localeType}.`
+                messageContext,
+            )} | Changed locale to ${localeType}.`,
         );
     }
 
@@ -316,7 +316,7 @@ export default class LocaleTypeCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionOptions } = getInteractionValue(interaction);
         const localeType =
@@ -329,7 +329,7 @@ export default class LocaleTypeCommand implements BaseCommand {
         await LocaleTypeCommand.updateLocaleMessage(
             messageContext,
             localeType,
-            interaction
+            interaction,
         );
     }
 }

@@ -50,21 +50,21 @@ export default class OstCommand implements BaseCommand {
                 example: "`/ost set ost:include`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.ost.help.example.include"
+                    "command.ost.help.example.include",
                 ),
             },
             {
                 example: "`/ost set ost:exclude`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.ost.help.example.exclude"
+                    "command.ost.help.example.exclude",
                 ),
             },
             {
                 example: "`/ost set ost:exclusive`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.ost.help.example.exclusive"
+                    "command.ost.help.example.exclusive",
                 ),
             },
             {
@@ -72,7 +72,7 @@ export default class OstCommand implements BaseCommand {
                 explanation: i18n.translate(
                     guildID,
                     "command.ost.help.example.reset",
-                    { defaultOst: `\`${DEFAULT_OST_PREFERENCE}\`` }
+                    { defaultOst: `\`${DEFAULT_OST_PREFERENCE}\`` },
                 ),
             },
         ],
@@ -89,7 +89,7 @@ export default class OstCommand implements BaseCommand {
                     name: OptionAction.SET,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.ost.help.description"
+                        "command.ost.help.description",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -98,10 +98,10 @@ export default class OstCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.ost.help.description"
+                                    "command.ost.help.description",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -111,7 +111,7 @@ export default class OstCommand implements BaseCommand {
                             name: "ost",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.ost.interaction.ost"
+                                "command.ost.interaction.ost",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -120,10 +120,10 @@ export default class OstCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.ost.interaction.ost"
+                                            "command.ost.interaction.ost",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -133,7 +133,7 @@ export default class OstCommand implements BaseCommand {
                                 (ostPreference) => ({
                                     name: ostPreference,
                                     value: ostPreference,
-                                })
+                                }),
                             ),
                         },
                     ],
@@ -143,7 +143,7 @@ export default class OstCommand implements BaseCommand {
                     description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
-                        { optionName: "ost" }
+                        { optionName: "ost" },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -153,10 +153,10 @@ export default class OstCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "misc.interaction.resetOption",
-                                    { optionName: "ost" }
+                                    { optionName: "ost" },
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -180,31 +180,31 @@ export default class OstCommand implements BaseCommand {
         await OstCommand.updateOption(
             MessageContext.fromMessage(message),
             ostPreference,
-            undefined
+            undefined,
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         ostPreference: OstPreference | null,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         const reset = ostPreference == null;
         if (reset) {
             await guildPreference.reset(GameOption.OST_PREFERENCE);
             logger.info(
-                `${getDebugLogHeader(messageContext)} | OST preference reset.`
+                `${getDebugLogHeader(messageContext)} | OST preference reset.`,
             );
         } else {
             await guildPreference.setOstPreference(ostPreference);
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | OST preference set to ${ostPreference}`
+                    messageContext,
+                )} | OST preference set to ${ostPreference}`,
             );
         }
 
@@ -216,7 +216,7 @@ export default class OstCommand implements BaseCommand {
             false,
             undefined,
             undefined,
-            interaction
+            interaction,
         );
     }
 
@@ -226,7 +226,7 @@ export default class OstCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);

@@ -34,7 +34,7 @@ const date = new Date(
     INITIAL_DAY,
     INITIAL_HOUR,
     INITIAL_MINUTE,
-    INITIAL_SECONDS
+    INITIAL_SECONDS,
 );
 
 const secondAgo = new Date(new Date(date).setSeconds(INITIAL_SECONDS - 1));
@@ -73,7 +73,7 @@ interface PlayerServer {
 
 function generatePlayerStats(
     numberPlayers: number,
-    offset = 0
+    offset = 0,
 ): Array<PlayerStat> {
     return [...Array(numberPlayers).keys()].map((i) => ({
         player_id: String(i + offset),
@@ -86,7 +86,7 @@ function generatePlayerStats(
 
 function generatePlayerServers(
     numberPlayers: number,
-    serverID: string
+    serverID: string,
 ): Array<PlayerServer> {
     return [...Array(numberPlayers).keys()].map((i) => ({
         player_id: String(i),
@@ -95,12 +95,12 @@ function generatePlayerServers(
 }
 
 async function getNumberOfFields(
-    embedGenerators: EmbedGenerator[]
+    embedGenerators: EmbedGenerator[],
 ): Promise<number> {
     return embedGenerators.reduce(
         async (prev, curr) =>
             (await prev) + ((await curr()).fields as Eris.EmbedField[]).length,
-        Promise.resolve(0)
+        Promise.resolve(0),
     );
 }
 
@@ -128,13 +128,13 @@ describe("leaderboard command", () => {
                             LeaderboardType.EXP,
                             LeaderboardScope.GLOBAL,
                             LeaderboardDuration.ALL_TIME,
-                            "1"
+                            "1",
                         );
 
                     const fields = await getNumberOfFields(embeds);
                     assert.strictEqual(
                         pageCount,
-                        Math.ceil(totalEntries / LEADERBOARD_ENTRIES_PER_PAGE)
+                        Math.ceil(totalEntries / LEADERBOARD_ENTRIES_PER_PAGE),
                     );
                     assert.strictEqual(fields, totalEntries);
                 });
@@ -154,13 +154,13 @@ describe("leaderboard command", () => {
                             LeaderboardType.EXP,
                             LeaderboardScope.GLOBAL,
                             LeaderboardDuration.ALL_TIME,
-                            "1"
+                            "1",
                         );
 
                     const fields = await getNumberOfFields(embeds);
                     assert.strictEqual(
                         pageCount,
-                        Math.ceil(totalEntries / LEADERBOARD_ENTRIES_PER_PAGE)
+                        Math.ceil(totalEntries / LEADERBOARD_ENTRIES_PER_PAGE),
                     );
                     assert.strictEqual(fields, totalEntries);
                 });
@@ -180,14 +180,14 @@ describe("leaderboard command", () => {
                             LeaderboardType.EXP,
                             LeaderboardScope.GLOBAL,
                             LeaderboardDuration.ALL_TIME,
-                            "1"
+                            "1",
                         );
 
                     const fields = await getNumberOfFields(embeds);
 
                     assert.strictEqual(
                         pageCount,
-                        Math.ceil(totalEntries / LEADERBOARD_ENTRIES_PER_PAGE)
+                        Math.ceil(totalEntries / LEADERBOARD_ENTRIES_PER_PAGE),
                     );
                     assert.strictEqual(fields, totalEntries);
                 });
@@ -214,11 +214,11 @@ describe("leaderboard command", () => {
                         LeaderboardType.EXP,
                         LeaderboardScope.GLOBAL,
                         LeaderboardDuration.ALL_TIME,
-                        String(INITIAL_TOTAL_ENTRIES - invokerPosition)
+                        String(INITIAL_TOTAL_ENTRIES - invokerPosition),
                     );
 
                 const generatedEmbeds = await Promise.all(
-                    embeds.map((x) => x())
+                    embeds.map((x) => x()),
                 );
 
                 // invoker has an indicator, every other entry doesn't
@@ -229,7 +229,7 @@ describe("leaderboard command", () => {
                         }
 
                         return !field.name.includes("\\➡");
-                    })
+                    }),
                 );
             });
         });
@@ -252,7 +252,7 @@ describe("leaderboard command", () => {
                             LeaderboardType.EXP,
                             LeaderboardScope.GLOBAL,
                             LeaderboardDuration.ALL_TIME,
-                            "1"
+                            "1",
                         );
 
                     const fields = await getNumberOfFields(embeds);
@@ -260,8 +260,9 @@ describe("leaderboard command", () => {
                     assert.strictEqual(
                         pageCount,
                         Math.ceil(
-                            INITIAL_TOTAL_ENTRIES / LEADERBOARD_ENTRIES_PER_PAGE
-                        )
+                            INITIAL_TOTAL_ENTRIES /
+                                LEADERBOARD_ENTRIES_PER_PAGE,
+                        ),
                     );
                     assert.strictEqual(fields, INITIAL_TOTAL_ENTRIES);
                 });
@@ -278,19 +279,19 @@ describe("leaderboard command", () => {
                     const serversRows: Array<PlayerServer> = [];
 
                     statsRows.push(
-                        ...generatePlayerStats(INITIAL_TOTAL_ENTRIES)
+                        ...generatePlayerStats(INITIAL_TOTAL_ENTRIES),
                     );
 
                     serversRows.push(
                         ...generatePlayerServers(
                             INITIAL_TOTAL_ENTRIES,
-                            SERVER_ID
-                        )
+                            SERVER_ID,
+                        ),
                     );
 
                     // invalid -- players outside of server
                     statsRows.push(
-                        ...generatePlayerStats(5, INITIAL_TOTAL_ENTRIES)
+                        ...generatePlayerStats(5, INITIAL_TOTAL_ENTRIES),
                     );
 
                     await dbContext.kmq
@@ -309,7 +310,7 @@ describe("leaderboard command", () => {
                             LeaderboardType.EXP,
                             LeaderboardScope.SERVER,
                             LeaderboardDuration.ALL_TIME,
-                            "1"
+                            "1",
                         );
 
                     const fields = await getNumberOfFields(embeds);
@@ -317,8 +318,9 @@ describe("leaderboard command", () => {
                     assert.strictEqual(
                         pageCount,
                         Math.ceil(
-                            INITIAL_TOTAL_ENTRIES / LEADERBOARD_ENTRIES_PER_PAGE
-                        )
+                            INITIAL_TOTAL_ENTRIES /
+                                LEADERBOARD_ENTRIES_PER_PAGE,
+                        ),
                     );
                     assert.strictEqual(fields, INITIAL_TOTAL_ENTRIES);
                 });
@@ -341,7 +343,7 @@ describe("leaderboard command", () => {
                         SERVER_ID,
                         gameStarter,
                         GameType.CLASSIC,
-                        false
+                        false,
                     );
 
                     sandbox.restore();
@@ -350,7 +352,7 @@ describe("leaderboard command", () => {
                     const statsRows: Array<PlayerStat> = [];
 
                     statsRows.push(
-                        ...generatePlayerStats(INITIAL_TOTAL_ENTRIES)
+                        ...generatePlayerStats(INITIAL_TOTAL_ENTRIES),
                     );
 
                     [...Array(INITIAL_TOTAL_ENTRIES).keys()].map((i) =>
@@ -360,14 +362,14 @@ describe("leaderboard command", () => {
                                 guildID,
                                 avatarURL,
                                 0,
-                                i.toString()
-                            )
-                        )
+                                i.toString(),
+                            ),
+                        ),
                     );
 
                     // invalid -- not in game
                     statsRows.push(
-                        ...generatePlayerStats(5, INITIAL_TOTAL_ENTRIES)
+                        ...generatePlayerStats(5, INITIAL_TOTAL_ENTRIES),
                     );
 
                     await dbContext.kmq
@@ -381,7 +383,7 @@ describe("leaderboard command", () => {
                             LeaderboardType.EXP,
                             LeaderboardScope.GAME,
                             LeaderboardDuration.ALL_TIME,
-                            "1"
+                            "1",
                         );
 
                     const fields = await getNumberOfFields(embeds);
@@ -389,8 +391,9 @@ describe("leaderboard command", () => {
                     assert.strictEqual(
                         pageCount,
                         Math.ceil(
-                            INITIAL_TOTAL_ENTRIES / LEADERBOARD_ENTRIES_PER_PAGE
-                        )
+                            INITIAL_TOTAL_ENTRIES /
+                                LEADERBOARD_ENTRIES_PER_PAGE,
+                        ),
                     );
                     assert.strictEqual(fields, INITIAL_TOTAL_ENTRIES);
                 });
@@ -413,7 +416,7 @@ describe("leaderboard command", () => {
                             LeaderboardType.GAMES_PLAYED,
                             LeaderboardScope.GLOBAL,
                             LeaderboardDuration.ALL_TIME,
-                            "1"
+                            "1",
                         );
 
                     const fields = await getNumberOfFields(embeds);
@@ -421,8 +424,9 @@ describe("leaderboard command", () => {
                     assert.strictEqual(
                         pageCount,
                         Math.ceil(
-                            INITIAL_TOTAL_ENTRIES / LEADERBOARD_ENTRIES_PER_PAGE
-                        )
+                            INITIAL_TOTAL_ENTRIES /
+                                LEADERBOARD_ENTRIES_PER_PAGE,
+                        ),
                     );
                     assert.strictEqual(fields, INITIAL_TOTAL_ENTRIES);
                 });
@@ -445,7 +449,7 @@ describe("leaderboard command", () => {
                             LeaderboardType.SONGS_GUESSED,
                             LeaderboardScope.GLOBAL,
                             LeaderboardDuration.ALL_TIME,
-                            "1"
+                            "1",
                         );
 
                     const fields = await getNumberOfFields(embeds);
@@ -453,8 +457,9 @@ describe("leaderboard command", () => {
                     assert.strictEqual(
                         pageCount,
                         Math.ceil(
-                            INITIAL_TOTAL_ENTRIES / LEADERBOARD_ENTRIES_PER_PAGE
-                        )
+                            INITIAL_TOTAL_ENTRIES /
+                                LEADERBOARD_ENTRIES_PER_PAGE,
+                        ),
                     );
                     assert.strictEqual(fields, INITIAL_TOTAL_ENTRIES);
                 });
@@ -542,15 +547,15 @@ describe("leaderboard command", () => {
                                 LeaderboardScope.GLOBAL,
                                 LeaderboardDuration.DAILY,
                                 "1",
-                                date
+                                date,
                             );
 
                         const fields = await getNumberOfFields(embeds);
                         assert.strictEqual(
                             pageCount,
                             Math.ceil(
-                                validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE
-                            )
+                                validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE,
+                            ),
                         );
                         assert.strictEqual(fields, validEntryCount);
                     });
@@ -568,7 +573,7 @@ describe("leaderboard command", () => {
                                 LeaderboardScope.GLOBAL,
                                 LeaderboardDuration.WEEKLY,
                                 "1",
-                                date
+                                date,
                             );
 
                         const fields = await getNumberOfFields(embeds);
@@ -576,8 +581,8 @@ describe("leaderboard command", () => {
                         assert.strictEqual(
                             pageCount,
                             Math.ceil(
-                                validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE
-                            )
+                                validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE,
+                            ),
                         );
                         assert.strictEqual(fields, validEntryCount);
                     });
@@ -594,7 +599,7 @@ describe("leaderboard command", () => {
                                 LeaderboardScope.GLOBAL,
                                 LeaderboardDuration.MONTHLY,
                                 "1",
-                                date
+                                date,
                             );
 
                         const fields = await getNumberOfFields(embeds);
@@ -602,8 +607,8 @@ describe("leaderboard command", () => {
                         assert.strictEqual(
                             pageCount,
                             Math.ceil(
-                                validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE
-                            )
+                                validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE,
+                            ),
                         );
                         assert.strictEqual(fields, validEntryCount);
                     });
@@ -643,7 +648,7 @@ describe("leaderboard command", () => {
                                 LeaderboardScope.SERVER,
                                 LeaderboardDuration.DAILY,
                                 "1",
-                                date
+                                date,
                             );
 
                         const fields = await getNumberOfFields(embeds);
@@ -651,8 +656,8 @@ describe("leaderboard command", () => {
                         assert.strictEqual(
                             pageCount,
                             Math.ceil(
-                                validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE
-                            )
+                                validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE,
+                            ),
                         );
                         assert.strictEqual(fields, validEntryCount);
                     });
@@ -671,7 +676,7 @@ describe("leaderboard command", () => {
                                 LeaderboardScope.SERVER,
                                 LeaderboardDuration.WEEKLY,
                                 "1",
-                                date
+                                date,
                             );
 
                         const fields = await getNumberOfFields(embeds);
@@ -679,8 +684,8 @@ describe("leaderboard command", () => {
                         assert.strictEqual(
                             pageCount,
                             Math.ceil(
-                                validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE
-                            )
+                                validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE,
+                            ),
                         );
                         assert.strictEqual(fields, validEntryCount);
                     });
@@ -698,7 +703,7 @@ describe("leaderboard command", () => {
                                 LeaderboardScope.SERVER,
                                 LeaderboardDuration.MONTHLY,
                                 "1",
-                                date
+                                date,
                             );
 
                         const fields = await getNumberOfFields(embeds);
@@ -706,8 +711,8 @@ describe("leaderboard command", () => {
                         assert.strictEqual(
                             pageCount,
                             Math.ceil(
-                                validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE
-                            )
+                                validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE,
+                            ),
                         );
                         assert.strictEqual(fields, validEntryCount);
                     });
@@ -726,7 +731,7 @@ describe("leaderboard command", () => {
                         SERVER_ID,
                         gameStarter,
                         GameType.CLASSIC,
-                        true
+                        true,
                     );
 
                     sandbox.restore();
@@ -743,9 +748,9 @@ describe("leaderboard command", () => {
                                     guildID,
                                     avatarURL,
                                     0,
-                                    i.toString()
-                                )
-                            )
+                                    i.toString(),
+                                ),
+                            ),
                         );
                 });
 
@@ -763,7 +768,7 @@ describe("leaderboard command", () => {
                                 LeaderboardScope.GAME,
                                 LeaderboardDuration.DAILY,
                                 "1",
-                                date
+                                date,
                             );
 
                         const fields = await getNumberOfFields(embeds);
@@ -771,8 +776,8 @@ describe("leaderboard command", () => {
                         assert.strictEqual(
                             pageCount,
                             Math.ceil(
-                                validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE
-                            )
+                                validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE,
+                            ),
                         );
                         assert.strictEqual(fields, validEntryCount);
                     });
@@ -791,7 +796,7 @@ describe("leaderboard command", () => {
                                 LeaderboardScope.GAME,
                                 LeaderboardDuration.WEEKLY,
                                 "1",
-                                date
+                                date,
                             );
 
                         const fields = await getNumberOfFields(embeds);
@@ -799,8 +804,8 @@ describe("leaderboard command", () => {
                         assert.strictEqual(
                             pageCount,
                             Math.ceil(
-                                validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE
-                            )
+                                validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE,
+                            ),
                         );
                         assert.strictEqual(fields, validEntryCount);
                     });
@@ -818,7 +823,7 @@ describe("leaderboard command", () => {
                                 LeaderboardScope.GAME,
                                 LeaderboardDuration.MONTHLY,
                                 "1",
-                                date
+                                date,
                             );
 
                         const fields = await getNumberOfFields(embeds);
@@ -826,8 +831,8 @@ describe("leaderboard command", () => {
                         assert.strictEqual(
                             pageCount,
                             Math.ceil(
-                                validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE
-                            )
+                                validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE,
+                            ),
                         );
                         assert.strictEqual(fields, validEntryCount);
                     });
@@ -841,7 +846,7 @@ describe("leaderboard command", () => {
                         rows.push({
                             player_id: "1",
                             date: new Date(
-                                new Date(date).setMinutes(INITIAL_MINUTE - i)
+                                new Date(date).setMinutes(INITIAL_MINUTE - i),
                             ),
                             songs_guessed: i,
                             exp_gained: 1,
@@ -863,7 +868,7 @@ describe("leaderboard command", () => {
                             LeaderboardScope.GLOBAL,
                             LeaderboardDuration.MONTHLY,
                             "1",
-                            date
+                            date,
                         );
 
                     const fields = await getNumberOfFields(embeds);
@@ -871,8 +876,8 @@ describe("leaderboard command", () => {
                     assert.strictEqual(
                         pageCount,
                         Math.ceil(
-                            validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE
-                        )
+                            validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE,
+                        ),
                     );
                     assert.strictEqual(fields, validEntryCount);
                 });
@@ -885,7 +890,7 @@ describe("leaderboard command", () => {
                         rows.push({
                             player_id: "1",
                             date: new Date(
-                                new Date(date).setMinutes(INITIAL_MINUTE - i)
+                                new Date(date).setMinutes(INITIAL_MINUTE - i),
                             ),
                             songs_guessed: i,
                             exp_gained: 1,
@@ -907,7 +912,7 @@ describe("leaderboard command", () => {
                             LeaderboardScope.GLOBAL,
                             LeaderboardDuration.MONTHLY,
                             "1",
-                            date
+                            date,
                         );
 
                     const fields = await getNumberOfFields(embeds);
@@ -915,8 +920,8 @@ describe("leaderboard command", () => {
                     assert.strictEqual(
                         pageCount,
                         Math.ceil(
-                            validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE
-                        )
+                            validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE,
+                        ),
                     );
                     assert.strictEqual(fields, validEntryCount);
                 });

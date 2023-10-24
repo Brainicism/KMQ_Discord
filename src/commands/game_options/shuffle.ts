@@ -57,7 +57,7 @@ export default class ShuffleCommand implements BaseCommand {
             "command.shuffle.help.description",
             {
                 random: `\`${ShuffleType.RANDOM}\``,
-            }
+            },
         ),
         usage: "/shuffle set\nshuffle:[random | popularity | weighted_easy | weighted_hard | chronological | reversechronological]\n\n/shuffle reset",
         examples: [
@@ -65,7 +65,7 @@ export default class ShuffleCommand implements BaseCommand {
                 example: "`/shuffle set shuffle:random`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.shuffle.help.example.random"
+                    "command.shuffle.help.example.random",
                 ),
             },
             {
@@ -79,7 +79,7 @@ export default class ShuffleCommand implements BaseCommand {
                                 ExpBonusModifier.SHUFFLE_POPULARITY
                             ]
                         }x`,
-                    }
+                    },
                 ),
             },
             {
@@ -93,7 +93,7 @@ export default class ShuffleCommand implements BaseCommand {
                                 ExpBonusModifier.SHUFFLE_CHRONOLOGICAL
                             ]
                         }x`,
-                    }
+                    },
                 ),
             },
             {
@@ -101,7 +101,7 @@ export default class ShuffleCommand implements BaseCommand {
                 explanation: i18n.translate(
                     guildID,
                     "command.shuffle.help.example.reset",
-                    { defaultShuffle: `\`${DEFAULT_SHUFFLE}\`` }
+                    { defaultShuffle: `\`${DEFAULT_SHUFFLE}\`` },
                 ),
             },
         ],
@@ -118,7 +118,7 @@ export default class ShuffleCommand implements BaseCommand {
                     name: OptionAction.SET,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.shuffle.help.description"
+                        "command.shuffle.help.description",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -127,10 +127,10 @@ export default class ShuffleCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.shuffle.help.description"
+                                    "command.shuffle.help.description",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -140,7 +140,7 @@ export default class ShuffleCommand implements BaseCommand {
                             name: "shuffle",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.shuffle.interaction.shuffle"
+                                "command.shuffle.interaction.shuffle",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -149,10 +149,10 @@ export default class ShuffleCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.shuffle.interaction.shuffle"
+                                            "command.shuffle.interaction.shuffle",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -162,7 +162,7 @@ export default class ShuffleCommand implements BaseCommand {
                                 (shuffleType) => ({
                                     name: shuffleType,
                                     value: shuffleType,
-                                })
+                                }),
                             ),
                         },
                     ],
@@ -172,7 +172,7 @@ export default class ShuffleCommand implements BaseCommand {
                     description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
-                        { optionName: "shuffle" }
+                        { optionName: "shuffle" },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -182,10 +182,10 @@ export default class ShuffleCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "misc.interaction.resetOption",
-                                    { optionName: "shuffle" }
+                                    { optionName: "shuffle" },
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -208,35 +208,35 @@ export default class ShuffleCommand implements BaseCommand {
         await ShuffleCommand.updateOption(
             MessageContext.fromMessage(message),
             shuffleType,
-            undefined
+            undefined,
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         shuffleType: ShuffleType | null,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         if (shuffleType && PREMIUM_SHUFFLE_TYPES.includes(shuffleType)) {
             if (!(await isUserPremium(messageContext.author.id))) {
                 logger.info(
                     `${getDebugLogHeader(
-                        messageContext
-                    )} | Non-premium user attempted to use shuffle option = ${shuffleType}`
+                        messageContext,
+                    )} | Non-premium user attempted to use shuffle option = ${shuffleType}`,
                 );
 
                 const embedPayload: EmbedPayload = {
                     description: i18n.translate(
                         messageContext.guildID,
-                        "command.premium.option.description"
+                        "command.premium.option.description",
                     ),
                     title: i18n.translate(
                         messageContext.guildID,
-                        "command.premium.option.title"
+                        "command.premium.option.title",
                     ),
                     color: EMBED_ERROR_COLOR,
                 };
@@ -244,7 +244,7 @@ export default class ShuffleCommand implements BaseCommand {
                 await sendErrorMessage(
                     messageContext,
                     embedPayload,
-                    interaction
+                    interaction,
                 );
 
                 return;
@@ -255,14 +255,14 @@ export default class ShuffleCommand implements BaseCommand {
         if (reset) {
             await guildPreference.reset(GameOption.SHUFFLE_TYPE);
             logger.info(
-                `${getDebugLogHeader(messageContext)} | Shuffle type reset.`
+                `${getDebugLogHeader(messageContext)} | Shuffle type reset.`,
             );
         } else {
             await guildPreference.setShuffleType(shuffleType);
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Shuffle type set to ${shuffleType}`
+                    messageContext,
+                )} | Shuffle type set to ${shuffleType}`,
             );
         }
 
@@ -274,7 +274,7 @@ export default class ShuffleCommand implements BaseCommand {
             false,
             undefined,
             undefined,
-            interaction
+            interaction,
         );
     }
 
@@ -284,7 +284,7 @@ export default class ShuffleCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
@@ -304,7 +304,7 @@ export default class ShuffleCommand implements BaseCommand {
         await ShuffleCommand.updateOption(
             messageContext,
             shuffleValue,
-            interaction
+            interaction,
         );
     }
 

@@ -52,7 +52,7 @@ export default class AnswerCommand implements BaseCommand {
                 easy: `\`${AnswerType.MULTIPLE_CHOICE_EASY}\``,
                 medium: `\`${AnswerType.MULTIPLE_CHOICE_MED}\``,
                 hard: `\`${AnswerType.MULTIPLE_CHOICE_HARD}\``,
-            }
+            },
         ),
         usage: "/answer set\nanswer:[typing | typingtypos | easy | medium | hard]\n\n/answer reset",
         examples: [
@@ -60,7 +60,7 @@ export default class AnswerCommand implements BaseCommand {
                 example: "`/answer set answer:typing`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.answer.help.example.typing"
+                    "command.answer.help.example.typing",
                 ),
             },
             {
@@ -72,7 +72,7 @@ export default class AnswerCommand implements BaseCommand {
                         penalty: `${
                             ExpBonusModifierValues[ExpBonusModifier.TYPO]
                         }x`,
-                    }
+                    },
                 ),
             },
             {
@@ -87,7 +87,7 @@ export default class AnswerCommand implements BaseCommand {
                                 ExpBonusModifier.MC_GUESS_EASY
                             ]
                         }x`,
-                    }
+                    },
                 ),
             },
             {
@@ -102,7 +102,7 @@ export default class AnswerCommand implements BaseCommand {
                                 ExpBonusModifier.MC_GUESS_MEDIUM
                             ]
                         }x`,
-                    }
+                    },
                 ),
             },
             {
@@ -117,7 +117,7 @@ export default class AnswerCommand implements BaseCommand {
                                 ExpBonusModifier.MC_GUESS_HARD
                             ]
                         }`,
-                    }
+                    },
                 ),
             },
         ],
@@ -134,7 +134,7 @@ export default class AnswerCommand implements BaseCommand {
                     name: OptionAction.SET,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.answer.help.interaction.description"
+                        "command.answer.help.interaction.description",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -143,10 +143,10 @@ export default class AnswerCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.answer.help.interaction.description"
+                                    "command.answer.help.interaction.description",
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -156,7 +156,7 @@ export default class AnswerCommand implements BaseCommand {
                             name: "answer",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.answer.help.interaction.answerOption"
+                                "command.answer.help.interaction.answerOption",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -165,10 +165,10 @@ export default class AnswerCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.answer.help.interaction.answerOption"
+                                            "command.answer.help.interaction.answerOption",
                                         ),
                                     }),
-                                    {}
+                                    {},
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
@@ -178,7 +178,7 @@ export default class AnswerCommand implements BaseCommand {
                                 (answerType) => ({
                                     name: answerType,
                                     value: answerType,
-                                })
+                                }),
                             ),
                         },
                     ],
@@ -188,7 +188,7 @@ export default class AnswerCommand implements BaseCommand {
                     description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
-                        { optionName: "answer" }
+                        { optionName: "answer" },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -198,10 +198,10 @@ export default class AnswerCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "misc.interaction.resetOption",
-                                    { optionName: "answer" }
+                                    { optionName: "answer" },
                                 ),
                             }),
-                            {}
+                            {},
                         ),
 
                     type: Eris.Constants.ApplicationCommandOptionTypes
@@ -225,17 +225,17 @@ export default class AnswerCommand implements BaseCommand {
         await AnswerCommand.updateOption(
             MessageContext.fromMessage(message),
             answerType,
-            undefined
+            undefined,
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
         answerType: AnswerType | null,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID
+            messageContext.guildID,
         );
 
         const reset = answerType == null;
@@ -243,14 +243,14 @@ export default class AnswerCommand implements BaseCommand {
         if (reset) {
             await guildPreference.reset(GameOption.ANSWER_TYPE);
             logger.info(
-                `${getDebugLogHeader(messageContext)} | Answer type reset.`
+                `${getDebugLogHeader(messageContext)} | Answer type reset.`,
             );
         } else {
             await guildPreference.setAnswerType(answerType);
             logger.info(
                 `${getDebugLogHeader(
-                    messageContext
-                )} | Answer type set to ${answerType}`
+                    messageContext,
+                )} | Answer type set to ${answerType}`,
             );
         }
 
@@ -262,7 +262,7 @@ export default class AnswerCommand implements BaseCommand {
             false,
             undefined,
             undefined,
-            interaction
+            interaction,
         );
     }
 
@@ -272,7 +272,7 @@ export default class AnswerCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
@@ -291,7 +291,7 @@ export default class AnswerCommand implements BaseCommand {
         await AnswerCommand.updateOption(
             messageContext,
             answerType,
-            interaction
+            interaction,
         );
     }
 }

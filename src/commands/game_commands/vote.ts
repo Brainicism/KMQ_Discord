@@ -50,7 +50,7 @@ export default class VoteCommand implements BaseCommand {
 
     static async sendVoteMessage(
         messageContext: MessageContext,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         let voteStatusString = "";
         const boostActive = await userBonusIsActive(messageContext.author.id);
@@ -63,7 +63,7 @@ export default class VoteCommand implements BaseCommand {
         if (userVoterStatus && boostActive) {
             const timeRemaining =
                 new Date(
-                    userVoterStatus["buff_expiry_date"].getTime() - Date.now()
+                    userVoterStatus["buff_expiry_date"].getTime() - Date.now(),
                 ).getTime() /
                 (1000 * 60);
 
@@ -75,10 +75,10 @@ export default class VoteCommand implements BaseCommand {
                         i18n.translateN(
                             messageContext.guildID,
                             "misc.plural.minute",
-                            Math.max(Math.ceil(timeRemaining), 0)
-                        )
+                            Math.max(Math.ceil(timeRemaining), 0),
+                        ),
                     ),
-                }
+                },
             );
         } else if (userVoterStatus) {
             // User has voted before
@@ -86,24 +86,24 @@ export default class VoteCommand implements BaseCommand {
             nextVoteTime.setHours(
                 nextVoteTime.getHours() +
                     VOTE_RESET_DURATION -
-                    VOTE_BONUS_DURATION
+                    VOTE_BONUS_DURATION,
             );
             if (nextVoteTime.getTime() <= Date.now()) {
                 voteStatusString = i18n.translate(
                     messageContext.guildID,
-                    "command.vote.available"
+                    "command.vote.available",
                 );
             } else {
                 const hoursLeft = Math.floor(
-                    (nextVoteTime.getTime() - Date.now()) / (60 * 60 * 1000)
+                    (nextVoteTime.getTime() - Date.now()) / (60 * 60 * 1000),
                 );
 
                 const minutesLeft = new Date(
-                    nextVoteTime.getTime() - Date.now()
+                    nextVoteTime.getTime() - Date.now(),
                 ).getMinutes();
 
                 const secondsLeft = new Date(
-                    nextVoteTime.getTime() - Date.now()
+                    nextVoteTime.getTime() - Date.now(),
                 ).getSeconds();
 
                 if (hoursLeft > 0) {
@@ -114,9 +114,9 @@ export default class VoteCommand implements BaseCommand {
                             hours: i18n.translateN(
                                 messageContext.guildID,
                                 "misc.plural.hour",
-                                hoursLeft
+                                hoursLeft,
                             ),
-                        }
+                        },
                     );
                 } else if (minutesLeft > 0) {
                     voteStatusString = i18n.translate(
@@ -126,9 +126,9 @@ export default class VoteCommand implements BaseCommand {
                             minutes: i18n.translateN(
                                 messageContext.guildID,
                                 "misc.plural.minute",
-                                minutesLeft
+                                minutesLeft,
                             ),
-                        }
+                        },
                     );
                 } else {
                     voteStatusString = i18n.translate(
@@ -138,16 +138,16 @@ export default class VoteCommand implements BaseCommand {
                             seconds: i18n.translateN(
                                 messageContext.guildID,
                                 "misc.plural.second",
-                                secondsLeft
+                                secondsLeft,
                             ),
-                        }
+                        },
                     );
                 }
             }
         } else {
             voteStatusString = i18n.translate(
                 messageContext.guildID,
-                "command.vote.available"
+                "command.vote.available",
             );
         }
 
@@ -156,11 +156,11 @@ export default class VoteCommand implements BaseCommand {
             title: boostActive
                 ? i18n.translate(
                       messageContext.guildID,
-                      "command.vote.boost.active"
+                      "command.vote.boost.active",
                   )
                 : i18n.translate(
                       messageContext.guildID,
-                      "command.vote.boost.inactive"
+                      "command.vote.boost.inactive",
                   ),
             description: `${voteStatusString}\n\n${i18n.translate(
                 messageContext.guildID,
@@ -169,7 +169,7 @@ export default class VoteCommand implements BaseCommand {
                     voteLink: VOTE_LINK,
                     voteResetDuration: String(VOTE_RESET_DURATION),
                     reviewLink: REVIEW_LINK,
-                }
+                },
             )} `,
             thumbnailUrl: KmqImages.THUMBS_UP,
             components: [
@@ -183,7 +183,7 @@ export default class VoteCommand implements BaseCommand {
                             emoji: { name: "✅", id: null },
                             label: i18n.translate(
                                 messageContext.guildID,
-                                "misc.interaction.vote"
+                                "misc.interaction.vote",
                             ),
                         },
                         {
@@ -193,7 +193,7 @@ export default class VoteCommand implements BaseCommand {
                             emoji: { name: "📖", id: null },
                             label: i18n.translate(
                                 messageContext.guildID,
-                                "misc.interaction.leaveReview"
+                                "misc.interaction.leaveReview",
                             ),
                         },
                     ],
@@ -207,13 +207,13 @@ export default class VoteCommand implements BaseCommand {
             true,
             undefined,
             [],
-            interaction
+            interaction,
         );
 
         logger.info(
             `${getDebugLogHeader(
-                messageContext
-            )} | Vote instructions retrieved.`
+                messageContext,
+            )} | Vote instructions retrieved.`,
         );
     }
 
@@ -223,7 +223,7 @@ export default class VoteCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         await VoteCommand.sendVoteMessage(messageContext, interaction);
     }

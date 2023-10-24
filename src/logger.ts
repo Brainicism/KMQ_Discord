@@ -24,7 +24,7 @@ export function getInternalLogger(): winston.Logger {
 
     const logFormat = format.printf(
         ({ level, message, timestamp }) =>
-            `${timestamp} [${level.toUpperCase()}] - ${message}`
+            `${timestamp} [${level.toUpperCase()}] - ${message}`,
     );
 
     return winston.createLogger({

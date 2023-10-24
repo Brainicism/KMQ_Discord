@@ -7,7 +7,7 @@ exports.up = async function (knex) {
         table.increments();
         table.dropUnique(
             ["category", "title", "message"],
-            "end_game_messages_category_title_message_unique"
+            "end_game_messages_category_title_message_unique",
         );
     });
 

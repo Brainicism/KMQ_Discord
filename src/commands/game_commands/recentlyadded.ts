@@ -40,7 +40,7 @@ export default class RecentlyAddedCommand implements BaseCommand {
         name: "recentlyadded",
         description: i18n.translate(
             guildID,
-            "command.recentlyadded.help.description"
+            "command.recentlyadded.help.description",
         ),
         usage: "/recentlyadded",
         examples: [
@@ -48,7 +48,7 @@ export default class RecentlyAddedCommand implements BaseCommand {
                 example: "`/recentlyadded`",
                 explanation: i18n.translate(
                     guildID,
-                    "command.recentlyadded.help.example"
+                    "command.recentlyadded.help.example",
                 ),
             },
         ],
@@ -68,12 +68,12 @@ export default class RecentlyAddedCommand implements BaseCommand {
     };
 
     static async showRecentlyAddedSongs(
-        messageOrInteraction: GuildTextableMessage | CommandInteraction
+        messageOrInteraction: GuildTextableMessage | CommandInteraction,
     ): Promise<void> {
         const messageContext = new MessageContext(
             messageOrInteraction.channel.id,
             new KmqMember(messageOrInteraction.member!.id),
-            messageOrInteraction.guildID as string
+            messageOrInteraction.guildID as string,
         );
 
         const newSongs: Array<QueriedSong> = await dbContext.kmq
@@ -83,7 +83,7 @@ export default class RecentlyAddedCommand implements BaseCommand {
             .where(
                 "publishedon",
                 ">=",
-                new Date(Date.now() - 1000 * 60 * 60 * 24 * 14)
+                new Date(Date.now() - 1000 * 60 * 60 * 24 * 14),
             )
             .execute();
 
@@ -93,11 +93,11 @@ export default class RecentlyAddedCommand implements BaseCommand {
                 {
                     title: i18n.translate(
                         messageContext.guildID,
-                        "command.recentlyadded.failure.noSongs.title"
+                        "command.recentlyadded.failure.noSongs.title",
                     ),
                     description: i18n.translate(
                         messageContext.guildID,
-                        "command.recentlyadded.failure.noSongs.description"
+                        "command.recentlyadded.failure.noSongs.description",
                     ),
                     thumbnailUrl: KmqImages.NOT_IMPRESSED,
                 },
@@ -106,7 +106,7 @@ export default class RecentlyAddedCommand implements BaseCommand {
                 [],
                 messageOrInteraction instanceof Eris.CommandInteraction
                     ? messageOrInteraction
-                    : undefined
+                    : undefined,
             );
             return;
         }
@@ -115,14 +115,14 @@ export default class RecentlyAddedCommand implements BaseCommand {
         const fields = newSongs.map((song) => ({
             name: `"${getLocalizedSongName(
                 song,
-                locale
+                locale,
             )}" - ${getLocalizedArtistName(song, locale)}`,
             value: `${discordDateFormat(
                 song.publishDate,
-                "d"
+                "d",
             )}\n[${friendlyFormattedNumber(song.views)} ${i18n.translate(
                 messageContext.guildID,
-                "misc.views"
+                "misc.views",
             )}](https://youtu.be/${song.youtubeLink})`,
             inline: true,
         }));
@@ -132,21 +132,21 @@ export default class RecentlyAddedCommand implements BaseCommand {
             (embedFieldsSubset) => ({
                 title: i18n.translate(
                     messageContext.guildID,
-                    "command.recentlyadded.title"
+                    "command.recentlyadded.title",
                 ),
                 description: i18n.translate(
                     messageContext.guildID,
-                    "command.recentlyadded.description"
+                    "command.recentlyadded.description",
                 ),
                 fields: embedFieldsSubset,
-            })
+            }),
         );
 
         await sendPaginationedEmbed(messageOrInteraction, embeds, undefined);
         logger.info(
             `${getDebugLogHeader(
-                messageContext
-            )} | Recently added songs retrieved.`
+                messageContext,
+            )} | Recently added songs retrieved.`,
         );
     }
 
@@ -156,7 +156,7 @@ export default class RecentlyAddedCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        _messageContext: MessageContext
+        _messageContext: MessageContext,
     ): Promise<void> {
         await RecentlyAddedCommand.showRecentlyAddedSongs(interaction);
     }

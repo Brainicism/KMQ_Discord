@@ -61,7 +61,7 @@ export function normalizePunctuationInName(name: string): string {
     for (const characterReplacement of CHARACTER_REPLACEMENTS) {
         cleanName = cleanName.replace(
             characterReplacement.pattern,
-            characterReplacement.replacement
+            characterReplacement.replacement,
         );
     }
 
@@ -79,7 +79,7 @@ export function cleanArtistName(name: string): string {
     for (const characterReplacement of CHARACTER_REPLACEMENTS) {
         cleanName = cleanName.replace(
             characterReplacement.pattern,
-            characterReplacement.replacement
+            characterReplacement.replacement,
         );
     }
 
@@ -94,7 +94,7 @@ function generateHint(name: string): string {
     const HIDDEN_CHARACTER_PERCENTAGE = 0.75;
     const nameLength = name.length;
     const eligibleCharacterIndicesToHide = _.range(0, nameLength).filter(
-        (x) => !name[x].match(REMOVED_CHARACTERS)
+        (x) => !name[x].match(REMOVED_CHARACTERS),
     );
 
     const hideMask = _.sampleSize(
@@ -102,10 +102,10 @@ function generateHint(name: string): string {
         Math.max(
             Math.floor(
                 eligibleCharacterIndicesToHide.length *
-                    HIDDEN_CHARACTER_PERCENTAGE
+                    HIDDEN_CHARACTER_PERCENTAGE,
             ),
-            1
-        )
+            1,
+        ),
     );
 
     const hiddenName = name
@@ -181,7 +181,7 @@ export default class GameRound extends Round {
         const artistNames = song.artistName.split("+").map((x) => x.trim());
         if (song.hangulArtistName) {
             artistNames.push(
-                ...song.hangulArtistName.split("+").map((x) => x.trim())
+                ...song.hangulArtistName.split("+").map((x) => x.trim()),
             );
         }
 
@@ -196,13 +196,13 @@ export default class GameRound extends Round {
             songHint: {
                 [LocaleType.EN]: generateHint(song.songName),
                 [LocaleType.KO]: generateHint(
-                    song.hangulSongName || song.songName
+                    song.hangulSongName || song.songName,
                 ),
             },
             artistHint: {
                 [LocaleType.EN]: generateHint(song.artistName),
                 [LocaleType.KO]: generateHint(
-                    song.hangulArtistName || song.artistName
+                    song.hangulArtistName || song.artistName,
                 ),
             },
         };
@@ -282,7 +282,7 @@ export default class GameRound extends Round {
     checkGuess(
         guess: string,
         guessModeType: GuessModeType,
-        typosAllowed = false
+        typosAllowed = false,
     ): number {
         let pointReward = 0;
 
@@ -344,12 +344,12 @@ export default class GameRound extends Round {
         guess: string,
         createdAt: number,
         guessModeType: GuessModeType,
-        typosAllowed = false
+        typosAllowed = false,
     ): void {
         const pointsAwarded = this.checkGuess(
             guess,
             guessModeType,
-            typosAllowed
+            typosAllowed,
         );
 
         this.guesses[playerID] = this.guesses[playerID] || [];
@@ -437,7 +437,7 @@ export default class GameRound extends Round {
         return (
             interactionUUID === this.interactionCorrectAnswerUUID ||
             Object.keys(this.interactionIncorrectAnswerUUIDs).includes(
-                interactionUUID
+                interactionUUID,
             )
         );
     }
@@ -459,7 +459,7 @@ export default class GameRound extends Round {
         messageContext: MessageContext,
         uniqueSongCounter: UniqueSongCounter,
         playerRoundResults: Array<PlayerRoundResult>,
-        gameType: GameType
+        gameType: GameType,
     ): string {
         let correctDescription = "";
         if (this.bonusModifier > 1 || this.isBonusArtist()) {
@@ -467,17 +467,17 @@ export default class GameRound extends Round {
             if (this.isBonusArtist() && this.bonusModifier > 1) {
                 bonusType = i18n.translate(
                     messageContext.guildID,
-                    "misc.inGame.bonusExpArtistRound"
+                    "misc.inGame.bonusExpArtistRound",
                 );
             } else if (this.bonusModifier > 1) {
                 bonusType = i18n.translate(
                     messageContext.guildID,
-                    "misc.inGame.bonusExpRound"
+                    "misc.inGame.bonusExpRound",
                 );
             } else {
                 bonusType = i18n.translate(
                     messageContext.guildID,
-                    "misc.inGame.bonusArtistRound"
+                    "misc.inGame.bonusArtistRound",
                 );
             }
 
@@ -489,7 +489,7 @@ export default class GameRound extends Round {
             (x): [string, Array<GuessResult>] => [
                 x[0],
                 x[1].sort((a, b) => a.timeToGuessMs - b.timeToGuessMs),
-            ]
+            ],
         );
 
         if (gameType === GameType.HIDDEN) {
@@ -509,18 +509,18 @@ export default class GameRound extends Round {
                 if (displayedGuess.length > MAX_DISPLAYED_GUESS_LENGTH) {
                     displayedGuess = `${displayedGuess.substring(
                         0,
-                        MAX_DISPLAYED_GUESS_LENGTH
+                        MAX_DISPLAYED_GUESS_LENGTH,
                     )}...`;
                 }
 
                 const playerResult = playerRoundResults.find(
-                    (x) => x.player.id === userID
+                    (x) => x.player.id === userID,
                 );
 
                 const streak =
                     playerResult && playerResult.streak >= 5
                         ? ` (🔥${friendlyFormattedNumber(
-                              playerRoundResults[0].streak
+                              playerRoundResults[0].streak,
                           )}) `
                         : " ";
 
@@ -538,16 +538,16 @@ export default class GameRound extends Round {
             if (Object.keys(this.guesses).length >= ROUND_MAX_RUNNERS_UP) {
                 correctDescription += `\n${i18n.translate(
                     messageContext.guildID,
-                    "misc.andManyOthers"
+                    "misc.andManyOthers",
                 )}`;
             }
         } else if (correctGuess) {
             const correctGuesser = `${getMention(
-                playerRoundResults[0].player.id
+                playerRoundResults[0].player.id,
             )} ${
                 playerRoundResults[0].streak >= 5
                     ? `(🔥${friendlyFormattedNumber(
-                          playerRoundResults[0].streak
+                          playerRoundResults[0].streak,
                       )})`
                     : ""
             }`;
@@ -574,11 +574,11 @@ export default class GameRound extends Round {
                 {
                     correctGuesser,
                     expGain: friendlyFormattedNumber(
-                        playerRoundResults[0].expGain
+                        playerRoundResults[0].expGain,
                     ),
                     timeToGuess:
                         playerIDToTimeToGuess[playerRoundResults[0].player.id],
-                }
+                },
             );
             if (playerRoundResults.length > 1) {
                 const runnersUp = playerRoundResults.slice(1);
@@ -586,10 +586,10 @@ export default class GameRound extends Round {
                     .map(
                         (x) =>
                             `${getMention(
-                                x.player.id
+                                x.player.id,
                             )} (+${friendlyFormattedNumber(x.expGain)} EXP) (${
                                 playerIDToTimeToGuess[x.player.id]
-                            }s)`
+                            }s)`,
                     )
                     .slice(0, ROUND_MAX_RUNNERS_UP)
                     .join("\n");
@@ -597,25 +597,25 @@ export default class GameRound extends Round {
                 if (runnersUp.length >= ROUND_MAX_RUNNERS_UP) {
                     runnersUpDescription += `\n${i18n.translate(
                         messageContext.guildID,
-                        "misc.andManyOthers"
+                        "misc.andManyOthers",
                     )}`;
                 }
 
                 correctDescription += `\n\n**${i18n.translate(
                     messageContext.guildID,
-                    "misc.inGame.runnersUp"
+                    "misc.inGame.runnersUp",
                 )}**\n${runnersUpDescription}`;
             }
         } else {
             correctDescription = i18n.translate(
                 messageContext.guildID,
-                "misc.inGame.noCorrectGuesses"
+                "misc.inGame.noCorrectGuesses",
             );
         }
 
         const uniqueSongMessage = this.getUniqueSongCounterMessage(
             messageContext,
-            uniqueSongCounter
+            uniqueSongCounter,
         );
 
         return `${correctDescription}\n${uniqueSongMessage}`;
@@ -640,7 +640,7 @@ export default class GameRound extends Round {
      */
     static similarityCheck(
         guess: string,
-        correctChoices: Array<string>
+        correctChoices: Array<string>,
     ): boolean {
         const distanceRequired = (length: number): number => {
             if (length <= 4) return -1;
@@ -668,7 +668,7 @@ export default class GameRound extends Round {
     private checkSongGuess(message: string): GuessCorrectness {
         const guess = normalizePunctuationInName(message);
         const cleanedSongAliases = this.acceptedSongAnswers.map((x) =>
-            normalizePunctuationInName(x)
+            normalizePunctuationInName(x),
         );
 
         return {
@@ -685,7 +685,7 @@ export default class GameRound extends Round {
     private checkArtistGuess(message: string): GuessCorrectness {
         const guess = cleanArtistName(message);
         const cleanedArtistAliases = this.acceptedArtistAnswers.map((x) =>
-            cleanArtistName(x)
+            cleanArtistName(x),
         );
 
         return {

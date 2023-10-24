@@ -46,7 +46,7 @@ export default class EndCommand implements BaseCommand {
 
     static endGame = async (
         messageContext: MessageContext,
-        interaction?: Eris.CommandInteraction
+        interaction?: Eris.CommandInteraction,
     ): Promise<void> => {
         const session = Session.getSession(messageContext.guildID);
         if (interaction) {
@@ -55,8 +55,8 @@ export default class EndCommand implements BaseCommand {
                 i18n.translate(LocaleType.EN, "command.end.interaction.title"),
                 i18n.translate(
                     LocaleType.EN,
-                    "command.end.interaction.description"
-                )
+                    "command.end.interaction.description",
+                ),
             );
         }
 
@@ -70,7 +70,7 @@ export default class EndCommand implements BaseCommand {
      */
     async processChatInputInteraction(
         interaction: Eris.CommandInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         await EndCommand.endGame(messageContext, interaction);
     }

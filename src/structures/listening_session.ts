@@ -31,7 +31,7 @@ export default class ListeningSession extends Session {
         voiceChannelID: string,
         guildID: string,
         gameSessionCreator: KmqMember,
-        isPremium: boolean
+        isPremium: boolean,
     ) {
         super(
             guildPreference,
@@ -39,7 +39,7 @@ export default class ListeningSession extends Session {
             voiceChannelID,
             guildID,
             gameSessionCreator,
-            isPremium
+            isPremium,
         );
         this.round = null;
     }
@@ -71,7 +71,7 @@ export default class ListeningSession extends Session {
 
     getVoiceMembers(): Eris.Member[] {
         return getCurrentVoiceMembers(this.voiceChannelID).filter(
-            (x) => x.id !== process.env.BOT_CLIENT_ID
+            (x) => x.id !== process.env.BOT_CLIENT_ID,
         );
     }
 
@@ -91,18 +91,18 @@ export default class ListeningSession extends Session {
 
         if (messageContext) {
             const remainingDuration = this.getRemainingDuration(
-                this.guildPreference
+                this.guildPreference,
             );
 
             const embedColor = round.getEndRoundColor(
                 false,
-                await userBonusIsActive(messageContext.author.id)
+                await userBonusIsActive(messageContext.author.id),
             );
 
             const description = `${round.getEndRoundDescription(
                 messageContext,
                 this.songSelector.getUniqueSongCounter(this.guildPreference),
-                []
+                [],
             )}`;
 
             const startRoundMessage = await this.sendRoundMessage(
@@ -112,7 +112,7 @@ export default class ListeningSession extends Session {
                 description,
                 embedColor ?? undefined,
                 false,
-                remainingDuration
+                remainingDuration,
             );
 
             round.interactionMessage = startRoundMessage;
@@ -125,7 +125,7 @@ export default class ListeningSession extends Session {
 
     async endRound(
         messageContext?: MessageContext,
-        guessResult?: GuessResult
+        guessResult?: GuessResult,
     ): Promise<void> {
         await this.round?.interactionMarkButtons();
         await super.endRound(messageContext, guessResult);
@@ -138,21 +138,21 @@ export default class ListeningSession extends Session {
 
         this.finished = true;
         logger.info(
-            `gid: ${this.guildID} | Listening session ended. rounds_played = ${this.roundsPlayed}`
+            `gid: ${this.guildID} | Listening session ended. rounds_played = ${this.roundsPlayed}`,
         );
         await super.endSession(reason);
     }
 
     async handleComponentInteraction(
         interaction: Eris.ComponentInteraction,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ): Promise<void> {
         if (!this.round) return;
         if (
             interaction.data.custom_id !== "bookmark" &&
             !this.handleInSessionInteractionFailures(
                 interaction,
-                messageContext
+                messageContext,
             )
         ) {
             return;
@@ -174,10 +174,10 @@ export default class ListeningSession extends Session {
                         "command.skip.success.description",
                         {
                             skipCounter: `${round.getSkipCount()}/${getMajorityCount(
-                                guildID
+                                guildID,
                             )}`,
-                        }
-                    )
+                        },
+                    ),
                 );
 
                 skipSong(messageContext, this);
@@ -187,13 +187,15 @@ export default class ListeningSession extends Session {
                     i18n.translate(guildID, "command.skip.vote.title"),
                     i18n.translate(guildID, "command.skip.vote.description", {
                         skipCounter: `${round.getSkipCount()}/${getMajorityCount(
-                            guildID
+                            guildID,
                         )}`,
-                    })
+                    }),
                 );
 
                 logger.info(
-                    `${getDebugLogHeader(messageContext)} | Skip vote received.`
+                    `${getDebugLogHeader(
+                        messageContext,
+                    )} | Skip vote received.`,
                 );
             }
         }

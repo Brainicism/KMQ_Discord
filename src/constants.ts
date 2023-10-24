@@ -106,7 +106,7 @@ export const CUM_EXP_TABLE = EXP_TABLE.map(
     (
         (sum) => (value) =>
             (sum += value)
-    )(0)
+    )(0),
 );
 
 export const VOTE_BONUS_DURATION = 1;
@@ -155,7 +155,7 @@ export const PATREON_SUPPORTER_BADGE_ID = 23;
 
 export const DATABASE_DOWNLOAD_DIR = path.join(
     __dirname,
-    "../sql_dumps/daisuki"
+    "../sql_dumps/daisuki",
 );
 
 export const ELIMINATION_DEFAULT_LIVES = 10;
@@ -237,12 +237,12 @@ export const DataFiles = {
     NEWS: path.join(__dirname, "../data/news.md"),
     FROZEN_TABLE_SCHEMA: path.join(
         __dirname,
-        "../data/frozen_table_schema.json"
+        "../data/frozen_table_schema.json",
     ),
     GROUP_LIST: path.join(__dirname, "../data/group_list.txt"),
     FEATURE_SWITCH_CONFIG: path.join(
         __dirname,
-        "../data/feature_switch_config.json"
+        "../data/feature_switch_config.json",
     ),
 };
 
@@ -268,7 +268,7 @@ export enum OptionAction {
 
 export const TEST_DB_CACHED_EXPORT = path.join(
     __dirname,
-    "../sql_dumps/kmq-test-cached.sql"
+    "../sql_dumps/kmq-test-cached.sql",
 );
 
 export const IGNORED_WARNING_SUBSTRINGS = [

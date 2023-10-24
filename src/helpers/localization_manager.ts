@@ -39,7 +39,7 @@ export class LocalizationManager {
     translate(
         localeOrGuildID: LocaleType | string,
         phrase: string,
-        replace: { [key: string]: string } = {}
+        replace: { [key: string]: string } = {},
     ): string {
         if (!this.hasKey(phrase)) {
             logger.error(`Missing translation for phrase: ${phrase}`);
@@ -53,7 +53,7 @@ export class LocalizationManager {
                 ? (localeOrGuildID as LocaleType)
                 : State.getGuildLocale(localeOrGuildID),
             phrase,
-            replace
+            replace,
         );
     }
 
@@ -74,7 +74,7 @@ export class LocalizationManager {
                 ? (localeOrGuildID as LocaleType)
                 : State.getGuildLocale(localeOrGuildID),
             phrase,
-            count
+            count,
         );
     }
 
@@ -92,7 +92,7 @@ export class LocalizationManager {
     private translateByLocale(
         locale: LocaleType,
         phrase: string,
-        replace: { [key: string]: string } = {}
+        replace: { [key: string]: string } = {},
     ): string {
         return this.internalLocalizer.t(phrase, {
             lng: locale,
@@ -110,7 +110,7 @@ export class LocalizationManager {
     private translateNByLocale(
         locale: LocaleType,
         phrase: string,
-        count: number
+        count: number,
     ): string {
         return this.internalLocalizer.t(phrase, {
             lng: locale,

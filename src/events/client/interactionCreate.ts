@@ -26,7 +26,7 @@ const logger = new IPCLogger("interactionCreate");
 
 const AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS: {
     [command: string]: (
-        interaction: Eris.AutocompleteInteraction
+        interaction: Eris.AutocompleteInteraction,
     ) => Promise<void>;
 } = {
     groups: GroupsCommand.processAutocompleteInteraction,
@@ -39,7 +39,7 @@ const AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS: {
 
 const MODAL_SUBMIT_INTERACTION_HANDLERS: {
     [command: string]: (
-        interaction: Eris.ModalSubmitInteraction
+        interaction: Eris.ModalSubmitInteraction,
     ) => Promise<void>;
 } = {
     feedback: FeedbackCommand.processModalSubmitInteraction,
@@ -54,7 +54,7 @@ export default async function interactionCreateHandler(
         | Eris.CommandInteraction
         | Eris.ComponentInteraction
         | Eris.AutocompleteInteraction
-        | Eris.ModalSubmitInteraction
+        | Eris.ModalSubmitInteraction,
 ): Promise<void> {
     if (!interaction.guildID) {
         if (
@@ -66,8 +66,8 @@ export default async function interactionCreateHandler(
                 i18n.translate(LocaleType.EN, "misc.interaction.title.failure"),
                 i18n.translate(
                     LocaleType.EN,
-                    "misc.failure.interaction.guildOnly"
-                )
+                    "misc.failure.interaction.guildOnly",
+                ),
             );
         }
 
@@ -78,7 +78,7 @@ export default async function interactionCreateHandler(
     const messageContext = new MessageContext(
         interaction.channel.id,
         member,
-        interaction.guildID as string
+        interaction.guildID as string,
     );
 
     const session = Session.getSession(interaction.guildID as string);
@@ -96,7 +96,7 @@ export default async function interactionCreateHandler(
         interactionName = `Component interaction for '${interaction.data.custom_id}'`;
         interactionPromise = session.handleComponentInteraction(
             interaction,
-            messageContext
+            messageContext,
         );
     } else if (interaction instanceof Eris.CommandInteraction) {
         if (
@@ -127,11 +127,11 @@ export default async function interactionCreateHandler(
                 interactionPromise =
                     commandInteractionHandler.processChatInputInteraction(
                         interaction,
-                        messageContext
+                        messageContext,
                     );
             } else {
                 logger.error(
-                    `No handler found for CHAT_INPUT CommandInteraction: ${interaction.data.name}`
+                    `No handler found for CHAT_INPUT CommandInteraction: ${interaction.data.name}`,
                 );
             }
         } else {
@@ -147,7 +147,7 @@ export default async function interactionCreateHandler(
                             ProfileCommand.handleProfileInteraction(
                                 interaction as Eris.CommandInteraction,
                                 interaction.data.target_id as string,
-                                true
+                                true,
                             );
                     } else if (
                         interaction.data.type ===
@@ -165,7 +165,7 @@ export default async function interactionCreateHandler(
                             ProfileCommand.handleProfileInteraction(
                                 interaction,
                                 authorID,
-                                true
+                                true,
                             );
                     }
 
@@ -179,22 +179,22 @@ export default async function interactionCreateHandler(
                             null,
                             i18n.translate(
                                 interaction.guildID as string,
-                                "misc.failure.interaction.bookmarkOutsideGame"
-                            )
+                                "misc.failure.interaction.bookmarkOutsideGame",
+                            ),
                         );
                         return;
                     }
 
                     interactionName = `Application Command for '${interaction.data.name}'`;
                     interactionPromise = session.handleBookmarkInteraction(
-                        interaction as Eris.CommandInteraction
+                        interaction as Eris.CommandInteraction,
                     );
                     break;
                 }
 
                 default: {
                     logger.error(
-                        `No handler found for CommandInteraction  (type = ${interaction.data.type}): ${interaction.data.name}`
+                        `No handler found for CommandInteraction  (type = ${interaction.data.type}): ${interaction.data.name}`,
                     );
                 }
             }
@@ -209,7 +209,7 @@ export default async function interactionCreateHandler(
             interactionPromise = autocompleteInteractionHandler(interaction);
         } else {
             logger.error(
-                `No handler for for AutocompleteInteraction (type = ${interaction.data.type}): ${interaction.data.name}`
+                `No handler for for AutocompleteInteraction (type = ${interaction.data.type}): ${interaction.data.name}`,
             );
         }
     } else if (interaction instanceof Eris.ModalSubmitInteraction) {
@@ -221,7 +221,7 @@ export default async function interactionCreateHandler(
             interactionPromise = modalSubmitInteractionHandler(interaction);
         } else {
             logger.error(
-                `No handler for for ModalSubmitInteraction (custom_id = ${interaction.data.custom_id})`
+                `No handler for for ModalSubmitInteraction (custom_id = ${interaction.data.custom_id})`,
             );
         }
     }
