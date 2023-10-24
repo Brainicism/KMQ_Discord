@@ -95,9 +95,14 @@ export default class SpotifyManager {
             truncated: false,
         };
 
-        const logHeader = `${getDebugLogHeader(
-            (messageContext || interaction)!,
-        )}, playlistID = ${playlistID}`;
+        let logHeader: string;
+        if (messageContext || interaction) {
+            logHeader = `${getDebugLogHeader(
+                (messageContext || interaction)!,
+            )}, playlistID = ${playlistID}`;
+        } else {
+            logHeader = `guildID = ${guildID}. playlistID = ${playlistID}`;
+        }
 
         if (
             !process.env.SPOTIFY_CLIENT_ID ||
