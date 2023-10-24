@@ -380,7 +380,9 @@ export default class SpotifyManager {
                 this.guildsParseInProgress[guildID] <
                 new Date(Date.now() - 1000 * 60 * 10)
             ) {
-                logger.warn(`Guild ${guildID} got stuck parsing Spotify`);
+                logger.warn(
+                    `Guild ${guildID} got stuck parsing Spotify at ${this.guildsParseInProgress[guildID]}`
+                );
                 delete this.guildsParseInProgress[guildID];
             }
         }
