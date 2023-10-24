@@ -4,6 +4,7 @@ import { IPCLogger } from "../logger";
 import { chooseRandom, delay, isPrimaryInstance, isWeekend } from "./utils";
 import {
     cleanupInactiveGameSessions,
+    cleanupInactiveListeningSessions,
     getMatchingGroupNames,
     isPowerHour,
 } from "./game_utils";
@@ -456,6 +457,8 @@ export function registerIntervals(clusterID: number): void {
     schedule.scheduleJob("*/10 * * * *", () => {
         // Cleanup inactive game sessions
         cleanupInactiveGameSessions();
+        // Cleanup inactive listening sessions
+        cleanupInactiveListeningSessions();
         // Change bot's status (song playing, power hour, etc.)
         updateBotStatus();
         // Clear any guilds stuck in parsing Spotify state

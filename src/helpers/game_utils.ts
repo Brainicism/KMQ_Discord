@@ -149,6 +149,28 @@ export async function cleanupInactiveGameSessions(): Promise<void> {
     }
 }
 
+/** Cleans up inactive ListeningSessions */
+export async function cleanupInactiveListeningSessions(): Promise<void> {
+    const { listeningSessions } = State;
+    let inactiveSessions = 0;
+    const totalSessions = Object.keys(listeningSessions).length;
+    await Promise.allSettled(
+        Object.keys(listeningSessions).map(async (guildID) => {
+            const listeningSession = listeningSessions[guildID];
+            if (listeningSession.getVoiceMembers().length === 0) {
+                await listeningSession.endSession("Empty listening session");
+                inactiveSessions++;
+            }
+        })
+    );
+
+    if (inactiveSessions > 0) {
+        logger.warn(
+            `Ended ${inactiveSessions} inactive listening sessions out of ${totalSessions}`
+        );
+    }
+}
+
 /**
  * @param userId - The user ID
  * @returns whether the player has bonus active
