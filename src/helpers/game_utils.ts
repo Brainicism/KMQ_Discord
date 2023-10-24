@@ -165,7 +165,7 @@ export async function cleanupInactiveListeningSessions(): Promise<void> {
     );
 
     if (inactiveSessions > 0) {
-        logger.info(
+        logger.warn(
             `Ended ${inactiveSessions} inactive listening sessions out of ${totalSessions}`
         );
     }
