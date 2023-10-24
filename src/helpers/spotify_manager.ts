@@ -47,7 +47,7 @@ export default class SpotifyManager {
     } = {};
 
     private accessToken: string | undefined;
-    private guildsParseInProgress: Set<string> = new Set();
+    private guildsParseInProgress: { [guildID: string]: Date } = {};
 
     async start(): Promise<void> {
         await this.refreshToken();
@@ -62,7 +62,7 @@ export default class SpotifyManager {
      * @returns whether a playlist is being parsed for the given guild
      */
     isParseInProgress(guildID: string): boolean {
-        return this.guildsParseInProgress.has(guildID);
+        return !!this.guildsParseInProgress[guildID];
     }
 
     /**
@@ -159,7 +159,7 @@ export default class SpotifyManager {
 
                 return UNMATCHED_PLAYLIST;
             } else {
-                this.guildsParseInProgress.add(guildID);
+                this.guildsParseInProgress[guildID] = new Date();
             }
 
             await interaction?.acknowledge();
@@ -301,7 +301,7 @@ export default class SpotifyManager {
                 );
             } finally {
                 clearInterval(updateParsing);
-                this.guildsParseInProgress.delete(guildID);
+                delete this.guildsParseInProgress[guildID];
             }
 
             message?.edit({
@@ -371,8 +371,18 @@ export default class SpotifyManager {
         };
     };
 
+    /**
+     * Remove any guilds that have been stuck parsing for more than 10 minutes
+     */
     cleanupSpotifyParsingLocks(): void {
-        this.guildsParseInProgress.clear();
+        for (const guildID in this.guildsParseInProgress) {
+            if (
+                this.guildsParseInProgress[guildID] <
+                new Date(Date.now() - 1000 * 60 * 10)
+            ) {
+                delete this.guildsParseInProgress[guildID];
+            }
+        }
     }
 
     private generateSpotifyResponsePromise(
@@ -457,7 +467,7 @@ export default class SpotifyManager {
                     logger.error(err.response.status);
                 }
 
-                this.guildsParseInProgress.delete(guildID);
+                delete this.guildsParseInProgress[guildID];
                 reject(err);
             }
         });
@@ -602,7 +612,7 @@ export default class SpotifyManager {
                     )}. err = ${err}`
                 );
 
-                this.guildsParseInProgress.delete(guildID);
+                delete this.guildsParseInProgress[guildID];
                 reject(err);
             }
         });
