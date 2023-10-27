@@ -1,5 +1,9 @@
 import { IPCLogger } from "../../logger";
-import { OptionAction, SPOTIFY_BASE_URL } from "../../constants";
+import {
+    OptionAction,
+    SPOTIFY_BASE_URL,
+    SPOTIFY_SHORTHAND_BASE_URL,
+} from "../../constants";
 import {
     friendlyFormattedNumber,
     isValidURL,
@@ -148,6 +152,13 @@ export default class SpotifyCommand implements BaseCommand {
                 ),
             },
             {
+                example: `\`/spotify playlist_url:${SPOTIFY_SHORTHAND_BASE_URL}...\``,
+                explanation: i18n.translate(
+                    guildID,
+                    "command.spotify.help.example.playlistURL",
+                ),
+            },
+            {
                 example: "`/spotify`",
                 explanation: i18n.translate(
                     guildID,
@@ -225,122 +236,15 @@ export default class SpotifyCommand implements BaseCommand {
             return;
         }
 
-        if (
-            isValidURL(playlistURL) &&
-            new RegExp(`^${SPOTIFY_BASE_URL}.+`).test(playlistURL)
-        ) {
-            let playlistID = playlistURL.split(SPOTIFY_BASE_URL)[1];
-            if (playlistID.includes("?si=")) {
-                playlistID = playlistID.split("?si=")[0];
-            }
+        const isFullURL = new RegExp(`^${SPOTIFY_BASE_URL}.+`).test(
+            playlistURL,
+        );
 
-            const premiumRequest = await isPremiumRequest(
-                session,
-                messageContext.author.id,
-            );
+        const isShorthandURL = new RegExp(
+            `^${SPOTIFY_SHORTHAND_BASE_URL}.+`,
+        ).test(playlistURL);
 
-            let matchedPlaylist: MatchedPlaylist;
-            if (session) {
-                matchedPlaylist = (await session.songSelector.reloadSongs(
-                    guildPreference,
-                    premiumRequest,
-                    playlistID,
-                    true,
-                    messageContext,
-                    interaction,
-                )) as MatchedPlaylist;
-            } else {
-                matchedPlaylist = (await new SongSelector().reloadSongs(
-                    guildPreference,
-                    premiumRequest,
-                    playlistID,
-                    true,
-                    messageContext,
-                    interaction,
-                )) as MatchedPlaylist;
-            }
-
-            logger.info(
-                `${getDebugLogHeader(messageContext)} | Matched ${
-                    matchedPlaylist.metadata.matchedSongsLength
-                }/${matchedPlaylist.metadata.playlistLength} (${(
-                    (100.0 * matchedPlaylist.metadata.matchedSongsLength) /
-                    matchedPlaylist.metadata.playlistLength
-                ).toFixed(2)}%) Spotify songs`,
-            );
-
-            if (matchedPlaylist.matchedSongs.length === 0) {
-                sendErrorMessage(
-                    messageContext,
-                    {
-                        title: i18n.translate(
-                            guildID,
-                            "command.spotify.noMatches.title",
-                        ),
-                        description: i18n.translate(
-                            guildID,
-                            "command.spotify.noMatches.description",
-                        ),
-                    },
-                    interaction,
-                );
-
-                return;
-            }
-
-            await guildPreference.setSpotifyPlaylistID(playlistID);
-
-            await LimitCommand.updateOption(
-                messageContext,
-                0,
-                matchedPlaylist.metadata.matchedSongsLength,
-                undefined,
-                false,
-            );
-
-            logger.info(
-                `${getDebugLogHeader(
-                    messageContext,
-                )} | Spotify playlist set to ${playlistID}`,
-            );
-
-            let matchedDescription = i18n.translate(
-                guildID,
-                "command.spotify.matched.description",
-                {
-                    matchedCount: friendlyFormattedNumber(
-                        matchedPlaylist.matchedSongs.length,
-                    ),
-                    totalCount: friendlyFormattedNumber(
-                        matchedPlaylist.metadata.playlistLength,
-                    ),
-                },
-            );
-
-            if (matchedPlaylist.truncated) {
-                matchedDescription += "\n\n";
-                matchedDescription += italicize(
-                    i18n.translate(
-                        guildID,
-                        "command.spotify.matched.truncated",
-                    ),
-                );
-            }
-
-            await sendInfoMessage(messageContext, {
-                title: i18n.translate(
-                    guildID,
-                    "command.spotify.matched.title",
-                    {
-                        playlistName: matchedPlaylist.metadata.playlistName,
-                    },
-                ),
-                description: matchedDescription,
-                url: playlistURL,
-                thumbnailUrl:
-                    matchedPlaylist.metadata.thumbnailUrl ?? undefined,
-            });
-        } else {
+        if (!isValidURL(playlistURL) || (!isFullURL && !isShorthandURL)) {
             sendErrorMessage(
                 messageContext,
                 {
@@ -357,6 +261,142 @@ export default class SpotifyCommand implements BaseCommand {
             );
             return;
         }
+
+        let playlistID: string;
+        if (isFullURL) {
+            playlistID = playlistURL.split(SPOTIFY_BASE_URL)[1];
+        } else {
+            try {
+                const response = await fetch(playlistURL);
+                const body = await response.text();
+                playlistID = body.split(SPOTIFY_BASE_URL)[1].split("?si=")[0];
+            } catch (err) {
+                logger.error(
+                    `${getDebugLogHeader(
+                        messageContext,
+                    )} | Failed to get playlist ID from shorthand Spotify URL. err = ${err}`,
+                );
+
+                sendErrorMessage(
+                    messageContext,
+                    {
+                        title: i18n.translate(
+                            messageContext.guildID,
+                            "command.spotify.invalidURL.title",
+                        ),
+                        description: i18n.translate(
+                            messageContext.guildID,
+                            "command.spotify.invalidURL.description",
+                        ),
+                    },
+                    interaction,
+                );
+                return;
+            }
+        }
+
+        if (playlistID.includes("?si=")) {
+            playlistID = playlistID.split("?si=")[0];
+        }
+
+        const premiumRequest = await isPremiumRequest(
+            session,
+            messageContext.author.id,
+        );
+
+        let matchedPlaylist: MatchedPlaylist;
+        if (session) {
+            matchedPlaylist = (await session.songSelector.reloadSongs(
+                guildPreference,
+                premiumRequest,
+                playlistID,
+                true,
+                messageContext,
+                interaction,
+            )) as MatchedPlaylist;
+        } else {
+            matchedPlaylist = (await new SongSelector().reloadSongs(
+                guildPreference,
+                premiumRequest,
+                playlistID,
+                true,
+                messageContext,
+                interaction,
+            )) as MatchedPlaylist;
+        }
+
+        logger.info(
+            `${getDebugLogHeader(messageContext)} | Matched ${
+                matchedPlaylist.metadata.matchedSongsLength
+            }/${matchedPlaylist.metadata.playlistLength} (${(
+                (100.0 * matchedPlaylist.metadata.matchedSongsLength) /
+                matchedPlaylist.metadata.playlistLength
+            ).toFixed(2)}%) Spotify songs`,
+        );
+
+        if (matchedPlaylist.matchedSongs.length === 0) {
+            sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        guildID,
+                        "command.spotify.noMatches.title",
+                    ),
+                    description: i18n.translate(
+                        guildID,
+                        "command.spotify.noMatches.description",
+                    ),
+                },
+                interaction,
+            );
+
+            return;
+        }
+
+        await guildPreference.setSpotifyPlaylistID(playlistID);
+
+        await LimitCommand.updateOption(
+            messageContext,
+            0,
+            matchedPlaylist.metadata.matchedSongsLength,
+            undefined,
+            false,
+        );
+
+        logger.info(
+            `${getDebugLogHeader(
+                messageContext,
+            )} | Spotify playlist set to ${playlistID}`,
+        );
+
+        let matchedDescription = i18n.translate(
+            guildID,
+            "command.spotify.matched.description",
+            {
+                matchedCount: friendlyFormattedNumber(
+                    matchedPlaylist.matchedSongs.length,
+                ),
+                totalCount: friendlyFormattedNumber(
+                    matchedPlaylist.metadata.playlistLength,
+                ),
+            },
+        );
+
+        if (matchedPlaylist.truncated) {
+            matchedDescription += "\n\n";
+            matchedDescription += italicize(
+                i18n.translate(guildID, "command.spotify.matched.truncated"),
+            );
+        }
+
+        await sendInfoMessage(messageContext, {
+            title: i18n.translate(guildID, "command.spotify.matched.title", {
+                playlistName: matchedPlaylist.metadata.playlistName,
+            }),
+            description: matchedDescription,
+            url: playlistURL,
+            thumbnailUrl: matchedPlaylist.metadata.thumbnailUrl ?? undefined,
+        });
 
         if (interaction?.acknowledged) {
             const optionsEmbed = await generateOptionsMessage(
