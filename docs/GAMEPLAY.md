@@ -80,8 +80,6 @@ For example, `/limit set top limit:100` will play the 100 most viewed songs in t
 
 View counts are frequently updated from YouTube.
 
-![limit](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/limit.png)
-
 ## /groups
 
 Setting the groups option limits the selection of songs to those belonging to the artist specified. For instance `/groups set group_1:blackpink group_2:itzy group_3:fromis 9 group_4:bts` will exclusively play songs from those four artists. You can view the list of groups names via the link in `/help action:groups`.
@@ -90,8 +88,6 @@ Setting the groups option limits the selection of songs to those belonging to th
 -   Add groups using `/groups add`
 -   Remove groups using `/groups remove`
 -   To reset this option, type `/groups reset`
-
-![groups](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/groups.png)
 
 ## /gender
 
@@ -109,13 +105,9 @@ Note that `/groups` and `/gender` are incompatible with each other. If you wish 
 
 Want to control whether groups or soloists are exclusively played? Check out `/help action:artisttype`.
 
-![gender](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/gender.png)
-
 ## /cutoff
 
 Setting a cutoff limits songs based on which year they were released. Using `/cutoff set earliest beginning_year:2015` will play songs from 2015 onwards, while `/cutoff set range beginning_year:2015 ending_year:2017` will play songs released between 2015 and 2017.
-
-![cutoff](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/cutoff.png)
 
 ## /seek
 
@@ -125,8 +117,6 @@ Setting the seek type changes which point in a song the bot starts playing from.
 -   `/seek set seek:random` will play from a random point in the song
 -   `/seek set seek:middle` will play from the middle of the song
 
-![seek](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/seek.png)
-
 ## /guessmode
 
 Setting the guess mode changes the objective of the game to guessing the name of the song, the artist, or both.
@@ -135,8 +125,6 @@ Setting the guess mode changes the objective of the game to guessing the name of
 -   `/guessmode set guessmode:artist` only accepts artist names as guesses
 -   `/guessmode set guessmode:both` accepts either the song or artist name
     -   A song guess will net you 1 point and an artist guess will net you 0.2 points
-
-![guessmode](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/guessmode.png)
 
 ## /exclude
 
@@ -149,21 +137,15 @@ Setting the exclude option ignores songs by the specified artists. For instance 
 
 Similarly, to force groups in to the game regardless of the current options, use `/include`.
 
-![exclude](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/exclude.png)
-
 ## /goal
 
 Setting the goal ends the game when the given goal score is reached. For example, if a player were to use `/goal set score:50`, the first player to 50 points would win the game.
-
-![goal](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/goal.png)
 
 ## /timer
 
 Setting a timer limits players to guess in under `time` seconds before the round ends automatically. If no one guesses right in the allotted time, the round is over.
 
 Set the timer to 10 (5? 3?) seconds and face off with your friends to see who the ultimate KMQ champ is, or set it to 30 seconds and avoid the `/skip` spam.
-
-![timer](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/timer.png)
 
 # Presets
 
@@ -197,8 +179,6 @@ Delete a preset.
 
 List all the server's presets.
 
-![preset](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/preset.png)
-
 # Game Modes
 
 Getting tired of classic KMQ? Try out elimination, teams, and hidden mode!
@@ -207,15 +187,11 @@ Getting tired of classic KMQ? Try out elimination, teams, and hidden mode!
 
 See who can survive the longest into a KMQ game with elimination mode. Guessing correctly will save your life while everyone else loses one. Use elimination mode in conjunction with `/timer` to raise the pressure!
 
-![elimination](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/elimination.png)
-
 ## /play teams
 
 Team up with your friends and crush the competition with teams mode! Split up into as many teams as you'd like and see who will emerge triumphant in the battle for 10% more EXP! Once your team is confident of its abilities, join the [official KMQ server](https://discord.gg/R55g4CRESW) to face-off with the best of the best.
 
 To keep the game fair, switching teams mid-game forfeits your current points and EXP.
-
-![teams](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/teams.png)
 
 ## /play hidden
 
