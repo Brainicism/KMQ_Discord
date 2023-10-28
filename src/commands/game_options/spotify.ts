@@ -186,6 +186,12 @@ export default class SpotifyCommand implements BaseCommand {
                 playlistURL == null,
             );
         } else {
+            logger.warn(
+                `${getDebugLogHeader(
+                    message,
+                )} | Invalid URL in call. playlistURL = ${playlistURL}`,
+            );
+
             sendErrorMessage(MessageContext.fromMessage(message), {
                 title: i18n.translate(
                     message.guildID,
@@ -245,6 +251,12 @@ export default class SpotifyCommand implements BaseCommand {
         ).test(playlistURL);
 
         if (!isValidURL(playlistURL) || (!isFullURL && !isShorthandURL)) {
+            logger.warn(
+                `${getDebugLogHeader(
+                    messageContext,
+                )} | Invalid URL in updateOption. playlistURL = ${playlistURL}`,
+            );
+
             sendErrorMessage(
                 messageContext,
                 {
@@ -274,7 +286,7 @@ export default class SpotifyCommand implements BaseCommand {
                 logger.error(
                     `${getDebugLogHeader(
                         messageContext,
-                    )} | Failed to get playlist ID from shorthand Spotify URL. err = ${err}`,
+                    )} | Failed to get playlist ID from shorthand Spotify URL. playlistURL = ${playlistURL}. err = ${err}`,
                 );
 
                 sendErrorMessage(
