@@ -276,7 +276,9 @@ export default class SpotifyCommand implements BaseCommand {
 
         let playlistID: string;
         if (isFullURL) {
-            playlistID = playlistURL.split(SPOTIFY_BASE_URL)[1];
+            playlistID = playlistURL
+                .split(SPOTIFY_BASE_URL)[1]
+                .split("?si=")[0];
         } else {
             try {
                 const response = await fetch(playlistURL);
@@ -305,10 +307,6 @@ export default class SpotifyCommand implements BaseCommand {
                 );
                 return;
             }
-        }
-
-        if (playlistID.includes("?si=")) {
-            playlistID = playlistID.split("?si=")[0];
         }
 
         const premiumRequest = await isPremiumRequest(
