@@ -189,7 +189,9 @@ export default class SpotifyCommand implements BaseCommand {
             logger.warn(
                 `${getDebugLogHeader(
                     message,
-                )} | Invalid URL in call. playlistURL = ${playlistURL}`,
+                )} | Invalid URL in call. playlistURL = ${
+                    parsedMessage.components[0]
+                }`,
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
@@ -275,38 +277,37 @@ export default class SpotifyCommand implements BaseCommand {
         }
 
         let playlistID: string;
-        if (isFullURL) {
-            playlistID = playlistURL
-                .split(SPOTIFY_BASE_URL)[1]
-                .split("?si=")[0];
-        } else {
-            try {
+        const matchPlaylistID = `${SPOTIFY_BASE_URL}([a-zA-Z0-9]+)`;
+        try {
+            if (isFullURL) {
+                playlistID = playlistURL.match(matchPlaylistID)![1];
+            } else {
                 const response = await fetch(playlistURL);
                 const body = await response.text();
-                playlistID = body.split(SPOTIFY_BASE_URL)[1].split("?si=")[0];
-            } catch (err) {
-                logger.error(
-                    `${getDebugLogHeader(
-                        messageContext,
-                    )} | Failed to get playlist ID from shorthand Spotify URL. playlistURL = ${playlistURL}. err = ${err}`,
-                );
-
-                sendErrorMessage(
-                    messageContext,
-                    {
-                        title: i18n.translate(
-                            messageContext.guildID,
-                            "command.spotify.invalidURL.title",
-                        ),
-                        description: i18n.translate(
-                            messageContext.guildID,
-                            "command.spotify.invalidURL.description",
-                        ),
-                    },
-                    interaction,
-                );
-                return;
+                playlistID = body.match(matchPlaylistID)![1];
             }
+        } catch (err) {
+            logger.error(
+                `${getDebugLogHeader(
+                    messageContext,
+                )} | Failed to get playlist ID from Spotify URL. playlistURL = ${playlistURL}. isFullURL = ${isFullURL}. err = ${err}`,
+            );
+
+            sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "command.spotify.invalidURL.title",
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "command.spotify.invalidURL.description",
+                    ),
+                },
+                interaction,
+            );
+            return;
         }
 
         const premiumRequest = await isPremiumRequest(
