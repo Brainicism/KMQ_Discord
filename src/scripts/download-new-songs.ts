@@ -191,6 +191,11 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
 
         cacheStream.once("finish", async () => {
             try {
+                if ((await fs.promises.stat(tempLocation)).size === 0) {
+                    reject(new Error(`Song file is empty. id = ${id}`));
+                    return;
+                }
+
                 await fs.promises.rename(tempLocation, cachedSongLocation);
                 const duration =
                     await getAudioDurationInSeconds(cachedSongLocation);
