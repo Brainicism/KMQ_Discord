@@ -253,6 +253,7 @@ export const STATUS_COOKIE = path.join(__dirname, "../status");
 
 export const PERMISSIONS_LINK = "https://www.youtube.com/watch?v=87GW0SmF5LI";
 export const SPOTIFY_BASE_URL = "https://open.spotify.com/playlist/";
+export const SPOTIFY_SHORTHAND_BASE_URL = "https://spotify.link/";
 
 export enum GroupAction {
     ADD = "add",
