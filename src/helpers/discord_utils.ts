@@ -1611,13 +1611,16 @@ export async function sendBookmarkedSongs(
             inline: boolean;
         }> = [...songs].map((bookmarkedSong) => ({
             name: `${bold(
-                `"${getLocalizedSongName(
-                    bookmarkedSong[1].song,
-                    locale,
-                )}" - ${getLocalizedArtistName(
-                    bookmarkedSong[1].song,
-                    locale,
-                )}`,
+                truncatedString(
+                    `"${getLocalizedSongName(
+                        bookmarkedSong[1].song,
+                        locale,
+                    )}" - ${getLocalizedArtistName(
+                        bookmarkedSong[1].song,
+                        locale,
+                    )}`,
+                    256,
+                ),
             )} (${standardDateFormat(bookmarkedSong[1].song.publishDate)})`,
             value: `[${friendlyFormattedNumber(
                 bookmarkedSong[1].song.views,
