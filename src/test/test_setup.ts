@@ -53,28 +53,28 @@ before(async function () {
         db.agnostic,
     );
 
-    // create dedup group name procedure
-    const originalDedupGroupNamesSqlPath = path.join(
+    // create post seed data cleaning procedure
+    const originalPostSeedDataCleaningSqlPath = path.join(
         __dirname,
-        "../../sql/procedures/deduplicate_app_kpop_group_names.sql",
+        "../../sql/procedures/post_seed_data_cleaning_procedure.sql",
     );
 
-    const testDedupGroupNamesSqlPath = path.join(
+    const testPostSeedDataCleaningSqlPath = path.join(
         __dirname,
-        "../../sql/deduplicate_app_kpop_group_names.validation.sql",
+        "../../sql/post_seed_data_cleaning_procedure.validation.sql",
     );
 
     cp.execSync(
-        `sed 's/kpop_videos/kpop_videos_test/g;s/kmq/kmq_test/g' ${originalDedupGroupNamesSqlPath} > ${testDedupGroupNamesSqlPath}`,
+        `sed 's/kpop_videos/kpop_videos_test/g;s/kmq/kmq_test/g' ${originalPostSeedDataCleaningSqlPath} > ${testPostSeedDataCleaningSqlPath}`,
     );
 
     cp.execSync(
-        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test < ${testDedupGroupNamesSqlPath}`,
+        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test < ${testPostSeedDataCleaningSqlPath}`,
         { stdio: "inherit" },
     );
 
     cp.execSync(
-        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test -e "CALL DeduplicateGroupNames()"`,
+        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test -e "CALL PostSeedDataCleaning()"`,
     );
 
     // create kmq data generation procedure
