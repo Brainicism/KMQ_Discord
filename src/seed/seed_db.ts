@@ -181,11 +181,9 @@ export async function generateKmqDataTables(
  * Re-creates the KMQ data tables
  * @param db - The database context
  */
-export async function deduplicateGroupNames(
-    db: DatabaseContext,
-): Promise<void> {
-    logger.info("Deduplicating group names...");
-    await sql`CALL DeduplicateGroupNames();`.execute(db.kmq);
+export async function postSeedDataCleaning(db: DatabaseContext): Promise<void> {
+    logger.info("Performing post seed data cleaning...");
+    await sql`CALL PostSeedDataCleaning();`.execute(db.kmq);
 }
 
 /**
@@ -393,15 +391,15 @@ async function validateSqlDump(
         );
 
         if (!bootstrap) {
-            logger.info("Validating deduplication of group names");
+            logger.info("Validating post-seed data cleaning");
             const originalDedupGroupNamesSqlPath = path.join(
                 __dirname,
-                "../../sql/procedures/deduplicate_app_kpop_group_names.sql",
+                "../../sql/procedures/post_seed_data_cleaning_procedure.sql",
             );
 
             const validationDedupGroupNamesSqlPath = path.join(
                 __dirname,
-                "../../sql/deduplicate_app_kpop_group_names.validation.sql",
+                "../../sql/post_seed_data_cleaning_procedure.validation.sql",
             );
 
             await exec(
@@ -413,7 +411,7 @@ async function validateSqlDump(
             );
 
             await sql
-                .raw("CALL DeduplicateGroupNames();")
+                .raw("CALL PostSeedDataCleaning();")
                 .execute(db.kpopVideosValidation);
 
             logger.info("Validating creation of data tables");
@@ -619,7 +617,7 @@ async function updateKpopDatabase(
 
     if (!options.skipReseed) {
         await seedDb(db, bootstrap);
-        await deduplicateGroupNames(db);
+        await postSeedDataCleaning(db);
     } else {
         logger.info("Skipping reseed");
     }
