@@ -9,7 +9,8 @@ BEGIN
 	UPDATE kpop_videos.app_kpop_group as a
 	RIGHT JOIN
 	(SELECT LOWER(name) as name, count(*) as c FROM kpop_videos.app_kpop_group GROUP BY LOWER(name) HAVING count(*) > 1 AND name NOT LIKE "%(%)%" ) as b USING (name)
-	SET a.name = concat(a.name, " (", a.fname, ")");
+	SET a.name = concat(a.name, " (", a.fname, ")")
+	WHERE a.fname <> '';
 
 	/* remove bracketed components from song names */
 	ALTER TABLE kpop_videos.app_kpop ADD COLUMN IF NOT EXISTS original_name VARCHAR(255);
