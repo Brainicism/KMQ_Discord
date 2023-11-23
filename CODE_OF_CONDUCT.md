@@ -56,7 +56,7 @@ further defined and clarified by project maintainers.
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported by contacting the project team through Discord direct-message
-(`Cool#0001` and `ohmi#7183`) or the [official KMQ server](https://discord.gg/RCuzwYV). All
+(`zshrc` and `ohmi`) or the [official KMQ server](https://discord.gg/RCuzwYV). All
 complaints will be reviewed and investigated and will result in a response that
 is deemed necessary and appropriate to the circumstances. The project team is
 obligated to maintain confidentiality with regard to the reporter of an incident.
