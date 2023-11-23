@@ -19,7 +19,7 @@ program
         "--timer <minutes>",
         "Countdown duration",
         (x) => parseInt(x, 10),
-        5,
+        2,
     );
 program.parse();
 
