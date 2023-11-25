@@ -91,12 +91,14 @@
     "@discordjs/node-pre-gyp" "^0.4.5"
     node-addon-api "^5.0.0"
 
-"@distube/ytdl-core@https://github.com/distubejs/ytdl-core":
-  version "4.13.2"
-  resolved "https://github.com/distubejs/ytdl-core#205e59ee23ae492ba229afec8603a16290c21c6e"
+"@distube/ytdl-core@^4.13.3":
+  version "4.13.3"
+  resolved "https://registry.yarnpkg.com/@distube/ytdl-core/-/ytdl-core-4.13.3.tgz#963086184b2933f623655ec9a18b251bf153753f"
+  integrity sha512-WHVzp0NyUkmdxRkfU8tN7eRquL7bnia2U/EDNWVupCptRo7EToTdBKHwJrDFqvavbXsdqLG/kR1r+1LaPglrFQ==
   dependencies:
     http-cookie-agent "^5.0.4"
     m3u8stream "^0.8.6"
+    miniget "^4.2.3"
     sax "^1.2.4"
     tough-cookie "^4.1.3"
     undici "^5.25.2"
@@ -2845,7 +2847,7 @@ mime-types@^2.1.12:
   dependencies:
     mime-db "1.52.0"
 
-miniget@^4.2.2:
+miniget@^4.2.2, miniget@^4.2.3:
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/miniget/-/miniget-4.2.3.tgz#3707a24c7c11c25d359473291638ab28aab349bd"
   integrity sha512-SjbDPDICJ1zT+ZvQwK0hUcRY4wxlhhNpHL9nJOB2MEAXRGagTljsO8MEDzQMTFf0Q8g4QNi8P9lEm/g7e+qgzA==
