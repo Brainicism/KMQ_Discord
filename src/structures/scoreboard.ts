@@ -103,9 +103,10 @@ export default class Scoreboard {
                 guessResult.pointsEarned,
             );
 
+            this.players[guessResult.userID].incrementCorrectGuessCount();
             this.players[guessResult.userID].incrementExp(guessResult.expGain);
-            const winnerScore = this.players[guessResult.userID].getScore();
 
+            const winnerScore = this.players[guessResult.userID].getScore();
             if (winnerScore === this.highestScore) {
                 // If user is tied for first, add them to the first place array
                 this.firstPlace.push(this.players[guessResult.userID]);
@@ -156,6 +157,14 @@ export default class Scoreboard {
      */
     getPlayerExpGain(userID: string): number {
         return this.players[userID]?.getExpGain() ?? 0;
+    }
+
+    /**
+     * @param userID - The Discord user ID of the player to check
+     * @returns the number of correct guesses by the player
+     */
+    getPlayerCorrectGuessCount(userID: string): number {
+        return this.players[userID]?.getCorrectGuessCount() ?? 0;
     }
 
     /**

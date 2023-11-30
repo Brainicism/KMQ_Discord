@@ -505,11 +505,13 @@ export default class GameSession extends Session {
             this.scoreboard.getPlayerIDs().map(async (participant) => {
                 await this.ensurePlayerStat(participant);
                 await GameSession.incrementPlayerGamesPlayed(participant);
-                const playerScore = this.scoreboard.getPlayerScore(participant);
-                if (playerScore > 0) {
+                const playerCorrectGuessCount =
+                    this.scoreboard.getPlayerCorrectGuessCount(participant);
+
+                if (playerCorrectGuessCount > 0) {
                     await GameSession.incrementPlayerSongsGuessed(
                         participant,
-                        1,
+                        playerCorrectGuessCount,
                     );
                 }
 
@@ -526,6 +528,8 @@ export default class GameSession extends Session {
                         leveledUpPlayers.push(levelUpResult);
                     }
                 }
+
+                const playerScore = this.scoreboard.getPlayerScore(participant);
 
                 await GameSession.insertPerSessionStats(
                     participant,
