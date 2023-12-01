@@ -23,6 +23,9 @@ export default class Player {
     /** The player's current score */
     protected score: number;
 
+    /** The number of correct guesses the player has made */
+    private correctGuessCount: number;
+
     /** The player's avatar URL */
     private readonly avatarURL: string | null;
 
@@ -48,6 +51,7 @@ export default class Player {
         this.guildID = guildID;
         this.avatarURL = avatarURL;
         this.score = points;
+        this.correctGuessCount = 0;
         this.username = username;
         this.firstGameOfTheDay = firstGameOfTheDay;
         this.premium = premium;
@@ -120,6 +124,11 @@ export default class Player {
         return this.score;
     }
 
+    /** @returns how many correct guesses the player has made */
+    getCorrectGuessCount(): number {
+        return this.correctGuessCount;
+    }
+
     /*
      * @param boldScore - whether to display the score in bold
      * @returns what to display as the score in the scoreboard for the player
@@ -150,6 +159,13 @@ export default class Player {
      */
     incrementScore(pointsEarned: number): void {
         this.score += pointsEarned;
+    }
+
+    /**
+     * Increments the player's correct guess count by 1
+     */
+    incrementCorrectGuessCount(): void {
+        this.correctGuessCount += 1;
     }
 
     /**
