@@ -529,11 +529,9 @@ export default class GameSession extends Session {
                     }
                 }
 
-                const playerScore = this.scoreboard.getPlayerScore(participant);
-
                 await GameSession.insertPerSessionStats(
                     participant,
-                    playerScore,
+                    playerCorrectGuessCount,
                     playerExpGain,
                     levelUpResult
                         ? levelUpResult.endLevel - levelUpResult.startLevel
@@ -1373,13 +1371,13 @@ export default class GameSession extends Session {
     /**
      * Store per-session stats for temporary leaderboard
      * @param userID - The user the data belongs to
-     * @param score - The score gained in the game
+     * @param correctGuessCount - The number of correct guesses
      * @param expGain - The EXP gained in the game
      * @param levelsGained - The levels gained in the game
      */
     private static async insertPerSessionStats(
         userID: string,
-        score: number,
+        correctGuessCount: number,
         expGain: number,
         levelsGained: number,
     ): Promise<void> {
@@ -1388,7 +1386,7 @@ export default class GameSession extends Session {
             .values({
                 player_id: userID,
                 date: new Date(),
-                songs_guessed: score,
+                songs_guessed: correctGuessCount,
                 exp_gained: expGain,
                 levels_gained: levelsGained,
             })
