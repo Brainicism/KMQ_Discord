@@ -38,7 +38,7 @@ BEGIN
 	SELECT
 		TRIM(kpop_videos.app_kpop.name) AS song_name_en,
 		TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1)) AS clean_song_name_en,
-		REGEXP_REPLACE(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1), '[^0-9a-zA-Z]', '') AS clean_song_name_alpha_numeric,
+		(CASE WHEN kpop_videos.app_kpop.name REGEXP '^[^a-zA-Z0-9]+$' THEN kpop_videos.app_kpop.name ELSE REGEXP_REPLACE(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1), '[^0-9a-zA-Z]', '') END) AS clean_song_name_alpha_numeric,
 		TRIM(kpop_videos.app_kpop.kname) AS song_name_ko,
 		TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop.kname, '(', 1)) AS clean_song_name_ko,
 		kpop_videos.app_kpop.alias AS song_aliases,
@@ -76,7 +76,7 @@ BEGIN
 		SELECT
 			TRIM(kpop_videos.app_kpop.name) AS song_name_en,
 			TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1)) AS clean_song_name_en,
-			REGEXP_REPLACE(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1), '[^0-9a-zA-Z]', '') AS clean_song_name_alpha_numeric,
+			(CASE WHEN kpop_videos.app_kpop.name REGEXP '^[^a-zA-Z0-9]+$' THEN kpop_videos.app_kpop.name ELSE REGEXP_REPLACE(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1), '[^0-9a-zA-Z]', '') END) AS clean_song_name_alpha_numeric,
 			TRIM(kpop_videos.app_kpop.kname) AS song_name_ko,
 			TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop.kname, '(', 1)) AS clean_song_name_ko,
 			kpop_videos.app_kpop.alias AS song_aliases,
