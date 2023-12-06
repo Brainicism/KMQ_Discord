@@ -5,4 +5,5 @@ export interface MatchedPlaylist {
     matchedSongs: Array<QueriedSong>;
     metadata: PlaylistMetadata;
     truncated: boolean;
+    unmatchedSongs: Array<string>;
 }

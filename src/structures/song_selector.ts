@@ -562,7 +562,7 @@ export default class SongSelector {
         messageContext?: MessageContext,
         interaction?: Eris.CommandInteraction,
     ): Promise<QueriedSongList & MatchedPlaylist> {
-        const { matchedSongs, metadata, truncated } =
+        const { matchedSongs, metadata, truncated, unmatchedSongs } =
             await State.spotifyManager.getMatchedSpotifySongs(
                 guildID,
                 playlistID,
@@ -590,6 +590,7 @@ export default class SongSelector {
             matchedSongs,
             metadata,
             truncated,
+            unmatchedSongs,
         };
     }
 }

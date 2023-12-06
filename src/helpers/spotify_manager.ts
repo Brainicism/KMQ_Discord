@@ -39,11 +39,7 @@ const SONG_MATCH_TIMEOUT_MS = 90000;
 
 export default class SpotifyManager {
     public cachedPlaylists: {
-        [playlistID: string]: {
-            metadata: PlaylistMetadata;
-            matchedSongs: Array<QueriedSong>;
-            truncated: boolean;
-        };
+        [playlistID: string]: MatchedPlaylist;
     } = {};
 
     private accessToken: string | undefined;
@@ -93,6 +89,7 @@ export default class SpotifyManager {
             },
             matchedSongs: [],
             truncated: false,
+            unmatchedSongs: [],
         };
 
         let logHeader: string;
@@ -115,30 +112,31 @@ export default class SpotifyManager {
         }
 
         const cachedPlaylist = this.cachedPlaylists[playlistID];
-        let spotifyMetadata: PlaylistMetadata | null;
+        let metadata: PlaylistMetadata | null;
         if (forceRefreshMetadata || !cachedPlaylist) {
-            spotifyMetadata = await this.getPlaylistMetadata(playlistID);
+            metadata = await this.getPlaylistMetadata(playlistID);
             logger.info(
                 `${logHeader} | Refreshing Spotify metadata. forceRefreshMetadata: ${forceRefreshMetadata}, cachedPlaylist: ${!!cachedPlaylist}`,
             );
         } else {
-            spotifyMetadata = cachedPlaylist.metadata;
+            metadata = cachedPlaylist.metadata;
         }
 
-        if (!spotifyMetadata) {
+        if (!metadata) {
             logger.warn(`${logHeader} | No Spotify metadata`);
             return UNMATCHED_PLAYLIST;
         }
 
         let matchedSongs: Array<QueriedSong> = [];
+        let unmatchedSongs: Array<string> = [];
         let truncated = false;
 
         if (
             cachedPlaylist &&
-            cachedPlaylist.metadata.snapshotID === spotifyMetadata.snapshotID
+            cachedPlaylist.metadata.snapshotID === metadata.snapshotID
         ) {
             logger.info(`${logHeader} | Using cached playlist`);
-            ({ matchedSongs, truncated } = cachedPlaylist);
+            ({ matchedSongs, truncated, unmatchedSongs } = cachedPlaylist);
         } else {
             if (this.isParseInProgress(guildID)) {
                 if (messageContext) {
@@ -174,15 +172,15 @@ export default class SpotifyManager {
             logger.info(`${logHeader} | Using Spotify API for playlist`);
 
             const numPlaylistPages = Math.ceil(
-                spotifyMetadata.playlistLength / spotifyMetadata.limit,
+                metadata.playlistLength / metadata.limit,
             );
 
             const requestURLs = [...Array(numPlaylistPages).keys()].map(
                 (n) =>
                     `${BASE_URL}/playlists/${playlistID}/tracks?${encodeURI(
                         `market=US&fields=items(track(name,artists(name))),next&limit=${
-                            spotifyMetadata!.limit
-                        }&offset=${n * spotifyMetadata!.limit}`,
+                            metadata!.limit
+                        }&offset=${n * metadata!.limit}`,
                     )}`,
             );
 
@@ -214,8 +212,6 @@ export default class SpotifyManager {
                     Date.now() - start
                 }ms`,
             );
-
-            const unmatchedSongs: Array<String> = [];
 
             logger.info(
                 `${logHeader} | Starting to parse playlist, number of songs: ${spotifySongs.length}`,
@@ -360,19 +356,22 @@ export default class SpotifyManager {
             }
         }
 
-        spotifyMetadata.matchedSongsLength = matchedSongs.length;
+        metadata.matchedSongsLength = matchedSongs.length;
         matchedSongs = _.uniqBy(matchedSongs, "youtubeLink");
+        unmatchedSongs = _.uniq(unmatchedSongs);
 
         this.cachedPlaylists[playlistID] = {
-            metadata: spotifyMetadata,
+            metadata,
             matchedSongs,
             truncated,
+            unmatchedSongs,
         };
 
         return {
             matchedSongs,
-            metadata: spotifyMetadata,
+            metadata,
             truncated,
+            unmatchedSongs,
         };
     };
 
@@ -611,7 +610,7 @@ export default class SpotifyManager {
                 if (result) {
                     resolve(result);
                 } else {
-                    resolve(`${song.name} - ${song.artists[0]}`);
+                    resolve(`"${song.name}" - ${song.artists.join(", ")}`);
                 }
             } catch (err) {
                 logger.error(

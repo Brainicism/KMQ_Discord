@@ -1185,6 +1185,10 @@
             }
         },
         "spotify": {
+            "fileFormat": {
+                "matched": "「{{playlistName}}」の一致した曲：\n{{matchedSongs}}",
+                "unmatched": "「{{playlistName}}」の一致しなかった曲：\n{{unmatchedSongs}}"
+            },
             "help": {
                 "description": "指定されたSpotifyプレイリストからの曲のみ再生する",
                 "example": {
@@ -1192,6 +1196,8 @@
                     "reset": "プレイリストからの再生を停止する"
                 },
                 "interaction": {
+                    "matches": "一致した曲と一致していない曲のリストを見る",
+                    "matchesLink": "一致した曲のYouTubeのURLを表示するかどうか",
                     "playlistURL": "曲を取得するプレイリスト"
                 },
                 "name": "spotify"
@@ -1208,6 +1214,10 @@
             "noMatches": {
                 "description": "曲がマッチしませんでした。",
                 "title": "Spotifyから曲を取得できませんでした。"
+            },
+            "noPlaylistSet": {
+                "description": "このコマンドを使用する前に{{spotifySet}}プレイリストを設定してください。",
+                "title": "プレイリストが設定されていません"
             },
             "parsing": "Spotifyプレイリストを読み込み中...",
             "parsingAlreadyInProgress": {

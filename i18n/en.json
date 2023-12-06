@@ -1185,6 +1185,10 @@
             }
         },
         "spotify": {
+            "fileFormat": {
+                "matched": "Matched songs for \"{{playlistName}}\":\n{{matchedSongs}}",
+                "unmatched": "Unmatched songs for \"{{playlistName}}\":\n{{unmatchedSongs}}"
+            },
             "help": {
                 "description": "Play songs exclusively from a given Spotify playlist",
                 "example": {
@@ -1192,6 +1196,8 @@
                     "reset": "Stop playing from the playlist"
                 },
                 "interaction": {
+                    "matches": "See a list of matched and unmatched songs",
+                    "matchesLink": "Whether to show the YouTube URL to matched songs",
                     "playlistURL": "The playlist to retrieve songs from"
                 },
                 "name": "spotify"
@@ -1208,6 +1214,10 @@
             "noMatches": {
                 "description": "No songs were matched.",
                 "title": "Failed to fetch songs from Spotify"
+            },
+            "noPlaylistSet": {
+                "description": "{{spotifySet}} a playlist before using this command.",
+                "title": "No Playlist Set"
             },
             "parsing": "Loading Spotify playlist...",
             "parsingAlreadyInProgress": {

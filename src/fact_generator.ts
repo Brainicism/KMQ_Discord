@@ -1045,7 +1045,7 @@ async function historicalGaonWeekly(lng: LocaleType): Promise<Array<string>> {
     const endYear = new Date().getFullYear() - 1;
     let week = weekOfYear();
     /**
-     * Some weeks have 53 days depending on when you start counting a 'week'
+     * Some years have 53 weeks depending on when you start counting a 'week'
      * Better safe than sorry and just call it the 52nd week
      */
     week = week === 53 ? 52 : week;
