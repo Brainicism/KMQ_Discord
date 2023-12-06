@@ -22,9 +22,13 @@ Gameplay is initiated via `/play`, which invites the bot to a voice channel. The
 
 If you are interested in contributing to KMQ, [instructions on setup and development can be found here.](docs/DEVELOPER.md)
 
+# Terms of Service
+
+Our terms of service can be found [here](https://kpop.gg/TERMS_OF_SERVICE).
+
 # Privacy Policy
 
-Our privacy policy can be found [here](https://brainicism.github.io/KMQ_Discord/PRIVACY).
+Our privacy policy can be found [here](https://kpop.gg/PRIVACY).
 
 # Credits
 
