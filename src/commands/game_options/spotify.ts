@@ -5,9 +5,11 @@ import {
     SPOTIFY_SHORTHAND_BASE_URL,
 } from "../../constants";
 import {
+    clickableSlashCommand,
     friendlyFormattedNumber,
     isValidURL,
     italicize,
+    standardDateFormat,
 } from "../../helpers/utils";
 import {
     generateEmbed,
@@ -17,9 +19,14 @@ import {
     notifyOptionsGenerationError,
     sendErrorMessage,
     sendInfoMessage,
+    sendMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { isPremiumRequest } from "../../helpers/game_utils";
+import {
+    getLocalizedArtistName,
+    getLocalizedSongName,
+    isPremiumRequest,
+} from "../../helpers/game_utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
@@ -29,6 +36,7 @@ import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import SongSelector from "../../structures/song_selector";
+import State from "../../state";
 import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type { MatchedPlaylist } from "../../interfaces/matched_playlist";
@@ -131,6 +139,51 @@ export default class SpotifyCommand implements BaseCommand {
                     type: Eris.Constants.ApplicationCommandOptionTypes
                         .SUB_COMMAND,
                     options: [],
+                },
+                {
+                    name: "matches",
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "command.spotify.help.interaction.matches",
+                    ),
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.spotify.help.interaction.matches",
+                                ),
+                            }),
+                            {},
+                        ),
+
+                    type: Eris.Constants.ApplicationCommandOptionTypes
+                        .SUB_COMMAND,
+                    options: [
+                        {
+                            name: "show_link",
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .BOOLEAN,
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.spotify.help.interaction.matchesLink",
+                            ),
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.spotify.help.interaction.matchesLink",
+                                        ),
+                                    }),
+                                    {},
+                                ),
+                        },
+                    ],
                 },
             ],
         },
@@ -442,6 +495,111 @@ export default class SpotifyCommand implements BaseCommand {
         }
     }
 
+    static async sendMatchedSongsFile(
+        interaction: Eris.CommandInteraction,
+        messageContext: MessageContext,
+        showLink: boolean,
+    ): Promise<void> {
+        const guildID = messageContext.guildID;
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID,
+        );
+
+        if (!guildPreference.isSpotifyPlaylist()) {
+            await sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        guildID,
+                        "command.spotify.noPlaylistSet.title",
+                    ),
+                    description: i18n.translate(
+                        guildID,
+                        "command.spotify.noPlaylistSet.description",
+                        {
+                            spotifySet: clickableSlashCommand(
+                                "spotify",
+                                OptionAction.SET,
+                            ),
+                        },
+                    ),
+                },
+                interaction,
+            );
+            return;
+        }
+
+        const playlistID = guildPreference.getSpotifyPlaylistID();
+        const premiumRequest = await isPremiumRequest(
+            Session.getSession(guildID),
+            messageContext.author.id,
+        );
+
+        const playlist = await State.spotifyManager.getMatchedSpotifySongs(
+            guildID,
+            playlistID!,
+            premiumRequest,
+            false,
+            messageContext,
+            interaction,
+        );
+
+        const locale = State.getGuildLocale(guildID);
+        const unmatchedSongs = playlist.unmatchedSongs.map(
+            (song, index) => `${index + 1}. ${song}`,
+        );
+
+        const matchedSongs = playlist.matchedSongs.map(
+            (song, index) =>
+                `${index + 1}. "${getLocalizedSongName(
+                    song,
+                    locale,
+                )}" - ${getLocalizedArtistName(song, locale)}${
+                    showLink ? ` (${song.youtubeLink})` : ""
+                }`,
+        );
+
+        const attachments: Eris.AdvancedMessageContentAttachment[] = [];
+        if (unmatchedSongs.length > 0) {
+            attachments.push({
+                filename: `kmq-playlist-unmatched-${playlistID}-${standardDateFormat(
+                    new Date(),
+                )}.txt`,
+                file: i18n.translate(
+                    locale,
+                    "command.spotify.fileFormat.unmatched",
+                    {
+                        playlistName: playlist.metadata.playlistName,
+                        unmatchedSongs: unmatchedSongs.join("\n"),
+                    },
+                ),
+            });
+        }
+
+        if (matchedSongs.length > 0) {
+            attachments.push({
+                filename: `kmq-playlist-matched-${playlistID}-${standardDateFormat(
+                    new Date(),
+                )}.txt`,
+                file: i18n.translate(
+                    locale,
+                    "command.spotify.fileFormat.matched",
+                    {
+                        playlistName: playlist.metadata.playlistName,
+                        matchedSongs: matchedSongs.join("\n"),
+                    },
+                ),
+            });
+        }
+
+        await sendMessage(
+            messageContext.textChannelID,
+            { attachments },
+            undefined,
+            interaction,
+        );
+    }
+
     /**
      * @param interaction - The interaction
      * @param messageContext - The message context
@@ -454,18 +612,27 @@ export default class SpotifyCommand implements BaseCommand {
             getInteractionValue(interaction);
 
         let playlistURL: string | undefined;
-        const action = interactionName as OptionAction;
-        if (action === OptionAction.RESET) {
-            playlistURL = undefined;
-        } else if (action === OptionAction.SET) {
-            playlistURL = encodeURI(interactionOptions["playlist_url"]);
-        }
+        if (interactionName! in OptionAction) {
+            const action = interactionName as OptionAction;
+            if (action === OptionAction.RESET) {
+                playlistURL = undefined;
+            } else if (action === OptionAction.SET) {
+                playlistURL = encodeURI(interactionOptions["playlist_url"]);
+            }
 
-        await SpotifyCommand.updateOption(
-            messageContext,
-            playlistURL,
-            interaction,
-            playlistURL == null,
-        );
+            await SpotifyCommand.updateOption(
+                messageContext,
+                playlistURL,
+                interaction,
+                playlistURL == null,
+            );
+        } else if (interactionName === "matches") {
+            const showLink = interactionOptions["show_link"] ?? false;
+            await SpotifyCommand.sendMatchedSongsFile(
+                interaction,
+                messageContext,
+                showLink,
+            );
+        }
     }
 }

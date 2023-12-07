@@ -1185,6 +1185,10 @@
             }
         },
         "spotify": {
+            "fileFormat": {
+                "matched": "与“{{playlistName}}”匹配的歌曲：\n{{matchedSongs}}",
+                "unmatched": "与“{{playlistName}}”不匹配的歌曲：\n{{unmatchedSongs}}"
+            },
             "help": {
                 "description": "仅从给定的 Spotify 播放列表中播放歌曲",
                 "example": {
@@ -1192,6 +1196,8 @@
                     "reset": "停止从播放列表中播放"
                 },
                 "interaction": {
+                    "matches": "查看匹配和不匹配歌曲的列表",
+                    "matchesLink": "是否显示匹配歌曲的YouTube链接",
                     "playlistURL": "检索歌曲的播放列表"
                 },
                 "name": "spotify"
@@ -1208,6 +1214,10 @@
             "noMatches": {
                 "description": "未匹配到任何歌曲。",
                 "title": "无法从 Spotify 检索歌曲。"
+            },
+            "noPlaylistSet": {
+                "description": "使用此命令前请{{spotifySet}}播放列表。",
+                "title": "未设置播放列表"
             },
             "parsing": "正在加载Spotify播放列表...",
             "parsingAlreadyInProgress": {

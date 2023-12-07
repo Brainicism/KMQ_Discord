@@ -6,6 +6,7 @@ import {
     sendInfoMessage,
     sendMessage,
 } from "../../helpers/discord_utils";
+import { standardDateFormat } from "../../helpers/utils";
 import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
@@ -177,7 +178,9 @@ export default class ListCommand implements BaseCommand {
                         ),
                         attachments: [
                             {
-                                filename: "groups.txt",
+                                filename: `kmq-groups-${standardDateFormat(
+                                    new Date(),
+                                )}.txt`,
                                 file: optionValue,
                             },
                         ],

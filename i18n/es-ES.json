@@ -1185,6 +1185,10 @@
             }
         },
         "spotify": {
+            "fileFormat": {
+                "matched": "Canciones encontradas para \"{{playlistName}}\":\n{{matchedSongs}}",
+                "unmatched": "Canciones no encontradas para \"{{playlistName}}\":\n{{unmatchedSongs}}"
+            },
             "help": {
                 "description": "Reproducir canciones exclusivamente de una lista de reproducción de Spotify dada",
                 "example": {
@@ -1192,6 +1196,8 @@
                     "reset": "Detener la reproducción de la lista de reproducción"
                 },
                 "interaction": {
+                    "matches": "Ver una lista de canciones coincidentes y no coincidentes",
+                    "matchesLink": "Si mostrar o no la URL de YouTube de las canciones coincidentes",
                     "playlistURL": "La lista de reproducción de la que recuperar canciones"
                 },
                 "name": "spotify"
@@ -1208,6 +1214,10 @@
             "noMatches": {
                 "description": "No se encontraron canciones.",
                 "title": "Error al obtener canciones de Spotify"
+            },
+            "noPlaylistSet": {
+                "description": "{{spotifySet}} una lista de reproducción antes de usar este comando.",
+                "title": "No se ha establecido ninguna lista de reproducción"
             },
             "parsing": "Cargando lista de reproducción de Spotify...",
             "parsingAlreadyInProgress": {
