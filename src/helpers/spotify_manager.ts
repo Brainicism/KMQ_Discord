@@ -511,9 +511,11 @@ export default class SpotifyManager {
 
             // handle songs with brackets in name, consider all components separately
             const songNameBracketComponents = song.name.split("(");
-            const songNames = [songNameBracketComponents[0]];
+            const songNames = [songNameBracketComponents[0].trim()];
             if (songNameBracketComponents.length > 1) {
-                songNames.push(songNameBracketComponents[1].replace(")", ""));
+                songNames.push(
+                    songNameBracketComponents[1].replace(")", "").trim(),
+                );
                 songNames.push(song.name);
             }
 
@@ -542,7 +544,7 @@ export default class SpotifyManager {
                             eb(
                                 "available_songs.clean_song_name_alpha_numeric",
                                 "like",
-                                songName.replace(/[^0-9a-z]/gi, ""),
+                                songName.replace(/[^0-9a-z]/gi, "") || songName,
                             ),
                         ),
                     ),
