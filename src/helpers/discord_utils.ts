@@ -178,7 +178,7 @@ export async function fetchUser(
     }
 
     // update cache
-    client.users.update(user);
+    client.users.update(user, client);
     return user;
 }
 
