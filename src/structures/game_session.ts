@@ -1209,10 +1209,6 @@ export default class GameSession extends Session {
             round.warnTypoReceived = true;
         }
 
-        if (pointsAwarded) {
-            round.userCorrect(userID, pointsAwarded);
-        }
-
         return pointsAwarded;
     }
 

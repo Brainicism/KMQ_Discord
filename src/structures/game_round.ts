@@ -248,17 +248,6 @@ export default class GameRound extends Round {
         return this.hintRequesters.size;
     }
 
-    /**
-     * Marks a user as having guessed correctly
-     * @param userID - The user ID of the correct guesser
-     * @param pointsAwarded - The number of points awarded to the correct guesser
-     */
-    userCorrect(userID: string, pointsAwarded: number): void {
-        if (!this.correctGuessers.some((x) => x.id === userID)) {
-            this.correctGuessers.push(new KmqMember(userID, pointsAwarded));
-        }
-    }
-
     getExpReward(typosAllowed = false): number {
         let exp = this.baseExp;
         if (this.hintUsed) {
