@@ -15,7 +15,8 @@ function getMockEliminationPlayer(
 describe("elimination scoreboard", () => {
     let scoreboard: EliminationScoreboard;
     beforeEach(() => {
-        scoreboard = new EliminationScoreboard(DEFAULT_LIVES);
+        const voiceChannelID = "12345";
+        scoreboard = new EliminationScoreboard(DEFAULT_LIVES, voiceChannelID);
     });
 
     describe("score/exp updating", () => {

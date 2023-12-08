@@ -10,7 +10,8 @@ const avatarURL = "avatar_url";
 describe("scoreboard", () => {
     let scoreboard: Scoreboard;
     beforeEach(() => {
-        scoreboard = new Scoreboard();
+        const voiceChannelID = "12345";
+        scoreboard = new Scoreboard(voiceChannelID);
         userIDs.map((x) =>
             scoreboard.addPlayer(new Player(x, guildID, avatarURL, 0, x)),
         );
@@ -149,7 +150,8 @@ describe("scoreboard", () => {
                     jisooID: new Player("jisooID", "guildID", "", 3, "jisoo"),
                 };
 
-                const sb = new Scoreboard();
+                const voiceChannelID = "12345";
+                const sb = new Scoreboard(voiceChannelID);
                 Object.values(players).map((x) => sb.addPlayer(x));
 
                 assert.deepStrictEqual(sb.getScoreToRankingMap(), {
@@ -179,7 +181,8 @@ describe("scoreboard", () => {
                     jisooID: new Player("jisooID", "guildID", "", 2, "jisoo"),
                 };
 
-                const sb = new Scoreboard();
+                const voiceChannelID = "12345";
+                const sb = new Scoreboard(voiceChannelID);
                 Object.values(players).map((x) => sb.addPlayer(x));
 
                 assert.deepStrictEqual(sb.getScoreToRankingMap(), {
@@ -194,7 +197,8 @@ describe("scoreboard", () => {
                     jisooID: new Player("jisooID", "guildID", "", 3, "jisoo"),
                 };
 
-                const sb = new Scoreboard();
+                const voiceChannelID = "12345";
+                const sb = new Scoreboard(voiceChannelID);
                 Object.values(players).map((x) => sb.addPlayer(x));
 
                 assert.deepStrictEqual(sb.getScoreToRankingMap(), {

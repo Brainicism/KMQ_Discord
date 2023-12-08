@@ -19,8 +19,8 @@ export default class TeamScoreboard extends Scoreboard {
      */
     protected players: TeamMap;
 
-    constructor() {
-        super();
+    constructor(voiceChannelID: string) {
+        super(voiceChannelID);
         this.players = {};
     }
 

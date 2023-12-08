@@ -152,15 +152,16 @@ export default class GameSession extends Session {
 
         switch (this.gameType) {
             case GameType.TEAMS:
-                this.scoreboard = new TeamScoreboard();
+                this.scoreboard = new TeamScoreboard(voiceChannelID);
                 break;
             case GameType.ELIMINATION:
                 this.scoreboard = new EliminationScoreboard(
                     eliminationLives || ELIMINATION_DEFAULT_LIVES,
+                    voiceChannelID,
                 );
                 break;
             default:
-                this.scoreboard = new Scoreboard();
+                this.scoreboard = new Scoreboard(voiceChannelID);
                 break;
         }
 

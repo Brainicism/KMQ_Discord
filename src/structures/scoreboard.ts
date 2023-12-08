@@ -1,12 +1,16 @@
+import { IPCLogger } from "../logger";
 import {
     ROUND_MAX_SCOREBOARD_PLAYERS,
     SCOREBOARD_FIELD_CUTOFF,
 } from "../constants";
 import { bold, friendlyFormattedNumber, getMention } from "../helpers/utils";
+import { getCurrentVoiceMembers } from "../helpers/discord_utils";
 import i18n from "../helpers/localization_manager";
 import type GuildPreference from "./guild_preference";
 import type Player from "./player";
 import type SuccessfulGuessResult from "../interfaces/success_guess_result";
+
+const logger = new IPCLogger("scoreboard");
 
 export default class Scoreboard {
     /** Mapping of Discord user ID to Player */
@@ -18,10 +22,14 @@ export default class Scoreboard {
     /** The current highest score */
     protected highestScore: number;
 
-    constructor() {
+    /** The ID of the voice channel the game is being played in, added purely for logging an edge case */
+    private voiceChannelID: string;
+
+    constructor(voiceChannelID: string) {
         this.players = {};
         this.firstPlace = [];
         this.highestScore = 0;
+        this.voiceChannelID = voiceChannelID;
     }
 
     /**
@@ -99,6 +107,19 @@ export default class Scoreboard {
         }
 
         for (const guessResult of guessResults) {
+            if (!this.players[guessResult.userID]) {
+                logger.warn(
+                    `Player ${
+                        guessResult.userID
+                    } not found in scoreboard. Current voice channel members = ${getCurrentVoiceMembers(
+                        this.voiceChannelID,
+                    )
+                        .map((x) => x.id)
+                        .join(", ")}}`,
+                );
+                continue;
+            }
+
             this.players[guessResult.userID].incrementScore(
                 guessResult.pointsEarned,
             );
