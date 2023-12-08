@@ -17,9 +17,10 @@ const GUILD_ID = "guild_id";
 describe("team scoreboard", () => {
     let scoreboard: TeamScoreboard;
     let firstTeam: Team;
+    const voiceChannelID: string = "1234";
 
     beforeEach(() => {
-        scoreboard = new TeamScoreboard();
+        scoreboard = new TeamScoreboard(voiceChannelID);
         firstTeam = scoreboard.addTeam(
             FIRST_TEAM_NAME,
             new Player(USER_IDS[0], GUILD_ID, AVATAR_URL, 0, USERNAMES[0]),
