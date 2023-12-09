@@ -84,6 +84,42 @@ export default async function messageCreateHandler(
 
     const session = Session.getSession(message.guildID);
     if (parsedMessage && invokedCommand) {
+        if (State.bannedServers.has(message.guildID)) {
+            logger.warn(
+                `Banned server attempted to execute command. id = ${message.guildID}`,
+            );
+
+            await sendErrorMessage(messageContext, {
+                title: i18n.translate(
+                    messageContext.guildID,
+                    "misc.interaction.title.failure",
+                ),
+                description: i18n.translate(
+                    messageContext.guildID,
+                    "misc.failure.interaction.guildBanned",
+                ),
+            });
+            return;
+        }
+
+        if (State.bannedPlayers.has(message.author.id)) {
+            logger.warn(
+                `Banned player attempted to execute command. id = ${message.author.id}`,
+            );
+
+            await sendErrorMessage(messageContext, {
+                title: i18n.translate(
+                    messageContext.guildID,
+                    "misc.interaction.title.failure",
+                ),
+                description: i18n.translate(
+                    messageContext.guildID,
+                    "misc.failure.interaction.playerBanned",
+                ),
+            });
+            return;
+        }
+
         if (!State.rateLimiter.check(message.author.id)) {
             logger.error(
                 `User ${

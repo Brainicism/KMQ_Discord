@@ -5,78 +5,88 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
     : ColumnType<T, T | undefined, T>;
 
 export interface AppKpop {
-    id: number;
-    is_audio: Generated<"n" | "y">;
-    id_parent: Generated<number | null>;
-    id_better_audio: Generated<number | null>;
-    name: Generated<string>;
-    kname: Generated<string>;
-    original_name: Generated<string>;
     alias: Generated<string>;
-    vtype: Generated<"alternate" | "duplicate" | "main">;
-    tags: Generated<string>;
-    vlink: Generated<string>;
-    id_artist: number;
-    id_original_artist: number;
-    releasedate: Date;
-    publishedon: Date;
-    views: Generated<number>;
-    promotedviews_yc: Generated<number>;
-    likes: Generated<number>;
     awards: Generated<number>;
     has_pak: Generated<"n" | "y">;
+    id: number;
+    id_artist: number;
+    id_better_audio: Generated<number | null>;
+    id_original_artist: number;
+    id_parent: Generated<number | null>;
+    is_audio: Generated<"n" | "y">;
+    kname: Generated<string>;
+    likes: Generated<number>;
+    name: Generated<string>;
+    original_name: Generated<string>;
+    promotedcharted: number;
+    promotedviews_yc: Generated<number>;
+    promotedweeks: number;
+    publishedon: Date;
+    regionlocked: Generated<string>;
+    releasedate: Date;
+    tags: Generated<string>;
+    viewhistory: string;
+    views: Generated<number>;
+    vlink: Generated<string>;
+    vtype: Generated<"alternate" | "duplicate" | "main">;
 }
 
 export interface AppKpopAgrelation {
+    endyear: number;
     id_artist: number;
     id_subgroup: number;
-    startyear: number;
-    endyear: number;
     roles: Generated<string>;
+    startyear: number;
 }
 
 export interface AppKpopCompany {
     id: number;
+    id_company: number;
     name: string;
 }
 
 export interface AppKpopGaondigi {
-    year: number;
-    week: number;
-    ranklist: string;
     aranklist: string;
+    ranklist: string;
+    week: number;
+    year: number;
 }
 
 export interface AppKpopGroup {
-    id: number;
-    is_collab: Generated<"n" | "y">;
-    name: string;
-    kname: Generated<string | null>;
-    previous_name: Generated<string>;
-    previous_kname: Generated<string>;
-    fname: Generated<string>;
     alias: Generated<string>;
-    id_company: Generated<number>;
-    members: "coed" | "female" | "male";
-    issolo: Generated<"n" | "y">;
-    id_parentgroup: Generated<number>;
-    formation: Generated<number | null>;
+    date_birth: Generated<Date | null>;
+    debut_date: Generated<Date | null>;
     disband: Generated<string>;
     fanclub: Generated<string | null>;
-    id_debut: Generated<number | null>;
-    debut_date: Generated<Date | null>;
-    date_birth: Generated<Date | null>;
-    is_deceased: Generated<"n" | "y">;
-    id_country: Generated<number>;
-    sales: Generated<number>;
-    gaondigital_times: Generated<number>;
+    fname: Generated<string>;
+    formation: Generated<number | null>;
     gaondigital_firsts: Generated<number>;
-    yawards_total: Generated<number>;
-    social: Generated<string>;
+    gaondigital_times: Generated<number>;
+    id: number;
+    id_company: Generated<number>;
+    id_country: Generated<number>;
+    id_debut: Generated<number | null>;
+    id_parentgroup: Generated<number>;
+    is_collab: Generated<"n" | "y">;
+    is_deceased: Generated<"n" | "y">;
+    issolo: Generated<"n" | "y">;
+    kname: Generated<string | null>;
+    members: "coed" | "female" | "male";
+    mslevel: Generated<number>;
+    name: string;
     original_name: Generated<string | null>;
+    previous_kname: Generated<string>;
+    previous_name: Generated<string>;
+    sales: Generated<number>;
+    social: Generated<string>;
+    yawards_total: Generated<number>;
 }
 
 export interface AppKpopMs {
+    date: Date;
+    id_artist: number;
+    id_musicvideo: Generated<number>;
+    musicname: Generated<string>;
     musicshow:
         | "countdown"
         | "inkigayo"
@@ -84,18 +94,14 @@ export interface AppKpopMs {
         | "musiccore"
         | "showchampion"
         | "theshow";
-    id_artist: number;
-    date: Date;
-    musicname: Generated<string>;
-    id_musicvideo: Generated<number>;
 }
 
 export interface AppUpcoming {
     id: number;
     id_artist: number;
+    name: Generated<string>;
     rdate: Date;
     rtype: "album" | "ep" | "single" | "undefined";
-    name: Generated<string>;
 }
 
 export interface KpopVideosDB {

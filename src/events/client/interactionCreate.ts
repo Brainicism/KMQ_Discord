@@ -74,6 +74,52 @@ export default async function interactionCreateHandler(
         return;
     }
 
+    if (State.bannedServers.has(interaction.guildID)) {
+        logger.warn(
+            `Banned server attempted to execute interaction. id = ${interaction.guildID}`,
+        );
+
+        if (
+            interaction instanceof Eris.ComponentInteraction ||
+            interaction instanceof Eris.CommandInteraction
+        ) {
+            tryCreateInteractionErrorAcknowledgement(
+                interaction,
+                i18n.translate(LocaleType.EN, "misc.interaction.title.failure"),
+                i18n.translate(
+                    LocaleType.EN,
+                    "misc.failure.interaction.guildBanned",
+                ),
+            );
+        }
+
+        return;
+    }
+
+    if (State.bannedPlayers.has(interaction.member!.id)) {
+        logger.warn(
+            `Banned player attempted to execute interaction. id = ${
+                interaction.member!.id
+            }`,
+        );
+
+        if (
+            interaction instanceof Eris.ComponentInteraction ||
+            interaction instanceof Eris.CommandInteraction
+        ) {
+            tryCreateInteractionErrorAcknowledgement(
+                interaction,
+                i18n.translate(LocaleType.EN, "misc.interaction.title.failure"),
+                i18n.translate(
+                    LocaleType.EN,
+                    "misc.failure.interaction.playerBanned",
+                ),
+            );
+        }
+
+        return;
+    }
+
     const member = new KmqMember(interaction.member!.id);
     const messageContext = new MessageContext(
         interaction.channel.id,

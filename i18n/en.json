@@ -1426,6 +1426,8 @@
                 "bookmarkOutsideGame": "You can only bookmark songs during a game.",
                 "eliminated": "You've been eliminated this round.",
                 "guildOnly": "KMQ can only be used in servers.",
+                "guildBanned": "This server is banned from using KMQ. For appeals, contact the official KMQ support server at https://discord.gg/RCuzwYV.",
+                "playerBanned": "You are banned from using KMQ. For appeals, contact the official KMQ support server at https://discord.gg/RCuzwYV.",
                 "invalidBookmark": "You can only bookmark songs recently played in the last {{BOOKMARK_MESSAGE_SIZE}} rounds. You must bookmark the message sent by the bot containing the song.",
                 "optionFromPreviousRound": "You are attempting to pick an option from an already completed round."
             },

@@ -5,28 +5,28 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
     : ColumnType<T, T | undefined, T>;
 
 export interface AvailableSongs {
-    song_name_en: string;
-    clean_song_name_en: string;
-    clean_song_name_alpha_numeric: string;
-    song_name_ko: string;
-    clean_song_name_ko: string;
-    song_aliases: string;
-    link: string;
-    artist_name_en: string;
-    original_artist_name_en: string;
-    artist_name_ko: Generated<string | null>;
     artist_aliases: string;
+    artist_name_en: string;
+    artist_name_ko: Generated<string | null>;
+    clean_song_name_alpha_numeric: string;
+    clean_song_name_en: string;
+    clean_song_name_ko: string;
+    id_artist: number;
+    id_parent_artist: number;
+    issolo: "n" | "y";
+    link: string;
+    members: "coed" | "female" | "male";
+    original_artist_name_en: string;
     previous_name_en: Generated<string | null>;
     previous_name_ko: Generated<string | null>;
-    members: "coed" | "female" | "male";
-    views: number;
     publishedon: Date;
-    id_artist: number;
-    issolo: "n" | "y";
-    id_parent_artist: number;
-    vtype: "audio" | "main";
-    tags: Generated<string | null>;
     rank: number;
+    song_aliases: string;
+    song_name_en: string;
+    song_name_ko: string;
+    tags: Generated<string | null>;
+    views: number;
+    vtype: "audio" | "main";
 }
 
 export interface Badges {
@@ -36,19 +36,31 @@ export interface Badges {
 }
 
 export interface BadgesPlayers {
-    user_id: string;
     badge_id: number;
+    user_id: string;
+}
+
+export interface BannedPlayers {
+    created_at: Date;
+    id: string;
+    reason: string;
+}
+
+export interface BannedServers {
+    created_at: Date;
+    id: string;
+    reason: string;
 }
 
 export interface BookmarkedSongs {
+    bookmarked_at: Date;
     user_id: string;
     vlink: string;
-    bookmarked_at: Date;
 }
 
 export interface CachedSongDuration {
-    vlink: string;
     duration: number;
+    vlink: string;
 }
 
 export interface CompetitionModerators {
@@ -59,69 +71,69 @@ export interface CompetitionModerators {
 export interface DailyStats {
     date: Date;
     gameSessions: Generated<number>;
-    roundsPlayed: Generated<number>;
-    players: Generated<number>;
     newPlayers: Generated<number>;
+    players: Generated<number>;
+    roundsPlayed: Generated<number>;
     serverCount: Generated<number>;
 }
 
 export interface DeadLinks {
-    vlink: string;
     reason: Generated<string | null>;
+    vlink: string;
 }
 
 export interface GameMessages {
     category: string;
-    title: string;
-    message: string;
-    weight: Generated<number>;
     id: Generated<number>;
+    message: string;
+    title: string;
+    weight: Generated<number>;
 }
 
 export interface GameOptionPresets {
     guild_id: string;
-    preset_name: string;
     option_name: string;
     option_value: Generated<string | null>;
+    preset_name: string;
 }
 
 export interface GameOptionPresetsJson {
+    game_options: string;
     guild_id: string;
     preset_name: string;
-    game_options: string;
 }
 
 export interface GameOptions {
+    client_id: Generated<string>;
     guild_id: string;
     option_name: string;
     option_value: Generated<string | null>;
-    client_id: string;
 }
 
 export interface GameSessions {
-    id: Generated<number>;
-    start_date: Date;
-    guild_id: string;
-    num_participants: number;
     avg_guess_time: number;
-    session_length: number;
-    rounds_played: number;
     correct_guesses: number;
+    guild_id: string;
+    id: Generated<number>;
+    num_participants: number;
+    rounds_played: number;
+    session_length: number;
+    start_date: Date;
 }
 
 export interface Guilds {
+    games_played: Generated<number>;
     guild_id: string;
     join_date: Date;
     last_active: Generated<Date | null>;
-    games_played: Generated<number>;
     songs_guessed: Generated<number>;
 }
 
 export interface KnexMigrations {
-    id: Generated<number>;
-    name: Generated<string | null>;
     batch: Generated<number | null>;
+    id: Generated<number>;
     migration_time: Generated<Date>;
+    name: Generated<string | null>;
 }
 
 export interface KnexMigrationsLock {
@@ -150,11 +162,11 @@ export interface NotDownloaded {
 }
 
 export interface PlayerGameSessionStats {
-    player_id: string;
     date: Date;
-    songs_guessed: Generated<number>;
     exp_gained: Generated<number>;
     levels_gained: Generated<number>;
+    player_id: string;
+    songs_guessed: Generated<number>;
 }
 
 export interface PlayerServers {
@@ -163,45 +175,45 @@ export interface PlayerServers {
 }
 
 export interface PlayerStats {
+    exp: Generated<number>;
+    first_play: Generated<Date>;
+    games_played: Generated<number>;
+    last_active: Generated<Date>;
+    level: Generated<number>;
     player_id: string;
     songs_guessed: Generated<number>;
-    games_played: Generated<number>;
-    first_play: Generated<Date>;
-    last_active: Generated<Date>;
-    exp: Generated<number>;
-    level: Generated<number>;
 }
 
 export interface PremiumUsers {
-    user_id: string;
     active: number;
     first_subscribed: Date;
     source: "loyalty" | "patreon";
+    user_id: string;
 }
 
 export interface SongMetadata {
-    vlink: string;
-    correct_guesses_legacy: number;
-    rounds_played_legacy: number;
     correct_guesses: Generated<number>;
-    rounds_played: Generated<number>;
-    skip_count: Generated<number>;
+    correct_guesses_legacy: number;
     hint_count: Generated<number>;
-    time_to_guess_ms: Generated<number>;
+    rounds_played: Generated<number>;
+    rounds_played_legacy: number;
+    skip_count: Generated<number>;
     time_played_ms: Generated<number>;
+    time_to_guess_ms: Generated<number>;
+    vlink: string;
 }
 
 export interface SystemStats {
     cluster_id: Generated<number | null>;
+    date: Date;
     stat_name: string;
     stat_value: number;
-    date: Date;
 }
 
 export interface TopGgUserVotes {
-    user_id: string;
     buff_expiry_date: Date;
     total_votes: Generated<number>;
+    user_id: string;
 }
 
 export interface KmqDB {
@@ -215,6 +227,8 @@ export interface KmqDB {
     available_songs: AvailableSongs;
     badges: Badges;
     badges_players: BadgesPlayers;
+    banned_players: BannedPlayers;
+    banned_servers: BannedServers;
     bookmarked_songs: BookmarkedSongs;
     cached_song_duration: CachedSongDuration;
     competition_moderators: CompetitionModerators;
