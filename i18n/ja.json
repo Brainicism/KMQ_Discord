@@ -1425,9 +1425,11 @@
                 "alreadyEliminated": "あなたはすでにこのラウンドで敗退しています。",
                 "bookmarkOutsideGame": "ゲーム中には曲をブックマークできません。",
                 "eliminated": "あなたはこのラウンドで敗退しました。",
+                "guildBanned": "このサーバーはKMQの使用が禁止されています。異議申し立ては、{{supportServer}}の公式KMQサポートサーバーまでご連絡ください。",
                 "guildOnly": "KMQはサーバーでのみ使用できます。",
                 "invalidBookmark": "最近の{{BOOKMARK_MESSAGE_SIZE}}ラウンドで再生された曲のみブックマークできます。ボットから送信されたメッセージに含まれる曲をブックマークする必要があります。",
-                "optionFromPreviousRound": "すでに完了したラウンドからオプションを選択しようとしています。"
+                "optionFromPreviousRound": "すでに完了したラウンドからオプションを選択しようとしています。",
+                "playerBanned": "あなたはKMQの使用が禁止されています。異議申し立ては、{{supportServer}}の公式KMQサポートサーバーまでご連絡ください。"
             },
             "maintenanceMode": {
                 "description": "KMQは現在メンテナンス中であり、新しいゲームを開始することはできません。後で再度確認してください！",

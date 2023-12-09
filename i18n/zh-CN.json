@@ -1425,9 +1425,11 @@
                 "alreadyEliminated": "你已经在本轮比赛中被淘汰了。",
                 "bookmarkOutsideGame": "你只能在游戏期间收藏歌曲。",
                 "eliminated": "你已经在本轮比赛中被淘汰了。",
+                "guildBanned": "此服务器被禁止使用KMQ。如需申诉，请联系{{supportServer}}的官方KMQ支持服务器。",
                 "guildOnly": "KMQ只能在服务器中使用。",
                 "invalidBookmark": "你只能收藏最近播放的{{BOOKMARK_MESSAGE_SIZE}}轮歌曲。你必须收藏机器人发送的包含歌曲的消息。",
-                "optionFromPreviousRound": "您正在尝试从已经完成的回合中选择选项。"
+                "optionFromPreviousRound": "您正在尝试从已经完成的回合中选择选项。",
+                "playerBanned": "您被禁止使用KMQ。如需申诉，请联系{{supportServer}}的官方KMQ支持服务器。"
             },
             "maintenanceMode": {
                 "description": "KMQ目前正在维护中，无法启动新游戏。请稍后再来！",

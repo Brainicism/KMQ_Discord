@@ -1,4 +1,4 @@
-import { Kysely, sql } from "kysely";
+import { Kysely } from "kysely";
 import { KmqDB } from "../typings/kmq_db";
 
 export async function up(db: Kysely<KmqDB>): Promise<void> {}

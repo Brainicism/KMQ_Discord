@@ -97,6 +97,9 @@ export default async function messageCreateHandler(
                 description: i18n.translate(
                     messageContext.guildID,
                     "misc.failure.interaction.guildBanned",
+                    {
+                        supportServer: "https://discord.gg/RCuzwYV",
+                    },
                 ),
             });
             return;
@@ -115,6 +118,9 @@ export default async function messageCreateHandler(
                 description: i18n.translate(
                     messageContext.guildID,
                     "misc.failure.interaction.playerBanned",
+                    {
+                        supportServer: "https://discord.gg/RCuzwYV",
+                    },
                 ),
             });
             return;

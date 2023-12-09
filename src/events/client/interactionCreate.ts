@@ -85,10 +85,16 @@ export default async function interactionCreateHandler(
         ) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                i18n.translate(LocaleType.EN, "misc.interaction.title.failure"),
                 i18n.translate(
-                    LocaleType.EN,
+                    interaction.guildID,
+                    "misc.interaction.title.failure",
+                ),
+                i18n.translate(
+                    interaction.guildID,
                     "misc.failure.interaction.guildBanned",
+                    {
+                        supportServer: "https://discord.gg/RCuzwYV",
+                    },
                 ),
             );
         }
@@ -109,10 +115,16 @@ export default async function interactionCreateHandler(
         ) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                i18n.translate(LocaleType.EN, "misc.interaction.title.failure"),
                 i18n.translate(
-                    LocaleType.EN,
+                    interaction.guildID,
+                    "misc.interaction.title.failure",
+                ),
+                i18n.translate(
+                    interaction.guildID,
                     "misc.failure.interaction.playerBanned",
+                    {
+                        supportServer: "https://discord.gg/RCuzwYV",
+                    },
                 ),
             );
         }
