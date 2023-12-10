@@ -1425,9 +1425,11 @@
                 "alreadyEliminated": "Ya has sido eliminado en esta ronda.",
                 "bookmarkOutsideGame": "Solo puedes marcar canciones durante un juego.",
                 "eliminated": "Has sido eliminado en esta ronda.",
+                "guildBanned": "Este servidor está prohibido de usar KMQ. Para apelaciones, contacta al servidor de soporte oficial de KMQ en {{supportServer}}.",
                 "guildOnly": "KMQ sólo puede ser utilizado en servidores.",
                 "invalidBookmark": "Solo puedes marcar canciones que hayan sido reproducidas en las últimas {{BOOKMARK_MESSAGE_SIZE}} rondas. Debes marcar el mensaje enviado por el bot que contiene la canción.",
-                "optionFromPreviousRound": "Estás intentando elegir una opción de una ronda que ya ha sido completada."
+                "optionFromPreviousRound": "Estás intentando elegir una opción de una ronda que ya ha sido completada.",
+                "playerBanned": "Estás prohibido de usar KMQ. Para apelaciones, contacta al servidor de soporte oficial de KMQ en {{supportServer}}."
             },
             "maintenanceMode": {
                 "description": "KMQ está actualmente en mantenimiento y no se pueden iniciar nuevos juegos. ¡Vuelve más tarde!",

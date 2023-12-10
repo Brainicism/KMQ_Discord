@@ -22,6 +22,8 @@ export default class State {
         song: {},
     };
 
+    static bannedServers: Set<string> = new Set();
+    static bannedPlayers: Set<string> = new Set();
     static processStartTime: number = Date.now();
     static ipc: IPC;
     static rateLimiter = new RateLimiter(15, 30);

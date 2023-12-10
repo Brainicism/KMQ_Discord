@@ -428,6 +428,20 @@ export function clearRestartNotification(): void {
     State.restartNotification = null;
 }
 
+async function reloadBanData(): Promise<void> {
+    const bannedServers = (
+        await dbContext.kmq.selectFrom("banned_servers").select("id").execute()
+    ).map((x) => x.id);
+
+    State.bannedServers = new Set(bannedServers);
+
+    const bannedPlayers = (
+        await dbContext.kmq.selectFrom("banned_players").select("id").execute()
+    ).map((x) => x.id);
+
+    State.bannedPlayers = new Set(bannedPlayers);
+}
+
 /**
  * @param clusterID - The cluster ID
  *  Sets up recurring cron-based tasks
@@ -466,6 +480,8 @@ export function registerIntervals(clusterID: number): void {
         updateBotStatus();
         // Clear any guilds stuck in parsing Spotify state
         cleanupSpotifyParsingLocks();
+        // Reload ban data
+        reloadBanData();
     });
 
     // Every 5 minutes
@@ -506,4 +522,5 @@ export function reloadCaches(): void {
     reloadBonusGroups();
     reloadLocales();
     reloadSongs();
+    reloadBanData();
 }
