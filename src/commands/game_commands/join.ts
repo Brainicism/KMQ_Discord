@@ -18,6 +18,8 @@ export default class JoinCommand implements BaseCommand {
         { checkFn: CommandPrechecks.notListeningPrecheck },
     ];
 
+    aliases = ["j"];
+
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         if (parsedMessage.components.length === 0) {
             logger.warn(`${getDebugLogHeader(message)} | Missing team name.`);
