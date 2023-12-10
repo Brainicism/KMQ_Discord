@@ -470,7 +470,7 @@
                         "title": "잘못된 팀 이름"
                     },
                     "noTeamName": {
-                        "description": "팀을 만들거나 이미 존재하는 경우 해당 팀에 합류하려면 팀 이름을 포함합니다(`{{joinCommand}} [팀 이름]`)."
+                        "description": "팀을 만들거나 이미 존재하는 경우 해당 팀에 합류하려면 팀 이름을 포함합니다({{joinCommand}} [팀 이름])."
                     },
                     "title": "가입 오류"
                 }
@@ -488,7 +488,7 @@
                 "title": "{{joiningUser}}이(가) {{teamName}}에 합류했습니다"
             },
             "team": {
-                "join": "{{teamName}}을(를) {{mentionedUser}}과(와) 함께 가입시키려면 `{{joinCommand}} {{teamNameWithCleanEmojis}}`을(를) 입력하십시오. {{startGameInstructions}}",
+                "join": "{{teamName}}을(를) {{mentionedUser}}과(와) 함께 가입시키려면 {{joinCommand}} team_name:{{teamNameWithCleanEmojis}}을(를) 입력하십시오. {{startGameInstructions}}",
                 "new": "새 팀이 생성되었습니다.",
                 "startGameInstructions": "\n{{beginCommand}}을(를) 입력하여 게임을 시작하십시오."
             }
@@ -834,7 +834,7 @@
             },
             "team": {
                 "joinTeam": {
-                    "description": "팀 리더는 `{{join}} [팀 이름]`을 입력하여 새 팀을 구성하세요. 게임 중간에 팀을 바꾸면 현재 점수와 경험치가 모두 사라집니다.",
+                    "description": "팀 리더는 {{join}} 입력하여 새 팀을 구성하세요. 게임 중간에 팀을 바꾸면 현재 점수와 경험치가 모두 사라집니다.",
                     "title": "{{join}} 팀에 입장하셨습니다!"
                 }
             },

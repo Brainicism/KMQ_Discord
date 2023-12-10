@@ -470,7 +470,7 @@
                         "title": "無効なチーム名"
                     },
                     "noTeamName": {
-                        "description": "チーム名を含めて、チームを作成するか、すでに存在する場合はそのチームに参加する (`{{joinCommand}} [チーム名]`)"
+                        "description": "チーム名を含めて、チームを作成するか、すでに存在する場合はそのチームに参加する ({{joinCommand}} [チーム名])"
                     },
                     "title": "参加エラー"
                 }
@@ -488,7 +488,7 @@
                 "title": "{{joiningUser}}さんが{{teamName}}に参加しました"
             },
             "team": {
-                "join": "{{mentionedUser}}さんと一緒に{{teamName}}に参加するには、`{{joinCommand}} {{teamNameWithCleanEmojis}}`を入力してください。{{startGameInstructions}}",
+                "join": "{{mentionedUser}}さんと一緒に{{teamName}}に参加するには、{{joinCommand}} team_name:{{teamNameWithCleanEmojis}}を入力してください。{{startGameInstructions}}",
                 "new": "新しいチームが作成されました",
                 "startGameInstructions": "{{beginCommand}}でゲームを開始してください。"
             }
@@ -834,7 +834,7 @@
             },
             "team": {
                 "joinTeam": {
-                    "description": "チームリーダーは、新しいチームを形成するには `{{join}} [チーム名]` と入力してください。ゲーム中にチームを変更すると、現在のスコアとEXPがすべて失われます。",
+                    "description": "チームリーダーは、新しいチームを形成するには {{join}} と入力してください。ゲーム中にチームを変更すると、現在のスコアとEXPがすべて失われます。",
                     "title": "チームに{{join}}しましょう！"
                 }
             },
