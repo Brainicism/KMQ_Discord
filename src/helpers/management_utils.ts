@@ -49,25 +49,28 @@ export async function warnServersImpendingRestart(
 ): Promise<void> {
     let serversWarned = 0;
     if (RESTART_WARNING_INTERVALS.has(timeUntilRestart)) {
-        for (const gameSession of Object.values(State.gameSessions)) {
-            if (gameSession.finished) continue;
+        for (const session of [
+            ...Object.values(State.gameSessions),
+            ...Object.values(State.listeningSessions),
+        ]) {
+            if (session.finished) continue;
             // eslint-disable-next-line no-await-in-loop
             await sendInfoMessage(
                 new MessageContext(
-                    gameSession.textChannelID,
+                    session.textChannelID,
                     null,
-                    gameSession.guildID,
+                    session.guildID,
                 ),
                 {
                     title: i18n.translate(
-                        gameSession.guildID,
+                        session.guildID,
                         "misc.restart.title",
                         {
                             timeUntilRestart: String(timeUntilRestart),
                         },
                     ),
                     description: i18n.translate(
-                        gameSession.guildID,
+                        session.guildID,
                         "misc.restart.description_hard",
                         {
                             downtimeMinutes: String(5),

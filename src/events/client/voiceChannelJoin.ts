@@ -1,5 +1,8 @@
+import { IPCLogger } from "../../logger";
 import Session from "../../structures/session";
 import type Eris from "eris";
+
+const logger = new IPCLogger("voiceChannelJoin");
 
 /**
  * @param member - The member that joined the voice channel
@@ -22,8 +25,14 @@ export default async function voiceChannelJoinHandler(
     }
 
     if (session.isGameSession()) {
+        logger.info(
+            `gid: ${newChannel.guild.id}, uid: ${member.id} | Player joined the voice channel`,
+        );
         await session.setPlayerInVC(member.id, true);
     }
 
+    logger.info(
+        `gid: ${newChannel.guild.id}, uid: ${member.id} | Updating premium status`,
+    );
     session.updatePremiumStatus();
 }

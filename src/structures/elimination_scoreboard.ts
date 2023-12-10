@@ -9,8 +9,8 @@ export default class EliminationScoreboard extends Scoreboard {
     /** Mapping of Discord user ID to EliminationPlayer */
     protected players: { [userID: string]: EliminationPlayer };
 
-    constructor(lives: number) {
-        super();
+    constructor(lives: number, voiceChannelID: string) {
+        super(voiceChannelID);
         this.players = {};
         this.startingLives = lives;
     }
