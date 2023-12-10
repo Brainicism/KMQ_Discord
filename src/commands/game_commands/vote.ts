@@ -23,15 +23,15 @@ import type CommandArgs from "../../interfaces/command_args";
 import type EmbedPayload from "../../interfaces/embed_payload";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("vote");
+const COMMAND_NAME = "vote";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export default class VoteCommand implements BaseCommand {
     aliases = ["v", "voted"];
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "vote",
+        name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.vote.help.description"),
-        usage: "/vote",
         examples: [],
         priority: 60,
     });

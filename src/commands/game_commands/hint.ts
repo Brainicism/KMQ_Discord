@@ -26,7 +26,8 @@ import type GameRound from "../../structures/game_round";
 import type GameSession from "../../structures/game_session";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("hint");
+const COMMAND_NAME = "hint";
+const logger = new IPCLogger(COMMAND_NAME);
 
 function isHintMajority(
     messageContext: MessageContext,
@@ -257,9 +258,8 @@ export default class HintCommand implements BaseCommand {
     ];
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "hint",
+        name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.hint.help.description"),
-        usage: "/hint",
         examples: [],
         priority: 1020,
     });

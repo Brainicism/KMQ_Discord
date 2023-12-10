@@ -17,7 +17,8 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("forceskip");
+const COMMAND_NAME = "forceskip";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export default class ForceSkipCommand implements BaseCommand {
     aliases = ["fskip", "fs"];
@@ -28,12 +29,11 @@ export default class ForceSkipCommand implements BaseCommand {
     ];
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "forceskip",
+        name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
             "command.forceskip.help.description",
         ),
-        usage: "/forceskip",
         examples: [],
         priority: 1009,
     });

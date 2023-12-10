@@ -1,5 +1,6 @@
 import { DEFAULT_SEEK, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { clickableSlashCommand } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -19,7 +20,8 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("seek");
+const COMMAND_NAME = "seek";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export default class SeekCommand implements BaseCommand {
     preRunChecks = [
@@ -40,33 +42,44 @@ export default class SeekCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "seek",
+        name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.seek.help.description"),
-        usage: "/seek set\nseek:[beginning | middle | random]\n\n/seek reset",
         examples: [
             {
-                example: "`/seek set seek:random`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} seek:random`,
                 explanation: i18n.translate(
                     guildID,
                     "command.seek.help.example.random",
                 ),
             },
             {
-                example: "`/seek set seek:middle`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} seek:middle`,
                 explanation: i18n.translate(
                     guildID,
                     "command.seek.help.example.middle",
                 ),
             },
             {
-                example: "`/seek set seek:beginning`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} seek:beginning`,
                 explanation: i18n.translate(
                     guildID,
                     "command.seek.help.example.beginning",
                 ),
             },
             {
-                example: "`/seek reset`",
+                example: clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.RESET,
+                ),
                 explanation: i18n.translate(
                     guildID,
                     "command.seek.help.example.reset",

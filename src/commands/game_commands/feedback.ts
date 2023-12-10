@@ -15,7 +15,8 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("feedback");
+const COMMAND_NAME = "feedback";
+const logger = new IPCLogger(COMMAND_NAME);
 
 const FEEDBACK_QUESTIONS: {
     question: string;
@@ -42,14 +43,13 @@ export default class FeedbackCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
+        name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
             "command.feedback.help.description",
         ),
         examples: [],
-        name: "feedback",
         priority: 500,
-        usage: "/feedback",
     });
 
     slashCommands = (): Array<

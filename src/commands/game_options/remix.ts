@@ -1,5 +1,6 @@
 import { DEFAULT_REMIX_PREFERENCE, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { clickableSlashCommand } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -20,7 +21,8 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("remix");
+const COMMAND_NAME = "remix";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export default class RemixCommand implements BaseCommand {
     preRunChecks = [
@@ -43,26 +45,34 @@ export default class RemixCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "remix",
+        name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.remix.help.description"),
-        usage: "/remix set\nremix:[include | exclude]\n\n/remix reset",
         examples: [
             {
-                example: "`/remix set remix:include`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} remix:include`,
                 explanation: i18n.translate(
                     guildID,
                     "command.remix.help.example.include",
                 ),
             },
             {
-                example: "`/remix set remix:exclude`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} remix:exclude`,
                 explanation: i18n.translate(
                     guildID,
                     "command.remix.help.example.exclude",
                 ),
             },
             {
-                example: "`/remix reset`",
+                example: clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.RESET,
+                ),
                 explanation: i18n.translate(
                     guildID,
                     "command.remix.help.example.reset",

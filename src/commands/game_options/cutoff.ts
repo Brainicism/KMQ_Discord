@@ -5,6 +5,7 @@ import {
     OptionAction,
 } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { clickableSlashCommand } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -24,7 +25,8 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("cutoff");
+const COMMAND_NAME = "cutoff";
+const logger = new IPCLogger(COMMAND_NAME);
 
 enum CutoffAppCommandAction {
     EARLIEST = "earliest",
@@ -57,12 +59,15 @@ export default class CutoffCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "cutoff",
+        name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.cutoff.help.description"),
-        usage: "/cutoff set earliest\nbeginning_year:[year_start]\n\n/cutoff set range\nbeginning_year:[year_start]\nending_year:[year_end]\n\n/cutoff reset",
         examples: [
             {
-                example: "`/cutoff set earliest beginning_year:2015`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                    CutoffAppCommandAction.EARLIEST,
+                )} beginning_year:2015`,
                 explanation: i18n.translate(
                     guildID,
                     "command.cutoff.help.example.singleCutoff",
@@ -72,8 +77,11 @@ export default class CutoffCommand implements BaseCommand {
                 ),
             },
             {
-                example:
-                    "`/cutoff set range beginning_year:2015 ending_year:2018`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                    CutoffAppCommandAction.RANGE,
+                )} beginning_year:2015 ending_year:2018`,
                 explanation: i18n.translate(
                     guildID,
                     "command.cutoff.help.example.twoCutoffs",
@@ -84,7 +92,10 @@ export default class CutoffCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/cutoff reset`",
+                example: clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.RESET,
+                ),
                 explanation: i18n.translate(
                     guildID,
                     "command.cutoff.help.example.reset",

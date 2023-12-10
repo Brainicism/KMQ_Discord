@@ -1,6 +1,7 @@
 import * as uuid from "uuid";
 import { GameOptionInternalToGameOption, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { clickableSlashCommand } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -23,7 +24,8 @@ import type CommandArgs from "../../interfaces/command_args";
 import type GameOption from "../../enums/game_option_name";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("preset");
+const COMMAND_NAME = "preset";
+const logger = new IPCLogger(COMMAND_NAME);
 const PRESET_NAME_MAX_LENGTH = 25;
 const MAX_NUM_PRESETS = 20;
 
@@ -148,44 +150,40 @@ export default class PresetCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "preset",
+        name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.preset.help.description"),
-        usage: `/preset list\n\n/preset [save | load | delete | export]\npreset_name:{${i18n.translate(
-            guildID,
-            "command.preset.help.usage.presetName",
-        )}}\n\n/preset import\nexported_preset:[${i18n.translate(
-            guildID,
-            "command.preset.help.usage.presetIdentifier",
-        )}]\nnew_preset_name:[${i18n.translate(
-            guildID,
-            "command.preset.help.usage.presetName",
-        )}]`,
         examples: [
             {
-                example: "`/preset list`",
+                example: clickableSlashCommand(COMMAND_NAME, PresetAction.LIST),
                 explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.list",
                 ),
             },
             {
-                example: `\`/preset save preset_name:[${i18n.translate(
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    PresetAction.SAVE,
+                )} preset_name:[${i18n.translate(
                     guildID,
                     "command.preset.help.usage.presetName",
-                )}]\``,
+                )}]`,
                 explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.save",
                 ),
             },
             {
-                example: `\`/preset load preset_name:[${i18n.translate(
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    PresetAction.LOAD,
+                )} preset_name:[${i18n.translate(
                     guildID,
                     "command.preset.help.usage.presetName",
                 )}]\n/preset load preset_identifier:[${i18n.translate(
                     guildID,
                     "command.preset.help.usage.presetIdentifier",
-                )}]\``,
+                )}]`,
                 explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.load",
@@ -193,43 +191,55 @@ export default class PresetCommand implements BaseCommand {
                 ),
             },
             {
-                example: `\`/preset replace preset_name:[${i18n.translate(
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    PresetAction.REPLACE,
+                )} preset_name:[${i18n.translate(
                     guildID,
                     "command.preset.help.usage.presetName",
-                )}]\``,
+                )}]`,
                 explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.replace",
                 ),
             },
             {
-                example: `\`/preset delete preset_name:[${i18n.translate(
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    PresetAction.DELETE,
+                )} preset_name:[${i18n.translate(
                     guildID,
                     "command.preset.help.usage.presetName",
-                )}]\``,
+                )}]`,
                 explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.delete",
                 ),
             },
             {
-                example: `\`/preset export preset_name:[${i18n.translate(
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    PresetAction.EXPORT,
+                )} preset_name:[${i18n.translate(
                     guildID,
                     "command.preset.help.usage.presetName",
-                )}]\``,
+                )}]`,
                 explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.export",
                 ),
             },
             {
-                example: `\`/preset import preset_identifier:[${i18n.translate(
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    PresetAction.IMPORT,
+                )} preset_identifier:[${i18n.translate(
                     guildID,
                     "command.preset.help.usage.presetIdentifier",
                 )}] preset_name:[${i18n.translate(
                     guildID,
                     "command.preset.help.usage.presetName",
-                )}]\``,
+                )}]`,
                 explanation: i18n.translate(
                     guildID,
                     "command.preset.help.example.import",

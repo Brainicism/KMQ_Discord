@@ -1,5 +1,6 @@
 import { DEFAULT_RELEASE_TYPE, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { clickableSlashCommand } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -19,7 +20,8 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("release");
+const COMMAND_NAME = "release";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export default class ReleaseCommand implements BaseCommand {
     aliases = ["releases", "videotype"];
@@ -129,15 +131,17 @@ export default class ReleaseCommand implements BaseCommand {
     ];
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "release",
+        name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
             "command.release.help.description",
         ),
-        usage: "/release set\nrelease:[official | all]\n\n/release reset",
         examples: [
             {
-                example: "`/release set release:official`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} release:official`,
                 explanation: i18n.translate(
                     guildID,
                     "command.release.help.example.official",
@@ -145,14 +149,20 @@ export default class ReleaseCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/release set release:all`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} release:all`,
                 explanation: i18n.translate(
                     guildID,
                     "command.release.help.example.all",
                 ),
             },
             {
-                example: "`/release reset`",
+                example: clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.RESET,
+                ),
                 explanation: i18n.translate(
                     guildID,
                     "command.release.help.example.reset",

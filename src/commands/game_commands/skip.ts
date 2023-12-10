@@ -20,7 +20,8 @@ import type EliminationScoreboard from "../../structures/elimination_scoreboard"
 import type HelpDocumentation from "../../interfaces/help";
 import type Round from "../../structures/round";
 
-const logger = new IPCLogger("skip");
+const COMMAND_NAME = "skip";
+const logger = new IPCLogger(COMMAND_NAME);
 
 async function sendSkipNotification(
     messageContext: MessageContext,
@@ -145,9 +146,8 @@ export default class SkipCommand implements BaseCommand {
     ];
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "skip",
+        name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.skip.help.description"),
-        usage: "/skip",
         examples: [],
         priority: 1010,
     });

@@ -1,6 +1,11 @@
 import { GROUP_LIST_URL, GroupAction } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
+    clickableSlashCommand,
+    getOrdinalNum,
+    setIntersection,
+} from "../../helpers/utils";
+import {
     generateOptionsMessage,
     getDebugLogHeader,
     getInteractionValue,
@@ -15,7 +20,6 @@ import {
     getMatchingGroupNames,
     getSimilarGroupNames,
 } from "../../helpers/game_utils";
-import { getOrdinalNum, setIntersection } from "../../helpers/utils";
 import AddCommand, { AddType } from "./add";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
@@ -34,7 +38,8 @@ import type EmbedPayload from "../../interfaces/embed_payload";
 import type HelpDocumentation from "../../interfaces/help";
 import type MatchedArtist from "../../interfaces/matched_artist";
 
-const logger = new IPCLogger("groups");
+const COMMAND_NAME = "groups";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export default class GroupsCommand implements BaseCommand {
     aliases = ["group", "artist", "artists"];
@@ -45,7 +50,7 @@ export default class GroupsCommand implements BaseCommand {
     ];
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "groups",
+        name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
             "command.groups.help.description",
@@ -53,19 +58,12 @@ export default class GroupsCommand implements BaseCommand {
                 groupList: GROUP_LIST_URL,
             },
         ),
-        usage: `/groups set [${i18n.translate(
-            guildID,
-            "misc.listOfGroups",
-        )}]\n\n/groups add [${i18n.translate(
-            guildID,
-            "misc.listOfGroups",
-        )}]\n\n/groups remove [${i18n.translate(
-            guildID,
-            "misc.listOfGroups",
-        )}]\n\n/groups reset`,
         examples: [
             {
-                example: "`/groups set group_1:blackpink`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    GroupAction.SET,
+                )} group_1:blackpink`,
                 explanation: i18n.translate(
                     guildID,
                     "command.groups.help.example.singleGroup",
@@ -75,8 +73,10 @@ export default class GroupsCommand implements BaseCommand {
                 ),
             },
             {
-                example:
-                    "`/groups set group_1:blackpink group_2:bts group_3:red velvet`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    GroupAction.SET,
+                )} group_1:blackpink group_2:bts group_3:red velvet`,
                 explanation: i18n.translate(
                     guildID,
                     "command.groups.help.example.multipleGroups",
@@ -88,7 +88,37 @@ export default class GroupsCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/groups reset`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    GroupAction.ADD,
+                )} group_1:twice group_2:red velvet`,
+                explanation: i18n.translate(
+                    guildID,
+                    "command.add.help.example.groups",
+                    {
+                        groupOne: "Twice",
+                        groupTwo: "Red Velvet",
+                        groups: "`/groups`",
+                    },
+                ),
+            },
+            {
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    GroupAction.REMOVE,
+                )} group_1:twice group_2:red velvet`,
+                explanation: i18n.translate(
+                    guildID,
+                    "command.remove.help.example.groups",
+                    {
+                        groupOne: "Twice",
+                        groupTwo: "Red Velvet",
+                        groups: "`/groups`",
+                    },
+                ),
+            },
+            {
+                example: clickableSlashCommand(COMMAND_NAME, GroupAction.RESET),
                 explanation: i18n.translate(
                     guildID,
                     "command.groups.help.example.reset",

@@ -1,5 +1,6 @@
 import { IPCLogger } from "../../logger";
 import { OptionAction } from "../../constants";
+import { clickableSlashCommand } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -21,7 +22,8 @@ import type CommandArgs from "../../interfaces/command_args";
 import type GameSession from "../../structures/game_session";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("goal");
+const COMMAND_NAME = "goal";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export default class GoalCommand implements BaseCommand {
     preRunChecks = [
@@ -42,15 +44,14 @@ export default class GoalCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "goal",
+        name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.goal.help.description"),
-        usage: `/goal set\nscore:[${i18n.translate(
-            guildID,
-            "command.goal.help.usage.points",
-        )}]\n\n/goal reset`,
         examples: [
             {
-                example: "`/goal set score:30`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} score:30`,
                 explanation: i18n.translate(
                     guildID,
                     "command.goal.help.example.set",
@@ -58,7 +59,10 @@ export default class GoalCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/goal reset`",
+                example: clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.RESET,
+                ),
                 explanation: i18n.translate(
                     guildID,
                     "command.goal.help.example.reset",

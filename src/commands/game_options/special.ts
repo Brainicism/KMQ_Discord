@@ -1,5 +1,6 @@
 import { EMBED_ERROR_COLOR, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { clickableSlashCommand } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -22,7 +23,8 @@ import type CommandArgs from "../../interfaces/command_args";
 import type EmbedPayload from "../../interfaces/embed_payload";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("special");
+const COMMAND_NAME = "special";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export default class SpecialCommand implements BaseCommand {
     preRunChecks = [
@@ -44,64 +46,87 @@ export default class SpecialCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "special",
+        name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
             "command.special.help.description",
         ),
-        usage: "/special set\nspecial:[reverse | slow | fast | faster | lowpitch | highpitch | nightcore]\n\n/special reset",
         examples: [
             {
-                example: "`/special set special:reverse`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} special:reverse`,
                 explanation: i18n.translate(
                     guildID,
                     "command.special.help.example.reverse",
                 ),
             },
             {
-                example: "`/special set special:slow`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} special:slow`,
                 explanation: i18n.translate(
                     guildID,
                     "command.special.help.example.slow",
                 ),
             },
             {
-                example: "`/special set special:fast`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} special:fast`,
                 explanation: i18n.translate(
                     guildID,
                     "command.special.help.example.fast",
                 ),
             },
             {
-                example: "`/special set special:faster`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} special:faster`,
                 explanation: i18n.translate(
                     guildID,
                     "command.special.help.example.faster",
                 ),
             },
             {
-                example: "`/special set special:lowpitch`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} special:lowpitch`,
                 explanation: i18n.translate(
                     guildID,
                     "command.special.help.example.lowPitch",
                 ),
             },
             {
-                example: "`/special set special:highpitch`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} special:highpitch`,
                 explanation: i18n.translate(
                     guildID,
                     "command.special.help.example.highPitch",
                 ),
             },
             {
-                example: "`/special set special:nightcore`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} special:nightcore`,
                 explanation: i18n.translate(
                     guildID,
                     "command.special.help.example.nightcore",
                 ),
             },
             {
-                example: "`/special reset`",
+                example: clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.RESET,
+                ),
                 explanation: i18n.translate(
                     guildID,
                     "command.special.help.example.reset",

@@ -14,7 +14,8 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("end");
+const COMMAND_NAME = "end";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export default class EndCommand implements BaseCommand {
     aliases = ["stop", "e"];
@@ -25,9 +26,8 @@ export default class EndCommand implements BaseCommand {
     ];
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "end",
+        name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.end.help.description"),
-        usage: "/end",
         examples: [],
         priority: 1020,
     });

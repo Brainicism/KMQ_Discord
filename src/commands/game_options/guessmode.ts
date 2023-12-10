@@ -1,5 +1,6 @@
 import { DEFAULT_GUESS_MODE, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { clickableSlashCommand } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -19,7 +20,8 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("guessmode");
+const COMMAND_NAME = "guessmode";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export default class GuessModeCommand implements BaseCommand {
     preRunChecks = [
@@ -42,36 +44,47 @@ export default class GuessModeCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "guessmode",
+        name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
             "command.guessmode.help.description",
         ),
-        usage: "/guessmode set\nguessmode:[song | artist | both]\n\n/guessmode reset",
         examples: [
             {
-                example: "`/guessmode set guessmode:song`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} guessmode:song`,
                 explanation: i18n.translate(
                     guildID,
                     "command.guessmode.help.example.song",
                 ),
             },
             {
-                example: "`/guessmode set guessmode:artist`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} guessmode:artist`,
                 explanation: i18n.translate(
                     guildID,
                     "command.guessmode.help.example.artist",
                 ),
             },
             {
-                example: "`/guessmode set guessmode:both`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} guessmode:both`,
                 explanation: i18n.translate(
                     guildID,
                     "command.guessmode.help.example.both",
                 ),
             },
             {
-                example: "`/guessmode reset`",
+                example: clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.RESET,
+                ),
                 explanation: i18n.translate(
                     guildID,
                     "command.guessmode.help.example.reset",

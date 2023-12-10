@@ -1,5 +1,6 @@
 import { EMBED_ERROR_COLOR, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { clickableSlashCommand } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -21,7 +22,8 @@ import type CommandArgs from "../../interfaces/command_args";
 import type EmbedPayload from "../../interfaces/embed_payload";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("artisttype");
+const COMMAND_NAME = "artisttype";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export default class ArtistTypeCommand implements BaseCommand {
     preRunChecks = [
@@ -42,7 +44,7 @@ export default class ArtistTypeCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "artisttype",
+        name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
             "command.artisttype.help.description",
@@ -52,31 +54,42 @@ export default class ArtistTypeCommand implements BaseCommand {
                 both: `\`${ArtistType.BOTH}\``,
             },
         ),
-        usage: "/artisttype set\nartisttype:[soloists | groups | both]\n\n/artisttype reset",
         examples: [
             {
-                example: "`/artisttype set artisttype:soloists`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} artisttype:soloists`,
                 explanation: i18n.translate(
                     guildID,
                     "command.artisttype.help.example.soloists",
                 ),
             },
             {
-                example: "`/artisttype set artisttype:groups`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} artisttype:groups`,
                 explanation: i18n.translate(
                     guildID,
                     "command.artisttype.help.example.groups",
                 ),
             },
             {
-                example: "`/artisttype set artisttype:both`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} artisttype:both`,
                 explanation: i18n.translate(
                     guildID,
                     "command.artisttype.help.example.both",
                 ),
             },
             {
-                example: "`/artisttype reset`",
+                example: clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.RESET,
+                ),
                 explanation: i18n.translate(
                     guildID,
                     "command.artisttype.help.example.reset",

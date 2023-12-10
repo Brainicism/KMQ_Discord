@@ -6,6 +6,11 @@ import {
 } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
+    clickableSlashCommand,
+    getOrdinalNum,
+    setIntersection,
+} from "../../helpers/utils";
+import {
     generateOptionsMessage,
     getDebugLogHeader,
     getInteractionValue,
@@ -20,7 +25,6 @@ import {
     getMatchingGroupNames,
     getSimilarGroupNames,
 } from "../../helpers/game_utils";
-import { getOrdinalNum, setIntersection } from "../../helpers/utils";
 import AddCommand, { AddType } from "./add";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
@@ -39,7 +43,8 @@ import type EmbedPayload from "../../interfaces/embed_payload";
 import type HelpDocumentation from "../../interfaces/help";
 import type MatchedArtist from "../../interfaces/matched_artist";
 
-const logger = new IPCLogger("excludes");
+const COMMAND_NAME = "exclude";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export default class ExcludeCommand implements BaseCommand {
     aliases = ["excludes", "ignore", "ignores"];
@@ -50,7 +55,7 @@ export default class ExcludeCommand implements BaseCommand {
     ];
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "exclude",
+        name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
             "command.exclude.help.description",
@@ -58,19 +63,12 @@ export default class ExcludeCommand implements BaseCommand {
                 groupList: GROUP_LIST_URL,
             },
         ),
-        usage: `/exclude set [${i18n.translate(
-            guildID,
-            "misc.listOfGroups",
-        )}]\n\n/exclude add [${i18n.translate(
-            guildID,
-            "misc.listOfGroups",
-        )}]\n\n/exclude remove [${i18n.translate(
-            guildID,
-            "misc.listOfGroups",
-        )}]\n\n/exclude reset`,
         examples: [
             {
-                example: "`/exclude set group_1:blackpink`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    GroupAction.SET,
+                )} group_1:blackpink`,
                 explanation: i18n.translate(
                     guildID,
                     "command.exclude.help.example.singleGroup",
@@ -80,8 +78,10 @@ export default class ExcludeCommand implements BaseCommand {
                 ),
             },
             {
-                example:
-                    "`/exclude set group_1:blackpink group_2:bts group_3:red velvet`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    GroupAction.SET,
+                )} group_1:blackpink group_2:bts group_3:red velvet`,
                 explanation: i18n.translate(
                     guildID,
                     "command.exclude.help.example.multipleGroups",
@@ -93,7 +93,39 @@ export default class ExcludeCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/exclude reset`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    GroupAction.ADD,
+                )} group_1:BESTie group_2:Dia group_3:iKON`,
+                explanation: i18n.translate(
+                    guildID,
+                    "command.add.help.example.exclude",
+                    {
+                        groupOne: "BESTie",
+                        groupTwo: "Dia",
+                        groupThree: "IKON",
+                        exclude: "`/exclude`",
+                    },
+                ),
+            },
+            {
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    GroupAction.REMOVE,
+                )} group_1:BESTie group_2:Dia group_3:iKON`,
+                explanation: i18n.translate(
+                    guildID,
+                    "command.remove.help.example.exclude",
+                    {
+                        groupOne: "BESTie",
+                        groupTwo: "Dia",
+                        groupThree: "iKON",
+                        exclude: "`/exclude`",
+                    },
+                ),
+            },
+            {
+                example: clickableSlashCommand(COMMAND_NAME, GroupAction.RESET),
                 explanation: i18n.translate(
                     guildID,
                     "command.exclude.help.example.reset",

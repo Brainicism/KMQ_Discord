@@ -13,7 +13,8 @@ import type GameSession from "../../structures/game_session";
 import type HelpDocumentation from "../../interfaces/help";
 import type MessageContext from "../../structures/message_context";
 
-const logger = new IPCLogger("score");
+const COMMAND_NAME = "score";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export default class ScoreCommand implements BaseCommand {
     aliases = ["scoreboard", "sb"];
@@ -24,9 +25,8 @@ export default class ScoreCommand implements BaseCommand {
     ];
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "score",
+        name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.score.help.description"),
-        usage: "/score",
         examples: [],
         priority: 50,
     });

@@ -35,7 +35,8 @@ import type CommandArgs from "../../interfaces/command_args";
 import type GameRound from "../../structures/game_round";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("exp");
+const COMMAND_NAME = "exp";
+const logger = new IPCLogger(COMMAND_NAME);
 
 interface ExpModifier {
     displayName: string;
@@ -329,9 +330,8 @@ export async function calculateTotalRoundExp(
 
 export default class ExpCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
-        name: "exp",
+        name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.exp.help.description"),
-        usage: "/exp",
         examples: [],
         priority: 50,
     });

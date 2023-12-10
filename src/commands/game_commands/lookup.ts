@@ -8,6 +8,7 @@ import {
     isValidURL,
 } from "../../helpers/utils";
 import {
+    getAllClickableSlashCommands,
     getDebugLogHeader,
     getInteractionValue,
     localizedAutocompleteFormat,
@@ -45,7 +46,8 @@ import type HelpDocumentation from "../../interfaces/help";
 import type MatchedArtist from "src/interfaces/matched_artist";
 import type QueriedSong from "../../interfaces/queried_song";
 
-const logger = new IPCLogger("lookup");
+const COMMAND_NAME = "lookup";
+const logger = new IPCLogger(COMMAND_NAME);
 
 const getDaisukiLink = (id: number, isMV: boolean): string => {
     if (isMV) {
@@ -404,9 +406,8 @@ export default class LookupCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "lookup",
+        name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.lookup.help.description"),
-        usage: "/lookup song_name\nsong_name:[song]\nartist_name:[artist]\n\n/lookup song_link\nsong_link:{youtube_url}",
         examples: [
             {
                 example: "`/lookup song_name song_name:love dive`",
@@ -602,7 +603,7 @@ export default class LookupCommand implements BaseCommand {
                         "command.lookup.validation.invalidYouTubeID",
                     ),
                     arg,
-                    this.help(guildID).usage,
+                    getAllClickableSlashCommands(COMMAND_NAME),
                 );
 
                 logger.info(

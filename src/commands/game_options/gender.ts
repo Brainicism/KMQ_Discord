@@ -1,6 +1,7 @@
 import { IPCLogger } from "../../logger";
 import { OptionAction } from "../../constants";
 import { availableGenders } from "../../enums/option_types/gender";
+import { clickableSlashCommand } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -21,7 +22,8 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("gender");
+const COMMAND_NAME = "gender";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export default class GenderCommand implements BaseCommand {
     preRunChecks = [
@@ -52,7 +54,7 @@ export default class GenderCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "gender",
+        name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
             "command.gender.help.description",
@@ -63,38 +65,52 @@ export default class GenderCommand implements BaseCommand {
                 genderAlternating: "`/gender alternating`",
             },
         ),
-        usage: "/gender set\ngender_1:[gender]\ngender_2:{gender}\ngender_3:{gender}\n\n/gender reset",
         examples: [
             {
-                example: "`/gender set female`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} female`,
                 explanation: i18n.translate(
                     guildID,
                     "command.gender.help.example.female",
                 ),
             },
             {
-                example: "`/gender set gender_1:male gender_2:female`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} gender_1:male gender_2:female`,
                 explanation: i18n.translate(
                     guildID,
                     "command.gender.help.example.maleFemale",
                 ),
             },
             {
-                example: "`/gender set gender_1:coed`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} gender_1:coed`,
                 explanation: i18n.translate(
                     guildID,
                     "command.gender.help.example.coed",
                 ),
             },
             {
-                example: "`/gender set gender_1:alternating`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} gender_1:alternating`,
                 explanation: i18n.translate(
                     guildID,
                     "command.gender.help.example.alternating",
                 ),
             },
             {
-                example: "`/gender reset`",
+                example: clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.RESET,
+                ),
                 explanation: i18n.translate(
                     guildID,
                     "command.gender.help.example.reset",

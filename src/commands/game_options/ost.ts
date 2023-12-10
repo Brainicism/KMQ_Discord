@@ -1,5 +1,6 @@
 import { DEFAULT_OST_PREFERENCE, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { clickableSlashCommand } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -19,7 +20,8 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("ost");
+const COMMAND_NAME = "ost";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export default class OstCommand implements BaseCommand {
     preRunChecks = [
@@ -42,33 +44,44 @@ export default class OstCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "ost",
+        name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.ost.help.description"),
-        usage: "/ost set\nost:[include | exclude | exclusive]\n\n/ost reset",
         examples: [
             {
-                example: "`/ost set ost:include`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} ost:include`,
                 explanation: i18n.translate(
                     guildID,
                     "command.ost.help.example.include",
                 ),
             },
             {
-                example: "`/ost set ost:exclude`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} ost:exclude`,
                 explanation: i18n.translate(
                     guildID,
                     "command.ost.help.example.exclude",
                 ),
             },
             {
-                example: "`/ost set ost:exclusive`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} ost:exclusive`,
                 explanation: i18n.translate(
                     guildID,
                     "command.ost.help.example.exclusive",
                 ),
             },
             {
-                example: "`/ost reset`",
+                example: clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.RESET,
+                ),
                 explanation: i18n.translate(
                     guildID,
                     "command.ost.help.example.reset",

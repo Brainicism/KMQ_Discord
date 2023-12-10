@@ -2226,3 +2226,61 @@ export async function notifyOptionsGenerationError(
         ),
     });
 }
+
+/**
+ * Gets all slash commands associated with a command
+ * @param commandName - The command name
+ * @returns a list of slash commands, formatted for Discord
+ */
+export function getAllClickableSlashCommands(commandName: string): string {
+    const commandFiles = State.client.commands;
+    const command = commandFiles[commandName];
+    if (!command) {
+        logger.error(
+            `Command ${commandName} unexpectedly not found in getAllClickableSlashCommands`,
+        );
+        return "";
+    }
+
+    if (!command.slashCommands) {
+        logger.error(
+            `Command ${commandName} unexpectedly missing slashCommands in getAllClickableSlashCommands`,
+        );
+        return "";
+    }
+
+    const results: string[] = [];
+    const slashCommands = command.slashCommands();
+    for (const slashCommand of slashCommands) {
+        if (!slashCommand.options) {
+            results.push(clickableSlashCommand(commandName));
+            continue;
+        }
+
+        for (const option of slashCommand.options) {
+            if (
+                option.type ===
+                Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND_GROUP
+            ) {
+                for (const subOption of option.options!) {
+                    results.push(
+                        clickableSlashCommand(
+                            commandName,
+                            `${option.name} ${subOption.name}`,
+                        ),
+                    );
+                }
+            } else {
+                const optionName =
+                    option.type ===
+                    Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND
+                        ? option.name
+                        : undefined;
+
+                results.push(clickableSlashCommand(commandName, optionName));
+            }
+        }
+    }
+
+    return results.join(" ");
+}

@@ -1,5 +1,6 @@
 import { IPCLogger } from "../../logger";
 import { OptionAction } from "../../constants";
+import { clickableSlashCommand } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -18,7 +19,9 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
+const COMMAND_NAME = "timer";
 const logger = new IPCLogger("guessTimeout");
+
 const TIMER_MIN_VALUE = 2;
 const TIMER_MAX_VALUE = 180;
 export default class GuessTimeoutCommand implements BaseCommand {
@@ -44,15 +47,14 @@ export default class GuessTimeoutCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "timer",
+        name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.timer.help.description"),
-        usage: `/timer set\ntimer:[${i18n.translate(
-            guildID,
-            "command.timer.help.usage.seconds",
-        )}]\n\n/timer reset`,
         examples: [
             {
-                example: "`/timer set timer:15`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} timer:15`,
                 explanation: i18n.translate(
                     guildID,
                     "command.timer.help.example.set",
@@ -60,7 +62,10 @@ export default class GuessTimeoutCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/timer reset`",
+                example: clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.RESET,
+                ),
                 explanation: i18n.translate(
                     guildID,
                     "command.timer.help.example.reset",

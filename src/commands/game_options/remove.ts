@@ -1,4 +1,4 @@
-import { EMBED_ERROR_COLOR, GROUP_LIST_URL, KmqImages } from "../../constants";
+import { EMBED_ERROR_COLOR, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     generateOptionsMessage,
@@ -12,7 +12,6 @@ import {
     getSimilarGroupNames,
 } from "../../helpers/game_utils";
 import CommandPrechecks from "../../command_prechecks";
-import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import MessageContext from "../../structures/message_context";
@@ -22,10 +21,11 @@ import i18n from "../../helpers/localization_manager";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type EmbedPayload from "../../interfaces/embed_payload";
-import type HelpDocumentation from "../../interfaces/help";
+import type Eris from "eris";
 import type MatchedArtist from "../../interfaces/matched_artist";
 
-const logger = new IPCLogger("remove");
+const COMMAND_NAME = "remove";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export enum RemoveType {
     // Groups with aliases
@@ -56,80 +56,6 @@ export default class RemoveCommand implements BaseCommand {
             },
         ],
     };
-
-    help = (guildID: string): HelpDocumentation => ({
-        name: "remove",
-        description: i18n.translate(
-            guildID,
-            "command.remove.help.description",
-            {
-                groups: "`/groups`",
-                exclude: "`/exclude`",
-                include: "`/include`",
-            },
-        ),
-        usage: `/groups remove [${i18n.translate(
-            guildID,
-            "misc.listOfGroups",
-        )}]\n\n/include remove [${i18n.translate(
-            guildID,
-            "misc.listOfGroups",
-        )}]\n\n/exclude remove [${i18n.translate(
-            guildID,
-            "misc.listOfGroups",
-        )}]`,
-        examples: [
-            {
-                example: "`/groups remove group_1:twice group_2:red velvet`",
-                explanation: i18n.translate(
-                    guildID,
-                    "command.remove.help.example.groups",
-                    {
-                        groupOne: "Twice",
-                        groupTwo: "Red Velvet",
-                        groups: "`/groups`",
-                    },
-                ),
-            },
-            {
-                example:
-                    "`/exclude remove group_1:BESTie group_2:Dia group_3:iKON`",
-                explanation: i18n.translate(
-                    guildID,
-                    "command.remove.help.example.exclude",
-                    {
-                        groupOne: "BESTie",
-                        groupTwo: "Dia",
-                        groupThree: "iKON",
-                        exclude: "`/exclude`",
-                    },
-                ),
-            },
-            {
-                example: "`/include remove group_1:exo`",
-                explanation: i18n.translate(
-                    guildID,
-                    "command.remove.help.example.include",
-                    {
-                        group: "exo",
-                        include: "`/include`",
-                    },
-                ),
-            },
-        ],
-        actionRowComponents: [
-            {
-                type: Eris.Constants.ComponentTypes.BUTTON,
-                style: Eris.Constants.ButtonStyles.LINK,
-                url: GROUP_LIST_URL,
-                label: i18n.translate(
-                    guildID,
-                    "misc.interaction.fullGroupsList",
-                ),
-            },
-        ],
-        priority: 200,
-    });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const rawGroupsToRemove = parsedMessage.argument

@@ -1,5 +1,6 @@
 import { ExpBonusModifierValues, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { clickableSlashCommand } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -20,7 +21,8 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("answer");
+const COMMAND_NAME = "answer";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export default class AnswerCommand implements BaseCommand {
     preRunChecks = [
@@ -42,7 +44,7 @@ export default class AnswerCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "answer",
+        name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
             "command.answer.help.description",
@@ -54,17 +56,22 @@ export default class AnswerCommand implements BaseCommand {
                 hard: `\`${AnswerType.MULTIPLE_CHOICE_HARD}\``,
             },
         ),
-        usage: "/answer set\nanswer:[typing | typingtypos | easy | medium | hard]\n\n/answer reset",
         examples: [
             {
-                example: "`/answer set answer:typing`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} answer:typing`,
                 explanation: i18n.translate(
                     guildID,
                     "command.answer.help.example.typing",
                 ),
             },
             {
-                example: "`/answer set answer:typingtypos`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} answer:typingtypos`,
                 explanation: i18n.translate(
                     guildID,
                     "command.answer.help.example.typingTypos",
@@ -76,7 +83,10 @@ export default class AnswerCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/answer set answer:easy`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} answer:easy`,
                 explanation: i18n.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",
@@ -91,7 +101,10 @@ export default class AnswerCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/answer set answer:medium`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} answer:medium`,
                 explanation: i18n.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",
@@ -106,7 +119,10 @@ export default class AnswerCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/answer set answer:hard`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} answer:hard`,
                 explanation: i18n.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",

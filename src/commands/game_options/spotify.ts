@@ -44,7 +44,8 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("spotify");
+const COMMAND_NAME = "spotify";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export default class SpotifyCommand implements BaseCommand {
     aliases = ["playlist"];
@@ -190,29 +191,37 @@ export default class SpotifyCommand implements BaseCommand {
     ];
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "spotify",
+        name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
             "command.spotify.help.description",
         ),
-        usage: "/spotify set\nplaylist_url:{playlist_url}\n\n/spotify reset",
         examples: [
             {
-                example: `\`/spotify playlist_url:${SPOTIFY_BASE_URL}...\``,
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} playlist_url:${SPOTIFY_BASE_URL}...`,
                 explanation: i18n.translate(
                     guildID,
                     "command.spotify.help.example.playlistURL",
                 ),
             },
             {
-                example: `\`/spotify playlist_url:${SPOTIFY_SHORTHAND_BASE_URL}...\``,
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} playlist_url:${SPOTIFY_SHORTHAND_BASE_URL}...`,
                 explanation: i18n.translate(
                     guildID,
                     "command.spotify.help.example.playlistURL",
                 ),
             },
             {
-                example: "`/spotify`",
+                example: clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.RESET,
+                ),
                 explanation: i18n.translate(
                     guildID,
                     "command.spotify.help.example.reset",
