@@ -1,5 +1,6 @@
 import { DEFAULT_LIMIT, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { clickableSlashCommand } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -19,7 +20,8 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("limit");
+const COMMAND_NAME = "limit";
+const logger = new IPCLogger(COMMAND_NAME);
 
 const LIMIT_START_MIN = 0;
 const LIMIT_START_MAX = 100000;
@@ -57,12 +59,15 @@ export default class LimitCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "limit",
+        name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.limit.help.description"),
-        usage: "/limit set top\nlimit:{limit}\n\n/limit set range\nlimit_start:{limit_start}\nlimit_end:{limit_end}\n\n/limit reset",
         examples: [
             {
-                example: "`/limit set top limit:250`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                    LimitAppCommandAction.TOP,
+                )} limit:250`,
                 explanation: i18n.translate(
                     guildID,
                     "command.limit.help.example.singleLimit",
@@ -72,7 +77,11 @@ export default class LimitCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/limit set range limit_start:250 limit_end:500`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                    LimitAppCommandAction.RANGE,
+                )} limit_start:250 limit_end:500`,
                 explanation: i18n.translate(
                     guildID,
                     "command.limit.help.example.twoLimits",
@@ -80,7 +89,10 @@ export default class LimitCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/limit reset`",
+                example: clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.RESET,
+                ),
                 explanation: i18n.translate(
                     guildID,
                     "command.limit.help.example.reset",

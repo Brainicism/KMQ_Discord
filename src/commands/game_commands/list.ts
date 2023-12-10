@@ -1,4 +1,5 @@
 import { IPCLogger } from "../../logger";
+import { clickableSlashCommand, standardDateFormat } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -6,7 +7,6 @@ import {
     sendInfoMessage,
     sendMessage,
 } from "../../helpers/discord_utils";
-import { standardDateFormat } from "../../helpers/utils";
 import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
@@ -17,7 +17,8 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("list");
+const COMMAND_NAME = "list";
+const logger = new IPCLogger(COMMAND_NAME);
 
 enum ListType {
     // Groups with aliases
@@ -49,32 +50,31 @@ export default class ListCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "list",
+        name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.list.help.description"),
-        usage: "/list type:[groups | exclude | include]",
         examples: [
             {
-                example: "`/list type:groups`",
+                example: `${clickableSlashCommand(COMMAND_NAME)} type:groups`,
                 explanation: i18n.translate(
                     guildID,
                     "command.list.help.example.groups",
-                    { groups: "`/groups`" },
+                    { groups: clickableSlashCommand("groups") },
                 ),
             },
             {
-                example: "`/list type:exclude`",
+                example: `${clickableSlashCommand(COMMAND_NAME)} type:exclude`,
                 explanation: i18n.translate(
                     guildID,
                     "command.list.help.example.exclude",
-                    { exclude: "`/exclude`" },
+                    { exclude: clickableSlashCommand("exclude") },
                 ),
             },
             {
-                example: "`/list type:include`",
+                example: `${clickableSlashCommand(COMMAND_NAME)} type:include`,
                 explanation: i18n.translate(
                     guildID,
                     "command.list.help.example.include",
-                    { include: "`/include`" },
+                    { include: clickableSlashCommand("include") },
                 ),
             },
         ],

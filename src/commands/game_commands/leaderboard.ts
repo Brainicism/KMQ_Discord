@@ -3,9 +3,11 @@ import { KmqImages, LEADERBOARD_ENTRIES_PER_PAGE } from "../../constants";
 import {
     arrayToString,
     chooseRandom,
+    clickableSlashCommand,
     friendlyFormattedNumber,
 } from "../../helpers/utils";
 import {
+    getAllClickableSlashCommands,
     getDebugLogHeader,
     getInteractionValue,
     getUserTag,
@@ -32,9 +34,11 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("leaderboard");
+const COMMAND_NAME = "leaderboard";
+const logger = new IPCLogger(COMMAND_NAME);
 
 enum LeaderboardAction {
+    SHOW = "show",
     ENROLL = "enroll",
     UNENROLL = "unenroll",
 }
@@ -65,69 +69,87 @@ export default class LeaderboardCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "leaderboard",
+        name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
             "command.leaderboard.help.description",
         ),
-        usage: `/leaderboard show\ntype:{gamesplayed | songsguessed | exp}\nscope:{server | game | global}\nduration:{daily | weekly | monthly | yearly}\npage:{${i18n.translate(
-            guildID,
-            "command.leaderboard.help.usage.pageNumber",
-        )}}\n\n/leaderboard enroll\n\n/leaderboard unenroll`,
         examples: [
             {
-                example: "`/leaderboard show`",
+                example: clickableSlashCommand(
+                    COMMAND_NAME,
+                    LeaderboardAction.SHOW,
+                ),
                 explanation: i18n.translate(
                     guildID,
                     "command.leaderboard.help.example.global",
                 ),
             },
             {
-                example: "`/leaderboard show page:3`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    LeaderboardAction.SHOW,
+                )} page:3`,
                 explanation: i18n.translate(
                     guildID,
                     "command.leaderboard.help.example.globalPage",
                 ),
             },
             {
-                example:
-                    "`/leaderboard show scope:game duration:monthly page:2`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    LeaderboardAction.SHOW,
+                )} scope:game duration:monthly page:2`,
                 explanation: i18n.translate(
                     guildID,
                     "command.leaderboard.help.example.gameMonthlyPage",
                 ),
             },
             {
-                example:
-                    "`/leaderboard show type:songsguessed scope:server page:3`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    LeaderboardAction.SHOW,
+                )} type:songsguessed scope:server page:3`,
                 explanation: i18n.translate(
                     guildID,
                     "command.leaderboard.help.example.serverSongsGuessedPage",
                 ),
             },
             {
-                example: "`/leaderboard enroll`",
+                example: clickableSlashCommand(
+                    COMMAND_NAME,
+                    LeaderboardAction.ENROLL,
+                ),
                 explanation: i18n.translate(
                     guildID,
                     "command.leaderboard.help.example.enroll",
                 ),
             },
             {
-                example: "`/leaderboard unenroll`",
+                example: clickableSlashCommand(
+                    COMMAND_NAME,
+                    LeaderboardAction.UNENROLL,
+                ),
                 explanation: i18n.translate(
                     guildID,
                     "command.leaderboard.help.example.unenroll",
                 ),
             },
             {
-                example: "`/leaderboard scope:server`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    LeaderboardAction.SHOW,
+                )} scope:server`,
                 explanation: i18n.translate(
                     guildID,
                     "command.leaderboard.help.example.server",
                 ),
             },
             {
-                example: "`/leaderboard duration:weekly page:4`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    LeaderboardAction.SHOW,
+                )} duration:weekly page:4`,
                 explanation: i18n.translate(
                     guildID,
                     "command.leaderboard.help.example.globalWeeklyPage",
@@ -188,7 +210,7 @@ export default class LeaderboardCommand implements BaseCommand {
                         .SUB_COMMAND,
                 },
                 {
-                    name: "show",
+                    name: LeaderboardAction.SHOW,
                     description: i18n.translate(
                         LocaleType.EN,
                         "command.leaderboard.help.description",
@@ -370,11 +392,11 @@ export default class LeaderboardCommand implements BaseCommand {
             const action = arg as LeaderboardAction;
             if (action === LeaderboardAction.ENROLL) {
                 LeaderboardCommand.enrollLeaderboard(messageContext);
+                return;
             } else if (action === LeaderboardAction.UNENROLL) {
                 LeaderboardCommand.unenrollLeaderboard(messageContext);
+                return;
             }
-
-            return;
         }
 
         let type: LeaderboardType | undefined;
@@ -419,7 +441,7 @@ export default class LeaderboardCommand implements BaseCommand {
                     },
                 ),
                 arg,
-                this.help(message.guildID).usage,
+                getAllClickableSlashCommands(COMMAND_NAME),
             );
             return;
         }
@@ -458,7 +480,7 @@ export default class LeaderboardCommand implements BaseCommand {
                     },
                 ),
                 arg,
-                this.help(message.guildID).usage,
+                getAllClickableSlashCommands(COMMAND_NAME),
             );
             return;
         }
@@ -494,7 +516,7 @@ export default class LeaderboardCommand implements BaseCommand {
                     },
                 ),
                 arg,
-                this.help(message.guildID).usage,
+                getAllClickableSlashCommands(COMMAND_NAME),
             );
             return;
         }
@@ -507,7 +529,7 @@ export default class LeaderboardCommand implements BaseCommand {
                     "command.leaderboard.validation.thirdArg",
                 ),
                 arg,
-                this.help(message.guildID).usage,
+                getAllClickableSlashCommands(COMMAND_NAME),
             );
             return;
         }

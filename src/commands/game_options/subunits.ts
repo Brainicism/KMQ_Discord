@@ -1,5 +1,6 @@
 import { DEFAULT_SUBUNIT_PREFERENCE, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { clickableSlashCommand } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -19,7 +20,8 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("subunits");
+const COMMAND_NAME = "subunits";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export default class SubunitsCommand implements BaseCommand {
     aliases = ["subunit", "su"];
@@ -42,16 +44,18 @@ export default class SubunitsCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "subunits",
+        name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
             "command.subunits.help.description",
             { groups: "`/groups`" },
         ),
-        usage: "/subunits set\nsubunits:[include | exclude]\n\n/subunits reset",
         examples: [
             {
-                example: "`/subunits set subunits:include`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} subunits:include`,
                 explanation: i18n.translate(
                     guildID,
                     "command.subunits.help.example.include",
@@ -64,14 +68,20 @@ export default class SubunitsCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/subunits set subunits:exclude`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} subunits:exclude`,
                 explanation: i18n.translate(
                     guildID,
                     "command.subunits.help.example.exclude",
                 ),
             },
             {
-                example: "`/subunits reset`",
+                example: clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.RESET,
+                ),
                 explanation: i18n.translate(
                     guildID,
                     "command.subunits.help.example.reset",
@@ -86,7 +96,7 @@ export default class SubunitsCommand implements BaseCommand {
         DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
     > => [
         {
-            name: "subunits",
+            name: COMMAND_NAME,
             description: i18n.translate(
                 LocaleType.EN,
                 "command.subunits.help.description",

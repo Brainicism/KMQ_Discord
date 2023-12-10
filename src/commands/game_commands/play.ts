@@ -59,7 +59,8 @@ import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import type TeamScoreboard from "../../structures/team_scoreboard";
 
-const logger = new IPCLogger("play");
+const COMMAND_NAME = "play";
+const logger = new IPCLogger(COMMAND_NAME);
 
 /**
  * Sends the beginning of game session message
@@ -175,7 +176,7 @@ export async function sendBeginGameSessionMessage(
 
         additionalPayloads.push(optionsEmbedPayload);
     } else {
-        await notifyOptionsGenerationError(messageContext, "play");
+        await notifyOptionsGenerationError(messageContext, COMMAND_NAME);
     }
 
     let newsFileContent: string | undefined;
@@ -268,23 +269,22 @@ export default class PlayCommand implements BaseCommand {
     aliases = ["random", "start", "p"];
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "play",
+        name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.play.help.description"),
-        usage: `/play classic\n\n/play elimination\nlives:{${i18n.translate(
-            guildID,
-            "command.play.help.usage.lives",
-        )}}\n\n/play teams create\n\n/play teams join\n\n/play hidden`,
         priority: 1050,
         examples: [
             {
-                example: "`/play classic`",
+                example: clickableSlashCommand(COMMAND_NAME, GameType.CLASSIC),
                 explanation: i18n.translate(
                     guildID,
                     "command.play.help.example.classic",
                 ),
             },
             {
-                example: "`/play elimination lives:5`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    GameType.ELIMINATION,
+                )} lives:5`,
                 explanation: i18n.translate(
                     guildID,
                     "command.play.help.example.elimination",
@@ -294,7 +294,10 @@ export default class PlayCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/play elimination`",
+                example: clickableSlashCommand(
+                    COMMAND_NAME,
+                    GameType.ELIMINATION,
+                ),
                 explanation: i18n.translate(
                     guildID,
                     "command.play.help.example.elimination",
@@ -304,14 +307,18 @@ export default class PlayCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/play teams create`",
+                example: clickableSlashCommand(
+                    COMMAND_NAME,
+                    GameType.TEAMS,
+                    "create",
+                ),
                 explanation: i18n.translate(
                     guildID,
                     "command.play.help.example.teams",
                 ),
             },
             {
-                example: "`/play hidden`",
+                example: clickableSlashCommand(COMMAND_NAME, GameType.HIDDEN),
                 explanation: i18n.translate(
                     guildID,
                     "command.play.help.example.hidden",

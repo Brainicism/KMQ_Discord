@@ -24,6 +24,11 @@ export async function sendValidationErrorMessage(
     usage?: string,
     interaction?: Eris.CommandInteraction,
 ): Promise<void> {
+    let description = warning;
+    if (usage) {
+        description += `\n\n${usage}`;
+    }
+
     await sendErrorMessage(
         messageContext,
         {
@@ -31,8 +36,7 @@ export async function sendValidationErrorMessage(
                 messageContext.guildID,
                 "misc.failure.validation.title",
             ),
-            description: warning,
-            footerText: usage,
+            description,
         },
         interaction,
     );

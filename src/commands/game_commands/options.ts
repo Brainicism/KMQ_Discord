@@ -13,18 +13,18 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("options");
+const COMMAND_NAME = "options";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export default class OptionsCommand implements BaseCommand {
     aliases = ["settings"];
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "options",
+        name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
             "command.options.help.description",
         ),
-        usage: "/options",
         examples: [],
         priority: 50,
     });

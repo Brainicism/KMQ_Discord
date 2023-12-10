@@ -1,6 +1,7 @@
 import * as uuid from "uuid";
 import { IPCLogger } from "../../logger";
 import {
+    getAllClickableSlashCommands,
     getDebugLogHeader,
     sendErrorMessage,
     sendOptionsMessage,
@@ -143,7 +144,9 @@ export default async function messageCreateHandler(
                 parsedMessage,
                 invokedCommand.validations ?? null,
                 typeof invokedCommand.help === "function"
-                    ? invokedCommand.help(message.guildID).usage
+                    ? getAllClickableSlashCommands(
+                          invokedCommand.help(message.guildID).name,
+                      )
                     : undefined,
             )
         ) {

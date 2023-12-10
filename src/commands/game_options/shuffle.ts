@@ -5,6 +5,7 @@ import {
     OptionAction,
 } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { clickableSlashCommand } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -28,7 +29,8 @@ import type CommandArgs from "../../interfaces/command_args";
 import type EmbedPayload from "../../interfaces/embed_payload";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("shuffle");
+const COMMAND_NAME = "shuffle";
+const logger = new IPCLogger(COMMAND_NAME);
 
 const PREMIUM_SHUFFLE_TYPES = [
     ShuffleType.WEIGHTED_EASY,
@@ -51,7 +53,7 @@ export default class ShuffleCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "shuffle",
+        name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
             "command.shuffle.help.description",
@@ -59,17 +61,22 @@ export default class ShuffleCommand implements BaseCommand {
                 random: `\`${ShuffleType.RANDOM}\``,
             },
         ),
-        usage: "/shuffle set\nshuffle:[random | popularity | weighted_easy | weighted_hard | chronological | reversechronological]\n\n/shuffle reset",
         examples: [
             {
-                example: "`/shuffle set shuffle:random`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} shuffle:random`,
                 explanation: i18n.translate(
                     guildID,
                     "command.shuffle.help.example.random",
                 ),
             },
             {
-                example: "`/shuffle set shuffle:popularity`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} shuffle:popularity`,
                 explanation: i18n.translate(
                     guildID,
                     "command.shuffle.help.example.popularity",
@@ -83,7 +90,10 @@ export default class ShuffleCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/shuffle set shuffle:chronological`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} shuffle:chronological`,
                 explanation: i18n.translate(
                     guildID,
                     "command.shuffle.help.example.chronological",
@@ -97,7 +107,10 @@ export default class ShuffleCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/shuffle reset`",
+                example: clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.RESET,
+                ),
                 explanation: i18n.translate(
                     guildID,
                     "command.shuffle.help.example.reset",

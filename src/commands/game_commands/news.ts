@@ -14,15 +14,15 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("news");
+const COMMAND_NAME = "news";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export default class NewsCommand implements BaseCommand {
     aliases = ["updates"];
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "news",
+        name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.news.help.description"),
-        usage: "/news",
         examples: [],
         priority: 10,
     });

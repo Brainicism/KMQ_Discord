@@ -1,4 +1,4 @@
-import { EMBED_ERROR_COLOR, GROUP_LIST_URL, KmqImages } from "../../constants";
+import { EMBED_ERROR_COLOR, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     generateOptionsMessage,
@@ -13,7 +13,6 @@ import {
 } from "../../helpers/game_utils";
 import { setIntersection } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
-import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import MessageContext from "../../structures/message_context";
@@ -23,9 +22,10 @@ import i18n from "../../helpers/localization_manager";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type EmbedPayload from "../../interfaces/embed_payload";
-import type HelpDocumentation from "../../interfaces/help";
+import type Eris from "eris";
 
-const logger = new IPCLogger("add");
+const COMMAND_NAME = "add";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export enum AddType {
     // Groups with aliases
@@ -56,73 +56,6 @@ export default class AddCommand implements BaseCommand {
             },
         ],
     };
-
-    help = (guildID: string): HelpDocumentation => ({
-        name: "add",
-        description: i18n.translate(guildID, "command.add.help.description", {
-            groups: "`/groups`",
-            exclude: "`/exclude`",
-            include: "`/include`",
-        }),
-        usage: `/groups add [${i18n.translate(
-            guildID,
-            "misc.listOfGroups",
-        )}]\n\n/include add [${i18n.translate(
-            guildID,
-            "misc.listOfGroups",
-        )}]\n\n/exclude add [${i18n.translate(guildID, "misc.listOfGroups")}]`,
-        examples: [
-            {
-                example: "`/groups add group_1:twice group_2:red velvet`",
-                explanation: i18n.translate(
-                    guildID,
-                    "command.add.help.example.groups",
-                    {
-                        groupOne: "Twice",
-                        groupTwo: "Red Velvet",
-                        groups: "`/groups`",
-                    },
-                ),
-            },
-            {
-                example:
-                    "`/exclude add group_1:BESTie group_2:Dia group_3:iKON`",
-                explanation: i18n.translate(
-                    guildID,
-                    "command.add.help.example.exclude",
-                    {
-                        groupOne: "BESTie",
-                        groupTwo: "Dia",
-                        groupThree: "IKON",
-                        exclude: "`/exclude`",
-                    },
-                ),
-            },
-            {
-                example: "`/include add group_1:exo`",
-                explanation: i18n.translate(
-                    guildID,
-                    "command.add.help.example.include",
-                    {
-                        groupOne: "EXO",
-                        include: "`/include`",
-                    },
-                ),
-            },
-        ],
-        actionRowComponents: [
-            {
-                type: Eris.Constants.ComponentTypes.BUTTON,
-                style: Eris.Constants.ButtonStyles.LINK,
-                url: GROUP_LIST_URL,
-                label: i18n.translate(
-                    guildID,
-                    "misc.interaction.fullGroupsList",
-                ),
-            },
-        ],
-        priority: 200,
-    });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const newGroupNames = parsedMessage.argument

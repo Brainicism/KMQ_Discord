@@ -5,6 +5,7 @@ import {
     KmqImages,
 } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { clickableSlashCommand, getOrdinalNum } from "../../helpers/utils";
 import {
     generateOptionsMessage,
     getDebugLogHeader,
@@ -20,7 +21,6 @@ import {
     getMatchingGroupNames,
     getSimilarGroupNames,
 } from "../../helpers/game_utils";
-import { getOrdinalNum } from "../../helpers/utils";
 import AddCommand, { AddType } from "./add";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
@@ -39,7 +39,8 @@ import type EmbedPayload from "../../interfaces/embed_payload";
 import type HelpDocumentation from "../../interfaces/help";
 import type MatchedArtist from "../../interfaces/matched_artist";
 
-const logger = new IPCLogger("includes");
+const COMMAND_NAME = "include";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export default class IncludeCommand implements BaseCommand {
     aliases = ["includes"];
@@ -50,7 +51,7 @@ export default class IncludeCommand implements BaseCommand {
     ];
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "include",
+        name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
             "command.include.help.description",
@@ -60,19 +61,12 @@ export default class IncludeCommand implements BaseCommand {
                 groupList: GROUP_LIST_URL,
             },
         ),
-        usage: `/include set [${i18n.translate(
-            guildID,
-            "misc.listOfGroups",
-        )}]\n\n/include add [${i18n.translate(
-            guildID,
-            "misc.listOfGroups",
-        )}]\n\n/include remove [${i18n.translate(
-            guildID,
-            "misc.listOfGroups",
-        )}]\n\n/include reset`,
         examples: [
             {
-                example: "`/include set group_1:blackpink`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    GroupAction.SET,
+                )} group_1:blackpink`,
                 explanation: i18n.translate(
                     guildID,
                     "command.include.help.example.singleGroup",
@@ -80,8 +74,10 @@ export default class IncludeCommand implements BaseCommand {
                 ),
             },
             {
-                example:
-                    "`/include set group_1:blackpink group_2:bts group_3:red velvet`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    GroupAction.SET,
+                )} group_1:blackpink group_2:bts group_3:red velvet`,
                 explanation: i18n.translate(
                     guildID,
                     "command.include.help.example.multipleGroups",
@@ -93,7 +89,35 @@ export default class IncludeCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/include reset`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    GroupAction.ADD,
+                )} group_1:exo`,
+                explanation: i18n.translate(
+                    guildID,
+                    "command.add.help.example.include",
+                    {
+                        groupOne: "EXO",
+                        include: "`/include`",
+                    },
+                ),
+            },
+            {
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    GroupAction.REMOVE,
+                )} group_1:exo`,
+                explanation: i18n.translate(
+                    guildID,
+                    "command.remove.help.example.include",
+                    {
+                        group: "exo",
+                        include: "`/include`",
+                    },
+                ),
+            },
+            {
+                example: clickableSlashCommand(COMMAND_NAME, GroupAction.RESET),
                 explanation: i18n.translate(
                     guildID,
                     "command.include.help.example.reset",

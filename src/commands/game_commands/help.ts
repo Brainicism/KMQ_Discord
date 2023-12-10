@@ -22,28 +22,25 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("help");
+const COMMAND_NAME = "help";
+const logger = new IPCLogger(COMMAND_NAME);
 const FIELDS_PER_EMBED = 8;
 const excludedCommands: Array<string> = [];
 
 export default class HelpCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
-        name: "help",
+        name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.help.help.description"),
-        usage: `/help\naction:[${i18n.translate(
-            guildID,
-            "command.help.command",
-        )}]`,
         examples: [
             {
-                example: "`/help`",
+                example: clickableSlashCommand(COMMAND_NAME),
                 explanation: i18n.translate(
                     guildID,
                     "command.help.help.example.allCommands",
                 ),
             },
             {
-                example: "`/help action:cutoff`",
+                example: `${clickableSlashCommand(COMMAND_NAME)} action:cutoff`,
                 explanation: i18n.translate(
                     guildID,
                     "command.help.help.example.sampleCommand",
@@ -172,7 +169,7 @@ export default class HelpCommand implements BaseCommand {
 
             const helpManual = helpManualFunc(messageContext.guildID);
 
-            embedTitle = `\`${helpManual.usage}\``;
+            embedTitle = `/${helpManual.name}`;
             embedDesc = helpManual.description;
             embedActionRowComponents = helpManual.actionRowComponents;
             if (helpManual.examples.length > 0) {
@@ -224,7 +221,7 @@ export default class HelpCommand implements BaseCommand {
                 {
                     play: clickableSlashCommand("play"),
                     options: clickableSlashCommand("options"),
-                    help: clickableSlashCommand("help"),
+                    help: clickableSlashCommand(COMMAND_NAME),
                     command: i18n.translate(
                         messageContext.guildID,
                         "command.help.command",

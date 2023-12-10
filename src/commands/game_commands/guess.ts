@@ -1,4 +1,5 @@
 import { IPCLogger } from "../../logger";
+import { clickableSlashCommand } from "../../helpers/utils";
 import {
     getInteractionValue,
     sendDeprecatedTextCommandMessage,
@@ -17,7 +18,8 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("guess");
+const COMMAND_NAME = "guess";
+const logger = new IPCLogger(COMMAND_NAME);
 
 const MIN_GUESS_LENGTH = 1;
 const MAX_GUESS_LENGTH = 500;
@@ -30,12 +32,11 @@ export default class GuessCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "guess",
+        name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.guess.help.description"),
-        usage: "/guess name:[name]",
         examples: [
             {
-                example: "`/guess name:madness`",
+                example: `${clickableSlashCommand(COMMAND_NAME)} name:madness`,
                 explanation: i18n.translate(
                     guildID,
                     "command.guess.help.example.song",

@@ -2,6 +2,7 @@ import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import {
     chunkArray,
+    clickableSlashCommand,
     discordDateFormat,
     friendlyFormattedNumber,
 } from "../../helpers/utils";
@@ -29,7 +30,8 @@ import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import type QueriedSong from "../../interfaces/queried_song";
 
-const logger = new IPCLogger("recentlyadded");
+const COMMAND_NAME = "recentlyadded";
+const logger = new IPCLogger(COMMAND_NAME);
 
 const FIELDS_PER_EMBED = 9;
 
@@ -37,15 +39,14 @@ export default class RecentlyAddedCommand implements BaseCommand {
     aliases = ["recent"];
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "recentlyadded",
+        name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
             "command.recentlyadded.help.description",
         ),
-        usage: "/recentlyadded",
         examples: [
             {
-                example: "`/recentlyadded`",
+                example: clickableSlashCommand(COMMAND_NAME),
                 explanation: i18n.translate(
                     guildID,
                     "command.recentlyadded.help.example",

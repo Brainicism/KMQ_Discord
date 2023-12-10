@@ -1,5 +1,6 @@
 import { IPCLogger } from "../../logger";
 import { OptionAction } from "../../constants";
+import { clickableSlashCommand } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -19,7 +20,8 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("language");
+const COMMAND_NAME = "language";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export default class LanguageCommand implements BaseCommand {
     preRunChecks = [
@@ -40,29 +42,37 @@ export default class LanguageCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "language",
+        name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
             "command.language.help.description",
         ),
-        usage: "/language set\nlanguage:[korean | all]\n\n/language reset",
         examples: [
             {
-                example: "`/language set language:korean`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} language:korean`,
                 explanation: i18n.translate(
                     guildID,
                     "command.language.help.example.korean",
                 ),
             },
             {
-                example: "`/language set language:all`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} language:all`,
                 explanation: i18n.translate(
                     guildID,
                     "command.language.help.example.all",
                 ),
             },
             {
-                example: "`/language reset`",
+                example: clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.RESET,
+                ),
                 explanation: i18n.translate(
                     guildID,
                     "command.language.help.example.reset",

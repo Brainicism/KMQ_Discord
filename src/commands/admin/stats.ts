@@ -22,13 +22,13 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("stats");
+const COMMAND_NAME = "stats";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export default class StatsCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
-        name: "stats",
+        name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.stats.help.description"),
-        usage: "/stats",
         examples: [],
         priority: 1,
     });

@@ -1,5 +1,6 @@
 import { DEFAULT_MULTIGUESS_TYPE, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { clickableSlashCommand } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -19,7 +20,9 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("multiguess");
+const COMMAND_NAME = "multiguess";
+const logger = new IPCLogger(COMMAND_NAME);
+
 export default class MultiGuessCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
@@ -39,30 +42,38 @@ export default class MultiGuessCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "multiguess",
+        name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
             "command.multiguess.help.description",
             { on: `\`${MultiGuessType.ON}\`` },
         ),
-        usage: "/multiguess set\nmultiguess:[on | off]\n\n/multiguess reset",
         examples: [
             {
-                example: "`/multiguess set multiguess:on`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} multiguess:on`,
                 explanation: i18n.translate(
                     guildID,
                     "command.multiguess.help.example.on",
                 ),
             },
             {
-                example: "`/multiguess set multiguess:off`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} multiguess:off`,
                 explanation: i18n.translate(
                     guildID,
                     "command.multiguess.help.example.off",
                 ),
             },
             {
-                example: "`/multiguess reset`",
+                example: clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.RESET,
+                ),
                 explanation: i18n.translate(
                     guildID,
                     "command.multiguess.help.example.reset",

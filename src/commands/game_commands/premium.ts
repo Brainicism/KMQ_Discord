@@ -1,4 +1,5 @@
 import { EMBED_SUCCESS_BONUS_COLOR, KmqImages } from "../../constants";
+import { clickableSlashCommand } from "../../helpers/utils";
 import { isUserPremium } from "../../helpers/game_utils";
 import { sendInfoMessage } from "../../helpers/discord_utils";
 import Eris from "eris";
@@ -10,6 +11,8 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
+const COMMAND_NAME = "premium";
+
 export default class PremiumCommand implements BaseCommand {
     validations = {
         arguments: [],
@@ -18,22 +21,21 @@ export default class PremiumCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
+        name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
             "command.premium.help.description",
         ),
         examples: [
             {
-                example: "`/premium`",
+                example: clickableSlashCommand(COMMAND_NAME),
                 explanation: i18n.translate(
                     guildID,
                     "command.premium.help.example",
                 ),
             },
         ],
-        name: "premium",
         priority: 50,
-        usage: "/premium",
     });
 
     slashCommands = (): Array<

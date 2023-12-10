@@ -1,5 +1,6 @@
 import { DEFAULT_LOCALE, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { clickableSlashCommand } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -16,7 +17,8 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("locale");
+const COMMAND_NAME = "locale";
+const logger = new IPCLogger(COMMAND_NAME);
 
 enum LocaleArgument {
     EN = "en",
@@ -67,15 +69,13 @@ export default class LocaleTypeCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "locale",
+        name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.locale.help.description"),
-        usage: `/locale language:[${i18n.translate(
-            guildID,
-            "command.locale.help.usage.language",
-        )}]`,
         examples: [
             {
-                example: "`/locale language:English`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                )} language:English`,
                 explanation: i18n.translate(
                     guildID,
                     "command.locale.help.example.toLanguage",
@@ -88,7 +88,9 @@ export default class LocaleTypeCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/locale language:Korean`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                )} language:Korean`,
                 explanation: i18n.translate(
                     guildID,
                     "command.locale.help.example.toLanguage",
@@ -101,7 +103,9 @@ export default class LocaleTypeCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/locale language:Spanish`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                )} language:Spanish`,
                 explanation: i18n.translate(
                     guildID,
                     "command.locale.help.example.toLanguage",
@@ -114,7 +118,9 @@ export default class LocaleTypeCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/locale language:French`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                )} language:French`,
                 explanation: i18n.translate(
                     guildID,
                     "command.locale.help.example.toLanguage",
@@ -127,7 +133,9 @@ export default class LocaleTypeCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/locale language:Chinese`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                )} language:Chinese`,
                 explanation: i18n.translate(
                     guildID,
                     "command.locale.help.example.toLanguage",
@@ -140,7 +148,9 @@ export default class LocaleTypeCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/locale language:Japanese`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                )} language:Japanese`,
                 explanation: i18n.translate(
                     guildID,
                     "command.locale.help.example.toLanguage",

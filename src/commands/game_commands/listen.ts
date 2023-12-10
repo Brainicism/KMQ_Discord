@@ -1,6 +1,7 @@
 import { EMBED_SUCCESS_BONUS_COLOR, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
 import { areUsersPremium } from "../../helpers/game_utils";
+import { clickableSlashCommand } from "../../helpers/utils";
 import {
     generateOptionsMessage,
     getCurrentVoiceMembers,
@@ -26,7 +27,8 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("listen");
+const COMMAND_NAME = "listen";
+const logger = new IPCLogger(COMMAND_NAME);
 
 /**
  * Sends the beginning of game session message
@@ -111,13 +113,12 @@ export default class ListenCommand implements BaseCommand {
     aliases = ["radio", "music"];
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "listen",
+        name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.listen.help.description"),
-        usage: "/listen",
         priority: 1040,
         examples: [
             {
-                example: "`/listen`",
+                example: clickableSlashCommand(COMMAND_NAME),
                 explanation: i18n.translate(
                     guildID,
                     "command.listen.help.example",

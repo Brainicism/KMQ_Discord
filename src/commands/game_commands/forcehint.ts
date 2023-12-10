@@ -20,7 +20,8 @@ import type CommandArgs from "../../interfaces/command_args";
 import type GameSession from "src/structures/game_session";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("forcehint");
+const COMMAND_NAME = "forcehint";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export default class ForceHintCommand implements BaseCommand {
     aliases = ["fhint", "fh"];
@@ -32,12 +33,11 @@ export default class ForceHintCommand implements BaseCommand {
     ];
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "forcehint",
+        name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
             "command.forcehint.help.description",
         ),
-        usage: "/forcehint",
         examples: [],
         priority: 1009,
     });

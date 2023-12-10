@@ -80,11 +80,13 @@ export function escapedFormatting(text: string): string {
 /**
  * @param commandName - The name of the slash command
  * @param subcommandName - The suboption of the slash command
+ * @param subcommandGroupName - The suboption group of the slash command
  * @returns a formatted version of the slash command, that allows users to click
  */
 export function clickableSlashCommand(
     commandName: string,
     subcommandName?: string,
+    subcommandGroupName?: string,
 ): string {
     let commandAndSubcommand = commandName;
 
@@ -104,8 +106,8 @@ export function clickableSlashCommand(
                 break;
             case "add":
             case "remove":
-                subcommandName = commandName;
                 commandName = "groups";
+                subcommandName = commandName;
                 break;
             case "preset":
                 subcommandName = "list";
@@ -123,6 +125,9 @@ export function clickableSlashCommand(
 
     if (subcommandName) {
         commandAndSubcommand = `${commandName} ${subcommandName}`;
+        if (subcommandGroupName) {
+            commandAndSubcommand = `${commandAndSubcommand} ${subcommandGroupName}`;
+        }
     }
 
     return `</${commandAndSubcommand}:${State.commandToID[commandName]}>`;

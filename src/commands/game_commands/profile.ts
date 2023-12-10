@@ -2,6 +2,7 @@
 import { CUM_EXP_TABLE, EPHEMERAL_MESSAGE_FLAG } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
+    clickableSlashCommand,
     discordDateFormat,
     friendlyFormattedNumber,
     romanize,
@@ -27,7 +28,8 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("profile");
+const COMMAND_NAME = "profile";
+const logger = new IPCLogger(COMMAND_NAME);
 
 const RANK_TITLES = [
     { title: "command.profile.rank.novice", req: 0 },
@@ -245,25 +247,23 @@ async function getProfileFields(
 
 export default class ProfileCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
-        name: "profile",
+        name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
             "command.profile.help.description",
         ),
-        usage: `/profile user_mention:{@${i18n.translate(
-            guildID,
-            "command.profile.help.usage.mention",
-        )}}\n\n/profile user_id:{user_id}`,
         examples: [
             {
-                example: "`/profile`",
+                example: clickableSlashCommand(COMMAND_NAME),
                 explanation: i18n.translate(
                     guildID,
                     "command.profile.help.example.self",
                 ),
             },
             {
-                example: "`/profile user_mention:@FortnitePlayer`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                )} user_mention:@FortnitePlayer`,
                 explanation: i18n.translate(
                     guildID,
                     "command.profile.help.example.otherPlayerMention",
@@ -273,7 +273,9 @@ export default class ProfileCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/profile user_id:141734249702096896`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                )} user_id:141734249702096896`,
                 explanation: i18n.translate(
                     guildID,
                     "command.profile.help.example.otherPlayerID",

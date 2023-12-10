@@ -1,5 +1,6 @@
 import { GameOptionInternalToGameOption } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { clickableSlashCommand } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
@@ -17,7 +18,8 @@ import type CommandArgs from "../../interfaces/command_args";
 import type GameOption from "../../enums/game_option_name";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("reset");
+const COMMAND_NAME = "reset";
+const logger = new IPCLogger(COMMAND_NAME);
 
 export default class ResetCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
@@ -29,12 +31,11 @@ export default class ResetCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "reset",
+        name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.reset.help.description"),
-        usage: "/reset",
         examples: [
             {
-                example: "`/reset`",
+                example: clickableSlashCommand(COMMAND_NAME),
                 explanation: i18n.translate(
                     guildID,
                     "command.reset.help.example.reset",

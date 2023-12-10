@@ -1,4 +1,5 @@
 import { IPCLogger } from "../../logger";
+import { clickableSlashCommand } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -18,7 +19,8 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("duration");
+const COMMAND_NAME = "duration";
+const logger = new IPCLogger(COMMAND_NAME);
 
 enum DurationAction {
     ADD = "add",
@@ -57,24 +59,17 @@ export default class DurationCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "duration",
+        name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
             "command.duration.help.description",
         ),
-        usage: `/duration set\nduration:[${i18n.translate(
-            guildID,
-            "command.duration.help.usage.minutes",
-        )}]\n\n/duration add\nduration:[${i18n.translate(
-            guildID,
-            "command.duration.help.usage.minutes",
-        )}]\n\n/duration remove\nduration:[${i18n.translate(
-            guildID,
-            "command.duration.help.usage.minutes",
-        )}]\n\n/duration reset`,
         examples: [
             {
-                example: "`/duration set duration:15`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    DurationActionInternal.SET,
+                )} duration:15`,
                 explanation: i18n.translate(
                     guildID,
                     "command.duration.help.example.set",
@@ -84,7 +79,10 @@ export default class DurationCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/duration add duration:5`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    DurationActionInternal.ADD,
+                )} duration:5`,
                 explanation: i18n.translate(
                     guildID,
                     "command.duration.help.example.increment",
@@ -94,7 +92,10 @@ export default class DurationCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/duration remove duration:5`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    DurationActionInternal.REMOVE,
+                )} duration:5`,
                 explanation: i18n.translate(
                     guildID,
                     "command.duration.help.example.decrement",
@@ -104,7 +105,10 @@ export default class DurationCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`/duration reset`",
+                example: clickableSlashCommand(
+                    COMMAND_NAME,
+                    DurationActionInternal.RESET,
+                ),
                 explanation: i18n.translate(
                     guildID,
                     "command.duration.help.example.reset",

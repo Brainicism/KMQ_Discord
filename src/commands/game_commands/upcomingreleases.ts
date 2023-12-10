@@ -1,6 +1,10 @@
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
-import { chunkArray, discordDateFormat } from "../../helpers/utils";
+import {
+    chunkArray,
+    clickableSlashCommand,
+    discordDateFormat,
+} from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -23,7 +27,8 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "src/interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("upcomingreleases");
+const COMMAND_NAME = "upcomingreleases";
+const logger = new IPCLogger(COMMAND_NAME);
 
 const FIELDS_PER_EMBED = 9;
 
@@ -46,22 +51,21 @@ export default class UpcomingReleasesCommand implements BaseCommand {
     aliases = ["upcoming"];
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "upcomingreleases",
+        name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
             "command.upcomingreleases.help.description",
         ),
-        usage: "/upcomingreleases release:[single | album | ep]",
         examples: [
             {
-                example: "`/upcomingreleases`",
+                example: clickableSlashCommand(COMMAND_NAME),
                 explanation: i18n.translate(
                     guildID,
                     "command.upcomingreleases.help.defaultExample",
                 ),
             },
             {
-                example: "`/upcomingreleases release:album`",
+                example: `${clickableSlashCommand(COMMAND_NAME)} release:album`,
                 explanation: i18n.translate(
                     guildID,
                     "command.upcomingreleases.help.albumExample",
