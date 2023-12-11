@@ -1,9 +1,5 @@
 import { IPCLogger } from "../../logger";
-import {
-    OptionAction,
-    SPOTIFY_BASE_URL,
-    SPOTIFY_SHORTHAND_BASE_URL,
-} from "../../constants";
+import { SPOTIFY_BASE_URL, SPOTIFY_SHORTHAND_BASE_URL } from "../../constants";
 import {
     clickableSlashCommand,
     friendlyFormattedNumber,
@@ -47,6 +43,12 @@ import type HelpDocumentation from "../../interfaces/help";
 const COMMAND_NAME = "spotify";
 const logger = new IPCLogger(COMMAND_NAME);
 
+const enum SpotifyCommandAction {
+    SET = "set",
+    RESET = "reset",
+    MATCHES = "matches",
+}
+
 export default class SpotifyCommand implements BaseCommand {
     aliases = ["playlist"];
 
@@ -70,7 +72,7 @@ export default class SpotifyCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: OptionAction.SET,
+                    name: SpotifyCommandAction.SET,
                     description: i18n.translate(
                         LocaleType.EN,
                         "command.spotify.help.description",
@@ -117,7 +119,7 @@ export default class SpotifyCommand implements BaseCommand {
                     ],
                 },
                 {
-                    name: OptionAction.RESET,
+                    name: SpotifyCommandAction.RESET,
                     description: i18n.translate(
                         LocaleType.EN,
                         "misc.interaction.resetOption",
@@ -142,7 +144,7 @@ export default class SpotifyCommand implements BaseCommand {
                     options: [],
                 },
                 {
-                    name: "matches",
+                    name: SpotifyCommandAction.MATCHES,
                     description: i18n.translate(
                         LocaleType.EN,
                         "command.spotify.help.interaction.matches",
@@ -200,7 +202,7 @@ export default class SpotifyCommand implements BaseCommand {
             {
                 example: `${clickableSlashCommand(
                     COMMAND_NAME,
-                    OptionAction.SET,
+                    SpotifyCommandAction.SET,
                 )} playlist_url:${SPOTIFY_BASE_URL}...`,
                 explanation: i18n.translate(
                     guildID,
@@ -210,7 +212,7 @@ export default class SpotifyCommand implements BaseCommand {
             {
                 example: `${clickableSlashCommand(
                     COMMAND_NAME,
-                    OptionAction.SET,
+                    SpotifyCommandAction.SET,
                 )} playlist_url:${SPOTIFY_SHORTHAND_BASE_URL}...`,
                 explanation: i18n.translate(
                     guildID,
@@ -220,7 +222,7 @@ export default class SpotifyCommand implements BaseCommand {
             {
                 example: clickableSlashCommand(
                     COMMAND_NAME,
-                    OptionAction.RESET,
+                    SpotifyCommandAction.RESET,
                 ),
                 explanation: i18n.translate(
                     guildID,
@@ -528,7 +530,7 @@ export default class SpotifyCommand implements BaseCommand {
                         {
                             spotifySet: clickableSlashCommand(
                                 "spotify",
-                                OptionAction.SET,
+                                SpotifyCommandAction.SET,
                             ),
                         },
                     ),
@@ -626,18 +628,14 @@ export default class SpotifyCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
-        let playlistURL: string | undefined;
         if (
-            Object.values(OptionAction).includes(
-                interactionName! as OptionAction,
-            )
+            interactionName === SpotifyCommandAction.RESET ||
+            interactionName === SpotifyCommandAction.SET
         ) {
-            const action = interactionName as OptionAction;
-            if (action === OptionAction.RESET) {
-                playlistURL = undefined;
-            } else if (action === OptionAction.SET) {
-                playlistURL = encodeURI(interactionOptions["playlist_url"]);
-            }
+            const playlistURL =
+                interactionName === SpotifyCommandAction.SET
+                    ? encodeURI(interactionOptions["playlist_url"])
+                    : undefined;
 
             await SpotifyCommand.updateOption(
                 messageContext,
@@ -645,7 +643,7 @@ export default class SpotifyCommand implements BaseCommand {
                 interaction,
                 playlistURL == null,
             );
-        } else if (interactionName === "matches") {
+        } else if (interactionName === SpotifyCommandAction.MATCHES) {
             const showLink = interactionOptions["show_link"] ?? false;
             await SpotifyCommand.sendMatchedSongsFile(
                 interaction,
