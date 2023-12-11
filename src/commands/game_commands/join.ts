@@ -1,11 +1,13 @@
 import { IPCLogger } from "../../logger";
+import { clickableSlashCommand } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     sendErrorMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import GameType from "src/enums/game_type";
 import MessageContext from "../../structures/message_context";
-import PlayCommand from "./play";
+import PlayCommand, { PlayTeamsAction } from "./play";
 import i18n from "../../helpers/localization_manager";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -31,7 +33,13 @@ export default class JoinCommand implements BaseCommand {
                 description: i18n.translate(
                     message.guildID,
                     "command.join.failure.joinError.noTeamName.description",
-                    { joinCommand: "/play teams join" },
+                    {
+                        joinCommand: clickableSlashCommand(
+                            "play",
+                            GameType.TEAMS,
+                            PlayTeamsAction.JOIN,
+                        ),
+                    },
                 ),
             });
             return;

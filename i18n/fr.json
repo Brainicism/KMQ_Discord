@@ -470,7 +470,7 @@
                         "title": "Nom d'équipe invalide"
                     },
                     "noTeamName": {
-                        "description": "Inclure un nom d'équipe pour créer une équipe ou pour rejoindre une équipe existante (`{{joinCommand}} [nom d'équipe]`)"
+                        "description": "Inclure un nom d'équipe pour créer une équipe ou pour rejoindre une équipe existante ({{joinCommand}} [nom d'équipe])"
                     },
                     "title": "Erreur de rejoindre"
                 }
@@ -488,7 +488,7 @@
                 "title": "{{joiningUser}} a rejoint {{teamName}}"
             },
             "team": {
-                "join": "Pour rejoindre {{teamName}} aux côtés de {{mentionedUser}}, entrez `{{joinCommand}} {{teamNameWithCleanEmojis}}`.{{startGameInstructions}}",
+                "join": "Pour rejoindre {{teamName}} aux côtés de {{mentionedUser}}, entrez {{joinCommand}} team_name:{{teamNameWithCleanEmojis}}.{{startGameInstructions}}",
                 "new": "Nouvelle équipe créée",
                 "startGameInstructions": "\nLancez le jeu avec {{beginCommand}}."
             }
@@ -834,7 +834,7 @@
             },
             "team": {
                 "joinTeam": {
-                    "description": "Chefs d'équipe, tapez `{{join}} [nom de l'équipe]` pour former une nouvelle équipe. N'oubliez pas que changer d'équipe en cours de partie entraînera la perte de tous vos points et de votre EXP actuels.",
+                    "description": "Chefs d'équipe, tapez {{join}} pour former une nouvelle équipe. N'oubliez pas que changer d'équipe en cours de partie entraînera la perte de tous vos points et de votre EXP actuels.",
                     "title": "{{join}} une équipe !"
                 }
             },

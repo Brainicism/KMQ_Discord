@@ -470,7 +470,7 @@
                         "title": "Invalid Team Name"
                     },
                     "noTeamName": {
-                        "description": "Include a team name to create a team or to join that team if it already exists (`{{joinCommand}} [team name]`)"
+                        "description": "Include a team name to create a team or to join that team if it already exists ({{joinCommand}} [team name])"
                     },
                     "title": "Join Error"
                 }
@@ -488,7 +488,7 @@
                 "title": "{{joiningUser}} joined {{teamName}}"
             },
             "team": {
-                "join": "To join {{teamName}} alongside {{mentionedUser}}, enter `{{joinCommand}} {{teamNameWithCleanEmojis}}`.{{startGameInstructions}}",
+                "join": "To join {{teamName}} alongside {{mentionedUser}}, enter {{joinCommand}} team_name:{{teamNameWithCleanEmojis}}.{{startGameInstructions}}",
                 "new": "New Team Created",
                 "startGameInstructions": "\nStart the game with {{beginCommand}}."
             }
@@ -834,7 +834,7 @@
             },
             "team": {
                 "joinTeam": {
-                    "description": "Team leaders, type `{{join}} [team name]` to form a new team. Remember, switching teams mid-game will forfeit all your current score and EXP.",
+                    "description": "Team leaders, type {{join}} to form a new team. Remember, switching teams mid-game will forfeit all your current score and EXP.",
                     "title": "{{join}} a team!"
                 }
             },

@@ -470,7 +470,7 @@
                         "title": "无效的团队名称"
                     },
                     "noTeamName": {
-                        "description": "包括团队名称以创建团队或加入已存在的团队(`{{joinCommand}} [团队名称]`)"
+                        "description": "包括团队名称以创建团队或加入已存在的团队({{joinCommand}} [团队名称])"
                     },
                     "title": "加入错误"
                 }
@@ -488,7 +488,7 @@
                 "title": "{{joiningUser}}加入了{{teamName}}"
             },
             "team": {
-                "join": "要加入{{mentionedUser}}所在的{{teamName}}，请输入“{{joinCommand}} {{teamNameWithCleanEmojis}}”。{{startGameInstructions}}",
+                "join": "要加入{{mentionedUser}}所在的{{teamName}}，请输入{{joinCommand}} team_name:{{teamNameWithCleanEmojis}}。{{startGameInstructions}}",
                 "new": "创建了新团队",
                 "startGameInstructions": "{{beginCommand}}开始游戏。"
             }
@@ -834,7 +834,7 @@
             },
             "team": {
                 "joinTeam": {
-                    "description": "团队领袖，请输入 `{{join}} [团队名称]` 来组建一个新团队。请记住，在游戏中途更换团队将导致您当前的所有得分和经验值被取消。",
+                    "description": "团队领袖，请输入 {{join}} 来组建一个新团队。请记住，在游戏中途更换团队将导致您当前的所有得分和经验值被取消。",
                     "title": "{{join}} 一个团队！"
                 }
             },
