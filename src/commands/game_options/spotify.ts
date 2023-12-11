@@ -601,12 +601,18 @@ export default class SpotifyCommand implements BaseCommand {
             });
         }
 
-        await sendMessage(
-            messageContext.textChannelID,
-            { attachments },
-            undefined,
-            interaction,
-        );
+        if (interaction.acknowledged) {
+            await interaction.createFollowup({
+                attachments,
+            });
+        } else {
+            await sendMessage(
+                messageContext.textChannelID,
+                { attachments },
+                undefined,
+                interaction,
+            );
+        }
     }
 
     /**
@@ -621,7 +627,11 @@ export default class SpotifyCommand implements BaseCommand {
             getInteractionValue(interaction);
 
         let playlistURL: string | undefined;
-        if (interactionName! in OptionAction) {
+        if (
+            Object.values(OptionAction).includes(
+                interactionName! as OptionAction,
+            )
+        ) {
             const action = interactionName as OptionAction;
             if (action === OptionAction.RESET) {
                 playlistURL = undefined;
