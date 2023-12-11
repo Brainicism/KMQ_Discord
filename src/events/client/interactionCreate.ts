@@ -16,6 +16,7 @@ import KmqMember from "../../structures/kmq_member";
 import LocaleType from "../../enums/locale_type";
 import LookupCommand from "../../commands/game_commands/lookup";
 import MessageContext from "../../structures/message_context";
+import PlayCommand from "../../commands/game_commands/play";
 import PresetCommand from "../../commands/game_commands/preset";
 import ProfileCommand from "../../commands/game_commands/profile";
 import Session from "../../structures/session";
@@ -35,6 +36,7 @@ const AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS: {
     lookup: LookupCommand.processAutocompleteInteraction,
     preset: PresetCommand.processAutocompleteInteraction,
     help: HelpCommand.processAutocompleteInteraction,
+    play: PlayCommand.processAutocompleteInteraction,
 };
 
 const MODAL_SUBMIT_INTERACTION_HANDLERS: {

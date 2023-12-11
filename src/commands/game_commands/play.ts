@@ -6,6 +6,7 @@ import {
     EMBED_SUCCESS_BONUS_COLOR,
     HIDDEN_DEFAULT_TIMER,
     KmqImages,
+    MAX_AUTOCOMPLETE_FIELDS,
 } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
@@ -35,6 +36,7 @@ import {
     notifyOptionsGenerationError,
     sendErrorMessage,
     sendInfoMessage,
+    tryAutocompleteInteractionAcknowledge,
     tryCreateInteractionSuccessAcknowledgement,
     voicePermissionsCheck,
 } from "../../helpers/discord_utils";
@@ -509,6 +511,7 @@ export default class PlayCommand implements BaseCommand {
                             options: [
                                 {
                                     name: "team_name",
+                                    autocomplete: true,
                                     description: i18n.translate(
                                         LocaleType.EN,
                                         "command.play.interaction.teams_join_team_name",
@@ -596,6 +599,62 @@ export default class PlayCommand implements BaseCommand {
                 : parsedMessage.components[1],
         );
     };
+
+    /**
+     * Handles showing suggested team names
+     * @param interaction - The interaction with intermediate typing state
+     */
+    static async processAutocompleteInteraction(
+        interaction: Eris.AutocompleteInteraction,
+    ): Promise<void> {
+        const interactionData = getInteractionValue(interaction);
+        const focusedKey = interactionData.focusedKey;
+        if (focusedKey === null) {
+            logger.error(
+                "focusedKey unexpectedly null in processGroupAutocompleteInteraction",
+            );
+
+            return;
+        }
+
+        const gameSession = Session.getSession(
+            interaction.guildID!,
+        ) as GameSession;
+
+        if (!gameSession || gameSession.gameType !== GameType.TEAMS) {
+            await tryAutocompleteInteractionAcknowledge(interaction, []);
+            return;
+        }
+
+        const teamNames = (
+            gameSession.scoreboard as TeamScoreboard
+        ).getTeamNames();
+
+        if (teamNames.length === 0) {
+            await tryAutocompleteInteractionAcknowledge(interaction, []);
+            return;
+        }
+
+        const focusedVal = interactionData.interactionOptions[focusedKey];
+        const lowercaseUserInput = focusedVal.toLowerCase();
+
+        if (!lowercaseUserInput) {
+            await tryAutocompleteInteractionAcknowledge(
+                interaction,
+                teamNames
+                    .map((x) => ({ name: x, value: x }))
+                    .slice(0, MAX_AUTOCOMPLETE_FIELDS),
+            );
+        } else {
+            await tryAutocompleteInteractionAcknowledge(
+                interaction,
+                teamNames
+                    .filter((x) => x.startsWith(lowercaseUserInput))
+                    .map((x) => ({ name: x, value: x }))
+                    .slice(0, MAX_AUTOCOMPLETE_FIELDS),
+            );
+        }
+    }
 
     static canStartTeamsGame(
         gameSession: GameSession | null,

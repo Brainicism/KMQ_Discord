@@ -1,5 +1,9 @@
 import * as uuid from "uuid";
-import { GameOptionInternalToGameOption, KmqImages } from "../../constants";
+import {
+    GameOptionInternalToGameOption,
+    KmqImages,
+    MAX_AUTOCOMPLETE_FIELDS,
+} from "../../constants";
 import { IPCLogger } from "../../logger";
 import { clickableSlashCommand } from "../../helpers/utils";
 import {
@@ -1337,7 +1341,8 @@ export default class PresetCommand implements BaseCommand {
                         ? true
                         : x.toLowerCase().startsWith(lowercaseUserInput),
                 )
-                .map((x) => ({ name: x, value: x })),
+                .map((x) => ({ name: x, value: x }))
+                .slice(0, MAX_AUTOCOMPLETE_FIELDS),
         );
     }
 }
