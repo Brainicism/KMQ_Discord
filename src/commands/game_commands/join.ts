@@ -5,7 +5,7 @@ import {
     sendErrorMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
-import GameType from "src/enums/game_type";
+import GameType from "../../enums/game_type";
 import MessageContext from "../../structures/message_context";
 import PlayCommand, { PlayTeamsAction } from "./play";
 import i18n from "../../helpers/localization_manager";
