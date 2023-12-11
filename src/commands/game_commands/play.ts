@@ -64,6 +64,12 @@ import type TeamScoreboard from "../../structures/team_scoreboard";
 const COMMAND_NAME = "play";
 const logger = new IPCLogger(COMMAND_NAME);
 
+export const enum PlayTeamsAction {
+    CREATE = "create",
+    JOIN = "join",
+    BEGIN = "begin",
+}
+
 /**
  * Sends the beginning of game session message
  * @param textChannelName - The name of the text channel to send the message to
@@ -116,7 +122,7 @@ export async function sendBeginGameSessionMessage(
         gameInstructions += i18n.translate(
             guildID,
             "command.play.exp.howToVote",
-            { vote: "`/vote`" },
+            { vote: clickableSlashCommand("vote") },
         );
     }
 
@@ -312,7 +318,7 @@ export default class PlayCommand implements BaseCommand {
                 example: clickableSlashCommand(
                     COMMAND_NAME,
                     GameType.TEAMS,
-                    "create",
+                    PlayTeamsAction.CREATE,
                 ),
                 explanation: i18n.translate(
                     guildID,
@@ -441,7 +447,7 @@ export default class PlayCommand implements BaseCommand {
                         .SUB_COMMAND_GROUP,
                     options: [
                         {
-                            name: "create",
+                            name: PlayTeamsAction.CREATE,
                             description: i18n.translate(
                                 LocaleType.EN,
                                 "command.play.interaction.teams_create",
@@ -462,7 +468,7 @@ export default class PlayCommand implements BaseCommand {
                                 .SUB_COMMAND,
                         },
                         {
-                            name: "begin",
+                            name: PlayTeamsAction.BEGIN,
                             description: i18n.translate(
                                 LocaleType.EN,
                                 "command.play.interaction.teams_begin",
@@ -483,7 +489,7 @@ export default class PlayCommand implements BaseCommand {
                                 .SUB_COMMAND,
                         },
                         {
-                            name: "join",
+                            name: PlayTeamsAction.JOIN,
                             description: i18n.translate(
                                 LocaleType.EN,
                                 "command.play.interaction.teams_join",
@@ -551,9 +557,13 @@ export default class PlayCommand implements BaseCommand {
         }
 
         const gameType = interactionKey.split(".")[0] as GameType;
-        if (interactionKey === "teams.begin") {
+        if (interactionKey === `${GameType.TEAMS}.${PlayTeamsAction.BEGIN}`) {
             await PlayCommand.beginTeamsGame(messageContext, interaction);
-        } else if (interactionKey.startsWith("teams.join")) {
+        } else if (
+            interactionKey.startsWith(
+                `${GameType.TEAMS}.${PlayTeamsAction.JOIN}`,
+            )
+        ) {
             await PlayCommand.joinTeamsGame(
                 messageContext,
                 interactionOptions["team_name"],
@@ -682,7 +692,13 @@ export default class PlayCommand implements BaseCommand {
                     description: i18n.translate(
                         messageContext.guildID,
                         "command.begin.ignored.noTeam.description",
-                        { join: "/play teams join" },
+                        {
+                            join: clickableSlashCommand(
+                                COMMAND_NAME,
+                                GameType.TEAMS,
+                                PlayTeamsAction.JOIN,
+                            ),
+                        },
                     ),
                 },
                 interaction,
@@ -875,7 +891,11 @@ export default class PlayCommand implements BaseCommand {
                         {
                             teamName: bold(teamName),
                             mentionedUser: getMention(messageContext.author.id),
-                            joinCommand: "/play teams join",
+                            joinCommand: clickableSlashCommand(
+                                COMMAND_NAME,
+                                GameType.TEAMS,
+                                PlayTeamsAction.JOIN,
+                            ),
                             teamNameWithCleanEmojis,
                             startGameInstructions:
                                 !gameSession.sessionInitialized
@@ -884,7 +904,11 @@ export default class PlayCommand implements BaseCommand {
                                           "command.join.team.startGameInstructions",
                                           {
                                               beginCommand:
-                                                  "`/play teams begin`",
+                                                  clickableSlashCommand(
+                                                      COMMAND_NAME,
+                                                      GameType.TEAMS,
+                                                      PlayTeamsAction.BEGIN,
+                                                  ),
                                           },
                                       )
                                     : "",
@@ -962,7 +986,11 @@ export default class PlayCommand implements BaseCommand {
                               messageContext.guildID,
                               "command.join.playerJoinedTeam.beforeGameStart.description",
                               {
-                                  beginCommand: "`/play teams begin`",
+                                  beginCommand: clickableSlashCommand(
+                                      COMMAND_NAME,
+                                      GameType.TEAMS,
+                                      PlayTeamsAction.BEGIN,
+                                  ),
                               },
                           )
                         : i18n.translate(
@@ -1009,7 +1037,15 @@ export default class PlayCommand implements BaseCommand {
             const description = i18n.translate(
                 guildID,
                 "misc.failure.notInVC.description",
-                { command: "`/play`" },
+                {
+                    command: clickableSlashCommand(
+                        COMMAND_NAME,
+                        gameType,
+                        gameType === GameType.TEAMS
+                            ? PlayTeamsAction.CREATE
+                            : undefined,
+                    ),
+                },
             );
 
             await sendErrorMessage(
@@ -1081,14 +1117,24 @@ export default class PlayCommand implements BaseCommand {
                 guildID,
                 "command.play.team.joinTeam.title",
                 {
-                    join: "`/play teams join`",
+                    join: clickableSlashCommand(
+                        COMMAND_NAME,
+                        GameType.TEAMS,
+                        PlayTeamsAction.JOIN,
+                    ),
                 },
             );
 
             const gameInstructions = i18n.translate(
                 guildID,
                 "command.play.team.joinTeam.description",
-                { join: "/play teams join" },
+                {
+                    join: clickableSlashCommand(
+                        COMMAND_NAME,
+                        GameType.TEAMS,
+                        PlayTeamsAction.JOIN,
+                    ),
+                },
             );
 
             gameSession = new GameSession(
@@ -1128,14 +1174,23 @@ export default class PlayCommand implements BaseCommand {
                 const ignoringOldGameTypeTitle = i18n.translate(
                     guildID,
                     "command.play.failure.overrideTeams.title",
-                    { playOldGameType: `\`/play ${oldGameType}\`` },
+                    {
+                        playOldGameType: clickableSlashCommand(
+                            COMMAND_NAME,
+                            oldGameType,
+                        ),
+                    },
                 );
 
                 const gameSpecificInstructions = i18n.translate(
                     guildID,
                     "command.play.failure.overrideTeams.teams.join",
                     {
-                        join: "/play teams join",
+                        join: clickableSlashCommand(
+                            COMMAND_NAME,
+                            GameType.TEAMS,
+                            PlayTeamsAction.JOIN,
+                        ),
                     },
                 );
 
@@ -1144,10 +1199,17 @@ export default class PlayCommand implements BaseCommand {
                     "command.play.failure.overrideTeams.description",
                     {
                         oldGameType: `\`${oldGameType}\``,
-                        end: "`/end`",
-                        playOldGameType: `\`/play ${oldGameType}\``,
+                        end: clickableSlashCommand("end"),
+                        playOldGameType: clickableSlashCommand(
+                            COMMAND_NAME,
+                            oldGameType,
+                        ),
                         gameSpecificInstructions,
-                        begin: "`/begin`",
+                        begin: clickableSlashCommand(
+                            COMMAND_NAME,
+                            GameType.TEAMS,
+                            PlayTeamsAction.BEGIN,
+                        ),
                     },
                 );
 
