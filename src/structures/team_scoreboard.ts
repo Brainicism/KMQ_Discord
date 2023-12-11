@@ -105,6 +105,13 @@ export default class TeamScoreboard extends Scoreboard {
     }
 
     /**
+     * @returns the names of all teams
+     */
+    getTeamNames(): Array<string> {
+        return Object.keys(this.players);
+    }
+
+    /**
      * @param name - The name of the team
      * @returns whether the Team is in first place (or tied for first)
      */
