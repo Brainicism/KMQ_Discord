@@ -127,7 +127,7 @@ async function resolveFactPromises(
 
 async function generateFacts(): Promise<void> {
     logger.info("Generating Reddit news facts...");
-    const newsFacts = await resolveFactPromises([redditKpopNews()]);
+    const newsFacts = await resolveFactPromises([redditKpopNews(), redditKpopDailySummary(), redditKpopWeeklySummary()]);
 
     Object.values(LocaleType).map(async (locale) => {
         const funFactPromises = funFactFunctions.map((x) => x(locale));
@@ -191,6 +191,16 @@ async function redditKpopNews(): Promise<string[]> {
         (x) =>
             `[${standardDateFormat(x.date)}] ${x.title} [(source)](${x.link})`,
     );
+}
+
+async function redditKpopDailySummary(): Promise<string[]> {
+    const summary = await State.geminiClient.getDailyPostSummary();
+    return [summary];
+}
+
+async function redditKpopWeeklySummary(): Promise<string[]> {
+    const summary = await State.geminiClient.getWeeklyPostSummary();
+    return [summary];
 }
 
 async function recentMusicVideos(lng: LocaleType): Promise<string[]> {
