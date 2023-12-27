@@ -58,7 +58,7 @@ export const DEFAULT_GENDER: Array<GenderModeOptions> = [
 export const DEFAULT_REMIX_PREFERENCE = RemixPreference.EXCLUDE;
 export const DEFAULT_LIMIT = 500;
 export const SONG_START_DELAY = 3000;
-
+export const KMQ_USER_AGENT = "KMQ (K-pop Music Quiz)";
 export const specialFfmpegArgs = {
     [SpecialType.REVERSE]: (seek: number, duration: number) => ({
         inputArgs: [],

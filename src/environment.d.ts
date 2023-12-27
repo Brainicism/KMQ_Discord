@@ -33,5 +33,8 @@ declare namespace NodeJS {
         AZURE_STORAGE_SAS_TOKEN?: string | undefined;
         DAISUKI_DB_PASSWORD?: string | undefined;
         IS_STANDBY?: string | undefined;
+        REDDIT_CLIENT_ID?: string | undefined;
+        REDDIT_CLIENT_SECRET?: string | undefined;
+        REDDIT_CLIENT_REFRESH_TOKEN?: string | undefined;
     }
 }

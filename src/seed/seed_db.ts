@@ -4,6 +4,7 @@ import {
     DATABASE_DOWNLOAD_DIR,
     DataFiles,
     EMBED_ERROR_COLOR,
+    KMQ_USER_AGENT,
     KmqImages,
 } from "../constants";
 import { IPCLogger } from "../logger";
@@ -231,7 +232,7 @@ const downloadDb = async (): Promise<void> => {
         {
             responseType: "arraybuffer",
             headers: {
-                "User-Agent": "KMQ (K-pop Music Quiz)",
+                "User-Agent": KMQ_USER_AGENT,
             },
         },
     );

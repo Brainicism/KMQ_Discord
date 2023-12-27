@@ -51,6 +51,9 @@ jobs:
                   echo "BOT_PREFIX=." >> .env
                   echo "APP_NAME=kmq-gci" >> .env
                   echo "DAISUKI_DB_PASSWORD=unusedpw" >> .env
+                  echo "REDDIT_CLIENT_ID=$REDDIT_CLIENT_ID" >> .env
+                  echo "REDDIT_CLIENT_SECRET=$REDDIT_CLIENT_SECRET" >> .env
+                  echo "REDDIT_CLIENT_REFRESH_TOKEN=$REDDIT_CLIENT_REFRESH_TOKEN" >> .env
             - name: Install node dependencies
               run: yarn install --frozen-lockfile
             - name: Extract metadata (tags, labels) for Docker

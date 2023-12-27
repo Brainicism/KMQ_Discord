@@ -1,6 +1,7 @@
 /* eslint-disable node/no-sync */
 import { BaseClusterWorker } from "eris-fleet";
 import { IPCLogger } from "./logger";
+import { RedditClient } from "./helpers/reddit_client";
 import { config } from "dotenv";
 import { durationSeconds } from "./helpers/utils";
 import { fetchAppCommandIDs, updateAppCommands } from "./helpers/discord_utils";
@@ -258,6 +259,8 @@ export default class BotWorker extends BaseClusterWorker {
         logger.info("Initializing Spotify manager...");
         State.spotifyManager = new SpotifyManager();
         State.spotifyManager.start();
+
+        State.redditClient = new RedditClient();
 
         if (
             [EnvType.CI, EnvType.DRY_RUN].includes(
