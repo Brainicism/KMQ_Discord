@@ -76,6 +76,7 @@
         "mysql2": "^3.6.2",
         "node-schedule": "^2.1.1",
         "sinon": "^17.0.0",
+        "snoowrap": "^1.23.0",
         "sodium-native": "^4.0.4",
         "tiny-async-pool": "^2.1.0",
         "ts-node": "^10.9.1",

@@ -8,6 +8,7 @@ import {
     friendlyFormattedNumber,
     getOrdinalNum,
     italicize,
+    standardDateFormat,
     weekOfYear,
 } from "./helpers/utils";
 import { sql } from "kysely";
@@ -73,6 +74,7 @@ const kmqFactFunctions: Array<(locale: LocaleType) => Promise<string[]>> = [
 interface FactCache {
     funFacts: string[][];
     kmqFacts: string[][];
+    newsFacts: string[][];
     lastUpdated: number | null;
 }
 
@@ -82,6 +84,7 @@ for (const locale of Object.values(LocaleType)) {
     localeToFactCache[locale] = {
         funFacts: [],
         kmqFacts: [],
+        newsFacts: [],
         lastUpdated: null,
     };
 }
@@ -99,11 +102,8 @@ interface GaonWeeklyEntry {
  */
 export async function reloadFactCache(): Promise<void> {
     logger.info("Regenerating fact cache...");
-    await Promise.allSettled(
-        Object.values(LocaleType).map(async (locale) => {
-            await generateFacts(locale);
-        }),
-    );
+    await generateFacts();
+    logger.info("Fact cache regenerated!");
 }
 
 async function resolveFactPromises(
@@ -125,16 +125,24 @@ async function resolveFactPromises(
     return resolvedPromises.map((x) => x["value"]);
 }
 
-async function generateFacts(locale: LocaleType): Promise<void> {
-    const funFactPromises = funFactFunctions.map((x) => x(locale));
-    const kmqFactPromises = kmqFactFunctions.map((x) => x(locale));
-    const funFacts = await resolveFactPromises(funFactPromises);
-    const kmqFacts = await resolveFactPromises(kmqFactPromises);
-    localeToFactCache[locale] = {
-        funFacts: funFacts.filter((facts) => facts.length > 0),
-        kmqFacts: kmqFacts.filter((facts) => facts.length > 0),
-        lastUpdated: Date.now(),
-    };
+async function generateFacts(): Promise<void> {
+    logger.info("Generating Reddit news facts...");
+    const newsFacts = await resolveFactPromises([redditKpopNews()]);
+
+    Object.values(LocaleType).map(async (locale) => {
+        const funFactPromises = funFactFunctions.map((x) => x(locale));
+        const kmqFactPromises = kmqFactFunctions.map((x) => x(locale));
+        logger.info(`Generating fun facts (${locale})...`);
+        const funFacts = await resolveFactPromises(funFactPromises);
+        logger.info(`Generating KMQ facts (${locale})...`);
+        const kmqFacts = await resolveFactPromises(kmqFactPromises);
+        localeToFactCache[locale] = {
+            funFacts: funFacts.filter((facts) => facts.length > 0),
+            kmqFacts: kmqFacts.filter((facts) => facts.length > 0),
+            newsFacts: newsFacts.filter((facts) => facts.length > 0),
+            lastUpdated: Date.now(),
+        };
+    });
 }
 
 function parseGaonWeeklyRankList(
@@ -163,14 +171,26 @@ function parseGaonWeeklyRankList(
 export function getFact(guildID: string): string | null {
     const locale: LocaleType = State.getGuildLocale(guildID);
     const randomVal = Math.random();
-    const factGroup =
-        randomVal < 0.85
-            ? localeToFactCache[locale].funFacts
-            : localeToFactCache[locale].kmqFacts;
+    let factGroup: string[][];
+    if (randomVal < 0.6) {
+        factGroup = localeToFactCache[locale].funFacts;
+    } else if (randomVal < 0.9) {
+        factGroup = localeToFactCache[locale].newsFacts;
+    } else {
+        factGroup = localeToFactCache[locale].kmqFacts;
+    }
 
     if (factGroup.length === 0) return null;
 
     return chooseRandom(chooseRandom(factGroup));
+}
+
+async function redditKpopNews(): Promise<string[]> {
+    const news = await State.redditClient.getRecentPopularPosts();
+    return news.map(
+        (x) =>
+            `[${standardDateFormat(x.date)}] ${x.title} [(source)](${x.link})`,
+    );
 }
 
 async function recentMusicVideos(lng: LocaleType): Promise<string[]> {

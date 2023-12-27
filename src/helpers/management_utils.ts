@@ -449,8 +449,6 @@ async function reloadBanData(): Promise<void> {
 export function registerIntervals(clusterID: number): void {
     // Everyday at 12am UTC => 7pm EST
     schedule.scheduleJob("0 0 * * *", () => {
-        // New fun facts
-        reloadFactCache();
         // New bonus groups
         reloadBonusGroups();
         // Groups used for autocomplete
@@ -459,6 +457,12 @@ export function registerIntervals(clusterID: number): void {
         reloadSongs();
         // Removed cached Spotify playlists
         clearCachedSpotifyPlaylists();
+    });
+
+    // every 6 hours
+    schedule.scheduleJob("0 */6 * * *", () => {
+        // Reload fact cache
+        reloadFactCache();
     });
 
     // Every hour
