@@ -27,7 +27,7 @@ export class RedditClient {
         try {
             const matchingPosts = await this.client.search({
                 subreddit: "kpop",
-                query: "flair:\"news\" OR flair:\"Tour News\" OR flair:\"Rumor\" OR flair:\"Achievement\"",
+                query: "flair:'news' OR flair:'Tour News' OR flair:'Rumor' OR flair:'Achievement'",
                 sort: "top",
                 time: "week",
             });
