@@ -140,7 +140,7 @@ export default class ListeningSession extends Session {
         logger.info(
             `gid: ${this.guildID} | Listening session ended. rounds_played = ${this.roundsPlayed}`,
         );
-        await super.endSession(reason);
+        await super.endSession(reason, false);
     }
 
     async handleComponentInteraction(

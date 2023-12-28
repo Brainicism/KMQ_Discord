@@ -216,7 +216,7 @@ export default abstract class Session {
                         this.guildPreference,
                     )}`,
                 );
-                await this.endSession("Error reloading songs");
+                await this.endSession("Error reloading songs", true);
                 return null;
             }
         }
@@ -259,7 +259,7 @@ export default abstract class Session {
                     "misc.failure.songQuery.description",
                 ),
             });
-            await this.endSession("Error querying random song");
+            await this.endSession("Error querying random song", true);
             return null;
         }
 
@@ -271,7 +271,10 @@ export default abstract class Session {
         ) as Eris.VoiceChannel;
 
         if (!voiceChannel || voiceChannel.voiceMembers.size === 0) {
-            await this.endSession("Voice channel is empty, during startRound");
+            await this.endSession(
+                "Voice channel is empty, during startRound",
+                false,
+            );
             return null;
         }
 
@@ -279,7 +282,7 @@ export default abstract class Session {
         try {
             await ensureVoiceConnection(this);
         } catch (err) {
-            await this.endSession("Unable to obtain voice connection");
+            await this.endSession("Unable to obtain voice connection", true);
             logger.error(
                 `${getDebugLogHeader(
                     messageContext,
@@ -343,16 +346,19 @@ export default abstract class Session {
 
         if (remainingDuration && remainingDuration < 0) {
             logger.info(`gid: ${this.guildID} | Game session duration reached`);
-            this.endSession("Game session duration reached");
+            this.endSession("Game session duration reached", false);
         }
     }
 
     /**
      * Ends the current GameSession
      * @param reason - The reason for the session end
+     * @param endedDueToError - Whether the session ended due to an error
      */
-    async endSession(reason: string): Promise<void> {
-        logger.info(`gid: ${this.guildID} | Session ended. Reason: ${reason}`);
+    async endSession(reason: string, endedDueToError: boolean): Promise<void> {
+        logger.info(
+            `gid: ${this.guildID} | Session ended. endedDueToError: ${endedDueToError}. Reason: ${reason}`,
+        );
 
         this.guildPreference.reloadSongCallback = undefined;
         Session.deleteSession(this.guildID);
@@ -729,8 +735,7 @@ export default abstract class Session {
         logger.info(
             `${getDebugLogHeader(
                 messageContext,
-            )} | Playing song in voice connection. seek = ${seekType}. song = ${this.getDebugSongDetails()}. guess mode = ${
-                this.guildPreference.gameOptions.guessModeType
+            )} | Playing song in voice connection. seek = ${seekType}. song = ${this.getDebugSongDetails()}. guess mode = ${this.guildPreference.gameOptions.guessModeType
             }`,
         );
         this.connection.removeAllListeners();
@@ -771,7 +776,7 @@ export default abstract class Session {
             // replace listener with no-op to catch any exceptions thrown after this event
             if (this.connection) {
                 this.connection.removeAllListeners("end");
-                this.connection.on("end", () => {});
+                this.connection.on("end", () => { });
                 logger.info(
                     `${getDebugLogHeader(
                         messageContext,
@@ -793,7 +798,7 @@ export default abstract class Session {
             if (this.connection) {
                 // replace listener with no-op to catch any exceptions thrown after this event
                 this.connection.removeAllListeners("error");
-                this.connection.on("error", () => {});
+                this.connection.on("error", () => { });
             }
 
             logger.error(
@@ -1007,10 +1012,10 @@ export default abstract class Session {
         durationText +=
             timeRemaining > 0
                 ? `⏰ ${i18n.translateN(
-                      locale,
-                      "misc.plural.minuteRemaining",
-                      Math.ceil(timeRemaining),
-                  )}`
+                    locale,
+                    "misc.plural.minuteRemaining",
+                    Math.ceil(timeRemaining),
+                )}`
                 : `⏰ ${i18n.translate(locale, "misc.timeFinished")}!`;
 
         return durationText;
