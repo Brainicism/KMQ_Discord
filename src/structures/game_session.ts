@@ -211,7 +211,7 @@ export default class GameSession extends Session {
             const randomSong = round.song;
             const correctChoice =
                 this.guildPreference.gameOptions.guessModeType ===
-                    GuessModeType.ARTIST
+                GuessModeType.ARTIST
                     ? getLocalizedArtistName(round.song, locale)
                     : getLocalizedSongName(round.song, locale, false);
 
@@ -295,9 +295,9 @@ export default class GameSession extends Session {
                                 this.guildPreference.gameOptions
                                     .guessModeType === GuessModeType.ARTIST
                                     ? i18n.translate(
-                                        this.guildID,
-                                        "misc.artist",
-                                    )
+                                          this.guildID,
+                                          "misc.artist",
+                                      )
                                     : i18n.translate(this.guildID, "misc.song"),
                         },
                     ),
@@ -362,7 +362,7 @@ export default class GameSession extends Session {
                 guessResult.correctGuessers &&
                 (this.lastGuesser === null ||
                     this.lastGuesser.userID !==
-                    guessResult.correctGuessers[0].id)
+                        guessResult.correctGuessers[0].id)
             ) {
                 this.lastGuesser = {
                     userID: guessResult.correctGuessers[0].id,
@@ -448,7 +448,7 @@ export default class GameSession extends Session {
                 correctGuess,
                 await userBonusIsActive(
                     playerRoundResults[0]?.player.id ??
-                    messageContext.author.id,
+                        messageContext.author.id,
                 ),
             );
 
@@ -541,13 +541,14 @@ export default class GameSession extends Session {
                         : 0,
                 );
 
-                // if game ended erroneously during player's FGOTD, mark it as errored to allow 
+                // if game ended erroneously during player's FGOTD, mark it as errored to allow
                 // for bonus to continue next game
                 await dbContext.kmq
                     .updateTable("player_stats")
                     .where("player_id", "=", participant)
                     .set({
-                        last_game_played_errored: isFirstGame && endedDueToError ? 1 : 0,
+                        last_game_played_errored:
+                            isFirstGame && endedDueToError ? 1 : 0,
                     })
                     .execute();
             }),
@@ -601,7 +602,7 @@ export default class GameSession extends Session {
         const averageGuessTime =
             this.guessTimes.length > 0
                 ? this.guessTimes.reduce((a, b) => a + b, 0) /
-                (this.guessTimes.length * 1000)
+                  (this.guessTimes.length * 1000)
                 : -1;
 
         await dbContext.kmq
@@ -859,21 +860,21 @@ export default class GameSession extends Session {
             this.scoreboard.addPlayer(
                 this.gameType === GameType.ELIMINATION
                     ? EliminationPlayer.fromUser(
-                        user as Eris.User,
-                        this.guildID,
-                        (
-                            this.scoreboard as EliminationScoreboard
-                        ).getLivesOfWeakestPlayer(),
-                        await isFirstGameOfDay(userID),
-                        await isUserPremium(userID),
-                    )
+                          user as Eris.User,
+                          this.guildID,
+                          (
+                              this.scoreboard as EliminationScoreboard
+                          ).getLivesOfWeakestPlayer(),
+                          await isFirstGameOfDay(userID),
+                          await isUserPremium(userID),
+                      )
                     : Player.fromUser(
-                        user as Eris.User,
-                        this.guildID,
-                        0,
-                        await isFirstGameOfDay(userID),
-                        await isUserPremium(userID),
-                    ),
+                          user as Eris.User,
+                          this.guildID,
+                          0,
+                          await isFirstGameOfDay(userID),
+                          await isUserPremium(userID),
+                      ),
             );
         }
 
@@ -912,20 +913,20 @@ export default class GameSession extends Session {
                     this.scoreboard.addPlayer(
                         this.gameType === GameType.ELIMINATION
                             ? EliminationPlayer.fromUser(
-                                player,
-                                this.guildID,
-                                (this.scoreboard as EliminationScoreboard)
-                                    .startingLives,
-                                firstGameOfDay,
-                                premium,
-                            )
+                                  player,
+                                  this.guildID,
+                                  (this.scoreboard as EliminationScoreboard)
+                                      .startingLives,
+                                  firstGameOfDay,
+                                  premium,
+                              )
                             : Player.fromUser(
-                                player,
-                                this.guildID,
-                                0,
-                                firstGameOfDay,
-                                premium,
-                            ),
+                                  player,
+                                  this.guildID,
+                                  0,
+                                  firstGameOfDay,
+                                  premium,
+                              ),
                     );
                 }),
         );
@@ -1065,7 +1066,8 @@ export default class GameSession extends Session {
                 });
             } else {
                 logger.error(
-                    `Failed fetching end game message. guildID = ${this.guildID
+                    `Failed fetching end game message. guildID = ${
+                        this.guildID
                     }. locale = ${State.getGuildLocale(
                         this.guildID,
                     )} endGameMessage =${!!endGameMessage}, endGameMessage.title=${!!endGameMessage?.title}, endGameMessage.message=${!!endGameMessage?.message}`,
@@ -1077,16 +1079,16 @@ export default class GameSession extends Session {
                 {
                     color:
                         this.gameType !== GameType.TEAMS &&
-                            (await userBonusIsActive(winners[0].id))
+                        (await userBonusIsActive(winners[0].id))
                             ? EMBED_SUCCESS_BONUS_COLOR
                             : EMBED_SUCCESS_COLOR,
                     description: !useLargerScoreboard
                         ? bold(
-                            i18n.translate(
-                                this.guildID,
-                                "command.score.scoreboardTitle",
-                            ),
-                        )
+                              i18n.translate(
+                                  this.guildID,
+                                  "command.score.scoreboardTitle",
+                              ),
+                          )
                         : undefined,
                     thumbnailUrl: winners[0].getAvatarURL(),
                     title: `🎉 ${this.scoreboard.getWinnerMessage(
@@ -1535,17 +1537,21 @@ export default class GameSession extends Session {
                     if (idx === 0) {
                         streak = lastGuesserStreak;
                         logger.info(
-                            `${getDebugLogHeader(messageContext)}, uid: ${correctGuesser.id
-                            } | Song correctly guessed. song = ${round.song.songName
+                            `${getDebugLogHeader(messageContext)}, uid: ${
+                                correctGuesser.id
+                            } | Song correctly guessed. song = ${
+                                round.song.songName
                             }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`,
                         );
                     } else {
                         streak = 0;
                         logger.info(
-                            `${getDebugLogHeader(messageContext)}, uid: ${correctGuesser.id
+                            `${getDebugLogHeader(messageContext)}, uid: ${
+                                correctGuesser.id
                             } | Song correctly guessed ${getOrdinalNum(
                                 guessPosition,
-                            )}. song = ${round.song.songName
+                            )}. song = ${
+                                round.song.songName
                             }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`,
                         );
                     }
@@ -1604,7 +1610,7 @@ export default class GameSession extends Session {
                 timestamp: `<t:${Math.floor(
                     (round.timerStartedAt +
                         this.guildPreference.gameOptions.guessTimeout! * 1000) /
-                    1000,
+                        1000,
                 )}:R>`,
             },
         );
@@ -1625,7 +1631,7 @@ export default class GameSession extends Session {
                 {
                     songOrArtist:
                         this.guildPreference.gameOptions.guessModeType ===
-                            GuessModeType.ARTIST
+                        GuessModeType.ARTIST
                             ? i18n.translate(this.guildID, "misc.artist")
                             : i18n.translate(this.guildID, "misc.song"),
                 },

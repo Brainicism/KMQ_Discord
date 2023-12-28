@@ -735,7 +735,8 @@ export default abstract class Session {
         logger.info(
             `${getDebugLogHeader(
                 messageContext,
-            )} | Playing song in voice connection. seek = ${seekType}. song = ${this.getDebugSongDetails()}. guess mode = ${this.guildPreference.gameOptions.guessModeType
+            )} | Playing song in voice connection. seek = ${seekType}. song = ${this.getDebugSongDetails()}. guess mode = ${
+                this.guildPreference.gameOptions.guessModeType
             }`,
         );
         this.connection.removeAllListeners();
@@ -776,7 +777,7 @@ export default abstract class Session {
             // replace listener with no-op to catch any exceptions thrown after this event
             if (this.connection) {
                 this.connection.removeAllListeners("end");
-                this.connection.on("end", () => { });
+                this.connection.on("end", () => {});
                 logger.info(
                     `${getDebugLogHeader(
                         messageContext,
@@ -798,7 +799,7 @@ export default abstract class Session {
             if (this.connection) {
                 // replace listener with no-op to catch any exceptions thrown after this event
                 this.connection.removeAllListeners("error");
-                this.connection.on("error", () => { });
+                this.connection.on("error", () => {});
             }
 
             logger.error(
@@ -1012,10 +1013,10 @@ export default abstract class Session {
         durationText +=
             timeRemaining > 0
                 ? `⏰ ${i18n.translateN(
-                    locale,
-                    "misc.plural.minuteRemaining",
-                    Math.ceil(timeRemaining),
-                )}`
+                      locale,
+                      "misc.plural.minuteRemaining",
+                      Math.ceil(timeRemaining),
+                  )}`
                 : `⏰ ${i18n.translate(locale, "misc.timeFinished")}!`;
 
         return durationText;
