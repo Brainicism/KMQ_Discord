@@ -751,6 +751,28 @@
                 "name": "マルチゲス"
             }
         },
+        "news": {
+            "disclaimer": "この要約はAIによって生成されたもので、正確でない可能性があります",
+            "error": {
+                "description": "最新ニュースの取得に失敗しました。後ほど再試行してください。",
+                "title": "ニュースエラー"
+            },
+            "help": {
+                "description": "インターネットから最新のK-popニュースを入手しよう！",
+                "example": {
+                    "get": "今日のK-popニュースの概要を見る",
+                    "subscribe": "このテキストチャンネルで週刊ニュースの更新を受け取る",
+                    "unsubscribe": "このテキストチャンネルでの日々のニュースの更新を停止する"
+                },
+                "interaction": {
+                    "range": "ニュースを見るための時間間隔",
+                    "subscribe": "このテキストチャンネルでニュースの更新を受け取るために登録する",
+                    "unsubscribe": "このテキストチャンネルでニュースの更新を受け取るのを停止する"
+                },
+                "name": "ニュース"
+            },
+            "title": "KMQニュース"
+        },
         "options": {
             "duration": "{{durationInMinutes}}分",
             "help": {

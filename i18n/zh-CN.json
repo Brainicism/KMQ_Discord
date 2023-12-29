@@ -751,6 +751,28 @@
                 "name": "多人猜歌"
             }
         },
+        "news": {
+            "disclaimer": "此摘要由AI生成，可能不准确",
+            "error": {
+                "description": "获取最新新闻失败。请稍后再试。",
+                "title": "新闻错误"
+            },
+            "help": {
+                "description": "从互联网获取最新的K-pop新闻！",
+                "example": {
+                    "get": "查看今天的K-pop新闻概览",
+                    "subscribe": "在此文本频道接收每周新闻更新",
+                    "unsubscribe": "停止在此文本频道接收每日新闻更新"
+                },
+                "interaction": {
+                    "range": "查看新闻的时间间隔",
+                    "subscribe": "注册以在此文本频道接收新闻更新",
+                    "unsubscribe": "停止在此文本频道接收新闻更新"
+                },
+                "name": "新闻"
+            },
+            "title": "KMQ新闻"
+        },
         "options": {
             "duration": "{{durationInMinutes}} 分钟",
             "help": {

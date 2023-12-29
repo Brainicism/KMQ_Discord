@@ -751,6 +751,28 @@
                 "name": "multiguess"
             }
         },
+        "news": {
+            "disclaimer": "Ce résumé a été généré par une IA et peut ne pas être exact",
+            "error": {
+                "description": "Échec de la récupération des dernières nouvelles. Réessayez plus tard.",
+                "title": "Erreur de Nouvelles"
+            },
+            "help": {
+                "description": "Obtenez les dernières nouvelles de K-pop sur internet!",
+                "example": {
+                    "get": "Voir un aperçu des nouvelles de K-pop d'aujourd'hui",
+                    "subscribe": "Recevez une mise à jour des nouvelles hebdomadaire dans ce canal de texte",
+                    "unsubscribe": "Arrêtez de recevoir des mises à jour des nouvelles quotidiennes dans ce canal de texte"
+                },
+                "interaction": {
+                    "range": "L'intervalle de temps pour voir les nouvelles",
+                    "subscribe": "Inscrivez-vous pour recevoir des mises à jour des nouvelles dans ce canal de texte",
+                    "unsubscribe": "Arrêtez de recevoir des mises à jour des nouvelles dans ce canal de texte"
+                },
+                "name": "nouvelles"
+            },
+            "title": "Nouvelles KMQ"
+        },
         "options": {
             "duration": "{{durationInMinutes}} min",
             "help": {
