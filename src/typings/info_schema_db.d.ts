@@ -1051,7 +1051,7 @@ export interface VIEWS {
     VIEW_DEFINITION: string;
 }
 
-export interface DB {
+export interface InfoSchemaDB {
     ALL_PLUGINS: ALLPLUGINS;
     APPLICABLE_ROLES: APPLICABLEROLES;
     CHARACTER_SETS: CHARACTERSETS;
