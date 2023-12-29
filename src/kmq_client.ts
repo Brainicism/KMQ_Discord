@@ -29,7 +29,12 @@ export default class KmqClient extends Eris.Client {
         const commandMap: { [commandName: string]: any } = {};
         try {
             let files: Array<string> = [];
-            for (const category of ["admin", "game_options", "game_commands", "misc_commands"]) {
+            for (const category of [
+                "admin",
+                "game_options",
+                "game_commands",
+                "misc_commands",
+            ]) {
                 files = files.concat(
                     (
                         await fs.promises.readdir(

@@ -142,7 +142,7 @@ function generateFacts(): void {
         const funFacts = await resolveFactPromises(funFactPromises);
         logger.info(`Generating KMQ facts (${locale})...`);
         const kmqFacts = await resolveFactPromises(kmqFactPromises);
-        logger.info(`Generating news facts (${locale})...`)
+        logger.info(`Generating news facts (${locale})...`);
         const newsFacts = await resolveFactPromises(newsFactPromises);
         localeToFactCache[locale] = {
             funFacts: funFacts.filter((facts) => facts.length > 0),

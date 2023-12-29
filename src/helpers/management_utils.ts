@@ -1,7 +1,13 @@
 /* eslint-disable global-require */
 /* eslint-disable import/no-dynamic-require */
 import { IPCLogger } from "../logger";
-import { chooseRandom, delay, isPrimaryInstance, isWeekend } from "./utils";
+import {
+    chooseRandom,
+    delay,
+    isPrimaryInstance,
+    isWeekend,
+    retryJob,
+} from "./utils";
 import {
     cleanupInactiveGameSessions,
     cleanupInactiveListeningSessions,
@@ -13,17 +19,18 @@ import { reloadFactCache } from "../fact_generator";
 import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
 import { sql } from "kysely";
 import KmqConfiguration from "../kmq_configuration";
+import KmqNewsCommand from "../commands/misc_commands/kmqnews";
+import LocaleType from "../enums/locale_type";
 import MessageContext from "../structures/message_context";
+import NewsRange from "../enums/news_range";
 import State from "../state";
 import _ from "lodash";
 import dbContext from "../database_context";
 import i18n from "./localization_manager";
 import schedule from "node-schedule";
 import updatePremiumUsers from "./patreon_manager";
-import type LocaleType from "../enums/locale_type";
 import type MatchedArtist from "../interfaces/matched_artist";
-import KmqNewsCommand, { NewsRange } from "../commands/misc_commands/kmqnews";
-import NewsSubscription from "src/interfaces/news_subscription";
+import type NewsSubscription from "../interfaces/news_subscription";
 
 const logger = new IPCLogger("management_utils");
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 3, 2, 1]);
@@ -445,17 +452,69 @@ async function reloadBanData(): Promise<void> {
 }
 
 async function registerNewsSubscriptions(): Promise<void> {
-    const subscriptions = await dbContext.kmq.selectFrom("news_subscriptions").selectAll().execute();
+    const subscriptions = await dbContext.kmq
+        .selectFrom("news_subscriptions")
+        .selectAll()
+        .execute();
+
     for (const s of subscriptions) {
         const subscription: NewsSubscription = {
             guildID: s.guild_id,
             textChannelID: s.text_channel_id,
             range: s.range,
             createdAt: new Date(s.created_at),
-        }
+        };
 
-        KmqNewsCommand.scheduleNewsJob(subscription)
+        KmqNewsCommand.scheduleNewsJob(subscription);
     }
+}
+
+async function reloadNews(): Promise<void> {
+    await Promise.allSettled(
+        Object.values(LocaleType).map(async (locale) => {
+            await Promise.allSettled(
+                Object.values(NewsRange).map(async (range) => {
+                    await retryJob<void | Error>(
+                        async () => {
+                            let summary: string;
+                            if (range === NewsRange.DAY) {
+                                summary =
+                                    await State.geminiClient.getDailyPostSummary(
+                                        locale,
+                                    );
+                            } else {
+                                summary =
+                                    await State.geminiClient.getWeeklyPostSummary(
+                                        locale,
+                                    );
+                            }
+
+                            if (summary === "") {
+                                logger.error(
+                                    `Error generating news for ${locale} ${range}`,
+                                );
+                                return Promise.reject(
+                                    new Error(
+                                        `Error generating news for ${locale} ${range}`,
+                                    ),
+                                );
+                            }
+
+                            State.news[range][locale] = summary;
+                            logger.info(
+                                `Generated news for ${locale} ${range}`,
+                            );
+                            return Promise.resolve();
+                        },
+                        [],
+                        3,
+                        true,
+                        5000,
+                    );
+                }),
+            );
+        }),
+    );
 }
 
 /**
@@ -491,6 +550,9 @@ export function registerIntervals(clusterID: number): void {
             return;
         // Ping a role in KMQ server notifying of power hour
         sendPowerHourNotification();
+
+        // Use reddit and Gemini to generate news
+        reloadNews();
     });
 
     // Every 10 minutes
@@ -546,4 +608,5 @@ export function reloadCaches(): void {
     reloadLocales();
     reloadSongs();
     reloadBanData();
+    reloadNews();
 }

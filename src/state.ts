@@ -55,6 +55,8 @@ export default class State {
     static redditClient: RedditClient;
     static geminiClient: GeminiClient;
 
+    static news: { [range: string]: { [locale: string]: string } };
+
     static commandToID: { [commandName: string]: string } = {};
     static getGuildLocale(guildID: string): LocaleType {
         return State.locales[guildID] ?? DEFAULT_LOCALE;

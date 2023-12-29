@@ -1,4 +1,4 @@
-import { NewsRange } from "../commands/misc_commands/kmqnews";
+import type NewsRange from "../enums/news_range";
 
 export default interface NewsSubscription {
     guildID: string;

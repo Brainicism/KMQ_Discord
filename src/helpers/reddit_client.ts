@@ -65,8 +65,7 @@ export class RedditClient {
                 time: "day",
             });
 
-            const popularPosts = matchingPosts
-                .filter((x) => x.score > 100)
+            const popularPosts = matchingPosts.filter((x) => x.score > 100);
 
             return popularPosts.map((x) => ({
                 title: x.title,
@@ -77,9 +76,7 @@ export class RedditClient {
             }));
         } catch (e) {
             logger.error(
-                `Failed to fetch getTopDayPosts(). e = ${JSON.stringify(
-                    e,
-                )}`,
+                `Failed to fetch getTopDayPosts(). e = ${JSON.stringify(e)}`,
             );
             return [];
         }
@@ -91,8 +88,7 @@ export class RedditClient {
                 time: "week",
             });
 
-            const popularPosts = matchingPosts
-                .filter((x) => x.score > 100)
+            const popularPosts = matchingPosts.filter((x) => x.score > 100);
 
             return popularPosts.map((x) => ({
                 title: x.title,
@@ -103,9 +99,7 @@ export class RedditClient {
             }));
         } catch (e) {
             logger.error(
-                `Failed to fetch getTopWeekPosts(). e = ${JSON.stringify(
-                    e,
-                )}`,
+                `Failed to fetch getTopWeekPosts(). e = ${JSON.stringify(e)}`,
             );
             return [];
         }

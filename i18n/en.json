@@ -494,6 +494,11 @@
             }
         },
         "kmqnews": {
+            "disclaimer": "This summary was AI-generated and may not be accurate",
+            "error": {
+                "title": "News Error",
+                "description": "Failed to fetch the latest news. Try again later."
+            },
             "help": {
                 "description": "Get the latest K-pop news from the internet!",
                 "example": {
