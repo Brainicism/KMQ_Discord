@@ -14,10 +14,10 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
-const COMMAND_NAME = "news";
+const COMMAND_NAME = "botnews";
 const logger = new IPCLogger(COMMAND_NAME);
 
-export default class NewsCommand implements BaseCommand {
+export default class BotNewsCommand implements BaseCommand {
     aliases = ["updates"];
 
     help = (guildID: string): HelpDocumentation => ({
@@ -28,7 +28,7 @@ export default class NewsCommand implements BaseCommand {
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
-        await NewsCommand.sendNews(MessageContext.fromMessage(message));
+        await BotNewsCommand.sendNews(MessageContext.fromMessage(message));
     };
 
     slashCommands = (): Array<
@@ -99,6 +99,6 @@ export default class NewsCommand implements BaseCommand {
         interaction: Eris.CommandInteraction,
         messageContext: MessageContext,
     ): Promise<void> {
-        await NewsCommand.sendNews(messageContext, interaction);
+        await BotNewsCommand.sendNews(messageContext, interaction);
     }
 }

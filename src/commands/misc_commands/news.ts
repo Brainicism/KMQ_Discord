@@ -31,7 +31,7 @@ enum Action {
 
 const RANGE_OPTION = "range";
 
-const COMMAND_NAME = "kmqnews";
+const COMMAND_NAME = "news";
 const logger = new IPCLogger(COMMAND_NAME);
 
 const scheduledJobName = (
@@ -40,7 +40,7 @@ const scheduledJobName = (
     range: NewsRange,
 ): string => `${guildID}-${textChannelID}-${range}`;
 
-export default class KmqNewsCommand implements BaseCommand {
+export default class NewsCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: COMMAND_NAME,
         description: i18n.translate(
@@ -326,14 +326,14 @@ export default class KmqNewsCommand implements BaseCommand {
 
         if (subscription.range === NewsRange.DAY) {
             schedule.scheduleJob(jobName, "0 0 * * *", async () => {
-                await KmqNewsCommand.sendNews(
+                await NewsCommand.sendNews(
                     subscriptionContext,
                     subscription.range,
                 );
             });
         } else if (subscription.range === NewsRange.WEEK) {
             schedule.scheduleJob(jobName, "0 0 * * 0", async () => {
-                await KmqNewsCommand.sendNews(
+                await NewsCommand.sendNews(
                     subscriptionContext,
                     subscription.range,
                 );
@@ -436,19 +436,19 @@ export default class KmqNewsCommand implements BaseCommand {
 
         const range = interactionOptions[RANGE_OPTION] as NewsRange;
         if (interactionName === Action.SUBSCRIBE) {
-            await KmqNewsCommand.subscribeNews(
+            await NewsCommand.subscribeNews(
                 messageContext,
                 range,
                 interaction,
             );
         } else if (interactionName === Action.UNSUBSCRIBE) {
-            await KmqNewsCommand.unsubscribeNews(
+            await NewsCommand.unsubscribeNews(
                 messageContext,
                 range,
                 interaction,
             );
         } else if (interactionName === Action.GET) {
-            await KmqNewsCommand.sendNews(messageContext, range, interaction);
+            await NewsCommand.sendNews(messageContext, range, interaction);
         }
     }
 }

@@ -80,6 +80,16 @@
                 "title": "게임 시작 무시"
             }
         },
+        "botnews": {
+            "help": {
+                "description": "KMQ에 대한 최신 업데이트를 표시합니다.",
+                "name": "봇뉴스"
+            },
+            "updates": {
+                "footer": "자세한 업데이트를 보려면 공식 KMQ 서버에 가입하십시오!",
+                "title": "Updates"
+            }
+        },
         "cutoff": {
             "failure": {
                 "invalidEndYear": {
@@ -739,16 +749,6 @@
                     "multiguess": "여러 사람이 올바르게 추측할 수 있도록 허용할지 여부입니다."
                 },
                 "name": "multiguess"
-            }
-        },
-        "news": {
-            "help": {
-                "description": "KMQ에 대한 최신 업데이트를 표시합니다.",
-                "name": "소식"
-            },
-            "updates": {
-                "footer": "자세한 업데이트를 보려면 공식 KMQ 서버에 가입하십시오!",
-                "title": "Updates"
             }
         },
         "options": {

@@ -80,6 +80,16 @@
                 "title": "Begin Ignored"
             }
         },
+        "botnews": {
+            "help": {
+                "description": "Displays the latest updates to KMQ.",
+                "name": "botnews"
+            },
+            "updates": {
+                "footer": "Join the official KMQ server for more detailed updates!",
+                "title": "Updates"
+            }
+        },
         "cutoff": {
             "failure": {
                 "invalidEndYear": {
@@ -493,28 +503,6 @@
                 "startGameInstructions": "\nStart the game with {{beginCommand}}."
             }
         },
-        "kmqnews": {
-            "disclaimer": "This summary was AI-generated and may not be accurate",
-            "error": {
-                "title": "News Error",
-                "description": "Failed to fetch the latest news. Try again later."
-            },
-            "help": {
-                "description": "Get the latest K-pop news from the internet!",
-                "example": {
-                    "get": "See an overview of today's K-pop news",
-                    "subscribe": "Receive a weekly news update in this text channel",
-                    "unsubscribe": "Stop receiving daily news updates in this text channel"
-                },
-                "interaction": {
-                    "range": "The time interval to see news from",
-                    "subscribe": "Sign up to receive news updates in this text channel",
-                    "unsubscribe": "Stop receiving news updates in this text channel"
-                },
-                "name": "kmqnews"
-            },
-            "title": "KMQ News"
-        },
         "language": {
             "help": {
                 "description": "Choose whether songs played should be exclusively in Korean.",
@@ -764,14 +752,26 @@
             }
         },
         "news": {
+            "disclaimer": "This summary was AI-generated and may not be accurate",
+            "error": {
+                "description": "Failed to fetch the latest news. Try again later.",
+                "title": "News Error"
+            },
             "help": {
-                "description": "Displays the latest updates to KMQ.",
+                "description": "Get the latest K-pop news from the internet!",
+                "example": {
+                    "get": "See an overview of today's K-pop news",
+                    "subscribe": "Receive a weekly news update in this text channel",
+                    "unsubscribe": "Stop receiving daily news updates in this text channel"
+                },
+                "interaction": {
+                    "range": "The time interval to see news from",
+                    "subscribe": "Sign up to receive news updates in this text channel",
+                    "unsubscribe": "Stop receiving news updates in this text channel"
+                },
                 "name": "news"
             },
-            "updates": {
-                "footer": "Join the official KMQ server for more detailed updates!",
-                "title": "Updates"
-            }
+            "title": "KMQ News"
         },
         "options": {
             "duration": "{{durationInMinutes}} mins",

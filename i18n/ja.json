@@ -80,6 +80,16 @@
                 "title": "無視された開始"
             }
         },
+        "botnews": {
+            "help": {
+                "description": "KMQの最新の更新を表示します。",
+                "name": "ボットニュース"
+            },
+            "updates": {
+                "footer": "詳細な更新情報を得るために、公式KMQサーバーに参加してください！",
+                "title": "更新"
+            }
+        },
         "cutoff": {
             "failure": {
                 "invalidEndYear": {
@@ -739,16 +749,6 @@
                     "multiguess": "複数の人が正しく推測できるかどうかを許可するかどうか"
                 },
                 "name": "マルチゲス"
-            }
-        },
-        "news": {
-            "help": {
-                "description": "KMQの最新の更新を表示します。",
-                "name": "ニュース"
-            },
-            "updates": {
-                "footer": "詳細な更新情報を得るために、公式KMQサーバーに参加してください！",
-                "title": "更新"
             }
         },
         "options": {

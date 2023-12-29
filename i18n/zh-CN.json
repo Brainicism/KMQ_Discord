@@ -80,6 +80,16 @@
                 "title": "开始被忽略"
             }
         },
+        "botnews": {
+            "help": {
+                "description": "显示最新的KMQ更新。",
+                "name": "机器人新闻"
+            },
+            "updates": {
+                "footer": "加入官方KMQ服务器以获取更详细的更新！",
+                "title": "更新"
+            }
+        },
         "cutoff": {
             "failure": {
                 "invalidEndYear": {
@@ -739,16 +749,6 @@
                     "multiguess": "是否允许多人猜对。"
                 },
                 "name": "多人猜歌"
-            }
-        },
-        "news": {
-            "help": {
-                "description": "显示最新的KMQ更新。",
-                "name": "新闻"
-            },
-            "updates": {
-                "footer": "加入官方KMQ服务器以获取更详细的更新！",
-                "title": "更新"
             }
         },
         "options": {

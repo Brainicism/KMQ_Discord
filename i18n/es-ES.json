@@ -80,6 +80,16 @@
                 "title": "Ignorado"
             }
         },
+        "botnews": {
+            "help": {
+                "description": "Muestra las últimas actualizaciones de KMQ.",
+                "name": "botnoticias"
+            },
+            "updates": {
+                "footer": "¡Únete al servidor oficial de KMQ para obtener actualizaciones más detalladas!",
+                "title": "Actualizaciones"
+            }
+        },
         "cutoff": {
             "failure": {
                 "invalidEndYear": {
@@ -739,16 +749,6 @@
                     "multiguess": "Si se permite que varias personas adivinen correctamente"
                 },
                 "name": "multiadivinanza"
-            }
-        },
-        "news": {
-            "help": {
-                "description": "Muestra las últimas actualizaciones de KMQ.",
-                "name": "noticias"
-            },
-            "updates": {
-                "footer": "¡Únete al servidor oficial de KMQ para obtener actualizaciones más detalladas!",
-                "title": "Actualizaciones"
             }
         },
         "options": {

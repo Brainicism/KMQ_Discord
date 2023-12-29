@@ -19,9 +19,9 @@ import { reloadFactCache } from "../fact_generator";
 import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
 import { sql } from "kysely";
 import KmqConfiguration from "../kmq_configuration";
-import KmqNewsCommand from "../commands/misc_commands/kmqnews";
 import LocaleType from "../enums/locale_type";
 import MessageContext from "../structures/message_context";
+import NewsCommand from "../commands/misc_commands/news";
 import NewsRange from "../enums/news_range";
 import State from "../state";
 import _ from "lodash";
@@ -465,7 +465,7 @@ async function registerNewsSubscriptions(): Promise<void> {
             createdAt: new Date(s.created_at),
         };
 
-        KmqNewsCommand.scheduleNewsJob(subscription);
+        NewsCommand.scheduleNewsJob(subscription);
     }
 }
 

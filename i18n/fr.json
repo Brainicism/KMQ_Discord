@@ -80,6 +80,16 @@
                 "title": "Commencer ignoré"
             }
         },
+        "botnews": {
+            "help": {
+                "description": "Affiche les dernières mises à jour de KMQ.",
+                "name": "botnouvelles"
+            },
+            "updates": {
+                "footer": "Rejoignez le serveur officiel de KMQ pour des mises à jour plus détaillées !",
+                "title": "Mises à jour"
+            }
+        },
         "cutoff": {
             "failure": {
                 "invalidEndYear": {
@@ -739,16 +749,6 @@
                     "multiguess": "Permet à plusieurs personnes de répondre correctement."
                 },
                 "name": "multiguess"
-            }
-        },
-        "news": {
-            "help": {
-                "description": "Affiche les dernières mises à jour de KMQ.",
-                "name": "nouvelles"
-            },
-            "updates": {
-                "footer": "Rejoignez le serveur officiel de KMQ pour des mises à jour plus détaillées !",
-                "title": "Mises à jour"
             }
         },
         "options": {
