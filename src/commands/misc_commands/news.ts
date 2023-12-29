@@ -44,7 +44,7 @@ export default class NewsCommand implements BaseCommand {
         name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
-            "command.kmqnews.help.description",
+            "command.news.help.description",
         ),
         examples: [
             {
@@ -53,7 +53,7 @@ export default class NewsCommand implements BaseCommand {
                 } ${RANGE_OPTION}:${NewsRange.DAY}`,
                 explanation: i18n.translate(
                     guildID,
-                    "command.kmqnews.help.example.get",
+                    "command.news.help.example.get",
                 ),
             },
             {
@@ -62,7 +62,7 @@ export default class NewsCommand implements BaseCommand {
                 } ${RANGE_OPTION}:${NewsRange.WEEK}`,
                 explanation: i18n.translate(
                     guildID,
-                    "command.kmqnews.help.example.subscribe",
+                    "command.news.help.example.subscribe",
                 ),
             },
             {
@@ -71,7 +71,7 @@ export default class NewsCommand implements BaseCommand {
                 } ${RANGE_OPTION}:${NewsRange.DAY}`,
                 explanation: i18n.translate(
                     guildID,
-                    "command.kmqnews.help.example.unsubscribe",
+                    "command.news.help.example.unsubscribe",
                 ),
             },
         ],
@@ -79,7 +79,7 @@ export default class NewsCommand implements BaseCommand {
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
-        logger.warn("Text-based command not supported for kmqnews");
+        logger.warn("Text-based command not supported for news");
         await sendDeprecatedTextCommandMessage(
             MessageContext.fromMessage(message),
         );
@@ -96,7 +96,7 @@ export default class NewsCommand implements BaseCommand {
                     // Reuse the description key
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.kmqnews.help.description",
+                        "command.news.help.description",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -105,7 +105,7 @@ export default class NewsCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.kmqnews.help.description",
+                                    "command.news.help.description",
                                 ),
                             }),
                             {},
@@ -117,7 +117,7 @@ export default class NewsCommand implements BaseCommand {
                             name: RANGE_OPTION,
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.kmqnews.help.interaction.range",
+                                "command.news.help.interaction.range",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -126,7 +126,7 @@ export default class NewsCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.kmqnews.help.interaction.range",
+                                            "command.news.help.interaction.range",
                                         ),
                                     }),
                                     {},
@@ -147,7 +147,7 @@ export default class NewsCommand implements BaseCommand {
                     name: Action.SUBSCRIBE,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.kmqnews.help.interaction.subscribe",
+                        "command.news.help.interaction.subscribe",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -156,7 +156,7 @@ export default class NewsCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.kmqnews.help.interaction.subscribe",
+                                    "command.news.help.interaction.subscribe",
                                 ),
                             }),
                             {},
@@ -168,7 +168,7 @@ export default class NewsCommand implements BaseCommand {
                             name: RANGE_OPTION,
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.kmqnews.help.interaction.range",
+                                "command.news.help.interaction.range",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -177,7 +177,7 @@ export default class NewsCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.kmqnews.help.interaction.range",
+                                            "command.news.help.interaction.range",
                                         ),
                                     }),
                                     {},
@@ -198,7 +198,7 @@ export default class NewsCommand implements BaseCommand {
                     name: Action.UNSUBSCRIBE,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.kmqnews.help.interaction.unsubscribe",
+                        "command.news.help.interaction.unsubscribe",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -207,7 +207,7 @@ export default class NewsCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.kmqnews.help.interaction.unsubscribe",
+                                    "command.news.help.interaction.unsubscribe",
                                 ),
                             }),
                             {},
@@ -219,7 +219,7 @@ export default class NewsCommand implements BaseCommand {
                             name: RANGE_OPTION,
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.kmqnews.help.interaction.range",
+                                "command.news.help.interaction.range",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -228,7 +228,7 @@ export default class NewsCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.kmqnews.help.interaction.range",
+                                            "command.news.help.interaction.range",
                                         ),
                                     }),
                                     {},
@@ -268,10 +268,10 @@ export default class NewsCommand implements BaseCommand {
             );
 
             await sendErrorMessage(messageContext, {
-                title: i18n.translate(locale, "command.kmqnews.error.title"),
+                title: i18n.translate(locale, "command.news.error.title"),
                 description: i18n.translate(
                     locale,
-                    "command.kmqnews.error.description",
+                    "command.news.error.description",
                 ),
                 thumbnailUrl: KmqImages.DEAD,
             });
@@ -290,13 +290,13 @@ export default class NewsCommand implements BaseCommand {
             {
                 title: i18n.translate(
                     messageContext.guildID,
-                    "command.kmqnews.title",
+                    "command.news.title",
                 ),
                 description: summary,
                 thumbnailUrl: thumbnail,
                 footerText: i18n.translate(
                     locale,
-                    "command.kmqnews.disclaimer",
+                    "command.news.disclaimer",
                 ),
             },
             false,
@@ -373,11 +373,11 @@ export default class NewsCommand implements BaseCommand {
         await sendInfoMessage(messageContext, {
             title: i18n.translate(
                 messageContext.guildID,
-                "command.kmqnews.subscribe.title",
+                "command.news.subscribe.title",
             ),
             description: i18n.translate(
                 messageContext.guildID,
-                "command.kmqnews.subscribe.description",
+                "command.news.subscribe.description",
             ),
         });
 
@@ -394,11 +394,11 @@ export default class NewsCommand implements BaseCommand {
             {
                 title: i18n.translate(
                     messageContext.guildID,
-                    "command.kmqnews.unsubscribe.title",
+                    "command.news.unsubscribe.title",
                 ),
                 description: i18n.translate(
                     messageContext.guildID,
-                    "command.kmqnews.unsubscribe.description",
+                    "command.news.unsubscribe.description",
                 ),
             },
             false,
