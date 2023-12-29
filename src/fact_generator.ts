@@ -71,6 +71,12 @@ const kmqFactFunctions: Array<(locale: LocaleType) => Promise<string[]>> = [
     songGuessRate,
 ];
 
+const newsFactFunctions: Array<(locale: LocaleType) => Promise<string[]>> = [
+    redditKpopNews,
+    redditKpopDailySummary,
+    redditKpopWeeklySummary,
+];
+
 interface FactCache {
     funFacts: string[][];
     kmqFacts: string[][];
@@ -100,9 +106,9 @@ interface GaonWeeklyEntry {
 /**
  * Reloads the fact cache
  */
-export async function reloadFactCache(): Promise<void> {
+export function reloadFactCache(): void {
     logger.info("Regenerating fact cache...");
-    await generateFacts();
+    generateFacts();
     logger.info("Fact cache regenerated!");
 }
 
@@ -125,17 +131,19 @@ async function resolveFactPromises(
     return resolvedPromises.map((x) => x["value"]);
 }
 
-async function generateFacts(): Promise<void> {
+function generateFacts(): void {
     logger.info("Generating Reddit news facts...");
-    const newsFacts = await resolveFactPromises([redditKpopNews(), redditKpopDailySummary(), redditKpopWeeklySummary()]);
 
     Object.values(LocaleType).map(async (locale) => {
         const funFactPromises = funFactFunctions.map((x) => x(locale));
         const kmqFactPromises = kmqFactFunctions.map((x) => x(locale));
+        const newsFactPromises = newsFactFunctions.map((x) => x(locale));
         logger.info(`Generating fun facts (${locale})...`);
         const funFacts = await resolveFactPromises(funFactPromises);
         logger.info(`Generating KMQ facts (${locale})...`);
         const kmqFacts = await resolveFactPromises(kmqFactPromises);
+        logger.info(`Generating news facts (${locale})...`)
+        const newsFacts = await resolveFactPromises(newsFactPromises);
         localeToFactCache[locale] = {
             funFacts: funFacts.filter((facts) => facts.length > 0),
             kmqFacts: kmqFacts.filter((facts) => facts.length > 0),
@@ -185,7 +193,7 @@ export function getFact(guildID: string): string | null {
     return chooseRandom(chooseRandom(factGroup));
 }
 
-async function redditKpopNews(): Promise<string[]> {
+async function redditKpopNews(_: LocaleType): Promise<string[]> {
     const news = await State.redditClient.getRecentPopularPosts();
     return news.map(
         (x) =>
@@ -193,13 +201,13 @@ async function redditKpopNews(): Promise<string[]> {
     );
 }
 
-async function redditKpopDailySummary(): Promise<string[]> {
-    const summary = await State.geminiClient.getDailyPostSummary();
+async function redditKpopDailySummary(lng: LocaleType): Promise<string[]> {
+    const summary = await State.geminiClient.getDailyPostSummaryFact(lng);
     return [summary];
 }
 
-async function redditKpopWeeklySummary(): Promise<string[]> {
-    const summary = await State.geminiClient.getWeeklyPostSummary();
+async function redditKpopWeeklySummary(lng: LocaleType): Promise<string[]> {
+    const summary = await State.geminiClient.getWeeklyPostSummaryFact(lng);
     return [summary];
 }
 

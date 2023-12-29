@@ -1,9 +1,38 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { IPCLogger } from "../logger";
+import { standardDateFormat } from "./utils";
+import LocaleType from "../enums/locale_type";
 import State from "../state";
 import type { GenerativeModel} from "@google/generative-ai";
 
 const logger = new IPCLogger("gemini_client");
+
+enum Interval {
+    DAY = "today",
+    WEEK = "this week",
+}
+
+const getFactPrompt = (posts: Array<Object>, interval: Interval, locale: LocaleType): string => {
+    let prompt = `Give a newscaster summary for 2-3 of the most interesting events for ${interval} in k-pop news, based on the following information. Do not add new information not verifiable from the story. Respond on one line.`
+
+    if (locale !== LocaleType.EN) {
+        prompt += ` Respond in the locale ${locale}`
+    }
+
+    return `${prompt}:\n ${JSON.stringify(posts)}`
+}
+
+const getNewsPrompt = (posts: Array<Object>, interval: Interval, locale: LocaleType): string => {
+    let prompt = `You are Kimiqo, a friendly 23 year old K-pop enthusiast who follows the latest updates in K-pop. You are giving an update on the latest happenings in K-pop for a game called KMQ (K-pop Music Quiz). You will be given a string delimited by |, where each column is: the date, the type of post, and the title of the post. The posts are sorted by significance.  Make sure to address the message to KMQ fans/players, and mention who you are. Limit your response to 250 words, even if it means you have to ignore some of the data.
+
+    Summarize ${interval} in K-pop in paragraph form (multiple paragraphs if needed), from the POV of an excited and preppy K-pop fan. Add a lot of personality to the summary. Use emojis where appropriate.`
+
+    if (locale !== LocaleType.EN) {
+        prompt += ` Respond in the locale ${locale}.`
+    }
+
+    return `${prompt} Data is below.\n:\n ${posts.join("\n")}`
+}
 
 export default class GeminiClient {
     private client: GenerativeModel;
@@ -13,13 +42,38 @@ export default class GeminiClient {
         this.client = genAI.getGenerativeModel({ model: "gemini-pro" })
     }
 
-    async getDailyPostSummary(): Promise<string> {
+    async getDailyPostSummaryFact(locale: LocaleType): Promise<string> {
         try {
             const topDayPosts = (await State.redditClient.getTopDayPosts()).map((x) => ({ title: x.title, link: x.link, date: x.date }));
+            return (await this.client.generateContent(getFactPrompt(topDayPosts, Interval.DAY, locale))).response.text();
+        } catch (e) {
+            logger.error(
+                `Failed to fetch getDailyPostSummaryFact(). e = ${JSON.stringify(
+                    e,
+                )}`,
+            );
+            return "";
+        }
+    }
 
-            const prompt = `Give a newscaster summary for 2-3 of the most interesting events for today in k-pop news, based on the following information. Do not add new information not verifiable from the story. Only report on good news. Respond on one line:\n ${JSON.stringify(topDayPosts)}`
+    async getWeeklyPostSummaryFact(locale: LocaleType): Promise<string> {
+        try {
+            const topWeekPosts = (await State.redditClient.getTopWeekPosts()).map((x) => ({ title: x.title, link: x.link, date: x.date }));
+            return (await this.client.generateContent(getFactPrompt(topWeekPosts, Interval.WEEK, locale))).response.text();
+        } catch (e) {
+            logger.error(
+                `Failed to fetch getWeeklyPostSummaryFact(). e = ${JSON.stringify(
+                    e,
+                )}`,
+            );
+            return "";
+        }
+    }
 
-            return (await this.client.generateContent(prompt)).response.text();
+    async getDailyPostSummary(locale: LocaleType): Promise<string> {
+        try {
+            const topDayPosts = (await State.redditClient.getTopDayPosts()).map((x) => (`${standardDateFormat(x.date)} | ${x.flair} | ${x.title}`));
+            return (await this.client.generateContent(getNewsPrompt(topDayPosts, Interval.DAY, locale))).response.text();
         } catch (e) {
             logger.error(
                 `Failed to fetch getDailyPostSummary(). e = ${JSON.stringify(
@@ -30,13 +84,10 @@ export default class GeminiClient {
         }
     }
 
-    async getWeeklyPostSummary(): Promise<string> {
+    async getWeeklyPostSummary(locale: LocaleType): Promise<string> {
         try {
-            const topWeekPosts = (await State.redditClient.getTopWeekPosts()).map((x) => ({ title: x.title, link: x.link, date: x.date }));
-
-            const prompt = `Give a newscaster summary for 3-5 of the most interesting events for this week in k-pop news, based on the following information. Do not add new information not verifiable from the story. Only report on good news. Respond on one line:\n ${JSON.stringify(topWeekPosts)}`
-
-            return (await this.client.generateContent(prompt)).response.text();
+            const topWeekPosts = (await State.redditClient.getTopWeekPosts()).map((x) => (`${standardDateFormat(x.date)} | ${x.flair} | ${x.title}`));
+            return (await this.client.generateContent(getNewsPrompt(topWeekPosts, Interval.WEEK, locale))).response.text();
         } catch (e) {
             logger.error(
                 `Failed to fetch getWeeklyPostSummary(). e = ${JSON.stringify(

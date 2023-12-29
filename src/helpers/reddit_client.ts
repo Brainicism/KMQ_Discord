@@ -4,6 +4,8 @@ import Snoowrap from "snoowrap";
 
 const logger = new IPCLogger("reddit_client");
 
+// TODO filter out [Song Cover]", "[Live]", "[Variety]", "[Behind-The-Scenes]", "[CF]", "[Audio]", "[Interview]", "[Dance Challenge]", "[Meta]"
+
 export interface KpopNewsRedditPost {
     title: string;
     link: string;

@@ -493,6 +493,23 @@
                 "startGameInstructions": "\nStart the game with {{beginCommand}}."
             }
         },
+        "kmqnews": {
+            "help": {
+                "description": "Get the latest K-pop news from the internet!",
+                "example": {
+                    "get": "See an overview of today's K-pop news",
+                    "subscribe": "Receive a weekly news update in this text channel",
+                    "unsubscribe": "Stop receiving daily news updates in this text channel"
+                },
+                "interaction": {
+                    "range": "The time interval to see news from",
+                    "subscribe": "Sign up to receive news updates in this text channel",
+                    "unsubscribe": "Stop receiving news updates in this text channel"
+                },
+                "name": "kmqnews"
+            },
+            "title": "KMQ News"
+        },
         "language": {
             "help": {
                 "description": "Choose whether songs played should be exclusively in Korean.",

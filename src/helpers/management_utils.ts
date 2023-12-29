@@ -22,6 +22,8 @@ import schedule from "node-schedule";
 import updatePremiumUsers from "./patreon_manager";
 import type LocaleType from "../enums/locale_type";
 import type MatchedArtist from "../interfaces/matched_artist";
+import KmqNewsCommand, { NewsRange } from "../commands/misc_commands/kmqnews";
+import NewsSubscription from "src/interfaces/news_subscription";
 
 const logger = new IPCLogger("management_utils");
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 3, 2, 1]);
@@ -442,11 +444,28 @@ async function reloadBanData(): Promise<void> {
     State.bannedPlayers = new Set(bannedPlayers);
 }
 
+async function registerNewsSubscriptions(): Promise<void> {
+    const subscriptions = await dbContext.kmq.selectFrom("news_subscriptions").selectAll().execute();
+    for (const s of subscriptions) {
+        const subscription: NewsSubscription = {
+            guildID: s.guild_id,
+            textChannelID: s.text_channel_id,
+            range: s.range,
+            createdAt: new Date(s.created_at),
+        }
+
+        KmqNewsCommand.scheduleNewsJob(subscription)
+    }
+}
+
 /**
  * @param clusterID - The cluster ID
  *  Sets up recurring cron-based tasks
  * */
 export function registerIntervals(clusterID: number): void {
+    // Every day/week based on when the subscription was registered
+    registerNewsSubscriptions();
+
     // Everyday at 12am UTC => 7pm EST
     schedule.scheduleJob("0 0 * * *", () => {
         // New bonus groups

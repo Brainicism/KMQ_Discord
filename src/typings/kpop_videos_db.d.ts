@@ -22,6 +22,8 @@ export interface AppKpop {
     promotedviews_yc: Generated<number>;
     promotedweeks: number;
     publishedon: Date;
+    recentlikes: Generated<number>;
+    recentviews: Generated<number>;
     regionlocked: Generated<string>;
     releasedate: Date;
     tags: Generated<string>;
@@ -37,6 +39,16 @@ export interface AppKpopAgrelation {
     id_subgroup: number;
     roles: Generated<string>;
     startyear: number;
+}
+
+export interface AppKpopAlbums {
+    id: number;
+    id_artist: number;
+    id_titletrack: number;
+    name: string;
+    releaseday: number;
+    releasemonth: number;
+    releaseyear: number;
 }
 
 export interface AppKpopCompany {
@@ -104,9 +116,10 @@ export interface AppUpcoming {
     rtype: "album" | "ep" | "single" | "undefined";
 }
 
-export interface KpopVideosDB {
+export interface DB {
     app_kpop: AppKpop;
     app_kpop_agrelation: AppKpopAgrelation;
+    app_kpop_albums: AppKpopAlbums;
     app_kpop_company: AppKpopCompany;
     app_kpop_gaondigi: AppKpopGaondigi;
     app_kpop_group: AppKpopGroup;

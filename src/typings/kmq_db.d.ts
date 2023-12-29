@@ -104,7 +104,7 @@ export interface GameOptionPresetsJson {
 }
 
 export interface GameOptions {
-    client_id: Generated<string>;
+    client_id: string;
     guild_id: string;
     option_name: string;
     option_value: Generated<string | null>;
@@ -216,14 +216,7 @@ export interface TopGgUserVotes {
     user_id: string;
 }
 
-export interface KmqDB {
-    "kpop_videos.app_kpop": AppKpop;
-    "kpop_videos.app_kpop_agrelation": AppKpopAgrelation;
-    "kpop_videos.app_kpop_company": AppKpopCompany;
-    "kpop_videos.app_kpop_gaondigi": AppKpopGaondigi;
-    "kpop_videos.app_kpop_group": AppKpopGroup;
-    "kpop_videos.app_kpop_ms": AppKpopMs;
-    "kpop_videos.app_upcoming": AppUpcoming;
+export interface DB {
     available_songs: AvailableSongs;
     badges: Badges;
     badges_players: BadgesPlayers;
