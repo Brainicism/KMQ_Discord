@@ -282,18 +282,15 @@ export default class KmqNewsCommand implements BaseCommand {
     };
 
     static scheduleNewsJob = (subscription: NewsSubscription): void => {
-        const hours = subscription.createdAt.getHours();
-        const minutes = subscription.createdAt.getMinutes();
         const subscriptionContext = new MessageContext(subscription.textChannelID, null, subscription.guildID)
         const jobName = scheduledJobName(subscription.guildID, subscription.textChannelID, subscription.range)
 
         if (subscription.range === NewsRange.DAY) {
-            schedule.scheduleJob(jobName, `${minutes} ${hours} * * *`, async () => {
+            schedule.scheduleJob(jobName, "0 0 * * *", async () => {
                 await KmqNewsCommand.sendNews(subscriptionContext, subscription.range);
             })
         } else if (subscription.range === NewsRange.WEEK) {
-            const dayOfWeek = subscription.createdAt.getDay();
-            schedule.scheduleJob(jobName, `${minutes} ${hours} * * ${dayOfWeek}`, async () => {
+            schedule.scheduleJob(jobName, "0 0 * * 0", async () => {
                 await KmqNewsCommand.sendNews(subscriptionContext, subscription.range);
             })
         }
