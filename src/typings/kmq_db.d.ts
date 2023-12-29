@@ -104,7 +104,7 @@ export interface GameOptionPresetsJson {
 }
 
 export interface GameOptions {
-    client_id: Generated<string>;
+    client_id: string;
     guild_id: string;
     option_name: string;
     option_value: Generated<string | null>;
@@ -155,6 +155,13 @@ export interface LeaderboardEnrollment {
 export interface Locale {
     guild_id: string;
     locale: string;
+}
+
+export interface NewsSubscriptions {
+    created_at: Date;
+    guild_id: string;
+    range: string;
+    text_channel_id: string;
 }
 
 export interface NotDownloaded {
@@ -219,6 +226,7 @@ export interface TopGgUserVotes {
 export interface KmqDB {
     "kpop_videos.app_kpop": AppKpop;
     "kpop_videos.app_kpop_agrelation": AppKpopAgrelation;
+    "kpop_videos.app_kpop_albums": AppKpopAlbums;
     "kpop_videos.app_kpop_company": AppKpopCompany;
     "kpop_videos.app_kpop_gaondigi": AppKpopGaondigi;
     "kpop_videos.app_kpop_group": AppKpopGroup;
@@ -245,6 +253,7 @@ export interface KmqDB {
     kpop_videos_sql_overrides: KpopVideosSqlOverrides;
     leaderboard_enrollment: LeaderboardEnrollment;
     locale: Locale;
+    news_subscriptions: NewsSubscriptions;
     not_downloaded: NotDownloaded;
     player_game_session_stats: PlayerGameSessionStats;
     player_servers: PlayerServers;

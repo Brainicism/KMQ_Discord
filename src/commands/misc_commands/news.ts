@@ -1,4 +1,3 @@
-// TODO rename this to news.ts
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import { chooseRandom, clickableSlashCommand } from "../../helpers/utils";
