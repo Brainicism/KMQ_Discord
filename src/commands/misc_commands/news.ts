@@ -435,11 +435,7 @@ export default class NewsCommand implements BaseCommand {
 
         const range = interactionOptions[RANGE_OPTION] as NewsRange;
         if (interactionName === Action.SUBSCRIBE) {
-            await NewsCommand.subscribeNews(
-                messageContext,
-                range,
-                interaction,
-            );
+            await NewsCommand.subscribeNews(messageContext, range, interaction);
         } else if (interactionName === Action.UNSUBSCRIBE) {
             await NewsCommand.unsubscribeNews(
                 messageContext,

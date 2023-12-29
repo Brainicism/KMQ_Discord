@@ -461,7 +461,7 @@ async function registerNewsSubscriptions(): Promise<void> {
         const subscription: NewsSubscription = {
             guildID: s.guild_id,
             textChannelID: s.text_channel_id,
-            range: s.range,
+            range: s.range as NewsRange,
             createdAt: new Date(s.created_at),
         };
 
