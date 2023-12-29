@@ -73,8 +73,6 @@ const kmqFactFunctions: Array<(locale: LocaleType) => Promise<string[]>> = [
 
 const newsFactFunctions: Array<(locale: LocaleType) => Promise<string[]>> = [
     redditKpopNews,
-    redditKpopDailySummary,
-    redditKpopWeeklySummary,
 ];
 
 interface FactCache {
@@ -199,16 +197,6 @@ async function redditKpopNews(_: LocaleType): Promise<string[]> {
         (x) =>
             `[${standardDateFormat(x.date)}] ${x.title} [(source)](${x.link})`,
     );
-}
-
-async function redditKpopDailySummary(lng: LocaleType): Promise<string[]> {
-    const summary = await State.geminiClient.getDailyPostSummaryFact(lng);
-    return [summary];
-}
-
-async function redditKpopWeeklySummary(lng: LocaleType): Promise<string[]> {
-    const summary = await State.geminiClient.getWeeklyPostSummaryFact(lng);
-    return [summary];
 }
 
 async function recentMusicVideos(lng: LocaleType): Promise<string[]> {

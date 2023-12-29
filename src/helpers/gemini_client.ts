@@ -12,20 +12,6 @@ enum Interval {
     WEEK = "this week",
 }
 
-const getFactPrompt = (
-    posts: Array<Object>,
-    interval: Interval,
-    locale: LocaleType,
-): string => {
-    let prompt = `Give a newscaster summary for 2-3 of the most interesting events for ${interval} in k-pop news, based on the following information. Do not add new information not verifiable from the story. Respond on one line.`;
-
-    if (locale !== LocaleType.EN) {
-        prompt += ` Respond in the locale ${locale}`;
-    }
-
-    return `${prompt}:\n ${JSON.stringify(posts)}`;
-};
-
 const getNewsPrompt = (
     posts: Array<Object>,
     interval: Interval,
@@ -48,48 +34,6 @@ export default class GeminiClient {
     constructor() {
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
         this.client = genAI.getGenerativeModel({ model: "gemini-pro" });
-    }
-
-    async getDailyPostSummaryFact(locale: LocaleType): Promise<string> {
-        try {
-            const topDayPosts = (await State.redditClient.getTopDayPosts()).map(
-                (x) => ({ title: x.title, link: x.link, date: x.date }),
-            );
-
-            return (
-                await this.client.generateContent(
-                    getFactPrompt(topDayPosts, Interval.DAY, locale),
-                )
-            ).response.text();
-        } catch (e) {
-            logger.error(
-                `Failed to fetch getDailyPostSummaryFact(). e = ${JSON.stringify(
-                    e,
-                )}`,
-            );
-            return "";
-        }
-    }
-
-    async getWeeklyPostSummaryFact(locale: LocaleType): Promise<string> {
-        try {
-            const topWeekPosts = (
-                await State.redditClient.getTopWeekPosts()
-            ).map((x) => ({ title: x.title, link: x.link, date: x.date }));
-
-            return (
-                await this.client.generateContent(
-                    getFactPrompt(topWeekPosts, Interval.WEEK, locale),
-                )
-            ).response.text();
-        } catch (e) {
-            logger.error(
-                `Failed to fetch getWeeklyPostSummaryFact(). e = ${JSON.stringify(
-                    e,
-                )}`,
-            );
-            return "";
-        }
     }
 
     async getDailyPostSummary(locale: LocaleType): Promise<string> {
