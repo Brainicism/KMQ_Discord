@@ -42,10 +42,7 @@ const scheduledJobName = (
 export default class NewsCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: COMMAND_NAME,
-        description: i18n.translate(
-            guildID,
-            "command.news.help.description",
-        ),
+        description: i18n.translate(guildID, "command.news.help.description"),
         examples: [
             {
                 example: `${clickableSlashCommand(COMMAND_NAME)} ${
@@ -294,10 +291,7 @@ export default class NewsCommand implements BaseCommand {
                 ),
                 description: summary,
                 thumbnailUrl: thumbnail,
-                footerText: i18n.translate(
-                    locale,
-                    "command.news.disclaimer",
-                ),
+                footerText: i18n.translate(locale, "command.news.disclaimer"),
             },
             false,
             undefined,
