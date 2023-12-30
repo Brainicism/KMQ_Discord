@@ -137,7 +137,10 @@ export async function cleanupInactiveGameSessions(): Promise<void> {
             const timeDiffMin = timeDiffMs / (1000 * 60);
             if (timeDiffMin > GAME_SESSION_INACTIVE_THRESHOLD) {
                 inactiveSessions++;
-                await gameSessions[guildID].endSession("Inactive game session");
+                await gameSessions[guildID].endSession(
+                    "Inactive game session",
+                    false,
+                );
             }
         }),
     );
@@ -613,16 +616,20 @@ export async function isPremiumRequest(
 export async function isFirstGameOfDay(userID: string): Promise<boolean> {
     const player = await dbContext.kmq
         .selectFrom("player_stats")
-        .select(
+        .select([
             sql<number>`DAYOFYEAR(last_active) = DAYOFYEAR(CURDATE())`.as(
                 "firstGameOfDay",
             ),
-        )
+            "last_game_played_errored",
+        ])
         .where("player_id", "=", userID)
         .executeTakeFirst();
 
     if (!player) return true;
-    return player["firstGameOfDay"] === 0;
+    const isFirstGame = player["firstGameOfDay"] === 0;
+    const lastGameEndedDueError = player["last_game_played_errored"] === 1;
+
+    return lastGameEndedDueError || isFirstGame;
 }
 
 /**

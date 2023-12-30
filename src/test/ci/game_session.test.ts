@@ -145,7 +145,7 @@ describe("game session", () => {
                     "sendEndGameMessage",
                 );
 
-                await gameSession.endSession("Initiated by test");
+                await gameSession.endSession("Initiated by test", false);
                 assert.ok(gameSession.finished);
 
                 assert.ok(sendEndGameMessageStub.called);

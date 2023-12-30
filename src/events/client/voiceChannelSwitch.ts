@@ -36,6 +36,7 @@ export default async function voiceChannelSwitchHandler(
 
         session.endSession(
             "Voice channel is empty, during voice channel switch",
+            false,
         );
         return;
     }

@@ -35,6 +35,7 @@ export default async function voiceChannelLeaveHandler(
 
         session.endSession(
             "Voice channel is empty, during voice channel leave",
+            false,
         );
         return;
     }
