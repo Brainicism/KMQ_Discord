@@ -284,6 +284,7 @@ export default class SpotifyCommand implements BaseCommand {
         const session = Session.getSession(guildID);
         if (reset) {
             await guildPreference.reset(GameOption.SPOTIFY_PLAYLIST_ID);
+            await guildPreference.reset(GameOption.LIMIT);
             logger.info(
                 `${getDebugLogHeader(
                     messageContext,
