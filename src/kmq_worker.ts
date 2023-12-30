@@ -201,7 +201,7 @@ export default class BotWorker extends BaseClusterWorker {
             async (guildID) => {
                 const session = Session.getSession(guildID);
                 logger.debug(`gid: ${guildID} | Forcing session end`);
-                await session.endSession("KMQ shutting down");
+                await session.endSession("KMQ shutting down", true);
             },
         );
 

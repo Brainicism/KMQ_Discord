@@ -1281,7 +1281,10 @@ export default class PlayCommand implements BaseCommand {
 
         // prevent any duplicate game sessions
         if (gameSessions[guildID]) {
-            await gameSessions[guildID].endSession("Duplicate game session");
+            await gameSessions[guildID].endSession(
+                "Duplicate game session",
+                false,
+            );
         }
 
         State.gameSessions[guildID] = gameSession;

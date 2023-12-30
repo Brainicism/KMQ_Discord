@@ -468,15 +468,16 @@ export default class GameSession extends Session {
         this.updateBookmarkSongList(round);
 
         if (this.scoreboard.gameFinished(this.guildPreference)) {
-            this.endSession("Game finished due to game options");
+            this.endSession("Game finished due to game options", false);
         }
     }
 
     /**
      * Ends the current GameSession
      * @param reason - The reason for the game session end
+     * @param endedDueToError - Whether the session ended due to an error
      */
-    async endSession(reason: string): Promise<void> {
+    async endSession(reason: string, endedDueToError: boolean): Promise<void> {
         if (this.finished) {
             return;
         }
@@ -504,6 +505,7 @@ export default class GameSession extends Session {
         // commit player stats
         await Promise.allSettled(
             this.scoreboard.getPlayerIDs().map(async (participant) => {
+                const isFirstGame = await isFirstGameOfDay(participant);
                 await this.ensurePlayerStat(participant);
                 await GameSession.incrementPlayerGamesPlayed(participant);
                 const playerCorrectGuessCount =
@@ -538,6 +540,17 @@ export default class GameSession extends Session {
                         ? levelUpResult.endLevel - levelUpResult.startLevel
                         : 0,
                 );
+
+                // if game ended erroneously during player's FGOTD, mark it as errored to allow
+                // for bonus to continue next game
+                await dbContext.kmq
+                    .updateTable("player_stats")
+                    .where("player_id", "=", participant)
+                    .set({
+                        last_game_played_errored:
+                            isFirstGame && endedDueToError ? 1 : 0,
+                    })
+                    .execute();
             }),
         );
 
@@ -612,7 +625,7 @@ export default class GameSession extends Session {
             await this.storeSongStats();
         }
 
-        await super.endSession(reason);
+        await super.endSession(reason, endedDueToError);
         await this.sendEndGameMessage();
 
         logger.info(

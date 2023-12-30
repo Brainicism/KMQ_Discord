@@ -186,6 +186,7 @@ export interface PlayerStats {
     first_play: Generated<Date>;
     games_played: Generated<number>;
     last_active: Generated<Date>;
+    last_game_played_errored: Generated<number>;
     level: Generated<number>;
     player_id: string;
     songs_guessed: Generated<number>;

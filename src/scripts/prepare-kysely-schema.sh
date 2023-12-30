@@ -54,6 +54,6 @@ echo Merging schemas...
 merge_schemas
 
 echo Running prettier...
-prettier --write 'src/typings/**/*.{js,ts}'
+npx prettier --write 'src/typings/**/*.{js,ts}'
 
 echo Done!

@@ -207,6 +207,7 @@ export default async function messageCreateHandler(
                 if (newSession) {
                     await newSession.endSession(
                         "Unknown error during command invocation, cleaning up",
+                        true,
                     );
                 }
             }

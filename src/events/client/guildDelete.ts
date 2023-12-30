@@ -65,5 +65,5 @@ export default async function guildDeleteHandler(
         );
     }
 
-    await Session.getSession(guild.id)?.endSession("Guild left");
+    await Session.getSession(guild.id)?.endSession("Guild left", false);
 }
