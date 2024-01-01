@@ -8,7 +8,7 @@ import { getNewConnection } from "../database_context";
 import path from "path";
 import type { DatabaseContext } from "../database_context";
 
-const logger = new IPCLogger("messageCreate");
+const logger = new IPCLogger("migrate_down");
 
 function getChoice(): Promise<string> {
     const rl = readline.createInterface({
