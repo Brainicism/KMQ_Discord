@@ -1,7 +1,9 @@
-import { FileMigrationProvider, Migrator, NO_MIGRATIONS } from "kysely";
+/* eslint-disable no-console */
+
+import * as readline from "readline";
+import { FileMigrationProvider, Migrator } from "kysely";
 import { IPCLogger } from "../logger";
 import { promises as fsp } from "fs";
-import * as readline from "readline";
 import { getNewConnection } from "../database_context";
 import path from "path";
 import type { DatabaseContext } from "../database_context";
@@ -14,12 +16,12 @@ function getChoice(): Promise<string> {
         output: process.stdout,
     });
 
-    return new Promise((resolve) =>
+    return new Promise((resolve) => {
         rl.question("Select a choice:\n", (ans) => {
             rl.close();
             resolve(ans);
-        }),
-    );
+        });
+    });
 }
 
 async function performMigrationDown(db: DatabaseContext): Promise<void> {
@@ -43,6 +45,7 @@ async function performMigrationDown(db: DatabaseContext): Promise<void> {
             currentMigrations.length - 2
         }): `,
     );
+
     console.log(
         currentMigrations
             .map(
@@ -55,7 +58,11 @@ async function performMigrationDown(db: DatabaseContext): Promise<void> {
     );
 
     const choice = Number(await getChoice());
-    if (isNaN(choice) || choice < 0 || choice > currentMigrations.length - 2) {
+    if (
+        Number.isNaN(choice) ||
+        choice < 0 ||
+        choice > currentMigrations.length - 2
+    ) {
         console.error("Invalid choice");
         process.exit(1);
     }
