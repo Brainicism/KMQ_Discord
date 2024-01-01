@@ -1,16 +1,30 @@
-import { FileMigrationProvider, Migrator, NO_MIGRATIONS } from "kysely";
+/* eslint-disable no-console */
+
+import * as readline from "readline";
+import { FileMigrationProvider, Migrator } from "kysely";
 import { IPCLogger } from "../logger";
 import { promises as fsp } from "fs";
 import { getNewConnection } from "../database_context";
 import path from "path";
 import type { DatabaseContext } from "../database_context";
 
-const logger = new IPCLogger("messageCreate");
+const logger = new IPCLogger("migrate_down");
 
-async function performMigrationDown(
-    db: DatabaseContext,
-    migrationName: string | undefined,
-): Promise<void> {
+function getChoice(): Promise<string> {
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+    });
+
+    return new Promise((resolve) => {
+        rl.question("Select a choice:\n", (ans) => {
+            rl.close();
+            resolve(ans);
+        });
+    });
+}
+
+async function performMigrationDown(db: DatabaseContext): Promise<void> {
     logger.info("Performing migrations (down)...");
     const migrator = new Migrator({
         db: db.kmq,
@@ -22,8 +36,44 @@ async function performMigrationDown(
         }),
     });
 
+    const currentMigrations = (await migrator.getMigrations()).filter(
+        (x) => x.executedAt,
+    );
+
+    console.log(
+        `Select a migration to migrate down to (0 - ${
+            currentMigrations.length - 2
+        }): `,
+    );
+
+    console.log(
+        currentMigrations
+            .map(
+                (x, i) =>
+                    `(${
+                        i === currentMigrations.length - 1 ? "CURRENT" : i
+                    }) | ${x.executedAt!.toISOString()} | ${x.name} `,
+            )
+            .join("\n"),
+    );
+
+    const choice = Number(await getChoice());
+    if (
+        Number.isNaN(choice) ||
+        choice < 0 ||
+        choice > currentMigrations.length - 2
+    ) {
+        console.error("Invalid choice");
+        process.exit(1);
+    }
+
+    const selectedRollbackMigration = currentMigrations[choice];
+    console.log(
+        `Selected migration rollback: ${selectedRollbackMigration.name}`,
+    );
+
     const { error, results } = await migrator.migrateTo(
-        migrationName === undefined ? NO_MIGRATIONS : migrationName,
+        selectedRollbackMigration.name,
     );
 
     for (const result of results || []) {
@@ -45,18 +95,8 @@ async function performMigrationDown(
 
 (async () => {
     if (require.main === module) {
-        const args = process.argv.slice(2);
-        const migrationName = args[0];
-        if (!migrationName) {
-            logger.error("Target migration not specified");
-            process.exit(1);
-        }
-
         const db = getNewConnection();
-        await performMigrationDown(
-            db,
-            migrationName === "EMPTY" ? undefined : migrationName,
-        );
+        await performMigrationDown(db);
         await db.destroy();
     }
 })();
