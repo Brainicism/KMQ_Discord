@@ -4,14 +4,31 @@ import Snoowrap from "snoowrap";
 
 const logger = new IPCLogger("reddit_client");
 
-// TODO filter out [Song Cover]", "[Live]", "[Variety]", "[Behind-The-Scenes]", "[CF]", "[Audio]", "[Interview]", "[Dance Challenge]", "[Meta]"
-
 export interface KpopNewsRedditPost {
     title: string;
     link: string;
     date: Date;
     flair: string;
 }
+
+// TODO filter out [Song Cover]", "[Live]", "[Variety]", "[Behind-The-Scenes]", "[CF]", "[Audio]", "[Interview]", "[Dance Challenge]", "[Meta]"
+
+const generateFilteredQuery = (): string => {
+    const filters = [
+        "Song Cover",
+        "Live",
+        "Variety",
+        "Behind-The-Scenes",
+        "CF",
+        "Audio",
+        "Interview",
+        "Dance Challenge",
+        "Meta",
+    ];
+
+    const flairedFilters = filters.map((x) => `flair:'${x}'`);
+    return `NOT (${flairedFilters.join(" OR ")})`;
+};
 
 export class RedditClient {
     private client: Snoowrap;
@@ -61,7 +78,10 @@ export class RedditClient {
 
     async getTopDayPosts(): Promise<Array<KpopNewsRedditPost>> {
         try {
-            const matchingPosts = await this.client.getTop("kpop", {
+            const matchingPosts = await this.client.search({
+                subreddit: "kpop",
+                query: generateFilteredQuery(),
+                sort: "top",
                 time: "day",
             });
 
@@ -84,7 +104,10 @@ export class RedditClient {
 
     async getTopWeekPosts(): Promise<Array<KpopNewsRedditPost>> {
         try {
-            const matchingPosts = await this.client.getTop("kpop", {
+            const matchingPosts = await this.client.search({
+                subreddit: "kpop",
+                query: generateFilteredQuery(),
+                sort: "top",
                 time: "week",
             });
 
