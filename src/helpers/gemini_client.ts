@@ -43,11 +43,20 @@ export default class GeminiClient {
                     `${standardDateFormat(x.date)} | ${x.flair} | ${x.title}`,
             );
 
-            return (
-                await this.client.generateContent(
-                    getNewsPrompt(topDayPosts, Interval.DAY, locale),
-                )
-            ).response.text();
+            const generatedContent = await this.client.generateContent(
+                getNewsPrompt(topDayPosts, Interval.DAY, locale),
+            );
+
+            const text = generatedContent.response.text();
+            if (text === "") {
+                logger.warn(
+                    `Failed to generate text for getDailyPostSummary(). generatedContent = ${JSON.stringify(
+                        generatedContent,
+                    )}. topDayPosts = ${topDayPosts}`,
+                );
+            }
+
+            return text;
         } catch (e) {
             logger.error(
                 `Failed to fetch getDailyPostSummary(). e = ${JSON.stringify(
@@ -67,11 +76,20 @@ export default class GeminiClient {
                     `${standardDateFormat(x.date)} | ${x.flair} | ${x.title}`,
             );
 
-            return (
-                await this.client.generateContent(
-                    getNewsPrompt(topWeekPosts, Interval.WEEK, locale),
-                )
-            ).response.text();
+            const generatedContent = await this.client.generateContent(
+                getNewsPrompt(topWeekPosts, Interval.WEEK, locale),
+            );
+
+            const text = generatedContent.response.text();
+            if (text === "") {
+                logger.warn(
+                    `Failed to generate text for getWeeklyPostSummary(). generatedContent = ${JSON.stringify(
+                        generatedContent,
+                    )}. topWeekPosts = ${topWeekPosts}`,
+                );
+            }
+
+            return text;
         } catch (e) {
             logger.error(
                 `Failed to fetch getWeeklyPostSummary(). e = ${JSON.stringify(
