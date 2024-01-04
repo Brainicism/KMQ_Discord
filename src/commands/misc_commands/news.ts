@@ -242,6 +242,7 @@ export default class NewsCommand implements BaseCommand {
     static sendNews = async (
         messageContext: MessageContext,
         range: NewsRange,
+        scheduled: boolean,
         interaction?: Eris.CommandInteraction,
     ): Promise<void> => {
         const locale = State.getGuildLocale(messageContext.guildID);
@@ -254,18 +255,24 @@ export default class NewsCommand implements BaseCommand {
                 )} | Error sending news due to missing entry. range = ${range}. locale = ${locale}`,
             );
 
-            await sendErrorMessage(
-                messageContext,
-                {
-                    title: i18n.translate(locale, "command.news.error.title"),
-                    description: i18n.translate(
-                        locale,
-                        "command.news.error.description",
-                    ),
-                    thumbnailUrl: KmqImages.DEAD,
-                },
-                interaction,
-            );
+            if (!scheduled) {
+                // Don't send an error message for subscriptions
+                await sendErrorMessage(
+                    messageContext,
+                    {
+                        title: i18n.translate(
+                            locale,
+                            "command.news.error.title",
+                        ),
+                        description: i18n.translate(
+                            locale,
+                            "command.news.error.description",
+                        ),
+                        thumbnailUrl: KmqImages.DEAD,
+                    },
+                    interaction,
+                );
+            }
 
             return;
         }
@@ -395,7 +402,12 @@ export default class NewsCommand implements BaseCommand {
                 interaction,
             );
         } else if (interactionName === Action.GET) {
-            await NewsCommand.sendNews(messageContext, range, interaction);
+            await NewsCommand.sendNews(
+                messageContext,
+                range,
+                false,
+                interaction,
+            );
         }
     }
 }

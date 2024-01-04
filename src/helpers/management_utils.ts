@@ -477,7 +477,11 @@ async function sendNewsNotifications(newsRange: NewsRange): Promise<void> {
                 subscription.guildID,
             );
 
-            await NewsCommand.sendNews(subscriptionContext, subscription.range);
+            await NewsCommand.sendNews(
+                subscriptionContext,
+                subscription.range,
+                true,
+            );
         }),
     );
 }
