@@ -451,22 +451,35 @@ async function reloadBanData(): Promise<void> {
     State.bannedPlayers = new Set(bannedPlayers);
 }
 
-async function reloadNewsSubscriptions(): Promise<void> {
+async function sendNewsNotifications(newsRange: NewsRange): Promise<void> {
     const subscriptions = await dbContext.kmq
         .selectFrom("news_subscriptions")
         .selectAll()
+        .where("range", "=", newsRange)
         .execute();
 
-    for (const s of subscriptions) {
-        const subscription: NewsSubscription = {
-            guildID: s.guild_id,
-            textChannelID: s.text_channel_id,
-            range: s.range as NewsRange,
-            createdAt: new Date(s.created_at),
-        };
+    logger.info(
+        `Sending ${newsRange} news notifications to ${subscriptions.length} channels`,
+    );
 
-        NewsCommand.scheduleNewsJob(subscription);
-    }
+    await Promise.allSettled(
+        subscriptions.map(async (s) => {
+            const subscription: NewsSubscription = {
+                guildID: s.guild_id,
+                textChannelID: s.text_channel_id,
+                range: s.range as NewsRange,
+                createdAt: new Date(s.created_at),
+            };
+
+            const subscriptionContext = new MessageContext(
+                subscription.textChannelID,
+                null,
+                subscription.guildID,
+            );
+
+            await NewsCommand.sendNews(subscriptionContext, subscription.range);
+        }),
+    );
 }
 
 async function reloadNews(): Promise<void> {
@@ -527,7 +540,19 @@ async function reloadNews(): Promise<void> {
  *  Sets up recurring cron-based tasks
  * */
 export function registerIntervals(clusterID: number): void {
-    // Everyday at 12am UTC => 7pm EST
+    // Every month on the 1st at 2am UTC => 9pm ET
+    schedule.scheduleJob("0 2 1 * *", () => {
+        // Send monthly news notifications, one hour after weekly news notifications
+        sendNewsNotifications(NewsRange.MONTH);
+    });
+
+    // Every week on Sunday at 1am UTC => 8pm ET
+    schedule.scheduleJob("0 1 * * 0", () => {
+        // Send weekly news notifications, one hour after daily news notifications
+        sendNewsNotifications(NewsRange.WEEK);
+    });
+
+    // Everyday at 12am UTC => 7pm ET
     schedule.scheduleJob("0 0 * * *", () => {
         // New bonus groups
         reloadBonusGroups();
@@ -537,6 +562,8 @@ export function registerIntervals(clusterID: number): void {
         reloadSongs();
         // Removed cached Spotify playlists
         clearCachedSpotifyPlaylists();
+        // Send daily news notifications
+        sendNewsNotifications(NewsRange.DAY);
     });
 
     // every 6 hours
@@ -611,5 +638,4 @@ export function reloadCaches(): void {
     reloadSongs();
     reloadBanData();
     reloadNews();
-    reloadNewsSubscriptions();
 }

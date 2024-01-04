@@ -11,6 +11,7 @@ const logger = new IPCLogger("gemini_client");
 enum PromptInterval {
     DAY = "today",
     WEEK = "this week",
+    MONTH = "this month",
 }
 
 const newsRangeToPromptInterval = (newsRange: NewsRange): PromptInterval => {
@@ -19,6 +20,8 @@ const newsRangeToPromptInterval = (newsRange: NewsRange): PromptInterval => {
             return PromptInterval.DAY;
         case NewsRange.WEEK:
             return PromptInterval.WEEK;
+        case NewsRange.MONTH:
+            return PromptInterval.MONTH;
         default:
             throw new Error(`Invalid newsRange: ${newsRange}`);
     }

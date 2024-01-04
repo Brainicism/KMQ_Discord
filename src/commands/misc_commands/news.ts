@@ -15,7 +15,6 @@ import NewsRange from "../../enums/news_range";
 import State from "../../state";
 import dbContext from "../../database_context";
 import i18n from "../../helpers/localization_manager";
-import schedule from "node-schedule";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -32,12 +31,6 @@ const RANGE_OPTION = "range";
 
 const COMMAND_NAME = "news";
 const logger = new IPCLogger(COMMAND_NAME);
-
-const scheduledJobName = (
-    guildID: string,
-    textChannelID: string,
-    range: NewsRange,
-): string => `${guildID}-${textChannelID}-${range}`;
 
 export default class NewsCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
@@ -302,36 +295,6 @@ export default class NewsCommand implements BaseCommand {
         );
     };
 
-    static scheduleNewsJob = (subscription: NewsSubscription): void => {
-        const subscriptionContext = new MessageContext(
-            subscription.textChannelID,
-            null,
-            subscription.guildID,
-        );
-
-        const jobName = scheduledJobName(
-            subscription.guildID,
-            subscription.textChannelID,
-            subscription.range,
-        );
-
-        if (subscription.range === NewsRange.DAY) {
-            schedule.scheduleJob(jobName, "0 0 * * *", async () => {
-                await NewsCommand.sendNews(
-                    subscriptionContext,
-                    subscription.range,
-                );
-            });
-        } else if (subscription.range === NewsRange.WEEK) {
-            schedule.scheduleJob(jobName, "0 0 * * 0", async () => {
-                await NewsCommand.sendNews(
-                    subscriptionContext,
-                    subscription.range,
-                );
-            });
-        }
-    };
-
     static subscribeNews = async (
         messageContext: MessageContext,
         range: NewsRange,
@@ -359,8 +322,6 @@ export default class NewsCommand implements BaseCommand {
                 created_at: subscription.createdAt,
             })
             .execute();
-
-        this.scheduleNewsJob(subscription);
 
         await sendInfoMessage(
             messageContext,
@@ -404,14 +365,6 @@ export default class NewsCommand implements BaseCommand {
             undefined,
             [],
             interaction,
-        );
-
-        schedule.cancelJob(
-            scheduledJobName(
-                messageContext.guildID,
-                messageContext.textChannelID,
-                range,
-            ),
         );
 
         await dbContext.kmq
