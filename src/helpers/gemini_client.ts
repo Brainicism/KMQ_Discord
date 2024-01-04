@@ -37,7 +37,7 @@ const getNewsPrompt = (
     Summarize ${interval} in K-pop in paragraph form (multiple paragraphs if needed), from the POV of an excited and preppy K-pop fan. Add a lot of personality to the summary. Use emojis where appropriate.`;
 
     if (locale !== LocaleType.EN) {
-        prompt += ` Respond in the locale ${locale}.`;
+        prompt += ` Respond in the locale: ${locale}.`;
     }
 
     return `${prompt} Data is below.\n:\n ${posts.join("\n")}\n`;
