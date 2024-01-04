@@ -1,6 +1,7 @@
 import { IPCLogger } from "../logger";
 import { KMQ_USER_AGENT } from "../constants";
 import Snoowrap from "snoowrap";
+import type NewsRange from "src/enums/news_range";
 
 const logger = new IPCLogger("reddit_client");
 
@@ -10,8 +11,6 @@ export interface KpopNewsRedditPost {
     date: Date;
     flair: string;
 }
-
-// TODO filter out [Song Cover]", "[Live]", "[Variety]", "[Behind-The-Scenes]", "[CF]", "[Audio]", "[Interview]", "[Dance Challenge]", "[Meta]"
 
 const generateFilteredQuery = (): string => {
     const filters = [
@@ -76,16 +75,18 @@ export class RedditClient {
         }
     }
 
-    async getTopDayPosts(): Promise<Array<KpopNewsRedditPost>> {
+    async getTopPosts(interval: NewsRange): Promise<Array<KpopNewsRedditPost>> {
         try {
             const matchingPosts = await this.client.search({
                 subreddit: "kpop",
                 query: generateFilteredQuery(),
                 sort: "top",
-                time: "day",
+                time: interval,
             });
 
-            const popularPosts = matchingPosts.filter((x) => x.score > 100);
+            const popularPosts = matchingPosts
+                .filter((x) => x.score > 100)
+                .slice(0, 25);
 
             return popularPosts.map((x) => ({
                 title: x.title,
@@ -97,32 +98,6 @@ export class RedditClient {
         } catch (e) {
             logger.error(
                 `Failed to fetch getTopDayPosts(). e = ${JSON.stringify(e)}`,
-            );
-            return [];
-        }
-    }
-
-    async getTopWeekPosts(): Promise<Array<KpopNewsRedditPost>> {
-        try {
-            const matchingPosts = await this.client.search({
-                subreddit: "kpop",
-                query: generateFilteredQuery(),
-                sort: "top",
-                time: "week",
-            });
-
-            const popularPosts = matchingPosts.filter((x) => x.score > 100);
-
-            return popularPosts.map((x) => ({
-                title: x.title,
-                link: `https://reddit.com${x.permalink}`,
-                date: new Date(x.created_utc * 1000),
-                flair: x.link_flair_css_class as string,
-                x: Date.now() - new Date(x.created_utc * 1000).getTime(),
-            }));
-        } catch (e) {
-            logger.error(
-                `Failed to fetch getTopWeekPosts(). e = ${JSON.stringify(e)}`,
             );
             return [];
         }

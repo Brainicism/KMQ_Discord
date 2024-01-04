@@ -771,7 +771,15 @@
                 },
                 "name": "ニュース"
             },
-            "title": "KMQニュース"
+            "subscribe": {
+                "description": "このテキストチャンネルでニュースの更新情報を受け取るようになります。",
+                "title": "KMQ ニュースに登録"
+            },
+            "title": "KMQ ニュース",
+            "unsubscribe": {
+                "description": "このテキストチャンネルでのニュースの更新情報の受信が停止されます。",
+                "title": "KMQ ニュースの登録解除"
+            }
         },
         "options": {
             "duration": "{{durationInMinutes}}分",

@@ -451,7 +451,7 @@ async function reloadBanData(): Promise<void> {
     State.bannedPlayers = new Set(bannedPlayers);
 }
 
-async function registerNewsSubscriptions(): Promise<void> {
+async function reloadNewsSubscriptions(): Promise<void> {
     const subscriptions = await dbContext.kmq
         .selectFrom("news_subscriptions")
         .selectAll()
@@ -470,24 +470,21 @@ async function registerNewsSubscriptions(): Promise<void> {
 }
 
 async function reloadNews(): Promise<void> {
+    if (!process.env.GEMINI_API_KEY) {
+        return;
+    }
+
     await Promise.allSettled(
         Object.values(LocaleType).map(async (locale) => {
             await Promise.allSettled(
                 Object.values(NewsRange).map(async (range) => {
                     await retryJob<void | Error>(
                         async () => {
-                            let summary: string;
-                            if (range === NewsRange.DAY) {
-                                summary =
-                                    await State.geminiClient.getDailyPostSummary(
-                                        locale,
-                                    );
-                            } else {
-                                summary =
-                                    await State.geminiClient.getWeeklyPostSummary(
-                                        locale,
-                                    );
-                            }
+                            const summary =
+                                await State.geminiClient.getPostSummary(
+                                    locale,
+                                    range,
+                                );
 
                             if (summary === "") {
                                 logger.error(
@@ -496,6 +493,14 @@ async function reloadNews(): Promise<void> {
                                 return Promise.reject(
                                     new Error(
                                         `Error generating news for ${locale} ${range}`,
+                                    ),
+                                );
+                            }
+
+                            if (summary.length < 500 || summary.length > 4096) {
+                                return Promise.reject(
+                                    new Error(
+                                        `Received abnormally sized news entry for ${locale} ${range}. length = ${summary.length}`,
                                     ),
                                 );
                             }
@@ -522,9 +527,6 @@ async function reloadNews(): Promise<void> {
  *  Sets up recurring cron-based tasks
  * */
 export function registerIntervals(clusterID: number): void {
-    // Every day/week based on when the subscription was registered
-    registerNewsSubscriptions();
-
     // Everyday at 12am UTC => 7pm EST
     schedule.scheduleJob("0 0 * * *", () => {
         // New bonus groups
@@ -609,4 +611,5 @@ export function reloadCaches(): void {
     reloadSongs();
     reloadBanData();
     reloadNews();
+    reloadNewsSubscriptions();
 }

@@ -2,19 +2,31 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { IPCLogger } from "../logger";
 import { standardDateFormat } from "./utils";
 import LocaleType from "../enums/locale_type";
+import NewsRange from "../enums/news_range";
 import State from "../state";
 import type { GenerativeModel } from "@google/generative-ai";
 
 const logger = new IPCLogger("gemini_client");
 
-enum Interval {
+enum PromptInterval {
     DAY = "today",
     WEEK = "this week",
 }
 
+const newsRangeToPromptInterval = (newsRange: NewsRange): PromptInterval => {
+    switch (newsRange) {
+        case NewsRange.DAY:
+            return PromptInterval.DAY;
+        case NewsRange.WEEK:
+            return PromptInterval.WEEK;
+        default:
+            throw new Error(`Invalid newsRange: ${newsRange}`);
+    }
+};
+
 const getNewsPrompt = (
     posts: Array<Object>,
-    interval: Interval,
+    interval: PromptInterval,
     locale: LocaleType,
 ): string => {
     let prompt = `You are Kimiqo, a friendly 23 year old K-pop enthusiast who follows the latest updates in K-pop. You are giving an update on the latest happenings in K-pop for a game called KMQ (K-pop Music Quiz). You will be given a string delimited by |, where each column is: the date, the type of post, and the title of the post. The posts are sorted by priority/significance.  Make sure to address the message to KMQ fans/players, and mention who you are. Limit your response to 250 words, even if it means you have to ignore some of the data.
@@ -25,7 +37,7 @@ const getNewsPrompt = (
         prompt += ` Respond in the locale ${locale}.`;
     }
 
-    return `${prompt} Data is below.\n:\n ${posts.join("\n")}`;
+    return `${prompt} Data is below.\n:\n ${posts.join("\n")}\n`;
 };
 
 export default class GeminiClient {
@@ -36,65 +48,39 @@ export default class GeminiClient {
         this.client = genAI.getGenerativeModel({ model: "gemini-pro" });
     }
 
-    async getDailyPostSummary(locale: LocaleType): Promise<string> {
+    async getPostSummary(
+        locale: LocaleType,
+        newsRange: NewsRange,
+    ): Promise<string> {
         try {
-            const topDayPosts = (await State.redditClient.getTopDayPosts()).map(
-                (x) =>
-                    `${standardDateFormat(x.date)} | ${x.flair} | ${x.title}`,
-            );
-
-            const generatedContent = await this.client.generateContent(
-                getNewsPrompt(topDayPosts, Interval.DAY, locale),
-            );
-
-            const text = generatedContent.response.text();
-            if (text === "") {
-                logger.warn(
-                    `Failed to generate text for getDailyPostSummary(). generatedContent = ${JSON.stringify(
-                        generatedContent,
-                    )}. topDayPosts = ${topDayPosts}`,
-                );
-            }
-
-            return text;
-        } catch (e) {
-            logger.error(
-                `Failed to fetch getDailyPostSummary(). e = ${JSON.stringify(
-                    e,
-                )}`,
-            );
-            return "";
-        }
-    }
-
-    async getWeeklyPostSummary(locale: LocaleType): Promise<string> {
-        try {
-            const topWeekPosts = (
-                await State.redditClient.getTopWeekPosts()
+            const topPosts = (
+                await State.redditClient.getTopPosts(newsRange)
             ).map(
                 (x) =>
                     `${standardDateFormat(x.date)} | ${x.flair} | ${x.title}`,
             );
 
-            const generatedContent = await this.client.generateContent(
-                getNewsPrompt(topWeekPosts, Interval.WEEK, locale),
+            const prompt = getNewsPrompt(
+                topPosts,
+                newsRangeToPromptInterval(newsRange),
+                locale,
             );
+
+            const generatedContent = await this.client.generateContent(prompt);
 
             const text = generatedContent.response.text();
             if (text === "") {
-                logger.warn(
-                    `Failed to generate text for getWeeklyPostSummary(). generatedContent = ${JSON.stringify(
+                throw new Error(
+                    `Failed to generate text for getPostSummary(). generatedContent = ${JSON.stringify(
                         generatedContent,
-                    )}. topWeekPosts = ${topWeekPosts}`,
+                    )}. prompt = ${prompt}`,
                 );
             }
 
             return text;
         } catch (e) {
             logger.error(
-                `Failed to fetch getWeeklyPostSummary(). e = ${JSON.stringify(
-                    e,
-                )}`,
+                `Failed to fetch getPostSummary(). locale = ${locale}. newsRange = ${newsRange}. e = ${e}`,
             );
             return "";
         }

@@ -252,26 +252,27 @@ export default class NewsCommand implements BaseCommand {
         interaction?: Eris.CommandInteraction,
     ): Promise<void> => {
         const locale = State.getGuildLocale(messageContext.guildID);
-
-        let summary: string;
-        try {
-            summary = State.news[range][locale];
-        } catch (err) {
+        const summary = State.news[range][locale];
+        if (!summary) {
             // Failed to generate news since startup
             logger.error(
-                `${getDebugLogHeader(messageContext)} | Error sending news: ${
-                    err.message
-                }`,
+                `${getDebugLogHeader(
+                    messageContext,
+                )} | Error sending news due to missing entry. range = ${range}. locale = ${locale}`,
             );
 
-            await sendErrorMessage(messageContext, {
-                title: i18n.translate(locale, "command.news.error.title"),
-                description: i18n.translate(
-                    locale,
-                    "command.news.error.description",
-                ),
-                thumbnailUrl: KmqImages.DEAD,
-            });
+            await sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(locale, "command.news.error.title"),
+                    description: i18n.translate(
+                        locale,
+                        "command.news.error.description",
+                    ),
+                    thumbnailUrl: KmqImages.DEAD,
+                },
+                interaction,
+            );
 
             return;
         }
@@ -285,10 +286,7 @@ export default class NewsCommand implements BaseCommand {
         await sendInfoMessage(
             messageContext,
             {
-                title: i18n.translate(
-                    messageContext.guildID,
-                    "command.news.title",
-                ),
+                title: i18n.translate(locale, "command.news.title"),
                 description: summary,
                 thumbnailUrl: thumbnail,
                 footerText: i18n.translate(locale, "command.news.disclaimer"),
@@ -364,18 +362,24 @@ export default class NewsCommand implements BaseCommand {
 
         this.scheduleNewsJob(subscription);
 
-        await sendInfoMessage(messageContext, {
-            title: i18n.translate(
-                messageContext.guildID,
-                "command.news.subscribe.title",
-            ),
-            description: i18n.translate(
-                messageContext.guildID,
-                "command.news.subscribe.description",
-            ),
-        });
-
-        await this.sendNews(messageContext, range, interaction);
+        await sendInfoMessage(
+            messageContext,
+            {
+                title: i18n.translate(
+                    messageContext.guildID,
+                    "command.news.subscribe.title",
+                ),
+                description: i18n.translate(
+                    messageContext.guildID,
+                    "command.news.subscribe.description",
+                ),
+                thumbnailUrl: KmqImages.THUMBS_UP,
+            },
+            false,
+            undefined,
+            [],
+            interaction,
+        );
     };
 
     static unsubscribeNews = async (
@@ -394,6 +398,7 @@ export default class NewsCommand implements BaseCommand {
                     messageContext.guildID,
                     "command.news.unsubscribe.description",
                 ),
+                thumbnailUrl: KmqImages.DEAD,
             },
             false,
             undefined,

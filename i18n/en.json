@@ -771,7 +771,15 @@
                 },
                 "name": "news"
             },
-            "title": "KMQ News"
+            "subscribe": {
+                "description": "You will now receive news updates in this text channel.",
+                "title": "Subscribed to KMQ News"
+            },
+            "title": "KMQ News",
+            "unsubscribe": {
+                "description": "You will no longer receive news updates in this text channel.",
+                "title": "Unsubscribed to KMQ News"
+            }
         },
         "options": {
             "duration": "{{durationInMinutes}} mins",

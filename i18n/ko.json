@@ -771,7 +771,15 @@
                 },
                 "name": "뉴스"
             },
-            "title": "KMQ 뉴스"
+            "subscribe": {
+                "description": "이제 이 텍스트 채널에서 뉴스 업데이트를 받게 됩니다.",
+                "title": "KMQ 뉴스 구독"
+            },
+            "title": "KMQ 뉴스",
+            "unsubscribe": {
+                "description": "이제 이 텍스트 채널에서 뉴스 업데이트를 받지 않게 됩니다.",
+                "title": "KMQ 뉴스 구독 해지"
+            }
         },
 
         "options": {

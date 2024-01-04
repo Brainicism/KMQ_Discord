@@ -771,7 +771,15 @@
                 },
                 "name": "新闻"
             },
-            "title": "KMQ新闻"
+            "subscribe": {
+                "description": "您现在将在此文本频道接收新闻更新。",
+                "title": "订阅KMQ新闻"
+            },
+            "title": "KMQ新闻",
+            "unsubscribe": {
+                "description": "您将不再在此文本频道接收新闻更新。",
+                "title": "取消订阅KMQ新闻"
+            }
         },
         "options": {
             "duration": "{{durationInMinutes}} 分钟",

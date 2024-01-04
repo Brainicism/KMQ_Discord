@@ -771,7 +771,15 @@
                 },
                 "name": "nouvelles"
             },
-            "title": "Nouvelles KMQ"
+            "subscribe": {
+                "description": "Vous recevrez désormais des mises à jour des actualités dans ce canal de texte.",
+                "title": "Abonné aux Nouvelles KMQ"
+            },
+            "title": "Nouvelles KMQ",
+            "unsubscribe": {
+                "description": "Vous ne recevrez plus de mises à jour des actualités dans ce canal de texte.",
+                "title": "Désabonné aux Nouvelles KMQ"
+            }
         },
         "options": {
             "duration": "{{durationInMinutes}} min",
