@@ -780,16 +780,16 @@
                     "title": "Already Subscribed"
                 },
                 "description": "You will now receive {{interval}} news updates in this text channel.",
-                "title": "Subscribed to KMQ News"
+                "title": "Subscribed to Kimiqo News Network"
             },
-            "title": "KMQ News",
+            "title": "Kimiqo News Network",
             "unsubscribe": {
                 "description": "You will no longer receive {{interval}} news updates in this text channel.",
                 "notSubscribed": {
                     "description": "You are not subscribed to {{interval}} news updates in this text channel.",
                     "title": "Not Subscribed"
                 },
-                "title": "Unsubscribed to KMQ News"
+                "title": "Unsubscribed from Kimiqo News Network"
             }
         },
         "options": {

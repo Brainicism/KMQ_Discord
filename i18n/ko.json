@@ -780,16 +780,16 @@
                     "title": "이미 구독 중"
                 },
                 "description": "이제 이 텍스트 채널에서 {{interval}} 뉴스 업데이트를 받게 됩니다.",
-                "title": "KMQ 뉴스 구독"
+                "title": "키미코 뉴스 네트워크에 구독함"
             },
-            "title": "KMQ 뉴스",
+            "title": "키미코 뉴스 네트워크",
             "unsubscribe": {
                 "description": "이 텍스트 채널에서 {{interval}} 뉴스 업데이트를 더 이상 받지 않습니다.",
                 "notSubscribed": {
                     "description": "이 텍스트 채널에서 {{interval}} 뉴스 업데이트를 구독하지 않았습니다.",
                     "title": "구독하지 않음"
                 },
-                "title": "KMQ 뉴스 구독 취소"
+                "title": "키미코 뉴스 네트워크 구독 취소함"
             }
         },
         "options": {

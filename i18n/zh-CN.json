@@ -780,16 +780,16 @@
                     "title": "已订阅"
                 },
                 "description": "您现在将在此文本频道接收{{interval}}新闻更新。",
-                "title": "已订阅KMQ新闻"
+                "title": "订阅了基米克新闻网络"
             },
-            "title": "KMQ新闻",
+            "title": "基米克新闻网络",
             "unsubscribe": {
                 "description": "您将不再在此文本频道接收{{interval}}新闻更新。",
                 "notSubscribed": {
                     "description": "您未订阅此文本频道的{{interval}}新闻更新。",
                     "title": "未订阅"
                 },
-                "title": "已退订KMQ新闻"
+                "title": "取消订阅基米克新闻网络"
             }
         },
         "options": {

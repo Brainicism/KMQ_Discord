@@ -780,16 +780,16 @@
                     "title": "Déjà Abonné"
                 },
                 "description": "Vous recevrez désormais des mises à jour des actualités {{interval}} dans ce canal de texte.",
-                "title": "Abonné aux Nouvelles KMQ"
+                "title": "Abonné au Réseau d'Informations Kimiqo"
             },
-            "title": "Nouvelles KMQ",
+            "title": "Réseau d'Informations Kimiqo",
             "unsubscribe": {
                 "description": "Vous ne recevrez plus les mises à jour des actualités {{interval}} dans ce canal de texte.",
                 "notSubscribed": {
                     "description": "Vous n'êtes pas abonné aux mises à jour des actualités {{interval}} dans ce canal de texte.",
                     "title": "Non Abonné"
                 },
-                "title": "Désabonné aux Nouvelles KMQ"
+                "title": "Désabonné du Réseau d'Informations Kimiqo"
             }
         },
         "options": {

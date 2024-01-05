@@ -780,16 +780,16 @@
                     "title": "Ya Suscrito"
                 },
                 "description": "Ahora recibirás actualizaciones de noticias {{interval}} en este canal de texto.",
-                "title": "Suscrito a Noticias KMQ"
+                "title": "Suscrito a la Red de Noticias Kimiqo"
             },
-            "title": "Noticias KMQ",
+            "title": "Red de Noticias Kimiqo",
             "unsubscribe": {
                 "description": "Ya no recibirás actualizaciones de noticias {{interval}} en este canal de texto.",
                 "notSubscribed": {
                     "description": "No estás suscrito a las actualizaciones de noticias {{interval}} en este canal de texto.",
                     "title": "No Suscrito"
                 },
-                "title": "Desuscrito a las Noticias de KMQ"
+                "title": "Dado de baja de la Red de Noticias Kimiqo"
             }
         },
         "options": {

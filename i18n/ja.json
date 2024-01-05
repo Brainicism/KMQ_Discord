@@ -780,16 +780,16 @@
                     "title": "既に購読中"
                 },
                 "description": "これからこのテキストチャンネルで{{interval}}のニュース更新を受け取ります。",
-                "title": "KMQニュースに購読"
+                "title": "キミコニュースネットワークに登録しました"
             },
-            "title": "KMQ ニュース",
+            "title": "キミコニュースネットワーク",
             "unsubscribe": {
                 "description": "このテキストチャネルでの{{interval}}ニュース更新をこれ以上受け取りません。",
                 "notSubscribed": {
                     "description": "このテキストチャネルでの{{interval}}ニュース更新に登録していません。",
                     "title": "未登録"
                 },
-                "title": "KMQニュースの購読を解除"
+                "title": "キミコニュースネットワークの登録を解除しました"
             }
         },
         "options": {
