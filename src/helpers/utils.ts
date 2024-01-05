@@ -118,6 +118,9 @@ export function clickableSlashCommand(
             case "lookup":
                 subcommandName = "song_name";
                 break;
+            case "news":
+                subcommandName = "daily";
+                break;
             default:
                 break;
         }

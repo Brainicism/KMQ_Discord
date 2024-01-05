@@ -40,27 +40,27 @@ export default class NewsCommand implements BaseCommand {
         description: i18n.translate(guildID, "command.news.help.description"),
         examples: [
             {
-                example: `${clickableSlashCommand(COMMAND_NAME)} ${
-                    Action.DAILY
-                }`,
+                example: `${clickableSlashCommand(COMMAND_NAME, Action.DAILY)}`,
                 explanation: i18n.translate(
                     guildID,
                     "command.news.help.example.get",
                 ),
             },
             {
-                example: `${clickableSlashCommand(COMMAND_NAME)} ${
-                    Action.SUBSCRIBE
-                } ${RANGE_OPTION}:${NewsRange.WEEKLY}`,
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    Action.SUBSCRIBE,
+                )} ${RANGE_OPTION}:${NewsRange.WEEKLY}`,
                 explanation: i18n.translate(
                     guildID,
                     "command.news.help.example.subscribe",
                 ),
             },
             {
-                example: `${clickableSlashCommand(COMMAND_NAME)} ${
-                    Action.UNSUBSCRIBE
-                } ${RANGE_OPTION}:${NewsRange.DAILY}`,
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    Action.UNSUBSCRIBE,
+                )} ${RANGE_OPTION}:${NewsRange.DAILY}`,
                 explanation: i18n.translate(
                     guildID,
                     "command.news.help.example.unsubscribe",
