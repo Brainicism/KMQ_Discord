@@ -452,6 +452,10 @@ async function reloadBanData(): Promise<void> {
 }
 
 async function sendNewsNotifications(newsRange: NewsRange): Promise<void> {
+    if (!KmqConfiguration.Instance.newsSubscriptionsEnabled()) {
+        return;
+    }
+
     const subscriptions = await dbContext.kmq
         .selectFrom("news_subscriptions")
         .selectAll()
