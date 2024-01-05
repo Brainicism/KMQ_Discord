@@ -22,7 +22,10 @@ export default class BotNewsCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: COMMAND_NAME,
-        description: i18n.translate(guildID, "command.news.help.description"),
+        description: i18n.translate(
+            guildID,
+            "command.botnews.help.description",
+        ),
         examples: [],
         priority: 10,
     });
@@ -56,13 +59,13 @@ export default class BotNewsCommand implements BaseCommand {
             {
                 title: i18n.translate(
                     messageContext.guildID,
-                    "command.news.updates.title",
+                    "command.botnews.updates.title",
                 ),
                 description: newsData,
                 thumbnailUrl: KmqImages.READING_BOOK,
                 footerText: `${State.version} | ${i18n.translate(
                     messageContext.guildID,
-                    "command.news.updates.footer",
+                    "command.botnews.updates.footer",
                 )}`,
                 components: [
                     {
