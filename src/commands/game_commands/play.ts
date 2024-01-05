@@ -241,7 +241,7 @@ export async function sendBeginGameSessionMessage(
                     description: newsData.map((x) => x.entry).join("\n"),
                     footerText: i18n.translate(
                         guildID,
-                        "command.news.updates.footer",
+                        "command.botnews.updates.footer",
                     ),
                 };
 
