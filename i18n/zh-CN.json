@@ -765,9 +765,12 @@
                     "unsubscribe": "停止在此文本频道接收每日新闻更新"
                 },
                 "interaction": {
+                    "daily": "获取今日的 K-pop 新闻",
+                    "monthly": "获取本月的 K-pop 新闻",
                     "range": "查看新闻的时间间隔",
                     "subscribe": "注册以在此文本频道接收新闻更新",
-                    "unsubscribe": "停止在此文本频道接收新闻更新"
+                    "unsubscribe": "停止在此文本频道接收新闻更新",
+                    "weekly": "获取本周的 K-pop 新闻"
                 },
                 "name": "新闻"
             },

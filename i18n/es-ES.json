@@ -765,9 +765,12 @@
                     "unsubscribe": "Deja de recibir actualizaciones diarias de noticias en este canal de texto"
                 },
                 "interaction": {
+                    "daily": "Obtén las noticias de K-pop de hoy",
+                    "monthly": "Obtén las noticias de K-pop del mes",
                     "range": "El intervalo de tiempo para ver noticias",
                     "subscribe": "Suscríbete para recibir actualizaciones de noticias en este canal de texto",
-                    "unsubscribe": "Deja de recibir actualizaciones de noticias en este canal de texto"
+                    "unsubscribe": "Deja de recibir actualizaciones de noticias en este canal de texto",
+                    "weekly": "Obtén las noticias de K-pop de esta semana"
                 },
                 "name": "noticias"
             },

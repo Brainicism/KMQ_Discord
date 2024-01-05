@@ -1,7 +1,7 @@
 enum NewsRange {
-    DAY = "day",
-    WEEK = "week",
-    MONTH = "month",
+    DAILY = "daily",
+    WEEKLY = "weekly",
+    MONTHLY = "monthly",
 }
 
 export default NewsRange;

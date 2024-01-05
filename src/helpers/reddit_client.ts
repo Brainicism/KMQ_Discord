@@ -1,7 +1,7 @@
 import { IPCLogger } from "../logger";
 import { KMQ_USER_AGENT } from "../constants";
+import NewsRange from "../enums/news_range";
 import Snoowrap from "snoowrap";
-import type NewsRange from "src/enums/news_range";
 
 const logger = new IPCLogger("reddit_client");
 
@@ -11,6 +11,25 @@ export interface KpopNewsRedditPost {
     date: Date;
     flair: string;
 }
+
+enum RedditInterval {
+    DAY = "day",
+    WEEK = "week",
+    MONTH = "month",
+}
+
+const newsRangeToRedditInterval = (newsRange: NewsRange): RedditInterval => {
+    switch (newsRange) {
+        case NewsRange.DAILY:
+            return RedditInterval.DAY;
+        case NewsRange.WEEKLY:
+            return RedditInterval.WEEK;
+        case NewsRange.MONTHLY:
+            return RedditInterval.MONTH;
+        default:
+            throw new Error(`Invalid newsRange: ${newsRange}`);
+    }
+};
 
 const generateFilteredQuery = (): string => {
     const filters = [
@@ -47,7 +66,7 @@ export class RedditClient {
                 subreddit: "kpop",
                 query: "flair:'news' OR flair:'Tour News' OR flair:'Rumor' OR flair:'Achievement'",
                 sort: "top",
-                time: "week",
+                time: RedditInterval.WEEK,
             });
 
             const popularPosts = matchingPosts
@@ -81,7 +100,7 @@ export class RedditClient {
                 subreddit: "kpop",
                 query: generateFilteredQuery(),
                 sort: "top",
-                time: interval,
+                time: newsRangeToRedditInterval(interval),
             });
 
             const popularPosts = matchingPosts

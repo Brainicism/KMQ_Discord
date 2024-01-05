@@ -24,7 +24,9 @@ import type NewsSubscription from "../../interfaces/news_subscription";
 enum Action {
     SUBSCRIBE = "subscribe",
     UNSUBSCRIBE = "unsubscribe",
-    GET = "get",
+    DAILY = "daily",
+    WEEKLY = "weekly",
+    MONTHLY = "monthly",
 }
 
 const RANGE_OPTION = "range";
@@ -39,8 +41,8 @@ export default class NewsCommand implements BaseCommand {
         examples: [
             {
                 example: `${clickableSlashCommand(COMMAND_NAME)} ${
-                    Action.GET
-                } ${RANGE_OPTION}:${NewsRange.DAY}`,
+                    Action.DAILY
+                }`,
                 explanation: i18n.translate(
                     guildID,
                     "command.news.help.example.get",
@@ -49,7 +51,7 @@ export default class NewsCommand implements BaseCommand {
             {
                 example: `${clickableSlashCommand(COMMAND_NAME)} ${
                     Action.SUBSCRIBE
-                } ${RANGE_OPTION}:${NewsRange.WEEK}`,
+                } ${RANGE_OPTION}:${NewsRange.WEEKLY}`,
                 explanation: i18n.translate(
                     guildID,
                     "command.news.help.example.subscribe",
@@ -58,7 +60,7 @@ export default class NewsCommand implements BaseCommand {
             {
                 example: `${clickableSlashCommand(COMMAND_NAME)} ${
                     Action.UNSUBSCRIBE
-                } ${RANGE_OPTION}:${NewsRange.DAY}`,
+                } ${RANGE_OPTION}:${NewsRange.DAILY}`,
                 explanation: i18n.translate(
                     guildID,
                     "command.news.help.example.unsubscribe",
@@ -82,11 +84,10 @@ export default class NewsCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: Action.GET,
-                    // Reuse the description key
+                    name: Action.DAILY,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.news.help.description",
+                        "command.news.help.interaction.daily",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -95,43 +96,52 @@ export default class NewsCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.news.help.description",
+                                    "command.news.help.interaction.daily",
                                 ),
                             }),
                             {},
                         ),
-                    type: Eris.Constants.ApplicationCommandOptionTypes
-                        .SUB_COMMAND,
-                    options: [
-                        {
-                            name: RANGE_OPTION,
-                            description: i18n.translate(
-                                LocaleType.EN,
-                                "command.news.help.interaction.range",
-                            ),
-                            description_localizations: Object.values(LocaleType)
-                                .filter((x) => x !== LocaleType.EN)
-                                .reduce(
-                                    (acc, locale) => ({
-                                        ...acc,
-                                        [locale]: i18n.translate(
-                                            locale,
-                                            "command.news.help.interaction.range",
-                                        ),
-                                    }),
-                                    {},
+                    type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+                },
+                {
+                    name: Action.WEEKLY,
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "command.news.help.interaction.weekly",
+                    ),
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.news.help.interaction.weekly",
                                 ),
-                            type: Eris.Constants.ApplicationCommandOptionTypes
-                                .STRING,
-                            required: true,
-                            choices: Object.values(NewsRange).map(
-                                (newsRange) => ({
-                                    name: newsRange,
-                                    value: newsRange,
-                                }),
-                            ),
-                        },
-                    ],
+                            }),
+                            {},
+                        ),
+                    type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+                },
+                {
+                    name: Action.MONTHLY,
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "command.news.help.interaction.monthly",
+                    ),
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.news.help.interaction.monthly",
+                                ),
+                            }),
+                            {},
+                        ),
+                    type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
                 },
                 {
                     name: Action.SUBSCRIBE,
@@ -392,16 +402,18 @@ export default class NewsCommand implements BaseCommand {
         const { interactionName, interactionOptions } =
             getInteractionValue(interaction);
 
-        const range = interactionOptions[RANGE_OPTION] as NewsRange;
         if (interactionName === Action.SUBSCRIBE) {
+            const range = interactionOptions[RANGE_OPTION] as NewsRange;
             await NewsCommand.subscribeNews(messageContext, range, interaction);
         } else if (interactionName === Action.UNSUBSCRIBE) {
+            const range = interactionOptions[RANGE_OPTION] as NewsRange;
             await NewsCommand.unsubscribeNews(
                 messageContext,
                 range,
                 interaction,
             );
-        } else if (interactionName === Action.GET) {
+        } else if ([Action.DAILY, Action.WEEKLY, Action.MONTHLY].includes(interactionName as Action)) {
+            const range = interactionName as NewsRange;
             await NewsCommand.sendNews(
                 messageContext,
                 range,

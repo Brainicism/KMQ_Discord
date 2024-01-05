@@ -765,9 +765,12 @@
                     "unsubscribe": "Stop receiving daily news updates in this text channel"
                 },
                 "interaction": {
+                    "daily": "Get today's K-pop news",
+                    "monthly": "Get this month's K-pop news",
                     "range": "The time interval to see news from",
                     "subscribe": "Sign up to receive news updates in this text channel",
-                    "unsubscribe": "Stop receiving news updates in this text channel"
+                    "unsubscribe": "Stop receiving news updates in this text channel",
+                    "weekly": "Get this week's K-pop news"
                 },
                 "name": "news"
             },
