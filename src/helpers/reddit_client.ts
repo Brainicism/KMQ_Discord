@@ -116,7 +116,9 @@ export class RedditClient {
             }));
         } catch (e) {
             logger.error(
-                `Failed to fetch getTopDayPosts(). e = ${JSON.stringify(e)}`,
+                `Failed to fetch getTopPosts(). interval = ${newsRangeToRedditInterval(
+                    interval,
+                )}. e = ${e}`,
             );
             return [];
         }

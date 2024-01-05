@@ -63,6 +63,12 @@ export default class GeminiClient {
                     `${standardDateFormat(x.date)} | ${x.flair} | ${x.title}`,
             );
 
+            if (topPosts.length === 0) {
+                throw new Error(
+                    `Failed to fetch topPosts(). locale = ${locale}. newsRange = ${newsRange}`,
+                );
+            }
+
             const prompt = getNewsPrompt(
                 topPosts,
                 newsRangeToPromptInterval(newsRange),
@@ -74,7 +80,7 @@ export default class GeminiClient {
             const text = generatedContent.response.text();
             if (text === "") {
                 throw new Error(
-                    `Failed to generate text for getPostSummary(). generatedContent = ${JSON.stringify(
+                    `Failed to generate text. generatedContent = ${JSON.stringify(
                         generatedContent,
                     )}. prompt = ${prompt}`,
                 );
