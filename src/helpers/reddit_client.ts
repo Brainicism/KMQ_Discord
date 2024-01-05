@@ -1,5 +1,6 @@
 import { IPCLogger } from "../logger";
 import { KMQ_USER_AGENT } from "../constants";
+import NewsRange from "../enums/news_range";
 import Snoowrap from "snoowrap";
 
 const logger = new IPCLogger("reddit_client");
@@ -10,6 +11,42 @@ export interface KpopNewsRedditPost {
     date: Date;
     flair: string;
 }
+
+enum RedditInterval {
+    DAY = "day",
+    WEEK = "week",
+    MONTH = "month",
+}
+
+const newsRangeToRedditInterval = (newsRange: NewsRange): RedditInterval => {
+    switch (newsRange) {
+        case NewsRange.DAILY:
+            return RedditInterval.DAY;
+        case NewsRange.WEEKLY:
+            return RedditInterval.WEEK;
+        case NewsRange.MONTHLY:
+            return RedditInterval.MONTH;
+        default:
+            throw new Error(`Invalid newsRange: ${newsRange}`);
+    }
+};
+
+const generateFilteredQuery = (): string => {
+    const filters = [
+        "Song Cover",
+        "Live",
+        "Variety",
+        "Behind-The-Scenes",
+        "CF",
+        "Audio",
+        "Interview",
+        "Dance Challenge",
+        "Meta",
+    ];
+
+    const flairedFilters = filters.map((x) => `flair:'${x}'`);
+    return `NOT (${flairedFilters.join(" OR ")})`;
+};
 
 export class RedditClient {
     private client: Snoowrap;
@@ -29,7 +66,7 @@ export class RedditClient {
                 subreddit: "kpop",
                 query: "flair:'news' OR flair:'Tour News' OR flair:'Rumor' OR flair:'Achievement'",
                 sort: "top",
-                time: "week",
+                time: RedditInterval.WEEK,
             });
 
             const popularPosts = matchingPosts
@@ -52,6 +89,36 @@ export class RedditClient {
                 `Failed to fetch getRecentPopularPosts(). e = ${JSON.stringify(
                     e,
                 )}`,
+            );
+            return [];
+        }
+    }
+
+    async getTopPosts(interval: NewsRange): Promise<Array<KpopNewsRedditPost>> {
+        try {
+            const matchingPosts = await this.client.search({
+                subreddit: "kpop",
+                query: generateFilteredQuery(),
+                sort: "top",
+                time: newsRangeToRedditInterval(interval),
+            });
+
+            const popularPosts = matchingPosts
+                .filter((x) => x.score > 100)
+                .slice(0, 25);
+
+            return popularPosts.map((x) => ({
+                title: x.title,
+                link: `https://reddit.com${x.permalink}`,
+                date: new Date(x.created_utc * 1000),
+                flair: x.link_flair_css_class as string,
+                x: Date.now() - new Date(x.created_utc * 1000).getTime(),
+            }));
+        } catch (e) {
+            logger.error(
+                `Failed to fetch getTopPosts(). interval = ${newsRangeToRedditInterval(
+                    interval,
+                )}. e = ${e}`,
             );
             return [];
         }

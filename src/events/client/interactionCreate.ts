@@ -8,7 +8,7 @@ import {
 import { measureExecutionTime } from "../../helpers/utils";
 import Eris from "eris";
 import ExcludeCommand from "../../commands/game_options/exclude";
-import FeedbackCommand from "../../commands/game_commands/feedback";
+import FeedbackCommand from "../../commands/misc_commands/feedback";
 import GroupsCommand from "../../commands/game_options/groups";
 import HelpCommand from "../../commands/game_commands/help";
 import IncludeCommand from "../../commands/game_options/include";

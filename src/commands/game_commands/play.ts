@@ -237,7 +237,7 @@ export async function sendBeginGameSessionMessage(
 
             if (Math.random() < recencyShowUpdate) {
                 const recentUpdatePayload = {
-                    title: clickableSlashCommand("news"),
+                    title: clickableSlashCommand("botnews"),
                     description: newsData.map((x) => x.entry).join("\n"),
                     footerText: i18n.translate(
                         guildID,

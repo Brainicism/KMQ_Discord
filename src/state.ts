@@ -3,6 +3,7 @@ import RateLimiter from "./rate_limiter";
 import type { IPC } from "eris-fleet";
 import type { RedditClient } from "./helpers/reddit_client";
 import type GameSession from "./structures/game_session";
+import type GeminiClient from "./helpers/gemini_client";
 import type KmqClient from "./kmq_client";
 import type ListeningSession from "./structures/listening_session";
 import type LocaleType from "./enums/locale_type";
@@ -52,6 +53,9 @@ export default class State {
     static restartNotification: RestartNotification | null;
     static spotifyManager: SpotifyManager;
     static redditClient: RedditClient;
+    static geminiClient: GeminiClient;
+
+    static news: { [range: string]: { [locale: string]: string } };
 
     static commandToID: { [commandName: string]: string } = {};
     static getGuildLocale(guildID: string): LocaleType {

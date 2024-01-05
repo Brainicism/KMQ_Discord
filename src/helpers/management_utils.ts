@@ -1,7 +1,13 @@
 /* eslint-disable global-require */
 /* eslint-disable import/no-dynamic-require */
 import { IPCLogger } from "../logger";
-import { chooseRandom, delay, isPrimaryInstance, isWeekend } from "./utils";
+import {
+    chooseRandom,
+    delay,
+    isPrimaryInstance,
+    isWeekend,
+    retryJob,
+} from "./utils";
 import {
     cleanupInactiveGameSessions,
     cleanupInactiveListeningSessions,
@@ -13,15 +19,18 @@ import { reloadFactCache } from "../fact_generator";
 import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
 import { sql } from "kysely";
 import KmqConfiguration from "../kmq_configuration";
+import LocaleType from "../enums/locale_type";
 import MessageContext from "../structures/message_context";
+import NewsCommand from "../commands/misc_commands/news";
+import NewsRange from "../enums/news_range";
 import State from "../state";
 import _ from "lodash";
 import dbContext from "../database_context";
 import i18n from "./localization_manager";
 import schedule from "node-schedule";
 import updatePremiumUsers from "./patreon_manager";
-import type LocaleType from "../enums/locale_type";
 import type MatchedArtist from "../interfaces/matched_artist";
+import type NewsSubscription from "../interfaces/news_subscription";
 
 const logger = new IPCLogger("management_utils");
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 3, 2, 1]);
@@ -442,12 +451,116 @@ async function reloadBanData(): Promise<void> {
     State.bannedPlayers = new Set(bannedPlayers);
 }
 
+async function sendNewsNotifications(newsRange: NewsRange): Promise<void> {
+    if (!KmqConfiguration.Instance.newsSubscriptionsEnabled()) {
+        return;
+    }
+
+    const subscriptions = await dbContext.kmq
+        .selectFrom("news_subscriptions")
+        .selectAll()
+        .where("range", "=", newsRange)
+        .execute();
+
+    logger.info(
+        `Sending ${newsRange} news notifications to ${subscriptions.length} channels`,
+    );
+
+    await Promise.allSettled(
+        subscriptions.map(async (s) => {
+            const subscription: NewsSubscription = {
+                guildID: s.guild_id,
+                textChannelID: s.text_channel_id,
+                range: s.range as NewsRange,
+                createdAt: new Date(s.created_at),
+            };
+
+            const subscriptionContext = new MessageContext(
+                subscription.textChannelID,
+                null,
+                subscription.guildID,
+            );
+
+            await NewsCommand.sendNews(
+                subscriptionContext,
+                subscription.range,
+                true,
+            );
+        }),
+    );
+}
+
+async function reloadNews(): Promise<void> {
+    if (!process.env.GEMINI_API_KEY) {
+        return;
+    }
+
+    await Promise.allSettled(
+        Object.values(LocaleType).map(async (locale) => {
+            await Promise.allSettled(
+                Object.values(NewsRange).map(async (range) => {
+                    await retryJob<void | Error>(
+                        async () => {
+                            const summary =
+                                await State.geminiClient.getPostSummary(
+                                    locale,
+                                    range,
+                                );
+
+                            if (summary === "") {
+                                logger.error(
+                                    `Error generating news for ${locale} ${range}`,
+                                );
+                                return Promise.reject(
+                                    new Error(
+                                        `Error generating news for ${locale} ${range}`,
+                                    ),
+                                );
+                            }
+
+                            if (summary.length < 400 || summary.length > 2500) {
+                                return Promise.reject(
+                                    new Error(
+                                        `Received abnormally sized news entry for ${locale} ${range}. length = ${summary.length}`,
+                                    ),
+                                );
+                            }
+
+                            State.news[range][locale] = summary;
+                            logger.info(
+                                `Generated news for ${locale} ${range}`,
+                            );
+                            return Promise.resolve();
+                        },
+                        [],
+                        3,
+                        true,
+                        5000,
+                    );
+                }),
+            );
+        }),
+    );
+}
+
 /**
  * @param clusterID - The cluster ID
  *  Sets up recurring cron-based tasks
  * */
 export function registerIntervals(clusterID: number): void {
-    // Everyday at 12am UTC => 7pm EST
+    // Every month on the 1st at 2am UTC => 9pm ET
+    schedule.scheduleJob("0 2 1 * *", () => {
+        // Send monthly news notifications, one hour after weekly news notifications
+        sendNewsNotifications(NewsRange.MONTHLY);
+    });
+
+    // Every week on Sunday at 1am UTC => 8pm ET
+    schedule.scheduleJob("0 1 * * 0", () => {
+        // Send weekly news notifications, one hour after daily news notifications
+        sendNewsNotifications(NewsRange.WEEKLY);
+    });
+
+    // Everyday at 12am UTC => 7pm ET
     schedule.scheduleJob("0 0 * * *", () => {
         // New bonus groups
         reloadBonusGroups();
@@ -457,6 +570,8 @@ export function registerIntervals(clusterID: number): void {
         reloadSongs();
         // Removed cached Spotify playlists
         clearCachedSpotifyPlaylists();
+        // Send daily news notifications
+        sendNewsNotifications(NewsRange.DAILY);
     });
 
     // every 6 hours
@@ -472,6 +587,9 @@ export function registerIntervals(clusterID: number): void {
             return;
         // Ping a role in KMQ server notifying of power hour
         sendPowerHourNotification();
+
+        // Use reddit and Gemini to generate news
+        reloadNews();
     });
 
     // Every 10 minutes
@@ -527,4 +645,5 @@ export function reloadCaches(): void {
     reloadLocales();
     reloadSongs();
     reloadBanData();
+    reloadNews();
 }

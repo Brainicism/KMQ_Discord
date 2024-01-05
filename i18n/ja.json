@@ -80,6 +80,16 @@
                 "title": "無視された開始"
             }
         },
+        "botnews": {
+            "help": {
+                "description": "KMQの最新の更新を表示します。",
+                "name": "ボットニュース"
+            },
+            "updates": {
+                "footer": "詳細な更新情報を得るために、公式KMQサーバーに参加してください！",
+                "title": "更新"
+            }
+        },
         "cutoff": {
             "failure": {
                 "invalidEndYear": {
@@ -742,13 +752,44 @@
             }
         },
         "news": {
+            "disclaimer": "この要約はAIによって生成されたもので、正確でない可能性があります",
+            "error": {
+                "description": "最新ニュースの取得に失敗しました。後ほど再試行してください。",
+                "title": "ニュースエラー"
+            },
             "help": {
-                "description": "KMQの最新の更新を表示します。",
+                "description": "インターネットから最新のK-popニュースを入手しよう！",
+                "example": {
+                    "get": "今日のK-popニュースの概要を見る",
+                    "subscribe": "このテキストチャンネルで週刊ニュースの更新を受け取る",
+                    "unsubscribe": "このテキストチャンネルでの日々のニュースの更新を停止する"
+                },
+                "interaction": {
+                    "daily": "今日のK-popニュースを入手",
+                    "monthly": "今月のK-popニュースを入手",
+                    "range": "ニュースを見るための時間間隔",
+                    "subscribe": "このテキストチャンネルでニュースの更新を受け取るために登録する",
+                    "unsubscribe": "このテキストチャンネルでニュースの更新を受け取るのを停止する",
+                    "weekly": "今週のK-popニュースを入手"
+                },
                 "name": "ニュース"
             },
-            "updates": {
-                "footer": "詳細な更新情報を得るために、公式KMQサーバーに参加してください！",
-                "title": "更新"
+            "subscribe": {
+                "alreadySubscribed": {
+                    "description": "このテキストチャンネルで{{interval}}のニュース更新をすでに購読しています。",
+                    "title": "既に購読中"
+                },
+                "description": "これからこのテキストチャンネルで{{interval}}のニュース更新を受け取ります。",
+                "title": "キミコニュースネットワークに登録しました"
+            },
+            "title": "キミコニュースネットワーク",
+            "unsubscribe": {
+                "description": "このテキストチャネルでの{{interval}}ニュース更新をこれ以上受け取りません。",
+                "notSubscribed": {
+                    "description": "このテキストチャネルでの{{interval}}ニュース更新に登録していません。",
+                    "title": "未登録"
+                },
+                "title": "キミコニュースネットワークの登録を解除しました"
             }
         },
         "options": {

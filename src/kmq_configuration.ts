@@ -71,4 +71,8 @@ export default class KmqConfiguration {
     patreonFetchingEnabled(): boolean {
         return this.config["patreonFetchingEnabled"] ?? false;
     }
+
+    newsSubscriptionsEnabled(): boolean {
+        return this.config["newsSubscriptionEnabled"] ?? false;
+    }
 }

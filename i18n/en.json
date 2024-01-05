@@ -80,6 +80,16 @@
                 "title": "Begin Ignored"
             }
         },
+        "botnews": {
+            "help": {
+                "description": "Displays the latest updates to KMQ.",
+                "name": "botnews"
+            },
+            "updates": {
+                "footer": "Join the official KMQ server for more detailed updates!",
+                "title": "Updates"
+            }
+        },
         "cutoff": {
             "failure": {
                 "invalidEndYear": {
@@ -742,13 +752,44 @@
             }
         },
         "news": {
+            "disclaimer": "This summary was AI-generated and may not be accurate",
+            "error": {
+                "description": "Failed to fetch the latest news. Try again later.",
+                "title": "News Error"
+            },
             "help": {
-                "description": "Displays the latest updates to KMQ.",
+                "description": "Get the latest K-pop news from the internet!",
+                "example": {
+                    "get": "See an overview of today's K-pop news",
+                    "subscribe": "Receive a weekly news update in this text channel",
+                    "unsubscribe": "Stop receiving daily news updates in this text channel"
+                },
+                "interaction": {
+                    "daily": "Get today's K-pop news",
+                    "monthly": "Get this month's K-pop news",
+                    "range": "The time interval to see news from",
+                    "subscribe": "Sign up to receive news updates in this text channel",
+                    "unsubscribe": "Stop receiving news updates in this text channel",
+                    "weekly": "Get this week's K-pop news"
+                },
                 "name": "news"
             },
-            "updates": {
-                "footer": "Join the official KMQ server for more detailed updates!",
-                "title": "Updates"
+            "subscribe": {
+                "alreadySubscribed": {
+                    "description": "You are already subscribed to {{interval}} news updates in this text channel.",
+                    "title": "Already Subscribed"
+                },
+                "description": "You will now receive {{interval}} news updates in this text channel.",
+                "title": "Subscribed to Kimiqo News Network"
+            },
+            "title": "Kimiqo News Network",
+            "unsubscribe": {
+                "description": "You will no longer receive {{interval}} news updates in this text channel.",
+                "notSubscribed": {
+                    "description": "You are not subscribed to {{interval}} news updates in this text channel.",
+                    "title": "Not Subscribed"
+                },
+                "title": "Unsubscribed from Kimiqo News Network"
             }
         },
         "options": {

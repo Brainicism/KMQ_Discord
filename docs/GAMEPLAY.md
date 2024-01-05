@@ -211,7 +211,7 @@ Use `/help action:[command_name]` for more details about the following commands:
 -   `/forceskip`: The person that started the game can force-skip the current song, no majority necessary
 -   `/options`: Show the current game options, which filter the songs that will be played
 -   `/help`: Show a general overview of available commands, as well as specific instructions for each command
--   `/news`: Show the latest features/changes to the bot
+-   `/botnews`: Show the latest features/changes to the bot
 -   `/profile`: Show per-player stats, along with a ranking against everyone else
 -   `/leaderboard`: Show the server/game/global KMQ leaderboard
 -   `/score`: Show the current game's scoreboard with EXP gained
@@ -224,6 +224,7 @@ Use `/help action:[command_name]` for more details about the following commands:
 -   `/lookup`: Get information about the given song (whether it's available in KMQ, aliases, etc.)
 -   `/upcomingreleases`: See a list of confirmed songs, albums, and EPs planned for release in the future
 -   `/guess`: Guess the name of the current song or artist when using `/play hidden`
+-   `/news`: Get a summary of the latest K-pop news from the internet!
 
 ## Game Option Commands
 

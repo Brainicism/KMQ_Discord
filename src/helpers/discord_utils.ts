@@ -80,6 +80,7 @@ const REQUIRED_VOICE_PERMISSIONS = [
 ];
 
 const MAX_INTERACTION_RESPONSE_TIME = 3 * 1000;
+const MAX_EMBED_DESCRIPTION_LENGTH = 4096;
 
 interface GameMessageMultiLocaleContent {
     [LocaleType.EN]: string;
@@ -533,7 +534,10 @@ export async function sendErrorMessage(
             ? embedPayload.author
             : messageContext.author;
 
-    if (embedPayload.description && embedPayload.description.length > 2048) {
+    if (
+        embedPayload.description &&
+        embedPayload.description.length > MAX_EMBED_DESCRIPTION_LENGTH
+    ) {
         logger.error(
             `${getDebugLogHeader(
                 messageContext,
@@ -649,7 +653,10 @@ export async function sendInfoMessage(
 ): Promise<Eris.Message<Eris.TextableChannel> | null> {
     const embeds = [embedPayload, ...additionalEmbeds];
     for (const embed of embeds) {
-        if (embed.description && embed.description.length > 2048) {
+        if (
+            embed.description &&
+            embed.description.length > MAX_EMBED_DESCRIPTION_LENGTH
+        ) {
             logger.error(
                 `${getDebugLogHeader(
                     messageContext,

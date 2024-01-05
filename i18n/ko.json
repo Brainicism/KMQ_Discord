@@ -80,6 +80,16 @@
                 "title": "게임 시작 무시"
             }
         },
+        "botnews": {
+            "help": {
+                "description": "KMQ에 대한 최신 업데이트를 표시합니다.",
+                "name": "봇뉴스"
+            },
+            "updates": {
+                "footer": "자세한 업데이트를 보려면 공식 KMQ 서버에 가입하십시오!",
+                "title": "Updates"
+            }
+        },
         "cutoff": {
             "failure": {
                 "invalidEndYear": {
@@ -742,13 +752,44 @@
             }
         },
         "news": {
-            "help": {
-                "description": "KMQ에 대한 최신 업데이트를 표시합니다.",
-                "name": "소식"
+            "disclaimer": "이 요약은 AI에 의해 생성되었으며 정확하지 않을 수 있습니다",
+            "error": {
+                "description": "최신 뉴스를 가져오는 데 실패했습니다. 나중에 다시 시도하세요.",
+                "title": "뉴스 오류"
             },
-            "updates": {
-                "footer": "자세한 업데이트를 보려면 공식 KMQ 서버에 가입하십시오!",
-                "title": "Updates"
+            "help": {
+                "description": "인터넷에서 최신 K-pop 뉴스를 받아보세요!",
+                "example": {
+                    "get": "오늘의 K-pop 뉴스 개요 보기",
+                    "subscribe": "이 텍스트 채널에서 주간 뉴스 업데이트 받기",
+                    "unsubscribe": "이 텍스트 채널에서 일일 뉴스 업데이트 수신 중단"
+                },
+                "interaction": {
+                    "daily": "오늘의 K-pop 뉴스를 받아보세요",
+                    "monthly": "이번 달의 K-pop 뉴스를 받아보세요",
+                    "range": "뉴스를 볼 시간 간격",
+                    "subscribe": "이 텍스트 채널에서 뉴스 업데이트를 받기 위해 가입하기",
+                    "unsubscribe": "이 텍스트 채널에서 뉴스 업데이트 수신 중단하기",
+                    "weekly": "이번 주의 K-pop 뉴스를 받아보세요"
+                },
+                "name": "뉴스"
+            },
+            "subscribe": {
+                "alreadySubscribed": {
+                    "description": "이 텍스트 채널에서 {{interval}} 뉴스 업데이트를 이미 구독 중입니다.",
+                    "title": "이미 구독 중"
+                },
+                "description": "이제 이 텍스트 채널에서 {{interval}} 뉴스 업데이트를 받게 됩니다.",
+                "title": "키미코 뉴스 네트워크에 구독함"
+            },
+            "title": "키미코 뉴스 네트워크",
+            "unsubscribe": {
+                "description": "이 텍스트 채널에서 {{interval}} 뉴스 업데이트를 더 이상 받지 않습니다.",
+                "notSubscribed": {
+                    "description": "이 텍스트 채널에서 {{interval}} 뉴스 업데이트를 구독하지 않았습니다.",
+                    "title": "구독하지 않음"
+                },
+                "title": "키미코 뉴스 네트워크 구독 취소함"
             }
         },
         "options": {

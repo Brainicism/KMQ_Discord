@@ -80,6 +80,16 @@
                 "title": "开始被忽略"
             }
         },
+        "botnews": {
+            "help": {
+                "description": "显示最新的KMQ更新。",
+                "name": "机器人新闻"
+            },
+            "updates": {
+                "footer": "加入官方KMQ服务器以获取更详细的更新！",
+                "title": "更新"
+            }
+        },
         "cutoff": {
             "failure": {
                 "invalidEndYear": {
@@ -742,13 +752,44 @@
             }
         },
         "news": {
+            "disclaimer": "此摘要由AI生成，可能不准确",
+            "error": {
+                "description": "获取最新新闻失败。请稍后再试。",
+                "title": "新闻错误"
+            },
             "help": {
-                "description": "显示最新的KMQ更新。",
+                "description": "从互联网获取最新的K-pop新闻！",
+                "example": {
+                    "get": "查看今天的K-pop新闻概览",
+                    "subscribe": "在此文本频道接收每周新闻更新",
+                    "unsubscribe": "停止在此文本频道接收每日新闻更新"
+                },
+                "interaction": {
+                    "daily": "获取今日的 K-pop 新闻",
+                    "monthly": "获取本月的 K-pop 新闻",
+                    "range": "查看新闻的时间间隔",
+                    "subscribe": "注册以在此文本频道接收新闻更新",
+                    "unsubscribe": "停止在此文本频道接收新闻更新",
+                    "weekly": "获取本周的 K-pop 新闻"
+                },
                 "name": "新闻"
             },
-            "updates": {
-                "footer": "加入官方KMQ服务器以获取更详细的更新！",
-                "title": "更新"
+            "subscribe": {
+                "alreadySubscribed": {
+                    "description": "您已经订阅了此文本频道的{{interval}}新闻更新。",
+                    "title": "已订阅"
+                },
+                "description": "您现在将在此文本频道接收{{interval}}新闻更新。",
+                "title": "订阅了基米克新闻网络"
+            },
+            "title": "基米克新闻网络",
+            "unsubscribe": {
+                "description": "您将不再在此文本频道接收{{interval}}新闻更新。",
+                "notSubscribed": {
+                    "description": "您未订阅此文本频道的{{interval}}新闻更新。",
+                    "title": "未订阅"
+                },
+                "title": "取消订阅基米克新闻网络"
             }
         },
         "options": {

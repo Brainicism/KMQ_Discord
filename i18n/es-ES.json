@@ -80,6 +80,16 @@
                 "title": "Ignorado"
             }
         },
+        "botnews": {
+            "help": {
+                "description": "Muestra las últimas actualizaciones de KMQ.",
+                "name": "botnoticias"
+            },
+            "updates": {
+                "footer": "¡Únete al servidor oficial de KMQ para obtener actualizaciones más detalladas!",
+                "title": "Actualizaciones"
+            }
+        },
         "cutoff": {
             "failure": {
                 "invalidEndYear": {
@@ -742,13 +752,44 @@
             }
         },
         "news": {
+            "disclaimer": "Este resumen fue generado por IA y puede no ser exacto",
+            "error": {
+                "description": "Fallo al obtener las últimas noticias. Inténtalo de nuevo más tarde.",
+                "title": "Error de Noticias"
+            },
             "help": {
-                "description": "Muestra las últimas actualizaciones de KMQ.",
+                "description": "¡Obtén las últimas noticias de K-pop de internet!",
+                "example": {
+                    "get": "Ver un resumen de las noticias de K-pop de hoy",
+                    "subscribe": "Recibe una actualización semanal de noticias en este canal de texto",
+                    "unsubscribe": "Deja de recibir actualizaciones diarias de noticias en este canal de texto"
+                },
+                "interaction": {
+                    "daily": "Obtén las noticias de K-pop de hoy",
+                    "monthly": "Obtén las noticias de K-pop del mes",
+                    "range": "El intervalo de tiempo para ver noticias",
+                    "subscribe": "Suscríbete para recibir actualizaciones de noticias en este canal de texto",
+                    "unsubscribe": "Deja de recibir actualizaciones de noticias en este canal de texto",
+                    "weekly": "Obtén las noticias de K-pop de esta semana"
+                },
                 "name": "noticias"
             },
-            "updates": {
-                "footer": "¡Únete al servidor oficial de KMQ para obtener actualizaciones más detalladas!",
-                "title": "Actualizaciones"
+            "subscribe": {
+                "alreadySubscribed": {
+                    "description": "Ya estás suscrito a las actualizaciones de noticias {{interval}} en este canal de texto.",
+                    "title": "Ya Suscrito"
+                },
+                "description": "Ahora recibirás actualizaciones de noticias {{interval}} en este canal de texto.",
+                "title": "Suscrito a la Red de Noticias Kimiqo"
+            },
+            "title": "Red de Noticias Kimiqo",
+            "unsubscribe": {
+                "description": "Ya no recibirás actualizaciones de noticias {{interval}} en este canal de texto.",
+                "notSubscribed": {
+                    "description": "No estás suscrito a las actualizaciones de noticias {{interval}} en este canal de texto.",
+                    "title": "No Suscrito"
+                },
+                "title": "Dado de baja de la Red de Noticias Kimiqo"
             }
         },
         "options": {

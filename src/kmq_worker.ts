@@ -13,6 +13,8 @@ import {
 import AppCommandsAction from "./enums/app_command_action";
 import EnvType from "./enums/env_type";
 import EvalCommand from "./commands/admin/eval";
+import GeminiClient from "./helpers/gemini_client";
+import NewsRange from "./enums/news_range";
 import ReloadCommand from "./commands/admin/reload";
 import SIGINTHandler from "./events/process/SIGINT";
 import Session from "./structures/session";
@@ -261,6 +263,12 @@ export default class BotWorker extends BaseClusterWorker {
         State.spotifyManager.start();
 
         State.redditClient = new RedditClient();
+        State.geminiClient = new GeminiClient();
+
+        State.news = {};
+        for (const range of Object.values(NewsRange)) {
+            State.news[range] = {};
+        }
 
         if (
             [EnvType.CI, EnvType.DRY_RUN].includes(
