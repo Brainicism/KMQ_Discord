@@ -336,6 +336,7 @@ export default class NewsCommand implements BaseCommand {
                     description: i18n.translate(
                         messageContext.guildID,
                         "command.news.subscribe.alreadySubscribed.description",
+                        { interval: `\`${range}\`` },
                     ),
                     thumbnailUrl: KmqImages.DEAD,
                 },
@@ -412,6 +413,7 @@ export default class NewsCommand implements BaseCommand {
                     description: i18n.translate(
                         messageContext.guildID,
                         "command.news.unsubscribe.notSubscribed.description",
+                        { interval: `\`${range}\`` },
                     ),
                     thumbnailUrl: KmqImages.DEAD,
                 },

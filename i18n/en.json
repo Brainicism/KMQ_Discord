@@ -776,7 +776,7 @@
             },
             "subscribe": {
                 "alreadySubscribed": {
-                    "description": "You are already subscribed to news updates in this text channel.",
+                    "description": "You are already subscribed to {{interval}} news updates in this text channel.",
                     "title": "Already Subscribed"
                 },
                 "description": "You will now receive {{interval}} news updates in this text channel.",
@@ -786,7 +786,7 @@
             "unsubscribe": {
                 "description": "You will no longer receive {{interval}} news updates in this text channel.",
                 "notSubscribed": {
-                    "description": "You are not subscribed to news updates in this text channel.",
+                    "description": "You are not subscribed to {{interval}} news updates in this text channel.",
                     "title": "Not Subscribed"
                 },
                 "title": "Unsubscribed to KMQ News"

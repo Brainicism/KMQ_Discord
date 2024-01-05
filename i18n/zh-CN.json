@@ -776,7 +776,7 @@
             },
             "subscribe": {
                 "alreadySubscribed": {
-                    "description": "您已在此文本频道订阅新闻更新。",
+                    "description": "您已经订阅了此文本频道的{{interval}}新闻更新。",
                     "title": "已订阅"
                 },
                 "description": "您现在将在此文本频道接收{{interval}}新闻更新。",
@@ -786,10 +786,10 @@
             "unsubscribe": {
                 "description": "您将不再在此文本频道接收{{interval}}新闻更新。",
                 "notSubscribed": {
-                    "description": "您未订阅此文本频道中的新闻更新。",
+                    "description": "您未订阅此文本频道的{{interval}}新闻更新。",
                     "title": "未订阅"
                 },
-                "title": "已取消订阅KMQ新闻"
+                "title": "已退订KMQ新闻"
             }
         },
         "options": {

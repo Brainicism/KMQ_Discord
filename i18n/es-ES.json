@@ -776,7 +776,7 @@
             },
             "subscribe": {
                 "alreadySubscribed": {
-                    "description": "Ya estás suscrito a las actualizaciones de noticias en este canal de texto.",
+                    "description": "Ya estás suscrito a las actualizaciones de noticias {{interval}} en este canal de texto.",
                     "title": "Ya Suscrito"
                 },
                 "description": "Ahora recibirás actualizaciones de noticias {{interval}} en este canal de texto.",
@@ -786,10 +786,10 @@
             "unsubscribe": {
                 "description": "Ya no recibirás actualizaciones de noticias {{interval}} en este canal de texto.",
                 "notSubscribed": {
-                    "description": "No estás suscrito a las actualizaciones de noticias en este canal de texto.",
+                    "description": "No estás suscrito a las actualizaciones de noticias {{interval}} en este canal de texto.",
                     "title": "No Suscrito"
                 },
-                "title": "Desuscrito a las Noticias KMQ"
+                "title": "Desuscrito a las Noticias de KMQ"
             }
         },
         "options": {

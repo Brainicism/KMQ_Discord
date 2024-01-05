@@ -776,20 +776,20 @@
             },
             "subscribe": {
                 "alreadySubscribed": {
-                    "description": "이 텍스트 채널에서 이미 뉴스 업데이트를 구독 중입니다.",
-                    "title": "이미 구독함"
+                    "description": "이 텍스트 채널에서 {{interval}} 뉴스 업데이트를 이미 구독 중입니다.",
+                    "title": "이미 구독 중"
                 },
-                "description": "이 텍스트 채널에서 {{interval}} 뉴스 업데이트를 이제 받게 됩니다.",
-                "title": "KMQ 뉴스 구독함"
+                "description": "이제 이 텍스트 채널에서 {{interval}} 뉴스 업데이트를 받게 됩니다.",
+                "title": "KMQ 뉴스 구독"
             },
             "title": "KMQ 뉴스",
             "unsubscribe": {
                 "description": "이 텍스트 채널에서 {{interval}} 뉴스 업데이트를 더 이상 받지 않습니다.",
                 "notSubscribed": {
-                    "description": "이 텍스트 채널에서 뉴스 업데이트를 구독하고 있지 않습니다.",
+                    "description": "이 텍스트 채널에서 {{interval}} 뉴스 업데이트를 구독하지 않았습니다.",
                     "title": "구독하지 않음"
                 },
-                "title": "KMQ 뉴스 구독 취소됨"
+                "title": "KMQ 뉴스 구독 취소"
             }
         },
         "options": {
