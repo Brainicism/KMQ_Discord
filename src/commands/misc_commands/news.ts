@@ -317,6 +317,33 @@ export default class NewsCommand implements BaseCommand {
         range: NewsRange,
         interaction: Eris.CommandInteraction,
     ): Promise<void> => {
+        const alreadySubscribed = await dbContext.kmq
+            .selectFrom("news_subscriptions")
+            .selectAll()
+            .where("guild_id", "=", messageContext.guildID)
+            .where("text_channel_id", "=", messageContext.textChannelID)
+            .where("range", "=", range)
+            .executeTakeFirst();
+
+        if (alreadySubscribed) {
+            await sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "command.news.subscribe.alreadySubscribed.title",
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "command.news.subscribe.alreadySubscribed.description",
+                    ),
+                    thumbnailUrl: KmqImages.DEAD,
+                },
+                interaction,
+            );
+            return;
+        }
+
         const subscription: NewsSubscription = {
             guildID: messageContext.guildID,
             textChannelID: messageContext.textChannelID,
@@ -350,6 +377,7 @@ export default class NewsCommand implements BaseCommand {
                 description: i18n.translate(
                     messageContext.guildID,
                     "command.news.subscribe.description",
+                    { interval: `\`${range}\`` },
                 ),
                 thumbnailUrl: KmqImages.THUMBS_UP,
             },
@@ -365,6 +393,39 @@ export default class NewsCommand implements BaseCommand {
         range: NewsRange,
         interaction: Eris.CommandInteraction,
     ): Promise<void> => {
+        const alreadySubscribed = await dbContext.kmq
+            .selectFrom("news_subscriptions")
+            .selectAll()
+            .where("guild_id", "=", messageContext.guildID)
+            .where("text_channel_id", "=", messageContext.textChannelID)
+            .where("range", "=", range)
+            .executeTakeFirst();
+
+        if (!alreadySubscribed) {
+            await sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "command.news.unsubscribe.notSubscribed.title",
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "command.news.unsubscribe.notSubscribed.description",
+                    ),
+                    thumbnailUrl: KmqImages.DEAD,
+                },
+                interaction,
+            );
+            return;
+        }
+
+        await dbContext.kmq
+            .deleteFrom("news_subscriptions")
+            .where("guild_id", "=", messageContext.guildID)
+            .where("range", "=", range)
+            .execute();
+
         await sendInfoMessage(
             messageContext,
             {
@@ -375,6 +436,7 @@ export default class NewsCommand implements BaseCommand {
                 description: i18n.translate(
                     messageContext.guildID,
                     "command.news.unsubscribe.description",
+                    { interval: `\`${range}\`` },
                 ),
                 thumbnailUrl: KmqImages.DEAD,
             },
@@ -383,12 +445,6 @@ export default class NewsCommand implements BaseCommand {
             [],
             interaction,
         );
-
-        await dbContext.kmq
-            .deleteFrom("news_subscriptions")
-            .where("guild_id", "=", messageContext.guildID)
-            .where("range", "=", range)
-            .execute();
     };
 
     /**
@@ -412,7 +468,11 @@ export default class NewsCommand implements BaseCommand {
                 range,
                 interaction,
             );
-        } else if ([Action.DAILY, Action.WEEKLY, Action.MONTHLY].includes(interactionName as Action)) {
+        } else if (
+            [Action.DAILY, Action.WEEKLY, Action.MONTHLY].includes(
+                interactionName as Action,
+            )
+        ) {
             const range = interactionName as NewsRange;
             await NewsCommand.sendNews(
                 messageContext,

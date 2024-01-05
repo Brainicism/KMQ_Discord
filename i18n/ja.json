@@ -775,13 +775,21 @@
                 "name": "ニュース"
             },
             "subscribe": {
-                "description": "このテキストチャンネルでニュースの更新情報を受け取るようになります。",
-                "title": "KMQ ニュースに登録"
+                "alreadySubscribed": {
+                    "description": "このテキストチャンネルで既にニュース更新を購読しています。",
+                    "title": "既に購読登録済み"
+                },
+                "description": "このテキストチャンネルで{{interval}}のニュース更新を受け取るようになります。",
+                "title": "KMQニュースに購読登録しました"
             },
             "title": "KMQ ニュース",
             "unsubscribe": {
-                "description": "このテキストチャンネルでのニュースの更新情報の受信が停止されます。",
-                "title": "KMQ ニュースの登録解除"
+                "description": "このテキストチャンネルで{{interval}}のニュース更新をこれ以上受け取りません。",
+                "notSubscribed": {
+                    "description": "このテキストチャンネルでニュース更新を購読していません。",
+                    "title": "未購読"
+                },
+                "title": "KMQニュースの購読を解除"
             }
         },
         "options": {

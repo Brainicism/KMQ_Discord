@@ -775,13 +775,21 @@
                 "name": "新闻"
             },
             "subscribe": {
-                "description": "您现在将在此文本频道接收新闻更新。",
-                "title": "订阅KMQ新闻"
+                "alreadySubscribed": {
+                    "description": "您已在此文本频道订阅新闻更新。",
+                    "title": "已订阅"
+                },
+                "description": "您现在将在此文本频道接收{{interval}}新闻更新。",
+                "title": "已订阅KMQ新闻"
             },
             "title": "KMQ新闻",
             "unsubscribe": {
-                "description": "您将不再在此文本频道接收新闻更新。",
-                "title": "取消订阅KMQ新闻"
+                "description": "您将不再在此文本频道接收{{interval}}新闻更新。",
+                "notSubscribed": {
+                    "description": "您未订阅此文本频道中的新闻更新。",
+                    "title": "未订阅"
+                },
+                "title": "已取消订阅KMQ新闻"
             }
         },
         "options": {

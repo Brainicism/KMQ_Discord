@@ -515,7 +515,6 @@ async function reloadNews(): Promise<void> {
                             }
 
                             if (summary.length < 400 || summary.length > 2500) {
-                                logger.info(summary);
                                 return Promise.reject(
                                     new Error(
                                         `Received abnormally sized news entry for ${locale} ${range}. length = ${summary.length}`,

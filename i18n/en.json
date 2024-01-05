@@ -775,12 +775,20 @@
                 "name": "news"
             },
             "subscribe": {
-                "description": "You will now receive news updates in this text channel.",
+                "alreadySubscribed": {
+                    "description": "You are already subscribed to news updates in this text channel.",
+                    "title": "Already Subscribed"
+                },
+                "description": "You will now receive {{interval}} news updates in this text channel.",
                 "title": "Subscribed to KMQ News"
             },
             "title": "KMQ News",
             "unsubscribe": {
-                "description": "You will no longer receive news updates in this text channel.",
+                "description": "You will no longer receive {{interval}} news updates in this text channel.",
+                "notSubscribed": {
+                    "description": "You are not subscribed to news updates in this text channel.",
+                    "title": "Not Subscribed"
+                },
                 "title": "Unsubscribed to KMQ News"
             }
         },
