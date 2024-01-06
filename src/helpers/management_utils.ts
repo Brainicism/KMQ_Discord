@@ -451,15 +451,8 @@ async function reloadBanData(): Promise<void> {
     State.bannedPlayers = new Set(bannedPlayers);
 }
 
-async function sendNewsNotifications(
-    clusterID: number,
-    newsRange: NewsRange,
-): Promise<void> {
+async function sendNewsNotifications(newsRange: NewsRange): Promise<void> {
     if (!KmqConfiguration.Instance.newsSubscriptionsEnabled()) {
-        return;
-    }
-
-    if (clusterID !== 0) {
         return;
     }
 
@@ -558,13 +551,13 @@ export function registerIntervals(clusterID: number): void {
     // Every month on the 1st at 2am UTC => 9pm ET
     schedule.scheduleJob("0 2 1 * *", () => {
         // Send monthly news notifications, one hour after weekly news notifications
-        sendNewsNotifications(clusterID, NewsRange.MONTHLY);
+        sendNewsNotifications(NewsRange.MONTHLY);
     });
 
     // Every week on Sunday at 1am UTC => 8pm ET
     schedule.scheduleJob("0 1 * * 0", () => {
         // Send weekly news notifications, one hour after daily news notifications
-        sendNewsNotifications(clusterID, NewsRange.WEEKLY);
+        sendNewsNotifications(NewsRange.WEEKLY);
     });
 
     // Everyday at 12am UTC => 7pm ET
@@ -578,7 +571,7 @@ export function registerIntervals(clusterID: number): void {
         // Removed cached Spotify playlists
         clearCachedSpotifyPlaylists();
         // Send daily news notifications
-        sendNewsNotifications(clusterID, NewsRange.DAILY);
+        sendNewsNotifications(NewsRange.DAILY);
     });
 
     // every 6 hours
