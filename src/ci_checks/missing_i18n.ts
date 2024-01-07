@@ -33,16 +33,23 @@ const dynamicTranslationKeyAllowlist = [
     "`command.exclude.interaction.${action}.description`",
     "`command.include.interaction.${action}.perGroupDescription`",
     "`command.include.interaction.${action}.description`",
+    "`command.${commandName}.help.name`",
+    "translationKey",
+    "feedbackQuestion.question",
+    "feedbackQuestion.placeholder",
+    "FEEDBACK_QUESTIONS[questionIndex].question",
+    "`command.upcomingreleases.${release.releaseType}`",
+    "`command.include.help.interaction.${action}.description`",
+    "`command.include.help.interaction.${action}.perGroupDescription`",
+    "`command.exclude.help.interaction.${action}.description`",
+    "`command.exclude.help.interaction.${action}.perGroupDescription`",
+    "`command.groups.help.interaction.${action}.description`",
+    "`command.groups.help.interaction.${action}.perGroupDescription`",
 ];
 
-const translationInterfaceFunctions = [
-    "i18n.localizer.translate",
-    "i18n.localizer.translateN",
-    "i18n.localizer.translateByLocale",
-    "i18n.localizer.translateNByLocale",
-];
+const translationInterfaceFunctions = ["i18n.translate", "i18n.translateN"];
 
-const translationInternalFunctions = ["i18n.localizer.internalLocalizer.t"];
+const translationInternalFunctions = ["i18n.internalLocalizer.t"];
 
 const translationKeys = new Set<string>();
 const dynamicTranslationKeys = new Set<string>();
