@@ -582,14 +582,17 @@ export function registerIntervals(clusterID: number): void {
 
     // Every hour
     schedule.scheduleJob("0 * * * *", () => {
-        if (!isPowerHour() || isWeekend()) return;
-        if (!State.client.guilds.has(process.env.DEBUG_SERVER_ID as string))
-            return;
-        // Ping a role in KMQ server notifying of power hour
-        sendPowerHourNotification();
-
         // Use reddit and Gemini to generate news
         reloadNews();
+
+        if (
+            isPowerHour() &&
+            !isWeekend() &&
+            State.client.guilds.has(process.env.DEBUG_SERVER_ID as string)
+        ) {
+            // Ping a role in KMQ server notifying of power hour
+            sendPowerHourNotification();
+        }
     });
 
     // Every 10 minutes
