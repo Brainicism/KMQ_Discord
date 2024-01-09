@@ -495,52 +495,46 @@ async function reloadNews(): Promise<void> {
         return;
     }
 
-    await Promise.allSettled(
-        Object.values(LocaleType).map(async (locale) => {
-            await Promise.allSettled(
-                Object.values(NewsRange).map(async (range) => {
-                    await retryJob<void | Error>(
-                        async () => {
-                            const summary =
-                                await State.geminiClient.getPostSummary(
-                                    locale,
-                                    range,
-                                );
-
-                            if (summary === "") {
-                                logger.error(
-                                    `Error generating news for ${locale} ${range}`,
-                                );
-                                return Promise.reject(
-                                    new Error(
-                                        `Error generating news for ${locale} ${range}`,
-                                    ),
-                                );
-                            }
-
-                            if (summary.length < 400 || summary.length > 2500) {
-                                return Promise.reject(
-                                    new Error(
-                                        `Received abnormally sized news entry for ${locale} ${range}. length = ${summary.length}`,
-                                    ),
-                                );
-                            }
-
-                            State.news[range][locale] = summary;
-                            logger.info(
-                                `Generated news for ${locale} ${range}`,
-                            );
-                            return Promise.resolve();
-                        },
-                        [],
-                        3,
-                        true,
-                        5000,
+    for (const locale of Object.values(LocaleType)) {
+        for (const range of Object.values(NewsRange)) {
+            /* eslint-disable no-await-in-loop */
+            await retryJob<void | Error>(
+                async () => {
+                    const summary = await State.geminiClient.getPostSummary(
+                        locale,
+                        range,
                     );
-                }),
+
+                    if (summary === "") {
+                        logger.error(
+                            `Error generating news for ${locale} ${range}`,
+                        );
+                        return Promise.reject(
+                            new Error(
+                                `Error generating news for ${locale} ${range}`,
+                            ),
+                        );
+                    }
+
+                    if (summary.length < 400 || summary.length > 2500) {
+                        return Promise.reject(
+                            new Error(
+                                `Received abnormally sized news entry for ${locale} ${range}. length = ${summary.length}`,
+                            ),
+                        );
+                    }
+
+                    State.news[range][locale] = summary;
+                    logger.info(`Generated news for ${locale} ${range}`);
+                    return Promise.resolve();
+                },
+                [],
+                3,
+                true,
+                1000,
             );
-        }),
-    );
+        }
+    }
 }
 
 /**
