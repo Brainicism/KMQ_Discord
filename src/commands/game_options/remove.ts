@@ -1,5 +1,6 @@
 import { EMBED_ERROR_COLOR, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { clickableSlashCommand } from "../../helpers/utils";
 import {
     generateOptionsMessage,
     getDebugLogHeader,
@@ -167,7 +168,9 @@ export default class RemoveCommand implements BaseCommand {
                         messageContext.guildID,
                         "command.remove.failure.unrecognizedGroups.removed",
                     ),
-                    helpGroups: "/help groups",
+                    helpGroups: `${clickableSlashCommand(
+                        "help",
+                    )} action:groups`,
                     unmatchedGroups: unmatchedGroups.join(", "),
                     solution: "",
                 },

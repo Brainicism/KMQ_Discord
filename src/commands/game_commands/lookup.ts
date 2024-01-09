@@ -2,6 +2,7 @@ import { IPCLogger } from "../../logger";
 import { KmqImages, SHADOW_BANNED_ARTIST_IDS } from "../../constants";
 import {
     chunkArray,
+    clickableSlashCommand,
     containsHangul,
     friendlyFormattedDate,
     friendlyFormattedNumber,
@@ -47,6 +48,9 @@ import type MatchedArtist from "src/interfaces/matched_artist";
 import type QueriedSong from "../../interfaces/queried_song";
 
 const COMMAND_NAME = "lookup";
+const SONG_NAME = "song_name";
+const SONG_LINK = "song_link";
+const ARTIST_NAME = "artist_name";
 const logger = new IPCLogger(COMMAND_NAME);
 
 const getDaisukiLink = (id: number, isMV: boolean): string => {
@@ -410,7 +414,10 @@ export default class LookupCommand implements BaseCommand {
         description: i18n.translate(guildID, "command.lookup.help.description"),
         examples: [
             {
-                example: "`/lookup song_name song_name:love dive`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    SONG_NAME,
+                )} ${SONG_NAME}:love dive`,
                 explanation: i18n.translate(
                     guildID,
                     "command.lookup.help.example.song",
@@ -418,8 +425,10 @@ export default class LookupCommand implements BaseCommand {
                 ),
             },
             {
-                example:
-                    "`/lookup song_link song_link:https://www.youtube.com/watch?v=4TWR90KJl84`",
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    SONG_LINK,
+                )} ${SONG_LINK}:https://www.youtube.com/watch?v=4TWR90KJl84`,
                 explanation: i18n.translate(
                     guildID,
                     "command.lookup.help.example.song",
@@ -437,7 +446,7 @@ export default class LookupCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: "song_name",
+                    name: SONG_NAME,
                     description: i18n.translate(
                         LocaleType.EN,
                         "command.lookup.help.interaction.byName.description",
@@ -459,7 +468,7 @@ export default class LookupCommand implements BaseCommand {
                         .SUB_COMMAND,
                     options: [
                         {
-                            name: "song_name",
+                            name: SONG_NAME,
                             description: i18n.translate(
                                 LocaleType.EN,
                                 "command.lookup.help.interaction.byName.field.song",
@@ -482,7 +491,7 @@ export default class LookupCommand implements BaseCommand {
                             autocomplete: true,
                         },
                         {
-                            name: "artist_name",
+                            name: ARTIST_NAME,
                             description: i18n.translate(
                                 LocaleType.EN,
                                 "command.lookup.help.interaction.byName.field.artist",
@@ -507,7 +516,7 @@ export default class LookupCommand implements BaseCommand {
                     ],
                 },
                 {
-                    name: "song_link",
+                    name: SONG_LINK,
                     description: i18n.translate(
                         LocaleType.EN,
                         "command.lookup.help.interaction.byLink.description",
@@ -529,7 +538,7 @@ export default class LookupCommand implements BaseCommand {
                         .SUB_COMMAND,
                     options: [
                         {
-                            name: "song_link",
+                            name: SONG_LINK,
                             description: i18n.translate(
                                 LocaleType.EN,
                                 "command.lookup.help.interaction.byLink.field",
@@ -689,16 +698,15 @@ export default class LookupCommand implements BaseCommand {
         _messageContext: MessageContext,
     ): Promise<void> {
         const interactionData = getInteractionValue(interaction);
-        if (interactionData.interactionName === "song_link") {
+        if (interactionData.interactionName === SONG_LINK) {
             await this.lookupSong(
                 interaction,
-                interactionData.interactionOptions["song_link"],
+                interactionData.interactionOptions[SONG_LINK],
             );
-        } else if (interactionData.interactionName === "song_name") {
-            const songName = interactionData.interactionOptions["song_name"];
+        } else if (interactionData.interactionName === SONG_NAME) {
+            const songName = interactionData.interactionOptions[SONG_NAME];
 
-            const artistName =
-                interactionData.interactionOptions["artist_name"];
+            const artistName = interactionData.interactionOptions[ARTIST_NAME];
 
             let artistID: number | undefined;
             if (artistName) {
@@ -739,9 +747,8 @@ export default class LookupCommand implements BaseCommand {
             State.getGuildLocale(interaction.guildID as string) ===
                 LocaleType.KO;
 
-        if (focusedKey === "song_name") {
-            const artistName =
-                interactionData.interactionOptions["artist_name"];
+        if (focusedKey === SONG_NAME) {
+            const artistName = interactionData.interactionOptions[ARTIST_NAME];
 
             let artistID: number | undefined;
             if (artistName) {
@@ -785,9 +792,9 @@ export default class LookupCommand implements BaseCommand {
                     ),
                 );
             }
-        } else if (focusedKey === "artist_name") {
+        } else if (focusedKey === ARTIST_NAME) {
             const enteredSongName =
-                interactionData.interactionOptions["song_name"];
+                interactionData.interactionOptions[SONG_NAME];
 
             let matchingArtists: Array<MatchedArtist> = [];
             if (!enteredSongName) {

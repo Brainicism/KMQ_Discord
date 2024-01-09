@@ -131,7 +131,7 @@ function missingPermissionsText(
     return i18n.translate(guildID, "misc.failure.missingPermissionsText", {
         missingPermissions: missingPermissions.join(", "),
         permissionsLink: PERMISSIONS_LINK,
-        helpCommand: "`/help`",
+        helpCommand: clickableSlashCommand("help"),
     });
 }
 
@@ -821,7 +821,7 @@ export async function generateOptionsMessage(
             description: i18n.translate(
                 guildID,
                 "misc.failure.retrievingSongData.description",
-                { helpCommand: "`/help`" },
+                { helpCommand: clickableSlashCommand("help") },
             ),
         });
         return null;
@@ -1115,7 +1115,7 @@ export async function generateOptionsMessage(
         footerText = i18n.translate(
             messageContext.guildID,
             "command.options.perCommandHelp",
-            { helpCommand: "/help" },
+            { helpCommand: clickableSlashCommand("help") },
         );
     } else if (session?.isListeningSession()) {
         footerText = i18n.translate(
@@ -2229,7 +2229,11 @@ export async function notifyOptionsGenerationError(
         description: i18n.translate(
             messageContext.guildID,
             "misc.failure.optionsGeneration.description",
-            { resetCommand: "`/reset`", helpCommand: "`/help`", debugId },
+            {
+                resetCommand: clickableSlashCommand("reset"),
+                helpCommand: clickableSlashCommand("help"),
+                debugId,
+            },
         ),
     });
 }

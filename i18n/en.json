@@ -75,7 +75,7 @@
         "begin": {
             "ignored": {
                 "noTeam": {
-                    "description": "Create a team using `{{join}} [team name]` before you can start the game."
+                    "description": "Create a team using {{join}} team_name:[team name] before you can start the game."
                 },
                 "title": "Begin Ignored"
             }
@@ -357,7 +357,7 @@
             "interaction": {
                 "failure": {
                     "notHidden": {
-                        "description": "`/guess` can only be used during `/play hidden`.",
+                        "description": "{{guessCommand}} can only be used during {{playHiddenCommand}}.",
                         "title": "Guess Ignored"
                     }
                 },
@@ -385,7 +385,7 @@
         },
         "help": {
             "command": "command",
-            "description": "Type {{play}} in chat and the bot will play a random k-pop song in VC. The goal of this game is to be the first person to guess the song name in chat.\nSee your current game options with {{options}}. Use {{help}} `[{{command}}]` to get more details ",
+            "description": "Type {{play}} in chat and the bot will play a random k-pop song in VC. The goal of this game is to be the first person to guess the song name in chat.\nSee your current game options with {{options}}. Use {{help}} action:`[{{command}}]` to get more details ",
             "examples": "Examples",
             "failure": {
                 "noDocs": "Sorry, there is no documentation on {{action}}."
@@ -801,7 +801,7 @@
             "listeningSessionNotAvailable": "Some options are not available during a listening session",
             "notSet": "Not set",
             "overview": "Now playing the top {{limit}} out of {{totalSongs}} available songs from the following options:",
-            "perCommandHelp": "Looking for information on how to use a command? Check out \"{{helpCommand}} [command]\" to learn more.",
+            "perCommandHelp": "Looking for information on how to use a command? Check out {{helpCommand}} action:[command] to learn more.",
             "premiumOptionsNonPremiumGame": "Note: active game is not premium",
             "preset": "Preset",
             "reset": "{{presetOrOption}} Reset",
@@ -845,7 +845,7 @@
                 "overrideTeams": {
                     "description": "If you meant to start a {{oldGameType}} game, {{end}} this game, call {{playOldGameType}}, {{gameSpecificInstructions}}, and then call {{begin}}.",
                     "teams": {
-                        "join": "`{{join}} [team name]` a team"
+                        "join": "{{join}} team_name:[team name] a team"
                     },
                     "title": "Ignoring {{playOldGameType}}"
                 }
@@ -925,12 +925,12 @@
                 "title": "Preset Deleted"
             },
             "exported": {
-                "description": "Import {{presetName}} as a new preset in other servers using:\n`{{presetImport}} {{presetUUID}} [preset_name]`\n\nAlternatively, load the preset's options directly using:\n`{{presetLoad}} {{presetUUID}}`",
+                "description": "Import {{presetName}} as a new preset in other servers using:\n{{presetImport}} exported_preset:{{presetUUID}} new_preset_name:[preset_name]\n\nAlternatively, load the preset's options directly using:\n{{presetLoad}} preset_name:{{presetUUID}}",
                 "title": "Preset Exported"
             },
             "failure": {
                 "alreadyExists": {
-                    "description": "Preset {{presetNameFormatted}} already exists. You can delete the old one with `{{presetDelete}} {{presetName}}`.",
+                    "description": "Preset {{presetNameFormatted}} already exists. You can delete the old one with {{presetDelete}} preset_name:{{presetName}}.",
                     "title": "Preset Already Exists"
                 },
                 "illegalPrefix": {
@@ -942,7 +942,7 @@
                     "title": "Preset Name Too Long"
                 },
                 "missingIdentifier": {
-                    "description": "You must specify a preset identifier. Use `{{presetExport}} [preset_name]` to retrieve a preset's identifier.",
+                    "description": "You must specify a preset identifier. Use {{presetExport}} preset_name:[preset_name] to retrieve a preset's identifier.",
                     "title": "Preset Identifier Missing"
                 },
                 "missingName": {
@@ -979,7 +979,7 @@
                 }
             },
             "imported": {
-                "description": "Load the newly imported preset using `{{presetLoad}} {{presetName}}`.",
+                "description": "Load the newly imported preset using {{presetLoad}} preset_name:{{presetName}}.",
                 "title": "Preset Imported"
             },
             "interaction": {
@@ -1302,7 +1302,7 @@
                 "description": "Choose whether to automatically include a group's subunits, when using {{groups}}.",
                 "example": {
                     "exclude": "Do not include subunits",
-                    "include": "Automatically include subunits. For example, `{{groupCommand}} {{parentGroup}}` would include songs by {{parentGroup}}, {{subunitOne}}, {{subunitTwo}}, etc.",
+                    "include": "Automatically include subunits. For example, {{groupCommand}} group_1:{{parentGroup}} would include songs by {{parentGroup}}, {{subunitOne}}, {{subunitTwo}}, etc.",
                     "reset": "Reset to the default option of {{defaultSubunit}}"
                 },
                 "name": "subunits"
@@ -1526,7 +1526,7 @@
                     "notInEnum": "Expected one of the following valid {{argument}} values: ({{validValues}})."
                 },
                 "numArguments": {
-                    "incorrect": "Incorrect number of arguments. See `{{help}} {{command}}` for usage."
+                    "incorrect": "Incorrect number of arguments. See {{help}} action:{{command}} for usage."
                 },
                 "number": {
                     "max": "Expected value less than or equal to {{max}} for {{argument}}",
@@ -1635,7 +1635,7 @@
             "notHidden": "You can't do that during a hidden game.",
             "notListeningSession": "You can't do that while in a listening session.",
             "notPremium": "You need KMQ Premium to use this command (see {{premium}}).",
-            "notSpotify": "You can't change that option when playing from Spotify. Use `/spotify reset` before changing this option.",
+            "notSpotify": "You can't change that option when playing from Spotify. Use {{spotifyResetCommand}} before changing this option.",
             "premiumOrDebugServer": "This command only works in the official KMQ server or for KMQ Premium members (see {{premium}}).",
             "title": "Wait..."
         },

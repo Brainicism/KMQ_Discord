@@ -116,6 +116,13 @@ export default class GuessCommand implements BaseCommand {
                     i18n.translate(
                         messageContext.guildID,
                         "command.guess.interaction.failure.notHidden.description",
+                        {
+                            guessCommand: clickableSlashCommand(COMMAND_NAME),
+                            playHiddenCommand: clickableSlashCommand(
+                                "play",
+                                GameType.HIDDEN,
+                            ),
+                        },
                     ),
                 );
                 return;
