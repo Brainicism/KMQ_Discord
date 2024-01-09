@@ -5,6 +5,8 @@ import Snoowrap from "snoowrap";
 
 const logger = new IPCLogger("reddit_client");
 
+const TOP_POSTS_LIMIT = 15;
+
 export interface KpopNewsRedditPost {
     title: string;
     link: string;
@@ -105,7 +107,7 @@ export class RedditClient {
 
             const popularPosts = matchingPosts
                 .filter((x) => x.score > 100)
-                .slice(0, 25);
+                .slice(0, TOP_POSTS_LIMIT);
 
             return popularPosts.map((x) => ({
                 title: x.title,
