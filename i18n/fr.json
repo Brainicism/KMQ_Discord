@@ -1299,7 +1299,7 @@
         },
         "subunits": {
             "help": {
-                "description": "Choisissez si vous souhaitez inclure les sous-unités d'un groupe lors de l'utilisation de {{groups}}.",
+                "description": "Choisissez d'inclure ou non les sous-unités avec {{groups}}.",
                 "example": {
                     "exclude": "Ne pas inclure les sous-unités",
                     "include": "Inclure automatiquement les sous-unités. Par exemple, {{groupCommand}} group_1:{{parentGroup}} inclurait les chansons de {{parentGroup}}, {{subunitOne}}, {{subunitTwo}}, etc.",

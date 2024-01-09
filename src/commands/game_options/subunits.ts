@@ -97,18 +97,6 @@ export default class SubunitsCommand implements BaseCommand {
     > => [
         {
             name: COMMAND_NAME,
-            description: i18n.translate(
-                LocaleType.EN,
-                "command.subunits.help.description",
-                { groups: clickableSlashCommand("groups") },
-            ),
-            descriptionLocalizations: {
-                [LocaleType.KO]: i18n.translate(
-                    LocaleType.KO,
-                    "command.subunits.help.description",
-                    { groups: clickableSlashCommand("groups") },
-                ),
-            },
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
@@ -117,7 +105,7 @@ export default class SubunitsCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.subunits.help.description",
                         {
-                            groups: clickableSlashCommand("groups"),
+                            groups: "/groups",
                         },
                     ),
                     description_localizations: Object.values(LocaleType)
@@ -129,7 +117,7 @@ export default class SubunitsCommand implements BaseCommand {
                                     locale,
                                     "command.subunits.help.description",
                                     {
-                                        groups: clickableSlashCommand("groups"),
+                                        groups: "/groups",
                                     },
                                 ),
                             }),
