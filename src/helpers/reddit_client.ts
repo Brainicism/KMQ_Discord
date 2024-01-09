@@ -41,6 +41,7 @@ const generateFilteredQuery = (): string => {
         "Audio",
         "Interview",
         "Dance Challenge",
+        "Dance Practice",
         "Meta",
     ];
 
