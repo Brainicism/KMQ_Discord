@@ -108,13 +108,21 @@ export class RedditClient {
                 .filter((x) => x.score > 100)
                 .slice(0, 25);
 
-            return popularPosts.map((x) => ({
-                title: x.title,
-                link: `https://reddit.com${x.permalink}`,
-                date: new Date(x.created_utc * 1000),
-                flair: x.link_flair_css_class as string,
-                x: Date.now() - new Date(x.created_utc * 1000).getTime(),
-            }));
+            return popularPosts.map((x) => {
+                const flairGroup = x.link_flair_css_class as string;
+                let flair = (x.link_flair_text as string).toLowerCase();
+                if (flair.startsWith("[") && flair.endsWith("]")) {
+                    flair = flair.slice(1, flair.length - 1);
+                }
+
+                return {
+                    title: x.title,
+                    link: `https://reddit.com${x.permalink}`,
+                    date: new Date(x.created_utc * 1000),
+                    flair: `${flairGroup}:${flair}`,
+                    x: Date.now() - new Date(x.created_utc * 1000).getTime(),
+                };
+            });
         } catch (e) {
             logger.error(
                 `Failed to fetch getTopPosts(). interval = ${newsRangeToRedditInterval(
