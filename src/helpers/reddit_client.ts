@@ -44,7 +44,7 @@ const generateFilteredQuery = (): string => {
         "Meta",
     ];
 
-    const flairedFilters = filters.map((x) => `flair:'${x}'`);
+    const flairedFilters = filters.map((x) => `flair:"${x}"`);
     return `NOT (${flairedFilters.join(" OR ")})`;
 };
 
