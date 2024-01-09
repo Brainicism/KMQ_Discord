@@ -1115,7 +1115,7 @@ export async function generateOptionsMessage(
         footerText = i18n.translate(
             messageContext.guildID,
             "command.options.perCommandHelp",
-            { helpCommand: clickableSlashCommand("help") },
+            { helpCommand: "/help" },
         );
     } else if (session?.isListeningSession()) {
         footerText = i18n.translate(
