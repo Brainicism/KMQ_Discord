@@ -115,6 +115,10 @@ export class RedditClient {
                     flair = flair.slice(1, flair.length - 1);
                 }
 
+                if (flair === "album discussion") {
+                    flair = "album";
+                }
+
                 return {
                     title: x.title,
                     link: `https://reddit.com${x.permalink}`,
