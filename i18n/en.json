@@ -925,12 +925,12 @@
                 "title": "Preset Deleted"
             },
             "exported": {
-                "description": "Import {{presetName}} as a new preset in other servers using:\n{{presetImport}} exported_preset:{{presetUUID}} new_preset_name:[preset_name]\n\nAlternatively, load the preset's options directly using:\n{{presetLoad}} preset_name:{{presetUUID}}",
+                "description": "Import {{presetName}} as a new preset in other servers using:\n{{presetImport}} `exported_preset:{{presetUUID}} new_preset_name:[preset_name]`\n\nAlternatively, load the preset's options directly using:\n{{presetLoad}} `preset_name:{{presetUUID}}`",
                 "title": "Preset Exported"
             },
             "failure": {
                 "alreadyExists": {
-                    "description": "Preset {{presetNameFormatted}} already exists. You can delete the old one with {{presetDelete}} preset_name:{{presetName}}.",
+                    "description": "Preset {{presetNameFormatted}} already exists. You can delete the old one with {{presetDelete}} `preset_name:{{presetName}}`.",
                     "title": "Preset Already Exists"
                 },
                 "illegalPrefix": {
@@ -942,7 +942,7 @@
                     "title": "Preset Name Too Long"
                 },
                 "missingIdentifier": {
-                    "description": "You must specify a preset identifier. Use {{presetExport}} preset_name:[preset_name] to retrieve a preset's identifier.",
+                    "description": "You must specify a preset identifier. Use {{presetExport}} `preset_name:[preset_name]` to retrieve a preset's identifier.",
                     "title": "Preset Identifier Missing"
                 },
                 "missingName": {
@@ -979,7 +979,7 @@
                 }
             },
             "imported": {
-                "description": "Load the newly imported preset using {{presetLoad}} preset_name:{{presetName}}.",
+                "description": "Load the newly imported preset using {{presetLoad}} `preset_name:{{presetName}}`.",
                 "title": "Preset Imported"
             },
             "interaction": {

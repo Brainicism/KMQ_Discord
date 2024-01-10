@@ -925,12 +925,12 @@
                 "title": "Préréglage supprimé"
             },
             "exported": {
-                "description": "Importer {{presetName}} en tant que nouveau préréglage dans d'autres serveurs en utilisant :\n{{presetImport}} exported_preset:{{presetUUID}} new_preset_name:[nom_préréglage]\n\nAlternativement, chargez directement les options du préréglage en utilisant :\n{{presetLoad}} preset_name:{{presetUUID}}",
+                "description": "Importer {{presetName}} en tant que nouveau préréglage dans d'autres serveurs en utilisant :\n{{presetImport}} `exported_preset:{{presetUUID}} new_preset_name:[nom_préréglage]`\n\nAlternativement, chargez directement les options du préréglage en utilisant :\n{{presetLoad}} `preset_name:{{presetUUID}}`",
                 "title": "Préréglage exporté"
             },
             "failure": {
                 "alreadyExists": {
-                    "description": "Le préréglage {{presetNameFormatted}} existe déjà. Vous pouvez supprimer l'ancien avec {{presetDelete}} preset_name:{{presetName}}.",
+                    "description": "Le préréglage {{presetNameFormatted}} existe déjà. Vous pouvez supprimer l'ancien avec {{presetDelete}} `preset_name:{{presetName}}`.",
                     "title": "Le préréglage existe déjà"
                 },
                 "illegalPrefix": {
@@ -942,7 +942,7 @@
                     "title": "Nom de préréglage trop long"
                 },
                 "missingIdentifier": {
-                    "description": "Vous devez spécifier un identifiant de préréglage. Utilisez {{presetExport}} preset_name:[nom_préréglage] pour récupérer l'identifiant d'un préréglage.",
+                    "description": "Vous devez spécifier un identifiant de préréglage. Utilisez {{presetExport}} `preset_name:[nom_préréglage]` pour récupérer l'identifiant d'un préréglage.",
                     "title": "Identifiant de préréglage manquant"
                 },
                 "missingName": {
@@ -979,7 +979,7 @@
                 }
             },
             "imported": {
-                "description": "Chargez le nouveau préréglage importé en utilisant {{presetLoad}} preset_name:{{presetName}}.",
+                "description": "Chargez le nouveau préréglage importé en utilisant {{presetLoad}} `preset_name:{{presetName}}`.",
                 "title": "Préréglage importé"
             },
             "interaction": {

@@ -925,12 +925,12 @@
                 "title": "预设已删除"
             },
             "exported": {
-                "description": "使用以下命令将 {{presetName}} 导入其他服务器作为新预设：\n{{presetImport}} exported_preset:{{presetUUID}} new_preset_name:[预设名称]\n\n或者，直接使用以下命令加载预设选项：\n{{presetLoad}} preset_name:{{presetUUID}}",
+                "description": "使用以下命令将 {{presetName}} 导入其他服务器作为新预设：\n{{presetImport}} `exported_preset:{{presetUUID}} new_preset_name:[预设名称]`\n\n或者，直接使用以下命令加载预设选项：\n{{presetLoad}} `preset_name:{{presetUUID}}`",
                 "title": "预设已导出"
             },
             "failure": {
                 "alreadyExists": {
-                    "description": "预设 {{presetNameFormatted}} 已存在。您可以使用 {{presetDelete}} preset_name:{{presetName}} 删除旧预设。",
+                    "description": "预设 {{presetNameFormatted}} 已存在。您可以使用 {{presetDelete}} `preset_name:{{presetName}}` 删除旧预设。",
                     "title": "预设已存在"
                 },
                 "illegalPrefix": {
@@ -942,7 +942,7 @@
                     "title": "预设名称过长"
                 },
                 "missingIdentifier": {
-                    "description": "您必须指定一个预设标识符。使用 {{presetExport}} preset_name:[preset_name] 来检索预设的标识符。",
+                    "description": "您必须指定一个预设标识符。使用 {{presetExport}} `preset_name:[preset_name]` 来检索预设的标识符。",
                     "title": "缺少预设标识符"
                 },
                 "missingName": {
@@ -979,7 +979,7 @@
                 }
             },
             "imported": {
-                "description": "使用 {{presetLoad}} preset_name:{{presetName}} 加载新导入的预设。",
+                "description": "使用 {{presetLoad}} `preset_name:{{presetName}}` 加载新导入的预设。",
                 "title": "导入的预设"
             },
             "interaction": {

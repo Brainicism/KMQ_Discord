@@ -925,12 +925,12 @@
                 "title": "Preestablecido Eliminado"
             },
             "exported": {
-                "description": "Importa {{presetName}} como un nuevo preestablecido en otros servidores usando:\n{{presetImport}} exported_preset:{{presetUUID}} new_preset_name:[nombre_preset]\n\nAlternativamente, carga las opciones del preestablecido directamente usando:\n{{presetLoad}} preset_name:{{presetUUID}}",
+                "description": "Importa {{presetName}} como un nuevo preestablecido en otros servidores usando:\n{{presetImport}} `exported_preset:{{presetUUID}} new_preset_name:[nombre_preset]`\n\nAlternativamente, carga las opciones del preestablecido directamente usando:\n{{presetLoad}} `preset_name:{{presetUUID}}`",
                 "title": "Preestablecido Exportado"
             },
             "failure": {
                 "alreadyExists": {
-                    "description": "El preestablecido {{presetNameFormatted}} ya existe. Puedes eliminar el antiguo con {{presetDelete}} preset_name:{{presetName}}.",
+                    "description": "El preestablecido {{presetNameFormatted}} ya existe. Puedes eliminar el antiguo con {{presetDelete}} `preset_name:{{presetName}}`.",
                     "title": "Preestablecido Ya Existe"
                 },
                 "illegalPrefix": {
@@ -942,7 +942,7 @@
                     "title": "Nombre de preestablecido demasiado largo"
                 },
                 "missingIdentifier": {
-                    "description": "Debe especificar un identificador de preestablecido. Use {{presetExport}} preset_name:[nombre_preset] para obtener el identificador de un preestablecido.",
+                    "description": "Debe especificar un identificador de preestablecido. Use {{presetExport}} `preset_name:[nombre_preset]` para obtener el identificador de un preestablecido.",
                     "title": "Falta el identificador de preestablecido"
                 },
                 "missingName": {
@@ -979,7 +979,7 @@
                 }
             },
             "imported": {
-                "description": "Carga el preestablecido recién importado usando {{presetLoad}} preset_name:{{presetName}}.",
+                "description": "Carga el preestablecido recién importado usando {{presetLoad}} `preset_name:{{presetName}}`.",
                 "title": "Preestablecido Importado"
             },
             "interaction": {

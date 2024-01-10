@@ -925,12 +925,12 @@
                 "title": "プリセット削除済み"
             },
             "exported": {
-                "description": "他のサーバーに新しいプリセットとして{{presetName}}をインポートするには、以下を使用してください：\n{{presetImport}} exported_preset:{{presetUUID}} new_preset_name:[プリセット名]\n\nまたは、プリセットのオプションを直接ロードするには、以下を使用してください：\n{{presetLoad}} preset_name:{{presetUUID}}",
+                "description": "他のサーバーに新しいプリセットとして{{presetName}}をインポートするには、以下を使用してください：\n{{presetImport}} `exported_preset:{{presetUUID}} new_preset_name:[プリセット名]`\n\nまたは、プリセットのオプションを直接ロードするには、以下を使用してください：\n{{presetLoad}} `preset_name:{{presetUUID}}`",
                 "title": "プリセットエクスポート済み"
             },
             "failure": {
                 "alreadyExists": {
-                    "description": "プリセット{{presetNameFormatted}}は既に存在しています。古いものは{{presetDelete}} preset_name:{{presetName}}で削除できます。",
+                    "description": "プリセット{{presetNameFormatted}}は既に存在しています。古いものは{{presetDelete}} `preset_name:{{presetName}}`で削除できます。",
                     "title": "プリセットは既に存在しています"
                 },
                 "illegalPrefix": {
@@ -942,7 +942,7 @@
                     "title": "プリセット名が長すぎます"
                 },
                 "missingIdentifier": {
-                    "description": "プリセットの識別子を指定する必要があります。{{presetExport}} preset_name:[プリセット名]を使用してプリセットの識別子を取得してください。",
+                    "description": "プリセットの識別子を指定する必要があります。{{presetExport}} `preset_name:[プリセット名]`を使用してプリセットの識別子を取得してください。",
                     "title": "プリセット識別子がありません"
                 },
                 "missingName": {
@@ -979,7 +979,7 @@
                 }
             },
             "imported": {
-                "description": "{{presetLoad}} preset_name:{{presetName}} を使用して新しくインポートされたプリセットを読み込みます。",
+                "description": "{{presetLoad}} `preset_name:{{presetName}}` を使用して新しくインポートされたプリセットを読み込みます。",
                 "title": "プリセットがインポートされました"
             },
             "interaction": {

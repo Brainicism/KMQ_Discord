@@ -925,12 +925,12 @@
                 "title": "사전 설정이 삭제됨."
             },
             "exported": {
-                "description": "다음을 사용하여 {{presetName}}을(를) 다른 서버의 새 사전 설정으로 가져옵니다.\n{{presetImport}} exported_preset:{{presetUUID}} new_preset_name:[사전 설정 이름]\n\n또는 다음을 사용하여 사전 설정 옵션을 직접 로드합니다.\n{{presetLoad}} preset_name:{{presetUUID}}",
+                "description": "다음을 사용하여 {{presetName}}을(를) 다른 서버의 새 사전 설정으로 가져옵니다.\n{{presetImport}} `exported_preset:{{presetUUID}} new_preset_name:[사전 설정 이름]`\n\n또는 다음을 사용하여 사전 설정 옵션을 직접 로드합니다.\n{{presetLoad}} `preset_name:{{presetUUID}}`",
                 "title": "사전 설정을 내보냄."
             },
             "failure": {
                 "alreadyExists": {
-                    "description": "사전 설정 {{presetNameFormatted}}이(가) 이미 존재합니다. {{presetDelete}} preset_name:{{presetName}}으로 이전 항목을 삭제할 수 있습니다.",
+                    "description": "사전 설정 {{presetNameFormatted}}이(가) 이미 존재합니다. {{presetDelete}} `preset_name:{{presetName}}`으로 이전 항목을 삭제할 수 있습니다.",
                     "title": "사전 설정이 이미 있음."
                 },
                 "illegalPrefix": {
@@ -942,7 +942,7 @@
                     "title": "사전 설정 이름이 너무 긺."
                 },
                 "missingIdentifier": {
-                    "description": "미리 설정된 식별자를 지정해야 합니다. 사전 설정의 식별자를 검색하려면 {{presetExport}} preset_name:[사전 설정 이름]을(를) 사용하십시오.",
+                    "description": "미리 설정된 식별자를 지정해야 합니다. 사전 설정의 식별자를 검색하려면 {{presetExport}} `preset_name:[사전 설정 이름]`을(를) 사용하십시오.",
                     "title": "사전 설정 식별자 누락"
                 },
                 "missingName": {
@@ -979,7 +979,7 @@
                 }
             },
             "imported": {
-                "description": "{{presetLoad}} preset_name:{{presetName}}을(를) 사용하여 새로 가져온 사전 설정을 로드합니다.",
+                "description": "{{presetLoad}} `preset_name:{{presetName}}`을(를) 사용하여 새로 가져온 사전 설정을 로드합니다.",
                 "title": "사전 설정을 가져옴."
             },
             "interaction": {
