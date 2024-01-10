@@ -7,6 +7,7 @@ import {
     sendErrorMessage,
     tryCreateInteractionErrorAcknowledgement,
 } from "./helpers/discord_utils";
+import { clickableSlashCommand } from "./helpers/utils";
 import { getTimeUntilRestart } from "./helpers/management_utils";
 import { isUserPremium } from "./helpers/game_utils";
 import AnswerType from "./enums/option_types/answer_type";
@@ -324,7 +325,7 @@ export default class CommandPrechecks {
             description: i18n.translate(
                 messageContext.guildID,
                 "misc.preCheck.notPremium",
-                { premium: "`/premium`" },
+                { premium: clickableSlashCommand("premium") },
             ),
         };
 
@@ -359,7 +360,7 @@ export default class CommandPrechecks {
             description: i18n.translate(
                 messageContext.guildID,
                 "misc.preCheck.premiumOrDebugServer",
-                { premium: "`/premium`" },
+                { premium: clickableSlashCommand("premium") },
             ),
         };
 
@@ -385,6 +386,12 @@ export default class CommandPrechecks {
                 description: i18n.translate(
                     messageContext.guildID,
                     "misc.preCheck.notSpotify",
+                    {
+                        spotifyResetCommand: clickableSlashCommand(
+                            "spotify",
+                            OptionAction.RESET,
+                        ),
+                    },
                 ),
             };
 

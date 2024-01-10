@@ -232,10 +232,19 @@ export default class GoalCommand implements BaseCommand {
                             messageContext.guildID,
                             "command.goal.failure.gameOptionConflict.description",
                             {
-                                elimination: `\`${GameType.ELIMINATION}\``,
-                                goal: "`goal`",
-                                classic: `\`${GameType.CLASSIC}\``,
-                                teams: `\`${GameType.TEAMS}\``,
+                                elimination: clickableSlashCommand(
+                                    "play",
+                                    GameType.ELIMINATION,
+                                ),
+                                goal: clickableSlashCommand(COMMAND_NAME),
+                                classic: clickableSlashCommand(
+                                    "play",
+                                    GameType.CLASSIC,
+                                ),
+                                teams: clickableSlashCommand(
+                                    "play",
+                                    GameType.TEAMS,
+                                ),
                             },
                         ),
                     },

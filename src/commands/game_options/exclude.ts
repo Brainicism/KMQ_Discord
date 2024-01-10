@@ -104,7 +104,10 @@ export default class ExcludeCommand implements BaseCommand {
                         groupOne: "BESTie",
                         groupTwo: "Dia",
                         groupThree: "IKON",
-                        exclude: "`/exclude`",
+                        exclude: clickableSlashCommand(
+                            COMMAND_NAME,
+                            GroupAction.ADD,
+                        ),
                     },
                 ),
             },
@@ -120,7 +123,10 @@ export default class ExcludeCommand implements BaseCommand {
                         groupOne: "BESTie",
                         groupTwo: "Dia",
                         groupThree: "iKON",
-                        exclude: "`/exclude`",
+                        exclude: clickableSlashCommand(
+                            COMMAND_NAME,
+                            GroupAction.REMOVE,
+                        ),
                     },
                 ),
             },
@@ -342,13 +348,19 @@ export default class ExcludeCommand implements BaseCommand {
                             messageContext.guildID,
                             "misc.failure.groupsExcludeConflict.description",
                             {
-                                conflictingOptionOne: "`exclude`",
-                                conflictingOptionTwo: "`groups`",
+                                conflictingOptionOne:
+                                    clickableSlashCommand(COMMAND_NAME),
+                                conflictingOptionTwo:
+                                    clickableSlashCommand("groups"),
                                 groupsList: [...intersection]
                                     .filter((x) => !x.includes("+"))
                                     .join(", "),
-                                solutionStepOne: "`/groups remove`",
-                                solutionStepTwo: "`/exclude`",
+                                solutionStepOne: clickableSlashCommand(
+                                    "groups",
+                                    GroupAction.REMOVE,
+                                ),
+                                solutionStepTwo:
+                                    clickableSlashCommand(COMMAND_NAME),
                                 allowOrPrevent: i18n.translate(
                                     messageContext.guildID,
                                     "misc.failure.groupsExcludeConflict.prevent",
@@ -427,13 +439,18 @@ export default class ExcludeCommand implements BaseCommand {
                         messageContext.guildID,
                         "command.exclude.failure.unrecognizedGroups.excluded",
                     ),
-                    helpGroups: "`/help groups`",
+                    helpGroups: `${clickableSlashCommand(
+                        "help",
+                    )} action:groups`,
                     unmatchedGroups: `${unmatchedGroups.join(", ")}`,
                     solution: i18n.translate(
                         messageContext.guildID,
                         "misc.failure.unrecognizedGroups.solution",
                         {
-                            command: "`/exclude add`",
+                            command: clickableSlashCommand(
+                                COMMAND_NAME,
+                                GroupAction.ADD,
+                            ),
                         },
                     ),
                 },

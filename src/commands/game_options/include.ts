@@ -3,6 +3,7 @@ import {
     GROUP_LIST_URL,
     GroupAction,
     KmqImages,
+    OptionAction,
 } from "../../constants";
 import { IPCLogger } from "../../logger";
 import { clickableSlashCommand, getOrdinalNum } from "../../helpers/utils";
@@ -56,8 +57,8 @@ export default class IncludeCommand implements BaseCommand {
             guildID,
             "command.include.help.description",
             {
-                gender: "`gender`",
-                artisttype: "`artisttype`",
+                gender: clickableSlashCommand("gender"),
+                artisttype: clickableSlashCommand("artisttype"),
                 groupList: GROUP_LIST_URL,
             },
         ),
@@ -98,7 +99,10 @@ export default class IncludeCommand implements BaseCommand {
                     "command.add.help.example.include",
                     {
                         groupOne: "EXO",
-                        include: "`/include`",
+                        include: clickableSlashCommand(
+                            COMMAND_NAME,
+                            GroupAction.ADD,
+                        ),
                     },
                 ),
             },
@@ -112,7 +116,10 @@ export default class IncludeCommand implements BaseCommand {
                     "command.remove.help.example.include",
                     {
                         group: "exo",
-                        include: "`/include`",
+                        include: clickableSlashCommand(
+                            COMMAND_NAME,
+                            GroupAction.REMOVE,
+                        ),
                     },
                 ),
             },
@@ -266,7 +273,7 @@ export default class IncludeCommand implements BaseCommand {
                 )} | Game option conflict between include and groups.`,
             );
 
-            sendErrorMessage(
+            await sendErrorMessage(
                 messageContext,
                 {
                     title: i18n.translate(
@@ -277,9 +284,12 @@ export default class IncludeCommand implements BaseCommand {
                         messageContext.guildID,
                         "misc.failure.gameOptionConflict.description",
                         {
-                            optionOne: "`groups`",
-                            optionTwo: "`include`",
-                            optionOneCommand: "`/groups reset`",
+                            optionOne: clickableSlashCommand("groups"),
+                            optionTwo: clickableSlashCommand(COMMAND_NAME),
+                            optionOneCommand: clickableSlashCommand(
+                                "groups",
+                                OptionAction.RESET,
+                            ),
                         },
                     ),
                 },
@@ -353,13 +363,18 @@ export default class IncludeCommand implements BaseCommand {
                         messageContext.guildID,
                         "command.include.failure.unrecognizedGroups.included",
                     ),
-                    helpGroups: "`/help groups`",
+                    helpGroups: `${clickableSlashCommand(
+                        "help",
+                    )} action:groups`,
                     unmatchedGroups: unmatchedGroups.join(", "),
                     solution: i18n.translate(
                         messageContext.guildID,
                         "misc.failure.unrecognizedGroups.solution",
                         {
-                            command: "`/include add`",
+                            command: clickableSlashCommand(
+                                COMMAND_NAME,
+                                GroupAction.ADD,
+                            ),
                         },
                     ),
                 },

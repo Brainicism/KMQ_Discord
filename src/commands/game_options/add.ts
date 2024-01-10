@@ -1,5 +1,11 @@
-import { EMBED_ERROR_COLOR, KmqImages } from "../../constants";
+import {
+    EMBED_ERROR_COLOR,
+    GroupAction,
+    KmqImages,
+    OptionAction,
+} from "../../constants";
 import { IPCLogger } from "../../logger";
+import { clickableSlashCommand, setIntersection } from "../../helpers/utils";
 import {
     generateOptionsMessage,
     getDebugLogHeader,
@@ -11,7 +17,6 @@ import {
     getMatchingGroupNames,
     getSimilarGroupNames,
 } from "../../helpers/game_utils";
-import { setIntersection } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
@@ -154,7 +159,9 @@ export default class AddCommand implements BaseCommand {
                         messageContext.guildID,
                         "misc.failure.unrecognizedGroups.added",
                     ),
-                    helpGroups: "`/help groups`",
+                    helpGroups: `${clickableSlashCommand(
+                        "help",
+                    )} action:groups`,
                     unmatchedGroups: unmatchedGroups.join(", "),
                     solution: "",
                 },
@@ -215,13 +222,21 @@ export default class AddCommand implements BaseCommand {
                             messageContext.guildID,
                             "misc.failure.groupsExcludeConflict.description",
                             {
-                                conflictingOptionOne: "`/groups`",
-                                conflictingOptionTwo: "`/exclude`",
+                                conflictingOptionOne:
+                                    clickableSlashCommand("groups"),
+                                conflictingOptionTwo:
+                                    clickableSlashCommand("exclude"),
                                 groupsList: [...intersection]
                                     .filter((x) => !x.includes("+"))
                                     .join(", "),
-                                solutionStepOne: "`/exclude remove`",
-                                solutionStepTwo: "`/groups add`",
+                                solutionStepOne: clickableSlashCommand(
+                                    "exclude",
+                                    GroupAction.REMOVE,
+                                ),
+                                solutionStepTwo: clickableSlashCommand(
+                                    "groups",
+                                    GroupAction.ADD,
+                                ),
                                 allowOrPrevent: i18n.translate(
                                     messageContext.guildID,
                                     "misc.failure.groupsExcludeConflict.allow",
@@ -261,7 +276,7 @@ export default class AddCommand implements BaseCommand {
                         )} | Game option conflict between include and groups.`,
                     );
 
-                    sendErrorMessage(
+                    await sendErrorMessage(
                         messageContext,
                         {
                             title: i18n.translate(
@@ -272,9 +287,12 @@ export default class AddCommand implements BaseCommand {
                                 messageContext.guildID,
                                 "misc.failure.gameOptionConflict.description",
                                 {
-                                    optionOne: "`groups`",
-                                    optionTwo: "`include`",
-                                    optionOneCommand: "`/groups reset`",
+                                    optionOne: clickableSlashCommand("groups"),
+                                    optionTwo: clickableSlashCommand("include"),
+                                    optionOneCommand: clickableSlashCommand(
+                                        "groups",
+                                        OptionAction.RESET,
+                                    ),
                                 },
                             ),
                         },
@@ -309,13 +327,21 @@ export default class AddCommand implements BaseCommand {
                             messageContext.guildID,
                             "misc.failure.groupsExcludeConflict.description",
                             {
-                                conflictingOptionOne: "`/exclude`",
-                                conflictingOptionTwo: "`/groups`",
+                                conflictingOptionOne:
+                                    clickableSlashCommand("exclude"),
+                                conflictingOptionTwo:
+                                    clickableSlashCommand("groups"),
                                 groupsList: [...intersection]
                                     .filter((x) => !x.includes("+"))
                                     .join(", "),
-                                solutionStepOne: "`/groups remove`",
-                                solutionStepTwo: "`/exclude add`",
+                                solutionStepOne: clickableSlashCommand(
+                                    "groups",
+                                    GroupAction.REMOVE,
+                                ),
+                                solutionStepTwo: clickableSlashCommand(
+                                    "exclude",
+                                    GroupAction.ADD,
+                                ),
                                 allowOrPrevent: i18n.translate(
                                     messageContext.guildID,
                                     "misc.failure.groupsExcludeConflict.prevent",
