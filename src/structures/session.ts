@@ -8,6 +8,7 @@ import {
     getLocalizedSongName,
 } from "../helpers/game_utils";
 import {
+    clickableSlashCommand,
     friendlyFormattedNumber,
     getMention,
     truncatedString,
@@ -561,8 +562,8 @@ export default abstract class Session {
                     "misc.gameOwnerChanged.description",
                     {
                         newGameOwner: getMention(this.owner.id),
-                        forcehintCommand: "`/forcehint`",
-                        forceskipCommand: "`/forceskip`",
+                        forcehintCommand: clickableSlashCommand("forcehint"),
+                        forceskipCommand: clickableSlashCommand("forceskip"),
                     },
                 ),
                 thumbnailUrl: KmqImages.LISTENING,

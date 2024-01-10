@@ -62,7 +62,10 @@ export default class GenderCommand implements BaseCommand {
                 male: "`male`",
                 female: "`female`",
                 coed: "`coed`",
-                genderAlternating: "`/gender alternating`",
+                genderAlternating: clickableSlashCommand(
+                    COMMAND_NAME,
+                    "alternating",
+                ),
             },
         ),
         examples: [
@@ -261,7 +264,7 @@ export default class GenderCommand implements BaseCommand {
                     )} | Game option conflict between gender and groups.`,
                 );
 
-                sendErrorMessage(
+                await sendErrorMessage(
                     messageContext,
                     {
                         title: i18n.translate(
@@ -272,9 +275,12 @@ export default class GenderCommand implements BaseCommand {
                             messageContext.guildID,
                             "misc.failure.gameOptionConflict.description",
                             {
-                                optionOne: "`groups`",
-                                optionTwo: "`gender`",
-                                optionOneCommand: "`/groups reset`",
+                                optionOne: clickableSlashCommand("groups"),
+                                optionTwo: clickableSlashCommand(COMMAND_NAME),
+                                optionOneCommand: clickableSlashCommand(
+                                    "groups",
+                                    OptionAction.RESET,
+                                ),
                             },
                         ),
                     },
@@ -300,8 +306,10 @@ export default class GenderCommand implements BaseCommand {
                             messageContext.guildID,
                             "command.gender.warning.gameOption.description",
                             {
-                                alternatingGenderCommand:
-                                    "`/gender alternating`",
+                                alternatingGenderCommand: `${clickableSlashCommand(
+                                    COMMAND_NAME,
+                                    OptionAction.SET,
+                                )} gender_1:alternating`,
                             },
                         ),
                     },
