@@ -1064,7 +1064,9 @@ export default class LeaderboardCommand implements BaseCommand {
                                     messageContext.guildID,
                                     chooseRandom(leaderboardQuotes),
                                     {
-                                        command: "/help leaderboard",
+                                        command: `${clickableSlashCommand(
+                                            "help",
+                                        )} action:${COMMAND_NAME}`,
                                     },
                                 ),
                             },

@@ -367,7 +367,9 @@ export default class ProfileCommand implements BaseCommand {
                             message.guildID,
                             "command.profile.failure.notFound.description",
                             {
-                                profileHelp: "`/help profile`",
+                                profileHelp: `${clickableSlashCommand(
+                                    "help",
+                                )} action:${COMMAND_NAME}`,
                             },
                         ),
                     });
@@ -383,7 +385,11 @@ export default class ProfileCommand implements BaseCommand {
                 description: i18n.translate(
                     message.guildID,
                     "command.profile.failure.notFound.badUsage.description",
-                    { profileHelp: "`/help profile`" },
+                    {
+                        profileHelp: `${clickableSlashCommand(
+                            "help",
+                        )} action:${COMMAND_NAME}`,
+                    },
                 ),
             });
             return;
@@ -473,7 +479,9 @@ export default class ProfileCommand implements BaseCommand {
                     interaction.guildID as string,
                     "misc.interaction.profile.inaccessible",
                     {
-                        profileUserID: `\`/profile ${userId}\``,
+                        profileUserID: `${clickableSlashCommand(
+                            COMMAND_NAME,
+                        )} user_id:${userId}`,
                     },
                 ),
             );

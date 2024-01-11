@@ -75,7 +75,7 @@
         "begin": {
             "ignored": {
                 "noTeam": {
-                    "description": "ゲームを開始する前に `{{join}} [チーム名]` を使用してチームを作成してください。"
+                    "description": "ゲームを開始する前に {{join}} team_name:[チーム名] を使用してチームを作成してください。"
                 },
                 "title": "無視された開始"
             }
@@ -357,7 +357,7 @@
             "interaction": {
                 "failure": {
                     "notHidden": {
-                        "description": "`/guess` は `/play hidden` 中にのみ使用できます。",
+                        "description": "{{guessCommand}} は {{playHiddenCommand}} 中にのみ使用できます。",
                         "title": "推測が無視されました"
                     }
                 },
@@ -801,7 +801,7 @@
             "listeningSessionNotAvailable": "リスニングセッション中には一部のオプションが利用できません。",
             "notSet": "未設定",
             "overview": "現在、以下のオプションから利用可能な{{totalSongs}}曲のうち、トップ{{limit}}曲を再生しています。",
-            "perCommandHelp": "コマンドの使用方法についての情報をお探しですか？「{{helpCommand}} [command]」をチェックして、詳細を学びましょう。",
+            "perCommandHelp": "コマンドの使用方法についての情報をお探しですか？{{helpCommand}} action:[コマンド]をチェックして、詳細を学びましょう。",
             "premiumOptionsNonPremiumGame": "注：アクティブなゲームはプレミアムではありません。",
             "preset": "プリセット",
             "reset": "{{presetOrOption}}をリセット",
@@ -845,7 +845,7 @@
                 "overrideTeams": {
                     "description": "{{oldGameType}}ゲームを開始するつもりだった場合は、このゲームを{{end}}し、{{playOldGameType}}を呼び出し、{{gameSpecificInstructions}}を実行してから{{begin}}を呼び出してください。",
                     "teams": {
-                        "join": "`{{join}} [チーム名]` チームに参加する"
+                        "join": "{{join}} team_name:[チーム名] チームに参加する"
                     },
                     "title": "{{playOldGameType}}を無視する"
                 }
@@ -925,12 +925,12 @@
                 "title": "プリセット削除済み"
             },
             "exported": {
-                "description": "他のサーバーに新しいプリセットとして{{presetName}}をインポートするには、以下を使用してください：\n`{{presetImport}} {{presetUUID}} [プリセット名]`\n\nまたは、プリセットのオプションを直接ロードするには、以下を使用してください：\n`{{presetLoad}} {{presetUUID}}`",
+                "description": "他のサーバーに新しいプリセットとして{{presetName}}をインポートするには、以下を使用してください：\n{{presetImport}} `exported_preset:{{presetUUID}} new_preset_name:[プリセット名]`\n\nまたは、プリセットのオプションを直接ロードするには、以下を使用してください：\n{{presetLoad}} `preset_name:{{presetUUID}}`",
                 "title": "プリセットエクスポート済み"
             },
             "failure": {
                 "alreadyExists": {
-                    "description": "プリセット{{presetNameFormatted}}は既に存在しています。古いものは`{{presetDelete}} {{presetName}}`で削除できます。",
+                    "description": "プリセット{{presetNameFormatted}}は既に存在しています。古いものは{{presetDelete}} `preset_name:{{presetName}}`で削除できます。",
                     "title": "プリセットは既に存在しています"
                 },
                 "illegalPrefix": {
@@ -942,7 +942,7 @@
                     "title": "プリセット名が長すぎます"
                 },
                 "missingIdentifier": {
-                    "description": "プリセットの識別子を指定する必要があります。`{{presetExport}} [プリセット名]`を使用してプリセットの識別子を取得してください。",
+                    "description": "プリセットの識別子を指定する必要があります。{{presetExport}} `preset_name:[プリセット名]`を使用してプリセットの識別子を取得してください。",
                     "title": "プリセット識別子がありません"
                 },
                 "missingName": {
@@ -979,7 +979,7 @@
                 }
             },
             "imported": {
-                "description": "`{{presetLoad}} {{presetName}}` を使用して新しくインポートされたプリセットを読み込みます。",
+                "description": "{{presetLoad}} `preset_name:{{presetName}}` を使用して新しくインポートされたプリセットを読み込みます。",
                 "title": "プリセットがインポートされました"
             },
             "interaction": {
@@ -1248,7 +1248,7 @@
                 "title": "SpotifyプレイリストURLが無効です"
             },
             "matched": {
-                "description": "{{matchedCount}}/{{totalCount}}曲がマッチしました。",
+                "description": "`{{matchedCount}}/{{totalCount}}`曲がマッチしました。",
                 "title": "Spotifyで\"{{playlistName}}\"を再生中",
                 "truncated": "注：プレイリストの処理に時間がかかり、完了しませんでした。次回は小さなプレイリストで再試行してください。"
             },
@@ -1302,7 +1302,7 @@
                 "description": "{{groups}}を使用する場合、グループのサブユニットを自動的に含めるかどうかを選択してください。",
                 "example": {
                     "exclude": "サブユニットを含めない",
-                    "include": "サブユニットを自動的に含める。例えば、`{{groupCommand}} {{parentGroup}}`は、{{parentGroup}}、{{subunitOne}}、{{subunitTwo}}などの曲を含みます。",
+                    "include": "サブユニットを自動的に含める。例えば、{{groupCommand}} group_1:{{parentGroup}}は、{{parentGroup}}、{{subunitOne}}、{{subunitTwo}}などの曲を含みます。",
                     "reset": "{{defaultSubunit}}のデフォルトオプションにリセットする"
                 },
                 "name": "サブユニット"
@@ -1526,7 +1526,7 @@
                     "notInEnum": "有効な{{argument}}の値のうち、次のいずれかを指定してください: ({{validValues}})。"
                 },
                 "numArguments": {
-                    "incorrect": "引数の数が正しくありません。使用法については、`{{help}} {{command}}`を参照してください。"
+                    "incorrect": "引数の数が正しくありません。使用法については、{{help}} action:{{command}}を参照してください。"
                 },
                 "number": {
                     "max": "{{argument}}に対して{{max}}以下の値を指定してください。",
@@ -1635,7 +1635,7 @@
             "notHidden": "非公開ゲーム中はその操作はできません。",
             "notListeningSession": "リスニングセッション中にはそれはできません。",
             "notPremium": "このコマンドを使用するには、KMQプレミアムが必要です（{{premium}}を参照）。",
-            "notSpotify": "Spotifyから再生している場合は、このオプションを変更できません。このオプションを変更する前に、`/spotify reset`を使用してください。",
+            "notSpotify": "Spotifyから再生している場合は、このオプションを変更できません。このオプションを変更する前に、{{spotifyResetCommand}}を使用してください。",
             "premiumOrDebugServer": "このコマンドは、公式KMQサーバーまたはKMQプレミアムメンバーのみで動作します（{{premium}}を参照）。",
             "title": "お待ちください..."
         },

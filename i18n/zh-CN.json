@@ -75,7 +75,7 @@
         "begin": {
             "ignored": {
                 "noTeam": {
-                    "description": "在开始游戏之前，请使用 `{{join}} [团队名称]` 创建一个团队。"
+                    "description": "在开始游戏之前，请使用 {{join}} team_name:[团队名称] 创建一个团队。"
                 },
                 "title": "开始被忽略"
             }
@@ -357,7 +357,7 @@
             "interaction": {
                 "failure": {
                     "notHidden": {
-                        "description": "`/guess` 只能在 `/play hidden` 期间使用。",
+                        "description": "{{guessCommand}} 只能在 {{playHiddenCommand}} 期间使用。",
                         "title": "猜测被忽略"
                     }
                 },
@@ -801,7 +801,7 @@
             "listeningSessionNotAvailable": "在听歌会话期间，某些选项不可用。",
             "notSet": "未设置",
             "overview": "现在播放以下选项中可用的前{{limit}}首歌曲中的前{{totalSongs}}首：",
-            "perCommandHelp": "需要了解如何使用命令吗？查看“{{helpCommand}} [command]”以了解更多信息。",
+            "perCommandHelp": "需要了解如何使用命令吗？查看{{helpCommand}} action:[命令]以了解更多信息。",
             "premiumOptionsNonPremiumGame": "注意：活动游戏不是高级版",
             "preset": "预设",
             "reset": "{{presetOrOption}} 重置",
@@ -845,7 +845,7 @@
                 "overrideTeams": {
                     "description": "如果您想开始{{oldGameType}}游戏，请{{end}}此游戏，调用{{playOldGameType}}，{{gameSpecificInstructions}}，然后调用{{begin}}。",
                     "teams": {
-                        "join": "`{{join}} [队伍名称]` 一个团队"
+                        "join": "{{join}} team_name:[队伍名称] 一个团队"
                     },
                     "title": "忽略 {{playOldGameType}}"
                 }
@@ -925,12 +925,12 @@
                 "title": "预设已删除"
             },
             "exported": {
-                "description": "使用以下命令将 {{presetName}} 导入其他服务器作为新预设：\n`{{presetImport}} {{presetUUID}} [预设名称]`\n\n或者，直接使用以下命令加载预设选项：\n`{{presetLoad}} {{presetUUID}}`",
+                "description": "使用以下命令将 {{presetName}} 导入其他服务器作为新预设：\n{{presetImport}} `exported_preset:{{presetUUID}} new_preset_name:[预设名称]`\n\n或者，直接使用以下命令加载预设选项：\n{{presetLoad}} `preset_name:{{presetUUID}}`",
                 "title": "预设已导出"
             },
             "failure": {
                 "alreadyExists": {
-                    "description": "预设 {{presetNameFormatted}} 已存在。您可以使用 `{{presetDelete}} {{presetName}}` 删除旧预设。",
+                    "description": "预设 {{presetNameFormatted}} 已存在。您可以使用 {{presetDelete}} `preset_name:{{presetName}}` 删除旧预设。",
                     "title": "预设已存在"
                 },
                 "illegalPrefix": {
@@ -942,7 +942,7 @@
                     "title": "预设名称过长"
                 },
                 "missingIdentifier": {
-                    "description": "您必须指定一个预设标识符。使用 `{{presetExport}} [preset_name]` 来检索预设的标识符。",
+                    "description": "您必须指定一个预设标识符。使用 {{presetExport}} `preset_name:[preset_name]` 来检索预设的标识符。",
                     "title": "缺少预设标识符"
                 },
                 "missingName": {
@@ -979,7 +979,7 @@
                 }
             },
             "imported": {
-                "description": "使用 `{{presetLoad}} {{presetName}}` 加载新导入的预设。",
+                "description": "使用 {{presetLoad}} `preset_name:{{presetName}}` 加载新导入的预设。",
                 "title": "导入的预设"
             },
             "interaction": {
@@ -1248,7 +1248,7 @@
                 "title": "无效的 Spotify 播放列表链接"
             },
             "matched": {
-                "description": "匹配了 {{matchedCount}}/{{totalCount}} 首歌曲。",
+                "description": "匹配了 `{{matchedCount}}/{{totalCount}}` 首歌曲。",
                 "title": "正在 Spotify 上播放“{{playlistName}}”",
                 "truncated": "注意：播放列表处理时间过长，未能完成。请尝试使用较小的播放列表。"
             },
@@ -1302,7 +1302,7 @@
                 "description": "选择是否在使用 {{groups}} 时自动包括组的子单元。",
                 "example": {
                     "exclude": "不包括子单元",
-                    "include": "自动包括子单元。例如，`{{groupCommand}} {{parentGroup}}` 将包括 {{parentGroup}}，{{subunitOne}}，{{subunitTwo}} 等歌曲。",
+                    "include": "自动包括子单元。例如，{{groupCommand}} group_1:{{parentGroup}} 将包括 {{parentGroup}}，{{subunitOne}}，{{subunitTwo}} 等歌曲。",
                     "reset": "重置为默认选项 {{defaultSubunit}}。"
                 },
                 "name": "子单位"
@@ -1526,7 +1526,7 @@
                     "notInEnum": "{{argument}} 应该是以下有效值之一：({{validValues}})。"
                 },
                 "numArguments": {
-                    "incorrect": "参数数量不正确。请参考 `{{help}} {{command}}` 以了解用法。"
+                    "incorrect": "参数数量不正确。请参考 {{help}} action:{{command}} 以了解用法。"
                 },
                 "number": {
                     "max": "{{argument}} 应该小于等于 {{max}}。",
@@ -1635,7 +1635,7 @@
             "notHidden": "在隐藏游戏期间无法进行该操作。",
             "notListeningSession": "您不能在听歌会话中进行此操作。",
             "notPremium": "您需要 KMQ Premium 才能使用此命令(请参见{{premium}})。",
-            "notSpotify": "您不能在从 Spotify 播放时更改该选项。请在更改此选项之前使用 `/spotify reset`。",
+            "notSpotify": "您不能在从 Spotify 播放时更改该选项。请在更改此选项之前使用 {{spotifyResetCommand}}。",
             "premiumOrDebugServer": "此命令仅适用于官方 KMQ 服务器或 KMQ Premium 成员(请参见{{premium}})。",
             "title": "请稍等..."
         },

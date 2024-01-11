@@ -809,7 +809,10 @@ export default class PresetCommand implements BaseCommand {
                         messageContext.guildID,
                         "command.preset.savedOrReplaced.description",
                         {
-                            presetLoad: `\`/preset load ${presetName}\``,
+                            presetLoad: `${clickableSlashCommand(
+                                COMMAND_NAME,
+                                PresetAction.LOAD,
+                            )} preset_name:${presetName}`,
                         },
                     ),
                     thumbnailUrl: KmqImages.HAPPY,
@@ -888,7 +891,10 @@ export default class PresetCommand implements BaseCommand {
                     messageContext.guildID,
                     "command.preset.savedOrReplaced.description",
                     {
-                        presetLoad: `\`/preset load ${presetName}\``,
+                        presetLoad: `${clickableSlashCommand(
+                            COMMAND_NAME,
+                            PresetAction.LOAD,
+                        )} preset_name:${presetName}`,
                     },
                 ),
                 thumbnailUrl: KmqImages.HAPPY,
@@ -951,9 +957,15 @@ export default class PresetCommand implements BaseCommand {
                     "command.preset.exported.description",
                     {
                         presetName: `\`${presetName}\``,
-                        presetImport: "/preset import",
+                        presetImport: clickableSlashCommand(
+                            COMMAND_NAME,
+                            PresetAction.IMPORT,
+                        ),
                         presetUUID,
-                        presetLoad: "/preset load",
+                        presetLoad: clickableSlashCommand(
+                            COMMAND_NAME,
+                            PresetAction.LOAD,
+                        ),
                     },
                 ),
                 thumbnailUrl: KmqImages.THUMBS_UP,
@@ -991,7 +1003,10 @@ export default class PresetCommand implements BaseCommand {
                         "command.preset.failure.alreadyExists.description",
                         {
                             presetNameFormatted: `\`${presetName}\``,
-                            presetDelete: "/preset delete",
+                            presetDelete: clickableSlashCommand(
+                                COMMAND_NAME,
+                                PresetAction.DELETE,
+                            ),
                             presetName,
                         },
                     ),
@@ -1086,7 +1101,10 @@ export default class PresetCommand implements BaseCommand {
                     messageContext.guildID,
                     "command.preset.imported.description",
                     {
-                        presetLoad: "/preset load",
+                        presetLoad: clickableSlashCommand(
+                            COMMAND_NAME,
+                            PresetAction.LOAD,
+                        ),
                         presetName,
                     },
                 ),
@@ -1119,7 +1137,9 @@ export default class PresetCommand implements BaseCommand {
                               messageContext.guildID,
                               "command.preset.list.failure.noPresets.description",
                               {
-                                  presetHelp: "`/help preset`",
+                                  presetHelp: `${clickableSlashCommand(
+                                      "help",
+                                  )} action:${COMMAND_NAME}`,
                               },
                           ),
                 footerText:

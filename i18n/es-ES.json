@@ -75,7 +75,7 @@
         "begin": {
             "ignored": {
                 "noTeam": {
-                    "description": "Crea un equipo usando `{{join}} [nombre del equipo]` antes de poder comenzar el juego."
+                    "description": "Crea un equipo usando {{join}} team_name:[nombre del equipo] antes de poder comenzar el juego."
                 },
                 "title": "Ignorado"
             }
@@ -357,7 +357,7 @@
             "interaction": {
                 "failure": {
                     "notHidden": {
-                        "description": "`/guess` solo puede ser usado durante `/play hidden`.",
+                        "description": "{{guessCommand}} solo puede ser usado durante {{playHiddenCommand}}.",
                         "title": "Respuesta ignorada"
                     }
                 },
@@ -801,7 +801,7 @@
             "listeningSessionNotAvailable": "Algunas opciones no están disponibles durante una sesión de escucha",
             "notSet": "No establecido",
             "overview": "Reproduciendo las mejores {{limit}} de {{totalSongs}} canciones disponibles de las siguientes opciones:",
-            "perCommandHelp": "¿Buscas información sobre cómo usar un comando? Echa un vistazo a \"{{helpCommand}} [comando]\" para obtener más información.",
+            "perCommandHelp": "¿Buscas información sobre cómo usar un comando? Echa un vistazo a {{helpCommand}} action:[comando] para obtener más información.",
             "premiumOptionsNonPremiumGame": "Nota: el juego activo no es premium",
             "preset": "Preestablecido",
             "reset": "{{presetOrOption}} Restablecer",
@@ -845,7 +845,7 @@
                 "overrideTeams": {
                     "description": "Si quisiste iniciar un juego de {{oldGameType}}, {{end}} este juego, llama a {{playOldGameType}}, {{gameSpecificInstructions}}, y luego llama a {{begin}}.",
                     "teams": {
-                        "join": "`{{join}} [nombre del equipo]` un equipo"
+                        "join": "{{join}} team_name:[nombre del equipo] un equipo"
                     },
                     "title": "Ignorando {{playOldGameType}}"
                 }
@@ -925,12 +925,12 @@
                 "title": "Preestablecido Eliminado"
             },
             "exported": {
-                "description": "Importa {{presetName}} como un nuevo preestablecido en otros servidores usando:\n`{{presetImport}} {{presetUUID}} [nombre_preset]`\n\nAlternativamente, carga las opciones del preestablecido directamente usando:\n`{{presetLoad}} {{presetUUID}}`",
+                "description": "Importa {{presetName}} como un nuevo preestablecido en otros servidores usando:\n{{presetImport}} `exported_preset:{{presetUUID}} new_preset_name:[nombre_preset]`\n\nAlternativamente, carga las opciones del preestablecido directamente usando:\n{{presetLoad}} `preset_name:{{presetUUID}}`",
                 "title": "Preestablecido Exportado"
             },
             "failure": {
                 "alreadyExists": {
-                    "description": "El preestablecido {{presetNameFormatted}} ya existe. Puedes eliminar el antiguo con `{{presetDelete}} {{presetName}}`.",
+                    "description": "El preestablecido {{presetNameFormatted}} ya existe. Puedes eliminar el antiguo con {{presetDelete}} `preset_name:{{presetName}}`.",
                     "title": "Preestablecido Ya Existe"
                 },
                 "illegalPrefix": {
@@ -942,7 +942,7 @@
                     "title": "Nombre de preestablecido demasiado largo"
                 },
                 "missingIdentifier": {
-                    "description": "Debe especificar un identificador de preestablecido. Use `{{presetExport}} [nombre_preset]` para obtener el identificador de un preestablecido.",
+                    "description": "Debe especificar un identificador de preestablecido. Use {{presetExport}} `preset_name:[nombre_preset]` para obtener el identificador de un preestablecido.",
                     "title": "Falta el identificador de preestablecido"
                 },
                 "missingName": {
@@ -979,7 +979,7 @@
                 }
             },
             "imported": {
-                "description": "Carga el preestablecido recién importado usando `{{presetLoad}} {{presetName}}`.",
+                "description": "Carga el preestablecido recién importado usando {{presetLoad}} `preset_name:{{presetName}}`.",
                 "title": "Preestablecido Importado"
             },
             "interaction": {
@@ -1302,7 +1302,7 @@
                 "description": "Elige si incluir automáticamente las subunidades de un grupo al usar {{groups}}.",
                 "example": {
                     "exclude": "No incluir subunidades",
-                    "include": "Incluir automáticamente subunidades. Por ejemplo, `{{groupCommand}} {{parentGroup}}` incluiría canciones de {{parentGroup}}, {{subunitOne}}, {{subunitTwo}}, etc.",
+                    "include": "Incluir automáticamente subunidades. Por ejemplo, {{groupCommand}} group_1:{{parentGroup}} incluiría canciones de {{parentGroup}}, {{subunitOne}}, {{subunitTwo}}, etc.",
                     "reset": "Restablecer a la opción predeterminada de {{defaultSubunit}}"
                 },
                 "name": "subunidades"
@@ -1526,7 +1526,7 @@
                     "notInEnum": "Se esperaba uno de los siguientes valores válidos para {{argument}}: ({{validValues}})."
                 },
                 "numArguments": {
-                    "incorrect": "Número incorrecto de argumentos. Consulta `{{help}} {{command}}` para ver el uso."
+                    "incorrect": "Número incorrecto de argumentos. Consulta {{help}} action:{{command}} para ver el uso."
                 },
                 "number": {
                     "max": "Se esperaba un valor menor o igual a {{max}} para {{argument}}",
@@ -1635,7 +1635,7 @@
             "notHidden": "No puedes hacer eso durante un juego oculto.",
             "notListeningSession": "No puedes hacer eso mientras estás en una sesión de escucha.",
             "notPremium": "Necesitas KMQ Premium para usar este comando (ver {{premium}}).",
-            "notSpotify": "No puedes cambiar esa opción cuando estás reproduciendo desde Spotify. Usa `/spotify reset` antes de cambiar esta opción.",
+            "notSpotify": "No puedes cambiar esa opción cuando estás reproduciendo desde Spotify. Usa {{spotifyResetCommand}} antes de cambiar esta opción.",
             "premiumOrDebugServer": "Este comando solo funciona en el servidor oficial de KMQ o para miembros de KMQ Premium (ver {{premium}}).",
             "title": "Espera..."
         },

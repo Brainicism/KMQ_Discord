@@ -1,5 +1,5 @@
 import { IPCLogger } from "../logger";
-import { arrayToString } from "./utils";
+import { arrayToString, clickableSlashCommand } from "./utils";
 import { getDebugLogHeader, sendErrorMessage } from "./discord_utils";
 import MessageContext from "../structures/message_context";
 import i18n from "./localization_manager";
@@ -65,7 +65,7 @@ export default (
                 message.guildID,
                 "misc.failure.validation.numArguments.incorrect",
                 {
-                    help: "/help",
+                    help: clickableSlashCommand("help"),
                     command: parsedMessage.action,
                 },
             ),

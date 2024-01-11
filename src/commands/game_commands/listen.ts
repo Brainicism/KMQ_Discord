@@ -165,7 +165,7 @@ export default class ListenCommand implements BaseCommand {
                     description: i18n.translate(
                         messageContext.guildID,
                         "misc.failure.notInVC.description",
-                        { command: "`/listen`" },
+                        { command: clickableSlashCommand(COMMAND_NAME) },
                     ),
                 },
                 interaction,

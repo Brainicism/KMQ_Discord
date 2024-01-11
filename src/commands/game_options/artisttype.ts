@@ -244,9 +244,12 @@ export default class ArtistTypeCommand implements BaseCommand {
                     messageContext.guildID,
                     "misc.failure.gameOptionConflict.description",
                     {
-                        optionOne: "`groups`",
-                        optionTwo: "`artisttype`",
-                        optionOneCommand: "`/groups reset`",
+                        optionOne: clickableSlashCommand("groups"),
+                        optionTwo: clickableSlashCommand("artisttype"),
+                        optionOneCommand: clickableSlashCommand(
+                            "groups",
+                            OptionAction.RESET,
+                        ),
                     },
                 ),
                 color: EMBED_ERROR_COLOR,

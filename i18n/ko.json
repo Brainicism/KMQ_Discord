@@ -75,7 +75,7 @@
         "begin": {
             "ignored": {
                 "noTeam": {
-                    "description": "게임을 시작하기 전에 `{{join}} [팀명]`을(를) 사용하여 팀을 만드십시오."
+                    "description": "게임을 시작하기 전에 {{join}} team_name[팀명]을(를) 사용하여 팀을 만드십시오."
                 },
                 "title": "게임 시작 무시"
             }
@@ -357,7 +357,7 @@
             "interaction": {
                 "failure": {
                     "notHidden": {
-                        "description": "`/guess`는 `/play hidden` 중에만 사용할 수 있습니다.",
+                        "description": "{{guessCommand}}는 {{playHiddenCommand}} 중에만 사용할 수 있습니다.",
                         "title": "추측 무시됨"
                     }
                 },
@@ -801,7 +801,7 @@
             "listeningSessionNotAvailable": "청취 세션 중에는 일부 옵션을 사용할 수 없습니다.",
             "notSet": "설정되지 않음",
             "overview": "이제 다음 옵션에서 사용 가능한 {{totalSongs}}곡 중 상위 {{limit}}곡을 재생합니다.",
-            "perCommandHelp": "명령어 사용 방법에 대한 정보를 찾고 계십니까? 자세한 내용은 \"{{helpCommand}} [명령어]\"을(를) 확인하세요.",
+            "perCommandHelp": "명령어 사용 방법에 대한 정보를 찾고 계십니까? 자세한 내용은 {{helpCommand}} action:[명령어]을(를) 확인하세요.",
             "premiumOptionsNonPremiumGame": "참고: 액티브 게임은 프리미엄이 아닙니다.",
             "preset": "사전 설정",
             "reset": "{{presetOrOption}}으(로) 재설정합니다",
@@ -845,7 +845,7 @@
                 "overrideTeams": {
                     "description": "{{oldGameType}} 게임, {{end}} 이 게임을 시작하려는 경우 {{playOldGameType}}, {{gameSpecificInstructions}}을(를) 호출한 다음 {{{begin}}을(를) 호출합니다.",
                     "teams": {
-                        "join": "`{{join}} [팀 이름]` 팀에 입장하셨습니다."
+                        "join": "{{join}} team_name:[팀 이름] 팀에 입장하셨습니다."
                     },
                     "title": "{{playOldGameType}} 무시"
                 }
@@ -925,12 +925,12 @@
                 "title": "사전 설정이 삭제됨."
             },
             "exported": {
-                "description": "다음을 사용하여 {{presetName}}을(를) 다른 서버의 새 사전 설정으로 가져옵니다.\n`{{presetImport}} {{presetUUID}} [preset_name]`\n\n또는 다음을 사용하여 사전 설정 옵션을 직접 로드합니다.\n`{{presetLoad}} {{presetUUID}}`",
+                "description": "다음을 사용하여 {{presetName}}을(를) 다른 서버의 새 사전 설정으로 가져옵니다.\n{{presetImport}} `exported_preset:{{presetUUID}} new_preset_name:[사전 설정 이름]`\n\n또는 다음을 사용하여 사전 설정 옵션을 직접 로드합니다.\n{{presetLoad}} `preset_name:{{presetUUID}}`",
                 "title": "사전 설정을 내보냄."
             },
             "failure": {
                 "alreadyExists": {
-                    "description": "사전 설정 {{presetNameFormatted}}이(가) 이미 존재합니다. `{{presetDelete}} {{presetName}}`으로 이전 항목을 삭제할 수 있습니다.",
+                    "description": "사전 설정 {{presetNameFormatted}}이(가) 이미 존재합니다. {{presetDelete}} `preset_name:{{presetName}}`으로 이전 항목을 삭제할 수 있습니다.",
                     "title": "사전 설정이 이미 있음."
                 },
                 "illegalPrefix": {
@@ -942,7 +942,7 @@
                     "title": "사전 설정 이름이 너무 긺."
                 },
                 "missingIdentifier": {
-                    "description": "미리 설정된 식별자를 지정해야 합니다. 사전 설정의 식별자를 검색하려면 `{{presetExport}} [사전 설정 이름]`을(를) 사용하십시오.",
+                    "description": "미리 설정된 식별자를 지정해야 합니다. 사전 설정의 식별자를 검색하려면 {{presetExport}} `preset_name:[사전 설정 이름]`을(를) 사용하십시오.",
                     "title": "사전 설정 식별자 누락"
                 },
                 "missingName": {
@@ -979,7 +979,7 @@
                 }
             },
             "imported": {
-                "description": "`{{presetLoad}} {{presetName}}`을(를) 사용하여 새로 가져온 사전 설정을 로드합니다.",
+                "description": "{{presetLoad}} `preset_name:{{presetName}}`을(를) 사용하여 새로 가져온 사전 설정을 로드합니다.",
                 "title": "사전 설정을 가져옴."
             },
             "interaction": {
@@ -1302,7 +1302,7 @@
                 "description": "{{groups}}을(를) 사용할 때 그룹의 하위 단위를 자동으로 포함할지 여부를 선택합니다.",
                 "example": {
                     "exclude": "하위 단위를 포함하지 마십시오",
-                    "include": "하위 단위를 자동으로 포함합니다. 예를 들어 `{{groupCommand}} {{parentGroup}}`에는 {{parentGroup}}, {{subunitOne}}, {{subunitTwo}} 등의 노래가 포함됩니다.",
+                    "include": "하위 단위를 자동으로 포함합니다. 예를 들어 {{groupCommand}} group_1:{{parentGroup}}에는 {{parentGroup}}, {{subunitOne}}, {{subunitTwo}} 등의 노래가 포함됩니다.",
                     "reset": "{{defaultSubunit}}의 기본 옵션으로 재설정합니다."
                 },
                 "name": "소단위"
@@ -1526,7 +1526,7 @@
                     "notInEnum": "다음 유효한 {{argument}} 값 중 하나가 필요합니다: ({{validValues}})."
                 },
                 "numArguments": {
-                    "incorrect": "인수 수가 잘못되었습니다. 사용법은 `{{help}} {{command}}`을(를) 참조하세요."
+                    "incorrect": "인수 수가 잘못되었습니다. 사용법은 {{help}} action:{{command}}을(를) 참조하세요."
                 },
                 "number": {
                     "max": "{{argument}}에 대해 {{max}}보다 작거나 같은 예상 값입니다.",
@@ -1635,7 +1635,7 @@
             "notHidden": "히든 게임 중에는 이 작업을 수행할 수 없습니다.",
             "notListeningSession": "청취 세션 중에는 이 작업을 수행할 수 없습니다.",
             "notPremium": "이 명령어를 사용하려면 KMQ 프리미엄이 필요합니다. ({{premium}} 참조.)",
-            "notSpotify": "Spotify에서 재생할 때는 이 옵션을 변경할 수 없습니다. 이 옵션을 변경하기 전에 `/spotify reset`을(를) 사용하세요.",
+            "notSpotify": "Spotify에서 재생할 때는 이 옵션을 변경할 수 없습니다. 이 옵션을 변경하기 전에 {{spotifyResetCommand}}을(를) 사용하세요.",
             "premiumOrDebugServer": "이 명령어는 공식 KMQ 서버 또는 KMQ 프리미엄 회원에게만 작동합니다. ({{premium}} 참조.)",
             "title": "잠시만 기다려주십시오..."
         },
