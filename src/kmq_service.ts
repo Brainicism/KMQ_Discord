@@ -37,7 +37,10 @@ export default class ServiceWorker extends BaseServiceWorker {
             this.reloadNews();
         });
 
-        this.reloadNews();
+        if (process.env.MINIMAL_RUN !== "true") {
+            this.reloadNews();
+        }
+
         this.serviceReady();
     }
 

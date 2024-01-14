@@ -274,8 +274,10 @@ export default class BotWorker extends BaseClusterWorker {
             return;
         }
 
-        logger.info("Loading cached application data...");
-        reloadCaches();
+        if (process.env.MINIMAL_RUN !== "true") {
+            logger.info("Loading cached application data...");
+            reloadCaches();
+        }
 
         logger.info("Updating bot's status..");
         updateBotStatus();
