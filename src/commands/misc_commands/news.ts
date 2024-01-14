@@ -24,6 +24,7 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import type NewsSubscription from "../../interfaces/news_subscription";
+import type NewsSummary from "../../interfaces/news_summary";
 
 enum Action {
     SUBSCRIBE = "subscribe",
@@ -260,7 +261,12 @@ export default class NewsCommand implements BaseCommand {
         interaction?: Eris.CommandInteraction,
     ): Promise<void> => {
         const locale = State.getGuildLocale(messageContext.guildID);
-        const summary = State.news[range][locale];
+        const summary: NewsSummary = await State.ipc.serviceCommand(
+            "kmq_service",
+            `getNews|${range}|${locale}`,
+            true,
+        );
+
         if (!summary) {
             // Failed to generate news since startup
             logger.error(
@@ -336,7 +342,7 @@ export default class NewsCommand implements BaseCommand {
                     locale,
                     "command.news.title",
                 )} (${dateRange})`,
-                description: summary,
+                description: summary.text,
                 thumbnailUrl: thumbnail,
                 footerText: i18n.translate(locale, "command.news.disclaimer"),
             },

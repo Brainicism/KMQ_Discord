@@ -1,9 +1,9 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { IPCLogger } from "../logger";
+import { RedditClient } from "./reddit_client";
 import { standardDateFormat } from "./utils";
 import LocaleType from "../enums/locale_type";
 import NewsRange from "../enums/news_range";
-import State from "../state";
 import type { GenerativeModel } from "@google/generative-ai";
 
 const logger = new IPCLogger("gemini_client");
@@ -56,9 +56,8 @@ export default class GeminiClient {
         newsRange: NewsRange,
     ): Promise<string> {
         try {
-            const topPosts = (
-                await State.redditClient.getTopPosts(newsRange)
-            ).map(
+            const redditClient = new RedditClient();
+            const topPosts = (await redditClient.getTopPosts(newsRange)).map(
                 (x) =>
                     `${standardDateFormat(x.date)} | ${x.flair} | ${x.title}`,
             );
