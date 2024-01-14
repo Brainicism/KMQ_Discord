@@ -1,13 +1,7 @@
 /* eslint-disable global-require */
 /* eslint-disable import/no-dynamic-require */
 import { IPCLogger } from "../logger";
-import {
-    chooseRandom,
-    delay,
-    isPrimaryInstance,
-    isWeekend,
-    retryJob,
-} from "./utils";
+import { chooseRandom, delay, isPrimaryInstance, isWeekend } from "./utils";
 import {
     cleanupInactiveGameSessions,
     cleanupInactiveListeningSessions,
@@ -19,7 +13,6 @@ import { reloadFactCache } from "../fact_generator";
 import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
 import { sql } from "kysely";
 import KmqConfiguration from "../kmq_configuration";
-import LocaleType from "../enums/locale_type";
 import MessageContext from "../structures/message_context";
 import NewsCommand from "../commands/misc_commands/news";
 import NewsRange from "../enums/news_range";
@@ -29,6 +22,7 @@ import dbContext from "../database_context";
 import i18n from "./localization_manager";
 import schedule from "node-schedule";
 import updatePremiumUsers from "./patreon_manager";
+import type LocaleType from "../enums/locale_type";
 import type MatchedArtist from "../interfaces/matched_artist";
 import type NewsSubscription from "../interfaces/news_subscription";
 
@@ -490,59 +484,6 @@ async function sendNewsNotifications(newsRange: NewsRange): Promise<void> {
     );
 }
 
-async function reloadNews(): Promise<void> {
-    if (!process.env.GEMINI_API_KEY) {
-        return;
-    }
-
-    await Promise.allSettled(
-        Object.values(LocaleType).map(async (locale) => {
-            await Promise.allSettled(
-                Object.values(NewsRange).map(async (range) => {
-                    await retryJob<void | Error>(
-                        async () => {
-                            const summary =
-                                await State.geminiClient.getPostSummary(
-                                    locale,
-                                    range,
-                                );
-
-                            if (summary === "") {
-                                logger.error(
-                                    `Error generating news for ${locale} ${range}`,
-                                );
-                                return Promise.reject(
-                                    new Error(
-                                        `Error generating news for ${locale} ${range}`,
-                                    ),
-                                );
-                            }
-
-                            if (summary.length < 400 || summary.length > 2500) {
-                                return Promise.reject(
-                                    new Error(
-                                        `Received abnormally sized news entry for ${locale} ${range}. length = ${summary.length}`,
-                                    ),
-                                );
-                            }
-
-                            State.news[range][locale] = summary;
-                            logger.info(
-                                `Generated news for ${locale} ${range}`,
-                            );
-                            return Promise.resolve();
-                        },
-                        [],
-                        3,
-                        true,
-                        5000,
-                    );
-                }),
-            );
-        }),
-    );
-}
-
 /**
  * @param clusterID - The cluster ID
  *  Sets up recurring cron-based tasks
@@ -590,12 +531,6 @@ export function registerIntervals(clusterID: number): void {
             // Ping a role in KMQ server notifying of power hour
             sendPowerHourNotification();
         }
-    });
-
-    // Every hour, but offset by cluster ID
-    schedule.scheduleJob(`${clusterID} * * * *`, () => {
-        // Use reddit and Gemini to generate news
-        reloadNews();
     });
 
     // Every 10 minutes
@@ -651,5 +586,4 @@ export function reloadCaches(): void {
     reloadLocales();
     reloadSongs();
     reloadBanData();
-    reloadNews();
 }
