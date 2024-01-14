@@ -1,6 +1,10 @@
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
-import { chooseRandom, clickableSlashCommand } from "../../helpers/utils";
+import {
+    chooseRandom,
+    clickableSlashCommand,
+    discordDateFormat,
+} from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -293,10 +297,45 @@ export default class NewsCommand implements BaseCommand {
             KmqImages.READING_BOOK,
         ]);
 
+        const today = new Date();
+        let dateRange: string;
+        switch (range) {
+            case NewsRange.DAILY: {
+                dateRange = discordDateFormat(today, "d");
+                break;
+            }
+
+            case NewsRange.WEEKLY: {
+                const lastWeek = new Date();
+                lastWeek.setDate(today.getDate() - 7);
+                dateRange = `${discordDateFormat(
+                    lastWeek,
+                    "d",
+                )} - ${discordDateFormat(today, "d")}`;
+                break;
+            }
+
+            case NewsRange.MONTHLY: {
+                const lastMonth = new Date();
+                lastMonth.setMonth(today.getMonth() - 1);
+                dateRange = `${discordDateFormat(
+                    lastMonth,
+                    "d",
+                )} - ${discordDateFormat(today, "d")}`;
+                break;
+            }
+
+            default:
+                dateRange = "";
+        }
+
         await sendInfoMessage(
             messageContext,
             {
-                title: i18n.translate(locale, "command.news.title"),
+                title: `${i18n.translate(
+                    locale,
+                    "command.news.title",
+                )} (${dateRange})`,
                 description: summary,
                 thumbnailUrl: thumbnail,
                 footerText: i18n.translate(locale, "command.news.disclaimer"),
