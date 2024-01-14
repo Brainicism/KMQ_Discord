@@ -369,7 +369,7 @@ export default class GroupsCommand implements BaseCommand {
                     ),
                     helpGroups: `${clickableSlashCommand(
                         "help",
-                    )} action${COMMAND_NAME}`,
+                    )} action:${COMMAND_NAME}`,
                     unmatchedGroups: unmatchedGroups.join(", "),
                     solution: i18n.translate(
                         messageContext.guildID,
