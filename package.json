@@ -9,6 +9,7 @@
         "dry-run": "NODE_ENV=dry-run npm run start",
         "dev_tsc": "NODE_ENV=development npm run start",
         "dev": "NODE_ENV=development_ts_node npm run start",
+        "dev_minimal": "NODE_ENV=development_ts_node MINIMAL_RUN=true npm run start",
         "ci": "NODE_ENV=ci npm run start",
         "prod": "NODE_ENV=production npm run start",
         "clean": "rm -rf build/ && rm -f tsconfig.tsbuildinfo",

@@ -6,9 +6,10 @@ rebuild () {
     npx tsc
 }
 
-
-echo "Bootstrapping..."
-npx ts-node --swc src/seed/bootstrap.ts
+if [ "${MINIMAL_RUN}" != "true" ]; then
+    echo "Bootstrapping..."
+    npx ts-node --swc src/seed/bootstrap.ts
+fi
 
 # run with ts-node + swc, no transpile needed
 if [ "${NODE_ENV}" == "development_ts_node" ]; then
