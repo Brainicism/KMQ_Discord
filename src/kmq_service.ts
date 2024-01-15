@@ -2,9 +2,9 @@ import * as schedule from "node-schedule";
 import { BaseServiceWorker } from "eris-fleet";
 import { IPCLogger } from "./logger";
 import { chooseRandom, retryJob } from "./helpers/utils";
-import { generateFacts } from "./fact_generator";
 import BotListingManager from "./helpers/bot_listing_manager";
 import EnvType from "./enums/env_type";
+import FactGenerator from "./fact_generator";
 import GeminiClient from "./helpers/gemini_client";
 import LocaleType from "./enums/locale_type";
 import NewsRange from "./enums/news_range";
@@ -112,7 +112,7 @@ export default class ServiceWorker extends BaseServiceWorker {
      */
     async reloadFactCache(): Promise<void> {
         logger.info("Regenerating fact cache...");
-        this.facts = await generateFacts();
+        this.facts = await FactGenerator.generateFacts();
         logger.info("Fact cache regenerated!");
     }
 
