@@ -9,7 +9,6 @@ import {
     isPowerHour,
 } from "./game_utils";
 import { normalizePunctuationInName } from "../structures/game_round";
-import { reloadFactCache } from "../fact_generator";
 import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
 import { sql } from "kysely";
 import KmqConfiguration from "../kmq_configuration";
@@ -515,12 +514,6 @@ export function registerIntervals(clusterID: number): void {
         sendNewsNotifications(NewsRange.DAILY);
     });
 
-    // every 6 hours
-    schedule.scheduleJob("0 */6 * * *", () => {
-        // Reload fact cache
-        reloadFactCache();
-    });
-
     // Every hour
     schedule.scheduleJob("0 * * * *", () => {
         if (
@@ -581,7 +574,6 @@ export function registerIntervals(clusterID: number): void {
 export function reloadCaches(): void {
     reloadAliases();
     reloadArtists();
-    reloadFactCache();
     reloadBonusGroups();
     reloadLocales();
     reloadSongs();

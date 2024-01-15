@@ -904,7 +904,9 @@ export default abstract class Session {
         timeRemaining: number | null,
     ): Promise<Eris.Message<Eris.TextableChannel> | null> {
         const fact =
-            Math.random() <= 0.05 ? getFact(messageContext.guildID) : null;
+            Math.random() <= 0.05
+                ? await getFact(messageContext.guildID)
+                : null;
 
         if (fact) {
             fields.push({
