@@ -37,5 +37,6 @@ declare namespace NodeJS {
         REDDIT_CLIENT_SECRET?: string | undefined;
         REDDIT_CLIENT_REFRESH_TOKEN?: string | undefined;
         GEMINI_API_KEY?: string | undefined;
+        MINIMAL_RUN?: string | undefined;
     }
 }

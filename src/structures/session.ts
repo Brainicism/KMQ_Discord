@@ -25,9 +25,9 @@ import {
     tryCreateInteractionSuccessAcknowledgement,
     tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
-import { getFact } from "../fact_generator";
 import { sql } from "kysely";
 import Eris from "eris";
+import FactGenerator from "../fact_generator";
 import GameRound from "./game_round";
 import GuessModeType from "../enums/option_types/guess_mode_type";
 import ListeningRound from "./listening_round";
@@ -904,7 +904,9 @@ export default abstract class Session {
         timeRemaining: number | null,
     ): Promise<Eris.Message<Eris.TextableChannel> | null> {
         const fact =
-            Math.random() <= 0.05 ? getFact(messageContext.guildID) : null;
+            Math.random() <= 0.05
+                ? await FactGenerator.getFact(messageContext.guildID)
+                : null;
 
         if (fact) {
             fields.push({
