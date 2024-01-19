@@ -53,6 +53,8 @@ const SONG_LINK = "song_link";
 const ARTIST_NAME = "artist_name";
 const logger = new IPCLogger(COMMAND_NAME);
 
+const ENTRIES_PER_PAGE = 10;
+
 const getDaisukiLink = (id: number, isMV: boolean): string => {
     if (isMV) {
         return `https://kpop.daisuki.com.br/mv.html?id=${id}`;
@@ -383,7 +385,7 @@ async function lookupBySongName(
         value: `https://youtu.be/${entry.youtubeLink}`,
     }));
 
-    const embedFieldSubsets = chunkArray(songEmbeds, 5);
+    const embedFieldSubsets = chunkArray(songEmbeds, ENTRIES_PER_PAGE);
     const embeds: Array<EmbedOptions> = embedFieldSubsets.map(
         (embedFieldsSubset) => ({
             title: i18n.translate(
