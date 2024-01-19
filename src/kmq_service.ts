@@ -135,7 +135,7 @@ export default class ServiceWorker extends BaseServiceWorker {
                                     );
 
                                 if (summary === "") {
-                                    logger.error(
+                                    logger.warn(
                                         `Error generating news for ${locale} ${range}`,
                                     );
                                     return Promise.reject(
@@ -170,6 +170,7 @@ export default class ServiceWorker extends BaseServiceWorker {
                             3,
                             true,
                             60000,
+                            false,
                         );
                     }),
                 );

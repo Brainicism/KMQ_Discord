@@ -87,7 +87,7 @@ export default class GeminiClient {
 
             return text;
         } catch (e) {
-            logger.error(
+            logger.warn(
                 `Failed to fetch getPostSummary(). locale = ${locale}. newsRange = ${newsRange}. e = ${e}`,
             );
             return "";
