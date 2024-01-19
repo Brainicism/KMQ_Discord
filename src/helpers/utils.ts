@@ -325,6 +325,7 @@ export function friendlyFormattedDate(date: Date, guildID: string): string {
  * @param maxRetries - retries of job before throwing
  * @param firstTry - whether this is the first try
  * @param delayDuration - time (in ms) before attempting job retry
+ * @param sendError - whether to send a warning or error
  * @returns the result of job
  */
 export async function retryJob<Type>(
@@ -333,13 +334,19 @@ export async function retryJob<Type>(
     maxRetries: number,
     firstTry: boolean,
     delayDuration?: number,
+    sendError = true,
 ): Promise<Type> {
     if (!firstTry && delayDuration) {
         await delay(delayDuration);
     }
 
     return job(...jobArgs).catch((err) => {
-        logger.error(`err = ${err}`);
+        if (sendError) {
+            logger.error(`err = ${err}`);
+        } else {
+            logger.warn(`err = ${err}`);
+        }
+
         if (maxRetries <= 0) {
             throw err;
         }
