@@ -606,14 +606,6 @@ export default class SpotifyManager {
                 if (results.length === 1) {
                     result = results[0];
                 } else if (results.length > 1) {
-                    logger.info(
-                        `Spotify match for '${
-                            song.name
-                        }' returned more than 1 result: (${results
-                            .map((x) => x.songName)
-                            .join(", ")}).`,
-                    );
-
                     // prioritize pre-bracket name
                     const properNameMatch = results.find(
                         (x) =>
