@@ -185,7 +185,12 @@ export default class GameRound extends Round {
             );
         }
 
-        this.acceptedArtistAnswers = [...artistNames, ...this.artistAliases];
+        this.acceptedArtistAnswers = [
+            ...artistNames.flatMap((x) =>
+                this.extractBracketedComponentsFromName(x),
+            ),
+            ...this.artistAliases,
+        ];
 
         this.baseExp = baseExp;
         this.hintUsed = false;
@@ -681,5 +686,16 @@ export default class GameRound extends Round {
             exact: !!this.song.songName && cleanedArtistAliases.includes(guess),
             similar: GameRound.similarityCheck(guess, cleanedArtistAliases),
         };
+    }
+
+    private extractBracketedComponentsFromName(name: string): Array<string> {
+        const match = name.match(/([^\s]+) \(([^)]+)\)/);
+
+        if (match) {
+            const output = [match[1], match[2]];
+            return output;
+        } else {
+            return [name];
+        }
     }
 }
