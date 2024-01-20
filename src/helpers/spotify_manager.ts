@@ -521,21 +521,15 @@ export default class SpotifyManager {
 
             const query = dbContext.kmq
                 .selectFrom("available_songs")
-                .innerJoin("kpop_videos.app_kpop_group", (jb) =>
-                    jb.on(({ or, eb, ref }) =>
-                        or([
-                            eb(
-                                "kpop_videos.app_kpop_group.id",
-                                "=",
-                                ref("available_songs.id_artist"),
-                            ),
-                            eb(
-                                "kpop_videos.app_kpop_group.id",
-                                "=",
-                                ref("available_songs.id_parent_artist"),
-                            ),
-                        ]),
-                    ),
+                .leftJoin(
+                    "kpop_videos.app_kpop_group as a",
+                    "a.id",
+                    "available_songs.id_artist",
+                )
+                .leftJoin(
+                    "kpop_videos.app_kpop_group as b",
+                    "b.id",
+                    "available_songs.id_parent_artist",
                 )
                 .select(SongSelector.QueriedSongFields)
                 .where(({ eb, or }) =>
@@ -607,7 +601,32 @@ export default class SpotifyManager {
                 .orderBy("views", "desc");
 
             try {
-                const result = (await query.executeTakeFirst()) as QueriedSong;
+                const results = await query.execute();
+                let result: QueriedSong | null = null;
+                if (results.length === 1) {
+                    result = results[0];
+                } else if (results.length > 1) {
+                    logger.info(
+                        `Spotify match for '${
+                            song.name
+                        }' returned more than 1 result: (${results
+                            .map((x) => x.songName)
+                            .join(", ")}).`,
+                    );
+
+                    // prioritize pre-bracket name
+                    const properNameMatch = results.find(
+                        (x) =>
+                            x.songName
+                                .toLowerCase()
+                                .replace(/[^0-9a-z]/gi, "") ===
+                            songNames[0]
+                                .toLowerCase()
+                                .replace(/[^0-9a-z]/gi, ""),
+                    );
+
+                    result = properNameMatch || results[0];
+                }
 
                 if (result) {
                     resolve(result);
