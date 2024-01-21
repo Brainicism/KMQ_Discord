@@ -1421,7 +1421,9 @@ export function getCurrentVoiceMembers(
         return [];
     }
 
-    return voiceChannel.voiceMembers.filter((x) => !x.bot);
+    return voiceChannel.voiceMembers
+        .filter((x) => !x.bot)
+        .filter((x) => !State.bannedPlayers.has(x.id));
 }
 
 /**
