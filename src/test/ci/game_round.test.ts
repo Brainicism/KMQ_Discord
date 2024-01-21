@@ -82,6 +82,39 @@ describe("game round", () => {
             });
         });
 
+        describe("artist name has a bracket (indicating alternative name)", () => {
+            it("should add the alternative name as an accepted artist name", () => {
+                gameRound = new GameRound(
+                    {
+                        songName: "Good Girls in the Dark",
+                        originalSongName: "Good Girls in the Dark",
+                        hangulSongName: "상사병에 걸린 소녀들",
+                        originalHangulSongName: "상사병에 걸린 소녀들",
+                        artistName: "Yena (Choi Yena)",
+                        hangulArtistName: "최예나 (나)",
+                        youtubeLink: "abcde",
+                        publishDate: new Date(),
+                        members: "female",
+                        artistID: 3,
+                        isSolo: "y",
+                        rank: 0,
+                        views: 123456789,
+                        tags: "",
+                        vtype: "main",
+                        selectionWeight: 1,
+                    },
+                    5,
+                );
+
+                assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
+                    "Yena",
+                    "Choi Yena",
+                    "최예나",
+                    "나",
+                ]);
+            });
+        });
+
         describe("artist name has trailing or leading spaces", () => {
             it("should remove them", () => {
                 gameRound = new GameRound(
