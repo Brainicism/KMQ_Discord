@@ -217,6 +217,10 @@ export default async function messageCreateHandler(
         session.gameType !== GameType.HIDDEN &&
         !session.isMultipleChoiceMode()
     ) {
+        if (State.bannedPlayers.has(message.author.id)) {
+            return;
+        }
+
         session.guessSong(messageContext, message.content, message.createdAt);
     }
 }
