@@ -18,7 +18,7 @@
         "lint_i18n": "npx eslint --no-eslintrc --config .eslintrc.i18n.js --fix --ext .json --format node_modules/eslint-plugin-i18n-json/formatter.js i18n/ ",
         "lint_i18n_ci": "npx eslint --no-eslintrc --config .eslintrc.i18n.js --ext .json  --max-warnings=0 --format node_modules/eslint-plugin-i18n-json/formatter.js i18n/ ",
         "lint_fix": "npx eslint --fix --cache src/ --ext .js,.ts",
-        "lint_ci": "npx eslint --cache src/ --ext .js,.ts --max-warnings=0",
+        "lint_ci": "npx eslint --debug --cache --cache-strategy content src/ --ext .js,.ts --max-warnings=0",
         "docker-compose-db": "cd docker/ && docker-compose up -d db",
         "docker-compose-dev": "cd docker/ && NODE_ENV=development docker-compose up  --exit-code-from kmq --build kmq",
         "docker-compose-dryrun": "cd docker/ && NODE_ENV=dry-run docker-compose up --exit-code-from kmq --build kmq",
