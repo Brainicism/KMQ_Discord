@@ -64,10 +64,6 @@ export default class KmqConfiguration {
         return this.config["persistMatchedSpotifySongs"] ?? false;
     }
 
-    patreonFetchingEnabled(): boolean {
-        return this.config["patreonFetchingEnabled"] ?? false;
-    }
-
     newsSubscriptionsEnabled(): boolean {
         return this.config["newsSubscriptionEnabled"] ?? false;
     }

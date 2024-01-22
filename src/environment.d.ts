@@ -22,8 +22,6 @@ declare namespace NodeJS {
         DEBUG_LOGGING?: string | undefined;
         POWER_HOUR_NOTIFICATION_CHANNEL_ID?: string | undefined;
         POWER_HOUR_NOTIFICATION_ROLE_ID?: string | undefined;
-        PATREON_CREATOR_ACCESS_TOKEN?: string | undefined;
-        PATREON_CAMPAIGN_ID?: string | undefined;
         SPOTIFY_CLIENT_ID?: string | undefined;
         SPOTIFY_CLIENT_SECRET?: string | undefined;
         DAISUKI_SEED_CRON_JOB?: string | undefined;
