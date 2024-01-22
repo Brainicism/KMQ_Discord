@@ -64,7 +64,6 @@ export default class SpotifyManager {
     /**
      * @param guildID - The guild to retrieve songs for
      * @param playlistID - The playlist to retrieve songs from
-     * @param isPremium - Whether the user is premium or not
      * @param forceRefreshMetadata - Whether to request new metadata
      * @param messageContext - The message context
      * @param interaction - The interaction
@@ -72,7 +71,6 @@ export default class SpotifyManager {
     getMatchedSpotifySongs = async (
         guildID: string,
         playlistID: string,
-        isPremium: boolean,
         forceRefreshMetadata: boolean,
         messageContext?: MessageContext,
         interaction?: Eris.CommandInteraction,
@@ -262,7 +260,7 @@ export default class SpotifyManager {
                     4,
                     spotifySongs,
                     (x: SpotifyTrack) =>
-                        this.generateSongMatchingPromise(x, isPremium, guildID),
+                        this.generateSongMatchingPromise(x, guildID),
                 )) {
                     if (typeof queryOutput === "string") {
                         unmatchedSongs.push(queryOutput);
@@ -482,7 +480,6 @@ export default class SpotifyManager {
 
     private generateSongMatchingPromise(
         song: SpotifyTrack,
-        isPremium: boolean,
         guildID: string,
     ): Promise<QueriedSong | string> {
         return new Promise(async (resolve, reject) => {
@@ -586,16 +583,7 @@ export default class SpotifyManager {
                 .where(
                     "rank",
                     "<=",
-                    isPremium
-                        ? parseInt(
-                              process.env
-                                  .PREMIUM_AUDIO_SONGS_PER_ARTIST as string,
-                              10,
-                          )
-                        : parseInt(
-                              process.env.AUDIO_SONGS_PER_ARTIST as string,
-                              10,
-                          ),
+                    parseInt(process.env.AUDIO_SONGS_PER_ARTIST as string, 10),
                 )
                 .orderBy((eb) => eb.fn("CHAR_LENGTH", ["tags"]), "asc")
                 .orderBy("views", "desc");

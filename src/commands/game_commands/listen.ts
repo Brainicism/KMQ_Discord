@@ -1,10 +1,8 @@
 import { EMBED_SUCCESS_BONUS_COLOR, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
-import { areUsersPremium } from "../../helpers/game_utils";
 import { clickableSlashCommand } from "../../helpers/utils";
 import {
     generateOptionsMessage,
-    getCurrentVoiceMembers,
     getDebugLogHeader,
     getGameInfoMessage,
     getUserVoiceChannel,
@@ -183,36 +181,15 @@ export default class ListenCommand implements BaseCommand {
             return;
         }
 
-        const isPremium = await areUsersPremium(
-            getCurrentVoiceMembers(voiceChannel.id).map((x) => x.id),
-        );
-
         const listeningSession = new ListeningSession(
             guildPreference,
             textChannel.id,
             voiceChannel.id,
             guildID,
             gameOwner,
-            isPremium,
         );
 
         State.listeningSessions[guildID] = listeningSession;
-
-        if (!isPremium) {
-            for (const [commandName, command] of Object.entries(
-                State.client.commands,
-            )) {
-                if (command.isUsingPremiumOption) {
-                    if (command.isUsingPremiumOption(guildPreference)) {
-                        logger.info(
-                            `Session started by non-premium request, clearing premium option: ${commandName}`,
-                        );
-                        // eslint-disable-next-line no-await-in-loop
-                        await command.resetPremium!(guildPreference);
-                    }
-                }
-            }
-        }
 
         await sendBeginListeningSessionMessage(
             textChannel.name,

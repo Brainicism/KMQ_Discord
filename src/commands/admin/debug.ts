@@ -1,10 +1,7 @@
 import * as uuid from "uuid";
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
-import {
-    getAvailableSongCount,
-    isPremiumRequest,
-} from "../../helpers/game_utils";
+import { getAvailableSongCount } from "../../helpers/game_utils";
 import {
     getDebugChannel,
     getDebugLogHeader,
@@ -13,7 +10,6 @@ import {
 } from "../../helpers/discord_utils";
 import GuildPreference from "../../structures/guild_preference";
 import MessageContext from "../../structures/message_context";
-import Session from "../../structures/session";
 import State from "../../state";
 import i18n from "../../helpers/localization_manager";
 import type BaseCommand from "../interfaces/base_command";
@@ -35,10 +31,8 @@ export default class DebugCommand implements BaseCommand {
         );
 
         const messageContext = MessageContext.fromMessage(message);
-        const session = Session.getSession(message.guildID);
         const { count, countBeforeLimit } = await getAvailableSongCount(
             guildPreference,
-            await isPremiumRequest(session, message.author.id),
             messageContext,
         );
 

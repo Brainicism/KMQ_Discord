@@ -726,7 +726,6 @@
                 "title": "Canción no encontrada"
             },
             "notInKMQ": "Esta canción tiene una entrada en [Daisuki]({{link}}), pero no está incluida en KMQ.",
-            "premiumSong": "¿Solo para KMQ Premium?",
             "songNameSearchResult": {
                 "notFoundDescription": "No se encontraron canciones con ese nombre",
                 "successDescription": "Las siguientes canciones están disponibles en KMQ:",
@@ -802,7 +801,6 @@
             "notSet": "No establecido",
             "overview": "Reproduciendo las mejores {{limit}} de {{totalSongs}} canciones disponibles de las siguientes opciones:",
             "perCommandHelp": "¿Buscas información sobre cómo usar un comando? Echa un vistazo a {{helpCommand}} action:[comando] para obtener más información.",
-            "premiumOptionsNonPremiumGame": "Nota: el juego activo no es premium",
             "preset": "Preestablecido",
             "reset": "{{presetOrOption}} Restablecer",
             "spotify": "Reproduciendo {{songCount}} canciones de Spotify con las siguientes opciones:",
@@ -881,43 +879,6 @@
             },
             "typeGuess": "¡Escucha la canción y escribe tu respuesta!",
             "voteReminder": "Psst. Gana más EXP votando (ver {{vote}})"
-        },
-        "premium": {
-            "help": {
-                "description": "Obtén más información sobre KMQ Premium, incluyendo si actualmente eres miembro.",
-                "example": "Muestra tu estado premium.",
-                "name": "premium"
-            },
-            "option": {
-                "description": "Esta opción solo puede ser utilizada por los seguidores premium de KMQ.",
-                "description_kmq_server": "Esta opción solo puede ser utilizada por los seguidores premium de KMQ o en el servidor oficial de KMQ.",
-                "title": "Opción Premium"
-            },
-            "status": {
-                "description": {
-                    "connectionReminder": "Asegúrate de conectar tu cuenta de Discord [aquí](https://www.patreon.com/settings/apps) para recibir tus beneficios.",
-                    "nonPremium": "Suscríbete a [KMQ Premium](https://www.patreon.com/kmq) aquí.",
-                    "premium": "Ya tienes [KMQ Premium](https://www.patreon.com/kmq)."
-                },
-                "perks": {
-                    "badge": {
-                        "description": "Muestra tu dedicación a KMQ con una insignia exclusiva en tu perfil",
-                        "title": "¡Insignia de Seguidor Premium!"
-                    },
-                    "moreSongs": {
-                        "description": "Obtén acceso a los 50 mejores lados B de cada artista (en lugar de 10)",
-                        "title": "¡Más canciones!"
-                    },
-                    "special": {
-                        "description": "Cambia la velocidad de reproducción de la canción en cualquier lugar donde la reproduzcas!",
-                        "title": "`/special` en cada servidor!"
-                    }
-                },
-                "title": {
-                    "nonPremium": "¡Suscríbete a KMQ Premium!",
-                    "premium": "¡Gracias por apoyar a KMQ!"
-                }
-            }
         },
         "preset": {
             "deleted": {
@@ -1634,9 +1595,7 @@
             "notGameSession": "No puedes hacer eso mientras estás en una sesión de juego.",
             "notHidden": "No puedes hacer eso durante un juego oculto.",
             "notListeningSession": "No puedes hacer eso mientras estás en una sesión de escucha.",
-            "notPremium": "Necesitas KMQ Premium para usar este comando (ver {{premium}}).",
             "notSpotify": "No puedes cambiar esa opción cuando estás reproduciendo desde Spotify. Usa {{spotifyResetCommand}} antes de cambiar esta opción.",
-            "premiumOrDebugServer": "Este comando solo funciona en el servidor oficial de KMQ o para miembros de KMQ Premium (ver {{premium}}).",
             "title": "Espera..."
         },
         "releaseDate": "Fecha de lanzamiento",

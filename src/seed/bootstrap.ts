@@ -41,7 +41,6 @@ function hasRequiredEnvironmentVariables(): boolean {
         "SONG_DOWNLOAD_DIR",
         "BOT_PREFIX",
         "NODE_ENV",
-        "PREMIUM_AUDIO_SONGS_PER_ARTIST",
         "AUDIO_SONGS_PER_ARTIST",
         "APP_NAME",
         "DAISUKI_DB_PASSWORD",

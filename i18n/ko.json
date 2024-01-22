@@ -726,7 +726,6 @@
                 "title": "노래를 찾을 수 없음"
             },
             "notInKMQ": "이 노래는 [Daisuki]({{link}})에 항목이 있지만 KMQ에는 포함되어 있지 않습니다.",
-            "premiumSong": "KMQ 프리미엄만?",
             "songNameSearchResult": {
                 "notFoundDescription": "해당 이름의 노래를 찾을 수 없습니다.",
                 "successDescription": "KMQ에서 사용할 수 있는 노래는 다음과 같습니다.:",
@@ -802,7 +801,6 @@
             "notSet": "설정되지 않음",
             "overview": "이제 다음 옵션에서 사용 가능한 {{totalSongs}}곡 중 상위 {{limit}}곡을 재생합니다.",
             "perCommandHelp": "명령어 사용 방법에 대한 정보를 찾고 계십니까? 자세한 내용은 {{helpCommand}} action:[명령어]을(를) 확인하세요.",
-            "premiumOptionsNonPremiumGame": "참고: 액티브 게임은 프리미엄이 아닙니다.",
             "preset": "사전 설정",
             "reset": "{{presetOrOption}}으(로) 재설정합니다",
             "spotify": "이제 다음 옵션으로 스포티파이의 {{songCount}}곡을 재생합니다.:",
@@ -881,43 +879,6 @@
             },
             "typeGuess": "노래를 듣고 추측을 입력하십시오!",
             "voteReminder": "쯧쯧... 투표를 통해 더 많은 경험치를 획득하세요. ({{vote}} 참조.)"
-        },
-        "premium": {
-            "help": {
-                "description": "현재 회원인지 여부를 포함하여 KMQ 프리미엄에 대해 자세히 알아보십시오.",
-                "example": "프리미엄 상태를 보여줍니다.",
-                "name": "프리미엄"
-            },
-            "option": {
-                "description": "이 옵션은 프리미엄 KMQ 서포터만 사용할 수 있습니다.",
-                "description_kmq_server": "이 옵션은 프리미엄 KMQ 서포터 또는 공식 KMQ 서버에서만 사용할 수 있습니다.",
-                "title": "프리미엄 옵션"
-            },
-            "status": {
-                "description": {
-                    "connectionReminder": "디스코드 계정을 [여기](https://www.patreon.com/settings/apps)에 연결하여 혜택을 받으십시오.",
-                    "nonPremium": "[KMQ 프리미엄](https://www.patreon.com/kmq)을(를) 구독하십시오.",
-                    "premium": "[KMQ 프리미엄](https://www.patreon.com/kmq)이 있습니다."
-                },
-                "perks": {
-                    "badge": {
-                        "description": "프로필의 독점 배지로 KMQ에 대한 사랑을 보여주세요.",
-                        "title": "프리미엄 서포터 뱃지!"
-                    },
-                    "moreSongs": {
-                        "description": "모든 아티스트에 대해 상위 50개의 b-side에 액세스할 수 있습니다. (10개에서 증가)",
-                        "title": "더 많은 노래!"
-                    },
-                    "special": {
-                        "description": "어디서나 노래 재생 속도를 변경할 수 있습니다!",
-                        "title": "모든 서버에서 `/special`을(를) 입력하세요!"
-                    }
-                },
-                "title": {
-                    "nonPremium": "KMQ 프리미엄을 구독하십시오!",
-                    "premium": "KMQ를 지원해 주셔서 감사합니다!"
-                }
-            }
         },
         "preset": {
             "deleted": {
@@ -1634,9 +1595,7 @@
             "notGameSession": "게임 세션 중에는 이 작업을 수행할 수 없습니다.",
             "notHidden": "히든 게임 중에는 이 작업을 수행할 수 없습니다.",
             "notListeningSession": "청취 세션 중에는 이 작업을 수행할 수 없습니다.",
-            "notPremium": "이 명령어를 사용하려면 KMQ 프리미엄이 필요합니다. ({{premium}} 참조.)",
             "notSpotify": "Spotify에서 재생할 때는 이 옵션을 변경할 수 없습니다. 이 옵션을 변경하기 전에 {{spotifyResetCommand}}을(를) 사용하세요.",
-            "premiumOrDebugServer": "이 명령어는 공식 KMQ 서버 또는 KMQ 프리미엄 회원에게만 작동합니다. ({{premium}} 참조.)",
             "title": "잠시만 기다려주십시오..."
         },
         "releaseDate": "발매 날짜",

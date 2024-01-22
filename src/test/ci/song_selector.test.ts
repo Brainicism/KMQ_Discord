@@ -897,50 +897,6 @@ describe("song selector", () => {
                 });
             });
         });
-
-        describe("premium", () => {
-            describe("non-premium songs", () => {
-                it("should only return non-premium songs", async () => {
-                    const isPremium = false;
-                    const { songs } = await SongSelector.getFilteredSongList(
-                        guildPreference,
-                        isPremium,
-                    );
-
-                    assert.strict(songs.size > 0);
-                    assert.strictEqual(
-                        Array.from(songs).every(
-                            (song) =>
-                                song.rank <=
-                                Number(process.env.AUDIO_SONGS_PER_ARTIST),
-                        ),
-                        true,
-                    );
-                });
-            });
-
-            describe("premium songs", () => {
-                it("should return premium and non-premium songs", async () => {
-                    const isPremium = true;
-                    const { songs } = await SongSelector.getFilteredSongList(
-                        guildPreference,
-                        isPremium,
-                    );
-
-                    assert.strict(songs.size > 0);
-                    assert.strictEqual(
-                        Array.from(songs).every(
-                            (song) =>
-                                song.rank <=
-                                Number(
-                                    process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST,
-                                ),
-                        ),
-                        true,
-                    );
-                });
-            });
-        });
     });
 
     describe("selectRandomSong", () => {

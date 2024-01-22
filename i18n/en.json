@@ -726,7 +726,6 @@
                 "title": "Song Not Found"
             },
             "notInKMQ": "This song has an entry on [Daisuki]({{link}}), but it isn't included in KMQ.",
-            "premiumSong": "KMQ Premium Only?",
             "songNameSearchResult": {
                 "notFoundDescription": "Could not find any songs by that name",
                 "successDescription": "The following songs are available in KMQ:",
@@ -802,7 +801,6 @@
             "notSet": "Not set",
             "overview": "Now playing the top {{limit}} out of {{totalSongs}} available songs from the following options:",
             "perCommandHelp": "Looking for information on how to use a command? Check out {{helpCommand}} action:[command] to learn more.",
-            "premiumOptionsNonPremiumGame": "Note: active game is not premium",
             "preset": "Preset",
             "reset": "{{presetOrOption}} Reset",
             "spotify": "Now playing {{songCount}} songs from Spotify with the following options:",
@@ -881,43 +879,6 @@
             },
             "typeGuess": "Listen to the song and type your guess!",
             "voteReminder": "Psst. Earn more EXP by voting (see {{vote}})"
-        },
-        "premium": {
-            "help": {
-                "description": "Find out more about KMQ Premium including whether you're currently a member.",
-                "example": "Shows your premium status.",
-                "name": "premium"
-            },
-            "option": {
-                "description": "This option can only be used by premium KMQ supporters.",
-                "description_kmq_server": "This option can only be used by premium KMQ supporters, or in the official KMQ server.",
-                "title": "Premium Option"
-            },
-            "status": {
-                "description": {
-                    "connectionReminder": "Make sure to connect your Discord account [here](https://www.patreon.com/settings/apps) to receive your perks.",
-                    "nonPremium": "Subscribe to [KMQ Premium](https://www.patreon.com/kmq) here.",
-                    "premium": "You have [KMQ Premium](https://www.patreon.com/kmq)."
-                },
-                "perks": {
-                    "badge": {
-                        "description": "Show off your dedication to KMQ with an exclusive badge on your profile",
-                        "title": "Premium Supporter Badge!"
-                    },
-                    "moreSongs": {
-                        "description": "Gain access to the top 50 b-sides for every artist (up from 10)",
-                        "title": "More songs!"
-                    },
-                    "special": {
-                        "description": "Change song playback speed anywhere you play!",
-                        "title": "`/special` in every server!"
-                    }
-                },
-                "title": {
-                    "nonPremium": "Subscribe to KMQ Premium!",
-                    "premium": "Thanks for supporting KMQ!"
-                }
-            }
         },
         "preset": {
             "deleted": {
@@ -1634,9 +1595,7 @@
             "notGameSession": "You can't do that while in a game session.",
             "notHidden": "You can't do that during a hidden game.",
             "notListeningSession": "You can't do that while in a listening session.",
-            "notPremium": "You need KMQ Premium to use this command (see {{premium}}).",
             "notSpotify": "You can't change that option when playing from Spotify. Use {{spotifyResetCommand}} before changing this option.",
-            "premiumOrDebugServer": "This command only works in the official KMQ server or for KMQ Premium members (see {{premium}}).",
             "title": "Wait..."
         },
         "releaseDate": "Release Date",

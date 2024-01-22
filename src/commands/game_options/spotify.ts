@@ -21,7 +21,6 @@ import {
 import {
     getLocalizedArtistName,
     getLocalizedSongName,
-    isPremiumRequest,
 } from "../../helpers/game_utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
@@ -375,16 +374,10 @@ export default class SpotifyCommand implements BaseCommand {
             return;
         }
 
-        const premiumRequest = await isPremiumRequest(
-            session,
-            messageContext.author.id,
-        );
-
         let matchedPlaylist: MatchedPlaylist;
         if (session) {
             matchedPlaylist = (await session.songSelector.reloadSongs(
                 guildPreference,
-                premiumRequest,
                 playlistID,
                 true,
                 messageContext,
@@ -393,7 +386,6 @@ export default class SpotifyCommand implements BaseCommand {
         } else {
             matchedPlaylist = (await new SongSelector().reloadSongs(
                 guildPreference,
-                premiumRequest,
                 playlistID,
                 true,
                 messageContext,
@@ -542,15 +534,9 @@ export default class SpotifyCommand implements BaseCommand {
         }
 
         const playlistID = guildPreference.getSpotifyPlaylistID();
-        const premiumRequest = await isPremiumRequest(
-            Session.getSession(guildID),
-            messageContext.author.id,
-        );
-
         const playlist = await State.spotifyManager.getMatchedSpotifySongs(
             guildID,
             playlistID!,
-            premiumRequest,
             false,
             messageContext,
             interaction,

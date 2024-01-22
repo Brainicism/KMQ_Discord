@@ -726,7 +726,6 @@
                 "title": "未找到歌曲。"
             },
             "notInKMQ": "这首歌在[Daisuki]({{link}})上有条目，但未包含在KMQ中。",
-            "premiumSong": "仅限KMQ高级会员？",
             "songNameSearchResult": {
                 "notFoundDescription": "找不到任何名为该名称的歌曲。",
                 "successDescription": "以下歌曲可在KMQ中使用：",
@@ -802,7 +801,6 @@
             "notSet": "未设置",
             "overview": "现在播放以下选项中可用的前{{limit}}首歌曲中的前{{totalSongs}}首：",
             "perCommandHelp": "需要了解如何使用命令吗？查看{{helpCommand}} action:[命令]以了解更多信息。",
-            "premiumOptionsNonPremiumGame": "注意：活动游戏不是高级版",
             "preset": "预设",
             "reset": "{{presetOrOption}} 重置",
             "spotify": "现在使用以下选项从Spotify播放{{songCount}}首歌曲：",
@@ -881,43 +879,6 @@
             },
             "typeGuess": "听歌并输入您的猜测！",
             "voteReminder": "嘘，通过投票赚取更多经验值(请参见 {{vote}})。"
-        },
-        "premium": {
-            "help": {
-                "description": "了解更多关于 KMQ Premium 的信息，包括您当前是否是会员。",
-                "example": "显示您的高级会员状态。",
-                "name": "高级会员"
-            },
-            "option": {
-                "description": "此选项仅可由 KMQ 高级支持者使用。",
-                "description_kmq_server": "此选项仅适用于高级KMQ支持者或官方KMQ服务器。",
-                "title": "高级选项"
-            },
-            "status": {
-                "description": {
-                    "connectionReminder": "请确保在此处连接您的Discord帐户[这里](https://www.patreon.com/settings/apps)，以获得您的特权。",
-                    "nonPremium": "在此处订阅[KMQ Premium](https://www.patreon.com/kmq)。",
-                    "premium": "您已经拥有[KMQ Premium](https://www.patreon.com/kmq)。"
-                },
-                "perks": {
-                    "badge": {
-                        "description": "通过在您的个人资料上展示独家徽章来展示您对KMQ的奉献精神。",
-                        "title": "高级支持者徽章！"
-                    },
-                    "moreSongs": {
-                        "description": "获得每位艺术家的前50首B面歌曲(从10首升级)",
-                        "title": "更多歌曲！"
-                    },
-                    "special": {
-                        "description": "在任何地方播放时更改歌曲播放速度！",
-                        "title": "每个服务器都有 `/special`！"
-                    }
-                },
-                "title": {
-                    "nonPremium": "订阅 KMQ 高级版！",
-                    "premium": "感谢您支持 KMQ！"
-                }
-            }
         },
         "preset": {
             "deleted": {
@@ -1634,9 +1595,7 @@
             "notGameSession": "您不能在游戏会话中进行此操作。",
             "notHidden": "在隐藏游戏期间无法进行该操作。",
             "notListeningSession": "您不能在听歌会话中进行此操作。",
-            "notPremium": "您需要 KMQ Premium 才能使用此命令(请参见{{premium}})。",
             "notSpotify": "您不能在从 Spotify 播放时更改该选项。请在更改此选项之前使用 {{spotifyResetCommand}}。",
-            "premiumOrDebugServer": "此命令仅适用于官方 KMQ 服务器或 KMQ Premium 成员(请参见{{premium}})。",
             "title": "请稍等..."
         },
         "releaseDate": "发布日期",

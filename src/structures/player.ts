@@ -11,9 +11,6 @@ export default class Player {
     /** The Discord username of the player */
     public readonly username: string;
 
-    /** Whether the player has premium features */
-    public readonly premium: boolean;
-
     /** The ID of the guild where the player is playing */
     public readonly guildID: string;
 
@@ -45,7 +42,6 @@ export default class Player {
         points: number,
         username: string,
         firstGameOfTheDay = false,
-        premium = false,
     ) {
         this.id = id;
         this.guildID = guildID;
@@ -54,7 +50,6 @@ export default class Player {
         this.correctGuessCount = 0;
         this.username = username;
         this.firstGameOfTheDay = firstGameOfTheDay;
-        this.premium = premium;
         this.inVC = true;
         this.expGain = 0;
         this.previousRoundRanking = null;
@@ -65,7 +60,6 @@ export default class Player {
         guildID: string,
         score = 0,
         firstGameOfDay = false,
-        premium = false,
     ): Player {
         return new Player(
             user.id,
@@ -74,7 +68,6 @@ export default class Player {
             score,
             user.username,
             firstGameOfDay,
-            premium,
         );
     }
 

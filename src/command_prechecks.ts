@@ -9,7 +9,6 @@ import {
 } from "./helpers/discord_utils";
 import { clickableSlashCommand } from "./helpers/utils";
 import { getTimeUntilRestart } from "./helpers/management_utils";
-import { isUserPremium } from "./helpers/game_utils";
 import AnswerType from "./enums/option_types/answer_type";
 import GameType from "./enums/game_type";
 import GuildPreference from "./structures/guild_preference";
@@ -308,65 +307,6 @@ export default class CommandPrechecks {
         }
 
         return true;
-    }
-
-    static async premiumPrecheck(precheckArgs: PrecheckArgs): Promise<boolean> {
-        const { messageContext, interaction } = precheckArgs;
-        const premium = await isUserPremium(messageContext.author.id);
-        if (premium) {
-            return true;
-        }
-
-        const embedPayload: EmbedPayload = {
-            title: i18n.translate(
-                messageContext.guildID,
-                "misc.preCheck.title",
-            ),
-            description: i18n.translate(
-                messageContext.guildID,
-                "misc.preCheck.notPremium",
-                { premium: clickableSlashCommand("premium") },
-            ),
-        };
-
-        await sendErrorMessage(messageContext, embedPayload, interaction);
-
-        return false;
-    }
-
-    static async premiumOrDebugServerPrecheck(
-        precheckArgs: PrecheckArgs,
-    ): Promise<boolean> {
-        const { messageContext, interaction } = precheckArgs;
-        const premium = await isUserPremium(messageContext.author.id);
-        const isDebugServer =
-            process.env.DEBUG_SERVER_ID === messageContext.guildID;
-
-        if (premium || isDebugServer) {
-            return true;
-        }
-
-        logger.warn(
-            `${getDebugLogHeader(
-                messageContext,
-            )} | User attempted to use a command only usable in the debug server/for premium users`,
-        );
-
-        const embedPayload: EmbedPayload = {
-            title: i18n.translate(
-                messageContext.guildID,
-                "misc.preCheck.title",
-            ),
-            description: i18n.translate(
-                messageContext.guildID,
-                "misc.preCheck.premiumOrDebugServer",
-                { premium: clickableSlashCommand("premium") },
-            ),
-        };
-
-        sendErrorMessage(messageContext, embedPayload, interaction);
-
-        return false;
     }
 
     static async notSpotifyPrecheck(

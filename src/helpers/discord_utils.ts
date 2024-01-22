@@ -37,7 +37,6 @@ import {
     getAvailableSongCount,
     getLocalizedArtistName,
     getLocalizedSongName,
-    isPremiumRequest,
     userBonusIsActive,
 } from "./game_utils";
 import { normalizePunctuationInName } from "../structures/game_round";
@@ -769,10 +768,6 @@ export async function generateOptionsMessage(
     }
 
     const guildID = messageContext.guildID;
-    const premiumRequest = await isPremiumRequest(
-        session,
-        messageContext.author.id,
-    );
 
     // Store the VALUE of ,[option]: [VALUE] into optionStrings
     // Null optionStrings values are set to "Not set" below
@@ -787,7 +782,6 @@ export async function generateOptionsMessage(
             await State.spotifyManager.getMatchedSpotifySongs(
                 guildID,
                 spotifyPlaylistID,
-                premiumRequest,
                 false,
                 messageContext,
                 interaction,
@@ -804,7 +798,6 @@ export async function generateOptionsMessage(
 
     const totalSongs = await getAvailableSongCount(
         guildPreference,
-        premiumRequest,
         messageContext,
         interaction,
     );
@@ -1019,16 +1012,6 @@ export async function generateOptionsMessage(
         )
         .join("\n");
 
-    let nonPremiumGameWarning = "";
-    if (premiumRequest && session?.isGameSession() && !session?.isPremium) {
-        nonPremiumGameWarning = italicize(
-            i18n.translate(
-                messageContext.guildID,
-                "command.options.premiumOptionsNonPremiumGame",
-            ),
-        );
-    }
-
     const fieldOptions = Object.keys(GameOptionCommand)
         .filter((option) => optionStrings[option as GameOption])
         .filter((option) => !PriorityGameOption.includes(option as GameOption));
@@ -1152,16 +1135,12 @@ export async function generateOptionsMessage(
     }
 
     let description = "";
-    if (nonPremiumGameWarning) {
-        description = `${nonPremiumGameWarning}\n\n`;
-    }
 
     description += optionsOverview;
     description += "\n\n";
     description += priorityOptions;
 
     return {
-        color: premiumRequest ? EMBED_SUCCESS_BONUS_COLOR : undefined,
         title,
         description,
         fields,

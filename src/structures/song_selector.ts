@@ -241,7 +241,6 @@ export default class SongSelector {
 
     async reloadSongs(
         guildPreference: GuildPreference,
-        isPremium: boolean,
         playlistID?: string,
         forceRefreshMetadata?: boolean,
         messageContext?: MessageContext,
@@ -250,7 +249,6 @@ export default class SongSelector {
         if (!playlistID) {
             this.filteredSongs = await SongSelector.getFilteredSongList(
                 guildPreference,
-                isPremium,
                 SHADOW_BANNED_ARTIST_IDS,
             );
 
@@ -259,7 +257,6 @@ export default class SongSelector {
 
         const playlist = await SongSelector.getSpotifySongList(
             guildPreference.guildID,
-            isPremium,
             playlistID,
             forceRefreshMetadata || false,
             messageContext,
@@ -273,13 +270,11 @@ export default class SongSelector {
     /**
      * Returns a list of songs from the data store, narrowed down by the specified game options
      * @param guildPreference - The GuildPreference
-     * @param premium - Whether the game is premium
      * @param shadowBannedArtistIds - artist IDs that shouldn't be populated by subunit inclusion
      * @returns a list of songs, as well as the number of songs before the filter option was applied
      */
     static async getFilteredSongList(
         guildPreference: GuildPreference,
-        premium: boolean = false,
         shadowBannedArtistIds: Array<number> = [],
     ): Promise<{ songs: Set<QueriedSong>; countBeforeLimit: number }> {
         const gameOptions = guildPreference.gameOptions;
@@ -512,12 +507,7 @@ export default class SongSelector {
         queryBuilder = queryBuilder.where(
             "rank",
             "<=",
-            premium
-                ? parseInt(
-                      process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST as string,
-                      10,
-                  )
-                : parseInt(process.env.AUDIO_SONGS_PER_ARTIST as string, 10),
+            parseInt(process.env.AUDIO_SONGS_PER_ARTIST as string, 10),
         );
 
         result = await queryBuilder.execute();
@@ -556,7 +546,6 @@ export default class SongSelector {
 
     static async getSpotifySongList(
         guildID: string,
-        isPremium: boolean,
         playlistID: string,
         forceRefreshMetadata: boolean,
         messageContext?: MessageContext,
@@ -566,23 +555,12 @@ export default class SongSelector {
             await State.spotifyManager.getMatchedSpotifySongs(
                 guildID,
                 playlistID,
-                isPremium,
                 forceRefreshMetadata,
                 messageContext,
                 interaction,
             );
 
-        const result = new Set(
-            matchedSongs.filter(
-                (x) =>
-                    x.rank <=
-                    Number(
-                        isPremium
-                            ? process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST
-                            : process.env.AUDIO_SONGS_PER_ARTIST,
-                    ),
-            ),
-        );
+        const result = new Set(matchedSongs);
 
         return {
             songs: result,

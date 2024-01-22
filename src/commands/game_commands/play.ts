@@ -11,10 +11,8 @@ import {
 import { IPCLogger } from "../../logger";
 import {
     activeBonusUsers,
-    areUsersPremium,
     isFirstGameOfDay,
     isPowerHour,
-    isUserPremium,
 } from "../../helpers/game_utils";
 import {
     bold,
@@ -869,7 +867,6 @@ export default class PlayCommand implements BaseCommand {
                     messageContext.guildID,
                     0,
                     await isFirstGameOfDay(messageContext.author.id),
-                    await isUserPremium(messageContext.author.id),
                 ),
                 messageContext.guildID,
             );
@@ -964,7 +961,6 @@ export default class PlayCommand implements BaseCommand {
                     messageContext.guildID,
                     0,
                     await isFirstGameOfDay(messageContext.author.id),
-                    await isUserPremium(messageContext.author.id),
                 ),
             );
 
@@ -1107,9 +1103,6 @@ export default class PlayCommand implements BaseCommand {
 
         const gameOwner = new KmqMember(messageContext.author.id);
         let gameSession: GameSession;
-        const isPremium = await areUsersPremium(
-            getCurrentVoiceMembers(voiceChannel.id).map((x) => x.id),
-        );
 
         if (gameType === GameType.TEAMS) {
             // (1) TEAMS game creation
@@ -1144,7 +1137,6 @@ export default class PlayCommand implements BaseCommand {
                 textChannel.guild.id,
                 gameOwner,
                 gameType,
-                isPremium,
             );
 
             logger.info(
@@ -1274,7 +1266,6 @@ export default class PlayCommand implements BaseCommand {
                 textChannel.guild.id,
                 gameOwner,
                 gameType,
-                isPremium,
                 lives,
             );
         }
@@ -1295,22 +1286,6 @@ export default class PlayCommand implements BaseCommand {
 
             if (!guildPreference.isGuessTimeoutSet()) {
                 await guildPreference.setGuessTimeout(HIDDEN_DEFAULT_TIMER);
-            }
-        }
-
-        if (!isPremium) {
-            for (const [commandName, command] of Object.entries(
-                State.client.commands,
-            )) {
-                if (command.isUsingPremiumOption) {
-                    if (command.isUsingPremiumOption(guildPreference)) {
-                        logger.info(
-                            `Session started by non-premium request, clearing premium option: ${commandName}`,
-                        );
-                        // eslint-disable-next-line no-await-in-loop
-                        await command.resetPremium!(guildPreference);
-                    }
-                }
             }
         }
 

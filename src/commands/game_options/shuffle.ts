@@ -1,6 +1,5 @@
 import {
     DEFAULT_SHUFFLE,
-    EMBED_ERROR_COLOR,
     ExpBonusModifierValues,
     OptionAction,
 } from "../../constants";
@@ -9,10 +8,8 @@ import { clickableSlashCommand } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
-    sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { isUserPremium } from "../../helpers/game_utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import ExpBonusModifier from "../../enums/exp_bonus_modifier";
@@ -26,16 +23,10 @@ import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
-import type EmbedPayload from "../../interfaces/embed_payload";
 import type HelpDocumentation from "../../interfaces/help";
 
 const COMMAND_NAME = "shuffle";
 const logger = new IPCLogger(COMMAND_NAME);
-
-const PREMIUM_SHUFFLE_TYPES = [
-    ShuffleType.WEIGHTED_EASY,
-    ShuffleType.WEIGHTED_HARD,
-];
 
 export default class ShuffleCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
@@ -234,36 +225,6 @@ export default class ShuffleCommand implements BaseCommand {
             messageContext.guildID,
         );
 
-        if (shuffleType && PREMIUM_SHUFFLE_TYPES.includes(shuffleType)) {
-            if (!(await isUserPremium(messageContext.author.id))) {
-                logger.info(
-                    `${getDebugLogHeader(
-                        messageContext,
-                    )} | Non-premium user attempted to use shuffle option = ${shuffleType}`,
-                );
-
-                const embedPayload: EmbedPayload = {
-                    description: i18n.translate(
-                        messageContext.guildID,
-                        "command.premium.option.description",
-                    ),
-                    title: i18n.translate(
-                        messageContext.guildID,
-                        "command.premium.option.title",
-                    ),
-                    color: EMBED_ERROR_COLOR,
-                };
-
-                await sendErrorMessage(
-                    messageContext,
-                    embedPayload,
-                    interaction,
-                );
-
-                return;
-            }
-        }
-
         const reset = shuffleType == null;
         if (reset) {
             await guildPreference.reset(GameOption.SHUFFLE_TYPE);
@@ -320,11 +281,4 @@ export default class ShuffleCommand implements BaseCommand {
             interaction,
         );
     }
-
-    resetPremium = async (guildPreference: GuildPreference): Promise<void> => {
-        await guildPreference.reset(GameOption.SHUFFLE_TYPE);
-    };
-
-    isUsingPremiumOption = (guildPreference: GuildPreference): boolean =>
-        PREMIUM_SHUFFLE_TYPES.includes(guildPreference.gameOptions.shuffleType);
 }

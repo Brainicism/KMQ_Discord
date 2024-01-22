@@ -8,7 +8,6 @@ export default class EliminationPlayer extends Player {
         guildID: string,
         score = ELIMINATION_DEFAULT_LIVES,
         firstGameOfDay = false,
-        premium = false,
     ): EliminationPlayer {
         return new EliminationPlayer(
             user.id,
@@ -17,7 +16,6 @@ export default class EliminationPlayer extends Player {
             score,
             user.username,
             firstGameOfDay,
-            premium,
         );
     }
 

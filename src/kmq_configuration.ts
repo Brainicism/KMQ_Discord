@@ -52,10 +52,6 @@ export default class KmqConfiguration {
         }
     }
 
-    premiumCommandEnabled(): boolean {
-        return this.config["premiumCommandEnabled"] ?? false;
-    }
-
     maintenanceModeEnabled(): boolean {
         return this.config["maintenanceModeEnabled"] ?? false;
     }

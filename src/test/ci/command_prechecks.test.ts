@@ -1,5 +1,4 @@
 import * as discord_utils from "../../helpers/discord_utils";
-import * as game_utils from "../../helpers/game_utils";
 import * as management_utils from "../../helpers/management_utils";
 import CommandPrechecks from "../../command_prechecks";
 import GameSession from "../../structures/game_session";
@@ -37,7 +36,6 @@ describe("command prechecks", () => {
         "dummy",
         new KmqMember("dummy"),
         GameType.CLASSIC,
-        false,
     );
 
     describe("inSessionCommandPrecheck", () => {
@@ -60,7 +58,6 @@ describe("command prechecks", () => {
                 "1234",
                 "12345",
                 mockKmqMember,
-                true,
             );
 
             describe("user and bot are in the same vc", () => {
@@ -104,7 +101,6 @@ describe("command prechecks", () => {
                 "1234",
                 mockKmqMember,
                 GameType.ELIMINATION,
-                true,
             );
 
             const teamGameSession = new GameSession(
@@ -114,7 +110,6 @@ describe("command prechecks", () => {
                 "1234",
                 mockKmqMember,
                 GameType.TEAMS,
-                false,
             );
 
             const classicGameSession = new GameSession(
@@ -124,7 +119,6 @@ describe("command prechecks", () => {
                 "1234",
                 mockKmqMember,
                 GameType.CLASSIC,
-                true,
             );
 
             describe("in the same voice channel", () => {
@@ -223,7 +217,6 @@ describe("command prechecks", () => {
             "1234",
             "1235",
             mockKmqMember,
-            false,
         );
 
         const gameSession = new GameSession(
@@ -233,7 +226,6 @@ describe("command prechecks", () => {
             "1235",
             mockKmqMember,
             GameType.CLASSIC,
-            true,
         );
 
         describe("session is null", () => {
@@ -282,7 +274,6 @@ describe("command prechecks", () => {
             debugServerId,
             mockKmqMember,
             GameType.CLASSIC,
-            false,
         );
 
         afterEach(() => {
@@ -375,7 +366,6 @@ describe("command prechecks", () => {
             "12345",
             mockKmqMember,
             GameType.CLASSIC,
-            true,
         );
 
         afterEach(() => {
@@ -422,7 +412,6 @@ describe("command prechecks", () => {
             "12345",
             mockKmqMember,
             GameType.CLASSIC,
-            true,
         );
 
         describe("restart is scheduled", () => {
@@ -458,117 +447,6 @@ describe("command prechecks", () => {
         });
     });
 
-    describe("premiumPrecheck", () => {
-        const gameSession = new GameSession(
-            new GuildPreference("12"),
-            "123",
-            "1234",
-            "12345",
-            mockKmqMember,
-            GameType.CLASSIC,
-            false,
-        );
-
-        describe("user is premium", () => {
-            it("should return true", async () => {
-                sandbox
-                    .stub(game_utils, "isUserPremium")
-                    .callsFake(() => Promise.resolve(true));
-
-                assert.strictEqual(
-                    await CommandPrechecks.premiumPrecheck({
-                        messageContext,
-                        session: gameSession,
-                    }),
-                    true,
-                );
-            });
-        });
-
-        describe("user is not premium", () => {
-            it("should return false", async () => {
-                sandbox
-                    .stub(game_utils, "isUserPremium")
-                    .callsFake(() => Promise.resolve(false));
-
-                assert.strictEqual(
-                    await CommandPrechecks.premiumPrecheck({
-                        messageContext,
-                        session: gameSession,
-                    }),
-                    false,
-                );
-            });
-        });
-    });
-
-    describe("premiumOrDebugServerPrecheck", () => {
-        const debugServerId = "123456789";
-        const gameSession = new GameSession(
-            new GuildPreference("12"),
-            "123",
-            "1234",
-            "12345",
-            mockKmqMember,
-            GameType.CLASSIC,
-            false,
-        );
-
-        afterEach(() => {
-            delete process.env.DEBUG_SERVER_ID;
-        });
-
-        describe("user is premium", () => {
-            it("should return true", async () => {
-                sandbox
-                    .stub(game_utils, "isUserPremium")
-                    .callsFake(() => Promise.resolve(true));
-
-                assert.strictEqual(
-                    await CommandPrechecks.premiumOrDebugServerPrecheck({
-                        messageContext,
-                        session: gameSession,
-                    }),
-                    true,
-                );
-            });
-        });
-
-        describe("message originates in debug server", () => {
-            it("should return true", async () => {
-                process.env.DEBUG_SERVER_ID = debugServerId;
-
-                assert.strictEqual(
-                    await CommandPrechecks.premiumOrDebugServerPrecheck({
-                        session: gameSession,
-                        messageContext: {
-                            ...messageContext,
-                            guildID: debugServerId,
-                        },
-                    }),
-                    true,
-                );
-            });
-        });
-
-        describe("user is not premium, nor does message originate in debug server", () => {
-            it("should return false", async () => {
-                process.env.DEBUG_SERVER_ID = "abc";
-                sandbox
-                    .stub(game_utils, "isUserPremium")
-                    .callsFake(() => Promise.resolve(false));
-
-                assert.strictEqual(
-                    await CommandPrechecks.premiumOrDebugServerPrecheck({
-                        session: gameSession,
-                        messageContext,
-                    }),
-                    false,
-                );
-            });
-        });
-    });
-
     describe("notSpotifyPrecheck", () => {
         const GUILD_ID = "123";
 
@@ -585,7 +463,6 @@ describe("command prechecks", () => {
             GUILD_ID,
             mockKmqMember,
             GameType.CLASSIC,
-            false,
         );
 
         describe("spotify playlist set", () => {
@@ -628,7 +505,6 @@ describe("command prechecks", () => {
                 GUILD_ID,
                 mockKmqMember,
                 GameType.HIDDEN,
-                false,
             );
 
             describe("change to multiple choice during hidden game via default reset", () => {
@@ -712,7 +588,6 @@ describe("command prechecks", () => {
                 GUILD_ID,
                 mockKmqMember,
                 GameType.CLASSIC,
-                false,
             );
 
             describe("change to multiple choice via default reset", () => {
@@ -800,7 +675,6 @@ describe("command prechecks", () => {
                 GUILD_ID,
                 mockKmqMember,
                 GameType.HIDDEN,
-                false,
             );
 
             describe("change timer to another value", () => {
@@ -866,7 +740,6 @@ describe("command prechecks", () => {
                 GUILD_ID,
                 mockKmqMember,
                 GameType.TEAMS,
-                false,
             );
 
             describe("change timer to another value", () => {
