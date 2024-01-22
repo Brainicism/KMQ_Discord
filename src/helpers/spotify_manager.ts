@@ -570,7 +570,7 @@ export default class SpotifyManager {
                     if (aliasIDs.length) {
                         expressions.push(
                             ...[
-                                eb("id_parentgroup", "in", aliasIDs),
+                                eb("a.id_parentgroup", "in", aliasIDs),
                                 eb("id_artist", "in", aliasIDs),
                                 eb("id_parent_artist", "in", aliasIDs),
                             ],
