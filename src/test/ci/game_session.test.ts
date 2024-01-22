@@ -65,7 +65,6 @@ describe("game session", () => {
                 "123",
                 new KmqMember("123"),
                 GameType.CLASSIC,
-                true,
             );
 
             sandbox.stub(Session, "getSession").callsFake(() => gameSession);

@@ -299,10 +299,7 @@ describe("game utils", () => {
             it("should return the expected song count", async () => {
                 const limit = 50;
                 await guildPreference.setLimit(0, limit);
-                const songCount = await getAvailableSongCount(
-                    guildPreference,
-                    true,
-                );
+                const songCount = await getAvailableSongCount(guildPreference);
 
                 assert(songCount.count);
                 assert(songCount.countBeforeLimit);
@@ -324,7 +321,6 @@ describe("game utils", () => {
                 guildId,
                 new KmqMember("id"),
                 GameType.CLASSIC,
-                false,
             );
 
             sandbox.restore();

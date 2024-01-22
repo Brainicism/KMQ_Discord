@@ -51,7 +51,6 @@ describe("begin command", () => {
                 "dummy",
                 gameStarter,
                 GameType.CLASSIC,
-                false,
             );
 
             sandbox.restore();
@@ -86,7 +85,6 @@ describe("begin command", () => {
                 "dummy",
                 gameStarter,
                 GameType.TEAMS,
-                true,
             );
 
             sandbox.restore();
@@ -103,7 +101,7 @@ describe("begin command", () => {
                 });
             });
 
-            describe("atleast 1 team has been added", () => {
+            describe("at least 1 team has been added", () => {
                 it("should return false", () => {
                     const scoreboard = gameSession.scoreboard as TeamScoreboard;
                     scoreboard.addTeam(
