@@ -1,13 +1,11 @@
-import { EMBED_ERROR_COLOR, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { OptionAction } from "../../constants";
 import { clickableSlashCommand } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
-    sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { isUserPremium } from "../../helpers/game_utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
@@ -20,7 +18,6 @@ import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
-import type EmbedPayload from "../../interfaces/embed_payload";
 import type HelpDocumentation from "../../interfaces/help";
 
 const COMMAND_NAME = "special";
@@ -30,7 +27,6 @@ export default class SpecialCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
         { checkFn: CommandPrechecks.notListeningPrecheck },
-        { checkFn: CommandPrechecks.premiumOrDebugServerPrecheck },
     ];
 
     validations = {
@@ -248,33 +244,6 @@ export default class SpecialCommand implements BaseCommand {
             messageContext.guildID,
         );
 
-        if (
-            process.env.DEBUG_SERVER_ID !== messageContext.guildID &&
-            !(await isUserPremium(messageContext.author.id))
-        ) {
-            logger.info(
-                `${getDebugLogHeader(
-                    messageContext,
-                )} | Non-premium user attempted to use premium special option`,
-            );
-
-            const embedPayload: EmbedPayload = {
-                description: i18n.translate(
-                    messageContext.guildID,
-                    "command.premium.option.description_kmq_server",
-                ),
-                title: i18n.translate(
-                    messageContext.guildID,
-                    "command.premium.option.title",
-                ),
-                color: EMBED_ERROR_COLOR,
-            };
-
-            await sendErrorMessage(messageContext, embedPayload, interaction);
-
-            return;
-        }
-
         const reset = specialType == null;
         if (reset) {
             await guildPreference.reset(GameOption.SPECIAL_TYPE);
@@ -331,14 +300,4 @@ export default class SpecialCommand implements BaseCommand {
             interaction,
         );
     }
-
-    resetPremium = async (guildPreference: GuildPreference): Promise<void> => {
-        if (guildPreference.guildID !== process.env.DEBUG_SERVER_ID) {
-            await guildPreference.reset(GameOption.SPECIAL_TYPE);
-        }
-    };
-
-    isUsingPremiumOption = (guildPreference: GuildPreference): boolean =>
-        guildPreference.guildID !== process.env.DEBUG_SERVER_ID &&
-        guildPreference.gameOptions.specialType !== null;
 }

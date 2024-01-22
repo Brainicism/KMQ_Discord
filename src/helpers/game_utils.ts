@@ -1,8 +1,5 @@
 import { IPCLogger } from "../logger";
-import {
-    PATREON_SUPPORTER_BADGE_ID,
-    SHADOW_BANNED_ARTIST_IDS,
-} from "../constants";
+import { SHADOW_BANNED_ARTIST_IDS } from "../constants";
 import {
     cleanArtistName,
     normalizePunctuationInName,
@@ -24,7 +21,6 @@ import type GameRound from "../structures/game_round";
 import type GuildPreference from "../structures/guild_preference";
 import type MatchedArtist from "../interfaces/matched_artist";
 import type MessageContext from "../structures/message_context";
-import type Patron from "../interfaces/patron";
 import type QueriedSong from "../interfaces/queried_song";
 import type Session from "../structures/session";
 
@@ -53,14 +49,12 @@ export async function ensureVoiceConnection(session: Session): Promise<void> {
 
 /**
  * @param guildPreference - The GuildPreference
- * @param isPremium - Whether to include premium songs
  * @param messageContext - The message which triggered the song count check
  * @param interaction - The interaction that triggered the song count check
  * @returns an object containing the total number of available songs before and after limit based on the GameOptions
  */
 export async function getAvailableSongCount(
     guildPreference: GuildPreference,
-    isPremium: boolean,
     messageContext?: MessageContext,
     interaction?: Eris.CommandInteraction,
 ): Promise<{
@@ -78,7 +72,6 @@ export async function getAvailableSongCount(
             if (session) {
                 matchedPlaylist = (await session.songSelector.reloadSongs(
                     guildPreference,
-                    isPremium,
                     playlistID,
                     !session.sessionInitialized,
                     messageContext,
@@ -87,7 +80,6 @@ export async function getAvailableSongCount(
             } else {
                 matchedPlaylist = (await new SongSelector().reloadSongs(
                     guildPreference,
-                    isPremium,
                     playlistID,
                     false,
                     messageContext,
@@ -104,7 +96,6 @@ export async function getAvailableSongCount(
         const { songs, countBeforeLimit } =
             await SongSelector.getFilteredSongList(
                 guildPreference,
-                isPremium,
                 SHADOW_BANNED_ARTIST_IDS,
             );
 
@@ -520,93 +511,6 @@ export async function getMultipleChoiceOptions(
     }
 
     return result;
-}
-
-/**
- * @param _userIDs - A list of user IDs to check
- * @returns whether at least one player has premium status
- */
-export async function areUsersPremium(
-    _userIDs: Array<string>,
-): Promise<boolean> {
-    return Promise.resolve(true);
-    // return !!(await dbContext.kmq
-    //     .selectFrom("premium_users")
-    //     .selectAll()
-    //     .where("active", "=", 1)
-    //     .where("user_id", "in", userIDs)
-    //     .executeTakeFirst());
-}
-
-/**
- * @param userID - The user ID
- * @returns whether the player has premium status
- */
-export async function isUserPremium(userID: string): Promise<boolean> {
-    return areUsersPremium([userID]);
-}
-
-/**
- * @param activePatrons - The users to grant premium membership
- * @param inactiveUserIDs - The users to revoke premium membership from
- */
-export async function updatePremium(
-    activePatrons: Array<Patron>,
-    inactiveUserIDs: string[],
-): Promise<void> {
-    // Grant premium
-    const activePatronsPayload = activePatrons.map((x) => ({
-        active: x.activePatron ? 1 : 0,
-        first_subscribed: x.firstSubscribed,
-        user_id: x.discordID,
-        source: "patreon" as const,
-    }));
-
-    await Promise.all(
-        activePatronsPayload.map(async (activePatronPayload) => {
-            await dbContext.kmq
-                .insertInto("premium_users")
-                .values(activePatronPayload)
-                .onDuplicateKeyUpdate(activePatronPayload)
-                .execute();
-        }),
-    );
-
-    const payload = activePatrons.map((x) => ({
-        user_id: x.discordID,
-        badge_id: PATREON_SUPPORTER_BADGE_ID,
-    }));
-
-    await dbContext.kmq
-        .insertInto("badges_players")
-        .values(payload)
-        .ignore()
-        .execute();
-
-    // Revoke premium
-    await dbContext.kmq
-        .updateTable("premium_users")
-        .where("user_id", "in", inactiveUserIDs)
-        .set({ active: 0 })
-        .execute();
-
-    await dbContext.kmq
-        .deleteFrom("badges_players")
-        .where("user_id", "in", inactiveUserIDs)
-        .where("badge_id", "=", PATREON_SUPPORTER_BADGE_ID)
-        .execute();
-}
-
-/**
- * @param session - The session
- * @param playerID - The player ID
- * @returns whether the current game is a premium game/listening session, or the player is premium
- */
-export async function isPremiumRequest(
-    session: Session,
-    playerID: string,
-): Promise<boolean> {
-    return session?.isPremium || (await isUserPremium(playerID));
 }
 
 /**

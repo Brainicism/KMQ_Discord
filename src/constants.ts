@@ -151,8 +151,6 @@ export const EMBED_ERROR_COLOR = 0xed4245; // Red
 export const EMBED_SUCCESS_COLOR = 0x57f287; // Green
 export const EMBED_SUCCESS_BONUS_COLOR = 0xfee75c; // Gold
 
-export const PATREON_SUPPORTER_BADGE_ID = 23;
-
 export const DATABASE_DOWNLOAD_DIR = path.join(
     __dirname,
     "../sql_dumps/daisuki",

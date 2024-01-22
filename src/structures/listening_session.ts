@@ -31,7 +31,6 @@ export default class ListeningSession extends Session {
         voiceChannelID: string,
         guildID: string,
         gameSessionCreator: KmqMember,
-        isPremium: boolean,
     ) {
         super(
             guildPreference,
@@ -39,7 +38,6 @@ export default class ListeningSession extends Session {
             voiceChannelID,
             guildID,
             gameSessionCreator,
-            isPremium,
         );
         this.round = null;
     }

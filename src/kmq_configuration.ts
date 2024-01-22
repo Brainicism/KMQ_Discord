@@ -52,10 +52,6 @@ export default class KmqConfiguration {
         }
     }
 
-    premiumCommandEnabled(): boolean {
-        return this.config["premiumCommandEnabled"] ?? false;
-    }
-
     maintenanceModeEnabled(): boolean {
         return this.config["maintenanceModeEnabled"] ?? false;
     }
@@ -66,10 +62,6 @@ export default class KmqConfiguration {
 
     persistMatchedSpotifySongs(): boolean {
         return this.config["persistMatchedSpotifySongs"] ?? false;
-    }
-
-    patreonFetchingEnabled(): boolean {
-        return this.config["patreonFetchingEnabled"] ?? false;
     }
 
     newsSubscriptionsEnabled(): boolean {

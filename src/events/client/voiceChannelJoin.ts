@@ -30,9 +30,4 @@ export default async function voiceChannelJoinHandler(
         );
         await session.setPlayerInVC(member.id, true);
     }
-
-    logger.info(
-        `gid: ${newChannel.guild.id}, uid: ${member.id} | Updating premium status`,
-    );
-    session.updatePremiumStatus();
 }

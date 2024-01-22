@@ -64,8 +64,7 @@ export default async function voiceChannelSwitchHandler(
     }
 
     logger.info(
-        `gid: ${newChannel.guild.id}, uid: ${member.id} | Updating premium status and owner`,
+        `gid: ${newChannel.guild.id}, uid: ${member.id} | Updating owner`,
     );
-    await session.updatePremiumStatus();
     session.updateOwner();
 }

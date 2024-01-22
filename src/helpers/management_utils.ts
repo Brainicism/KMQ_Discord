@@ -20,7 +20,6 @@ import _ from "lodash";
 import dbContext from "../database_context";
 import i18n from "./localization_manager";
 import schedule from "node-schedule";
-import updatePremiumUsers from "./patreon_manager";
 import type LocaleType from "../enums/locale_type";
 import type MatchedArtist from "../interfaces/matched_artist";
 import type NewsSubscription from "../interfaces/news_subscription";
@@ -561,11 +560,6 @@ export function registerIntervals(clusterID: number): void {
         if (timeUntilRestart && State.restartNotification) {
             updateBotStatus();
             await warnServersImpendingRestart(timeUntilRestart);
-        }
-
-        // Sync state with Patreon subscribers
-        if (await isPrimaryInstance()) {
-            updatePremiumUsers();
         }
     });
 }

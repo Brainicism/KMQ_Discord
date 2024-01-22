@@ -48,8 +48,7 @@ export default async function voiceChannelLeaveHandler(
     }
 
     logger.info(
-        `gid: ${oldChannel.guild.id}, uid: ${member.id} | Updating premium status and owner`,
+        `gid: ${oldChannel.guild.id}, uid: ${member.id} | Updating owner`,
     );
-    await session.updatePremiumStatus();
     session.updateOwner();
 }

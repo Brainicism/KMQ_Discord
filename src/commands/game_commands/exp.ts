@@ -11,7 +11,6 @@ import {
     getAvailableSongCount,
     isFirstGameOfDay,
     isPowerHour,
-    isPremiumRequest,
     userBonusIsActive,
 } from "../../helpers/game_utils";
 import {
@@ -25,7 +24,6 @@ import ExpBonusModifier from "../../enums/exp_bonus_modifier";
 import GuessModeType from "../../enums/option_types/guess_mode_type";
 import GuildPreference from "../../structures/guild_preference";
 import MessageContext from "../../structures/message_context";
-import Session from "../../structures/session";
 import ShuffleType from "../../enums/option_types/shuffle_type";
 import State from "../../state";
 import i18n from "../../helpers/localization_manager";
@@ -172,10 +170,8 @@ export async function calculateOptionsExpMultiplierInternal(
         });
     }
 
-    const session = Session.getSession(guildPreference.guildID);
     const { count, countBeforeLimit } = await getAvailableSongCount(
         guildPreference,
-        await isPremiumRequest(session, playerID),
         messageContext,
     );
 

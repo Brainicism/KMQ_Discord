@@ -2,18 +2,17 @@ import * as uuid from "uuid";
 import { IPCLogger } from "../logger";
 import { KmqImages, specialFfmpegArgs } from "../constants";
 import {
-    areUsersPremium,
-    ensureVoiceConnection,
-    getLocalizedArtistName,
-    getLocalizedSongName,
-} from "../helpers/game_utils";
-import {
     clickableSlashCommand,
     friendlyFormattedNumber,
     getMention,
     truncatedString,
     underline,
 } from "../helpers/utils";
+import {
+    ensureVoiceConnection,
+    getLocalizedArtistName,
+    getLocalizedSongName,
+} from "../helpers/game_utils";
 import {
     generateEmbed,
     getCurrentVoiceMembers,
@@ -86,9 +85,6 @@ export default abstract class Session {
 
     public songSelector: SongSelector;
 
-    /** Whether the session has premium members */
-    public isPremium: boolean;
-
     /** The guild preference */
     protected guildPreference: GuildPreference;
 
@@ -112,7 +108,6 @@ export default abstract class Session {
         voiceChannelID: string,
         guildID: string,
         gameSessionCreator: KmqMember,
-        isPremium: boolean,
     ) {
         this.guildPreference = guildPreference;
         this.textChannelID = textChannelID;
@@ -128,7 +123,6 @@ export default abstract class Session {
         this.songMessageIDs = [];
         this.bookmarkedSongs = {};
         this.songSelector = new SongSelector();
-        this.isPremium = isPremium;
 
         this.guildPreference.reloadSongCallback = async () => {
             logger.info(
@@ -137,7 +131,6 @@ export default abstract class Session {
 
             await this.songSelector.reloadSongs(
                 this.guildPreference,
-                this.isPremium,
                 this.guildPreference.getSpotifyPlaylistID() ?? undefined,
             );
         };
@@ -194,7 +187,6 @@ export default abstract class Session {
             try {
                 await this.songSelector.reloadSongs(
                     this.guildPreference,
-                    this.isPremium,
                     this.guildPreference.getSpotifyPlaylistID() ?? undefined,
                     !this.sessionInitialized,
                 );
@@ -627,44 +619,6 @@ export default abstract class Session {
 
     getRoundsPlayed(): number {
         return this.roundsPlayed;
-    }
-
-    /**
-     * The game has changed its premium state, so update filtered songs and reset premium options if non-premium
-     */
-    async updatePremiumStatus(): Promise<void> {
-        const oldPremiumStatus = this.isPremium;
-
-        const isPremium = await areUsersPremium(
-            getCurrentVoiceMembers(this.voiceChannelID).map((x) => x.id),
-        );
-
-        if (oldPremiumStatus === isPremium) {
-            return;
-        }
-
-        this.isPremium = isPremium;
-
-        await this.songSelector.reloadSongs(
-            this.guildPreference,
-            isPremium,
-            this.guildPreference.getSpotifyPlaylistID() ?? undefined,
-        );
-
-        if (!isPremium) {
-            await Promise.allSettled(
-                Object.entries(State.client.commands).map(
-                    async ([commandName, command]) => {
-                        if (command.resetPremium) {
-                            logger.info(
-                                `gid: ${this.guildID} | Resetting premium for game option: ${commandName}`,
-                            );
-                            await command.resetPremium(this.guildPreference);
-                        }
-                    },
-                ),
-            );
-        }
     }
 
     abstract handleComponentInteraction(

@@ -30,7 +30,6 @@ import {
     getMultipleChoiceOptions,
     getTimeToGuessMs,
     isFirstGameOfDay,
-    isUserPremium,
     userBonusIsActive,
 } from "../helpers/game_utils";
 import State from "../state";
@@ -129,7 +128,6 @@ export default class GameSession extends Session {
         guildID: string,
         gameSessionCreator: KmqMember,
         gameType: GameType,
-        isPremium: boolean,
         eliminationLives?: number,
     ) {
         super(
@@ -138,7 +136,6 @@ export default class GameSession extends Session {
             voiceChannelID,
             guildID,
             gameSessionCreator,
-            isPremium,
         );
         this.gameType = gameType;
         this.sessionInitialized = false;
@@ -866,14 +863,12 @@ export default class GameSession extends Session {
                               this.scoreboard as EliminationScoreboard
                           ).getLivesOfWeakestPlayer(),
                           await isFirstGameOfDay(userID),
-                          await isUserPremium(userID),
                       )
                     : Player.fromUser(
                           user as Eris.User,
                           this.guildID,
                           0,
                           await isFirstGameOfDay(userID),
-                          await isUserPremium(userID),
                       ),
             );
         }
@@ -908,7 +903,6 @@ export default class GameSession extends Session {
                 .filter((x) => x !== process.env.BOT_CLIENT_ID)
                 .map(async (playerId) => {
                     const firstGameOfDay = await isFirstGameOfDay(playerId);
-                    const premium = await isUserPremium(playerId);
                     const player = (await fetchUser(playerId)) as Eris.User;
                     this.scoreboard.addPlayer(
                         this.gameType === GameType.ELIMINATION
@@ -918,14 +912,12 @@ export default class GameSession extends Session {
                                   (this.scoreboard as EliminationScoreboard)
                                       .startingLives,
                                   firstGameOfDay,
-                                  premium,
                               )
                             : Player.fromUser(
                                   player,
                                   this.guildID,
                                   0,
                                   firstGameOfDay,
-                                  premium,
                               ),
                     );
                 }),

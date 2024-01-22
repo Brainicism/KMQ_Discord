@@ -277,11 +277,7 @@ async function getSongsFromDb(databaseContext: DatabaseContext): Promise<any> {
     return avBuilder
         .selectFrom("rankedAudioSongs")
         .select(["songName", "artistName", "youtubeLink", "views"])
-        .where(
-            "rank",
-            "<=",
-            process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST as string,
-        )
+        .where("rank", "<=", process.env.AUDIO_SONGS_PER_ARTIST as string)
         .unionAll(mvBuilder)
         .orderBy("views", "desc")
         .execute();

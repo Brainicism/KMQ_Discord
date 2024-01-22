@@ -726,7 +726,6 @@
                 "title": "Chanson non trouvée"
             },
             "notInKMQ": "Cette chanson a une entrée sur [Daisuki]({{link}}), mais elle n'est pas incluse dans KMQ.",
-            "premiumSong": "KMQ Premium seulement ?",
             "songNameSearchResult": {
                 "notFoundDescription": "Impossible de trouver des chansons portant ce nom.",
                 "successDescription": "Les chansons suivantes sont disponibles dans KMQ :",
@@ -802,7 +801,6 @@
             "notSet": "Non défini",
             "overview": "En train de jouer les {{limit}} premières chansons parmi un total de {{totalSongs}} chansons disponibles à partir des options suivantes :",
             "perCommandHelp": "Vous cherchez des informations sur l'utilisation d'une commande ? Consultez {{helpCommand}} action:[commande] pour en savoir plus.",
-            "premiumOptionsNonPremiumGame": "Note : le jeu actif n'est pas premium",
             "preset": "Préréglage",
             "reset": "{{presetOrOption}} Réinitialiser",
             "spotify": "En train de jouer {{songCount}} chansons de Spotify avec les options suivantes :",
@@ -881,43 +879,6 @@
             },
             "typeGuess": "Écoutez la chanson et tapez votre réponse !",
             "voteReminder": "Psst. Gagnez plus d'EXP en votant (voir {{vote}})."
-        },
-        "premium": {
-            "help": {
-                "description": "En savoir plus sur KMQ Premium, y compris si vous êtes actuellement membre.",
-                "example": "Affiche votre statut premium.",
-                "name": "premium"
-            },
-            "option": {
-                "description": "Cette option ne peut être utilisée que par les supporters premium de KMQ.",
-                "description_kmq_server": "Cette option ne peut être utilisée que par les supporters premium de KMQ ou dans le serveur KMQ officiel.",
-                "title": "Option Premium"
-            },
-            "status": {
-                "description": {
-                    "connectionReminder": "Assurez-vous de connecter votre compte Discord [ici](https://www.patreon.com/settings/apps) pour recevoir vos avantages.",
-                    "nonPremium": "Abonnez-vous à [KMQ Premium](https://www.patreon.com/kmq) ici.",
-                    "premium": "Vous avez [KMQ Premium](https://www.patreon.com/kmq)."
-                },
-                "perks": {
-                    "badge": {
-                        "description": "Montrez votre dévouement envers KMQ avec un badge exclusif sur votre profil.",
-                        "title": "Badge de Supporter Premium!"
-                    },
-                    "moreSongs": {
-                        "description": "Accédez aux 50 meilleurs b-sides de chaque artiste (au lieu de 10).",
-                        "title": "Plus de chansons!"
-                    },
-                    "special": {
-                        "description": "Modifiez la vitesse de lecture des chansons où que vous soyez!",
-                        "title": "`/special` dans chaque serveur !"
-                    }
-                },
-                "title": {
-                    "nonPremium": "Abonnez-vous à KMQ Premium !",
-                    "premium": "Merci de soutenir KMQ !"
-                }
-            }
         },
         "preset": {
             "deleted": {
@@ -1634,9 +1595,7 @@
             "notGameSession": "Vous ne pouvez pas faire cela pendant une session de jeu.",
             "notHidden": "Vous ne pouvez pas faire cela pendant une partie cachée.",
             "notListeningSession": "Vous ne pouvez pas faire cela pendant une session d'écoute.",
-            "notPremium": "Vous avez besoin de KMQ Premium pour utiliser cette commande (voir {{premium}}).",
             "notSpotify": "Vous ne pouvez pas changer cette option lorsque vous jouez depuis Spotify. Utilisez {{spotifyResetCommand}} avant de changer cette option.",
-            "premiumOrDebugServer": "Cette commande ne fonctionne que dans le serveur officiel de KMQ ou pour les membres KMQ Premium (voir {{premium}}).",
             "title": "Attendez..."
         },
         "releaseDate": "Date de sortie",
