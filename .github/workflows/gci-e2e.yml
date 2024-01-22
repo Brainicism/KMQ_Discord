@@ -30,7 +30,6 @@ jobs:
             DB_USER_CI: root
             DB_PORT: 3306
             AUDIO_SONGS_PER_ARTIST: 10
-            PREMIUM_AUDIO_SONGS_PER_ARTIST: 50
         steps:
             - name: Checkout KMQ_Discord
               uses: actions/checkout@v2
@@ -45,7 +44,6 @@ jobs:
                   echo "BOT_TOKEN=$BOT_TOKEN" >> .env
                   echo "WEB_SERVER_PORT=5858" >> .env
                   echo "SONG_DOWNLOAD_DIR=/songs" >> .env
-                  echo "PREMIUM_AUDIO_SONGS_PER_ARTIST=$PREMIUM_AUDIO_SONGS_PER_ARTIST" >> .env
                   echo "AUDIO_SONGS_PER_ARTIST=$AUDIO_SONGS_PER_ARTIST" >> .env
                   echo "BOT_CLIENT_ID=123" >> .env
                   echo "BOT_PREFIX=." >> .env
@@ -92,7 +90,7 @@ jobs:
             - name: Parse pre-upgrade container ID
               id: old-container-id
               run: |
-                  docker ps 
+                  docker ps
                   echo OLD_CONTAINER_ID=$(sudo docker ps -aqf "name=kmq-gci") > $GITHUB_OUTPUT
             - name: Begin upgrade
               run: npx ts-node src/scripts/announce-restart.ts --docker-image=ghcr.io/brainicism/kmq_discord:gci --timer=0

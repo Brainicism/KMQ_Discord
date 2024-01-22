@@ -23,7 +23,6 @@ jobs:
             DB_USER_CI: root
             DB_PORT: 3306
             AUDIO_SONGS_PER_ARTIST: 10
-            PREMIUM_AUDIO_SONGS_PER_ARTIST: 50
         steps:
             - name: Checkout KMQ_Discord
               uses: actions/checkout@v2
