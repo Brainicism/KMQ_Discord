@@ -5,6 +5,7 @@ import {
     clickableSlashCommand,
     friendlyFormattedNumber,
     getMention,
+    retryJob,
     truncatedString,
     underline,
 } from "../helpers/utils";
@@ -273,7 +274,7 @@ export default abstract class Session {
 
         // join voice channel and start round
         try {
-            await ensureVoiceConnection(this);
+            retryJob(ensureVoiceConnection, [this], 3, true, 1000);
         } catch (err) {
             await this.endSession("Unable to obtain voice connection", true);
             logger.error(
