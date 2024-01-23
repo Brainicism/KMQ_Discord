@@ -24,10 +24,7 @@ const COMMAND_NAME = "special";
 const logger = new IPCLogger(COMMAND_NAME);
 
 export default class SpecialCommand implements BaseCommand {
-    preRunChecks = [
-        { checkFn: CommandPrechecks.competitionPrecheck },
-        { checkFn: CommandPrechecks.notListeningPrecheck },
-    ];
+    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
         minArgCount: 0,
