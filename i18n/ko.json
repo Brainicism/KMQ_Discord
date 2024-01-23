@@ -1011,6 +1011,7 @@
                     "mention": "멘션"
                 }
             },
+            "ineligibleForRank": "랭크 자격 없음",
             "interaction": {
                 "userID": "프로필을 볼 플레이어의 사용자 ID",
                 "userMention": "프로필을 볼 사용자 언급"

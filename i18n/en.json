@@ -1011,6 +1011,7 @@
                     "mention": "mention"
                 }
             },
+            "ineligibleForRank": "Ineligible for Rank",
             "interaction": {
                 "userID": "The user ID of the player whose profile to view",
                 "userMention": "Mention the user whose profile to view"
@@ -1038,7 +1039,6 @@
                 "supreme": "Supreme Ruler of the Two Koreas",
                 "trainee": "Trainee"
             },
-            "ineligibleForRank": "Ineligible for Rank",
             "songsGuessed": "Songs Guessed",
             "timesVoted": "Times Voted"
         },
