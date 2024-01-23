@@ -1011,6 +1011,7 @@
                     "mention": "メンション"
                 }
             },
+            "ineligibleForRank": "ランク資格なし",
             "interaction": {
                 "userID": "プロフィールを表示するプレイヤーのユーザーID",
                 "userMention": "プロフィールを表示するユーザーをメンションしてください。"
