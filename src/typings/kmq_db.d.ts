@@ -104,7 +104,7 @@ export interface GameOptionPresetsJson {
 }
 
 export interface GameOptions {
-    client_id: string;
+    client_id: Generated<string>;
     guild_id: string;
     option_name: string;
     option_value: Generated<string | null>;
@@ -189,6 +189,7 @@ export interface PlayerStats {
     last_game_played_errored: Generated<number>;
     level: Generated<number>;
     player_id: string;
+    rank_ineligible: Generated<number>;
     songs_guessed: Generated<number>;
 }
 

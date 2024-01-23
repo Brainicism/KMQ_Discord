@@ -1011,6 +1011,7 @@
                     "mention": "mention"
                 }
             },
+            "ineligibleForRank": "Inéligible pour le Classement",
             "interaction": {
                 "userID": "L'ID utilisateur du joueur dont le profil doit être consulté",
                 "userMention": "Mentionnez l'utilisateur dont le profil doit être consulté"

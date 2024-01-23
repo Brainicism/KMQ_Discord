@@ -1011,6 +1011,7 @@
                     "mention": "提及"
                 }
             },
+            "ineligibleForRank": "无资格排名",
             "interaction": {
                 "userID": "要查看其资料的玩家的用户 ID",
                 "userMention": "提及要查看其资料的用户"
