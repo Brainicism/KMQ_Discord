@@ -91,6 +91,7 @@ async function getProfileFields(
             "last_active",
             "exp",
             "level",
+            "rank_ineligible",
         ])
         .where("player_id", "=", requestedPlayer.id)
         .executeTakeFirst();
@@ -101,6 +102,7 @@ async function getProfileFields(
 
     const songsGuessed = playerStats["songs_guessed"];
     const gamesPlayed = playerStats["games_played"];
+    const isRankIneligible = playerStats["rank_ineligible"] === 1;
     const firstPlayDateString = discordDateFormat(
         new Date(playerStats["first_play"]),
         "d",
@@ -120,6 +122,7 @@ async function getProfileFields(
                 .selectFrom("player_stats")
                 .select((eb) => eb.fn.countAll<number>().as("count"))
                 .where("exp", ">", 0)
+                .where("rank_ineligible", "=", 0)
                 .executeTakeFirst()
         )?.["count"] ?? 0;
 
@@ -130,6 +133,7 @@ async function getProfileFields(
                 .select((eb) => eb.fn.countAll<number>().as("count"))
                 .where("songs_guessed", ">", songsGuessed)
                 .where("exp", ">", 0)
+                .where("rank_ineligible", "=", 0)
                 .executeTakeFirst()
         )?.["count"] ?? totalPlayers;
 
@@ -140,6 +144,7 @@ async function getProfileFields(
                 .select((eb) => eb.fn.countAll<number>().as("count"))
                 .where("games_played", ">", gamesPlayed)
                 .where("exp", ">", 0)
+                .where("rank_ineligible", "=", 0)
                 .executeTakeFirst()
         )?.["count"] ?? totalPlayers;
 
@@ -149,6 +154,7 @@ async function getProfileFields(
                 .selectFrom("player_stats")
                 .select((eb) => eb.fn.countAll<number>().as("count"))
                 .where("exp", ">", exp)
+                .where("rank_ineligible", "=", 0)
                 .executeTakeFirst()
         )?.["count"] ?? totalPlayers;
 
@@ -181,27 +187,33 @@ async function getProfileFields(
         },
         {
             name: i18n.translate(guildID, "command.profile.overallRank"),
-            value: `#${friendlyFormattedNumber(
-                relativeLevelRank + 1,
-            )}/${friendlyFormattedNumber(totalPlayers)}`,
+            value: isRankIneligible
+                ? i18n.translate(guildID, "command.profile.ineligibleForRank")
+                : `#${friendlyFormattedNumber(
+                      relativeLevelRank + 1,
+                  )}/${friendlyFormattedNumber(totalPlayers)}`,
             inline: true,
         },
         {
             name: i18n.translate(guildID, "command.profile.songsGuessed"),
-            value: `${friendlyFormattedNumber(
-                songsGuessed,
-            )} | #${friendlyFormattedNumber(
-                relativeSongRank + 1,
-            )}/${friendlyFormattedNumber(totalPlayers)} `,
+            value: `${friendlyFormattedNumber(songsGuessed)} ${
+                isRankIneligible
+                    ? ""
+                    : ` | #${friendlyFormattedNumber(
+                          relativeSongRank + 1,
+                      )}/${friendlyFormattedNumber(totalPlayers)}`
+            }`,
             inline: true,
         },
         {
             name: i18n.translate(guildID, "command.profile.gamesPlayed"),
-            value: `${friendlyFormattedNumber(
-                gamesPlayed,
-            )} | #${friendlyFormattedNumber(
-                relativeGamesPlayedRank + 1,
-            )}/${friendlyFormattedNumber(totalPlayers)} `,
+            value: `${friendlyFormattedNumber(gamesPlayed)} ${
+                isRankIneligible
+                    ? ""
+                    : ` | #${friendlyFormattedNumber(
+                          relativeGamesPlayedRank + 1,
+                      )}/${friendlyFormattedNumber(totalPlayers)}`
+            }`,
             inline: true,
         },
         {
