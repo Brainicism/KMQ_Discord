@@ -1038,6 +1038,7 @@
                 "supreme": "Supreme Ruler of the Two Koreas",
                 "trainee": "Trainee"
             },
+            "ineligibleForRank": "Ineligible for Rank",
             "songsGuessed": "Songs Guessed",
             "timesVoted": "Times Voted"
         },
