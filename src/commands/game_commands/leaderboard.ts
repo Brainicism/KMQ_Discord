@@ -675,6 +675,7 @@ export default class LeaderboardCommand implements BaseCommand {
                                     topPlayers = await topPlayersQuery
                                         .select(["exp", "level", "player_id"])
                                         .orderBy("exp", "desc")
+                                        .where("rank_ineligible", "=", 0)
                                         .offset(offset)
                                         .limit(LEADERBOARD_ENTRIES_PER_PAGE)
                                         .execute();
@@ -707,6 +708,7 @@ export default class LeaderboardCommand implements BaseCommand {
                                             "games_played as game_count",
                                             "level",
                                         ])
+                                        .where("rank_ineligible", "=", 0)
                                         .orderBy("game_count", "desc")
                                         .offset(offset)
                                         .limit(LEADERBOARD_ENTRIES_PER_PAGE)
@@ -741,6 +743,7 @@ export default class LeaderboardCommand implements BaseCommand {
                                             "level",
                                             "exp",
                                         ])
+                                        .where("rank_ineligible", "=", 0)
                                         .orderBy("songs_guessed", "desc")
                                         .offset(offset)
                                         .limit(LEADERBOARD_ENTRIES_PER_PAGE)
