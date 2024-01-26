@@ -644,7 +644,7 @@ export default class GameSession extends Session {
         if (!this.connection) return;
         if (this.connection.listenerCount("end") === 0) return;
         if (!this.round) return;
-        if (!this.guessEligible(messageContext)) return;
+        if (!this.guessEligible(messageContext, createdAt)) return;
 
         const round = this.round;
         const pointsEarned = this.checkGuess(
@@ -792,7 +792,7 @@ export default class GameSession extends Session {
 
         if (
             round.incorrectGuessers.has(interaction.member!.id) ||
-            !this.guessEligible(messageContext)
+            !this.guessEligible(messageContext, interaction.createdAt)
         ) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
@@ -1222,9 +1222,13 @@ export default class GameSession extends Session {
      * Checks whether the author of the message is eligible to guess in the
      * current game session
      * @param messageContext - The context of the message to check for guess eligibility
+     * @param createdAt - The time the guess was made
      * @returns whether the user's guess is eligible
      */
-    private guessEligible(messageContext: MessageContext): boolean {
+    private guessEligible(
+        messageContext: MessageContext,
+        createdAt: number,
+    ): boolean {
         const userVoiceChannel = getUserVoiceChannel(messageContext);
         // if user isn't in the same voice channel
         if (!userVoiceChannel || userVoiceChannel.id !== this.voiceChannelID) {
@@ -1233,6 +1237,12 @@ export default class GameSession extends Session {
 
         // if message isn't in the active game session's text channel
         if (messageContext.textChannelID !== this.textChannelID) {
+            return false;
+        }
+
+        // Ignore guesses made before the round started
+        const round = this.round;
+        if (round && createdAt < round.startedAt) {
             return false;
         }
 
