@@ -670,7 +670,7 @@ export default abstract class Session {
 
         if (!songDuration) {
             logger.error(
-                `Song duration for ${round.song.youtubeLink} unexpectly uncached. Defaulting to 60s`,
+                `Song duration for ${round.song.youtubeLink} unexpectedly uncached. Defaulting to 60s`,
             );
             songDuration = 60;
         }
@@ -713,6 +713,9 @@ export default abstract class Session {
                 inputArgs = ffmpegArgs.inputArgs;
                 encoderArgs = ffmpegArgs.encoderArgs;
             }
+
+            // Overwrite the round's startedAt to the time right before the song starts playing
+            round.startedAt = Date.now();
 
             this.connection.play(stream, {
                 inputArgs,

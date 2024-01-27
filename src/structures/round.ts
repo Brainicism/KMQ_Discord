@@ -20,7 +20,7 @@ export default abstract class Round {
     public readonly artistAliases: string[];
 
     /** Timestamp of the creation of the Round in epoch milliseconds */
-    public readonly startedAt: number;
+    public startedAt: number;
 
     /** Timestamp of the last time the Round was interacted with in epoch milliseconds */
     public lastActive: number;
