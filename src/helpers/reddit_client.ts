@@ -102,10 +102,12 @@ export class RedditClient {
                 query: generateFilteredQuery(),
                 sort: "top",
                 time: newsRangeToRedditInterval(interval),
+                count: 30,
             });
 
             const popularPosts = matchingPosts
                 .filter((x) => x.score > 100)
+                .filter((x) => !x.title.toLowerCase().includes("pictorial"))
                 .slice(0, 25);
 
             return popularPosts.map((x) => {
