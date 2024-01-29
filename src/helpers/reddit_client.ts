@@ -128,7 +128,7 @@ export class RedditClient {
                 };
             });
         } catch (e) {
-            logger.error(
+            logger.warn(
                 `Failed to fetch getTopPosts(). interval = ${newsRangeToRedditInterval(
                     interval,
                 )}. e = ${e}`,
