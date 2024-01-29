@@ -352,7 +352,7 @@ export default class GameSession extends Session {
 
         round.interactionMarkAnswers(guessResult.correctGuessers?.length ?? 0);
 
-        const timePlayed = Date.now() - round.startedAt;
+        const timePlayed = Date.now() - round.songStartedAt;
         if (guessResult.correct) {
             // update guessing streaks
             if (
@@ -1242,7 +1242,7 @@ export default class GameSession extends Session {
 
         // Ignore guesses made before the round started
         const round = this.round;
-        if (round && createdAt < round.startedAt) {
+        if (round && createdAt < round.songStartedAt) {
             return false;
         }
 

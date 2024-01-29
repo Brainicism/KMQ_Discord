@@ -714,8 +714,7 @@ export default abstract class Session {
                 encoderArgs = ffmpegArgs.encoderArgs;
             }
 
-            // Overwrite the round's startedAt to the time right before the song starts playing
-            round.startedAt = Date.now();
+            round.songStartedAt = Date.now();
 
             this.connection.play(stream, {
                 inputArgs,

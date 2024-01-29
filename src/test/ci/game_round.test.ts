@@ -727,12 +727,14 @@ describe("game round", () => {
                 },
                 5,
             );
+
+            gameRound.songStartedAt = gameRound.startedAt + 500;
         });
 
         it("should keep track of a player's first guess", () => {
             const guess = "dalla dalla";
             const playerID = "123";
-            const createdAt = gameRound.startedAt + 1000;
+            const createdAt = gameRound.songStartedAt + 1000;
             const guessModeType = GuessModeType.SONG_NAME;
             const typosAllowed = false;
             gameRound.storeGuess(
@@ -746,7 +748,7 @@ describe("game round", () => {
             assert.deepStrictEqual(gameRound.getGuesses(), {
                 [playerID]: [
                     {
-                        timeToGuessMs: createdAt - gameRound.startedAt,
+                        timeToGuessMs: createdAt - gameRound.songStartedAt,
                         guess,
                         correct: true,
                     },
@@ -762,7 +764,7 @@ describe("game round", () => {
             const typosAllowed = false;
             const playerID = "123";
 
-            const firstGuessCreatedAt = gameRound.startedAt + 1000;
+            const firstGuessCreatedAt = gameRound.songStartedAt + 1000;
             const firstGuess = "icy";
             gameRound.storeGuess(
                 playerID,
@@ -776,7 +778,7 @@ describe("game round", () => {
                 [playerID]: [
                     {
                         timeToGuessMs:
-                            firstGuessCreatedAt - gameRound.startedAt,
+                            firstGuessCreatedAt - gameRound.songStartedAt,
                         guess: firstGuess,
                         correct: false,
                     },
@@ -787,7 +789,7 @@ describe("game round", () => {
             await delay(10);
 
             const secondGuess = "dalla dalla";
-            const secondGuessCreatedAt = gameRound.startedAt + 2000;
+            const secondGuessCreatedAt = gameRound.songStartedAt + 2000;
 
             gameRound.storeGuess(
                 playerID,
@@ -801,13 +803,13 @@ describe("game round", () => {
                 [playerID]: [
                     {
                         timeToGuessMs:
-                            firstGuessCreatedAt - gameRound.startedAt,
+                            firstGuessCreatedAt - gameRound.songStartedAt,
                         guess: firstGuess,
                         correct: false,
                     },
                     {
                         timeToGuessMs:
-                            secondGuessCreatedAt - gameRound.startedAt,
+                            secondGuessCreatedAt - gameRound.songStartedAt,
                         guess: secondGuess,
                         correct: true,
                     },
