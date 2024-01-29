@@ -1,6 +1,7 @@
 import * as schedule from "node-schedule";
 import { BaseServiceWorker } from "eris-fleet";
 import { IPCLogger } from "./logger";
+import { RedditClient } from "./helpers/reddit_client";
 import { chooseRandom, retryJob } from "./helpers/utils";
 import BotListingManager from "./helpers/bot_listing_manager";
 import EnvType from "./enums/env_type";
@@ -8,6 +9,7 @@ import FactGenerator from "./fact_generator";
 import GeminiClient from "./helpers/gemini_client";
 import LocaleType from "./enums/locale_type";
 import NewsRange from "./enums/news_range";
+import type { KpopNewsRedditPost } from "./helpers/reddit_client";
 import type { Setup } from "eris-fleet/dist/services/BaseServiceWorker";
 import type FactCache from "./interfaces/fact_cache";
 import type NewsSummary from "./interfaces/news_summary";
@@ -122,16 +124,59 @@ export default class ServiceWorker extends BaseServiceWorker {
         }
 
         const geminiClient = new GeminiClient();
+        const redditClient = new RedditClient();
+
+        const rangeToTopPosts: { [range: string]: Array<KpopNewsRedditPost> } =
+            {};
+
+        await Promise.allSettled(
+            Object.values(NewsRange).map(async (range) => {
+                try {
+                    await retryJob<void | Error>(
+                        async () => {
+                            const topPosts =
+                                await redditClient.getTopPosts(range);
+
+                            if (topPosts.length === 0) {
+                                throw new Error(
+                                    `Failed to fetch topPosts(). newsRange = ${range}`,
+                                );
+                            }
+
+                            rangeToTopPosts[range] = topPosts;
+                        },
+                        [],
+                        3,
+                        true,
+                        60000,
+                        false,
+                    );
+                } catch (err) {
+                    logger.warn(
+                        `Failed to fetch topPosts(). newsRange = ${range}. err = ${err}`,
+                    );
+                }
+            }),
+        );
+
         await Promise.allSettled(
             Object.values(LocaleType).map(async (locale) => {
                 await Promise.allSettled(
                     Object.values(NewsRange).map(async (range) => {
                         await retryJob<void | Error>(
                             async () => {
+                                if (!rangeToTopPosts[range]) {
+                                    logger.warn(
+                                        `Skipping generating news for ${locale} ${range} because topPosts is null`,
+                                    );
+                                    return Promise.resolve();
+                                }
+
                                 const summary =
                                     await geminiClient.getPostSummary(
                                         locale,
                                         range,
+                                        rangeToTopPosts[range],
                                     );
 
                                 if (summary === "") {
