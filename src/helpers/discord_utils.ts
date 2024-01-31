@@ -2039,12 +2039,16 @@ export async function sendDeprecatedTextCommandMessage(
 export const fetchAppCommandIDs = async (): Promise<{
     [commandName: string]: string;
 }> => {
-    const commands =
-        process.env.NODE_ENV === EnvType.PROD
-            ? await State.client.getCommands()
-            : await State.client.getGuildCommands(
+    let commands: Eris.AnyApplicationCommand[];
+    if (process.env.NODE_ENV === EnvType.PROD) {
+        commands = await State.client.getCommands();
+    } else {
+        commands = process.env.DEBUG_SERVER_ID
+            ? await State.client.getGuildCommands(
                   process.env.DEBUG_SERVER_ID as string,
-              );
+              )
+            : [];
+    }
 
     const commandToID: { [commandName: string]: string } = {};
     for (const command of commands) {
@@ -2176,7 +2180,7 @@ export const updateAppCommands = async (
                 commandStructures,
             );
         } else {
-            logger.error("Debug server unexpectedly unavailable");
+            logger.warn("Debug server unexpectedly unavailable");
         }
     }
 
