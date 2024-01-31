@@ -293,13 +293,11 @@ export async function reloadBonusGroups(): Promise<void> {
             )
             .limit(bonusGroupCount)
             .execute()
-    ).map((x) => x.name);
+    )
+        .map((x) => x.name)
+        .sort();
 
-    State.bonusArtists = new Set(
-        (await getMatchingGroupNames(artistNameQuery)).matchedGroups.map(
-            (x) => x.name,
-        ),
-    );
+    State.bonusArtists = new Set(artistNameQuery);
 }
 
 async function reloadArtists(): Promise<void> {
