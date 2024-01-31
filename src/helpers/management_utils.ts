@@ -5,7 +5,6 @@ import { chooseRandom, delay, isPrimaryInstance, isWeekend } from "./utils";
 import {
     cleanupInactiveGameSessions,
     cleanupInactiveListeningSessions,
-    getMatchingGroupNames,
     isPowerHour,
 } from "./game_utils";
 import { normalizePunctuationInName } from "../structures/game_round";
