@@ -1057,7 +1057,7 @@ export default class GameSession extends Session {
                     inline: false,
                 });
             } else {
-                logger.error(
+                logger.warn(
                     `Failed fetching end game message. guildID = ${
                         this.guildID
                     }. locale = ${State.getGuildLocale(
