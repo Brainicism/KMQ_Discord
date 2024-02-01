@@ -787,9 +787,8 @@ export async function generateOptionsMessage(
                 interaction,
             );
 
-        optionStrings[
-            GameOption.SPOTIFY_PLAYLIST_ID
-        ] = `[${matchedPlaylist.metadata.playlistName}](${SPOTIFY_BASE_URL}${spotifyPlaylistID})`;
+        optionStrings[GameOption.SPOTIFY_PLAYLIST_ID] =
+            `[${matchedPlaylist.metadata.playlistName}](${SPOTIFY_BASE_URL}${spotifyPlaylistID})`;
 
         thumbnailUrl = matchedPlaylist.metadata.thumbnailUrl ?? undefined;
     } else {
@@ -835,9 +834,8 @@ export async function generateOptionsMessage(
         ? guildPreference.getDisplayedGroupNames()
         : null;
     optionStrings[GameOption.GENDER] = gameOptions.gender.join(", ");
-    optionStrings[
-        GameOption.CUTOFF
-    ] = `${gameOptions.beginningYear} - ${gameOptions.endYear}`;
+    optionStrings[GameOption.CUTOFF] =
+        `${gameOptions.beginningYear} - ${gameOptions.endYear}`;
     optionStrings[GameOption.ARTIST_TYPE] = gameOptions.artistType;
     optionStrings[GameOption.ANSWER_TYPE] = gameOptions.answerType;
     optionStrings[GameOption.RELEASE_TYPE] = gameOptions.releaseType;
