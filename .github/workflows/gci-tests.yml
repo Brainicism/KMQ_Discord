@@ -46,11 +46,11 @@ jobs:
             - name: Install node dependencies
               run: yarn install --frozen-lockfile
             - name: Prettier
-              run: npm run prettier_ci
+              run: npm run prettier-ci
             - name: npm run lint
-              run: npm run lint_ci
+              run: npm run lint-ci
             - name: Lint translations
-              run: npm run lint_i18n_ci
+              run: npm run lint-i18n-ci
             - name: Check for missing translations
               run: npx ts-node src/ci_checks/missing_i18n.ts $(find src -name '*.ts' -print)
             - name: Copy .env for CI
@@ -69,4 +69,4 @@ jobs:
                     sleep 1
                   done
             - name: Run tests
-              run: npm run test_ci
+              run: npm run test-ci

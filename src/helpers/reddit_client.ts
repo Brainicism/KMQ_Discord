@@ -50,9 +50,21 @@ const generateFilteredQuery = (): string => {
 };
 
 export class RedditClient {
-    private client: Snoowrap;
+    private client: Snoowrap | null;
 
     constructor() {
+        if (
+            !process.env.REDDIT_CLIENT_ID ||
+            process.env.REDDIT_CLIENT_SECRET ||
+            process.env.REDDIT_CLIENT_REFRESH_TOKEN
+        ) {
+            logger.warn(
+                "Reddit credentials not specified, skipping client initialization...",
+            );
+            this.client = null;
+            return;
+        }
+
         this.client = new Snoowrap({
             clientId: process.env.REDDIT_CLIENT_ID,
             clientSecret: process.env.REDDIT_CLIENT_SECRET,
@@ -62,6 +74,7 @@ export class RedditClient {
     }
 
     async getRecentPopularPosts(): Promise<Array<KpopNewsRedditPost>> {
+        if (!this.client) return [];
         try {
             const matchingPosts = await this.client.search({
                 subreddit: "kpop",
@@ -96,6 +109,8 @@ export class RedditClient {
     }
 
     async getTopPosts(interval: NewsRange): Promise<Array<KpopNewsRedditPost>> {
+        if (!this.client) return [];
+
         try {
             const matchingPosts = await this.client.search({
                 subreddit: "kpop",
@@ -138,7 +153,7 @@ export class RedditClient {
                         ),
                 );
         } catch (e) {
-            logger.error(
+            logger.warn(
                 `Failed to fetch getTopPosts(). interval = ${newsRangeToRedditInterval(
                     interval,
                 )}. e = ${e}`,

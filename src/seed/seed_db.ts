@@ -151,6 +151,9 @@ program
     )
     .option("--limit <limit>", "Limit the number of songs to download", (x) =>
         parseInt(x, 10),
+    )
+    .option("--songs <songs>", "Comma seperated youtube IDs to download", (x) =>
+        x.split(",").map((y) => y.trim()),
     );
 
 program.parse();
@@ -658,7 +661,10 @@ async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
 
         let songsDownloaded = 0;
         if (!options.skipDownload) {
-            songsDownloaded = await downloadAndConvertSongs(options.limit);
+            songsDownloaded = await downloadAndConvertSongs(
+                options.limit,
+                options.songs,
+            );
         }
 
         await generateKmqDataTables(db);
@@ -688,6 +694,7 @@ async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
 
 (async () => {
     if (require.main === module) {
+        logger.info(JSON.stringify(options));
         const db = getNewConnection();
         try {
             await loadStoredProcedures();
