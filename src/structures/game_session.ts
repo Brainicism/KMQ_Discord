@@ -1251,7 +1251,10 @@ export default class GameSession extends Session {
 
         // Ignore guesses made before the round started
         const round = this.round;
-        if (round && createdAt < round.songStartedAt) {
+        if (
+            round &&
+            (round.songStartedAt === null || createdAt < round.songStartedAt)
+        ) {
             return false;
         }
 
