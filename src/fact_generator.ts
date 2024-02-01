@@ -705,8 +705,8 @@ export default class FactGenerator {
             .selectFrom("available_songs")
             .select(["song_name_en", "artist_name_en", "link"])
             .select((eb) => eb.fn("YEAR", ["publishedon"]).as("publish_year"))
-            .where(sql`WEEK(publishedon) = WEEK(NOW())`)
-            .where(sql`YEAR(publishedon) != YEAR(NOW())`)
+            .where(sql<boolean>`WEEK(publishedon) = WEEK(NOW())`)
+            .where(sql<boolean>`YEAR(publishedon) != YEAR(NOW())`)
             .orderBy("views", "desc")
             .limit(25)
             .execute();
@@ -819,7 +819,7 @@ export default class FactGenerator {
             .select((eb) => eb.fn("MONTH", ["date_birth"]).as("birth_month"))
             .select(sql`DATE_FORMAT(date_birth, '%M %e')`.as("formatted_bday"))
             .where("date_birth", "is not", null)
-            .where(sql`MONTH(date_birth) = MONTH(CURRENT_DATE())`)
+            .where(sql<boolean>`MONTH(date_birth) = MONTH(CURRENT_DATE())`)
             .limit(10)
             .execute();
 
@@ -1201,8 +1201,8 @@ export default class FactGenerator {
                 "app_kpop_group.name as artist_name",
             ])
             .select(sql`DATEDIFF(rdate, NOW())`.as("diff"))
-            .where(sql`DATEDIFF(rdate, NOW()) >= 1`)
-            .where(sql`DATEDIFF(rdate, NOW()) < 31`)
+            .where(sql<boolean>`DATEDIFF(rdate, NOW()) >= 1`)
+            .where(sql<boolean>`DATEDIFF(rdate, NOW()) < 31`)
             .where("app_upcoming.name", "<>", "")
             .execute();
 
