@@ -734,7 +734,7 @@ describe("game round", () => {
         it("should keep track of a player's first guess", () => {
             const guess = "dalla dalla";
             const playerID = "123";
-            const createdAt = gameRound.songStartedAt + 1000;
+            const createdAt = gameRound.songStartedAt! + 1000;
             const guessModeType = GuessModeType.SONG_NAME;
             const typosAllowed = false;
             gameRound.storeGuess(
@@ -748,7 +748,7 @@ describe("game round", () => {
             assert.deepStrictEqual(gameRound.getGuesses(), {
                 [playerID]: [
                     {
-                        timeToGuessMs: createdAt - gameRound.songStartedAt,
+                        timeToGuessMs: createdAt - gameRound.songStartedAt!,
                         guess,
                         correct: true,
                     },
@@ -764,7 +764,7 @@ describe("game round", () => {
             const typosAllowed = false;
             const playerID = "123";
 
-            const firstGuessCreatedAt = gameRound.songStartedAt + 1000;
+            const firstGuessCreatedAt = gameRound.songStartedAt! + 1000;
             const firstGuess = "icy";
             gameRound.storeGuess(
                 playerID,
@@ -778,7 +778,7 @@ describe("game round", () => {
                 [playerID]: [
                     {
                         timeToGuessMs:
-                            firstGuessCreatedAt - gameRound.songStartedAt,
+                            firstGuessCreatedAt - gameRound.songStartedAt!,
                         guess: firstGuess,
                         correct: false,
                     },
@@ -789,7 +789,7 @@ describe("game round", () => {
             await delay(10);
 
             const secondGuess = "dalla dalla";
-            const secondGuessCreatedAt = gameRound.songStartedAt + 2000;
+            const secondGuessCreatedAt = gameRound.songStartedAt! + 2000;
 
             gameRound.storeGuess(
                 playerID,
@@ -803,13 +803,13 @@ describe("game round", () => {
                 [playerID]: [
                     {
                         timeToGuessMs:
-                            firstGuessCreatedAt - gameRound.songStartedAt,
+                            firstGuessCreatedAt - gameRound.songStartedAt!,
                         guess: firstGuess,
                         correct: false,
                     },
                     {
                         timeToGuessMs:
-                            secondGuessCreatedAt - gameRound.songStartedAt,
+                            secondGuessCreatedAt - gameRound.songStartedAt!,
                         guess: secondGuess,
                         correct: true,
                     },

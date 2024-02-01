@@ -352,6 +352,15 @@ export default class GameSession extends Session {
 
         round.interactionMarkAnswers(guessResult.correctGuessers?.length ?? 0);
 
+        if (round.songStartedAt === null) {
+            logger.error(
+                `${getDebugLogHeader(
+                    messageContext,
+                )} | songStartedAt is unexpectedly null`,
+            );
+            round.songStartedAt = round.startedAt;
+        }
+
         const timePlayed = Date.now() - round.songStartedAt;
         if (guessResult.correct) {
             // update guessing streaks
