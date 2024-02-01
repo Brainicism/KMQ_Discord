@@ -74,6 +74,7 @@ export interface AppKpopGroup {
     formation: Generated<number | null>;
     gaondigital_firsts: Generated<number>;
     gaondigital_times: Generated<number>;
+    has_songs: Generated<number | null>;
     id: number;
     id_company: Generated<number>;
     id_country: Generated<number>;
