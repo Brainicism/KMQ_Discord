@@ -787,9 +787,8 @@ export async function generateOptionsMessage(
                 interaction,
             );
 
-        optionStrings[
-            GameOption.SPOTIFY_PLAYLIST_ID
-        ] = `[${matchedPlaylist.metadata.playlistName}](${SPOTIFY_BASE_URL}${spotifyPlaylistID})`;
+        optionStrings[GameOption.SPOTIFY_PLAYLIST_ID] =
+            `[${matchedPlaylist.metadata.playlistName}](${SPOTIFY_BASE_URL}${spotifyPlaylistID})`;
 
         thumbnailUrl = matchedPlaylist.metadata.thumbnailUrl ?? undefined;
     } else {
@@ -835,9 +834,8 @@ export async function generateOptionsMessage(
         ? guildPreference.getDisplayedGroupNames()
         : null;
     optionStrings[GameOption.GENDER] = gameOptions.gender.join(", ");
-    optionStrings[
-        GameOption.CUTOFF
-    ] = `${gameOptions.beginningYear} - ${gameOptions.endYear}`;
+    optionStrings[GameOption.CUTOFF] =
+        `${gameOptions.beginningYear} - ${gameOptions.endYear}`;
     optionStrings[GameOption.ARTIST_TYPE] = gameOptions.artistType;
     optionStrings[GameOption.ANSWER_TYPE] = gameOptions.answerType;
     optionStrings[GameOption.RELEASE_TYPE] = gameOptions.releaseType;
@@ -2039,12 +2037,16 @@ export async function sendDeprecatedTextCommandMessage(
 export const fetchAppCommandIDs = async (): Promise<{
     [commandName: string]: string;
 }> => {
-    const commands =
-        process.env.NODE_ENV === EnvType.PROD
-            ? await State.client.getCommands()
-            : await State.client.getGuildCommands(
+    let commands: Eris.AnyApplicationCommand[];
+    if (process.env.NODE_ENV === EnvType.PROD) {
+        commands = await State.client.getCommands();
+    } else {
+        commands = process.env.DEBUG_SERVER_ID
+            ? await State.client.getGuildCommands(
                   process.env.DEBUG_SERVER_ID as string,
-              );
+              )
+            : [];
+    }
 
     const commandToID: { [commandName: string]: string } = {};
     for (const command of commands) {
@@ -2176,7 +2178,7 @@ export const updateAppCommands = async (
                 commandStructures,
             );
         } else {
-            logger.error("Debug server unexpectedly unavailable");
+            logger.warn("Debug server unexpectedly unavailable");
         }
     }
 

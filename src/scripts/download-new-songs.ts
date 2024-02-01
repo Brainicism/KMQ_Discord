@@ -316,9 +316,16 @@ async function updateNotDownloaded(
 const downloadNewSongs = async (
     db: DatabaseContext,
     limit?: number,
+    songOverrides?: string[],
 ): Promise<number> => {
     const allSongs: Array<QueriedSong> = await getSongsFromDb(db);
     let songsToDownload = limit ? allSongs.slice(0, limit) : allSongs.slice();
+    if (songOverrides) {
+        songsToDownload = songsToDownload.filter((x) =>
+            songOverrides.includes(x.youtubeLink),
+        );
+    }
+
     let downloadCount = 0;
     let deadLinksSkipped = 0;
     const knownDeadIDs = new Set(
@@ -398,10 +405,12 @@ const downloadNewSongs = async (
 
 /**
  * @param limit - The limit specified for downloading songs
+ * @param songOverrides - Song overrides
  * @returns - the number of songs downloaded
  */
 export default async function downloadAndConvertSongs(
     limit?: number,
+    songOverrides?: string[],
 ): Promise<number> {
     const db = getNewConnection();
     try {
@@ -411,7 +420,12 @@ export default async function downloadAndConvertSongs(
         }
 
         await clearPartiallyCachedSongs();
-        const songsDownloaded = await downloadNewSongs(db, limit);
+        const songsDownloaded = await downloadNewSongs(
+            db,
+            limit,
+            songOverrides,
+        );
+
         return songsDownloaded;
     } finally {
         await db.destroy();

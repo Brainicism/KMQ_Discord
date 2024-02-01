@@ -1,8 +1,9 @@
 import type { ColumnType } from "kysely";
 
-export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
-    ? ColumnType<S, I | undefined, U>
-    : ColumnType<T, T | undefined, T>;
+export type Generated<T> =
+    T extends ColumnType<infer S, infer I, infer U>
+        ? ColumnType<S, I | undefined, U>
+        : ColumnType<T, T | undefined, T>;
 
 export interface AppKpop {
     alias: Generated<string>;
@@ -74,6 +75,7 @@ export interface AppKpopGroup {
     formation: Generated<number | null>;
     gaondigital_firsts: Generated<number>;
     gaondigital_times: Generated<number>;
+    has_songs: Generated<number | null>;
     id: number;
     id_company: Generated<number>;
     id_country: Generated<number>;

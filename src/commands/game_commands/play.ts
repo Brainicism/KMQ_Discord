@@ -191,7 +191,7 @@ export async function sendBeginGameSessionMessage(
             await fs.promises.readFile(DataFiles.NEWS)
         ).toString();
     } catch (e) {
-        logger.error(`News file does not exist or is empty. error = ${e}`);
+        logger.warn(`News file does not exist or is empty. error = ${e}`);
     }
 
     if (newsFileContent) {
