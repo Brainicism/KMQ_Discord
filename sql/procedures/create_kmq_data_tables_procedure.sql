@@ -111,5 +111,14 @@ BEGIN
 
 	RENAME TABLE available_songs TO old, available_songs_temp TO available_songs;
 	DROP TABLE old;
+
+	/* mark artists as not having songs */
+	ALTER TABLE kpop_videos.app_kpop_group ADD COLUMN IF NOT EXISTS has_songs TINYINT(1) DEFAULT 1;
+
+	UPDATE kpop_videos.app_kpop_group
+	SET has_songs = 0
+	WHERE id in (SELECT id FROM kmq.available_songs
+	RIGHT JOIN kpop_videos.app_kpop_group ON kmq.available_songs.id_artist = kpop_videos.app_kpop_group.id
+	WHERE song_name_en is null);
 END //
 DELIMITER ;
