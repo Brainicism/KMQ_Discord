@@ -41,13 +41,13 @@ export interface BadgesPlayers {
 }
 
 export interface BannedPlayers {
-    created_at: Date;
+    created_at: Generated<Date>;
     id: string;
     reason: string;
 }
 
 export interface BannedServers {
-    created_at: Date;
+    created_at: Generated<Date>;
     id: string;
     reason: string;
 }
@@ -158,7 +158,7 @@ export interface Locale {
 }
 
 export interface NewsSubscriptions {
-    created_at: Date;
+    created_at: Generated<Date>;
     guild_id: string;
     range: string;
     text_channel_id: string;
