@@ -48,7 +48,6 @@ check_environment_variables
 mkdir -p src/typings
 generate_database_type "kmq" "kmq_db.d.ts" "KmqDB"
 generate_database_type "kpop_videos" "kpop_videos_db.d.ts" "KpopVideosDB"
-generate_database_type "information_schema" "info_schema_db.d.ts" "InfoSchemaDB"
 
 echo Merging schemas...
 merge_schemas
