@@ -9,7 +9,6 @@ import {
     QUICK_GUESS_MS,
     ROUND_MAX_RUNNERS_UP,
 } from "../constants";
-import { IPCLogger } from "../logger";
 import { friendlyFormattedNumber, getMention } from "../helpers/utils";
 import ExpBonusModifier from "../enums/exp_bonus_modifier";
 import GameType from "../enums/game_type";
@@ -36,8 +35,6 @@ const CHARACTER_REPLACEMENTS = [
 ];
 
 const MAX_DISPLAYED_GUESS_LENGTH = 50;
-
-const logger = new IPCLogger("game_round");
 
 interface GuessCorrectness {
     exact: boolean;
