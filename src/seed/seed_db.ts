@@ -99,6 +99,7 @@ async function replaceBetterAudioSongs(
             "b.vlink as better_audio_link",
         ])
         .where("b.vlink", "is not", null)
+        .$narrowType<{ better_audio_link: string }>()
         .execute();
 
     for (const betterAudioSong of songsWithBetterAudioCounterpart) {
@@ -109,17 +110,13 @@ async function replaceBetterAudioSongs(
             .execute();
 
         // replace main video with better audio entry
-        if (betterAudioSong.better_audio_link) {
-            // TODO: this null check shouldn't be needed, but Kysely does not narrow types automatically
-            // can be removed when .$narrowType is available
-            await db
-                .updateTable("app_kpop")
-                .where("id", "=", betterAudioSong.original_id)
-                .set({
-                    vlink: betterAudioSong.better_audio_link,
-                })
-                .execute();
-        }
+        await db
+            .updateTable("app_kpop")
+            .where("id", "=", betterAudioSong.original_id)
+            .set({
+                vlink: betterAudioSong.better_audio_link,
+            })
+            .execute();
     }
 }
 
