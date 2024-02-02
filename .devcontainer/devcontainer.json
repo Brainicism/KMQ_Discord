@@ -4,10 +4,15 @@
 	"dockerComposeFile": "docker-compose.yml",
 	"service": "app",
 	"workspaceFolder": "/workspace",
-	"extensions": [
-		"dbaeumer.vscode-eslint",
-		"esbenp.prettier-vscode",
-		"lokalise.i18n-ally"
-	],
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"dbaeumer.vscode-eslint",
+				"esbenp.prettier-vscode",
+				"lokalise.i18n-ally",
+				"hbenl.vscode-mocha-test-adapter"
+			]
+		}
+	},
 	"remoteUser": "node"
 }
