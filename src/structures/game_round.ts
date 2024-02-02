@@ -350,9 +350,6 @@ export default class GameRound extends Round {
         );
 
         if (this.songStartedAt === null) {
-            logger.error(
-                `uid: ${playerID}, guess: ${guess}, createdAt: ${createdAt} | songStartedAt is unexpectedly null`,
-            );
             return;
         }
 

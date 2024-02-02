@@ -323,11 +323,6 @@ export default class GameSession extends Session {
         const round = this.round;
 
         if (round.songStartedAt === null) {
-            logger.error(
-                `${getDebugLogHeader(
-                    messageContext,
-                )} | songStartedAt is unexpectedly null`,
-            );
             return;
         }
 
