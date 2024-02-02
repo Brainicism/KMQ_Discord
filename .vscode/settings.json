@@ -7,5 +7,8 @@
     "i18n-ally.enabledParsers": [
         "json"
     ],
-    "i18n-ally.keystyle": "nested"
+    "i18n-ally.keystyle": "nested",
+    "mochaExplorer.files": "src/test/ci/**/*.ts",
+    "mochaExplorer.require": "ts-node/register",
+    "mochaExplorer.fullTrace": true
 }
