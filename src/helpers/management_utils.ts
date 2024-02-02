@@ -283,6 +283,7 @@ export async function reloadBonusGroups(): Promise<void> {
             .selectFrom("app_kpop_group")
             .select(["name"])
             .where("is_collab", "=", "n")
+            .where("has_songs", "=", 1)
             .orderBy(
                 sql`RAND(${
                     date.getFullYear() +

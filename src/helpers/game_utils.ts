@@ -204,6 +204,8 @@ export async function getSimilarGroupNames(
     const similarGroups = await dbContext.kpopVideos
         .selectFrom("app_kpop_group")
         .select(["id", "name", "kname"])
+        .where("is_collab", "=", "n")
+        .where("has_songs", "=", 1)
         .where(({ or, eb }) =>
             or([
                 eb("name", "like", `%${groupName}%`),
@@ -234,6 +236,8 @@ export async function getMatchingGroupNames(
             .selectFrom("app_kpop_group")
             .select(["id"])
             .where("name", "in", rawGroupNames)
+            .where("is_collab", "=", "n")
+            .where("has_songs", "=", 1)
             .execute()
     ).map((x) => x.id);
 

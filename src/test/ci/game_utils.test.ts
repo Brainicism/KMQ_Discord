@@ -271,8 +271,8 @@ describe("game utils", () => {
 
                     describe("one alias match, one non-match", () => {
                         it("should have one match, and one non-match", async () => {
-                            const artistName = "Minseung";
-                            const artistAlias = "Minseung alias";
+                            const artistName = "Twice";
+                            const artistAlias = "Twice alias";
                             State.aliases.artist[artistName] = [artistAlias];
                             const nonMatchArtist = "Weee";
                             const matchResults = await getMatchingGroupNames([
@@ -283,6 +283,46 @@ describe("game utils", () => {
                             assert.deepStrictEqual(
                                 matchResults.matchedGroups.map((x) => x.name),
                                 [artistName],
+                            );
+
+                            assert.deepStrictEqual(
+                                matchResults.unmatchedGroups,
+                                [nonMatchArtist],
+                            );
+                        });
+                    });
+
+                    describe("Artist without songs fail", () => {
+                        it("should not match any group", async () => {
+                            State.aliases.artist = {};
+                            const nonMatchArtist = "ampstyle";
+                            const matchResults = await getMatchingGroupNames([
+                                nonMatchArtist,
+                            ]);
+
+                            assert.deepStrictEqual(
+                                matchResults.matchedGroups.length,
+                                0,
+                            );
+
+                            assert.deepStrictEqual(
+                                matchResults.unmatchedGroups,
+                                [nonMatchArtist],
+                            );
+                        });
+                    });
+
+                    describe("Collab should fail", () => {
+                        it("should not match any group", async () => {
+                            State.aliases.artist = {};
+                            const nonMatchArtist = "PSY + Hyuna";
+                            const matchResults = await getMatchingGroupNames([
+                                nonMatchArtist,
+                            ]);
+
+                            assert.deepStrictEqual(
+                                matchResults.matchedGroups.length,
+                                0,
                             );
 
                             assert.deepStrictEqual(
