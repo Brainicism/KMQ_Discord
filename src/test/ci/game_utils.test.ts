@@ -3,12 +3,14 @@ import {
     cleanupInactiveGameSessions,
     getAvailableSongCount,
     getMatchingGroupNames,
+    getSimilarGroupNames,
 } from "../../helpers/game_utils";
 import { describe } from "mocha";
 import GameSession from "../../structures/game_session";
 import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";
 import KmqMember from "../../structures/kmq_member";
+import LocaleType from "../../enums/locale_type";
 import OstPreference from "../../enums/option_types/ost_preference";
 import ReleaseType from "../../enums/option_types/release_type";
 import State from "../../state";
@@ -331,6 +333,132 @@ describe("game utils", () => {
                             );
                         });
                     });
+                });
+            });
+        });
+
+        describe("getSimilarGroupNames", () => {
+            describe("full name match", () => {
+                describe("happy path", () => {
+                    it("should return the artist's name", async () => {
+                        // matches in both locales, and returns in the correct locale
+                        assert.deepStrictEqual(
+                            await getSimilarGroupNames(
+                                "Blackpink",
+                                LocaleType.EN,
+                            ),
+                            ["Blackpink"],
+                        );
+
+                        assert.deepStrictEqual(
+                            await getSimilarGroupNames(
+                                "블랙핑크",
+                                LocaleType.EN,
+                            ),
+                            ["Blackpink"],
+                        );
+
+                        assert.deepStrictEqual(
+                            await getSimilarGroupNames(
+                                "Blackpink",
+                                LocaleType.KO,
+                            ),
+                            ["블랙핑크"],
+                        );
+
+                        assert.deepStrictEqual(
+                            await getSimilarGroupNames(
+                                "블랙핑크",
+                                LocaleType.KO,
+                            ),
+                            ["블랙핑크"],
+                        );
+                    });
+                });
+
+                describe("matches a collab artist", () => {
+                    it("should return empty", async () => {
+                        assert.deepStrictEqual(
+                            await getSimilarGroupNames(
+                                "PSY + Hyuna",
+                                LocaleType.EN,
+                            ),
+                            [],
+                        );
+                    });
+                });
+
+                describe("matches an artist with no songs", () => {
+                    it("should return empty", async () => {
+                        assert.deepStrictEqual(
+                            await getSimilarGroupNames(
+                                "ampstyle",
+                                LocaleType.EN,
+                            ),
+                            [],
+                        );
+                    });
+                });
+            });
+
+            describe("partial match", () => {
+                describe("only one potential match", () => {
+                    it("should return the artist's name", async () => {
+                        assert.deepStrictEqual(
+                            await getSimilarGroupNames(
+                                "Blackpin",
+                                LocaleType.EN,
+                            ),
+                            ["Blackpink"],
+                        );
+
+                        assert.deepStrictEqual(
+                            await getSimilarGroupNames(
+                                "lackpink",
+                                LocaleType.EN,
+                            ),
+                            ["Blackpink"],
+                        );
+                    });
+                });
+
+                describe("multiple potential matches", () => {
+                    it("should return the artist names ordered by ascending length", async () => {
+                        const similarGroupNames = await getSimilarGroupNames(
+                            "girls",
+                            LocaleType.EN,
+                        );
+
+                        // every similar match contains the substring
+                        assert.ok(
+                            similarGroupNames.every((name) =>
+                                name.toLowerCase().includes("girls"),
+                            ),
+                        );
+
+                        // matches are sorted by ascending order (closest match)
+                        const isSorted = (arr: number[]): boolean =>
+                            arr.every(
+                                (val, index) =>
+                                    index === 0 || val >= arr[index - 1],
+                            );
+
+                        assert.ok(
+                            isSorted(similarGroupNames.map((x) => x.length)),
+                        );
+                    });
+                });
+            });
+
+            describe("no match", () => {
+                it("should return empty", async () => {
+                    assert.deepStrictEqual(
+                        await getSimilarGroupNames(
+                            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+                            LocaleType.EN,
+                        ),
+                        [],
+                    );
                 });
             });
         });
