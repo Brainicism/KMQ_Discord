@@ -321,6 +321,16 @@ export default class GameSession extends Session {
         }
 
         const round = this.round;
+
+        if (round.songStartedAt === null) {
+            logger.error(
+                `${getDebugLogHeader(
+                    messageContext,
+                )} | songStartedAt is unexpectedly null`,
+            );
+            return;
+        }
+
         if (guessResult.correct) {
             guessResult.correctGuessers = (
                 guessResult.correctGuessers ?? []
@@ -351,15 +361,6 @@ export default class GameSession extends Session {
         await super.endRound(messageContext);
 
         round.interactionMarkAnswers(guessResult.correctGuessers?.length ?? 0);
-
-        if (round.songStartedAt === null) {
-            logger.error(
-                `${getDebugLogHeader(
-                    messageContext,
-                )} | songStartedAt is unexpectedly null`,
-            );
-            round.songStartedAt = round.startedAt;
-        }
 
         const timePlayed = Date.now() - round.songStartedAt;
         if (guessResult.correct) {

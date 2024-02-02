@@ -353,7 +353,7 @@ export default class GameRound extends Round {
             logger.error(
                 `uid: ${playerID}, guess: ${guess}, createdAt: ${createdAt} | songStartedAt is unexpectedly null`,
             );
-            this.songStartedAt = this.startedAt;
+            return;
         }
 
         this.guesses[playerID] = this.guesses[playerID] || [];
