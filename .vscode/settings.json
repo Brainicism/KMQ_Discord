@@ -10,5 +10,8 @@
     "i18n-ally.keystyle": "nested",
     "mochaExplorer.files": "src/test/ci/**/*.ts",
     "mochaExplorer.require": "ts-node/register",
-    "mochaExplorer.fullTrace": true
+    "mochaExplorer.fullTrace": true,
+    "mochaExplorer.env": {
+        "NODE_ENV": "test"
+    }
 }
