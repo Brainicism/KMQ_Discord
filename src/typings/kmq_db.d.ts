@@ -1,8 +1,9 @@
 import type { ColumnType } from "kysely";
 
-export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
-    ? ColumnType<S, I | undefined, U>
-    : ColumnType<T, T | undefined, T>;
+export type Generated<T> =
+    T extends ColumnType<infer S, infer I, infer U>
+        ? ColumnType<S, I | undefined, U>
+        : ColumnType<T, T | undefined, T>;
 
 export interface AvailableSongs {
     artist_aliases: string;
@@ -41,13 +42,13 @@ export interface BadgesPlayers {
 }
 
 export interface BannedPlayers {
-    created_at: Date;
+    created_at: Generated<Date>;
     id: string;
     reason: string;
 }
 
 export interface BannedServers {
-    created_at: Date;
+    created_at: Generated<Date>;
     id: string;
     reason: string;
 }
@@ -158,7 +159,7 @@ export interface Locale {
 }
 
 export interface NewsSubscriptions {
-    created_at: Date;
+    created_at: Generated<Date>;
     guild_id: string;
     range: string;
     text_channel_id: string;

@@ -1,10 +1,10 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { IPCLogger } from "../logger";
-import { RedditClient } from "./reddit_client";
 import { standardDateFormat } from "./utils";
 import LocaleType from "../enums/locale_type";
 import NewsRange from "../enums/news_range";
 import type { GenerativeModel } from "@google/generative-ai";
+import type { KpopNewsRedditPost } from "./reddit_client";
 
 const logger = new IPCLogger("gemini_client");
 
@@ -54,22 +54,16 @@ export default class GeminiClient {
     async getPostSummary(
         locale: LocaleType,
         newsRange: NewsRange,
+        topPosts: Array<KpopNewsRedditPost>,
     ): Promise<string> {
         try {
-            const redditClient = new RedditClient();
-            const topPosts = (await redditClient.getTopPosts(newsRange)).map(
+            const formattedTopPosts = topPosts.map(
                 (x) =>
                     `${standardDateFormat(x.date)} | ${x.flair} | ${x.title}`,
             );
 
-            if (topPosts.length === 0) {
-                throw new Error(
-                    `Failed to fetch topPosts(). locale = ${locale}. newsRange = ${newsRange}`,
-                );
-            }
-
             const prompt = getNewsPrompt(
-                topPosts,
+                formattedTopPosts,
                 newsRangeToPromptInterval(newsRange),
                 locale,
             );

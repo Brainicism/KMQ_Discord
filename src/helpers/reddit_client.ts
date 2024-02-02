@@ -50,9 +50,21 @@ const generateFilteredQuery = (): string => {
 };
 
 export class RedditClient {
-    private client: Snoowrap;
+    private client: Snoowrap | null;
 
     constructor() {
+        if (
+            !process.env.REDDIT_CLIENT_ID ||
+            process.env.REDDIT_CLIENT_SECRET ||
+            process.env.REDDIT_CLIENT_REFRESH_TOKEN
+        ) {
+            logger.warn(
+                "Reddit credentials not specified, skipping client initialization...",
+            );
+            this.client = null;
+            return;
+        }
+
         this.client = new Snoowrap({
             clientId: process.env.REDDIT_CLIENT_ID,
             clientSecret: process.env.REDDIT_CLIENT_SECRET,
@@ -62,6 +74,7 @@ export class RedditClient {
     }
 
     async getRecentPopularPosts(): Promise<Array<KpopNewsRedditPost>> {
+        if (!this.client) return [];
         try {
             const matchingPosts = await this.client.search({
                 subreddit: "kpop",
@@ -96,39 +109,51 @@ export class RedditClient {
     }
 
     async getTopPosts(interval: NewsRange): Promise<Array<KpopNewsRedditPost>> {
+        if (!this.client) return [];
+
         try {
             const matchingPosts = await this.client.search({
                 subreddit: "kpop",
                 query: generateFilteredQuery(),
                 sort: "top",
                 time: newsRangeToRedditInterval(interval),
+                count: 30,
             });
 
-            const popularPosts = matchingPosts
+            return matchingPosts
                 .filter((x) => x.score > 100)
-                .slice(0, 25);
+                .filter((x) => !x.title.toLowerCase().includes("pictorial"))
+                .slice(0, 25)
+                .map((x) => {
+                    const flairGroup = x.link_flair_css_class as string;
+                    let flair = (x.link_flair_text as string).toLowerCase();
+                    if (flair.startsWith("[") && flair.endsWith("]")) {
+                        flair = flair.slice(1, flair.length - 1);
+                    }
 
-            return popularPosts.map((x) => {
-                const flairGroup = x.link_flair_css_class as string;
-                let flair = (x.link_flair_text as string).toLowerCase();
-                if (flair.startsWith("[") && flair.endsWith("]")) {
-                    flair = flair.slice(1, flair.length - 1);
-                }
+                    if (flair === "album discussion") {
+                        flair = "album";
+                    }
 
-                if (flair === "album discussion") {
-                    flair = "album";
-                }
-
-                return {
-                    title: x.title,
-                    link: `https://reddit.com${x.permalink}`,
-                    date: new Date(x.created_utc * 1000),
-                    flair: `${flairGroup}:${flair}`,
-                    x: Date.now() - new Date(x.created_utc * 1000).getTime(),
-                };
-            });
+                    return {
+                        title: x.title,
+                        link: `https://reddit.com${x.permalink}`,
+                        date: new Date(x.created_utc * 1000),
+                        flair: `${flairGroup}:${flair}`,
+                        x:
+                            Date.now() -
+                            new Date(x.created_utc * 1000).getTime(),
+                    };
+                })
+                .filter(
+                    (x) =>
+                        !(
+                            x.flair.startsWith("teaser") &&
+                            x.title.toLowerCase().includes("dance practice")
+                        ),
+                );
         } catch (e) {
-            logger.error(
+            logger.warn(
                 `Failed to fetch getTopPosts(). interval = ${newsRangeToRedditInterval(
                     interval,
                 )}. e = ${e}`,
