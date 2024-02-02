@@ -207,7 +207,13 @@ async function bootstrapDatabases(): Promise<void> {
     }
 
     if (process.env.NODE_ENV === EnvType.PROD) {
-        await generateKmqDataTables(db);
+        if (!KmqConfiguration.Instance.disallowMigrations()) {
+            await generateKmqDataTables(db);
+        } else {
+            logger.info(
+                "Skipping generateKmqDataTables due to disabled migrations",
+            );
+        }
     }
 
     logger.info("Cleaning up stale data");
