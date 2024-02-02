@@ -346,9 +346,13 @@ export default class GameRound extends Round {
             typosAllowed,
         );
 
+        if (this.songStartedAt === null) {
+            return;
+        }
+
         this.guesses[playerID] = this.guesses[playerID] || [];
         this.guesses[playerID].push({
-            timeToGuessMs: createdAt - this.startedAt,
+            timeToGuessMs: createdAt - this.songStartedAt,
             guess,
             correct: pointsAwarded > 0,
         });

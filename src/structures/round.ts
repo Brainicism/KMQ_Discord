@@ -22,6 +22,9 @@ export default abstract class Round {
     /** Timestamp of the creation of the Round in epoch milliseconds */
     public readonly startedAt: number;
 
+    /** Timestamp of when the song started playing in epoch milliseconds */
+    public songStartedAt: number | null;
+
     /** Timestamp of the last time the Round was interacted with in epoch milliseconds */
     public lastActive: number;
 
@@ -57,6 +60,7 @@ export default abstract class Round {
             (x) => State.aliases.artist[x] || [],
         );
         this.startedAt = Date.now();
+        this.songStartedAt = null;
         this.lastActive = Date.now();
         this.timerStartedAt = Date.now();
         this.finished = false;
