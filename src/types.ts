@@ -29,7 +29,7 @@ export const GameOptionCommand: { [option: string]: string } = {
     [GameOption.DURATION]: "duration",
     [GameOption.EXCLUDE]: "exclude",
     [GameOption.INCLUDE]: "include",
-    [GameOption.SPOTIFY_PLAYLIST_ID]: "spotify",
+    [GameOption.SPOTIFY_PLAYLIST_ID]: "playlist",
 };
 
 export const PriorityGameOption: Array<GameOption> = [
