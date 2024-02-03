@@ -8,8 +8,8 @@ import type KmqClient from "./kmq_client";
 import type ListeningSession from "./structures/listening_session";
 import type LocaleType from "./enums/locale_type";
 import type MatchedArtist from "./interfaces/matched_artist";
-import type RestartNotification from "./interfaces/restart_notification";
 import type PlaylistManager from "./helpers/playlist_manager";
+import type RestartNotification from "./interfaces/restart_notification";
 
 export default class State {
     static version: string;
