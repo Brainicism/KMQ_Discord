@@ -208,6 +208,16 @@ export default class PlaylistCommand implements BaseCommand {
                 example: `${clickableSlashCommand(
                     COMMAND_NAME,
                     PlaylistCommandAction.SET,
+                )} playlist_url:${YOUTUBE_PLAYLIST_BASE_URL}...`,
+                explanation: i18n.translate(
+                    guildID,
+                    "command.playlist.help.example.playlistURL",
+                ),
+            },
+            {
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    PlaylistCommandAction.SET,
                 )} playlist_url:${SPOTIFY_BASE_URL}...`,
                 explanation: i18n.translate(
                     guildID,
