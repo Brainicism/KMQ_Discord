@@ -44,11 +44,15 @@ export default class SpotifyManager {
         [playlistID: string]: MatchedPlaylist;
     } = {};
 
+    private youtubeClient: youtube_v3.Youtube | undefined;
     private accessToken: string | undefined;
     private guildsParseInProgress: { [guildID: string]: Date } = {};
 
     async start(): Promise<void> {
         await this.refreshToken();
+        this.youtubeClient = new youtube_v3.Youtube({
+            auth: process.env.YOUTUBE_API_KEY,
+        });
 
         setInterval(async () => {
             await this.refreshToken();
@@ -193,6 +197,11 @@ export default class SpotifyManager {
             unmatchedSongs: [],
         };
 
+        if (!this.youtubeClient) {
+            logger.warn("Youtube API client not initialized, API key missing?");
+            return UNMATCHED_PLAYLIST;
+        }
+
         let logHeader: string;
         if (messageContext || interaction) {
             logHeader = `${getDebugLogHeader(
@@ -201,10 +210,6 @@ export default class SpotifyManager {
         } else {
             logHeader = `guildID = ${guildID}. playlistID = ${playlistId}`;
         }
-
-        const client = new youtube_v3.Youtube({
-            auth: process.env.YOUTUBE_API_KEY,
-        });
 
         let metadata: PlaylistMetadata | null;
         const cachedPlaylist = this.cachedPlaylists[playlistId];
@@ -295,7 +300,7 @@ export default class SpotifyManager {
 
                 try {
                     resp = (
-                        await client.playlistItems.list({
+                        await this.youtubeClient.playlistItems.list({
                             part: ["snippet"],
                             playlistId,
                             pageToken,
@@ -981,34 +986,51 @@ export default class SpotifyManager {
     private async getYoutubePlaylistMetadata(
         playlistId: string,
     ): Promise<PlaylistMetadata | null> {
-        const client = new youtube_v3.Youtube({
-            auth: process.env.YOUTUBE_API_KEY,
-        });
+        if (!this.youtubeClient) {
+            logger.warn("Youtube API client not initialized, API key missing?");
+            return null;
+        }
 
-        const response = (
-            await client.playlists.list({
-                part: ["snippet", "contentDetails"],
-                id: [playlistId],
-            })
-        ).data;
+        let response: youtube_v3.Schema$PlaylistListResponse;
 
-        logger.info(`${playlistId} | ${JSON.stringify(response)}`);
-        if (!response.items) {
+        try {
+            response = (
+                await this.youtubeClient.playlists.list({
+                    part: ["snippet", "contentDetails"],
+                    id: [playlistId],
+                })
+            ).data;
+        } catch (e) {
+            logger.error(
+                `Error calling client.playlists.list for ${playlistId}. err = e`,
+            );
+            return null;
+        }
+
+        const playlistResponse = response.items;
+        if (!playlistResponse) {
             logger.error(
                 `Unable to fetch playlist metadata for ${playlistId}. resp = ${JSON.stringify(
                     response,
                 )}`,
             );
+            logger.error(`${playlistId} | ${JSON.stringify(response)}`);
+            return null;
         }
 
-        const playlistName = response.items![0].snippet?.title as string;
+        if (playlistResponse.length === 0) {
+            logger.warn(`Could not find playlist metadata for ${playlistId}`);
+            return null;
+        }
+
+        const playlistName = playlistResponse[0].snippet!.title as string;
         const snapshotID = response.etag as string;
-        const thumbnailUrl = response.items![0].snippet?.thumbnails?.default
+        const thumbnailUrl = playlistResponse[0].snippet!.thumbnails?.default
             ?.url as string;
 
-        const limit = response.pageInfo?.resultsPerPage as number;
-        const songCount = response.items![0].contentDetails
-            ?.itemCount as number;
+        const limit = response.pageInfo!.resultsPerPage as number;
+        const songCount = playlistResponse[0].contentDetails!
+            .itemCount as number;
 
         return {
             playlistId,

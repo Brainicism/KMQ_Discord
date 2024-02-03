@@ -1217,7 +1217,7 @@
             },
             "noMatches": {
                 "description": "No songs were matched.",
-                "title": "Failed to fetch songs from Spotify"
+                "title": "Failed to fetch songs from playlist"
             },
             "noPlaylistSet": {
                 "description": "{{spotifySet}} a playlist before using this command.",
