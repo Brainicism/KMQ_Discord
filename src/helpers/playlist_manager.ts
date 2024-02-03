@@ -252,6 +252,9 @@ export default class PlaylistManager {
             };
         }
 
+        this.guildsParseInProgress[guildID] = new Date();
+        await interaction?.acknowledge();
+
         let pageToken: string | null | undefined = "";
         const songs: Array<{
             title: string;
