@@ -37,6 +37,11 @@ const logger = new IPCLogger("spotify_manager");
 
 const BASE_URL = "https://api.spotify.com/v1";
 
+const PLAYLIST_UNMATCHED_SONGS_DIR = path.join(
+    __dirname,
+    "../../data/spotify_unmatched_playlists",
+);
+
 const SONG_MATCH_TIMEOUT_MS = 90000;
 
 export default class SpotifyManager {
@@ -238,134 +243,163 @@ export default class SpotifyManager {
         ) {
             logger.info(`${logHeader} | Using cached playlist`);
             ({ matchedSongs, truncated, unmatchedSongs } = cachedPlaylist);
-        } else {
-            let pageToken: string | null | undefined = "";
-            const songs: Array<{
-                title: string;
-                videoId: string;
-            }> = [];
+            return {
+                matchedSongs,
+                metadata,
+                truncated,
+                unmatchedSongs,
+            };
+        }
 
-            let page = 0;
-            const numPlaylistPages = Math.ceil(metadata.playlistLength / 50);
+        let pageToken: string | null | undefined = "";
+        const songs: Array<{
+            title: string;
+            videoId: string;
+        }> = [];
 
-            const parsingTitle = i18n.translate(
-                guildID,
-                "command.spotify.parsing",
-            );
+        let page = 0;
+        const numPlaylistPages = Math.ceil(metadata.playlistLength / 50);
 
-            let message: Eris.Message | null = null;
-            if (interaction?.acknowledged) {
-                message = await interaction.createFollowup({
-                    embeds: [
-                        {
-                            title: parsingTitle,
-                            description: visualProgressBar(0, numPlaylistPages),
-                        },
-                    ],
-                });
-            } else if (messageContext) {
-                message = await sendInfoMessage(messageContext, {
-                    title: parsingTitle,
-                    description: visualProgressBar(0, numPlaylistPages),
-                });
-            }
+        const parsingTitle = i18n.translate(guildID, "command.spotify.parsing");
 
-            const updateParsing = setInterval(() => {
-                message?.edit({
-                    embeds: [
-                        {
-                            title: parsingTitle,
-                            description: visualProgressBar(
-                                page,
-                                numPlaylistPages,
-                            ),
-                        },
-                    ],
-                });
-            }, 2000);
+        let message: Eris.Message | null = null;
+        if (interaction?.acknowledged) {
+            message = await interaction.createFollowup({
+                embeds: [
+                    {
+                        title: parsingTitle,
+                        description: visualProgressBar(0, numPlaylistPages),
+                    },
+                ],
+            });
+        } else if (messageContext) {
+            message = await sendInfoMessage(messageContext, {
+                title: parsingTitle,
+                description: visualProgressBar(0, numPlaylistPages),
+            });
+        }
 
-            while (pageToken != null) {
-                page++;
-                if (
-                    page % Math.floor(numPlaylistPages / 4) === 1 ||
-                    page === numPlaylistPages ||
-                    page === 1
-                ) {
-                    logger.info(
-                        `${logHeader} | Calling Youtube API ${page}/${numPlaylistPages} for playlist`,
-                    );
-                }
-
-                let resp: youtube_v3.Schema$PlaylistItemListResponse;
-
-                try {
-                    resp = (
-                        await this.youtubeClient.playlistItems.list({
-                            part: ["snippet"],
-                            playlistId,
-                            pageToken,
-                            maxResults: 50,
-                        })
-                    ).data;
-                } catch (e) {
-                    logger.error(
-                        `${logHeader} | Error calling client.playlistItems.list for ${playlistId}. err = ${e}`,
-                    );
-                    continue;
-                }
-
-                songs.push(
-                    // eslint-disable-next-line no-unsafe-optional-chaining
-                    ...resp.items!.map((x) => ({
-                        title: x.snippet?.title as string,
-                        videoId: x.snippet?.resourceId?.videoId as string,
-                    })),
-                );
-
-                pageToken = resp.nextPageToken;
-                if (!pageToken) break;
-            }
-
-            clearTimeout(updateParsing);
-
+        const updateParsing = setInterval(() => {
             message?.edit({
                 embeds: [
                     {
                         title: parsingTitle,
-                        description: visualProgressBar(1, 1),
+                        description: visualProgressBar(page, numPlaylistPages),
                     },
                 ],
             });
+        }, 2000);
 
-            const youtubePlaylistVideoIDs: {
-                videoId: string;
-                title: string;
-            }[] = songs.map((x) => ({
-                videoId: x.videoId,
-                title: x.title,
-            }));
+        while (pageToken != null) {
+            page++;
+            if (
+                page % Math.floor(numPlaylistPages / 4) === 1 ||
+                page === numPlaylistPages ||
+                page === 1
+            ) {
+                logger.info(
+                    `${logHeader} | Calling Youtube API ${page}/${numPlaylistPages} for playlist`,
+                );
+            }
 
-            matchedSongs = await dbContext.kmq
-                .selectFrom("available_songs")
-                .select(SongSelector.QueriedSongFields)
-                .where(
-                    "link",
-                    "in",
-                    youtubePlaylistVideoIDs.map((x) => x.videoId),
-                )
-                .execute();
+            let resp: youtube_v3.Schema$PlaylistItemListResponse;
 
-            unmatchedSongs = youtubePlaylistVideoIDs
-                .filter(
-                    (x) =>
-                        !matchedSongs
-                            .map((y) => y.youtubeLink)
-                            .includes(x.videoId),
-                )
-                .map((x) => x.title);
+            try {
+                resp = (
+                    await this.youtubeClient.playlistItems.list({
+                        part: ["snippet"],
+                        playlistId,
+                        pageToken,
+                        maxResults: 50,
+                    })
+                ).data;
+            } catch (e) {
+                logger.error(
+                    `${logHeader} | Error calling client.playlistItems.list for ${playlistId}. err = ${e}`,
+                );
+                continue;
+            }
+
+            songs.push(
+                // eslint-disable-next-line no-unsafe-optional-chaining
+                ...resp.items!.map((x) => ({
+                    title: x.snippet?.title as string,
+                    videoId: x.snippet?.resourceId?.videoId as string,
+                })),
+            );
+
+            pageToken = resp.nextPageToken;
+            if (!pageToken) break;
         }
 
+        clearTimeout(updateParsing);
+
+        message?.edit({
+            embeds: [
+                {
+                    title: parsingTitle,
+                    description: visualProgressBar(1, 1),
+                },
+            ],
+        });
+
+        const youtubePlaylistVideoIDs: {
+            videoId: string;
+            title: string;
+        }[] = songs.map((x) => ({
+            videoId: x.videoId,
+            title: x.title,
+        }));
+
+        matchedSongs = await dbContext.kmq
+            .selectFrom("available_songs")
+            .select(SongSelector.QueriedSongFields)
+            .where(
+                "link",
+                "in",
+                youtubePlaylistVideoIDs.map((x) => x.videoId),
+            )
+            .execute();
+
+        unmatchedSongs = youtubePlaylistVideoIDs
+            .filter(
+                (x) =>
+                    !matchedSongs.map((y) => y.youtubeLink).includes(x.videoId),
+            )
+            .map((x) => x.title);
+
         metadata.matchedSongsLength = matchedSongs.length;
+
+        if (unmatchedSongs.length) {
+            if (!(await pathExists(PLAYLIST_UNMATCHED_SONGS_DIR))) {
+                await fs.promises.mkdir(PLAYLIST_UNMATCHED_SONGS_DIR);
+            }
+
+            const playlistUnmatchedSongsPath = path.resolve(
+                __dirname,
+                PLAYLIST_UNMATCHED_SONGS_DIR,
+                `${playlistId}-${standardDateFormat(new Date())}.txt`,
+            );
+
+            await fs.promises.writeFile(
+                playlistUnmatchedSongsPath,
+                unmatchedSongs.join("\n"),
+            );
+        }
+
+        if (KmqConfiguration.Instance.persistMatchedPlaylistSongs()) {
+            await fs.promises.writeFile(
+                path.resolve(
+                    PLAYLIST_UNMATCHED_SONGS_DIR,
+                    `${playlistId}-${standardDateFormat(
+                        new Date(),
+                    )}.matched.txt`,
+                ),
+                matchedSongs
+                    .map((x) => `${x.songName} - ${x.artistName}`)
+                    .join("\n"),
+            );
+        }
 
         const playlist: MatchedPlaylist = {
             matchedSongs,
@@ -452,239 +486,199 @@ export default class SpotifyManager {
         ) {
             logger.info(`${logHeader} | Using cached playlist`);
             ({ matchedSongs, truncated, unmatchedSongs } = cachedPlaylist);
-        } else {
-            if (this.isParseInProgress(guildID)) {
-                if (messageContext) {
-                    logger.warn(
-                        `${logHeader} | Skipping parsing due to another parse in progress`,
-                    );
 
-                    await sendErrorMessage(
-                        messageContext,
-                        {
-                            title: i18n.translate(
-                                messageContext.guildID,
-                                "command.spotify.parsingAlreadyInProgress.title",
-                            ),
-                            description: i18n.translate(
-                                messageContext.guildID,
-                                "command.spotify.parsingAlreadyInProgress.description",
-                            ),
-                        },
-                        interaction,
-                    );
-                }
+            return {
+                matchedSongs,
+                metadata,
+                truncated,
+                unmatchedSongs,
+            };
+        }
 
-                return UNMATCHED_PLAYLIST;
-            } else {
-                this.guildsParseInProgress[guildID] = new Date();
-            }
+        this.guildsParseInProgress[guildID] = new Date();
+        await interaction?.acknowledge();
 
-            await interaction?.acknowledge();
+        const spotifySongs: Array<SpotifyTrack> = [];
+        const start = Date.now();
+        logger.info(`${logHeader} | Using Spotify API for playlist`);
 
-            const spotifySongs: Array<SpotifyTrack> = [];
-            const start = Date.now();
-            logger.info(`${logHeader} | Using Spotify API for playlist`);
+        const numPlaylistPages = Math.ceil(
+            metadata.playlistLength / metadata.limit,
+        );
 
-            const numPlaylistPages = Math.ceil(
-                metadata.playlistLength / metadata.limit,
-            );
+        const requestURLs = [...Array(numPlaylistPages).keys()].map(
+            (n) =>
+                `${BASE_URL}/playlists/${playlistId}/tracks?${encodeURI(
+                    `market=US&fields=items(track(name,artists(name))),next&limit=${
+                        metadata!.limit
+                    }&offset=${n * metadata!.limit}`,
+                )}`,
+        );
 
-            const requestURLs = [...Array(numPlaylistPages).keys()].map(
-                (n) =>
-                    `${BASE_URL}/playlists/${playlistId}/tracks?${encodeURI(
-                        `market=US&fields=items(track(name,artists(name))),next&limit=${
-                            metadata!.limit
-                        }&offset=${n * metadata!.limit}`,
-                    )}`,
-            );
-
-            let numProcessedPlaylistPages = 0;
-            for await (const results of asyncPool(
-                10,
-                requestURLs,
-                (requestURL: string) =>
-                    this.generateSpotifyResponsePromise(requestURL, guildID),
-            )) {
-                numProcessedPlaylistPages++;
-                if (
-                    numProcessedPlaylistPages %
-                        Math.floor(numPlaylistPages / 4) ===
-                        1 ||
-                    numProcessedPlaylistPages === numPlaylistPages ||
-                    numProcessedPlaylistPages === 1
-                ) {
-                    logger.info(
-                        `${logHeader} | Calling Spotify API ${numProcessedPlaylistPages}/${numPlaylistPages} for playlist`,
-                    );
-                }
-
-                spotifySongs.push(...results);
-            }
-
-            logger.info(
-                `${logHeader} | Finished grabbing Spotify song data for playlist after ${
-                    Date.now() - start
-                }ms`,
-            );
-
-            logger.info(
-                `${logHeader} | Starting to parse playlist, number of songs: ${spotifySongs.length}`,
-            );
-
-            const parsingTitle = i18n.translate(
-                guildID,
-                "command.spotify.parsing",
-            );
-
-            let message: Eris.Message | null = null;
-            if (interaction?.acknowledged) {
-                message = await interaction.createFollowup({
-                    embeds: [
-                        {
-                            title: parsingTitle,
-                            description: visualProgressBar(
-                                0,
-                                spotifySongs.length,
-                            ),
-                        },
-                    ],
-                });
-            } else if (messageContext) {
-                message = await sendInfoMessage(messageContext, {
-                    title: parsingTitle,
-                    description: visualProgressBar(0, spotifySongs.length),
-                });
-            }
-
-            const updateParsing = setInterval(() => {
-                message?.edit({
-                    embeds: [
-                        {
-                            title: parsingTitle,
-                            description: visualProgressBar(
-                                unmatchedSongs.length + matchedSongs.length,
-                                spotifySongs.length,
-                            ),
-                        },
-                    ],
-                });
-            }, 2000);
-
-            try {
-                const songMatchStartTime = Date.now();
-                for await (const queryOutput of asyncPool(
-                    4,
-                    spotifySongs,
-                    (x: SpotifyTrack) =>
-                        this.generateSongMatchingPromise(x, guildID),
-                )) {
-                    if (typeof queryOutput === "string") {
-                        unmatchedSongs.push(queryOutput);
-                    } else {
-                        matchedSongs.push(queryOutput);
-                    }
-
-                    const processedSongCount =
-                        unmatchedSongs.length + matchedSongs.length;
-
-                    if (
-                        processedSongCount % 100 === 0 ||
-                        processedSongCount === 1 ||
-                        processedSongCount === spotifySongs.length
-                    ) {
-                        logger.info(
-                            `${logHeader} | Processed ${processedSongCount}/${spotifySongs.length} for playlist`,
-                        );
-                    }
-
-                    if (
-                        Date.now() - songMatchStartTime >
-                        SONG_MATCH_TIMEOUT_MS
-                    ) {
-                        logger.warn(
-                            `${logHeader} | Playlist exceeded song match timeout of ${SONG_MATCH_TIMEOUT_MS}ms after processing ${processedSongCount}/${spotifySongs.length}`,
-                        );
-                        truncated = true;
-                        break;
-                    }
-                }
-
+        let numProcessedPlaylistPages = 0;
+        for await (const results of asyncPool(
+            10,
+            requestURLs,
+            (requestURL: string) =>
+                this.generateSpotifyResponsePromise(requestURL, guildID),
+        )) {
+            numProcessedPlaylistPages++;
+            if (
+                numProcessedPlaylistPages % Math.floor(numPlaylistPages / 4) ===
+                    1 ||
+                numProcessedPlaylistPages === numPlaylistPages ||
+                numProcessedPlaylistPages === 1
+            ) {
                 logger.info(
-                    `${logHeader} | Finished parsing playlist after ${
-                        Date.now() - songMatchStartTime
-                    }ms.`,
+                    `${logHeader} | Calling Spotify API ${numProcessedPlaylistPages}/${numPlaylistPages} for playlist`,
                 );
-            } finally {
-                clearInterval(updateParsing);
-                delete this.guildsParseInProgress[guildID];
             }
 
+            spotifySongs.push(...results);
+        }
+
+        logger.info(
+            `${logHeader} | Finished grabbing Spotify song data for playlist after ${
+                Date.now() - start
+            }ms`,
+        );
+
+        logger.info(
+            `${logHeader} | Starting to parse playlist, number of songs: ${spotifySongs.length}`,
+        );
+
+        const parsingTitle = i18n.translate(guildID, "command.spotify.parsing");
+
+        let message: Eris.Message | null = null;
+        if (interaction?.acknowledged) {
+            message = await interaction.createFollowup({
+                embeds: [
+                    {
+                        title: parsingTitle,
+                        description: visualProgressBar(0, spotifySongs.length),
+                    },
+                ],
+            });
+        } else if (messageContext) {
+            message = await sendInfoMessage(messageContext, {
+                title: parsingTitle,
+                description: visualProgressBar(0, spotifySongs.length),
+            });
+        }
+
+        const updateParsing = setInterval(() => {
             message?.edit({
                 embeds: [
                     {
                         title: parsingTitle,
-                        description: visualProgressBar(1, 1),
+                        description: visualProgressBar(
+                            unmatchedSongs.length + matchedSongs.length,
+                            spotifySongs.length,
+                        ),
                     },
                 ],
             });
+        }, 2000);
 
-            const SPOTIFY_PLAYLIST_UNMATCHED_SONGS_DIR = path.join(
-                __dirname,
-                "../../data/spotify_unmatched_playlists",
-            );
+        try {
+            const songMatchStartTime = Date.now();
+            for await (const queryOutput of asyncPool(
+                4,
+                spotifySongs,
+                (x: SpotifyTrack) =>
+                    this.generateSongMatchingPromise(x, guildID),
+            )) {
+                if (typeof queryOutput === "string") {
+                    unmatchedSongs.push(queryOutput);
+                } else {
+                    matchedSongs.push(queryOutput);
+                }
 
-            if (unmatchedSongs.length) {
-                if (!(await pathExists(SPOTIFY_PLAYLIST_UNMATCHED_SONGS_DIR))) {
-                    await fs.promises.mkdir(
-                        SPOTIFY_PLAYLIST_UNMATCHED_SONGS_DIR,
+                const processedSongCount =
+                    unmatchedSongs.length + matchedSongs.length;
+
+                if (
+                    processedSongCount % 100 === 0 ||
+                    processedSongCount === 1 ||
+                    processedSongCount === spotifySongs.length
+                ) {
+                    logger.info(
+                        `${logHeader} | Processed ${processedSongCount}/${spotifySongs.length} for playlist`,
                     );
                 }
 
-                const playlistUnmatchedSongsPath = path.resolve(
-                    __dirname,
-                    SPOTIFY_PLAYLIST_UNMATCHED_SONGS_DIR,
-                    `${playlistId}-${standardDateFormat(new Date())}.txt`,
-                );
-
-                await fs.promises.writeFile(
-                    playlistUnmatchedSongsPath,
-                    unmatchedSongs.join("\n"),
-                );
+                if (Date.now() - songMatchStartTime > SONG_MATCH_TIMEOUT_MS) {
+                    logger.warn(
+                        `${logHeader} | Playlist exceeded song match timeout of ${SONG_MATCH_TIMEOUT_MS}ms after processing ${processedSongCount}/${spotifySongs.length}`,
+                    );
+                    truncated = true;
+                    break;
+                }
             }
 
-            if (KmqConfiguration.Instance.persistMatchedSpotifySongs()) {
-                await fs.promises.writeFile(
-                    path.resolve(
-                        SPOTIFY_PLAYLIST_UNMATCHED_SONGS_DIR,
-                        `${playlistId}-${standardDateFormat(
-                            new Date(),
-                        )}.matched.txt`,
-                    ),
-                    matchedSongs
-                        .map((x) => `${x.songName} - ${x.artistName}`)
-                        .join("\n"),
-                );
-            }
+            logger.info(
+                `${logHeader} | Finished parsing playlist after ${
+                    Date.now() - songMatchStartTime
+                }ms.`,
+            );
+        } finally {
+            clearInterval(updateParsing);
+            delete this.guildsParseInProgress[guildID];
         }
+
+        message?.edit({
+            embeds: [
+                {
+                    title: parsingTitle,
+                    description: visualProgressBar(1, 1),
+                },
+            ],
+        });
 
         metadata.matchedSongsLength = matchedSongs.length;
         matchedSongs = _.uniqBy(matchedSongs, "youtubeLink");
         unmatchedSongs = _.uniq(unmatchedSongs);
 
-        this.cachedPlaylists[playlistId] = {
+        if (unmatchedSongs.length) {
+            if (!(await pathExists(PLAYLIST_UNMATCHED_SONGS_DIR))) {
+                await fs.promises.mkdir(PLAYLIST_UNMATCHED_SONGS_DIR);
+            }
+
+            const playlistUnmatchedSongsPath = path.resolve(
+                __dirname,
+                PLAYLIST_UNMATCHED_SONGS_DIR,
+                `${playlistId}-${standardDateFormat(new Date())}.txt`,
+            );
+
+            await fs.promises.writeFile(
+                playlistUnmatchedSongsPath,
+                unmatchedSongs.join("\n"),
+            );
+        }
+
+        if (KmqConfiguration.Instance.persistMatchedPlaylistSongs()) {
+            await fs.promises.writeFile(
+                path.resolve(
+                    PLAYLIST_UNMATCHED_SONGS_DIR,
+                    `${playlistId}-${standardDateFormat(
+                        new Date(),
+                    )}.matched.txt`,
+                ),
+                matchedSongs
+                    .map((x) => `${x.songName} - ${x.artistName}`)
+                    .join("\n"),
+            );
+        }
+
+        const playlist: MatchedPlaylist = {
             metadata,
             matchedSongs,
             truncated,
             unmatchedSongs,
         };
 
-        return {
-            matchedSongs,
-            metadata,
-            truncated,
-            unmatchedSongs,
-        };
+        this.cachedPlaylists[playlistId] = playlist;
+        return playlist;
     };
 
     /**
