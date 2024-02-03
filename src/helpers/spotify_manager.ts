@@ -243,6 +243,42 @@ export default class SpotifyManager {
             let page = 0;
             const numPlaylistPages = Math.ceil(metadata.playlistLength / 50);
 
+            const parsingTitle = i18n.translate(
+                guildID,
+                "command.spotify.parsing",
+            );
+
+            let message: Eris.Message | null = null;
+            if (interaction?.acknowledged) {
+                message = await interaction.createFollowup({
+                    embeds: [
+                        {
+                            title: parsingTitle,
+                            description: visualProgressBar(0, numPlaylistPages),
+                        },
+                    ],
+                });
+            } else if (messageContext) {
+                message = await sendInfoMessage(messageContext, {
+                    title: parsingTitle,
+                    description: visualProgressBar(0, numPlaylistPages),
+                });
+            }
+
+            const updateParsing = setInterval(() => {
+                message?.edit({
+                    embeds: [
+                        {
+                            title: parsingTitle,
+                            description: visualProgressBar(
+                                page,
+                                numPlaylistPages,
+                            ),
+                        },
+                    ],
+                });
+            }, 2000);
+
             while (pageToken != null) {
                 page++;
                 if (
@@ -255,15 +291,23 @@ export default class SpotifyManager {
                     );
                 }
 
-                // eslint-disable-next-line no-await-in-loop
-                const resp: youtube_v3.Schema$PlaylistItemListResponse = (
-                    await client.playlistItems.list({
-                        part: ["snippet"],
-                        playlistId,
-                        pageToken,
-                        maxResults: 50,
-                    })
-                ).data;
+                let resp: youtube_v3.Schema$PlaylistItemListResponse;
+
+                try {
+                    resp = (
+                        await client.playlistItems.list({
+                            part: ["snippet"],
+                            playlistId,
+                            pageToken,
+                            maxResults: 50,
+                        })
+                    ).data;
+                } catch (e) {
+                    logger.error(
+                        `${logHeader} | Error calling client.playlistItems.list for ${playlistId}. err = ${e}`,
+                    );
+                    continue;
+                }
 
                 songs.push(
                     // eslint-disable-next-line no-unsafe-optional-chaining
@@ -276,6 +320,17 @@ export default class SpotifyManager {
                 pageToken = resp.nextPageToken;
                 if (!pageToken) break;
             }
+
+            clearTimeout(updateParsing);
+
+            message?.edit({
+                embeds: [
+                    {
+                        title: parsingTitle,
+                        description: visualProgressBar(1, 1),
+                    },
+                ],
+            });
 
             const youtubePlaylistVideoIDs: {
                 videoId: string;
@@ -295,7 +350,6 @@ export default class SpotifyManager {
                 )
                 .execute();
 
-            // todo: WHAT TO DO WITH THIS
             unmatchedSongs = youtubePlaylistVideoIDs
                 .filter(
                     (x) =>
@@ -565,10 +619,7 @@ export default class SpotifyManager {
                 embeds: [
                     {
                         title: parsingTitle,
-                        description: visualProgressBar(
-                            unmatchedSongs.length + matchedSongs.length,
-                            spotifySongs.length,
-                        ),
+                        description: visualProgressBar(1, 1),
                     },
                 ],
             });

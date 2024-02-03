@@ -1223,7 +1223,7 @@
                 "description": "{{spotifySet}} a playlist before using this command.",
                 "title": "No Playlist Set"
             },
-            "parsing": "Loading Spotify playlist...",
+            "parsing": "Loading playlist...",
             "parsingAlreadyInProgress": {
                 "description": "Please wait for the current playlist to finish loading before starting a new one.",
                 "title": "Already Loading Playlist"
