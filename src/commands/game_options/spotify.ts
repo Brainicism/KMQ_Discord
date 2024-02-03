@@ -1,5 +1,9 @@
 import { IPCLogger } from "../../logger";
-import { SPOTIFY_BASE_URL, SPOTIFY_SHORTHAND_BASE_URL } from "../../constants";
+import {
+    SPOTIFY_BASE_URL,
+    SPOTIFY_SHORTHAND_BASE_URL,
+    YOUTUBE_PLAYLIST_BASE_URL,
+} from "../../constants";
 import {
     clickableSlashCommand,
     friendlyFormattedNumber,
@@ -308,15 +312,24 @@ export default class SpotifyCommand implements BaseCommand {
             return;
         }
 
-        const isFullURL = new RegExp(`^${SPOTIFY_BASE_URL}.+`).test(
+        const isSpotifyFullURL = new RegExp(`^${SPOTIFY_BASE_URL}.+`).test(
             playlistURL,
         );
 
-        const isShorthandURL = new RegExp(
+        const isSpotifyShorthandURL = new RegExp(
             `^${SPOTIFY_SHORTHAND_BASE_URL}.+`,
         ).test(playlistURL);
 
-        if (!isValidURL(playlistURL) || (!isFullURL && !isShorthandURL)) {
+        const isYoutubePlaylistURL = new RegExp(
+            `^${YOUTUBE_PLAYLIST_BASE_URL.replace("?", "\\?")}.+`,
+        ).test(playlistURL);
+
+        if (
+            !isValidURL(playlistURL) ||
+            (!isSpotifyFullURL &&
+                !isSpotifyShorthandURL &&
+                !isYoutubePlaylistURL)
+        ) {
             logger.warn(
                 `${getDebugLogHeader(
                     messageContext,
@@ -340,21 +353,31 @@ export default class SpotifyCommand implements BaseCommand {
             return;
         }
 
-        let playlistID: string;
+        let kmqPlaylistIdentifier: string;
         const matchPlaylistID = `${SPOTIFY_BASE_URL}([a-zA-Z0-9]+)`;
         try {
-            if (isFullURL) {
-                playlistID = playlistURL.match(matchPlaylistID)![1];
-            } else {
+            if (isSpotifyFullURL) {
+                kmqPlaylistIdentifier = `spotify|${
+                    playlistURL.match(matchPlaylistID)![1]
+                }`;
+            } else if (isSpotifyShorthandURL) {
                 const response = await fetch(playlistURL);
                 const body = await response.text();
-                playlistID = body.match(matchPlaylistID)![1];
+                kmqPlaylistIdentifier = `spotify|${
+                    body.match(matchPlaylistID)![1]
+                }`;
+            } else {
+                kmqPlaylistIdentifier = `youtube|${
+                    playlistURL.match(
+                        `${YOUTUBE_PLAYLIST_BASE_URL.replace("?", "\\?")}(.+)`,
+                    )![1]
+                }`;
             }
         } catch (err) {
             logger.error(
                 `${getDebugLogHeader(
                     messageContext,
-                )} | Failed to get playlist ID from Spotify URL. playlistURL = ${playlistURL}. isFullURL = ${isFullURL}. err = ${err}`,
+                )} | Failed to get playlist ID from playlist URL. playlistURL = ${playlistURL}. err = ${err}`,
             );
 
             sendErrorMessage(
@@ -378,7 +401,7 @@ export default class SpotifyCommand implements BaseCommand {
         if (session) {
             matchedPlaylist = (await session.songSelector.reloadSongs(
                 guildPreference,
-                playlistID,
+                kmqPlaylistIdentifier,
                 true,
                 messageContext,
                 interaction,
@@ -386,7 +409,7 @@ export default class SpotifyCommand implements BaseCommand {
         } else {
             matchedPlaylist = (await new SongSelector().reloadSongs(
                 guildPreference,
-                playlistID,
+                kmqPlaylistIdentifier,
                 true,
                 messageContext,
                 interaction,
@@ -421,7 +444,7 @@ export default class SpotifyCommand implements BaseCommand {
             return;
         }
 
-        await guildPreference.setSpotifyPlaylistID(playlistID);
+        await guildPreference.setSpotifyPlaylistID(kmqPlaylistIdentifier);
 
         await LimitCommand.updateOption(
             messageContext,
@@ -434,7 +457,7 @@ export default class SpotifyCommand implements BaseCommand {
         logger.info(
             `${getDebugLogHeader(
                 messageContext,
-            )} | Spotify playlist set to ${playlistID}`,
+            )} | Spotify playlist set to ${kmqPlaylistIdentifier}`,
         );
 
         let matchedDescription = i18n.translate(
@@ -509,7 +532,7 @@ export default class SpotifyCommand implements BaseCommand {
             messageContext.guildID,
         );
 
-        if (!guildPreference.isSpotifyPlaylist()) {
+        if (!guildPreference.isPlaylist()) {
             await sendErrorMessage(
                 messageContext,
                 {
@@ -534,7 +557,7 @@ export default class SpotifyCommand implements BaseCommand {
         }
 
         const playlistID = guildPreference.getSpotifyPlaylistID();
-        const playlist = await State.spotifyManager.getMatchedSpotifySongs(
+        const playlist = await State.spotifyManager.getMatchedYoutubeSongs(
             guildID,
             playlistID!,
             false,
@@ -638,5 +661,27 @@ export default class SpotifyCommand implements BaseCommand {
                 showLink,
             );
         }
+    }
+
+    /**
+     * @param kmqPlaylistIdentifier - Identifier containing either youtube/spotify followed by the playlist ID
+     * @returns whether it is a Spotify playlist, and the parsed playlist ID
+     */
+    static parseKmqPlaylistIdentifier(kmqPlaylistIdentifier: string): {
+        isSpotify: boolean;
+        playlistId: string;
+    } {
+        const identifierComponents = kmqPlaylistIdentifier.split("|");
+        if (identifierComponents.length === 1) {
+            return {
+                isSpotify: true,
+                playlistId: identifierComponents[0],
+            };
+        }
+
+        return {
+            isSpotify: identifierComponents[0] === "spotify",
+            playlistId: identifierComponents[1],
+        };
     }
 }

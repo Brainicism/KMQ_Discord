@@ -317,7 +317,7 @@ export default class CommandPrechecks {
             messageContext.guildID,
         );
 
-        if (guildPreference.isSpotifyPlaylist()) {
+        if (guildPreference.isPlaylist()) {
             const embedPayload: EmbedPayload = {
                 title: i18n.translate(
                     messageContext.guildID,

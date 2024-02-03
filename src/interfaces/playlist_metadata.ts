@@ -1,5 +1,5 @@
 export interface PlaylistMetadata {
-    playlistID: string;
+    playlistId: string;
     playlistName: string;
     playlistLength: number;
     matchedSongsLength: number;

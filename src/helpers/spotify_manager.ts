@@ -13,9 +13,11 @@ import {
     standardDateFormat,
     visualProgressBar,
 } from "./utils";
+import { youtube_v3 } from "googleapis";
 import Axios from "axios";
 import KmqConfiguration from "../kmq_configuration";
 import SongSelector from "../structures/song_selector";
+import SpotifyCommand from "../commands/game_options/spotify";
 import State from "../state";
 import _ from "lodash";
 import asyncPool from "tiny-async-pool";
@@ -61,23 +63,16 @@ export default class SpotifyManager {
         return !!this.guildsParseInProgress[guildID];
     }
 
-    /**
-     * @param guildID - The guild to retrieve songs for
-     * @param playlistID - The playlist to retrieve songs from
-     * @param forceRefreshMetadata - Whether to request new metadata
-     * @param messageContext - The message context
-     * @param interaction - The interaction
-     */
-    getMatchedSpotifySongs = async (
+    getMatchedYoutubeSongs = async (
         guildID: string,
-        playlistID: string,
+        playlistId: string,
         forceRefreshMetadata: boolean,
         messageContext?: MessageContext,
         interaction?: Eris.CommandInteraction,
     ): Promise<MatchedPlaylist> => {
         const UNMATCHED_PLAYLIST = {
             metadata: {
-                playlistID,
+                playlistId,
                 playlistName: "",
                 playlistLength: 0,
                 matchedSongsLength: 0,
@@ -94,9 +89,229 @@ export default class SpotifyManager {
         if (messageContext || interaction) {
             logHeader = `${getDebugLogHeader(
                 (messageContext || interaction)!,
-            )}, playlistID = ${playlistID}`;
+            )}, playlistID = ${playlistId}`;
         } else {
-            logHeader = `guildID = ${guildID}. playlistID = ${playlistID}`;
+            logHeader = `guildID = ${guildID}. playlistID = ${playlistId}`;
+        }
+
+        const client = new youtube_v3.Youtube({
+            auth: process.env.YOUTUBE_API_KEY,
+        });
+
+        let metadata: PlaylistMetadata | null;
+        const cachedPlaylist = this.cachedPlaylists[playlistId];
+
+        if (forceRefreshMetadata || !cachedPlaylist) {
+            metadata = await this.getYoutubePlaylistMetadata(playlistId);
+            logger.info(
+                `${logHeader} | Refreshing Youtube metadata. forceRefreshMetadata: ${forceRefreshMetadata}, cachedPlaylist: ${!!cachedPlaylist}`,
+            );
+        } else {
+            metadata = cachedPlaylist.metadata;
+        }
+
+        if (!metadata) {
+            logger.warn(`${logHeader} | No Youtube metadata`);
+            return UNMATCHED_PLAYLIST;
+        }
+
+        let matchedSongs: Array<QueriedSong> = [];
+        let unmatchedSongs: Array<string> = [];
+        let truncated = false;
+
+        if (
+            cachedPlaylist &&
+            cachedPlaylist.metadata.snapshotID === metadata.snapshotID
+        ) {
+            logger.info(`${logHeader} | Using cached playlist`);
+            ({ matchedSongs, truncated, unmatchedSongs } = cachedPlaylist);
+        } else {
+            let pageToken: string | null | undefined = "";
+            const songs: Array<{
+                title: string;
+                videoId: string;
+            }> = [];
+
+            let page = 0;
+            const numPlaylistPages = Math.ceil(metadata.playlistLength / 50);
+
+            while (true) {
+                page++;
+                if (
+                    page % Math.floor(numPlaylistPages / 4) === 1 ||
+                    page === numPlaylistPages ||
+                    page === 1
+                ) {
+                    logger.info(
+                        `${logHeader} | Calling Youtube API ${page}/${numPlaylistPages} for playlist`,
+                    );
+                }
+
+                // eslint-disable-next-line no-await-in-loop
+                const resp: youtube_v3.Schema$PlaylistItemListResponse = (
+                    await client.playlistItems.list({
+                        part: ["snippet"],
+                        playlistId,
+                        pageToken,
+                        maxResults: 50,
+                    })
+                ).data;
+
+                songs.push(
+                    // eslint-disable-next-line no-unsafe-optional-chaining
+                    ...resp.items!.map((x) => ({
+                        title: x.snippet?.title as string,
+                        videoId: x.snippet?.resourceId?.videoId as string,
+                    })),
+                );
+
+                pageToken = resp.nextPageToken;
+                if (!pageToken) break;
+            }
+
+            const youtubePlaylistVideoIDs: string[] = songs.map(
+                (x) => x.videoId,
+            );
+
+            matchedSongs = await dbContext.kmq
+                .selectFrom("available_songs")
+                .select(SongSelector.QueriedSongFields)
+                .where("link", "in", youtubePlaylistVideoIDs)
+                .execute();
+
+            unmatchedSongs = youtubePlaylistVideoIDs.filter(
+                (x) => !matchedSongs.map((y) => y.youtubeLink).includes(x),
+            );
+        }
+
+        metadata.matchedSongsLength = matchedSongs.length;
+
+        const playlist: MatchedPlaylist = {
+            matchedSongs,
+            metadata,
+            truncated,
+            unmatchedSongs: [],
+        };
+
+        this.cachedPlaylists[playlistId] = playlist;
+        return playlist;
+    };
+
+    getMatchedSongs = async (
+        guildID: string,
+        kmqPlaylistIdentifier: string,
+        forceRefreshMetadata: boolean,
+        messageContext?: MessageContext,
+        interaction?: Eris.CommandInteraction,
+    ): Promise<MatchedPlaylist> => {
+        const kmqPlaylistParsed = SpotifyCommand.parseKmqPlaylistIdentifier(
+            kmqPlaylistIdentifier,
+        );
+
+        const playlistId = kmqPlaylistParsed.playlistId;
+
+        const UNMATCHED_PLAYLIST = {
+            metadata: {
+                playlistId,
+                playlistName: "",
+                playlistLength: 0,
+                matchedSongsLength: 0,
+                limit: 0,
+                snapshotID: "",
+                thumbnailUrl: null,
+            },
+            matchedSongs: [],
+            truncated: false,
+            unmatchedSongs: [],
+        };
+
+        let logHeader: string;
+        if (messageContext || interaction) {
+            logHeader = `${getDebugLogHeader(
+                (messageContext || interaction)!,
+            )}, playlistID = ${playlistId}`;
+        } else {
+            logHeader = `guildID = ${guildID}. playlistID = ${playlistId}`;
+        }
+
+        if (this.isParseInProgress(guildID)) {
+            if (messageContext) {
+                logger.warn(
+                    `${logHeader} | Skipping parsing due to another parse in progress`,
+                );
+
+                await sendErrorMessage(
+                    messageContext,
+                    {
+                        title: i18n.translate(
+                            messageContext.guildID,
+                            "command.spotify.parsingAlreadyInProgress.title",
+                        ),
+                        description: i18n.translate(
+                            messageContext.guildID,
+                            "command.spotify.parsingAlreadyInProgress.description",
+                        ),
+                    },
+                    interaction,
+                );
+            }
+
+            return UNMATCHED_PLAYLIST;
+        }
+
+        return kmqPlaylistParsed.isSpotify
+            ? this.getMatchedSpotifySongs(
+                  guildID,
+                  playlistId,
+                  forceRefreshMetadata,
+                  messageContext,
+                  interaction,
+              )
+            : this.getMatchedYoutubeSongs(
+                  guildID,
+                  playlistId,
+                  forceRefreshMetadata,
+                  messageContext,
+                  interaction,
+              );
+    };
+
+    /**
+     * @param guildID - The guild to retrieve songs for
+     * @param playlistId - The playlist to retrieve songs from
+     * @param forceRefreshMetadata - Whether to request new metadata
+     * @param messageContext - The message context
+     * @param interaction - The interaction
+     */
+    getMatchedSpotifySongs = async (
+        guildID: string,
+        playlistId: string,
+        forceRefreshMetadata: boolean,
+        messageContext?: MessageContext,
+        interaction?: Eris.CommandInteraction,
+    ): Promise<MatchedPlaylist> => {
+        const UNMATCHED_PLAYLIST = {
+            metadata: {
+                playlistId,
+                playlistName: "",
+                playlistLength: 0,
+                matchedSongsLength: 0,
+                limit: 0,
+                snapshotID: "",
+                thumbnailUrl: null,
+            },
+            matchedSongs: [],
+            truncated: false,
+            unmatchedSongs: [],
+        };
+
+        let logHeader: string;
+        if (messageContext || interaction) {
+            logHeader = `${getDebugLogHeader(
+                (messageContext || interaction)!,
+            )}, playlistID = ${playlistId}`;
+        } else {
+            logHeader = `guildID = ${guildID}. playlistID = ${playlistId}`;
         }
 
         if (
@@ -109,10 +324,10 @@ export default class SpotifyManager {
             return UNMATCHED_PLAYLIST;
         }
 
-        const cachedPlaylist = this.cachedPlaylists[playlistID];
+        const cachedPlaylist = this.cachedPlaylists[playlistId];
         let metadata: PlaylistMetadata | null;
         if (forceRefreshMetadata || !cachedPlaylist) {
-            metadata = await this.getPlaylistMetadata(playlistID);
+            metadata = await this.getSpotifyPlaylistMetadata(playlistId);
             logger.info(
                 `${logHeader} | Refreshing Spotify metadata. forceRefreshMetadata: ${forceRefreshMetadata}, cachedPlaylist: ${!!cachedPlaylist}`,
             );
@@ -175,7 +390,7 @@ export default class SpotifyManager {
 
             const requestURLs = [...Array(numPlaylistPages).keys()].map(
                 (n) =>
-                    `${BASE_URL}/playlists/${playlistID}/tracks?${encodeURI(
+                    `${BASE_URL}/playlists/${playlistId}/tracks?${encodeURI(
                         `market=US&fields=items(track(name,artists(name))),next&limit=${
                             metadata!.limit
                         }&offset=${n * metadata!.limit}`,
@@ -330,7 +545,7 @@ export default class SpotifyManager {
                 const playlistUnmatchedSongsPath = path.resolve(
                     __dirname,
                     SPOTIFY_PLAYLIST_UNMATCHED_SONGS_DIR,
-                    `${playlistID}-${standardDateFormat(new Date())}.txt`,
+                    `${playlistId}-${standardDateFormat(new Date())}.txt`,
                 );
 
                 await fs.promises.writeFile(
@@ -343,7 +558,7 @@ export default class SpotifyManager {
                 await fs.promises.writeFile(
                     path.resolve(
                         SPOTIFY_PLAYLIST_UNMATCHED_SONGS_DIR,
-                        `${playlistID}-${standardDateFormat(
+                        `${playlistId}-${standardDateFormat(
                             new Date(),
                         )}.matched.txt`,
                     ),
@@ -358,7 +573,7 @@ export default class SpotifyManager {
         matchedSongs = _.uniqBy(matchedSongs, "youtubeLink");
         unmatchedSongs = _.uniq(unmatchedSongs);
 
-        this.cachedPlaylists[playlistID] = {
+        this.cachedPlaylists[playlistId] = {
             metadata,
             matchedSongs,
             truncated,
@@ -669,10 +884,53 @@ export default class SpotifyManager {
         }
     };
 
-    private async getPlaylistMetadata(
-        playlistID: string,
+    private async getYoutubePlaylistMetadata(
+        playlistId: string,
     ): Promise<PlaylistMetadata | null> {
-        const requestURL = `${BASE_URL}/playlists/${playlistID}`;
+        const client = new youtube_v3.Youtube({
+            auth: process.env.YOUTUBE_API_KEY,
+        });
+
+        const response = (
+            await client.playlists.list({
+                part: ["snippet", "contentDetails"],
+                id: [playlistId],
+            })
+        ).data;
+
+        logger.info(`${playlistId} | ${JSON.stringify(response)}`);
+        if (!response.items) {
+            logger.error(
+                `Unable to fetch playlist metadata for ${playlistId}. resp = ${JSON.stringify(
+                    response,
+                )}`,
+            );
+        }
+
+        const playlistName = response.items![0].snippet?.title as string;
+        const snapshotID = response.etag as string;
+        const thumbnailUrl = response.items![0].snippet?.thumbnails?.default
+            ?.url as string;
+
+        const limit = response.pageInfo?.resultsPerPage as number;
+        const songCount = response.items![0].contentDetails
+            ?.itemCount as number;
+
+        return {
+            playlistId,
+            playlistName,
+            thumbnailUrl,
+            snapshotID,
+            limit,
+            playlistLength: songCount,
+            matchedSongsLength: 0,
+        };
+    }
+
+    private async getSpotifyPlaylistMetadata(
+        playlistId: string,
+    ): Promise<PlaylistMetadata | null> {
+        const requestURL = `${BASE_URL}/playlists/${playlistId}`;
 
         try {
             const response = (
@@ -695,7 +953,7 @@ export default class SpotifyManager {
             const songCount = response.tracks.total;
 
             return {
-                playlistID,
+                playlistId,
                 playlistName,
                 thumbnailUrl,
                 snapshotID,

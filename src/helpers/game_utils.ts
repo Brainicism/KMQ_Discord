@@ -62,7 +62,7 @@ export async function getAvailableSongCount(
     countBeforeLimit: number | undefined;
 }> {
     try {
-        if (guildPreference.isSpotifyPlaylist()) {
+        if (guildPreference.isPlaylist()) {
             const playlistID = guildPreference.getSpotifyPlaylistID()!;
             const session =
                 State.gameSessions[guildPreference.guildID] ??

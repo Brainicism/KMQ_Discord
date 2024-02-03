@@ -804,6 +804,7 @@
             "preset": "Preset",
             "reset": "{{presetOrOption}} Reset",
             "spotify": "Now playing {{songCount}} songs from Spotify with the following options:",
+            "youtube": "Now playing {{songCount}} songs from Youtube with the following options:",
             "timer": "{{timerInSeconds}} sec",
             "title": "Options",
             "updated": "{{presetOrOption}} Updated"

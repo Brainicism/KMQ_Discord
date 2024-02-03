@@ -11,6 +11,7 @@ import {
     PERMISSIONS_LINK,
     PROFILE_COMMAND_NAME,
     SPOTIFY_BASE_URL,
+    YOUTUBE_PLAYLIST_BASE_URL,
 } from "../constants";
 import {
     ConflictingGameOptions,
@@ -48,6 +49,7 @@ import GameOption from "../enums/game_option_name";
 import GameType from "../enums/game_type";
 import LocaleType from "../enums/locale_type";
 import MessageContext from "../structures/message_context";
+import SpotifyCommand from "../commands/game_options/spotify";
 import State from "../state";
 import _ from "lodash";
 import axios from "axios";
@@ -774,21 +776,30 @@ export async function generateOptionsMessage(
     const optionStrings: { [option: string]: string | null } = {};
 
     const gameOptions = guildPreference.gameOptions;
-    const spotifyPlaylistID = gameOptions.spotifyPlaylistID;
+    const kmqPlaylistIdentifier = gameOptions.spotifyPlaylistID;
     let thumbnailUrl: string | undefined;
 
-    if (spotifyPlaylistID) {
-        const matchedPlaylist =
-            await State.spotifyManager.getMatchedSpotifySongs(
-                guildID,
-                spotifyPlaylistID,
-                false,
-                messageContext,
-                interaction,
-            );
+    if (kmqPlaylistIdentifier) {
+        const matchedPlaylist = await State.spotifyManager.getMatchedSongs(
+            guildID,
+            kmqPlaylistIdentifier,
+            false,
+            messageContext,
+            interaction,
+        );
+
+        const kmqPlaylistParsed = SpotifyCommand.parseKmqPlaylistIdentifier(
+            kmqPlaylistIdentifier,
+        );
+
+        const playlistUrl = `${
+            kmqPlaylistParsed.isSpotify
+                ? SPOTIFY_BASE_URL
+                : YOUTUBE_PLAYLIST_BASE_URL
+        }${kmqPlaylistParsed.playlistId}`;
 
         optionStrings[GameOption.SPOTIFY_PLAYLIST_ID] =
-            `[${matchedPlaylist.metadata.playlistName}](${SPOTIFY_BASE_URL}${spotifyPlaylistID})`;
+            `[${matchedPlaylist.metadata.playlistName}](${playlistUrl})`;
 
         thumbnailUrl = matchedPlaylist.metadata.thumbnailUrl ?? undefined;
     } else {
@@ -952,8 +963,8 @@ export async function generateOptionsMessage(
     }
 
     // Special case: Options that rely on modifying queried songs are disabled when playing from Spotify
-    const isSpotify = guildPreference.isSpotifyPlaylist();
-    if (isSpotify) {
+    const isPlaylist = guildPreference.isPlaylist();
+    if (isPlaylist) {
         const disabledOptions = [
             GameOption.LIMIT,
             GameOption.GROUPS,
@@ -975,7 +986,7 @@ export async function generateOptionsMessage(
     }
 
     let optionsOverview: string;
-    if (!isSpotify) {
+    if (!isPlaylist) {
         optionsOverview = i18n.translate(
             messageContext.guildID,
             "command.options.overview",
@@ -987,9 +998,15 @@ export async function generateOptionsMessage(
             },
         );
     } else {
+        const kmqPlaylistParsed = SpotifyCommand.parseKmqPlaylistIdentifier(
+            guildPreference.getSpotifyPlaylistID() as string,
+        );
+
         optionsOverview = i18n.translate(
             messageContext.guildID,
-            "command.options.spotify",
+            kmqPlaylistParsed.isSpotify
+                ? "command.options.spotify"
+                : "command.options.youtube",
             {
                 songCount: bold(limit),
             },
@@ -1014,7 +1031,7 @@ export async function generateOptionsMessage(
         .filter((option) => !PriorityGameOption.includes(option as GameOption));
 
     // Remove priority options; emplace /spotify / /answer at the start of options
-    if (isSpotify) {
+    if (isPlaylist) {
         priorityOptions = "";
         if (!session?.isListeningSession()) {
             fieldOptions.unshift(GameOption.ANSWER_TYPE);
