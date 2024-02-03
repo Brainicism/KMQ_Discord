@@ -149,11 +149,11 @@ export default class SpotifyManager {
                     {
                         title: i18n.translate(
                             messageContext.guildID,
-                            "command.spotify.parsingAlreadyInProgress.title",
+                            "command.playlist.parsingAlreadyInProgress.title",
                         ),
                         description: i18n.translate(
                             messageContext.guildID,
-                            "command.spotify.parsingAlreadyInProgress.description",
+                            "command.playlist.parsingAlreadyInProgress.description",
                         ),
                     },
                     interaction,
@@ -260,7 +260,10 @@ export default class SpotifyManager {
         let page = 0;
         const numPlaylistPages = Math.ceil(metadata.playlistLength / 50);
 
-        const parsingTitle = i18n.translate(guildID, "command.spotify.parsing");
+        const parsingTitle = i18n.translate(
+            guildID,
+            "command.playlist.parsing",
+        );
 
         let message: Eris.Message | null = null;
         if (interaction?.acknowledged) {
@@ -547,7 +550,10 @@ export default class SpotifyManager {
             `${logHeader} | Starting to parse playlist, number of songs: ${spotifySongs.length}`,
         );
 
-        const parsingTitle = i18n.translate(guildID, "command.spotify.parsing");
+        const parsingTitle = i18n.translate(
+            guildID,
+            "command.playlist.parsing",
+        );
 
         let message: Eris.Message | null = null;
         if (interaction?.acknowledged) {

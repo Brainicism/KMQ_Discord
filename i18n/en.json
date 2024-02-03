@@ -1188,7 +1188,7 @@
                 "special": "The type of modification to make on each song"
             }
         },
-        "spotify": {
+        "playlist": {
             "fileFormat": {
                 "matched": "Matched songs for \"{{playlistName}}\":\n{{matchedSongs}}",
                 "unmatched": "Unmatched songs for \"{{playlistName}}\":\n{{unmatchedSongs}}"
@@ -1204,7 +1204,7 @@
                     "matchesLink": "Whether to show the YouTube URL to matched songs",
                     "playlistURL": "The playlist to retrieve songs from"
                 },
-                "name": "spotify"
+                "name": "playlist"
             },
             "invalidURL": {
                 "description": "The link to the playlist is invalid. Use `Share > Copy Link to Playlist` in Spotify to retrieve a valid link.",
@@ -1227,6 +1227,11 @@
             "parsingAlreadyInProgress": {
                 "description": "Please wait for the current playlist to finish loading before starting a new one.",
                 "title": "Already Loading Playlist"
+            }
+        },
+        "spotify": {
+            "help": {
+                "name": "spotify2"
             }
         },
         "stats": {

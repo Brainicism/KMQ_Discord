@@ -2109,19 +2109,6 @@ export const updateAppCommands = async (
                     command.slashCommands() as Array<Eris.ChatInputApplicationCommandStructure>;
 
                 for (const cmd of commands) {
-                    if (!cmd.name) {
-                        if (!i18n.hasKey(`command.${commandName}.help.name`)) {
-                            throw new Error(
-                                `Missing slash command name: command.${commandName}.help.name`,
-                            );
-                        }
-
-                        cmd.name = i18n.translate(
-                            LocaleType.EN,
-                            `command.${commandName}.help.name`,
-                        );
-                    }
-
                     cmd.nameLocalizations =
                         cmd.nameLocalizations ??
                         Object.values(LocaleType)
@@ -2173,6 +2160,39 @@ export const updateAppCommands = async (
                                     {},
                                 );
                         }
+                    }
+
+                    if (!cmd.name) {
+                        if (!i18n.hasKey(`command.${commandName}.help.name`)) {
+                            throw new Error(
+                                `Missing slash command name: command.${commandName}.help.name`,
+                            );
+                        }
+
+                        cmd.name = i18n.translate(
+                            LocaleType.EN,
+                            `command.${commandName}.help.name`,
+                        );
+                    }
+
+                    if (command.slashCommandAlias) {
+                        const aliasedCmd = structuredClone(cmd);
+
+                        if (
+                            !i18n.hasKey(
+                                `command.${command.slashCommandAlias}.help.name`,
+                            )
+                        ) {
+                            throw new Error(
+                                `Missing slash command name: command.${command.slashCommandAlias}.help.name`,
+                            );
+                        }
+
+                        aliasedCmd.name = i18n.translate(
+                            LocaleType.EN,
+                            `command.${command.slashCommandAlias}.help.name`,
+                        );
+                        commandStructures.push(aliasedCmd);
                     }
 
                     commandStructures.push(cmd);

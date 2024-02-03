@@ -9,12 +9,14 @@ const logger = new IPCLogger("kmq_client");
 
 export default class KmqClient extends Eris.Client {
     public commands: { [commandName: string]: BaseCommand };
+    public commandsHandlers: { [commandName: string]: BaseCommand };
     public aliases: { [aliasName: string]: BaseCommand };
 
     constructor(token: string, options: Eris.ClientOptions) {
         super(token, options);
         logger.info("Starting KMQ Client");
         this.commands = {};
+        this.commandsHandlers = {};
         this.aliases = {};
         this.registerCommands(true);
     }
@@ -131,6 +133,12 @@ export default class KmqClient extends Eris.Client {
         }
 
         this.commands[commandName] = command;
+        this.commandsHandlers[commandName] = command;
+
+        if (command.slashCommandAlias) {
+            this.commandsHandlers[command.slashCommandAlias] = command;
+        }
+
         return true;
     }
 }
