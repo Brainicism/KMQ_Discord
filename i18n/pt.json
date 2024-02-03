@@ -1,0 +1,1632 @@
+{
+    "10th": "10º",
+    "11th": "11º",
+    "12th": "12º",
+    "13th": "13º",
+    "14th": "14º",
+    "15th": "15º",
+    "16th": "16º",
+    "17th": "17º",
+    "18th": "18º",
+    "19th": "19º",
+    "1st": "1º",
+    "20th": "20º",
+    "21st": "21º",
+    "22nd": "22º",
+    "23rd": "23º",
+    "24th": "24º",
+    "25th": "25º",
+    "2nd": "2º",
+    "3rd": "3º",
+    "4th": "4º",
+    "5th": "5º",
+    "6th": "6º",
+    "7th": "7º",
+    "8th": "8º",
+    "9th": "9º",
+    "command": {
+        "add": {
+            "failure": {
+                "unrecognizedGroups": {
+                    "added": "adicionado"
+                }
+            },
+            "help": {
+                "description": "Adiciona um ou mais grupos para as opções {{groups}}, {{exclude}} ou {{include}} atuais.",
+                "example": {
+                    "exclude": "Adiciona {{groupOne}}, {{groupTwo}} e {{groupThree}} para a opção {{exclude}} atual",
+                    "groups": "Adiciona {{groupOne}} e {{groupTwo}} para a opção {{groups}} atual",
+                    "include": "Adiciona {{groupOne}} para a opção {{include}} atual"
+                },
+                "name": "adicionar"
+            }
+        },
+        "answer": {
+            "help": {
+                "description": "Escolha como responder: digitando sua resposta ou por meio de múltipla escolha. As opções são as seguintes: `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}` e `{{hard}}`",
+                "example": {
+                    "multipleChoice": "Clique no botão de {{optionCount}} opções de múltipla escolha para adivinhar. A penalidade {{penalty}} EXP será aplicada",
+                    "typing": "Digite sua resposta no chat para adivinhar",
+                    "typingTypos": "Digite sua resposta no chat para adivinhar. Pequenos erros de digitação serão marcados como corretos. A penalidade {{penalty}} EXP será aplicada"
+                },
+                "interaction": {
+                    "answerOption": "Como responder no jogo",
+                    "description": "Escolha como responder: digitando sua resposta ou por meio de múltipla escolha"
+                },
+                "name": "responder"
+            }
+        },
+        "artisttype": {
+            "help": {
+                "description": "Escolha se deseja ouvir solistas, grupos ou ambos. As opções são as seguintes: {{soloists}}, {{groups}} e {{both}}.",
+                "example": {
+                    "both": "Reproduz músicas de solistas e grupos",
+                    "groups": "Reproduzir músicas apenas de grupos",
+                    "reset": "Redefine a opção de tipo de artista",
+                    "soloists": "Reproduzir músicas apenas de solistas"
+                },
+                "interaction": {
+                    "artistTypeOption": "O tipo de artista de quem reproduzir músicas",
+                    "description": "Escolha se deseja ouvir solistas, grupos ou ambos"
+                },
+                "name": "artisttype"
+            }
+        },
+        "begin": {
+            "ignored": {
+                "noTeam": {
+                    "description": "Crie uma equipe usando {{join}} team_name:[nome da equipe] antes de poder iniciar o jogo."
+                },
+                "title": "Iniciar ignorados"
+            }
+        },
+        "botnews": {
+            "help": {
+                "description": "Exibe as últimas atualizações do KMQ.",
+                "name": "botnews"
+            },
+            "updates": {
+                "footer": "Entre no servidor oficial do KMQ para atualizações mais detalhadas!",
+                "title": "Atualizações"
+            }
+        },
+        "cutoff": {
+            "failure": {
+                "invalidEndYear": {
+                    "description": "O ano final deve ser posterior ou igual ao ano inicial.",
+                    "title": "Ano final inválido"
+                }
+            },
+            "help": {
+                "description": "Defina um intervalo de anos de corte para músicas. Se um valor for especificado, apenas músicas APÓS esse ano serão reproduzidas. Se dois valores forem especificados, somente músicas ENTRE esses dois anos serão reproduzidas.",
+                "example": {
+                    "reset": "Redefinir para o corte padrão de {{defaultBeginningSearchYear}} para {{defaultEndSearchYear}}",
+                    "singleCutoff": "Reproduzir músicas lançadas depois do ano {{year}}",
+                    "twoCutoffs": "Reproduzir músicas lançadas entre os anos {{beginningYear}}-{{endingYear}}"
+                },
+                "interaction": {
+                    "beginningYear": "O primeiro ano a ser incluído",
+                    "description": "Definir um intervalo de anos de corte para músicas",
+                    "earliestOption": "Selecionar músicas para cada ano a partir de [beginning_year]",
+                    "endingYear": "O último ano a ser incluído",
+                    "rangeOption": "Selecionar músicas para cada ano entre [beginning_year] e [ending_year]"
+                },
+                "name": "corte"
+            }
+        },
+        "debug": {
+            "description": "Se um desenvolvedor de bot pediu que você fizesse isso, envie a eles isto:\n{{debugID}}",
+            "title": "Detalhes de depuração enviados!"
+        },
+        "duration": {
+            "failure": {
+                "removingDuration": {
+                    "notSet": {
+                        "description": "A duração não está definida atualmente."
+                    },
+                    "title": "Erro ao remover duração",
+                    "tooShort": {
+                        "description": "A duração não pode ser inferior a 2 minutos."
+                    }
+                }
+            },
+            "help": {
+                "description": "Define uma duração máxima para o jogo KMQ em minutos.",
+                "example": {
+                    "decrement": "Remove {{duration}} minutos da duração do jogo atual",
+                    "increment": "Adicione {{duration}} minutos à duração do jogo atual",
+                    "reset": "Desabilita a duração",
+                    "set": "O jogo terminará automaticamente após {{duration}} minutos"
+                },
+                "name": "duração",
+                "usage": {
+                    "minutes": "minutos"
+                }
+            },
+            "interaction": {
+                "durationAdd": "Quantos minutos adicionar à duração",
+                "durationRemove": "Quantos minutos remover da duração",
+                "durationSet": "Quantos minutos jogar KMQ antes de encerrar o jogo"
+            }
+        },
+        "end": {
+            "help": {
+                "description": "Conclui o jogo atual e decide um vencedor.",
+                "name": "fim"
+            },
+            "interaction": {
+                "description": "Espero que você tenha se divertido!",
+                "title": "Encerramento do jogo"
+            }
+        },
+        "exclude": {
+            "failure": {
+                "unrecognizedGroups": {
+                    "excluded": "excluído"
+                }
+            },
+            "help": {
+                "description": "Selecione quantos grupos deseja ignorar. Uma lista de nomes de grupos pode ser encontrada [aqui]({{groupList}}).",
+                "example": {
+                    "multipleGroups": "Ignorar músicas de {{groupOne}}, {{groupTwo}} e {{groupThree}}",
+                    "reset": "Redefine a opção de exclusão",
+                    "singleGroup": "Ignorar músicas de {{group}}"
+                },
+                "interaction": {
+                    "add": {
+                        "description": "Adicionar os grupos fornecidos à opção de jogo de exclusão",
+                        "perGroupDescription": "O {{ordinalNum}} grupo a ser adicionado"
+                    },
+                    "description": "Impedir a reprodução de músicas dos grupos fornecidos",
+                    "remove": {
+                        "description": "Remover os grupos fornecidos da opção de jogo de exclusão",
+                        "perGroupDescription": "O {{ordinalNum}} grupo para remover"
+                    },
+                    "reset": {
+                        "description": "Redefinir a opção de exclusão"
+                    },
+                    "set": {
+                        "description": "Excluir músicas dos grupos fornecidos nas opções do jogo",
+                        "perGroupDescription": "O {{ordinalNum}} grupo a excluir"
+                    }
+                },
+                "name": "excluir"
+            }
+        },
+        "exp": {
+            "activeModifiers": "🚀 Modificadores ativos 🚀",
+            "artistGroupGuessModePenalty": "Penalidade do modo de adivinhação de artista/grupo",
+            "bonusArtists": "Adivinhar músicas dos artistas de bônus diário",
+            "bonusArtistsTitle": "🎤 Artistas de bônus atuais 🎤",
+            "bonusDescription": "Você pode obter EXP de bônus para o seguinte",
+            "bonusTitle": "Formas de obter bônus de EXP",
+            "explanation": {
+                "bonusArtistGuess": "Adivinhar corretamente um artista de bônus",
+                "firstGameOfDay": "Primeiro jogo do dia",
+                "powerHour": "Jogar durante uma KMQ Power Hour ou no fim de semana",
+                "quickGuess": "Adivinhar rapidamente",
+                "rareGuess": "Bônus de adivinhações corretas raras",
+                "rareGuessRange": "{{rareGuessLowerBound}} até {{rareGuessUpperBound}}",
+                "streak": "Ter uma sequência de adivinhações de mais de 5",
+                "voting": "Votar"
+            },
+            "firstGameOfDayBonus": "Bônus do primeiro jogo do dia",
+            "help": {
+                "description": "Mostra seu modificador de EXP atual e a lista de artistas de bônus de EXP atuais.",
+                "name": "exp"
+            },
+            "lowSongCountPenalty": "Penalidade de contagem baixa de músicas",
+            "multipleChoicePenalty": "Penalidade de múltipla escolha",
+            "powerHourBonus": "Bônus de Power Hour",
+            "shuffleChronologicalPenalty": "Penalidade de embaralhamento cronológico",
+            "shufflePopularityPenalty": "Penalidade de popularidade do embaralhamento",
+            "shuffleWeightedEasyPenalty": "Penalidade fácil ponderada do embaralhamento",
+            "title": "Bônus de EXP",
+            "totalModifier": "Modificador total",
+            "typosAllowedPenalty": "Penalidade de erros de digitação permitidos",
+            "voteBonus": "Bônus de voto"
+        },
+        "feedback": {
+            "help": {
+                "description": "Envie quaisquer comentários ou relatórios de bugs sobre o KMQ",
+                "name": "comentários"
+            },
+            "questions": {
+                "improveKMQ": {
+                    "placeholder": "O KMQ é MUITO viciante. Minha família e amigos sentem minha falta.",
+                    "question": "O que pode ser melhorado no KMQ?"
+                },
+                "likeKMQ": {
+                    "placeholder": "O KMQ me ajuda a descobrir novas músicas e gêneros.",
+                    "question": "O que você gosta no KMQ?"
+                },
+                "title": "Feedback do KMQ"
+            }
+        },
+        "forcehint": {
+            "failure": {
+                "notOwner": {
+                    "description": "Somente o proprietário do jogo ({{mentionedUser}}) pode usar dicas forçadas."
+                }
+            },
+            "help": {
+                "description": "Receber uma dica sobre a música atual diretamente, sem a necessidade de votação.",
+                "name": "dicaforçada"
+            },
+            "hintIgnored": "Dica forçada ignorada"
+        },
+        "forceskip": {
+            "description": "O proprietário pulou a rodada forçadamente...",
+            "failure": {
+                "notOwner": {
+                    "description": "Somente o proprietário do jogo ({{mentionedUser}}) pode pular a música atual forçadamente."
+                }
+            },
+            "help": {
+                "description": "Pular a música atual diretamente, sem a necessidade de votação.",
+                "name": "pularforçado"
+            },
+            "skipIgnored": "Pular forçado ignorado"
+        },
+        "gender": {
+            "help": {
+                "description": "Escolha o gênero dos artistas que você gostaria de ouvir. As opções são as seguintes: {{male}}, {{female}} e {{coed}}. Além disso, use {{genderAlternating}} para alternar entre artistas masculinos e femininos a cada rodada.",
+                "example": {
+                    "alternating": "Alternar entre artistas masculinos e femininos a cada rodada",
+                    "coed": "Reproduzir músicas apenas de grupos mistos (grupos com membros masculinos e femininos)",
+                    "female": "Reproduzir músicas apenas de artistas femininas",
+                    "maleFemale": "Reproduzir músicas de artistas masculinos e femininos",
+                    "reset": "Redefinir para os gêneros padrão masculino, feminino e misto"
+                },
+                "interaction": {
+                    "description": "Escolha o gênero dos artistas que você gostaria de ouvir.",
+                    "gender": "O gênero dos membros do grupo ou do solista"
+                },
+                "name": "gênero"
+            },
+            "warning": {
+                "gameOption": {
+                    "description": "Com apenas um grupo escolhido, o comando {{alternatingGenderCommand}} pode não se comportar como esperado. Considere incluir mais grupos para alternar corretamente os gêneros.",
+                    "title": "Alerta de opções do jogo"
+                }
+            }
+        },
+        "goal": {
+            "failure": {
+                "gameOptionConflict": {
+                    "description": "Um jogo {{elimination}} está em andamento. {{goal}} e {{elimination}} são incompatíveis. Jogue um jogo {{classic}} ou {{teams}} para usar {{goal}}."
+                },
+                "goalExceeded": {
+                    "description": "A meta fornecida ultrapassa a pontuação mais alta. Aumente sua meta ou inicie um novo jogo.",
+                    "title": "Erro ao aplicar a meta"
+                }
+            },
+            "help": {
+                "description": "Quando o jogador com mais pontos atingir a meta, o jogo termina. Chamá-lo sem argumentos desativa a meta. Se um jogo estiver em andamento, a meta deve exceder a pontuação mais alta.",
+                "example": {
+                    "reset": "Desabilita a meta",
+                    "set": "O primeiro jogador a atingir {{goal}} ganha o jogo"
+                },
+                "interaction": {
+                    "description": "Quando o jogador com mais pontos atingir a meta, o jogo termina.",
+                    "score": "O número de pontos necessários para vencer"
+                },
+                "name": "meta",
+                "usage": {
+                    "points": "pontos"
+                }
+            }
+        },
+        "groups": {
+            "help": {
+                "description": "Selecione quantos grupos deseja ouvir. Uma lista de nomes de grupos pode ser encontrada [aqui]({{groupList}}).",
+                "example": {
+                    "multipleGroups": "Reproduz músicas apenas de {{groupOne}}, {{groupTwo}} e {{groupThree}}",
+                    "reset": "Redefine a opção de grupos",
+                    "singleGroup": "Reproduz músicas apenas de {{group}}"
+                },
+                "interaction": {
+                    "add": {
+                        "description": "Adicionar os grupos fornecidos às opções do jogo",
+                        "perGroupDescription": "O {{ordinalNum}} grupo a ser adicionado"
+                    },
+                    "description": "Selecionar artistas para tocar exclusivamente",
+                    "remove": {
+                        "description": "Remover os grupos fornecidos das opções do jogo",
+                        "perGroupDescription": "O {{ordinalNum}} grupo a ser removido"
+                    },
+                    "reset": {
+                        "description": "Redefinir a opção de grupos"
+                    },
+                    "set": {
+                        "description": "Reproduzir músicas dos grupos fornecidos",
+                        "perGroupDescription": "O {{ordinalNum}} grupo do qual reproduzir músicas"
+                    }
+                },
+                "name": "grupos"
+            }
+        },
+        "guess": {
+            "help": {
+                "description": "Envie sua resposta para a música atual durante /play hidden.",
+                "example": {
+                    "song": "Use {{name}} como chute para a música atual"
+                },
+                "name": "chutar"
+            },
+            "interaction": {
+                "failure": {
+                    "notHidden": {
+                        "description": "{{guessCommand}} só pode ser usado durante {{playHiddenCommand}}.",
+                        "title": "Chute ignorado"
+                    }
+                },
+                "guessReceived": {
+                    "description": "Você chutou {{guess}}",
+                    "title": "Chute recebido"
+                },
+                "name": "Seu melhor palpite para a música atual"
+            }
+        },
+        "guessmode": {
+            "help": {
+                "description": "Escolha se deseja adivinhar pelo título da música, nome do artista ou ambos.",
+                "example": {
+                    "artist": "Digite o nome correto do artista para ganhar uma rodada do jogo",
+                    "both": "Digite o nome correto do artista (0,2 pontos) ou o nome da música (1 ponto) para ganhar uma rodada do jogo",
+                    "reset": "Redefinir para o modo de adivinhação padrão de {{defaultGuessMode}}",
+                    "song": "Digite o nome correto da música para ganhar uma rodada do jogo"
+                },
+                "name": "modochute"
+            },
+            "interaction": {
+                "guessMode": "O que é considerado um chute válido"
+            }
+        },
+        "help": {
+            "command": "comando",
+            "description": "Digite {{play}} no chat e o bot tocará uma música k-pop aleatória em VC. O objetivo deste jogo é ser a primeira pessoa a adivinhar o nome da música no chat.\nVeja suas opções atuais de jogo com {{options}}. Use {{help}} action:`[{{command}}]` para obter mais detalhes",
+            "examples": "Exemplos",
+            "failure": {
+                "noDocs": "Desculpe, não há documentação sobre {{action}}."
+            },
+            "help": {
+                "description": "Obtenha ajuda com a funcionalidade do bot.",
+                "example": {
+                    "allCommands": "Mostra todos os comandos disponíveis e uma breve descrição",
+                    "sampleCommand": "Mostra uma descrição detalhada para o comando _cutoff_"
+                },
+                "name": "ajuda"
+            },
+            "interaction": {
+                "action": "O nome de um comando para obter documentação."
+            },
+            "title": "Ajuda de comando do {{kmq}}"
+        },
+        "hint": {
+            "artistName": "Nome do artista",
+            "failure": {
+                "invalidHintRequest": {
+                    "eliminated": {
+                        "description": "Somente jogadores vivos podem solicitar dicas."
+                    },
+                    "multipleChoice": {
+                        "description": "Você não pode solicitar dicas enquanto joga múltipla escolha."
+                    },
+                    "noSongPlaying": {
+                        "description": "Uma dica pode ser solicitada apenas quando uma música está tocando."
+                    },
+                    "title": "Solicitação de dica inválida"
+                }
+            },
+            "help": {
+                "description": "Dá uma dica sobre a música que está sendo tocada atualmente.",
+                "name": "dica"
+            },
+            "request": {
+                "description": "{{hintCounter}} solicitações de dicas recebidas.",
+                "title": "Solicitação de dica"
+            },
+            "songName": "Nome da música",
+            "title": "Dica"
+        },
+        "include": {
+            "failure": {
+                "unrecognizedGroups": {
+                    "included": "incluído"
+                }
+            },
+            "help": {
+                "description": "Selecione quantos grupos desejar incluir à força, ignorando outros filtros ({{gender}}, {{artisttype}} etc.). Uma lista de nomes de grupos pode ser encontrada [aqui]({{groupList}}).",
+                "example": {
+                    "multipleGroups": "Forçar inclusão das músicas de {{groupOne}}, {{groupTwo}} e {{groupThree}}",
+                    "reset": "Redefine a opção incluir",
+                    "singleGroup": "Forçar inclusão das músicas de {{group}}"
+                },
+                "interaction": {
+                    "add": {
+                        "description": "Adicionar os grupos fornecidos à opção de jogo incluir",
+                        "perGroupDescription": "O {{ordinalNum}} grupo a ser adicionado"
+                    },
+                    "description": "Selecionar artistas para incluir à força",
+                    "remove": {
+                        "description": "Remover os grupos fornecidos da opção de jogo incluir",
+                        "perGroupDescription": "O {{ordinalNum}} grupo a ser removido"
+                    },
+                    "reset": {
+                        "description": "Redefinir a opção incluir"
+                    },
+                    "set": {
+                        "description": "Incluir músicas dos grupos fornecidos nas opções de jogo",
+                        "perGroupDescription": "O {{ordinalNum}} grupo a ser incluído"
+                    }
+                },
+                "name": "incluir"
+            }
+        },
+        "join": {
+            "failure": {
+                "joinError": {
+                    "alreadyInTeam": {
+                        "description": "Você já é um membro desta equipe."
+                    },
+                    "badEmojis": {
+                        "description": "Você só pode incluir emojis que estão neste servidor."
+                    },
+                    "invalidCharacters": {
+                        "description": "O nome da sua equipe consiste apenas em caracteres inválidos."
+                    },
+                    "invalidTeamName": {
+                        "title": "Nome de equipe inválido"
+                    },
+                    "noTeamName": {
+                        "description": "Inclua um nome de equipe para criar uma equipe ou para ingressar naquela equipe se ela já existe ({{joinCommand}} [nome da equipe])"
+                    },
+                    "title": "Erro ao entrar"
+                }
+            },
+            "playerJoined": {
+                "title": "Jogador ingressou"
+            },
+            "playerJoinedTeam": {
+                "afterGameStart": {
+                    "description": "{{mentionedUser}} acha que tem condições para levar {{teamName}} à vitória!"
+                },
+                "beforeGameStart": {
+                    "description": "Quando todos tiverem entrado em uma equipe, {{beginCommand}} o jogo!"
+                },
+                "title": "{{joiningUser}} entrou em {{teamName}}"
+            },
+            "team": {
+                "join": "Para entrar em {{teamName}} com {{mentionedUser}}, digite {{joinCommand}} team_name:{{teamNameWithCleanEmojis}}.{{startGameInstructions}}",
+                "new": "Nova equipe criada",
+                "startGameInstructions": "\nComece o jogo com {{beginCommand}}."
+            }
+        },
+        "language": {
+            "help": {
+                "description": "Escolha se as músicas tocadas devem ser exclusivamente em coreano.",
+                "example": {
+                    "all": "Reproduzir todas as músicas disponíveis",
+                    "korean": "Toca somente músicas coreanas. Ignora músicas que estão em idiomas estrangeiros: inglês, japonês, chinês",
+                    "reset": "Redefine para o idioma padrão de {{defaultLanguage}}"
+                },
+                "name": "idioma"
+            },
+            "interaction": {
+                "language": "O idioma das músicas a serem tocadas."
+            }
+        },
+        "leaderboard": {
+            "duration": {
+                "allTime": "Geral",
+                "daily": "Diário",
+                "monthly": "Mensal",
+                "weekly": "Semanal",
+                "yearly": "Anual"
+            },
+            "enrolled": {
+                "description": "Seu nome agora está visível no quadro de líderes.",
+                "title": "Inscrição no quadro de líderes concluída."
+            },
+            "failure": {
+                "alreadyEnrolled": {
+                    "description": "Você já está visível no quadro de líderes. Se quiser atualizar seu nome de exibição, cancele a inscrição e inscreva-se novamente.",
+                    "title": "Jogador já inscrito"
+                },
+                "empty": {
+                    "description": "Ninguém ganhou EXP neste intervalo de tempo. Agora é sua chance de ir para o primeiro lugar!",
+                    "title": "Quadro de líderes vazio"
+                },
+                "game": {
+                    "noParticipants": {
+                        "description": "Alguém precisa pontuar antes que este comando funcione.",
+                        "title": "Nenhum participante"
+                    }
+                },
+                "outOfRange": {
+                    "description": "O quadro de líderes não vai tão longe.",
+                    "title": "😐"
+                }
+            },
+            "gamesPlayed": "{{gameCount}} jogos jogados",
+            "help": {
+                "description": "Visualizar o quadro de líderes do KMQ.",
+                "example": {
+                    "enroll": "Permite que seu nome seja exibido no quadro de líderes",
+                    "gameMonthlyPage": "Mostra a 2ª página do placar mensal contendo jogadores com pontos no jogo atual",
+                    "global": "Mostrar o quadro de líderes global",
+                    "globalPage": "Mostra a 3ª página do placar global",
+                    "globalWeeklyPage": "Mostra a 4ª página do quadro de líderes por EXP ganho nesta semana",
+                    "server": "Mostra o placar do servidor inteiro.",
+                    "serverSongsGuessedPage": "Mostra a 3a página do placar no servidor inteiro por canções adivinhadas no total",
+                    "unenroll": "Oculta seu nome do quadro de líderes"
+                },
+                "name": "quadro de líderes",
+                "usage": {
+                    "pageNumber": "page_number"
+                }
+            },
+            "interaction": {
+                "duration": "Escolha até que ponto no passado o quadro de líderes deve procurar",
+                "page": "Escolha qual página começar a mostrar a partir do quadro de líderes",
+                "scope": "Escolha quais jogadores incluir no placar",
+                "type": "Escolha o que define a ordem do placar"
+            },
+            "levelEntry": {
+                "permanent": "{{level}} {{formattedNumber}} ({{rankName}})",
+                "temporary": "{{formattedNumber}} {{levelPluralized}} ganho"
+            },
+            "quote": {
+                "name": "Quer que seu nome apareça no quadro de líderes? Veja {{command}}",
+                "nextPage": "Quer ver a próxima página do placar? Veja {{command}}"
+            },
+            "rankNumber": "Posição nº{{rank}}",
+            "resets": "Redefine {{timestamp}}",
+            "scope": {
+                "currentGame": "Do jogo atual",
+                "global": "Global",
+                "server": {
+                    "noName": "Do servidor",
+                    "withName": "De {{serverName}}"
+                }
+            },
+            "songsGuessed": "{{songsGuessed}} músicas adivinhadas",
+            "title": "{{leaderboardScope}} {{leaderboardDuration}} Classificação {{leaderboardType}}",
+            "type": {
+                "byGamesPlayed": "por jogos jogados",
+                "bySongsGuessed": "por músicas adivinhadas"
+            },
+            "unenrolled": {
+                "description": "Você não está mais visível no quadro de líderes.",
+                "title": "Cancelamento da inscrição no quadro de líderes concluído."
+            },
+            "validation": {
+                "firstArg": "Esperava-se um dos seguintes valores válidos para o primeiro argumento: (um número positivo, {{typeOrScopeOrDuration}})",
+                "secondArg": "Esperava-se um dos seguintes valores válidos para o segundo argumento: (um número positivo, {{argument}})",
+                "thirdArg": "Esperava-se um número positivo para o terceiro argumento"
+            }
+        },
+        "limit": {
+            "failure": {
+                "invalidLimit": {
+                    "greaterThanStart": {
+                        "description": "O limite final deve ser maior que o limite inicial."
+                    },
+                    "greaterThanZero": {
+                        "description": "O limite final deve ser maior que 0."
+                    },
+                    "title": "Limite final inválido"
+                }
+            },
+            "help": {
+                "description": "Defina um número máximo de resultados na consulta da música. Isso efetivamente define o \"Top X número de músicas\" com base nos filtros selecionados.",
+                "example": {
+                    "reset": "Redefinir para o limite padrão de {{defaultLimit}}",
+                    "singleLimit": "Reproduz as {{limit}} músicas mais ouvidas das opções selecionadas atualmente",
+                    "twoLimits": "Reproduz entre as músicas mais ouvidas de {{limitStart}} a {{limitEnd}} das opções selecionadas atualmente"
+                },
+                "interaction": {
+                    "description": "Defina um número máximo de resultados na consulta da música",
+                    "description_range": "Reproduzir entre as músicas [limit_start] e [limit_end].",
+                    "description_top": "Reproduzir as [limit] músicas principais.",
+                    "limit": "Ouvir esta quantidade das músicas principais",
+                    "limit_end": "Reproduzir músicas entre o limite inicial e este valor",
+                    "limit_start": "Das músicas mais ouvidas, comece a reproduzir a partir de [limit_start]"
+                },
+                "name": "limite"
+            }
+        },
+        "list": {
+            "currentValue": {
+                "nothingSelected": "Nada selecionado atualmente",
+                "title": "Valor atual de {{optionListed}}"
+            },
+            "failure": {
+                "groupsInFile": {
+                    "description": "Muitos grupos para listar em uma mensagem do Discord, veja o arquivo em anexo.",
+                    "noFilePermissions": {
+                        "description": "Muitos grupos para listar em uma mensagem do Discord. O bot precisa das permissões {{attachFile}} para enviar o arquivo da lista de grupos.",
+                        "title": "Erro ao enviar o arquivo"
+                    }
+                }
+            },
+            "help": {
+                "description": "Exibe os grupos selecionados atualmente para uma determinada opção de jogo.",
+                "example": {
+                    "exclude": "Lista as opções {{exclude}} atuais",
+                    "groups": "Lista as opções {{groups}} atuais",
+                    "include": "Lista as opções {{include}} atuais"
+                },
+                "name": "lista"
+            },
+            "interaction": {
+                "listType": "Quer sejam impressos os grupos atualmente definidos, grupos incluídos ou grupos excluídos"
+            }
+        },
+        "listen": {
+            "help": {
+                "description": "Transmitir músicas das opções atuais.",
+                "example": "A música começará a tocar no canal de voz atual.",
+                "name": "ouvir"
+            },
+            "musicStarting": "Música começando em #{{textChannelName}} em 🔊 {{voiceChannelName}}"
+        },
+        "locale": {
+            "help": {
+                "description": "Alterar o idioma do bot.",
+                "example": {
+                    "reset": "Redefinir o idioma do bot para {{defaultLocale}}",
+                    "toLanguage": "Alterar o idioma do bot para {{language}}"
+                },
+                "interaction": {
+                    "description": "Alterar o idioma do bot.",
+                    "language": "Idioma para o qual alterar"
+                },
+                "name": "configuração regional",
+                "usage": {
+                    "language": "idioma"
+                }
+            },
+            "language": {
+                "en": "Inglês",
+                "es-ES": "Espanhol",
+                "fr": "Francês",
+                "ja": "Japonês",
+                "ko": "Coreano",
+                "zh-CN": "Chinês"
+            },
+            "updatedDescription": "O idioma do bot foi atualizado para `{{language}}`."
+        },
+        "lookup": {
+            "help": {
+                "description": "Verificar se um determinado vídeo do YouTube está incluído no banco de dados do KMQ e nas opções atuais do jogo.",
+                "example": {
+                    "song": "Fornece informações sobre {{song}} por {{artist}}."
+                },
+                "interaction": {
+                    "byLink": {
+                        "description": "Encontrar uma música pelo link do YouTube",
+                        "field": "O link do YouTube da música"
+                    },
+                    "byName": {
+                        "description": "Filtrar músicas pelo nome e/ou artista",
+                        "field": {
+                            "artist": "O artista que fez a música",
+                            "song": "O nome da música"
+                        }
+                    }
+                },
+                "name": "pesquisar"
+            },
+            "inCurrentGameOptions": "Nas opções atuais do jogo?",
+            "inKMQ": "Esta música está incluída no KMQ! Aqui está o link para [Daisuki]({{link}}).",
+            "notFound": {
+                "description": "A música solicitada não foi encontrada na cópia do banco de dados Daisuki do KMQ; portanto, não está incluída no KMQ.",
+                "title": "Música não encontrada"
+            },
+            "notInKMQ": "Esta música tem uma entrada em [Daisuki]({{link}}), mas não está incluída no KMQ.",
+            "songNameSearchResult": {
+                "notFoundDescription": "Não foi possível encontrar nenhuma música com esse nome",
+                "successDescription": "As seguintes músicas estão disponíveis no KMQ:",
+                "title": "Resultados da pesquisa"
+            },
+            "validation": {
+                "invalidYouTubeID": "Esperava-se uma ID ou link válido do YouTube."
+            }
+        },
+        "multiguess": {
+            "help": {
+                "description": "Define se várias pessoas podem adivinhar uma música corretamente. Quando {{on}}, os jogadores terão 1,5 segundos após a primeira resposta correta ser dada, para continuar respondendo. A primeira resposta recebe EXP total, respostas corretas que vêm depois recebem multiplicativamente menos EXP.",
+                "example": {
+                    "off": "Apenas a primeira pessoa que adivinhar corretamente recebe o ponto",
+                    "on": "Permite um período de carência de 1,5 segundo a partir de quando ocorre a primeira adivinhação correta. Vários jogadores são capazes de adivinhar corretamente",
+                    "reset": "Redefinir para o tipo de adivinhação múltipla padrão de {{defaultMultiguess}}"
+                },
+                "interaction": {
+                    "description": "Define se várias pessoas podem adivinhar uma música corretamente",
+                    "multiguess": "Se várias pessoas podem adivinhar corretamente"
+                },
+                "name": "multiadivinhação"
+            }
+        },
+        "news": {
+            "disclaimer": "Este resumo foi gerado por IA e pode não ser preciso",
+            "error": {
+                "description": "Falha ao buscar as últimas notícias. Tente novamente mais tarde.",
+                "title": "Erro de notícias"
+            },
+            "help": {
+                "description": "Obtenha as últimas notícias de K-pop da internet!",
+                "example": {
+                    "get": "Veja uma visão geral das notícias de K-pop de hoje",
+                    "subscribe": "Receba uma atualização semanal de notícias neste canal de texto",
+                    "unsubscribe": "Pare de receber atualizações diárias de notícias neste canal de texto"
+                },
+                "interaction": {
+                    "daily": "Obtenha as notícias de K-pop de hoje",
+                    "monthly": "Obtenha as notícias de K-pop deste mês",
+                    "range": "O intervalo de tempo para ver as notícias",
+                    "subscribe": "Inscreva-se para receber atualizações de notícias neste canal de texto",
+                    "unsubscribe": "Pare de receber atualizações de notícias neste canal de texto",
+                    "weekly": "Obtenha as notícias de K-pop desta semana"
+                },
+                "name": "notícias"
+            },
+            "subscribe": {
+                "alreadySubscribed": {
+                    "description": "Você já está inscrito para atualizações de notícias em {{interval}} neste canal de texto.",
+                    "title": "Já inscrito"
+                },
+                "description": "Agora você receberá atualizações de notícias em {{interval}} neste canal de texto.",
+                "title": "Inscrito na rede de notícias Kimiqo"
+            },
+            "title": "Rede de notícias Kimiqo",
+            "unsubscribe": {
+                "description": "Você não receberá mais atualizações de notícias em {{interval}} neste canal de texto.",
+                "notSubscribed": {
+                    "description": "Você não está inscrito para atualizações de notícias em {{interval}} neste canal de texto.",
+                    "title": "Não inscrito"
+                },
+                "title": "Cancelou a inscrição da rede de notícias Kimiqo"
+            }
+        },
+        "options": {
+            "duration": "{{durationInMinutes}} min",
+            "help": {
+                "description": "Exibe as opções atuais do jogo.",
+                "name": "opções"
+            },
+            "listeningSessionNotAvailable": "Algumas opções não estão disponíveis durante uma sessão de escuta",
+            "notSet": "Não definido",
+            "overview": "Agora reproduzindo as {{limit}} principais de {{totalSongs}} músicas disponíveis das seguintes opções:",
+            "perCommandHelp": "Procurando informações sobre como usar um comando? Confira {{helpCommand}} action:[command] para saber mais.",
+            "preset": "Predefinição",
+            "reset": "{{presetOrOption}} Redefinido",
+            "spotify": "Agora reproduzindo {{songCount}} músicas do Spotify com as seguintes opções:",
+            "timer": "{{timerInSeconds}} seg",
+            "title": "Opções",
+            "updated": "{{presetOrOption}} Atualizado"
+        },
+        "ost": {
+            "help": {
+                "description": "Escolha se deseja incluir músicas OST.",
+                "example": {
+                    "exclude": "Excluir músicas OST",
+                    "exclusive": "Reproduzir exclusivamente músicas OST",
+                    "include": "Incluir músicas OST",
+                    "reset": "Redefinir para a opção padrão de {{defaultOst}}"
+                },
+                "name": "trilha sonora"
+            },
+            "interaction": {
+                "ost": "Se deseja incluir, reproduzir exclusivamente ou excluir músicas OST"
+            }
+        },
+        "play": {
+            "exp": {
+                "doubleExpForVoting": "receberá EXP em dobro por [votar]({{link}})!",
+                "howToVote": "Consulte {{vote}} para obter informações sobre como votar. Obrigado por apoiar o KMQ!",
+                "powerHour": "KMQ POWER HOUR ATIVO",
+                "weekend": "DUPLO EXP DE FIM DE SEMANA ATIVO"
+            },
+            "failure": {
+                "alreadyInSession": "Jogo já em execução",
+                "botRestarting": {
+                    "description": "O bot está reiniciando em {{timeUntilRestart}} minutos, aguarde até que o bot volte a funcionar!",
+                    "title": "Não é possível iniciar um novo jogo"
+                },
+                "hiddenGameMode": {
+                    "description": "Você não tem permissão para usar este comando.",
+                    "title": "Modo de jogo oculto"
+                },
+                "overrideTeams": {
+                    "description": "Se você queria iniciar um jogo {{oldGameType}}, {{end}} este jogo, chame {{playOldGameType}}, {{gameSpecificInstructions}} e, em seguida, chame {{begin}}.",
+                    "teams": {
+                        "join": "{{join}} team_name:[nome da equipe] uma equipe"
+                    },
+                    "title": "Ignorando {{playOldGameType}}"
+                }
+            },
+            "gameStarting": "Jogo começando em #{{textChannelName}} em 🔊 {{voiceChannelName}}",
+            "help": {
+                "description": "Inicia um jogo de KMQ.",
+                "example": {
+                    "classic": "Iniciar um jogo clássico de KMQ (digite seu palpite primeiro para ganhar um ponto)",
+                    "elimination": "Iniciar um jogo de eliminação de KMQ onde cada jogador começa com {{lives}} vidas",
+                    "hidden": "Iniciar um jogo oculto de KMQ, onde os jogadores só podem responder com /guess",
+                    "teams": "Divida-se em quantas equipes quiser e veja em quem você pode confiar para ajudá-lo a vencer!"
+                },
+                "interaction": {
+                    "lives": "Escolha com quantas vidas cada jogador começa"
+                },
+                "name": "jogar",
+                "usage": {
+                    "lives": "vidas"
+                }
+            },
+            "interaction": {
+                "teams_begin": "Inicia um modo de jogo 'equipes' de KMQ. Só pode ser usado depois de `/play teams create`",
+                "teams_create": "Prepara um modo de jogo 'equipes' de KMQ para a criação da equipe.",
+                "teams_join": "Entra em uma equipe. Só pode ser usado depois de `/play teams create`",
+                "teams_join_team_name": "O nome da equipe para entrar"
+            },
+            "team": {
+                "joinTeam": {
+                    "description": "Líderes de equipe, digitem {{join}} para formar uma nova equipe. Lembre-se, mudar de equipe no meio do jogo fará com que você perca toda a sua pontuação e EXP atuais.",
+                    "title": "{{join}} uma equipe!"
+                }
+            },
+            "typeGuess": "Ouça a música e digite seu palpite!",
+            "voteReminder": "Psiu. Ganhe mais EXP votando (veja {{vote}})"
+        },
+        "preset": {
+            "deleted": {
+                "description": "Predefinição {{presetName}} excluída com sucesso.",
+                "title": "Predefinição excluída"
+            },
+            "exported": {
+                "description": "Importar {{presetName}} como uma nova predefinição em outros servidores usando:\n{{presetImport}} `exported_preset:{{presetUUID}} new_preset_name:[preset_name]`\n\nAlternativamente, carregue as opções da predefinição diretamente usando:\n{{presetLoad}} `preset_name:{{presetUUID}}`",
+                "title": "Predefinição exportada"
+            },
+            "failure": {
+                "alreadyExists": {
+                    "description": "A predefinição {{presetNameFormatted}} já existe. Você pode excluir a antiga com {{presetDelete}} `preset_name:{{presetName}}`.",
+                    "title": "Predefinição já existe"
+                },
+                "illegalPrefix": {
+                    "description": "O nome da predefinição não pode começar com {{importPrefix}}.",
+                    "title": "Erro de predefinição"
+                },
+                "lengthyName": {
+                    "description": "O nome da predefinição deve ter no máximo {{presetNameMaxLength}} caracteres.",
+                    "title": "Nome de predefinição muito longo"
+                },
+                "missingIdentifier": {
+                    "description": "Você deve especificar um identificador de predefinição. Use {{presetExport}} `preset_name:[preset_name]` para recuperar o identificador de uma predefinição.",
+                    "title": "Identificador de predefinição ausente"
+                },
+                "missingName": {
+                    "description": "Você deve especificar um nome de predefinição.",
+                    "title": "Nome de predefinição ausente"
+                },
+                "noSuchPreset": {
+                    "description": "A predefinição {{presetName}} não existe.",
+                    "identifier": {
+                        "description": "O identificador de predefinição {{presetUUID}} não existe."
+                    },
+                    "title": "Tal predefinição não existe"
+                },
+                "tooMany": {
+                    "description": "Cada corporação pode ter até {{maxNumPresets}} predefinições. Exclua algumas antes de adicionar mais.",
+                    "title": "Muitas predefinições"
+                }
+            },
+            "help": {
+                "description": "Várias ações para salvar/carregar predefinições de opções de jogo. O nome da predefinição deve ter uma palavra.",
+                "example": {
+                    "delete": "Exclui a predefinição mencionada",
+                    "export": "Retorna um identificador exclusivo que pode ser usado para carregar/importar a predefinição mencionada",
+                    "import": "Cria uma nova predefinição usando um identificador de predefinição exportado",
+                    "list": "Lista todas as predefinições do servidor",
+                    "load": "Carrega a predefinição ou o identificador da predefinição mencionado ({{exampleIdentifier}}) nas opções do jogo",
+                    "replace": "Substitui as opções da predefinição mencionada pelas opções atuais do jogo",
+                    "save": "Salva as opções atuais do jogo como uma predefinição"
+                },
+                "name": "predefinição",
+                "usage": {
+                    "presetIdentifier": "identificador_da_predefinição",
+                    "presetName": "nome_da_predefinição"
+                }
+            },
+            "imported": {
+                "description": "Carregue a predefinição recém-importada usando {{presetLoad}} `preset_name:{{presetName}}`.",
+                "title": "Predefinição importada"
+            },
+            "interaction": {
+                "delete": {
+                    "presetName": "A predefinição para excluir"
+                },
+                "export": {
+                    "presetName": "A predefinição para exportar"
+                },
+                "import": {
+                    "exportedPresetID": "O ID da predefinição para importar",
+                    "presetName": "O nome a dar à predefinição importada"
+                },
+                "load": {
+                    "presetName": "A predefinição para carregar"
+                },
+                "replace": {
+                    "presetName": "A predefinição para substituir"
+                },
+                "save": {
+                    "presetName": "O que chamar esta predefinição"
+                }
+            },
+            "list": {
+                "failure": {
+                    "noPresets": {
+                        "description": "Você não tem predefinições. Consulte {{presetHelp}} para ver como criar uma."
+                    }
+                },
+                "loadInstructions": {
+                    "footer": "Carregar uma predefinição com {{presetLoad}} [nome_da_predefinição]"
+                },
+                "title": "Predefinições disponíveis"
+            },
+            "replaced": {
+                "title": "Predefinição substituída"
+            },
+            "saved": {
+                "title": "Predefinição salva"
+            },
+            "savedOrReplaced": {
+                "description": "Você pode carregar esta predefinição mais tarde com {{presetLoad}}."
+            }
+        },
+        "profile": {
+            "badges": "Emblemas",
+            "experience": "Experiência",
+            "failure": {
+                "notFound": {
+                    "badUsage": {
+                        "description": "Certifique-se de estar usando este comando corretamente. Consulte {{profileHelp}} para mais detalhes."
+                    },
+                    "description": "Não foi possível encontrar o ID de usuário especificado. Consulte {{profileHelp}} para detalhes.",
+                    "title": "Nenhum perfil encontrado"
+                }
+            },
+            "firstPlayed": "Primeiro jogo",
+            "gamesPlayed": "Jogos jogados",
+            "help": {
+                "description": "Mostra suas estatísticas de jogo.",
+                "example": {
+                    "otherPlayerID": "Visualiza um perfil de jogador com base em seu ID do Discord",
+                    "otherPlayerMention": "Visualiza o perfil de jogador de {{playerName}}",
+                    "self": "Veja seu próprio perfil de jogador"
+                },
+                "name": "perfil",
+                "usage": {
+                    "mention": "menção"
+                }
+            },
+            "ineligibleForRank": "Inelegível para classificação",
+            "interaction": {
+                "userID": "O ID de usuário do jogador cujo perfil visualizar",
+                "userMention": "Mencione o usuário cujo perfil visualizar"
+            },
+            "lastActive": "Última atividade",
+            "overallRank": "Classificação geral",
+            "rank": {
+                "almighty": "Governante Todo-Poderoso do Sistema Solar",
+                "aoty": "Artista do Ano",
+                "benevolent": "Governante Benevolente da Terra",
+                "bonsang": "Vencedor do prêmio Bonsang",
+                "ceo": "CEO da KMQ Entertainment",
+                "daesang": "Vencedor do prêmio Daesang",
+                "divine": "Governante Divino das Estrelas",
+                "enlightened": "Governante Iluminado da Galáxia",
+                "immortal": "Governante Imortal do Universo",
+                "newAoty": "Artista Revelação do Ano",
+                "novice": "Novato",
+                "nugu": "Nugu",
+                "omniscient": "Governante Onisciente do Multiverso",
+                "preDebut": "Pré-estreia",
+                "president": "Presidente da Coreia do Sul",
+                "reuniter": "Reunificador das Duas Coreias",
+                "ruler": "Governante das Duas Coreias",
+                "supreme": "Governante Supremo das Duas Coreias",
+                "trainee": "Treinee"
+            },
+            "songsGuessed": "Músicas adivinhadas",
+            "timesVoted": "Vezes votadas"
+        },
+        "recentlyadded": {
+            "description": "As seguintes músicas foram adicionadas ao KMQ nas últimas duas semanas:",
+            "failure": {
+                "noSongs": {
+                    "description": "Verifique mais tarde se o KMQ adicionou novas músicas.",
+                    "title": "Nenhuma música adicionada recentemente"
+                }
+            },
+            "help": {
+                "description": "Ver músicas adicionadas ao KMQ nas últimas duas semanas.",
+                "example": "Mostrar músicas adicionadas recentemente",
+                "name": "adicionadorecentemente"
+            },
+            "title": "Músicas adicionadas recentemente"
+        },
+        "release": {
+            "help": {
+                "description": "Escolha se deseja incluir apenas videoclipes oficiais ou todos os vídeos (lados B, ensaios de dança, versões acústicas, remixes etc.).",
+                "example": {
+                    "all": "Reproduz todos os vídeos disponíveis, incluindo ensaios de dança, versões acústicas, remixes",
+                    "official": "Reproduz apenas videoclipes {{official}}",
+                    "reset": "Redefinir para o tipo de lançamento padrão de {{defaultRelease}}"
+                },
+                "interaction": {
+                    "description": "Escolha se deseja incluir apenas videoclipes oficiais, ou todos os vídeos.",
+                    "release": "O tipo de lançamento de onde reproduzir"
+                },
+                "name": "lançamento"
+            }
+        },
+        "remix": {
+            "help": {
+                "description": "Escolha se deseja incluir músicas remixadas.",
+                "example": {
+                    "exclude": "Excluir remixes",
+                    "include": "Incluir remixes",
+                    "reset": "Redefinir para a opção padrão de {{defaultRemix}}"
+                },
+                "name": "remixagem"
+            },
+            "interaction": {
+                "remix": "Se deseja incluir ou excluir músicas remixadas"
+            }
+        },
+        "remove": {
+            "failure": {
+                "noGroupsSelected": {
+                    "description": "Não há grupos selecionados no momento.",
+                    "title": "Remoção falhou"
+                },
+                "unrecognizedGroups": {
+                    "removed": "removido"
+                }
+            },
+            "help": {
+                "description": "Remove um ou mais grupos das opções atuais de {{groups}}, {{exclude}} ou {{include}}.",
+                "example": {
+                    "exclude": "Remove {{groupOne}}, {{groupTwo}} e {{groupThree}} da opção {{exclude}} atual",
+                    "groups": "Remove {{groupOne}} e {{groupTwo}} da opção {{groups}} atual",
+                    "include": "Remove {{group}} da opção {{include}} atual"
+                },
+                "name": "remover"
+            }
+        },
+        "reset": {
+            "help": {
+                "description": "Redefinir para as opções de jogo padrão.",
+                "example": {
+                    "reset": "Redefine para as opções de jogo padrão"
+                },
+                "name": "reiniciar"
+            }
+        },
+        "score": {
+            "help": {
+                "description": "Veja o placar do jogo atual.",
+                "name": "pontuação"
+            },
+            "scoreboardTitle": "Placar"
+        },
+        "seek": {
+            "help": {
+                "description": "Escolha se cada música é reproduzida do início, do meio ou de um ponto aleatório.",
+                "example": {
+                    "beginning": "A música será reproduzida a partir do começo",
+                    "middle": "As músicas serão reproduzidas a partir do ponto médio",
+                    "random": "As músicas serão reproduzidas a partir de um ponto aleatório no meio",
+                    "reset": "Redefinir para a busca padrão de {{defaultSeek}}"
+                },
+                "name": "buscar"
+            },
+            "interaction": {
+                "seek": "De onde começar a tocar cada música"
+            }
+        },
+        "shuffle": {
+            "help": {
+                "description": "Escolha como as músicas são embaralhadas.",
+                "example": {
+                    "chronological": "As músicas serão reproduzidas na ordem em que foram lançadas, com alguma aleatoriedade. A penalidade {{penalty}} EXP será aplicada",
+                    "popularity": "As músicas serão reproduzidas com base na popularidade decrescente. A penalidade {{penalty}} EXP será aplicada",
+                    "random": "As músicas serão reproduzidas aleatoriamente",
+                    "reset": "Redefinir para o modo de embaralhamento padrão de {{defaultShuffle}}"
+                },
+                "name": "embaralhar"
+            },
+            "interaction": {
+                "shuffle": "O tipo de embaralhamento de música a ser usado no jogo"
+            }
+        },
+        "skip": {
+            "failure": {
+                "skipIgnored": "Pular ignorado"
+            },
+            "help": {
+                "description": "Vote para pular a música atual. Uma música é pulada quando a maioria dos participantes vota para pulá-la.",
+                "name": "pular"
+            },
+            "success": {
+                "description": "{{skipCounter}} pulos alcançados, pulando..."
+            },
+            "vote": {
+                "description": "{{skipCounter}} solicitações de pulo recebidas.",
+                "title": "Solicitação de pular"
+            }
+        },
+        "special": {
+            "help": {
+                "description": "Modifique a velocidade de reprodução da música.",
+                "example": {
+                    "fast": "Reproduz a música em velocidade rápida",
+                    "faster": "Reproduz a música em velocidade mais rápida",
+                    "highPitch": "Reproduz a música em tom alto",
+                    "lowPitch": "Reproduz a música em tom baixo",
+                    "nightcore": "Reproduz uma edição nightcore da música",
+                    "reset": "Redefinir a opção especial",
+                    "reverse": "Reproduz a música ao contrário",
+                    "slow": "Reproduz a música em velocidade lenta"
+                },
+                "name": "especial"
+            },
+            "interaction": {
+                "special": "O tipo de modificação a fazer em cada música"
+            }
+        },
+        "spotify": {
+            "fileFormat": {
+                "matched": "Músicas correspondentes para \"{{playlistName}}\":\n{{matchedSongs}}",
+                "unmatched": "Músicas não correspondentes para \"{{playlistName}}\":\n{{unmatchedSongs}}"
+            },
+            "help": {
+                "description": "Reproduzir músicas exclusivamente de uma determinada lista de reprodução do Spotify",
+                "example": {
+                    "playlistURL": "Começar a reproduzir músicas da lista de reprodução",
+                    "reset": "Parar de reproduzir da lista de reprodução"
+                },
+                "interaction": {
+                    "matches": "Veja uma lista de músicas correspondentes e não correspondentes",
+                    "matchesLink": "Se deseja mostrar o URL do YouTube para músicas correspondentes",
+                    "playlistURL": "A lista de reprodução da qual recuperar músicas"
+                },
+                "name": "spotify"
+            },
+            "invalidURL": {
+                "description": "O link para a lista de reprodução é inválido. Use `Compartilhar > Copiar link para a lista de reprodução` no Spotify para recuperar um link válido.",
+                "title": "URL inválido da lista de reprodução do Spotify"
+            },
+            "matched": {
+                "description": "{{matchedCount}}/{{totalCount}} músicas correspondentes.",
+                "title": "Tocando \"{{playlistName}}\" no Spotify",
+                "truncated": "Nota: A lista de reprodução levou muito tempo para processar e não foi concluída. Tente novamente com uma lista de reprodução menor na próxima vez."
+            },
+            "noMatches": {
+                "description": "Nenhuma música foi correspondida.",
+                "title": "Não foi possível obter músicas do Spotify"
+            },
+            "noPlaylistSet": {
+                "description": "{{spotifySet}} uma lista de reprodução antes de usar este comando.",
+                "title": "Nenhuma lista de reprodução definida"
+            },
+            "parsing": "Carregando a lista de reprodução do Spotify...",
+            "parsingAlreadyInProgress": {
+                "description": "Aguarde a lista de reprodução atual terminar de carregar antes de iniciar uma nova.",
+                "title": "Lista de reprodução já sendo carregada"
+            }
+        },
+        "stats": {
+            "description": "Status detalhado do bot: {{link}}",
+            "failure": {
+                "description": "Tente novamente mais tarde.",
+                "title": "Erro ao recuperar estatísticas"
+            },
+            "footer": "\"Estatísticas recentes\" representam dados das últimas 24 horas.",
+            "game": {
+                "activeGameSessions": "Sessões de jogo ativas",
+                "activePlayers": "Jogadores ativos",
+                "latestSongUpdate": "Atualização mais recente da música",
+                "recentGameRounds": "(Recente) Rodadas de jogo",
+                "recentGameSessions": "(Recente) Sessões de jogo",
+                "recentPlayers": "(Recente) Jogadores",
+                "title": "Estatísticas do jogo"
+            },
+            "help": {
+                "description": "Várias estatísticas de uso/sistema.",
+                "name": "estatísticas"
+            },
+            "system": {
+                "apiLatency": "Latência da API",
+                "databaseLatency": "Latência do banco de dados",
+                "loadAverage": "Média de carga do sistema",
+                "memoryUsage": "Uso de memória do processo",
+                "requestLatency": "Latência da solicitação",
+                "title": "Estatísticas do sistema",
+                "uptime": "Tempo de atividade"
+            },
+            "title": "Estatísticas do bot"
+        },
+        "subunits": {
+            "help": {
+                "description": "Escolha se deseja incluir automaticamente as subunidades de um grupo, ao usar {{groups}}.",
+                "example": {
+                    "exclude": "Não incluir subunidades",
+                    "include": "Incluir automaticamente subunidades. Por exemplo, {{groupCommand}} group_1:{{parentGroup}} incluiria músicas de {{parentGroup}}, {{subunitOne}}, {{subunitTwo}}, etc.",
+                    "reset": "Redefinir para a opção padrão de {{defaultSubunit}}"
+                },
+                "name": "subunidades"
+            },
+            "interaction": {
+                "subunits": "Se deseja incluir subunidades"
+            }
+        },
+        "timer": {
+            "help": {
+                "description": "Tente seu melhor para adivinhar corretamente antes que o cronômetro acabe! Insira um tempo em segundos ou não dê argumentos para desativar.",
+                "example": {
+                    "reset": "Desativa o cronômetro",
+                    "set": "Em {{timer}} segundos, se nenhum usuário tiver adivinhado corretamente, a rodada termina e a próxima começa automaticamente"
+                },
+                "interaction": {
+                    "description": "Tente o seu melhor para adivinhar corretamente antes que o cronômetro acabe!",
+                    "timer": "Quantos segundos para tocar cada música antes de pular"
+                },
+                "name": "temporizador",
+                "usage": {
+                    "seconds": "segundos"
+                }
+            }
+        },
+        "upcomingreleases": {
+            "album": "Álbum",
+            "description": "As seguintes músicas, álbuns e EPs estão programados para serem lançados:",
+            "ep": "PE",
+            "failure": {
+                "noReleases": {
+                    "description": "Volte mais tarde para ver se há novos lançamentos programados.",
+                    "title": "Nenhum lançamento próximo"
+                }
+            },
+            "help": {
+                "albumExample": "Mostrar lançamentos de álbuns futuros",
+                "defaultExample": "Mostrar lançamentos de artistas futuros, incluindo músicas, álbuns e EPs",
+                "description": "Veja músicas, álbuns e extended plays (EPs) com lançamento previsto para breve.",
+                "interaction": {
+                    "releaseType": "O tipo de lançamento a ser mostrado"
+                },
+                "name": "próximoslançamentos"
+            },
+            "single": "Músicas",
+            "title": "Próximos lançamentos"
+        },
+        "vote": {
+            "available": "Agora você pode votar!",
+            "boost": {
+                "active": "Potencialização ativa!",
+                "inactive": "Potencialização inativa"
+            },
+            "description": "Vote no KMQ em [top.gg]({{voteLink}}) e você receberá 2x EXP por uma hora! Você pode votar uma vez a cada {{voteResetDuration}} horas.\n\nAgradeceríamos se você também pudesse deixar uma [avaliação]({{reviewLink}}).",
+            "help": {
+                "description": "Mostra instruções sobre como votar para receber 2x EXP por uma hora.",
+                "name": "voto"
+            },
+            "timeLeft": "Faltam {{time}}.",
+            "unavailable": {
+                "hours": "Você pode votar em **{{hours}}**.",
+                "minutes": "Você pode votar em **{{minutes}}**.",
+                "seconds": "Você pode votar em **{{seconds}}**."
+            }
+        }
+    },
+    "fact": {
+        "didYouKnow": "Você sabia?",
+        "fun": {
+            "bigThreeDominance": "Fato curioso: BTS, Blackpink e Twice combinadas respondem por {{bigThreeViews}} visualizações do YouTube, ou {{proportion}}%!",
+            "birthday": "Fato curioso: O aniversário de {{name}} é neste mês em {{formattedDate}}!",
+            "companyByArtistCount": "Fato curioso: {{company}} é a empresa de entretenimento com a {{ordinalNum}} maior quantidade de artistas (incluindo subunidades e estreias solo) com um total de {{num}}!",
+            "companyByArtistViews": "Fato curioso: {{name}} é a {{ordinalNum}} empresa de entretenimento mais vista com {{views}} visualizações totais no YouTube!",
+            "fanclubName": "Fato curioso: O nome do fã-clube de {{name}} é '{{fanclub}}'!",
+            "historicalGaonWeekly": "Fato curioso: Nesta semana em {{year}}, {{songName}} foi a música mais bem classificada nas paradas semanais do GAON!",
+            "hyperlinkGenerator": "[\"{{songName}}\" de {{artistName}}]({{url}})",
+            "mostActiveYear": "Fato curioso: {{year}} foi o {{ordinalNum}} ano mais ativo no K-Pop com {{num}} lançamentos de videoclipes!",
+            "mostAnnualAwardShowWins": "Fato curioso: {{artistName}} tem o {{ordinalNum}} maior número de prêmios anuais com {{wins}}!",
+            "mostDebuts": "Fato curioso: {{year}} teve a {{ordinalNum}} maior quantidade de estreias com a estreia de {{num}} grupos!",
+            "mostGaonAppearances": "Fato curioso: {{artistName}} foi o {{ordinalNum}} que mais se classificou nas paradas semanais digitais do GAON com {{appearances}} aparições!",
+            "mostGaonFirsts": "Fato curioso: {{artistName}} alcançou o topo das paradas semanais digitais do GAON o {{ordinalNum}} maior número de vezes com {{firstPlaceCount}} aparições em primeiro lugar!",
+            "mostLikedGroup": "Fato curioso: {{artist}} é o {{ordinalNum}} grupo mais curtido com {{likes}} curtidas totais no YouTube!",
+            "mostLikedVideo": "Fato curioso: {{hyperlink}} é o {{ordinalNum}} vídeo mais curtido com {{likes}} curtidas totais no YouTube!",
+            "mostMVs": "Fato curioso: {{artist}} tem o {{ordinalNum}} maior número de videoclipes com {{num}} no YouTube!",
+            "mostMusicShowWins": "Fato curioso: {{artist}} venceu o {{ordinalNum}} maior número de programas de música com {{num}} vitórias!",
+            "mostViewedGroup": "Fato curioso: {{artist}} é o {{ordinalNum}} grupo mais visto com {{views}} visualizações totais no YouTube!",
+            "mostViewedSoloist": "Fato curioso: {{artist}} é o {{ordinalNum}} artista solo mais visto com {{views}} visualizações totais no YouTube!",
+            "mostViewedVideo": "Fato curioso: {{hyperlink}} é o {{ordinalNum}} vídeo mais visto com {{views}} visualizações totais no YouTube!",
+            "mvViewMilestone": "Fato curioso: {{hyperlink}} atingiu recentemente {{views}} visualizações no YouTube!",
+            "newMV": "Alerta de nova música: confira este videoclipe recém-lançado, {{hyperlink}}",
+            "oldMV": "Fato curioso: {{hyperlink}} foi lançado esta semana em {{year}}!",
+            "recentGaonWeekly": "Fato curioso: {{songName}} é a {{ordinalNum}} música mais bem classificada nas paradas semanais do Gaon na semana passada!",
+            "recentMusicShowWin": "Fato curioso: {{hyperlink}} venceu recentemente no {{musicShow}} em {{winDate}}",
+            "recentPak": "Fato curioso: {{hyperlink}} é o {{ordinalNum}} videoclipe mais recente a receber um PAK (Perfect All-Kill)!",
+            "upcomingReleases": "Fato curioso: '{{releaseName}}' ({{releaseType}}) de '{{artistName}}' será lançado em breve em {{dateString}}!",
+            "viewsByArtistType": "Fato curioso: Há um total combinado de {{totalViews}} visualizações em todos os videoclipes de K-Pop no YouTube, {{groupViews}} ({{groupProportion}}%) dos quais são de grupos, enquanto {{soloViews}} ({{soloProportion}}%) são de artistas solo.",
+            "viewsByGender": "Fato curioso: Há um total combinado de {{totalViews}} visualizações em todos os videoclipes de K-Pop no YouTube, {{maleViews}} ({{maleProportion}}%) dos quais são de grupos masculinos, {{femaleViews}} ({{femaleProportion}}%) de grupos femininos e os restantes {{coedViews}} ({{coedProportion}}%) de grupos mistos."
+        },
+        "kmq": {
+            "guessRate": "Fato curioso: {{hyperlink}} tem uma taxa de acerto de {{percentage}}% em {{roundsPlayed}} rodadas jogadas",
+            "highestLeveledPlayerStats": "Fato curioso: O {{ordinalNum}} jogador de KMQ de nível mais alto é o Nível {{level}}, com {{songsGuessed}} músicas acertadas em {{gamesPlayed}} jogos!",
+            "longestGame": "Fato do KMQ: O jogo de KMQ mais longo do mundo (atualmente) durou {{sessionLength}} minutos, com {{roundsPlayed}} músicas tocadas, um tempo médio de acerto de {{avgGuessTime}} segundos, com {{numParticipants}} participantes! Você consegue superar isso?",
+            "mostActivePlayerGamesPlayed": "Fato do KMQ: O jogador mais ativo jogou {{gamesPlayed}} jogos desde 8 de novembro de 2020!",
+            "mostActivePlayerSongsGuessed": "Fato do KMQ: O jogador mais ativo acertou {{songsGuessed}} músicas desde 8 de novembro de 2020!",
+            "mostActiveServer": "Fato do KMQ: O servidor mais ativo jogou {{gamesPlayed}} jogos de KMQ, com um total de {{songsGuessed}} músicas acertadas!",
+            "mostCorrectGuessesServer": "Fato do KMQ: O servidor com mais acertos jogou {{gamesPlayed}} jogos de KMQ, com um total de {{songsGuessed}} músicas acertadas!",
+            "recentRounds": "Fato do KMQ: Houve um total de {{recentGameCount}} rodadas de KMQ jogadas na semana passada!",
+            "recentSessions": "Fato do KMQ: Um total de {{recentSessions}} jogos de KMQ foram jogados na semana passada!",
+            "totalGames": "Fato do KMQ: Um total de {{totalGamesPlayed}} jogos de KMQ foram jogados!",
+            "uniquePlayers": "Fato do KMQ: {{recentActivePlayers}} jogadores únicos jogaram KMQ nos últimos {{xDays}}!"
+        }
+    },
+    "misc": {
+        "andManyOthers": "e muitos outros...",
+        "artist": "artista",
+        "artistAliases": "Pseudônimos do artista",
+        "bookmark": "Marcador",
+        "classic": {
+            "yourScore": "Sua pontuação é {{score}}."
+        },
+        "conflict": "conflito",
+        "duration": "Duração",
+        "elimination": {
+            "yourLives": "Você tem {{lives}} vidas."
+        },
+        "failure": {
+            "afkChannel": {
+                "description": "Certifique-se de não estar no canal de voz inativo para que possa me ouvir!",
+                "title": "Canal de voz ausente"
+            },
+            "command": {
+                "description": "Ocorreu um erro ao executar este comando.\nForneça isso a um desenvolvedor se isso acontecer consistentemente:\n{{debugId}}",
+                "title": "Erro ao executar o comando"
+            },
+            "deprecatedTextCommand": {
+                "description": "Comandos de texto não são mais compatíveis com novos comandos. Experimente os novos e aprimorados comandos de barra! Se os comandos de barra não estiverem visíveis no servidor, convide novamente o KMQ para o servidor.",
+                "title": "Comandos de texto obsoletos"
+            },
+            "error": "Erro",
+            "errorSelectingSong": {
+                "description": "Tente iniciar a rodada novamente. Se o problema persistir, relate-o em nosso servidor oficial do KMQ.",
+                "title": "Erro na seleção da música"
+            },
+            "game": {
+                "noneInProgress": {
+                    "description": "Não há jogo em andamento.",
+                    "title": "Nenhum jogo ativo"
+                }
+            },
+            "gameOptionConflict": {
+                "description": "A opção de jogo {{optionOne}} está definida atualmente. {{optionTwo}} e {{optionOne}} são incompatíveis. Remova a opção {{optionOne}} digitando {{optionOneCommand}} para prosseguir.",
+                "title": "Conflito de opção de jogo"
+            },
+            "groupsExcludeConflict": {
+                "allow": "para permitir que eles toquem",
+                "description": "Um ou mais dos {{conflictingOptionOne}} fornecidos já estão incluídos em {{conflictingOptionTwo}}. \nOs seguintes grupos **não** foram adicionados a {{conflictingOptionOne}}:\n {{groupsList}}\nUse {{solutionStepOne}} e então {{solutionStepTwo}} {{allowOrPrevent}}.",
+                "prevent": "para impedi-los de tocar",
+                "title": "Conflito de grupos e exclusão"
+            },
+            "interaction": {
+                "alreadyEliminated": "Você já foi eliminado desta rodada.",
+                "bookmarkOutsideGame": "Você só pode marcar músicas durante um jogo.",
+                "eliminated": "Você foi eliminado desta rodada.",
+                "guildBanned": "Este servidor está proibido de usar KMQ. Para recursos, entre em contato com o servidor oficial de suporte KMQ em {{supportServer}}.",
+                "guildOnly": "O KMQ só pode ser usado em servidores.",
+                "invalidBookmark": "Você só pode marcar músicas tocadas recentemente nas últimas {{BOOKMARK_MESSAGE_SIZE}} rodadas. Você deve marcar a mensagem enviada pelo bot contendo a música.",
+                "optionFromPreviousRound": "Você está tentando escolher uma opção de uma rodada já concluída.",
+                "playerBanned": "Você está proibido de usar o KMQ. Para recursos, entre em contato com o servidor oficial de suporte do KMQ em {{supportServer}}."
+            },
+            "maintenanceMode": {
+                "description": "O KMQ está atualmente em manutenção e novos jogos não podem ser iniciados. Volte mais tarde!",
+                "title": "Modo de manutenção"
+            },
+            "messageTooLong": "A mensagem de resposta foi muito longa, relate este erro ao servidor de ajuda do KMQ",
+            "missingPermissions": {
+                "description": "Olá! Não consigo enviar mensagens no canal {{channelName}}. Certifique-se de que o bot tenha permissão para enviar mensagens neste canal. Veja o seguinte link para detalhes: {{permissionsLink}}.",
+                "title": "Permissões ausentes"
+            },
+            "missingPermissionsText": "Certifique-se de que o bot tenha as seguintes permissões: {{missingPermissions}}\n\nVeja o seguinte link para detalhes: {{permissionsLink}}. Se você ainda estiver tendo problemas, entre no servidor oficial do KMQ encontrado em {{helpCommand}}",
+            "notInVC": {
+                "description": "Envie {{command}} novamente quando estiver em um canal de voz.",
+                "title": "Entrar em um canal de voz"
+            },
+            "optionsGeneration": {
+                "description": "Falha ao enviar opções para o canal. Use {{resetCommand}} e tente novamente. Se o problema persistir, relate-o no servidor oficial do KMQ encontrado em {{helpCommand}} e forneça a seguinte ID a um desenvolvedor:\n{{debugId}}",
+                "title": "Erro ao enviar opções"
+            },
+            "retrievingSongData": {
+                "description": "Tente novamente em breve ou relate este erro ao servidor oficial do KMQ encontrado em {{helpCommand}}.",
+                "title": "Erro ao recuperar dados da música"
+            },
+            "round": {
+                "noneInProgress": {
+                    "description": "A rodada atual terminou! Aguarde o início da próxima rodada.",
+                    "title": "Rodada concluída"
+                }
+            },
+            "songPlaying": {
+                "description": "Iniciando nova rodada em 3 segundos...",
+                "title": "Erro ao reproduzir a música"
+            },
+            "songQuery": {
+                "description": "Falha ao encontrar músicas correspondentes a este critério. Tente ampliar sua pesquisa.",
+                "title": "Erro de consulta de música"
+            },
+            "unrecognizedGroups": {
+                "added": "adicionado",
+                "description": "Um ou mais dos nomes de grupo especificados não foram reconhecidos. Os grupos correspondentes são {{matchedGroupsAction}}. Certifique-se de que o nome do grupo corresponda exatamente à lista fornecida por {{helpGroups}}.\nOs seguintes grupos **não** foram reconhecidos:\n {{unmatchedGroups}}\n{{solution}}",
+                "didYouMean": "__Você quis dizer:__\n {{suggestions}}",
+                "solution": "Use {{command}} para adicionar os grupos não correspondentes.",
+                "title": "Nome de grupo desconhecido"
+            },
+            "validation": {
+                "boolean": {
+                    "notBoolean": "Valor verdadeiro/falso esperado para {{argument}}."
+                },
+                "char": {
+                    "notChar": "Esperava-se um caractere para {{argument}}."
+                },
+                "enum": {
+                    "notInEnum": "Esperava-se um dos seguintes valores de {{argument}} válidos: ({{validValues}})."
+                },
+                "numArguments": {
+                    "incorrect": "Número incorreto de argumentos. Consulte {{help}} action:{{command}} para uso."
+                },
+                "number": {
+                    "max": "Valor esperado menor ou igual a {{max}} para {{argument}}",
+                    "min": "Valor esperado maior ou igual a {{min}} para {{argument}}.",
+                    "notNumber": "Valor numérico esperado para {{argument}}."
+                },
+                "title": "Erro de validação de entrada"
+            },
+            "vcFull": {
+                "description": "Certifique-se de que haja espaço suficiente no canal de voz para eu entrar.",
+                "title": "Canal de voz cheio"
+            },
+            "vcJoin": {
+                "description": "Algo deu errado, tente iniciar o jogo novamente em breve.",
+                "title": "Erro ao entrar no canal de voz"
+            }
+        },
+        "formattedLimit": "{{limitStart}} a {{limitEnd}} ({{songCount}} músicas)",
+        "gameOwnerChanged": {
+            "description": "O novo dono do jogo é {{newGameOwner}}. Eles são responsáveis por {{forcehintCommand}} e {{forceskipCommand}}.",
+            "title": "Proprietário do jogo alterado"
+        },
+        "inGame": {
+            "aliases": "Pseudônimos",
+            "bonusArtistRound": "RODADA BÔNUS DO ARTISTA",
+            "bonusExpArtistRound": "RODADA DE EXP BÔNUS E ARTISTA",
+            "bonusExpRound": "RODADA DE EXP BÔNUS",
+            "correctGuess": "{{correctGuesser}} adivinhou corretamente (+{{expGain}} EXP) ({{timeToGuess}}s)",
+            "hiddenRemainingPlayers": "Esperando por",
+            "hiddenTimerInfo": "{{guessButton}} antes que a rodada termine {{timestamp}}!",
+            "noCorrectGuesses": "Ninguém conseguiu.",
+            "noWinners": "Ninguém ganhou",
+            "runnersUp": "Vice-campeões",
+            "songsCorrectlyGuessed": "{{songCount}} músicas adivinhadas corretamente!",
+            "uniqueSongsPlayed": "{{uniqueSongCount}} músicas únicas tocadas.",
+            "winMessage": "{{playerName}} vence!"
+        },
+        "interaction": {
+            "bookmarked": {
+                "description": "Você receberá uma mensagem direta com um link para {{songName}} ao final do jogo.",
+                "message": {
+                    "playedOn": "Tocada em {{date}}",
+                    "title": "Músicas marcadas"
+                },
+                "title": "Música marcada"
+            },
+            "faq": "Perguntas frequentes",
+            "fullGroupsList": "Lista completa de grupos",
+            "genericProgress": {
+                "description": "🤖",
+                "title": "Trabalhando nisso!"
+            },
+            "guess": {
+                "title": "Adivinhe a {{songOrArtist}}!"
+            },
+            "howToPlay": "Como jogar",
+            "leaveReview": "Deixe uma avaliação!",
+            "officialKmqServer": "Servidor oficial do KMQ",
+            "profile": {
+                "inaccessible": "Não consigo acessar esse usuário agora. Tente usar {{profileUserID}} no lugar.",
+                "noStats": "Este usuário precisa jogar seu primeiro jogo antes que suas estatísticas sejam rastreadas."
+            },
+            "resetOption": "Redefine a opção {{optionName}}",
+            "title": {
+                "failure": "Ops"
+            },
+            "vote": "Voto!"
+        },
+        "level": "Nível",
+        "levelUp": {
+            "entry": "{{user}} subiu do {{startLevel}} para {{endLevel}} ({{rank}})",
+            "title": "🚀 Potencializar!"
+        },
+        "listOfGroups": "lista de grupos",
+        "no": "Não",
+        "none": "Nenhum",
+        "notApplicable": "N/D",
+        "plural": {
+            "day_one": "{{count}} dia",
+            "day_other": "{{count}} dias",
+            "hourAgo_one": "{{count}} hora atrás",
+            "hourAgo_other": "{{count}} horas atrás",
+            "hour_one": "{{count}} hora",
+            "hour_other": "{{count}} horas",
+            "level_one": "nível",
+            "level_other": "níveis",
+            "minuteAgo_one": "{{count}} minuto atrás",
+            "minuteAgo_other": "{{count}} minutos atrás",
+            "minuteRemaining_one": "{{count}} minuto restante",
+            "minuteRemaining_other": "{{count}} minutos restantes",
+            "minute_one": "{{count}} minuto",
+            "minute_other": "{{count}} minutos",
+            "player_one": "{{count}} jogador",
+            "player_other": "{{count}} jogadores",
+            "second_one": "{{count}} segundo",
+            "second_other": "{{count}} segundos",
+            "song_one": "{{count}} música",
+            "song_other": "{{count}} músicas"
+        },
+        "preCheck": {
+            "competition": "Este comando foi desativado para usuários regulares na competição.",
+            "debugChannel": "Você não pode fazer isso neste canal.",
+            "debugServer": "Você não pode fazer isso neste servidor.",
+            "differentVC": "Você deve estar no mesmo canal de voz que o bot para usar este comando.",
+            "notGameSession": "Você não pode fazer isso em uma sessão de jogo.",
+            "notHidden": "Você não pode fazer isso durante um jogo oculto.",
+            "notListeningSession": "Você não pode fazer isso em uma sessão de escuta.",
+            "notSpotify": "Você não pode alterar essa opção ao reproduzir do Spotify. Use {{spotifyResetCommand}} antes de alterar esta opção.",
+            "title": "Aguarde..."
+        },
+        "releaseDate": "Data de lançamento",
+        "restart": {
+            "description_hard": "O tempo de inatividade será de aproximadamente alguns segundos. Encerre o jogo atual para garantir que seu progresso seja salvo!",
+            "title": "Próxima reinicialização em {{timeUntilRestart}} minutos."
+        },
+        "sendingBookmarkedSongs": {
+            "description": "Enviando {{songs}} para {{players}}.\n\nMarque músicas durante o jogo clicando com o botão direito na mensagem da música e selecionando `Apps > Marcar música`",
+            "title": "Enviando músicas marcadas..."
+        },
+        "skip": "Pular",
+        "song": "música",
+        "songAliases": "Pseudônimos da música",
+        "team": {
+            "yourScore": "Sua pontuação: {{score}}",
+            "yourTeamScore": "Pontuação da sua equipe: {{teamScore}}"
+        },
+        "timeFinished": "Tempo esgotado",
+        "uniqueSongsReset": {
+            "description": "Todas as músicas foram tocadas. {{totalSongCount}} músicas serão embaralhadas novamente.",
+            "title": "Redefinindo músicas exclusivas"
+        },
+        "usage": "Uso",
+        "views": "visualizações",
+        "warning": {
+            "addRemoveOrdering": {
+                "footer": "Você quis usar {{command}} {{addOrRemove}}?"
+            }
+        },
+        "yes": "Sim"
+    }
+}
