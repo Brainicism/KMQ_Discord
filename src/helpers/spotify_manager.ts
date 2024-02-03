@@ -243,6 +243,7 @@ export default class SpotifyManager {
         ) {
             logger.info(`${logHeader} | Using cached playlist`);
             ({ matchedSongs, truncated, unmatchedSongs } = cachedPlaylist);
+            metadata.matchedSongsLength = matchedSongs.length;
             return {
                 matchedSongs,
                 metadata,
@@ -489,6 +490,7 @@ export default class SpotifyManager {
         ) {
             logger.info(`${logHeader} | Using cached playlist`);
             ({ matchedSongs, truncated, unmatchedSongs } = cachedPlaylist);
+            metadata.matchedSongsLength = matchedSongs.length;
 
             return {
                 matchedSongs,
@@ -641,9 +643,9 @@ export default class SpotifyManager {
             ],
         });
 
-        metadata.matchedSongsLength = matchedSongs.length;
         matchedSongs = _.uniqBy(matchedSongs, "youtubeLink");
         unmatchedSongs = _.uniq(unmatchedSongs);
+        metadata.matchedSongsLength = matchedSongs.length;
 
         if (unmatchedSongs.length) {
             if (!(await pathExists(PLAYLIST_UNMATCHED_SONGS_DIR))) {
