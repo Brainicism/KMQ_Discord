@@ -1,0 +1,1632 @@
+{
+    "10th": "10e",
+    "11th": "11e",
+    "12th": "12e",
+    "13th": "13e",
+    "14th": "14e",
+    "15th": "15e",
+    "16th": "16e",
+    "17th": "17e",
+    "18th": "18e",
+    "19th": "19e",
+    "1st": "1e",
+    "20th": "20e",
+    "21st": "21e",
+    "22nd": "22e",
+    "23rd": "23e",
+    "24th": "24e",
+    "25th": "25e",
+    "2nd": "2e",
+    "3rd": "3e",
+    "4th": "4e",
+    "5th": "5e",
+    "6th": "6e",
+    "7th": "7e",
+    "8th": "8e",
+    "9th": "9e",
+    "command": {
+        "add": {
+            "failure": {
+                "unrecognizedGroups": {
+                    "added": "toegevoegd"
+                }
+            },
+            "help": {
+                "description": "Voegt een of meerdere groepen toe aan de huidige opties {{groups}}, {{exclude}} of {{include}}.",
+                "example": {
+                    "exclude": "Voegt {{groupOne}}, {{groupTwo}} en {{groupThree}} toe aan de huidige optie {{exclude}}",
+                    "groups": "Voegt {{groupOne}} en {{groupTwo}} toe aan de huidige optie {{groups}}",
+                    "include": "Voegt {{groupOne}} toe aan de huidige optie {{include}}"
+                },
+                "name": "toevoegen"
+            }
+        },
+        "answer": {
+            "help": {
+                "description": "Kies hoe je wilt antwoorden: door je antwoord te typen of via een meervoudige keuze. De opties zijn de volgende: `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}` en `{{hard}}`",
+                "example": {
+                    "multipleChoice": "Klik op de knop van de {{optionCount}} meervoudige keuzeopties om te raden. Er wordt een straf van {{penalty}} EXP toegepast",
+                    "typing": "Typ je antwoord in de chat om te raden",
+                    "typingTypos": "Typ je antwoord in de chat om te raden. Kleine typfouten worden als correct gemarkeerd. Er wordt een straf van {{penalty}} EXP toegepast"
+                },
+                "interaction": {
+                    "answerOption": "Hoe je in-game kunt antwoorden",
+                    "description": "Kies hoe je wilt antwoorden: door je antwoord te typen of via een meervoudige keuze"
+                },
+                "name": "antwoord"
+            }
+        },
+        "artisttype": {
+            "help": {
+                "description": "Kies of je nummers van solisten, groepen of beide wilt horen. De opties zijn de volgende: {{soloists}}, {{groups}} en {{both}}.",
+                "example": {
+                    "both": "Speelt nummers af van zowel solisten als groepen",
+                    "groups": "Speel alleen nummers van groepen",
+                    "reset": "Stelt de optie voor het type artiest opnieuw in",
+                    "soloists": "Speel alleen nummers van solisten"
+                },
+                "interaction": {
+                    "artistTypeOption": "Het type artiest om af te spelen",
+                    "description": "Kies of je nummers van solisten, groepen of beide wilt horen"
+                },
+                "name": "artisttype"
+            }
+        },
+        "begin": {
+            "ignored": {
+                "noTeam": {
+                    "description": "Maak een team met {{join}} team_name:[teamnaam] voordat je aan het spel kunt beginnen."
+                },
+                "title": "Negeren starten"
+            }
+        },
+        "botnews": {
+            "help": {
+                "description": "Toont de nieuwste updates van KMQ.",
+                "name": "botnews"
+            },
+            "updates": {
+                "footer": "Word lid van de officiële KMQ-server voor meer gedetailleerde updates!",
+                "title": "Updates"
+            }
+        },
+        "cutoff": {
+            "failure": {
+                "invalidEndYear": {
+                    "description": "Het eindjaar moet na of gelijk zijn aan het startjaar.",
+                    "title": "Ongeldig eindjaar"
+                }
+            },
+            "help": {
+                "description": "Geef een jaargrens voor nummers op. Als er één waarde wordt opgegeven, worden alleen nummers NA dat jaar afgespeeld. Als er twee waarden worden opgegeven, worden alleen nummers TUSSEN die twee jaren afgespeeld.",
+                "example": {
+                    "reset": "Reset naar de standaard afsnijding van {{defaultBeginningSearchYear}} naar {{defaultEndSearchYear}}",
+                    "singleCutoff": "Speel nummers af die zijn uitgebracht na het jaar {{year}}",
+                    "twoCutoffs": "Speel nummers af die zijn uitgebracht tussen de jaren {{beginningYear}}-{{endingYear}}"
+                },
+                "interaction": {
+                    "beginningYear": "Het vroegste jaar om op te nemen",
+                    "description": "Stel een jaargrens voor nummers in",
+                    "earliestOption": "Kies nummers voor elk jaar vanaf [beginjaar]",
+                    "endingYear": "Het laatste jaar om op te nemen",
+                    "rangeOption": "Kies nummers voor elk jaar tussen [beginjaar] en [eindjaar]"
+                },
+                "name": "cut-off"
+            }
+        },
+        "debug": {
+            "description": "Als een botontwikkelaar je dit heeft gevraagd, geef hem dit dan:\n{{debugID}}",
+            "title": "Debuggegevens verzonden!"
+        },
+        "duration": {
+            "failure": {
+                "removingDuration": {
+                    "notSet": {
+                        "description": "De duur is op dit moment niet ingesteld."
+                    },
+                    "title": "Fout bij verwijderen duur",
+                    "tooShort": {
+                        "description": "De duur kan niet korter zijn dan 2 minuten."
+                    }
+                }
+            },
+            "help": {
+                "description": "Stelt een maximale lengte in voor het KMQ-spel in minuten.",
+                "example": {
+                    "decrement": "Verwijder {{duration}} minuten van de huidige speldduur",
+                    "increment": "Voeg {{duration}} minuten toe aan de huidige speldduur",
+                    "reset": "Schakelt de duur uit",
+                    "set": "Het spel eindigt automatisch na {{duration}} minuten"
+                },
+                "name": "duur",
+                "usage": {
+                    "minutes": "minuten"
+                }
+            },
+            "interaction": {
+                "durationAdd": "Hoeveel minuten moeten worden toegevoegd aan de duur",
+                "durationRemove": "Hoeveel minuten moeten worden verwijderd van de duur",
+                "durationSet": "Hoeveel minuten je KMQ wilt spelen voordat je het spel afsluit"
+            }
+        },
+        "end": {
+            "help": {
+                "description": "Beëindigt het huidige spel en kiest een winnaar.",
+                "name": "eind"
+            },
+            "interaction": {
+                "description": "Ik hoop dat je plezier hebt gehad!",
+                "title": "Spel beëindigen"
+            }
+        },
+        "exclude": {
+            "failure": {
+                "unrecognizedGroups": {
+                    "excluded": "uitgesloten"
+                }
+            },
+            "help": {
+                "description": "Selecteer zoveel groepen als je wilt negeren. Een lijst met groepsnamen kun je [hier]({{groupList}}) vinden.",
+                "example": {
+                    "multipleGroups": "Negeer nummers van {{groupOne}}, {{groupTwo}} en {{groupThree}}",
+                    "reset": "Stelt de optie uitsluiten opnieuw in",
+                    "singleGroup": "Negeer nummers van {{group}}"
+                },
+                "interaction": {
+                    "add": {
+                        "description": "Voeg de opgegeven groepen toe aan de optie spel uitsluiten",
+                        "perGroupDescription": "De {{ordinalNum}} groep die moet worden toegevoegd"
+                    },
+                    "description": "Voorkom dat er nummers van de opgegeven groepen worden afgespeeld",
+                    "remove": {
+                        "description": "Verwijder de opgegeven groepen uit de optie spel uitsluiten",
+                        "perGroupDescription": "De {{ordinalNum}} groep die moet worden verwijderd"
+                    },
+                    "reset": {
+                        "description": "Stel de optie uitsluiten opnieuw in"
+                    },
+                    "set": {
+                        "description": "Sluit nummers van de opgegeven groepen uit in de spelopties",
+                        "perGroupDescription": "De {{ordinalNum}} groep die moet worden uitgesloten"
+                    }
+                },
+                "name": "uitsluiten"
+            }
+        },
+        "exp": {
+            "activeModifiers": "🚀 Actieve modifiers 🚀",
+            "artistGroupGuessModePenalty": "Straf voor het raden van artiesten-/groepsmodus",
+            "bonusArtists": "Nummers van bonusartiesten raden",
+            "bonusArtistsTitle": "🎤 Huidige bonusartiesten 🎤",
+            "bonusDescription": "Je kunt bonus-EXP krijgen voor het volgende",
+            "bonusTitle": "Manieren om EXP-bonussen te krijgen",
+            "explanation": {
+                "bonusArtistGuess": "Juist raden voor een bonusartiest",
+                "firstGameOfDay": "Eerste spel van de dag",
+                "powerHour": "Spelen tijdens een KMQ Power Hour of Weekend",
+                "quickGuess": "Snel raden",
+                "rareGuess": "Bonus voor zeldzame juiste antwoorden",
+                "rareGuessRange": "{{rareGuessLowerBound}} tot {{rareGuessUpperBound}}",
+                "streak": "Een reeks van meer dan 5 juiste antwoorden",
+                "voting": "Stemmen"
+            },
+            "firstGameOfDayBonus": "Bonus voor eerste spel van de dag",
+            "help": {
+                "description": "Laat je huidige EXP-modifier en de lijst met huidige bonus-EXP-artiesten zien.",
+                "name": "exp"
+            },
+            "lowSongCountPenalty": "Straf voor weinig nummers",
+            "multipleChoicePenalty": "Straf voor meervoudige keuze",
+            "powerHourBonus": "Power Hour-bonus",
+            "shuffleChronologicalPenalty": "Straf voor het schudden van de chronologische volgorde",
+            "shufflePopularityPenalty": "Straf voor het schudden van de populariteit",
+            "shuffleWeightedEasyPenalty": "Straf voor het schudden van eenvoudige weging",
+            "title": "EXP-bonussen",
+            "totalModifier": "Totale modifier",
+            "typosAllowedPenalty": "Straf toegestaan voor typfouten",
+            "voteBonus": "Stembonus"
+        },
+        "feedback": {
+            "help": {
+                "description": "Geef feedback of meld eventuele bugs over KMQ",
+                "name": "feedback"
+            },
+            "questions": {
+                "improveKMQ": {
+                    "placeholder": "KMQ is TE verslavend. Mijn familie en vrienden missen me.",
+                    "question": "Wat kan er worden verbeterd aan KMQ?"
+                },
+                "likeKMQ": {
+                    "placeholder": "KMQ helpt me nieuwe muziek en genres te ontdekken.",
+                    "question": "Wat vind je leuk aan KMQ?"
+                },
+                "title": "KMQ-feedback"
+            }
+        },
+        "forcehint": {
+            "failure": {
+                "notOwner": {
+                    "description": "Alleen de eigenaar van het spel ({{mentionedUser}}) kan force-hint gebruiken."
+                }
+            },
+            "help": {
+                "description": "Ontvang direct een hint voor het huidige nummer zonder dat er gestemd hoeft te worden.",
+                "name": "forcedwing"
+            },
+            "hintIgnored": "Forcehint genegeerd"
+        },
+        "forceskip": {
+            "description": "Eigenaar heeft de ronde overgeslagen met de force-skip...",
+            "failure": {
+                "notOwner": {
+                    "description": "Alleen de eigenaar van het spel ({{mentionedUser}}) kan het huidige nummer met de force-skip overslaan."
+                }
+            },
+            "help": {
+                "description": "Sla het huidige nummer direct over zonder dat er gestemd hoeft te worden.",
+                "name": "forcedoverslaan"
+            },
+            "skipIgnored": "Force-skip genegeerd"
+        },
+        "gender": {
+            "help": {
+                "description": "Kies het geslacht van de artiesten waarvan je nummers wilt horen. De opties zijn de volgende: {{male}}, {{female}} en {{coed}}. Gebruik als alternatief {{genderAlternating}} om elke ronde af te wisselen tussen mannelijke en vrouwelijke artiesten.",
+                "example": {
+                    "alternating": "Wissel elke ronde af tussen mannelijke en vrouwelijke artiesten",
+                    "coed": "Speel alleen nummers van gemengde groepen (groepen met zowel mannelijke als vrouwelijke leden)",
+                    "female": "Speel alleen nummers van vrouwelijke artiesten",
+                    "maleFemale": "Speel nummers van zowel mannelijke als vrouwelijke artiesten",
+                    "reset": "Stel opnieuw in naar de standaardgeslachten man, vrouw en gemengd"
+                },
+                "interaction": {
+                    "description": "Kies het geslacht van de artiesten waarvan je nummers wilt horen.",
+                    "gender": "Het geslacht van de groepsleden of solist"
+                },
+                "name": "gender"
+            },
+            "warning": {
+                "gameOption": {
+                    "description": "Met slechts één gekozen groep werkt {{alternatingGenderCommand}} mogelijk niet zoals verwacht. Overweeg om meer groepen op te nemen om de geslachten correct af te wisselen.",
+                    "title": "Waarschuwing speloptie"
+                }
+            }
+        },
+        "goal": {
+            "failure": {
+                "gameOptionConflict": {
+                    "description": "Er is momenteel een {{elimination}} bezig. {{goal}} en {{elimination}} zijn onverenigbaar. Speel een {{classic}}- of {{teams}}-spel om {{goal}} te gebruiken."
+                },
+                "goalExceeded": {
+                    "description": "Het opgegeven doel overschrijdt de hoogste score. Verhoog je doel of begin een nieuw spel.",
+                    "title": "Fout bij toepassen doel"
+                }
+            },
+            "help": {
+                "description": "Zodra de speler met de meeste punten de doelscore bereikt, eindigt het spel. Door het aan te roepen zonder argumenten wordt het doel uitgeschakeld. Als er een spel bezig is, moet het doel de hoogste score overschrijden.",
+                "example": {
+                    "reset": "Schakelt het doel uit",
+                    "set": "De eerste speler die {{goal}} bereikt, wint het spel"
+                },
+                "interaction": {
+                    "description": "Zodra de speler met de meeste punten de doelscore bereikt, eindigt het spel.",
+                    "score": "Het aantal punten dat nodig is om te winnen"
+                },
+                "name": "doel",
+                "usage": {
+                    "points": "punten"
+                }
+            }
+        },
+        "groups": {
+            "help": {
+                "description": "Selecteer zoveel groepen die je wilt horen. Een lijst met groepsnamen kun je [hier]({{groupList}}) vinden.",
+                "example": {
+                    "multipleGroups": "Speelt alleen nummers van {{groupOne}}, {{groupTwo}} en {{groupThree}}",
+                    "reset": "Stelt de groepsoptie opnieuw in",
+                    "singleGroup": "Speelt alleen nummers van {{group}}"
+                },
+                "interaction": {
+                    "add": {
+                        "description": "Voeg de gegeven groepen toe aan de spelopties",
+                        "perGroupDescription": "De {{ordinalNum}} groep die moet worden toegevoegd"
+                    },
+                    "description": "Selecteer artiesten om exclusief af te spelen",
+                    "remove": {
+                        "description": "Verwijder de gegeven groepen uit de spelopties",
+                        "perGroupDescription": "De {{ordinalNum}} groep die moet worden verwijderd"
+                    },
+                    "reset": {
+                        "description": "Stel de optie groepen opnieuw in"
+                    },
+                    "set": {
+                        "description": "Speel nummers van de gegeven groepen",
+                        "perGroupDescription": "De {{ordinalNum}} groep waarvan nummers moeten worden afgespeeld"
+                    }
+                },
+                "name": "groepen"
+            }
+        },
+        "guess": {
+            "help": {
+                "description": "Geef je antwoord voor het huidige nummer tijdens /play hidden.",
+                "example": {
+                    "song": "Gebruik {{name}} als je gok voor het huidige nummer"
+                },
+                "name": "gok"
+            },
+            "interaction": {
+                "failure": {
+                    "notHidden": {
+                        "description": "{{guessCommand}} kan alleen worden gebruikt tijdens {{playHiddenCommand}}.",
+                        "title": "Gok genegeerd"
+                    }
+                },
+                "guessReceived": {
+                    "description": "Je gokte {{guess}}",
+                    "title": "Gok ontvangen"
+                },
+                "name": "Je beste schot op het huidige nummer"
+            }
+        },
+        "guessmode": {
+            "help": {
+                "description": "Kies of je wilt gokken op de songtitel, artiestennaam of beide.",
+                "example": {
+                    "artist": "Typ de correcte naam van de artiest om een gameronde te winnen",
+                    "both": "Typ de correcte naam van de artiest (0,2 punten) of de naam van het nummer (1 punt) om een gameronde te winnen",
+                    "reset": "Stel opnieuw in op de standaard gokmodus van {{defaultGuessMode}}",
+                    "song": "Typ de correcte songnaam om een gameronde te winnen"
+                },
+                "name": "gokmodus"
+            },
+            "interaction": {
+                "guessMode": "Wat wordt beschouwd als een geldige gok"
+            }
+        },
+        "help": {
+            "command": "commando",
+            "description": "Typ {{play}} in de chat en de bot speelt een willekeurig k-popnummer af in VC. Het doel van dit spel is om als eerste de songnaam in de chat te raden.\nBekijk je huidige spelopties met {{options}}. Gebruik {{help}} actie:`[{{command}}]` om meer details te krijgen",
+            "examples": "Voorbeelden",
+            "failure": {
+                "noDocs": "Sorry, er is geen documentatie over {{action}}."
+            },
+            "help": {
+                "description": "Krijg hulp bij de functionaliteit van de bot.",
+                "example": {
+                    "allCommands": "Geeft alle beschikbare commando's en een korte beschrijving weer",
+                    "sampleCommand": "Geeft een gedetailleerde beschrijving voor het afsnijdingscommando weer"
+                },
+                "name": "hulp"
+            },
+            "interaction": {
+                "action": "De naam van een commando waar je documentatie van wilt krijgen."
+            },
+            "title": "{{kmq}} Commando-hulp"
+        },
+        "hint": {
+            "artistName": "Artiestennaam",
+            "failure": {
+                "invalidHintRequest": {
+                    "eliminated": {
+                        "description": "Alleen nog levende spelers mogen hints aanvragen."
+                    },
+                    "multipleChoice": {
+                        "description": "Je kunt geen hints aanvragen tijdens het spelen van een meervoudige keuze."
+                    },
+                    "noSongPlaying": {
+                        "description": "Een hint kan alleen worden aangevraagd als er een liedje wordt afgespeeld."
+                    },
+                    "title": "Ongeldige hintverzoek"
+                }
+            },
+            "help": {
+                "description": "Geeft een hint voor het nummer dat momenteel wordt afgespeeld.",
+                "name": "hint"
+            },
+            "request": {
+                "description": "{{hintCounter}} hintverzoeken ontvangen.",
+                "title": "Hintverzoek"
+            },
+            "songName": "Songnaam",
+            "title": "Tip"
+        },
+        "include": {
+            "failure": {
+                "unrecognizedGroups": {
+                    "included": "meegenomen"
+                }
+            },
+            "help": {
+                "description": "Selecteer zoveel groepen die je wilt toevoegen, waarbij andere filters worden genegeerd ({{gender}}, {{artisttype}}, etc.). Een lijst met groepsnamen kun je [hier]({{groupList}}) vinden.",
+                "example": {
+                    "multipleGroups": "Neem nummers van {{groupOne}}, {{groupTwo}} en {{groupThree}} op",
+                    "reset": "Stelt de optie opnemen opnieuw in",
+                    "singleGroup": "Neem nummers van {{group}} op"
+                },
+                "interaction": {
+                    "add": {
+                        "description": "Voeg de gegeven groepen toe aan de optie spel opnemen",
+                        "perGroupDescription": "De {{ordinalNum}} groep die moet worden toegevoegd"
+                    },
+                    "description": "Selecteer artiesten die je wilt opnemen",
+                    "remove": {
+                        "description": "Verwijder de gegeven groepen uit de optie spel opnemen",
+                        "perGroupDescription": "De {{ordinalNum}} groep die moet worden verwijderd"
+                    },
+                    "reset": {
+                        "description": "Stel de optie opnemen opnieuw in"
+                    },
+                    "set": {
+                        "description": "Neem nummers van de gegeven groepen op in de spelopties",
+                        "perGroupDescription": "Groep {{ordinalNum}} om op te nemen"
+                    }
+                },
+                "name": "opnemen"
+            }
+        },
+        "join": {
+            "failure": {
+                "joinError": {
+                    "alreadyInTeam": {
+                        "description": "Je bent al lid van dit team."
+                    },
+                    "badEmojis": {
+                        "description": "Je kunt alleen emoji's opnemen die in deze server staan."
+                    },
+                    "invalidCharacters": {
+                        "description": "Je teamnaam bevat alleen ongeldige tekens."
+                    },
+                    "invalidTeamName": {
+                        "title": "Ongeldige teamnaam"
+                    },
+                    "noTeamName": {
+                        "description": "Geef een teamnaam op om een team te maken of om je bij dat team aan te sluiten als het al bestaat ({{joinCommand}} [teamnaam])"
+                    },
+                    "title": "Deelnamefout"
+                }
+            },
+            "playerJoined": {
+                "title": "Speler heeft zich aangesloten"
+            },
+            "playerJoinedTeam": {
+                "afterGameStart": {
+                    "description": "{{mentionedUser}} denkt dat ze hebben wat nodig is om {{teamName}} naar de overwinning te leiden!"
+                },
+                "beforeGameStart": {
+                    "description": "Zodra iedereen lid is van een team, start je {{beginCommand}} het spel!"
+                },
+                "title": "{{joiningUser}} heeft zich aangesloten bij {{teamName}}"
+            },
+            "team": {
+                "join": "Voer {{joinCommand}} teamnaam:{{teamNameWithCleanEmojis}} in om je bij {{teamName}} aan te sluiten naast {{mentionedUser}}.{{startGameInstructions}}",
+                "new": "Nieuw team gemaakt",
+                "startGameInstructions": "\nStart het spel met {{beginCommand}}."
+            }
+        },
+        "language": {
+            "help": {
+                "description": "Kies of afgespeelde nummers alleen in het Koreaans mogen zijn.",
+                "example": {
+                    "all": "Speel alle beschikbare nummers af",
+                    "korean": "Speelt alleen Koreaanse nummers af. Negeert nummers die in vreemde talen zijn: Engels, Japans, Chinees",
+                    "reset": "Stel opnieuw in op de standaardtaal van {{defaultLanguage}}"
+                },
+                "name": "taal"
+            },
+            "interaction": {
+                "language": "De taal van de muziek die moet worden afgespeeld"
+            }
+        },
+        "leaderboard": {
+            "duration": {
+                "allTime": "Alhoewel",
+                "daily": "Dagelijks",
+                "monthly": "Maandelijks",
+                "weekly": "Wekelijks",
+                "yearly": "Jaarlijks"
+            },
+            "enrolled": {
+                "description": "Je naam is nu zichtbaar op het klassement.",
+                "title": "Klassementinschrijving voltooid"
+            },
+            "failure": {
+                "alreadyEnrolled": {
+                    "description": "Je bent al zichtbaar op het klassement. Als je je weergavenaam wilt bijwerken, schrijf je dan uit en schrijf je weer in.",
+                    "title": "Speler al ingeschreven"
+                },
+                "empty": {
+                    "description": "Niemand heeft in dit tijdsinterval EXP verdiend. Nu is je kans om voor de eerste plaats te gaan!",
+                    "title": "Leeg klassement"
+                },
+                "game": {
+                    "noParticipants": {
+                        "description": "Iemand moet een punt scoren voordat dit commando werkt.",
+                        "title": "Geen deelnemers"
+                    }
+                },
+                "outOfRange": {
+                    "description": "Het klassement gaat niet zo ver terug.",
+                    "title": "😐"
+                }
+            },
+            "gamesPlayed": "{{gameCount}} spellen gespeeld",
+            "help": {
+                "description": "Bekijk het KMQ-klassement.",
+                "example": {
+                    "enroll": "Maakt het mogelijk dat je naam wordt weergegeven in het klassement",
+                    "gameMonthlyPage": "Geeft de 2e pagina weer van het maandelijkse scorebord met spelers met punten in het huidige spel",
+                    "global": "Geef het wereldwijde klassement weer",
+                    "globalPage": "Geeft de 3e pagina van het wereldwijde klassement weer",
+                    "globalWeeklyPage": "Geeft de 4e pagina van het klassement weer, op EXP behaald deze week",
+                    "server": "Geeft het serverbrede klassement weer",
+                    "serverSongsGuessedPage": "Geeft de 3e pagina van het serverbrede klassement weer op totaal geraden nummers",
+                    "unenroll": "Verbergt je naam uit het klassement"
+                },
+                "name": "klassement",
+                "usage": {
+                    "pageNumber": "paginanummer"
+                }
+            },
+            "interaction": {
+                "duration": "Kies hoe ver terug het klassement moet gaan",
+                "page": "Kies vanaf welke pagina het klassement moet worden weergegeven",
+                "scope": "Kies welke spelers moeten worden opgenomen in het klassement",
+                "type": "Kies wat de volgorde van het klassement bepaalt"
+            },
+            "levelEntry": {
+                "permanent": "{{level}} {{formattedNumber}} ({{rankName}})",
+                "temporary": "{{formattedNumber}} {{levelPluralized}} behaald"
+            },
+            "quote": {
+                "name": "Wil je dat je naam in het klassement verschijnt? Zie {{command}}",
+                "nextPage": "Wil je de volgende pagina van het klassement zien? Zie {{command}}"
+            },
+            "rankNumber": "Rangnummer #{{rank}}",
+            "resets": "Stelt {{timestamp}} opnieuw in",
+            "scope": {
+                "currentGame": "Huidig spel",
+                "global": "Wereldwijd",
+                "server": {
+                    "noName": "Server",
+                    "withName": "{{serverName}}'s"
+                }
+            },
+            "songsGuessed": "{{songsGuessed}} nummers geraden",
+            "title": "{{leaderboardScope}} {{leaderboardDuration}} klassement {{leaderboardType}}",
+            "type": {
+                "byGamesPlayed": "op gespeelde spellen",
+                "bySongsGuessed": "op geraden nummers"
+            },
+            "unenrolled": {
+                "description": "Je bent niet langer zichtbaar op het klassement.",
+                "title": "Afmelden klassement voltooid"
+            },
+            "validation": {
+                "firstArg": "Er werd een van de volgende geldige waarden verwacht voor het eerste argument: (een positief getal, {{typeOrScopeOrDuration}})",
+                "secondArg": "Er werd een van de volgende geldige waarden verwacht voor het tweede argument: (een positief getal, {{argument}})",
+                "thirdArg": "Er werd een positief getal verwacht voor het derde argument"
+            }
+        },
+        "limit": {
+            "failure": {
+                "invalidLimit": {
+                    "greaterThanStart": {
+                        "description": "Eindlimiet moet groter zijn dan de beginlimiet."
+                    },
+                    "greaterThanZero": {
+                        "description": "Eindlimiet moet groter zijn dan 0."
+                    },
+                    "title": "Ongeldige eindlimiet"
+                }
+            },
+            "help": {
+                "description": "Stel een maximum aantal resultaten in voor de nummerquery. Hiermee wordt effectief het \"Top X aantal nummers\" ingesteld op basis van de geselecteerde filters.",
+                "example": {
+                    "reset": "Reset naar de standaardlimiet van {{defaultLimit}}",
+                    "singleLimit": "Speelt de top {{limit}} meest beluisterde nummers af van de momenteel geselecteerde opties",
+                    "twoLimits": "Speelt tussen de {{limitStart}} en {{limitEnd}} meest beluisterde nummers af van de momenteel geselecteerde opties"
+                },
+                "interaction": {
+                    "description": "Stel een maximum aantal resultaten in voor de nummerquery",
+                    "description_range": "Speel tussen de [limit_start] en [limit_end] beste nummers.",
+                    "description_top": "Speel de [limit] beste nummers.",
+                    "limit": "Speel zoveel van de beste nummers",
+                    "limit_end": "Speel nummers af tussen de startlimiet en deze waarde",
+                    "limit_start": "Begin vanaf de meest beluisterde nummers met het afspelen vanaf [limit_start]"
+                },
+                "name": "limiet"
+            }
+        },
+        "list": {
+            "currentValue": {
+                "nothingSelected": "Momenteel niets geselecteerd",
+                "title": "Huidige {{optionListed}}-waarde"
+            },
+            "failure": {
+                "groupsInFile": {
+                    "description": "Te veel groepen om op te noemen in een Discord-bericht, zie het bijgevoegde bestand.",
+                    "noFilePermissions": {
+                        "description": "Te veel groepen om op te noemen in een Discord-bericht. De bot heeft {{attachFile}}-machtigingen nodig om het groepenlijstbestand verzendt.",
+                        "title": "Fout bij verzenden bestand"
+                    }
+                }
+            },
+            "help": {
+                "description": "Geeft de momenteel geselecteerde groepen weer voor een bepaalde speloptie.",
+                "example": {
+                    "exclude": "Somt de huidige {{exclude}}-opties op",
+                    "groups": "Somt de huidige {{groups}}-opties op",
+                    "include": "Somt de huidige {{include}}-opties op"
+                },
+                "name": "lijst"
+            },
+            "interaction": {
+                "listType": "Of de momenteel ingestelde groepen, meegenomen groepen of uitgesloten groepen moeten worden afgedrukt"
+            }
+        },
+        "listen": {
+            "help": {
+                "description": "Stream nummers van de huidige opties.",
+                "example": "Muziek wordt afgespeeld in het huidige spraakkanaal.",
+                "name": "luister"
+            },
+            "musicStarting": "Muziek start in #{{textChannelName}} in 🔊 {{voiceChannelName}}"
+        },
+        "locale": {
+            "help": {
+                "description": "Verander de taal van de bot.",
+                "example": {
+                    "reset": "Stel de taal van de bot opnieuw in op {{defaultLocale}}",
+                    "toLanguage": "Verander de taal van de bot in {{language}}"
+                },
+                "interaction": {
+                    "description": "Verander de taal van de bot.",
+                    "language": "De taal waarin moet worden gewijzigd"
+                },
+                "name": "landinstellingen",
+                "usage": {
+                    "language": "taal"
+                }
+            },
+            "language": {
+                "en": "Engels",
+                "es-ES": "Spaans",
+                "fr": "Frans",
+                "ja": "Japans",
+                "ko": "Koreaans",
+                "zh-CN": "Chinees"
+            },
+            "updatedDescription": "De taal van de bot is bijgewerkt naar `{{language}}`."
+        },
+        "lookup": {
+            "help": {
+                "description": "Controleer of een bepaalde YouTube-video is opgenomen in de database van KMQ en de huidige spelopties.",
+                "example": {
+                    "song": "Geeft informatie over {{song}} van {{artist}}."
+                },
+                "interaction": {
+                    "byLink": {
+                        "description": "Zoek een nummer via de YouTube-link",
+                        "field": "De YouTube-link van het nummer"
+                    },
+                    "byName": {
+                        "description": "Filter nummers op hun naam en/of artiest",
+                        "field": {
+                            "artist": "De artiest die het nummer maakte",
+                            "song": "De naam van het nummer"
+                        }
+                    }
+                },
+                "name": "opzoeken"
+            },
+            "inCurrentGameOptions": "In de huidige spelopties?",
+            "inKMQ": "Dit nummer is opgenomen in KMQ! Hier is de link naar [Daisuki]({{link}}).",
+            "notFound": {
+                "description": "Het opgevraagde nummer is niet gevonden in de kopie van KMQ van de Daisuki-database, daarom is het niet opgenomen in KMQ.",
+                "title": "Nummer niet gevonden"
+            },
+            "notInKMQ": "Dit nummer heeft een vermelding op [Daisuki]({{link}}), maar het is niet opgenomen in KMQ.",
+            "songNameSearchResult": {
+                "notFoundDescription": "Kon geen nummers met die naam vinden",
+                "successDescription": "De volgende nummers zijn beschikbaar in KMQ:",
+                "title": "Zoekresultaten"
+            },
+            "validation": {
+                "invalidYouTubeID": "Een geldig YouTube-ID of een link verwacht."
+            }
+        },
+        "multiguess": {
+            "help": {
+                "description": "Stelt in of meerdere mensen een nummer correct kunnen raden. Wanneer {{on}} het geval is, hebben spelers 1,5 seconde na het geven van het eerste correcte antwoord om door te gaan met antwoorden. Het eerste antwoord ontvangt volledige EXP, correcte antwoorden die daarna komen, ontvangen vermenigvuldigd minder EXP.",
+                "example": {
+                    "off": "Alleen de eerste persoon die correct antwoordt, ontvangt het punt",
+                    "on": "Maakt een respijtperiode van 1,5 seconde mogelijk vanaf het moment dat de eerste correcte gok gebeurt. Meerdere spelers kunnen correct raden",
+                    "reset": "Stel opnieuw in op het standaard multiguess-type van {{defaultMultiguess}}"
+                },
+                "interaction": {
+                    "description": "Stelt in of meerdere mensen een nummer correct kunnen raden",
+                    "multiguess": "Of je toe wilt staan dat meerdere mensen correct raden"
+                },
+                "name": "multigokken"
+            }
+        },
+        "news": {
+            "disclaimer": "Deze samenvatting is door AI gegenereerd en is mogelijk niet nauwkeurig",
+            "error": {
+                "description": "Het ophalen van het laatste nieuws is mislukt. Probeer het later opnieuw.",
+                "title": "Nieuwsfout"
+            },
+            "help": {
+                "description": "Ontvang het laatste K-popnieuws van internet!",
+                "example": {
+                    "get": "Zie een overzicht van het K-popnieuws van vandaag",
+                    "subscribe": "Ontvang een wekelijks nieuwsoverzicht in dit tekstkanaal",
+                    "unsubscribe": "Ontvang geen dagelijkse nieuwsupdates meer in dit tekstkanaal"
+                },
+                "interaction": {
+                    "daily": "Ontvang het K-popnieuws van vandaag",
+                    "monthly": "Ontvang het K-popnieuws van deze maand",
+                    "range": "Het tijdsinterval waarvan je nieuws wilt zien",
+                    "subscribe": "Meld je aan om nieuwsupdates te ontvangen in dit tekstkanaal",
+                    "unsubscribe": "Ontvang geen nieuwsupdates meer in dit tekstkanaal",
+                    "weekly": "Ontvang het K-popnieuws van deze week"
+                },
+                "name": "nieuws"
+            },
+            "subscribe": {
+                "alreadySubscribed": {
+                    "description": "Je bent al geabonneerd op {{interval}} nieuwsupdates in dit tekstkanaal.",
+                    "title": "Al geabonneerd"
+                },
+                "description": "Je ontvangt nu {{interval}} nieuwsupdates in dit tekstkanaal.",
+                "title": "Geabonneerd op Kimiqo News Network"
+            },
+            "title": "Kimiqo Nieuws Netwerk",
+            "unsubscribe": {
+                "description": "Je ontvangt niet langer {{interval}} nieuwsupdates in dit tekstkanaal.",
+                "notSubscribed": {
+                    "description": "Je bent niet geabonneerd op {{interval}} nieuwsupdates in dit tekstkanaal.",
+                    "title": "Niet geabonneerd"
+                },
+                "title": "Uitgeschreven voor het Kimiqo News Network"
+            }
+        },
+        "options": {
+            "duration": "{{durationInMinutes}} minuten",
+            "help": {
+                "description": "Geeft de huidige spelopties weer.",
+                "name": "opties"
+            },
+            "listeningSessionNotAvailable": "Sommige opties zijn niet beschikbaar tijdens een luistersessie",
+            "notSet": "Niet ingesteld",
+            "overview": "Speelt nu de bovenste {{limit}} van de {{totalSongs}} beschikbare nummers af van de volgende opties:",
+            "perCommandHelp": "Zoek je informatie over hoe je een opdracht moet gebruiken? Bekijk {{helpCommand}} actie:[opdracht] om meer te weten te komen.",
+            "preset": "Vooraf ingesteld",
+            "reset": "{{presetOrOption}}-reset",
+            "spotify": "Speelt nu {{songCount}} nummers van Spotify af met de volgende opties:",
+            "timer": "{{timerInSeconds}} sec",
+            "title": "Opties",
+            "updated": "{{presetOrOption}} bijgewerkt"
+        },
+        "ost": {
+            "help": {
+                "description": "Kies of je OST-nummers wilt opnemen.",
+                "example": {
+                    "exclude": "Sluit OST-nummers uit",
+                    "exclusive": "Speel uitsluitend OST-nummers af",
+                    "include": "Neem OST-nummers op",
+                    "reset": "Stel opnieuw in op de standaardoptie van {{defaultOst}}"
+                },
+                "name": "ost"
+            },
+            "interaction": {
+                "ost": "Of je OST-nummers wilt opnemen, uitsluitend wilt afspelen of wilt uitsluiten"
+            }
+        },
+        "play": {
+            "exp": {
+                "doubleExpForVoting": "krijgt dubbele EXP voor [stemmen]({{link}})!",
+                "howToVote": "Zie {{vote}} voor informatie over hoe je kunt stemmen. Bedankt voor je steun aan KMQ!",
+                "powerHour": "KMQ POWER HOUR ACTIEF",
+                "weekend": "DOUBLE EXP WEEKEND ACTIEF"
+            },
+            "failure": {
+                "alreadyInSession": "Spel al bezig",
+                "botRestarting": {
+                    "description": "Bot start over {{timeUntilRestart}} minuten opnieuw op, wacht tot de bot weer actief is!",
+                    "title": "Kan geen nieuw spel starten"
+                },
+                "hiddenGameMode": {
+                    "description": "Je hebt geen toestemming om dit commando te gebruiken.",
+                    "title": "Verborgen spelmodus"
+                },
+                "overrideTeams": {
+                    "description": "Als je van plan was een {{oldGameType}}-spel te starten, beëindig je {{end}} dit spel, roep je {{playOldGameType}} aan, {{gameSpecificInstructions}}, en roep je vervolgens {{begin}} aan.",
+                    "teams": {
+                        "join": "{{join}} team_name:[teamnaam] een team"
+                    },
+                    "title": "Negeert {{playOldGameType}}"
+                }
+            },
+            "gameStarting": "Spel start binnenkort in #{{textChannelName}} in 🔊 {{voiceChannelName}}",
+            "help": {
+                "description": "Start een KMQ-spel.",
+                "example": {
+                    "classic": "Start een klassiek KMQ-spel (typ eerst je gok om een punt te krijgen)",
+                    "elimination": "Start een eliminatiegame van KMQ waarbij elke speler begint met {{lives}} levens",
+                    "hidden": "Start een verborgen spel van KMQ, waarbij spelers alleen kunnen antwoorden met /gokken",
+                    "teams": "Verdeeld je in zoveel teams als je wilt en ontdek van wie je kunt op aan om je te helpen winnen!"
+                },
+                "interaction": {
+                    "lives": "Kies met hoeveel levens elke speler begint"
+                },
+                "name": "speel",
+                "usage": {
+                    "lives": "levens"
+                }
+            },
+            "interaction": {
+                "teams_begin": "Start een 'teams'-spelmodus van KMQ. Kan alleen worden gebruikt na `/play teams create`",
+                "teams_create": "Bereidt een 'teams'-spelmodus van KMQ voor om een team te creëren.",
+                "teams_join": "Word lid van een team. Kan alleen worden gebruikt na `/play team create`",
+                "teams_join_team_name": "De naam van het team om lid van te worden"
+            },
+            "team": {
+                "joinTeam": {
+                    "description": "Teamleiders, typ {{join}} om een nieuw team te vormen. Onthoud dat door halverwege het spel van team te wisselen je al je huidige scores en EXP verliest.",
+                    "title": "{{join}} een team!"
+                }
+            },
+            "typeGuess": "Luister naar het nummer en typ je gok!",
+            "voteReminder": "Psst. Verdien meer EXP door te stemmen (zie {{vote}})"
+        },
+        "preset": {
+            "deleted": {
+                "description": "Vooraf ingestelde {{presetName}} succesvol verwijderd.",
+                "title": "Preset verwijderd"
+            },
+            "exported": {
+                "description": "Importeer {{presetName}} als een nieuwe preset in andere servers met behulp van:\n{{presetImport}} `exported_preset:{{presetUUID}} new_preset_name:[preset_name]`\n\nJe kunt de opties van de preset ook rechtstreeks laden door te gebruiken:\n{{presetLoad}} `preset_name:{{presetUUID}}`",
+                "title": "Preset geëxporteerd"
+            },
+            "failure": {
+                "alreadyExists": {
+                    "description": "Preset {{presetNameFormatted}} bestaat al. Je kunt de oude verwijderen met {{presetDelete}} `preset_name:{{presetName}}`.",
+                    "title": "Preset bestaat al"
+                },
+                "illegalPrefix": {
+                    "description": "De naam van de preset mag niet beginnen met {{importPrefix}}.",
+                    "title": "Preset-fout"
+                },
+                "lengthyName": {
+                    "description": "De naam van de preset mag maximaal {{presetNameMaxLength}} tekens lang zijn.",
+                    "title": "Presetnaam te lang"
+                },
+                "missingIdentifier": {
+                    "description": "Je moet een preset-id opgeven. Gebruik {{presetExport}} `preset_name:[preset_name]` om een preset-id op te halen.",
+                    "title": "Preset-id ontbreekt"
+                },
+                "missingName": {
+                    "description": "Je moet een presetnaam opgeven.",
+                    "title": "Presetnaam ontbreekt"
+                },
+                "noSuchPreset": {
+                    "description": "Preset {{presetName}} bestaat niet.",
+                    "identifier": {
+                        "description": "Preset-id {{presetUUID}} bestaat niet."
+                    },
+                    "title": "Geen dergelijke preset"
+                },
+                "tooMany": {
+                    "description": "Elke guild mag maximaal {{maxNumPresets}} presets hebben. Verwijder er een paar voordat je er meer toevoegt.",
+                    "title": "Te veel presets"
+                }
+            },
+            "help": {
+                "description": "Verschillende acties om presets voor spelopties op te slaan/te laden. Presetnaam mag maar uit één woord bestaan.",
+                "example": {
+                    "delete": "Verwijdert de genoemde preset",
+                    "export": "Retourneert een unieke id die kan worden gebruikt om de genoemde preset te laden/importeren",
+                    "import": "Maakt een nieuwe preset aan met behulp van een geëxporteerde preset-id",
+                    "list": "Geeft een lijst met alle presets van de server",
+                    "load": "Laadt de genoemde preset of preset-id ({{exampleIdentifier}}) in de spelopties",
+                    "replace": "Vervangt de opties van de genoemde preset door de huidige spelopties",
+                    "save": "Slaat de huidige spelopties op als een preset"
+                },
+                "name": "voorinstelling",
+                "usage": {
+                    "presetIdentifier": "preset_id",
+                    "presetName": "presetnaam"
+                }
+            },
+            "imported": {
+                "description": "Laad de nieuw geïmporteerde preset met {{presetLoad}} `preset_name:{{presetName}}`.",
+                "title": "Preset geïmporteerd"
+            },
+            "interaction": {
+                "delete": {
+                    "presetName": "De preset om te verwijderen"
+                },
+                "export": {
+                    "presetName": "De preset om te exporteren"
+                },
+                "import": {
+                    "exportedPresetID": "De ID van de te importeren preset",
+                    "presetName": "De naam die je aan de geïmporteerde preset wilt geven"
+                },
+                "load": {
+                    "presetName": "De preset om te laden"
+                },
+                "replace": {
+                    "presetName": "De preset om te vervangen"
+                },
+                "save": {
+                    "presetName": "Hoe je deze preset wilt noemen"
+                }
+            },
+            "list": {
+                "failure": {
+                    "noPresets": {
+                        "description": "Je hebt geen presets. Raadpleeg {{presetHelp}} om te zien hoe je er een kunt maken."
+                    }
+                },
+                "loadInstructions": {
+                    "footer": "Laad een preset met {{presetLoad}} [preset_name]"
+                },
+                "title": "Beschikbare presets"
+            },
+            "replaced": {
+                "title": "Preset vervangen"
+            },
+            "saved": {
+                "title": "Preset opgeslagen"
+            },
+            "savedOrReplaced": {
+                "description": "Je kunt deze preset later laden met {{presetLoad}}."
+            }
+        },
+        "profile": {
+            "badges": "Badges",
+            "experience": "Ervaring",
+            "failure": {
+                "notFound": {
+                    "badUsage": {
+                        "description": "Zorg ervoor dat je dit commando correct gebruikt. Zie {{profileHelp}} voor meer details."
+                    },
+                    "description": "De opgegeven gebruikers-ID is niet gevonden. Zie {{profileHelp}} voor meer informatie.",
+                    "title": "Geen profiel gevonden"
+                }
+            },
+            "firstPlayed": "Eerste keer gespeeld",
+            "gamesPlayed": "Gespeelde spellen",
+            "help": {
+                "description": "Geeft je spelstatistieken weer.",
+                "example": {
+                    "otherPlayerID": "Bekijkt een spelersprofiel op basis van hun Discord-ID",
+                    "otherPlayerMention": "Bekijkt het spelersprofiel van {{playerName}}",
+                    "self": "Bekijk je eigen spelersprofiel"
+                },
+                "name": "profiel",
+                "usage": {
+                    "mention": "vermeld"
+                }
+            },
+            "ineligibleForRank": "Niet in aanmerking komend voor rang",
+            "interaction": {
+                "userID": "De gebruikers-ID van de speler waarvan je het profiel wilt bekijken",
+                "userMention": "Vermeld de gebruiker waarvan je het profiel wilt bekijken"
+            },
+            "lastActive": "Laatst actief",
+            "overallRank": "Totale rang",
+            "rank": {
+                "almighty": "Almachtige heerser van het zonnestelsel",
+                "aoty": "Artiest van het jaar",
+                "benevolent": "Welwillende heerser van de Aarde",
+                "bonsang": "Bonsang Award-winnaar",
+                "ceo": "CEO van KMQ Entertainment",
+                "daesang": "Daesang Award-winnaar",
+                "divine": "Goddelijke heerser van de sterren",
+                "enlightened": "Verlichte heerser van de Melkweg",
+                "immortal": "Onsterfelijke heerser van het universum",
+                "newAoty": "Nieuwe artiest van het jaar",
+                "novice": "Beginner",
+                "nugu": "Nobody",
+                "omniscient": "Alwetende heerser van het multiversum",
+                "preDebut": "Pre-debuut",
+                "president": "President van Zuid-Korea",
+                "reuniter": "Hereniging van de twee Korea's",
+                "ruler": "Heerser van de twee Korea's",
+                "supreme": "Oppermachtige heerser van de twee Korea's",
+                "trainee": "Stagiair"
+            },
+            "songsGuessed": "Geraden nummers",
+            "timesVoted": "Aantal keer gestemd"
+        },
+        "recentlyadded": {
+            "description": "De volgende nummers zijn de afgelopen twee weken aan KMQ toegevoegd:",
+            "failure": {
+                "noSongs": {
+                    "description": "Kom later terug om te zien of KMQ nieuwe nummers heeft toegevoegd.",
+                    "title": "Onlangs geen nummers toegevoegd"
+                }
+            },
+            "help": {
+                "description": "Bekijk nummers die de afgelopen twee weken aan KMQ zijn toegevoegd.",
+                "example": "Laat recent toegevoegde nummers zien",
+                "name": "recenttoegevoegd"
+            },
+            "title": "Recent toegevoegde nummers"
+        },
+        "release": {
+            "help": {
+                "description": "Kies of je alleen officiële muziekvideo's wilt opnemen, of alle video's (b-kanten, dansoefeningen, akoestische versies, remixes, etc.).",
+                "example": {
+                    "all": "Speelt alle beschikbare video's af, inclusief dansoefeningen, akoestische versies, remixen",
+                    "official": "Speelt alleen {{official}} muziekvideo's af",
+                    "reset": "Stel opnieuw in op het standaard releasetype van {{defaultRelease}}"
+                },
+                "interaction": {
+                    "description": "Kies of je alleen officiële muziekvideo's, of alle video's wilt opnemen.",
+                    "release": "Het type releases om af te spelen"
+                },
+                "name": "uitgave"
+            }
+        },
+        "remix": {
+            "help": {
+                "description": "Kies of je remixnummers wilt opnemen.",
+                "example": {
+                    "exclude": "Sluit remixen uit",
+                    "include": "Neem remixen op",
+                    "reset": "Stel opnieuw in op de standaardoptie van {{defaultRemix}}"
+                },
+                "name": "remix"
+            },
+            "interaction": {
+                "remix": "Of je remixnummers wilt opnemen of uitsluiten"
+            }
+        },
+        "remove": {
+            "failure": {
+                "noGroupsSelected": {
+                    "description": "Er zijn momenteel geen groepen geselecteerd.",
+                    "title": "Verwijderen mislukt"
+                },
+                "unrecognizedGroups": {
+                    "removed": "verwijderd"
+                }
+            },
+            "help": {
+                "description": "Verwijdert een of meerdere groepen uit de huidige {{groups}}, {{exclude}} of {{include}}-opties",
+                "example": {
+                    "exclude": "Verwijdert {{groupOne}}, {{groupTwo}} en {{groupThree}} uit de huidige {{exclude}}-optie",
+                    "groups": "Verwijdert {{groupOne}} en {{groupTwo}} uit de huidige {{groups}}-optie",
+                    "include": "Verwijdert {{group}} uit de huidige {{include}}-optie"
+                },
+                "name": "verwijder"
+            }
+        },
+        "reset": {
+            "help": {
+                "description": "Stel de standaardopties voor het spel opnieuw in.",
+                "example": {
+                    "reset": "Herstelt naar de standaardopties voor het spel"
+                },
+                "name": "reset"
+            }
+        },
+        "score": {
+            "help": {
+                "description": "Zie het scorebord voor het huidige spel.",
+                "name": "score"
+            },
+            "scoreboardTitle": "Scorebord"
+        },
+        "seek": {
+            "help": {
+                "description": "Kies of elk nummer vanaf het begin, het midden of op een willekeurig punt moet worden afgespeeld.",
+                "example": {
+                    "beginning": "Nummer wordt vanaf het begin afgespeeld",
+                    "middle": "Nummers worden vanaf het midden afgespeeld",
+                    "random": "Nummers worden vanaf een willekeurig punt in het midden afgespeeld",
+                    "reset": "Stel opnieuw in op de standaardshift van {{defaultSeek}}"
+                },
+                "name": "zoek"
+            },
+            "interaction": {
+                "seek": "Vanaf waar elk nummer moet worden afgespeeld"
+            }
+        },
+        "shuffle": {
+            "help": {
+                "description": "Kies hoe nummers worden geschud.",
+                "example": {
+                    "chronological": "Nummers worden afgespeeld in de volgorde waarin ze zijn uitgebracht, met enige willekeur. Er wordt een EXP-straf van {{penalty}} toegepast",
+                    "popularity": "Nummers worden afgespeeld op basis van afnemende populariteit. Er wordt een EXP-straf van {{penalty}} toegepast",
+                    "random": "Nummers worden willekeurig afgespeeld",
+                    "reset": "Stel opnieuw in op de standaard schudmodus van {{defaultShuffle}}"
+                },
+                "name": "schud"
+            },
+            "interaction": {
+                "shuffle": "Het type muziek schudden om in het spel te gebruiken"
+            }
+        },
+        "skip": {
+            "failure": {
+                "skipIgnored": "Skip genegeerd"
+            },
+            "help": {
+                "description": "Stem om het huidige nummer over te slaan. Een nummer wordt overgeslagen wanneer de meerderheid van de deelnemers ervoor kiest om het over te slaan.",
+                "name": "overslaan"
+            },
+            "success": {
+                "description": "{{skipCounter}} skips bereikt, skippen..."
+            },
+            "vote": {
+                "description": "{{skipCounter}} skipverzoeken ontvangen.",
+                "title": "Skipverzoek"
+            }
+        },
+        "special": {
+            "help": {
+                "description": "Wijzig de afspeelsnelheid van het nummer.",
+                "example": {
+                    "fast": "Speelt het nummer af in een snelle snelheid",
+                    "faster": "Speelt het nummer af met een snellere snelheid",
+                    "highPitch": "Speelt het nummer af met een hoge snelheid",
+                    "lowPitch": "Speelt het nummer af met een lage snelheid",
+                    "nightcore": "Speelt een nightcore-bewerking van het nummer af",
+                    "reset": "Reset de speciale optie",
+                    "reverse": "Speelt het nummer achterstevoren af",
+                    "slow": "Speelt het nummer af met een lage snelheid"
+                },
+                "name": "speciale"
+            },
+            "interaction": {
+                "special": "Het type aanpassing om te maken voor elk nummer"
+            }
+        },
+        "spotify": {
+            "fileFormat": {
+                "matched": "Toekomende nummers voor \"{{playlistName}}\":\n{{matchedSongs}}",
+                "unmatched": "Niet-toekomende nummers voor \"{{playlistName}}\":\n{{unmatchedSongs}}"
+            },
+            "help": {
+                "description": "Speelt uitsluitend nummers af van een bepaalde Spotify-playlist",
+                "example": {
+                    "playlistURL": "Start met het afspelen van nummers van de playlist",
+                    "reset": "Stop met afspelen van de playlist"
+                },
+                "interaction": {
+                    "matches": "Zie een lijst met overeenkomende en niet-overeenkomende nummers",
+                    "matchesLink": "Of je de YouTube-URL wilt weergeven voor overeenkomende nummers",
+                    "playlistURL": "De playlist waaruit nummers moeten worden opgehaald"
+                },
+                "name": "spotify"
+            },
+            "invalidURL": {
+                "description": "De link naar de playlist is ongeldig. Gebruik `Delen > Link naar playlist kopiëren` in Spotify om een geldige link op te halen.",
+                "title": "Ongeldige Spotify Playlist-URL"
+            },
+            "matched": {
+                "description": "Toekomende `{{matchedCount}}/{{totalCount}}` nummers.",
+                "title": "Speelt \"{{playlistName}}\" af op Spotify",
+                "truncated": "Opmerking: het verwerken van de playlist duurde te lang en is niet voltooid. Probeer het de volgende keer met een kleinere playlist."
+            },
+            "noMatches": {
+                "description": "Er zijn geen nummers gevonden.",
+                "title": "Het ophalen van nummers van Spotify is mislukt"
+            },
+            "noPlaylistSet": {
+                "description": "{{spotifySet}} een playlist voordat je dit commando gebruikt.",
+                "title": "Geen playlist ingesteld"
+            },
+            "parsing": "Spotify-playlist laden...",
+            "parsingAlreadyInProgress": {
+                "description": "Wacht tot de huidige playlist is geladen voordat je een nieuwe start.",
+                "title": "Playlist wordt al geladen"
+            }
+        },
+        "stats": {
+            "description": "Gedetailleerde botstatus: {{link}}",
+            "failure": {
+                "description": "Probeer het later opnieuw.",
+                "title": "Fout bij ophalen statistieken"
+            },
+            "footer": "\"Recente\" statistieken geven gegevens weer van de afgelopen 24 uur.",
+            "game": {
+                "activeGameSessions": "Actieve spelrondes",
+                "activePlayers": "Actieve spelers",
+                "latestSongUpdate": "Laatste songupdate",
+                "recentGameRounds": "(Recente) spelrondes",
+                "recentGameSessions": "(Recente) sessies",
+                "recentPlayers": "(Recente) spelers",
+                "title": "Spelstatistieken"
+            },
+            "help": {
+                "description": "Diverse gebruiks-/systeemstatistieken.",
+                "name": "stats"
+            },
+            "system": {
+                "apiLatency": "API-latentie",
+                "databaseLatency": "Database-latentie",
+                "loadAverage": "Systeembelasting gemiddeld",
+                "memoryUsage": "Geheugengebruik proces",
+                "requestLatency": "Latentie verzoek",
+                "title": "Systeemstatistieken",
+                "uptime": "Activiteitstijd"
+            },
+            "title": "Botstatistieken"
+        },
+        "subunits": {
+            "help": {
+                "description": "Kies of je de subunits van een groep automatisch wilt opnemen bij het gebruiken van {{groups}}.",
+                "example": {
+                    "exclude": "Neem subunits niet op",
+                    "include": "Neem automatisch subunits op. Bijvoorbeeld, {{groupCommand}} group_1:{{parentGroup}} zou nummers opnemen van {{parentGroup}}, {{subunitOne}}, {{subunitTwo}}, etc.",
+                    "reset": "Stel opnieuw in op de standaardoptie van {{defaultSubunit}}"
+                },
+                "name": "subunits"
+            },
+            "interaction": {
+                "subunits": "Of je subunits wilt opnemen"
+            }
+        },
+        "timer": {
+            "help": {
+                "description": "Doe je best om correct te raden voordat de tijd om is! Voer een tijd in secondes in of geef geen argumenten om uit te schakelen.",
+                "example": {
+                    "reset": "Schakelt de timer uit",
+                    "set": "In {{timer}} seconden eindigt de ronde als er geen gebruikers correct hebben geraden, en begint de volgende ronde automatisch"
+                },
+                "interaction": {
+                    "description": "Doe je best om correct te raden voordat de tijd om is!",
+                    "timer": "Hoeveel seconden om elk nummer af te spelen voordat wordt overgeslagen"
+                },
+                "name": "timer",
+                "usage": {
+                    "seconds": "seconden"
+                }
+            }
+        },
+        "upcomingreleases": {
+            "album": "Album",
+            "description": "De volgende nummers, albums en EP's worden uitgebracht:",
+            "ep": "EP",
+            "failure": {
+                "noReleases": {
+                    "description": "Kom later terug om te zien of er nieuwe releases zijn gepland.",
+                    "title": "Geen aankomende releases"
+                }
+            },
+            "help": {
+                "albumExample": "Laat aankomende albumreleases zien",
+                "defaultExample": "Laat aankomende artiestenreleases zien, inclusief nummers, albums en EP's",
+                "description": "Bekijk nummers, albums en extended plays (EP's) die binnenkort worden uitgebracht.",
+                "interaction": {
+                    "releaseType": "Het type release dat moet worden weergegeven"
+                },
+                "name": "upcomingreleases"
+            },
+            "single": "Single",
+            "title": "Aankomende releases"
+        },
+        "vote": {
+            "available": "Je kunt nu stemmen!",
+            "boost": {
+                "active": "Boost actief!",
+                "inactive": "Boost inactief"
+            },
+            "description": "Stem voor KMQ op [top.gg]({{voteLink}}) en je ontvangt 2x EXP voor een uur! Je kunt elke {{voteResetDuration}} uur stemmen.\n\nWe stellen het op prijs als je ook een [beoordeling]({{reviewLink}}) zou willen achterlaten.",
+            "help": {
+                "description": "Geeft instructies hoe je moet stemmen om 2x EXP voor een uur te ontvangen.",
+                "name": "vote"
+            },
+            "timeLeft": "Nog {{time}} over.",
+            "unavailable": {
+                "hours": "Je kunt over **{{hours}}** stemmen.",
+                "minutes": "Je kunt over **{{minutes}}** stemmen.",
+                "seconds": "Je kunt over **{{seconds}}** stemmen."
+            }
+        }
+    },
+    "fact": {
+        "didYouKnow": "Wist je?",
+        "fun": {
+            "bigThreeDominance": "Grappig feit: BTS, Blackpink en Twice zijn samen goed voor {{bigThreeViews}} YouTube-views, of {{proportion}}%",
+            "birthday": "Grappig feit: {{name}}'s verjaardag is deze maand op {{formattedDate}}!",
+            "companyByArtistCount": "Grappig feit: {{company}} is het entertainmentbedrijf met de {{ordinalNum}} meeste artiesten (inclusief subunits en solodebuten) met in totaal {{num}}!",
+            "companyByArtistViews": "Grappig feit: {{name}} is het {{ordinalNum}} meest bekeken entertainmentbedrijf met in totaal {{views}} YouTube-views!",
+            "fanclubName": "Grappig feit: de fanclubnaam van {{name}} is '{{fanclub}}'!",
+            "historicalGaonWeekly": "Grappig feit: deze week in {{year}} was {{songName}} het meest populair in de GAON Weekly-hitlijsten!",
+            "hyperlinkGenerator": "\"[{{songName}}\" van {{artistName}}]({{url}})",
+            "mostActiveYear": "Grappig feit: {{year}} was het {{ordinalNum}} meest actieve jaar in K-Pop met {{num}} uitgebrachte muziekvideo's!",
+            "mostAnnualAwardShowWins": "Grappig feit: {{artistName}} heeft de {{ordinalNum}} meeste jaarlijkse award show-overwinningen met {{wins}}!",
+            "mostDebuts": "Grappig feit: {{year}} had de {{ordinalNum}} meeste debuten met {{num}} debuterende groepen!",
+            "mostGaonAppearances": "Grappig feit: {{artistName}} stond de {{ordinalNum}} meeste keren in de digitale hitlijsten van GAON met {{appearances}} optredens!",
+            "mostGaonFirsts": "Grappig feit: {{artistName}} stond de {{ordinalNum}} meeste keren op de eerste plaats in de digitale hitlijsten van GAON met {{firstPlaceCount}} optredens!",
+            "mostLikedGroup": "Grappig feit: {{artist}} is de {{ordinalNum}} meest gelikte groep met in totaal {{likes}} YouTube-likes!",
+            "mostLikedVideo": "Grappig feit: {{hyperlink}} is de {{ordinalNum}} meest gelikte video met in totaal {{likes}} YouTube-likes!",
+            "mostMVs": "Grappig feit: {{artist}} heeft de {{ordinalNum}} meeste muziekvideo's met {{num}} op YouTube!",
+            "mostMusicShowWins": "Grappig feit: {{artist}} was de {{ordinalNum}} meest gewaardeerde groep met {{num}} gewonnen muziekprogramma's!",
+            "mostViewedGroup": "Grappig feit: {{artist}} is de {{ordinalNum}} meest bekeken groep met in totaal {{views}} YouTube-views!",
+            "mostViewedSoloist": "Grappig feit: {{artist}} is de {{ordinalNum}} meest bekeken soloartiest met in totaal {{views}} YouTube-views!",
+            "mostViewedVideo": "Grappig feit: {{hyperlink}} is de {{ordinalNum}} meest bekeken video met in totaal {{views}} YouTube-views!",
+            "mvViewMilestone": "Grappig feit: {{hyperlink}} heeft onlangs {{views}} views op YouTube bereikt!",
+            "newMV": "Nieuw nummeralert: Bekijk deze onlangs uitgebrachte muziekvideo, {{hyperlink}}",
+            "oldMV": "Grappig feit: {{hyperlink}} is deze week uitgebracht in {{year}}!",
+            "recentGaonWeekly": "Grappig feit: {{songName}} is het {{ordinalNum}} meest populaire nummer in de Gaon Weekly-hitlijsten van vorige week!",
+            "recentMusicShowWin": "Grappig feit: {{hyperlink}} won onlangs op {{musicShow}} op {{winDate}}",
+            "recentPak": "Grappig feit: {{hyperlink}} is de {{ordinalNum}} meest recente muziekvideo die een PAK (Perfect All-Kill) heeft ontvangen!",
+            "upcomingReleases": "Grappig feit: '{{releaseName}}' ({{releaseType}}) van '{{artistName}}' komt binnenkort uit op {{dateString}}!",
+            "viewsByArtistType": "Grappig feit: er zijn in totaal {{totalViews}} views op alle K-Popmuziekvideo's op YouTube, {{groupViews}} ({{groupProportion}}%) waarvan afkomstig zijn van groepen, terwijl {{soloViews}} ({{soloProportion}}%) afkomstig zijn van soloartiesten.",
+            "viewsByGender": "Grappig feit: er zijn in totaal {{totalViews}} views op alle K-Popmuziekvideo's op YouTube, {{maleViews}} ({{maleProportion}}%) waarvan afkomstig zijn van mannelijke groepen, {{femaleViews}} ({{femaleProportion}}%) afkomstig zijn van vrouwengroepen, en de resterende {{coedViews}} ({{coedProportion}}%) afkomstig zijn van co-ed groepen."
+        },
+        "kmq": {
+            "guessRate": "Grappig feit: {{hyperlink}} heeft een raderingspercentage van {{percentage}}% over {{roundsPlayed}} gespeelde rondes",
+            "highestLeveledPlayerStats": "Grappig feit: de {{ordinalNum}} hoogste KMQ-speler is niveau {{level}} en heeft {{songsGuessed}} nummers geraden in {{gamesPlayed}} spellen!",
+            "longestGame": "KMQ-feit: het (huidige) langste spel KMQ ter wereld duurde {{sessionLength}} minuten, met {{roundsPlayed}} gespeelde nummers, een gemiddelde goktijd van {{avgGuessTime}} seconden, en met {{numParticipants}} deelnemers! Kun jij dat verslaan?",
+            "mostActivePlayerGamesPlayed": "KMQ-feit: de meest actieve speler heeft {{gamesPlayed}} spellen gespeeld sinds 8 november 2020!",
+            "mostActivePlayerSongsGuessed": "KMQ-feit: de meest actieve speler heeft {{songsGuessed}} nummers geraden sinds 8 november 2020!",
+            "mostActiveServer": "KMQ-feit: de meest actieve server heeft {{gamesPlayed}} spellen van KMQ gespeeld, met in totaal {{songsGuessed}} geraden nummers!",
+            "mostCorrectGuessesServer": "KMQ-feit: de server met de meeste correcte raadsels heeft {{gamesPlayed}} spellen van KMQ gespeeld, met in totaal {{songsGuessed}} geraden nummers!",
+            "recentRounds": "KMQ-feit: er zijn in totaal {{recentGameCount}} rondes KMQ gespeeld in de afgelopen week!",
+            "recentSessions": "KMQ-feit: in totaal zijn er {{recentSessions}} spellen van KMQ gespeeld in de afgelopen week!",
+            "totalGames": "KMQ-feit: er zijn in totaal {{totalGamesPlayed}} spellen van KMQ gespeeld!",
+            "uniquePlayers": "KMQ-feit: {{recentActivePlayers}} unieke spelers hebben KMQ gespeeld in de afgelopen {{xDays}}!"
+        }
+    },
+    "misc": {
+        "andManyOthers": "en vele anderen...",
+        "artist": "artiest",
+        "artistAliases": "Artiestenaliassen",
+        "bookmark": "Bladwijzer",
+        "classic": {
+            "yourScore": "Je score is {{score}}."
+        },
+        "conflict": "conflict",
+        "duration": "Duur",
+        "elimination": {
+            "yourLives": "Je hebt {{lives}} levens."
+        },
+        "failure": {
+            "afkChannel": {
+                "description": "Zorg ervoor dat je je niet in het inactieve spraakkanaal bevindt, zodat je mij kunt horen!",
+                "title": "AFK-spraakkanaal"
+            },
+            "command": {
+                "description": "Er is een fout opgetreden tijdens het uitvoeren van dit commando.\nGeef dit aan een ontwikkelaar als dit vaker gebeurt:\n{{debugId}}",
+                "title": "Fout bij uitvoeren commando"
+            },
+            "deprecatedTextCommand": {
+                "description": "Tekstcommando's worden niet langer ondersteund voor nieuwe commando's. Probeer in plaats daarvan de nieuwe en verbeterde schuine commando's uit! Als schuine commando's niet zichtbaar zijn in de server, nodig dan KMQ opnieuw uit op de server.",
+                "title": "Tekstcommando's zijn verouderd"
+            },
+            "error": "Fout",
+            "errorSelectingSong": {
+                "description": "Probeer de ronde opnieuw te starten. Als het probleem zich blijft voordoen, meld het dan op onze officiële KMQ-server.",
+                "title": "Fout bij selecteren nummer"
+            },
+            "game": {
+                "noneInProgress": {
+                    "description": "Er is geen spel bezig.",
+                    "title": "Geen actief spel"
+                }
+            },
+            "gameOptionConflict": {
+                "description": "De speloptie {{optionOne}} is momenteel ingesteld. {{optionTwo}} en {{optionOne}} zijn onverenigbaar. Verwijder de optie {{optionOne}} door {{optionOneCommand}} in te typen om door te gaan.",
+                "title": "Conflict spelopties"
+            },
+            "groupsExcludeConflict": {
+                "allow": "zodat ze kunnen spelen",
+                "description": "Een of meerdere van de gegeven {{conflictingOptionOne}} zijn al opgenomen in {{conflictingOptionTwo}}. \nDe volgende groepen zijn **niet** toegevoegd aan {{conflictingOptionOne}}:\n {{groupsList}}\nGebruik {{solutionStepOne}} en vervolgens {{solutionStepTwo}} {{allowOrPrevent}}.",
+                "prevent": "zodat ze niet kunnen spelen",
+                "title": "Groepen en conflicten uitsluiten"
+            },
+            "interaction": {
+                "alreadyEliminated": "Je bent deze ronde al uitgeschakeld.",
+                "bookmarkOutsideGame": "Je kunt nummers alleen tijdens een spel naar bladwijzers zetten.",
+                "eliminated": "Je bent deze ronde uitgeschakeld.",
+                "guildBanned": "Deze server heeft een verbod gekregen om KMQ te gebruiken. Voor bezwaren kun je contact opnemen met de officiële ondersteuningsserver van KMQ op {{supportServer}}.",
+                "guildOnly": "KMQ kan alleen op servers worden gebruikt.",
+                "invalidBookmark": "Je kunt alleen nummers naar bladwijzers zetten die recentelijk zijn gespeeld in de laatste {{BOOKMARK_MESSAGE_SIZE}} rondes. Je moet een bericht naar bladwijzers zetten dat door de bot is verzonden en het nummer bevat.",
+                "optionFromPreviousRound": "Je probeert een optie te kiezen uit een reeds voltooide ronde.",
+                "playerBanned": "Je hebt een verbod gekregen om KMQ te gebruiken. Voor bezwaren kun je contact opnemen met de officiële ondersteuningsserver van KMQ op {{supportServer}}."
+            },
+            "maintenanceMode": {
+                "description": "KMQ is momenteel in onderhoud en er kunnen geen nieuwe spellen worden gestart. Kom later terug!",
+                "title": "Onderhoudsmodus"
+            },
+            "messageTooLong": "Het antwoordbericht was te lang, meld deze fout aan de KMQ-ondersteuningsserver",
+            "missingPermissions": {
+                "description": "Hoi! Het lukt me niet om een bericht te sturen in het kanaal {{channelName}}. Zorg ervoor dat de bot toestemming heeft om berichten te sturen in dit kanaal. Zie de volgende link voor meer informatie: {{permissionsLink}}.",
+                "title": "Ontbrekende machtigingen"
+            },
+            "missingPermissionsText": "Zorg ervoor dat de bot de volgende machtigingen heeft: {{missingPermissions}}\n\nZie de volgende link voor meer informatie: {{permissionsLink}}. Als je nog steeds problemen hebt, word lid van de officiële KMQ-server in {{helpCommand}}",
+            "notInVC": {
+                "description": "Verzend {{command}} opnieuw wanneer je je in een spraakkanaal bevindt.",
+                "title": "Word lid van een spraakkanaal"
+            },
+            "optionsGeneration": {
+                "description": "Het is niet gelukt om opties naar het kanaal te verzenden. Gebruik {{resetCommand}} en probeer het opnieuw. Als het probleem zich blijft voordoen, meldt u het dan op de officiële KMQ-server in {{helpCommand}} en geeft u de volgende ID aan een ontwikkelaar:\n{{debugId}}",
+                "title": "Fout bij verzenden opties"
+            },
+            "retrievingSongData": {
+                "description": "Probeer het over een tijdje opnieuw of meld deze fout aan de officiële KMQ-server in {{helpCommand}}.",
+                "title": "Fout bij ophalen gegevens nummer"
+            },
+            "round": {
+                "noneInProgress": {
+                    "description": "De huidige ronde is afgelopen! Wacht tot de volgende ronde begint.",
+                    "title": "Ronde voltooid"
+                }
+            },
+            "songPlaying": {
+                "description": "Nieuwe ronde begint over 3 seconden...",
+                "title": "Fout bij afspelen nummer"
+            },
+            "songQuery": {
+                "description": "Het is niet gelukt om nummers te vinden die aan deze criteria voldoen. Probeer je zoekopdracht uit te breiden.",
+                "title": "Fout bij zoeken naar nummer"
+            },
+            "unrecognizedGroups": {
+                "added": "toegevoegd",
+                "description": "Een of meer van de opgegeven groepsnamen werd niet herkend. De groepen die overeenkomen zijn {{matchedGroupsAction}}. Zorg ervoor dat de groepsnaam exact overeenkomt met de lijst die door {{helpGroups}} wordt verstrekt.\nDe volgende groepen zijn **niet** herkend:\n {{unmatchedGroups}}\n{{solution}}",
+                "didYouMean": "__Be bedoelde u:__\n {{suggestions}}",
+                "solution": "Gebruik {{command}} om de niet-overeenkomende groepen toe te voegen.",
+                "title": "Naam van onbekende groep"
+            },
+            "validation": {
+                "boolean": {
+                    "notBoolean": "Er werd een waarde van waar/onwaar verwacht voor {{argument}}."
+                },
+                "char": {
+                    "notChar": "Er werd een teken verwacht voor {{argument}}."
+                },
+                "enum": {
+                    "notInEnum": "Er werd een van de volgende geldige waarden verwacht voor {{argument}}: ({{validValues}})."
+                },
+                "numArguments": {
+                    "incorrect": "Onjuist aantal argumenten. Zie {{help}} actie:{{command}} voor gebruik."
+                },
+                "number": {
+                    "max": "Er werd een waarde kleiner dan of gelijk aan {{max}} verwacht voor {{argument}}",
+                    "min": "Er werd een waarde groter dan of gelijk aan {{min}} verwacht voor {{argument}}.",
+                    "notNumber": "Er werd een numerieke waarde verwacht voor {{argument}}."
+                },
+                "title": "Invoervalidatiefout"
+            },
+            "vcFull": {
+                "description": "Zorg ervoor dat er genoeg ruimte is in het spraakkanaal zodat ik kan deelnemen.",
+                "title": "Spraakkanaal vol"
+            },
+            "vcJoin": {
+                "description": "Er is iets misgegaan, probeer het spel over een tijdje opnieuw te starten.",
+                "title": "Fout bij deelnemen aan spraakkanaal"
+            }
+        },
+        "formattedLimit": "{{limitStart}} tot {{limitEnd}} ({{songCount}} nummers)",
+        "gameOwnerChanged": {
+            "description": "De nieuwe eigenaar van het spel is {{newGameOwner}}. Zij zijn verantwoordelijk voor {{forcehintCommand}} en {{forceskipCommand}}.",
+            "title": "Eigenaar spel gewijzigd"
+        },
+        "inGame": {
+            "aliases": "Aliassen",
+            "bonusArtistRound": "BONUSRONDE ARTIESTEN",
+            "bonusExpArtistRound": "BONUS-ERVARING EN ARTISTRONDE",
+            "bonusExpRound": "BONUSERVARINGSRONDE",
+            "correctGuess": "{{correctGuesser}} heeft correct geraden (+{{expGain}} EXP) ({{timeToGuess}}s)",
+            "hiddenRemainingPlayers": "Wachten op",
+            "hiddenTimerInfo": "{{guessButton}} voor het eind van de ronde {{timestamp}}!",
+            "noCorrectGuesses": "Niemand heeft het geraden.",
+            "noWinners": "Niemand heeft gewonnen",
+            "runnersUp": "Tweede plaatsen",
+            "songsCorrectlyGuessed": "{{songCount}} nummers correct geraden!",
+            "uniqueSongsPlayed": "{{uniqueSongCount}} unieke nummers gespeeld.",
+            "winMessage": "{{playerName}} wint!"
+        },
+        "interaction": {
+            "bookmarked": {
+                "description": "Je ontvangt een direct bericht met een link naar {{songName}} aan het einde van het spel.",
+                "message": {
+                    "playedOn": "Afgespeeld op {{date}}",
+                    "title": "Nummers naar bladwijzers verzet"
+                },
+                "title": "Nummer naar bladwijzer verzet"
+            },
+            "faq": "Veelgestelde vragen",
+            "fullGroupsList": "Volledige lijst met groepen",
+            "genericProgress": {
+                "description": "🤖",
+                "title": "Ik ben ermee bezig!"
+            },
+            "guess": {
+                "title": "Raad de {{songOrArtist}}!"
+            },
+            "howToPlay": "Hoe te spelen",
+            "leaveReview": "Laat een beoordeling achter!",
+            "officialKmqServer": "Officiële KMQ-server",
+            "profile": {
+                "inaccessible": "Ik heb op dit moment geen toegang tot die gebruiker. Probeer in plaats daarvan {{profileUserID}}.",
+                "noStats": "Deze gebruiker moet zijn/haar eerste spel spelen voordat zijn/haar statistieken worden bijgehouden."
+            },
+            "resetOption": "Stelt de optie {{optionName}} opnieuw in",
+            "title": {
+                "failure": "Oeps"
+            },
+            "vote": "Stem!"
+        },
+        "level": "Niveau",
+        "levelUp": {
+            "entry": "{{user}} is gestegen van niveau {{startLevel}} naar {{endLevel}} ({{rank}})",
+            "title": "🚀 Power-up!"
+        },
+        "listOfGroups": "lijst met groepen",
+        "no": "Nee",
+        "none": "Geen",
+        "notApplicable": "N/B",
+        "plural": {
+            "day_one": "{{count}} dag",
+            "day_other": "{{count}} dagen",
+            "hourAgo_one": "{{count}} uur geleden",
+            "hourAgo_other": "{{count}} uren geleden",
+            "hour_one": "{{count}} uur",
+            "hour_other": "{{count}} uren",
+            "level_one": "niveau",
+            "level_other": "niveaus",
+            "minuteAgo_one": "{{count}} minuut geleden",
+            "minuteAgo_other": "{{count}} minuten geleden",
+            "minuteRemaining_one": "Nog {{count}} minuut over",
+            "minuteRemaining_other": "Nog {{count}} minuten over",
+            "minute_one": "{{count}} minuut",
+            "minute_other": "{{count}} minuten",
+            "player_one": "{{count}} speler",
+            "player_other": "{{count}} spelers",
+            "second_one": "{{count}} seconde",
+            "second_other": "{{count}} seconden",
+            "song_one": "{{count}} nummer",
+            "song_other": "{{count}} nummers"
+        },
+        "preCheck": {
+            "competition": "Dit commando is uitgeschakeld voor reguliere gebruikers in de competitie.",
+            "debugChannel": "Je kunt dat niet in dit kanaal doen.",
+            "debugServer": "Je kunt dat niet in deze server doen.",
+            "differentVC": "Je moet je in hetzelfde spraakkanaal bevinden als de bot om dit commando te kunnen gebruiken.",
+            "notGameSession": "Je kunt dat niet doen tijdens een spel.",
+            "notHidden": "Je kunt dat niet doen tijdens een verborgen spel.",
+            "notListeningSession": "Je kunt dat niet doen tijdens een luistersessie.",
+            "notSpotify": "Je kunt die optie niet wijzigen als je Spotify gebruikt. Gebruik {{spotifyResetCommand}} voordat je deze optie wijzigt.",
+            "title": "Wachten..."
+        },
+        "releaseDate": "Datum van uitgave",
+        "restart": {
+            "description_hard": "De downtime is ongeveer een paar seconden. Sluit het huidige spel af om ervoor te zorgen dat je voortgang wordt opgeslagen!",
+            "title": "Opnieuw starten over {{timeUntilRestart}} minuten."
+        },
+        "sendingBookmarkedSongs": {
+            "description": "{{songs}} worden verzonden naar {{players}}.\n\n😺️nummers tijdens het spel door met de rechtermuisknop op het nummerbericht te klikken en `Apps > Nummer naar bladwijzers zetten` te selecteren",
+            "title": "Nummer naar bladwijzers verzet verzenden..."
+        },
+        "skip": "Overslaan",
+        "song": "nummer",
+        "songAliases": "Aliasnamen van nummers",
+        "team": {
+            "yourScore": "Je score: {{score}}",
+            "yourTeamScore": "De score van je team: {{teamScore}}"
+        },
+        "timeFinished": "De tijd is om.",
+        "uniqueSongsReset": {
+            "description": "Alle nummers zijn afgespeeld. Er worden {{totalSongCount}} nummers opnieuw geschud.",
+            "title": " unieke nummers opnieuw instellen"
+        },
+        "usage": "Gebruiksaanwijzing",
+        "views": "beoordelingen",
+        "warning": {
+            "addRemoveOrdering": {
+                "footer": "Be doel je {{command}} {{addOrRemove}} gebruiken?"
+            }
+        },
+        "yes": "Ja"
+    }
+}

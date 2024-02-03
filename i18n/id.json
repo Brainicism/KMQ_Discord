@@ -1,0 +1,1632 @@
+{
+    "10th": "10",
+    "11th": "11",
+    "12th": "12",
+    "13th": "13",
+    "14th": "14",
+    "15th": "15",
+    "16th": "16",
+    "17th": "17",
+    "18th": "18",
+    "19th": "19",
+    "1st": "1",
+    "20th": "20",
+    "21st": "21",
+    "22nd": "22",
+    "23rd": "23",
+    "24th": "24",
+    "25th": "25",
+    "2nd": "2",
+    "3rd": "3",
+    "4th": "4",
+    "5th": "5",
+    "6th": "6",
+    "7th": "7",
+    "8th": "8",
+    "9th": "9",
+    "command": {
+        "add": {
+            "failure": {
+                "unrecognizedGroups": {
+                    "added": "ditambahkan"
+                }
+            },
+            "help": {
+                "description": "Menambahkan satu atau lebih grup ke opsi {{groups}}, {{exclude}}, atau {{include}} saat ini.",
+                "example": {
+                    "exclude": "Menambahkan {{groupOne}}, {{groupTwo}}, dan {{groupThree}} ke opsi {{exclude}} saat ini",
+                    "groups": "Menambahkan {{groupOne}} dan {{groupTwo}} ke opsi {{groups}} saat ini",
+                    "include": "Menambahkan {{groupOne}} ke opsi {{include}} saat ini"
+                },
+                "name": "tambahkan"
+            }
+        },
+        "answer": {
+            "help": {
+                "description": "Pilih cara menjawab: dengan mengetik jawaban Anda, atau melalui pilihan ganda. Opsi sebagai berikut: `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}`, dan `{{hard}}`",
+                "example": {
+                    "multipleChoice": "Klik tombol dari {{optionCount}} pilihan ganda untuk menebak. Penalti EXP {{penalty}} akan diterapkan",
+                    "typing": "Ketik jawaban Anda di obrolan untuk menebak",
+                    "typingTypos": "Ketik jawaban Anda di obrolan untuk menebak. Salah ketik ringan akan ditandai sebagai benar. Penalti EXP {{penalty}} akan diterapkan"
+                },
+                "interaction": {
+                    "answerOption": "Cara menjawab dalam permainan",
+                    "description": "Pilih cara menjawab: dengan mengetik jawaban Anda, atau melalui pilihan ganda"
+                },
+                "name": "jawaban"
+            }
+        },
+        "artisttype": {
+            "help": {
+                "description": "Pilih apakah Anda ingin mendengar lagu solois, grup, atau keduanya. Opsi sebagai berikut: {{soloists}}, {{groups}}, dan {{both}}.",
+                "example": {
+                    "both": "Memutar lagu dari solois dan grup",
+                    "groups": "Putar lagu hanya dari grup",
+                    "reset": "Mengatur ulang opsi jenis artis",
+                    "soloists": "Putar lagu hanya dari solois"
+                },
+                "interaction": {
+                    "artistTypeOption": "Jenis artis yang akan diputar lagunya",
+                    "description": "Pilih apakah Anda ingin mendengar lagu solois, grup, atau keduanya"
+                },
+                "name": "jenisartis"
+            }
+        },
+        "begin": {
+            "ignored": {
+                "noTeam": {
+                    "description": "Buat tim menggunakan {{join}} team_name:[nama tim] sebelum Anda dapat memulai permainan."
+                },
+                "title": "Mulai Diabaikan"
+            }
+        },
+        "botnews": {
+            "help": {
+                "description": "Menampilkan pembaruan terbaru untuk KMQ.",
+                "name": "beritabot"
+            },
+            "updates": {
+                "footer": "Bergabunglah dengan server KMQ resmi untuk pembaruan yang lebih rinci!",
+                "title": "Pembaruan"
+            }
+        },
+        "cutoff": {
+            "failure": {
+                "invalidEndYear": {
+                    "description": "Tahun akhir harus setelah atau sama dengan tahun awal.",
+                    "title": "Tahun Akhir Tidak Valid"
+                }
+            },
+            "help": {
+                "description": "Tetapkan rentang tahun pemutusan untuk lagu. Jika satu nilai ditentukan, hanya lagu SETELAH tahun itu yang akan diputar. Jika dua nilai ditentukan, hanya lagu DI ANTARA dua tahun itu yang akan diputar.",
+                "example": {
+                    "reset": "Atur ulang ke pemutusan default {{defaultBeginningSearchYear}} hingga {{defaultEndSearchYear}}",
+                    "singleCutoff": "Putar lagu yang dirilis setelah tahun {{year}}",
+                    "twoCutoffs": "Putar lagu yang dirilis antara tahun {{beginningYear}}-{{endingYear}}"
+                },
+                "interaction": {
+                    "beginningYear": "Tahun paling awal untuk disertakan",
+                    "description": "Tetapkan rentang tahun pemutusan untuk lagu",
+                    "earliestOption": "Pilih lagu untuk setiap tahun mulai dari [beginning_year]",
+                    "endingYear": "Tahun terakhir untuk disertakan",
+                    "rangeOption": "Pilih lagu untuk setiap tahun antara [beginning_year] dan [ending_year]"
+                },
+                "name": "potongbatas"
+            }
+        },
+        "debug": {
+            "description": "Jika Anda diminta oleh pengembang bot untuk melakukan ini, berikan mereka berikut ini:\n{{debugID}}",
+            "title": "Detail Debug Terkirim!"
+        },
+        "duration": {
+            "failure": {
+                "removingDuration": {
+                    "notSet": {
+                        "description": "Durasi saat ini tidak ditetapkan."
+                    },
+                    "title": "Kesalahan Menghapus Durasi",
+                    "tooShort": {
+                        "description": "Durasi tidak boleh kurang dari 2 menit."
+                    }
+                }
+            },
+            "help": {
+                "description": "Menetapkan panjang maksimum untuk permainan KMQ dalam menit.",
+                "example": {
+                    "decrement": "Hapus {{duration}} menit dari durasi permainan saat ini",
+                    "increment": "Tambahkan {{duration}} menit ke durasi permainan saat ini",
+                    "reset": "Menonaktifkan durasi",
+                    "set": "Permainan akan otomatis berakhir setelah {{duration}} menit"
+                },
+                "name": "durasi",
+                "usage": {
+                    "minutes": "menit"
+                }
+            },
+            "interaction": {
+                "durationAdd": "Berapa menit yang akan ditambahkan ke durasi",
+                "durationRemove": "Berapa menit yang akan dihapus dari durasi",
+                "durationSet": "Berapa menit untuk memainkan KMQ hingga mengakhiri permainan"
+            }
+        },
+        "end": {
+            "help": {
+                "description": "Menyelesaikan permainan saat ini dan memutuskan pemenangnya.",
+                "name": "akhiri"
+            },
+            "interaction": {
+                "description": "Semoga Anda bersenang-senang!",
+                "title": "Mengakhiri permainan"
+            }
+        },
+        "exclude": {
+            "failure": {
+                "unrecognizedGroups": {
+                    "excluded": "dikecualikan"
+                }
+            },
+            "help": {
+                "description": "Pilih sebanyak mungkin grup yang ingin Anda abaikan. Daftar nama grup dapat ditemukan [di sini]({{groupList}}).",
+                "example": {
+                    "multipleGroups": "Abaikan lagu-lagu dari {{groupOne}}, {{groupTwo}}, dan {{groupThree}}",
+                    "reset": "Mengatur ulang opsi kecualikan",
+                    "singleGroup": "Abaikan lagu-lagu dari {{group}}"
+                },
+                "interaction": {
+                    "add": {
+                        "description": "Tambahkan grup yang diberikan ke opsi kecualikan permainan",
+                        "perGroupDescription": "Grup {{ordinalNum}} untuk ditambahkan"
+                    },
+                    "description": "Cegah memutar lagu dari grup yang diberikan",
+                    "remove": {
+                        "description": "Hapus grup yang diberikan dari opsi kecualikan permainan",
+                        "perGroupDescription": "Grup {{ordinalNum}} untuk dihapus"
+                    },
+                    "reset": {
+                        "description": "Atur ulang opsi kecualikan"
+                    },
+                    "set": {
+                        "description": "Kecualikan lagu dari grup yang diberikan dalam opsi permainan",
+                        "perGroupDescription": "Grup {{ordinalNum}} untuk dikecualikan"
+                    }
+                },
+                "name": "kecualikan"
+            }
+        },
+        "exp": {
+            "activeModifiers": "🚀 Pengubah Aktif 🚀",
+            "artistGroupGuessModePenalty": "Penalti Mode Tebak Artis/Grup",
+            "bonusArtists": "Menebak lagu dengan artis bonus harian",
+            "bonusArtistsTitle": "🎤 Artis Bonus Saat Ini 🎤",
+            "bonusDescription": "Anda bisa mendapatkan EXP bonus untuk berikut ini",
+            "bonusTitle": "Cara Mendapatkan Bonus EXP",
+            "explanation": {
+                "bonusArtistGuess": "Menebak dengan benar untuk artis bonus",
+                "firstGameOfDay": "Permainan pertama hari itu",
+                "powerHour": "Bermain selama KMQ Power Hour atau Akhir Pekan",
+                "quickGuess": "Menebak dengan cepat",
+                "rareGuess": "Bonus tebakan benar langka",
+                "rareGuessRange": "{{rareGuessLowerBound}} hingga {{rareGuessUpperBound}}",
+                "streak": "Memiliki tebakan beruntun lebih dari 5",
+                "voting": "Pemungutan suara"
+            },
+            "firstGameOfDayBonus": "Bonus Permainan Pertama Hari Ini",
+            "help": {
+                "description": "Menunjukkan pengubah EXP Anda saat ini, dan daftar artis EXP bonus saat ini.",
+                "name": "exp"
+            },
+            "lowSongCountPenalty": "Penalti Jumlah Lagu Rendah",
+            "multipleChoicePenalty": "Penalti Pilihan Ganda",
+            "powerHourBonus": "Bonus Power Hour",
+            "shuffleChronologicalPenalty": "Penalti Acak Kronologis",
+            "shufflePopularityPenalty": "Penalti Acak Popularitas",
+            "shuffleWeightedEasyPenalty": "Penalti Acak Berbobot Mudah",
+            "title": "Bonus EXP",
+            "totalModifier": "Total Pengubah",
+            "typosAllowedPenalty": "Penalti Kesalahan Ketik Diizinkan",
+            "voteBonus": "Bonus Pemungutan Suara"
+        },
+        "feedback": {
+            "help": {
+                "description": "Kirim umpan balik atau laporan bug apa pun tentang KMQ",
+                "name": "umpanbalik"
+            },
+            "questions": {
+                "improveKMQ": {
+                    "placeholder": "KMQ TERLALU membuat ketagihan. Keluarga dan teman saya merindukan saya.",
+                    "question": "Apa saja yang dapat ditingkatkan dari KMQ?"
+                },
+                "likeKMQ": {
+                    "placeholder": "KMQ membantu saya menemukan musik dan genre baru.",
+                    "question": "Apa yang Anda sukai tentang KMQ?"
+                },
+                "title": "Umpan Balik KMQ"
+            }
+        },
+        "forcehint": {
+            "failure": {
+                "notOwner": {
+                    "description": "Hanya pemilik permainan ({{mentionedUser}}) yang dapat menggunakan force-hint."
+                }
+            },
+            "help": {
+                "description": "Terima langsung petunjuk lagu saat ini tanpa memerlukan pemungutan suara.",
+                "name": "forcehint"
+            },
+            "hintIgnored": "Force Hint Diabaikan"
+        },
+        "forceskip": {
+            "description": "Pemilik telah melewati _round_ secara paksa...",
+            "failure": {
+                "notOwner": {
+                    "description": "Hanya pemilik permainan ({{mentionedUser}}) yang dapat melewati lagu saat ini secara paksa."
+                }
+            },
+            "help": {
+                "description": "Lewati langsung lagu saat ini tanpa memerlukan pemungutan suara.",
+                "name": "forceskip"
+            },
+            "skipIgnored": "Force Skip Diabaikan"
+        },
+        "gender": {
+            "help": {
+                "description": "Pilih jenis kelamin artis yang ingin Anda dengar. Opsi sebagai berikut: {{male}}, {{female}}, dan {{coed}}. Atau, gunakan {{genderAlternating}} untuk berganti-ganti antara artis pria dan wanita setiap _round_.",
+                "example": {
+                    "alternating": "Berganti-ganti antara artis pria dan wanita setiap _round_",
+                    "coed": "Putar lagu hanya dari grup campuran (grup dengan anggota pria dan wanita)",
+                    "female": "Putar lagu hanya dari artis wanita",
+                    "maleFemale": "Putar lagu dari artis pria dan wanita",
+                    "reset": "Atur ulang ke jenis kelamin default pria, wanita, dan campuran"
+                },
+                "interaction": {
+                    "description": "Pilih jenis kelamin artis yang ingin Anda dengar.",
+                    "gender": "Jenis kelamin anggota grup atau penyanyi solo"
+                },
+                "name": "gender"
+            },
+            "warning": {
+                "gameOption": {
+                    "description": "Dengan hanya satu grup yang dipilh, {{alternatingGenderCommand}} mungkin tidak berfungsi sesuai yang diharapkan. Pertimbangkan untuk menyertakan lebih banyak grup agar jenis kelamin berganti-ganti dengan benar.",
+                    "title": "Peringatan Opsi Permainan"
+                }
+            }
+        },
+        "goal": {
+            "failure": {
+                "gameOptionConflict": {
+                    "description": "Permainan {{elimination}} sedang berlangsung. {{goal}} dan {{elimination}} tidak kompatibel. Mainkan permainan {{classic}} atau {{teams}} untuk menggunakan {{goal}}."
+                },
+                "goalExceeded": {
+                    "description": "Skor yang diberikan melebihi skor tertinggi. Harap naikkan skor Anda, atau mulai permainan baru.",
+                    "title": "Kesalahan Menerapkan Skor"
+                }
+            },
+            "help": {
+                "description": "Setelah pemain dengan poin terbanyak mencapai skor skor, permainan berakhir. Memanggilnya tanpa argumen akan menonaktifkan skor. Jika permainan sedang berlangsung, skor harus melebihi skor tertinggi.",
+                "example": {
+                    "reset": "Menonaktifkan skor",
+                    "set": "Pemain pertama yang {{goal}} memenangkan permainan"
+                },
+                "interaction": {
+                    "description": "Setelah pemain dengan poin terbanyak mencapai skor skor, permainan berakhir.",
+                    "score": "Jumlah poin yang dibutuhkan untuk menang"
+                },
+                "name": "skor",
+                "usage": {
+                    "points": "titik"
+                }
+            }
+        },
+        "groups": {
+            "help": {
+                "description": "Pilih sebanyak mungkin grup yang ingin Anda dengar. Daftar nama grup dapat ditemukan [di sini]({{groupList}}).",
+                "example": {
+                    "multipleGroups": "Memutar lagu hanya dari {{groupOne}}, {{groupTwo}}, dan {{groupThree}}",
+                    "reset": "Mengatur ulang opsi grup",
+                    "singleGroup": "Memutar lagu hanya dari {{group}}"
+                },
+                "interaction": {
+                    "add": {
+                        "description": "Menambahkan grup tertentu ke opsi permainan",
+                        "perGroupDescription": "Grup {{ordinalNum}} untuk ditambahkan"
+                    },
+                    "description": "Pilih artis untuk diputar secara eksklusif",
+                    "remove": {
+                        "description": "Menghapus grup tertentu dari opsi permainan",
+                        "perGroupDescription": "Grup {{ordinalNum}} untuk dihapus"
+                    },
+                    "reset": {
+                        "description": "Mengatur ulang opsi grup"
+                    },
+                    "set": {
+                        "description": "Putar lagu dari grup tertentu",
+                        "perGroupDescription": "Grup {{ordinalNum}} untuk memutar lagu"
+                    }
+                },
+                "name": "grup"
+            }
+        },
+        "guess": {
+            "help": {
+                "description": "Kirimkan jawaban Anda untuk lagu saat ini selama /putar tersembunyi.",
+                "example": {
+                    "song": "Gunakan {{name}} sebagai tebakan Anda untuk lagu saat ini"
+                },
+                "name": "tebak"
+            },
+            "interaction": {
+                "failure": {
+                    "notHidden": {
+                        "description": "{{guessCommand}} hanya dapat digunakan selama {{playHiddenCommand}}.",
+                        "title": "Tebakan Diabaikan"
+                    }
+                },
+                "guessReceived": {
+                    "description": "Anda menebak {{guess}}",
+                    "title": "Tebakan Diterima"
+                },
+                "name": "Tebakan terbaik Anda untuk lagu saat ini"
+            }
+        },
+        "guessmode": {
+            "help": {
+                "description": "Pilih apakah akan menebak dengan judul lagu, nama artis, atau keduanya.",
+                "example": {
+                    "artist": "Ketik nama artis yang benar untuk memenangkan _round_ permainan",
+                    "both": "Ketik nama artis yang benar (0,2 poin) atau nama lagu (1 poin) untuk memenangkan sebuah _round_ permainan",
+                    "reset": "Atur ulang ke mode tebak default {{defaultGuessMode}}",
+                    "song": "Ketik nama lagu yang benar untuk memenangkan _round_ permainan"
+                },
+                "name": "modetebak"
+            },
+            "interaction": {
+                "guessMode": "Yang dianggap tebakan yang sah"
+            }
+        },
+        "help": {
+            "command": "perintah",
+            "description": "Ketik {{play}} di obrolan dan bot akan memutar lagu k-pop secara acak di VC. Tujuan permainan ini adalah menjadi orang pertama yang menebak nama lagu di obrolan.\nLihat opsi permainan Anda saat ini dengan {{options}}. Gunakan {{help}} tindakan:`[{{command}}]` untuk mendapatkan detail lebih lanjut ",
+            "examples": "Contoh",
+            "failure": {
+                "noDocs": "Maaf, tidak ada dokumentasi tentang {{action}}."
+            },
+            "help": {
+                "description": "Dapatkan bantuan terkait fungsionalitas bot.",
+                "example": {
+                    "allCommands": "Menampilkan semua perintah yang tersedia dan deskripsi singkatnya",
+                    "sampleCommand": "Menampilkan deskripsi detail untuk perintah cutoff"
+                },
+                "name": "bantuan"
+            },
+            "interaction": {
+                "action": "Nama perintah yang dokumentasinya akan ditampilkan."
+            },
+            "title": "Bantuan Perintah {{kmq}}"
+        },
+        "hint": {
+            "artistName": "Nama Artis",
+            "failure": {
+                "invalidHintRequest": {
+                    "eliminated": {
+                        "description": "Hanya pemain yang masih hidup yang dapat meminta petunjuk."
+                    },
+                    "multipleChoice": {
+                        "description": "Anda tidak dapat meminta petunjuk saat memainkan pilihan ganda."
+                    },
+                    "noSongPlaying": {
+                        "description": "Petunjuk hanya dapat diminta saat lagu sedang diputar."
+                    },
+                    "title": "Permintaan Petunjuk Tidak Valid"
+                }
+            },
+            "help": {
+                "description": "Memberikan petunjuk ke lagu yang saat ini sedang diputar.",
+                "name": "isyarat"
+            },
+            "request": {
+                "description": "Permintaan petunjuk {{hintCounter}} diterima.",
+                "title": "Permintaan Petunjuk"
+            },
+            "songName": "Nama Lagu",
+            "title": "Petunjuk"
+        },
+        "include": {
+            "failure": {
+                "unrecognizedGroups": {
+                    "included": "termasuk"
+                }
+            },
+            "help": {
+                "description": "Pilih grup sebanyak yang ingin Anda masukkan secara paksa, dengan mengabaikan filter lain ({{gender}}, {{artisttype}}, dll.). Daftar nama grup dapat ditemukan [di sini]({{groupList}}).",
+                "example": {
+                    "multipleGroups": "Masukkan secara paksa lagu-lagu dari {{groupOne}}, {{groupTwo}}, dan {{groupThree}}",
+                    "reset": "Mengatur ulang opsi include",
+                    "singleGroup": "Masukkan secara paksa lagu-lagu dari {{group}}"
+                },
+                "interaction": {
+                    "add": {
+                        "description": "Tambahkan grup yang diberikan ke opsi permainan yang dimasukkan",
+                        "perGroupDescription": "Grup ke-{{ordinalNum}} yang akan ditambahkan"
+                    },
+                    "description": "Pilih artis untuk dimasukkan secara paksa",
+                    "remove": {
+                        "description": "Hapus grup yang diberikan dari opsi permainan yang dimasukkan",
+                        "perGroupDescription": "Grup ke-{{ordinalNum}} yang akan dihapus"
+                    },
+                    "reset": {
+                        "description": "Mengatur ulang opsi include"
+                    },
+                    "set": {
+                        "description": "Masukkan lagu-lagu dari grup yang diberikan dalam opsi permainan",
+                        "perGroupDescription": "Grup ke-{{ordinalNum}} yang akan dimasukkan"
+                    }
+                },
+                "name": "sertakan"
+            }
+        },
+        "join": {
+            "failure": {
+                "joinError": {
+                    "alreadyInTeam": {
+                        "description": "Anda sudah menjadi anggota tim ini."
+                    },
+                    "badEmojis": {
+                        "description": "Anda hanya dapat memasukkan emoji yang ada di server ini."
+                    },
+                    "invalidCharacters": {
+                        "description": "Nama tim Anda hanya terdiri dari karakter yang tidak valid."
+                    },
+                    "invalidTeamName": {
+                        "title": "Nama Tim Tidak Valid"
+                    },
+                    "noTeamName": {
+                        "description": "Sertakan nama tim untuk membuat tim atau untuk bergabung dengan tim itu jika sudah ada ({{joinCommand}} [nama tim])"
+                    },
+                    "title": "Kesalahan Bergabung"
+                }
+            },
+            "playerJoined": {
+                "title": "Pemain Bergabung"
+            },
+            "playerJoinedTeam": {
+                "afterGameStart": {
+                    "description": "{{mentionedUser}} tampaknya merasa mampu memimpin {{teamName}} menuju kemenangan!"
+                },
+                "beforeGameStart": {
+                    "description": "Jika semua sudah bergabung dengan tim, {{beginCommand}} permainan!"
+                },
+                "title": "{{joiningUser}} bergabung dengan {{teamName}}"
+            },
+            "team": {
+                "join": "Untuk bergabung dengan {{teamName}} bersama dengan {{mentionedUser}}, masukkan {{joinCommand}} nama_tim:{{teamNameWithCleanEmojis}}.{{startGameInstructions}}",
+                "new": "Tim Baru Dibuat",
+                "startGameInstructions": "\nMulai permainan dengan {{beginCommand}}."
+            }
+        },
+        "language": {
+            "help": {
+                "description": "Pilih apakah lagu-lagu yang diputar harus khusus dalam bahasa Korea.",
+                "example": {
+                    "all": "Putar semua lagu yang tersedia",
+                    "korean": "Memutar hanya lagu berbahasa Korea. Mengabaikan lagu-lagu yang menggunakan bahasa asing: Inggris, Jepang, Mandarin",
+                    "reset": "Mengatur ulang ke bahasa default {{defaultLanguage}}"
+                },
+                "name": "bahasa"
+            },
+            "interaction": {
+                "language": "Bahasa musik yang akan diputar"
+            }
+        },
+        "leaderboard": {
+            "duration": {
+                "allTime": "Sepanjang Masa",
+                "daily": "Harian",
+                "monthly": "Bulanan",
+                "weekly": "Mingguan",
+                "yearly": "Tahunan"
+            },
+            "enrolled": {
+                "description": "Nama Anda sekarang terlihat di papan peringkat.",
+                "title": "Proses Pendaftaran Papan Peringkat Selesai"
+            },
+            "failure": {
+                "alreadyEnrolled": {
+                    "description": "Anda sudah terlihat di papan peringkat. Jika Anda ingin memperbarui nama tampilan Anda, batalkan pendaftaran dan daftar lagi.",
+                    "title": "Pemain Sudah Terdaftar"
+                },
+                "empty": {
+                    "description": "Tidak ada yang memperoleh EXP dalam interval waktu ini. Sekarang kesempatan Anda untuk memperoleh peringkat pertama!",
+                    "title": "Papan Peringkat Kosong"
+                },
+                "game": {
+                    "noParticipants": {
+                        "description": "Seseorang perlu mencetak poin agar perintah ini berfungsi.",
+                        "title": "Tidak Ada Peserta"
+                    }
+                },
+                "outOfRange": {
+                    "description": "Papan peringkat tidak sejauh itu.",
+                    "title": "😐"
+                }
+            },
+            "gamesPlayed": "{{gameCount}} permainan dimainkan",
+            "help": {
+                "description": "Lihat papan peringkat KMQ.",
+                "example": {
+                    "enroll": "Memungkinkan nama Anda ditampilkan di papan peringkat",
+                    "gameMonthlyPage": "Menampilkan halaman ke-2 dari skor bulanan yang berisi pemain dengan poin dalam permainan saat ini",
+                    "global": "Menampilkan papan peringkat global",
+                    "globalPage": "Menampilkan halaman ke-3 dari papan peringkat global",
+                    "globalWeeklyPage": "Menampilkan halaman ke-4 dari papan peringkat, berdasarkan EXP yang diperoleh minggu ini",
+                    "server": "Menampilkan papan peringkat seluruh server",
+                    "serverSongsGuessedPage": "Menampilkan halaman ke-3 dari papan peringkat seluruh server menurut jumlah total lagu yang ditebak",
+                    "unenroll": "Menyembunyikan nama Anda dari papan peringkat"
+                },
+                "name": "papanperingkat",
+                "usage": {
+                    "pageNumber": "nomor_halaman"
+                }
+            },
+            "interaction": {
+                "duration": "Pilih seberapa jauh ke belakang papan peringkat akan melihat",
+                "page": "Pilih halaman mana yang akan mulai menampilkan papan peringkat",
+                "scope": "Pilih pemain mana yang akan dimasukkan dalam papan peringkat",
+                "type": "Pilih yang menentukan urutan papan peringkat"
+            },
+            "levelEntry": {
+                "permanent": "{{level}} {{formattedNumber}} ({{rankName}})",
+                "temporary": "{{formattedNumber}} {{levelPluralized}} diperoleh"
+            },
+            "quote": {
+                "name": "Ingin nama Anda muncul di papan peringkat? Lihat {{command}}",
+                "nextPage": "Ingin melihat halaman papan peringkat berikutnya? Lihat {{command}}"
+            },
+            "rankNumber": "Peringkat #{{rank}}",
+            "resets": "Mereset {{timestamp}}",
+            "scope": {
+                "currentGame": "Game Saat Ini",
+                "global": "Global",
+                "server": {
+                    "noName": "Server",
+                    "withName": "{{serverName}}"
+                }
+            },
+            "songsGuessed": "{{songsGuessed}} lagu ditebak",
+            "title": "{{leaderboardScope}} {{leaderboardDuration}} Papan Peringkat {{leaderboardType}}",
+            "type": {
+                "byGamesPlayed": "berdasarkan permainan yang dimainkan",
+                "bySongsGuessed": "berdasarkan lagu yang ditebak"
+            },
+            "unenrolled": {
+                "description": "Anda tidak lagi terlihat di papan peringkat.",
+                "title": "Proses Pembatalan Pendaftaran Papan Peringkat Selesai"
+            },
+            "validation": {
+                "firstArg": "Diperkirakan salah satu dari nilai yang valid berikut untuk argumen pertama: (angka positif, {{typeOrScopeOrDuration}})",
+                "secondArg": "Diperkirakan salah satu dari nilai yang valid berikut untuk argumen kedua: (angka positif, {{argument}})",
+                "thirdArg": "Diperkirakan angka positif untuk argumen ketiga"
+            }
+        },
+        "limit": {
+            "failure": {
+                "invalidLimit": {
+                    "greaterThanStart": {
+                        "description": "Batas akhir harus lebih besar dari batas awal."
+                    },
+                    "greaterThanZero": {
+                        "description": "Batas akhir harus lebih besar dari 0."
+                    },
+                    "title": "Batas Akhir Tidak Valid"
+                }
+            },
+            "help": {
+                "description": "Tetapkan jumlah hasil maksimum dalam permintaan lagu. Ini secara efektif menetapkan \"Jumlah X lagu Teratas\" berdasarkan filter yang dipilih.",
+                "example": {
+                    "reset": "Atur ulang ke batas default {{defaultLimit}}",
+                    "singleLimit": "Memutar {{limit}} lagu yang paling banyak didengarkan dari opsi yang dipilih saat ini",
+                    "twoLimits": "Memutar antara {{limitStart}} hingga {{limitEnd}} lagu yang paling banyak didengarkan dari opsi yang dipilih saat ini"
+                },
+                "interaction": {
+                    "description": "Tetapkan jumlah hasil maksimum dalam permintaan lagu",
+                    "description_range": "Putar antara [limit_start] hingga [limit_end] lagu teratas.",
+                    "description_top": "Putar [limit] lagu teratas",
+                    "limit": "Putar sebanyak ini lagu teratas",
+                    "limit_end": "Putar lagu antara batas awal dan nilai ini",
+                    "limit_start": "Dari lagu yang paling banyak didengarkan, mulai putar dari [limit_start]"
+                },
+                "name": "batas"
+            }
+        },
+        "list": {
+            "currentValue": {
+                "nothingSelected": "Tidak ada yang dipilih saat ini",
+                "title": "Nilai {{optionListed}} Saat Ini"
+            },
+            "failure": {
+                "groupsInFile": {
+                    "description": "Terlalu banyak grup untuk dicantumkan dalam pesan Discord, lihat file terlampir.",
+                    "noFilePermissions": {
+                        "description": "Terlalu banyak grup untuk dicantumkan dalam pesan Discord. Bot membutuhkan izin {{attachFile}} untuk mengirim file daftar grup.",
+                        "title": "Kesalahan Mengirim File"
+                    }
+                }
+            },
+            "help": {
+                "description": "Menampilkan grup yang saat ini dipilih untuk opsi permainan tertentu.",
+                "example": {
+                    "exclude": "Mencantumkan opsi {{exclude}} saat ini",
+                    "groups": "Mencantumkan opsi {{groups}} saat ini",
+                    "include": "Mencantumkan opsi {{include}} saat ini"
+                },
+                "name": "daftar"
+            },
+            "interaction": {
+                "listType": "Apakah akan mencetak grup yang ditetapkan saat ini, grup yang disertakan, atau grup yang dikecualikan"
+            }
+        },
+        "listen": {
+            "help": {
+                "description": "Alirkan lagu dari opsi saat ini.",
+                "example": "Musik akan mulai diputar di saluran suara saat ini.",
+                "name": "dengarkan"
+            },
+            "musicStarting": "Musik Dimulai di #{{textChannelName}} di 🔊 {{voiceChannelName}}"
+        },
+        "locale": {
+            "help": {
+                "description": "Ubah bahasa bot.",
+                "example": {
+                    "reset": "Atur ulang bahasa bot ke {{defaultLocale}}",
+                    "toLanguage": "Ubah bahasa bot ke {{language}}"
+                },
+                "interaction": {
+                    "description": "Ubah bahasa bot.",
+                    "language": "Bahasa yang akan diubah"
+                },
+                "name": "lokal",
+                "usage": {
+                    "language": "bahasa"
+                }
+            },
+            "language": {
+                "en": "Inggris",
+                "es-ES": "Spanyol",
+                "fr": "Perancis",
+                "ja": "Jepang",
+                "ko": "Korea",
+                "zh-CN": "Tiongkok"
+            },
+            "updatedDescription": "Bahasa bot telah diperbarui ke `{{language}}`."
+        },
+        "lookup": {
+            "help": {
+                "description": "Periksa apakah video YouTube yang diberikan termasuk dalam basis data KMQ dan opsi permainan saat ini.",
+                "example": {
+                    "song": "Memberikan informasi tentang {{song}} oleh {{artist}}."
+                },
+                "interaction": {
+                    "byLink": {
+                        "description": "Temukan lagu dengan tautan YouTube-nya",
+                        "field": "Tautan YouTube lagu"
+                    },
+                    "byName": {
+                        "description": "Filter lagu dengan nama dan/atau artisnya",
+                        "field": {
+                            "artist": "Artis yang membuat lagu",
+                            "song": "Nama lagu"
+                        }
+                    }
+                },
+                "name": "lihat"
+            },
+            "inCurrentGameOptions": "Dalam Opsi Permainan Saat Ini?",
+            "inKMQ": "Lagu ini termasuk dalam KMQ! Berikut tautan ke [Daisuki]({{link}}).",
+            "notFound": {
+                "description": "Lagu yang diminta tidak ditemukan dalam salinan basis data Daisuki milik KMQ, oleh karena itu tidak termasuk dalam KMQ.",
+                "title": "Lagu Tidak Ditemukan"
+            },
+            "notInKMQ": "Lagu ini memiliki entri di [Daisuki]({{link}}), tetapi tidak termasuk dalam KMQ.",
+            "songNameSearchResult": {
+                "notFoundDescription": "Tidak dapat menemukan lagu apa pun dengan nama itu",
+                "successDescription": "Lagu-lagu berikut tersedia di KMQ:",
+                "title": "Hasil Pencarian"
+            },
+            "validation": {
+                "invalidYouTubeID": "Diperkirakan ID atau tautan YouTube yang valid."
+            }
+        },
+        "multiguess": {
+            "help": {
+                "description": "Menetapkan apakah beberapa orang dapat menebak lagu dengan benar. Ketika {{on}}, pemain akan memiliki 1,5 detik setelah jawaban benar pertama diberikan, untuk terus menjawab. Jawaban pertama menerima EXP penuh, jawaban benar yang muncul setelahnya menerima EXP yang semakin sedikit.",
+                "example": {
+                    "off": "Hanya orang pertama yang menebak dengan benar yang diberikan poin",
+                    "on": "Memungkinkan masa tenggang 1,5 detik sejak tebakan benar pertama terjadi. Beberapa pemain dapat menebak dengan benar",
+                    "reset": "Atur ulang ke tipe tebakganda default {{defaultMultiguess}}"
+                },
+                "interaction": {
+                    "description": "Menetapkan apakah beberapa orang dapat menebak lagu dengan benar",
+                    "multiguess": "Apakah akan mengizinkan beberapa orang untuk menebak dengan benar"
+                },
+                "name": "tebakganda"
+            }
+        },
+        "news": {
+            "disclaimer": "Ringkasan ini dibuat oleh AI dan mungkin tidak akurat",
+            "error": {
+                "description": "Gagal mengambil berita terbaru. Coba lagi nanti.",
+                "title": "Kesalahan Berita"
+            },
+            "help": {
+                "description": "Dapatkan berita K-pop terbaru dari internet!",
+                "example": {
+                    "get": "Lihat ringkasan berita K-pop hari ini",
+                    "subscribe": "Terima pembaruan berita mingguan di saluran teks ini",
+                    "unsubscribe": "Berhenti menerima pembaruan berita harian di saluran teks ini"
+                },
+                "interaction": {
+                    "daily": "Dapatkan berita K-pop hari ini",
+                    "monthly": "Dapatkan berita K-pop bulan ini",
+                    "range": "Interval waktu untuk melihat berita",
+                    "subscribe": "Daftar untuk menerima pembaruan berita di saluran teks ini",
+                    "unsubscribe": "Berhenti menerima pembaruan berita di saluran teks ini",
+                    "weekly": "Dapatkan berita K-pop minggu ini"
+                },
+                "name": "berita"
+            },
+            "subscribe": {
+                "alreadySubscribed": {
+                    "description": "Anda sudah berlangganan pembaruan berita {{interval}} di saluran teks ini.",
+                    "title": "Sudah Berlangganan"
+                },
+                "description": "Anda sekarang akan menerima pembaruan berita {{interval}} di saluran teks ini.",
+                "title": "Berlangganan Jaringan Berita Kimiqo"
+            },
+            "title": "Jaringan Berita Kimiqo",
+            "unsubscribe": {
+                "description": "Anda tidak akan lagi menerima pembaruan berita {{interval}} di saluran teks ini.",
+                "notSubscribed": {
+                    "description": "Anda tidak berlangganan pembaruan berita {{interval}} di saluran teks ini.",
+                    "title": "Tidak Berlangganan"
+                },
+                "title": "Berhenti berlangganan Jaringan Berita Kimiqo"
+            }
+        },
+        "options": {
+            "duration": "{{durationInMinutes}} menit",
+            "help": {
+                "description": "Menampilkan opsi permainan saat ini.",
+                "name": "opsi"
+            },
+            "listeningSessionNotAvailable": "Beberapa opsi tidak tersedia selama sesi mendengarkan",
+            "notSet": "Tidak ditetapkan",
+            "overview": "Sekarang memutar {{limit}} teratas dari {{totalSongs}} lagu yang tersedia dari opsi berikut:",
+            "perCommandHelp": "Mencari informasi tentang cara menggunakan perintah? Periksa {{helpCommand}} tindakan:[perintah] untuk mempelajari lebih lanjut.",
+            "preset": "Praatur",
+            "reset": "{{presetOrOption}} Atur Ulang",
+            "spotify": "Sekarang memutar {{songCount}} lagu dari Spotify dengan opsi berikut:",
+            "timer": "{{timerInSeconds}} dtk",
+            "title": "Opsi",
+            "updated": "{{presetOrOption}} Diperbarui"
+        },
+        "ost": {
+            "help": {
+                "description": "Pilih apakah akan menyertakan lagu-lagu OST.",
+                "example": {
+                    "exclude": "Kecualikan lagu OST",
+                    "exclusive": "Putar khusus lagu OST",
+                    "include": "Sertakan lagu OST",
+                    "reset": "Atur ulang ke opsi default {{defaultOst}}"
+                },
+                "name": "ost"
+            },
+            "interaction": {
+                "ost": "Apakah akan menyertakan, memutar khusus, atau mengecualikan lagu OST"
+            }
+        },
+        "play": {
+            "exp": {
+                "doubleExpForVoting": "akan menerima EXP ganda untuk [pemungutan suara]({{link}})!",
+                "howToVote": "Lihat {{vote}} untuk info tentang cara memberikan suara. Terima kasih telah mendukung KMQ!",
+                "powerHour": "KMQ POWER HOUR AKTIF",
+                "weekend": "DOUBLE EXP WEEKEND AKTIF"
+            },
+            "failure": {
+                "alreadyInSession": "Permainan Sudah Berlangsung",
+                "botRestarting": {
+                    "description": "Bot akan memulai ulang dalam {{timeUntilRestart}} menit, mohon tunggu hingga bot kembali aktif!",
+                    "title": "Tidak Dapat Memulai Permainan Baru"
+                },
+                "hiddenGameMode": {
+                    "description": "Anda tidak memiliki izin untuk menggunakan perintah ini.",
+                    "title": "Mode Permainan Tersembunyi"
+                },
+                "overrideTeams": {
+                    "description": "Jika Anda bermaksud untuk memulai permainan {{oldGameType}}, {{end}} _game_ ini, panggil {{playOldGameType}}, {{gameSpecificInstructions}}, lalu panggil {{begin}}.",
+                    "teams": {
+                        "join": "{{join}} team_name:[nama tim] tim"
+                    },
+                    "title": "Mengabaikan {{playOldGameType}}"
+                }
+            },
+            "gameStarting": "Permainan Dimulai di #{{textChannelName}} di 🔊 {{voiceChannelName}}",
+            "help": {
+                "description": "Memulai permainan KMQ.",
+                "example": {
+                    "classic": "Mulai permainan KMQ klasik (ketik tebakan Anda terlebih dahulu untuk mendapatkan satu poin)",
+                    "elimination": "Mulai permainan eliminasi KMQ di mana setiap pemain memulai dengan {{lives}} nyawa",
+                    "hidden": "Mulai permainan KMQ tersembunyi, di mana pemain hanya dapat menjawab dengan /tebak",
+                    "teams": "Berbagi menjadi sebanyak mungkin tim yang Anda inginkan dan lihat siapa yang dapat Anda andalkan untuk membantu Anda menang!"
+                },
+                "interaction": {
+                    "lives": "Pilih berapa banyak nyawa yang akan memulai dengan masing-masing pemain"
+                },
+                "name": "bermain",
+                "usage": {
+                    "lives": "nyawa"
+                }
+            },
+            "interaction": {
+                "teams_begin": "Mulai mode permainan 'tim' KMQ. Hanya dapat digunakan setelah `/play tim buat`",
+                "teams_create": "Menyiapkan mode permainan 'tim' KMQ untuk pembuatan tim.",
+                "teams_join": "Bergabung dengan sebuah tim. Hanya dapat digunakan setelah `/play tim buat`",
+                "teams_join_team_name": "Nama tim untuk bergabung"
+            },
+            "team": {
+                "joinTeam": {
+                    "description": "Pemimpin tim, ketik {{join}} untuk membentuk tim baru. Ingat, berganti tim di tengah permainan akan menghilangkan semua skor dan EXP Anda saat ini.",
+                    "title": "{{join}} sebuah tim!"
+                }
+            },
+            "typeGuess": "Dengarkan lagu dan ketikkan tebakan Anda!",
+            "voteReminder": "Psst. Dapatkan lebih banyak EXP dengan memberikan suara (lihat {{vote}})"
+        },
+        "preset": {
+            "deleted": {
+                "description": "Praatur {{presetName}} berhasil dihapus.",
+                "title": "Praatur Dihapus"
+            },
+            "exported": {
+                "description": "Impor {{presetName}} sebagai praatur baru di server lain menggunakan:\n{{presetImport}} `exported_preset:{{presetUUID}} new_preset_name:[nama_praatur]`\n\nSelain itu, muat opsi praatur langsung menggunakan:\n{{presetLoad}} `preset_name:{{presetUUID}}`",
+                "title": "Praatur Diekspor"
+            },
+            "failure": {
+                "alreadyExists": {
+                    "description": "Praatur {{presetNameFormatted}} sudah ada. Anda dapat menghapus yang lama dengan {{presetDelete}} `nama_praatur:{{presetName}}`.",
+                    "title": "Praatur Sudah Ada"
+                },
+                "illegalPrefix": {
+                    "description": "Nama praatur tidak dapat diawali dengan {{importPrefix}}.",
+                    "title": "Kesalahan Praatur"
+                },
+                "lengthyName": {
+                    "description": "Nama praatur harus paling banyak {{presetNameMaxLength}} karakter.",
+                    "title": "Nama Praatur Terlalu Panjang"
+                },
+                "missingIdentifier": {
+                    "description": "Anda harus menentukan pengenal praatur. Gunakan {{presetExport}} `preset_name:[nama_praatur]` untuk mengambil pengenal praatur.",
+                    "title": "Pengenal Praatur Tidak Ada"
+                },
+                "missingName": {
+                    "description": "Anda harus menentukan nama praatur.",
+                    "title": "Nama Praatur Tidak Ad"
+                },
+                "noSuchPreset": {
+                    "description": "Praatur {{presetName}} tidak ada.",
+                    "identifier": {
+                        "description": "Pengenal praatur {{presetUUID}} tidak ada."
+                    },
+                    "title": "Tidak Ada Praatur"
+                },
+                "tooMany": {
+                    "description": "Setiap serikat hanya boleh memiliki hingga {{maxNumPresets}} praatur. Silakan hapus beberapa sebelum menambahkan lebih banyak.",
+                    "title": "Terlalu Banyak Praatur"
+                }
+            },
+            "help": {
+                "description": "Berbagai tindakan untuk menyimpan/memuat praatur opsi permainan. Nama praatur harus satu kata.",
+                "example": {
+                    "delete": "Menghapus praatur yang disebutkan",
+                    "export": "Mengembalikan pengenal unik yang dapat digunakan untuk memuat/mengimpor praatur yang disebutkan",
+                    "import": "Membuat praatur baru menggunakan pengenal praatur yang diekspor",
+                    "list": "Mencantumkan semua praatur server",
+                    "load": "Memuat praatur atau pengenal praatur yang disebutkan ({{exampleIdentifier}}) ke dalam opsi permainan",
+                    "replace": "Ganti opsi praatur yang disebutkan dengan opsi permainan saat ini",
+                    "save": "Menyimpan opsi permainan saat ini sebagai praatur"
+                },
+                "name": "praatur",
+                "usage": {
+                    "presetIdentifier": "pengenal_praatur",
+                    "presetName": "nama_praatur"
+                }
+            },
+            "imported": {
+                "description": "Muat praatur yang baru diimpor menggunakan {{presetLoad}} `preset_name:{{presetName}}`.",
+                "title": "Praatur Diimpor"
+            },
+            "interaction": {
+                "delete": {
+                    "presetName": "Praatur yang akan dihapus"
+                },
+                "export": {
+                    "presetName": "Praatur yang akan diekspor"
+                },
+                "import": {
+                    "exportedPresetID": "ID praatur yang akan diimpor",
+                    "presetName": "Nama yang akan diberikan ke praatur yang diimpor"
+                },
+                "load": {
+                    "presetName": "Praatur yang akan dimuat"
+                },
+                "replace": {
+                    "presetName": "Praatur yang akan diganti"
+                },
+                "save": {
+                    "presetName": "Apa nama yang akan diberikan ke praatur ini"
+                }
+            },
+            "list": {
+                "failure": {
+                    "noPresets": {
+                        "description": "Anda tidak memiliki praatur. Lihat {{presetHelp}} untuk melihat cara membuatnya."
+                    }
+                },
+                "loadInstructions": {
+                    "footer": "Muat praatur dengan {{presetLoad}} [nama_praatur]"
+                },
+                "title": "Praatur yang Tersedia"
+            },
+            "replaced": {
+                "title": "Praatur Diganti"
+            },
+            "saved": {
+                "title": "Praatur Disimpan"
+            },
+            "savedOrReplaced": {
+                "description": "Anda dapat memuat praatur ini nanti dengan {{presetLoad}}."
+            }
+        },
+        "profile": {
+            "badges": "Lencana",
+            "experience": "Pengalaman",
+            "failure": {
+                "notFound": {
+                    "badUsage": {
+                        "description": "Pastikan Anda menggunakan perintah ini dengan benar. Lihat {{profileHelp}} untuk detail lebih lanjut."
+                    },
+                    "description": "Tidak dapat menemukan ID pengguna yang ditentukan. Lihat {{profileHelp}} untuk detailnya.",
+                    "title": "Tidak Ditemukan Profil"
+                }
+            },
+            "firstPlayed": "Pertama Kali Dimainkan",
+            "gamesPlayed": "Permainan Dimainkan",
+            "help": {
+                "description": "Menampilkan statistik permainan Anda.",
+                "example": {
+                    "otherPlayerID": "Melihat profil pemain berdasarkan ID Discord mereka",
+                    "otherPlayerMention": "Melihat profil pemain {{playerName}}",
+                    "self": "Lihat profil pemain Anda sendiri"
+                },
+                "name": "profil",
+                "usage": {
+                    "mention": "sebutkan"
+                }
+            },
+            "ineligibleForRank": "Tidak Memenuhi Syarat untuk Peringkat",
+            "interaction": {
+                "userID": "ID pengguna pemain yang profilnya akan dilihat",
+                "userMention": "Sebutkan pengguna yang profilnya akan dilihat"
+            },
+            "lastActive": "Terakhir Aktif",
+            "overallRank": "Peringkat Keseluruhan",
+            "rank": {
+                "almighty": "Penguasa Tertinggi Tata Surya",
+                "aoty": "Artis Tahun Ini",
+                "benevolent": "Penguasa Bumi yang Bijaksana",
+                "bonsang": "Pemenang Penghargaan Bonsang",
+                "ceo": "CEO KMQ Entertainment",
+                "daesang": "Pemenang Penghargaan Daesang",
+                "divine": "Penguasa Bintang yang Ilahi",
+                "enlightened": "Penguasa Galaksi yang Berpengetahuan",
+                "immortal": "Penguasa Alam Semesta yang Abadi",
+                "newAoty": "Artis Baru Tahun Ini",
+                "novice": "Pemula",
+                "nugu": "Nugu",
+                "omniscient": "Penguasa Multiverse yang Maha Tahu",
+                "preDebut": "Pra-debut",
+                "president": "Presiden Korea Selatan",
+                "reuniter": "Penyatuan Kembali Dua Korea",
+                "ruler": "Penguasa Dua Korea",
+                "supreme": "Penguasa Tertinggi Dua Korea",
+                "trainee": "Trainee"
+            },
+            "songsGuessed": "Lagu Ditebak",
+            "timesVoted": "Kali Diberikan Suara"
+        },
+        "recentlyadded": {
+            "description": "Lagu berikut ini ditambahkan ke KMQ dalam dua minggu terakhir:",
+            "failure": {
+                "noSongs": {
+                    "description": "Periksa kembali nanti untuk melihat apakah KMQ telah menambahkan lagu baru.",
+                    "title": "Tidak Ada Lagu yang Ditambahkan Baru-baru Ini"
+                }
+            },
+            "help": {
+                "description": "Tampilkan lagu-lagu yang ditambahkan ke KMQ dalam dua minggu terakhir.",
+                "example": "Tampilkan lagu yang baru-baru ini ditambahkan",
+                "name": "ditambahkanakhir"
+            },
+            "title": "Lagu yang Baru Ditambahkan"
+        },
+        "release": {
+            "help": {
+                "description": "Pilih apakah hanya menyertakan video musik resmi, atau semua video (b-side, latihan tari, versi akustik, remix, dll.).",
+                "example": {
+                    "all": "Memutar semua video yang tersedia, termasuk latihan tari, versi akustik, remix",
+                    "official": "Memutar hanya video musik {{official}}",
+                    "reset": "Atur ulang ke jenis rilis default {{defaultRelease}}"
+                },
+                "interaction": {
+                    "description": "Pilih apakah hanya menyertakan video musik resmi, atau semua video.",
+                    "release": "Jenis rilis yang akan diputar"
+                },
+                "name": "rilis"
+            }
+        },
+        "remix": {
+            "help": {
+                "description": "Pilih apakah akan menyertakan lagu-lagu remix.",
+                "example": {
+                    "exclude": "Kecualikan remix",
+                    "include": "Sertakan remix",
+                    "reset": "Atur ulang ke opsi default {{defaultRemix}}"
+                },
+                "name": "aransemen ulang"
+            },
+            "interaction": {
+                "remix": "Apakah akan menyertakan atau mengecualikan lagu-lagu yang di-remix"
+            }
+        },
+        "remove": {
+            "failure": {
+                "noGroupsSelected": {
+                    "description": "Tidak ada grup yang saat ini dipilih.",
+                    "title": "Hapus Gagal"
+                },
+                "unrecognizedGroups": {
+                    "removed": "dihapus"
+                }
+            },
+            "help": {
+                "description": "Menghapus satu atau lebih grup dari opsi {{groups}}, {{exclude}}, atau {{include}} saat ini.",
+                "example": {
+                    "exclude": "Menghapus {{groupOne}}, {{groupTwo}}, dan {{groupThree}} dari opsi {{exclude}} saat ini",
+                    "groups": "Menghapus {{groupOne}} dan {{groupTwo}} dari opsi {{groups}} saat ini",
+                    "include": "Menghapus {{group}} dari opsi {{include}} saat ini"
+                },
+                "name": "hapus"
+            }
+        },
+        "reset": {
+            "help": {
+                "description": "Atur ulang ke opsi permainan default.",
+                "example": {
+                    "reset": "Mengatur ulang ke opsi permainan default"
+                },
+                "name": "atur ulang"
+            }
+        },
+        "score": {
+            "help": {
+                "description": "Lihat papan skor untuk permainan saat ini.",
+                "name": "skor"
+            },
+            "scoreboardTitle": "Papan Skor"
+        },
+        "seek": {
+            "help": {
+                "description": "Pilih apakah masing-masing lagu diputar dari awal, tengah, atau titik acak.",
+                "example": {
+                    "beginning": "Lagu akan diputar mulai dari awal",
+                    "middle": "Lagu akan diputar mulai dari titik tengah",
+                    "random": "Lagu akan diputar mulai dari titik acak di tengah",
+                    "reset": "Atur ulang ke pencarian default {{defaultSeek}}"
+                },
+                "name": "cari"
+            },
+            "interaction": {
+                "seek": "Dari mana mulai memutar setiap lagu"
+            }
+        },
+        "shuffle": {
+            "help": {
+                "description": "Pilih cara mengocok lagu.",
+                "example": {
+                    "chronological": "Lagu akan diputar dalam urutan dirilis, dengan beberapa keacakan. Penalti EXP {{penalty}} akan diterapkan",
+                    "popularity": "Lagu akan diputar berdasarkan popularitas menurun. Penalti EXP {{penalty}} akan diterapkan",
+                    "random": "Lagu akan diputar secara acak",
+                    "reset": "Atur ulang ke mode acak default {{defaultShuffle}}"
+                },
+                "name": "acak"
+            },
+            "interaction": {
+                "shuffle": "Jenis pengocokan musik yang akan digunakan dalam permainan"
+            }
+        },
+        "skip": {
+            "failure": {
+                "skipIgnored": "Lewati Diabaikan"
+            },
+            "help": {
+                "description": "Pilih untuk melewati lagu saat ini. Sebuah lagu dilewati ketika mayoritas peserta memilih untuk melewatinya.",
+                "name": "lewati"
+            },
+            "success": {
+                "description": "{{skipCounter}} kali lewati tercapai, lewati..."
+            },
+            "vote": {
+                "description": "Permintaan lewati {{skipCounter}} diterima.",
+                "title": "Permintaan Lewati"
+            }
+        },
+        "special": {
+            "help": {
+                "description": "Ubah kecepatan pemutaran ulang lagu.",
+                "example": {
+                    "fast": "Memutar lagu dengan kecepatan cepat",
+                    "faster": "Memutar lagu dengan kecepatan lebih cepat",
+                    "highPitch": "Memutar lagu dengan nada tinggi",
+                    "lowPitch": "Memutar lagu dengan nada rendah",
+                    "nightcore": "Memutar lagu dengan edit nightcore",
+                    "reset": "Atur ulang opsi khusus",
+                    "reverse": "Memutar lagu secara terbalik",
+                    "slow": "Memutar lagu dengan kecepatan lambat"
+                },
+                "name": "khusus"
+            },
+            "interaction": {
+                "special": "Jenis modifikasi yang akan dibuat pada setiap lagu"
+            }
+        },
+        "spotify": {
+            "fileFormat": {
+                "matched": "Lagu yang cocok untuk \"{{playlistName}}\":\n{{matchedSongs}}",
+                "unmatched": "Lagu yang tidak cocok untuk \"{{playlistName}}\":\n{{unmatchedSongs}}"
+            },
+            "help": {
+                "description": "Putar lagu khusus dari daftar putar Spotify yang diberikan",
+                "example": {
+                    "playlistURL": "Mulai memutar lagu dari daftar putar",
+                    "reset": "Berhenti memutar dari daftar putar"
+                },
+                "interaction": {
+                    "matches": "Lihat daftar lagu yang cocok dan tidak cocok",
+                    "matchesLink": "Apakah akan menampilkan URL YouTube ke lagu yang cocok",
+                    "playlistURL": "Daftar putar untuk mengambil lagu"
+                },
+                "name": "spotify"
+            },
+            "invalidURL": {
+                "description": "Tautan ke daftar putar tidak valid. Gunakan `Bagikan > Salin Tautan ke Daftar Putar` di Spotify untuk mengambil tautan yang valid.",
+                "title": "URL Daftar Putar Spotify Tidak Valid"
+            },
+            "matched": {
+                "description": "Cocokkan `{{matchedCount}}/{{totalCount}}` lagu.",
+                "title": "Memutar \"{{playlistName}}\" di Spotify",
+                "truncated": "Catatan: Daftar putar membutuhkan waktu terlalu lama untuk diproses dan tidak selesai hingga tuntas. Coba lagi dengan daftar putar yang lebih kecil lain kali."
+            },
+            "noMatches": {
+                "description": "Tidak ada lagu yang cocok.",
+                "title": "Gagal mengambil lagu dari Spotify"
+            },
+            "noPlaylistSet": {
+                "description": "{{spotifySet}} daftar putar sebelum menggunakan perintah ini.",
+                "title": "Tidak Ada Daftar Putar yang Ditetapkan"
+            },
+            "parsing": "Memuat daftar putar Spotify...",
+            "parsingAlreadyInProgress": {
+                "description": "Harap tunggu hingga daftar putar saat ini selesai memuat sebelum memulai yang baru.",
+                "title": "Daftar Putar Sudah Dimuat"
+            }
+        },
+        "stats": {
+            "description": "Status bot terperinci: {{link}}",
+            "failure": {
+                "description": "Silakan coba lagi nanti.",
+                "title": "Kesalahan Mengambil Statistik"
+            },
+            "footer": "Statistik \"Terkini\" mewakili data dari 24 jam terakhir.",
+            "game": {
+                "activeGameSessions": "Sesi Permainan Aktif",
+                "activePlayers": "Pemain Aktif",
+                "latestSongUpdate": "Pembaruan Lagu Terbaru",
+                "recentGameRounds": "Ronde Permainan (Terkini)",
+                "recentGameSessions": "Sesi Permainan (Terkini)",
+                "recentPlayers": "Pemain (Terkini)",
+                "title": "Statistik Permainan"
+            },
+            "help": {
+                "description": "Berbagai statistik penggunaan/sistem.",
+                "name": "statistik"
+            },
+            "system": {
+                "apiLatency": "Latensi API",
+                "databaseLatency": "Latensi Basis Data",
+                "loadAverage": "Rata-rata Beban Sistem",
+                "memoryUsage": "Penggunaan Memori Proses",
+                "requestLatency": "Latensi Permintaan",
+                "title": "Statistik Sistem",
+                "uptime": "Waktu Aktif"
+            },
+            "title": "Statistik Bot"
+        },
+        "subunits": {
+            "help": {
+                "description": "Pilih apakah akan menyertakan subunit grup secara otomatis, saat menggunakan {{groups}}.",
+                "example": {
+                    "exclude": "Jangan sertakan subunit",
+                    "include": "Sertakan subunit secara otomatis. Misalnya, {{groupCommand}} grup_1:{{parentGroup}} akan menyertakan lagu-lagu oleh {{parentGroup}}, {{subunitOne}}, {{subunitTwo}}, dll.",
+                    "reset": "Atur ulang ke opsi default {{defaultSubunit}}"
+                },
+                "name": "subunit"
+            },
+            "interaction": {
+                "subunits": "Apakah akan menyertakan subunit"
+            }
+        },
+        "timer": {
+            "help": {
+                "description": "Coba tebak dengan benar sebelum waktu habis! Masukkan waktu dalam detik, atau tidak berikan argumen apa pun untuk menonaktifkan.",
+                "example": {
+                    "reset": "Menonaktifkan pengatur waktu",
+                    "set": "Dalam {{timer}} detik, jika tidak ada pengguna yang menebak dengan benar, ronde berakhir dan yang berikutnya dimulai secara otomatis"
+                },
+                "interaction": {
+                    "description": "Coba tebak dengan benar sebelum waktu habis!",
+                    "timer": "Berapa detik yang akan diputar setiap lagu sebelum dilewati"
+                },
+                "name": "pengatur waktu",
+                "usage": {
+                    "seconds": "detik"
+                }
+            }
+        },
+        "upcomingreleases": {
+            "album": "Album",
+            "description": "Lagu, album, dan EP berikutnya dijadwalkan akan dirilis:",
+            "ep": "EP",
+            "failure": {
+                "noReleases": {
+                    "description": "Periksa kembali nanti untuk melihat apakah ada rilis baru yang dijadwalkan.",
+                    "title": "Tidak Ada Rilis Mendatang"
+                }
+            },
+            "help": {
+                "albumExample": "Tampilkan rilis album mendatang",
+                "defaultExample": "Tampilkan rilis artis mendatang, termasuk lagu, album, dan EP",
+                "description": "Lihat lagu, album, dan _extended play_ (EP) yang dijadwalkan akan segera dirilis.",
+                "interaction": {
+                    "releaseType": "Jenis rilis yang akan ditampilkan"
+                },
+                "name": "rilismendatang"
+            },
+            "single": "Singel",
+            "title": "Rilis Mendatang"
+        },
+        "vote": {
+            "available": "Anda dapat memilih sekarang!",
+            "boost": {
+                "active": "Dorongan aktif!",
+                "inactive": "Dorongan Tidak Aktif"
+            },
+            "description": "Pilih KMQ di [top.gg]({{voteLink}}) dan Anda akan menerima 2x EXP selama satu jam! Anda dapat memilih sekali setiap {{voteResetDuration}} jam.\n\nKami akan menghargai jika Anda juga bisa meninggalkan [ulasan]({{reviewLink}}).",
+            "help": {
+                "description": "Menampilkan petunjuk tentang cara memilih untuk menerima 2x EXP selama satu jam.",
+                "name": "pilih"
+            },
+            "timeLeft": "Sisa {{time}}.",
+            "unavailable": {
+                "hours": "Anda dapat memilih dalam **{{hours}}**.",
+                "minutes": "Anda dapat memilih dalam **{{minutes}}**.",
+                "seconds": "Anda dapat memilih dalam **{{seconds}}**."
+            }
+        }
+    },
+    "fact": {
+        "didYouKnow": "Tahukah Anda?",
+        "fun": {
+            "bigThreeDominance": "Fakta Menarik: BTS, Blackpink, dan Twice digabungkan menghasilkan {{bigThreeViews}} tampilan YouTube, atau {{proportion}}%!",
+            "birthday": "Fakta Menarik: Ulang tahun {{name}} adalah bulan ini pada {{formattedDate}}!",
+            "companyByArtistCount": "Fakta Menarik: {{company}} adalah perusahaan hiburan dengan artis terbanyak {{ordinalNum}} (termasuk subunit dan debut solo) dengan total {{num}}!",
+            "companyByArtistViews": "Fakta Menarik: {{name}} adalah perusahaan hiburan dengan penayangan terbanyak {{ordinalNum}} dengan total tampilan YouTube {{views}}!",
+            "fanclubName": "Fakta Menarik: Nama penggemar {{name}} adalah '{{fanclub}}'!",
+            "historicalGaonWeekly": "Fakta Menarik: Pada minggu ini di {{year}}, {{songName}} adalah lagu dengan peringkat teratas di tangga lagu Mingguan GAON!",
+            "hyperlinkGenerator": "[\"{{songName}}\" oleh {{artistName}}]({{url}})",
+            "mostActiveYear": "Fakta Menarik: {{year}} adalah tahun paling aktif {{ordinalNum}} dalam K-Pop dengan rilis video musik {{num}}!",
+            "mostAnnualAwardShowWins": "Fakta Menarik: {{artistName}} memiliki kemenangan pertunjukan penghargaan tahunan terbanyak {{ordinalNum}} dengan {{wins}}!",
+            "mostDebuts": "Fakta Menarik: {{year}} memiliki debut terbanyak {{ordinalNum}} dengan {{num}} grup yang memulai debut!",
+            "mostGaonAppearances": "Fakta Menarik: {{artistName}} telah bertengger di tangga lagu mingguan digital GAON terbanyak {{ordinalNum}} dengan {{appearances}} kemunculan!",
+            "mostGaonFirsts": "Fakta Menarik: {{artistName}} telah berada di puncak tangga lagu mingguan digital GAON terbanyak {{ordinalNum}} dengan {{firstPlaceCount}} penampilan peringkat pertama!",
+            "mostLikedGroup": "Fakta Menarik: {{artist}} adalah grup dengan jumlah suka terbanyak {{ordinalNum}} dengan total suka YouTube {{likes}}!",
+            "mostLikedVideo": "Fakta Menarik: {{hyperlink}} adalah video dengan jumlah suka terbanyak {{ordinalNum}} dengan total suka YouTube {{likes}}!",
+            "mostMVs": "Fakta Menarik: {{artist}} memiliki video musik terbanyak {{ordinalNum}} dengan {{num}} di YouTube!",
+            "mostMusicShowWins": "Fakta Menarik: {{artist}} telah memenangkan pertunjukan musik terbanyak {{ordinalNum}} dengan {{num}} kemenangan!",
+            "mostViewedGroup": "Fakta Menarik: {{artist}} adalah grup dengan penayangan terbanyak {{ordinalNum}} dengan total penayangan YouTube {{views}}!",
+            "mostViewedSoloist": "Fakta Menarik: {{artist}} adalah artis solo dengan penayangan terbanyak {{ordinalNum}} dengan total penayangan YouTube {{views}}!",
+            "mostViewedVideo": "Fakta Menarik: {{hyperlink}} adalah video dengan penayangan terbanyak {{ordinalNum}} dengan total penayangan YouTube {{views}}!",
+            "mvViewMilestone": "Fakta Menarik: {{hyperlink}} baru-baru ini mencapai {{views}} tampilan di YouTube!",
+            "newMV": "Peringatan Lagu Baru: Lihat video musik yang baru dirilis ini, {{hyperlink}}",
+            "oldMV": "Fakta Menarik: {{hyperlink}} dirilis minggu ini pada tahun {{year}}!",
+            "recentGaonWeekly": "Fakta Menarik: {{songName}} adalah lagu dengan peringkat tertinggi {{ordinalNum}} di tangga lagu Mingguan Gaon minggu lalu!",
+            "recentMusicShowWin": "Fakta Menarik: {{hyperlink}} baru-baru ini memenangkan {{musicShow}} pada {{winDate}}",
+            "recentPak": "Fakta Menarik: {{hyperlink}} adalah video musik terbaru {{ordinalNum}} yang menerima PAK (Perfect All-Kill)!",
+            "upcomingReleases": "Fakta Menarik: '{{releaseName}}' ({{releaseType}}) oleh '{{artistName}}' akan segera dirilis pada {{dateString}}!",
+            "viewsByArtistType": "Fakta Menarik: Ada total gabungan {{totalViews}} tampilan pada semua video musik K-Pop di YouTube, {{groupViews}} ({{groupProportion}}%) di antaranya berasal dari grup, sedangkan {{soloViews}} ({{soloProportion}}%) berasal dari artis solo.",
+            "viewsByGender": "Fakta Menarik: Ada total gabungan {{totalViews}} tampilan pada semua video musik K-Pop di YouTube, {{maleViews}} ({{maleProportion}}%) di antaranya berasal dari grup pria, {{femaleViews}} ({{femaleProportion}}%) dari grup wanita, dan sisanya {{coedViews}} ({{coedProportion}}%) dari grup campuran."
+        },
+        "kmq": {
+            "guessRate": "Fakta Menarik: {{hyperlink}} memiliki rasio tebakan {{percentage}}% lebih dari {{roundsPlayed}} ronde yang dimainkan",
+            "highestLeveledPlayerStats": "Fakta Menarik: Pemain KMQ dengan level tertinggi {{ordinalNum}} adalah Level {{level}}, dengan {{songsGuessed}} lagu ditebak selama {{gamesPlayed}} permainan!",
+            "longestGame": "Fakta KMQ: Permainan KMQ terpanjang di dunia (saat ini) berlangsung selama {{sessionLength}} menit, dengan {{roundsPlayed}} lagu diputar, waktu tebakan rata-rata {{avgGuessTime}} detik, dengan {{numParticipants}} peserta! Bisakah Anda mengalahkannya?",
+            "mostActivePlayerGamesPlayed": "Fakta KMQ: Pemain paling aktif telah memainkan {{gamesPlayed}} permainan sejak 8 November 2020!",
+            "mostActivePlayerSongsGuessed": "Fakta KMQ: Pemain paling aktif telah menebak {{songsGuessed}} lagu sejak 8 November 2020!",
+            "mostActiveServer": "Fakta KMQ: Server paling aktif telah memainkan {{gamesPlayed}} permainan KMQ, dengan total {{songsGuessed}} lagu ditebak!",
+            "mostCorrectGuessesServer": "Fakta KMQ: Server dengan tebakan paling benar telah memainkan {{gamesPlayed}} permainan KMQ, dengan total {{songsGuessed}} lagu ditebak!",
+            "recentRounds": "Fakta KMQ: Ada total {{recentGameCount}} putaran KMQ yang telah dimainkan dalam seminggu terakhir!",
+            "recentSessions": "Fakta KMQ: Sebanyak {{recentSessions}} permainan KMQ telah dimainkan dalam seminggu terakhir!",
+            "totalGames": "Fakta KMQ: Sebanyak {{totalGamesPlayed}} permainan KMQ telah dimainkan!",
+            "uniquePlayers": "Fakta KMQ: {{recentActivePlayers}} pemain unik telah memainkan KMQ dalam {{xDays}} terakhir!"
+        }
+    },
+    "misc": {
+        "andManyOthers": "dan banyak lagi lainnya...",
+        "artist": "artis",
+        "artistAliases": "Alias Artis",
+        "bookmark": "Penanda",
+        "classic": {
+            "yourScore": "Skor Anda adalah {{score}}."
+        },
+        "conflict": "konflik",
+        "duration": "Durasi",
+        "elimination": {
+            "yourLives": "Anda memiliki {{lives}} nyawa."
+        },
+        "failure": {
+            "afkChannel": {
+                "description": "Pastikan Anda tidak berada di saluran suara yang tidak aktif sehingga Anda dapat mendengar saya!",
+                "title": "Saluran Suara AFK"
+            },
+            "command": {
+                "description": "Saya mengalami kesalahan saat menjalankan perintah ini.\nBerikan ini kepada pengembang jika hal ini sering terjadi:\n{{debugId}}",
+                "title": "Kesalahan Menjalankan Perintah"
+            },
+            "deprecatedTextCommand": {
+                "description": "Perintah teks tidak lagi didukung untuk perintah baru. Cobalah perintah garis miring yang baru dan lebih baik! Jika perintah garis miring tidak terlihat di server, silakan undang kembali KMQ ke server.",
+                "title": "Perintah Teks Tidak Digunakan Lagi"
+            },
+            "error": "Kesalahan",
+            "errorSelectingSong": {
+                "description": "Silakan coba mulai ronde lagi. Jika masalah berlanjut, laporkan ke server KMQ resmi kami.",
+                "title": "Kesalahan Memilih Lagu"
+            },
+            "game": {
+                "noneInProgress": {
+                    "description": "Tidak ada permainan yang sedang berlangsung.",
+                    "title": "Tidak Ada Permainan Aktif"
+                }
+            },
+            "gameOptionConflict": {
+                "description": "Opsi permainan {{optionOne}} saat ini ditetapkan. {{optionTwo}} dan {{optionOne}} tidak kompatibel. Hapus opsi {{optionOne}} dengan mengetik {{optionOneCommand}} untuk melanjutkan.",
+                "title": "Konflik Opsi Permainan"
+            },
+            "groupsExcludeConflict": {
+                "allow": "untuk mengizinkan mereka bermain",
+                "description": "Satu atau lebih {{conflictingOptionOne}} yang diberikan sudah disertakan dalam {{conflictingOptionTwo}}. \nGrup-grup berikut **tidak** ditambahkan ke {{conflictingOptionOne}}:\n {{groupsList}}\nGunakan {{solutionStepOne}} lalu {{solutionStepTwo}} {{allowOrPrevent}}.",
+                "prevent": "untuk mencegah mereka bermain",
+                "title": "Konflik Grup dan Pengecualian"
+            },
+            "interaction": {
+                "alreadyEliminated": "Anda sudah tereliminasi di ronde ini.",
+                "bookmarkOutsideGame": "Anda hanya dapat menandai lagu selama permainan.",
+                "eliminated": "Anda sudah tereliminasi di ronde ini.",
+                "guildBanned": "Server ini dilarang menggunakan KMQ. Untuk pengajuan banding, hubungi server dukungan KMQ resmi di {{supportServer}}.",
+                "guildOnly": "KMQ hanya dapat digunakan di server.",
+                "invalidBookmark": "Anda hanya dapat menandai lagu yang baru diputar dalam {{BOOKMARK_MESSAGE_SIZE}} ronde terakhir. Anda harus menandai pesan yang dikirim oleh bot yang berisi lagu.",
+                "optionFromPreviousRound": "Anda mencoba memilih opsi dari ronde yang sudah selesai.",
+                "playerBanned": "Anda dilarang menggunakan KMQ. Untuk pengajuan banding, hubungi server dukungan KMQ resmi di {{supportServer}}."
+            },
+            "maintenanceMode": {
+                "description": "KMQ saat ini sedang dalam pemeliharaan, dan permainan baru tidak dapat dimulai. Periksa kembali nanti!",
+                "title": "Mode Pemeliharaan"
+            },
+            "messageTooLong": "Pesan tanggapan terlalu panjang, laporkan kesalahan ini ke server bantuan KMQ",
+            "missingPermissions": {
+                "description": "Hai! Saya tidak dapat mengirim pesan di saluran {{channelName}}. Pastikan bot memiliki izin untuk mengirim pesan di saluran ini. Lihat tautan berikut untuk detailnya: {{permissionsLink}}.",
+                "title": "Izin Hilang"
+            },
+            "missingPermissionsText": "Pastikan bot memiliki izin berikut: {{missingPermissions}}\n\nLihat tautan berikut untuk detailnya: {{permissionsLink}}. Jika Anda masih mengalami masalah, bergabunglah dengan server KMQ resmi yang ditemukan di {{helpCommand}}",
+            "notInVC": {
+                "description": "Kirim {{command}} lagi saat Anda berada di saluran suara.",
+                "title": "Bergabung dengan Saluran Suara"
+            },
+            "optionsGeneration": {
+                "description": "Gagal mengirim opsi ke saluran. Gunakan {{resetCommand}} dan coba lagi. Jika masalah berlanjut, laporkan kesalahan ini di server KMQ resmi yang ditemukan di {{helpCommand}} dan berikan ID berikut kepada pengembang:\n{{debugId}}",
+                "title": "Kesalahan Mengirim Opsi"
+            },
+            "retrievingSongData": {
+                "description": "Coba lagi nanti, atau laporkan kesalahan ini ke server KMQ resmi yang ditemukan di {{helpCommand}}.",
+                "title": "Kesalahan Mengambil Data Lagu"
+            },
+            "round": {
+                "noneInProgress": {
+                    "description": "Ronde saat ini telah berakhir! Tunggu hingga ronde berikutnya dimulai.",
+                    "title": "Ronde Selesai"
+                }
+            },
+            "songPlaying": {
+                "description": "Memulai ronde baru dalam 3 detik...",
+                "title": "Kesalahan Memutar Lagu"
+            },
+            "songQuery": {
+                "description": "Gagal menemukan lagu yang cocok dengan kriteria ini. Coba perluas pencarian Anda.",
+                "title": "Kesalahan Kueri Lagu"
+            },
+            "unrecognizedGroups": {
+                "added": "ditambahkan",
+                "description": "Satu atau lebih nama grup yang ditentukan tidak dikenali. Grup yang cocok adalah {{matchedGroupsAction}}. Pastikan nama grup sama persis dengan daftar yang disediakan oleh {{helpGroups}}.\nGrup-grup berikut **tidak** dikenali:\n {{unmatchedGroups}}\n{{solution}}",
+                "didYouMean": "__Maksud Anda:__\n {{suggestions}}",
+                "solution": "Gunakan {{command}} untuk menambahkan grup yang tidak cocok.",
+                "title": "Nama Grup Tidak Dikenal"
+            },
+            "validation": {
+                "boolean": {
+                    "notBoolean": "Diperkirakan nilai benar/salah untuk {{argument}}."
+                },
+                "char": {
+                    "notChar": "Diperkirakan karakter untuk {{argument}}."
+                },
+                "enum": {
+                    "notInEnum": "Diperkirakan salah satu dari nilai {{argument}} berikut ini: ({{validValues}})."
+                },
+                "numArguments": {
+                    "incorrect": "Jumlah argumen salah. Lihat tindakan {{help}}:{{command}} untuk penggunaan."
+                },
+                "number": {
+                    "max": "Diperkirakan nilai kurang dari atau sama dengan {{max}} untuk {{argument}}",
+                    "min": "Diperkirakan nilai lebih besar dari atau sama dengan {{min}} untuk {{argument}}.",
+                    "notNumber": "Nilai numerik diharapkan untuk {{argument}}."
+                },
+                "title": "Kesalahan validasi masukan"
+            },
+            "vcFull": {
+                "description": "Pastikan ada cukup ruang di saluran suara bagi saya untuk bergabung.",
+                "title": "Saluran Suara Penuh"
+            },
+            "vcJoin": {
+                "description": "Ada yang salah, coba mulai permainan lagi nanti.",
+                "title": "Kesalahan Bergabung dengan Saluran Suara"
+            }
+        },
+        "formattedLimit": "{{limitStart}} hingga {{limitEnd}} ({{songCount}} lagu)",
+        "gameOwnerChanged": {
+            "description": "Pemilik permainan baru adalah {{newGameOwner}}. Mereka bertanggung jawab atas {{forcehintCommand}} dan {{forceskipCommand}}.",
+            "title": "Pemilik Permainan Berganti"
+        },
+        "inGame": {
+            "aliases": "Alias",
+            "bonusArtistRound": "RONDE BONUS ARTIS",
+            "bonusExpArtistRound": "BONUS EXP DAN RONDE ARTIS",
+            "bonusExpRound": "RONDE BONUS EXP",
+            "correctGuess": "{{correctGuesser}} menebak dengan benar (+{{expGain}} EXP) ({{timeToGuess}}d)",
+            "hiddenRemainingPlayers": "Menunggu",
+            "hiddenTimerInfo": "{{guessButton}} sebelum ronde berakhir {{timestamp}}!",
+            "noCorrectGuesses": "Tidak ada yang berhasil.",
+            "noWinners": "Tidak Ada Pemenang",
+            "runnersUp": "Runner-up",
+            "songsCorrectlyGuessed": "{{songCount}} lagu ditebak dengan benar!",
+            "uniqueSongsPlayed": "{{uniqueSongCount}} lagu unik diputar.",
+            "winMessage": "{{playerName}} menang!"
+        },
+        "interaction": {
+            "bookmarked": {
+                "description": "Anda akan menerima pesan langsung dengan tautan ke {{songName}} di akhir permainan.",
+                "message": {
+                    "playedOn": "Diputar pada {{date}}",
+                    "title": "Lagu yang Ditandai"
+                },
+                "title": "Lagu Ditandai"
+            },
+            "faq": "Pertanyaan yang Sering Diajukan",
+            "fullGroupsList": "Daftar Lengkap Grup",
+            "genericProgress": {
+                "description": "🤖",
+                "title": "Sedang dikerjakan!"
+            },
+            "guess": {
+                "title": "Tebak {{songOrArtist}}!"
+            },
+            "howToPlay": "Cara Bermain",
+            "leaveReview": "Tinggalkan ulasan!",
+            "officialKmqServer": "Server KMQ Resmi",
+            "profile": {
+                "inaccessible": "Saya tidak dapat mengakses pengguna itu saat ini. Coba gunakan {{profileUserID}} sebagai gantinya.",
+                "noStats": "Pengguna ini perlu memainkan permainan pertama mereka sebelum statistik mereka dilacak."
+            },
+            "resetOption": "Mengatur ulang opsi {{optionName}}",
+            "title": {
+                "failure": "Wah-oh"
+            },
+            "vote": "Pilih!"
+        },
+        "level": "Level",
+        "levelUp": {
+            "entry": "{{user}} telah naik level dari {{startLevel}} ke {{endLevel}} ({{rank}})",
+            "title": "🚀 Power Up!"
+        },
+        "listOfGroups": "daftar grup",
+        "no": "Tidak",
+        "none": "Tidak Ada",
+        "notApplicable": "N/A",
+        "plural": {
+            "day_one": "{{count}} hari",
+            "day_other": "{{count}} hari",
+            "hourAgo_one": "{{count}} jam yang lalu",
+            "hourAgo_other": "{{count}} jam yang lalu",
+            "hour_one": "{{count}} jam",
+            "hour_other": "{{count}} jam",
+            "level_one": "level",
+            "level_other": "level",
+            "minuteAgo_one": "{{count}} menit yang lalu",
+            "minuteAgo_other": "{{count}} menit yang lalu",
+            "minuteRemaining_one": "{{count}} menit tersisa",
+            "minuteRemaining_other": "{{count}} menit tersisa",
+            "minute_one": "{{count}} menit",
+            "minute_other": "{{count}} menit",
+            "player_one": "{{count}} pemain",
+            "player_other": "{{count}} pemain",
+            "second_one": "{{count}} detik",
+            "second_other": "{{count}} detik",
+            "song_one": "{{count}} lagu",
+            "song_other": "{{count}} lagu"
+        },
+        "preCheck": {
+            "competition": "Perintah ini telah dinonaktifkan untuk pengguna reguler dalam kompetisi.",
+            "debugChannel": "Anda tidak dapat melakukan itu di saluran ini.",
+            "debugServer": "Anda tidak dapat melakukan itu di server ini.",
+            "differentVC": "Anda harus berada di saluran suara yang sama dengan bot untuk menggunakan perintah ini.",
+            "notGameSession": "Anda tidak dapat melakukan itu saat dalam sesi permainan.",
+            "notHidden": "Anda tidak dapat melakukan itu selama permainan tersembunyi.",
+            "notListeningSession": "Anda tidak dapat melakukan itu saat dalam sesi mendengarkan.",
+            "notSpotify": "Anda tidak dapat mengubah opsi itu saat bermain dari Spotify. Gunakan {{spotifyResetCommand}} sebelum mengubah opsi ini.",
+            "title": "Tunggu..."
+        },
+        "releaseDate": "Tanggal Rilis",
+        "restart": {
+            "description_hard": "Waktu henti akan berlangsung kurang lebih beberapa detik. Harap akhiri permainan saat ini untuk memastikan kemajuan Anda tersimpan!",
+            "title": "Restart Mendatang dalam {{timeUntilRestart}} Menit."
+        },
+        "sendingBookmarkedSongs": {
+            "description": "Mengirim {{songs}} ke {{players}}.\n\nTandai lagu selama permainan dengan mengklik kanan pesan lagu dan memilih `Aplikasi > Tandai Lagu`",
+            "title": "Mengirim Lagu yang Ditandai..."
+        },
+        "skip": "Lewati",
+        "song": "lagu",
+        "songAliases": "Alias Lagu",
+        "team": {
+            "yourScore": "Skor Anda: {{score}}",
+            "yourTeamScore": "Skor tim Anda: {{teamScore}}"
+        },
+        "timeFinished": "Waktu habis",
+        "uniqueSongsReset": {
+            "description": "Semua lagu telah diputar. {{totalSongCount}} lagu akan diacak ulang.",
+            "title": "Mengatur Ulang Lagu Unik"
+        },
+        "usage": "Penggunaan",
+        "views": "tayang",
+        "warning": {
+            "addRemoveOrdering": {
+                "footer": "Apakah Anda bermaksud menggunakan {{command}} {{addOrRemove}}?"
+            }
+        },
+        "yes": "Iya"
+    }
+}
