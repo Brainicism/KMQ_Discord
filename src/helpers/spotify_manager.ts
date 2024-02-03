@@ -7,6 +7,7 @@ import {
 } from "./discord_utils";
 import { normalizePunctuationInName } from "../structures/game_round";
 import {
+    parseKmqPlaylistIdentifier,
     pathExists,
     retryJob,
     retryWithExponentialBackoff,
@@ -17,7 +18,6 @@ import { youtube_v3 } from "googleapis";
 import Axios from "axios";
 import KmqConfiguration from "../kmq_configuration";
 import SongSelector from "../structures/song_selector";
-import SpotifyCommand from "../commands/game_options/spotify";
 import State from "../state";
 import _ from "lodash";
 import asyncPool from "tiny-async-pool";
@@ -70,7 +70,7 @@ export default class SpotifyManager {
         messageContext?: MessageContext,
         interaction?: Eris.CommandInteraction,
     ): Promise<PlaylistMetadata> => {
-        const kmqPlaylistParsed = SpotifyCommand.parseKmqPlaylistIdentifier(
+        const kmqPlaylistParsed = parseKmqPlaylistIdentifier(
             kmqPlaylistIdentifier,
         );
 
@@ -99,7 +99,7 @@ export default class SpotifyManager {
         messageContext?: MessageContext,
         interaction?: Eris.CommandInteraction,
     ): Promise<MatchedPlaylist> => {
-        const kmqPlaylistParsed = SpotifyCommand.parseKmqPlaylistIdentifier(
+        const kmqPlaylistParsed = parseKmqPlaylistIdentifier(
             kmqPlaylistIdentifier,
         );
 
@@ -243,7 +243,7 @@ export default class SpotifyManager {
             let page = 0;
             const numPlaylistPages = Math.ceil(metadata.playlistLength / 50);
 
-            while (true) {
+            while (pageToken != null) {
                 page++;
                 if (
                     page % Math.floor(numPlaylistPages / 4) === 1 ||

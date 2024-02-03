@@ -6,7 +6,11 @@ import {
     SHADOW_BANNED_ARTIST_IDS,
 } from "../constants";
 import { IPCLogger } from "../logger";
-import { chooseWeightedRandom, setDifference } from "../helpers/utils";
+import {
+    chooseWeightedRandom,
+    parseKmqPlaylistIdentifier,
+    setDifference,
+} from "../helpers/utils";
 import { sql } from "kysely";
 import ArtistType from "../enums/option_types/artist_type";
 import LanguageType from "../enums/option_types/language_type";
@@ -14,7 +18,6 @@ import OstPreference from "../enums/option_types/ost_preference";
 import ReleaseType from "../enums/option_types/release_type";
 import RemixPreference from "../enums/option_types/remix_preference";
 import ShuffleType from "../enums/option_types/shuffle_type";
-import SpotifyCommand from "../commands/game_options/spotify";
 import State from "../state";
 import SubunitsPreference from "../enums/option_types/subunit_preference";
 import dbContext from "../database_context";
@@ -29,8 +32,6 @@ import type GuildPreference from "./guild_preference";
 import type MessageContext from "./message_context";
 import type QueriedSong from "../interfaces/queried_song";
 import type UniqueSongCounter from "../interfaces/unique_song_counter";
-import { PlaylistMetadata } from "../interfaces/playlist_metadata";
-import SpotifyManager from "../helpers/spotify_manager";
 
 const logger = new IPCLogger("song_selector");
 
@@ -554,7 +555,7 @@ export default class SongSelector {
         messageContext?: MessageContext,
         interaction?: Eris.CommandInteraction,
     ): Promise<QueriedSongList & MatchedPlaylist> {
-        const kmqPlaylistParsed = SpotifyCommand.parseKmqPlaylistIdentifier(
+        const kmqPlaylistParsed = parseKmqPlaylistIdentifier(
             kmqPlaylistIdentifier,
         );
 

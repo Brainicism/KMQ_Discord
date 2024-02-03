@@ -29,6 +29,7 @@ import {
     friendlyFormattedNumber,
     getOrdinalNum,
     italicize,
+    parseKmqPlaylistIdentifier,
     standardDateFormat,
     strikethrough,
     truncatedString,
@@ -49,7 +50,6 @@ import GameOption from "../enums/game_option_name";
 import GameType from "../enums/game_type";
 import LocaleType from "../enums/locale_type";
 import MessageContext from "../structures/message_context";
-import SpotifyCommand from "../commands/game_options/spotify";
 import State from "../state";
 import _ from "lodash";
 import axios from "axios";
@@ -789,7 +789,7 @@ export async function generateOptionsMessage(
                 interaction,
             );
 
-        const kmqPlaylistParsed = SpotifyCommand.parseKmqPlaylistIdentifier(
+        const kmqPlaylistParsed = parseKmqPlaylistIdentifier(
             kmqPlaylistIdentifier,
         );
 
@@ -999,7 +999,7 @@ export async function generateOptionsMessage(
             },
         );
     } else {
-        const kmqPlaylistParsed = SpotifyCommand.parseKmqPlaylistIdentifier(
+        const kmqPlaylistParsed = parseKmqPlaylistIdentifier(
             guildPreference.getKmqPlaylistID() as string,
         );
 

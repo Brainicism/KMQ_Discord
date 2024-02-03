@@ -664,26 +664,4 @@ export default class SpotifyCommand implements BaseCommand {
             );
         }
     }
-
-    /**
-     * @param kmqPlaylistIdentifier - Identifier containing either youtube/spotify followed by the playlist ID
-     * @returns whether it is a Spotify playlist, and the parsed playlist ID
-     */
-    static parseKmqPlaylistIdentifier(kmqPlaylistIdentifier: string): {
-        isSpotify: boolean;
-        playlistId: string;
-    } {
-        const identifierComponents = kmqPlaylistIdentifier.split("|");
-        if (identifierComponents.length === 1) {
-            return {
-                isSpotify: true,
-                playlistId: identifierComponents[0],
-            };
-        }
-
-        return {
-            isSpotify: identifierComponents[0] === "spotify",
-            playlistId: identifierComponents[1],
-        };
-    }
 }

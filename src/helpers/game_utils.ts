@@ -1,5 +1,4 @@
 import { IPCLogger } from "../logger";
-import { PlaylistMetadata } from "../interfaces/playlist_metadata";
 import { SHADOW_BANNED_ARTIST_IDS } from "../constants";
 import {
     cleanArtistName,
