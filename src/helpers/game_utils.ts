@@ -1,4 +1,5 @@
 import { IPCLogger } from "../logger";
+import { PlaylistMetadata } from "../interfaces/playlist_metadata";
 import { SHADOW_BANNED_ARTIST_IDS } from "../constants";
 import {
     cleanArtistName,
@@ -15,7 +16,6 @@ import State from "../state";
 import _ from "lodash";
 import dbContext from "../database_context";
 import type { AvailableGenders } from "../enums/option_types/gender";
-import type { MatchedPlaylist } from "../interfaces/matched_playlist";
 import type Eris from "eris";
 import type GameRound from "../structures/game_round";
 import type GuildPreference from "../structures/guild_preference";
@@ -63,33 +63,20 @@ export async function getAvailableSongCount(
 }> {
     try {
         if (guildPreference.isPlaylist()) {
-            const playlistID = guildPreference.getSpotifyPlaylistID()!;
-            const session =
-                State.gameSessions[guildPreference.guildID] ??
-                State.listeningSessions[guildPreference.guildID];
+            const kmqPlaylistIdentifier = guildPreference.getKmqPlaylistID()!;
 
-            let matchedPlaylist: MatchedPlaylist;
-            if (session) {
-                matchedPlaylist = (await session.songSelector.reloadSongs(
-                    guildPreference,
-                    playlistID,
-                    !session.sessionInitialized,
-                    messageContext,
-                    interaction,
-                )) as MatchedPlaylist;
-            } else {
-                matchedPlaylist = (await new SongSelector().reloadSongs(
-                    guildPreference,
-                    playlistID,
+            const playlistMetadata =
+                await State.spotifyManager.getMatchedPlaylistMetadata(
+                    guildPreference.guildID,
+                    kmqPlaylistIdentifier,
                     false,
                     messageContext,
                     interaction,
-                )) as MatchedPlaylist;
-            }
+                );
 
             return {
-                count: matchedPlaylist.metadata.matchedSongsLength,
-                countBeforeLimit: matchedPlaylist.metadata.matchedSongsLength,
+                count: playlistMetadata.matchedSongsLength,
+                countBeforeLimit: playlistMetadata.matchedSongsLength,
             };
         }
 

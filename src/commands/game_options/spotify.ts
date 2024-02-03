@@ -556,10 +556,12 @@ export default class SpotifyCommand implements BaseCommand {
             return;
         }
 
-        const playlistID = guildPreference.getSpotifyPlaylistID();
-        const playlist = await State.spotifyManager.getMatchedYoutubeSongs(
+        const kmqPlaylistIdentifier =
+            guildPreference.getKmqPlaylistID() as string;
+
+        const playlist = await State.spotifyManager.getMatchedPlaylist(
             guildID,
-            playlistID!,
+            kmqPlaylistIdentifier,
             false,
             messageContext,
             interaction,
@@ -583,7 +585,7 @@ export default class SpotifyCommand implements BaseCommand {
         const attachments: Eris.AdvancedMessageContentAttachment[] = [];
         if (unmatchedSongs.length > 0) {
             attachments.push({
-                filename: `kmq-playlist-unmatched-${playlistID}-${standardDateFormat(
+                filename: `kmq-playlist-unmatched-${kmqPlaylistIdentifier}-${standardDateFormat(
                     new Date(),
                 )}.txt`,
                 file: i18n.translate(
@@ -599,7 +601,7 @@ export default class SpotifyCommand implements BaseCommand {
 
         if (matchedSongs.length > 0) {
             attachments.push({
-                filename: `kmq-playlist-matched-${playlistID}-${standardDateFormat(
+                filename: `kmq-playlist-matched-${kmqPlaylistIdentifier}-${standardDateFormat(
                     new Date(),
                 )}.txt`,
                 file: i18n.translate(

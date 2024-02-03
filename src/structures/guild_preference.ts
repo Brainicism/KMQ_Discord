@@ -911,7 +911,7 @@ export default class GuildPreference {
     }
 
     /** @returns the ID of the playlist to retrieve songs from */
-    getSpotifyPlaylistID(): string | null {
+    getKmqPlaylistID(): string | null {
         return this.gameOptions.spotifyPlaylistID;
     }
 

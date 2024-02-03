@@ -780,13 +780,14 @@ export async function generateOptionsMessage(
     let thumbnailUrl: string | undefined;
 
     if (kmqPlaylistIdentifier) {
-        const matchedPlaylist = await State.spotifyManager.getMatchedSongs(
-            guildID,
-            kmqPlaylistIdentifier,
-            false,
-            messageContext,
-            interaction,
-        );
+        const matchedPlaylistMetadata =
+            await State.spotifyManager.getMatchedPlaylistMetadata(
+                guildID,
+                kmqPlaylistIdentifier,
+                false,
+                messageContext,
+                interaction,
+            );
 
         const kmqPlaylistParsed = SpotifyCommand.parseKmqPlaylistIdentifier(
             kmqPlaylistIdentifier,
@@ -799,9 +800,9 @@ export async function generateOptionsMessage(
         }${kmqPlaylistParsed.playlistId}`;
 
         optionStrings[GameOption.SPOTIFY_PLAYLIST_ID] =
-            `[${matchedPlaylist.metadata.playlistName}](${playlistUrl})`;
+            `[${matchedPlaylistMetadata.playlistName}](${playlistUrl})`;
 
-        thumbnailUrl = matchedPlaylist.metadata.thumbnailUrl ?? undefined;
+        thumbnailUrl = matchedPlaylistMetadata.thumbnailUrl ?? undefined;
     } else {
         optionStrings[GameOption.SPOTIFY_PLAYLIST_ID] = null;
     }
@@ -999,7 +1000,7 @@ export async function generateOptionsMessage(
         );
     } else {
         const kmqPlaylistParsed = SpotifyCommand.parseKmqPlaylistIdentifier(
-            guildPreference.getSpotifyPlaylistID() as string,
+            guildPreference.getKmqPlaylistID() as string,
         );
 
         optionsOverview = i18n.translate(

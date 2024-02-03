@@ -63,141 +63,36 @@ export default class SpotifyManager {
         return !!this.guildsParseInProgress[guildID];
     }
 
-    getMatchedYoutubeSongs = async (
+    getMatchedPlaylistMetadata = async (
         guildID: string,
-        playlistId: string,
+        kmqPlaylistIdentifier: string,
         forceRefreshMetadata: boolean,
         messageContext?: MessageContext,
         interaction?: Eris.CommandInteraction,
-    ): Promise<MatchedPlaylist> => {
-        const UNMATCHED_PLAYLIST = {
-            metadata: {
-                playlistId,
-                playlistName: "",
-                playlistLength: 0,
-                matchedSongsLength: 0,
-                limit: 0,
-                snapshotID: "",
-                thumbnailUrl: null,
-            },
-            matchedSongs: [],
-            truncated: false,
-            unmatchedSongs: [],
-        };
+    ): Promise<PlaylistMetadata> => {
+        const kmqPlaylistParsed = SpotifyCommand.parseKmqPlaylistIdentifier(
+            kmqPlaylistIdentifier,
+        );
 
-        let logHeader: string;
-        if (messageContext || interaction) {
-            logHeader = `${getDebugLogHeader(
-                (messageContext || interaction)!,
-            )}, playlistID = ${playlistId}`;
-        } else {
-            logHeader = `guildID = ${guildID}. playlistID = ${playlistId}`;
+        const cachedPlaylist =
+            this.cachedPlaylists[kmqPlaylistParsed.playlistId];
+
+        if (cachedPlaylist) {
+            return cachedPlaylist.metadata;
         }
 
-        const client = new youtube_v3.Youtube({
-            auth: process.env.YOUTUBE_API_KEY,
-        });
-
-        let metadata: PlaylistMetadata | null;
-        const cachedPlaylist = this.cachedPlaylists[playlistId];
-
-        if (forceRefreshMetadata || !cachedPlaylist) {
-            metadata = await this.getYoutubePlaylistMetadata(playlistId);
-            logger.info(
-                `${logHeader} | Refreshing Youtube metadata. forceRefreshMetadata: ${forceRefreshMetadata}, cachedPlaylist: ${!!cachedPlaylist}`,
-            );
-        } else {
-            metadata = cachedPlaylist.metadata;
-        }
-
-        if (!metadata) {
-            logger.warn(`${logHeader} | No Youtube metadata`);
-            return UNMATCHED_PLAYLIST;
-        }
-
-        let matchedSongs: Array<QueriedSong> = [];
-        let unmatchedSongs: Array<string> = [];
-        let truncated = false;
-
-        if (
-            cachedPlaylist &&
-            cachedPlaylist.metadata.snapshotID === metadata.snapshotID
-        ) {
-            logger.info(`${logHeader} | Using cached playlist`);
-            ({ matchedSongs, truncated, unmatchedSongs } = cachedPlaylist);
-        } else {
-            let pageToken: string | null | undefined = "";
-            const songs: Array<{
-                title: string;
-                videoId: string;
-            }> = [];
-
-            let page = 0;
-            const numPlaylistPages = Math.ceil(metadata.playlistLength / 50);
-
-            while (true) {
-                page++;
-                if (
-                    page % Math.floor(numPlaylistPages / 4) === 1 ||
-                    page === numPlaylistPages ||
-                    page === 1
-                ) {
-                    logger.info(
-                        `${logHeader} | Calling Youtube API ${page}/${numPlaylistPages} for playlist`,
-                    );
-                }
-
-                // eslint-disable-next-line no-await-in-loop
-                const resp: youtube_v3.Schema$PlaylistItemListResponse = (
-                    await client.playlistItems.list({
-                        part: ["snippet"],
-                        playlistId,
-                        pageToken,
-                        maxResults: 50,
-                    })
-                ).data;
-
-                songs.push(
-                    // eslint-disable-next-line no-unsafe-optional-chaining
-                    ...resp.items!.map((x) => ({
-                        title: x.snippet?.title as string,
-                        videoId: x.snippet?.resourceId?.videoId as string,
-                    })),
-                );
-
-                pageToken = resp.nextPageToken;
-                if (!pageToken) break;
-            }
-
-            const youtubePlaylistVideoIDs: string[] = songs.map(
-                (x) => x.videoId,
-            );
-
-            matchedSongs = await dbContext.kmq
-                .selectFrom("available_songs")
-                .select(SongSelector.QueriedSongFields)
-                .where("link", "in", youtubePlaylistVideoIDs)
-                .execute();
-
-            unmatchedSongs = youtubePlaylistVideoIDs.filter(
-                (x) => !matchedSongs.map((y) => y.youtubeLink).includes(x),
-            );
-        }
-
-        metadata.matchedSongsLength = matchedSongs.length;
-
-        const playlist: MatchedPlaylist = {
-            matchedSongs,
-            metadata,
-            truncated,
-            unmatchedSongs: [],
-        };
-
-        this.cachedPlaylists[playlistId] = playlist;
-        return playlist;
+        return (
+            await State.spotifyManager.getMatchedPlaylist(
+                guildID,
+                kmqPlaylistIdentifier,
+                forceRefreshMetadata,
+                messageContext,
+                interaction,
+            )
+        ).metadata;
     };
 
-    getMatchedSongs = async (
+    getMatchedPlaylist = async (
         guildID: string,
         kmqPlaylistIdentifier: string,
         forceRefreshMetadata: boolean,
@@ -260,20 +155,168 @@ export default class SpotifyManager {
         }
 
         return kmqPlaylistParsed.isSpotify
-            ? this.getMatchedSpotifySongs(
+            ? this.getMatchedSpotifyPlaylist(
                   guildID,
                   playlistId,
                   forceRefreshMetadata,
                   messageContext,
                   interaction,
               )
-            : this.getMatchedYoutubeSongs(
+            : this.getMatchedYoutubePlaylist(
                   guildID,
                   playlistId,
                   forceRefreshMetadata,
                   messageContext,
                   interaction,
               );
+    };
+
+    getMatchedYoutubePlaylist = async (
+        guildID: string,
+        playlistId: string,
+        forceRefreshMetadata: boolean,
+        messageContext?: MessageContext,
+        interaction?: Eris.CommandInteraction,
+    ): Promise<MatchedPlaylist> => {
+        const UNMATCHED_PLAYLIST = {
+            metadata: {
+                playlistId,
+                playlistName: "",
+                playlistLength: 0,
+                matchedSongsLength: 0,
+                limit: 0,
+                snapshotID: "",
+                thumbnailUrl: null,
+            },
+            matchedSongs: [],
+            truncated: false,
+            unmatchedSongs: [],
+        };
+
+        let logHeader: string;
+        if (messageContext || interaction) {
+            logHeader = `${getDebugLogHeader(
+                (messageContext || interaction)!,
+            )}, playlistID = ${playlistId}`;
+        } else {
+            logHeader = `guildID = ${guildID}. playlistID = ${playlistId}`;
+        }
+
+        const client = new youtube_v3.Youtube({
+            auth: process.env.YOUTUBE_API_KEY,
+        });
+
+        let metadata: PlaylistMetadata | null;
+        const cachedPlaylist = this.cachedPlaylists[playlistId];
+
+        if (forceRefreshMetadata || !cachedPlaylist) {
+            metadata = await this.getYoutubePlaylistMetadata(playlistId);
+            logger.info(
+                `${logHeader} | Refreshing Youtube metadata. forceRefreshMetadata: ${forceRefreshMetadata}, cachedPlaylist: ${!!cachedPlaylist}`,
+            );
+        } else {
+            metadata = cachedPlaylist.metadata;
+        }
+
+        if (!metadata) {
+            logger.warn(`${logHeader} | No Youtube metadata`);
+            return UNMATCHED_PLAYLIST;
+        }
+
+        let matchedSongs: Array<QueriedSong> = [];
+        let unmatchedSongs: Array<string>;
+        let truncated = false;
+
+        if (
+            cachedPlaylist &&
+            cachedPlaylist.metadata.snapshotID === metadata.snapshotID
+        ) {
+            logger.info(`${logHeader} | Using cached playlist`);
+            ({ matchedSongs, truncated, unmatchedSongs } = cachedPlaylist);
+        } else {
+            let pageToken: string | null | undefined = "";
+            const songs: Array<{
+                title: string;
+                videoId: string;
+            }> = [];
+
+            let page = 0;
+            const numPlaylistPages = Math.ceil(metadata.playlistLength / 50);
+
+            while (true) {
+                page++;
+                if (
+                    page % Math.floor(numPlaylistPages / 4) === 1 ||
+                    page === numPlaylistPages ||
+                    page === 1
+                ) {
+                    logger.info(
+                        `${logHeader} | Calling Youtube API ${page}/${numPlaylistPages} for playlist`,
+                    );
+                }
+
+                // eslint-disable-next-line no-await-in-loop
+                const resp: youtube_v3.Schema$PlaylistItemListResponse = (
+                    await client.playlistItems.list({
+                        part: ["snippet"],
+                        playlistId,
+                        pageToken,
+                        maxResults: 50,
+                    })
+                ).data;
+
+                songs.push(
+                    // eslint-disable-next-line no-unsafe-optional-chaining
+                    ...resp.items!.map((x) => ({
+                        title: x.snippet?.title as string,
+                        videoId: x.snippet?.resourceId?.videoId as string,
+                    })),
+                );
+
+                pageToken = resp.nextPageToken;
+                if (!pageToken) break;
+            }
+
+            const youtubePlaylistVideoIDs: {
+                videoId: string;
+                title: string;
+            }[] = songs.map((x) => ({
+                videoId: x.videoId,
+                title: x.title,
+            }));
+
+            matchedSongs = await dbContext.kmq
+                .selectFrom("available_songs")
+                .select(SongSelector.QueriedSongFields)
+                .where(
+                    "link",
+                    "in",
+                    youtubePlaylistVideoIDs.map((x) => x.videoId),
+                )
+                .execute();
+
+            // todo: WHAT TO DO WITH THIS
+            unmatchedSongs = youtubePlaylistVideoIDs
+                .filter(
+                    (x) =>
+                        !matchedSongs
+                            .map((y) => y.youtubeLink)
+                            .includes(x.videoId),
+                )
+                .map((x) => x.title);
+        }
+
+        metadata.matchedSongsLength = matchedSongs.length;
+
+        const playlist: MatchedPlaylist = {
+            matchedSongs,
+            metadata,
+            truncated,
+            unmatchedSongs,
+        };
+
+        this.cachedPlaylists[playlistId] = playlist;
+        return playlist;
     };
 
     /**
@@ -283,7 +326,7 @@ export default class SpotifyManager {
      * @param messageContext - The message context
      * @param interaction - The interaction
      */
-    getMatchedSpotifySongs = async (
+    getMatchedSpotifyPlaylist = async (
         guildID: string,
         playlistId: string,
         forceRefreshMetadata: boolean,

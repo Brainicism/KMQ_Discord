@@ -29,6 +29,8 @@ import type GuildPreference from "./guild_preference";
 import type MessageContext from "./message_context";
 import type QueriedSong from "../interfaces/queried_song";
 import type UniqueSongCounter from "../interfaces/unique_song_counter";
+import { PlaylistMetadata } from "../interfaces/playlist_metadata";
+import SpotifyManager from "../helpers/spotify_manager";
 
 const logger = new IPCLogger("song_selector");
 
@@ -558,14 +560,14 @@ export default class SongSelector {
 
         const { matchedSongs, metadata, truncated, unmatchedSongs } =
             kmqPlaylistParsed.isSpotify
-                ? await State.spotifyManager.getMatchedSpotifySongs(
+                ? await State.spotifyManager.getMatchedSpotifyPlaylist(
                       guildID,
                       kmqPlaylistParsed.playlistId,
                       forceRefreshMetadata,
                       messageContext,
                       interaction,
                   )
-                : await State.spotifyManager.getMatchedYoutubeSongs(
+                : await State.spotifyManager.getMatchedYoutubePlaylist(
                       guildID,
                       kmqPlaylistParsed.playlistId,
                       forceRefreshMetadata,
