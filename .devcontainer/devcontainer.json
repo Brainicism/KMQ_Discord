@@ -10,7 +10,8 @@
 				"dbaeumer.vscode-eslint",
 				"esbenp.prettier-vscode",
 				"lokalise.i18n-ally",
-				"hbenl.vscode-mocha-test-adapter"
+				"hbenl.vscode-mocha-test-adapter",
+				"chamboug.js-auto-backticks"
 			]
 		}
 	},
