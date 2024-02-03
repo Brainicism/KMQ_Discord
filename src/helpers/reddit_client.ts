@@ -55,8 +55,8 @@ export class RedditClient {
     constructor() {
         if (
             !process.env.REDDIT_CLIENT_ID ||
-            process.env.REDDIT_CLIENT_SECRET ||
-            process.env.REDDIT_CLIENT_REFRESH_TOKEN
+            !process.env.REDDIT_CLIENT_SECRET ||
+            !process.env.REDDIT_CLIENT_REFRESH_TOKEN
         ) {
             logger.warn(
                 "Reddit credentials not specified, skipping client initialization...",
