@@ -20,6 +20,12 @@ program
         "Countdown duration",
         (x) => parseInt(x, 10),
         5,
+    )
+    .option(
+        "--provisioning-timeout <minutes>",
+        "Timeout before standby provisioning is considered failed",
+        (x) => parseInt(x, 10),
+        15,
     );
 program.parse();
 
@@ -85,6 +91,7 @@ function serverShutdown(
     restartMinutes: number,
     restart: boolean,
     dockerImage: string,
+    provisioningTimeout: number,
 ): Promise<void> {
     return new Promise(async () => {
         // if stopping server, inform immediately
@@ -134,7 +141,10 @@ function serverShutdown(
                     standbyProvisioning = false;
                 }
 
-                if (Date.now() - standbyCreateTime > 1000 * 60 * 5) {
+                if (
+                    Date.now() - standbyCreateTime >
+                    1000 * 60 * provisioningTimeout
+                ) {
                     throw new Error("Standby took too long to provision");
                 }
 
@@ -171,10 +181,15 @@ process.on("SIGINT", async () => {
 
 (async () => {
     const options = program.opts();
+    console.log(options);
     const restartMinutes = options.timer;
+    const provisioningTimeout = options.provisioningTimeout;
     const dockerImage = options.dockerImage;
 
-    console.log(options);
-
-    await serverShutdown(restartMinutes, options.restart, dockerImage);
+    await serverShutdown(
+        restartMinutes,
+        options.restart,
+        dockerImage,
+        provisioningTimeout,
+    );
 })();
