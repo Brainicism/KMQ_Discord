@@ -166,9 +166,9 @@ export default class GuildPreference {
             default: [null],
             setter: this.setForcePlaySong,
         },
-        [GameOption.SPOTIFY_PLAYLIST_ID]: {
+        [GameOption.PLAYLIST_ID]: {
             default: [null],
-            setter: this.setSpotifyPlaylistID,
+            setter: this.setKmqPlaylistID,
         },
     };
 
@@ -197,7 +197,7 @@ export default class GuildPreference {
         ostPreference: DEFAULT_OST_PREFERENCE,
         remixPreference: DEFAULT_REMIX_PREFERENCE,
         forcePlaySongID: null,
-        spotifyPlaylistID: null,
+        kmqPlaylistIdentifier: null,
     };
 
     /** The GuildPreference's respective GameOptions */
@@ -897,29 +897,31 @@ export default class GuildPreference {
     }
 
     /**
-     * Sets the Spotify playlist option value
-     * @param playlistID - Spotify playlist ID
+     * Sets the playlist option value
+     * @param kmqPlaylistIdentifier -  KMQ playlist ID
      */
-    async setSpotifyPlaylistID(playlistID: string | null): Promise<void> {
-        this.gameOptions.spotifyPlaylistID = playlistID;
+    async setKmqPlaylistID(
+        kmqPlaylistIdentifier: string | null,
+    ): Promise<void> {
+        this.gameOptions.kmqPlaylistIdentifier = kmqPlaylistIdentifier;
         await this.updateGuildPreferences([
             {
-                name: GameOptionInternal.SPOTIFY_PLAYLIST_ID,
-                value: playlistID,
+                name: GameOptionInternal.PLAYLIST_ID,
+                value: kmqPlaylistIdentifier,
             },
         ]);
     }
 
     /** @returns the ID of the playlist to retrieve songs from */
     getKmqPlaylistID(): string | null {
-        return this.gameOptions.spotifyPlaylistID;
+        return this.gameOptions.kmqPlaylistIdentifier;
     }
 
     /**
-     * @returns whether the spotify playing option is set
+     * @returns whether the playing option is set
      */
     isPlaylist(): boolean {
-        return this.gameOptions.spotifyPlaylistID !== null;
+        return this.gameOptions.kmqPlaylistIdentifier !== null;
     }
 
     /**

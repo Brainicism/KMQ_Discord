@@ -561,14 +561,14 @@ export default class SongSelector {
 
         const { matchedSongs, metadata, truncated, unmatchedSongs } =
             kmqPlaylistParsed.isSpotify
-                ? await State.spotifyManager.getMatchedSpotifyPlaylist(
+                ? await State.playlistManager.getMatchedSpotifyPlaylist(
                       guildID,
                       kmqPlaylistParsed.playlistId,
                       forceRefreshMetadata,
                       messageContext,
                       interaction,
                   )
-                : await State.spotifyManager.getMatchedYoutubePlaylist(
+                : await State.playlistManager.getMatchedYoutubePlaylist(
                       guildID,
                       kmqPlaylistParsed.playlistId,
                       forceRefreshMetadata,

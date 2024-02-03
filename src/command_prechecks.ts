@@ -309,7 +309,7 @@ export default class CommandPrechecks {
         return true;
     }
 
-    static async notSpotifyPrecheck(
+    static async notPlaylistPrecheck(
         precheckArgs: PrecheckArgs,
     ): Promise<boolean> {
         const { messageContext, interaction } = precheckArgs;
@@ -325,10 +325,10 @@ export default class CommandPrechecks {
                 ),
                 description: i18n.translate(
                     messageContext.guildID,
-                    "misc.preCheck.notSpotify",
+                    "misc.preCheck.notPlaylist",
                     {
-                        spotifyResetCommand: clickableSlashCommand(
-                            "spotify",
+                        playlistResetCommand: clickableSlashCommand(
+                            "playlist",
                             OptionAction.RESET,
                         ),
                     },

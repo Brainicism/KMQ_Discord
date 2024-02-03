@@ -26,7 +26,7 @@ const logger = new IPCLogger(COMMAND_NAME);
 export default class OstCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
-        { checkFn: CommandPrechecks.notSpotifyPrecheck },
+        { checkFn: CommandPrechecks.notPlaylistPrecheck },
     ];
 
     aliases = ["osts"];

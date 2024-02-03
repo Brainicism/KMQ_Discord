@@ -44,7 +44,7 @@ const PLAYLIST_UNMATCHED_SONGS_DIR = path.join(
 
 const SONG_MATCH_TIMEOUT_MS = 90000;
 
-export default class SpotifyManager {
+export default class PlaylistManager {
     public cachedPlaylists: {
         [playlistID: string]: MatchedPlaylist;
     } = {};
@@ -54,13 +54,13 @@ export default class SpotifyManager {
     private guildsParseInProgress: { [guildID: string]: Date } = {};
 
     async start(): Promise<void> {
-        await this.refreshToken();
+        await this.refreshSpotifyToken();
         this.youtubeClient = new youtube_v3.Youtube({
             auth: process.env.YOUTUBE_API_KEY,
         });
 
         setInterval(async () => {
-            await this.refreshToken();
+            await this.refreshSpotifyToken();
         }, 3600000 * 0.8);
     }
 
@@ -91,7 +91,7 @@ export default class SpotifyManager {
         }
 
         return (
-            await State.spotifyManager.getMatchedPlaylist(
+            await State.playlistManager.getMatchedPlaylist(
                 guildID,
                 kmqPlaylistIdentifier,
                 forceRefreshMetadata,
@@ -594,7 +594,7 @@ export default class SpotifyManager {
                 4,
                 spotifySongs,
                 (x: SpotifyTrack) =>
-                    this.generateSongMatchingPromise(x, guildID),
+                    this.generateSpotifySongMatchingPromise(x, guildID),
             )) {
                 if (typeof queryOutput === "string") {
                     unmatchedSongs.push(queryOutput);
@@ -692,14 +692,14 @@ export default class SpotifyManager {
     /**
      * Remove any guilds that have been stuck parsing for more than 10 minutes
      */
-    cleanupSpotifyParsingLocks(): void {
+    cleanupPlaylistParsingLocks(): void {
         for (const guildID in this.guildsParseInProgress) {
             if (
                 this.guildsParseInProgress[guildID] <
                 new Date(Date.now() - 1000 * 60 * 10)
             ) {
                 logger.warn(
-                    `Guild ${guildID} got stuck parsing Spotify at ${this.guildsParseInProgress[guildID]}`,
+                    `Guild ${guildID} got stuck parsing Playlist at ${this.guildsParseInProgress[guildID]}`,
                 );
                 delete this.guildsParseInProgress[guildID];
             }
@@ -794,7 +794,7 @@ export default class SpotifyManager {
         });
     }
 
-    private generateSongMatchingPromise(
+    private generateSpotifySongMatchingPromise(
         song: SpotifyTrack,
         guildID: string,
     ): Promise<QueriedSong | string> {
@@ -942,12 +942,12 @@ export default class SpotifyManager {
         });
     }
 
-    private refreshToken = async (): Promise<void> => {
+    private refreshSpotifyToken = async (): Promise<void> => {
         try {
-            await this.refreshTokenInternal();
+            await this.refreshSpotifyTokenInternal();
         } catch (e) {
             await retryWithExponentialBackoff(
-                this.refreshTokenInternal,
+                this.refreshSpotifyTokenInternal,
                 "Refreshing Spotify refresh token",
                 5,
                 5000,
@@ -955,7 +955,7 @@ export default class SpotifyManager {
         }
     };
 
-    private refreshTokenInternal = async (): Promise<void> => {
+    private refreshSpotifyTokenInternal = async (): Promise<void> => {
         if (
             !process.env.SPOTIFY_CLIENT_ID ||
             !process.env.SPOTIFY_CLIENT_SECRET

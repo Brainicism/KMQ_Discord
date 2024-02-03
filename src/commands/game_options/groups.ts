@@ -46,7 +46,7 @@ export default class GroupsCommand implements BaseCommand {
 
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
-        { checkFn: CommandPrechecks.notSpotifyPrecheck },
+        { checkFn: CommandPrechecks.notPlaylistPrecheck },
     ];
 
     help = (guildID: string): HelpDocumentation => ({

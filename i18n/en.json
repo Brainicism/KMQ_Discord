@@ -1194,7 +1194,7 @@
                 "unmatched": "Unmatched songs for \"{{playlistName}}\":\n{{unmatchedSongs}}"
             },
             "help": {
-                "description": "Play songs exclusively from a given Spotify playlist",
+                "description": "Play songs exclusively from a given Spotify/Youtube playlist",
                 "example": {
                     "playlistURL": "Start playing songs from the playlist",
                     "reset": "Stop playing from the playlist"
@@ -1207,12 +1207,12 @@
                 "name": "playlist"
             },
             "invalidURL": {
-                "description": "The link to the playlist is invalid. Use `Share > Copy Link to Playlist` in Spotify to retrieve a valid link.",
-                "title": "Invalid Spotify Playlist URL"
+                "description": "The link to the playlist is invalid. For Spotify, Use `Share > Copy Link to Playlist` in Spotify to retrieve a valid link.",
+                "title": "Invalid Playlist URL"
             },
             "matched": {
                 "description": "Matched `{{matchedCount}}/{{totalCount}}` songs.",
-                "title": "Playing \"{{playlistName}}\" on Spotify",
+                "title": "Playing \"{{playlistName}}\"",
                 "truncated": "Note: The playlist took too long to process and did not finish to completion. Try again with a smaller playlist next time."
             },
             "noMatches": {
@@ -1220,7 +1220,7 @@
                 "title": "Failed to fetch songs from playlist"
             },
             "noPlaylistSet": {
-                "description": "{{spotifySet}} a playlist before using this command.",
+                "description": "{{playlistSet}} a playlist before using this command.",
                 "title": "No Playlist Set"
             },
             "parsing": "Loading playlist...",
@@ -1231,7 +1231,7 @@
         },
         "spotify": {
             "help": {
-                "name": "spotify2"
+                "name": "spotify"
             }
         },
         "stats": {
@@ -1602,7 +1602,7 @@
             "notGameSession": "You can't do that while in a game session.",
             "notHidden": "You can't do that during a hidden game.",
             "notListeningSession": "You can't do that while in a listening session.",
-            "notSpotify": "You can't change that option when playing from Spotify. Use {{spotifyResetCommand}} before changing this option.",
+            "notPlaylist": "You can't change that option when playing from a playlist. Use {{playlistResetCommand}} before changing this option.",
             "title": "Wait..."
         },
         "releaseDate": "Release Date",

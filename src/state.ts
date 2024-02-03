@@ -9,7 +9,7 @@ import type ListeningSession from "./structures/listening_session";
 import type LocaleType from "./enums/locale_type";
 import type MatchedArtist from "./interfaces/matched_artist";
 import type RestartNotification from "./interfaces/restart_notification";
-import type SpotifyManager from "./helpers/spotify_manager";
+import type PlaylistManager from "./helpers/playlist_manager";
 
 export default class State {
     static version: string;
@@ -51,7 +51,7 @@ export default class State {
     }> = [];
 
     static restartNotification: RestartNotification | null;
-    static spotifyManager: SpotifyManager;
+    static playlistManager: PlaylistManager;
     static redditClient: RedditClient;
     static geminiClient: GeminiClient;
 

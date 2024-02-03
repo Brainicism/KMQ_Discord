@@ -14,10 +14,10 @@ import AppCommandsAction from "./enums/app_command_action";
 import EnvType from "./enums/env_type";
 import EvalCommand from "./commands/admin/eval";
 import GeminiClient from "./helpers/gemini_client";
+import PlaylistManager from "./helpers/playlist_manager";
 import ReloadCommand from "./commands/admin/reload";
 import SIGINTHandler from "./events/process/SIGINT";
 import Session from "./structures/session";
-import SpotifyManager from "./helpers/spotify_manager";
 import State from "./state";
 import channelDeleteHandler from "./events/client/channelDelete";
 import connectHandler from "./events/client/connect";
@@ -257,9 +257,9 @@ export default class BotWorker extends BaseClusterWorker {
         logger.info("Registering process event handlers...");
         this.registerProcessEvents();
 
-        logger.info("Initializing Spotify manager...");
-        State.spotifyManager = new SpotifyManager();
-        State.spotifyManager.start();
+        logger.info("Initializing Playlist manager...");
+        State.playlistManager = new PlaylistManager();
+        State.playlistManager.start();
 
         State.redditClient = new RedditClient();
         State.geminiClient = new GeminiClient();

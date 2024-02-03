@@ -776,12 +776,12 @@ export async function generateOptionsMessage(
     const optionStrings: { [option: string]: string | null } = {};
 
     const gameOptions = guildPreference.gameOptions;
-    const kmqPlaylistIdentifier = gameOptions.spotifyPlaylistID;
+    const kmqPlaylistIdentifier = gameOptions.kmqPlaylistIdentifier;
     let thumbnailUrl: string | undefined;
 
     if (kmqPlaylistIdentifier) {
         const matchedPlaylistMetadata =
-            await State.spotifyManager.getMatchedPlaylistMetadata(
+            await State.playlistManager.getMatchedPlaylistMetadata(
                 guildID,
                 kmqPlaylistIdentifier,
                 false,
@@ -799,12 +799,12 @@ export async function generateOptionsMessage(
                 : YOUTUBE_PLAYLIST_BASE_URL
         }${kmqPlaylistParsed.playlistId}`;
 
-        optionStrings[GameOption.SPOTIFY_PLAYLIST_ID] =
+        optionStrings[GameOption.PLAYLIST_ID] =
             `[${matchedPlaylistMetadata.playlistName}](${playlistUrl})`;
 
         thumbnailUrl = matchedPlaylistMetadata.thumbnailUrl ?? undefined;
     } else {
-        optionStrings[GameOption.SPOTIFY_PLAYLIST_ID] = null;
+        optionStrings[GameOption.PLAYLIST_ID] = null;
     }
 
     const totalSongs = await getAvailableSongCount(
@@ -963,7 +963,7 @@ export async function generateOptionsMessage(
         }
     }
 
-    // Special case: Options that rely on modifying queried songs are disabled when playing from Spotify
+    // Special case: Options that rely on modifying queried songs are disabled when playing from KMQ playlist
     const isPlaylist = guildPreference.isPlaylist();
     if (isPlaylist) {
         const disabledOptions = [
@@ -1031,14 +1031,14 @@ export async function generateOptionsMessage(
         .filter((option) => optionStrings[option as GameOption])
         .filter((option) => !PriorityGameOption.includes(option as GameOption));
 
-    // Remove priority options; emplace /spotify / /answer at the start of options
+    // Remove priority options; emplace /playlist / /answer at the start of options
     if (isPlaylist) {
         priorityOptions = "";
         if (!session?.isListeningSession()) {
             fieldOptions.unshift(GameOption.ANSWER_TYPE);
         }
 
-        fieldOptions.unshift(GameOption.SPOTIFY_PLAYLIST_ID);
+        fieldOptions.unshift(GameOption.PLAYLIST_ID);
     }
 
     // Split non-priority options into three fields

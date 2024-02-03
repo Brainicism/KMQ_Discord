@@ -65,7 +65,7 @@ export async function getAvailableSongCount(
             const kmqPlaylistIdentifier = guildPreference.getKmqPlaylistID()!;
 
             const playlistMetadata =
-                await State.spotifyManager.getMatchedPlaylistMetadata(
+                await State.playlistManager.getMatchedPlaylistMetadata(
                     guildPreference.guildID,
                     kmqPlaylistIdentifier,
                     false,
