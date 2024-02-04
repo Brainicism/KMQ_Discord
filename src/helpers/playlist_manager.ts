@@ -297,15 +297,14 @@ export default class PlaylistManager {
             });
         }, 2000);
 
-        while (pageToken != null) {
-            page++;
+        while (page < numPlaylistPages) {
             if (
-                page % Math.floor(numPlaylistPages / 4) === 1 ||
+                page % Math.floor(numPlaylistPages / 4) === 0 ||
                 page === numPlaylistPages ||
-                page === 1
+                page === 0
             ) {
                 logger.info(
-                    `${logHeader} | Calling Youtube API ${page}/${numPlaylistPages} for playlist`,
+                    `${logHeader} | Calling Youtube API ${page + 1}/${numPlaylistPages} for playlist`,
                 );
             }
 
@@ -337,6 +336,7 @@ export default class PlaylistManager {
 
             pageToken = resp.nextPageToken;
             if (!pageToken) break;
+            page++;
         }
 
         clearTimeout(updateParsing);
@@ -530,19 +530,19 @@ export default class PlaylistManager {
             (requestURL: string) =>
                 this.generateSpotifyResponsePromise(requestURL, guildID),
         )) {
-            numProcessedPlaylistPages++;
             if (
                 numProcessedPlaylistPages % Math.floor(numPlaylistPages / 4) ===
-                    1 ||
+                    0 ||
                 numProcessedPlaylistPages === numPlaylistPages ||
-                numProcessedPlaylistPages === 1
+                numProcessedPlaylistPages === 0
             ) {
                 logger.info(
-                    `${logHeader} | Calling Spotify API ${numProcessedPlaylistPages}/${numPlaylistPages} for playlist`,
+                    `${logHeader} | Calling Spotify API ${numProcessedPlaylistPages + 1}/${numPlaylistPages} for playlist`,
                 );
             }
 
             spotifySongs.push(...results);
+            numProcessedPlaylistPages++;
         }
 
         logger.info(
