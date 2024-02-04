@@ -11,7 +11,6 @@ import {
     italicize,
     standardDateFormat,
 } from "../../helpers/utils";
-import url from "url";
 import {
     generateEmbed,
     generateOptionsMessage,
