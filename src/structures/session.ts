@@ -131,7 +131,7 @@ export default abstract class Session {
 
             await this.songSelector.reloadSongs(
                 this.guildPreference,
-                this.guildPreference.getSpotifyPlaylistID() ?? undefined,
+                this.guildPreference.getKmqPlaylistID() ?? undefined,
             );
         };
     }
@@ -187,7 +187,7 @@ export default abstract class Session {
             try {
                 await this.songSelector.reloadSongs(
                     this.guildPreference,
-                    this.guildPreference.getSpotifyPlaylistID() ?? undefined,
+                    this.guildPreference.getKmqPlaylistID() ?? undefined,
                     !this.sessionInitialized,
                 );
             } catch (err) {

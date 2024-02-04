@@ -806,7 +806,8 @@
             "spotify": "En train de jouer {{songCount}} chansons de Spotify avec les options suivantes :",
             "timer": "{{timerInSeconds}} sec",
             "title": "Options",
-            "updated": "{{presetOrOption}} Mis à jour"
+            "updated": "{{presetOrOption}} Mis à jour",
+            "youtube": "Lecture en cours de {{songCount}} chansons de YouTube avec les options suivantes :"
         },
         "ost": {
             "help": {
@@ -879,6 +880,47 @@
             },
             "typeGuess": "Écoutez la chanson et tapez votre réponse !",
             "voteReminder": "Psst. Gagnez plus d'EXP en votant (voir {{vote}})."
+        },
+        "playlist": {
+            "fileFormat": {
+                "matched": "Chansons correspondantes pour \"{{playlistName}}\":\n{{matchedSongs}}",
+                "unmatched": "Chansons non correspondantes pour \"{{playlistName}}\":\n{{unmatchedSongs}}"
+            },
+            "help": {
+                "description": "Jouez exclusivement des chansons à partir d'une playlist Spotify/YouTube donnée",
+                "example": {
+                    "playlistURL": "Commencer à jouer des chansons de la playlist",
+                    "reset": "Arrêter de jouer à partir de la playlist"
+                },
+                "interaction": {
+                    "matches": "Voir une liste de chansons correspondantes et non correspondantes",
+                    "matchesLink": "Indique si l'URL YouTube des chansons correspondantes doit être affichée ou non",
+                    "playlistURL": "La playlist à partir de laquelle récupérer les chansons"
+                },
+                "name": "playlist"
+            },
+            "invalidURL": {
+                "description": "Le lien vers la playlist est invalide. Pour Spotify, utilisez `Partager > Copier le lien vers la playlist` dans Spotify pour récupérer un lien valide.",
+                "title": "URL de playlist invalide"
+            },
+            "matched": {
+                "description": "`{{matchedCount}}/{{totalCount}}` chansons trouvées.",
+                "title": "Lecture de \"{{playlistName}}\"",
+                "truncated": "Note : La playlist a pris trop de temps à être traitée et n'a pas été complètement terminée. Essayez avec une playlist plus petite la prochaine fois."
+            },
+            "noMatches": {
+                "description": "Aucune chanson trouvée.",
+                "title": "Échec de la récupération des chansons depuis la playlist"
+            },
+            "noPlaylistSet": {
+                "description": "{{playlistSet}} une playlist avant d'utiliser cette commande.",
+                "title": "Aucune playlist définie"
+            },
+            "parsing": "Chargement de la playlist...",
+            "parsingAlreadyInProgress": {
+                "description": "Veuillez attendre que le chargement de la playlist en cours soit terminé avant de commencer un nouveau.",
+                "title": "Chargement de la playlist déjà en cours"
+            }
         },
         "preset": {
             "deleted": {
@@ -1188,44 +1230,8 @@
             }
         },
         "spotify": {
-            "fileFormat": {
-                "matched": "Chansons correspondantes pour \"{{playlistName}}\":\n{{matchedSongs}}",
-                "unmatched": "Chansons non correspondantes pour \"{{playlistName}}\":\n{{unmatchedSongs}}"
-            },
             "help": {
-                "description": "Jouer des chansons exclusivement à partir d'une playlist Spotify donnée",
-                "example": {
-                    "playlistURL": "Commencer à jouer des chansons de la playlist",
-                    "reset": "Arrêter de jouer à partir de la playlist"
-                },
-                "interaction": {
-                    "matches": "Voir une liste de chansons correspondantes et non correspondantes",
-                    "matchesLink": "Indique si l'URL YouTube des chansons correspondantes doit être affichée ou non",
-                    "playlistURL": "La playlist à partir de laquelle récupérer les chansons"
-                },
                 "name": "spotify"
-            },
-            "invalidURL": {
-                "description": "Le lien vers la playlist n'est pas valide. Utilisez `Partager > Copier le lien vers la playlist` dans Spotify pour récupérer un lien valide.",
-                "title": "URL de playlist Spotify invalide"
-            },
-            "matched": {
-                "description": "`{{matchedCount}}/{{totalCount}}` chansons trouvées.",
-                "title": "Lecture de \"{{playlistName}}\" sur Spotify",
-                "truncated": "Note : La playlist a pris trop de temps à être traitée et n'a pas été complètement terminée. Essayez avec une playlist plus petite la prochaine fois."
-            },
-            "noMatches": {
-                "description": "Aucune chanson trouvée.",
-                "title": "Impossible de récupérer les chansons de Spotify"
-            },
-            "noPlaylistSet": {
-                "description": "{{spotifySet}} une playlist avant d'utiliser cette commande.",
-                "title": "Aucune playlist définie"
-            },
-            "parsing": "Chargement de la playlist Spotify...",
-            "parsingAlreadyInProgress": {
-                "description": "Veuillez attendre que le chargement de la playlist en cours soit terminé avant de commencer un nouveau.",
-                "title": "Chargement de la playlist déjà en cours"
             }
         },
         "stats": {
@@ -1596,7 +1602,7 @@
             "notGameSession": "Vous ne pouvez pas faire cela pendant une session de jeu.",
             "notHidden": "Vous ne pouvez pas faire cela pendant une partie cachée.",
             "notListeningSession": "Vous ne pouvez pas faire cela pendant une session d'écoute.",
-            "notSpotify": "Vous ne pouvez pas changer cette option lorsque vous jouez depuis Spotify. Utilisez {{spotifyResetCommand}} avant de changer cette option.",
+            "notPlaylist": "Vous ne pouvez pas modifier cette option lors de la lecture à partir d'une playlist. Utilisez {{playlistResetCommand}} avant de modifier cette option.",
             "title": "Attendez..."
         },
         "releaseDate": "Date de sortie",

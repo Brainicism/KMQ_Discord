@@ -164,7 +164,7 @@ export default async function interactionCreateHandler(
             Eris.Constants.ApplicationCommandTypes.CHAT_INPUT
         ) {
             const commandInteractionHandler =
-                State.client.commands[interaction.data.name];
+                State.client.commandsHandlers[interaction.data.name];
 
             if (commandInteractionHandler?.processChatInputInteraction) {
                 if (commandInteractionHandler.preRunChecks) {

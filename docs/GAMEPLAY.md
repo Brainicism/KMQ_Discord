@@ -233,7 +233,7 @@ Use `/help action:[command_name]` for more details about the following commands:
 -   `/gender`: Choose the gender of the artists to exclusively play from
 -   `/answer`: Choose whether to type in your answer (and allow typos), or to pick from multiple choices on buttons
 -   `/cutoff`: Set a cutoff year for songs. Only songs released during and after the cutoff year will be chosen
--   `/spotify`: Play songs from a Spotify playlist
+-   `/playlist`: Play songs from a Spotify/YouTube playlist
 -   `/artisttype`: Choose whether to hear from soloists, groups, or both
 -   `/release`: Specify whether official releases are played, or to include b-sides, dance practices, acoustic versions, and remixes
 -   `/language`: Choose whether to include Japanese/English/Chinese songs, or only Korean songs

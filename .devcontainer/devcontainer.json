@@ -10,9 +10,12 @@
 				"dbaeumer.vscode-eslint",
 				"esbenp.prettier-vscode",
 				"lokalise.i18n-ally",
-				"hbenl.vscode-mocha-test-adapter"
+				"hbenl.vscode-mocha-test-adapter",
+				"chamboug.js-auto-backticks"
 			]
 		}
 	},
-	"remoteUser": "node"
+	"remoteUser": "node",
+	"postCreateCommand": "/bin/sh .devcontainer/post_create_command.sh",
+	"postAttachCommand": "/bin/sh .devcontainer/post_attach_command.sh"
 }

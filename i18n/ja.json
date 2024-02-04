@@ -806,7 +806,8 @@
             "spotify": "現在、以下のオプションでSpotifyから{{songCount}}曲を再生しています。",
             "timer": "{{timerInSeconds}}秒",
             "title": "オプション",
-            "updated": "{{presetOrOption}}が更新されました"
+            "updated": "{{presetOrOption}}が更新されました",
+            "youtube": "次のオプションを使用してYouTubeから{{songCount}}曲を再生中です："
         },
         "ost": {
             "help": {
@@ -879,6 +880,47 @@
             },
             "typeGuess": "曲を聴いて、答えを入力してください！",
             "voteReminder": "Psst. 投票してEXPをもっと稼ぎましょう（{{vote}}を参照）"
+        },
+        "playlist": {
+            "fileFormat": {
+                "matched": "「{{playlistName}}」の一致した曲：\n{{matchedSongs}}",
+                "unmatched": "「{{playlistName}}」の一致しなかった曲：\n{{unmatchedSongs}}"
+            },
+            "help": {
+                "description": "指定されたSpotify/YouTubeプレイリストからのみ曲を再生します",
+                "example": {
+                    "playlistURL": "プレイリストから曲の再生を開始する",
+                    "reset": "プレイリストからの再生を停止する"
+                },
+                "interaction": {
+                    "matches": "一致した曲と一致していない曲のリストを見る",
+                    "matchesLink": "一致した曲のYouTubeのURLを表示するかどうか",
+                    "playlistURL": "曲を取得するプレイリスト"
+                },
+                "name": "プレイリスト"
+            },
+            "invalidURL": {
+                "description": "プレイリストへのリンクは無効です。Spotifyでは、`共有 > プレイリストのリンクをコピー`を使用して有効なリンクを取得してください。",
+                "title": "無効なプレイリストのURL"
+            },
+            "matched": {
+                "description": "`{{matchedCount}}/{{totalCount}}`曲がマッチしました。",
+                "title": "\"{{playlistName}}\" の再生",
+                "truncated": "注：プレイリストの処理に時間がかかり、完了しませんでした。次回は小さなプレイリストで再試行してください。"
+            },
+            "noMatches": {
+                "description": "曲がマッチしませんでした。",
+                "title": "プレイリストから曲を取得できませんでした"
+            },
+            "noPlaylistSet": {
+                "description": "このコマンドを使用する前に{{playlistSet}}プレイリストを設定してください。",
+                "title": "プレイリストが設定されていません"
+            },
+            "parsing": "プレイリストを読み込み中...",
+            "parsingAlreadyInProgress": {
+                "description": "新しい読み込みを開始する前に、現在のプレイリストの読み込みが終了するのを待ってください。",
+                "title": "すでにプレイリストを読み込み中です"
+            }
         },
         "preset": {
             "deleted": {
@@ -1188,44 +1230,8 @@
             }
         },
         "spotify": {
-            "fileFormat": {
-                "matched": "「{{playlistName}}」の一致した曲：\n{{matchedSongs}}",
-                "unmatched": "「{{playlistName}}」の一致しなかった曲：\n{{unmatchedSongs}}"
-            },
             "help": {
-                "description": "指定されたSpotifyプレイリストからの曲のみ再生する",
-                "example": {
-                    "playlistURL": "プレイリストから曲の再生を開始する",
-                    "reset": "プレイリストからの再生を停止する"
-                },
-                "interaction": {
-                    "matches": "一致した曲と一致していない曲のリストを見る",
-                    "matchesLink": "一致した曲のYouTubeのURLを表示するかどうか",
-                    "playlistURL": "曲を取得するプレイリスト"
-                },
                 "name": "spotify"
-            },
-            "invalidURL": {
-                "description": "プレイリストへのリンクが無効です。有効なリンクを取得するには、Spotifyの「共有>プレイリストへのリンクをコピー」を使用してください。",
-                "title": "SpotifyプレイリストURLが無効です"
-            },
-            "matched": {
-                "description": "`{{matchedCount}}/{{totalCount}}`曲がマッチしました。",
-                "title": "Spotifyで\"{{playlistName}}\"を再生中",
-                "truncated": "注：プレイリストの処理に時間がかかり、完了しませんでした。次回は小さなプレイリストで再試行してください。"
-            },
-            "noMatches": {
-                "description": "曲がマッチしませんでした。",
-                "title": "Spotifyから曲を取得できませんでした。"
-            },
-            "noPlaylistSet": {
-                "description": "このコマンドを使用する前に{{spotifySet}}プレイリストを設定してください。",
-                "title": "プレイリストが設定されていません"
-            },
-            "parsing": "Spotifyプレイリストを読み込み中...",
-            "parsingAlreadyInProgress": {
-                "description": "新しい読み込みを開始する前に、現在のプレイリストの読み込みが終了するのを待ってください。",
-                "title": "すでにプレイリストを読み込み中です"
             }
         },
         "stats": {
@@ -1596,7 +1602,7 @@
             "notGameSession": "ゲームセッション中にはそれはできません。",
             "notHidden": "非公開ゲーム中はその操作はできません。",
             "notListeningSession": "リスニングセッション中にはそれはできません。",
-            "notSpotify": "Spotifyから再生している場合は、このオプションを変更できません。このオプションを変更する前に、{{spotifyResetCommand}}を使用してください。",
+            "notPlaylist": "プレイリストから再生しているときは、そのオプションを変更することはできません。このオプションを変更する前に{{playlistResetCommand}}を使用してください。",
             "title": "お待ちください..."
         },
         "releaseDate": "リリース日",

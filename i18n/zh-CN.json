@@ -806,7 +806,8 @@
             "spotify": "现在使用以下选项从Spotify播放{{songCount}}首歌曲：",
             "timer": "{{timerInSeconds}} 秒",
             "title": "选项",
-            "updated": "{{presetOrOption}} 已更新"
+            "updated": "{{presetOrOption}} 已更新",
+            "youtube": "现在使用以下选项从YouTube播放{{songCount}}首歌曲："
         },
         "ost": {
             "help": {
@@ -879,6 +880,47 @@
             },
             "typeGuess": "听歌并输入您的猜测！",
             "voteReminder": "嘘，通过投票赚取更多经验值(请参见 {{vote}})。"
+        },
+        "playlist": {
+            "fileFormat": {
+                "matched": "与“{{playlistName}}”匹配的歌曲：\n{{matchedSongs}}",
+                "unmatched": "与“{{playlistName}}”不匹配的歌曲：\n{{unmatchedSongs}}"
+            },
+            "help": {
+                "description": "仅从给定的Spotify/YouTube播放列表播放歌曲",
+                "example": {
+                    "playlistURL": "开始播放播放列表中的歌曲",
+                    "reset": "停止从播放列表中播放"
+                },
+                "interaction": {
+                    "matches": "查看匹配和不匹配歌曲的列表",
+                    "matchesLink": "是否显示匹配歌曲的YouTube链接",
+                    "playlistURL": "检索歌曲的播放列表"
+                },
+                "name": "播放列表"
+            },
+            "invalidURL": {
+                "description": "播放列表链接无效。对于Spotify，请使用`分享 > 复制播放列表链接`以检索有效链接。",
+                "title": "无效的播放列表 URL"
+            },
+            "matched": {
+                "description": "匹配了 `{{matchedCount}}/{{totalCount}}` 首歌曲。",
+                "title": "正在播放 \"{{playlistName}}\"",
+                "truncated": "注意：播放列表处理时间过长，未能完成。请尝试使用较小的播放列表。"
+            },
+            "noMatches": {
+                "description": "未匹配到任何歌曲。",
+                "title": "无法从播放列表中获取歌曲"
+            },
+            "noPlaylistSet": {
+                "description": "使用此命令前请{{playlistSet}}播放列表。",
+                "title": "未设置播放列表"
+            },
+            "parsing": "加载播放列表中...",
+            "parsingAlreadyInProgress": {
+                "description": "请等待当前播放列表加载完成后再开始新的加载。",
+                "title": "播放列表已在加载中"
+            }
         },
         "preset": {
             "deleted": {
@@ -1188,44 +1230,8 @@
             }
         },
         "spotify": {
-            "fileFormat": {
-                "matched": "与“{{playlistName}}”匹配的歌曲：\n{{matchedSongs}}",
-                "unmatched": "与“{{playlistName}}”不匹配的歌曲：\n{{unmatchedSongs}}"
-            },
             "help": {
-                "description": "仅从给定的 Spotify 播放列表中播放歌曲",
-                "example": {
-                    "playlistURL": "开始播放播放列表中的歌曲",
-                    "reset": "停止从播放列表中播放"
-                },
-                "interaction": {
-                    "matches": "查看匹配和不匹配歌曲的列表",
-                    "matchesLink": "是否显示匹配歌曲的YouTube链接",
-                    "playlistURL": "检索歌曲的播放列表"
-                },
                 "name": "spotify"
-            },
-            "invalidURL": {
-                "description": "播放列表链接无效。请在 Spotify 中使用“分享>复制播放列表链接”来检索有效链接。",
-                "title": "无效的 Spotify 播放列表链接"
-            },
-            "matched": {
-                "description": "匹配了 `{{matchedCount}}/{{totalCount}}` 首歌曲。",
-                "title": "正在 Spotify 上播放“{{playlistName}}”",
-                "truncated": "注意：播放列表处理时间过长，未能完成。请尝试使用较小的播放列表。"
-            },
-            "noMatches": {
-                "description": "未匹配到任何歌曲。",
-                "title": "无法从 Spotify 检索歌曲。"
-            },
-            "noPlaylistSet": {
-                "description": "使用此命令前请{{spotifySet}}播放列表。",
-                "title": "未设置播放列表"
-            },
-            "parsing": "正在加载Spotify播放列表...",
-            "parsingAlreadyInProgress": {
-                "description": "请等待当前播放列表加载完成后再开始新的加载。",
-                "title": "播放列表已在加载中"
             }
         },
         "stats": {
@@ -1596,7 +1602,7 @@
             "notGameSession": "您不能在游戏会话中进行此操作。",
             "notHidden": "在隐藏游戏期间无法进行该操作。",
             "notListeningSession": "您不能在听歌会话中进行此操作。",
-            "notSpotify": "您不能在从 Spotify 播放时更改该选项。请在更改此选项之前使用 {{spotifyResetCommand}}。",
+            "notPlaylist": "从播放列表播放时，您不能更改该选项。更改此选项之前，请使用{{playlistResetCommand}}。",
             "title": "请稍等..."
         },
         "releaseDate": "发布日期",

@@ -806,7 +806,8 @@
             "spotify": "Reproduciendo {{songCount}} canciones de Spotify con las siguientes opciones:",
             "timer": "{{timerInSeconds}} seg",
             "title": "Opciones",
-            "updated": "{{presetOrOption}} Actualizado"
+            "updated": "{{presetOrOption}} Actualizado",
+            "youtube": "Ahora reproduciendo {{songCount}} canciones de YouTube con las siguientes opciones:"
         },
         "ost": {
             "help": {
@@ -879,6 +880,47 @@
             },
             "typeGuess": "¡Escucha la canción y escribe tu respuesta!",
             "voteReminder": "Psst. Gana más EXP votando (ver {{vote}})"
+        },
+        "playlist": {
+            "fileFormat": {
+                "matched": "Canciones encontradas para \"{{playlistName}}\":\n{{matchedSongs}}",
+                "unmatched": "Canciones no encontradas para \"{{playlistName}}\":\n{{unmatchedSongs}}"
+            },
+            "help": {
+                "description": "Reproduce canciones exclusivamente de una lista de reproducción de Spotify/YouTube dada",
+                "example": {
+                    "playlistURL": "Comenzar a reproducir canciones de la lista de reproducción",
+                    "reset": "Detener la reproducción de la lista de reproducción"
+                },
+                "interaction": {
+                    "matches": "Ver una lista de canciones coincidentes y no coincidentes",
+                    "matchesLink": "Si mostrar o no la URL de YouTube de las canciones coincidentes",
+                    "playlistURL": "La lista de reproducción de la que recuperar canciones"
+                },
+                "name": "listadereproducción"
+            },
+            "invalidURL": {
+                "description": "El enlace a la lista de reproducción no es válido. Para Spotify, usa `Compartir > Copiar enlace de la lista de reproducción` en Spotify para recuperar un enlace válido.",
+                "title": "URL de lista de reproducción no válida"
+            },
+            "matched": {
+                "description": "Coincidieron `{{matchedCount}}/{{totalCount}}` canciones.",
+                "title": "Reproduciendo \"{{playlistName}}\"",
+                "truncated": "Nota: La lista de reproducción tardó demasiado en procesarse y no se completó. Intente de nuevo con una lista de reproducción más pequeña la próxima vez."
+            },
+            "noMatches": {
+                "description": "No se encontraron canciones.",
+                "title": "No se pudieron obtener canciones de la lista de reproducción"
+            },
+            "noPlaylistSet": {
+                "description": "{{playlistSet}} una lista de reproducción antes de usar este comando.",
+                "title": "No se ha establecido ninguna lista de reproducción"
+            },
+            "parsing": "Cargando lista de reproducción...",
+            "parsingAlreadyInProgress": {
+                "description": "Por favor, espera a que termine de cargar la lista de reproducción actual antes de iniciar una nueva.",
+                "title": "Ya se está cargando la lista de reproducción"
+            }
         },
         "preset": {
             "deleted": {
@@ -1188,44 +1230,8 @@
             }
         },
         "spotify": {
-            "fileFormat": {
-                "matched": "Canciones encontradas para \"{{playlistName}}\":\n{{matchedSongs}}",
-                "unmatched": "Canciones no encontradas para \"{{playlistName}}\":\n{{unmatchedSongs}}"
-            },
             "help": {
-                "description": "Reproducir canciones exclusivamente de una lista de reproducción de Spotify dada",
-                "example": {
-                    "playlistURL": "Comenzar a reproducir canciones de la lista de reproducción",
-                    "reset": "Detener la reproducción de la lista de reproducción"
-                },
-                "interaction": {
-                    "matches": "Ver una lista de canciones coincidentes y no coincidentes",
-                    "matchesLink": "Si mostrar o no la URL de YouTube de las canciones coincidentes",
-                    "playlistURL": "La lista de reproducción de la que recuperar canciones"
-                },
                 "name": "spotify"
-            },
-            "invalidURL": {
-                "description": "El enlace a la lista de reproducción no es válido. Utilice `Compartir > Copiar enlace a la lista de reproducción` en Spotify para obtener un enlace válido.",
-                "title": "URL de lista de reproducción de Spotify no válida"
-            },
-            "matched": {
-                "description": "Coincidieron `{{matchedCount}}/{{totalCount}}` canciones.",
-                "title": "Reproduciendo \"{{playlistName}}\" en Spotify",
-                "truncated": "Nota: La lista de reproducción tardó demasiado en procesarse y no se completó. Intente de nuevo con una lista de reproducción más pequeña la próxima vez."
-            },
-            "noMatches": {
-                "description": "No se encontraron canciones.",
-                "title": "Error al obtener canciones de Spotify"
-            },
-            "noPlaylistSet": {
-                "description": "{{spotifySet}} una lista de reproducción antes de usar este comando.",
-                "title": "No se ha establecido ninguna lista de reproducción"
-            },
-            "parsing": "Cargando lista de reproducción de Spotify...",
-            "parsingAlreadyInProgress": {
-                "description": "Por favor, espera a que termine de cargar la lista de reproducción actual antes de iniciar una nueva.",
-                "title": "Ya se está cargando la lista de reproducción"
             }
         },
         "stats": {
@@ -1596,7 +1602,7 @@
             "notGameSession": "No puedes hacer eso mientras estás en una sesión de juego.",
             "notHidden": "No puedes hacer eso durante un juego oculto.",
             "notListeningSession": "No puedes hacer eso mientras estás en una sesión de escucha.",
-            "notSpotify": "No puedes cambiar esa opción cuando estás reproduciendo desde Spotify. Usa {{spotifyResetCommand}} antes de cambiar esta opción.",
+            "notPlaylist": "No puedes cambiar esa opción cuando reproduces desde una lista de reproducción. Usa {{playlistResetCommand}} antes de cambiar esta opción.",
             "title": "Espera..."
         },
         "releaseDate": "Fecha de lanzamiento",
