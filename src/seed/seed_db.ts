@@ -396,7 +396,7 @@ async function validateSqlDump(
             );
 
             await sql
-                .raw(`CALL CreateKmqDataTables();`)
+                .raw("CALL CreateKmqDataTables();")
                 .execute(db.kpopVideosValidation);
         }
     } catch (e) {

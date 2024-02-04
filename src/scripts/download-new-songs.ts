@@ -6,7 +6,6 @@ import {
     retryJob,
 } from "../helpers/utils";
 import { getNewConnection } from "../database_context";
-import { sql } from "kysely";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import path from "path";
