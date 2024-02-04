@@ -24,7 +24,7 @@ import type { PlaylistMetadata } from "../interfaces/playlist_metadata";
                         metadata.option_value,
                     );
 
-                    const playlistID = optionValue.playlistID;
+                    const playlistID = optionValue.playlistId;
                     playlistIDs.push({
                         guild_id: metadata.guild_id,
                         option_name: "spotifyPlaylistID",
@@ -66,7 +66,7 @@ import type { PlaylistMetadata } from "../interfaces/playlist_metadata";
                         metadata.option_value,
                     );
 
-                    const playlistID = optionValue.playlistID;
+                    const playlistID = optionValue.playlistId;
                     playlistIDs.push({
                         guild_id: metadata.guild_id,
                         preset_name: metadata.preset_name,
