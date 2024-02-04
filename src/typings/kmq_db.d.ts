@@ -18,6 +18,7 @@ export interface AvailableSongs {
     link: string;
     members: "coed" | "female" | "male";
     original_artist_name_en: string;
+    original_link: Generated<string | null>;
     previous_name_en: Generated<string | null>;
     previous_name_ko: Generated<string | null>;
     publishedon: Date;

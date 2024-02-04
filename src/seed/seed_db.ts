@@ -90,12 +90,18 @@ export async function tableExists(
 async function replaceBetterAudioSongs(
     db: Kysely<KpopVideosDB>,
 ): Promise<void> {
+    await db.schema
+        .alterTable("app_kpop")
+        .addColumn("original_vlink", "varchar(255)")
+        .execute();
+
     const songsWithBetterAudioCounterpart = await db
         .selectFrom("app_kpop as a")
         .leftJoin("app_kpop as b", "a.id_better_audio", "b.id")
         .select([
             "a.id as original_id",
             "a.original_name as original_name",
+            "a.vlink as original_link",
             "b.vlink as better_audio_link",
         ])
         .where("b.vlink", "is not", null)
@@ -115,6 +121,7 @@ async function replaceBetterAudioSongs(
             .where("id", "=", betterAudioSong.original_id)
             .set({
                 vlink: betterAudioSong.better_audio_link,
+                original_vlink: betterAudioSong.original_link,
             })
             .execute();
     }

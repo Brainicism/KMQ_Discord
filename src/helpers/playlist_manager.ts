@@ -363,10 +363,19 @@ export default class PlaylistManager {
             matchedSongs = await dbContext.kmq
                 .selectFrom("available_songs")
                 .select(SongSelector.QueriedSongFields)
-                .where(
-                    "link",
-                    "in",
-                    youtubePlaylistVideoIDs.map((x) => x.videoId),
+                .where((eb) =>
+                    eb.or([
+                        eb(
+                            "link",
+                            "in",
+                            youtubePlaylistVideoIDs.map((x) => x.videoId),
+                        ),
+                        eb(
+                            "original_link",
+                            "in",
+                            youtubePlaylistVideoIDs.map((x) => x.videoId),
+                        ),
+                    ]),
                 )
                 .execute();
 
@@ -374,7 +383,11 @@ export default class PlaylistManager {
                 .filter(
                     (x) =>
                         !matchedSongs
-                            .map((y) => y.youtubeLink)
+                            .flatMap((y) =>
+                                y.originalLink
+                                    ? [y.originalLink, y.youtubeLink]
+                                    : [y.youtubeLink],
+                            )
                             .includes(x.videoId),
                 )
                 .map((x) => `${x.title} (${x.videoId})`);
