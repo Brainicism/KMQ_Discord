@@ -37,6 +37,6 @@ export default interface GameOptions {
     subunitPreference: SubunitsPreference;
     ostPreference: OstPreference;
     forcePlaySongID: string | null;
-    kmqPlaylistIdentifier: string | null;
+    spotifyPlaylistID: string | null;
     remixPreference: RemixPreference;
 }

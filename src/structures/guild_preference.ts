@@ -197,7 +197,7 @@ export default class GuildPreference {
         ostPreference: DEFAULT_OST_PREFERENCE,
         remixPreference: DEFAULT_REMIX_PREFERENCE,
         forcePlaySongID: null,
-        kmqPlaylistIdentifier: null,
+        spotifyPlaylistID: null,
     };
 
     /** The GuildPreference's respective GameOptions */
@@ -903,7 +903,7 @@ export default class GuildPreference {
     async setKmqPlaylistID(
         kmqPlaylistIdentifier: string | null,
     ): Promise<void> {
-        this.gameOptions.kmqPlaylistIdentifier = kmqPlaylistIdentifier;
+        this.gameOptions.spotifyPlaylistID = kmqPlaylistIdentifier;
         await this.updateGuildPreferences([
             {
                 name: GameOptionInternal.PLAYLIST_ID,
@@ -914,14 +914,14 @@ export default class GuildPreference {
 
     /** @returns the ID of the playlist to retrieve songs from */
     getKmqPlaylistID(): string | null {
-        return this.gameOptions.kmqPlaylistIdentifier;
+        return this.gameOptions.spotifyPlaylistID;
     }
 
     /**
      * @returns whether the playing option is set
      */
     isPlaylist(): boolean {
-        return this.gameOptions.kmqPlaylistIdentifier !== null;
+        return this.gameOptions.spotifyPlaylistID !== null;
     }
 
     /**

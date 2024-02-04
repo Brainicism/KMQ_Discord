@@ -776,7 +776,7 @@ export async function generateOptionsMessage(
     const optionStrings: { [option: string]: string | null } = {};
 
     const gameOptions = guildPreference.gameOptions;
-    const kmqPlaylistIdentifier = gameOptions.kmqPlaylistIdentifier;
+    const kmqPlaylistIdentifier = gameOptions.spotifyPlaylistID;
     let thumbnailUrl: string | undefined;
 
     if (kmqPlaylistIdentifier) {
