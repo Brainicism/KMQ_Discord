@@ -87,46 +87,6 @@ export async function tableExists(
     );
 }
 
-async function replaceBetterAudioSongs(
-    db: Kysely<KpopVideosDB>,
-): Promise<void> {
-    await db.schema
-        .alterTable("app_kpop")
-        .addColumn("original_vlink", "varchar(255)")
-        .execute();
-
-    const songsWithBetterAudioCounterpart = await db
-        .selectFrom("app_kpop as a")
-        .leftJoin("app_kpop as b", "a.id_better_audio", "b.id")
-        .select([
-            "a.id as original_id",
-            "a.original_name as original_name",
-            "a.vlink as original_link",
-            "b.vlink as better_audio_link",
-        ])
-        .where("b.vlink", "is not", null)
-        .$narrowType<{ better_audio_link: string }>()
-        .execute();
-
-    for (const betterAudioSong of songsWithBetterAudioCounterpart) {
-        // remove 'better' audio entry to not consume b-side limit
-        await db
-            .deleteFrom("app_kpop")
-            .where("vlink", "=", betterAudioSong.better_audio_link)
-            .execute();
-
-        // replace main video with better audio entry
-        await db
-            .updateTable("app_kpop")
-            .where("id", "=", betterAudioSong.original_id)
-            .set({
-                vlink: betterAudioSong.better_audio_link,
-                original_vlink: betterAudioSong.original_link,
-            })
-            .execute();
-    }
-}
-
 async function listTables(
     db: DatabaseContext,
     databaseName: string,
@@ -353,8 +313,6 @@ async function validateSqlDump(
             `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${mvSeedFilePath}`,
         );
 
-        await replaceBetterAudioSongs(db.kpopVideosValidation);
-
         logger.info("Validating MV song count");
         const mvSongCount = (await db.kpopVideosValidation
             .selectFrom("app_kpop")
@@ -536,9 +494,6 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
 
     await sql`DROP TABLE IF EXISTS kpop_videos.old;`.execute(db.agnostic);
     await sql`DROP DATABASE IF EXISTS kpop_videos_tmp;`.execute(db.agnostic);
-
-    logger.info("Substituting songs with better audio");
-    await replaceBetterAudioSongs(db.kpopVideos);
 
     // override queries
     logger.info("Performing data overrides");

@@ -4,6 +4,22 @@ CREATE PROCEDURE CreateKmqDataTables(
 	IN maxRank INT
 )
 BEGIN
+	/* replace songs with better audio counterpart */
+	ALTER TABLE kpop_videos.app_kpop ADD COLUMN IF NOT EXISTS original_vlink VARCHAR(255);
+	DROP TEMPORARY TABLE IF EXISTS temp_tbl;
+	CREATE TEMPORARY TABLE temp_tbl
+	SELECT a.id as original_id, a.original_name as original_name, a.vlink as original_link, b.vlink as better_audio_link
+	FROM kpop_videos.app_kpop as a
+	LEFT JOIN kpop_videos.app_kpop as b ON a.id_better_audio = b.id
+	WHERE b.vlink is not null;
+
+	DELETE kpop_videos.app_kpop FROM kpop_videos.app_kpop
+	JOIN temp_tbl tt on app_kpop.vlink = tt.better_audio_link
+	WHERE kpop_videos.app_kpop.vlink = tt.better_audio_link;
+
+	UPDATE kpop_videos.app_kpop JOIN temp_tbl tt on kpop_videos.app_kpop.id = tt.original_id
+	SET kpop_videos.app_kpop.vlink = tt.better_audio_link, kpop_videos.app_kpop.original_vlink = tt.original_link;
+
 	/* update available_songs table */
 	DROP TABLE IF EXISTS available_songs_temp;
 	CREATE TABLE available_songs_temp (

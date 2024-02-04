@@ -445,6 +445,7 @@ describe("exp command", () => {
                     artistName: "x",
                     hangulArtistName: "x",
                     youtubeLink: "x",
+                    originalLink: null,
                     publishDate: new Date(),
                     members: "female",
                     artistID: 1,
