@@ -804,10 +804,10 @@
             "preset": "预设",
             "reset": "{{presetOrOption}} 重置",
             "spotify": "现在使用以下选项从Spotify播放{{songCount}}首歌曲：",
-            "youtube": "现在使用以下选项从YouTube播放{{songCount}}首歌曲：",
             "timer": "{{timerInSeconds}} 秒",
             "title": "选项",
-            "updated": "{{presetOrOption}} 已更新"
+            "updated": "{{presetOrOption}} 已更新",
+            "youtube": "现在使用以下选项从YouTube播放{{songCount}}首歌曲："
         },
         "ost": {
             "help": {
@@ -880,6 +880,47 @@
             },
             "typeGuess": "听歌并输入您的猜测！",
             "voteReminder": "嘘，通过投票赚取更多经验值(请参见 {{vote}})。"
+        },
+        "playlist": {
+            "fileFormat": {
+                "matched": "与“{{playlistName}}”匹配的歌曲：\n{{matchedSongs}}",
+                "unmatched": "与“{{playlistName}}”不匹配的歌曲：\n{{unmatchedSongs}}"
+            },
+            "help": {
+                "description": "仅从给定的Spotify/YouTube播放列表播放歌曲",
+                "example": {
+                    "playlistURL": "开始播放播放列表中的歌曲",
+                    "reset": "停止从播放列表中播放"
+                },
+                "interaction": {
+                    "matches": "查看匹配和不匹配歌曲的列表",
+                    "matchesLink": "是否显示匹配歌曲的YouTube链接",
+                    "playlistURL": "检索歌曲的播放列表"
+                },
+                "name": "播放列表"
+            },
+            "invalidURL": {
+                "description": "播放列表链接无效。对于Spotify，请使用`分享 > 复制播放列表链接`以检索有效链接。",
+                "title": "无效的播放列表 URL"
+            },
+            "matched": {
+                "description": "匹配了 `{{matchedCount}}/{{totalCount}}` 首歌曲。",
+                "title": "正在播放 \"{{playlistName}}\"",
+                "truncated": "注意：播放列表处理时间过长，未能完成。请尝试使用较小的播放列表。"
+            },
+            "noMatches": {
+                "description": "未匹配到任何歌曲。",
+                "title": "无法从播放列表中获取歌曲"
+            },
+            "noPlaylistSet": {
+                "description": "使用此命令前请{{playlistSet}}播放列表。",
+                "title": "未设置播放列表"
+            },
+            "parsing": "加载播放列表中...",
+            "parsingAlreadyInProgress": {
+                "description": "请等待当前播放列表加载完成后再开始新的加载。",
+                "title": "播放列表已在加载中"
+            }
         },
         "preset": {
             "deleted": {
@@ -1186,47 +1227,6 @@
             },
             "interaction": {
                 "special": "对每首歌曲进行的修改类型"
-            }
-        },
-        "playlist": {
-            "fileFormat": {
-                "matched": "与“{{playlistName}}”匹配的歌曲：\n{{matchedSongs}}",
-                "unmatched": "与“{{playlistName}}”不匹配的歌曲：\n{{unmatchedSongs}}"
-            },
-            "help": {
-                "description": "仅从给定的Spotify/YouTube播放列表播放歌曲",
-                "example": {
-                    "playlistURL": "开始播放播放列表中的歌曲",
-                    "reset": "停止从播放列表中播放"
-                },
-                "interaction": {
-                    "matches": "查看匹配和不匹配歌曲的列表",
-                    "matchesLink": "是否显示匹配歌曲的YouTube链接",
-                    "playlistURL": "检索歌曲的播放列表"
-                },
-                "name": "播放列表"
-            },
-            "invalidURL": {
-                "description": "播放列表链接无效。对于Spotify，请使用`分享 > 复制播放列表链接`以检索有效链接。",
-                "title": "无效的播放列表 URL"
-            },
-            "matched": {
-                "description": "匹配了 `{{matchedCount}}/{{totalCount}}` 首歌曲。",
-                "title": "正在播放 \"{{playlistName}}\"",
-                "truncated": "注意：播放列表处理时间过长，未能完成。请尝试使用较小的播放列表。"
-            },
-            "noMatches": {
-                "description": "未匹配到任何歌曲。",
-                "title": "无法从播放列表中获取歌曲"
-            },
-            "noPlaylistSet": {
-                "description": "使用此命令前请{{playlistSet}}播放列表。",
-                "title": "未设置播放列表"
-            },
-            "parsing": "加载播放列表中...",
-            "parsingAlreadyInProgress": {
-                "description": "请等待当前播放列表加载完成后再开始新的加载。",
-                "title": "播放列表已在加载中"
             }
         },
         "spotify": {

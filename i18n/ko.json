@@ -804,10 +804,10 @@
             "preset": "사전 설정",
             "reset": "{{presetOrOption}}으(로) 재설정합니다",
             "spotify": "이제 다음 옵션으로 스포티파이의 {{songCount}}곡을 재생합니다.:",
-            "youtube": "다음 옵션을 사용하여 YouTube에서 {{songCount}}곡을 재생 중입니다:",
             "timer": "{{timerInSeconds}}초",
             "title": "옵션",
-            "updated": "{{presetOrOption}}이 업데이트되었습니다!"
+            "updated": "{{presetOrOption}}이 업데이트되었습니다!",
+            "youtube": "다음 옵션을 사용하여 YouTube에서 {{songCount}}곡을 재생 중입니다:"
         },
         "ost": {
             "help": {
@@ -880,6 +880,47 @@
             },
             "typeGuess": "노래를 듣고 추측을 입력하십시오!",
             "voteReminder": "쯧쯧... 투표를 통해 더 많은 경험치를 획득하세요. ({{vote}} 참조.)"
+        },
+        "playlist": {
+            "fileFormat": {
+                "matched": "\"{{playlistName}}\"에 대한 일치하는 노래들:\n{{matchedSongs}}",
+                "unmatched": "\"{{playlistName}}\"에 대한 일치하지 않는 노래들:\n{{unmatchedSongs}}"
+            },
+            "help": {
+                "description": "주어진 Spotify/YouTube 플레이리스트에서만 노래를 재생합니다",
+                "example": {
+                    "playlistURL": "재생 목록에서 노래 재생을 시작합니다.",
+                    "reset": "재생 목록에서 노래 재생을 중지합니다."
+                },
+                "interaction": {
+                    "matches": "일치하는 곡과 일치하지 않는 곡의 목록 보기",
+                    "matchesLink": "일치하는 곡의 YouTube URL을 보여줄지 여부",
+                    "playlistURL": "노래를 검색할 재생 목록"
+                },
+                "name": "플레이리스트"
+            },
+            "invalidURL": {
+                "description": "플레이리스트 링크가 유효하지 않습니다. Spotify에서는 `공유 > 플레이리스트 링크 복사하기`를 사용하여 유효한 링크를 검색하세요.",
+                "title": "잘못된 재생 목록 URL"
+            },
+            "matched": {
+                "description": "`{{matchedCount}}/{{totalCount}}` 노래가 일치합니다.",
+                "title": "\"{{playlistName}}\" 재생 중",
+                "truncated": "참고: 재생 목록을 처리하는 데 시간이 너무 오래 걸리고 완료할 때까지 완료되지 않았습니다. 다음에는 더 작은 재생 목록을 사용하여 다시 시도하십시오."
+            },
+            "noMatches": {
+                "description": "일치하는 노래가 없습니다.",
+                "title": "재생 목록에서 노래를 가져오지 못했습니다"
+            },
+            "noPlaylistSet": {
+                "description": "이 명령을 사용하기 전에 {{playlistSet}} 재생 목록을 설정하세요.",
+                "title": "플레이리스트가 설정되지 않음"
+            },
+            "parsing": "플레이리스트를 불러오는 중...",
+            "parsingAlreadyInProgress": {
+                "description": "새로운 작업을 시작하기 전에 현재의 플레이리스트 로딩이 완료될 때까지 기다려 주세요.",
+                "title": "이미 플레이리스트를 불러오는 중입니다"
+            }
         },
         "preset": {
             "deleted": {
@@ -1186,47 +1227,6 @@
             },
             "interaction": {
                 "special": "각 노래에 적용할 모드 유형입니다."
-            }
-        },
-        "playlist": {
-            "fileFormat": {
-                "matched": "\"{{playlistName}}\"에 대한 일치하는 노래들:\n{{matchedSongs}}",
-                "unmatched": "\"{{playlistName}}\"에 대한 일치하지 않는 노래들:\n{{unmatchedSongs}}"
-            },
-            "help": {
-                "description": "주어진 Spotify/YouTube 플레이리스트에서만 노래를 재생합니다",
-                "example": {
-                    "playlistURL": "재생 목록에서 노래 재생을 시작합니다.",
-                    "reset": "재생 목록에서 노래 재생을 중지합니다."
-                },
-                "interaction": {
-                    "matches": "일치하는 곡과 일치하지 않는 곡의 목록 보기",
-                    "matchesLink": "일치하는 곡의 YouTube URL을 보여줄지 여부",
-                    "playlistURL": "노래를 검색할 재생 목록"
-                },
-                "name": "플레이리스트"
-            },
-            "invalidURL": {
-                "description": "플레이리스트 링크가 유효하지 않습니다. Spotify에서는 `공유 > 플레이리스트 링크 복사하기`를 사용하여 유효한 링크를 검색하세요.",
-                "title": "잘못된 재생 목록 URL"
-            },
-            "matched": {
-                "description": "`{{matchedCount}}/{{totalCount}}` 노래가 일치합니다.",
-                "title": "\"{{playlistName}}\" 재생 중",
-                "truncated": "참고: 재생 목록을 처리하는 데 시간이 너무 오래 걸리고 완료할 때까지 완료되지 않았습니다. 다음에는 더 작은 재생 목록을 사용하여 다시 시도하십시오."
-            },
-            "noMatches": {
-                "description": "일치하는 노래가 없습니다.",
-                "title": "재생 목록에서 노래를 가져오지 못했습니다"
-            },
-            "noPlaylistSet": {
-                "description": "이 명령을 사용하기 전에 {{playlistSet}} 재생 목록을 설정하세요.",
-                "title": "플레이리스트가 설정되지 않음"
-            },
-            "parsing": "플레이리스트를 불러오는 중...",
-            "parsingAlreadyInProgress": {
-                "description": "새로운 작업을 시작하기 전에 현재의 플레이리스트 로딩이 완료될 때까지 기다려 주세요.",
-                "title": "이미 플레이리스트를 불러오는 중입니다"
             }
         },
         "spotify": {
