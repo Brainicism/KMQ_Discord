@@ -62,7 +62,6 @@ export default class SongSelector {
         "available_songs.issolo as isSolo",
         "available_songs.tags",
         "available_songs.views",
-        "available_songs.rank",
         "available_songs.vtype",
     ] as const;
 
@@ -508,12 +507,6 @@ export default class SongSelector {
         } else {
             queryBuilder = queryBuilder.orderBy("views", "desc");
         }
-
-        queryBuilder = queryBuilder.where(
-            "rank",
-            "<=",
-            parseInt(process.env.AUDIO_SONGS_PER_ARTIST as string, 10),
-        );
 
         result = await queryBuilder.execute();
 

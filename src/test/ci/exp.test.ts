@@ -450,7 +450,6 @@ describe("exp command", () => {
                     members: "female",
                     artistID: 1,
                     isSolo: "y",
-                    rank: 0,
                     views: 1,
                     tags: "",
                     vtype: "main",
