@@ -241,7 +241,6 @@ export default class GuildPreference {
         }
 
         // extraneous keys
-        // TODO: this doesn't actually remove the entries in the database
         for (const option in validatedGameOptions) {
             if (!(option in GuildPreference.DEFAULT_OPTIONS)) {
                 extraneousKeysRemoved++;
@@ -976,13 +975,15 @@ export default class GuildPreference {
         }
 
         await dbContext.kmq.transaction().execute(async (trx) => {
+            await trx
+                .deleteFrom("game_options")
+                .where("guild_id", "=", this.guildID)
+                .where("client_id", "=", process.env.BOT_CLIENT_ID as string)
+                .execute();
+
             await Promise.all(
                 updatedOptions.map((x) =>
-                    trx
-                        .insertInto("game_options")
-                        .values(x)
-                        .onDuplicateKeyUpdate(x)
-                        .execute(),
+                    trx.insertInto("game_options").values(x).execute(),
                 ),
             );
         });

@@ -141,10 +141,15 @@ function serverShutdown(
                     standbyProvisioning = false;
                 }
 
+                // abort upgrade
                 if (
                     Date.now() - standbyCreateTime >
                     1000 * 60 * provisioningTimeout
                 ) {
+                    // remove stuck container
+                    cp.execSync(`docker rm -f ${appName}`);
+                    // rename 'old' container back to normal
+                    cp.execSync(`docker rename ${oldAppName} ${appName}`);
                     throw new Error("Standby took too long to provision");
                 }
 
