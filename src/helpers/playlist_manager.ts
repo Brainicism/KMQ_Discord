@@ -298,83 +298,90 @@ export default class PlaylistManager {
             });
         }, 2000);
 
-        while (page < numPlaylistPages) {
-            if (
-                page % Math.floor(numPlaylistPages / 4) === 0 ||
-                page === numPlaylistPages ||
-                page === 0
-            ) {
-                logger.info(
-                    `${logHeader} | Calling YouTube API ${page + 1}/${numPlaylistPages} for playlist`,
+        const parseStartTime = Date.now();
+
+        try {
+            while (page < numPlaylistPages) {
+                if (
+                    page % Math.floor(numPlaylistPages / 4) === 0 ||
+                    page === numPlaylistPages ||
+                    page === 0
+                ) {
+                    logger.info(
+                        `${logHeader} | Calling YouTube API ${page + 1}/${numPlaylistPages} for playlist`,
+                    );
+                }
+
+                let resp: youtube_v3.Schema$PlaylistItemListResponse;
+
+                try {
+                    resp = (
+                        await this.youtubeClient.playlistItems.list({
+                            part: ["snippet"],
+                            playlistId,
+                            pageToken,
+                            maxResults: 50,
+                        })
+                    ).data;
+                } catch (e) {
+                    logger.error(
+                        `${logHeader} | Error calling client.playlistItems.list for ${playlistId}. err = ${e}`,
+                    );
+                    continue;
+                }
+
+                songs.push(
+                    // eslint-disable-next-line no-unsafe-optional-chaining
+                    ...resp.items!.map((x) => ({
+                        title: x.snippet?.title as string,
+                        videoId: x.snippet?.resourceId?.videoId as string,
+                    })),
                 );
+
+                pageToken = resp.nextPageToken;
+                if (!pageToken) break;
+                page++;
             }
 
-            let resp: youtube_v3.Schema$PlaylistItemListResponse;
+            message?.edit({
+                embeds: [
+                    {
+                        title: parsingTitle,
+                        description: visualProgressBar(1, 1),
+                    },
+                ],
+            });
 
-            try {
-                resp = (
-                    await this.youtubeClient.playlistItems.list({
-                        part: ["snippet"],
-                        playlistId,
-                        pageToken,
-                        maxResults: 50,
-                    })
-                ).data;
-            } catch (e) {
-                logger.error(
-                    `${logHeader} | Error calling client.playlistItems.list for ${playlistId}. err = ${e}`,
-                );
-                continue;
-            }
+            const youtubePlaylistVideoIDs: {
+                videoId: string;
+                title: string;
+            }[] = songs.map((x) => ({
+                videoId: x.videoId,
+                title: x.title,
+            }));
 
-            songs.push(
-                // eslint-disable-next-line no-unsafe-optional-chaining
-                ...resp.items!.map((x) => ({
-                    title: x.snippet?.title as string,
-                    videoId: x.snippet?.resourceId?.videoId as string,
-                })),
-            );
+            matchedSongs = await dbContext.kmq
+                .selectFrom("available_songs")
+                .select(SongSelector.QueriedSongFields)
+                .where(
+                    "link",
+                    "in",
+                    youtubePlaylistVideoIDs.map((x) => x.videoId),
+                )
+                .execute();
 
-            pageToken = resp.nextPageToken;
-            if (!pageToken) break;
-            page++;
+            unmatchedSongs = youtubePlaylistVideoIDs
+                .filter(
+                    (x) =>
+                        !matchedSongs
+                            .map((y) => y.youtubeLink)
+                            .includes(x.videoId),
+                )
+                .map((x) => x.title);
+        } finally {
+            clearInterval(updateParsing);
+            delete this.guildsParseInProgress[guildID];
         }
-
-        clearTimeout(updateParsing);
-
-        message?.edit({
-            embeds: [
-                {
-                    title: parsingTitle,
-                    description: visualProgressBar(1, 1),
-                },
-            ],
-        });
-
-        const youtubePlaylistVideoIDs: {
-            videoId: string;
-            title: string;
-        }[] = songs.map((x) => ({
-            videoId: x.videoId,
-            title: x.title,
-        }));
-
-        matchedSongs = await dbContext.kmq
-            .selectFrom("available_songs")
-            .select(SongSelector.QueriedSongFields)
-            .where(
-                "link",
-                "in",
-                youtubePlaylistVideoIDs.map((x) => x.videoId),
-            )
-            .execute();
-
-        unmatchedSongs = youtubePlaylistVideoIDs
-            .filter(
-                (x) =>
-                    !matchedSongs.map((y) => y.youtubeLink).includes(x.videoId),
-            )
-            .map((x) => x.title);
 
         metadata.matchedSongsLength = matchedSongs.length;
 
@@ -408,6 +415,12 @@ export default class PlaylistManager {
                     .join("\n"),
             );
         }
+
+        logger.info(
+            `${logHeader} | Finished parsing playlist after ${
+                Date.now() - parseStartTime
+            }ms.`,
+        );
 
         const playlist: MatchedPlaylist = {
             matchedSongs,
@@ -526,6 +539,7 @@ export default class PlaylistManager {
         );
 
         let numProcessedPlaylistPages = 0;
+        const parseStartTime = Date.now();
         for await (const results of asyncPool(
             10,
             requestURLs,
@@ -594,7 +608,6 @@ export default class PlaylistManager {
         }, 2000);
 
         try {
-            const songMatchStartTime = Date.now();
             for await (const queryOutput of asyncPool(
                 4,
                 spotifySongs,
@@ -620,7 +633,7 @@ export default class PlaylistManager {
                     );
                 }
 
-                if (Date.now() - songMatchStartTime > SONG_MATCH_TIMEOUT_MS) {
+                if (Date.now() - parseStartTime > SONG_MATCH_TIMEOUT_MS) {
                     logger.warn(
                         `${logHeader} | Playlist exceeded song match timeout of ${SONG_MATCH_TIMEOUT_MS}ms after processing ${processedSongCount}/${spotifySongs.length}`,
                     );
@@ -631,7 +644,7 @@ export default class PlaylistManager {
 
             logger.info(
                 `${logHeader} | Finished parsing playlist after ${
-                    Date.now() - songMatchStartTime
+                    Date.now() - parseStartTime
                 }ms.`,
             );
         } finally {
