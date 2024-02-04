@@ -1,8 +1,6 @@
 DELIMITER //
 DROP PROCEDURE IF EXISTS CreateKmqDataTables //
-CREATE PROCEDURE CreateKmqDataTables(
-	IN maxRank INT
-)
+CREATE PROCEDURE CreateKmqDataTables()
 BEGIN
 	/* replace songs with better audio counterpart */
 	ALTER TABLE kpop_videos.app_kpop ADD COLUMN IF NOT EXISTS original_vlink VARCHAR(255);
