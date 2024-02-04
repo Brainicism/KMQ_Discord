@@ -121,7 +121,7 @@ export default class PlaylistManager {
                 playlistLength: 0,
                 matchedSongsLength: 0,
                 limit: 0,
-                snapshotID: "",
+                playlistChangeHash: "",
                 thumbnailUrl: null,
             },
             matchedSongs: [],
@@ -194,7 +194,7 @@ export default class PlaylistManager {
                 playlistLength: 0,
                 matchedSongsLength: 0,
                 limit: 0,
-                snapshotID: "",
+                playlistChangeHash: "",
                 thumbnailUrl: null,
             },
             matchedSongs: [],
@@ -239,7 +239,8 @@ export default class PlaylistManager {
 
         if (
             cachedPlaylist &&
-            cachedPlaylist.metadata.snapshotID === metadata.snapshotID
+            cachedPlaylist.metadata.playlistChangeHash ===
+                metadata.playlistChangeHash
         ) {
             logger.info(`${logHeader} | Using cached playlist`);
             ({ matchedSongs, truncated, unmatchedSongs } = cachedPlaylist);
@@ -440,7 +441,7 @@ export default class PlaylistManager {
                 playlistLength: 0,
                 matchedSongsLength: 0,
                 limit: 0,
-                snapshotID: "",
+                playlistChangeHash: "",
                 thumbnailUrl: null,
             },
             matchedSongs: [],
@@ -489,7 +490,8 @@ export default class PlaylistManager {
 
         if (
             cachedPlaylist &&
-            cachedPlaylist.metadata.snapshotID === metadata.snapshotID
+            cachedPlaylist.metadata.playlistChangeHash ===
+                metadata.playlistChangeHash
         ) {
             logger.info(`${logHeader} | Using cached playlist`);
             ({ matchedSongs, truncated, unmatchedSongs } = cachedPlaylist);
@@ -1029,7 +1031,7 @@ export default class PlaylistManager {
         }
 
         const playlistName = playlistResponse[0].snippet!.title as string;
-        const snapshotID = response.etag as string;
+        const playlistChangeHash = response.etag as string;
         const thumbnailUrl = playlistResponse[0].snippet!.thumbnails?.default
             ?.url as string;
 
@@ -1041,7 +1043,7 @@ export default class PlaylistManager {
             playlistId,
             playlistName,
             thumbnailUrl,
-            snapshotID,
+            playlistChangeHash,
             limit,
             playlistLength: songCount,
             matchedSongsLength: 0,
@@ -1064,7 +1066,7 @@ export default class PlaylistManager {
             ).data;
 
             const playlistName = response.name;
-            const snapshotID = response.snapshot_id;
+            const playlistChangeHash = response.snapshot_id;
             let thumbnailUrl: string | null = null;
             if (response.images.length > 0) {
                 thumbnailUrl = response.images[0].url;
@@ -1077,7 +1079,7 @@ export default class PlaylistManager {
                 playlistId,
                 playlistName,
                 thumbnailUrl,
-                snapshotID,
+                playlistChangeHash,
                 limit,
                 playlistLength: songCount,
                 matchedSongsLength: 0,
