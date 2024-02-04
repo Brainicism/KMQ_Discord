@@ -11,6 +11,7 @@ import {
     italicize,
     standardDateFormat,
 } from "../../helpers/utils";
+import url from "url";
 import {
     generateEmbed,
     generateOptionsMessage,
@@ -330,9 +331,10 @@ export default class PlaylistCommand implements BaseCommand {
             `^${SPOTIFY_SHORTHAND_BASE_URL}.+`,
         ).test(playlistURL);
 
-        const isYoutubePlaylistURL = new RegExp(
-            `^${YOUTUBE_PLAYLIST_BASE_URL.replace("?", "\\?")}.+`,
-        ).test(playlistURL);
+        const parsedUrl = new URL(playlistURL);
+        const isYoutubePlaylistURL =
+            parsedUrl.host === "www.youtube.com" &&
+            parsedUrl.searchParams.get("list");
 
         if (
             !isValidURL(playlistURL) ||
@@ -377,11 +379,7 @@ export default class PlaylistCommand implements BaseCommand {
                     body.match(matchPlaylistID)![1]
                 }`;
             } else {
-                kmqPlaylistIdentifier = `youtube|${
-                    playlistURL.match(
-                        `${YOUTUBE_PLAYLIST_BASE_URL.replace("?", "\\?")}(.+)`,
-                    )![1]
-                }`;
+                kmqPlaylistIdentifier = `youtube|${parsedUrl.searchParams.get("list")}`;
             }
         } catch (err) {
             logger.error(
