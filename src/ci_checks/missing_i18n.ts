@@ -45,6 +45,7 @@ const dynamicTranslationKeyAllowlist = [
     "`command.exclude.help.interaction.${action}.perGroupDescription`",
     "`command.groups.help.interaction.${action}.description`",
     "`command.groups.help.interaction.${action}.perGroupDescription`",
+    `command.${command.slashCommandAlias}.help.name`,
 ];
 
 const translationInterfaceFunctions = ["i18n.translate", "i18n.translateN"];
