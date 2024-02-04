@@ -332,7 +332,7 @@ export default class PlaylistCommand implements BaseCommand {
 
         const parsedUrl = new URL(playlistURL);
         const isYoutubePlaylistURL =
-            parsedUrl.host === "www.youtube.com" &&
+            ["www.youtube.com", "youtube.com"].includes(parsedUrl.host) &&
             parsedUrl.searchParams.get("list");
 
         if (
