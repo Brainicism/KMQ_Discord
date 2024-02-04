@@ -251,6 +251,7 @@ export async function reloadAliases(): Promise<void> {
     for (const mapping of songAliasMapping) {
         songAliases[mapping["link"]] = mapping["song_aliases"]
             .split(";")
+            .map((x) => x.trim())
             .filter((x: string) => x);
     }
 
@@ -258,6 +259,7 @@ export async function reloadAliases(): Promise<void> {
     for (const mapping of artistAliasMapping) {
         const aliases: Array<string> = mapping["artist_aliases"]
             .split(";")
+            .map((x) => x.trim())
             .filter((x: string) => x);
 
         const previousNameEn = mapping["previous_name_en"];

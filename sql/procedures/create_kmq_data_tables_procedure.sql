@@ -11,10 +11,11 @@ BEGIN
 	SELECT a.id as original_id, a.original_name as original_name, a.vlink as original_link, b.vlink as better_audio_link
 	FROM kpop_videos.app_kpop as a
 	LEFT JOIN kpop_videos.app_kpop as b ON a.id_better_audio = b.id
-	WHERE b.vlink is not null;
+	WHERE b.vlink is not null
+	AND a.vtype IN ('main', 'audio');
 
 	DELETE kpop_videos.app_kpop FROM kpop_videos.app_kpop
-	JOIN temp_tbl tt on app_kpop.vlink = tt.better_audio_link
+	JOIN temp_tbl tt on kpop_videos.app_kpop.vlink = tt.better_audio_link
 	WHERE kpop_videos.app_kpop.vlink = tt.better_audio_link;
 
 	UPDATE kpop_videos.app_kpop JOIN temp_tbl tt on kpop_videos.app_kpop.id = tt.original_id
