@@ -1194,7 +1194,7 @@
                 "unmatched": "Unmatched songs for \"{{playlistName}}\":\n{{unmatchedSongs}}"
             },
             "help": {
-                "description": "Play songs exclusively from a given Spotify/Youtube playlist",
+                "description": "Play songs exclusively from a given Spotify/YouTube playlist",
                 "example": {
                     "playlistURL": "Start playing songs from the playlist",
                     "reset": "Stop playing from the playlist"
