@@ -226,7 +226,7 @@ async function getSongsFromDb(databaseContext: DatabaseContext): Promise<any> {
             .execute()
     ).map((x) => x.vlink);
 
-    let builder = databaseContext.kpopVideos
+    return databaseContext.kpopVideos
         .selectFrom("app_kpop")
         .innerJoin("app_kpop_group", "app_kpop.id_artist", "app_kpop_group.id")
         .select([
@@ -236,10 +236,10 @@ async function getSongsFromDb(databaseContext: DatabaseContext): Promise<any> {
             "app_kpop.views as views",
         ])
         .where("vtype", "=", "main")
-        .where("tags", "not like", "%c%");
-
-    builder = builder.where("vlink", "not in", deadLinks);
-    return builder.execute();
+        .where("tags", "not like", "%c%")
+        .where("vlink", "not in", deadLinks)
+        .orderBy("views", "desc")
+        .execute();
 }
 
 async function getCurrentlyDownloadedFiles(): Promise<Set<string>> {
