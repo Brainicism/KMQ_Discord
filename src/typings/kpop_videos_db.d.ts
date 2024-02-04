@@ -19,6 +19,7 @@ export interface AppKpop {
     likes: Generated<number>;
     name: Generated<string>;
     original_name: Generated<string>;
+    original_vlink: Generated<string | null>;
     promotedcharted: number;
     promotedviews_yc: Generated<number>;
     promotedweeks: number;

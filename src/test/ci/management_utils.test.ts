@@ -11,19 +11,12 @@ describe("management utils", () => {
 
         describe("song aliases", () => {
             it("should add the song aliases", () => {
-                const videoID = "0rtV5esQT6I";
-                const expectedAliases = [
-                    "Like OOH AHH",
-                    "Like OOH-AHH",
-                    "OOH AHH하게",
-                    "우아하게",
-                ];
+                const videoID = "lQaclKRINdA";
+                const expectedAliases = ["It Is War", "It's War"];
 
-                assert.ok(
-                    setIntersection(
-                        State.aliases.song[videoID],
-                        expectedAliases,
-                    ).size === expectedAliases.length,
+                assert.deepStrictEqual(
+                    State.aliases.song[videoID],
+                    expectedAliases,
                 );
             });
         });
