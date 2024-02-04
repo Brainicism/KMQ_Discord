@@ -22,8 +22,6 @@ import fs from "fs";
 import path from "path";
 import util from "util";
 import type { DatabaseContext } from "../database_context";
-import type { KpopVideosDB } from "../typings/kpop_videos_db";
-import type { Kysely } from "kysely";
 
 const exec = util.promisify(cp.exec);
 
