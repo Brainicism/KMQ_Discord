@@ -377,7 +377,7 @@ export default class PlaylistManager {
                             .map((y) => y.youtubeLink)
                             .includes(x.videoId),
                 )
-                .map((x) => x.title);
+                .map((x) => `${x.title} (${x.videoId})`);
         } finally {
             clearInterval(updateParsing);
             delete this.guildsParseInProgress[guildID];
