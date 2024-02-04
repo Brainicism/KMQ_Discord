@@ -203,7 +203,7 @@ export default class PlaylistManager {
         };
 
         if (!this.youtubeClient) {
-            logger.warn("Youtube API client not initialized, API key missing?");
+            logger.warn("YouTube API client not initialized, API key missing?");
             return UNMATCHED_PLAYLIST;
         }
 
@@ -222,14 +222,14 @@ export default class PlaylistManager {
         if (forceRefreshMetadata || !cachedPlaylist) {
             metadata = await this.getYoutubePlaylistMetadata(playlistId);
             logger.info(
-                `${logHeader} | Refreshing Youtube metadata. forceRefreshMetadata: ${forceRefreshMetadata}, cachedPlaylist: ${!!cachedPlaylist}`,
+                `${logHeader} | Refreshing YouTube metadata. forceRefreshMetadata: ${forceRefreshMetadata}, cachedPlaylist: ${!!cachedPlaylist}`,
             );
         } else {
             metadata = cachedPlaylist.metadata;
         }
 
         if (!metadata) {
-            logger.warn(`${logHeader} | No Youtube metadata`);
+            logger.warn(`${logHeader} | No YouTube metadata`);
             return UNMATCHED_PLAYLIST;
         }
 
@@ -305,7 +305,7 @@ export default class PlaylistManager {
                 page === 0
             ) {
                 logger.info(
-                    `${logHeader} | Calling Youtube API ${page + 1}/${numPlaylistPages} for playlist`,
+                    `${logHeader} | Calling YouTube API ${page + 1}/${numPlaylistPages} for playlist`,
                 );
             }
 
@@ -994,7 +994,7 @@ export default class PlaylistManager {
         playlistId: string,
     ): Promise<PlaylistMetadata | null> {
         if (!this.youtubeClient) {
-            logger.warn("Youtube API client not initialized, API key missing?");
+            logger.warn("YouTube API client not initialized, API key missing?");
             return null;
         }
 

@@ -301,8 +301,7 @@ export default class PlaylistCommand implements BaseCommand {
             await guildPreference.reset(GameOption.PLAYLIST_ID);
             await guildPreference.reset(GameOption.LIMIT);
             logger.info(
-                `${getDebugLogHeader(messageContext)} | 
-                Playlist reset.`,
+                `${getDebugLogHeader(messageContext)} | Playlist reset.`,
             );
 
             await sendOptionsMessage(
