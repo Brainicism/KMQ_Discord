@@ -90,6 +90,12 @@ interface GameMessageMultiLocaleContent {
     [LocaleType.ES]: string;
     [LocaleType.JA]: string;
     [LocaleType.ZH]: string;
+    [LocaleType.NL]: string;
+    [LocaleType.ID]: string;
+    [LocaleType.PT]: string;
+    [LocaleType.RU]: string;
+    [LocaleType.DE]: string;
+    [LocaleType.HI]: string;
 }
 
 /**
