@@ -11,6 +11,7 @@ import {
     PERMISSIONS_LINK,
     PROFILE_COMMAND_NAME,
     SPOTIFY_BASE_URL,
+    YOUTUBE_PLAYLIST_BASE_URL,
 } from "../constants";
 import {
     ConflictingGameOptions,
@@ -28,6 +29,7 @@ import {
     friendlyFormattedNumber,
     getOrdinalNum,
     italicize,
+    parseKmqPlaylistIdentifier,
     standardDateFormat,
     strikethrough,
     truncatedString,
@@ -774,25 +776,35 @@ export async function generateOptionsMessage(
     const optionStrings: { [option: string]: string | null } = {};
 
     const gameOptions = guildPreference.gameOptions;
-    const spotifyPlaylistID = gameOptions.spotifyPlaylistID;
+    const kmqPlaylistIdentifier = gameOptions.spotifyPlaylistID;
     let thumbnailUrl: string | undefined;
 
-    if (spotifyPlaylistID) {
-        const matchedPlaylist =
-            await State.spotifyManager.getMatchedSpotifySongs(
+    if (kmqPlaylistIdentifier) {
+        const matchedPlaylistMetadata =
+            await State.playlistManager.getMatchedPlaylistMetadata(
                 guildID,
-                spotifyPlaylistID,
+                kmqPlaylistIdentifier,
                 false,
                 messageContext,
                 interaction,
             );
 
-        optionStrings[GameOption.SPOTIFY_PLAYLIST_ID] =
-            `[${matchedPlaylist.metadata.playlistName}](${SPOTIFY_BASE_URL}${spotifyPlaylistID})`;
+        const kmqPlaylistParsed = parseKmqPlaylistIdentifier(
+            kmqPlaylistIdentifier,
+        );
 
-        thumbnailUrl = matchedPlaylist.metadata.thumbnailUrl ?? undefined;
+        const playlistUrl = `${
+            kmqPlaylistParsed.isSpotify
+                ? SPOTIFY_BASE_URL
+                : YOUTUBE_PLAYLIST_BASE_URL
+        }${kmqPlaylistParsed.playlistId}`;
+
+        optionStrings[GameOption.PLAYLIST_ID] =
+            `[${matchedPlaylistMetadata.playlistName}](${playlistUrl})`;
+
+        thumbnailUrl = matchedPlaylistMetadata.thumbnailUrl ?? undefined;
     } else {
-        optionStrings[GameOption.SPOTIFY_PLAYLIST_ID] = null;
+        optionStrings[GameOption.PLAYLIST_ID] = null;
     }
 
     const totalSongs = await getAvailableSongCount(
@@ -951,9 +963,9 @@ export async function generateOptionsMessage(
         }
     }
 
-    // Special case: Options that rely on modifying queried songs are disabled when playing from Spotify
-    const isSpotify = guildPreference.isSpotifyPlaylist();
-    if (isSpotify) {
+    // Special case: Options that rely on modifying queried songs are disabled when playing from KMQ playlist
+    const isPlaylist = guildPreference.isPlaylist();
+    if (isPlaylist) {
         const disabledOptions = [
             GameOption.LIMIT,
             GameOption.GROUPS,
@@ -975,7 +987,7 @@ export async function generateOptionsMessage(
     }
 
     let optionsOverview: string;
-    if (!isSpotify) {
+    if (!isPlaylist) {
         optionsOverview = i18n.translate(
             messageContext.guildID,
             "command.options.overview",
@@ -987,9 +999,15 @@ export async function generateOptionsMessage(
             },
         );
     } else {
+        const kmqPlaylistParsed = parseKmqPlaylistIdentifier(
+            guildPreference.getKmqPlaylistID() as string,
+        );
+
         optionsOverview = i18n.translate(
             messageContext.guildID,
-            "command.options.spotify",
+            kmqPlaylistParsed.isSpotify
+                ? "command.options.spotify"
+                : "command.options.youtube",
             {
                 songCount: bold(limit),
             },
@@ -1013,14 +1031,14 @@ export async function generateOptionsMessage(
         .filter((option) => optionStrings[option as GameOption])
         .filter((option) => !PriorityGameOption.includes(option as GameOption));
 
-    // Remove priority options; emplace /spotify / /answer at the start of options
-    if (isSpotify) {
+    // Remove priority options; emplace /playlist / /answer at the start of options
+    if (isPlaylist) {
         priorityOptions = "";
         if (!session?.isListeningSession()) {
             fieldOptions.unshift(GameOption.ANSWER_TYPE);
         }
 
-        fieldOptions.unshift(GameOption.SPOTIFY_PLAYLIST_ID);
+        fieldOptions.unshift(GameOption.PLAYLIST_ID);
     }
 
     // Split non-priority options into three fields
@@ -2091,19 +2109,6 @@ export const updateAppCommands = async (
                     command.slashCommands() as Array<Eris.ChatInputApplicationCommandStructure>;
 
                 for (const cmd of commands) {
-                    if (!cmd.name) {
-                        if (!i18n.hasKey(`command.${commandName}.help.name`)) {
-                            throw new Error(
-                                `Missing slash command name: command.${commandName}.help.name`,
-                            );
-                        }
-
-                        cmd.name = i18n.translate(
-                            LocaleType.EN,
-                            `command.${commandName}.help.name`,
-                        );
-                    }
-
                     cmd.nameLocalizations =
                         cmd.nameLocalizations ??
                         Object.values(LocaleType)
@@ -2155,6 +2160,39 @@ export const updateAppCommands = async (
                                     {},
                                 );
                         }
+                    }
+
+                    if (!cmd.name) {
+                        if (!i18n.hasKey(`command.${commandName}.help.name`)) {
+                            throw new Error(
+                                `Missing slash command name: command.${commandName}.help.name`,
+                            );
+                        }
+
+                        cmd.name = i18n.translate(
+                            LocaleType.EN,
+                            `command.${commandName}.help.name`,
+                        );
+                    }
+
+                    if (command.slashCommandAlias) {
+                        const aliasedCmd = structuredClone(cmd);
+
+                        if (
+                            !i18n.hasKey(
+                                `command.${command.slashCommandAlias}.help.name`,
+                            )
+                        ) {
+                            throw new Error(
+                                `Missing slash command name: command.${command.slashCommandAlias}.help.name`,
+                            );
+                        }
+
+                        aliasedCmd.name = i18n.translate(
+                            LocaleType.EN,
+                            `command.${command.slashCommandAlias}.help.name`,
+                        );
+                        commandStructures.push(aliasedCmd);
                     }
 
                     commandStructures.push(cmd);

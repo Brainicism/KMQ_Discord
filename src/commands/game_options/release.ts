@@ -28,7 +28,7 @@ export default class ReleaseCommand implements BaseCommand {
 
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
-        { checkFn: CommandPrechecks.notSpotifyPrecheck },
+        { checkFn: CommandPrechecks.notPlaylistPrecheck },
     ];
 
     validations = {

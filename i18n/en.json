@@ -806,7 +806,8 @@
             "spotify": "Now playing {{songCount}} songs from Spotify with the following options:",
             "timer": "{{timerInSeconds}} sec",
             "title": "Options",
-            "updated": "{{presetOrOption}} Updated"
+            "updated": "{{presetOrOption}} Updated",
+            "youtube": "Now playing {{songCount}} songs from YouTube with the following options:"
         },
         "ost": {
             "help": {
@@ -879,6 +880,47 @@
             },
             "typeGuess": "Listen to the song and type your guess!",
             "voteReminder": "Psst. Earn more EXP by voting (see {{vote}})"
+        },
+        "playlist": {
+            "fileFormat": {
+                "matched": "Matched songs for \"{{playlistName}}\":\n{{matchedSongs}}",
+                "unmatched": "Unmatched songs for \"{{playlistName}}\":\n{{unmatchedSongs}}"
+            },
+            "help": {
+                "description": "Play songs exclusively from a given Spotify/YouTube playlist",
+                "example": {
+                    "playlistURL": "Start playing songs from the playlist",
+                    "reset": "Stop playing from the playlist"
+                },
+                "interaction": {
+                    "matches": "See a list of matched and unmatched songs",
+                    "matchesLink": "Whether to show the YouTube URL to matched songs",
+                    "playlistURL": "The playlist to retrieve songs from"
+                },
+                "name": "playlist"
+            },
+            "invalidURL": {
+                "description": "The link to the playlist is invalid. For Spotify, use `Share > Copy Link to Playlist` in Spotify to retrieve a valid link.",
+                "title": "Invalid Playlist URL"
+            },
+            "matched": {
+                "description": "Matched `{{matchedCount}}/{{totalCount}}` songs.",
+                "title": "Playing \"{{playlistName}}\"",
+                "truncated": "Note: The playlist took too long to process and did not finish to completion. Try again with a smaller playlist next time."
+            },
+            "noMatches": {
+                "description": "No songs were matched.",
+                "title": "Failed to fetch songs from playlist"
+            },
+            "noPlaylistSet": {
+                "description": "{{playlistSet}} a playlist before using this command.",
+                "title": "No Playlist Set"
+            },
+            "parsing": "Loading playlist...",
+            "parsingAlreadyInProgress": {
+                "description": "Please wait for the current playlist to finish loading before starting a new one.",
+                "title": "Already Loading Playlist"
+            }
         },
         "preset": {
             "deleted": {
@@ -1188,44 +1230,8 @@
             }
         },
         "spotify": {
-            "fileFormat": {
-                "matched": "Matched songs for \"{{playlistName}}\":\n{{matchedSongs}}",
-                "unmatched": "Unmatched songs for \"{{playlistName}}\":\n{{unmatchedSongs}}"
-            },
             "help": {
-                "description": "Play songs exclusively from a given Spotify playlist",
-                "example": {
-                    "playlistURL": "Start playing songs from the playlist",
-                    "reset": "Stop playing from the playlist"
-                },
-                "interaction": {
-                    "matches": "See a list of matched and unmatched songs",
-                    "matchesLink": "Whether to show the YouTube URL to matched songs",
-                    "playlistURL": "The playlist to retrieve songs from"
-                },
                 "name": "spotify"
-            },
-            "invalidURL": {
-                "description": "The link to the playlist is invalid. Use `Share > Copy Link to Playlist` in Spotify to retrieve a valid link.",
-                "title": "Invalid Spotify Playlist URL"
-            },
-            "matched": {
-                "description": "Matched `{{matchedCount}}/{{totalCount}}` songs.",
-                "title": "Playing \"{{playlistName}}\" on Spotify",
-                "truncated": "Note: The playlist took too long to process and did not finish to completion. Try again with a smaller playlist next time."
-            },
-            "noMatches": {
-                "description": "No songs were matched.",
-                "title": "Failed to fetch songs from Spotify"
-            },
-            "noPlaylistSet": {
-                "description": "{{spotifySet}} a playlist before using this command.",
-                "title": "No Playlist Set"
-            },
-            "parsing": "Loading Spotify playlist...",
-            "parsingAlreadyInProgress": {
-                "description": "Please wait for the current playlist to finish loading before starting a new one.",
-                "title": "Already Loading Playlist"
             }
         },
         "stats": {
@@ -1596,7 +1602,7 @@
             "notGameSession": "You can't do that while in a game session.",
             "notHidden": "You can't do that during a hidden game.",
             "notListeningSession": "You can't do that while in a listening session.",
-            "notSpotify": "You can't change that option when playing from Spotify. Use {{spotifyResetCommand}} before changing this option.",
+            "notPlaylist": "You can't change that option when playing from a playlist. Use {{playlistResetCommand}} before changing this option.",
             "title": "Wait..."
         },
         "releaseDate": "Release Date",

@@ -447,7 +447,7 @@ describe("command prechecks", () => {
         });
     });
 
-    describe("notSpotifyPrecheck", () => {
+    describe("notPlaylistPrecheck", () => {
         const GUILD_ID = "123";
 
         const guildPreference = new GuildPreference(GUILD_ID);
@@ -465,12 +465,12 @@ describe("command prechecks", () => {
             GameType.CLASSIC,
         );
 
-        describe("spotify playlist set", () => {
+        describe("KMQ playlist set", () => {
             it("should return false", async () => {
-                await guildPreference.setSpotifyPlaylistID("id");
+                await guildPreference.setKmqPlaylistID("id");
 
                 assert.strictEqual(
-                    await CommandPrechecks.notSpotifyPrecheck({
+                    await CommandPrechecks.notPlaylistPrecheck({
                         messageContext,
                         session,
                     }),
@@ -479,12 +479,12 @@ describe("command prechecks", () => {
             });
         });
 
-        describe("spotify playlist not set", () => {
+        describe("KMQ playlist not set", () => {
             it("should return true", async () => {
-                await guildPreference.setSpotifyPlaylistID(null);
+                await guildPreference.setKmqPlaylistID(null);
 
                 assert.strictEqual(
-                    await CommandPrechecks.notSpotifyPrecheck({
+                    await CommandPrechecks.notPlaylistPrecheck({
                         session,
                         messageContext,
                     }),

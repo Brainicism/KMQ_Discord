@@ -166,9 +166,9 @@ export default class GuildPreference {
             default: [null],
             setter: this.setForcePlaySong,
         },
-        [GameOption.SPOTIFY_PLAYLIST_ID]: {
+        [GameOption.PLAYLIST_ID]: {
             default: [null],
-            setter: this.setSpotifyPlaylistID,
+            setter: this.setKmqPlaylistID,
         },
     };
 
@@ -241,6 +241,7 @@ export default class GuildPreference {
         }
 
         // extraneous keys
+        // TODO: this doesn't actually remove the entries in the database
         for (const option in validatedGameOptions) {
             if (!(option in GuildPreference.DEFAULT_OPTIONS)) {
                 extraneousKeysRemoved++;
@@ -896,28 +897,30 @@ export default class GuildPreference {
     }
 
     /**
-     * Sets the Spotify playlist option value
-     * @param playlistID - Spotify playlist ID
+     * Sets the playlist option value
+     * @param kmqPlaylistIdentifier -  KMQ playlist ID
      */
-    async setSpotifyPlaylistID(playlistID: string | null): Promise<void> {
-        this.gameOptions.spotifyPlaylistID = playlistID;
+    async setKmqPlaylistID(
+        kmqPlaylistIdentifier: string | null,
+    ): Promise<void> {
+        this.gameOptions.spotifyPlaylistID = kmqPlaylistIdentifier;
         await this.updateGuildPreferences([
             {
-                name: GameOptionInternal.SPOTIFY_PLAYLIST_ID,
-                value: playlistID,
+                name: GameOptionInternal.PLAYLIST_ID,
+                value: kmqPlaylistIdentifier,
             },
         ]);
     }
 
     /** @returns the ID of the playlist to retrieve songs from */
-    getSpotifyPlaylistID(): string | null {
+    getKmqPlaylistID(): string | null {
         return this.gameOptions.spotifyPlaylistID;
     }
 
     /**
-     * @returns whether the spotify playing option is set
+     * @returns whether the playing option is set
      */
-    isSpotifyPlaylist(): boolean {
+    isPlaylist(): boolean {
         return this.gameOptions.spotifyPlaylistID !== null;
     }
 
@@ -973,15 +976,13 @@ export default class GuildPreference {
         }
 
         await dbContext.kmq.transaction().execute(async (trx) => {
-            await trx
-                .deleteFrom("game_options")
-                .where("guild_id", "=", this.guildID)
-                .where("client_id", "=", process.env.BOT_CLIENT_ID as string)
-                .execute();
-
             await Promise.all(
                 updatedOptions.map((x) =>
-                    trx.insertInto("game_options").values(x).execute(),
+                    trx
+                        .insertInto("game_options")
+                        .values(x)
+                        .onDuplicateKeyUpdate(x)
+                        .execute(),
                 ),
             );
         });

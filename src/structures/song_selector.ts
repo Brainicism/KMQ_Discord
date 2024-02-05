@@ -6,7 +6,11 @@ import {
     SHADOW_BANNED_ARTIST_IDS,
 } from "../constants";
 import { IPCLogger } from "../logger";
-import { chooseWeightedRandom, setDifference } from "../helpers/utils";
+import {
+    chooseWeightedRandom,
+    parseKmqPlaylistIdentifier,
+    setDifference,
+} from "../helpers/utils";
 import { sql } from "kysely";
 import ArtistType from "../enums/option_types/artist_type";
 import LanguageType from "../enums/option_types/language_type";
@@ -51,6 +55,7 @@ export default class SongSelector {
         "available_songs.artist_name_en as artistName",
         "available_songs.artist_name_ko as hangulArtistName",
         "available_songs.link as youtubeLink",
+        "available_songs.original_link as originalLink",
         "available_songs.publishedon as publishDate",
         "available_songs.members",
         "available_songs.id_artist as artistID",
@@ -241,12 +246,12 @@ export default class SongSelector {
 
     async reloadSongs(
         guildPreference: GuildPreference,
-        playlistID?: string,
+        kmqPlaylistIdentifier?: string,
         forceRefreshMetadata?: boolean,
         messageContext?: MessageContext,
         interaction?: Eris.CommandInteraction,
     ): Promise<MatchedPlaylist | null> {
-        if (!playlistID) {
+        if (!kmqPlaylistIdentifier) {
             this.filteredSongs = await SongSelector.getFilteredSongList(
                 guildPreference,
                 SHADOW_BANNED_ARTIST_IDS,
@@ -255,9 +260,9 @@ export default class SongSelector {
             return null;
         }
 
-        const playlist = await SongSelector.getSpotifySongList(
+        const playlist = await SongSelector.getPlaylistSongList(
             guildPreference.guildID,
-            playlistID,
+            kmqPlaylistIdentifier,
             forceRefreshMetadata || false,
             messageContext,
             interaction!,
@@ -544,21 +549,33 @@ export default class SongSelector {
         };
     }
 
-    static async getSpotifySongList(
+    static async getPlaylistSongList(
         guildID: string,
-        playlistID: string,
+        kmqPlaylistIdentifier: string,
         forceRefreshMetadata: boolean,
         messageContext?: MessageContext,
         interaction?: Eris.CommandInteraction,
     ): Promise<QueriedSongList & MatchedPlaylist> {
+        const kmqPlaylistParsed = parseKmqPlaylistIdentifier(
+            kmqPlaylistIdentifier,
+        );
+
         const { matchedSongs, metadata, truncated, unmatchedSongs } =
-            await State.spotifyManager.getMatchedSpotifySongs(
-                guildID,
-                playlistID,
-                forceRefreshMetadata,
-                messageContext,
-                interaction,
-            );
+            kmqPlaylistParsed.isSpotify
+                ? await State.playlistManager.getMatchedSpotifyPlaylist(
+                      guildID,
+                      kmqPlaylistParsed.playlistId,
+                      forceRefreshMetadata,
+                      messageContext,
+                      interaction,
+                  )
+                : await State.playlistManager.getMatchedYoutubePlaylist(
+                      guildID,
+                      kmqPlaylistParsed.playlistId,
+                      forceRefreshMetadata,
+                      messageContext,
+                      interaction,
+                  );
 
         const result = new Set(matchedSongs);
 

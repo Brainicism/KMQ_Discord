@@ -36,7 +36,7 @@ enum LimitAppCommandAction {
 export default class LimitCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
-        { checkFn: CommandPrechecks.notSpotifyPrecheck },
+        { checkFn: CommandPrechecks.notPlaylistPrecheck },
     ];
 
     validations = {

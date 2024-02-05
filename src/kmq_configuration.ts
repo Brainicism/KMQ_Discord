@@ -60,7 +60,7 @@ export default class KmqConfiguration {
         return this.config["disallowMigrations"] ?? false;
     }
 
-    persistMatchedSpotifySongs(): boolean {
+    persistMatchedPlaylistSongs(): boolean {
         return this.config["persistMatchedSpotifySongs"] ?? false;
     }
 

@@ -251,6 +251,7 @@ export async function reloadAliases(): Promise<void> {
     for (const mapping of songAliasMapping) {
         songAliases[mapping["link"]] = mapping["song_aliases"]
             .split(";")
+            .map((x) => x.trim())
             .filter((x: string) => x);
     }
 
@@ -258,6 +259,7 @@ export async function reloadAliases(): Promise<void> {
     for (const mapping of artistAliasMapping) {
         const aliases: Array<string> = mapping["artist_aliases"]
             .split(";")
+            .map((x) => x.trim())
             .filter((x: string) => x);
 
         const previousNameEn = mapping["previous_name_en"];
@@ -412,12 +414,12 @@ async function reloadLocales(): Promise<void> {
     }
 }
 
-function clearCachedSpotifyPlaylists(): void {
-    State.spotifyManager.cachedPlaylists = {};
+function clearCachedPlaylists(): void {
+    State.playlistManager.cachedPlaylists = {};
 }
 
-function cleanupSpotifyParsingLocks(): void {
-    State.spotifyManager.cleanupSpotifyParsingLocks();
+function cleanupPlaylistParsingLocks(): void {
+    State.playlistManager.cleanupPlaylistParsingLocks();
 }
 
 /**
@@ -505,8 +507,8 @@ export function registerIntervals(clusterID: number): void {
         reloadArtists();
         // Songs used for autocomplete
         reloadSongs();
-        // Removed cached Spotify playlists
-        clearCachedSpotifyPlaylists();
+        // Removed cached playlists
+        clearCachedPlaylists();
         // Send daily news notifications
         sendNewsNotifications(NewsRange.DAILY);
     });
@@ -531,8 +533,8 @@ export function registerIntervals(clusterID: number): void {
         cleanupInactiveListeningSessions();
         // Change bot's status (song playing, power hour, etc.)
         updateBotStatus();
-        // Clear any guilds stuck in parsing Spotify state
-        cleanupSpotifyParsingLocks();
+        // Clear any guilds stuck in parsing Playlist state
+        cleanupPlaylistParsingLocks();
         // Reload ban data
         reloadBanData();
     });

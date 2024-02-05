@@ -4,6 +4,23 @@ CREATE PROCEDURE CreateKmqDataTables(
 	IN maxRank INT
 )
 BEGIN
+	/* replace songs with better audio counterpart */
+	ALTER TABLE kpop_videos.app_kpop ADD COLUMN IF NOT EXISTS original_vlink VARCHAR(255);
+	DROP TEMPORARY TABLE IF EXISTS temp_tbl;
+	CREATE TEMPORARY TABLE temp_tbl
+	SELECT a.id as original_id, a.original_name as original_name, a.vlink as original_link, b.vlink as better_audio_link
+	FROM kpop_videos.app_kpop as a
+	LEFT JOIN kpop_videos.app_kpop as b ON a.id_better_audio = b.id
+	WHERE b.vlink is not null
+	AND a.vtype IN ('main', 'audio');
+
+	DELETE kpop_videos.app_kpop FROM kpop_videos.app_kpop
+	JOIN temp_tbl tt on kpop_videos.app_kpop.vlink = tt.better_audio_link
+	WHERE kpop_videos.app_kpop.vlink = tt.better_audio_link;
+
+	UPDATE kpop_videos.app_kpop JOIN temp_tbl tt on kpop_videos.app_kpop.id = tt.original_id
+	SET kpop_videos.app_kpop.vlink = tt.better_audio_link, kpop_videos.app_kpop.original_vlink = tt.original_link;
+
 	/* update available_songs table */
 	DROP TABLE IF EXISTS available_songs_temp;
 	CREATE TABLE available_songs_temp (
@@ -14,6 +31,7 @@ BEGIN
 		clean_song_name_ko VARCHAR(255) NOT NULL,
 		song_aliases VARCHAR(255) NOT NULL,
 		link VARCHAR(255) NOT NULL,
+		original_link VARCHAR(255),
 		artist_name_en VARCHAR(255) NOT NULL,
 		original_artist_name_en VARCHAR(255) NOT NULL,
 		artist_name_ko VARCHAR(255),
@@ -43,6 +61,7 @@ BEGIN
 		TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop.kname, '(', 1)) AS clean_song_name_ko,
 		kpop_videos.app_kpop.alias AS song_aliases,
 		vlink AS link,
+		kpop_videos.app_kpop.original_vlink AS original_link,
 		TRIM(kpop_videos.app_kpop_group.name) AS artist_name_en,
 		TRIM(kpop_videos.app_kpop_group.original_name) AS original_artist_name_en,
 		TRIM(kpop_videos.app_kpop_group.kname) AS artist_name_ko,
@@ -81,6 +100,7 @@ BEGIN
 			TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop.kname, '(', 1)) AS clean_song_name_ko,
 			kpop_videos.app_kpop.alias AS song_aliases,
 			vlink AS link,
+			null,
 			TRIM(kpop_videos.app_kpop_group.name) AS artist_name_en,
 			TRIM(kpop_videos.app_kpop_group.original_name) AS original_artist_name_en,
 			TRIM(kpop_videos.app_kpop_group.kname) AS artist_name_ko,
