@@ -689,11 +689,17 @@
                 }
             },
             "language": {
+                "de": "Allemand",
                 "en": "Anglais",
                 "es-ES": "Espagnol",
                 "fr": "Français",
+                "hi": "Hindi",
+                "id": "Indonésien",
                 "ja": "Japonais",
                 "ko": "Coréen",
+                "nl": "Néerlandais",
+                "pt-BR": "Portugais",
+                "ru": "Russe",
                 "zh-CN": "Chinois"
             },
             "updatedDescription": "La langue du bot a été mise à jour en `{{language}}`."

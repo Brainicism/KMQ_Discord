@@ -689,11 +689,17 @@
                 }
             },
             "language": {
+                "de": "Jerman",
                 "en": "Inggris",
                 "es-ES": "Spanyol",
                 "fr": "Perancis",
+                "hi": "Hindi",
+                "id": "Indonesia",
                 "ja": "Jepang",
                 "ko": "Korea",
+                "nl": "Belanda",
+                "pt-BR": "Portugis",
+                "ru": "Rusia",
                 "zh-CN": "Tionghoa"
             },
             "updatedDescription": "Bahasa bot telah diperbarui ke `{{language}}`."

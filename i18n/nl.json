@@ -689,11 +689,17 @@
                 }
             },
             "language": {
+                "de": "Duits",
                 "en": "Engels",
                 "es-ES": "Spaans",
                 "fr": "Frans",
+                "hi": "Hindi",
+                "id": "Indonesisch",
                 "ja": "Japans",
                 "ko": "Koreaans",
+                "nl": "Nederlands",
+                "pt-BR": "Portugees",
+                "ru": "Russisch",
                 "zh-CN": "Chinees"
             },
             "updatedDescription": "De taal van de bot is bijgewerkt naar `{{language}}`."
