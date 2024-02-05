@@ -207,7 +207,7 @@ export default class ServiceWorker extends BaseServiceWorker {
                     [],
                     3,
                     true,
-                    60000,
+                    1000,
                     false,
                 );
             }
