@@ -32,6 +32,7 @@ import type Eris from "eris";
 import type MessageContext from "../structures/message_context";
 import type QueriedSong from "../interfaces/queried_song";
 import type SpotifyTrack from "../interfaces/spotify_track";
+import { QueryResult } from "kysely";
 
 const logger = new IPCLogger("spotify_manager");
 
@@ -360,6 +361,27 @@ export default class PlaylistManager {
                 title: x.title,
             }));
 
+            const songsinDB = await dbContext.kpopVideos
+                .selectFrom("app_kpop")
+                .select(["original_vlink", "id", "id_parent"])
+                .where("original_vlink",
+                        "in",
+                        youtubePlaylistVideoIDs.map((x) => x.videoId))
+                .execute();
+
+            const vlinksinDB = await dbContext.kpopVideos
+                .selectFrom("app_kpop")
+                .select(["original_vlink", "id"])
+                .where((eb) => eb.or([
+                    eb("id",
+                        "in",
+                        songsinDB.map((x) => x.id)),
+                        eb("id",
+                        "in",
+                        songsinDB.map((x) => x.id_parent)),
+                  ]))
+                .execute();
+
             matchedSongs = await dbContext.kmq
                 .selectFrom("available_songs")
                 .select(SongSelector.QueriedSongFields)
@@ -368,16 +390,35 @@ export default class PlaylistManager {
                         eb(
                             "link",
                             "in",
-                            youtubePlaylistVideoIDs.map((x) => x.videoId),
+                            vlinksinDB.map((x) => x.original_vlink),
                         ),
                         eb(
                             "original_link",
                             "in",
-                            youtubePlaylistVideoIDs.map((x) => x.videoId),
+                            vlinksinDB.map((x) => x.original_vlink),
                         ),
                     ]),
                 )
                 .execute();
+
+            // matchedSongs = await dbContext.kmq
+            //     .selectFrom("available_songs")
+            //     .select(SongSelector.QueriedSongFields)
+            //     .where((eb) =>
+            //         eb.or([
+            //             eb(
+            //                 "link",
+            //                 "in",
+            //                 youtubePlaylistVideoIDs.map((x) => x.videoId),
+            //             ),
+            //             eb(
+            //                 "original_link",
+            //                 "in",
+            //                 youtubePlaylistVideoIDs.map((x) => x.videoId),
+            //             ),
+            //         ]),
+            //     )
+            //     .execute();
 
             unmatchedSongs = youtubePlaylistVideoIDs
                 .filter(
