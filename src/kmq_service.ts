@@ -159,68 +159,65 @@ export default class ServiceWorker extends BaseServiceWorker {
             }),
         );
 
-        await Promise.allSettled(
-            Object.values(LocaleType).map(async (locale) => {
-                await Promise.allSettled(
-                    Object.values(NewsRange).map(async (range) => {
-                        await retryJob<void | Error>(
-                            async () => {
-                                if (!rangeToTopPosts[range]) {
-                                    logger.warn(
-                                        `Skipping generating news for ${locale} ${range} because topPosts is null`,
-                                    );
-                                    return Promise.resolve();
-                                }
-
-                                const summary =
-                                    await geminiClient.getPostSummary(
-                                        locale,
-                                        range,
-                                        rangeToTopPosts[range],
-                                    );
-
-                                if (summary === "") {
-                                    logger.warn(
-                                        `Error generating news for ${locale} ${range}`,
-                                    );
-                                    return Promise.reject(
-                                        new Error(
-                                            `Error generating news for ${locale} ${range}`,
-                                        ),
-                                    );
-                                }
-
-                                if (
-                                    summary.length < 400 ||
-                                    summary.length > 2500
-                                ) {
-                                    return Promise.reject(
-                                        new Error(
-                                            `Received abnormally sized news entry for ${locale} ${range}. length = ${summary.length}`,
-                                        ),
-                                    );
-                                }
-
-                                this.news[range][locale] = {
-                                    text: summary,
-                                    generatedAt: Date.now(),
-                                };
-
-                                logger.info(
-                                    `Generated news for ${locale} ${range}`,
+        for (const locale of Object.values(LocaleType)) {
+            for (const range of Object.values(NewsRange)) {
+                try {
+                    // eslint-disable-next-line no-await-in-loop
+                    await retryJob<void | Error>(
+                        async () => {
+                            if (!rangeToTopPosts[range]) {
+                                logger.warn(
+                                    `Skipping generating news for ${locale} ${range} because topPosts is null`,
                                 );
                                 return Promise.resolve();
-                            },
-                            [],
-                            3,
-                            true,
-                            60000,
-                            false,
-                        );
-                    }),
-                );
-            }),
-        );
+                            }
+
+                            const summary = await geminiClient.getPostSummary(
+                                locale as LocaleType,
+                                range as NewsRange,
+                                rangeToTopPosts[range],
+                            );
+
+                            if (summary === "") {
+                                logger.warn(
+                                    `Error generating news for ${locale} ${range}`,
+                                );
+                                return Promise.reject(
+                                    new Error(
+                                        `Error generating news for ${locale} ${range}`,
+                                    ),
+                                );
+                            }
+
+                            if (summary.length < 400 || summary.length > 2500) {
+                                return Promise.reject(
+                                    new Error(
+                                        `Received abnormally sized news entry for ${locale} ${range}. length = ${summary.length}`,
+                                    ),
+                                );
+                            }
+
+                            this.news[range][locale] = {
+                                text: summary,
+                                generatedAt: Date.now(),
+                            };
+
+                            logger.info(
+                                `Generated news for ${locale} ${range}`,
+                            );
+                            return Promise.resolve();
+                        },
+                        [],
+                        3,
+                        true,
+                        1000,
+                        false,
+                    );
+                } catch (err) {
+                    logger.warn(`Failed to generate news. err = ${err}`);
+                }
+            }
+        }
     }
 
     shutdown = (done: () => void): void => {
