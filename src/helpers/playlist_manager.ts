@@ -235,6 +235,8 @@ export default class PlaylistManager {
         }
 
         let matchedSongs: Array<QueriedSong> = [];
+        let matchedSongs1: Array<QueriedSong> = [];
+        let matchedSongs2: Array<QueriedSong> = [];
         let unmatchedSongs: Array<string>;
         let truncated = false;
 
@@ -361,28 +363,25 @@ export default class PlaylistManager {
                 title: x.title,
             }));
 
+            // Get list of videos in database
             const songsinDB = await dbContext.kpopVideos
                 .selectFrom("app_kpop")
-                .select(["original_vlink", "id", "id_parent"])
-                .where("original_vlink",
+                .select(["vlink", "id", "id_parent"])
+                .where("vlink",
                         "in",
                         youtubePlaylistVideoIDs.map((x) => x.videoId))
                 .execute();
 
+            // Get list of parent videos
             const vlinksinDB = await dbContext.kpopVideos
                 .selectFrom("app_kpop")
-                .select(["original_vlink", "id"])
-                .where((eb) => eb.or([
-                    eb("id",
+                .select(["vlink", "id"])
+                .where("id",
                         "in",
-                        songsinDB.map((x) => x.id)),
-                        eb("id",
-                        "in",
-                        songsinDB.map((x) => x.id_parent)),
-                  ]))
+                        songsinDB.map((x) => x.id_parent))
                 .execute();
 
-            matchedSongs = await dbContext.kmq
+            matchedSongs1 = await dbContext.kmq
                 .selectFrom("available_songs")
                 .select(SongSelector.QueriedSongFields)
                 .where((eb) =>
@@ -390,16 +389,37 @@ export default class PlaylistManager {
                         eb(
                             "link",
                             "in",
-                            vlinksinDB.map((x) => x.original_vlink),
+                            vlinksinDB.map((x) => x.vlink),
                         ),
                         eb(
                             "original_link",
                             "in",
-                            vlinksinDB.map((x) => x.original_vlink),
+                            vlinksinDB.map((x) => x.vlink),
                         ),
                     ]),
                 )
                 .execute();
+
+            matchedSongs2 = await dbContext.kmq
+                .selectFrom("available_songs")
+                .select(SongSelector.QueriedSongFields)
+                .where((eb) =>
+                    eb.or([
+                        eb(
+                            "link",
+                            "in",
+                            youtubePlaylistVideoIDs.map((x) => x.videoId),
+                        ),
+                        eb(
+                            "original_link",
+                            "in",
+                            youtubePlaylistVideoIDs.map((x) => x.videoId),
+                        ),
+                    ]),
+                )
+                .execute();
+
+            matchedSongs = matchedSongs1.concat(matchedSongs2);
 
             // matchedSongs = await dbContext.kmq
             //     .selectFrom("available_songs")
