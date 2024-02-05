@@ -10,6 +10,7 @@ enum LocaleType {
     PT = "pt-BR",
     RU = "ru",
     DE = "de",
+    HI = "hi",
 }
 
 export default LocaleType;
