@@ -53,7 +53,7 @@
                     "answerOption": "Como responder no jogo",
                     "description": "Escolha como responder: digitando sua resposta ou por múltipla escolha"
                 },
-                "name": "resposta."
+                "name": "resposta"
             }
         },
         "artisttype": {
@@ -229,7 +229,7 @@
         "feedback": {
             "help": {
                 "description": "Envie comentários ou relatórios de erros sobre o KMQ",
-                "name": "feedback."
+                "name": "feedback"
             },
             "questions": {
                 "improveKMQ": {
@@ -251,7 +251,7 @@
             },
             "help": {
                 "description": "Receber uma dica diretamente para a música atual sem exigir votação.",
-                "name": "forçar_dica"
+                "name": "forçardica"
             },
             "hintIgnored": "Dica Forçada Ignorada"
         },
@@ -264,7 +264,7 @@
             },
             "help": {
                 "description": "Pular a música atual diretamente sem exigir votação.",
-                "name": "forçar_pular"
+                "name": "forçarpular"
             },
             "skipIgnored": "Pular Força Ignorado"
         },
@@ -377,7 +377,7 @@
                     "reset": "Restaurar para o modo de palpite padrão de {{defaultGuessMode}}",
                     "song": "Digite o nome correto da música para ganhar uma rodada do jogo"
                 },
-                "name": "modo_palpite"
+                "name": "modopalpite"
             },
             "interaction": {
                 "guessMode": "O que é considerado um palpite válido"
@@ -700,7 +700,7 @@
         },
         "lookup": {
             "help": {
-                "description": "Verifique se um determinado vídeo do YouTube está incluído no banco de dados do KMQ e nas opções atuais do jogo.",
+                "description": "Confira se um vídeo do YouTube está no banco de dados do KMQ e nas opções de jogo.",
                 "example": {
                     "song": "Fornece informações sobre {{song}} por {{artist}}."
                 },
@@ -897,7 +897,7 @@
                     "matchesLink": "Se deve mostrar o URL do YouTube para músicas correspondentes",
                     "playlistURL": "A lista de reprodução da qual as músicas serão recuperadas"
                 },
-                "name": "lista de reprodução"
+                "name": "listadereprodução"
             },
             "invalidURL": {
                 "description": "O link para a lista de reprodução é inválido. Para o Spotify, use `Compartilhar > Copiar Link para a Lista de Reprodução` no Spotify para recuperar um link válido.",
@@ -965,13 +965,13 @@
                 }
             },
             "help": {
-                "description": "Várias ações para salvar/carregar predefinições de opções de jogo. O nome da predefinição deve ter apenas uma palavra.",
+                "description": "Ações para salvar/carregar predefinições de jogo. Nome da predefinição deve ser uma única palavra.",
                 "example": {
                     "delete": "Exclui a predefinição mencionada",
                     "export": "Retorna um identificador único que pode ser usado para carregar/importar a predefinição mencionada",
                     "import": "Cria uma nova predefinição usando um identificador de predefinição exportado",
                     "list": "Lista todas as predefinições do servidor.",
-                    "load": "Carrega a predefinição ou identificador de predefinição mencionado ({{exampleIdentifier}}) nas opções do jogo",
+                    "load": "Carrega a predefinição/identificador ({{exampleIdentifier}}) nas opções do jogo",
                     "replace": "Substitui as opções da predefinição mencionada pelas opções atuais da partida",
                     "save": "Salva as opções atuais do jogo como uma predefinição"
                 },
@@ -1199,7 +1199,7 @@
                 "skipIgnored": "Ignorado ignorado."
             },
             "help": {
-                "description": "Vote para pular a música atual. Uma música é pulada quando a maioria dos participantes vota para pulá-la.",
+                "description": "Vote para pular a música atual. Será pulada se a maioria dos participantes decidir por isso.",
                 "name": "pular"
             },
             "success": {
@@ -1223,7 +1223,7 @@
                     "reverse": "Reproduz a música ao contrário",
                     "slow": "Reproduz a música em uma velocidade lenta"
                 },
-                "name": "especial."
+                "name": "especial"
             },
             "interaction": {
                 "special": "O tipo de modificação a ser feita em cada música"

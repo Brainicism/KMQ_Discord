@@ -264,7 +264,7 @@
             },
             "help": {
                 "description": "Sla het huidige nummer direct over zonder dat er gestemd hoeft te worden.",
-                "name": "forceren_overslaan"
+                "name": "forcerenoverslaan"
             },
             "skipIgnored": "Gedwongen overslaan genegeerd"
         },
@@ -747,7 +747,7 @@
                     "description": "Stelt in of meerdere mensen een nummer correct kunnen raden",
                     "multiguess": "Of meerdere mensen het goed mogen raden"
                 },
-                "name": "meerdere-gok"
+                "name": "meerderegok"
             }
         },
         "news": {
@@ -965,7 +965,7 @@
                 }
             },
             "help": {
-                "description": "Verschillende acties om speloptievoorinstellingen op te slaan/laden. De naam van de voorinstelling mag uit één woord bestaan.",
+                "description": "Acties voor opslaan/laden van speloptievoorinstellingen. Voorinstellingsnaam moet één woord zijn.",
                 "example": {
                     "delete": "Verwijdert de genoemde voorinstelling",
                     "export": "Retourneert een unieke ID die kan worden gebruikt om de genoemde voorinstelling te laden/importeren",
@@ -1199,7 +1199,7 @@
                 "skipIgnored": "Skip genegeerd"
             },
             "help": {
-                "description": "Stem om het huidige nummer over te slaan. Een nummer wordt overgeslagen wanneer de meerderheid van de deelnemers ervoor kiest om het over te slaan.",
+                "description": "Stem om het huidige nummer te skippen. Overslaan bij meerderheidskeuze van deelnemers.",
                 "name": "overslaan"
             },
             "success": {
@@ -1267,13 +1267,13 @@
         },
         "subunits": {
             "help": {
-                "description": "Kies of de subunits van een groep automatisch moeten worden opgenomen wanneer {{groups}} wordt gebruikt.",
+                "description": "Kies of subunits van een groep automatisch opgenomen worden bij gebruik van {{groups}}.",
                 "example": {
                     "exclude": "Voeg geen subgroepen toe",
                     "include": "Subunits automatisch opnemen. Bijvoorbeeld, {{groupCommand}} group_1:{{parentGroup}} zou nummers van {{parentGroup}}, {{subunitOne}}, {{subunitTwo}}, etc. bevatten.",
                     "reset": "Reset naar de standaardoptie van {{defaultSubunit}}"
                 },
-                "name": "\"subgroepen\""
+                "name": "subgroepen"
             },
             "interaction": {
                 "subunits": "Of subunits moeten worden opgenomen"

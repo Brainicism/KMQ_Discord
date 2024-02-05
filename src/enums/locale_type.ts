@@ -7,7 +7,9 @@ enum LocaleType {
     ZH = "zh-CN",
     NL = "nl",
     ID = "id",
-    PT = "pt",
+    PT = "pt-BR",
+    RU = "ru",
+    DE = "de",
 }
 
 export default LocaleType;

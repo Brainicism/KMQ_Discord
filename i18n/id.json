@@ -69,7 +69,7 @@
                     "artistTypeOption": "Jenis artis untuk diputar",
                     "description": "Pilih apakah Anda ingin mendengar dari solois, grup, atau keduanya"
                 },
-                "name": "jenis_artis"
+                "name": "jenisartis"
             }
         },
         "begin": {
@@ -251,7 +251,7 @@
             },
             "help": {
                 "description": "Langsung menerima petunjuk ke lagu saat ini tanpa perlu memilih.",
-                "name": "paksa petunjuk"
+                "name": "paksapetunjuk"
             },
             "hintIgnored": "Paksa Petunjuk Diabaikan"
         },
@@ -264,7 +264,7 @@
             },
             "help": {
                 "description": "Langsung lewati lagu saat ini tanpa perlu memilih.",
-                "name": "lewati paksa"
+                "name": "lewatipaksa"
             },
             "skipIgnored": "Paksa Lewati Diabaikan"
         },
@@ -282,7 +282,7 @@
                     "description": "Pilih jenis kelamin artis yang ingin Anda dengar.",
                     "gender": "Jenis kelamin anggota grup atau solois"
                 },
-                "name": "jenis kelamin"
+                "name": "jeniskelamin"
             },
             "warning": {
                 "gameOption": {
@@ -377,7 +377,7 @@
                     "reset": "Atur ulang ke mode tebak default yaitu {{defaultGuessMode}}",
                     "song": "Ketik nama lagu yang benar untuk memenangkan ronde permainan"
                 },
-                "name": "mode_tebakan"
+                "name": "modetebakan"
             },
             "interaction": {
                 "guessMode": "Apa yang dianggap sebagai tebakan yang valid"
@@ -562,7 +562,7 @@
                     "serverSongsGuessedPage": "Menampilkan halaman ketiga papan peringkat di seluruh server berdasarkan total tebakan lagu",
                     "unenroll": "Sembunyikan nama Anda dari papan peringkat"
                 },
-                "name": "papan peringkat",
+                "name": "papanperingkat",
                 "usage": {
                     "pageNumber": "halaman_nomor"
                 }
@@ -661,7 +661,7 @@
                 "name": "daftar"
             },
             "interaction": {
-                "listType": "Apakah akan mencetak grup yang saat ini ditetapkan, grup yang disertakan, atau grup yang dikecualikan"
+                "listType": "Apakah akan menampilkan grup yang ditetapkan, disertakan, atau dikecualikan"
             }
         },
         "listen": {
@@ -747,7 +747,7 @@
                     "description": "Tetapkan apakah beberapa orang dapat menebak lagu dengan benar",
                     "multiguess": "Apakah akan memperbolehkan banyak orang untuk menebak dengan benar"
                 },
-                "name": "tebakan_ganda"
+                "name": "tebakanganda"
             }
         },
         "news": {
@@ -818,7 +818,7 @@
                     "include": "Sertakan lagu OST",
                     "reset": "Atur ulang ke opsi default {{defaultOst}}"
                 },
-                "name": "lagu_film"
+                "name": "lagufilm"
             },
             "interaction": {
                 "ost": "Apakah akan menyertakan, memainkan secara eksklusif, atau mengecualikan lagu OST"
@@ -856,7 +856,7 @@
                     "classic": "Mulai permainan KMQ klasik (ketik tebakan Anda terlebih dahulu untuk mendapatkan poin)",
                     "elimination": "Mulai permainan eliminasi KMQ di mana setiap pemain memulai dengan {{lives}} nyawa",
                     "hidden": "Mulai permainan KMQ tersembunyi, tempat pemain hanya bisa menjawab dengan /tebak",
-                    "teams": "Bergabunglah dengan banyak tim sesuai keinginan Anda dan lihat siapa yang dapat Anda andalkan untuk membantu Anda menang!"
+                    "teams": "Bergabunglah dengan tim sesuai keinginan dan temukan siapa yang dapat membantu Anda menang!"
                 },
                 "interaction": {
                     "lives": "Pilih berapa banyak nyawa yang dimiliki setiap pemain di awal"
@@ -897,7 +897,7 @@
                     "matchesLink": "Apakah akan menampilkan URL YouTube ke lagu yang cocok",
                     "playlistURL": "Daftar putar untuk mengambil lagu"
                 },
-                "name": "daftar putar"
+                "name": "daftarputar"
             },
             "invalidURL": {
                 "description": "Tautan ke daftar putar tidak sah. Untuk Spotify, gunakan `Bagikan > Salin Tautan ke Daftar Putar` di Spotify untuk mengambil tautan yang sah.",
@@ -968,14 +968,14 @@
                 "description": "Berbagai tindakan untuk menyimpan/memuat pra setel opsi permainan. Nama pra setel harus satu kata.",
                 "example": {
                     "delete": "Menghapus pra setel yang disebutkan",
-                    "export": "Mengembalikan pengidentifikasi unik yang dapat digunakan untuk memuat/mengimpor pra setel yang disebutkan",
+                    "export": "Memberikan identifikasi unik untuk memuat/mengimpor preset yang disebut",
                     "import": "Membuat pra setel baru menggunakan pengidentifikasi pra setel yang diekspor",
                     "list": "Mencantumkan semua pra setel server",
                     "load": "Memuat pra setel atau pengenal pra setel yang disebutkan ({{exampleIdentifier}}) ke opsi permainan",
                     "replace": "Ganti opsi pra setel yang disebutkan dengan opsi permainan saat ini",
                     "save": "Menyimpan opsi permainan saat ini sebagai prasetel"
                 },
-                "name": "pra setel",
+                "name": "prasetel",
                 "usage": {
                     "presetIdentifier": "pengidentifikasi_pra_setel",
                     "presetName": "nama_pra_setel"
@@ -1095,7 +1095,7 @@
             "help": {
                 "description": "Lihat lagu yang ditambahkan ke KMQ dalam dua minggu terakhir.",
                 "example": "Tampilkan lagu yang baru saja ditambahkan",
-                "name": "ditambahkan baru-baru ini"
+                "name": "ditambahkanbarubaruini"
             },
             "title": "Lagu yang Baru Ditambahkan"
         },
@@ -1122,7 +1122,7 @@
                     "include": "Sertakan remix",
                     "reset": "Atur ulang ke opsi default {{defaultRemix}}"
                 },
-                "name": "aransemen ulang"
+                "name": "aransemenulang"
             },
             "interaction": {
                 "remix": "Apakah akan menyertakan atau mengecualikan lagu yang di-remix"
@@ -1154,7 +1154,7 @@
                 "example": {
                     "reset": "Atur ulang ke opsi permainan default"
                 },
-                "name": "atur ulang"
+                "name": "aturulang"
             }
         },
         "score": {
@@ -1199,7 +1199,7 @@
                 "skipIgnored": "Lewati Diabaikan"
             },
             "help": {
-                "description": "Pilih untuk melewatkan lagu saat ini. Sebuah lagu akan dilewati ketika mayoritas peserta memilih untuk melewatkannya.",
+                "description": "Pilih melewati lagu saat ini jika mayoritas peserta setuju.",
                 "name": "lewati"
             },
             "success": {
@@ -1231,7 +1231,7 @@
         },
         "spotify": {
             "help": {
-                "name": "musik_Spotify"
+                "name": "musikspotify"
             }
         },
         "stats": {
@@ -1290,7 +1290,7 @@
                     "description": "Berusaha semampu Anda untuk menebak dengan benar sebelum waktu habis!",
                     "timer": "Berapa detik untuk memutar setiap lagu sebelum dilewati"
                 },
-                "name": "pengatur waktu",
+                "name": "pengaturwaktu",
                 "usage": {
                     "seconds": "detik"
                 }
@@ -1313,7 +1313,7 @@
                 "interaction": {
                     "releaseType": "Jenis rilis untuk ditampilkan"
                 },
-                "name": "rilis_mendatang"
+                "name": "rilismendatang"
             },
             "single": "Tunggal",
             "title": "Perilisan Mendatang"
