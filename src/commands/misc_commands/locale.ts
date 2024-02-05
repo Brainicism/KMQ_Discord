@@ -42,8 +42,26 @@ enum LocaleArgument {
     ZH = "zh",
     CH = "ch",
     CHINESE = "chinese",
-}
 
+    NL = "nl",
+    DUTCH = "dutch",
+
+    ID = "id",
+    INDONESIAN = "indonesian",
+
+    PT = "pt",
+    PT_BR = "pt-BR",
+    PORTUGUESE = "portuguese",
+
+    RU = "ru",
+    RUSSIAN = "russian",
+
+    DE = "de",
+    GERMAN = "german",
+
+    HI = "hi",
+    HINDI = "hindi",
+}
 const LanguageNameToLocaleType = {
     English: LocaleType.EN,
     Korean: LocaleType.KO,
@@ -51,6 +69,12 @@ const LanguageNameToLocaleType = {
     French: LocaleType.FR,
     Japanese: LocaleType.JA,
     Chinese: LocaleType.ZH,
+    Dutch: LocaleType.NL,
+    Indonesian: LocaleType.ID,
+    Portuguese: LocaleType.PT,
+    Russian: LocaleType.RU,
+    German: LocaleType.DE,
+    Hindi: LocaleType.HI,
 };
 
 export default class LocaleTypeCommand implements BaseCommand {
@@ -244,6 +268,37 @@ export default class LocaleTypeCommand implements BaseCommand {
                 case LocaleArgument.CH:
                 case LocaleArgument.CHINESE:
                     localeType = LocaleType.ZH;
+                    break;
+
+                case LocaleArgument.NL:
+                case LocaleArgument.DUTCH:
+                    localeType = LocaleType.NL;
+                    break;
+
+                case LocaleArgument.ID:
+                case LocaleArgument.INDONESIAN:
+                    localeType = LocaleType.ID;
+                    break;
+
+                case LocaleArgument.PT:
+                case LocaleArgument.PT_BR:
+                case LocaleArgument.PORTUGUESE:
+                    localeType = LocaleType.PT;
+                    break;
+
+                case LocaleArgument.RU:
+                case LocaleArgument.RUSSIAN:
+                    localeType = LocaleType.RU;
+                    break;
+
+                case LocaleArgument.DE:
+                case LocaleArgument.GERMAN:
+                    localeType = LocaleType.DE;
+                    break;
+
+                case LocaleArgument.HI:
+                case LocaleArgument.HINDI:
+                    localeType = LocaleType.HI;
                     break;
 
                 default:
