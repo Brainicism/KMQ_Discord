@@ -381,6 +381,7 @@ export default class PlaylistManager {
                         songsinDB.map((x) => x.id_parent))
                 .execute();
 
+            // Match parent videos
             matchedSongs1 = await dbContext.kmq
                 .selectFrom("available_songs")
                 .select(SongSelector.QueriedSongFields)
@@ -400,6 +401,7 @@ export default class PlaylistManager {
                 )
                 .execute();
 
+            // Match original videos
             matchedSongs2 = await dbContext.kmq
                 .selectFrom("available_songs")
                 .select(SongSelector.QueriedSongFields)
@@ -419,6 +421,7 @@ export default class PlaylistManager {
                 )
                 .execute();
 
+            // Combine videos
             matchedSongs = matchedSongs1.concat(matchedSongs2);
 
             // matchedSongs = await dbContext.kmq
