@@ -62,7 +62,7 @@
                 "example": {
                     "both": "Spielt Songs sowohl von Solisten als auch von Gruppen",
                     "groups": "Spiele nur Songs von Gruppen",
-                    "reset": "Setzt die Option „Künstlertyp\" zurück",
+                    "reset": "Setzt die Option Künstlertyp zurück",
                     "soloists": "Spielt nur Songs von Solokünstlern"
                 },
                 "interaction": {
@@ -620,7 +620,7 @@
                 }
             },
             "help": {
-                "description": "Lege eine maximale Anzahl von Ergebnissen in der Songabfrage fest. Dies legt effektiv die \"\"Top X Anzahl von Songs\"\" basierend auf den ausgewählten Filtern fest.",
+                "description": "Lege eine maximale Anzahl von Ergebnissen in der Songabfrage fest. Dies legt effektiv die \"Top X Anzahl von Songs\" basierend auf den ausgewählten Filtern fest.",
                 "example": {
                     "reset": "Auf das Standardlimit {{defaultLimit}} zurücksetzen",
                     "singleLimit": "Spielt die Top-{{limit}} meistgehörten Songs aus den aktuell ausgewählten Optionen",
@@ -883,8 +883,8 @@
         },
         "playlist": {
             "fileFormat": {
-                "matched": "Übereinstimmende Songs für \"\"{{playlistName}}\"\":\n{{matchedSongs}}",
-                "unmatched": "Nicht übereinstimmende Songs für \"\"{{playlistName}}\"\":\n{{unmatchedSongs}}"
+                "matched": "Übereinstimmende Songs für \"{{playlistName}}\":\n{{matchedSongs}}",
+                "unmatched": "Nicht übereinstimmende Songs für \"{{playlistName}}\":\n{{unmatchedSongs}}"
             },
             "help": {
                 "description": "Spiele Lieder ausschließlich von einer bestimmten Spotify/YouTube-Wiedergabeliste",
@@ -905,7 +905,7 @@
             },
             "matched": {
                 "description": "Übereinstimmende `{{matchedCount}}/{{totalCount}}` Songs.",
-                "title": "Spiele \"\"{{playlistName}}\"\"",
+                "title": "Spiele \"{{playlistName}}\"",
                 "truncated": "Hinweis: Die Verarbeitung der Wiedergabeliste hat zu lange gedauert und wurde nicht abgeschlossen. Versuche es beim nächsten Mal mit einer kleineren Wiedergabeliste."
             },
             "noMatches": {

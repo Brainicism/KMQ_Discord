@@ -1240,7 +1240,7 @@
                 "description": "Silakan coba lagi nanti.",
                 "title": "Kesalahan Mengambil Statistik"
             },
-            "footer": "\"Statistik \"Terkini\" mewakili data dari 24 jam terakhir.",
+            "footer": "Statistik \"Terkini\" mewakili data dari 24 jam terakhir.",
             "game": {
                 "activeGameSessions": "Sesi Permainan Aktif",
                 "activePlayers": "Pemain Aktif",

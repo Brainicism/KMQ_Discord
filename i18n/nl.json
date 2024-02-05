@@ -421,7 +421,7 @@
             },
             "help": {
                 "description": "Geeft een hint voor het momenteel afgespeelde nummer.",
-                "name": "\"hint\""
+                "name": "hint"
             },
             "request": {
                 "description": "{{hintCounter}} hints ontvangen.",
@@ -1346,7 +1346,7 @@
             "companyByArtistViews": "Leuk weetje: {{name}} is het {{ordinalNum}} meest bekeken entertainmentbedrijf met in totaal {{views}} YouTube-weergaven!",
             "fanclubName": "Leuk weetje: de fanclubnaam van {{name}} is '{{fanclub}}'!",
             "historicalGaonWeekly": "Leuk weetje: in deze week in {{year}}, was {{songName}} het best scorende nummer in de GAON Weekly-hitlijsten!",
-            "hyperlinkGenerator": "[{{songName}}\" van {{artistName}}]({{url}})",
+            "hyperlinkGenerator": "[\"{{songName}}\" van {{artistName}}]({{url}})",
             "mostActiveYear": "Leuk weetje: {{year}} was het {{ordinalNum}} meest actieve jaar in K-Pop met {{num}} uitgebrachte muziekvideo's!",
             "mostAnnualAwardShowWins": "Leuk weetje: {{artistName}} heeft met {{wins}} de {{ordinalNum}} meeste overwinningen op jaarlijkse prijsuitreikingen!",
             "mostDebuts": "Leuk weetje: {{year}} had de {{ordinalNum}} meeste debuten met {{num}} debuterende groepen!",
