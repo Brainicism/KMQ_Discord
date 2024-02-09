@@ -103,7 +103,7 @@ export default class BotListingManager {
             );
             logger.info(`${botListing.name} server count posted`);
         } catch (e) {
-            logger.error(
+            logger.warn(
                 `Error updating ${botListing.name} server count. error = ${e}`,
             );
         }
