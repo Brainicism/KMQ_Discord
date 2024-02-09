@@ -351,7 +351,14 @@ export async function retryJob<Type>(
             throw err;
         }
 
-        return retryJob(job, jobArgs, maxRetries - 1, false, delayDuration);
+        return retryJob(
+            job,
+            jobArgs,
+            maxRetries - 1,
+            false,
+            delayDuration,
+            sendError,
+        );
     });
 }
 
