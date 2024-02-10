@@ -1,0 +1,44 @@
+name: i18n-ai-translate
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'i18n/en.json'
+
+jobs:
+  check-and-commit:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ github.head_ref }}
+        fetch-depth: 0
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Setup Git Config
+      run: |
+        git config --global user.email "mahditaaha11@gmail.com"
+        git config --global user.name "Taaha Mahdi"
+
+    - name: Fetch original translation
+      run: |
+        git fetch origin master:i18n/en.json i18n/en-before.json
+
+    - name: Translate the diff
+      run: |
+        npx i18n-ai-translate diff -b i18n/en-before.json -a i18n/en.json -l "English" --api-key "${GEMINI_API_KEY}"
+        rm i18n/en-before.json
+        git add .
+        git commit -m "Update translations" || echo "No changes to commit"
+        git push
+
