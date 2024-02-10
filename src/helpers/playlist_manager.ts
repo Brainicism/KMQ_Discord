@@ -380,7 +380,7 @@ export default class PlaylistManager {
             // Replace duplicate links with main links.
             for (const video of vlinksinDB) {
                 for (const original of youtubePlaylistVideoIDs) {
-                    if (original.videoId == video.duplicate_link) {
+                    if (original.videoId === video.duplicate_link) {
                         original.videoId = video.main_link;
                     }
                 }
