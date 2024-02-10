@@ -7,9 +7,6 @@ on:
     paths:
       - 'i18n/en.json'
 
-env:
-  GEMINI_API_KEY: ${{ env.GEMINI_API_KEY }}
-
 jobs:
   check-and-commit:
     runs-on: ubuntu-latest
@@ -41,7 +38,7 @@ jobs:
 
     - name: Translate the diff
       run: |
-        npx i18n-ai-translate diff -b i18n/en-before.json -a i18n/en.json -l "English" --api-key "${GEMINI_API_KEY}"
+        npx i18n-ai-translate diff -b i18n/en-before.json -a i18n/en.json -l "English" --api-key "${{ vars.GEMINI_API_KEY }}"
         rm i18n/en-before.json
         git add .
         git commit -m "Update translations" || echo "No changes to commit"
