@@ -27,8 +27,8 @@ jobs:
 
     - name: Setup Git Config
       run: |
-        git config --global user.email "mahditaaha11@gmail.com"
-        git config --global user.name "Taaha Mahdi"
+        git config --global user.name 'KMQ GH Action Committer'
+        git config --global user.email '<>'
 
     - name: Copy .env for CI
       env:
@@ -50,3 +50,8 @@ jobs:
         git commit -m "Update translations" || echo "No changes to commit"
         git push
 
+    - name: Lint translations
+      run: npm run lint-i18n-ci
+
+    - name: Check for missing translations
+      run: npx ts-node src/ci_checks/missing_i18n.ts $(find src -name '*.ts' -print)
