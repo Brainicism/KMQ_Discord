@@ -251,7 +251,10 @@ export default class SongSelector {
         messageContext?: MessageContext,
         interaction?: Eris.CommandInteraction,
     ): Promise<MatchedPlaylist | null> {
-        if (!kmqPlaylistIdentifier) {
+        if (
+            !kmqPlaylistIdentifier ||
+            guildPreference.gameOptions.forcePlaySongID
+        ) {
             this.filteredSongs = await SongSelector.getFilteredSongList(
                 guildPreference,
                 SHADOW_BANNED_ARTIST_IDS,

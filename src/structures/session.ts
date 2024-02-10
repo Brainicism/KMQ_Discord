@@ -884,10 +884,12 @@ export default abstract class Session {
 
         const songAndArtist = `"${song}" - ${artist}`;
 
+        // prioritize original link (usually the music video)
+        const youtubeLink = round.song.originalLink || round.song.youtubeLink;
         const embed: EmbedPayload = {
             color: embedColor,
             title: `${songAndArtist} (${round.song.publishDate.getFullYear()})`,
-            url: `https://youtu.be/${round.song.youtubeLink}`,
+            url: `https://youtu.be/${youtubeLink}`,
             description,
             fields,
         };
@@ -909,7 +911,7 @@ export default abstract class Session {
         );
 
         let footerText = `${views}${aliases}${duration}`;
-        const thumbnailUrl = `https://img.youtube.com/vi/${round.song.youtubeLink}/hqdefault.jpg`;
+        const thumbnailUrl = `https://img.youtube.com/vi/${youtubeLink}/hqdefault.jpg`;
         if (round instanceof GameRound) {
             if (round.warnTypoReceived) {
                 footerText += `\n/${i18n.translate(
