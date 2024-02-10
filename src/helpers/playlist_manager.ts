@@ -32,7 +32,6 @@ import type Eris from "eris";
 import type MessageContext from "../structures/message_context";
 import type QueriedSong from "../interfaces/queried_song";
 import type SpotifyTrack from "../interfaces/spotify_track";
-import { QueryResult } from "kysely";
 
 const logger = new IPCLogger("spotify_manager");
 
@@ -371,10 +370,8 @@ export default class PlaylistManager {
                         youtubePlaylistVideoIDs.map((x) => x.videoId))
                 .execute();
 
-                for (let key in vlinksinDB) {
-                    let video = vlinksinDB[key];
-                    for (let key2 in youtubePlaylistVideoIDs) {
-                        let original = youtubePlaylistVideoIDs[key2]
+                for (const video of vlinksinDB) {
+                    for (const original of youtubePlaylistVideoIDs) {
                         if(original.videoId == video.duplicate_link){
                             original.videoId = video.main_link
                         }
