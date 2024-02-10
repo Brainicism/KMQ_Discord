@@ -23,7 +23,7 @@ jobs:
         node-version: '18'
 
     - name: Install Dependencies
-      run: yarn global add i18n-ai-translate
+      run: yarn add i18n-ai-translate
 
     - name: Setup Git Config
       run: |
@@ -38,7 +38,7 @@ jobs:
 
     - name: Translate the diff
       run: |
-        yarn run i18n-ai-translate diff -b i18n/en-before.json -a i18n/en.json -l "English" --api-key "${GEMINI_API_KEY}"
+        npx i18n-ai-translate diff -b i18n/en-before.json -a i18n/en.json -l "English" --api-key "${GEMINI_API_KEY}"
         rm i18n/en-before.json
         git add .
         git commit -m "Update translations" || echo "No changes to commit"
