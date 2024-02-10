@@ -30,6 +30,13 @@ jobs:
         git config --global user.email "mahditaaha11@gmail.com"
         git config --global user.name "Taaha Mahdi"
 
+    - name: Copy .env for CI
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      run: |
+        echo "API_KEY=$GEMINI_API_KEY" >> .env
+      shell: bash
+
     - name: Fetch original translation
       run: |
         git checkout origin/master -- i18n/en.json
@@ -38,7 +45,7 @@ jobs:
 
     - name: Translate the diff
       run: |
-        npx i18n-ai-translate diff -b i18n/en-before.json -a i18n/en.json -l "English" --api-key "${{ vars.GEMINI_API_KEY }}"
+        npx i18n-ai-translate diff -b i18n/en-before.json -a i18n/en.json -l "English"
         rm i18n/en-before.json
         git add .
         git commit -m "Update translations" || echo "No changes to commit"
