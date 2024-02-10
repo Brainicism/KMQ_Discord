@@ -32,7 +32,9 @@ jobs:
 
     - name: Fetch original translation
       run: |
-        git fetch origin master:i18n/en.json i18n/en-before.json
+        git checkout origin/master -- i18n/en.json
+        cp i18n/en.json i18n/en-before.json
+        git checkout i18n/en.json
 
     - name: Translate the diff
       run: |
