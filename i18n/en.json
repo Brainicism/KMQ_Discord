@@ -28,7 +28,7 @@
         "add": {
             "failure": {
                 "unrecognizedGroups": {
-                    "added": "this is a test"
+                    "added": "this is a test again"
                 }
             },
             "help": {
