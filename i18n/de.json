@@ -28,7 +28,7 @@
         "add": {
             "failure": {
                 "unrecognizedGroups": {
-                    "added": "das ist wieder ein Test"
+                    "added": "hinzugefügt"
                 }
             },
             "help": {
@@ -77,8 +77,7 @@
                 "noTeam": {
                     "description": "Erstelle ein Team mit {{join}} team_name:[Teamname], bevor du das Spiel starten kannst."
                 },
-                "title": "Beginn ignoriert",
-                "titleAgain": "Beginn Wieder Ignoriert?"
+                "title": "Beginn ignoriert"
             }
         },
         "botnews": {
@@ -109,6 +108,7 @@
                     "beginningYear": "Das früheste Jahr, das einbezogen werden soll",
                     "description": "Lege einen Cutoff-Jahresbereich für Songs fest",
                     "earliestOption": "Wähle Songs für jedes Jahr ab [beginning_year]",
+                    "endingYear": "Das letzte Jahr, das einbezogen werden soll",
                     "rangeOption": "Wähle Songs für jedes Jahr zwischen [beginning_year] und [ending_year]"
                 },
                 "name": "cutoff"

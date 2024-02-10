@@ -28,7 +28,7 @@
         "add": {
             "failure": {
                 "unrecognizedGroups": {
-                    "added": "다시 한번 시험입니다"
+                    "added": "추가"
                 }
             },
             "help": {
@@ -77,8 +77,7 @@
                 "noTeam": {
                     "description": "게임을 시작하기 전에 {{join}} team_name[팀명]을(를) 사용하여 팀을 만드십시오."
                 },
-                "title": "게임 시작 무시",
-                "titleAgain": "다시 무시됨을 시작할까요?"
+                "title": "게임 시작 무시"
             }
         },
         "botnews": {
@@ -109,6 +108,7 @@
                     "beginningYear": "포함할 가장 빠른 연도",
                     "description": "노래의 연도 범위 설정",
                     "earliestOption": "[beginning_year]부터 시작하는 연도별 곡 선택",
+                    "endingYear": "마지막으로 포함된 연도",
                     "rangeOption": "[beginning_year]와 [ending_year] 사이의 연도별 곡 선택"
                 },
                 "name": "연도설정"

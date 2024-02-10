@@ -28,7 +28,7 @@
         "add": {
             "failure": {
                 "unrecognizedGroups": {
-                    "added": "这是一次测试"
+                    "added": "已添加"
                 }
             },
             "help": {
@@ -77,8 +77,7 @@
                 "noTeam": {
                     "description": "在开始游戏之前，请使用 {{join}} team_name:[团队名称] 创建一个团队。"
                 },
-                "title": "开始被忽略",
-                "titleAgain": "再次忽略开始吗？"
+                "title": "开始被忽略"
             }
         },
         "botnews": {
@@ -109,6 +108,7 @@
                     "beginningYear": "包含的最早年份",
                     "description": "设置歌曲的截止年份范围",
                     "earliestOption": "选择从 [beginning_year] 开始的每年的歌曲",
+                    "endingYear": "包含的最晚年份",
                     "rangeOption": "选择从 [beginning_year] 到 [ending_year] 之间的每年的歌曲"
                 },
                 "name": "截止年份"

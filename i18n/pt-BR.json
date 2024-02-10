@@ -28,7 +28,7 @@
         "add": {
             "failure": {
                 "unrecognizedGroups": {
-                    "added": "isso é outro teste"
+                    "added": "adicionado"
                 }
             },
             "help": {
@@ -77,8 +77,7 @@
                 "noTeam": {
                     "description": "Crie uma equipe usando {{join}} nome_da_equipe:[nome da equipe] antes de começar a partida."
                 },
-                "title": "Ignorado Iniciado",
-                "titleAgain": "Recomeçar Ignorado Novamente?"
+                "title": "Ignorado Iniciado"
             }
         },
         "botnews": {
@@ -109,6 +108,7 @@
                     "beginningYear": "O primeiro ano a ser incluído",
                     "description": "Definir um intervalo de anos de corte para músicas",
                     "earliestOption": "Escolha músicas para cada ano a partir de [beginning_year]",
+                    "endingYear": "O último ano a ser incluído",
                     "rangeOption": "Escolha músicas entre [beginning_year] e [ending_year]"
                 },
                 "name": "limite"

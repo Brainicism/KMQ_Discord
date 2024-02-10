@@ -28,7 +28,7 @@
         "add": {
             "failure": {
                 "unrecognizedGroups": {
-                    "added": "ceci est un autre test"
+                    "added": "ajouté"
                 }
             },
             "help": {
@@ -77,8 +77,7 @@
                 "noTeam": {
                     "description": "Créez une équipe en utilisant {{join}} team_name:[nom de l'équipe] avant de pouvoir commencer le jeu."
                 },
-                "title": "Commencer ignoré",
-                "titleAgain": "Recommencer à ignorer ?"
+                "title": "Commencer ignoré"
             }
         },
         "botnews": {
@@ -109,6 +108,7 @@
                     "beginningYear": "L'année la plus ancienne à inclure",
                     "description": "Définir une plage de dates pour les chansons",
                     "earliestOption": "Choisir des chansons pour chaque année à partir de [beginning_year]",
+                    "endingYear": "La dernière année à inclure",
                     "rangeOption": "Choisir des chansons pour chaque année entre [beginning_year] et [ending_year]"
                 },
                 "name": "plagededates"
