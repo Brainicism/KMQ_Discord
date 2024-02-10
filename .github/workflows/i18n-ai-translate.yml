@@ -8,7 +8,7 @@ on:
       - 'i18n/en.json'
 
 jobs:
-  check-and-commit:
+  diff:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Repo
@@ -39,7 +39,7 @@ jobs:
 
     - name: Fetch original translation
       run: |
-        cp i18n/en.json 18n/en-latest.json
+        cp i18n/en.json i18n/en-latest.json
         git checkout origin/master -- i18n/en.json
 
     - name: Translate the diff
