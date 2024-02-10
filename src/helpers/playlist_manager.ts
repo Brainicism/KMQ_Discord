@@ -235,8 +235,6 @@ export default class PlaylistManager {
         }
 
         let matchedSongs: Array<QueriedSong> = [];
-        let matchedSongs1: Array<QueriedSong> = [];
-        let matchedSongs2: Array<QueriedSong> = [];
         let unmatchedSongs: Array<string>;
         let truncated = false;
 
@@ -363,46 +361,28 @@ export default class PlaylistManager {
                 title: x.title,
             }));
 
-            // Get list of videos in database
-            const songsinDB = await dbContext.kpopVideos
-                .selectFrom("app_kpop")
-                .select(["vlink", "id", "id_parent"])
-                .where("vlink",
+            // Get list of vids with parent vid if possible
+            const vlinksinDB = await dbContext.kpopVideos
+                .selectFrom("app_kpop as a")
+                .rightJoin("app_kpop as b", "a.id_parent", "b.id")
+                .select(["a.id as duplicate_id", "b.id", "a.vlink as duplicate_link", "b.vlink as main_link"])
+                .where("a.vlink",
                         "in",
                         youtubePlaylistVideoIDs.map((x) => x.videoId))
                 .execute();
 
-            // Get list of parent videos
-            const vlinksinDB = await dbContext.kpopVideos
-                .selectFrom("app_kpop")
-                .select(["vlink", "id"])
-                .where("id",
-                        "in",
-                        songsinDB.map((x) => x.id_parent))
-                .execute();
+                for (let key in vlinksinDB) {
+                    let video = vlinksinDB[key];
+                    for (let key2 in youtubePlaylistVideoIDs) {
+                        let original = youtubePlaylistVideoIDs[key2]
+                        if(original.videoId == video.duplicate_link){
+                            original.videoId = video.main_link
+                        }
+                    };
+                };
 
-            // Match parent videos
-            matchedSongs1 = await dbContext.kmq
-                .selectFrom("available_songs")
-                .select(SongSelector.QueriedSongFields)
-                .where((eb) =>
-                    eb.or([
-                        eb(
-                            "link",
-                            "in",
-                            vlinksinDB.map((x) => x.vlink),
-                        ),
-                        eb(
-                            "original_link",
-                            "in",
-                            vlinksinDB.map((x) => x.vlink),
-                        ),
-                    ]),
-                )
-                .execute();
-
-            // Match original videos
-            matchedSongs2 = await dbContext.kmq
+                // Match songs with vlinks
+                matchedSongs = await dbContext.kmq
                 .selectFrom("available_songs")
                 .select(SongSelector.QueriedSongFields)
                 .where((eb) =>
@@ -420,28 +400,6 @@ export default class PlaylistManager {
                     ]),
                 )
                 .execute();
-
-            // Combine videos
-            matchedSongs = matchedSongs1.concat(matchedSongs2);
-
-            // matchedSongs = await dbContext.kmq
-            //     .selectFrom("available_songs")
-            //     .select(SongSelector.QueriedSongFields)
-            //     .where((eb) =>
-            //         eb.or([
-            //             eb(
-            //                 "link",
-            //                 "in",
-            //                 youtubePlaylistVideoIDs.map((x) => x.videoId),
-            //             ),
-            //             eb(
-            //                 "original_link",
-            //                 "in",
-            //                 youtubePlaylistVideoIDs.map((x) => x.videoId),
-            //             ),
-            //         ]),
-            //     )
-            //     .execute();
 
             unmatchedSongs = youtubePlaylistVideoIDs
                 .filter(
