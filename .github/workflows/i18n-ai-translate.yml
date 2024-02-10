@@ -39,14 +39,13 @@ jobs:
 
     - name: Fetch original translation
       run: |
+        cp i18n/en.json 18n/en-latest.json
         git checkout origin/master -- i18n/en.json
-        cp i18n/en.json i18n/en-before.json
-        git checkout i18n/en.json
 
     - name: Translate the diff
       run: |
-        npx i18n-ai-translate diff -b i18n/en-before.json -a i18n/en.json -l "English"
-        rm i18n/en-before.json
+        npx i18n-ai-translate diff -b i18n/en.json -a i18n/en-latest.json -l "English"
+        mv i18n/en-latest.json i18n/en.json
         git add .
         git commit -m "Update translations" || echo "No changes to commit"
         git push
