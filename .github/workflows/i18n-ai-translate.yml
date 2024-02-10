@@ -22,6 +22,12 @@ jobs:
       with:
         node-version: '18'
 
+    - name: Lint translations
+      run: npm run lint-i18n-ci
+
+    - name: Check for missing translations
+      run: npx ts-node src/ci_checks/missing_i18n.ts $(find src -name '*.ts' -print)
+
     - name: Install Dependencies
       run: yarn add i18n-ai-translate
 
@@ -50,8 +56,3 @@ jobs:
         git commit -m "Update translations" || echo "No changes to commit"
         git push
 
-    - name: Lint translations
-      run: npm run lint-i18n-ci
-
-    - name: Check for missing translations
-      run: npx ts-node src/ci_checks/missing_i18n.ts $(find src -name '*.ts' -print)
