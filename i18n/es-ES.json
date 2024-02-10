@@ -28,7 +28,7 @@
         "add": {
             "failure": {
                 "unrecognizedGroups": {
-                    "added": "añadido"
+                    "added": "esto es una prueba otra vez"
                 }
             },
             "help": {
@@ -77,7 +77,8 @@
                 "noTeam": {
                     "description": "Crea un equipo usando {{join}} team_name:[nombre del equipo] antes de poder comenzar el juego."
                 },
-                "title": "Ignorado"
+                "title": "Ignorado",
+                "titleAgain": "¿Empezar ignorado otra vez?"
             }
         },
         "botnews": {
@@ -108,7 +109,6 @@
                     "beginningYear": "El año más temprano a incluir",
                     "description": "Establecer un rango de años límite para las canciones",
                     "earliestOption": "Elegir canciones para cada año a partir de [año_inicial]",
-                    "endingYear": "El último año a incluir",
                     "rangeOption": "Elegir canciones para cada año entre [año_inicial] y [año_final]"
                 },
                 "name": "rango"

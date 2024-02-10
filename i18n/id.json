@@ -28,7 +28,7 @@
         "add": {
             "failure": {
                 "unrecognizedGroups": {
-                    "added": "ditambahkan"
+                    "added": "ini adalah ujian lagi"
                 }
             },
             "help": {
@@ -77,7 +77,8 @@
                 "noTeam": {
                     "description": "Buat tim menggunakan {{join}} team_name:[nama tim] sebelum Anda dapat memulai permainan."
                 },
-                "title": "Mulai Diabaikan"
+                "title": "Mulai Diabaikan",
+                "titleAgain": "Mulai Diabaikan Lagi?"
             }
         },
         "botnews": {
@@ -108,7 +109,6 @@
                     "beginningYear": "Tahun paling awal untuk disertakan",
                     "description": "Tetapkan kisaran tahun pemotongan untuk lagu",
                     "earliestOption": "Pilih lagu untuk setiap tahun dimulai dari [beginning_year]",
-                    "endingYear": "Tahun terakhir yang akan disertakan",
                     "rangeOption": "Pilih lagu untuk setiap tahun antara [beginning_year] dan [ending_year]"
                 },
                 "name": "pemotongan"

@@ -28,7 +28,7 @@
         "add": {
             "failure": {
                 "unrecognizedGroups": {
-                    "added": "toegevoegd"
+                    "added": "dit is weer een test"
                 }
             },
             "help": {
@@ -77,7 +77,8 @@
                 "noTeam": {
                     "description": "Maak een team met behulp van {{join}} team_name:[teamnaam] voordat u het spel kunt beginnen."
                 },
-                "title": "Negeren begonnen"
+                "title": "Negeren begonnen",
+                "titleAgain": "Begin Genegeerd Weer?"
             }
         },
         "botnews": {
@@ -108,7 +109,6 @@
                     "beginningYear": "Het vroegste jaar dat moet worden opgenomen",
                     "description": "Stel een uitsluitingsreeks in voor nummers",
                     "earliestOption": "Kies nummers voor elk jaar vanaf [beginjaar]",
-                    "endingYear": "Het laatste jaar dat moet worden opgenomen",
                     "rangeOption": "Kies nummers voor elk jaar tussen [beginjaar] en [eindjaar]"
                 },
                 "name": "uitsluiten"

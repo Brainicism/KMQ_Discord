@@ -28,7 +28,7 @@
         "add": {
             "failure": {
                 "unrecognizedGroups": {
-                    "added": "追加されました"
+                    "added": "これは再びテストです"
                 }
             },
             "help": {
@@ -77,7 +77,8 @@
                 "noTeam": {
                     "description": "ゲームを開始する前に {{join}} team_name:[チーム名] を使用してチームを作成してください。"
                 },
-                "title": "無視された開始"
+                "title": "無視された開始",
+                "titleAgain": "無視を再度開始する?"
             }
         },
         "botnews": {
@@ -108,7 +109,6 @@
                     "beginningYear": "含める最も古い年",
                     "description": "曲のカットオフ年を設定する",
                     "earliestOption": "[beginning_year]から始まるすべての年の曲を選択する",
-                    "endingYear": "含める最も新しい年",
                     "rangeOption": "[beginning_year]から[ending_year]までのすべての年の曲を選択する"
                 },
                 "name": "カットオフ"

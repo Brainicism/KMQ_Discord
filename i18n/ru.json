@@ -28,7 +28,7 @@
         "add": {
             "failure": {
                 "unrecognizedGroups": {
-                    "added": "добавлен"
+                    "added": "это опять тест"
                 }
             },
             "help": {
@@ -77,7 +77,8 @@
                 "noTeam": {
                     "description": "Для начала игры создайте команду с помощью {{join}} team_name:[название команды]."
                 },
-                "title": "Игнорировать начало"
+                "title": "Игнорировать начало",
+                "titleAgain": "Игнорировать дальше?"
             }
         },
         "botnews": {
@@ -108,7 +109,6 @@
                     "beginningYear": "Самый ранний год для включения",
                     "description": "Задайте диапазон годов для песен",
                     "earliestOption": "Выберите песни за каждый год, начиная с [beginning_year]",
-                    "endingYear": "Последний год, который нужно включить",
                     "rangeOption": "Выберите песни за каждый год между [beginning_year] и [ending_year]"
                 },
                 "name": "отсечение"
