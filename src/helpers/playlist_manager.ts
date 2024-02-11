@@ -948,12 +948,6 @@ export default class PlaylistManager {
 
                     return or(expressions);
                 })
-
-                .where(
-                    "rank",
-                    "<=",
-                    parseInt(process.env.AUDIO_SONGS_PER_ARTIST as string, 10),
-                )
                 .orderBy((eb) => eb.fn("CHAR_LENGTH", ["tags"]), "asc")
                 .orderBy("views", "desc");
 

@@ -13,7 +13,6 @@ export default interface QueriedSong {
     members: AvailableGenders;
     artistID: number;
     isSolo: string;
-    rank: number;
     views: number;
     tags: string | null;
     vtype: string;

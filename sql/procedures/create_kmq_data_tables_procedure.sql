@@ -1,8 +1,6 @@
 DELIMITER //
 DROP PROCEDURE IF EXISTS CreateKmqDataTables //
-CREATE PROCEDURE CreateKmqDataTables(
-	IN maxRank INT
-)
+CREATE PROCEDURE CreateKmqDataTables()
 BEGIN
 	/* replace songs with better audio counterpart */
 	ALTER TABLE kpop_videos.app_kpop ADD COLUMN IF NOT EXISTS original_vlink VARCHAR(255);
@@ -45,8 +43,7 @@ BEGIN
 		issolo ENUM('y', 'n') NOT NULL,
 		id_parent_artist INT(11) NOT NULL,
 		vtype ENUM('main', 'audio') NOT NULL,
-		tags VARCHAR(25),
-		rank INT NOT NULL
+		tags VARCHAR(25)
 	) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 	CREATE TABLE IF NOT EXISTS available_songs LIKE available_songs_temp;
@@ -75,8 +72,7 @@ BEGIN
 		issolo,
 		id_parentgroup,
 		vtype,
-		tags,
-		0 AS rank
+		tags
 	FROM kpop_videos.app_kpop
 	JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
 	INNER JOIN kmq.cached_song_duration USING (vlink)
@@ -90,42 +86,38 @@ BEGIN
 
 	/* audio-only videos */
 	INSERT INTO available_songs_temp
-	SELECT *
-	FROM (
-		SELECT
-			TRIM(kpop_videos.app_kpop.name) AS song_name_en,
-			TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1)) AS clean_song_name_en,
-			(CASE WHEN kpop_videos.app_kpop.name REGEXP '^[^a-zA-Z0-9]+$' THEN kpop_videos.app_kpop.name ELSE REGEXP_REPLACE(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1), '[^0-9a-zA-Z]', '') END) AS clean_song_name_alpha_numeric,
-			TRIM(kpop_videos.app_kpop.kname) AS song_name_ko,
-			TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop.kname, '(', 1)) AS clean_song_name_ko,
-			kpop_videos.app_kpop.alias AS song_aliases,
-			vlink AS link,
-			null,
-			TRIM(kpop_videos.app_kpop_group.name) AS artist_name_en,
-			TRIM(kpop_videos.app_kpop_group.original_name) AS original_artist_name_en,
-			TRIM(kpop_videos.app_kpop_group.kname) AS artist_name_ko,
-			kpop_videos.app_kpop_group.alias AS artist_aliases,
-			kpop_videos.app_kpop_group.previous_name AS previous_name_en,
-			kpop_videos.app_kpop_group.previous_kname AS previous_name_ko,
-			kpop_videos.app_kpop_group.members AS members,
-			kpop_videos.app_kpop.views AS views,
-			releasedate as publishedon,
-			kpop_videos.app_kpop_group.id AS id_artist,
-			issolo,
-			id_parentgroup,
-			'audio' AS vtype,
-			tags,
-			RANK() OVER(PARTITION BY app_kpop.id_artist ORDER BY views DESC) AS rank
-		FROM kpop_videos.app_kpop
-		JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
-		INNER JOIN kmq.cached_song_duration USING (vlink)
-		LEFT JOIN kmq.not_downloaded USING (vlink)
-		WHERE kmq.not_downloaded.vlink IS NULL
-		AND kpop_videos.app_kpop.is_audio = 'y'
-		AND vlink NOT IN (SELECT vlink FROM kmq.dead_links)
-		AND tags NOT LIKE "%c%"
-	) rankedAudioSongs
-	WHERE rank <= maxRank;
+	SELECT
+		TRIM(kpop_videos.app_kpop.name) AS song_name_en,
+		TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1)) AS clean_song_name_en,
+		(CASE WHEN kpop_videos.app_kpop.name REGEXP '^[^a-zA-Z0-9]+$' THEN kpop_videos.app_kpop.name ELSE REGEXP_REPLACE(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1), '[^0-9a-zA-Z]', '') END) AS clean_song_name_alpha_numeric,
+		TRIM(kpop_videos.app_kpop.kname) AS song_name_ko,
+		TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop.kname, '(', 1)) AS clean_song_name_ko,
+		kpop_videos.app_kpop.alias AS song_aliases,
+		vlink AS link,
+		null,
+		TRIM(kpop_videos.app_kpop_group.name) AS artist_name_en,
+		TRIM(kpop_videos.app_kpop_group.original_name) AS original_artist_name_en,
+		TRIM(kpop_videos.app_kpop_group.kname) AS artist_name_ko,
+		kpop_videos.app_kpop_group.alias AS artist_aliases,
+		kpop_videos.app_kpop_group.previous_name AS previous_name_en,
+		kpop_videos.app_kpop_group.previous_kname AS previous_name_ko,
+		kpop_videos.app_kpop_group.members AS members,
+		kpop_videos.app_kpop.views AS views,
+		releasedate as publishedon,
+		kpop_videos.app_kpop_group.id AS id_artist,
+		issolo,
+		id_parentgroup,
+		'audio' AS vtype,
+		tags
+	FROM kpop_videos.app_kpop
+	JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
+	INNER JOIN kmq.cached_song_duration USING (vlink)
+	LEFT JOIN kmq.not_downloaded USING (vlink)
+	WHERE kmq.not_downloaded.vlink IS NULL
+	AND kpop_videos.app_kpop.is_audio = 'y'
+	AND vlink NOT IN (SELECT vlink FROM kmq.dead_links)
+	AND tags NOT LIKE "%c%";
+
 
 	CREATE INDEX available_songs_id_artist_index ON available_songs_temp (id_artist);
 	DELETE FROM available_songs_temp WHERE clean_song_name_en = '';
