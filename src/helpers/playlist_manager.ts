@@ -361,15 +361,10 @@ export default class PlaylistManager {
             }));
 
             // Get list of vids with parent vid if possible.
-            const vlinksinDB = await dbContext.kpopVideos
+            const duplicateToMainVideoMapping = await dbContext.kpopVideos
                 .selectFrom("app_kpop as a")
                 .rightJoin("app_kpop as b", "a.id_parent", "b.id")
-                .select([
-                    "a.id as duplicate_id",
-                    "b.id",
-                    "a.vlink as duplicate_link",
-                    "b.vlink as main_link",
-                ])
+                .select(["a.vlink as duplicate_link", "b.vlink as main_link"])
                 .where(
                     "a.vlink",
                     "in",
@@ -378,10 +373,10 @@ export default class PlaylistManager {
                 .execute();
 
             // Replace duplicate links with main links.
-            for (const video of vlinksinDB) {
+            for (const duplicate of duplicateToMainVideoMapping) {
                 for (const original of youtubePlaylistVideoIDs) {
-                    if (original.videoId === video.duplicate_link) {
-                        original.videoId = video.main_link;
+                    if (original.videoId === duplicate.duplicate_link) {
+                        original.videoId = duplicate.main_link;
                     }
                 }
             }
