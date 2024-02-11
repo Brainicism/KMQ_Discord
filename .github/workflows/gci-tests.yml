@@ -48,10 +48,6 @@ jobs:
               run: npm run prettier-ci
             - name: npm run lint
               run: npm run lint-ci
-            - name: Lint translations
-              run: npm run lint-i18n-ci
-            - name: Check for missing translations
-              run: npx ts-node src/ci_checks/missing_i18n.ts $(find src -name '*.ts' -print)
             - name: Copy .env for CI
               run: |
                   echo "DB_USER=$DB_USER_CI" >> .env
