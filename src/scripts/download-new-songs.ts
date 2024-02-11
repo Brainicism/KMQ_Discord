@@ -197,6 +197,15 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
                 }
 
                 await fs.promises.rename(tempLocation, cachedSongLocation);
+            } catch (err) {
+                reject(
+                    new Error(
+                        `Error renaming temp song file from ${tempLocation} to ${cachedSongLocation}. err = ${err}`,
+                    ),
+                );
+            }
+
+            try {
                 const duration =
                     await getAudioDurationInSeconds(cachedSongLocation);
 
@@ -210,9 +219,11 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
             } catch (err) {
                 reject(
                     new Error(
-                        `Error renaming temp song file from ${tempLocation} to ${cachedSongLocation}. err = ${err}`,
+                        `Error calculating cached_song_duration. err = ${err}`,
                     ),
                 );
+
+                await fs.promises.unlink(cachedSongLocation);
             }
         });
         cacheStream.once("error", (e) => reject(e));
@@ -335,6 +346,22 @@ const downloadNewSongs = async (
     );
 
     const currentlyDownloadedFiles = await getCurrentlyDownloadedFiles();
+
+    // check for downloaded songs without cache duration
+    for (const currentlyDownloadedFile of currentlyDownloadedFiles) {
+        // eslint-disable-next-line no-await-in-loop
+        const result = !!(await db.kmq
+            .selectFrom("cached_song_duration")
+            .selectAll()
+            .where("vlink", "=", currentlyDownloadedFile.replace(".ogg", ""))
+            .executeTakeFirst());
+
+        if (!result) {
+            logger.warn(
+                `${currentlyDownloadedFile} is downloaded, but missing cache duration`,
+            );
+        }
+    }
 
     logger.info(`Total songs in database: ${allSongs.length}`);
     songsToDownload = songsToDownload.filter(
