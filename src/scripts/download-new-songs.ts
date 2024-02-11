@@ -6,7 +6,6 @@ import {
     retryJob,
 } from "../helpers/utils";
 import { getNewConnection } from "../database_context";
-import { sql } from "kysely";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import path from "path";
@@ -227,7 +226,7 @@ async function getSongsFromDb(databaseContext: DatabaseContext): Promise<any> {
             .execute()
     ).map((x) => x.vlink);
 
-    let mvBuilder = databaseContext.kpopVideos
+    return databaseContext.kpopVideos
         .selectFrom("app_kpop")
         .innerJoin("app_kpop_group", "app_kpop.id_artist", "app_kpop_group.id")
         .select([
@@ -237,48 +236,8 @@ async function getSongsFromDb(databaseContext: DatabaseContext): Promise<any> {
             "app_kpop.views as views",
         ])
         .where("vtype", "=", "main")
-        .where("is_audio", "=", "n")
-        .where("tags", "not like", "%c%");
-
-    mvBuilder = mvBuilder.where("vlink", "not in", deadLinks);
-
-    const avBuilder = databaseContext.kpopVideos.with(
-        "rankedAudioSongs",
-        (db) => {
-            let builder = db
-                .selectFrom("app_kpop")
-                .innerJoin(
-                    "app_kpop_group",
-                    "app_kpop.id_artist",
-                    "app_kpop_group.id",
-                )
-                .select([
-                    "app_kpop.name as songName",
-                    "app_kpop_group.name as artistName",
-                    "vlink as youtubeLink",
-                    "app_kpop.views as views",
-                ])
-                .select(
-                    sql`RANK() OVER(PARTITION BY app_kpop.id_artist ORDER BY views DESC)`.as(
-                        "rank",
-                    ),
-                )
-                .where("is_audio", "=", "y")
-                .where("tags", "not like", "%c%");
-
-            if (deadLinks.length) {
-                builder = builder.where("vlink", "not in", deadLinks);
-            }
-
-            return builder;
-        },
-    );
-
-    return avBuilder
-        .selectFrom("rankedAudioSongs")
-        .select(["songName", "artistName", "youtubeLink", "views"])
-        .where("rank", "<=", process.env.AUDIO_SONGS_PER_ARTIST as string)
-        .unionAll(mvBuilder)
+        .where("tags", "not like", "%c%")
+        .where("vlink", "not in", deadLinks)
         .orderBy("views", "desc")
         .execute();
 }
