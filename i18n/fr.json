@@ -893,7 +893,7 @@
                 "unmatched": "Chansons non correspondantes pour \"{{playlistName}}\":\n{{unmatchedSongs}}"
             },
             "help": {
-                "description": "Lisez des chansons exclusivement à partir d'une liste d'écoute YouTube/Spotify donnée. Les listes d'écoute YouTube sont fortement recommandées, avec des résultats plus rapides et plus précis",
+                "description": "Lire uniquement les chansons d'une playlist YouTube/Spotify donnée. Les playlists YouTube sont fortement recommandées, les résultats étant plus rapides et plus précis",
                 "example": {
                     "playlistURL": "Commencer à jouer des chansons de la playlist",
                     "reset": "Arrêter de jouer à partir de la playlist"
@@ -901,7 +901,7 @@
                 "interaction": {
                     "matches": "Voir une liste de chansons correspondantes et non correspondantes",
                     "matchesLink": "Indique si l'URL YouTube des chansons correspondantes doit être affichée ou non",
-                    "playlistURL": "La liste d'écoute YouTube/Spotify dans laquelle récupérer les chansons"
+                    "playlistURL": "Playlist YouTube/Spotify depuis laquelle récupérer les chansons"
                 },
                 "name": "playlist"
             },
@@ -915,7 +915,7 @@
                 "truncated": "Note : La playlist a pris trop de temps à être traitée et n'a pas été complètement terminée. Essayez avec une playlist plus petite la prochaine fois."
             },
             "noMatches": {
-                "description": "Aucune chanson n'a été trouvée. Vérifiez que la liste d'écoute n'est pas privée.",
+                "description": "Aucune chanson ne correspond. Assurez-vous que la playlist n'est pas privée.",
                 "title": "Échec de la récupération des chansons depuis la playlist"
             },
             "noPlaylistSet": {

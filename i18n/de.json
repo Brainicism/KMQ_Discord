@@ -893,7 +893,7 @@
                 "unmatched": "Nicht übereinstimmende Songs für \"{{playlistName}}\":\n{{unmatchedSongs}}"
             },
             "help": {
-                "description": "Songs exklusiv von einer bestimmten YouTube/Spotify-Playlist abspielen. YouTube-Playlists werden dringend empfohlen, da diese schnellere und genauere Ergebnisse liefern.",
+                "description": "Spiele Lieder exklusiv von einer bestimmten YouTube/Spotify-Playlist. Youtube-Playlists werden dringend empfohlen, da sie schnellere und präzisere Ergebnisse liefern.",
                 "example": {
                     "playlistURL": "Beginne mit dem Abspielen von Songs aus der Wiedergabeliste",
                     "reset": "Beende die Wiedergabe von der Wiedergabeliste"
@@ -901,7 +901,7 @@
                 "interaction": {
                     "matches": "Zeigt eine Liste der übereinstimmenden und nicht übereinstimmenden Lieder an",
                     "matchesLink": "Ob die YouTube-URL für übereinstimmende Songs angezeigt werden soll",
-                    "playlistURL": "Die YouTube/Spotify-Playlist, aus der Songs abgerufen werden sollen."
+                    "playlistURL": "YouTube/Spotify-Playlist, von der Titel abgerufen werden sollen."
                 },
                 "name": "wiedergabeliste"
             },
@@ -915,7 +915,7 @@
                 "truncated": "Hinweis: Die Verarbeitung der Wiedergabeliste hat zu lange gedauert und wurde nicht abgeschlossen. Versuche es beim nächsten Mal mit einer kleineren Wiedergabeliste."
             },
             "noMatches": {
-                "description": "Es wurden keine Songs gefunden. Stelle sicher, dass die Playlist nicht privat ist.",
+                "description": "Keine Lieder gefunden. Stelle sicher, dass die Playlist nicht privat ist.",
                 "title": "Fehler beim Abrufen von Songs aus der Wiedergabeliste"
             },
             "noPlaylistSet": {
