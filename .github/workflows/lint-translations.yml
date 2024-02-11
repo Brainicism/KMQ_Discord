@@ -23,7 +23,7 @@ jobs:
         node-version: '18'
 
     - name: Install Dependencies
-      run: yarn add i18n-ai-translate
+      run: yarn global add i18n-ai-translate
 
     - name: Setup Git Config
       run: |
@@ -44,7 +44,7 @@ jobs:
         diff i18n/en-latest.json i18n/en.json
         if [ $? -eq 0 ]; then return 0
 
-        npx i18n-ai-translate diff -b i18n/en.json -a i18n/en-latest.json -l "English" --verbose
+        i18n-ai-translate diff -b i18n/en.json -a i18n/en-latest.json -l "English" --verbose
         mv i18n/en-latest.json i18n/en.json
         git add .
         git commit -m "Update translations" || echo "No changes to commit"
