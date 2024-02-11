@@ -119,16 +119,17 @@ BEGIN
 	AND tags NOT LIKE "%c%";
 
 
+	CREATE INDEX available_songs_id_artist_index ON available_songs_temp (id_artist);
 	DELETE FROM available_songs_temp WHERE clean_song_name_en = '';
 
 	RENAME TABLE available_songs TO old, available_songs_temp TO available_songs;
 	DROP TABLE old;
 
 	/* mark artists as not having songs */
-	ALTER TABLE kpop_videos.app_kpop_group ADD COLUMN IF NOT EXISTS has_songs TINYINT(1) DEFAULT 1;
-
-	UPDATE kmq.available_songs RIGHT JOIN kpop_videos.app_kpop_group ON kmq.available_songs.id_artist = kpop_videos.app_kpop_group.id
-	SET has_songs = kmq.available_songs.song_name_en is not null;
-
+	ALTER TABLE kpop_videos.app_kpop_group ADD COLUMN IF NOT EXISTS has_songs TINYINT(1) DEFAULT 0;
+	UPDATE kpop_videos.app_kpop_group
+	SET has_songs = 1
+	WHERE id in (SELECT DISTINCT(id_artist) FROM available_songs
+	RIGHT JOIN kpop_videos.app_kpop_group ON available_songs.id_artist = kpop_videos.app_kpop_group.id);
 END //
 DELIMITER ;

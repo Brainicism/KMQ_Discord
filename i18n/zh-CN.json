@@ -620,7 +620,7 @@
                 }
             },
             "help": {
-                "description": "在歌曲查询中设置最大结果数。这有效地基于所选过滤器设置“前X首歌曲”。",
+                "description": "在歌曲查询中设置最大结果数。这有效地基于所选过滤器设置\"前X首歌曲\"。",
                 "example": {
                     "reset": "重置为默认限制 {{defaultLimit}}",
                     "singleLimit": "播放当前选项中最受欢迎的 {{limit}} 首歌曲",
@@ -689,11 +689,17 @@
                 }
             },
             "language": {
+                "de": "德语",
                 "en": "英语",
                 "es-ES": "西班牙语",
                 "fr": "法语",
+                "hi": "印地语",
+                "id": "印尼语",
                 "ja": "日语",
                 "ko": "韩语",
+                "nl": "荷兰语",
+                "pt-BR": "葡萄牙语",
+                "ru": "俄语",
                 "zh-CN": "中文"
             },
             "updatedDescription": "机器人的语言已更新为`{{language}}`。"
@@ -867,8 +873,8 @@
                 }
             },
             "interaction": {
-                "teams_begin": "开始 KMQ 的“团队”游戏模式。只能在 `/play teams create` 后使用。",
-                "teams_create": "准备创建 KMQ 的“团队”游戏模式。",
+                "teams_begin": "开始 KMQ 的\"团队\"游戏模式。只能在 `/play teams create` 后使用。",
+                "teams_create": "准备创建 KMQ 的\"团队\"游戏模式。",
                 "teams_join": "加入一个团队。仅可在 `/play teams create` 后使用。",
                 "teams_join_team_name": "要加入的团队名称。"
             },
@@ -883,8 +889,8 @@
         },
         "playlist": {
             "fileFormat": {
-                "matched": "与“{{playlistName}}”匹配的歌曲：\n{{matchedSongs}}",
-                "unmatched": "与“{{playlistName}}”不匹配的歌曲：\n{{unmatchedSongs}}"
+                "matched": "与\"{{playlistName}}\"匹配的歌曲：\n{{matchedSongs}}",
+                "unmatched": "与\"{{playlistName}}\"不匹配的歌曲：\n{{unmatchedSongs}}"
             },
             "help": {
                 "description": "仅从给定的Spotify/YouTube播放列表播放歌曲",
@@ -1240,7 +1246,7 @@
                 "description": "请稍后再试。",
                 "title": "检索统计数据时出错"
             },
-            "footer": "“最近”的统计数据表示最近 24 小时的数据。",
+            "footer": "\"最近\"的统计数据表示最近 24 小时的数据。",
             "game": {
                 "activeGameSessions": "活跃的游戏会话",
                 "activePlayers": "活跃的玩家",
@@ -1344,9 +1350,9 @@
             "birthday": "趣味事实：{{name}}的生日是本月的{{formattedDate}}！",
             "companyByArtistCount": "趣味事实：{{company}}是拥有{{num}}位艺人(包括子团体和个人出道)的娱乐公司中排名第{{ordinalNum}}！",
             "companyByArtistViews": "趣闻：{{name}}是观看次数排名第{{ordinalNum}}的娱乐公司，总共有{{views}}个YouTube观看次数！",
-            "fanclubName": "趣闻：{{name}}的粉丝俱乐部名字是“{{fanclub}}”！",
+            "fanclubName": "趣闻：{{name}}的粉丝俱乐部名字是\"{{fanclub}}\"！",
             "historicalGaonWeekly": "趣闻：在{{year}}的这一周，{{songName}}是GAON周榜排名第一的歌曲！",
-            "hyperlinkGenerator": "[{{artistName}}的歌曲“{{songName}}”]({{url}})",
+            "hyperlinkGenerator": "[{{artistName}}的歌曲\"{{songName}}\"]({{url}})",
             "mostActiveYear": "趣闻：{{year}}年是K-Pop最活跃的第{{ordinalNum}}年，共发布了{{num}}个音乐视频！",
             "mostAnnualAwardShowWins": "趣闻：{{artistName}}是获得年度奖项最多的第{{ordinalNum}}名艺人，共获得{{wins}}个奖项！",
             "mostDebuts": "趣闻：{{year}}年有{{num}}个团体出道，排名第{{ordinalNum}}！",
@@ -1611,7 +1617,7 @@
             "title": "即将在{{timeUntilRestart}}分钟内重新启动。"
         },
         "sendingBookmarkedSongs": {
-            "description": "向{{players}}发送{{songs}}。\n\n在游戏过程中通过右键单击歌曲消息并选择“应用程序> 添加书签”来添加书签。",
+            "description": "向{{players}}发送{{songs}}。\n\n在游戏过程中通过右键单击歌曲消息并选择\"应用程序> 添加书签\"来添加书签。",
             "title": "正在发送已添加的书签歌曲..."
         },
         "skip": "跳过",

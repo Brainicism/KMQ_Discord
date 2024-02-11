@@ -360,6 +360,28 @@ export default class PlaylistManager {
                 title: x.title,
             }));
 
+            // Get list of vids with parent vid if possible.
+            const duplicateToMainVideoMapping = await dbContext.kpopVideos
+                .selectFrom("app_kpop as a")
+                .rightJoin("app_kpop as b", "a.id_parent", "b.id")
+                .select(["a.vlink as duplicate_link", "b.vlink as main_link"])
+                .where(
+                    "a.vlink",
+                    "in",
+                    youtubePlaylistVideoIDs.map((x) => x.videoId),
+                )
+                .execute();
+
+            // Replace duplicate links with main links.
+            for (const duplicate of duplicateToMainVideoMapping) {
+                for (const original of youtubePlaylistVideoIDs) {
+                    if (original.videoId === duplicate.duplicate_link) {
+                        original.videoId = duplicate.main_link;
+                    }
+                }
+            }
+
+            // Match songs with vlinks
             matchedSongs = await dbContext.kmq
                 .selectFrom("available_songs")
                 .select(SongSelector.QueriedSongFields)
