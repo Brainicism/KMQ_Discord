@@ -22,7 +22,6 @@ export interface AvailableSongs {
     previous_name_en: Generated<string | null>;
     previous_name_ko: Generated<string | null>;
     publishedon: Date;
-    rank: number;
     song_aliases: string;
     song_name_en: string;
     song_name_ko: string;

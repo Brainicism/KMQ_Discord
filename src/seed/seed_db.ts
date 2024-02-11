@@ -138,9 +138,7 @@ export async function generateKmqDataTables(
     db: DatabaseContext,
 ): Promise<void> {
     logger.info("Re-creating KMQ data tables view...");
-    await sql`CALL CreateKmqDataTables(${process.env.AUDIO_SONGS_PER_ARTIST});`.execute(
-        db.kmq,
-    );
+    await sql`CALL CreateKmqDataTables();`.execute(db.kmq);
 }
 
 /**
@@ -398,9 +396,7 @@ async function validateSqlDump(
             );
 
             await sql
-                .raw(
-                    `CALL CreateKmqDataTables(${process.env.AUDIO_SONGS_PER_ARTIST});`,
-                )
+                .raw("CALL CreateKmqDataTables();")
                 .execute(db.kpopVideosValidation);
         }
     } catch (e) {
