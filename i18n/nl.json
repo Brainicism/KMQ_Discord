@@ -893,7 +893,7 @@
                 "unmatched": "Niet-overeenkomende nummers voor \"{{playlistName}}\":\n{{unmatchedSongs}}"
             },
             "help": {
-                "description": "Speel nummers exclusief van een bepaalde Spotify-/YouTube-playlist",
+                "description": "Speel uitsluitend nummers af van een gegeven YouTube/Spotify-afspeellijst. YouTube-afspeellijsten worden ten zeerste aanbevolen, met snellere en nauwkeurigere resultaten",
                 "example": {
                     "playlistURL": "Begin met het afspelen van nummers uit de playlist",
                     "reset": "Stop met afspelen van de playlist"
@@ -901,7 +901,7 @@
                 "interaction": {
                     "matches": "Bekijk een lijst met nummers die zijn gevonden en niet zijn gevonden",
                     "matchesLink": "Of de YouTube-URL voor overeenkomende nummers moet worden weergegeven",
-                    "playlistURL": "De playlist om nummers uit op te halen"
+                    "playlistURL": "De YouTube/Spotify-afspeellijst waaruit nummers moeten worden opgehaald"
                 },
                 "name": "afspeellijst"
             },
@@ -915,7 +915,7 @@
                 "truncated": "Let op: het verwerken van de playlist duurde te lang en was niet voltooid. Probeer het de volgende keer met een kleinere playlist."
             },
             "noMatches": {
-                "description": "Er zijn geen nummers gevonden.",
+                "description": "Er zijn geen nummers gevonden. Controleer of de afspeellijst niet privé is.",
                 "title": "Kon nummers niet ophalen uit afspeellijst"
             },
             "noPlaylistSet": {

@@ -893,7 +893,7 @@
                 "unmatched": "Canciones no encontradas para \"{{playlistName}}\":\n{{unmatchedSongs}}"
             },
             "help": {
-                "description": "Reproduce canciones exclusivamente de una lista de reproducción de Spotify/YouTube dada",
+                "description": "Reproducir canciones exclusivamente de una lista de reproducción de YouTube/Spotify específica. Las listas de reproducción de YouTube son muy recomendables, con resultados más rápidos y precisos.",
                 "example": {
                     "playlistURL": "Comenzar a reproducir canciones de la lista de reproducción",
                     "reset": "Detener la reproducción de la lista de reproducción"
@@ -901,7 +901,7 @@
                 "interaction": {
                     "matches": "Ver una lista de canciones coincidentes y no coincidentes",
                     "matchesLink": "Si mostrar o no la URL de YouTube de las canciones coincidentes",
-                    "playlistURL": "La lista de reproducción de la que recuperar canciones"
+                    "playlistURL": "La lista de reproducción de YouTube/Spotify de la que extraer las canciones"
                 },
                 "name": "listadereproducción"
             },
@@ -915,7 +915,7 @@
                 "truncated": "Nota: La lista de reproducción tardó demasiado en procesarse y no se completó. Intente de nuevo con una lista de reproducción más pequeña la próxima vez."
             },
             "noMatches": {
-                "description": "No se encontraron canciones.",
+                "description": "No se encontraron canciones. Asegúrate de que la lista de reproducción no sea privada.",
                 "title": "No se pudieron obtener canciones de la lista de reproducción"
             },
             "noPlaylistSet": {
