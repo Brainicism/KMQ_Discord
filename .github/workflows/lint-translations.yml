@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-      - 'i18n/en.json'
+      - 'i18n/*'
 
 jobs:
   diff:
@@ -22,12 +22,6 @@ jobs:
       with:
         node-version: '18'
 
-    - name: Lint translations
-      run: npm run lint-i18n-ci
-
-    - name: Check for missing translations
-      run: npx ts-node src/ci_checks/missing_i18n.ts $(find src -name '*.ts' -print)
-
     - name: Install Dependencies
       run: yarn add i18n-ai-translate
 
@@ -43,16 +37,22 @@ jobs:
         echo "API_KEY=$GEMINI_API_KEY" >> .env
       shell: bash
 
-    - name: Fetch original translation
+    - name: Translate the diff
       run: |
         cp i18n/en.json i18n/en-latest.json
         git checkout origin/master -- i18n/en.json
+        diff i18n/en-latest.json i18n/en.json
+        if [ $? -eq 0 ]; then return 0
 
-    - name: Translate the diff
-      run: |
         npx i18n-ai-translate diff -b i18n/en.json -a i18n/en-latest.json -l "English" --verbose
         mv i18n/en-latest.json i18n/en.json
         git add .
         git commit -m "Update translations" || echo "No changes to commit"
         git push
+
+    - name: Lint translations
+      run: npm run lint-i18n-ci
+
+    - name: Check for missing translations
+      run: npx ts-node src/ci_checks/missing_i18n.ts $(find src -name '*.ts' -print)
 
