@@ -899,6 +899,7 @@
                     "reset": "Pare de tocar a partir da lista de reprodução"
                 },
                 "interaction": {
+                    "description": "Reproduzir músicas exclusivamente de um playlist do YouTube/Spotify",
                     "matches": "Veja uma lista de músicas correspondentes e não correspondentes",
                     "matchesLink": "Se deve mostrar o URL do YouTube para músicas correspondentes",
                     "playlistURL": "Playlist do YouTube/Spotify para recuperar as músicas"

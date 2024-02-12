@@ -899,6 +899,7 @@
                     "reset": "Detener la reproducción de la lista de reproducción"
                 },
                 "interaction": {
+                    "description": "Reproducir canciones exclusivamente en una playlist dada de YouTube/Spotify",
                     "matches": "Ver una lista de canciones coincidentes y no coincidentes",
                     "matchesLink": "Si mostrar o no la URL de YouTube de las canciones coincidentes",
                     "playlistURL": "La lista de reproducción de YouTube/Spotify desde la que recuperar canciones"

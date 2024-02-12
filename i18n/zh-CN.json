@@ -899,6 +899,7 @@
                     "reset": "停止从播放列表中播放"
                 },
                 "interaction": {
+                    "description": "完全播放来自给定 YouTube/Spotify 播放列表的歌曲",
                     "matches": "查看匹配和不匹配歌曲的列表",
                     "matchesLink": "是否显示匹配歌曲的YouTube链接",
                     "playlistURL": "要检索歌曲的 YouTube/Spotify 播放列表"

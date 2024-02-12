@@ -899,6 +899,7 @@
                     "reset": "Stop playing from the playlist"
                 },
                 "interaction": {
+                    "description": "Play songs exclusively from a given YouTube/Spotify playlist",
                     "matches": "See a list of matched and unmatched songs",
                     "matchesLink": "Whether to show the YouTube URL to matched songs",
                     "playlistURL": "The YouTube/Spotify playlist to retrieve songs from"

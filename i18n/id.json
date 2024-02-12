@@ -899,6 +899,7 @@
                     "reset": "Berhenti memutar dari daftar putar"
                 },
                 "interaction": {
+                    "description": "Putar lagu-lagu secara eksklusif dari daftar putar YouTube/Spotify yang diberikan",
                     "matches": "Lihat daftar lagu yang cocok dan tidak cocok",
                     "matchesLink": "Apakah akan menampilkan URL YouTube ke lagu yang cocok",
                     "playlistURL": "Daftar putar YouTube/Spotify untuk mengambil lagu"

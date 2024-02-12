@@ -899,6 +899,7 @@
                     "reset": "재생 목록에서 노래 재생을 중지합니다."
                 },
                 "interaction": {
+                    "description": "제공된 YouTube/Spotify 플레이리스트에서만 노래 재생",
                     "matches": "일치하는 곡과 일치하지 않는 곡의 목록 보기",
                     "matchesLink": "일치하는 곡의 YouTube URL을 보여줄지 여부",
                     "playlistURL": "노래를 검색할 YouTube/Spotify 재생 목록"

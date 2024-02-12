@@ -899,6 +899,7 @@
                     "reset": "プレイリストからの再生を停止する"
                 },
                 "interaction": {
+                    "description": "YouTube/Spotify の特定のプレイリストからしか曲を再生しない",
                     "matches": "一致した曲と一致していない曲のリストを見る",
                     "matchesLink": "一致した曲のYouTubeのURLを表示するかどうか",
                     "playlistURL": "曲を取得するための YouTube/Spotify プレイリスト"

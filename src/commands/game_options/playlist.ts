@@ -80,7 +80,7 @@ export default class PlaylistCommand implements BaseCommand {
                     name: PlaylistCommandAction.SET,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.playlist.help.description",
+                        "command.playlist.help.interaction.description",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -89,7 +89,7 @@ export default class PlaylistCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.playlist.help.description",
+                                    "command.playlist.help.interaction.description",
                                 ),
                             }),
                             {},
