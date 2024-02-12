@@ -893,7 +893,7 @@
                 "unmatched": "Unmatched songs for \"{{playlistName}}\":\n{{unmatchedSongs}}"
             },
             "help": {
-                "description": "Play songs exclusively from a given Spotify/YouTube playlist",
+                "description": "Play songs exclusively from a given YouTube/Spotify playlist. YouTube playlists are strongly recommended, with faster and more accurate results",
                 "example": {
                     "playlistURL": "Start playing songs from the playlist",
                     "reset": "Stop playing from the playlist"
@@ -901,7 +901,7 @@
                 "interaction": {
                     "matches": "See a list of matched and unmatched songs",
                     "matchesLink": "Whether to show the YouTube URL to matched songs",
-                    "playlistURL": "The playlist to retrieve songs from"
+                    "playlistURL": "The YouTube/Spotify playlist to retrieve songs from"
                 },
                 "name": "playlist"
             },
@@ -915,7 +915,7 @@
                 "truncated": "Note: The playlist took too long to process and did not finish to completion. Try again with a smaller playlist next time."
             },
             "noMatches": {
-                "description": "No songs were matched.",
+                "description": "No songs were matched. Make sure that the playlist is not private.",
                 "title": "Failed to fetch songs from playlist"
             },
             "noPlaylistSet": {

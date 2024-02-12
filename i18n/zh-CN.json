@@ -893,7 +893,7 @@
                 "unmatched": "与\"{{playlistName}}\"不匹配的歌曲：\n{{unmatchedSongs}}"
             },
             "help": {
-                "description": "仅从给定的Spotify/YouTube播放列表播放歌曲",
+                "description": "仅从给定的 YouTube/Spotify 播放列表播放歌曲。强烈建议使用 YouTube 播放列表，结果更快、更准确",
                 "example": {
                     "playlistURL": "开始播放播放列表中的歌曲",
                     "reset": "停止从播放列表中播放"
@@ -901,7 +901,7 @@
                 "interaction": {
                     "matches": "查看匹配和不匹配歌曲的列表",
                     "matchesLink": "是否显示匹配歌曲的YouTube链接",
-                    "playlistURL": "检索歌曲的播放列表"
+                    "playlistURL": "要检索歌曲的 YouTube/Spotify 播放列表"
                 },
                 "name": "播放列表"
             },
@@ -915,7 +915,7 @@
                 "truncated": "注意：播放列表处理时间过长，未能完成。请尝试使用较小的播放列表。"
             },
             "noMatches": {
-                "description": "未匹配到任何歌曲。",
+                "description": "没有匹配的歌曲。确保播放列表不是私有的。",
                 "title": "无法从播放列表中获取歌曲"
             },
             "noPlaylistSet": {

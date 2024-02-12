@@ -893,7 +893,7 @@
                 "unmatched": "Músicas não correspondentes para \"{{playlistName}}\":\n{{unmatchedSongs}}"
             },
             "help": {
-                "description": "Reproduzir músicas exclusivamente de uma determinada lista de reprodução do Spotify/YouTube",
+                "description": "Reproduzir músicas exclusivamente de uma determinada playlist do YouTube/Spotify. As playlists do YouTube são fortemente recomendadas, com resultados mais rápidos e mais precisos",
                 "example": {
                     "playlistURL": "Começar a tocar músicas da lista de reprodução",
                     "reset": "Pare de tocar a partir da lista de reprodução"
@@ -901,7 +901,7 @@
                 "interaction": {
                     "matches": "Veja uma lista de músicas correspondentes e não correspondentes",
                     "matchesLink": "Se deve mostrar o URL do YouTube para músicas correspondentes",
-                    "playlistURL": "A lista de reprodução da qual as músicas serão recuperadas"
+                    "playlistURL": "Playlist do YouTube/Spotify para recuperar as músicas"
                 },
                 "name": "listadereprodução"
             },
@@ -915,7 +915,7 @@
                 "truncated": "Observação: A lista de reprodução demorou muito para ser processada e não foi concluída. Tente novamente com uma lista de reprodução menor da próxima vez."
             },
             "noMatches": {
-                "description": "Nenhuma música foi correspondida.",
+                "description": "Nenhuma música foi associada. Certifique-se de que a playlist não seja privada.",
                 "title": "Falha ao buscar músicas da lista de reprodução"
             },
             "noPlaylistSet": {
