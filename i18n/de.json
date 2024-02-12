@@ -899,6 +899,7 @@
                     "reset": "Beende die Wiedergabe von der Wiedergabeliste"
                 },
                 "interaction": {
+                    "description": "Titel ausschließlich aus einer bestimmten YouTube-/Spotify-Playlist abspielen",
                     "matches": "Zeigt eine Liste der übereinstimmenden und nicht übereinstimmenden Lieder an",
                     "matchesLink": "Ob die YouTube-URL für übereinstimmende Songs angezeigt werden soll",
                     "playlistURL": "Die YouTube-/Spotify-Wiedergabeliste, aus der Titel abgerufen werden sollen."

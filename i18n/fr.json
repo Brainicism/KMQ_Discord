@@ -899,6 +899,7 @@
                     "reset": "Arrêter de jouer à partir de la playlist"
                 },
                 "interaction": {
+                    "description": "Jouer des chansons exclusivement à partir d'une liste de lecture YouTube/Spotify donnée",
                     "matches": "Voir une liste de chansons correspondantes et non correspondantes",
                     "matchesLink": "Indique si l'URL YouTube des chansons correspondantes doit être affichée ou non",
                     "playlistURL": "La playlist YouTube/Spotify depuis laquelle récupérer les chansons"

@@ -899,6 +899,7 @@
                     "reset": "Stop met afspelen van de playlist"
                 },
                 "interaction": {
+                    "description": "Exclusief nummers afspelen van een bepaalde YouTube/Spotify-afspeellijst",
                     "matches": "Bekijk een lijst met nummers die zijn gevonden en niet zijn gevonden",
                     "matchesLink": "Of de YouTube-URL voor overeenkomende nummers moet worden weergegeven",
                     "playlistURL": "De YouTube-/Spotify-afspeellijst waar nummers uit moeten worden gehaald"

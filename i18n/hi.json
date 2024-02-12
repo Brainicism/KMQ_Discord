@@ -899,6 +899,7 @@
                     "reset": "प्लेलिस्ट से बजाना बंद करें"
                 },
                 "interaction": {
+                    "description": "YouTube/Spotify प्लेलिस्ट में से विशेष रूप से गाने बजाएँ",
                     "matches": "मिलान किए गए और असमान मिलान वाले गानों की सूची देखें",
                     "matchesLink": "मैच हुए गानों के लिए YouTube URL दिखाएँ या नहीं",
                     "playlistURL": "जिस YouTube/Spotify प्लेलिस्ट से गाने लाने हैं"
