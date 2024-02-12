@@ -893,7 +893,7 @@
                 "unmatched": "\"{{playlistName}}\"에 대한 일치하지 않는 노래들:\n{{unmatchedSongs}}"
             },
             "help": {
-                "description": "지정된 YouTube/Spotify 플레이리스트에서만 곡을 재생합니다. YouTube 플레이리스트는 더 빠르고 정확한 결과를 얻을 수 있으므로 강력히 권장됩니다.",
+                "description": "주어진 YouTube/Spotify 재생 목록에서만 노래 재생하기. YouTube 재생 목록을 적극 권장하며 결과가 더 빠르고 정확할 수 있습니다.",
                 "example": {
                     "playlistURL": "재생 목록에서 노래 재생을 시작합니다.",
                     "reset": "재생 목록에서 노래 재생을 중지합니다."
@@ -901,7 +901,7 @@
                 "interaction": {
                     "matches": "일치하는 곡과 일치하지 않는 곡의 목록 보기",
                     "matchesLink": "일치하는 곡의 YouTube URL을 보여줄지 여부",
-                    "playlistURL": "곡을 검색할 YouTube/Spotify 플레이리스트"
+                    "playlistURL": "노래를 검색할 YouTube/Spotify 재생 목록"
                 },
                 "name": "플레이리스트"
             },
@@ -915,7 +915,7 @@
                 "truncated": "참고: 재생 목록을 처리하는 데 시간이 너무 오래 걸리고 완료할 때까지 완료되지 않았습니다. 다음에는 더 작은 재생 목록을 사용하여 다시 시도하십시오."
             },
             "noMatches": {
-                "description": "노래가 일치하지 않았습니다. 플레이리스트가 비공개인지 확인하십시오.",
+                "description": "일치하는 노래가 없습니다. 재생 목록이 비공개가 아닌지 확인하십시오.",
                 "title": "재생 목록에서 노래를 가져오지 못했습니다"
             },
             "noPlaylistSet": {

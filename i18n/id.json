@@ -893,7 +893,7 @@
                 "unmatched": "Lagu yang tidak cocok untuk \"{{playlistName}}\":\n{{unmatchedSongs}}"
             },
             "help": {
-                "description": "Putar lagu secara ekslusif dari daftar putar YouTube/Spotify yang diberikan. Daftar putar YouTube sangat direkomendasikan, dengan hasil yang lebih cepat dan akurat",
+                "description": "Putar lagu khusus dari daftar putar YouTube/Spotify yang diberikan. Daftar putar YouTube sangat direkomendasikan, dengan hasil yang lebih cepat dan lebih akurat",
                 "example": {
                     "playlistURL": "Mulai memutar lagu dari daftar putar",
                     "reset": "Berhenti memutar dari daftar putar"
@@ -915,7 +915,7 @@
                 "truncated": "Catatan: Daftar putar terlalu lama untuk diproses dan tidak selesai sampai akhir. Coba lagi dengan daftar putar yang lebih kecil lain kali."
             },
             "noMatches": {
-                "description": "Tidak ada lagu yang cocok. Pastikan daftar putar tidak bersifat pribadi.",
+                "description": "Tidak ada lagu yang cocok. Pastikan bahwa daftar putar bukan privat.",
                 "title": "Gagal mengambil lagu dari daftar putar"
             },
             "noPlaylistSet": {

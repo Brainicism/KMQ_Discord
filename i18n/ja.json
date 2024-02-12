@@ -893,7 +893,7 @@
                 "unmatched": "「{{playlistName}}」の一致しなかった曲：\n{{unmatchedSongs}}"
             },
             "help": {
-                "description": "YouTube/Spotify の指定したプレイリストからのみ曲を選択します。より高速でさらに正確な結果を得られるため、YouTube プレイリストが強く推奨されます。\"",
+                "description": "指定した YouTube/Spotify プレイリストでのみ曲を再生します。より高速で正確な結果が得られる YouTube プレイリストを強くお勧めします",
                 "example": {
                     "playlistURL": "プレイリストから曲の再生を開始する",
                     "reset": "プレイリストからの再生を停止する"
@@ -901,7 +901,7 @@
                 "interaction": {
                     "matches": "一致した曲と一致していない曲のリストを見る",
                     "matchesLink": "一致した曲のYouTubeのURLを表示するかどうか",
-                    "playlistURL": "曲を取得する YouTube/Spotify プレイリスト"
+                    "playlistURL": "曲を取得するための YouTube/Spotify プレイリスト"
                 },
                 "name": "プレイリスト"
             },
@@ -915,7 +915,7 @@
                 "truncated": "注：プレイリストの処理に時間がかかり、完了しませんでした。次回は小さなプレイリストで再試行してください。"
             },
             "noMatches": {
-                "description": "一致する曲が見つかりませんでした。プレイリストが非公開でないことを確認してください。",
+                "description": "一致する曲がありませんでした。プレイリストがプライベートでないことを確認してください。",
                 "title": "プレイリストから曲を取得できませんでした"
             },
             "noPlaylistSet": {
