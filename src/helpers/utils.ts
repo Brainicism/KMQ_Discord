@@ -685,3 +685,12 @@ export function parseKmqPlaylistIdentifier(kmqPlaylistIdentifier: string): {
         playlistId: identifierComponents[1],
     };
 }
+
+/**
+ * @param m: the string
+ * @returns whether the string contains atleast one alphanum char
+ */
+export function hasAtLeastOneAlphanumeric(m: string): boolean {
+    // eslint-disable-next-line no-control-regex
+    return /[a-zA-Z0-9]/.test(m);
+}

@@ -9,7 +9,11 @@ import {
     QUICK_GUESS_MS,
     ROUND_MAX_RUNNERS_UP,
 } from "../constants";
-import { friendlyFormattedNumber, getMention } from "../helpers/utils";
+import {
+    friendlyFormattedNumber,
+    getMention,
+    hasAtLeastOneAlphanumeric,
+} from "../helpers/utils";
 import ExpBonusModifier from "../enums/exp_bonus_modifier";
 import GameType from "../enums/game_type";
 import GuessModeType from "../enums/option_types/guess_mode_type";
@@ -58,6 +62,12 @@ type PlayerToGuesses = {
  */
 export function normalizePunctuationInName(name: string): string {
     let cleanName = name.toLowerCase();
+
+    // dont clean if string is fully non-alphanumeric
+    if (!hasAtLeastOneAlphanumeric(name)) {
+        return name;
+    }
+
     for (const characterReplacement of CHARACTER_REPLACEMENTS) {
         cleanName = cleanName.replace(
             characterReplacement.pattern,
