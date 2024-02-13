@@ -685,3 +685,12 @@ export function parseKmqPlaylistIdentifier(kmqPlaylistIdentifier: string): {
         playlistId: identifierComponents[1],
     };
 }
+
+/**
+ * @param m: the string
+ * @returns whether the string contains atleast one ascii char
+ */
+export function hasAtLeastOneASCII(m: string): boolean {
+    // eslint-disable-next-line no-control-regex
+    return /[^\x00-\x7F]/.test(m);
+}
