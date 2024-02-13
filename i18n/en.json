@@ -907,7 +907,7 @@
                 "name": "playlist"
             },
             "invalidURL": {
-                "description": "The link to the playlist is invalid. For Spotify, use `Share > Copy Link to Playlist` in Spotify to retrieve a valid link.",
+                "description": "The link to the playlist is invalid. Only YouTube and Spotify playlists are supported. For Spotify, use `Share > Copy Link to Playlist` in Spotify to retrieve a valid link.",
                 "title": "Invalid Playlist URL"
             },
             "matched": {
