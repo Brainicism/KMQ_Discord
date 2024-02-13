@@ -250,10 +250,7 @@ export default class PlaylistCommand implements BaseCommand {
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         let playlistURL: string | undefined;
-        if (
-            parsedMessage.components.length > 0 &&
-            isValidURL(parsedMessage.components[0])
-        ) {
+        if (parsedMessage.components.length > 0) {
             playlistURL = parsedMessage.components[0];
         }
 
@@ -317,11 +314,29 @@ export default class PlaylistCommand implements BaseCommand {
             return;
         }
 
-        if (!playlistURL) {
-            logger.error("playlistURL unexpectedly undefined");
+        if (!playlistURL || !isValidURL(playlistURL)) {
+            logger.warn(
+                `Invalid URL in updateOption. playlistURL = ${playlistURL}`,
+            );
+
+            sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "command.playlist.invalidURL.title",
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "command.playlist.invalidURL.description",
+                    ),
+                },
+                interaction,
+            );
             return;
         }
 
+        const parsedUrl = new URL(playlistURL);
         const isSpotifyFullURL = new RegExp(`^${SPOTIFY_BASE_URL}.+`).test(
             playlistURL,
         );
@@ -330,21 +345,19 @@ export default class PlaylistCommand implements BaseCommand {
             `^${SPOTIFY_SHORTHAND_BASE_URL}.+`,
         ).test(playlistURL);
 
-        const parsedUrl = new URL(playlistURL);
         const isYoutubePlaylistURL =
             ["www.youtube.com", "youtube.com"].includes(parsedUrl.host) &&
             parsedUrl.searchParams.get("list");
 
         if (
-            !isValidURL(playlistURL) ||
-            (!isSpotifyFullURL &&
-                !isSpotifyShorthandURL &&
-                !isYoutubePlaylistURL)
+            !isSpotifyFullURL &&
+            !isSpotifyShorthandURL &&
+            !isYoutubePlaylistURL
         ) {
             logger.warn(
                 `${getDebugLogHeader(
                     messageContext,
-                )} | Invalid URL in updateOption. playlistURL = ${playlistURL}`,
+                )} | Unsupported URL in updateOption. playlistURL = ${playlistURL}`,
             );
 
             sendErrorMessage(

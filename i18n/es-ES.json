@@ -907,7 +907,7 @@
                 "name": "listadereproducción"
             },
             "invalidURL": {
-                "description": "El enlace a la lista de reproducción no es válido. Para Spotify, usa `Compartir > Copiar enlace de la lista de reproducción` en Spotify para recuperar un enlace válido.",
+                "description": "El enlace a la lista de reproducción no es válido. Solo se admiten las listas de reproducción de YouTube y Spotify. En el caso de Spotify, usa `Compartir > Copiar enlace a la lista de reproducción` en Spotify para obtener un enlace válido.",
                 "title": "URL de lista de reproducción no válida"
             },
             "matched": {

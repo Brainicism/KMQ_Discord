@@ -907,7 +907,7 @@
                 "name": "플레이리스트"
             },
             "invalidURL": {
-                "description": "플레이리스트 링크가 유효하지 않습니다. Spotify에서는 `공유 > 플레이리스트 링크 복사하기`를 사용하여 유효한 링크를 검색하세요.",
+                "description": "플레이리스트에 대한 링크가 올바르지 않습니다. YouTube와 Spotify 플레이리스트만 지원됩니다. Spotify의 경우, Spotify에서 `공유 > 플레이리스트에 대한 링크 복사`를 사용하여 유효한 링크를 가져오세요.",
                 "title": "잘못된 재생 목록 URL"
             },
             "matched": {
