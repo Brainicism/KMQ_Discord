@@ -12,7 +12,7 @@ import {
 import {
     friendlyFormattedNumber,
     getMention,
-    hasAtLeastOneASCII,
+    hasAtLeastOneAlphanumeric,
 } from "../helpers/utils";
 import ExpBonusModifier from "../enums/exp_bonus_modifier";
 import GameType from "../enums/game_type";
@@ -63,8 +63,8 @@ type PlayerToGuesses = {
 export function normalizePunctuationInName(name: string): string {
     let cleanName = name.toLowerCase();
 
-    // dont clean if string is fully non-ascii
-    if (!hasAtLeastOneASCII(name)) {
+    // dont clean if string is fully non-alphanumeric
+    if (!hasAtLeastOneAlphanumeric(name)) {
         return name;
     }
 

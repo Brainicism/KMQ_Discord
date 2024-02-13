@@ -688,9 +688,9 @@ export function parseKmqPlaylistIdentifier(kmqPlaylistIdentifier: string): {
 
 /**
  * @param m: the string
- * @returns whether the string contains atleast one ascii char
+ * @returns whether the string contains atleast one alphanum char
  */
-export function hasAtLeastOneASCII(m: string): boolean {
+export function hasAtLeastOneAlphanumeric(m: string): boolean {
     // eslint-disable-next-line no-control-regex
-    return /[^\x00-\x7F]/.test(m);
+    return /[a-zA-Z0-9]/.test(m);
 }
