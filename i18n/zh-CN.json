@@ -907,7 +907,7 @@
                 "name": "播放列表"
             },
             "invalidURL": {
-                "description": "播放列表链接无效。对于Spotify，请使用`分享 > 复制播放列表链接`以检索有效链接。",
+                "description": "播放列表的链接无效。仅支持 YouTube 和 Spotify 播放列表。对于 Spotify，请在 Spotify 中使用“分享 > 复制到播放列表的链接”以检索有效的链接。",
                 "title": "无效的播放列表 URL"
             },
             "matched": {

@@ -907,7 +907,7 @@
                 "name": "wiedergabeliste"
             },
             "invalidURL": {
-                "description": "Der Link zur Wiedergabeliste ist ungültig. Verwende für Spotify `Teilen > Link zur Wiedergabeliste kopieren`, um einen gültigen Link abzurufen.",
+                "description": "Der Link zu der Wiedergabeliste ist ungültig. Nur YouTube- und Spotify-Wiedergabelisten werden unterstützt. Verwenden Sie für Spotify `Teilen > Link zu Wiedergabeliste kopieren` in Spotify, um einen gültigen Link abzurufen.",
                 "title": "Ungültige Playlist-URL"
             },
             "matched": {

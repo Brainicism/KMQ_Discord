@@ -907,7 +907,7 @@
                 "name": "daftarputar"
             },
             "invalidURL": {
-                "description": "Tautan ke daftar putar tidak sah. Untuk Spotify, gunakan `Bagikan > Salin Tautan ke Daftar Putar` di Spotify untuk mengambil tautan yang sah.",
+                "description": "Tautan ke daftar putar tidak valid. Hanya daftar putar YouTube dan Spotify yang didukung. Untuk Spotify, gunakan `Bagikan > Salin Tautan ke Daftar Putar` di Spotify untuk mendapatkan tautan yang valid.",
                 "title": "URL Daftar Putar Tidak Sah"
             },
             "matched": {

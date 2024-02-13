@@ -907,7 +907,7 @@
                 "name": "playlist"
             },
             "invalidURL": {
-                "description": "Le lien vers la playlist est invalide. Pour Spotify, utilisez `Partager > Copier le lien vers la playlist` dans Spotify pour récupérer un lien valide.",
+                "description": "Le lien vers la liste de lecture n'est pas valide. Seules les listes de lecture YouTube et Spotify sont prises en charge. Pour Spotify, utilisez `Partager > Copier le lien vers la liste de lecture` dans Spotify pour récupérer un lien valide.",
                 "title": "URL de playlist invalide"
             },
             "matched": {

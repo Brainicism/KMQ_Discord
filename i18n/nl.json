@@ -907,7 +907,7 @@
                 "name": "afspeellijst"
             },
             "invalidURL": {
-                "description": "De link naar de playlist is ongeldig. Voor Spotify gebruikt u `Delen > Link naar playlist kopiëren` in Spotify om een geldige link op te halen.",
+                "description": "De link naar de playlist is ongeldig. Alleen YouTube- en Spotify-afspeellijsten worden ondersteund. Gebruik voor Spotify `Delen > Link naar afspeellijst kopiëren` in Spotify om een geldige link op te halen.",
                 "title": "Ongeldige URL van afspeellijst"
             },
             "matched": {
