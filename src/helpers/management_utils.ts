@@ -483,16 +483,19 @@ async function sendNewsNotifications(newsRange: NewsRange): Promise<void> {
  *  Sets up recurring cron-based tasks
  * */
 export function registerIntervals(clusterID: number): void {
-    // Every month on the 1st at 2am UTC => 9pm ET
-    schedule.scheduleJob("0 2 1 * *", () => {
-        // Send monthly news notifications, one hour after weekly news notifications
-        sendNewsNotifications(NewsRange.MONTHLY);
+    // busiest times for r/kpop are 6pm and midnight KST
+    // 15:00 UTC => midnight KST (busiest time for r/kpop)
+    // wait a couple hours for NA to upvote posts
+    schedule.scheduleJob("0 18 * * *", () => {
+        sendNewsNotifications(NewsRange.DAILY);
     });
 
-    // Every week on Sunday at 1am UTC => 8pm ET
-    schedule.scheduleJob("0 1 * * 0", () => {
-        // Send weekly news notifications, one hour after daily news notifications
+    schedule.scheduleJob("5 18 * * 0", () => {
         sendNewsNotifications(NewsRange.WEEKLY);
+    });
+
+    schedule.scheduleJob("10 18 1 * *", () => {
+        sendNewsNotifications(NewsRange.MONTHLY);
     });
 
     // Everyday at 12am UTC => 7pm ET
@@ -503,8 +506,6 @@ export function registerIntervals(clusterID: number): void {
         reloadArtists();
         // Songs used for autocomplete
         reloadSongs();
-        // Send daily news notifications
-        sendNewsNotifications(NewsRange.DAILY);
     });
 
     // Every hour
