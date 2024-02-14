@@ -414,10 +414,6 @@ async function reloadLocales(): Promise<void> {
     }
 }
 
-function clearCachedPlaylists(): void {
-    State.playlistManager.cachedPlaylists = {};
-}
-
 function cleanupPlaylistParsingLocks(): void {
     State.playlistManager.cleanupPlaylistParsingLocks();
 }
@@ -507,8 +503,6 @@ export function registerIntervals(clusterID: number): void {
         reloadArtists();
         // Songs used for autocomplete
         reloadSongs();
-        // Removed cached playlists
-        clearCachedPlaylists();
         // Send daily news notifications
         sendNewsNotifications(NewsRange.DAILY);
     });
