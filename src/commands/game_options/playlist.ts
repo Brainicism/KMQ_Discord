@@ -346,8 +346,9 @@ export default class PlaylistCommand implements BaseCommand {
         ).test(playlistURL);
 
         const isYoutubePlaylistURL =
-            ["www.youtube.com", "youtube.com"].includes(parsedUrl.host) &&
-            parsedUrl.searchParams.get("list");
+            ["www.youtube.com", "youtube.com", "music.youtube.com"].includes(
+                parsedUrl.host,
+            ) && parsedUrl.searchParams.get("list");
 
         if (
             !isSpotifyFullURL &&

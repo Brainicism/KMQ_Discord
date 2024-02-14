@@ -263,7 +263,12 @@ export default class PlaylistManager {
         }> = [];
 
         let page = 0;
-        const numPlaylistPages = Math.ceil(metadata.playlistLength / 50);
+        // only first page of a mix playlist contains unique songs
+        // they always start with an "RD".
+        const isMixPlaylist = playlistId.startsWith("RD");
+        const numPlaylistPages = isMixPlaylist
+            ? 1
+            : Math.ceil(metadata.playlistLength / 50);
 
         const parsingTitle = i18n.translate(
             guildID,
@@ -342,6 +347,10 @@ export default class PlaylistManager {
                 if (!pageToken) break;
                 page++;
             }
+
+            // playlist length might differ from actual number of songs in the playlist
+            // e.g: mix playlists always returning 5 instead of actual size
+            metadata.playlistLength = songs.length;
 
             message?.edit({
                 embeds: [
