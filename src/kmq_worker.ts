@@ -7,7 +7,9 @@ import { durationSeconds } from "./helpers/utils";
 import { fetchAppCommandIDs, updateAppCommands } from "./helpers/discord_utils";
 import {
     registerIntervals,
+    reloadArtists,
     reloadCaches,
+    reloadSongs,
     updateBotStatus,
 } from "./helpers/management_utils";
 import AppCommandsAction from "./enums/app_command_action";
@@ -51,7 +53,7 @@ config({ path: path.resolve(__dirname, "../.env") });
 
 export default class BotWorker extends BaseClusterWorker {
     handleCommand = async (commandName: string): Promise<any> => {
-        logger.debug(`Received cluster command: ${commandName}`);
+        logger.info(`Received cluster command: ${commandName}`);
         if (commandName.startsWith("eval")) {
             const evalString = commandName.substring(
                 commandName.indexOf("|") + 1,
@@ -141,6 +143,11 @@ export default class BotWorker extends BaseClusterWorker {
             case "fetch_app_command_ids":
                 logger.info("Fetching app command IDs");
                 State.commandToID = await fetchAppCommandIDs();
+                return null;
+            case "reload_autocomplete_data":
+                logger.info("Reloading autocomplete data");
+                reloadArtists();
+                reloadSongs();
                 return null;
             default:
                 return null;
