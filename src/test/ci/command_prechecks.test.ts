@@ -797,4 +797,62 @@ describe("command prechecks", () => {
             });
         });
     });
+
+    describe("notSuddenDeathPrecheck", () => {
+        describe("listening session", () => {
+            it("should return true", () => {
+                assert.strictEqual(
+                    CommandPrechecks.notSuddenDeathPrecheck({
+                        session: new ListeningSession(
+                            new GuildPreference("12"),
+                            "123",
+                            "1234",
+                            "12345",
+                            mockKmqMember,
+                        ),
+                        messageContext,
+                    }),
+                    true,
+                );
+            });
+        });
+
+        describe("non-sudden death game session", () => {
+            it("should return true", () => {
+                assert.strictEqual(
+                    CommandPrechecks.notSuddenDeathPrecheck({
+                        session: new GameSession(
+                            new GuildPreference("12"),
+                            "123",
+                            "1234",
+                            "12345",
+                            mockKmqMember,
+                            GameType.CLASSIC,
+                        ),
+                        messageContext,
+                    }),
+                    true,
+                );
+            });
+        });
+
+        describe("sudden death game session", () => {
+            it("should return false", () => {
+                assert.strictEqual(
+                    CommandPrechecks.notSuddenDeathPrecheck({
+                        session: new GameSession(
+                            new GuildPreference("12"),
+                            "123",
+                            "1234",
+                            "12345",
+                            mockKmqMember,
+                            GameType.SUDDEN_DEATH,
+                        ),
+                        messageContext,
+                    }),
+                    false,
+                );
+            });
+        });
+    });
 });
