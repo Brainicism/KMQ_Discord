@@ -129,11 +129,36 @@ export default class KmqWebServer {
         );
 
         httpServer.get("/ping", async (request, reply) => {
+            if (request.ip !== "127.0.0.1") {
+                logger.error("Clear restart attempted by non-allowed IP");
+                reply.code(401).send();
+                return;
+            }
+
             try {
                 await fleet.ipc.allClustersCommand("ping", true);
-                reply.code(200).send();
+                reply.code(200).send("Pong");
             } catch (e) {
                 logger.error(`Health check on /ping failed with error: ${e}`);
+                reply.code(500).send(e);
+            }
+        });
+
+        httpServer.post("/reload_autocomplete", async (request, reply) => {
+            if (request.ip !== "127.0.0.1") {
+                logger.error("Clear restart attempted by non-allowed IP");
+                reply.code(401).send();
+                return;
+            }
+
+            try {
+                await fleet.ipc.allClustersCommand(
+                    "reload_autocomplete_data",
+                    true,
+                );
+                reply.code(200).send();
+            } catch (e) {
+                logger.error(`reload_autocomplete failed with: ${e}`);
                 reply.code(500).send(e);
             }
         });

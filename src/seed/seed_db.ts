@@ -589,6 +589,7 @@ export async function updateGroupList(db: DatabaseContext): Promise<void> {
         .selectFrom("app_kpop_group")
         .select(["name", "members as gender"])
         .where("is_collab", "=", "n")
+        .where("has_songs", "=", 1)
         .orderBy("name", "asc")
         .execute();
 
@@ -645,6 +646,19 @@ async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
     }
 }
 
+async function reloadAutocompleteData(): Promise<void> {
+    logger.info("Requesting autocomplete data reload");
+    await Axios.post(
+        `http://127.0.0.1:${process.env.WEB_SERVER_PORT}/reload_autocomplete`,
+        {},
+        {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        },
+    );
+}
+
 (async () => {
     if (require.main === module) {
         logger.info(JSON.stringify(options));
@@ -652,6 +666,11 @@ async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
         try {
             await loadStoredProcedures();
             await seedAndDownloadNewSongs(db);
+            try {
+                await reloadAutocompleteData();
+            } catch (e) {
+                logger.warn(`reloadAutocompleteData failed with: ${e}`);
+            }
 
             if (process.env.NODE_ENV !== EnvType.PROD) {
                 await updateDaisukiSchemaTypings(db);

@@ -302,7 +302,10 @@ export async function reloadBonusGroups(): Promise<void> {
     State.bonusArtists = new Set(artistNameQuery);
 }
 
-async function reloadArtists(): Promise<void> {
+/**
+ *Reload artist name data for autocomplete
+ */
+export async function reloadArtists(): Promise<void> {
     const artistAliasMapping = await dbContext.kmq
         .selectFrom("available_songs")
         .select([
@@ -360,7 +363,10 @@ async function reloadArtists(): Promise<void> {
         .execute();
 }
 
-async function reloadSongs(): Promise<void> {
+/**
+ * Reload song names for autocomplete
+ */
+export async function reloadSongs(): Promise<void> {
     const songMapping = await dbContext.kmq
         .selectFrom("available_songs")
         .select([
@@ -502,10 +508,6 @@ export function registerIntervals(clusterID: number): void {
     schedule.scheduleJob("0 0 * * *", () => {
         // New bonus groups
         reloadBonusGroups();
-        // Groups used for autocomplete
-        reloadArtists();
-        // Songs used for autocomplete
-        reloadSongs();
     });
 
     // Every hour
