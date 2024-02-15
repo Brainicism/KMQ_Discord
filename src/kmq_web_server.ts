@@ -129,6 +129,12 @@ export default class KmqWebServer {
         );
 
         httpServer.get("/ping", async (request, reply) => {
+            if (request.ip !== "127.0.0.1") {
+                logger.error("Clear restart attempted by non-allowed IP");
+                reply.code(401).send();
+                return;
+            }
+
             try {
                 await fleet.ipc.allClustersCommand("ping", true);
                 reply.code(200).send("Pong");
