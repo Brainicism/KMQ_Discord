@@ -862,6 +862,7 @@
                     "classic": "Começar um jogo clássico de KMQ (digite seu palpite primeiro para ganhar um ponto)",
                     "elimination": "Iniciar uma partida de eliminação do KMQ, onde cada jogador começa com {{lives}} vidas",
                     "hidden": "Iniciar um jogo oculto de KMQ, onde os jogadores só podem responder com /guess",
+                    "suddenDeath": "Iniciar o jogo do KMQ da morte súbita, onde alguém tem que acertar a música ou o jogo acaba",
                     "teams": "Divida-se em quantas equipes quiser e veja em quem você pode confiar para ajudá-lo a vencer!"
                 },
                 "interaction": {
@@ -1610,6 +1611,7 @@
             "notHidden": "Você não pode fazer isso durante um jogo oculto.",
             "notListeningSession": "Você não pode fazer isso durante uma sessão de audição.",
             "notPlaylist": "Você não pode alterar essa opção ao tocar a partir de uma lista de reprodução. Use {{playlistResetCommand}} antes de alterar esta opção.",
+            "notSuddenDeath": "Você não pode fazer isso durante a morte súbita.",
             "title": "Espere..."
         },
         "releaseDate": "Data de Lançamento",

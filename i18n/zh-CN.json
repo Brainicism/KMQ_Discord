@@ -862,6 +862,7 @@
                     "classic": "开始一场经典模式的 KMQ 游戏(首先输入你的猜测以获得一分)",
                     "elimination": "开始一场淘汰模式的 KMQ 游戏，每个玩家都有 {{lives}} 条命",
                     "hidden": "开始一个KMQ的隐藏游戏，玩家只能用/guess命令回答问题。",
+                    "suddenDeath": "以突然死亡开局一场 KMQ 游戏，有人必须答对歌名，否则游戏结束",
                     "teams": "分成尽可能多的团队，看看谁可以帮助你赢得胜利！"
                 },
                 "interaction": {
@@ -1610,6 +1611,7 @@
             "notHidden": "在隐藏游戏期间无法进行该操作。",
             "notListeningSession": "您不能在听歌会话中进行此操作。",
             "notPlaylist": "从播放列表播放时，您不能更改该选项。更改此选项之前，请使用{{playlistResetCommand}}。",
+            "notSuddenDeath": "你在突然死亡期间不能这样做。",
             "title": "请稍等..."
         },
         "releaseDate": "发布日期",

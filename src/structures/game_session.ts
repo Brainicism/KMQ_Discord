@@ -471,6 +471,11 @@ export default class GameSession extends Session {
 
         if (this.scoreboard.gameFinished(this.guildPreference)) {
             this.endSession("Game finished due to game options", false);
+        } else if (
+            this.gameType === GameType.SUDDEN_DEATH &&
+            !guessResult.correct
+        ) {
+            this.endSession("Sudden death game ended", false);
         }
     }
 

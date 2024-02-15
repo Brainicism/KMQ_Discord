@@ -344,7 +344,7 @@ export default abstract class Session {
     }
 
     /**
-     * Ends the current GameSession
+     * Ends the current Session
      * @param reason - The reason for the session end
      * @param endedDueToError - Whether the session ended due to an error
      */

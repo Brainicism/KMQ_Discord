@@ -143,6 +143,7 @@ export default class SkipCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.inSessionCommandPrecheck },
         { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notSuddenDeathPrecheck },
     ];
 
     help = (guildID: string): HelpDocumentation => ({

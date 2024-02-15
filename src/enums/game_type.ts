@@ -4,6 +4,7 @@ enum GameType {
     TEAMS = "teams",
     COMPETITION = "competition",
     HIDDEN = "hidden",
+    SUDDEN_DEATH = "suddendeath",
 }
 
 export default GameType;

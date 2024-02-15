@@ -26,6 +26,7 @@ export default class ForceSkipCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.inSessionCommandPrecheck },
         { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notSuddenDeathPrecheck },
     ];
 
     help = (guildID: string): HelpDocumentation => ({

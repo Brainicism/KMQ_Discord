@@ -862,6 +862,7 @@
                     "classic": "Starte ein klassisches Spiel von KMQ (gib zuerst deinen Tipp ein, um einen Punkt zu erhalten)",
                     "elimination": "Starte ein Eliminierungs-Spiel von KMQ, bei dem jeder Spieler mit {{lives}} Leben beginnt",
                     "hidden": "Starte ein verstecktes Spiel von KMQ, bei dem die Spieler nur mit /guess antworten können",
+                    "suddenDeath": "Beginne ein plötzliches Spiel von KMQ, bei dem jemand das Lied erraten muss, oder das Spiel endet",
                     "teams": "Bilde beliebig viele Teams und finde heraus, wer zum Sieg beiträgt!"
                 },
                 "interaction": {
@@ -1610,6 +1611,7 @@
             "notHidden": "Das kannst du während eines versteckten Spiels nicht tun.",
             "notListeningSession": "Das kannst du während einer Hörsitzung nicht tun.",
             "notPlaylist": "Du kannst diese Option nicht ändern, wenn du von einer Wiedergabeliste aus spielst. Verwende {{playlistResetCommand}}, bevor du diese Option änderst.",
+            "notSuddenDeath": "Das darfst du beim plötzlichen Tod nicht machen.",
             "title": "Warten..."
         },
         "releaseDate": "Erscheinungsdatum",
