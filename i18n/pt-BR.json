@@ -862,7 +862,7 @@
                     "classic": "Começar um jogo clássico de KMQ (digite seu palpite primeiro para ganhar um ponto)",
                     "elimination": "Iniciar uma partida de eliminação do KMQ, onde cada jogador começa com {{lives}} vidas",
                     "hidden": "Iniciar um jogo oculto de KMQ, onde os jogadores só podem responder com /guess",
-                    "suddenDeath": "Iniciar o jogo do KMQ da morte súbita, onde alguém tem que acertar a música ou o jogo acaba",
+                    "suddenDeath": "Iniciar um jogo de KMQ mata-mata, onde alguém deve acertar a música ou o jogo termina",
                     "teams": "Divida-se em quantas equipes quiser e veja em quem você pode confiar para ajudá-lo a vencer!"
                 },
                 "interaction": {
@@ -1527,6 +1527,7 @@
         },
         "inGame": {
             "aliases": "Apelidos",
+            "and": "e",
             "bonusArtistRound": "RODADA DE ARTISTA BÔNUS",
             "bonusExpArtistRound": "RODADA BÔNUS EXP E ARTISTA",
             "bonusExpRound": "RODADA DE EXP BÔNUS",
@@ -1537,8 +1538,7 @@
             "noWinners": "Ninguém Ganhou",
             "runnersUp": "Vice-campeões",
             "songsCorrectlyGuessed": "{{songCount}} músicas respondidas corretamente!",
-            "uniqueSongsPlayed": "{{uniqueSongCount}} músicas únicas tocadas.",
-            "winMessage": "{{playerName}} vence!"
+            "uniqueSongsPlayed": "{{uniqueSongCount}} músicas únicas tocadas."
         },
         "interaction": {
             "bookmarked": {
@@ -1600,7 +1600,11 @@
             "second_one": "{{count}} segundo",
             "second_other": "{{count}} segundos",
             "song_one": "{{count}} música",
-            "song_other": "{{count}} músicas"
+            "song_other": "{{count}} músicas",
+            "suddenDeathEnd_one": "Você sobreviveu a {{count}} músicas!",
+            "suddenDeathEnd_other": "Você sobreviveu a {{count}} músicas!",
+            "winMessage_one": "{{player}} vence!",
+            "winMessage_other": "{{player}} vence!"
         },
         "preCheck": {
             "competition": "Este comando foi desabilitado para usuários regulares na competição.",
@@ -1611,7 +1615,7 @@
             "notHidden": "Você não pode fazer isso durante um jogo oculto.",
             "notListeningSession": "Você não pode fazer isso durante uma sessão de audição.",
             "notPlaylist": "Você não pode alterar essa opção ao tocar a partir de uma lista de reprodução. Use {{playlistResetCommand}} antes de alterar esta opção.",
-            "notSuddenDeath": "Você não pode fazer isso durante a morte súbita.",
+            "notSuddenDeath": "Você não pode fazer isso durante um mata-mata.",
             "title": "Espere..."
         },
         "releaseDate": "Data de Lançamento",

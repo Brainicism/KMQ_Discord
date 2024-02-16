@@ -862,7 +862,7 @@
                     "classic": "Mulai permainan KMQ klasik (ketik tebakan Anda terlebih dahulu untuk mendapatkan poin)",
                     "elimination": "Mulai permainan eliminasi KMQ di mana setiap pemain memulai dengan {{lives}} nyawa",
                     "hidden": "Mulai permainan KMQ tersembunyi, tempat pemain hanya bisa menjawab dengan /tebak",
-                    "suddenDeath": "Mulai permainan kematian mendadak KMQ, di mana seseorang harus menebak lagu dengan benar, atau permainan berakhir",
+                    "suddenDeath": "Mulai permainan kematian mendadak KMQ, dimana seseorang harus menebak lagu dengan benar, atau permainan berakhir",
                     "teams": "Bergabunglah dengan tim sesuai keinginan dan temukan siapa yang dapat membantu Anda menang!"
                 },
                 "interaction": {
@@ -1527,6 +1527,7 @@
         },
         "inGame": {
             "aliases": "Alias",
+            "and": "dan",
             "bonusArtistRound": "RONDE ARTIS BONUS",
             "bonusExpArtistRound": "BONUS EXP DAN RONDE ARTIS",
             "bonusExpRound": "RONDE EXP BONUS",
@@ -1537,8 +1538,7 @@
             "noWinners": "Tidak Ada yang Menang",
             "runnersUp": "Juara Kedua",
             "songsCorrectlyGuessed": "{{songCount}} lagu ditebak dengan benar!",
-            "uniqueSongsPlayed": "{{uniqueSongCount}} lagu unik dimainkan.",
-            "winMessage": "{{playerName}} menang!"
+            "uniqueSongsPlayed": "{{uniqueSongCount}} lagu unik dimainkan."
         },
         "interaction": {
             "bookmarked": {
@@ -1600,7 +1600,11 @@
             "second_one": "{{count}} detik",
             "second_other": "{{count}} detik",
             "song_one": "{{count}} lagu",
-            "song_other": "{{count}} lagu"
+            "song_other": "{{count}} lagu",
+            "suddenDeathEnd_one": "Anda selamat dari {{count}} lagu!",
+            "suddenDeathEnd_other": "Anda selamat dari {{count}} lagu!",
+            "winMessage_one": "{{player}} menang!",
+            "winMessage_other": "{{player}} menang!"
         },
         "preCheck": {
             "competition": "Perintah ini telah dinonaktifkan untuk pengguna reguler dalam kompetisi.",
@@ -1611,7 +1615,7 @@
             "notHidden": "Anda tidak dapat melakukan itu selama permainan tersembunyi.",
             "notListeningSession": "Anda tidak dapat melakukan itu saat dalam sesi mendengarkan.",
             "notPlaylist": "Anda tidak dapat mengubah opsi itu saat memutar dari daftar putar. Gunakan {{playlistResetCommand}} sebelum mengubah opsi ini.",
-            "notSuddenDeath": "Kamu tidak bisa melakukan itu dengan kematian mendadak.",
+            "notSuddenDeath": "Anda tidak dapat melakukan itu selama kematian mendadak.",
             "title": "Tunggu dulu..."
         },
         "releaseDate": "Tanggal Rilis",

@@ -862,7 +862,7 @@
                     "classic": "Démarrez une partie classique de KMQ (tapez d'abord votre réponse pour obtenir un point)",
                     "elimination": "Démarrez une partie d'élimination de KMQ où chaque joueur commence avec {{lives}} vies",
                     "hidden": "Démarrer une partie cachée de KMQ, où les joueurs ne peuvent répondre qu'avec /guess",
-                    "suddenDeath": "Commencez une partie de mort subite de KMQ, où quelqu'un doit trouver la chanson ou le jeu s'arrête",
+                    "suddenDeath": "Commencer une partie à mort subite de KMQ, où quelqu'un doit trouver le morceau, sinon la partie se termine",
                     "teams": "Divisez-vous en d'équipes et voyez sur qui vous pouvez compter pour vous aider à gagner!"
                 },
                 "interaction": {
@@ -1527,6 +1527,7 @@
         },
         "inGame": {
             "aliases": "Alias",
+            "and": "et",
             "bonusArtistRound": "TOUR ARTISTE BONUS",
             "bonusExpArtistRound": "TOUR EXP ET ARTISTE BONUS",
             "bonusExpRound": "TOUR EXP BONUS",
@@ -1537,8 +1538,7 @@
             "noWinners": "Personne n'a gagné.",
             "runnersUp": "Finalistes",
             "songsCorrectlyGuessed": "{{songCount}} chansons correctement devinées !",
-            "uniqueSongsPlayed": "{{uniqueSongCount}} chansons uniques jouées.",
-            "winMessage": "{{playerName}} gagne !"
+            "uniqueSongsPlayed": "{{uniqueSongCount}} chansons uniques jouées."
         },
         "interaction": {
             "bookmarked": {
@@ -1600,7 +1600,11 @@
             "second_one": "il y a {{count}} seconde",
             "second_other": "il y a {{count}} secondes",
             "song_one": "{{count}} chanson",
-            "song_other": "{{count}} chansons"
+            "song_other": "{{count}} chansons",
+            "suddenDeathEnd_one": "Vous avez survécu à {{count}} morceau !",
+            "suddenDeathEnd_other": "Vous avez survécu à {{count}} morceaux !",
+            "winMessage_one": "{{player}} gagne !",
+            "winMessage_other": "{{player}} gagne !"
         },
         "preCheck": {
             "competition": "Cette commande a été désactivée pour les utilisateurs réguliers dans la compétition.",
@@ -1611,7 +1615,7 @@
             "notHidden": "Vous ne pouvez pas faire cela pendant une partie cachée.",
             "notListeningSession": "Vous ne pouvez pas faire cela pendant une session d'écoute.",
             "notPlaylist": "Vous ne pouvez pas modifier cette option lors de la lecture à partir d'une playlist. Utilisez {{playlistResetCommand}} avant de modifier cette option.",
-            "notSuddenDeath": "Vous ne pouvez pas faire ça pendant une mort subite.",
+            "notSuddenDeath": "Vous ne pouvez pas faire ça en mort subite.",
             "title": "Attendez..."
         },
         "releaseDate": "Date de sortie",

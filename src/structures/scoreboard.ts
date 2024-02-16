@@ -45,33 +45,31 @@ export default class Scoreboard {
      */
     getWinnerMessage(guildID: string): string {
         let winnerStr = "";
-
-        if (this.firstPlace.length === 1) {
-            return i18n.translate(guildID, "misc.inGame.winMessage", {
-                playerName: this.firstPlace[0].getDisplayedName(
-                    false,
-                    false,
-                    false,
-                ),
-            });
-        }
-
         for (let i = 0; i < this.firstPlace.length; i++) {
-            winnerStr += this.firstPlace[i].getName();
+            winnerStr += this.firstPlace[i].getDisplayedName(
+                false,
+                false,
+                false,
+            );
             if (i === this.firstPlace.length - 1) {
                 // Last entry -- append just the username
-                winnerStr += " ";
+                winnerStr += "";
             } else if (i === this.firstPlace.length - 2) {
                 // Second last entry -- use "and"
-                winnerStr += " and ";
+                const and = i18n.translate(guildID, "misc.inGame.and");
+                winnerStr += ` ${and} `;
             } else {
                 // At least two more entries -- separate by ","
                 winnerStr += ", ";
             }
         }
 
-        winnerStr += "win!";
-        return winnerStr;
+        return i18n.translateN(
+            guildID,
+            "misc.plural.winMessage",
+            this.firstPlace.length,
+            { player: winnerStr },
+        );
     }
 
     getScoreboardEmbedFields(

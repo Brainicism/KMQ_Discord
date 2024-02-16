@@ -1076,6 +1076,15 @@ export default class GameSession extends Session {
                 );
             }
 
+            const winnerMessage =
+                this.gameType === GameType.SUDDEN_DEATH
+                    ? i18n.translateN(
+                          this.guildID,
+                          "misc.inGame.plural.suddenDeathEnd",
+                          this.roundsPlayed - 1,
+                      )
+                    : this.scoreboard.getWinnerMessage(this.guildID);
+
             await sendInfoMessage(
                 new MessageContext(this.textChannelID, null, this.guildID),
                 {
@@ -1093,9 +1102,7 @@ export default class GameSession extends Session {
                           )
                         : undefined,
                     thumbnailUrl: winners[0].getAvatarURL(),
-                    title: `🎉 ${this.scoreboard.getWinnerMessage(
-                        this.guildID,
-                    )} 🎉`,
+                    title: `🎉 ${winnerMessage} 🎉`,
                     fields,
                     footerText,
                     components: [

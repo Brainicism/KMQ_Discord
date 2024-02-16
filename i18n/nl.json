@@ -862,7 +862,7 @@
                     "classic": "Start een klassiek spelletje KMQ (typ je gok als eerste om een punt te krijgen)",
                     "elimination": "Start een KMQ-eliminatiespel waarin elke speler begint met {{lives}} levens",
                     "hidden": "Start een verborgen spelletje KMQ, waarbij spelers alleen kunnen antwoorden met /raad",
-                    "suddenDeath": "Start een sudden death-wedstrijd van KMQ, waar iemand het nummer correct moet raden, anders is het spel afgelopen",
+                    "suddenDeath": "Start een plotse doodgame van KMQ, waarbij iemand het liedje goed moet raden of het spel eindigt",
                     "teams": "Splits op in zoveel teams als je wilt en kijk van wie je afhankelijk kunt zijn om te winnen!"
                 },
                 "interaction": {
@@ -1527,6 +1527,7 @@
         },
         "inGame": {
             "aliases": "Aliassen",
+            "and": "en",
             "bonusArtistRound": "BONUSRONDE ARTIEST",
             "bonusExpArtistRound": "BONUS-EXP EN ARTIESTENRONDES",
             "bonusExpRound": "BONUS EXP RONDE",
@@ -1537,8 +1538,7 @@
             "noWinners": "Niemand heeft gewonnen",
             "runnersUp": "Runners-up",
             "songsCorrectlyGuessed": "{{songCount}} nummers correct geraden!",
-            "uniqueSongsPlayed": "{{uniqueSongCount}} unieke nummers afgespeeld.",
-            "winMessage": "{{playerName}} wint!"
+            "uniqueSongsPlayed": "{{uniqueSongCount}} unieke nummers afgespeeld."
         },
         "interaction": {
             "bookmarked": {
@@ -1600,7 +1600,11 @@
             "second_one": "{{count}} seconde",
             "second_other": "{{count}} seconden",
             "song_one": "{{count}} nummer",
-            "song_other": "{{count}} nummers"
+            "song_other": "{{count}} nummers",
+            "suddenDeathEnd_one": "Je overleefde {{count}} liedje!",
+            "suddenDeathEnd_other": "Je overleefde {{count}} liedjes!",
+            "winMessage_one": "{{player}} wint!",
+            "winMessage_other": "{{player}} wint!"
         },
         "preCheck": {
             "competition": "Deze opdracht is uitgeschakeld voor gewone gebruikers in de competitie.",
@@ -1611,7 +1615,7 @@
             "notHidden": "U kunt dat niet doen tijdens een verborgen spel.",
             "notListeningSession": "Je kunt dat niet doen tijdens een luistersessie.",
             "notPlaylist": "Je kunt die optie niet wijzigen wanneer je vanaf een afspeellijst afspeelt. Gebruik {{playlistResetCommand}} voordat je deze optie wijzigt.",
-            "notSuddenDeath": "Dat kun je niet doen tijdens een sudden death.",
+            "notSuddenDeath": "Je kunt dat niet doen tijdens een plotselinge dood.",
             "title": "Wachten..."
         },
         "releaseDate": "Uitgavedatum",

@@ -1527,6 +1527,7 @@
         },
         "inGame": {
             "aliases": "Aliases",
+            "and": "and",
             "bonusArtistRound": "BONUS ARTIST ROUND",
             "bonusExpArtistRound": "BONUS EXP AND ARTIST ROUND",
             "bonusExpRound": "BONUS EXP ROUND",
@@ -1537,8 +1538,7 @@
             "noWinners": "Nobody Won",
             "runnersUp": "Runners Up",
             "songsCorrectlyGuessed": "{{songCount}} songs correctly guessed!",
-            "uniqueSongsPlayed": "{{uniqueSongCount}} unique songs played.",
-            "winMessage": "{{playerName}} wins!"
+            "uniqueSongsPlayed": "{{uniqueSongCount}} unique songs played."
         },
         "interaction": {
             "bookmarked": {
@@ -1600,7 +1600,11 @@
             "second_one": "{{count}} second",
             "second_other": "{{count}} seconds",
             "song_one": "{{count}} song",
-            "song_other": "{{count}} songs"
+            "song_other": "{{count}} songs",
+            "suddenDeathEnd_one": "You survived {{count}} song!",
+            "suddenDeathEnd_other": "You survived {{count}} songs!",
+            "winMessage_one": "{{player}} wins!",
+            "winMessage_other": "{{player}} win!"
         },
         "preCheck": {
             "competition": "This command has been disabled for regular users in the competition.",
