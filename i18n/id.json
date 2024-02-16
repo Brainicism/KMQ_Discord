@@ -862,7 +862,7 @@
                     "classic": "Mulai permainan KMQ klasik (ketik tebakan Anda terlebih dahulu untuk mendapatkan poin)",
                     "elimination": "Mulai permainan eliminasi KMQ di mana setiap pemain memulai dengan {{lives}} nyawa",
                     "hidden": "Mulai permainan KMQ tersembunyi, tempat pemain hanya bisa menjawab dengan /tebak",
-                    "suddenDeath": "Mulai permainan kematian mendadak KMQ, dimana seseorang harus menebak lagu dengan benar, atau permainan berakhir",
+                    "suddenDeath": "Mulai game sudden death KMQ, tebak lagunya atau game berakhir",
                     "teams": "Bergabunglah dengan tim sesuai keinginan dan temukan siapa yang dapat membantu Anda menang!"
                 },
                 "interaction": {

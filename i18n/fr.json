@@ -862,7 +862,7 @@
                     "classic": "Démarrez une partie classique de KMQ (tapez d'abord votre réponse pour obtenir un point)",
                     "elimination": "Démarrez une partie d'élimination de KMQ où chaque joueur commence avec {{lives}} vies",
                     "hidden": "Démarrer une partie cachée de KMQ, où les joueurs ne peuvent répondre qu'avec /guess",
-                    "suddenDeath": "Commencer une partie à mort subite de KMQ, où quelqu'un doit trouver le morceau, sinon la partie se termine",
+                    "suddenDeath": "Lancez un jeu de mort subite KMQ, où il faut deviner le morceau, ou la partie s'achève",
                     "teams": "Divisez-vous en d'équipes et voyez sur qui vous pouvez compter pour vous aider à gagner!"
                 },
                 "interaction": {
