@@ -162,6 +162,21 @@ export default class GameSession extends Session {
                 break;
         }
 
+        // eslint-disable-next-line @typescript-eslint/require-await
+        this.guildPreference.answerTypeChangeCallback = async () => {
+            const round = this.round;
+
+            if (!round) return;
+            if (this.guildPreference.isMultipleChoiceMode()) {
+                logger.info(
+                    `gid: ${this.guildID} | answerType changed to multiple choice, re-sending mc buttons`,
+                );
+                this.sendMultipleChoiceOptionsMessage();
+            } else {
+                round.interactionMessage = null;
+            }
+        };
+
         this.syncAllVoiceMembers();
     }
 
@@ -204,104 +219,7 @@ export default class GameSession extends Session {
         }
 
         if (this.guildPreference.isMultipleChoiceMode()) {
-            const locale = State.getGuildLocale(this.guildID);
-            const randomSong = round.song;
-            const correctChoice =
-                this.guildPreference.gameOptions.guessModeType ===
-                GuessModeType.ARTIST
-                    ? getLocalizedArtistName(round.song, locale)
-                    : getLocalizedSongName(round.song, locale, false);
-
-            const wrongChoices = await getMultipleChoiceOptions(
-                this.guildPreference.gameOptions.answerType,
-                this.guildPreference.gameOptions.guessModeType,
-                randomSong.members,
-                correctChoice,
-                randomSong.artistID,
-                locale,
-            );
-
-            let buttons: Array<Eris.InteractionButton> = [];
-            for (const choice of wrongChoices) {
-                const id = uuid.v4();
-                round.interactionIncorrectAnswerUUIDs[id] = 0;
-                buttons.push({
-                    type: 2,
-                    style: 1,
-                    label: choice.substring(0, 70),
-                    custom_id: id,
-                });
-            }
-
-            round.interactionCorrectAnswerUUID = uuid.v4() as string;
-            buttons.push({
-                type: 2,
-                style: 1,
-                label: correctChoice.substring(0, 70),
-                custom_id: round.interactionCorrectAnswerUUID,
-            });
-
-            buttons = _.shuffle(buttons);
-
-            let actionRows: Array<ButtonActionRow>;
-            switch (this.guildPreference.gameOptions.answerType) {
-                case AnswerType.MULTIPLE_CHOICE_EASY:
-                    actionRows = [
-                        {
-                            type: 1,
-                            components: buttons,
-                        },
-                    ];
-                    break;
-                case AnswerType.MULTIPLE_CHOICE_MED:
-                    actionRows = chunkArray(buttons, 3).map((x) => ({
-                        type: 1,
-                        components: x,
-                    }));
-                    break;
-                case AnswerType.MULTIPLE_CHOICE_HARD:
-                    actionRows = chunkArray(buttons, 4).map((x) => ({
-                        type: 1,
-                        components: x,
-                    }));
-                    break;
-                default:
-                    logger.error(
-                        `Unexpected answerType: ${this.guildPreference.gameOptions.answerType}`,
-                    );
-
-                    actionRows = [
-                        {
-                            type: 1,
-                            components: buttons,
-                        },
-                    ];
-                    break;
-            }
-
-            round.interactionComponents = actionRows;
-
-            round.interactionMessage = await sendInfoMessage(
-                new MessageContext(this.textChannelID, null, this.guildID),
-                {
-                    title: i18n.translate(
-                        this.guildID,
-                        "misc.interaction.guess.title",
-                        {
-                            songOrArtist:
-                                this.guildPreference.gameOptions
-                                    .guessModeType === GuessModeType.ARTIST
-                                    ? i18n.translate(
-                                          this.guildID,
-                                          "misc.artist",
-                                      )
-                                    : i18n.translate(this.guildID, "misc.song"),
-                        },
-                    ),
-                    components: actionRows,
-                    thumbnailUrl: KmqImages.LISTENING,
-                },
-            );
+            await this.sendMultipleChoiceOptionsMessage();
         }
 
         return round;
@@ -1649,5 +1567,108 @@ export default class GameSession extends Session {
             description: `${hiddenTimerInfo}\n\n${waitingFor}\n${remainingPlayers}`,
             thumbnailUrl: KmqImages.THUMBS_UP,
         };
+    }
+
+    private async sendMultipleChoiceOptionsMessage(): Promise<void> {
+        const locale = State.getGuildLocale(this.guildID);
+        const round = this.round;
+        if (!round) {
+            return;
+        }
+
+        const randomSong = round.song;
+        const correctChoice =
+            this.guildPreference.gameOptions.guessModeType ===
+            GuessModeType.ARTIST
+                ? getLocalizedArtistName(round.song, locale)
+                : getLocalizedSongName(round.song, locale, false);
+
+        const wrongChoices = await getMultipleChoiceOptions(
+            this.guildPreference.gameOptions.answerType,
+            this.guildPreference.gameOptions.guessModeType,
+            randomSong.members,
+            correctChoice,
+            randomSong.artistID,
+            locale,
+        );
+
+        let buttons: Array<Eris.InteractionButton> = [];
+        for (const choice of wrongChoices) {
+            const id = uuid.v4();
+            round.interactionIncorrectAnswerUUIDs[id] = 0;
+            buttons.push({
+                type: 2,
+                style: 1,
+                label: choice.substring(0, 70),
+                custom_id: id,
+            });
+        }
+
+        round.interactionCorrectAnswerUUID = uuid.v4() as string;
+        buttons.push({
+            type: 2,
+            style: 1,
+            label: correctChoice.substring(0, 70),
+            custom_id: round.interactionCorrectAnswerUUID,
+        });
+
+        buttons = _.shuffle(buttons);
+
+        let actionRows: Array<ButtonActionRow>;
+        switch (this.guildPreference.gameOptions.answerType) {
+            case AnswerType.MULTIPLE_CHOICE_EASY:
+                actionRows = [
+                    {
+                        type: 1,
+                        components: buttons,
+                    },
+                ];
+                break;
+            case AnswerType.MULTIPLE_CHOICE_MED:
+                actionRows = chunkArray(buttons, 3).map((x) => ({
+                    type: 1,
+                    components: x,
+                }));
+                break;
+            case AnswerType.MULTIPLE_CHOICE_HARD:
+                actionRows = chunkArray(buttons, 4).map((x) => ({
+                    type: 1,
+                    components: x,
+                }));
+                break;
+            default:
+                logger.error(
+                    `Unexpected answerType: ${this.guildPreference.gameOptions.answerType}`,
+                );
+
+                actionRows = [
+                    {
+                        type: 1,
+                        components: buttons,
+                    },
+                ];
+                break;
+        }
+
+        round.interactionComponents = actionRows;
+
+        round.interactionMessage = await sendInfoMessage(
+            new MessageContext(this.textChannelID, null, this.guildID),
+            {
+                title: i18n.translate(
+                    this.guildID,
+                    "misc.interaction.guess.title",
+                    {
+                        songOrArtist:
+                            this.guildPreference.gameOptions.guessModeType ===
+                            GuessModeType.ARTIST
+                                ? i18n.translate(this.guildID, "misc.artist")
+                                : i18n.translate(this.guildID, "misc.song"),
+                    },
+                ),
+                components: actionRows,
+                thumbnailUrl: KmqImages.LISTENING,
+            },
+        );
     }
 }
