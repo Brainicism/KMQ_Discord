@@ -42,6 +42,7 @@ import type SeekType from "../enums/option_types/seek_type";
 import type ShuffleType from "../enums/option_types/shuffle_type";
 import type SpecialType from "../enums/option_types/special_type";
 import type SubunitsPreference from "../enums/option_types/subunit_preference";
+import { isThisTypeNode } from "typescript";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("guild_preference");
@@ -208,6 +209,9 @@ export default class GuildPreference {
 
     /** Callback to reload songs */
     public reloadSongCallback: (() => Promise<void>) | undefined;
+
+    /** Callback to reload songs */
+    public answerTypeChangeCallback: (() => Promise<void>) | undefined;
 
     /** The guild preference cache */
     private static guildPreferencesCache: {
@@ -994,6 +998,16 @@ export default class GuildPreference {
                 logger.error(
                     `gid: ${this.guildID} | reloadSongCallback unexpectedly failed, session might not exist?`,
                 );
+            }
+        }
+
+        if (this.answerTypeChangeCallback) {
+            if (
+                updatedOptionsObjects
+                    ?.map((x) => x.name)
+                    .includes(GameOptionInternal.ANSWER_TYPE)
+            ) {
+                await this.answerTypeChangeCallback();
             }
         }
     }
