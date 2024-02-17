@@ -6,6 +6,7 @@ import {
     tryInteractionAcknowledge,
 } from "../../helpers/discord_utils";
 import { measureExecutionTime } from "../../helpers/utils";
+import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import ExcludeCommand from "../../commands/game_options/exclude";
 import FeedbackCommand from "../../commands/misc_commands/feedback";
@@ -22,6 +23,7 @@ import ProfileCommand from "../../commands/game_commands/profile";
 import Session from "../../structures/session";
 import State from "../../state";
 import i18n from "../../helpers/localization_manager";
+import type PrecheckArgs from "../../interfaces/precheck_args";
 
 const logger = new IPCLogger("interactionCreate");
 
@@ -167,19 +169,33 @@ export default async function interactionCreateHandler(
                 State.client.commandsHandlers[interaction.data.name];
 
             if (commandInteractionHandler?.processChatInputInteraction) {
+                const prechecks: Array<{
+                    checkFn: (
+                        precheckArgs: PrecheckArgs,
+                    ) => boolean | Promise<boolean>;
+                    errorMessage?: string;
+                }> = [
+                    {
+                        checkFn: CommandPrechecks.maintenancePrecheck,
+                        errorMessage: undefined,
+                    },
+                ];
+
                 if (commandInteractionHandler.preRunChecks) {
-                    for (const precheck of commandInteractionHandler.preRunChecks) {
-                        if (
-                            // eslint-disable-next-line no-await-in-loop
-                            !(await precheck.checkFn({
-                                messageContext,
-                                session,
-                                errorMessage: precheck.errorMessage,
-                                interaction,
-                            }))
-                        ) {
-                            return;
-                        }
+                    prechecks.push(...commandInteractionHandler.preRunChecks);
+                }
+
+                for (const precheck of prechecks) {
+                    if (
+                        // eslint-disable-next-line no-await-in-loop
+                        !(await precheck.checkFn({
+                            messageContext,
+                            session,
+                            errorMessage: precheck.errorMessage,
+                            interaction,
+                        }))
+                    ) {
+                        return;
                     }
                 }
 

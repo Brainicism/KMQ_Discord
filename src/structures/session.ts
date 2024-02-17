@@ -29,6 +29,7 @@ import Eris from "eris";
 import FactGenerator from "../fact_generator";
 import GameRound from "./game_round";
 import GuessModeType from "../enums/option_types/guess_mode_type";
+import KmqConfiguration from "../kmq_configuration";
 import ListeningRound from "./listening_round";
 import LocaleType from "../enums/locale_type";
 import MessageContext from "./message_context";
@@ -180,6 +181,16 @@ export default abstract class Session {
                     messageContext,
                 )} | ${this.sessionName()} starting`,
             );
+        }
+
+        if (KmqConfiguration.Instance.maintenanceModeEnabled()) {
+            logger.warn(
+                `${getDebugLogHeader(
+                    messageContext,
+                )} | Session ending due to maintenance mode `,
+            );
+            await this.endSession("Maintenance mode enabled", true);
+            return null;
         }
 
         this.sessionInitialized = true;

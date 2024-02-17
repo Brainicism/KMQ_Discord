@@ -87,6 +87,17 @@ export default class KmqWebServer {
             reply.code(200).send();
         });
 
+        httpServer.post("/reload-config", {}, async (request, reply) => {
+            if (request.ip !== "127.0.0.1") {
+                logger.error("Reload config attempted by non-allowed IP");
+                reply.code(401).send();
+                return;
+            }
+
+            await fleet.ipc.allClustersCommand("reload_config");
+            reply.code(200).send();
+        });
+
         httpServer.post("/voted", {}, async (request, reply) => {
             const requestAuthorizationToken = request.headers["authorization"];
             if (requestAuthorizationToken !== process.env.TOP_GG_WEBHOOK_AUTH) {
@@ -108,7 +119,7 @@ export default class KmqWebServer {
             {},
             async (request, reply) => {
                 if (request.ip !== "127.0.0.1") {
-                    logger.error("Clear restart attempted by non-allowed IP");
+                    logger.error("eval attempted by non-allowed IP");
                     reply.code(401).send();
                     return;
                 }
@@ -130,7 +141,7 @@ export default class KmqWebServer {
 
         httpServer.get("/ping", async (request, reply) => {
             if (request.ip !== "127.0.0.1") {
-                logger.error("Clear restart attempted by non-allowed IP");
+                logger.error("Ping attempted by non-allowed IP");
                 reply.code(401).send();
                 return;
             }
@@ -146,7 +157,7 @@ export default class KmqWebServer {
 
         httpServer.post("/reload_autocomplete", async (request, reply) => {
             if (request.ip !== "127.0.0.1") {
-                logger.error("Clear restart attempted by non-allowed IP");
+                logger.error("Reload autocomplete attempted by non-allowed IP");
                 reply.code(401).send();
                 return;
             }

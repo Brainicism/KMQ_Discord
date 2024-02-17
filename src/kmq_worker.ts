@@ -16,6 +16,7 @@ import AppCommandsAction from "./enums/app_command_action";
 import EnvType from "./enums/env_type";
 import EvalCommand from "./commands/admin/eval";
 import GeminiClient from "./helpers/gemini_client";
+import KmqConfiguration from "./kmq_configuration";
 import PlaylistManager from "./helpers/playlist_manager";
 import ReloadCommand from "./commands/admin/reload";
 import SIGINTHandler from "./events/process/SIGINT";
@@ -126,6 +127,10 @@ export default class BotWorker extends BaseClusterWorker {
                     activeListeners,
                 };
             }
+
+            case "reload_config":
+                KmqConfiguration.reload();
+                return null;
 
             case "clear_restart":
                 if (!State.restartNotification) {

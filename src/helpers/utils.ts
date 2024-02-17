@@ -196,6 +196,20 @@ export async function parseJsonFile(filePath: string): Promise<any> {
 }
 
 /**
+ * @param filePath - the file path of the JSON file
+ * @returns a Javascript object representation of the file
+ */
+export function parseJsonFileSync(filePath: string): any {
+    try {
+        // eslint-disable-next-line node/no-sync
+        const fileContents = fs.readFileSync(filePath).toString();
+        return JSON.parse(fileContents);
+    } catch (e) {
+        throw new Error(`Unable to read JSON file at: ${filePath}`);
+    }
+}
+
+/**
  * @param arr - The input array of strings
  * @returns a proper comma+'and' separated string
  */
@@ -569,6 +583,20 @@ export function getMention(userID: string): string {
 export async function pathExists(filePath: string): Promise<boolean> {
     try {
         await fs.promises.access(filePath);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+/**
+ * @param filePath - The file path
+ * @returns whether the path exists
+ */
+export function pathExistsSync(filePath: string): boolean {
+    try {
+        // eslint-disable-next-line node/no-sync
+        fs.accessSync(filePath);
         return true;
     } catch (e) {
         return false;

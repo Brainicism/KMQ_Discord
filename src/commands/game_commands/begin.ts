@@ -8,7 +8,6 @@ export default class BeginCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
         { checkFn: CommandPrechecks.notListeningPrecheck },
-        { checkFn: CommandPrechecks.maintenancePrecheck },
     ];
 
     call = async ({ message }: CommandArgs): Promise<void> => {
