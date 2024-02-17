@@ -1448,7 +1448,7 @@
                 "playerBanned": "Vous êtes banni de l'utilisation de KMQ. Pour faire appel, contactez le serveur de support officiel de KMQ à {{supportServer}}."
             },
             "maintenanceMode": {
-                "description": "KMQ est actuellement en maintenance, et de nouvelles parties ne peuvent pas être lancées. Revenez plus tard!",
+                "description": "KMQ est actuellement en maintenance. Revenez plus tard !",
                 "title": "Mode de maintenance"
             },
             "messageTooLong": "Le message de réponse était trop long, signalez cette erreur au serveur d'aide KMQ",
