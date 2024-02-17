@@ -42,7 +42,6 @@ import type SeekType from "../enums/option_types/seek_type";
 import type ShuffleType from "../enums/option_types/shuffle_type";
 import type SpecialType from "../enums/option_types/special_type";
 import type SubunitsPreference from "../enums/option_types/subunit_preference";
-import { isThisTypeNode } from "typescript";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("guild_preference");
