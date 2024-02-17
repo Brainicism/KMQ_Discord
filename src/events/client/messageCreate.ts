@@ -6,6 +6,7 @@ import {
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
+import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";
@@ -16,6 +17,7 @@ import i18n from "../../helpers/localization_manager";
 import validate from "../../helpers/validate";
 import type { GuildTextableMessage } from "../../types";
 import type ParsedMessage from "../../interfaces/parsed_message";
+import type PrecheckArgs from "../../interfaces/precheck_args";
 
 const logger = new IPCLogger("messageCreate");
 
@@ -150,19 +152,33 @@ export default async function messageCreateHandler(
                     : undefined,
             )
         ) {
+            const prechecks: Array<{
+                checkFn: (
+                    precheckArgs: PrecheckArgs,
+                ) => boolean | Promise<boolean>;
+                errorMessage?: string;
+            }> = [
+                {
+                    checkFn: CommandPrechecks.maintenancePrecheck,
+                    errorMessage: undefined,
+                },
+            ];
+
             if (invokedCommand.preRunChecks) {
-                for (const precheck of invokedCommand.preRunChecks) {
-                    if (
-                        // eslint-disable-next-line no-await-in-loop
-                        !(await precheck.checkFn({
-                            messageContext,
-                            session,
-                            errorMessage: precheck.errorMessage,
-                            parsedMessage,
-                        }))
-                    ) {
-                        return;
-                    }
+                prechecks.push(...invokedCommand.preRunChecks);
+            }
+
+            for (const precheck of prechecks) {
+                if (
+                    // eslint-disable-next-line no-await-in-loop
+                    !(await precheck.checkFn({
+                        messageContext,
+                        session,
+                        errorMessage: precheck.errorMessage,
+                        parsedMessage,
+                    }))
+                ) {
+                    return;
                 }
             }
 

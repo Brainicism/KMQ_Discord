@@ -1448,7 +1448,7 @@
                 "playerBanned": "U bent verbannen van het gebruik van KMQ. Voor bezwaren kunt u contact opnemen met de officiële KMQ-ondersteuningsserver op {{supportServer}}."
             },
             "maintenanceMode": {
-                "description": "KMQ is momenteel in onderhoud en nieuwe spellen kunnen niet worden gestart. Kom later terug!",
+                "description": "KMQ wordt momenteel onderhouden. Kom later terug!",
                 "title": "Onderhoudsmodus"
             },
             "messageTooLong": "Het antwoordbericht was te lang. Meld deze fout aan de KMQ-hulpdienst",

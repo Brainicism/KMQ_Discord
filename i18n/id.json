@@ -1448,7 +1448,7 @@
                 "playerBanned": "Anda dilarang menggunakan KMQ. Untuk banding, hubungi server dukungan KMQ resmi di {{supportServer}}."
             },
             "maintenanceMode": {
-                "description": "KMQ saat ini sedang dalam pemeliharaan, dan permainan baru tidak dapat dimulai. Periksa nanti!",
+                "description": "KMQ saat ini sedang dalam pemeliharaan. Periksa lagi nanti!",
                 "title": "Mode Pemeliharaan"
             },
             "messageTooLong": "Pesan balasan terlalu panjang, laporkan kesalahan ini ke server bantuan KMQ",
