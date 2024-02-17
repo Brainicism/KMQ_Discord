@@ -228,7 +228,7 @@ async function bootstrapDatabases(): Promise<void> {
 (async () => {
     if (require.main === module) {
         if (process.env.NODE_ENV === EnvType.CI) return;
-        await KmqConfiguration.reload();
+        KmqConfiguration.reload();
         if (!hasRequiredEnvironmentVariables()) {
             logger.error("Missing required environment variables, aborting...");
             process.exit(1);
