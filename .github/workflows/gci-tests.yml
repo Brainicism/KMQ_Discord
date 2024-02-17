@@ -34,7 +34,7 @@ jobs:
             - name: Setup MariaDB
               uses: getong/mariadb-action@v1.1
               with:
-                  mariadb version: "10.3.34"
+                  mariadb version: "10.6.17"
                   mysql root password: "$DB_PASS_CI"
             - name: Check for newly introduced environment variables
               run: python src/ci_checks/check_env_var.py

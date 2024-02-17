@@ -60,7 +60,7 @@ jobs:
             - name: Setup MariaDB
               uses: getong/mariadb-action@v1.1
               with:
-                  mariadb version: "10.3.34"
+                  mariadb version: "10.6.17"
                   mysql root password: "$DB_PASS_CI"
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v2
