@@ -53,8 +53,12 @@ const logger = new IPCLogger("kmq");
 config({ path: path.resolve(__dirname, "../.env") });
 
 export default class BotWorker extends BaseClusterWorker {
+    logHeader = (): string => `Cluster #${this.clusterID}`;
+
     handleCommand = async (commandName: string): Promise<any> => {
-        logger.info(`Received cluster command: ${commandName}`);
+        logger.info(
+            `${this.logHeader()} | Received cluster command: ${commandName}`,
+        );
         if (commandName.startsWith("eval")) {
             const evalString = commandName.substring(
                 commandName.indexOf("|") + 1,
@@ -78,7 +82,7 @@ export default class BotWorker extends BaseClusterWorker {
             };
 
             logger.info(
-                `Received restart notification: ${JSON.stringify(
+                `${this.logHeader()} | Received restart notification: ${JSON.stringify(
                     State.restartNotification,
                 )}`,
             );
@@ -134,23 +138,31 @@ export default class BotWorker extends BaseClusterWorker {
 
             case "clear_restart":
                 if (!State.restartNotification) {
-                    logger.warn("No active restart notification to clear");
+                    logger.warn(
+                        `${this.logHeader()} | No active restart notification to clear`,
+                    );
                     return null;
                 }
 
-                logger.info("Cleared pending restart notification");
+                logger.info(
+                    `${this.logHeader()} | Cleared pending restart notification `,
+                );
                 State.restartNotification = null;
                 return null;
             case "activate":
-                logger.info("Registering interactive client events");
+                logger.info(
+                    `${this.logHeader()} | Registering interactive client events`,
+                );
                 this.registerInteractiveClientEvents(State.client);
                 return null;
             case "fetch_app_command_ids":
-                logger.info("Fetching app command IDs");
+                logger.info(`${this.logHeader()} | Fetching app command IDs`);
                 State.commandToID = await fetchAppCommandIDs();
                 return null;
             case "reload_autocomplete_data":
-                logger.info("Reloading autocomplete data");
+                logger.info(
+                    `${this.logHeader()} | Reloading autocomplete data`,
+                );
                 reloadArtists();
                 reloadSongs();
                 return null;
@@ -206,12 +218,14 @@ export default class BotWorker extends BaseClusterWorker {
 
     // eslint-disable-next-line class-methods-use-this
     shutdown = async (done: () => void): Promise<void> => {
-        logger.debug("SHUTDOWN received, cleaning up...");
+        logger.debug(`${this.logHeader()} | SHUTDOWN received, cleaning up...`);
 
         const endSessionPromises = Object.keys(State.gameSessions).map(
             async (guildID) => {
                 const session = Session.getSession(guildID);
-                logger.debug(`gid: ${guildID} | Forcing session end`);
+                logger.debug(
+                    `${this.logHeader()} |  gid: ${guildID} | Forcing session end`,
+                );
                 await session.endSession("KMQ shutting down", true);
             },
         );
@@ -250,26 +264,30 @@ export default class BotWorker extends BaseClusterWorker {
             };
 
             logger.info(
-                `Soft restart ready to proceed: ${JSON.stringify(
+                `${this.logHeader()} | Soft restart ready to proceed: ${JSON.stringify(
                     State.restartNotification,
                 )}`,
             );
         });
 
         logger.info(
-            `Started worker ID: ${this.workerID} on cluster ID: ${this.clusterID}`,
+            `${this.logHeader()} | Started worker ID: ${this.workerID} on cluster ID: ${this.clusterID}`,
         );
 
-        logger.info("Registering cron tasks...");
+        logger.info(`${this.logHeader()} | Registering cron tasks...`);
         registerIntervals(this.clusterID);
 
-        logger.info("Registering client event handlers...");
+        logger.info(
+            `${this.logHeader()} | Registering client event handlers...`,
+        );
         this.registerClientEvents(State.client);
 
-        logger.info("Registering process event handlers...");
+        logger.info(
+            `${this.logHeader()} | Registering process event handlers...`,
+        );
         this.registerProcessEvents();
 
-        logger.info("Initializing Playlist manager...");
+        logger.info(`${this.logHeader()} | Initializing Playlist manager...`);
         State.playlistManager = new PlaylistManager();
         State.playlistManager.start();
 
@@ -281,25 +299,27 @@ export default class BotWorker extends BaseClusterWorker {
                 process.env.NODE_ENV as EnvType,
             )
         ) {
-            logger.info("Dry run finished successfully.");
+            logger.info(`${this.logHeader()} | Dry run finished successfully.`);
             State.ipc.totalShutdown();
             return;
         }
 
         if (process.env.MINIMAL_RUN !== "true") {
-            logger.info("Loading cached application data...");
+            logger.info(
+                `${this.logHeader()} | Loading cached application data...`,
+            );
             reloadCaches();
         }
 
-        logger.info("Updating bot's status..");
+        logger.info(`${this.logHeader()} | Updating bot's status..`);
         updateBotStatus();
         logger.info(
-            `Logged in as '${State.client.user.username}'! in '${
+            `${this.logHeader()} | Logged in as '${State.client.user.username}'! in '${
                 process.env.NODE_ENV
             }' mode (${durationSeconds(State.processStartTime, Date.now())}s)`,
         );
 
-        logger.info("Reloading app commands");
+        logger.info(`${this.logHeader()} | Reloading app commands`);
         updateAppCommands(AppCommandsAction.RELOAD);
     }
 }
