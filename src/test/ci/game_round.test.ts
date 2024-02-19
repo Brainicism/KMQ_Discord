@@ -269,6 +269,12 @@ describe("game round", () => {
             });
         });
 
+        describe("has exclusively unwanted punctation or symbols", () => {
+            it("does not modify the input", () => {
+                assert.strictEqual(normalizePunctuationInName("!? "), "!? ");
+            });
+        });
+
         describe("has punctuation to replace", () => {
             it("replaces the punctuation with the correct replacement", () => {
                 assert.strictEqual(
