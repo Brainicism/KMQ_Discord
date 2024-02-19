@@ -79,24 +79,6 @@ export function normalizePunctuationInName(name: string): string {
 }
 
 /**
- * Takes in an artist name and removes the characters in the predefined list
- * @param name - the artist name
- * @returns The cleaned artist name
- */
-export function cleanArtistName(name: string): string {
-    let cleanName = name.toLowerCase().trim();
-
-    for (const characterReplacement of CHARACTER_REPLACEMENTS) {
-        cleanName = cleanName.replace(
-            characterReplacement.pattern,
-            characterReplacement.replacement,
-        );
-    }
-
-    return cleanName;
-}
-
-/**
  * @param name - the name of the song/artist
  * @returns The hint for the round
  * */
@@ -691,9 +673,9 @@ export default class GameRound extends Round {
      * @returns whether or not the guess was correct
      */
     private checkArtistGuess(message: string): GuessCorrectness {
-        const guess = cleanArtistName(message);
+        const guess = normalizePunctuationInName(message);
         const cleanedArtistAliases = this.acceptedArtistAnswers.map((x) =>
-            cleanArtistName(x),
+            normalizePunctuationInName(x),
         );
 
         return {

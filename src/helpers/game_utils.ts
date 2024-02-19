@@ -1,10 +1,7 @@
 import { IPCLogger } from "../logger";
 import { SHADOW_BANNED_ARTIST_IDS } from "../constants";
-import {
-    cleanArtistName,
-    normalizePunctuationInName,
-} from "../structures/game_round";
 import { containsHangul, md5Hash } from "./utils";
+import { normalizePunctuationInName } from "../structures/game_round";
 import { sql } from "kysely";
 import AnswerType from "../enums/option_types/answer_type";
 import GameType from "../enums/game_type";
@@ -267,8 +264,8 @@ export async function getMatchingGroupNames(
             const matchingAlias = Object.entries(State.aliases.artist).find(
                 (artistAliasTuple) =>
                     artistAliasTuple[1]
-                        .map((x) => cleanArtistName(x))
-                        .includes(cleanArtistName(groupName)),
+                        .map((x) => normalizePunctuationInName(x))
+                        .includes(normalizePunctuationInName(groupName)),
             );
 
             if (matchingAlias) {
