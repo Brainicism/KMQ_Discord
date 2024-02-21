@@ -80,6 +80,11 @@
                 "title": "Mulai Diabaikan"
             }
         },
+        "botlanguage": {
+            "help": {
+                "name": "bahasa bot"
+            }
+        },
         "botnews": {
             "help": {
                 "description": "Menampilkan pembaruan terbaru untuk KMQ.",
@@ -1341,11 +1346,6 @@
                 "hours": "Anda dapat memilih dalam **{{hours}}**.",
                 "minutes": "Anda dapat memilih dalam **{{minutes}}**.",
                 "seconds": "Anda dapat memilih dalam **{{seconds}}**."
-            }
-        },
-        "botlanguage": {
-            "help": {
-                "name": "bahasa bot"
             }
         }
     },

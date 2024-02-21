@@ -80,6 +80,11 @@
                 "title": "开始被忽略"
             }
         },
+        "botlanguage": {
+            "help": {
+                "name": "机器人语言"
+            }
+        },
         "botnews": {
             "help": {
                 "description": "显示最新的KMQ更新。",
@@ -1341,11 +1346,6 @@
                 "hours": "你可以在 **{{hours}}** 内投票。",
                 "minutes": "你可以在 **{{minutes}}** 内投票。",
                 "seconds": "你可以在 **{{seconds}}** 内投票。"
-            }
-        },
-        "botlanguage": {
-            "help": {
-                "name": "机器人语言"
             }
         }
     },

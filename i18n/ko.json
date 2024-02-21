@@ -80,6 +80,11 @@
                 "title": "게임 시작 무시"
             }
         },
+        "botlanguage": {
+            "help": {
+                "name": "봇 언어"
+            }
+        },
         "botnews": {
             "help": {
                 "description": "KMQ에 대한 최신 업데이트를 표시합니다.",
@@ -1341,11 +1346,6 @@
                 "hours": "**{{hours}}** 후에 투표할 수 있습니다.",
                 "minutes": "**{{minutes}}** 후에 투표할 수 있습니다.",
                 "seconds": "**{{seconds}}** 후에 투표할 수 있습니다."
-            }
-        },
-        "botlanguage": {
-            "help": {
-                "name": "봇 언어"
             }
         }
     },

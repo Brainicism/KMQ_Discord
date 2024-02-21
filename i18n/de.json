@@ -80,6 +80,11 @@
                 "title": "Beginn ignoriert"
             }
         },
+        "botlanguage": {
+            "help": {
+                "name": "botsprache"
+            }
+        },
         "botnews": {
             "help": {
                 "description": "Zeigt die neuesten Updates von KMQ an.",
@@ -1341,11 +1346,6 @@
                 "hours": "Du kannst in **{{hours}}** abstimmen.",
                 "minutes": "Du kannst in **{{minutes}}** abstimmen.",
                 "seconds": "Du kannst in **{{seconds}}** Sekunden abstimmen."
-            }
-        },
-        "botlanguage": {
-            "help": {
-                "name": "botsprache"
             }
         }
     },

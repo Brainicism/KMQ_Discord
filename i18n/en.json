@@ -80,6 +80,11 @@
                 "title": "Begin Ignored"
             }
         },
+        "botlanguage": {
+            "help": {
+                "name": "botlanguage"
+            }
+        },
         "botnews": {
             "help": {
                 "description": "Displays the latest updates to KMQ.",
@@ -1239,11 +1244,6 @@
         "spotify": {
             "help": {
                 "name": "spotify"
-            }
-        },
-        "botlanguage": {
-            "help": {
-                "name": "botlanguage"
             }
         },
         "stats": {

@@ -80,6 +80,11 @@
                 "title": "Ignorado Iniciado"
             }
         },
+        "botlanguage": {
+            "help": {
+                "name": "idioma do bot"
+            }
+        },
         "botnews": {
             "help": {
                 "description": "Mostra as atualizações mais recentes do KMQ.",
@@ -1341,11 +1346,6 @@
                 "hours": "Você poderá votar em **{{hours}}**.",
                 "minutes": "Você poderá votar em **{{minutes}}**.",
                 "seconds": "Você poderá votar em **{{seconds}}**."
-            }
-        },
-        "botlanguage": {
-            "help": {
-                "name": "idioma do bot"
             }
         }
     },
