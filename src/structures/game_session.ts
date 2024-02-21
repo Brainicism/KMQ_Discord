@@ -167,7 +167,7 @@ export default class GameSession extends Session {
             const round = this.round;
 
             if (!round) return;
-            if (this.guildPreference.isMultipleChoiceMode()) {
+            if (this.isMultipleChoiceMode()) {
                 logger.info(
                     `gid: ${this.guildID} | answerType changed to multiple choice, re-sending mc buttons`,
                 );
@@ -208,7 +208,7 @@ export default class GameSession extends Session {
             return null;
         }
 
-        if (this.guildPreference.isHiddenMode()) {
+        if (this.isHiddenMode()) {
             // Show players that haven't guessed and a button to guess
             round.interactionMessage = await sendInfoMessage(
                 new MessageContext(this.textChannelID, null, this.guildID),
@@ -218,7 +218,7 @@ export default class GameSession extends Session {
             this.startHiddenUpdateTimer();
         }
 
-        if (this.guildPreference.isMultipleChoiceMode()) {
+        if (this.isMultipleChoiceMode()) {
             await this.sendMultipleChoiceOptionsMessage();
         }
 
@@ -244,7 +244,7 @@ export default class GameSession extends Session {
             return;
         }
 
-        const isHidden = this.guildPreference.isHiddenMode();
+        const isHidden = this.isHiddenMode();
         if (guessResult.correct) {
             guessResult.correctGuessers = (
                 guessResult.correctGuessers ?? []
@@ -257,7 +257,7 @@ export default class GameSession extends Session {
 
         this.stopHiddenUpdateTimer();
 
-        if (this.guildPreference.isHiddenMode()) {
+        if (this.isHiddenMode()) {
             if (!guessResult.correct && round.correctGuessers.length > 0) {
                 // At least one person guessed correctly but someone didn't submit a /guess,
                 // which led to the timer ending and guessResult.correct being false
@@ -361,7 +361,7 @@ export default class GameSession extends Session {
                 messageContext,
                 this.songSelector.getUniqueSongCounter(this.guildPreference),
                 playerRoundResults,
-                this.guildPreference.isHiddenMode(),
+                this.isHiddenMode(),
             )}${scoreboardTitle}`;
 
             const correctGuess = playerRoundResults.length > 0;
@@ -379,7 +379,7 @@ export default class GameSession extends Session {
                 round,
                 description,
                 embedColor,
-                correctGuess && !this.guildPreference.isMultipleChoiceMode(),
+                correctGuess && !this.isMultipleChoiceMode(),
                 remainingDuration,
             );
 
@@ -542,7 +542,7 @@ export default class GameSession extends Session {
             .execute();
 
         // commit session's song plays and correct guesses
-        if (!this.guildPreference.isMultipleChoiceMode()) {
+        if (!this.isMultipleChoiceMode()) {
             await this.storeSongStats();
         }
 
@@ -576,11 +576,11 @@ export default class GameSession extends Session {
             guess,
             createdAt,
             this.guildPreference.gameOptions.guessModeType,
-            this.guildPreference.isMultipleChoiceMode(),
+            this.isMultipleChoiceMode(),
             this.guildPreference.typosAllowed(),
         );
 
-        if (this.guildPreference.isHiddenMode()) {
+        if (this.isHiddenMode()) {
             // Determine whether to wait for more guesses
             if (
                 this.scoreboard.getRemainingPlayers(
@@ -598,8 +598,7 @@ export default class GameSession extends Session {
 
         if (
             pointsEarned > 0 ||
-            (this.guildPreference.isHiddenMode() &&
-                round.correctGuessers.length > 0)
+            (this.isHiddenMode() && round.correctGuessers.length > 0)
         ) {
             // If not hidden, someone guessed correctly
             // If hidden, everyone guessed and at least one person was right
@@ -636,10 +635,7 @@ export default class GameSession extends Session {
                 .execute();
 
             await this.startRound(messageContext);
-        } else if (
-            this.guildPreference.isMultipleChoiceMode() ||
-            this.guildPreference.isHiddenMode()
-        ) {
+        } else if (this.isMultipleChoiceMode() || this.isHiddenMode()) {
             // If hidden or multiple choice, everyone guessed and no one was right
             if (
                 setDifference(
@@ -1460,7 +1456,11 @@ export default class GameSession extends Session {
                         round,
                         getNumParticipants(this.voiceChannelID),
                         lastGuesserStreak,
-                        getTimeToGuessMs(correctGuesser, round, this.gameType),
+                        getTimeToGuessMs(
+                            correctGuesser,
+                            round,
+                            this.isHiddenMode(),
+                        ),
                         guessPosition,
                         await userBonusIsActive(correctGuesser.id),
                         correctGuesser.id,

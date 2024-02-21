@@ -1,5 +1,6 @@
 import * as discord_utils from "../../helpers/discord_utils";
 import * as management_utils from "../../helpers/management_utils";
+import AnswerType from "../../enums/option_types/answer_type";
 import CommandPrechecks from "../../command_prechecks";
 import GameSession from "../../structures/game_session";
 import GameType from "../../enums/game_type";
@@ -494,187 +495,19 @@ describe("command prechecks", () => {
         });
     });
 
-    describe("answerHiddenPrecheck", () => {
+    describe("timerHiddenPrecheck", () => {
         const GUILD_ID = "123";
 
-        describe("hidden game session", () => {
+        describe("hidden answer type", () => {
+            const guildPreference = new GuildPreference(GUILD_ID);
+            guildPreference.setAnswerType(AnswerType.HIDDEN);
             const session = new GameSession(
-                new GuildPreference(GUILD_ID),
-                "123",
-                "1234",
-                GUILD_ID,
-                mockKmqMember,
-                GameType.HIDDEN,
-            );
-
-            describe("change to multiple choice during hidden game via default reset", () => {
-                it("should return false", () => {
-                    assert.strictEqual(
-                        CommandPrechecks.answerHiddenPrecheck({
-                            session,
-                            messageContext,
-                            parsedMessage: {
-                                components: [],
-                                action: "answer",
-                                argument: "",
-                                message: "",
-                            },
-                        }),
-                        false,
-                    );
-                });
-            });
-
-            describe("change to multiple choice during hidden game via explicit multiple choice", () => {
-                it("should return false", () => {
-                    assert.strictEqual(
-                        CommandPrechecks.answerHiddenPrecheck({
-                            session,
-                            messageContext,
-                            parsedMessage: {
-                                components: ["easy"],
-                                action: "answer",
-                                argument: "",
-                                message: "",
-                            },
-                        }),
-                        false,
-                    );
-                });
-            });
-
-            describe("change to typing typos", () => {
-                it("should return true", () => {
-                    assert.strictEqual(
-                        CommandPrechecks.answerHiddenPrecheck({
-                            session,
-                            messageContext,
-                            parsedMessage: {
-                                components: ["typingtypos"],
-                                action: "answer",
-                                argument: "",
-                                message: "",
-                            },
-                        }),
-                        true,
-                    );
-                });
-            });
-
-            describe("changing non-answer option", () => {
-                it("should return true", () => {
-                    assert.strictEqual(
-                        CommandPrechecks.answerHiddenPrecheck({
-                            session,
-                            messageContext,
-                            parsedMessage: {
-                                components: [],
-                                action: "timer",
-                                argument: "",
-                                message: "",
-                            },
-                        }),
-                        true,
-                    );
-                });
-            });
-        });
-
-        describe("non-hidden game session", () => {
-            const session = new GameSession(
-                new GuildPreference(GUILD_ID),
+                guildPreference,
                 "123",
                 "1234",
                 GUILD_ID,
                 mockKmqMember,
                 GameType.CLASSIC,
-            );
-
-            describe("change to multiple choice via default reset", () => {
-                it("should return true", () => {
-                    assert.strictEqual(
-                        CommandPrechecks.answerHiddenPrecheck({
-                            session,
-                            messageContext,
-                            parsedMessage: {
-                                components: [],
-                                action: "answer",
-                                argument: "",
-                                message: "",
-                            },
-                        }),
-                        true,
-                    );
-                });
-            });
-
-            describe("change to multiple choice via explicit multiple choice", () => {
-                it("should return true", () => {
-                    assert.strictEqual(
-                        CommandPrechecks.answerHiddenPrecheck({
-                            session,
-                            messageContext,
-                            parsedMessage: {
-                                components: ["easy"],
-                                action: "answer",
-                                argument: "",
-                                message: "",
-                            },
-                        }),
-                        true,
-                    );
-                });
-            });
-
-            describe("change to typing typos", () => {
-                it("should return true", () => {
-                    assert.strictEqual(
-                        CommandPrechecks.answerHiddenPrecheck({
-                            session,
-                            messageContext,
-                            parsedMessage: {
-                                components: ["typingtypos"],
-                                action: "answer",
-                                argument: "",
-                                message: "",
-                            },
-                        }),
-                        true,
-                    );
-                });
-            });
-
-            describe("changing non-answer option", () => {
-                it("should return true", () => {
-                    assert.strictEqual(
-                        CommandPrechecks.answerHiddenPrecheck({
-                            session,
-                            messageContext,
-                            parsedMessage: {
-                                components: [],
-                                action: "timer",
-                                argument: "",
-                                message: "",
-                            },
-                        }),
-                        true,
-                    );
-                });
-            });
-        });
-    });
-
-    describe("timerHiddenPrecheck", () => {
-        const GUILD_ID = "123";
-
-        describe("hidden game session", () => {
-            const session = new GameSession(
-                new GuildPreference(GUILD_ID),
-                "123",
-                "1234",
-                GUILD_ID,
-                mockKmqMember,
-                GameType.HIDDEN,
             );
 
             describe("change timer to another value", () => {
@@ -732,9 +565,11 @@ describe("command prechecks", () => {
             });
         });
 
-        describe("non-hidden game session", () => {
+        describe("non-hidden answer type", () => {
+            const guildPreference = new GuildPreference(GUILD_ID);
+            guildPreference.setAnswerType(AnswerType.MULTIPLE_CHOICE_MED);
             const session = new GameSession(
-                new GuildPreference(GUILD_ID),
+                guildPreference,
                 "123",
                 "1234",
                 GUILD_ID,
