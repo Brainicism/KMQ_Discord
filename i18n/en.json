@@ -1241,6 +1241,11 @@
                 "name": "spotify"
             }
         },
+        "botlanguage": {
+            "help": {
+                "name": "botlanguage"
+            }
+        },
         "stats": {
             "description": "Detailed bot status: {{link}}",
             "failure": {
