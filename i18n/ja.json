@@ -1342,6 +1342,11 @@
                 "minutes": "**{{minutes}}** 後に投票できます。",
                 "seconds": "**{{seconds}}** 後に投票できます。"
             }
+        },
+        "botlanguage": {
+            "help": {
+                "name": "ボット言語"
+            }
         }
     },
     "fact": {

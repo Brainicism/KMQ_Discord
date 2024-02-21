@@ -1342,6 +1342,11 @@
                 "minutes": "Du kannst in **{{minutes}}** abstimmen.",
                 "seconds": "Du kannst in **{{seconds}}** Sekunden abstimmen."
             }
+        },
+        "botlanguage": {
+            "help": {
+                "name": "botsprache"
+            }
         }
     },
     "fact": {

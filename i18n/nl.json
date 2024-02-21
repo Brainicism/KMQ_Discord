@@ -1342,6 +1342,11 @@
                 "minutes": "U kunt stemmen in **{{minutes}}**.",
                 "seconds": "Je kunt stemmen in **{{seconds}}**."
             }
+        },
+        "botlanguage": {
+            "help": {
+                "name": "bot-taal"
+            }
         }
     },
     "fact": {

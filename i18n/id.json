@@ -1342,6 +1342,11 @@
                 "minutes": "Anda dapat memilih dalam **{{minutes}}**.",
                 "seconds": "Anda dapat memilih dalam **{{seconds}}**."
             }
+        },
+        "botlanguage": {
+            "help": {
+                "name": "bahasa bot"
+            }
         }
     },
     "fact": {

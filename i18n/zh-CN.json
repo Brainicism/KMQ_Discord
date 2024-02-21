@@ -1342,6 +1342,11 @@
                 "minutes": "你可以在 **{{minutes}}** 内投票。",
                 "seconds": "你可以在 **{{seconds}}** 内投票。"
             }
+        },
+        "botlanguage": {
+            "help": {
+                "name": "机器人语言"
+            }
         }
     },
     "fact": {

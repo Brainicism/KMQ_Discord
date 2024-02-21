@@ -1342,6 +1342,11 @@
                 "minutes": "Puedes votar en **{{minutes}}**.",
                 "seconds": "Puedes votar en **{{seconds}}**."
             }
+        },
+        "botlanguage": {
+            "help": {
+                "name": "botlanguage"
+            }
         }
     },
     "fact": {
