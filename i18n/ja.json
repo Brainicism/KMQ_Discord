@@ -80,6 +80,11 @@
                 "title": "無視された開始"
             }
         },
+        "botlanguage": {
+            "help": {
+                "name": "ボット言語"
+            }
+        },
         "botnews": {
             "help": {
                 "description": "KMQの最新の更新を表示します。",

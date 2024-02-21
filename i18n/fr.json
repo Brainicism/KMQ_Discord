@@ -80,6 +80,11 @@
                 "title": "Commencer ignoré"
             }
         },
+        "botlanguage": {
+            "help": {
+                "name": "langue de bot"
+            }
+        },
         "botnews": {
             "help": {
                 "description": "Affiche les dernières mises à jour de KMQ.",
