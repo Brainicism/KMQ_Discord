@@ -45,6 +45,7 @@
             "help": {
                 "description": "Choisissez comment répondre : en tapant votre réponse, ou via un choix multiple. Les options sont les suivantes : `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}`, et `{{hard}}`.",
                 "example": {
+                    "hidden": "Répondez avec /guess avant que le minuteur ne s'arrête",
                     "multipleChoice": "Cliquez sur le bouton parmi {{optionCount}} options à choix multiples pour deviner. Une pénalité de {{penalty}} EXP sera appliquée.",
                     "typing": "Tapez votre réponse dans le chat pour deviner.",
                     "typingTypos": "Tapez votre réponse dans le chat pour deviner. Les petites fautes de frappe seront considérées comme correctes. Une pénalité de {{penalty}} EXP sera appliquée."
@@ -861,7 +862,6 @@
                 "example": {
                     "classic": "Démarrez une partie classique de KMQ (tapez d'abord votre réponse pour obtenir un point)",
                     "elimination": "Démarrez une partie d'élimination de KMQ où chaque joueur commence avec {{lives}} vies",
-                    "hidden": "Démarrer une partie cachée de KMQ, où les joueurs ne peuvent répondre qu'avec /guess",
                     "teams": "Divisez-vous en d'équipes et voyez sur qui vous pouvez compter pour vous aider à gagner!"
                 },
                 "interaction": {
@@ -1607,7 +1607,7 @@
             "debugServer": "Vous ne pouvez pas faire cela dans ce serveur.",
             "differentVC": "Vous devez être dans le même canal vocal que le bot pour utiliser cette commande.",
             "notGameSession": "Vous ne pouvez pas faire cela pendant une session de jeu.",
-            "notHidden": "Vous ne pouvez pas faire cela pendant une partie cachée.",
+            "notHidden": "Vous ne pouvez pas faire ça pendant une manche cachée",
             "notListeningSession": "Vous ne pouvez pas faire cela pendant une session d'écoute.",
             "notPlaylist": "Vous ne pouvez pas modifier cette option lors de la lecture à partir d'une playlist. Utilisez {{playlistResetCommand}} avant de modifier cette option.",
             "title": "Attendez..."

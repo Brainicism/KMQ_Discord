@@ -45,6 +45,7 @@
             "help": {
                 "description": "Elige cómo responder: escribiendo tu respuesta o mediante opciones múltiples. Las opciones son las siguientes: `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}` y `{{hard}}`",
                 "example": {
+                    "hidden": "Responde con /guess antes de que acabe el tiempo",
                     "multipleChoice": "Haz clic en el botón de una de las {{optionCount}} opciones de opciones múltiples para adivinar. Se aplicará una penalización de {{penalty}} EXP",
                     "typing": "Escribe tu respuesta en el chat para adivinar",
                     "typingTypos": "Escribe tu respuesta en el chat para adivinar. Se aceptarán pequeños errores de escritura. Se aplicará una penalización de {{penalty}} EXP"
@@ -861,7 +862,6 @@
                 "example": {
                     "classic": "Comienza un juego clásico de KMQ (escribe tu respuesta primero para obtener un punto)",
                     "elimination": "Comienza un juego de eliminación de KMQ donde cada jugador comienza con {{lives}} vidas",
-                    "hidden": "Comienza un juego oculto de KMQ, donde los jugadores solo pueden responder con /guess",
                     "teams": "Divídete en tantos equipos como quieras y ve quién puede ayudarte a ganar!"
                 },
                 "interaction": {
@@ -1607,7 +1607,7 @@
             "debugServer": "No puedes hacer eso en este servidor.",
             "differentVC": "Debes estar en el mismo canal de voz que el bot para usar este comando.",
             "notGameSession": "No puedes hacer eso mientras estás en una sesión de juego.",
-            "notHidden": "No puedes hacer eso durante un juego oculto.",
+            "notHidden": "No puedes hacer eso durante una ronda oculta",
             "notListeningSession": "No puedes hacer eso mientras estás en una sesión de escucha.",
             "notPlaylist": "No puedes cambiar esa opción cuando reproduces desde una lista de reproducción. Usa {{playlistResetCommand}} antes de cambiar esta opción.",
             "title": "Espera..."

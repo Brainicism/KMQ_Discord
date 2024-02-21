@@ -45,10 +45,10 @@
             "help": {
                 "description": "Choose how to answer: by typing your answer, or via multiple choice. Options are the following: `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}`, and `{{hard}}`",
                 "example": {
+                    "hidden": "Answer with /guess before the timer runs out",
                     "multipleChoice": "Click on the button from {{optionCount}} multiple choice options to guess. {{penalty}} EXP penalty will be applied",
                     "typing": "Type your answer in the chat to guess",
-                    "typingTypos": "Type your answer in the chat to guess. Small typos will be marked as correct. {{penalty}} EXP penalty will be applied",
-                    "hidden": "Answer with /guess before the timer runs out"
+                    "typingTypos": "Type your answer in the chat to guess. Small typos will be marked as correct. {{penalty}} EXP penalty will be applied"
                 },
                 "interaction": {
                     "answerOption": "How to answer in-game",

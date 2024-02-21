@@ -1173,6 +1173,11 @@ commander@^11.1.0:
   resolved "https://registry.yarnpkg.com/commander/-/commander-11.1.0.tgz#62fdce76006a68e5c1ab3314dc92e800eb83d906"
   integrity sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==
 
+commander@^12.0.0:
+  version "12.0.0"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-12.0.0.tgz#b929db6df8546080adfd004ab215ed48cf6f2592"
+  integrity sha512-MwVNWlYjDTtOjX5PiD7o5pK0UrFU/OYgcJfjjK4RaHZETNtjJqrZa9Y9ds88+A+f+d5lv+561eZ+yCKoS3gbAA==
+
 comment-parser@1.4.1:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/comment-parser/-/comment-parser-1.4.1.tgz#bdafead37961ac079be11eb7ec65c4d021eaf9cc"
@@ -2418,15 +2423,15 @@ https-proxy-agent@^7.0.1:
     agent-base "^7.0.2"
     debug "4"
 
-i18n-ai-translate@^1.2.2:
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/i18n-ai-translate/-/i18n-ai-translate-1.2.2.tgz#a03dc0c36293494d0d68a5f97786681570f9776f"
-  integrity sha512-cwmbA0sa2HuvQj+KIkFyXttfKSZEb8p4pAN3ez30PBdR7bBdtZgUUGOaNXQ6+dTA4QU/FzQ1Mp+xrfuCEyissQ==
+i18n-ai-translate@^1.2.4:
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/i18n-ai-translate/-/i18n-ai-translate-1.2.4.tgz#ee67eb583a63ae2f5a056d8d1c6b4a2f3d5c06c7"
+  integrity sha512-EGdo+3FEU54My9KnhlF/QCij4g4IVCf0tmFZqRdV36qrKUkkME4Mv/0jgZBof9xfJWxSYpO9WkI6eW9bQuZ1wg==
   dependencies:
     "@google/generative-ai" "^0.2.0"
     "@types/flat" "^5.0.5"
     "@types/node" "^20.11.16"
-    commander "^11.1.0"
+    commander "^12.0.0"
     dotenv "^16.4.1"
     flat "5.0.2"
     iso-639-1 "^3.1.0"
