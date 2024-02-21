@@ -3,7 +3,6 @@ import State from "../state";
 import i18n from "../helpers/localization_manager";
 import type { ButtonActionRow } from "../types";
 import type Eris from "eris";
-import type GameType from "../enums/game_type";
 import type MessageContext from "./message_context";
 import type PlayerRoundResult from "../interfaces/player_round_result";
 import type QueriedSong from "../interfaces/queried_song";
@@ -76,7 +75,7 @@ export default abstract class Round {
         messageContext: MessageContext,
         uniqueSongCounter: UniqueSongCounter,
         playerRoundResults: Array<PlayerRoundResult>,
-        gameType?: GameType,
+        isHidden?: boolean,
     ): string;
 
     abstract getEndRoundColor(

@@ -6,8 +6,8 @@ import {
     tryCreateInteractionErrorAcknowledgement,
     tryCreateInteractionSuccessAcknowledgement,
 } from "../../helpers/discord_utils";
+import AnswerType from "../../enums/option_types/answer_type";
 import Eris from "eris";
-import GameType from "../../enums/game_type";
 import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
@@ -106,7 +106,7 @@ export default class GuessCommand implements BaseCommand {
         }
 
         if (session && session.isGameSession()) {
-            if (session.gameType !== GameType.HIDDEN) {
+            if (!session.isHiddenMode()) {
                 await tryCreateInteractionErrorAcknowledgement(
                     interaction,
                     i18n.translate(
@@ -119,8 +119,8 @@ export default class GuessCommand implements BaseCommand {
                         {
                             guessCommand: clickableSlashCommand(COMMAND_NAME),
                             playHiddenCommand: clickableSlashCommand(
-                                "play",
-                                GameType.HIDDEN,
+                                "answer",
+                                AnswerType.HIDDEN,
                             ),
                         },
                     ),

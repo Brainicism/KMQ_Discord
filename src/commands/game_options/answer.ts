@@ -28,7 +28,6 @@ export default class AnswerCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
         { checkFn: CommandPrechecks.notListeningPrecheck },
-        { checkFn: CommandPrechecks.answerHiddenPrecheck },
     ];
 
     validations = {
@@ -54,6 +53,7 @@ export default class AnswerCommand implements BaseCommand {
                 easy: `\`${AnswerType.MULTIPLE_CHOICE_EASY}\``,
                 medium: `\`${AnswerType.MULTIPLE_CHOICE_MED}\``,
                 hard: `\`${AnswerType.MULTIPLE_CHOICE_HARD}\``,
+                hidden: `\`${AnswerType.HIDDEN}\``,
             },
         ),
         examples: [
@@ -134,6 +134,16 @@ export default class AnswerCommand implements BaseCommand {
                             ]
                         }`,
                     },
+                ),
+            },
+            {
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} answer:hidden`,
+                explanation: i18n.translate(
+                    guildID,
+                    "command.answer.help.example.hidden",
                 ),
             },
         ],

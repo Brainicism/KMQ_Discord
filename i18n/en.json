@@ -47,7 +47,8 @@
                 "example": {
                     "multipleChoice": "Click on the button from {{optionCount}} multiple choice options to guess. {{penalty}} EXP penalty will be applied",
                     "typing": "Type your answer in the chat to guess",
-                    "typingTypos": "Type your answer in the chat to guess. Small typos will be marked as correct. {{penalty}} EXP penalty will be applied"
+                    "typingTypos": "Type your answer in the chat to guess. Small typos will be marked as correct. {{penalty}} EXP penalty will be applied",
+                    "hidden": "Answer with /guess before the timer runs out"
                 },
                 "interaction": {
                     "answerOption": "How to answer in-game",
@@ -861,7 +862,6 @@
                 "example": {
                     "classic": "Start a classic game of KMQ (type in your guess first to get a point)",
                     "elimination": "Start an elimination game of KMQ where each player starts with {{lives}} lives",
-                    "hidden": "Start a hidden game of KMQ, where players can only answer with /guess",
                     "teams": "Split up into as many teams as you want and see who you can depend on to help you win!"
                 },
                 "interaction": {
@@ -1607,7 +1607,7 @@
             "debugServer": "You can't do that in this server.",
             "differentVC": "You must be in the same voice channel as the bot to use this command.",
             "notGameSession": "You can't do that while in a game session.",
-            "notHidden": "You can't do that during a hidden game.",
+            "notHidden": "You can't do that during a hidden round.",
             "notListeningSession": "You can't do that while in a listening session.",
             "notPlaylist": "You can't change that option when playing from a playlist. Use {{playlistResetCommand}} before changing this option.",
             "title": "Wait..."

@@ -38,7 +38,6 @@ import {
     tryCreateInteractionSuccessAcknowledgement,
     voicePermissionsCheck,
 } from "../../helpers/discord_utils";
-import AnswerType from "../../enums/option_types/answer_type";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameSession from "../../structures/game_session";
@@ -322,13 +321,6 @@ export default class PlayCommand implements BaseCommand {
                     "command.play.help.example.teams",
                 ),
             },
-            {
-                example: clickableSlashCommand(COMMAND_NAME, GameType.HIDDEN),
-                explanation: i18n.translate(
-                    guildID,
-                    "command.play.help.example.hidden",
-                ),
-            },
         ],
     });
 
@@ -356,20 +348,6 @@ export default class PlayCommand implements BaseCommand {
                             }),
                             {},
                         ),
-                    type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
-                },
-                {
-                    name: GameType.HIDDEN,
-                    description: i18n.translate(
-                        LocaleType.EN,
-                        "command.play.help.example.hidden",
-                    ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.play.help.example.hidden",
-                        ),
-                    },
                     type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
                 },
                 {
@@ -1278,11 +1256,7 @@ export default class PlayCommand implements BaseCommand {
         }
 
         State.gameSessions[guildID] = gameSession;
-        if (gameType === GameType.HIDDEN) {
-            if (guildPreference.isMultipleChoiceMode()) {
-                await guildPreference.setAnswerType(AnswerType.TYPING);
-            }
-
+        if (gameSession.isHiddenMode()) {
             if (!guildPreference.isGuessTimeoutSet()) {
                 await guildPreference.setGuessTimeout(HIDDEN_DEFAULT_TIMER);
             }

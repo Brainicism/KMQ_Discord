@@ -208,7 +208,7 @@ export default class GameSession extends Session {
             return null;
         }
 
-        if (this.gameType === GameType.HIDDEN) {
+        if (this.guildPreference.isHiddenMode()) {
             // Show players that haven't guessed and a button to guess
             round.interactionMessage = await sendInfoMessage(
                 new MessageContext(this.textChannelID, null, this.guildID),
@@ -244,19 +244,20 @@ export default class GameSession extends Session {
             return;
         }
 
+        const isHidden = this.guildPreference.isHiddenMode();
         if (guessResult.correct) {
             guessResult.correctGuessers = (
                 guessResult.correctGuessers ?? []
             ).sort(
                 (a, b) =>
-                    getTimeToGuessMs(a, round, this.gameType) -
-                    getTimeToGuessMs(b, round, this.gameType),
+                    getTimeToGuessMs(a, round, isHidden) -
+                    getTimeToGuessMs(b, round, isHidden),
             );
         }
 
-        if (this.gameType === GameType.HIDDEN) {
-            this.stopHiddenUpdateTimer();
+        this.stopHiddenUpdateTimer();
 
+        if (this.guildPreference.isHiddenMode()) {
             if (!guessResult.correct && round.correctGuessers.length > 0) {
                 // At least one person guessed correctly but someone didn't submit a /guess,
                 // which led to the timer ending and guessResult.correct being false
@@ -264,8 +265,8 @@ export default class GameSession extends Session {
                     correct: true,
                     correctGuessers: round.correctGuessers.sort(
                         (a, b) =>
-                            getTimeToGuessMs(a, round, this.gameType) -
-                            getTimeToGuessMs(b, round, this.gameType),
+                            getTimeToGuessMs(a, round, isHidden) -
+                            getTimeToGuessMs(b, round, isHidden),
                     ),
                 };
             }
@@ -360,7 +361,7 @@ export default class GameSession extends Session {
                 messageContext,
                 this.songSelector.getUniqueSongCounter(this.guildPreference),
                 playerRoundResults,
-                this.gameType,
+                this.guildPreference.isHiddenMode(),
             )}${scoreboardTitle}`;
 
             const correctGuess = playerRoundResults.length > 0;
@@ -579,7 +580,7 @@ export default class GameSession extends Session {
             this.guildPreference.typosAllowed(),
         );
 
-        if (this.gameType === GameType.HIDDEN) {
+        if (this.guildPreference.isHiddenMode()) {
             // Determine whether to wait for more guesses
             if (
                 this.scoreboard.getRemainingPlayers(
@@ -597,7 +598,7 @@ export default class GameSession extends Session {
 
         if (
             pointsEarned > 0 ||
-            (this.gameType === GameType.HIDDEN &&
+            (this.guildPreference.isHiddenMode() &&
                 round.correctGuessers.length > 0)
         ) {
             // If not hidden, someone guessed correctly
@@ -637,7 +638,7 @@ export default class GameSession extends Session {
             await this.startRound(messageContext);
         } else if (
             this.guildPreference.isMultipleChoiceMode() ||
-            this.gameType === GameType.HIDDEN
+            this.guildPreference.isHiddenMode()
         ) {
             // If hidden or multiple choice, everyone guessed and no one was right
             if (
@@ -1080,6 +1081,11 @@ export default class GameSession extends Session {
         return this.guildPreference.isMultipleChoiceMode();
     }
 
+    /** @returns if hidden mode is active */
+    isHiddenMode(): boolean {
+        return this.guildPreference.isHiddenMode();
+    }
+
     /**
      * Prepares a new GameRound
      * @param randomSong - The queried song
@@ -1429,11 +1435,10 @@ export default class GameSession extends Session {
 
     private multiguessDelayIsActive(guildPreference: GuildPreference): boolean {
         const playerIsAlone = getNumParticipants(this.voiceChannelID) === 1;
-        const isHiddenGameType = this.gameType === GameType.HIDDEN;
         return (
             guildPreference.gameOptions.multiGuessType === MultiGuessType.ON &&
             !playerIsAlone &&
-            !isHiddenGameType
+            !this.guildPreference.isHiddenMode()
         );
     }
 

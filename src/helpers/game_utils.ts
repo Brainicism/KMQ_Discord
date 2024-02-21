@@ -7,7 +7,6 @@ import {
 import { containsHangul, md5Hash } from "./utils";
 import { sql } from "kysely";
 import AnswerType from "../enums/option_types/answer_type";
-import GameType from "../enums/game_type";
 import GuessModeType from "../enums/option_types/guess_mode_type";
 import LocaleType from "../enums/locale_type";
 import SongSelector from "../structures/song_selector";
@@ -589,20 +588,20 @@ export function isPowerHour(): boolean {
 /**
  * @param guesser - The user to retrieve the time to guess for
  * @param round - The finished game round
- * @param gameType - The game type
+ * @param isHidden - Whether the answer type is hidden
  * @returns the milliseconds it took for a player to enter their guess
  */
 export function getTimeToGuessMs(
     guesser: { id: string },
     round: GameRound,
-    gameType: GameType,
+    isHidden: boolean,
 ): number {
     const correctGuessTimes = round
         .getGuesses()
         [guesser.id].filter((x) => x.correct)
         .map((x) => x.timeToGuessMs);
 
-    if (gameType === GameType.HIDDEN) {
+    if (isHidden) {
         // Use the most recent guess time for hidden games, since they can be overwritten
         return Math.max(...correctGuessTimes);
     }

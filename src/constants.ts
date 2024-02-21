@@ -140,6 +140,7 @@ export const ExpBonusModifierValues = {
     [ExpBonusModifier.TYPO]: 0.8,
     [ExpBonusModifier.HINT_USED]: 0.5,
     [ExpBonusModifier.FIRST_GAME_OF_DAY]: 1.5,
+    [ExpBonusModifier.HIDDEN]: 1.05,
 };
 
 export const LEADERBOARD_ENTRIES_PER_PAGE = 10;
