@@ -1080,7 +1080,7 @@ export default class GameSession extends Session {
                 this.gameType === GameType.SUDDEN_DEATH
                     ? i18n.translateN(
                           this.guildID,
-                          "misc.inGame.plural.suddenDeathEnd",
+                          "misc.plural.suddenDeathEnd",
                           this.roundsPlayed - 1,
                       )
                     : this.scoreboard.getWinnerMessage(
