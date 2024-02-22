@@ -80,6 +80,11 @@
                 "title": "게임 시작 무시"
             }
         },
+        "botlanguage": {
+            "help": {
+                "name": "봇 언어"
+            }
+        },
         "botnews": {
             "help": {
                 "description": "KMQ에 대한 최신 업데이트를 표시합니다.",

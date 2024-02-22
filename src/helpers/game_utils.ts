@@ -508,7 +508,7 @@ export async function isFirstGameOfDay(userID: string): Promise<boolean> {
     const player = await dbContext.kmq
         .selectFrom("player_stats")
         .select([
-            sql<number>`DAYOFYEAR(last_active) = DAYOFYEAR(CURDATE())`.as(
+            sql<number>`DAYOFYEAR(last_game_started_at) = DAYOFYEAR(CURDATE())`.as(
                 "firstGameOfDay",
             ),
             "last_game_played_errored",

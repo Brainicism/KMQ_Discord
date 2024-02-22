@@ -80,6 +80,11 @@
                 "title": "Negeren begonnen"
             }
         },
+        "botlanguage": {
+            "help": {
+                "name": "bot-taal"
+            }
+        },
         "botnews": {
             "help": {
                 "description": "Geeft de laatste updates van KMQ weer.",

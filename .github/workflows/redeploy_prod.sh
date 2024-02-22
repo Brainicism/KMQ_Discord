@@ -18,4 +18,4 @@ echo "Latest commit:"
 git log -n 1 --pretty
 
 echo "Initiating restart"
-npx ts-node src/scripts/announce-restart.ts --docker-image=$docker_image --provisioning-timeout=15
+npx ts-node src/scripts/announce-restart.ts --docker-image=$docker_image --timer=3 --provisioning-timeout=15

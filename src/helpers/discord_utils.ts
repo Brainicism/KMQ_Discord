@@ -2122,10 +2122,12 @@ export const updateAppCommands = async (
                             .reduce(
                                 (acc, locale) => ({
                                     ...acc,
-                                    [locale]: i18n.translate(
-                                        locale,
-                                        `command.${commandName}.help.name`,
-                                    ),
+                                    [locale]: i18n
+                                        .translate(
+                                            locale,
+                                            `command.${commandName}.help.name`,
+                                        )
+                                        .replace(" ", ""),
                                 }),
                                 {},
                             );
@@ -2175,10 +2177,12 @@ export const updateAppCommands = async (
                             );
                         }
 
-                        cmd.name = i18n.translate(
-                            LocaleType.EN,
-                            `command.${commandName}.help.name`,
-                        );
+                        cmd.name = i18n
+                            .translate(
+                                LocaleType.EN,
+                                `command.${commandName}.help.name`,
+                            )
+                            .replace(" ", "");
                     }
 
                     if (command.slashCommandAlias) {
@@ -2194,10 +2198,12 @@ export const updateAppCommands = async (
                             );
                         }
 
-                        aliasedCmd.name = i18n.translate(
-                            LocaleType.EN,
-                            `command.${command.slashCommandAlias}.help.name`,
-                        );
+                        aliasedCmd.name = i18n
+                            .translate(
+                                LocaleType.EN,
+                                `command.${command.slashCommandAlias}.help.name`,
+                            )
+                            .replace(" ", "");
                         commandStructures.push(aliasedCmd);
                     }
 

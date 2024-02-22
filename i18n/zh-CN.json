@@ -80,6 +80,11 @@
                 "title": "开始被忽略"
             }
         },
+        "botlanguage": {
+            "help": {
+                "name": "机器人语言"
+            }
+        },
         "botnews": {
             "help": {
                 "description": "显示最新的KMQ更新。",

@@ -80,6 +80,11 @@
                 "title": "Ignorado Iniciado"
             }
         },
+        "botlanguage": {
+            "help": {
+                "name": "idioma do bot"
+            }
+        },
         "botnews": {
             "help": {
                 "description": "Mostra as atualizações mais recentes do KMQ.",
