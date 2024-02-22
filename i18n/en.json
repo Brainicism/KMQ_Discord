@@ -1603,8 +1603,8 @@
             "song_other": "{{count}} songs",
             "suddenDeathEnd_one": "You survived {{count}} song!",
             "suddenDeathEnd_other": "You survived {{count}} songs!",
-            "winMessage_one": "{{player}} wins!",
-            "winMessage_other": "{{player}} win!"
+            "winMessage_one": "{{winners, list}} wins!",
+            "winMessage_other": "{{winners, list}} win!"
         },
         "preCheck": {
             "competition": "This command has been disabled for regular users in the competition.",

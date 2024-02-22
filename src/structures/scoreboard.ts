@@ -40,36 +40,20 @@ export default class Scoreboard {
     }
 
     /**
-     * @param guildID - The ID of the guild to get the scoreboard for
+     * @param locale - The locale to use for the message
      * @returns a string congratulating the winner(s)
      */
-    getWinnerMessage(guildID: string): string {
-        let winnerStr = "";
-        for (let i = 0; i < this.firstPlace.length; i++) {
-            winnerStr += this.firstPlace[i].getDisplayedName(
-                false,
-                false,
-                false,
-            );
-            if (i === this.firstPlace.length - 1) {
-                // Last entry -- append just the username
-                winnerStr += "";
-            } else if (i === this.firstPlace.length - 2) {
-                // Second last entry -- use "and"
-                const and = i18n.translate(guildID, "misc.inGame.and");
-                winnerStr += ` ${and} `;
-            } else {
-                // At least two more entries -- separate by ","
-                winnerStr += ", ";
-            }
-        }
-
-        return i18n.translateN(
-            guildID,
-            "misc.plural.winMessage",
-            this.firstPlace.length,
-            { player: winnerStr },
+    getWinnerMessage(locale: string): string {
+        const winners = this.firstPlace.map((x) =>
+            x.getDisplayedName(false, false, false),
         );
+        return i18n.internalLocalizer.t("misc.plural.winMessage", {
+            lng: locale,
+            count: winners.length,
+            style: "long",
+            type: "conjunction",
+            winners,
+        });
     }
 
     getScoreboardEmbedFields(

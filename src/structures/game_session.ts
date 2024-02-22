@@ -1083,7 +1083,9 @@ export default class GameSession extends Session {
                           "misc.inGame.plural.suddenDeathEnd",
                           this.roundsPlayed - 1,
                       )
-                    : this.scoreboard.getWinnerMessage(this.guildID);
+                    : this.scoreboard.getWinnerMessage(
+                          State.getGuildLocale(this.guildID),
+                      );
 
             await sendInfoMessage(
                 new MessageContext(this.textChannelID, null, this.guildID),
