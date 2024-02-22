@@ -47,6 +47,7 @@ export default class Scoreboard {
         const winners = this.firstPlace.map((x) =>
             x.getDisplayedName(false, false, false),
         );
+
         return i18n.internalLocalizer.t("misc.plural.winMessage", {
             lng: locale,
             count: winners.length,
