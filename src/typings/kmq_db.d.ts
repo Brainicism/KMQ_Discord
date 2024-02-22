@@ -188,6 +188,7 @@ export interface PlayerStats {
     games_played: Generated<number>;
     last_active: Generated<Date>;
     last_game_played_errored: Generated<number>;
+    last_game_started_at: Generated<Date | null>;
     level: Generated<number>;
     player_id: string;
     rank_ineligible: Generated<number>;

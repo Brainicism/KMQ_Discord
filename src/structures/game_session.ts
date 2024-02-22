@@ -427,12 +427,12 @@ export default class GameSession extends Session {
             this.scoreboard.getPlayerIDs().map(async (participant) => {
                 const isFirstGame = await isFirstGameOfDay(participant);
                 await this.ensurePlayerStat(participant);
-                await GameSession.incrementPlayerGamesPlayed(participant);
+                await this.incrementPlayerGamesPlayed(participant);
                 const playerCorrectGuessCount =
                     this.scoreboard.getPlayerCorrectGuessCount(participant);
 
                 if (playerCorrectGuessCount > 0) {
-                    await GameSession.incrementPlayerSongsGuessed(
+                    await this.incrementPlayerSongsGuessed(
                         participant,
                         playerCorrectGuessCount,
                     );
@@ -443,7 +443,7 @@ export default class GameSession extends Session {
 
                 let levelUpResult: LevelUpResult | null = null;
                 if (playerExpGain > 0) {
-                    levelUpResult = await GameSession.incrementPlayerExp(
+                    levelUpResult = await this.incrementPlayerExp(
                         participant,
                         playerExpGain,
                     );
@@ -452,7 +452,7 @@ export default class GameSession extends Session {
                     }
                 }
 
-                await GameSession.insertPerSessionStats(
+                await this.insertPerSessionStats(
                     participant,
                     playerCorrectGuessCount,
                     playerExpGain,
@@ -1209,6 +1209,7 @@ export default class GameSession extends Session {
                 player_id: userID,
                 first_play: currentDateString,
                 last_active: currentDateString,
+                last_game_started_at: new Date(this.startedAt),
             })
             .ignore()
             .execute();
@@ -1228,7 +1229,7 @@ export default class GameSession extends Session {
      * @param userID - The player's Discord user ID
      * @param score - The player's score in the current GameSession
      */
-    private static async incrementPlayerSongsGuessed(
+    private async incrementPlayerSongsGuessed(
         userID: string,
         score: number,
     ): Promise<void> {
@@ -1238,6 +1239,7 @@ export default class GameSession extends Session {
             .set({
                 songs_guessed: sql`songs_guessed + ${score}`,
                 last_active: new Date(),
+                last_game_started_at: new Date(this.startedAt),
             })
             .execute();
     }
@@ -1246,9 +1248,7 @@ export default class GameSession extends Session {
      * Updates a user's games played in the data store
      * @param userID - The player's Discord user ID
      */
-    private static async incrementPlayerGamesPlayed(
-        userID: string,
-    ): Promise<void> {
+    private async incrementPlayerGamesPlayed(userID: string): Promise<void> {
         await dbContext.kmq
             .updateTable("player_stats")
             .where("player_id", "=", userID)
@@ -1262,7 +1262,7 @@ export default class GameSession extends Session {
      * @param userID - The Discord ID of the user to exp gain
      * @param expGain - The amount of EXP gained
      */
-    private static async incrementPlayerExp(
+    private async incrementPlayerExp(
         userID: string,
         expGain: number,
     ): Promise<LevelUpResult | null> {
@@ -1313,7 +1313,7 @@ export default class GameSession extends Session {
      * @param expGain - The EXP gained in the game
      * @param levelsGained - The levels gained in the game
      */
-    private static async insertPerSessionStats(
+    private async insertPerSessionStats(
         userID: string,
         correctGuessCount: number,
         expGain: number,
