@@ -1527,7 +1527,6 @@
         },
         "inGame": {
             "aliases": "Aliases",
-            "and": "and",
             "bonusArtistRound": "BONUS ARTIST ROUND",
             "bonusExpArtistRound": "BONUS EXP AND ARTIST ROUND",
             "bonusExpRound": "BONUS EXP ROUND",

@@ -862,7 +862,7 @@
                     "classic": "クラシックなKMQゲームを開始します（最初に推測してポイントを獲得してください）",
                     "elimination": "エリミネーションモードのKMQゲームを開始します。各プレイヤーは{{lives}}つのライフでスタートします",
                     "hidden": "KMQの非公開ゲームを開始し、プレイヤーは/guessでしか回答できません",
-                    "suddenDeath": "誰が曲を見つけるか、ゲームが終わる、KMQ の突然死ゲームを開始します",
+                    "suddenDeath": "サドンデス形式のKMQを開始します。誰か一人が曲を当てるか、ゲームが終了します。",
                     "teams": "チームを分割し、勝利に役立つ人物を見つけましょう！"
                 },
                 "interaction": {
@@ -1527,7 +1527,6 @@
         },
         "inGame": {
             "aliases": "エイリアス",
-            "and": "と",
             "bonusArtistRound": "ボーナスアーティストラウンド",
             "bonusExpArtistRound": "ボーナスEXPとアーティストラウンド",
             "bonusExpRound": "ボーナスEXPラウンド",
@@ -1601,10 +1600,10 @@
             "second_other": "{{count}}秒前",
             "song_one": "{{count}}曲",
             "song_other": "{{count}}曲",
-            "suddenDeathEnd_one": "{{count}} 曲を生き延びました！",
-            "suddenDeathEnd_other": "{{count}} 曲を生き延びました！",
-            "winMessage_one": "{{player}} が勝利！",
-            "winMessage_other": "{{player}} が勝利！"
+            "suddenDeathEnd_one": "「{{count}}」曲で生き残りました！",
+            "suddenDeathEnd_other": "「{{count}}」曲で生き残りました！",
+            "winMessage_one": "「{{winners, list}}」が勝利しました！",
+            "winMessage_other": "「{{winners, list}}」が勝利しました！"
         },
         "preCheck": {
             "competition": "このコマンドは競技中の一般ユーザーには無効です。",
@@ -1615,7 +1614,7 @@
             "notHidden": "非公開ゲーム中はその操作はできません。",
             "notListeningSession": "リスニングセッション中にはそれはできません。",
             "notPlaylist": "プレイリストから再生しているときは、そのオプションを変更することはできません。このオプションを変更する前に{{playlistResetCommand}}を使用してください。",
-            "notSuddenDeath": "突然死中では、あなたはそれを行うことはできません。",
+            "notSuddenDeath": "サドンデス中はそれを実施できません。",
             "title": "お待ちください..."
         },
         "releaseDate": "リリース日",

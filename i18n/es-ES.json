@@ -1527,7 +1527,6 @@
         },
         "inGame": {
             "aliases": "Alias",
-            "and": "y",
             "bonusArtistRound": "RONDA DE ARTISTA BONUS",
             "bonusExpArtistRound": "RONDA DE EXP Y ARTISTA BONUS",
             "bonusExpRound": "RONDA DE EXP BONUS",
@@ -1603,8 +1602,8 @@
             "song_other": "{{count}} canciones",
             "suddenDeathEnd_one": "¡Sobreviviste a {{count}} canción!",
             "suddenDeathEnd_other": "¡Sobreviviste a {{count}} canciones!",
-            "winMessage_one": "{{player}} ¡gana!",
-            "winMessage_other": "{{player}} ¡gana!"
+            "winMessage_one": "¡{{winners, list}} gana!",
+            "winMessage_other": "¡Gana {{winners, list}}!"
         },
         "preCheck": {
             "competition": "Este comando ha sido desactivado para usuarios regulares en la competencia.",
@@ -1615,7 +1614,7 @@
             "notHidden": "No puedes hacer eso durante un juego oculto.",
             "notListeningSession": "No puedes hacer eso mientras estás en una sesión de escucha.",
             "notPlaylist": "No puedes cambiar esa opción cuando reproduces desde una lista de reproducción. Usa {{playlistResetCommand}} antes de cambiar esta opción.",
-            "notSuddenDeath": "No puedes hacer eso durante una muerte súbita",
+            "notSuddenDeath": "No puedes hacer eso durante la muerte súbita.",
             "title": "Espera..."
         },
         "releaseDate": "Fecha de lanzamiento",

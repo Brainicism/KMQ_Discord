@@ -1527,7 +1527,6 @@
         },
         "inGame": {
             "aliases": "Alias",
-            "and": "dan",
             "bonusArtistRound": "RONDE ARTIS BONUS",
             "bonusExpArtistRound": "BONUS EXP DAN RONDE ARTIS",
             "bonusExpRound": "RONDE EXP BONUS",
@@ -1601,10 +1600,10 @@
             "second_other": "{{count}} detik",
             "song_one": "{{count}} lagu",
             "song_other": "{{count}} lagu",
-            "suddenDeathEnd_one": "Anda selamat dari {{count}} lagu!",
-            "suddenDeathEnd_other": "Anda selamat dari {{count}} lagu!",
-            "winMessage_one": "{{player}} menang!",
-            "winMessage_other": "{{player}} menang!"
+            "suddenDeathEnd_one": "Kamu selamat dari {{count}} lagu!",
+            "suddenDeathEnd_other": "Selamat, kamu telah selamat dari {{count}} lagu!",
+            "winMessage_one": "{{winners, list}} menang!",
+            "winMessage_other": "{{winners, list}} menang!"
         },
         "preCheck": {
             "competition": "Perintah ini telah dinonaktifkan untuk pengguna reguler dalam kompetisi.",
@@ -1615,7 +1614,7 @@
             "notHidden": "Anda tidak dapat melakukan itu selama permainan tersembunyi.",
             "notListeningSession": "Anda tidak dapat melakukan itu saat dalam sesi mendengarkan.",
             "notPlaylist": "Anda tidak dapat mengubah opsi itu saat memutar dari daftar putar. Gunakan {{playlistResetCommand}} sebelum mengubah opsi ini.",
-            "notSuddenDeath": "Anda tidak dapat melakukan itu selama kematian mendadak.",
+            "notSuddenDeath": "Kamu tidak boleh melakukan itu selama tiba-tiba",
             "title": "Tunggu dulu..."
         },
         "releaseDate": "Tanggal Rilis",

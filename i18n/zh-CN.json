@@ -862,7 +862,7 @@
                     "classic": "开始一场经典模式的 KMQ 游戏(首先输入你的猜测以获得一分)",
                     "elimination": "开始一场淘汰模式的 KMQ 游戏，每个玩家都有 {{lives}} 条命",
                     "hidden": "开始一个KMQ的隐藏游戏，玩家只能用/guess命令回答问题。",
-                    "suddenDeath": "开始一场 KMQ 闪电战，直至有人答对歌曲，否则游戏结束",
+                    "suddenDeath": "开始 KMQ 突然死亡游戏，需要有人猜对歌曲，否则游戏结束",
                     "teams": "分成尽可能多的团队，看看谁可以帮助你赢得胜利！"
                 },
                 "interaction": {
@@ -1527,7 +1527,6 @@
         },
         "inGame": {
             "aliases": "别名",
-            "and": "和",
             "bonusArtistRound": "额外艺术家回合",
             "bonusExpArtistRound": "额外经验和艺术家回合",
             "bonusExpRound": "额外经验回合",
@@ -1601,10 +1600,10 @@
             "second_other": "{{count}}秒钟",
             "song_one": "{{count}}首歌曲",
             "song_other": "{{count}}首歌曲",
-            "suddenDeathEnd_one": "您撑过 {{count}} 首歌！",
-            "suddenDeathEnd_other": "您撑过 {{count}} 首歌！",
-            "winMessage_one": "{{player}} 赢了！",
-            "winMessage_other": "{{player}} 赢了！"
+            "suddenDeathEnd_one": "您在 {{count}} 首歌曲中幸存下来！",
+            "suddenDeathEnd_other": "您在 {{count}} 首歌曲中幸存下来！",
+            "winMessage_one": "{{winners, list}} 获胜！",
+            "winMessage_other": "{{winners, list}} 获胜！"
         },
         "preCheck": {
             "competition": "此命令已在比赛中禁用普通用户。",
@@ -1615,7 +1614,7 @@
             "notHidden": "在隐藏游戏期间无法进行该操作。",
             "notListeningSession": "您不能在听歌会话中进行此操作。",
             "notPlaylist": "从播放列表播放时，您不能更改该选项。更改此选项之前，请使用{{playlistResetCommand}}。",
-            "notSuddenDeath": "在闪电战期间，您不能这样做。",
+            "notSuddenDeath": "你无法在突然死亡比赛中这样做。",
             "title": "请稍等..."
         },
         "releaseDate": "发布日期",

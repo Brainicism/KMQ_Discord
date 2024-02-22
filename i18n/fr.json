@@ -1527,7 +1527,6 @@
         },
         "inGame": {
             "aliases": "Alias",
-            "and": "et",
             "bonusArtistRound": "TOUR ARTISTE BONUS",
             "bonusExpArtistRound": "TOUR EXP ET ARTISTE BONUS",
             "bonusExpRound": "TOUR EXP BONUS",
@@ -1601,10 +1600,10 @@
             "second_other": "il y a {{count}} secondes",
             "song_one": "{{count}} chanson",
             "song_other": "{{count}} chansons",
-            "suddenDeathEnd_one": "Vous avez survécu à {{count}} morceau !",
-            "suddenDeathEnd_other": "Vous avez survécu à {{count}} morceaux !",
-            "winMessage_one": "{{player}} gagne !",
-            "winMessage_other": "{{player}} gagne !"
+            "suddenDeathEnd_one": "Vous avez survécu à {{count}} chansons !",
+            "suddenDeathEnd_other": "Vous avez survécu à {{count}} chansons !",
+            "winMessage_one": "{{winners, list}} remporte la partie !",
+            "winMessage_other": "{{winners, list}} remportent la partie !"
         },
         "preCheck": {
             "competition": "Cette commande a été désactivée pour les utilisateurs réguliers dans la compétition.",
@@ -1615,7 +1614,7 @@
             "notHidden": "Vous ne pouvez pas faire cela pendant une partie cachée.",
             "notListeningSession": "Vous ne pouvez pas faire cela pendant une session d'écoute.",
             "notPlaylist": "Vous ne pouvez pas modifier cette option lors de la lecture à partir d'une playlist. Utilisez {{playlistResetCommand}} avant de modifier cette option.",
-            "notSuddenDeath": "Vous ne pouvez pas faire ça en mort subite.",
+            "notSuddenDeath": "Vous ne pouvez pas faire ça pendant la mort subite.",
             "title": "Attendez..."
         },
         "releaseDate": "Date de sortie",

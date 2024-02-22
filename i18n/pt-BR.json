@@ -1527,7 +1527,6 @@
         },
         "inGame": {
             "aliases": "Apelidos",
-            "and": "e",
             "bonusArtistRound": "RODADA DE ARTISTA BÔNUS",
             "bonusExpArtistRound": "RODADA BÔNUS EXP E ARTISTA",
             "bonusExpRound": "RODADA DE EXP BÔNUS",
@@ -1601,10 +1600,10 @@
             "second_other": "{{count}} segundos",
             "song_one": "{{count}} música",
             "song_other": "{{count}} músicas",
-            "suddenDeathEnd_one": "Você sobreviveu a {{count}} músicas!",
-            "suddenDeathEnd_other": "Você sobreviveu a {{count}} músicas!",
-            "winMessage_one": "{{player}} vence!",
-            "winMessage_other": "{{player}} vence!"
+            "suddenDeathEnd_one": "Você sobreviveu {{count}} música!",
+            "suddenDeathEnd_other": "Você sobreviveu {{count}} músicas!",
+            "winMessage_one": "{{winners, list}} vencem!",
+            "winMessage_other": "{{winners, list}} vencem!"
         },
         "preCheck": {
             "competition": "Este comando foi desabilitado para usuários regulares na competição.",
@@ -1615,7 +1614,7 @@
             "notHidden": "Você não pode fazer isso durante um jogo oculto.",
             "notListeningSession": "Você não pode fazer isso durante uma sessão de audição.",
             "notPlaylist": "Você não pode alterar essa opção ao tocar a partir de uma lista de reprodução. Use {{playlistResetCommand}} antes de alterar esta opção.",
-            "notSuddenDeath": "Você não pode fazer isso durante um mata-mata.",
+            "notSuddenDeath": "Você não pode fazer isso durante morte súbita.",
             "title": "Espere..."
         },
         "releaseDate": "Data de Lançamento",

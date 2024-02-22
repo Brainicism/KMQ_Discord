@@ -1527,7 +1527,6 @@
         },
         "inGame": {
             "aliases": "Aliase",
-            "and": "und",
             "bonusArtistRound": "BONUS-KÜNSTLER-RUNDE",
             "bonusExpArtistRound": "BONUS-EXP-UND-KÜNSTLER-RUNDE",
             "bonusExpRound": "BONUS-EXP-RUNDE",
@@ -1601,10 +1600,10 @@
             "second_other": "{{count}} Sekunden",
             "song_one": "{{count}} Song",
             "song_other": "{{count}} Songs",
-            "suddenDeathEnd_one": "Du hast {{count}} Song überlebt!",
-            "suddenDeathEnd_other": "Du hast {{count}} Songs überlebt!",
-            "winMessage_one": "{{player}} hat gewonnen!",
-            "winMessage_other": "{{player}} hat gewonnen!"
+            "suddenDeathEnd_one": "Du hast {{count}} Lieder überlebt!",
+            "suddenDeathEnd_other": "Du hast {{count}} Lieder überlebt!",
+            "winMessage_one": "{{winners, list}} gewinnt!",
+            "winMessage_other": "{{winners, list}} gewinnen!"
         },
         "preCheck": {
             "competition": "Dieser Befehl wurde für normale Benutzer im Wettbewerb deaktiviert.",
@@ -1615,7 +1614,7 @@
             "notHidden": "Das kannst du während eines versteckten Spiels nicht tun.",
             "notListeningSession": "Das kannst du während einer Hörsitzung nicht tun.",
             "notPlaylist": "Du kannst diese Option nicht ändern, wenn du von einer Wiedergabeliste aus spielst. Verwende {{playlistResetCommand}}, bevor du diese Option änderst.",
-            "notSuddenDeath": "Das kannst du nicht während des Sudden Death machen.",
+            "notSuddenDeath": "Das kannst du während des Modus - plötzlicher Tod nicht machen.",
             "title": "Warten..."
         },
         "releaseDate": "Erscheinungsdatum",

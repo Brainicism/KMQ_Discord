@@ -1527,7 +1527,6 @@
         },
         "inGame": {
             "aliases": "उपनाम",
-            "and": "और",
             "bonusArtistRound": "बोनस कलाकार राउंड",
             "bonusExpArtistRound": "बोनस EXP और कलाकार राउंड",
             "bonusExpRound": "बोनस EXP राउंड",
@@ -1601,10 +1600,10 @@
             "second_other": "{{count}} सेकंड",
             "song_one": "{{count}} गाना",
             "song_other": "{{count}} गाने",
-            "suddenDeathEnd_one": "आप {{count}} गाने तक जीवित रहे!",
-            "suddenDeathEnd_other": "आप {{count}} गानों तक जीवित रहे!",
-            "winMessage_one": "{{player}} विजयी रहा!",
-            "winMessage_other": "{{player}} ने जीत हासिल की!"
+            "suddenDeathEnd_one": "आपने {{count}} गाना बचा लिया!",
+            "suddenDeathEnd_other": "आपने {{count}} गाने बचाए!",
+            "winMessage_one": "{{winners, list}} जीते!",
+            "winMessage_other": "{{winners, list}} जीते!"
         },
         "preCheck": {
             "competition": "प्रतियोगिता में नियमित उपयोगकर्ताओं के लिए इस आदेश को अक्षम कर दिया गया है।",
