@@ -197,6 +197,10 @@ To keep the game fair, switching teams mid-game forfeits your current points and
 
 Instead of guessing in chat, `/guess` directly to the bot. Everyone can take their time to think out what song is playing before the timer ends.
 
+## /play suddendeath
+
+Everyone shares one life! If you can't guess the song in time, the game ends. No hints, no skips, no second chances.
+
 # Full Command List
 
 Use `/help action:[command_name]` for more details about the following commands:

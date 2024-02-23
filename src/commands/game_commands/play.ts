@@ -364,12 +364,18 @@ export default class PlayCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.play.help.example.hidden",
                     ),
-                    description_localizations: {
-                        [LocaleType.KO]: i18n.translate(
-                            LocaleType.KO,
-                            "command.play.help.example.hidden",
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.play.help.example.hidden",
+                                ),
+                            }),
+                            {},
                         ),
-                    },
                     type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
                 },
                 {
@@ -534,6 +540,26 @@ export default class PlayCommand implements BaseCommand {
                             ],
                         },
                     ],
+                },
+                {
+                    name: GameType.SUDDEN_DEATH,
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "command.play.help.example.suddenDeath",
+                    ),
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.play.help.example.suddenDeath",
+                                ),
+                            }),
+                            {},
+                        ),
+                    type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
                 },
             ],
         },

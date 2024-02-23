@@ -454,4 +454,33 @@ export default class CommandPrechecks {
         );
         return false;
     }
+
+    static notSuddenDeathPrecheck(precheckArgs: PrecheckArgs): boolean {
+        if (
+            !precheckArgs.session ||
+            precheckArgs.session.isListeningSession() ||
+            (precheckArgs.session as GameSession).gameType !==
+                GameType.SUDDEN_DEATH
+        ) {
+            return true;
+        }
+
+        const embedPayload: EmbedPayload = {
+            title: i18n.translate(
+                precheckArgs.messageContext.guildID,
+                "misc.preCheck.title",
+            ),
+            description: i18n.translate(
+                precheckArgs.messageContext.guildID,
+                "misc.preCheck.notSuddenDeath",
+            ),
+        };
+
+        sendErrorMessage(
+            precheckArgs.messageContext,
+            embedPayload,
+            precheckArgs.interaction,
+        );
+        return false;
+    }
 }

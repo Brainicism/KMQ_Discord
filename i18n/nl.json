@@ -867,6 +867,7 @@
                     "classic": "Start een klassiek spelletje KMQ (typ je gok als eerste om een punt te krijgen)",
                     "elimination": "Start een KMQ-eliminatiespel waarin elke speler begint met {{lives}} levens",
                     "hidden": "Start een verborgen spelletje KMQ, waarbij spelers alleen kunnen antwoorden met /raad",
+                    "suddenDeath": "Start een plotselinge dood-game van KMQ, waarbij iemand het liedje moet raden, of de game eindigt",
                     "teams": "Splits op in zoveel teams als je wilt en kijk van wie je afhankelijk kunt zijn om te winnen!"
                 },
                 "interaction": {
@@ -1541,8 +1542,7 @@
             "noWinners": "Niemand heeft gewonnen",
             "runnersUp": "Runners-up",
             "songsCorrectlyGuessed": "{{songCount}} nummers correct geraden!",
-            "uniqueSongsPlayed": "{{uniqueSongCount}} unieke nummers afgespeeld.",
-            "winMessage": "{{playerName}} wint!"
+            "uniqueSongsPlayed": "{{uniqueSongCount}} unieke nummers afgespeeld."
         },
         "interaction": {
             "bookmarked": {
@@ -1604,7 +1604,11 @@
             "second_one": "{{count}} seconde",
             "second_other": "{{count}} seconden",
             "song_one": "{{count}} nummer",
-            "song_other": "{{count}} nummers"
+            "song_other": "{{count}} nummers",
+            "suddenDeathEnd_one": "U hebt {{count}} liedje overleefd!",
+            "suddenDeathEnd_other": "U hebt {{count}} liedjes overleefd!",
+            "winMessage_one": "{{winners, list}} wint!",
+            "winMessage_other": "{{winners, list}} wint!"
         },
         "preCheck": {
             "competition": "Deze opdracht is uitgeschakeld voor gewone gebruikers in de competitie.",
@@ -1615,6 +1619,7 @@
             "notHidden": "U kunt dat niet doen tijdens een verborgen spel.",
             "notListeningSession": "Je kunt dat niet doen tijdens een luistersessie.",
             "notPlaylist": "Je kunt die optie niet wijzigen wanneer je vanaf een afspeellijst afspeelt. Gebruik {{playlistResetCommand}} voordat je deze optie wijzigt.",
+            "notSuddenDeath": "Dat kan niet tijdens een plotselinge dood.",
             "title": "Wachten..."
         },
         "releaseDate": "Uitgavedatum",

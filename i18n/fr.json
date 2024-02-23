@@ -867,6 +867,7 @@
                     "classic": "Démarrez une partie classique de KMQ (tapez d'abord votre réponse pour obtenir un point)",
                     "elimination": "Démarrez une partie d'élimination de KMQ où chaque joueur commence avec {{lives}} vies",
                     "hidden": "Démarrer une partie cachée de KMQ, où les joueurs ne peuvent répondre qu'avec /guess",
+                    "suddenDeath": "Lancez un jeu de mort subite KMQ, où il faut deviner le morceau, ou la partie s'achève",
                     "teams": "Divisez-vous en d'équipes et voyez sur qui vous pouvez compter pour vous aider à gagner!"
                 },
                 "interaction": {
@@ -1541,8 +1542,7 @@
             "noWinners": "Personne n'a gagné.",
             "runnersUp": "Finalistes",
             "songsCorrectlyGuessed": "{{songCount}} chansons correctement devinées !",
-            "uniqueSongsPlayed": "{{uniqueSongCount}} chansons uniques jouées.",
-            "winMessage": "{{playerName}} gagne !"
+            "uniqueSongsPlayed": "{{uniqueSongCount}} chansons uniques jouées."
         },
         "interaction": {
             "bookmarked": {
@@ -1604,7 +1604,11 @@
             "second_one": "il y a {{count}} seconde",
             "second_other": "il y a {{count}} secondes",
             "song_one": "{{count}} chanson",
-            "song_other": "{{count}} chansons"
+            "song_other": "{{count}} chansons",
+            "suddenDeathEnd_one": "Vous avez survécu à {{count}} chansons !",
+            "suddenDeathEnd_other": "Vous avez survécu à {{count}} chansons !",
+            "winMessage_one": "{{winners, list}} remporte la partie !",
+            "winMessage_other": "{{winners, list}} remportent la partie !"
         },
         "preCheck": {
             "competition": "Cette commande a été désactivée pour les utilisateurs réguliers dans la compétition.",
@@ -1615,6 +1619,7 @@
             "notHidden": "Vous ne pouvez pas faire cela pendant une partie cachée.",
             "notListeningSession": "Vous ne pouvez pas faire cela pendant une session d'écoute.",
             "notPlaylist": "Vous ne pouvez pas modifier cette option lors de la lecture à partir d'une playlist. Utilisez {{playlistResetCommand}} avant de modifier cette option.",
+            "notSuddenDeath": "Vous ne pouvez pas faire ça pendant la mort subite.",
             "title": "Attendez..."
         },
         "releaseDate": "Date de sortie",

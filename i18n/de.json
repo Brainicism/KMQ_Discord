@@ -867,6 +867,7 @@
                     "classic": "Starte ein klassisches Spiel von KMQ (gib zuerst deinen Tipp ein, um einen Punkt zu erhalten)",
                     "elimination": "Starte ein Eliminierungs-Spiel von KMQ, bei dem jeder Spieler mit {{lives}} Leben beginnt",
                     "hidden": "Starte ein verstecktes Spiel von KMQ, bei dem die Spieler nur mit /guess antworten können",
+                    "suddenDeath": "Starte ein KMQ-Sudden-Death-Spiel: Ein Fehlversuch beendet es",
                     "teams": "Bilde beliebig viele Teams und finde heraus, wer zum Sieg beiträgt!"
                 },
                 "interaction": {
@@ -1541,8 +1542,7 @@
             "noWinners": "Niemand hat gewonnen",
             "runnersUp": "Zweiter/Zweite",
             "songsCorrectlyGuessed": "{{songCount}} Songs richtig geraten!",
-            "uniqueSongsPlayed": "{{uniqueSongCount}} einzigartige Songs gespielt.",
-            "winMessage": "{{playerName}} gewinnt!"
+            "uniqueSongsPlayed": "{{uniqueSongCount}} einzigartige Songs gespielt."
         },
         "interaction": {
             "bookmarked": {
@@ -1604,7 +1604,11 @@
             "second_one": "{{count}} Sekunde",
             "second_other": "{{count}} Sekunden",
             "song_one": "{{count}} Song",
-            "song_other": "{{count}} Songs"
+            "song_other": "{{count}} Songs",
+            "suddenDeathEnd_one": "Du hast {{count}} Lieder überlebt!",
+            "suddenDeathEnd_other": "Du hast {{count}} Lieder überlebt!",
+            "winMessage_one": "{{winners, list}} gewinnt!",
+            "winMessage_other": "{{winners, list}} gewinnen!"
         },
         "preCheck": {
             "competition": "Dieser Befehl wurde für normale Benutzer im Wettbewerb deaktiviert.",
@@ -1615,6 +1619,7 @@
             "notHidden": "Das kannst du während eines versteckten Spiels nicht tun.",
             "notListeningSession": "Das kannst du während einer Hörsitzung nicht tun.",
             "notPlaylist": "Du kannst diese Option nicht ändern, wenn du von einer Wiedergabeliste aus spielst. Verwende {{playlistResetCommand}}, bevor du diese Option änderst.",
+            "notSuddenDeath": "Das kannst du während des Modus - plötzlicher Tod nicht machen.",
             "title": "Warten..."
         },
         "releaseDate": "Erscheinungsdatum",

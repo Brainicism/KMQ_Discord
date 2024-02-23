@@ -867,6 +867,7 @@
                     "classic": "Comienza un juego clásico de KMQ (escribe tu respuesta primero para obtener un punto)",
                     "elimination": "Comienza un juego de eliminación de KMQ donde cada jugador comienza con {{lives}} vidas",
                     "hidden": "Comienza un juego oculto de KMQ, donde los jugadores solo pueden responder con /guess",
+                    "suddenDeath": "Inicia un juego de muerte súbita en KMQ: acierta la canción o la partida termina",
                     "teams": "Divídete en tantos equipos como quieras y ve quién puede ayudarte a ganar!"
                 },
                 "interaction": {
@@ -1541,8 +1542,7 @@
             "noWinners": "Nadie ganó",
             "runnersUp": "Finalistas",
             "songsCorrectlyGuessed": "{{songCount}} canciones adivinadas correctamente!",
-            "uniqueSongsPlayed": "{{uniqueSongCount}} canciones únicas reproducidas.",
-            "winMessage": "{{playerName}} gana!"
+            "uniqueSongsPlayed": "{{uniqueSongCount}} canciones únicas reproducidas."
         },
         "interaction": {
             "bookmarked": {
@@ -1604,7 +1604,11 @@
             "second_one": "hace {{count}} segundo",
             "second_other": "hace {{count}} segundos",
             "song_one": "{{count}} canción",
-            "song_other": "{{count}} canciones"
+            "song_other": "{{count}} canciones",
+            "suddenDeathEnd_one": "¡Sobreviviste a {{count}} canción!",
+            "suddenDeathEnd_other": "¡Sobreviviste a {{count}} canciones!",
+            "winMessage_one": "¡{{winners, list}} gana!",
+            "winMessage_other": "¡Gana {{winners, list}}!"
         },
         "preCheck": {
             "competition": "Este comando ha sido desactivado para usuarios regulares en la competencia.",
@@ -1615,6 +1619,7 @@
             "notHidden": "No puedes hacer eso durante un juego oculto.",
             "notListeningSession": "No puedes hacer eso mientras estás en una sesión de escucha.",
             "notPlaylist": "No puedes cambiar esa opción cuando reproduces desde una lista de reproducción. Usa {{playlistResetCommand}} antes de cambiar esta opción.",
+            "notSuddenDeath": "No puedes hacer eso durante la muerte súbita.",
             "title": "Espera..."
         },
         "releaseDate": "Fecha de lanzamiento",
