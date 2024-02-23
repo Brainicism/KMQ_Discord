@@ -172,8 +172,18 @@ export default class GameSession extends Session {
                     `gid: ${this.guildID} | answerType changed to multiple choice, re-sending mc buttons`,
                 );
                 this.sendMultipleChoiceOptionsMessage();
+            } else if (this.isHiddenMode()) {
+                logger.info(
+                    `gid: ${this.guildID} | answerType changed to hidden, re-sending hidden message`,
+                );
+
+                this.sendHiddenGuessMessage(
+                    new MessageContext(this.textChannelID, null, this.guildID),
+                    round,
+                );
             } else {
                 round.interactionMessage = null;
+                this.stopHiddenUpdateTimer();
             }
         };
 
@@ -210,12 +220,7 @@ export default class GameSession extends Session {
 
         if (this.isHiddenMode()) {
             // Show players that haven't guessed and a button to guess
-            round.interactionMessage = await sendInfoMessage(
-                new MessageContext(this.textChannelID, null, this.guildID),
-                this.generateRemainingPlayersMessage(round),
-            );
-
-            this.startHiddenUpdateTimer();
+            await this.sendHiddenGuessMessage(messageContext, round);
         }
 
         if (this.isMultipleChoiceMode()) {
@@ -1689,5 +1694,17 @@ export default class GameSession extends Session {
                 thumbnailUrl: KmqImages.LISTENING,
             },
         );
+    }
+
+    private async sendHiddenGuessMessage(
+        messageContext: MessageContext,
+        round: GameRound,
+    ): Promise<void> {
+        round.interactionMessage = await sendInfoMessage(
+            messageContext,
+            this.generateRemainingPlayersMessage(round),
+        );
+
+        this.startHiddenUpdateTimer();
     }
 }

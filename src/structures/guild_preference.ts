@@ -208,7 +208,7 @@ export default class GuildPreference {
     /** Callback to reload songs */
     public reloadSongCallback: (() => Promise<void>) | undefined;
 
-    /** Callback to reload songs */
+    /** Callback to send song messages */
     public answerTypeChangeCallback: (() => Promise<void>) | undefined;
 
     /** The guild preference cache */

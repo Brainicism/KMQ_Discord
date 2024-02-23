@@ -276,16 +276,17 @@ export default class AnswerCommand implements BaseCommand {
                 `${getDebugLogHeader(messageContext)} | Answer type reset.`,
             );
         } else {
-            await guildPreference.setAnswerType(answerType);
+            if (answerType === AnswerType.HIDDEN) {
+                await AnswerCommand.setAnswerHidden(guildPreference);
+            } else {
+                await guildPreference.setAnswerType(answerType);
+            }
+
             logger.info(
                 `${getDebugLogHeader(
                     messageContext,
                 )} | Answer type set to ${answerType}`,
             );
-
-            if (answerType === AnswerType.HIDDEN) {
-                await AnswerCommand.setAnswerHidden(guildPreference);
-            }
         }
 
         await sendOptionsMessage(
