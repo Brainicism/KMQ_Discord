@@ -4,7 +4,7 @@ import { KmqDB } from "../typings/kmq_db";
 export async function up(db: Kysely<KmqDB>): Promise<void> {
     await db.schema
         .alterTable("player_stats")
-        .addColumn("last_game_started_at", "timestamp")
+        .addColumn("last_game_started_at", "datetime")
         .execute();
 
     await db
