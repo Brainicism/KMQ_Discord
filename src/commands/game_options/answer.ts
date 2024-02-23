@@ -1,4 +1,8 @@
-import { ExpBonusModifierValues, OptionAction } from "../../constants";
+import {
+    ExpBonusModifierValues,
+    HIDDEN_DEFAULT_TIMER,
+    OptionAction,
+} from "../../constants";
 import { IPCLogger } from "../../logger";
 import { clickableSlashCommand } from "../../helpers/utils";
 import {
@@ -28,7 +32,6 @@ export default class AnswerCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
         { checkFn: CommandPrechecks.notListeningPrecheck },
-        { checkFn: CommandPrechecks.answerHiddenPrecheck },
     ];
 
     validations = {
@@ -54,6 +57,7 @@ export default class AnswerCommand implements BaseCommand {
                 easy: `\`${AnswerType.MULTIPLE_CHOICE_EASY}\``,
                 medium: `\`${AnswerType.MULTIPLE_CHOICE_MED}\``,
                 hard: `\`${AnswerType.MULTIPLE_CHOICE_HARD}\``,
+                hidden: `\`${AnswerType.HIDDEN}\``,
             },
         ),
         examples: [
@@ -134,6 +138,16 @@ export default class AnswerCommand implements BaseCommand {
                             ]
                         }`,
                     },
+                ),
+            },
+            {
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} answer:hidden`,
+                explanation: i18n.translate(
+                    guildID,
+                    "command.answer.help.example.hidden",
                 ),
             },
         ],
@@ -262,7 +276,12 @@ export default class AnswerCommand implements BaseCommand {
                 `${getDebugLogHeader(messageContext)} | Answer type reset.`,
             );
         } else {
-            await guildPreference.setAnswerType(answerType);
+            if (answerType === AnswerType.HIDDEN) {
+                await AnswerCommand.setAnswerHidden(guildPreference);
+            } else {
+                await guildPreference.setAnswerType(answerType);
+            }
+
             logger.info(
                 `${getDebugLogHeader(
                     messageContext,
@@ -280,6 +299,15 @@ export default class AnswerCommand implements BaseCommand {
             undefined,
             interaction,
         );
+    }
+
+    static async setAnswerHidden(
+        guildPreference: GuildPreference,
+    ): Promise<void> {
+        await guildPreference.setAnswerType(AnswerType.HIDDEN);
+        if (!guildPreference.isGuessTimeoutSet()) {
+            await guildPreference.setGuessTimeout(HIDDEN_DEFAULT_TIMER);
+        }
     }
 
     /**

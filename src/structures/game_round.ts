@@ -11,7 +11,6 @@ import {
 } from "../constants";
 import { friendlyFormattedNumber, getMention } from "../helpers/utils";
 import ExpBonusModifier from "../enums/exp_bonus_modifier";
-import GameType from "../enums/game_type";
 import GuessModeType from "../enums/option_types/guess_mode_type";
 import KmqMember from "./kmq_member";
 import LocaleType from "../enums/locale_type";
@@ -449,7 +448,7 @@ export default class GameRound extends Round {
         messageContext: MessageContext,
         uniqueSongCounter: UniqueSongCounter,
         playerRoundResults: Array<PlayerRoundResult>,
-        gameType: GameType,
+        isHidden: boolean,
     ): string {
         let correctDescription = "";
         if (this.bonusModifier > 1 || this.isBonusArtist()) {
@@ -482,7 +481,7 @@ export default class GameRound extends Round {
             ],
         );
 
-        if (gameType === GameType.HIDDEN) {
+        if (isHidden) {
             for (const entry of sortedGuesses
                 .map((x): [string, GuessResult] => {
                     const playerID = x[0];

@@ -23,7 +23,6 @@ import { mapTo } from "../helpers/utils";
 import AnswerType from "../enums/option_types/answer_type";
 import EnvType from "../enums/env_type";
 import GameOption from "../enums/game_option_name";
-import GameType from "../enums/game_type";
 import Session from "./session";
 import _ from "lodash";
 import dbContext from "../database_context";
@@ -209,7 +208,7 @@ export default class GuildPreference {
     /** Callback to reload songs */
     public reloadSongCallback: (() => Promise<void>) | undefined;
 
-    /** Callback to reload songs */
+    /** Callback to send song messages */
     public answerTypeChangeCallback: (() => Promise<void>) | undefined;
 
     /** The guild preference cache */
@@ -743,9 +742,16 @@ export default class GuildPreference {
 
     /** @returns if multiple choice mode is active */
     isMultipleChoiceMode(): boolean {
-        return ![AnswerType.TYPING, AnswerType.TYPING_TYPOS].includes(
-            this.gameOptions.answerType,
-        );
+        return [
+            AnswerType.MULTIPLE_CHOICE_EASY,
+            AnswerType.MULTIPLE_CHOICE_MED,
+            AnswerType.MULTIPLE_CHOICE_HARD,
+        ].includes(this.gameOptions.answerType);
+    }
+
+    /** @returns if hidden is active */
+    isHiddenMode(): boolean {
+        return this.gameOptions.answerType === AnswerType.HIDDEN;
     }
 
     /**
@@ -1021,7 +1027,7 @@ export default class GuildPreference {
 
         const session = Session.getSession(this.guildID);
         if (session && session.isGameSession()) {
-            if (session.gameType === GameType.HIDDEN) {
+            if (session.isHiddenMode()) {
                 // do not reset timer if hidden (a timer must always be set)
                 this.gameOptions["guessTimeout"] = oldOptions.guessTimeout;
             }

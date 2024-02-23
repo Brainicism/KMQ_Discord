@@ -20,6 +20,7 @@ enum ExpBonusModifier {
     TYPO,
     HINT_USED,
     FIRST_GAME_OF_DAY,
+    HIDDEN,
 }
 
 export default ExpBonusModifier;

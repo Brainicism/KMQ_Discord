@@ -45,6 +45,7 @@
             "help": {
                 "description": "Wähle aus, wie du antworten möchtest: Indem du deine Antwort eingibst oder über Multiple-Choice. Die folgenden Optionen stehen zur Auswahl: `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}` und `{{hard}}`",
                 "example": {
+                    "hidden": "Antworte mit /guess bevor der Timer abläuft",
                     "multipleChoice": "Klicke auf die Schaltfläche aus {{optionCount}} Multiple-Choice-Optionen, um zu raten. {{penalty}} EXP-Strafe wird angewendet",
                     "typing": "Schreib deine Antwort in den Chat, um zu raten",
                     "typingTypos": "Gib deine Antwort im Chat ein, um zu raten. Kleine Tippfehler werden als richtig gewertet. {{penalty}} EXP-Strafe wird angewendet"
@@ -1616,7 +1617,7 @@
             "debugServer": "Das kannst du auf diesem Server nicht tun.",
             "differentVC": "Du musst dich im selben Sprachkanal wie der Bot befinden, um diesen Befehl nutzen zu können.",
             "notGameSession": "Das kannst du in einer Spielsitzung nicht tun.",
-            "notHidden": "Das kannst du während eines versteckten Spiels nicht tun.",
+            "notHidden": "Dies kannst du während einer versteckten Runde nicht tun.",
             "notListeningSession": "Das kannst du während einer Hörsitzung nicht tun.",
             "notPlaylist": "Du kannst diese Option nicht ändern, wenn du von einer Wiedergabeliste aus spielst. Verwende {{playlistResetCommand}}, bevor du diese Option änderst.",
             "notSuddenDeath": "Das kannst du während des Modus - plötzlicher Tod nicht machen.",

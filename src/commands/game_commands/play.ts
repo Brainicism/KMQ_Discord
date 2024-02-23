@@ -38,6 +38,7 @@ import {
     tryCreateInteractionSuccessAcknowledgement,
     voicePermissionsCheck,
 } from "../../helpers/discord_utils";
+import AnswerCommand from "../game_options/answer";
 import AnswerType from "../../enums/option_types/answer_type";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
@@ -323,7 +324,7 @@ export default class PlayCommand implements BaseCommand {
                 ),
             },
             {
-                example: clickableSlashCommand(COMMAND_NAME, GameType.HIDDEN),
+                example: clickableSlashCommand(COMMAND_NAME, AnswerType.HIDDEN),
                 explanation: i18n.translate(
                     guildID,
                     "command.play.help.example.hidden",
@@ -359,7 +360,7 @@ export default class PlayCommand implements BaseCommand {
                     type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
                 },
                 {
-                    name: GameType.HIDDEN,
+                    name: AnswerType.HIDDEN,
                     description: i18n.translate(
                         LocaleType.EN,
                         "command.play.help.example.hidden",
@@ -597,6 +598,7 @@ export default class PlayCommand implements BaseCommand {
                 messageContext,
                 gameType,
                 interactionOptions["lives"],
+                interactionKey === AnswerType.HIDDEN,
                 interaction,
             );
         }
@@ -620,6 +622,7 @@ export default class PlayCommand implements BaseCommand {
             parsedMessage.components.length <= 1
                 ? null
                 : parsedMessage.components[1],
+            gameTypeRaw === AnswerType.HIDDEN,
         );
     };
 
@@ -1044,6 +1047,7 @@ export default class PlayCommand implements BaseCommand {
         messageContext: MessageContext,
         gameType: GameType,
         livesArg: string | null,
+        hiddenMode: boolean,
         interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const guildID = messageContext.guildID;
@@ -1118,6 +1122,10 @@ export default class PlayCommand implements BaseCommand {
                     )} | Teams game session was in progress, has been reset.`,
                 );
             }
+        }
+
+        if (hiddenMode) {
+            await AnswerCommand.setAnswerHidden(guildPreference);
         }
 
         // (1) No game session exists yet (create ELIMINATION, TEAMS, CLASSIC, or COMPETITION game), or
@@ -1304,11 +1312,7 @@ export default class PlayCommand implements BaseCommand {
         }
 
         State.gameSessions[guildID] = gameSession;
-        if (gameType === GameType.HIDDEN) {
-            if (guildPreference.isMultipleChoiceMode()) {
-                await guildPreference.setAnswerType(AnswerType.TYPING);
-            }
-
+        if (gameSession.isHiddenMode()) {
             if (!guildPreference.isGuessTimeoutSet()) {
                 await guildPreference.setGuessTimeout(HIDDEN_DEFAULT_TIMER);
             }

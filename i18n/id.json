@@ -45,6 +45,7 @@
             "help": {
                 "description": "Pilih cara menjawab: dengan mengetik jawaban Anda, atau melalui pilihan ganda. Opsinya sebagai berikut: `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}`, dan `{{hard}}`",
                 "example": {
+                    "hidden": "Jawab dengan /tebak sebelum waktu habis",
                     "multipleChoice": "Klik tombol dari {{optionCount}} berbagai opsi pilihan untuk menebak. Penalti {{penalty}} EXP akan diterapkan",
                     "typing": "Ketik jawaban Anda dalam obrolan untuk menebak",
                     "typingTypos": "Ketik jawaban Anda dalam obrolan untuk menebak. Kesalahan ketik kecil akan ditandai sebagai benar. Penalti {{penalty}} EXP akan diterapkan"
@@ -1616,7 +1617,7 @@
             "debugServer": "Anda tidak dapat melakukan itu di server ini.",
             "differentVC": "Anda harus berada di saluran suara yang sama dengan bot untuk menggunakan perintah ini.",
             "notGameSession": "Anda tidak dapat melakukan itu saat dalam sesi permainan.",
-            "notHidden": "Anda tidak dapat melakukan itu selama permainan tersembunyi.",
+            "notHidden": "Kamu tidak bisa melakukan itu selama babak tersembunyi.",
             "notListeningSession": "Anda tidak dapat melakukan itu saat dalam sesi mendengarkan.",
             "notPlaylist": "Anda tidak dapat mengubah opsi itu saat memutar dari daftar putar. Gunakan {{playlistResetCommand}} sebelum mengubah opsi ini.",
             "notSuddenDeath": "Kamu tidak boleh melakukan itu selama tiba-tiba",

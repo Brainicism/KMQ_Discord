@@ -45,6 +45,7 @@
             "help": {
                 "description": "Escolha como responder: digitando sua resposta ou por múltipla escolha. As opções são as seguintes: `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}` e `{{hard}}`",
                 "example": {
+                    "hidden": "Responda com /guess antes que o cronômetro zere",
                     "multipleChoice": "Clique no botão de {{optionCount}} opções de múltipla escolha para adivinhar. A penalidade de {{penalty}} EXP será aplicada",
                     "typing": "Digite sua resposta no chat para adivinhar",
                     "typingTypos": "Digite sua resposta no chat para adivinhar. Pequenos erros de digitação serão marcados como corretos. A penalidade de {{penalty}} EXP será aplicada"
@@ -1616,7 +1617,7 @@
             "debugServer": "Você não pode fazer isso neste servidor.",
             "differentVC": "Você deve estar no mesmo canal de voz que o bot para usar este comando.",
             "notGameSession": "Você não pode fazer isso durante uma sessão de jogo.",
-            "notHidden": "Você não pode fazer isso durante um jogo oculto.",
+            "notHidden": "Não é possível fazer isso durante uma rodada oculta.",
             "notListeningSession": "Você não pode fazer isso durante uma sessão de audição.",
             "notPlaylist": "Você não pode alterar essa opção ao tocar a partir de uma lista de reprodução. Use {{playlistResetCommand}} antes de alterar esta opção.",
             "notSuddenDeath": "Você não pode fazer isso durante morte súbita.",

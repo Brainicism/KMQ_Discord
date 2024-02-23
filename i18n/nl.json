@@ -45,6 +45,7 @@
             "help": {
                 "description": "Kies hoe u wilt antwoorden: door uw antwoord te typen of via een meerkeuzevraag. Opties zijn de volgende: `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}` en `{{hard}}`",
                 "example": {
+                    "hidden": "Antwoord met /guess voordat de timer afloopt",
                     "multipleChoice": "Klik op de knop van de {{optionCount}} meerkeuzeopties om te raden. {{penalty}} EXP-straf wordt toegepast",
                     "typing": "Typ je antwoord in de chat om te raden",
                     "typingTypos": "Typ je antwoord in de chat om te raden. Kleine typfouten worden als correct gemarkeerd. {{penalty}} EXP-straf wordt toegepast"
@@ -1616,7 +1617,7 @@
             "debugServer": "Je kunt dat niet doen op deze server.",
             "differentVC": "Je moet in hetzelfde spraakkanaal zijn als de bot om deze opdracht te gebruiken.",
             "notGameSession": "Je kunt dat niet doen tijdens een spelsessie.",
-            "notHidden": "U kunt dat niet doen tijdens een verborgen spel.",
+            "notHidden": "Dat kan je niet doen tijdens een verborgen ronde.",
             "notListeningSession": "Je kunt dat niet doen tijdens een luistersessie.",
             "notPlaylist": "Je kunt die optie niet wijzigen wanneer je vanaf een afspeellijst afspeelt. Gebruik {{playlistResetCommand}} voordat je deze optie wijzigt.",
             "notSuddenDeath": "Dat kan niet tijdens een plotselinge dood.",

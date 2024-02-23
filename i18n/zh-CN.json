@@ -45,6 +45,7 @@
             "help": {
                 "description": "选择如何回答：通过输入答案或通过多项选择。选项如下：`{{typing}}`、`{{typingtypos}}`、`{{easy}}`、`{{medium}}`和`{{hard}}`。",
                 "example": {
+                    "hidden": "在计时器结束前用 /guess 来回答",
                     "multipleChoice": "点击{{optionCount}}个选项中的按钮来猜测。将会有{{penalty}}点经验值惩罚。",
                     "typing": "在聊天框中输入答案来猜测。",
                     "typingTypos": "在聊天框中输入答案来猜测。小的拼写错误也会被视为正确。将会有{{penalty}}点经验值惩罚。"
@@ -1616,7 +1617,7 @@
             "debugServer": "您不能在此服务器进行此操作。",
             "differentVC": "您必须与机器人在同一个语音频道中才能使用此命令。",
             "notGameSession": "您不能在游戏会话中进行此操作。",
-            "notHidden": "在隐藏游戏期间无法进行该操作。",
+            "notHidden": "你在隐藏回合期间无法执行此操作。",
             "notListeningSession": "您不能在听歌会话中进行此操作。",
             "notPlaylist": "从播放列表播放时，您不能更改该选项。更改此选项之前，请使用{{playlistResetCommand}}。",
             "notSuddenDeath": "你无法在突然死亡比赛中这样做。",

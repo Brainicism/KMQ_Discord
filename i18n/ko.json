@@ -45,6 +45,7 @@
             "help": {
                 "description": "답변 방법 선택: 답을 입력하거나 객관식을 통해 선택합니다. 옵션은 다음과 같습니다: `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}`, `{{hard}}`",
                 "example": {
+                    "hidden": "타이머가 0이 되기 전에 /guess로 답변하세요.",
                     "multipleChoice": "{{optionCount}}개의 객관식 옵션에서 버튼을 클릭하여 추측하십시오. {{penalty}} 경험치 패널티가 적용됩니다.",
                     "typing": "채팅에 답을 입력하여 추측합니다.",
                     "typingTypos": "채팅에 답을 입력하여 추측합니다. 사소한 오타는 올바른 것으로 표시됩니다. {{penalty}} 경험치 패널티가 적용됩니다."
@@ -1616,7 +1617,7 @@
             "debugServer": "이 서버에서는 이 작업을 수행할 수 없습니다.",
             "differentVC": "이 명령어를 사용하려면 봇과 동일한 음성 채널에 있어야 합니다.",
             "notGameSession": "게임 세션 중에는 이 작업을 수행할 수 없습니다.",
-            "notHidden": "히든 게임 중에는 이 작업을 수행할 수 없습니다.",
+            "notHidden": "숨겨진 라운드에서는 해당 작업을 실행할 수 없습니다.",
             "notListeningSession": "청취 세션 중에는 이 작업을 수행할 수 없습니다.",
             "notPlaylist": "재생 목록에서 재생할 때 해당 옵션을 변경할 수 없습니다. 이 옵션을 변경하기 전에 {{playlistResetCommand}}를 사용하세요.",
             "notSuddenDeath": "폭사 게임 중에는 그렇게 할 수 없습니다.",
