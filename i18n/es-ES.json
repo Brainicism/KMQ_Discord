@@ -862,6 +862,7 @@
                 "example": {
                     "classic": "Comienza un juego clásico de KMQ (escribe tu respuesta primero para obtener un punto)",
                     "elimination": "Comienza un juego de eliminación de KMQ donde cada jugador comienza con {{lives}} vidas",
+                    "hidden": "Inicia una partida oculta de KMQ, donde los jugadores solo pueden contestar con /guess",
                     "teams": "Divídete en tantos equipos como quieras y ve quién puede ayudarte a ganar!"
                 },
                 "interaction": {

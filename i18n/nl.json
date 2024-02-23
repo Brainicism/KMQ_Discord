@@ -862,6 +862,7 @@
                 "example": {
                     "classic": "Start een klassiek spelletje KMQ (typ je gok als eerste om een punt te krijgen)",
                     "elimination": "Start een KMQ-eliminatiespel waarin elke speler begint met {{lives}} levens",
+                    "hidden": "Start een verborgen spelletje KMQ, waarin spelers alleen kunnen antwoorden met /raden",
                     "teams": "Splits op in zoveel teams als je wilt en kijk van wie je afhankelijk kunt zijn om te winnen!"
                 },
                 "interaction": {

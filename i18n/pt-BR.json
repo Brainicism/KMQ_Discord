@@ -862,6 +862,7 @@
                 "example": {
                     "classic": "Começar um jogo clássico de KMQ (digite seu palpite primeiro para ganhar um ponto)",
                     "elimination": "Iniciar uma partida de eliminação do KMQ, onde cada jogador começa com {{lives}} vidas",
+                    "hidden": "Comece um jogo oculto de KMQ, onde os jogadores só podem responder com /adivinhação",
                     "teams": "Divida-se em quantas equipes quiser e veja em quem você pode confiar para ajudá-lo a vencer!"
                 },
                 "interaction": {
