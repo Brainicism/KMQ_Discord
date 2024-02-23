@@ -81,6 +81,11 @@
                 "title": "Игнорировать начало"
             }
         },
+        "botlanguage": {
+            "help": {
+                "name": "бот-язык"
+            }
+        },
         "botnews": {
             "help": {
                 "description": "Отображает последние обновления KMQ.",
@@ -862,7 +867,8 @@
                 "example": {
                     "classic": "Начать классическую игру KMQ (введите угадку, чтобы получить очко)",
                     "elimination": "Начать игру на выбывание в KMQ, где каждый игрок начинает с {{lives}} жизнями",
-                    "hidden": "Запустите скрытую игру в KMQ, где игроки могут отвечать только при помощи /guess",
+                    "hidden": "Начните скрытую игру в KMQ, где игроки могут отвечать только с помощью /guess",
+                    "suddenDeath": "Начинается Sudden Death в KQM, где кто-то обязан угадывать песни правильно, или иначе - конец",
                     "teams": "Создайте любое количество команд и выясните, кто поможет вам победить!"
                 },
                 "interaction": {
@@ -1537,8 +1543,7 @@
             "noWinners": "Никто не выиграл",
             "runnersUp": "Финалисты",
             "songsCorrectlyGuessed": "{{songCount}} песен угадано верно!",
-            "uniqueSongsPlayed": "Сыграно {{uniqueSongCount}} уникальных песен.",
-            "winMessage": "{{playerName}} побеждает!"
+            "uniqueSongsPlayed": "Сыграно {{uniqueSongCount}} уникальных песен."
         },
         "interaction": {
             "bookmarked": {
@@ -1600,7 +1605,11 @@
             "second_one": "{{count}} секунда",
             "second_other": "{{count}} секунд",
             "song_one": "{{count}} песня",
-            "song_other": "{{count}} песен"
+            "song_other": "{{count}} песен",
+            "suddenDeathEnd_one": "Ты пережил {{count}} песню!",
+            "suddenDeathEnd_other": "Вы пережили {{count}} песен!",
+            "winMessage_one": "Побеждает {{winners, list}}!",
+            "winMessage_other": "Выиграл {{winners, list}}!"
         },
         "preCheck": {
             "competition": "Эта команда отключена для обычных пользователей в соревновании.",
@@ -1611,6 +1620,7 @@
             "notHidden": "Вы не можете сделать этого во время скрытого раунда.",
             "notListeningSession": "Во время прослушивания нельзя этого сделать.",
             "notPlaylist": "Вы не можете изменить этот параметр при игре из плейлиста. Используйте {{playlistResetCommand}} перед изменением этого параметра.",
+            "notSuddenDeath": "Во время внезапной смерти такого делать нельзя.",
             "title": "Подождите..."
         },
         "releaseDate": "Дата выпуска",

@@ -255,6 +255,7 @@ export default class HintCommand implements BaseCommand {
         { checkFn: CommandPrechecks.inSessionCommandPrecheck },
         { checkFn: CommandPrechecks.competitionPrecheck },
         { checkFn: CommandPrechecks.notListeningPrecheck },
+        { checkFn: CommandPrechecks.notSuddenDeathPrecheck },
     ];
 
     help = (guildID: string): HelpDocumentation => ({

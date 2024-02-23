@@ -19,6 +19,7 @@
         "lint-i18n-ci": "npx eslint --no-eslintrc --config .eslintrc.i18n.js --ext .json  --max-warnings=0 --format node_modules/eslint-plugin-i18n-json/formatter.js i18n/ ",
         "lint-fix": "npx eslint --fix --cache src/ --ext .js,.ts",
         "lint-ci": "npx eslint --cache src/ --ext .js,.ts --max-warnings=0",
+        "lint-all": "npm run prettier && npm run lint && npm run lint-i18n",
         "docker-compose-db": "cd docker/ && docker-compose up -d db",
         "docker-compose-dev": "cd docker/ && NODE_ENV=development docker-compose up  --exit-code-from kmq --build kmq",
         "docker-compose-dryrun": "cd docker/ && NODE_ENV=dry-run docker-compose up --exit-code-from kmq --build kmq",
@@ -98,7 +99,7 @@
         "eslint-plugin-only-warn": "^1.1.0",
         "eslint-plugin-sort-imports-es6-autofix": "^0.6.0",
         "eslint-plugin-tsdoc": "^0.2.17",
-        "i18n-ai-translate": "^1.2.4",
+        "i18n-ai-translate": "^1.2.5",
         "kysely-codegen": "^0.11.0",
         "prettier": "3.2.4",
         "typescript": "~5.3.3"

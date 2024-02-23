@@ -2,17 +2,14 @@
 import { ExpBonusModifierValues } from "../../constants";
 import { delay } from "../../helpers/utils";
 import ExpBonusModifier from "../../enums/exp_bonus_modifier";
-import GameRound, {
-    cleanArtistName,
-    normalizePunctuationInName,
-} from "../../structures/game_round";
+import GameRound from "../../structures/game_round";
 import GuessModeType from "../../enums/option_types/guess_mode_type";
 import State from "../../state";
 import assert from "assert";
 
 describe("game round", () => {
     let gameRound: GameRound;
-    describe("constructor defaults", () => {
+    describe("checkGuess", () => {
         describe("artist/song names without aliases", () => {
             it("adds the corresponding name as a correct answer", () => {
                 gameRound = new GameRound(
@@ -37,15 +34,30 @@ describe("game round", () => {
                     5,
                 );
 
-                assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
-                    "Jisoo",
-                    "지수",
-                ]);
+                assert.ok(gameRound.checkGuess("Jisoo", GuessModeType.ARTIST));
+                assert.ok(gameRound.checkGuess("지수", GuessModeType.ARTIST));
+                assert.ok(
+                    gameRound.checkGuess("Song1", GuessModeType.SONG_NAME),
+                );
 
-                assert.deepStrictEqual(gameRound.acceptedSongAnswers, [
-                    "Song1",
-                    "노래1",
-                ]);
+                assert.ok(
+                    gameRound.checkGuess("노래1", GuessModeType.SONG_NAME),
+                );
+
+                // invalid options
+                assert.ok(
+                    !gameRound.checkGuess(
+                        "fakeartistname",
+                        GuessModeType.ARTIST,
+                    ),
+                );
+
+                assert.ok(
+                    !gameRound.checkGuess(
+                        "fakesongname",
+                        GuessModeType.SONG_NAME,
+                    ),
+                );
             });
         });
 
@@ -73,12 +85,14 @@ describe("game round", () => {
                     5,
                 );
 
-                assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
-                    "IU",
-                    "Blackpink",
-                    "아이유",
-                    "블랙핑크",
-                ]);
+                assert.ok(gameRound.checkGuess("IU", GuessModeType.ARTIST));
+                assert.ok(
+                    gameRound.checkGuess("Blackpink", GuessModeType.ARTIST),
+                );
+                assert.ok(gameRound.checkGuess("아이유", GuessModeType.ARTIST));
+                assert.ok(
+                    gameRound.checkGuess("블랙핑크", GuessModeType.ARTIST),
+                );
             });
         });
 
@@ -106,12 +120,12 @@ describe("game round", () => {
                     5,
                 );
 
-                assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
-                    "Yena",
-                    "Choi Yena",
-                    "최예나",
-                    "나",
-                ]);
+                assert.ok(gameRound.checkGuess("Yena", GuessModeType.ARTIST));
+                assert.ok(
+                    gameRound.checkGuess("Choi Yena", GuessModeType.ARTIST),
+                );
+                assert.ok(gameRound.checkGuess("최예나", GuessModeType.ARTIST));
+                assert.ok(gameRound.checkGuess("나", GuessModeType.ARTIST));
             });
         });
 
@@ -139,12 +153,100 @@ describe("game round", () => {
                     5,
                 );
 
-                assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
-                    "Blackpink",
-                    "IU",
-                    "블랙핑크",
-                    "아이유",
-                ]);
+                assert.ok(
+                    gameRound.checkGuess("Blackpink", GuessModeType.ARTIST),
+                );
+                assert.ok(gameRound.checkGuess("IU", GuessModeType.ARTIST));
+                assert.ok(
+                    gameRound.checkGuess("블랙핑크", GuessModeType.ARTIST),
+                );
+                assert.ok(gameRound.checkGuess("아이유", GuessModeType.ARTIST));
+            });
+        });
+
+        describe("names contains unwanted characters", () => {
+            it("should remove the unwanted characters", () => {
+                gameRound = new GameRound(
+                    {
+                        songName: "Sev en  !",
+                        originalSongName: "Sev en  !",
+                        hangulSongName: "금  !요",
+                        originalHangulSongName: "금  !요",
+                        artistName: "Jung  kook",
+                        hangulArtistName: "정  국",
+                        youtubeLink: "abcde",
+                        originalLink: null,
+                        publishDate: new Date(),
+                        members: "female",
+                        artistID: 3,
+                        isSolo: "y",
+                        views: 123456789,
+                        tags: "",
+                        vtype: "main",
+                        selectionWeight: 1,
+                    },
+                    5,
+                );
+
+                assert.ok(
+                    gameRound.checkGuess("Seven", GuessModeType.SONG_NAME),
+                );
+
+                assert.ok(
+                    gameRound.checkGuess("Seve n", GuessModeType.SONG_NAME),
+                );
+
+                assert.ok(
+                    gameRound.checkGuess(
+                        "금  !      요",
+                        GuessModeType.SONG_NAME,
+                    ),
+                );
+
+                assert.ok(
+                    gameRound.checkGuess("금요", GuessModeType.SONG_NAME),
+                );
+
+                assert.ok(
+                    gameRound.checkGuess("Jungkook", GuessModeType.ARTIST),
+                );
+
+                assert.ok(
+                    gameRound.checkGuess("Jung kook", GuessModeType.ARTIST),
+                );
+
+                assert.ok(gameRound.checkGuess("정국", GuessModeType.ARTIST));
+                assert.ok(gameRound.checkGuess("정 국", GuessModeType.ARTIST));
+            });
+        });
+
+        describe("song name is solely unwanted characters", () => {
+            it("should not clean the song name", () => {
+                gameRound = new GameRound(
+                    {
+                        songName: "?!",
+                        originalSongName: "?!",
+                        hangulSongName: "@#",
+                        originalHangulSongName: "@#",
+                        artistName: "a",
+                        hangulArtistName: "a",
+                        youtubeLink: "abcde",
+                        originalLink: null,
+                        publishDate: new Date(),
+                        members: "female",
+                        artistID: 3,
+                        isSolo: "y",
+                        views: 123456789,
+                        tags: "",
+                        vtype: "main",
+                        selectionWeight: 1,
+                    },
+                    5,
+                );
+
+                assert.ok(gameRound.checkGuess("?!", GuessModeType.SONG_NAME));
+                assert.ok(gameRound.checkGuess("@#", GuessModeType.SONG_NAME));
+                assert.ok(!gameRound.checkGuess("", GuessModeType.SONG_NAME));
             });
         });
 
@@ -184,12 +286,33 @@ describe("game round", () => {
                             5,
                         );
 
-                        assert.deepStrictEqual(gameRound.acceptedSongAnswers, [
-                            "A really epic song",
-                            "An epic song",
-                            "A good song",
-                            "정말 서사시 노래",
-                        ]);
+                        assert.ok(
+                            gameRound.checkGuess(
+                                "A really epic song",
+                                GuessModeType.SONG_NAME,
+                            ),
+                        );
+
+                        assert.ok(
+                            gameRound.checkGuess(
+                                "An epic song",
+                                GuessModeType.SONG_NAME,
+                            ),
+                        );
+
+                        assert.ok(
+                            gameRound.checkGuess(
+                                "A good song",
+                                GuessModeType.SONG_NAME,
+                            ),
+                        );
+
+                        assert.ok(
+                            gameRound.checkGuess(
+                                "정말 서사시 노래",
+                                GuessModeType.SONG_NAME,
+                            ),
+                        );
                     });
                 });
             });
@@ -224,79 +347,90 @@ describe("game round", () => {
                             5,
                         );
 
-                        assert.deepStrictEqual(
-                            gameRound.acceptedArtistAnswers,
-                            ["Person2", "2인칭", "Person Two", "Person Too"],
+                        assert.ok(
+                            gameRound.checkGuess(
+                                "Person2",
+                                GuessModeType.ARTIST,
+                            ),
+                        );
+
+                        assert.ok(
+                            gameRound.checkGuess("2인칭", GuessModeType.ARTIST),
+                        );
+
+                        assert.ok(
+                            gameRound.checkGuess(
+                                "Person Two",
+                                GuessModeType.ARTIST,
+                            ),
+                        );
+
+                        assert.ok(
+                            gameRound.checkGuess(
+                                "Person Too",
+                                GuessModeType.ARTIST,
+                            ),
                         );
                     });
                 });
             });
         });
-    });
 
-    describe("clean song/artist name", () => {
-        describe("has uppercase characters", () => {
-            it("converts to full lower case", () => {
-                assert.strictEqual(
-                    normalizePunctuationInName("BLahBLah"),
-                    "blahblah",
-                );
-                assert.strictEqual(cleanArtistName("ClaHClaH"), "clahclah");
-            });
-        });
-
-        describe("has trailing or leading spaces", () => {
-            it("removes the whitespace", () => {
-                assert.strictEqual(
-                    normalizePunctuationInName("       blahblah          "),
-                    "blahblah",
-                );
-
-                assert.strictEqual(
-                    cleanArtistName("       clahclah          "),
-                    "clahclah",
-                );
-            });
-        });
-
-        describe("has unwanted punctuation or symbols", () => {
-            it("removes the specified list of removed punctuation", () => {
-                assert.strictEqual(
-                    normalizePunctuationInName("!bl:ah blah?"),
-                    "blahblah",
-                );
-                assert.strictEqual(cleanArtistName("!cl:ah clah?"), "clahclah");
-            });
-        });
-
-        describe("has exclusively unwanted punctation or symbols", () => {
-            it("does not modify the input", () => {
-                assert.strictEqual(normalizePunctuationInName("!? "), "!? ");
-            });
-        });
-
-        describe("has punctuation to replace", () => {
-            it("replaces the punctuation with the correct replacement", () => {
-                assert.strictEqual(
-                    normalizePunctuationInName("blah & blah"),
-                    "blahandblah",
+        describe("typos", () => {
+            it("should allow typos if enabled", () => {
+                gameRound = new GameRound(
+                    {
+                        songName: "Perfect Night",
+                        originalSongName: "Perfect Night",
+                        hangulSongName: "Perfect Night",
+                        originalHangulSongName: "Perfect Night",
+                        artistName: "Le Sserafim",
+                        hangulArtistName: "르세라핌",
+                        youtubeLink: "abcde",
+                        originalLink: null,
+                        publishDate: new Date(),
+                        members: "male",
+                        artistID: 4,
+                        isSolo: "y",
+                        views: 2,
+                        tags: "",
+                        vtype: "main",
+                        selectionWeight: 1,
+                    },
+                    5,
                 );
 
-                assert.strictEqual(
-                    cleanArtistName("clah & clah"),
-                    "clahandclah",
+                assert.ok(
+                    !gameRound.checkGuess(
+                        "Perfect Hight",
+                        GuessModeType.SONG_NAME,
+                        false,
+                    ),
                 );
-            });
-        });
 
-        describe("has brackets in them", () => {
-            describe("artist names", () => {
-                it("does not ignore the sections in the brackets", () => {
-                    assert.strictEqual(
-                        cleanArtistName("cla(hclah)"),
-                        "clahclah",
-                    );
-                });
+                assert.ok(
+                    gameRound.checkGuess(
+                        "Perfect Hight",
+                        GuessModeType.SONG_NAME,
+                        true,
+                    ),
+                );
+
+                assert.ok(
+                    !gameRound.checkGuess(
+                        "Le SserafiN",
+                        GuessModeType.ARTIST,
+                        false,
+                    ),
+                );
+
+                assert.ok(
+                    gameRound.checkGuess(
+                        "Le SserafiN",
+                        GuessModeType.ARTIST,
+                        true,
+                    ),
+                );
             });
         });
     });
@@ -364,7 +498,7 @@ describe("game round", () => {
         });
     });
 
-    describe("check guess", () => {
+    describe("check guess points", () => {
         beforeEach(() => {
             gameRound = new GameRound(
                 {

@@ -62,9 +62,15 @@ export class LocalizationManager {
      * @param localeOrGuildID - A locale to translate to, or the guild ID to translate for
      * @param phrase - The phrase to translate
      * @param count - The number which decides whether to select singular or plural
+     * @param replace - Replacements to be applied to the phrase
      * @returns The translated phrase
      */
-    translateN(localeOrGuildID: string, phrase: string, count: number): string {
+    translateN(
+        localeOrGuildID: string,
+        phrase: string,
+        count: number,
+        replace: { [key: string]: string } = {},
+    ): string {
         if (!this.hasKey(`${phrase}_one`) || !this.hasKey(`${phrase}_other`)) {
             logger.error(`Missing translation for plural phrase: ${phrase}`);
         }
@@ -75,6 +81,7 @@ export class LocalizationManager {
                 : State.getGuildLocale(localeOrGuildID),
             phrase,
             count,
+            replace,
         );
     }
 
@@ -105,16 +112,19 @@ export class LocalizationManager {
      * @param locale - The locale to translate to
      * @param phrase - The phrase to translate
      * @param count - The number which decides whether to select singular or plural
+     * @param replace - Replacements to be applied to the phrase
      * @returns The translated phrase
      */
     private translateNByLocale(
         locale: LocaleType,
         phrase: string,
         count: number,
+        replace: { [key: string]: string } = {},
     ): string {
         return this.internalLocalizer.t(phrase, {
             lng: locale,
             count,
+            replace,
         });
     }
 }

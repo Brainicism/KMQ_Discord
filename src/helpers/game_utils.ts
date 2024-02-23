@@ -1,10 +1,7 @@
 import { IPCLogger } from "../logger";
 import { SHADOW_BANNED_ARTIST_IDS } from "../constants";
-import {
-    cleanArtistName,
-    normalizePunctuationInName,
-} from "../structures/game_round";
 import { containsHangul, md5Hash } from "./utils";
+import { normalizePunctuationInName } from "../structures/game_round";
 import { sql } from "kysely";
 import AnswerType from "../enums/option_types/answer_type";
 import GuessModeType from "../enums/option_types/guess_mode_type";
@@ -266,8 +263,8 @@ export async function getMatchingGroupNames(
             const matchingAlias = Object.entries(State.aliases.artist).find(
                 (artistAliasTuple) =>
                     artistAliasTuple[1]
-                        .map((x) => cleanArtistName(x))
-                        .includes(cleanArtistName(groupName)),
+                        .map((x) => normalizePunctuationInName(x))
+                        .includes(normalizePunctuationInName(groupName)),
             );
 
             if (matchingAlias) {
@@ -510,7 +507,7 @@ export async function isFirstGameOfDay(userID: string): Promise<boolean> {
     const player = await dbContext.kmq
         .selectFrom("player_stats")
         .select([
-            sql<number>`DAYOFYEAR(last_active) = DAYOFYEAR(CURDATE())`.as(
+            sql<number>`DAYOFYEAR(last_game_started_at) = DAYOFYEAR(CURDATE())`.as(
                 "firstGameOfDay",
             ),
             "last_game_played_errored",

@@ -81,6 +81,11 @@
                 "title": "नजरअंदाज करना शुरू करें"
             }
         },
+        "botlanguage": {
+            "help": {
+                "name": "बोटभाषा"
+            }
+        },
         "botnews": {
             "help": {
                 "description": "KMQ के नवीनतम अपडेट प्रदर्शित करता है।",
@@ -862,7 +867,8 @@
                 "example": {
                     "classic": "KMQ का क्लासिक खेल शुरू करें (पहले अपने अनुमान को टाइप करें ताकि एक अंक मिल सके)",
                     "elimination": "KMQ का एक एलिमिनेशन गेम शुरू करें जहां प्रत्येक खिलाड़ी {{lives}} लाइव से शुरू होता है",
-                    "hidden": "केएमक्यू के एक छुपे हुए खेल की शुरुआत करें, जहाँ खिलाड़ी केवल /guess के साथ उत्तर दे सकते हैं",
+                    "hidden": "KMQ का एक छिपा हुआ गेम शुरू करें, जहाँ खिलाड़ी केवल /अनुमान के साथ उत्तर दे सकते हैं",
+                    "suddenDeath": "केएमक्यू का सडन डेथ खेल शुरू करें, गीत पहचानें या खेल खत्म।",
                     "teams": "जितनी चाहें उतनी टीमों में विभाजित हो जाएं और देखें कि जीतने में कौन आपका साथ दे सकता है!"
                 },
                 "interaction": {
@@ -1537,8 +1543,7 @@
             "noWinners": "कोई नहीं जीता",
             "runnersUp": "उपविजेता",
             "songsCorrectlyGuessed": "{{songCount}} गाने सही तरीके से अनुमानित किए गए!",
-            "uniqueSongsPlayed": "{{uniqueSongCount}} अद्वितीय गाने बजाए गए।",
-            "winMessage": "{{playerName}} जीतता है!"
+            "uniqueSongsPlayed": "{{uniqueSongCount}} अद्वितीय गाने बजाए गए।"
         },
         "interaction": {
             "bookmarked": {
@@ -1600,7 +1605,11 @@
             "second_one": "{{count}} सेकंड",
             "second_other": "{{count}} सेकंड",
             "song_one": "{{count}} गाना",
-            "song_other": "{{count}} गाने"
+            "song_other": "{{count}} गाने",
+            "suddenDeathEnd_one": "आपने {{count}} गाना बचा लिया!",
+            "suddenDeathEnd_other": "आपने {{count}} गाने बचाए!",
+            "winMessage_one": "{{winners, list}} जीते!",
+            "winMessage_other": "{{winners, list}} जीते!"
         },
         "preCheck": {
             "competition": "प्रतियोगिता में नियमित उपयोगकर्ताओं के लिए इस आदेश को अक्षम कर दिया गया है।",
@@ -1611,6 +1620,7 @@
             "notHidden": "आप ऐसा छिपे हुए राउंड में नहीं कर सकते हैं।",
             "notListeningSession": "आप सुनने के सेशन में रहते हुए ऐसा नहीं कर सकते।",
             "notPlaylist": "आप किसी प्लेलिस्ट से खेलते समय उस विकल्प को नहीं बदल सकते। इस विकल्प को बदलने से पहले {{playlistResetCommand}} का उपयोग करें।",
+            "notSuddenDeath": "आप अचानक मौत के दौरान ऐसा नहीं कर सकते।",
             "title": "प्रतीक्षा करें..."
         },
         "releaseDate": "रिलीज़ तिथि",

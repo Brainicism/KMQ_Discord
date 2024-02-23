@@ -81,6 +81,11 @@
                 "title": "Begin Ignored"
             }
         },
+        "botlanguage": {
+            "help": {
+                "name": "botlanguage"
+            }
+        },
         "botnews": {
             "help": {
                 "description": "Displays the latest updates to KMQ.",
@@ -863,6 +868,7 @@
                     "classic": "Start a classic game of KMQ (type in your guess first to get a point)",
                     "elimination": "Start an elimination game of KMQ where each player starts with {{lives}} lives",
                     "hidden": "Start a hidden game of KMQ, where players can only answer with /guess",
+                    "suddenDeath": "Start a sudden death game of KMQ, where someone has to get the song right, or the game ends",
                     "teams": "Split up into as many teams as you want and see who you can depend on to help you win!"
                 },
                 "interaction": {
@@ -1537,8 +1543,7 @@
             "noWinners": "Nobody Won",
             "runnersUp": "Runners Up",
             "songsCorrectlyGuessed": "{{songCount}} songs correctly guessed!",
-            "uniqueSongsPlayed": "{{uniqueSongCount}} unique songs played.",
-            "winMessage": "{{playerName}} wins!"
+            "uniqueSongsPlayed": "{{uniqueSongCount}} unique songs played."
         },
         "interaction": {
             "bookmarked": {
@@ -1600,7 +1605,11 @@
             "second_one": "{{count}} second",
             "second_other": "{{count}} seconds",
             "song_one": "{{count}} song",
-            "song_other": "{{count}} songs"
+            "song_other": "{{count}} songs",
+            "suddenDeathEnd_one": "You survived {{count}} song!",
+            "suddenDeathEnd_other": "You survived {{count}} songs!",
+            "winMessage_one": "{{winners, list}} wins!",
+            "winMessage_other": "{{winners, list}} win!"
         },
         "preCheck": {
             "competition": "This command has been disabled for regular users in the competition.",
@@ -1611,6 +1620,7 @@
             "notHidden": "You can't do that during a hidden round.",
             "notListeningSession": "You can't do that while in a listening session.",
             "notPlaylist": "You can't change that option when playing from a playlist. Use {{playlistResetCommand}} before changing this option.",
+            "notSuddenDeath": "You can't do that during sudden death.",
             "title": "Wait..."
         },
         "releaseDate": "Release Date",

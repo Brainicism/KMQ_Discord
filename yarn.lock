@@ -2423,10 +2423,10 @@ https-proxy-agent@^7.0.1:
     agent-base "^7.0.2"
     debug "4"
 
-i18n-ai-translate@^1.2.4:
-  version "1.2.4"
-  resolved "https://registry.yarnpkg.com/i18n-ai-translate/-/i18n-ai-translate-1.2.4.tgz#ee67eb583a63ae2f5a056d8d1c6b4a2f3d5c06c7"
-  integrity sha512-EGdo+3FEU54My9KnhlF/QCij4g4IVCf0tmFZqRdV36qrKUkkME4Mv/0jgZBof9xfJWxSYpO9WkI6eW9bQuZ1wg==
+i18n-ai-translate@^1.2.5:
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/i18n-ai-translate/-/i18n-ai-translate-1.2.5.tgz#042a9a4963be6587f8056e01d04c0d22c0361aae"
+  integrity sha512-BPiM1XlpeCuL0O+gvnzP0B79aTvstV/cyXSD3JzwW+lAcawn63W+JjrcPxZXQ77IPF4DFQP8E+Y3WS2aX0j0jQ==
   dependencies:
     "@google/generative-ai" "^0.2.0"
     "@types/flat" "^5.0.5"
