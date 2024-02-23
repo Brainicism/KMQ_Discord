@@ -1,4 +1,8 @@
-import { ExpBonusModifierValues, OptionAction } from "../../constants";
+import {
+    ExpBonusModifierValues,
+    HIDDEN_DEFAULT_TIMER,
+    OptionAction,
+} from "../../constants";
 import { IPCLogger } from "../../logger";
 import { clickableSlashCommand } from "../../helpers/utils";
 import {
@@ -278,6 +282,10 @@ export default class AnswerCommand implements BaseCommand {
                     messageContext,
                 )} | Answer type set to ${answerType}`,
             );
+
+            if (answerType === AnswerType.HIDDEN) {
+                await AnswerCommand.setAnswerHidden(guildPreference);
+            }
         }
 
         await sendOptionsMessage(
@@ -290,6 +298,15 @@ export default class AnswerCommand implements BaseCommand {
             undefined,
             interaction,
         );
+    }
+
+    static async setAnswerHidden(
+        guildPreference: GuildPreference,
+    ): Promise<void> {
+        await guildPreference.setAnswerType(AnswerType.HIDDEN);
+        if (!guildPreference.isGuessTimeoutSet()) {
+            await guildPreference.setGuessTimeout(HIDDEN_DEFAULT_TIMER);
+        }
     }
 
     /**

@@ -38,6 +38,8 @@ import {
     tryCreateInteractionSuccessAcknowledgement,
     voicePermissionsCheck,
 } from "../../helpers/discord_utils";
+import AnswerCommand from "../game_options/answer";
+import AnswerType from "../../enums/option_types/answer_type";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameSession from "../../structures/game_session";
@@ -351,6 +353,26 @@ export default class PlayCommand implements BaseCommand {
                     type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
                 },
                 {
+                    name: AnswerType.HIDDEN,
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "command.play.help.example.hidden",
+                    ),
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.play.help.example.hidden",
+                                ),
+                            }),
+                            {},
+                        ),
+                    type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+                },
+                {
                     name: GameType.ELIMINATION,
                     description: i18n.translate(
                         LocaleType.EN,
@@ -531,6 +553,14 @@ export default class PlayCommand implements BaseCommand {
             return;
         }
 
+        if (interactionKey === AnswerType.HIDDEN) {
+            const guildPreference = await GuildPreference.getGuildPreference(
+                messageContext.guildID,
+            );
+
+            await AnswerCommand.setAnswerHidden(guildPreference);
+        }
+
         const gameType = interactionKey.split(".")[0] as GameType;
         if (interactionKey === `${GameType.TEAMS}.${PlayTeamsAction.BEGIN}`) {
             await PlayCommand.beginTeamsGame(messageContext, interaction);
@@ -564,6 +594,14 @@ export default class PlayCommand implements BaseCommand {
             gameType = GameType.CLASSIC;
         } else {
             gameType = gameTypeRaw as GameType;
+        }
+
+        if (gameTypeRaw === AnswerType.HIDDEN) {
+            const guildPreference = await GuildPreference.getGuildPreference(
+                message.guildID,
+            );
+
+            await AnswerCommand.setAnswerHidden(guildPreference);
         }
 
         await PlayCommand.startGame(

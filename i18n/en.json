@@ -862,6 +862,7 @@
                 "example": {
                     "classic": "Start a classic game of KMQ (type in your guess first to get a point)",
                     "elimination": "Start an elimination game of KMQ where each player starts with {{lives}} lives",
+                    "hidden": "Start a hidden game of KMQ, where players can only answer with /guess",
                     "teams": "Split up into as many teams as you want and see who you can depend on to help you win!"
                 },
                 "interaction": {
