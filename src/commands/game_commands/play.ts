@@ -323,6 +323,13 @@ export default class PlayCommand implements BaseCommand {
                     "command.play.help.example.teams",
                 ),
             },
+            {
+                example: clickableSlashCommand(COMMAND_NAME, AnswerType.HIDDEN),
+                explanation: i18n.translate(
+                    guildID,
+                    "command.play.help.example.hidden",
+                ),
+            },
         ],
     });
 
