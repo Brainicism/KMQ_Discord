@@ -20,7 +20,7 @@ services:
             - 5858:5858
 
     db:
-        image: mariadb:10.3
+        image: mariadb:10.6.17
         restart: on-failure
         env_file: .env
         environment:

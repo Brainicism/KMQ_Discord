@@ -80,6 +80,11 @@
                 "title": "Begin Ignored"
             }
         },
+        "botlanguage": {
+            "help": {
+                "name": "botlanguage"
+            }
+        },
         "botnews": {
             "help": {
                 "description": "Displays the latest updates to KMQ.",
@@ -1449,7 +1454,7 @@
                 "playerBanned": "You are banned from using KMQ. For appeals, contact the official KMQ support server at {{supportServer}}."
             },
             "maintenanceMode": {
-                "description": "KMQ is currently under maintenance, and new games cannot be started. Check back later!",
+                "description": "KMQ is currently under maintenance. Check back later!",
                 "title": "Maintenance Mode"
             },
             "messageTooLong": "Response message was too long, report this error to the KMQ help server",

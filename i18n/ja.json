@@ -80,6 +80,11 @@
                 "title": "無視された開始"
             }
         },
+        "botlanguage": {
+            "help": {
+                "name": "ボット言語"
+            }
+        },
         "botnews": {
             "help": {
                 "description": "KMQの最新の更新を表示します。",
@@ -1449,7 +1454,7 @@
                 "playerBanned": "あなたはKMQの使用が禁止されています。異議申し立ては、{{supportServer}}の公式KMQサポートサーバーまでご連絡ください。"
             },
             "maintenanceMode": {
-                "description": "KMQは現在メンテナンス中であり、新しいゲームを開始することはできません。後で再度確認してください！",
+                "description": "KMQは現在メンテナンス中です。後で確認してください！",
                 "title": "メンテナンスモード"
             },
             "messageTooLong": "レスポンスメッセージが長すぎます。このエラーをKMQヘルプサーバーに報告してください。",

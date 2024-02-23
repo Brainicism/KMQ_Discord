@@ -209,6 +209,9 @@ export default class GuildPreference {
     /** Callback to reload songs */
     public reloadSongCallback: (() => Promise<void>) | undefined;
 
+    /** Callback to reload songs */
+    public answerTypeChangeCallback: (() => Promise<void>) | undefined;
+
     /** The guild preference cache */
     private static guildPreferencesCache: {
         [guildID: string]: GuildPreference;
@@ -994,6 +997,16 @@ export default class GuildPreference {
                 logger.error(
                     `gid: ${this.guildID} | reloadSongCallback unexpectedly failed, session might not exist?`,
                 );
+            }
+        }
+
+        if (this.answerTypeChangeCallback) {
+            if (
+                updatedOptionsObjects
+                    ?.map((x) => x.name)
+                    .includes(GameOptionInternal.ANSWER_TYPE)
+            ) {
+                await this.answerTypeChangeCallback();
             }
         }
     }

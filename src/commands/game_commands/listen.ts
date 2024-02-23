@@ -97,7 +97,6 @@ export async function sendBeginListeningSessionMessage(
 export default class ListenCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.notRestartingPrecheck },
-        { checkFn: CommandPrechecks.maintenancePrecheck },
         { checkFn: CommandPrechecks.notListeningPrecheck },
         { checkFn: CommandPrechecks.notInGamePrecheck },
     ];

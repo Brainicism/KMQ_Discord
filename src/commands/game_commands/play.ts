@@ -263,7 +263,6 @@ export default class PlayCommand implements BaseCommand {
         { checkFn: CommandPrechecks.competitionPrecheck },
         { checkFn: CommandPrechecks.notListeningPrecheck },
         { checkFn: CommandPrechecks.notRestartingPrecheck },
-        { checkFn: CommandPrechecks.maintenancePrecheck },
     ];
 
     validations = {

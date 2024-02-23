@@ -80,6 +80,11 @@
                 "title": "开始被忽略"
             }
         },
+        "botlanguage": {
+            "help": {
+                "name": "机器人语言"
+            }
+        },
         "botnews": {
             "help": {
                 "description": "显示最新的KMQ更新。",
@@ -1449,7 +1454,7 @@
                 "playerBanned": "您被禁止使用KMQ。如需申诉，请联系{{supportServer}}的官方KMQ支持服务器。"
             },
             "maintenanceMode": {
-                "description": "KMQ目前正在维护中，无法启动新游戏。请稍后再来！",
+                "description": "KMQ目前正在维护中。稍后再试！",
                 "title": "维护模式"
             },
             "messageTooLong": "响应消息过长，请将此错误报告给KMQ帮助服务器。",
