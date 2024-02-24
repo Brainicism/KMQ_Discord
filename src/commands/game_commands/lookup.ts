@@ -7,6 +7,7 @@ import {
     friendlyFormattedDate,
     friendlyFormattedNumber,
     isValidURL,
+    truncatedString,
 } from "../../helpers/utils";
 import {
     getAllClickableSlashCommands,
@@ -360,10 +361,13 @@ async function lookupBySongName(
     }
 
     const songEmbeds = kmqSongEntries.map((entry) => ({
-        name: `**"${getLocalizedSongName(
-            entry,
-            locale,
-        )}"** - ${getLocalizedArtistName(entry, locale)}`,
+        name: truncatedString(
+            `**"${getLocalizedSongName(
+                entry,
+                locale,
+            )}"** - ${getLocalizedArtistName(entry, locale)}`,
+            100,
+        ),
         value: `https://youtu.be/${entry.youtubeLink}`,
     }));
 
