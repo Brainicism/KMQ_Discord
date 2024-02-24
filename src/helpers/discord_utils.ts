@@ -81,7 +81,6 @@ const REQUIRED_VOICE_PERMISSIONS = [
 ];
 
 const MAX_INTERACTION_RESPONSE_TIME = 3 * 1000;
-const MAX_EMBED_DESCRIPTION_LENGTH = 4096;
 
 interface GameMessageMultiLocaleContent {
     [LocaleType.EN]: string;
