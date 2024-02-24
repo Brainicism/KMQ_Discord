@@ -21,9 +21,9 @@ import {
     tryAutocompleteInteractionAcknowledge,
 } from "../../helpers/discord_utils";
 import {
+    getEmojisFromSongTags,
     getLocalizedArtistName,
     getLocalizedSongName,
-    getEmojisFromSongTags,
 } from "../../helpers/game_utils";
 import { getVideoID, validateID } from "@distube/ytdl-core";
 import { normalizePunctuationInName } from "../../structures/game_round";
