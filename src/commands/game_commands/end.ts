@@ -5,7 +5,6 @@ import {
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
-import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import i18n from "../../helpers/localization_manager";
@@ -52,9 +51,12 @@ export default class EndCommand implements BaseCommand {
         if (interaction) {
             await tryCreateInteractionSuccessAcknowledgement(
                 interaction,
-                i18n.translate(LocaleType.EN, "command.end.interaction.title"),
                 i18n.translate(
-                    LocaleType.EN,
+                    messageContext.guildID,
+                    "command.end.interaction.title",
+                ),
+                i18n.translate(
+                    messageContext.guildID,
                     "command.end.interaction.description",
                 ),
             );
