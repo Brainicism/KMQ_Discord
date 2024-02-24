@@ -23,6 +23,7 @@ import {
 import {
     getLocalizedArtistName,
     getLocalizedSongName,
+    getTagsFromSong,
 } from "../../helpers/game_utils";
 import { getVideoID, validateID } from "@distube/ytdl-core";
 import { normalizePunctuationInName } from "../../structures/game_round";
@@ -84,6 +85,7 @@ async function lookupByYoutubeID(
             "views",
             "id_artist",
             "id",
+            "tags",
         ])
         .where("vlink", "=", videoID)
         .executeTakeFirst();
@@ -114,6 +116,7 @@ async function lookupByYoutubeID(
     let artistName: string;
     const songAliases: string[] = [];
     const artistAliases: string[] = [];
+    let tags: string = getTagsFromSong(daisukiEntry);
     let views: number;
     let publishDate: Date;
     let songDuration: string | null = null;
@@ -126,6 +129,7 @@ async function lookupByYoutubeID(
         });
         songName = getLocalizedSongName(kmqSongEntry, locale);
         artistName = getLocalizedArtistName(kmqSongEntry, locale);
+
         songAliases.push(...(State.aliases.song[videoID] ?? []));
         artistAliases.push(
             ...(State.aliases.artist[kmqSongEntry.artistName] ?? []),
@@ -290,7 +294,7 @@ async function lookupByYoutubeID(
     sendInfoMessage(
         messageContext,
         {
-            title: `"${songName}" - ${artistName}`,
+            title: `"${songName}" - ${artistName} ${tags}`,
             url: `https://youtu.be/${videoID}`,
             description,
             thumbnailUrl: `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`,
