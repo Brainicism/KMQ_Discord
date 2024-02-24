@@ -562,11 +562,11 @@ export function registerIntervals(clusterID: number): void {
 }
 
 /** Reloads caches */
-export function reloadCaches(): void {
-    reloadAliases();
-    reloadArtists();
-    reloadBonusGroups();
-    reloadLocales();
-    reloadSongs();
-    reloadBanData();
+export async function reloadCaches(): Promise<void> {
+    await reloadAliases();
+    await reloadArtists();
+    await reloadBonusGroups();
+    await reloadLocales();
+    await reloadSongs();
+    await reloadBanData();
 }

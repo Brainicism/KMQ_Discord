@@ -47,9 +47,7 @@ jobs:
                   echo "BOT_PREFIX=." >> .env
                   echo "APP_NAME=kmq-gci" >> .env
                   echo "DAISUKI_DB_PASSWORD=unusedpw" >> .env
-                  echo "REDDIT_CLIENT_ID=$REDDIT_CLIENT_ID" >> .env
-                  echo "REDDIT_CLIENT_SECRET=$REDDIT_CLIENT_SECRET" >> .env
-                  echo "REDDIT_CLIENT_REFRESH_TOKEN=$REDDIT_CLIENT_REFRESH_TOKEN" >> .env
+                  echo "DEBUG_SERVER_ID=${{ secrets.DEBUG_SERVER_ID }}" >> .env
             - name: Install node dependencies
               run: yarn install --frozen-lockfile
             - name: Extract metadata (tags, labels) for Docker
@@ -85,6 +83,8 @@ jobs:
               run: . ./.env && docker run -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} -v ${PWD}/data:/app/data -v ${PWD}/.env:/app/.env -v ${PWD}/logs:/app/logs --env NODE_ENV=production --network=host --name kmq-gci ghcr.io/brainicism/kmq_discord:gci &
             - name: Check pre-upgrade KMQ healthiness
               run: while [[ "$(docker inspect --format='{{json .State.Health.Status}}' kmq-gci)" != "\"healthy\"" ]]; do sleep 1; done
+            - name: Check for errors
+              run: docker logs kmq-gci 2>&1 | grep -i "\[Error\]" && echo "Errors found in container logs." && exit 1 || echo "No errors found in container logs." && exit 0
             - name: Parse pre-upgrade container ID
               id: old-container-id
               run: |
