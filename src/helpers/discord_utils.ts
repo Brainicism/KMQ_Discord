@@ -480,14 +480,14 @@ export async function sendMessage(
             }
 
             if (embed.description) {
-                if (embed.description.length > 2048) {
+                if (embed.description.length > 4096) {
                     logger.error(
                         `Description was too long. title = ${embed.description}`,
                     );
 
                     embed.description = truncatedString(
                         embed.description,
-                        2047,
+                        4095,
                     );
                 }
             }
@@ -596,26 +596,6 @@ export async function sendErrorMessage(
             ? embedPayload.author
             : messageContext.author;
 
-    if (
-        embedPayload.description &&
-        embedPayload.description.length > MAX_EMBED_DESCRIPTION_LENGTH
-    ) {
-        logger.error(
-            `${getDebugLogHeader(
-                messageContext,
-            )} | Message was too long. description = ${
-                embedPayload.description
-            }`,
-        );
-        return sendErrorMessage(messageContext, {
-            title: i18n.translate(messageContext.guildID, "misc.failure.error"),
-            description: i18n.translate(
-                messageContext.guildID,
-                "misc.failure.messageTooLong",
-            ),
-        });
-    }
-
     return sendMessage(
         messageContext.textChannelID,
         {
@@ -705,29 +685,6 @@ export async function sendInfoMessage(
     interaction?: Eris.CommandInteraction,
 ): Promise<Eris.Message<Eris.TextableChannel> | null> {
     const embeds = [embedPayload, ...additionalEmbeds];
-    for (const embed of embeds) {
-        if (
-            embed.description &&
-            embed.description.length > MAX_EMBED_DESCRIPTION_LENGTH
-        ) {
-            logger.error(
-                `${getDebugLogHeader(
-                    messageContext,
-                )} | Message was too long. description = ${embed.description}`,
-            );
-            return sendErrorMessage(messageContext, {
-                title: i18n.translate(
-                    messageContext.guildID,
-                    "misc.failure.error",
-                ),
-                description: i18n.translate(
-                    messageContext.guildID,
-                    "misc.failure.messageTooLong",
-                ),
-            });
-        }
-    }
-
     return sendMessage(
         messageContext.textChannelID,
         {
