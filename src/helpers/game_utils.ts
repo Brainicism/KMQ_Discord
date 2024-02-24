@@ -563,6 +563,46 @@ export function getLocalizedArtistName(
     return song.hangulArtistName || song.artistName;
 }
 
+/**
+ * @param daisukiEntry - The song to retrieve the tags from
+ * @returns the tags in the form of discord emoji's in a string;
+ * Tags are either language tags or the remix tag.
+ */
+export function getEmojisFromSongTags(daisukiEntry: {
+    tags: string | null;
+}): string {
+    let tagText: string = "";
+    if (daisukiEntry.tags === null) {
+        return tagText;
+    }
+
+    if (daisukiEntry.tags.includes("e")) {
+        tagText += " :flag_gb:"; // English
+    }
+
+    if (daisukiEntry.tags.includes("z")) {
+        tagText += " :flag_cn:"; // Chinese
+    }
+
+    if (daisukiEntry.tags.includes("j")) {
+        tagText += " :flag_jp:"; // Japanese
+    }
+
+    if (daisukiEntry.tags.includes("s")) {
+        tagText += " :flag_es:"; // Spanish
+    }
+
+    if (daisukiEntry.tags.includes("l")) {
+        tagText += " :globe_with_meridians:"; // Other Language
+    }
+
+    if (daisukiEntry.tags.includes("x")) {
+        tagText += " :arrows_counterclockwise:"; // Remix
+    }
+
+    return tagText;
+}
+
 /** @returns whether its a KMQ power hour */
 export function isPowerHour(): boolean {
     const date = new Date();
