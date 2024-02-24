@@ -470,6 +470,61 @@ export async function sendMessage(
         }
     }
 
+    if (messageContent.embeds) {
+        for (const embed of messageContent.embeds.values()) {
+            if (embed.title) {
+                if (embed.title.length > 256) {
+                    logger.error(`Title was too long. title = ${embed.title}`);
+                    embed.title = truncatedString(embed.title!, 255);
+                }
+            }
+
+            if (embed.description) {
+                if (embed.description.length > 2048) {
+                    logger.error(
+                        `Description was too long. title = ${embed.description}`,
+                    );
+
+                    embed.description = truncatedString(
+                        embed.description,
+                        2047,
+                    );
+                }
+            }
+
+            if (embed.footer) {
+                if (embed.footer.text.length > 2048) {
+                    logger.error(
+                        `Footer was too long. title = ${embed.footer}`,
+                    );
+
+                    embed.footer.text = truncatedString(
+                        embed.footer.text,
+                        2047,
+                    );
+                }
+            }
+
+            if (embed.fields) {
+                for (const field of embed.fields) {
+                    if (field.name.length > 256) {
+                        logger.error(
+                            `Field name was too long. field.name = ${field.name}`,
+                        );
+                        field.name = truncatedString(field.name, 255);
+                    }
+
+                    if (field.value.length > 1024) {
+                        logger.error(
+                            `Field value was too long. field.value = ${field.value}`,
+                        );
+                        field.value = truncatedString(field.value, 1023);
+                    }
+                }
+            }
+        }
+    }
+
     try {
         return await State.client.createMessage(textChannelID, messageContent);
     } catch (e) {
@@ -559,15 +614,6 @@ export async function sendErrorMessage(
                 "misc.failure.messageTooLong",
             ),
         });
-    }
-
-    if (embedPayload.title.length > 256) {
-        logger.error(
-            `${getDebugLogHeader(
-                messageContext,
-            )} | Title was too long. title = ${embedPayload.title}`,
-        );
-        embedPayload.title = truncatedString(embedPayload.title, 256);
     }
 
     return sendMessage(
@@ -679,17 +725,6 @@ export async function sendInfoMessage(
                     "misc.failure.messageTooLong",
                 ),
             });
-        }
-    }
-
-    for (const [i, embed] of embeds.entries()) {
-        if (embed.title.length > 256) {
-            logger.error(
-                `${getDebugLogHeader(
-                    messageContext,
-                )} | Title was too long. title = ${embed.title}`,
-            );
-            embeds[i].title = truncatedString(embedPayload.title, 256);
         }
     }
 

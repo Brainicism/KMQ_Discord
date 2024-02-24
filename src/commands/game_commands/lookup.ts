@@ -363,7 +363,7 @@ async function lookupBySongName(
         name: `**"${getLocalizedSongName(
             entry,
             locale,
-        )}"** - ${getLocalizedArtistName(entry, locale)}`,
+        )}"** - ${getLocalizedArtistName(entry, locale)}`.substring(0, 100),
         value: `https://youtu.be/${entry.youtubeLink}`,
     }));
 
