@@ -23,7 +23,7 @@ import {
 import {
     getLocalizedArtistName,
     getLocalizedSongName,
-    getTagsFromSong,
+    getEmojisFromSongTags,
 } from "../../helpers/game_utils";
 import { getVideoID, validateID } from "@distube/ytdl-core";
 import { normalizePunctuationInName } from "../../structures/game_round";
@@ -116,7 +116,7 @@ async function lookupByYoutubeID(
     let artistName: string;
     const songAliases: string[] = [];
     const artistAliases: string[] = [];
-    let tags: string = getTagsFromSong(daisukiEntry);
+    const tags: string = getEmojisFromSongTags(daisukiEntry);
     let views: number;
     let publishDate: Date;
     let songDuration: string | null = null;
@@ -369,7 +369,7 @@ async function lookupBySongName(
             `**"${getLocalizedSongName(
                 entry,
                 locale,
-            )}"** - ${getLocalizedArtistName(entry, locale)}${getTagsFromSong(entry)}`,
+            )}"** - ${getLocalizedArtistName(entry, locale)}${getEmojisFromSongTags(entry)}`,
             100,
         ),
         value: `https://youtu.be/${entry.youtubeLink}`,

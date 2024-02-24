@@ -563,32 +563,44 @@ export function getLocalizedArtistName(
     return song.hangulArtistName || song.artistName;
 }
 
-export function getTagsFromSong(daisukiEntry: { tags: string | null }): string {
-    let tag_text: string = "";
+/**
+ * @param daisukiEntry - The song to retrieve the tags from
+ * @returns the tags in the form of discord emoji's in a string;
+ * Tags are either language tags or the remix tag.
+ */
+export function getEmojisFromSongTags(daisukiEntry: {
+    tags: string | null;
+}): string {
+    let tagText: string = "";
     if (daisukiEntry.tags === null) {
-        return tag_text;
-    } else {
-        if (daisukiEntry.tags.indexOf("e") != -1) {
-            tag_text += " :flag_gb:"; // English
-        }
-        if (daisukiEntry.tags.indexOf("z") != -1) {
-            tag_text += " :flag_cn:"; // Chinese
-        }
-        if (daisukiEntry.tags.indexOf("j") != -1) {
-            tag_text += " :flag_jp:"; // Japanese
-        }
-        if (daisukiEntry.tags.indexOf("s") != -1) {
-            tag_text += " :flag_es:"; // Spanish
-        }
-        if (daisukiEntry.tags.indexOf("l") != -1) {
-            tag_text += " :globe_with_meridians:"; // Other Language
-        }
-        if (daisukiEntry.tags.indexOf("x") != -1) {
-            tag_text += " :arrows_counterclockwise:"; // Remix
-        }
+        return tagText;
     }
 
-    return tag_text;
+    if (daisukiEntry.tags.includes("e")) {
+        tagText += " :flag_gb:"; // English
+    }
+
+    if (daisukiEntry.tags.includes("z")) {
+        tagText += " :flag_cn:"; // Chinese
+    }
+
+    if (daisukiEntry.tags.includes("j")) {
+        tagText += " :flag_jp:"; // Japanese
+    }
+
+    if (daisukiEntry.tags.includes("s")) {
+        tagText += " :flag_es:"; // Spanish
+    }
+
+    if (daisukiEntry.tags.includes("l")) {
+        tagText += " :globe_with_meridians:"; // Other Language
+    }
+
+    if (daisukiEntry.tags.includes("x")) {
+        tagText += " :arrows_counterclockwise:"; // Remix
+    }
+
+    return tagText;
 }
 
 /** @returns whether its a KMQ power hour */
