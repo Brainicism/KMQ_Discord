@@ -294,7 +294,7 @@ async function lookupByYoutubeID(
     sendInfoMessage(
         messageContext,
         {
-            title: `"${songName}" - ${artistName} ${tags}`,
+            title: `"${songName}" - ${artistName}${tags}`,
             url: `https://youtu.be/${videoID}`,
             description,
             thumbnailUrl: `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`,
@@ -369,7 +369,7 @@ async function lookupBySongName(
             `**"${getLocalizedSongName(
                 entry,
                 locale,
-            )}"** - ${getLocalizedArtistName(entry, locale)}`,
+            )}"** - ${getLocalizedArtistName(entry, locale)}${getTagsFromSong(entry)}`,
             100,
         ),
         value: `https://youtu.be/${entry.youtubeLink}`,

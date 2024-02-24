@@ -563,31 +563,29 @@ export function getLocalizedArtistName(
     return song.hangulArtistName || song.artistName;
 }
 
-export function getTagsFromSong(daisukiEntry: {
-    id: number;
-    alias: string;
-    kname: string;
-    name: string;
-    id_artist: number;
-    publishedon: Date;
-    tags: string;
-    views: number;
-}): string {
+export function getTagsFromSong(daisukiEntry: { tags: string | null }): string {
     let tag_text: string = "";
-    if (daisukiEntry.tags.indexOf("e") != -1) {
-        tag_text += ":flag_gb:"; // English
-    }
-    if (daisukiEntry.tags.indexOf("z") != -1) {
-        tag_text += ":flag_cn:"; // Chinese
-    }
-    if (daisukiEntry.tags.indexOf("j") != -1) {
-        tag_text += ":flag_jp:"; // Japanese
-    }
-    if (daisukiEntry.tags.indexOf("s") != -1) {
-        tag_text += ":flag_es:"; // Spanish
-    }
-    if (daisukiEntry.tags.indexOf("l") != -1) {
-        tag_text += ":globe_with_meridians:"; // Other Language
+    if (daisukiEntry.tags === null) {
+        return tag_text;
+    } else {
+        if (daisukiEntry.tags.indexOf("e") != -1) {
+            tag_text += " :flag_gb:"; // English
+        }
+        if (daisukiEntry.tags.indexOf("z") != -1) {
+            tag_text += " :flag_cn:"; // Chinese
+        }
+        if (daisukiEntry.tags.indexOf("j") != -1) {
+            tag_text += " :flag_jp:"; // Japanese
+        }
+        if (daisukiEntry.tags.indexOf("s") != -1) {
+            tag_text += " :flag_es:"; // Spanish
+        }
+        if (daisukiEntry.tags.indexOf("l") != -1) {
+            tag_text += " :globe_with_meridians:"; // Other Language
+        }
+        if (daisukiEntry.tags.indexOf("x") != -1) {
+            tag_text += " :arrows_counterclockwise:"; // Remix
+        }
     }
 
     return tag_text;
