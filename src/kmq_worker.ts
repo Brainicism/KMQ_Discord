@@ -274,6 +274,10 @@ export default class BotWorker extends BaseClusterWorker {
             `${this.logHeader()} | Started worker ID: ${this.workerID} on cluster ID: ${this.clusterID}`,
         );
 
+        this.init();
+    }
+
+    async init(): Promise<void> {
         logger.info(`${this.logHeader()} | Registering cron tasks...`);
         registerIntervals(this.clusterID);
 
@@ -289,10 +293,30 @@ export default class BotWorker extends BaseClusterWorker {
 
         logger.info(`${this.logHeader()} | Initializing Playlist manager...`);
         State.playlistManager = new PlaylistManager();
-        State.playlistManager.start();
+        await State.playlistManager.start();
 
         State.redditClient = new RedditClient();
         State.geminiClient = new GeminiClient();
+
+        if (process.env.MINIMAL_RUN !== "true") {
+            logger.info(
+                `${this.logHeader()} | Loading cached application data...`,
+            );
+
+            await reloadCaches();
+        }
+
+        logger.info(`${this.logHeader()} | Updating bot's status..`);
+        await updateBotStatus();
+
+        logger.info(`${this.logHeader()} | Reloading app commands`);
+        await updateAppCommands(AppCommandsAction.RELOAD);
+
+        logger.info(
+            `${this.logHeader()} | Logged in as '${State.client.user.username}'! in '${
+                process.env.NODE_ENV
+            }' mode (${durationSeconds(State.processStartTime, Date.now())}s)`,
+        );
 
         if (
             [EnvType.CI, EnvType.DRY_RUN].includes(
@@ -301,25 +325,6 @@ export default class BotWorker extends BaseClusterWorker {
         ) {
             logger.info(`${this.logHeader()} | Dry run finished successfully.`);
             State.ipc.totalShutdown();
-            return;
         }
-
-        if (process.env.MINIMAL_RUN !== "true") {
-            logger.info(
-                `${this.logHeader()} | Loading cached application data...`,
-            );
-            reloadCaches();
-        }
-
-        logger.info(`${this.logHeader()} | Updating bot's status..`);
-        updateBotStatus();
-        logger.info(
-            `${this.logHeader()} | Logged in as '${State.client.user.username}'! in '${
-                process.env.NODE_ENV
-            }' mode (${durationSeconds(State.processStartTime, Date.now())}s)`,
-        );
-
-        logger.info(`${this.logHeader()} | Reloading app commands`);
-        updateAppCommands(AppCommandsAction.RELOAD);
     }
 }
