@@ -187,9 +187,6 @@ function registerProcessEvents(fleet: Fleet): void {
                 }
             }
 
-            // store app command IDs in each cluster
-            await fleet.ipc.allClustersCommand("fetch_app_command_ids");
-
             // inform workers to begin accepting commands
             fleet.ipc.allClustersCommand("activate");
 
