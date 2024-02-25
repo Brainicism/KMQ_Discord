@@ -2046,38 +2046,12 @@ export async function sendDeprecatedTextCommandMessage(
 }
 
 /**
- * Fetches slash command names associated with their Discord IDs
- * @returns a map of app command names to their IDs
- */
-export const fetchAppCommandIDs = async (): Promise<{
-    [commandName: string]: string;
-}> => {
-    let commands: Eris.AnyApplicationCommand[];
-    if (process.env.NODE_ENV === EnvType.PROD) {
-        commands = await State.client.getCommands();
-    } else {
-        commands = process.env.DEBUG_SERVER_ID
-            ? await State.client.getGuildCommands(
-                  process.env.DEBUG_SERVER_ID as string,
-              )
-            : [];
-    }
-
-    const commandToID: { [commandName: string]: string } = {};
-    for (const command of commands) {
-        commandToID[command.name] = command.id;
-    }
-
-    return commandToID;
-};
-
-/**
  * Updates the Discord slash commands
  * @param appCommandType - Whether to reload or delete app commands
  */
 export const updateAppCommands = async (
     appCommandType = AppCommandsAction.RELOAD,
-): Promise<void> => {
+): Promise<{ [commandName: string]: string }> => {
     const isProd = process.env.NODE_ENV === EnvType.PROD;
 
     let commandStructures: Eris.ApplicationCommandStructure[] = [];
@@ -2206,15 +2180,16 @@ export const updateAppCommands = async (
         commandStructures = [];
     }
 
+    let appCommands: Eris.AnyApplicationCommand<true>[] = [];
     if (isProd) {
-        await State.client.bulkEditCommands(commandStructures);
+        appCommands = await State.client.bulkEditCommands(commandStructures);
     } else {
         const debugServer = State.client.guilds.get(
             process.env.DEBUG_SERVER_ID as string,
         );
 
         if (debugServer) {
-            await State.client.bulkEditGuildCommands(
+            appCommands = await State.client.bulkEditGuildCommands(
                 debugServer.id,
                 commandStructures,
             );
@@ -2223,7 +2198,12 @@ export const updateAppCommands = async (
         }
     }
 
-    await State.ipc.allClustersCommand("fetch_app_command_ids");
+    const commandToID: { [commandName: string]: string } = {};
+    for (const command of appCommands) {
+        commandToID[command.name] = command.id;
+    }
+
+    return commandToID;
 };
 
 /**

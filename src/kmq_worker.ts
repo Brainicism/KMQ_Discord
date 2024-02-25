@@ -4,7 +4,6 @@ import { IPCLogger } from "./logger";
 import { RedditClient } from "./helpers/reddit_client";
 import { config } from "dotenv";
 import { durationSeconds } from "./helpers/utils";
-import { fetchAppCommandIDs, updateAppCommands } from "./helpers/discord_utils";
 import {
     registerIntervals,
     reloadArtists,
@@ -12,6 +11,7 @@ import {
     reloadSongs,
     updateBotStatus,
 } from "./helpers/management_utils";
+import { updateAppCommands } from "./helpers/discord_utils";
 import AppCommandsAction from "./enums/app_command_action";
 import EnvType from "./enums/env_type";
 import EvalCommand from "./commands/admin/eval";
@@ -154,10 +154,6 @@ export default class BotWorker extends BaseClusterWorker {
                     `${this.logHeader()} | Registering interactive client events`,
                 );
                 this.registerInteractiveClientEvents(State.client);
-                return null;
-            case "fetch_app_command_ids":
-                logger.info(`${this.logHeader()} | Fetching app command IDs`);
-                State.commandToID = await fetchAppCommandIDs();
                 return null;
             case "reload_autocomplete_data":
                 logger.info(
@@ -310,8 +306,7 @@ export default class BotWorker extends BaseClusterWorker {
         await updateBotStatus();
 
         logger.info(`${this.logHeader()} | Reloading app commands`);
-        await updateAppCommands(AppCommandsAction.RELOAD);
-
+        State.commandToID = await updateAppCommands(AppCommandsAction.RELOAD);
         logger.info(
             `${this.logHeader()} | Logged in as '${State.client.user.username}'! in '${
                 process.env.NODE_ENV
