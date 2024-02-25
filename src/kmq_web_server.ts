@@ -147,8 +147,21 @@ export default class KmqWebServer {
             }
 
             try {
-                await fleet.ipc.allClustersCommand("ping", true);
-                reply.code(200).send("Pong");
+                const clusterStatuses = (await fleet.ipc.allClustersCommand(
+                    "ping",
+                    true,
+                ))!;
+
+                const allClustersReady = Array.from(
+                    clusterStatuses.values(),
+                ).every((x) => x === true);
+
+                if (allClustersReady) {
+                    reply.code(200).send("Pong");
+                } else {
+                    logger.warn("Clusters not ready");
+                    reply.code(503).send();
+                }
             } catch (e) {
                 logger.error(`Health check on /ping failed with error: ${e}`);
                 reply.code(500).send(e);

@@ -85,6 +85,9 @@ jobs:
               run: while [[ "$(docker inspect --format='{{json .State.Health.Status}}' kmq-gci)" != "\"healthy\"" ]]; do sleep 1; done
             - name: Check for errors
               run: docker logs kmq-gci 2>&1 | grep -i "\[Error\]" && echo "Errors found in container logs." && exit 1 || echo "No errors found in container logs." && exit 0
+            - name: Print logs
+              if: always()
+              run: docker logs kmq-gci 2>&1
             - name: Parse pre-upgrade container ID
               id: old-container-id
               run: |
