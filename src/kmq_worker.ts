@@ -53,6 +53,7 @@ const logger = new IPCLogger("kmq");
 config({ path: path.resolve(__dirname, "../.env") });
 
 export default class BotWorker extends BaseClusterWorker {
+    ready = false;
     logHeader = (): string => `Cluster #${this.clusterID}`;
 
     handleCommand = async (commandName: string): Promise<any> => {
@@ -92,7 +93,11 @@ export default class BotWorker extends BaseClusterWorker {
 
         switch (commandName) {
             case "ping":
-                return null;
+                if (!this.ready) {
+                    logger.warn(`Cluster #${this.clusterID} not yet ready`);
+                }
+
+                return this.ready;
             case "worker_version":
                 return State.version;
             case "reload_commands":
@@ -274,39 +279,60 @@ export default class BotWorker extends BaseClusterWorker {
     }
 
     async init(): Promise<void> {
-        logger.info(`${this.logHeader()} | Registering cron tasks...`);
-        registerIntervals(this.clusterID);
-
-        logger.info(
-            `${this.logHeader()} | Registering client event handlers...`,
-        );
-        this.registerClientEvents(State.client);
-
-        logger.info(
-            `${this.logHeader()} | Registering process event handlers...`,
-        );
-        this.registerProcessEvents();
-
-        logger.info(`${this.logHeader()} | Initializing Playlist manager...`);
-        State.playlistManager = new PlaylistManager();
-        await State.playlistManager.start();
-
-        State.redditClient = new RedditClient();
-        State.geminiClient = new GeminiClient();
-
-        if (process.env.MINIMAL_RUN !== "true") {
+        try {
             logger.info(
-                `${this.logHeader()} | Loading cached application data...`,
+                `${this.logHeader()} | Registering client event handlers...`,
             );
+            this.registerClientEvents(State.client);
 
-            await reloadCaches();
+            logger.info(
+                `${this.logHeader()} | Registering process event handlers...`,
+            );
+            this.registerProcessEvents();
+        } catch (e) {
+            logger.error(`Fatal error during kmq worker initialization: ${e}`);
+            process.exit(1);
         }
 
-        logger.info(`${this.logHeader()} | Updating bot's status..`);
-        await updateBotStatus();
+        try {
+            logger.info(`${this.logHeader()} | Registering cron tasks...`);
+            registerIntervals(this.clusterID);
 
-        logger.info(`${this.logHeader()} | Reloading app commands`);
-        State.commandToID = await updateAppCommands(AppCommandsAction.RELOAD);
+            logger.info(
+                `${this.logHeader()} | Initializing Playlist manager...`,
+            );
+            State.playlistManager = new PlaylistManager();
+            await State.playlistManager.start();
+
+            logger.info(`${this.logHeader()} | Initializing Reddit Client...`);
+            State.redditClient = new RedditClient();
+
+            logger.info(`${this.logHeader()} | Initializing Gemini Client...`);
+            State.geminiClient = new GeminiClient();
+
+            if (process.env.MINIMAL_RUN !== "true") {
+                logger.info(
+                    `${this.logHeader()} | Loading cached application data...`,
+                );
+
+                await reloadCaches();
+            }
+
+            logger.info(`${this.logHeader()} | Reloading app commands`);
+            State.commandToID = await updateAppCommands(
+                AppCommandsAction.RELOAD,
+            );
+
+            logger.info(`${this.logHeader()} | Updating bot's status..`);
+            await updateBotStatus();
+        } catch (e) {
+            logger.error(
+                `Non-fatal error during kmq worker initialization: ${JSON.stringify(e)}`,
+            );
+        } finally {
+            this.ready = true;
+        }
+
         logger.info(
             `${this.logHeader()} | Logged in as '${State.client.user.username}'! in '${
                 process.env.NODE_ENV
