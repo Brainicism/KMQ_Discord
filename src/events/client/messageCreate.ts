@@ -86,6 +86,7 @@ export default async function messageCreateHandler(
 
     const session = Session.getSession(message.guildID);
     if (parsedMessage && invokedCommand) {
+        const hrstart = process.hrtime();
         if (State.bannedServers.has(message.guildID)) {
             logger.warn(
                 `Banned server attempted to execute command. id = ${message.guildID}`,
@@ -227,6 +228,10 @@ export default async function messageCreateHandler(
                 }
             }
         }
+
+        const hrend = process.hrtime(hrstart);
+        const executionTime = hrend[0] * 1000 + hrend[1] / 1000000;
+        logger.info(`${parsedMessage.action} took ${executionTime}ms`);
     } else if (
         session?.isGameSession() &&
         !session.isHiddenMode() &&
