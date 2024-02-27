@@ -68,7 +68,7 @@ export default async function interactionCreateHandler(
             interaction instanceof Eris.ComponentInteraction ||
             interaction instanceof Eris.CommandInteraction
         ) {
-            tryCreateInteractionErrorAcknowledgement(
+            await tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 i18n.translate(LocaleType.EN, "misc.interaction.title.failure"),
                 i18n.translate(
@@ -90,7 +90,7 @@ export default async function interactionCreateHandler(
             interaction instanceof Eris.ComponentInteraction ||
             interaction instanceof Eris.CommandInteraction
         ) {
-            tryCreateInteractionErrorAcknowledgement(
+            await tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 i18n.translate(
                     interaction.guildID,
@@ -120,7 +120,7 @@ export default async function interactionCreateHandler(
             interaction instanceof Eris.ComponentInteraction ||
             interaction instanceof Eris.CommandInteraction
         ) {
-            tryCreateInteractionErrorAcknowledgement(
+            await tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 i18n.translate(
                     interaction.guildID,
@@ -154,7 +154,7 @@ export default async function interactionCreateHandler(
                 !session ||
                 (!session.round && interaction.data.custom_id !== "bookmark")
             ) {
-                tryInteractionAcknowledge(interaction);
+                await tryInteractionAcknowledge(interaction);
                 return;
             }
 
@@ -253,7 +253,7 @@ export default async function interactionCreateHandler(
 
                     case BOOKMARK_COMMAND_NAME: {
                         if (!session) {
-                            tryCreateInteractionErrorAcknowledgement(
+                            await tryCreateInteractionErrorAcknowledgement(
                                 interaction as Eris.CommandInteraction,
                                 null,
                                 i18n.translate(
