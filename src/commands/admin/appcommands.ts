@@ -49,7 +49,7 @@ export default class AppCommandsCommand implements BaseCommand {
             );
         }
 
-        await updateAppCommands(appCommandType);
+        State.commandToID = await updateAppCommands(appCommandType);
         await sendInfoMessage(MessageContext.fromMessage(message), {
             title: "Commands Updated",
         });
