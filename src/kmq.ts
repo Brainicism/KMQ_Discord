@@ -77,7 +77,7 @@ const options: Options = {
         },
         restMode: true,
         messageLimit: 0,
-        requestTimeout: 15000,
+        requestTimeout: 30000,
     },
     fetchTimeout: 5000,
     customClient: KmqClient,
