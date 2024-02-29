@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import { IPCLogger } from "../logger";
 import { exec } from "child_process";
 import {
@@ -130,6 +131,20 @@ async function ffmpegOpusJob(id: string): Promise<void> {
     });
 }
 
+async function cacheSongDuration(
+    songLocation: string,
+    id: string,
+    db: DatabaseContext,
+): Promise<void> {
+    const duration = await getAudioDurationInSeconds(songLocation);
+
+    await db.kmq
+        .insertInto("cached_song_duration")
+        .values({ vlink: id, duration })
+        .onDuplicateKeyUpdate({ vlink: id, duration })
+        .execute();
+}
+
 const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
     const cachedSongLocation = path.join(
         process.env.SONG_DOWNLOAD_DIR as string,
@@ -205,23 +220,14 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
             }
 
             try {
-                const duration =
-                    await getAudioDurationInSeconds(cachedSongLocation);
-
-                await db.kmq
-                    .insertInto("cached_song_duration")
-                    .values({ vlink: id, duration })
-                    .onDuplicateKeyUpdate({ vlink: id, duration })
-                    .execute();
-
+                await cacheSongDuration(cachedSongLocation, id, db);
                 resolve();
-            } catch (err) {
+            } catch (e) {
                 reject(
                     new Error(
-                        `Error calculating cached_song_duration. err = ${err}`,
+                        `Error calculating cached_song_duration. err = ${e}`,
                     ),
                 );
-
                 await fs.promises.unlink(cachedSongLocation);
             }
         });
@@ -308,7 +314,6 @@ const downloadNewSongs = async (
 
     // check for downloaded songs without cache duration
     for (const currentlyDownloadedFile of currentlyDownloadedFiles) {
-        // eslint-disable-next-line no-await-in-loop
         const result = !!(await db.kmq
             .selectFrom("cached_song_duration")
             .selectAll()
@@ -318,6 +323,14 @@ const downloadNewSongs = async (
         if (!result) {
             logger.warn(
                 `${currentlyDownloadedFile} is downloaded, but missing cache duration`,
+            );
+
+            const songLocation = `${process.env.SONG_DOWNLOAD_DIR as string}/${currentlyDownloadedFile}`;
+
+            await cacheSongDuration(
+                songLocation,
+                currentlyDownloadedFile.replace(".ogg", ""),
+                db,
             );
         }
     }
@@ -342,7 +355,6 @@ const downloadNewSongs = async (
             } (${downloadCount + 1}/${songsToDownload.length})`,
         );
         try {
-            // eslint-disable-next-line no-await-in-loop
             await retryJob(downloadSong, [db, song.youtubeLink], 1, true, 5000);
         } catch (err) {
             logger.error(
@@ -350,7 +362,6 @@ const downloadNewSongs = async (
             );
             deadLinksSkipped++;
             try {
-                // eslint-disable-next-line no-await-in-loop
                 await fs.promises.unlink(
                     `${process.env.SONG_DOWNLOAD_DIR as string}/${
                         song.youtubeLink
@@ -369,7 +380,6 @@ const downloadNewSongs = async (
             `Encoding song: '${song.songName}' by ${song.artistName} | ${song.youtubeLink}`,
         );
         try {
-            // eslint-disable-next-line no-await-in-loop
             await retryJob(ffmpegOpusJob, [song.youtubeLink], 1, true, 5000);
         } catch (err) {
             logger.error(
