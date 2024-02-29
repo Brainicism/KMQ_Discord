@@ -331,12 +331,15 @@ export default class PlayCommand implements BaseCommand {
                 ),
             },
             {
-                example: clickableSlashCommand(COMMAND_NAME, GameType.SUDDEN_DEATH),
+                example: clickableSlashCommand(
+                    COMMAND_NAME,
+                    GameType.SUDDEN_DEATH,
+                ),
                 explanation: i18n.translate(
                     guildID,
                     "command.play.help.example.suddenDeath",
                 ),
-            }
+            },
         ],
     });
 
