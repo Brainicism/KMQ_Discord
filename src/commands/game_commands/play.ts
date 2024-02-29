@@ -330,6 +330,16 @@ export default class PlayCommand implements BaseCommand {
                     "command.play.help.example.hidden",
                 ),
             },
+            {
+                example: clickableSlashCommand(
+                    COMMAND_NAME,
+                    GameType.SUDDEN_DEATH,
+                ),
+                explanation: i18n.translate(
+                    guildID,
+                    "command.play.help.example.suddenDeath",
+                ),
+            },
         ],
     });
 
