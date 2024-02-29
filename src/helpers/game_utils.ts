@@ -566,7 +566,7 @@ export function getLocalizedArtistName(
 /**
  * @param daisukiEntry - The song to retrieve the tags from
  * @returns the tags in the form of discord emoji's in a string;
- * Tags are either language tags or the remix tag.
+ * Tags are language tags.
  */
 export function getEmojisFromSongTags(daisukiEntry: {
     tags: string | null;
@@ -594,10 +594,6 @@ export function getEmojisFromSongTags(daisukiEntry: {
 
     if (daisukiEntry.tags.includes("l")) {
         tagText += " :globe_with_meridians:"; // Other Language
-    }
-
-    if (daisukiEntry.tags.includes("x")) {
-        tagText += " :arrows_counterclockwise:"; // Remix
     }
 
     return tagText;

@@ -11,7 +11,6 @@ import {
     DEFAULT_MULTIGUESS_TYPE,
     DEFAULT_OST_PREFERENCE,
     DEFAULT_RELEASE_TYPE,
-    DEFAULT_REMIX_PREFERENCE,
     DEFAULT_SEEK,
     DEFAULT_SHUFFLE,
     DEFAULT_SUBUNIT_PREFERENCE,
@@ -36,7 +35,6 @@ import type MatchedArtist from "../interfaces/matched_artist";
 import type MultiGuessType from "../enums/option_types/multiguess_type";
 import type OstPreference from "../enums/option_types/ost_preference";
 import type ReleaseType from "../enums/option_types/release_type";
-import type RemixPreference from "../enums/option_types/remix_preference";
 import type SeekType from "../enums/option_types/seek_type";
 import type ShuffleType from "../enums/option_types/shuffle_type";
 import type SpecialType from "../enums/option_types/special_type";
@@ -60,7 +58,6 @@ type GameOptionValue =
     | MultiGuessType
     | SubunitsPreference
     | OstPreference
-    | RemixPreference
     | string
     | null;
 
@@ -134,10 +131,6 @@ export default class GuildPreference {
             default: [DEFAULT_OST_PREFERENCE],
             setter: this.setOstPreference,
         },
-        [GameOption.REMIX_PREFERENCE]: {
-            default: [DEFAULT_REMIX_PREFERENCE],
-            setter: this.setRemixPreference,
-        },
         [GameOption.GUESS_MODE_TYPE]: {
             default: [DEFAULT_GUESS_MODE],
             setter: this.setGuessModeType,
@@ -194,7 +187,6 @@ export default class GuildPreference {
         multiGuessType: DEFAULT_MULTIGUESS_TYPE,
         subunitPreference: DEFAULT_SUBUNIT_PREFERENCE,
         ostPreference: DEFAULT_OST_PREFERENCE,
-        remixPreference: DEFAULT_REMIX_PREFERENCE,
         forcePlaySongID: null,
         spotifyPlaylistID: null,
     };
@@ -931,20 +923,6 @@ export default class GuildPreference {
      */
     isPlaylist(): boolean {
         return this.gameOptions.spotifyPlaylistID !== null;
-    }
-
-    /**
-     * Sets the remix preference option value
-     * @param remixPreference - The RemixPreference
-     */
-    async setRemixPreference(remixPreference: RemixPreference): Promise<void> {
-        this.gameOptions.remixPreference = remixPreference;
-        await this.updateGuildPreferences([
-            {
-                name: GameOptionInternal.REMIX_PREFERENCE,
-                value: remixPreference,
-            },
-        ]);
     }
 
     /**
