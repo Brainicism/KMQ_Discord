@@ -1,13 +1,15 @@
+import * as uuid from "uuid";
 import { BOOKMARK_COMMAND_NAME, PROFILE_COMMAND_NAME } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
+    getDebugLogHeader,
     getInteractionValue,
+    sendErrorMessage,
     tryCreateInteractionErrorAcknowledgement,
     tryInteractionAcknowledge,
 } from "../../helpers/discord_utils";
-import { measureExecutionTime } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
-import Eris from "eris";
+import Eris, { CommandInteraction } from "eris";
 import ExcludeCommand from "../../commands/game_options/exclude";
 import FeedbackCommand from "../../commands/misc_commands/feedback";
 import GroupsCommand from "../../commands/game_options/groups";
@@ -60,12 +62,13 @@ export default async function interactionCreateHandler(
         | Eris.AutocompleteInteraction
         | Eris.ModalSubmitInteraction,
 ): Promise<void> {
+    const hrstart = process.hrtime();
     if (!interaction.guildID) {
         if (
             interaction instanceof Eris.ComponentInteraction ||
             interaction instanceof Eris.CommandInteraction
         ) {
-            tryCreateInteractionErrorAcknowledgement(
+            await tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 i18n.translate(LocaleType.EN, "misc.interaction.title.failure"),
                 i18n.translate(
@@ -87,7 +90,7 @@ export default async function interactionCreateHandler(
             interaction instanceof Eris.ComponentInteraction ||
             interaction instanceof Eris.CommandInteraction
         ) {
-            tryCreateInteractionErrorAcknowledgement(
+            await tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 i18n.translate(
                     interaction.guildID,
@@ -117,7 +120,7 @@ export default async function interactionCreateHandler(
             interaction instanceof Eris.ComponentInteraction ||
             interaction instanceof Eris.CommandInteraction
         ) {
-            tryCreateInteractionErrorAcknowledgement(
+            await tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 i18n.translate(
                     interaction.guildID,
@@ -144,168 +147,196 @@ export default async function interactionCreateHandler(
     );
 
     const session = Session.getSession(interaction.guildID as string);
-    let interactionPromise: Promise<any> | null = null;
     let interactionName: string | null = null;
-    if (interaction instanceof Eris.ComponentInteraction) {
-        if (
-            !session ||
-            (!session.round && interaction.data.custom_id !== "bookmark")
-        ) {
-            tryInteractionAcknowledge(interaction);
-            return;
-        }
+    try {
+        if (interaction instanceof Eris.ComponentInteraction) {
+            if (
+                !session ||
+                (!session.round && interaction.data.custom_id !== "bookmark")
+            ) {
+                await tryInteractionAcknowledge(interaction);
+                return;
+            }
 
-        interactionName = `Component interaction for '${interaction.data.custom_id}'`;
-        interactionPromise = session.handleComponentInteraction(
-            interaction,
-            messageContext,
-        );
-    } else if (interaction instanceof Eris.CommandInteraction) {
-        if (
-            interaction.data.type ===
-            Eris.Constants.ApplicationCommandTypes.CHAT_INPUT
-        ) {
-            const commandInteractionHandler =
-                State.client.commandsHandlers[interaction.data.name];
+            interactionName = `Component interaction for '${interaction.data.custom_id}'`;
+            await session.handleComponentInteraction(
+                interaction,
+                messageContext,
+            );
+        } else if (interaction instanceof Eris.CommandInteraction) {
+            if (
+                interaction.data.type ===
+                Eris.Constants.ApplicationCommandTypes.CHAT_INPUT
+            ) {
+                const commandInteractionHandler =
+                    State.client.commandsHandlers[interaction.data.name];
 
-            if (commandInteractionHandler?.processChatInputInteraction) {
-                const prechecks: Array<{
-                    checkFn: (
-                        precheckArgs: PrecheckArgs,
-                    ) => boolean | Promise<boolean>;
-                    errorMessage?: string;
-                }> = [
-                    {
-                        checkFn: CommandPrechecks.maintenancePrecheck,
-                        errorMessage: undefined,
-                    },
-                ];
+                if (commandInteractionHandler?.processChatInputInteraction) {
+                    const prechecks: Array<{
+                        checkFn: (
+                            precheckArgs: PrecheckArgs,
+                        ) => boolean | Promise<boolean>;
+                        errorMessage?: string;
+                    }> = [
+                        {
+                            checkFn: CommandPrechecks.maintenancePrecheck,
+                            errorMessage: undefined,
+                        },
+                    ];
 
-                if (commandInteractionHandler.preRunChecks) {
-                    prechecks.push(...commandInteractionHandler.preRunChecks);
-                }
-
-                for (const precheck of prechecks) {
-                    if (
-                        // eslint-disable-next-line no-await-in-loop
-                        !(await precheck.checkFn({
-                            messageContext,
-                            session,
-                            errorMessage: precheck.errorMessage,
-                            interaction,
-                        }))
-                    ) {
-                        return;
+                    if (commandInteractionHandler.preRunChecks) {
+                        prechecks.push(
+                            ...commandInteractionHandler.preRunChecks,
+                        );
                     }
-                }
 
-                interactionName = `CHAT_INPUT CommandInteraction interaction for '${interaction.data.name}'`;
-                interactionPromise =
-                    commandInteractionHandler.processChatInputInteraction(
+                    for (const precheck of prechecks) {
+                        if (
+                            // eslint-disable-next-line no-await-in-loop
+                            !(await precheck.checkFn({
+                                messageContext,
+                                session,
+                                errorMessage: precheck.errorMessage,
+                                interaction,
+                            }))
+                        ) {
+                            return;
+                        }
+                    }
+
+                    interactionName = `CHAT_INPUT CommandInteraction interaction for '${interaction.data.name}'`;
+                    await commandInteractionHandler.processChatInputInteraction(
                         interaction,
                         messageContext,
                     );
+                } else {
+                    logger.error(
+                        `No handler found for CHAT_INPUT CommandInteraction: ${interaction.data.name}`,
+                    );
+                }
             } else {
-                logger.error(
-                    `No handler found for CHAT_INPUT CommandInteraction: ${interaction.data.name}`,
-                );
-            }
-        } else {
-            switch (interaction.data.name) {
-                case PROFILE_COMMAND_NAME: {
-                    interaction = interaction as Eris.CommandInteraction;
-                    if (
-                        interaction.data.type ===
-                        Eris.Constants.ApplicationCommandTypes.USER
-                    ) {
-                        interactionName = `USER Application Command for '${interaction.data.name}'`;
-                        interactionPromise =
-                            ProfileCommand.handleProfileInteraction(
+                switch (interaction.data.name) {
+                    case PROFILE_COMMAND_NAME: {
+                        interaction = interaction as Eris.CommandInteraction;
+                        if (
+                            interaction.data.type ===
+                            Eris.Constants.ApplicationCommandTypes.USER
+                        ) {
+                            interactionName = `USER Application Command for '${interaction.data.name}'`;
+                            await ProfileCommand.handleProfileInteraction(
                                 interaction as Eris.CommandInteraction,
                                 interaction.data.target_id as string,
                                 true,
                             );
-                    } else if (
-                        interaction.data.type ===
-                        Eris.Constants.ApplicationCommandTypes.MESSAGE
-                    ) {
-                        const messageID = interaction.data.target_id;
-                        const authorID = (
-                            interaction as Eris.CommandInteraction
-                        ).data.resolved!["messages"]!.get(messageID as string)!
-                            .author.id;
+                        } else if (
+                            interaction.data.type ===
+                            Eris.Constants.ApplicationCommandTypes.MESSAGE
+                        ) {
+                            const messageID = interaction.data.target_id;
+                            const authorID = (
+                                interaction as Eris.CommandInteraction
+                            ).data.resolved!["messages"]!.get(
+                                messageID as string,
+                            )!.author.id;
 
-                        interactionName = `MESSAGE Application Command for '${interaction.data.name}'`;
+                            interactionName = `MESSAGE Application Command for '${interaction.data.name}'`;
 
-                        interactionPromise =
-                            ProfileCommand.handleProfileInteraction(
+                            await ProfileCommand.handleProfileInteraction(
                                 interaction,
                                 authorID,
                                 true,
                             );
+                        }
+
+                        break;
                     }
 
-                    break;
-                }
+                    case BOOKMARK_COMMAND_NAME: {
+                        if (!session) {
+                            await tryCreateInteractionErrorAcknowledgement(
+                                interaction as Eris.CommandInteraction,
+                                null,
+                                i18n.translate(
+                                    interaction.guildID as string,
+                                    "misc.failure.interaction.bookmarkOutsideGame",
+                                ),
+                            );
+                            return;
+                        }
 
-                case BOOKMARK_COMMAND_NAME: {
-                    if (!session) {
-                        tryCreateInteractionErrorAcknowledgement(
+                        interactionName = `Application Command for '${interaction.data.name}'`;
+                        await session.handleBookmarkInteraction(
                             interaction as Eris.CommandInteraction,
-                            null,
-                            i18n.translate(
-                                interaction.guildID as string,
-                                "misc.failure.interaction.bookmarkOutsideGame",
-                            ),
                         );
-                        return;
+                        break;
                     }
 
-                    interactionName = `Application Command for '${interaction.data.name}'`;
-                    interactionPromise = session.handleBookmarkInteraction(
-                        interaction as Eris.CommandInteraction,
-                    );
-                    break;
-                }
-
-                default: {
-                    logger.error(
-                        `No handler found for CommandInteraction  (type = ${interaction.data.type}): ${interaction.data.name}`,
-                    );
+                    default: {
+                        logger.error(
+                            `No handler found for CommandInteraction  (type = ${interaction.data.type}): ${interaction.data.name}`,
+                        );
+                    }
                 }
             }
-        }
-    } else if (interaction instanceof Eris.AutocompleteInteraction) {
-        const autocompleteInteractionHandler =
-            AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS[interaction.data.name];
+        } else if (interaction instanceof Eris.AutocompleteInteraction) {
+            const autocompleteInteractionHandler =
+                AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS[
+                    interaction.data.name
+                ];
 
-        const parsedInteraction = getInteractionValue(interaction);
-        if (autocompleteInteractionHandler) {
-            interactionName = `Autocomplete interaction for '${interaction.data.name}' for value '${parsedInteraction.focusedKey}'`;
-            interactionPromise = autocompleteInteractionHandler(interaction);
-        } else {
-            logger.error(
-                `No handler for for AutocompleteInteraction (type = ${interaction.data.type}): ${interaction.data.name}`,
+            const parsedInteraction = getInteractionValue(interaction);
+            if (autocompleteInteractionHandler) {
+                interactionName = `Autocomplete interaction for '${interaction.data.name}' for value '${parsedInteraction.focusedKey}'`;
+                await autocompleteInteractionHandler(interaction);
+            } else {
+                logger.error(
+                    `No handler for for AutocompleteInteraction (type = ${interaction.data.type}): ${interaction.data.name}`,
+                );
+            }
+        } else if (interaction instanceof Eris.ModalSubmitInteraction) {
+            interactionName = `ModalSubmit interaction for ${interaction.data.custom_id}`;
+            const modalSubmitInteractionHandler =
+                MODAL_SUBMIT_INTERACTION_HANDLERS[interaction.data.custom_id];
+
+            if (modalSubmitInteractionHandler) {
+                await modalSubmitInteractionHandler(interaction);
+            } else {
+                logger.error(
+                    `No handler for for ModalSubmitInteraction (custom_id = ${interaction.data.custom_id})`,
+                );
+            }
+        }
+    } catch (err) {
+        const debugId = uuid.v4();
+
+        logger.error(
+            `${getDebugLogHeader(
+                messageContext,
+            )} | Error while invoking command (${interactionName}) | ${debugId} | Exception Name: ${err.name}. Reason: ${
+                err.message
+            }. Trace: ${err.stack}}`,
+        );
+
+        if (interaction instanceof CommandInteraction) {
+            await sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "misc.failure.command.title",
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "misc.failure.command.description",
+                        { debugId },
+                    ),
+                },
+                interaction,
             );
         }
-    } else if (interaction instanceof Eris.ModalSubmitInteraction) {
-        interactionName = `ModalSubmit interaction for ${interaction.data.custom_id}`;
-        const modalSubmitInteractionHandler =
-            MODAL_SUBMIT_INTERACTION_HANDLERS[interaction.data.custom_id];
-
-        if (modalSubmitInteractionHandler) {
-            interactionPromise = modalSubmitInteractionHandler(interaction);
-        } else {
-            logger.error(
-                `No handler for for ModalSubmitInteraction (custom_id = ${interaction.data.custom_id})`,
-            );
-        }
+    } finally {
+        const hrend = process.hrtime(hrstart);
+        const executionTime = hrend[0] * 1000 + hrend[1] / 1000000;
+        logger.info(`${interactionName} took ${executionTime}ms`);
     }
-
-    if (interactionPromise === null) {
-        return;
-    }
-
-    const executionTime = await measureExecutionTime(interactionPromise);
-    logger.info(`${interactionName} took ${executionTime}ms`);
 }
