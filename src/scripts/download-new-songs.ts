@@ -221,6 +221,7 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
 
             try {
                 await cacheSongDuration(cachedSongLocation, id, db);
+                resolve();
             } catch (e) {
                 reject(
                     new Error(
