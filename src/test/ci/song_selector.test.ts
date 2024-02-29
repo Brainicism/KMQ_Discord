@@ -9,7 +9,6 @@ import GuildPreference from "../../structures/guild_preference";
 import LanguageType from "../../enums/option_types/language_type";
 import OstPreference from "../../enums/option_types/ost_preference";
 import ReleaseType from "../../enums/option_types/release_type";
-import RemixPreference from "../../enums/option_types/remix_preference";
 import ShuffleType from "../../enums/option_types/shuffle_type";
 import SongSelector from "../../structures/song_selector";
 import SubunitsPreference from "../../enums/option_types/subunit_preference";
@@ -25,7 +24,6 @@ async function getMockGuildPreference(): Promise<GuildPreference> {
     await guildPreference.setSubunitPreference(SubunitsPreference.EXCLUDE);
     await guildPreference.setLimit(0, 99999);
     await guildPreference.setOstPreference(OstPreference.INCLUDE);
-    await guildPreference.setRemixPreference(RemixPreference.INCLUDE);
     await guildPreference.setReleaseType(ReleaseType.ALL);
     return guildPreference;
 }
@@ -671,43 +669,17 @@ describe("song selector", () => {
         });
 
         describe("remixes", () => {
-            describe("exclude remixes", () => {
-                it("should only return songs, not including remixes", async () => {
-                    await guildPreference.setRemixPreference(
-                        RemixPreference.EXCLUDE,
-                    );
-                    const { songs } =
-                        await SongSelector.getFilteredSongList(guildPreference);
+            it("should not includes remixes", async () => {
+                const { songs } =
+                    await SongSelector.getFilteredSongList(guildPreference);
 
-                    assert.strict(songs.size > 0);
-                    assert.strictEqual(
-                        Array.from(songs).every(
-                            (song) => !song.tags!.includes("x"),
-                        ),
-                        true,
-                    );
-                });
-            });
-
-            describe("include remixes", () => {
-                it("should only return songs including remixes", async () => {
-                    await guildPreference.setRemixPreference(
-                        RemixPreference.INCLUDE,
-                    );
-                    const { songs } =
-                        await SongSelector.getFilteredSongList(guildPreference);
-
-                    // should have both non remixes and remixes
-                    assert.strictEqual(
-                        Array.from(songs).filter((song) =>
-                            song.tags!.includes("x"),
-                        ).length > 0 &&
-                            Array.from(songs).filter(
-                                (song) => !song.tags!.includes("x"),
-                            ).length > 0,
-                        true,
-                    );
-                });
+                assert.strict(songs.size > 0);
+                assert.strictEqual(
+                    Array.from(songs).every(
+                        (song) => !song.tags!.includes("x"),
+                    ),
+                    true,
+                );
             });
         });
 
