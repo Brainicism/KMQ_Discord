@@ -135,8 +135,10 @@ export default class KmqClient extends Eris.Client {
         this.commands[commandName] = command;
         this.commandsHandlers[commandName] = command;
 
-        if (command.slashCommandAlias) {
-            this.commandsHandlers[command.slashCommandAlias] = command;
+        if (command.slashCommandAliases) {
+            for (const slashCommandAlias of command.slashCommandAliases) {
+                this.commandsHandlers[slashCommandAlias] = command;
+            }
         }
 
         return true;

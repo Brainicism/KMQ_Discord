@@ -72,6 +72,7 @@ const REQUIRED_TEXT_PERMISSIONS = [
     "addReactions" as const,
     "embedLinks" as const,
     "attachFiles" as const,
+    "viewChannel" as const,
 ];
 
 const REQUIRED_VOICE_PERMISSIONS = [
@@ -265,14 +266,16 @@ export async function textPermissionsCheck(
     const channel = await fetchChannel(textChannelID);
     if (!channel) return false;
     if (
-        !channel
-            .permissionsOf(process.env.BOT_CLIENT_ID as string)
-            .has("sendMessages")
+        !["sendMessages" as const, "viewChannel" as const].every((permission) =>
+            channel
+                .permissionsOf(process.env.BOT_CLIENT_ID as string)
+                .has(permission),
+        )
     ) {
         logger.warn(
             `${getDebugLogHeader(
                 messageContext,
-            )} | Missing SEND_MESSAGES permissions`,
+            )} | Missing SEND_MESSAGES or VIEW_CHANNEL permissions`,
         );
         const embed: Eris.EmbedOptions = {
             title: i18n.translate(
@@ -2148,29 +2151,31 @@ export const updateAppCommands = async (
                             .replace(" ", "");
                     }
 
-                    if (command.slashCommandAlias) {
-                        const aliasedCmd = structuredClone(cmd);
+                    if (command.slashCommandAliases) {
+                        for (const slashCommandAlias of command.slashCommandAliases) {
+                            const aliasedCmd = structuredClone(cmd);
 
-                        if (
-                            !i18n.hasKey(
-                                `command.${command.slashCommandAlias}.help.name`,
-                            )
-                        ) {
-                            throw new Error(
-                                `Missing slash command name: command.${command.slashCommandAlias}.help.name`,
-                            );
+                            if (
+                                !i18n.hasKey(
+                                    `command.${slashCommandAlias}.help.name`,
+                                )
+                            ) {
+                                throw new Error(
+                                    `Missing slash command name: command.${slashCommandAlias}.help.name`,
+                                );
+                            }
+
+                            aliasedCmd.name = i18n
+                                .translate(
+                                    LocaleType.EN,
+                                    `command.${slashCommandAlias}.help.name`,
+                                )
+                                .replace(" ", "");
+                            commandStructures.push(aliasedCmd);
                         }
 
-                        aliasedCmd.name = i18n
-                            .translate(
-                                LocaleType.EN,
-                                `command.${command.slashCommandAlias}.help.name`,
-                            )
-                            .replace(" ", "");
-                        commandStructures.push(aliasedCmd);
+                        commandStructures.push(cmd);
                     }
-
-                    commandStructures.push(cmd);
                 }
             }
         }

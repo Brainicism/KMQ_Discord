@@ -322,13 +322,18 @@ export default class BotWorker extends BaseClusterWorker {
             State.commandToID = await updateAppCommands(
                 AppCommandsAction.RELOAD,
             );
-
             logger.info(`${this.logHeader()} | Updating bot's status..`);
             await updateBotStatus();
         } catch (e) {
-            logger.error(
-                `Non-fatal error during kmq worker initialization: ${JSON.stringify(e)}`,
-            );
+            if (e instanceof Error) {
+                logger.error(
+                    `Non-fatal error during kmq workers initialization: | Name: ${e.name}. Reason: ${e.message}. Trace: ${e.stack}}`,
+                );
+            } else {
+                logger.error(
+                    `Non-fatal error during kmq worker initialization: ${e}`,
+                );
+            }
         } finally {
             this.ready = true;
         }

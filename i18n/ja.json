@@ -1349,6 +1349,11 @@
                 "minutes": "**{{minutes}}** 後に投票できます。",
                 "seconds": "**{{seconds}}** 後に投票できます。"
             }
+        },
+        "youtube": {
+            "help": {
+                "name": "youtube"
+            }
         }
     },
     "fact": {
