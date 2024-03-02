@@ -1248,11 +1248,6 @@
                 "name": "spotify"
             }
         },
-        "youtube": {
-            "help": {
-                "name": "youtube"
-            }
-        },
         "stats": {
             "description": "Detailed bot status: {{link}}",
             "failure": {
@@ -1353,6 +1348,11 @@
                 "hours": "You can vote in **{{hours}}**.",
                 "minutes": "You can vote in **{{minutes}}**.",
                 "seconds": "You can vote in **{{seconds}}**."
+            }
+        },
+        "youtube": {
+            "help": {
+                "name": "youtube"
             }
         }
     },

@@ -1349,6 +1349,11 @@
                 "minutes": "Du kannst in **{{minutes}}** abstimmen.",
                 "seconds": "Du kannst in **{{seconds}}** Sekunden abstimmen."
             }
+        },
+        "youtube": {
+            "help": {
+                "name": "youtube"
+            }
         }
     },
     "fact": {
