@@ -1301,6 +1301,7 @@ export async function sendPaginationedEmbed(
     startPage = 1,
 ): Promise<Eris.Message | null> {
     if (embeds.length > 1) {
+        logger.error("embed paginationator.creator sendpagination embed");
         return EmbedPaginator.createPaginationEmbed(
             messageOrInteraction.channel as GuildTextableChannel,
             messageOrInteraction.member!.id,
@@ -1312,6 +1313,7 @@ export async function sendPaginationedEmbed(
                 : undefined,
         );
     }
+    logger.error("after embed paginationator.creator sendpagination embed");
 
     let embed: Eris.EmbedOptions;
     if (typeof embeds[0] === "function") {
