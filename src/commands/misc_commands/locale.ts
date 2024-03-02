@@ -79,7 +79,7 @@ const LanguageNameToLocaleType = {
 
 export default class LocaleTypeCommand implements BaseCommand {
     aliases = ["botlanguage"];
-    slashCommandAlias = "botlanguage";
+    slashCommandAliases = ["botlanguage"];
 
     validations = {
         minArgCount: 0,

@@ -312,9 +312,9 @@ export default async function interactionCreateHandler(
         logger.error(
             `${getDebugLogHeader(
                 messageContext,
-            )} | Error while invoking command (${interactionName}) | ${debugId} | Exception Name: ${err.name}. Reason: ${
+            )} | Error while invoking command (${interactionName}) | ${debugId} |  Data: ${JSON.stringify(interaction.data)} | Exception Name: ${err.name}. Reason: ${
                 err.message
-            }. Trace: ${err.stack}}`,
+            }. Trace: ${err.stack}}.`,
         );
 
         if (interaction instanceof CommandInteraction) {

@@ -14,7 +14,7 @@ export default interface BaseCommand {
     call: CallFunc;
     help?: (guildID: string) => HelpDocumentation;
     aliases?: Array<string>;
-    slashCommandAlias?: string;
+    slashCommandAliases?: string[];
     validations?: CommandValidations;
     preRunChecks?: Array<{
         checkFn: (precheckArgs: PrecheckArgs) => boolean | Promise<boolean>;

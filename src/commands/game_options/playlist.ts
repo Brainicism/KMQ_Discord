@@ -53,7 +53,7 @@ const enum PlaylistCommandAction {
 }
 
 export default class PlaylistCommand implements BaseCommand {
-    aliases = ["spotify"];
+    aliases = ["spotify", "youtube"];
 
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
@@ -68,7 +68,7 @@ export default class PlaylistCommand implements BaseCommand {
         ],
     };
 
-    slashCommandAlias = "spotify";
+    slashCommandAliases = ["youtube", "spotify"];
 
     slashCommands = (): Array<
         DefaultSlashCommand | Eris.ChatInputApplicationCommandStructure
