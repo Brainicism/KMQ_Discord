@@ -1,9 +1,10 @@
 /* eslint-disable node/no-sync */
 import { BaseClusterWorker } from "eris-fleet";
+import { DataFiles } from "./constants";
 import { IPCLogger } from "./logger";
 import { RedditClient } from "./helpers/reddit_client";
 import { config } from "dotenv";
-import { durationSeconds } from "./helpers/utils";
+import { durationSeconds, pathExists } from "./helpers/utils";
 import {
     registerIntervals,
     reloadArtists,
@@ -316,6 +317,26 @@ export default class BotWorker extends BaseClusterWorker {
                 );
 
                 await reloadCaches();
+            }
+
+            if (await pathExists(DataFiles.CACHED_APP_CMD_IDS)) {
+                logger.info(
+                    `${this.logHeader()} | Loading cached app command IDs`,
+                );
+
+                try {
+                    State.commandToID = JSON.parse(
+                        (
+                            await fs.promises.readFile(
+                                DataFiles.CACHED_APP_CMD_IDS,
+                            )
+                        ).toString(),
+                    );
+                } catch (e) {
+                    logger.error(
+                        `${this.logHeader()} | Failed loading cached app command IDs: ${e}`,
+                    );
+                }
             }
 
             logger.info(`${this.logHeader()} | Reloading app commands`);
