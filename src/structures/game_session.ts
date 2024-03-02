@@ -1002,7 +1002,6 @@ export default class GameSession extends Session {
                           this.guildID,
                           "misc.plural.suddenDeathEnd",
                           this.roundsPlayed - 1,
-                          { count: String(this.roundsPlayed - 1) },
                       )
                     : this.scoreboard.getWinnerMessage(
                           State.getGuildLocale(this.guildID),
