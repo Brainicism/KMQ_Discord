@@ -1248,6 +1248,11 @@
                 "name": "spotify"
             }
         },
+        "youtube": {
+            "help": {
+                "name": "youtube"
+            }
+        },
         "stats": {
             "description": "Detailed bot status: {{link}}",
             "failure": {
