@@ -15,5 +15,4 @@ data/
 *.validation.sql
 *.test.sql
 .eslintcache
-.vscode/launch.json
 *.bak
