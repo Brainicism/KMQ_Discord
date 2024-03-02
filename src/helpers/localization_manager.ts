@@ -69,7 +69,7 @@ export class LocalizationManager {
         localeOrGuildID: string,
         phrase: string,
         count: number,
-        replace: { [key: string]: string } = {},
+        replace: { [key: string]: string } | undefined = undefined,
     ): string {
         if (!this.hasKey(`${phrase}_one`) || !this.hasKey(`${phrase}_other`)) {
             logger.error(`Missing translation for plural phrase: ${phrase}`);
@@ -119,7 +119,7 @@ export class LocalizationManager {
         locale: LocaleType,
         phrase: string,
         count: number,
-        replace: { [key: string]: string } = {},
+        replace: { [key: string]: string } | undefined = undefined,
     ): string {
         return this.internalLocalizer.t(phrase, {
             lng: locale,
