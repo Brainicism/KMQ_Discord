@@ -1300,28 +1300,16 @@ export async function sendPaginationedEmbed(
     startPage = 1,
 ): Promise<Eris.Message | null> {
     if (embeds.length > 1) {
-        if (
-            messageOrInteraction instanceof Eris.CommandInteraction ||
-            (await textPermissionsCheck(
-                messageOrInteraction.channel.id,
-                messageOrInteraction.guildID as string,
-                messageOrInteraction.member!.id,
-                [...REQUIRED_TEXT_PERMISSIONS, "readMessageHistory"],
-            ))
-        ) {
-            return EmbedPaginator.createPaginationEmbed(
-                messageOrInteraction.channel as GuildTextableChannel,
-                messageOrInteraction.member!.id,
-                embeds,
-                { timeout: 60000, startPage, cycling: true },
-                components,
-                messageOrInteraction instanceof Eris.CommandInteraction
-                    ? messageOrInteraction
-                    : undefined,
-            );
-        }
-
-        return null;
+        return EmbedPaginator.createPaginationEmbed(
+            messageOrInteraction.channel as GuildTextableChannel,
+            messageOrInteraction.member!.id,
+            embeds,
+            { timeout: 60000, startPage, cycling: true },
+            components,
+            messageOrInteraction instanceof Eris.CommandInteraction
+                ? messageOrInteraction
+                : undefined,
+        );
     }
 
     let embed: Eris.EmbedOptions;
