@@ -525,6 +525,7 @@ export async function sendMessage(
     }
 
     try {
+        logger.error("what");
         return await State.client.createMessage(textChannelID, messageContent);
     } catch (e) {
         if (!channel) {
