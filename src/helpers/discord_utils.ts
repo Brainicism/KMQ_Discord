@@ -2173,9 +2173,9 @@ export const updateAppCommands = async (
                                 .replace(" ", "");
                             commandStructures.push(aliasedCmd);
                         }
-
-                        commandStructures.push(cmd);
                     }
+
+                    commandStructures.push(cmd);
                 }
             }
         }
