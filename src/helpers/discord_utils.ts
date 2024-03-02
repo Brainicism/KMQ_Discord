@@ -310,7 +310,7 @@ export async function textPermissionsCheck(
             )}] permissions`,
         );
 
-        sendMessage(channel.id, {
+        await sendMessage(channel.id, {
             content: missingPermissionsText(guildID, missingPermissions),
         });
         return false;
@@ -1301,12 +1301,13 @@ export async function sendPaginationedEmbed(
 ): Promise<Eris.Message | null> {
     if (embeds.length > 1) {
         if (
-            await textPermissionsCheck(
+            messageOrInteraction instanceof Eris.CommandInteraction ||
+            (await textPermissionsCheck(
                 messageOrInteraction.channel.id,
                 messageOrInteraction.guildID as string,
                 messageOrInteraction.member!.id,
                 [...REQUIRED_TEXT_PERMISSIONS, "readMessageHistory"],
-            )
+            ))
         ) {
             return EmbedPaginator.createPaginationEmbed(
                 messageOrInteraction.channel as GuildTextableChannel,
