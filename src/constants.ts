@@ -240,6 +240,7 @@ export const DataFiles = {
         __dirname,
         "../data/feature_switch_config.json",
     ),
+    CACHED_APP_CMD_IDS: path.join(__dirname, "../data/cached_app_cmd_ids.json"),
 };
 
 // ephermeral to the docker container, not mounted from host

@@ -2,6 +2,7 @@
 import * as uuid from "uuid";
 import {
     BOOKMARK_COMMAND_NAME,
+    DataFiles,
     EMBED_ERROR_COLOR,
     EMBED_SUCCESS_BONUS_COLOR,
     EMBED_SUCCESS_COLOR,
@@ -54,6 +55,7 @@ import State from "../state";
 import _ from "lodash";
 import axios from "axios";
 import dbContext from "../database_context";
+import fs from "fs";
 import i18n from "./localization_manager";
 import type { EmbedGenerator, GuildTextableMessage } from "../types";
 import type { GuildTextableChannel } from "eris";
@@ -2206,6 +2208,10 @@ export const updateAppCommands = async (
         commandToID[command.name] = command.id;
     }
 
+    await fs.promises.writeFile(
+        DataFiles.CACHED_APP_CMD_IDS,
+        JSON.stringify(commandToID),
+    );
     return commandToID;
 };
 
