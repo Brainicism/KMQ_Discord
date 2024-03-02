@@ -24,11 +24,11 @@ jobs:
             DB_PORT: 3306
         steps:
             - name: Checkout KMQ_Discord
-              uses: actions/checkout@v2
+              uses: actions/checkout@v4
             - name: Check for undocumented game option commands
               run: src/ci_checks/check_help.sh
             - name: Setup Python
-              uses: actions/setup-python@v2
+              uses: actions/setup-python@v5
               with:
                   python-version: "3.10"
             - name: Setup MariaDB
@@ -39,7 +39,7 @@ jobs:
             - name: Check for newly introduced environment variables
               run: python src/ci_checks/check_env_var.py
             - name: Setup Node.js environment
-              uses: actions/setup-node@v2.1.2
+              uses: actions/setup-node@v4
               with:
                   node-version: 18
             - name: Install node dependencies

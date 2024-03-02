@@ -18,7 +18,7 @@ jobs:
         timeout-minutes: 10
         steps:
             - name: Checkout KMQ_Discord
-              uses: actions/checkout@v2
+              uses: actions/checkout@v4
               with:
                   fetch-depth: 0
                   token: ${{ secrets.PAT }}
@@ -49,20 +49,18 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
               with:
                   ref: prod
-            - name: Set up QEMU
-              uses: docker/setup-qemu-action@v2
             - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v2
+              uses: docker/setup-buildx-action@v3
             - name: Get application version
               id: app-version-parser
               run: |
                   APP_VERSION=$(npm pkg get version | sed 's/"//g') 
                   echo IMAGE_NAME=ghcr.io/brainicism/kmq_discord:$APP_VERSION > $GITHUB_OUTPUT
             - name: Log in to the Container registry
-              uses: docker/login-action@v2
+              uses: docker/login-action@v3
               with:
                   registry: ghcr.io
                   username: ${{ github.actor }}
@@ -70,7 +68,7 @@ jobs:
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v2
             - name: Build and push Docker image
-              uses: docker/build-push-action@v4
+              uses: docker/build-push-action@v5
               with:
                   context: .
                   file: docker/kmq/Dockerfile
