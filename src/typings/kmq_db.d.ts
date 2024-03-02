@@ -107,6 +107,7 @@ export interface GameOptionPresetsJson {
 export interface GameOptions {
     client_id: Generated<string>;
     guild_id: string;
+    last_updated: Generated<Date | null>;
     option_name: string;
     option_value: Generated<string | null>;
 }

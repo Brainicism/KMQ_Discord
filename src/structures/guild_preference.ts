@@ -25,7 +25,9 @@ import GameOption from "../enums/game_option_name";
 import Session from "./session";
 import _ from "lodash";
 import dbContext from "../database_context";
+import type { GameOptions as GameOptionsSchema } from "../typings/kmq_db";
 import type { GenderModeOptions } from "../enums/option_types/gender";
+import type { Insertable } from "kysely";
 import type { MutexInterface } from "async-mutex";
 import type ArtistType from "../enums/option_types/artist_type";
 import type GameOptions from "../interfaces/game_options";
@@ -932,14 +934,7 @@ export default class GuildPreference {
     async updateGuildPreferences(
         updatedOptionsObjects?: Array<{ name: string; value: GameOptionValue }>,
     ): Promise<void> {
-        interface GameOptionDatabaseEntry {
-            guild_id: string;
-            client_id: string;
-            option_name: string;
-            option_value: string;
-        }
-
-        let updatedOptions: GameOptionDatabaseEntry[] = [];
+        let updatedOptions: Insertable<GameOptionsSchema>[] = [];
         if (updatedOptionsObjects) {
             updatedOptions = Object.values(updatedOptionsObjects).map(
                 (option) => ({
@@ -947,6 +942,7 @@ export default class GuildPreference {
                     client_id: process.env.BOT_CLIENT_ID as string,
                     option_name: option.name,
                     option_value: JSON.stringify(option.value),
+                    last_updated: new Date(),
                 }),
             );
         } else {
@@ -958,6 +954,7 @@ export default class GuildPreference {
                     client_id: process.env.BOT_CLIENT_ID as string,
                     option_name: optionName,
                     option_value: JSON.stringify(optionValue),
+                    last_updated: new Date(),
                 };
             });
         }
