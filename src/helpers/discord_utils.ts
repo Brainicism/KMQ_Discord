@@ -2151,29 +2151,31 @@ export const updateAppCommands = async (
                             .replace(" ", "");
                     }
 
-                    if (command.slashCommandAlias) {
-                        const aliasedCmd = structuredClone(cmd);
+                    if (command.slashCommandAliases) {
+                        for (const slashCommandAlias of command.slashCommandAliases) {
+                            const aliasedCmd = structuredClone(cmd);
 
-                        if (
-                            !i18n.hasKey(
-                                `command.${command.slashCommandAlias}.help.name`,
-                            )
-                        ) {
-                            throw new Error(
-                                `Missing slash command name: command.${command.slashCommandAlias}.help.name`,
-                            );
+                            if (
+                                !i18n.hasKey(
+                                    `command.${slashCommandAlias}.help.name`,
+                                )
+                            ) {
+                                throw new Error(
+                                    `Missing slash command name: command.${slashCommandAlias}.help.name`,
+                                );
+                            }
+
+                            aliasedCmd.name = i18n
+                                .translate(
+                                    LocaleType.EN,
+                                    `command.${slashCommandAlias}.help.name`,
+                                )
+                                .replace(" ", "");
+                            commandStructures.push(aliasedCmd);
                         }
 
-                        aliasedCmd.name = i18n
-                            .translate(
-                                LocaleType.EN,
-                                `command.${command.slashCommandAlias}.help.name`,
-                            )
-                            .replace(" ", "");
-                        commandStructures.push(aliasedCmd);
+                        commandStructures.push(cmd);
                     }
-
-                    commandStructures.push(cmd);
                 }
             }
         }
