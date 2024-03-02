@@ -202,7 +202,7 @@ export default async function messageCreateHandler(
                         messageContext,
                     )} | Error while invoking command (${
                         parsedMessage.action
-                    }) | ${debugId} | Exception Name: ${err.name}. Reason: ${
+                    }) | ${debugId} | Data: "${parsedMessage.argument}" | Exception Name: ${err.name}. Reason: ${
                         err.message
                     }. Trace: ${err.stack}}`,
                 );
