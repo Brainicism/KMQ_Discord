@@ -53,5 +53,5 @@ STOPSIGNAL SIGINT
 ARG NODE_ENV
 ENV NODE_ENV=$NODE_ENV
 HEALTHCHECK --start-interval=5s --interval=60s --timeout=3s --start-period=30s \
-  CMD [ "$(cat status)" = "ready" ] && curl -f 127.0.0.1:5858/ping || exit 1
+  CMD [ "$(cat status)" = "ready" ] && curl -s -w "%{http_code}" -f 127.0.0.1:5858/ping || exit 1
 ENTRYPOINT ["./start.sh", "docker"]
