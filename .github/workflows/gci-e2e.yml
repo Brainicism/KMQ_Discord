@@ -90,6 +90,7 @@ jobs:
               run: |
                   docker logs kmq-gci 2>&1
                   docker inspect kmq-gci | jq '.[].State'
+                  docker --version
             - name: Parse pre-upgrade container ID
               id: old-container-id
               run: |
