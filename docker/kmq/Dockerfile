@@ -10,14 +10,6 @@ RUN apt-get update && apt-get install -y git \
     libtool \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /binaries
-RUN wget "https://azcopyvnext.azureedge.net/release20230331/azcopy_linux_${TARGETARCH}_10.18.0.tar.gz" \
-    && tar xzfv azcopy_linux_${TARGETARCH}_10.18.0.tar.gz \
-    && cp -fv azcopy_linux_${TARGETARCH}_10.18.0/azcopy /binaries \
-    && chmod +x /binaries/azcopy \
-    && rm azcopy_linux_${TARGETARCH}_10.18.0.tar.gz \
-    && rm -rfv azcopy_linux_${TARGETARCH}_10.18.0
-
 WORKDIR /app
 COPY yarn.lock package.json ./
 RUN yarn global add node-gyp@9.4.0
@@ -33,8 +25,6 @@ COPY templates/ templates/
 COPY src/ src/
 RUN npx tsc
 
-# remove dev dependencies
-RUN yarn install --production --ignore-scripts --prefer-offline
 # ================================================================= #
 FROM node:18-slim
 RUN apt-get update && apt-get install -y default-mysql-client \
@@ -46,7 +36,6 @@ RUN apt-get update && apt-get install -y default-mysql-client \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /app /app
-COPY --from=build /binaries/azcopy /usr/bin/azcopy
 WORKDIR /app
 
 STOPSIGNAL SIGINT
