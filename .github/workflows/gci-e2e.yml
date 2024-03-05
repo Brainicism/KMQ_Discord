@@ -87,7 +87,10 @@ jobs:
               run: docker logs kmq-gci 2>&1 | grep -i "\[Error\]" && echo "Errors found in container logs." && exit 1 || echo "No errors found in container logs." && exit 0
             - name: Print logs
               if: always()
-              run: docker logs kmq-gci 2>&1
+              run: |
+                  docker logs kmq-gci 2>&1
+                  docker inspect kmq-gci | jq '.[].State'
+                  docker --version
             - name: Parse pre-upgrade container ID
               id: old-container-id
               run: |
