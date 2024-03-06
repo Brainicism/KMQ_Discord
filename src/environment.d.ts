@@ -35,5 +35,6 @@ declare namespace NodeJS {
         GEMINI_API_KEY?: string | undefined;
         MINIMAL_RUN?: string | undefined;
         YOUTUBE_API_KEY?: string | undefined;
+        CENTRAL_REQUEST_HANDLER_ENABLED?: string | undefined;
     }
 }

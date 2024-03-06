@@ -84,7 +84,8 @@ const options: Options = {
     guildsPerShard: process.env.GUILDS_PER_SHARD
         ? parseInt(process.env.GUILDS_PER_SHARD as string, 10)
         : 2000,
-    useCentralRequestHandler: true,
+    useCentralRequestHandler:
+        process.env.CENTRAL_REQUEST_HANDLER_ENABLED === "true",
     softKillNotificationPeriod: 3 * 60 * 1000,
 };
 
