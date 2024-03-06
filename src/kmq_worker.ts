@@ -1,10 +1,13 @@
 /* eslint-disable node/no-sync */
 import { BaseClusterWorker } from "eris-fleet";
-import { DataFiles } from "./constants";
 import { IPCLogger } from "./logger";
 import { RedditClient } from "./helpers/reddit_client";
 import { config } from "dotenv";
-import { durationSeconds, pathExists } from "./helpers/utils";
+import { durationSeconds } from "./helpers/utils";
+import {
+    getCachedAppCommandIds,
+    updateAppCommands,
+} from "./helpers/discord_utils";
 import {
     registerIntervals,
     reloadArtists,
@@ -12,7 +15,6 @@ import {
     reloadSongs,
     updateBotStatus,
 } from "./helpers/management_utils";
-import { updateAppCommands } from "./helpers/discord_utils";
 import AppCommandsAction from "./enums/app_command_action";
 import EnvType from "./enums/env_type";
 import EvalCommand from "./commands/admin/eval";
@@ -168,6 +170,16 @@ export default class BotWorker extends BaseClusterWorker {
                 reloadArtists();
                 reloadSongs();
                 return null;
+            case "reload_app_commands":
+                State.commandToID = await updateAppCommands(
+                    AppCommandsAction.RELOAD,
+                );
+                return null;
+            case "delete_app_commands":
+                State.commandToID = await updateAppCommands(
+                    AppCommandsAction.DELETE,
+                );
+                return null;
             default:
                 return null;
         }
@@ -319,25 +331,7 @@ export default class BotWorker extends BaseClusterWorker {
                 await reloadCaches();
             }
 
-            if (await pathExists(DataFiles.CACHED_APP_CMD_IDS)) {
-                logger.info(
-                    `${this.logHeader()} | Loading cached app command IDs`,
-                );
-
-                try {
-                    State.commandToID = JSON.parse(
-                        (
-                            await fs.promises.readFile(
-                                DataFiles.CACHED_APP_CMD_IDS,
-                            )
-                        ).toString(),
-                    );
-                } catch (e) {
-                    logger.error(
-                        `${this.logHeader()} | Failed loading cached app command IDs: ${e}`,
-                    );
-                }
-            }
+            State.commandToID = await getCachedAppCommandIds();
 
             logger.info(`${this.logHeader()} | Reloading app commands`);
             State.commandToID = await updateAppCommands(

@@ -31,6 +31,7 @@ import {
     getOrdinalNum,
     italicize,
     parseKmqPlaylistIdentifier,
+    pathExists,
     standardDateFormat,
     strikethrough,
     truncatedString,
@@ -2187,33 +2188,82 @@ export const updateAppCommands = async (
 
     let appCommands: Eris.AnyApplicationCommand<true>[] = [];
     if (isProd) {
-        appCommands = await State.client.bulkEditCommands(commandStructures);
+        try {
+            logger.info("bulkEditCommands begin");
+            appCommands =
+                await State.client.bulkEditCommands(commandStructures);
+            logger.info("bulkEditCommands finish");
+        } catch (e) {
+            logger.error(`Error during bulkEditCommands: ${e}`);
+        }
     } else {
         const debugServer = State.client.guilds.get(
             process.env.DEBUG_SERVER_ID as string,
         );
 
         if (debugServer) {
-            appCommands = await State.client.bulkEditGuildCommands(
-                debugServer.id,
-                commandStructures,
-            );
+            try {
+                logger.info("bulkEditGuildCommands begin");
+                appCommands = await State.client.bulkEditGuildCommands(
+                    debugServer.id,
+                    commandStructures,
+                );
+                logger.info("bulkEditGuildCommands finish");
+            } catch (e) {
+                logger.error(`Error during bulkEditGuildCommands: ${e}`);
+            }
         } else {
             logger.warn("Debug server unexpectedly unavailable");
         }
     }
 
-    const commandToID: { [commandName: string]: string } = {};
-    for (const command of appCommands) {
-        commandToID[command.name] = command.id;
+    if (appCommandType === AppCommandsAction.RELOAD) {
+        if (appCommands.length > 0) {
+            const commandToID: { [commandName: string]: string } = {};
+            for (const command of appCommands) {
+                commandToID[command.name] = command.id;
+            }
+
+            await fs.promises.writeFile(
+                DataFiles.CACHED_APP_CMD_IDS,
+                JSON.stringify(commandToID),
+            );
+
+            return commandToID;
+        }
+
+        // if update app command failed, use cached IDs instead
+        return getCachedAppCommandIds();
     }
 
-    await fs.promises.writeFile(
-        DataFiles.CACHED_APP_CMD_IDS,
-        JSON.stringify(commandToID),
-    );
-    return commandToID;
+    return {};
 };
+
+/**
+ * Gets cached app command IDs
+ */
+export async function getCachedAppCommandIds(): Promise<{
+    [commandName: string]: string;
+}> {
+    if (await pathExists(DataFiles.CACHED_APP_CMD_IDS)) {
+        try {
+            const cachedAppCommandMap = JSON.parse(
+                (
+                    await fs.promises.readFile(DataFiles.CACHED_APP_CMD_IDS)
+                ).toString(),
+            );
+
+            logger.info(
+                `Loaded cached app command IDs: ${JSON.stringify(cachedAppCommandMap)}`,
+            );
+            return cachedAppCommandMap;
+        } catch (e) {
+            logger.error(`Failed loading cached app command IDs: ${e}`);
+        }
+    }
+
+    return {};
+}
 
 /**
  * Sends a message to the user that the command failed
