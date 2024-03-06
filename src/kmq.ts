@@ -77,9 +77,9 @@ const options: Options = {
         },
         restMode: true,
         messageLimit: 0,
-        requestTimeout: 30000,
+        requestTimeout: 15000,
     },
-    fetchTimeout: 5000,
+    fetchTimeout: 20000,
     customClient: KmqClient,
     guildsPerShard: process.env.GUILDS_PER_SHARD
         ? parseInt(process.env.GUILDS_PER_SHARD as string, 10)

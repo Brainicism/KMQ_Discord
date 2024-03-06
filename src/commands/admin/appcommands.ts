@@ -1,9 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import { IPCLogger } from "../../logger";
-import {
-    sendInfoMessage,
-    updateAppCommands,
-} from "../../helpers/discord_utils";
+import { sendInfoMessage } from "../../helpers/discord_utils";
 import AppCommandsAction from "../../enums/app_command_action";
 import CommandPrechecks from "../../command_prechecks";
 import EnvType from "../../enums/env_type";
@@ -43,13 +40,14 @@ export default class AppCommandsCommand implements BaseCommand {
             logger.info(
                 `Creating ${commandModificationScope} application commands...`,
             );
+            await State.ipc.allClustersCommand("reload_app_commands", true);
         } else {
             logger.info(
                 `Deleting ${commandModificationScope} application commands`,
             );
+            await State.ipc.allClustersCommand("delete_app_commands", true);
         }
 
-        State.commandToID = await updateAppCommands(appCommandType);
         await sendInfoMessage(MessageContext.fromMessage(message), {
             title: "Commands Updated",
         });

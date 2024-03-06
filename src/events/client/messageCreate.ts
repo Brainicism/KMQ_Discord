@@ -197,15 +197,25 @@ export default async function messageCreateHandler(
             } catch (err) {
                 const debugId = uuid.v4();
 
-                logger.error(
-                    `${getDebugLogHeader(
-                        messageContext,
-                    )} | Error while invoking command (${
-                        parsedMessage.action
-                    }) | ${debugId} | Data: "${parsedMessage.argument}" | Exception Name: ${err.name}. Reason: ${
-                        err.message
-                    }. Trace: ${err.stack}}`,
-                );
+                if (err instanceof Error) {
+                    logger.error(
+                        `${getDebugLogHeader(
+                            messageContext,
+                        )} | Error while invoking command (${
+                            parsedMessage.action
+                        }) | ${debugId} | Data: "${parsedMessage.argument}" | Exception Name: ${err.name}. Reason: ${
+                            err.message
+                        }. Trace: ${err.stack}}`,
+                    );
+                } else {
+                    logger.error(
+                        `${getDebugLogHeader(
+                            messageContext,
+                        )} | Error while invoking command (${
+                            parsedMessage.action
+                        }) | ${debugId} | Data: "${parsedMessage.argument}" | err = ${err}`,
+                    );
+                }
 
                 await sendErrorMessage(messageContext, {
                     title: i18n.translate(
