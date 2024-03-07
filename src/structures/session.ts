@@ -937,9 +937,16 @@ export default abstract class Session {
             ) {
                 embed.thumbnailUrl = thumbnailUrl;
                 embed.footerText = footerText;
-                await round.interactionMessage.edit({
-                    embeds: [generateEmbed(messageContext, embed)],
-                });
+                try {
+                    await round.interactionMessage.edit({
+                        embeds: [generateEmbed(messageContext, embed)],
+                    });
+                } catch (e) {
+                    logger.warn(
+                        `Error editing roundMessage interaction. Bot potentially left server? e = ${e}}`,
+                    );
+                }
+
                 return round.interactionMessage;
             }
         } else if (round instanceof ListeningRound) {

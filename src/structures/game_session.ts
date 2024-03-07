@@ -279,7 +279,15 @@ export default class GameSession extends Session {
 
         await super.endRound(messageContext);
 
-        round.interactionMarkAnswers(guessResult.correctGuessers?.length ?? 0);
+        try {
+            await round.interactionMarkAnswers(
+                guessResult.correctGuessers?.length ?? 0,
+            );
+        } catch (e) {
+            logger.warn(
+                `Failed to mark interaction answers. Bot potentially left server? e = ${e}`,
+            );
+        }
 
         const timePlayed = Date.now() - round.songStartedAt;
         if (guessResult.correct) {
