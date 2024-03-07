@@ -734,10 +734,12 @@ export default class LookupCommand implements BaseCommand {
         const focusedVal = interactionData.interactionOptions[focusedKey];
 
         const lowercaseUserInput = normalizePunctuationInName(focusedVal);
+        const showPopular = lowercaseUserInput.length < 2;
         const showHangul =
             containsHangul(lowercaseUserInput) ||
-            State.getGuildLocale(interaction.guildID as string) ===
-                LocaleType.KO;
+            (State.getGuildLocale(interaction.guildID as string) ===
+                LocaleType.KO &&
+                showPopular);
 
         if (focusedKey === SONG_NAME) {
             const artistName = interactionData.interactionOptions[ARTIST_NAME];
@@ -749,7 +751,7 @@ export default class LookupCommand implements BaseCommand {
                         ?.id;
             }
 
-            if (lowercaseUserInput.length < 2) {
+            if (showPopular) {
                 await tryAutocompleteInteractionAcknowledge(
                     interaction,
                     localizedAutocompleteFormat(
