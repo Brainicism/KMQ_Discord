@@ -147,11 +147,9 @@ export class RedditClient {
                 })
                 .filter(
                     (x) =>
-                        !(
-                            x.flair.startsWith("teaser") &&
-                            x.flair.includes("ama") &&
-                            x.title.toLowerCase().includes("dance practice")
-                        ),
+                        !x.flair.startsWith("teaser") &&
+                        !x.flair.includes("ama") &&
+                        !x.title.toLowerCase().includes("dance practice"),
                 );
         } catch (e) {
             logger.warn(
