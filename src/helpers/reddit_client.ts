@@ -149,6 +149,7 @@ export class RedditClient {
                     (x) =>
                         !(
                             x.flair.startsWith("teaser") &&
+                            x.flair.includes("ama") &&
                             x.title.toLowerCase().includes("dance practice")
                         ),
                 );
