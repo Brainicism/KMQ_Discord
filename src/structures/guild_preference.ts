@@ -1,5 +1,6 @@
 import * as uuid from "uuid";
 import {
+    DEFAULT_ADVANCED_SETTINGS,
     DEFAULT_ANSWER_TYPE,
     DEFAULT_ARTIST_TYPE,
     DEFAULT_BEGINNING_SEARCH_YEAR,
@@ -25,10 +26,12 @@ import GameOption from "../enums/game_option_name";
 import Session from "./session";
 import _ from "lodash";
 import dbContext from "../database_context";
+import type { AdvancedSettings } from "../types";
 import type { GameOptions as GameOptionsSchema } from "../typings/kmq_db";
 import type { GenderModeOptions } from "../enums/option_types/gender";
 import type { Insertable } from "kysely";
 import type { MutexInterface } from "async-mutex";
+import type AdvancedCommandAction from "../enums/advanced_setting_action_name";
 import type ArtistType from "../enums/option_types/artist_type";
 import type GameOptions from "../interfaces/game_options";
 import type GuessModeType from "../enums/option_types/guess_mode_type";
@@ -55,6 +58,7 @@ type GameOptionValue =
     | ArtistType
     | AnswerType
     | ShuffleType
+    | AdvancedSettings
     | MatchedArtist[]
     | LanguageType
     | MultiGuessType
@@ -183,6 +187,7 @@ export default class GuildPreference {
         goal: null,
         guessTimeout: null,
         duration: null,
+        advancedSettings: DEFAULT_ADVANCED_SETTINGS,
         artistType: DEFAULT_ARTIST_TYPE,
         answerType: DEFAULT_ANSWER_TYPE,
         languageType: DEFAULT_LANGUAGE,
@@ -811,6 +816,47 @@ export default class GuildPreference {
     /** @returns whether the goal option is set */
     isGoalSet(): this is GuildPreference & { gameOptions: { goal: number } } {
         return this.gameOptions.goal !== null;
+    }
+
+    /**
+     * Sets the advanced settings value
+     * @param settingName - The advanced setting's name
+     * @param settingValue - The setting's vlaue
+     */
+    async updateAdvancedSetting(
+        settingName: AdvancedCommandAction,
+        settingValue: number,
+    ): Promise<void> {
+        this.gameOptions.advancedSettings[settingName] = settingValue;
+        await this.updateGuildPreferences([
+            {
+                name: GameOptionInternal.ADVANCED_SETTINGS,
+                value: this.gameOptions.advancedSettings,
+            },
+        ]);
+    }
+
+    /**
+     * Resets the advanced settings
+     */
+    async resetAdvancedSettings(): Promise<void> {
+        this.gameOptions.advancedSettings = DEFAULT_ADVANCED_SETTINGS;
+        await this.updateGuildPreferences([
+            {
+                name: GameOptionInternal.ADVANCED_SETTINGS,
+                value: this.gameOptions.advancedSettings,
+            },
+        ]);
+    }
+
+    /** @returns whether the goal option is set */
+    getMultiGuessDelay(): number {
+        return this.gameOptions.advancedSettings.multiguessdelay;
+    }
+
+    /** @returns whether the goal option is set */
+    getSongStartDelay(): number {
+        return this.gameOptions.advancedSettings.songstartdelay;
     }
 
     /**

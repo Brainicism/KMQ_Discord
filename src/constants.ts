@@ -1,4 +1,5 @@
 /* eslint-disable no-return-assign */
+import AdvancedCommandAction from "./enums/advanced_setting_action_name";
 import AnswerType from "./enums/option_types/answer_type";
 import ArtistType from "./enums/option_types/artist_type";
 import ExpBonusModifier from "./enums/exp_bonus_modifier";
@@ -55,7 +56,12 @@ export const DEFAULT_GENDER: Array<GenderModeOptions> = [
     "coed",
 ];
 export const DEFAULT_LIMIT = 500;
-export const SONG_START_DELAY = 3000;
+
+export const DEFAULT_ADVANCED_SETTINGS = {
+    [AdvancedCommandAction.MULTIGUESS_DELAY]: 1.5,
+    [AdvancedCommandAction.SONG_START_DELAY]: 3,
+};
+
 export const KMQ_USER_AGENT = "KMQ (K-pop Music Quiz)";
 export const specialFfmpegArgs = {
     [SpecialType.REVERSE]: (seek: number, duration: number) => ({
@@ -160,6 +166,7 @@ export const ELIMINATION_MAX_LIVES = 10000;
 export const ELIMINATION_MIN_LIVES = 1;
 
 export const enum GameOptionInternal {
+    ADVANCED_SETTINGS = "advancedSettings",
     BEGINNING_YEAR = "beginningYear",
     END_YEAR = "endYear",
     GENDER = "gender",
