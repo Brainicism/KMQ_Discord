@@ -841,7 +841,10 @@ export default class GuildPreference {
      * Resets the advanced settings
      */
     async resetAdvancedSettings(): Promise<void> {
-        this.gameOptions.advancedSettings = DEFAULT_ADVANCED_SETTINGS;
+        this.gameOptions.advancedSettings = {
+            ...DEFAULT_ADVANCED_SETTINGS,
+        };
+
         await this.updateGuildPreferences([
             {
                 name: GameOptionInternal.ADVANCED_SETTINGS,
