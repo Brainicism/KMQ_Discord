@@ -1354,6 +1354,24 @@
             "help": {
                 "name": "youtube"
             }
+        },
+        "advanced": {
+            "help": {
+                "description": "Pengaturan KMQ Lanjutan. Ubah dengan risiko Anda sendiri!",
+                "example": {
+                    "reset": "Mengatur ulang pengaturan lanjutan ke default"
+                },
+                "interaction": {
+                    "delay": "penundaan",
+                    "description": "Perbarui pengaturan KMQ lanjutan",
+                    "description_multiguess_delay": "Penundaan sebelum mengakhiri ronde, setelah seseorang menebak dengan benar.",
+                    "description_song_start_delay": "Penundaan sebelum memutar lagu baru setelah menyelesaikan babak permainan"
+                },
+                "name": "lanjutan"
+            },
+            "optionUpdated": {
+                "title": "Pengaturan Lanjutan Diperbarui"
+            }
         }
     },
     "fact": {

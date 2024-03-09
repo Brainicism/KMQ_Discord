@@ -1248,6 +1248,24 @@
                 "name": "spotify"
             }
         },
+        "advanced": {
+            "optionUpdated": {
+                "title": "Advanced Settings Updated"
+            },
+            "help": {
+                "description": "Advanced KMQ settings. Change at your own risk!",
+                "example": {
+                    "reset": "Resets the advanced settings to the default"
+                },
+                "interaction": {
+                    "delay": "delay",
+                    "description": "Update an advanced KMQ setting",
+                    "description_song_start_delay": "The delay before playing a new song after a game round completes",
+                    "description_multiguess_delay": "The delay before ending the round, after someone guesses correctly."
+                },
+                "name": "advanced"
+            }
+        },
         "stats": {
             "description": "Detailed bot status: {{link}}",
             "failure": {

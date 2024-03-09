@@ -1354,6 +1354,24 @@
             "help": {
                 "name": "youtube"
             }
+        },
+        "advanced": {
+            "help": {
+                "description": "Ajustes avanzados de KMQ. ¡Cámbielos bajo su propio riesgo!",
+                "example": {
+                    "reset": "Restablece la configuración avanzada a los valores predeterminados"
+                },
+                "interaction": {
+                    "delay": "retraso",
+                    "description": "Actualizar una configuración avanzada de KMQ",
+                    "description_multiguess_delay": "El retraso antes de terminar la ronda, después de que alguien adivine correctamente.",
+                    "description_song_start_delay": "El retraso antes de que suene una nueva canción después de que finalice una ronda del juego"
+                },
+                "name": "avanzada"
+            },
+            "optionUpdated": {
+                "title": "Configuración avanzada actualizada"
+            }
         }
     },
     "fact": {

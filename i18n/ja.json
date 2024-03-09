@@ -1354,6 +1354,24 @@
             "help": {
                 "name": "youtube"
             }
+        },
+        "advanced": {
+            "help": {
+                "description": "上級KMQ設定注意して変更してください!",
+                "example": {
+                    "reset": "上級設定を初期値にリセットします"
+                },
+                "interaction": {
+                    "delay": "遅延",
+                    "description": "上級KMQ設定を更新します",
+                    "description_multiguess_delay": "ラウンド終了までの遅延期間（回答が正しい場合のみ）",
+                    "description_song_start_delay": "ゲームラウンドが終了してから新しい曲を再生するまでの遅延時間"
+                },
+                "name": "上級"
+            },
+            "optionUpdated": {
+                "title": "上級設定が更新されました"
+            }
         }
     },
     "fact": {

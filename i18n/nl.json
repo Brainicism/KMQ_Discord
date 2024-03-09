@@ -1354,6 +1354,24 @@
             "help": {
                 "name": "youtube"
             }
+        },
+        "advanced": {
+            "help": {
+                "description": "Geavanceerde KMQ-instellingen. Verander op eigen risico!",
+                "example": {
+                    "reset": "Stelt de geavanceerde instellingen opnieuw in op de standaardinstellingen"
+                },
+                "interaction": {
+                    "delay": "vertraging",
+                    "description": "Werk een geavanceerde KMQ-instelling bij",
+                    "description_multiguess_delay": "De vertraging voordat de ronde wordt beëindigd, nadat iemand correct heeft geraden.",
+                    "description_song_start_delay": "De vertraging voor het afspelen van een nieuw nummer na het voltooien van een spelronde"
+                },
+                "name": "geavanceerd"
+            },
+            "optionUpdated": {
+                "title": "Geavanceerde instellingen bijgewerkt"
+            }
         }
     },
     "fact": {
