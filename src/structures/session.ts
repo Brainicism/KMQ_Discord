@@ -1035,7 +1035,7 @@ export default abstract class Session {
         locale: LocaleType,
         round: Round,
     ): string {
-        const aliases: Array<string> = [];
+        let aliases: Array<string> = [];
         if (guessModeType === GuessModeType.ARTIST) {
             if (round.song.hangulArtistName) {
                 if (locale === LocaleType.KO) {
@@ -1057,6 +1057,15 @@ export default abstract class Session {
 
             aliases.push(...round.songAliases);
         }
+
+        if (aliases.length === 0) {
+            return "";
+        }
+
+        // dont include the original song name as an alias
+        aliases = aliases.filter(
+            (alias) => alias !== getLocalizedSongName(round.song, locale),
+        );
 
         if (aliases.length === 0) {
             return "";
