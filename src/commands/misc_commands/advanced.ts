@@ -1,5 +1,6 @@
 import { IPCLogger } from "../../logger";
 import { OptionAction } from "../../constants";
+import { bold } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -244,7 +245,11 @@ export default class AdvancedSettingCommand implements BaseCommand {
                     messageContext.guildID,
                     "command.advanced.optionUpdated.title",
                 ),
-                description: `${JSON.stringify(guildPreference.gameOptions.advancedSettings)}`,
+                description: `${Object.entries(
+                    guildPreference.gameOptions.advancedSettings,
+                )
+                    .map(([key, val]) => `${bold(key)}: ${val}`)
+                    .join("\n")}`,
             },
             true,
             undefined,

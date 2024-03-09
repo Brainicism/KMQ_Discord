@@ -20,6 +20,7 @@ import {
 import { IPCLogger } from "../logger";
 import { Mutex } from "async-mutex";
 import { mapTo } from "../helpers/utils";
+import AdvancedCommandActionName from "../enums/advanced_setting_action_name";
 import AnswerType from "../enums/option_types/answer_type";
 import EnvType from "../enums/env_type";
 import GameOption from "../enums/game_option_name";
@@ -851,12 +852,16 @@ export default class GuildPreference {
 
     /** @returns whether the goal option is set */
     getMultiGuessDelay(): number {
-        return this.gameOptions.advancedSettings.multiguessdelay;
+        return this.gameOptions.advancedSettings[
+            AdvancedCommandActionName.MULTIGUESS_DELAY
+        ];
     }
 
     /** @returns whether the goal option is set */
     getSongStartDelay(): number {
-        return this.gameOptions.advancedSettings.songstartdelay;
+        return this.gameOptions.advancedSettings[
+            AdvancedCommandActionName.SONG_START_DELAY
+        ];
     }
 
     /**

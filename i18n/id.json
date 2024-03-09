@@ -50,7 +50,7 @@
                 "interaction": {
                     "delay": "penundaan",
                     "description": "Perbarui pengaturan KMQ lanjutan",
-                    "description_multiguess_delay": "Penundaan sebelum mengakhiri ronde, setelah seseorang menebak dengan benar.",
+                    "description_multiguess_delay": "Penundaan sebelum mengakhiri ronde, setelah seseorang menebak dengan benar",
                     "description_song_start_delay": "Penundaan sebelum memutar lagu baru setelah menyelesaikan babak permainan"
                 },
                 "name": "lanjutan"

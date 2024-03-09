@@ -50,7 +50,7 @@
                 "interaction": {
                     "delay": "vertraging",
                     "description": "Werk een geavanceerde KMQ-instelling bij",
-                    "description_multiguess_delay": "De vertraging voordat de ronde wordt beëindigd, nadat iemand correct heeft geraden.",
+                    "description_multiguess_delay": "De vertraging voordat de ronde wordt beëindigd, nadat iemand correct heeft geraden",
                     "description_song_start_delay": "De vertraging voor het afspelen van een nieuw nummer na het voltooien van een spelronde"
                 },
                 "name": "geavanceerd"

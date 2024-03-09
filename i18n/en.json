@@ -50,7 +50,7 @@
                 "interaction": {
                     "delay": "delay",
                     "description": "Update an advanced KMQ setting",
-                    "description_multiguess_delay": "The delay before ending the round, after someone guesses correctly.",
+                    "description_multiguess_delay": "The delay before ending the round, after someone guesses correctly",
                     "description_song_start_delay": "The delay before playing a new song after a game round completes"
                 },
                 "name": "advanced"
