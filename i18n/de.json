@@ -41,6 +41,24 @@
                 "name": "hinzufügen"
             }
         },
+        "advanced": {
+            "help": {
+                "description": "Erweiterte KMQ-Einstellungen. Ändern Sie sie auf eigenes Risiko!",
+                "example": {
+                    "reset": "Setzt die erweiterten Einstellungen auf den Standard zurück"
+                },
+                "interaction": {
+                    "delay": "Verzögerung",
+                    "description": "Aktualisiere eine erweiterte KMQ-Einstellung",
+                    "description_multiguess_delay": "Die Verzögerung vor dem Beenden der Runde, nachdem jemand richtig geraten hat",
+                    "description_song_start_delay": "Die Verzögerung vor dem Abspielen eines neuen Liedes nach Abschluss einer Spielrunde"
+                },
+                "name": "erweitert"
+            },
+            "optionUpdated": {
+                "title": "Erweiterte Einstellungen aktualisiert"
+            }
+        },
         "answer": {
             "help": {
                 "description": "Wähle aus, wie du antworten möchtest: Indem du deine Antwort eingibst oder über Multiple-Choice. Die folgenden Optionen stehen zur Auswahl: `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}` und `{{hard}}`",

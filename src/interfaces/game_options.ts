@@ -1,3 +1,4 @@
+import type { AdvancedSettings } from "../types";
 import type { GenderModeOptions } from "../enums/option_types/gender";
 import type AnswerType from "../enums/option_types/answer_type";
 import type ArtistType from "../enums/option_types/artist_type";
@@ -37,4 +38,5 @@ export default interface GameOptions {
     ostPreference: OstPreference;
     forcePlaySongID: string | null;
     spotifyPlaylistID: string | null;
+    advancedSettings: AdvancedSettings;
 }

@@ -43,7 +43,6 @@ import {
     EMBED_SUCCESS_COLOR,
     KmqImages,
     REVIEW_LINK,
-    SONG_START_DELAY,
     VOTE_LINK,
 } from "../constants";
 import { IPCLogger } from "../logger";
@@ -72,7 +71,6 @@ import type QueriedSong from "../interfaces/queried_song";
 import type Round from "./round";
 import type SuccessfulGuessResult from "../interfaces/success_guess_result";
 
-const MULTIGUESS_DELAY = 1500;
 const HIDDEN_UPDATE_INTERVAL = 2000;
 
 const logger = new IPCLogger("game_session");
@@ -199,12 +197,18 @@ export default class GameSession extends Session {
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
     async startRound(messageContext: MessageContext): Promise<Round | null> {
+        const multiGuessDelayMs =
+            this.guildPreference.getMultiGuessDelay() * 1000;
+
+        const songStartDelayMs =
+            this.guildPreference.getSongStartDelay() * 1000;
+
         if (this.sessionInitialized) {
             // Only add a delay if the game has already started
             await delay(
                 this.multiguessDelayIsActive(this.guildPreference)
-                    ? SONG_START_DELAY - MULTIGUESS_DELAY
-                    : SONG_START_DELAY,
+                    ? Math.max(songStartDelayMs - multiGuessDelayMs, 0)
+                    : songStartDelayMs,
             );
         }
 
@@ -627,7 +631,7 @@ export default class GameSession extends Session {
             round.finished = true;
             await delay(
                 this.multiguessDelayIsActive(this.guildPreference)
-                    ? MULTIGUESS_DELAY
+                    ? this.guildPreference.getMultiGuessDelay() * 1000
                     : 0,
             );
 

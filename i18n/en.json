@@ -41,6 +41,24 @@
                 "name": "add"
             }
         },
+        "advanced": {
+            "help": {
+                "description": "Advanced KMQ settings. Change at your own risk!",
+                "example": {
+                    "reset": "Resets the advanced settings to the default"
+                },
+                "interaction": {
+                    "delay": "delay",
+                    "description": "Update an advanced KMQ setting",
+                    "description_multiguess_delay": "The delay before ending the round, after someone guesses correctly",
+                    "description_song_start_delay": "The delay before playing a new song after a game round completes"
+                },
+                "name": "advanced"
+            },
+            "optionUpdated": {
+                "title": "Advanced Settings Updated"
+            }
+        },
         "answer": {
             "help": {
                 "description": "Choose how to answer: by typing your answer, or via multiple choice. Options are the following: `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}`, and `{{hard}}`",

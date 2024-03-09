@@ -41,6 +41,24 @@
                 "name": "adicionar"
             }
         },
+        "advanced": {
+            "help": {
+                "description": "Configurações avançadas de KMQ. Altere por sua conta e risco!",
+                "example": {
+                    "reset": "Redefine as configurações avançadas para o padrão"
+                },
+                "interaction": {
+                    "delay": "atraso",
+                    "description": "Atualizar uma configuração avançada de KMQ",
+                    "description_multiguess_delay": "O atraso antes de finalizar a rodada, depois que alguém acerta",
+                    "description_song_start_delay": "O atraso antes de reproduzir uma nova música após o término de uma rodada do jogo"
+                },
+                "name": "avançadas"
+            },
+            "optionUpdated": {
+                "title": "Configurações Avançadas Atualizadas"
+            }
+        },
         "answer": {
             "help": {
                 "description": "Escolha como responder: digitando sua resposta ou por múltipla escolha. As opções são as seguintes: `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}` e `{{hard}}`",

@@ -1,5 +1,6 @@
 import GameOption from "./enums/game_option_name";
 import type { GuildTextableWithThreads } from "eris";
+import type AdvancedCommandAction from "./enums/advanced_setting_action_name";
 import type Eris from "eris";
 
 export type GuildTextableMessage = Eris.Message<GuildTextableWithThreads> & {
@@ -50,4 +51,9 @@ export const ConflictingGameOptions: { [option: string]: Array<GameOption> } = {
 
 export type ButtonActionRow = Omit<Eris.ActionRow, "components"> & {
     components: Eris.InteractionButton[];
+};
+
+export type AdvancedSettings = {
+    [AdvancedCommandAction.MULTIGUESS_DELAY]: number;
+    [AdvancedCommandAction.SONG_START_DELAY]: number;
 };
