@@ -41,6 +41,24 @@
                 "name": "添加"
             }
         },
+        "advanced": {
+            "help": {
+                "description": "高级 KMQ 设置。自行更改风险自负！",
+                "example": {
+                    "reset": "将高级设置重置为默认设置"
+                },
+                "interaction": {
+                    "delay": "延迟",
+                    "description": "更新高级 KMQ 设置",
+                    "description_multiguess_delay": "在有人正确猜出答案后结束回合的延迟时间。",
+                    "description_song_start_delay": "游戏回合结束后播放新歌曲之前的延迟时间"
+                },
+                "name": "高级"
+            },
+            "optionUpdated": {
+                "title": "高级设置已更新"
+            }
+        },
         "answer": {
             "help": {
                 "description": "选择如何回答：通过输入答案或通过多项选择。选项如下：`{{typing}}`、`{{typingtypos}}`、`{{easy}}`、`{{medium}}`和`{{hard}}`。",
@@ -1353,24 +1371,6 @@
         "youtube": {
             "help": {
                 "name": "YouTube"
-            }
-        },
-        "advanced": {
-            "help": {
-                "description": "高级 KMQ 设置。自行更改风险自负！",
-                "example": {
-                    "reset": "将高级设置重置为默认设置"
-                },
-                "interaction": {
-                    "delay": "延迟",
-                    "description": "更新高级 KMQ 设置",
-                    "description_multiguess_delay": "在有人正确猜出答案后结束回合的延迟时间。",
-                    "description_song_start_delay": "游戏回合结束后播放新歌曲之前的延迟时间"
-                },
-                "name": "高级"
-            },
-            "optionUpdated": {
-                "title": "高级设置已更新"
             }
         }
     },

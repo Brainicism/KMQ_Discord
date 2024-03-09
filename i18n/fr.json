@@ -41,6 +41,24 @@
                 "name": "ajouter"
             }
         },
+        "advanced": {
+            "help": {
+                "description": "Paramètres avancés KMQ. Modifiez-les à vos propres risques !",
+                "example": {
+                    "reset": "Réinitialise les paramètres avancés aux valeurs par défaut"
+                },
+                "interaction": {
+                    "delay": "délai",
+                    "description": "Mettre à jour un paramètre avancé KMQ",
+                    "description_multiguess_delay": "Le délai avant de mettre fin à la manche, après que quelqu'un a deviné correctement.",
+                    "description_song_start_delay": "Le délai avant de jouer une nouvelle chanson après une manche de jeu"
+                },
+                "name": "avancé"
+            },
+            "optionUpdated": {
+                "title": "Paramètres avancés mis à jour"
+            }
+        },
         "answer": {
             "help": {
                 "description": "Choisissez comment répondre : en tapant votre réponse, ou via un choix multiple. Les options sont les suivantes : `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}`, et `{{hard}}`.",
@@ -1353,24 +1371,6 @@
         "youtube": {
             "help": {
                 "name": "YouTube"
-            }
-        },
-        "advanced": {
-            "help": {
-                "description": "Paramètres avancés KMQ. Modifiez-les à vos propres risques !",
-                "example": {
-                    "reset": "Réinitialise les paramètres avancés aux valeurs par défaut"
-                },
-                "interaction": {
-                    "delay": "délai",
-                    "description": "Mettre à jour un paramètre avancé KMQ",
-                    "description_multiguess_delay": "Le délai avant de mettre fin à la manche, après que quelqu'un a deviné correctement.",
-                    "description_song_start_delay": "Le délai avant de jouer une nouvelle chanson après une manche de jeu"
-                },
-                "name": "avancé"
-            },
-            "optionUpdated": {
-                "title": "Paramètres avancés mis à jour"
             }
         }
     },
