@@ -218,10 +218,10 @@ export async function updateBotStatus(): Promise<void> {
 
 /** Reload song/artist aliases */
 export async function reloadAliases(): Promise<void> {
-    const songAliasMapping = await dbContext.kmq
-        .selectFrom("available_songs")
-        .select(["link", "song_aliases"])
-        .where("song_aliases", "<>", "")
+    const songAliasMapping = await dbContext.kpopVideos
+        .selectFrom("app_kpop")
+        .select(["vlink as link", "alias as song_aliases"])
+        .where("alias", "<>", "")
         .execute();
 
     const artistAliasMapping: {
