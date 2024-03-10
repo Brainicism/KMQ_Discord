@@ -218,10 +218,10 @@ export async function updateBotStatus(): Promise<void> {
 
 /** Reload song/artist aliases */
 export async function reloadAliases(): Promise<void> {
-    const songAliasMapping = await dbContext.kmq
-        .selectFrom("available_songs")
-        .select(["link", "song_aliases"])
-        .where("song_aliases", "<>", "")
+    const songAliasMapping = await dbContext.kpopVideos
+        .selectFrom("app_kpop")
+        .select(["vlink as link", "alias as song_aliases"])
+        .where("alias", "<>", "")
         .execute();
 
     const artistAliasMapping: {
@@ -229,20 +229,20 @@ export async function reloadAliases(): Promise<void> {
         artist_aliases: string;
         previous_name_en: string | null;
         previous_name_ko: string | null;
-    }[] = await dbContext.kmq
-        .selectFrom("available_songs")
+    }[] = await dbContext.kpopVideos
+        .selectFrom("app_kpop_group")
         .select([
-            "artist_name_en",
-            "artist_aliases",
-            "previous_name_en",
-            "previous_name_ko",
+            "name as artist_name_en",
+            "alias as artist_aliases",
+            "previous_name as previous_name_en",
+            "previous_kname as previous_name_ko",
         ])
         .distinct()
         .where(({ or, eb }) =>
             or([
-                eb("artist_aliases", "<>", ""),
-                eb("previous_name_en", "<>", ""),
-                eb("previous_name_ko", "<>", ""),
+                eb("alias", "<>", ""),
+                eb("previous_name", "<>", ""),
+                eb("previous_kname", "<>", ""),
             ]),
         )
         .execute();
