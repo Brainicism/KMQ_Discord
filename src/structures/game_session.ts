@@ -1093,14 +1093,22 @@ export default class GameSession extends Session {
         }
 
         round.interactionMessageNeedsUpdate = false;
-        round.interactionMessage?.edit({
-            embeds: [
-                {
-                    ...this.generateRemainingPlayersMessage(round),
-                    thumbnail: { url: KmqImages.THUMBS_UP },
-                },
-            ],
-        });
+        if (round.interactionMessage) {
+            try {
+                round.interactionMessage.edit({
+                    embeds: [
+                        {
+                            ...this.generateRemainingPlayersMessage(round),
+                            thumbnail: { url: KmqImages.THUMBS_UP },
+                        },
+                    ],
+                });
+            } catch (e) {
+                logger.warn(
+                    `Error editing updateGuessedMembersMessage interaction. gid = ${round.interactionMessage.guildID}. e = ${e}}`,
+                );
+            }
+        }
     }
 
     /** @returns if multiple choice mode is active */
