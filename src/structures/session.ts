@@ -943,7 +943,7 @@ export default abstract class Session {
                     });
                 } catch (e) {
                     logger.warn(
-                        `Error editing roundMessage interaction. Bot potentially left server? e = ${e}}`,
+                        `Error editing roundMessage interaction. gid = ${this.guildID}. e = ${e}}`,
                     );
                 }
 

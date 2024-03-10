@@ -5,6 +5,8 @@ import type MessageContext from "./message_context";
 import type PlayerRoundResult from "../interfaces/player_round_result";
 import type QueriedSong from "../interfaces/queried_song";
 import type UniqueSongCounter from "../interfaces/unique_song_counter";
+import { IPCLogger } from "../logger";
+const logger = new IPCLogger("listening_round");
 
 export default class ListeningRound extends Round {
     /** UUID associated with skip interaction custom_id */
@@ -61,10 +63,16 @@ export default class ListeningRound extends Round {
             })),
         }));
 
-        await this.interactionMessage.edit({
-            embeds: this.interactionMessage.embeds,
-            components: this.interactionComponents,
-        });
+        try {
+            await this.interactionMessage.edit({
+                embeds: this.interactionMessage.embeds,
+                components: this.interactionComponents,
+            });
+        } catch (e) {
+            logger.warn(
+                `Error editing interactionSuccessfulSkip interaction. gid = ${this.interactionMessage.guildID}. e = ${e}}`,
+            );
+        }
     }
 
     async interactionMarkButtons(): Promise<void> {
@@ -80,9 +88,15 @@ export default class ListeningRound extends Round {
             })),
         }));
 
-        await this.interactionMessage.edit({
-            embeds: this.interactionMessage.embeds,
-            components: this.interactionComponents,
-        });
+        try {
+            await this.interactionMessage.edit({
+                embeds: this.interactionMessage.embeds,
+                components: this.interactionComponents,
+            });
+        } catch (e) {
+            logger.warn(
+                `Error editing interactionMarkButtons interaction. gid = ${this.interactionMessage.guildID}. e = ${e}}`,
+            );
+        }
     }
 }

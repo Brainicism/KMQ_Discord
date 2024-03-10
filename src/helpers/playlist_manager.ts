@@ -293,14 +293,23 @@ export default class PlaylistManager {
         }
 
         const updateParsing = setInterval(() => {
-            message?.edit({
-                embeds: [
-                    {
-                        title: parsingTitle,
-                        description: visualProgressBar(page, numPlaylistPages),
-                    },
-                ],
-            });
+            try {
+                message?.edit({
+                    embeds: [
+                        {
+                            title: parsingTitle,
+                            description: visualProgressBar(
+                                page,
+                                numPlaylistPages,
+                            ),
+                        },
+                    ],
+                });
+            } catch (e) {
+                logger.warn(
+                    `Error editing getMatchedYoutubePlaylist inProgressParsingMessage. gid = ${message?.guildID}. e = ${e}`,
+                );
+            }
         }, 2000);
 
         const parseStartTime = Date.now();
@@ -352,14 +361,20 @@ export default class PlaylistManager {
             // e.g: mix playlists always returning 5 instead of actual size
             metadata.playlistLength = songs.length;
 
-            message?.edit({
-                embeds: [
-                    {
-                        title: parsingTitle,
-                        description: visualProgressBar(1, 1),
-                    },
-                ],
-            });
+            try {
+                message?.edit({
+                    embeds: [
+                        {
+                            title: parsingTitle,
+                            description: visualProgressBar(1, 1),
+                        },
+                    ],
+                });
+            } catch (e) {
+                logger.warn(
+                    `Error editing getMatchedYoutubePlaylist finishParsingMessage. gid = ${message?.guildID}. e = ${e}`,
+                );
+            }
 
             const youtubePlaylistVideoIDs: {
                 videoId: string;
@@ -638,17 +653,23 @@ export default class PlaylistManager {
         }
 
         const updateParsing = setInterval(() => {
-            message?.edit({
-                embeds: [
-                    {
-                        title: parsingTitle,
-                        description: visualProgressBar(
-                            unmatchedSongs.length + matchedSongs.length,
-                            spotifySongs.length,
-                        ),
-                    },
-                ],
-            });
+            try {
+                message?.edit({
+                    embeds: [
+                        {
+                            title: parsingTitle,
+                            description: visualProgressBar(
+                                unmatchedSongs.length + matchedSongs.length,
+                                spotifySongs.length,
+                            ),
+                        },
+                    ],
+                });
+            } catch (e) {
+                logger.warn(
+                    `Error editing getMatchedSpotifyPlaylist inProgressParsingMessage. gid = ${message?.guildID}. e = ${e}`,
+                );
+            }
         }, 2000);
 
         try {
@@ -696,14 +717,20 @@ export default class PlaylistManager {
             delete this.guildsParseInProgress[guildID];
         }
 
-        message?.edit({
-            embeds: [
-                {
-                    title: parsingTitle,
-                    description: visualProgressBar(1, 1),
-                },
-            ],
-        });
+        try {
+            message?.edit({
+                embeds: [
+                    {
+                        title: parsingTitle,
+                        description: visualProgressBar(1, 1),
+                    },
+                ],
+            });
+        } catch (e) {
+            logger.warn(
+                `Error editing getMatchedSpotifyPlaylist finishParsingMessage. gid = ${message?.guildID}. e = ${e}}`,
+            );
+        }
 
         matchedSongs = _.uniqBy(matchedSongs, "youtubeLink");
         unmatchedSongs = _.uniq(unmatchedSongs);
