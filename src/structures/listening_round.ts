@@ -1,11 +1,12 @@
 import { EMBED_SUCCESS_BONUS_COLOR } from "../constants";
+import { IPCLogger } from "../logger";
 import Round from "./round";
 import type Eris from "eris";
 import type MessageContext from "./message_context";
 import type PlayerRoundResult from "../interfaces/player_round_result";
 import type QueriedSong from "../interfaces/queried_song";
 import type UniqueSongCounter from "../interfaces/unique_song_counter";
-import { IPCLogger } from "../logger";
+
 const logger = new IPCLogger("listening_round");
 
 export default class ListeningRound extends Round {

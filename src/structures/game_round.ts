@@ -9,6 +9,7 @@ import {
     QUICK_GUESS_MS,
     ROUND_MAX_RUNNERS_UP,
 } from "../constants";
+import { IPCLogger } from "../logger";
 import { friendlyFormattedNumber, getMention } from "../helpers/utils";
 import ExpBonusModifier from "../enums/exp_bonus_modifier";
 import GuessModeType from "../enums/option_types/guess_mode_type";
@@ -24,7 +25,7 @@ import type MessageContext from "./message_context";
 import type PlayerRoundResult from "../interfaces/player_round_result";
 import type QueriedSong from "../interfaces/queried_song";
 import type UniqueSongCounter from "../interfaces/unique_song_counter";
-import { IPCLogger } from "../logger";
+
 const logger = new IPCLogger("game_round");
 
 /** List of characters to remove from song/artist names/guesses */
