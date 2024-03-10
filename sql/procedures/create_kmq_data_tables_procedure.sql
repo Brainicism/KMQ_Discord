@@ -125,11 +125,21 @@ BEGIN
 	RENAME TABLE available_songs TO old, available_songs_temp TO available_songs;
 	DROP TABLE old;
 
-	/* mark artists as not having songs */
-	ALTER TABLE kpop_videos.app_kpop_group ADD COLUMN IF NOT EXISTS has_songs TINYINT(1) DEFAULT 0;
-	UPDATE kpop_videos.app_kpop_group
+	/* atomically swap app_kpop_group to avoid race condition*/
+	DROP TABLE IF EXISTS kpop_videos.app_kpop_group_temp;
+	CREATE TABLE IF NOT EXISTS kpop_videos.app_kpop_group_temp LIKE kpop_videos.app_kpop_group;
+	INSERT INTO kpop_videos.app_kpop_group_temp
+	SELECT * FROM kpop_videos.app_kpop_group;
+
+	/* mark artists as not having songs */	
+	ALTER TABLE kpop_videos.app_kpop_group_temp ADD COLUMN IF NOT EXISTS has_songs TINYINT(1) DEFAULT 0;
+	UPDATE kpop_videos.app_kpop_group_temp
 	SET has_songs = 1
 	WHERE id in (SELECT DISTINCT(id_artist) FROM available_songs
-	RIGHT JOIN kpop_videos.app_kpop_group ON available_songs.id_artist = kpop_videos.app_kpop_group.id);
+	RIGHT JOIN kpop_videos.app_kpop_group_temp ON available_songs.id_artist = kpop_videos.app_kpop_group_temp.id);
+
+	RENAME TABLE kpop_videos.app_kpop_group TO old, kpop_videos.app_kpop_group_temp TO kpop_videos.app_kpop_group;
+	DROP TABLE old;
+
 END //
 DELIMITER ;
