@@ -291,7 +291,7 @@ async function lookupByYoutubeID(
         messageOrInteraction.guildID as string,
     );
 
-    sendInfoMessage(
+    await sendInfoMessage(
         messageContext,
         {
             title: `"${songName}" - ${artistName}${tags}`,

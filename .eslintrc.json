@@ -1,7 +1,5 @@
 {
-    "extends": [
-        "airbnb-base","airbnb-typescript/base", "prettier"
-    ],
+    "extends": ["airbnb-base", "airbnb-typescript/base", "prettier"],
     "plugins": [
         "eslint-plugin-tsdoc",
         "jsdoc",
@@ -15,33 +13,31 @@
         "project": "./tsconfig.json"
     },
     "rules": {
+        "@typescript-eslint/no-floating-promises": ["error"],
+        "@typescript-eslint/no-misused-promises": [
+            "error",
+            {
+                "checksVoidReturn": {
+                    "arguments": false
+                }
+            }
+        ],
         "node/no-sync": ["error"],
         "import/order": ["off"],
-        "no-lonely-if":["off"],
-        "no-else-return":["off"],
+        "no-lonely-if": ["off"],
+        "no-else-return": ["off"],
         "deprecation/deprecation": "warn",
-        "@typescript-eslint/await-thenable": [
-            "error"
-        ],
-        "@typescript-eslint/require-await": [
-            "error"
-        ],
-        "@typescript-eslint/quotes": [
-            "warn",
-            "double"
-        ],
+        "@typescript-eslint/await-thenable": ["error"],
+        "@typescript-eslint/require-await": ["error"],
+        "@typescript-eslint/quotes": ["warn", "double"],
         "@typescript-eslint/explicit-function-return-type": [
             "warn",
             {
                 "allowExpressions": true
             }
         ],
-        "@typescript-eslint/type-annotation-spacing": [
-            "warn"
-        ],
-        "import/no-cycle": [
-            "warn"
-        ],
+        "@typescript-eslint/type-annotation-spacing": ["warn"],
+        "import/no-cycle": ["warn"],
         "@typescript-eslint/consistent-type-imports": ["warn"],
         "jsdoc/require-jsdoc": [
             "warn",
@@ -58,9 +54,7 @@
                 "requireReturn": false
             }
         ],
-        "tsdoc/syntax": [
-            "warn"
-        ],
+        "tsdoc/syntax": ["warn"],
         "max-len": [
             "warn",
             {
@@ -76,20 +70,16 @@
                 "message": "Do not use `forEach()`, use `for/of` instead"
             }
         ],
-        "no-continue": [
-            "off"
+        "no-continue": ["off"],
+        "no-plusplus": ["off"],
+        "no-async-promise-executor": ["off"],
+        "lines-between-class-members": [
+            "error",
+            "always",
+            { "exceptAfterSingleLine": true }
         ],
-        "no-plusplus": [
-            "off"
-        ],
-        "no-async-promise-executor": [
-            "off"
-        ],
-        "lines-between-class-members": ["error", "always", { "exceptAfterSingleLine": true }],
         "@typescript-eslint/lines-between-class-members": ["off"],
-        "no-param-reassign": [
-            "off"
-        ],
+        "no-param-reassign": ["off"],
         "@typescript-eslint/no-unused-vars": [
             "warn",
             {
@@ -109,21 +99,11 @@
                 ]
             }
         ],
-        "prefer-destructuring": [
-            "off"
-        ],
-        "func-names": [
-            "off"
-        ],
-        "@typescript-eslint/dot-notation": [
-            "off"
-        ],
-        "no-multi-str": [
-            "off"
-        ],
-        "no-console": [
-            "warn"
-        ],
+        "prefer-destructuring": ["off"],
+        "func-names": ["off"],
+        "@typescript-eslint/dot-notation": ["off"],
+        "no-multi-str": ["off"],
+        "no-console": ["warn"],
         "padding-line-between-statements": [
             "warn",
             {

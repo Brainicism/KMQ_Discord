@@ -17,7 +17,7 @@ export default interface BaseCommand {
     slashCommandAliases?: string[];
     validations?: CommandValidations;
     preRunChecks?: Array<{
-        checkFn: (precheckArgs: PrecheckArgs) => boolean | Promise<boolean>;
+        checkFn: (precheckArgs: PrecheckArgs) => Promise<boolean>;
         errorMessage?: string;
     }>;
     slashCommands?: () => Array<

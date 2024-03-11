@@ -1,6 +1,7 @@
 import dbContext from "../database_context";
 import type { PlaylistMetadata } from "../interfaces/playlist_metadata";
 
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
     if (require.main === module) {
         {

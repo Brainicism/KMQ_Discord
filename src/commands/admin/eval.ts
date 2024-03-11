@@ -27,7 +27,7 @@ export default class EvalCommand implements BaseCommand {
             value: JSON.stringify(result),
         }));
 
-        sendInfoMessage(MessageContext.fromMessage(message), {
+        await sendInfoMessage(MessageContext.fromMessage(message), {
             title: evalString,
             fields: clusterResultFields,
         });

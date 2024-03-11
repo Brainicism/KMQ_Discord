@@ -292,9 +292,9 @@ export default class PlaylistManager {
             });
         }
 
-        const updateParsing = setInterval(() => {
+        const updateParsing = setInterval(async () => {
             try {
-                message?.edit({
+                await message?.edit({
                     embeds: [
                         {
                             title: parsingTitle,
@@ -362,7 +362,7 @@ export default class PlaylistManager {
             metadata.playlistLength = songs.length;
 
             try {
-                message?.edit({
+                await message?.edit({
                     embeds: [
                         {
                             title: parsingTitle,
@@ -652,9 +652,9 @@ export default class PlaylistManager {
             });
         }
 
-        const updateParsing = setInterval(() => {
+        const updateParsing = setInterval(async () => {
             try {
-                message?.edit({
+                await message?.edit({
                     embeds: [
                         {
                             title: parsingTitle,
@@ -718,7 +718,7 @@ export default class PlaylistManager {
         }
 
         try {
-            message?.edit({
+            await message?.edit({
                 embeds: [
                     {
                         title: parsingTitle,

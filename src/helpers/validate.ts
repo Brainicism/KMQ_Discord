@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import { IPCLogger } from "../logger";
 import { arrayToString, clickableSlashCommand } from "./utils";
 import { getDebugLogHeader, sendErrorMessage } from "./discord_utils";
@@ -46,12 +47,12 @@ export async function sendValidationErrorMessage(
     );
 }
 
-export default (
+export default async (
     message: GuildTextableMessage,
     parsedMessage: ParsedMessage,
     validations: CommandValidations | null,
     usage?: string,
-): boolean => {
+): Promise<boolean> => {
     if (!validations) return true;
     const args = parsedMessage.components;
     const messageContext = MessageContext.fromMessage(message);
@@ -59,7 +60,7 @@ export default (
         (validations.maxArgCount && args.length > validations.maxArgCount) ||
         args.length < validations.minArgCount
     ) {
-        sendValidationErrorMessage(
+        await sendValidationErrorMessage(
             messageContext,
             i18n.translate(
                 message.guildID,
@@ -83,7 +84,7 @@ export default (
         switch (validation.type) {
             case "number": {
                 if (Number.isNaN(Number(arg))) {
-                    sendValidationErrorMessage(
+                    await sendValidationErrorMessage(
                         messageContext,
                         i18n.translate(
                             message.guildID,
@@ -102,7 +103,7 @@ export default (
                     validation.minValue != null &&
                     intArg < validation.minValue
                 ) {
-                    sendValidationErrorMessage(
+                    await sendValidationErrorMessage(
                         messageContext,
                         i18n.translate(
                             message.guildID,
@@ -122,7 +123,7 @@ export default (
                     validation.maxValue != null &&
                     intArg > validation.maxValue
                 ) {
-                    sendValidationErrorMessage(
+                    await sendValidationErrorMessage(
                         messageContext,
                         i18n.translate(
                             message.guildID,
@@ -144,7 +145,7 @@ export default (
             case "boolean": {
                 arg = arg.toLowerCase();
                 if (!(arg === "false" || arg === "true")) {
-                    sendValidationErrorMessage(
+                    await sendValidationErrorMessage(
                         messageContext,
                         i18n.translate(
                             message.guildID,
@@ -165,7 +166,7 @@ export default (
                 if (enums) {
                     arg = arg.toLowerCase();
                     if (!enums.includes(arg)) {
-                        sendValidationErrorMessage(
+                        await sendValidationErrorMessage(
                             messageContext,
                             i18n.translate(
                                 message.guildID,
@@ -188,7 +189,7 @@ export default (
 
             case "char": {
                 if (arg.length !== 1) {
-                    sendValidationErrorMessage(
+                    await sendValidationErrorMessage(
                         messageContext,
                         i18n.translate(
                             message.guildID,

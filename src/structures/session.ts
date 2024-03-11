@@ -253,7 +253,7 @@ export default abstract class Session {
         );
 
         if (randomSong === null) {
-            sendErrorMessage(messageContext, {
+            await sendErrorMessage(messageContext, {
                 title: i18n.translate(
                     this.guildID,
                     "misc.failure.songQuery.title",
@@ -350,7 +350,7 @@ export default abstract class Session {
 
         if (remainingDuration && remainingDuration < 0) {
             logger.info(`gid: ${this.guildID} | Game session duration reached`);
-            this.endSession("Game session duration reached", false);
+            await this.endSession("Game session duration reached", false);
         }
     }
 
@@ -552,8 +552,8 @@ export default abstract class Session {
     }
 
     /** Sends a message notifying who the new owner is */
-    updateOwner(): void {
-        sendInfoMessage(
+    async updateOwner(): Promise<void> {
+        await sendInfoMessage(
             new MessageContext(this.textChannelID, null, this.guildID),
             {
                 title: i18n.translate(
@@ -763,7 +763,7 @@ export default abstract class Session {
             await this.startRound(messageContext);
         });
 
-        this.connection.once("error", (err) => {
+        this.connection.once("error", async (err) => {
             if (this.connection) {
                 // replace listener with no-op to catch any exceptions thrown after this event
                 this.connection.removeAllListeners("error");
@@ -775,7 +775,7 @@ export default abstract class Session {
                     messageContext,
                 )} | Unknown error with stream dispatcher. song = ${this.getDebugSongDetails()}. err = ${err}`,
             );
-            this.errorRestartRound();
+            await this.errorRestartRound();
         });
 
         return true;
@@ -795,10 +795,10 @@ export default abstract class Session {
      * @param _messageContext - Unused
      * @returns whether to continue with handling the interaction
      */
-    protected handleInSessionInteractionFailures(
+    protected async handleInSessionInteractionFailures(
         interaction: Eris.ComponentInteraction,
         _messageContext: MessageContext,
-    ): boolean {
+    ): Promise<boolean> {
         if (!this.round) {
             return false;
         }
@@ -809,12 +809,12 @@ export default abstract class Session {
                 .map((x) => x.id)
                 .includes(interaction.member!.id)
         ) {
-            tryInteractionAcknowledge(interaction);
+            await tryInteractionAcknowledge(interaction);
             return false;
         }
 
         if (!round.isValidInteraction(interaction.data.custom_id)) {
-            tryCreateInteractionErrorAcknowledgement(
+            await tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 null,
                 i18n.translate(

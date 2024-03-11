@@ -14,6 +14,7 @@ export class LocalizationManager {
 
     constructor() {
         this.internalLocalizer = i18next.createInstance().use(Backend);
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.internalLocalizer.init({
             preload: Object.values(LocaleType),
             supportedLngs: Object.values(LocaleType),

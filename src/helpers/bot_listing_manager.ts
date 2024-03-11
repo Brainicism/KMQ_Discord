@@ -70,16 +70,17 @@ export default class BotListingManager {
     }
 
     start(): void {
-        setInterval(() => {
-            this.postStats();
+        setInterval(async () => {
+            await this.postStats();
         }, 1800000);
     }
 
-    private postStats(): void {
+    private async postStats(): Promise<void> {
         for (const siteConfigKeyName of Object.keys(BOT_LISTING_SITES).filter(
             (x) => x in process.env,
         )) {
-            this.postStat(siteConfigKeyName);
+            // eslint-disable-next-line no-await-in-loop
+            await this.postStat(siteConfigKeyName);
         }
     }
 

@@ -364,9 +364,9 @@ describe("scoreboard", () => {
     });
 
     describe("game finished", () => {
-        beforeEach(() => {
+        beforeEach(async () => {
             guildPreference = new GuildPreference("1234");
-            guildPreference.setGoal(5);
+            await guildPreference.setGoal(5);
         });
 
         describe("goal is not set", () => {

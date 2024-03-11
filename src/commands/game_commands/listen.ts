@@ -176,7 +176,7 @@ export default class ListenCommand implements BaseCommand {
             return;
         }
 
-        if (!voicePermissionsCheck(messageContext, interaction)) {
+        if (!(await voicePermissionsCheck(messageContext, interaction))) {
             return;
         }
 
@@ -198,7 +198,7 @@ export default class ListenCommand implements BaseCommand {
             interaction,
         );
 
-        listeningSession.startRound(messageContext);
+        await listeningSession.startRound(messageContext);
     };
 
     /**

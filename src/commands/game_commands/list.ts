@@ -169,7 +169,7 @@ export default class ListCommand implements BaseCommand {
 
         if (optionValue.length > 2000) {
             try {
-                sendMessage(
+                await sendMessage(
                     messageContext.textChannelID,
                     {
                         content: i18n.translate(

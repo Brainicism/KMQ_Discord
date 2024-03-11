@@ -93,6 +93,7 @@ async function performMigrationDown(db: DatabaseContext): Promise<void> {
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
     if (require.main === module) {
         const db = getNewConnection();

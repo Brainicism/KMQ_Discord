@@ -28,9 +28,9 @@ describe("begin command", () => {
 
     describe("can start", () => {
         describe("game session is null", () => {
-            it("should return false", () => {
+            it("should return false", async () => {
                 assert.strictEqual(
-                    PlayCommand.canStartTeamsGame(
+                    await PlayCommand.canStartTeamsGame(
                         null,
                         new MessageContext("", gameStarter, "dummy"),
                     ),
@@ -55,9 +55,9 @@ describe("begin command", () => {
 
             sandbox.restore();
 
-            it("should return false (classic games are not started using /begin)", () => {
+            it("should return false (classic games are not started using /begin)", async () => {
                 assert.strictEqual(
-                    PlayCommand.canStartTeamsGame(
+                    await PlayCommand.canStartTeamsGame(
                         gameSession,
                         new MessageContext("", gameStarter, "dummy"),
                     ),
@@ -65,7 +65,7 @@ describe("begin command", () => {
                 );
 
                 assert.strictEqual(
-                    PlayCommand.canStartTeamsGame(
+                    await PlayCommand.canStartTeamsGame(
                         gameSession,
                         new MessageContext("", gameStarter, "dummy"),
                     ),
@@ -90,9 +90,9 @@ describe("begin command", () => {
             sandbox.restore();
 
             describe("no teams have been added yet", () => {
-                it("should return false", () => {
+                it("should return false", async () => {
                     assert.strictEqual(
-                        PlayCommand.canStartTeamsGame(
+                        await PlayCommand.canStartTeamsGame(
                             gameSession,
                             new MessageContext("", gameStarter, "dummy"),
                         ),
@@ -102,7 +102,7 @@ describe("begin command", () => {
             });
 
             describe("at least 1 team has been added", () => {
-                it("should return false", () => {
+                it("should return false", async () => {
                     const scoreboard = gameSession.scoreboard as TeamScoreboard;
                     scoreboard.addTeam(
                         "Loona",
@@ -111,7 +111,7 @@ describe("begin command", () => {
                     );
 
                     assert.strictEqual(
-                        PlayCommand.canStartTeamsGame(
+                        await PlayCommand.canStartTeamsGame(
                             gameSession,
                             mockMessageContext,
                         ),
@@ -125,7 +125,7 @@ describe("begin command", () => {
                     );
 
                     assert.strictEqual(
-                        PlayCommand.canStartTeamsGame(
+                        await PlayCommand.canStartTeamsGame(
                             gameSession,
                             mockMessageContext,
                         ),

@@ -114,5 +114,5 @@ after(async function () {
 
     logger.info("Test re-applying migrations...");
     await performMigrations(dbContext);
-    dbContext.destroy();
+    await dbContext.destroy();
 });

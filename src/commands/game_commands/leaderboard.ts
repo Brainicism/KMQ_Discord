@@ -359,9 +359,15 @@ export default class LeaderboardCommand implements BaseCommand {
             getInteractionValue(interaction);
 
         if (interactionName === LeaderboardAction.ENROLL) {
-            LeaderboardCommand.enrollLeaderboard(messageContext, interaction);
+            await LeaderboardCommand.enrollLeaderboard(
+                messageContext,
+                interaction,
+            );
         } else if (interactionName === LeaderboardAction.UNENROLL) {
-            LeaderboardCommand.unenrollLeaderboard(messageContext, interaction);
+            await LeaderboardCommand.unenrollLeaderboard(
+                messageContext,
+                interaction,
+            );
         } else {
             await LeaderboardCommand.showLeaderboard(
                 interaction,
@@ -373,9 +379,9 @@ export default class LeaderboardCommand implements BaseCommand {
         }
     }
 
-    call = ({ message, parsedMessage }: CommandArgs): void => {
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         if (parsedMessage.components.length === 0) {
-            LeaderboardCommand.showLeaderboard(
+            await LeaderboardCommand.showLeaderboard(
                 message,
                 LeaderboardType.EXP,
                 LeaderboardScope.GLOBAL,
@@ -391,10 +397,10 @@ export default class LeaderboardCommand implements BaseCommand {
         ) {
             const action = arg as LeaderboardAction;
             if (action === LeaderboardAction.ENROLL) {
-                LeaderboardCommand.enrollLeaderboard(messageContext);
+                await LeaderboardCommand.enrollLeaderboard(messageContext);
                 return;
             } else if (action === LeaderboardAction.UNENROLL) {
-                LeaderboardCommand.unenrollLeaderboard(messageContext);
+                await LeaderboardCommand.unenrollLeaderboard(messageContext);
                 return;
             }
         }
@@ -427,7 +433,7 @@ export default class LeaderboardCommand implements BaseCommand {
         }
 
         if (pageOffset === 0 && !type && !scope && !duration) {
-            sendValidationErrorMessage(
+            await sendValidationErrorMessage(
                 messageContext,
                 i18n.translate(
                     message.guildID,
@@ -447,7 +453,7 @@ export default class LeaderboardCommand implements BaseCommand {
         }
 
         if (parsedMessage.components.length === 1) {
-            LeaderboardCommand.showLeaderboard(
+            await LeaderboardCommand.showLeaderboard(
                 message,
                 type,
                 scope,
@@ -467,7 +473,7 @@ export default class LeaderboardCommand implements BaseCommand {
         ) {
             duration = arg as LeaderboardDuration;
         } else if (pageOffset === 0) {
-            sendValidationErrorMessage(
+            await sendValidationErrorMessage(
                 messageContext,
                 i18n.translate(
                     message.guildID,
@@ -486,7 +492,7 @@ export default class LeaderboardCommand implements BaseCommand {
         }
 
         if (parsedMessage.components.length === 2) {
-            LeaderboardCommand.showLeaderboard(
+            await LeaderboardCommand.showLeaderboard(
                 message,
                 type,
                 scope,
@@ -504,7 +510,7 @@ export default class LeaderboardCommand implements BaseCommand {
         ) {
             duration = arg as LeaderboardDuration;
         } else if (pageOffset === 0) {
-            sendValidationErrorMessage(
+            await sendValidationErrorMessage(
                 messageContext,
                 i18n.translate(
                     message.guildID,
@@ -522,7 +528,7 @@ export default class LeaderboardCommand implements BaseCommand {
         }
 
         if (pageOffset === 0 && parsedMessage.components.length > 3) {
-            sendValidationErrorMessage(
+            await sendValidationErrorMessage(
                 messageContext,
                 i18n.translate(
                     message.guildID,
@@ -534,7 +540,7 @@ export default class LeaderboardCommand implements BaseCommand {
             return;
         }
 
-        LeaderboardCommand.showLeaderboard(
+        await LeaderboardCommand.showLeaderboard(
             message,
             type,
             scope,
@@ -1090,7 +1096,7 @@ export default class LeaderboardCommand implements BaseCommand {
             .executeTakeFirst());
 
         if (alreadyEnrolled) {
-            sendErrorMessage(
+            await sendErrorMessage(
                 messageContext,
                 {
                     title: i18n.translate(
@@ -1115,7 +1121,7 @@ export default class LeaderboardCommand implements BaseCommand {
             })
             .execute();
 
-        sendInfoMessage(
+        await sendInfoMessage(
             messageContext,
             {
                 title: i18n.translate(
@@ -1143,7 +1149,7 @@ export default class LeaderboardCommand implements BaseCommand {
             .where("player_id", "=", messageContext.author.id)
             .execute();
 
-        sendInfoMessage(
+        await sendInfoMessage(
             messageContext,
             {
                 title: i18n.translate(
@@ -1177,7 +1183,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
         if (scope === LeaderboardScope.GAME) {
             if (!State.gameSessions[messageContext.guildID]) {
-                sendErrorMessage(
+                await sendErrorMessage(
                     messageContext,
                     {
                         title: i18n.translate(
@@ -1203,7 +1209,7 @@ export default class LeaderboardCommand implements BaseCommand {
                 ].scoreboard.getPlayerIDs();
 
             if (participantIDs.length === 0) {
-                sendErrorMessage(
+                await sendErrorMessage(
                     messageContext,
                     {
                         title: i18n.translate(
@@ -1234,7 +1240,7 @@ export default class LeaderboardCommand implements BaseCommand {
             );
 
         if (pageCount === 0) {
-            sendErrorMessage(
+            await sendErrorMessage(
                 messageContext,
                 {
                     title: i18n.translate(
@@ -1255,7 +1261,7 @@ export default class LeaderboardCommand implements BaseCommand {
         }
 
         if (pageOffset > pageCount) {
-            sendErrorMessage(
+            await sendErrorMessage(
                 messageContext,
                 {
                     title: i18n.translate(

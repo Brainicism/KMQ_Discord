@@ -21,13 +21,15 @@ import type PrecheckArgs from "./interfaces/precheck_args";
 const logger = new IPCLogger("command_prechecks");
 
 export default class CommandPrechecks {
-    static inSessionCommandPrecheck(precheckArgs: PrecheckArgs): boolean {
+    static async inSessionCommandPrecheck(
+        precheckArgs: PrecheckArgs,
+    ): Promise<boolean> {
         const { messageContext, session, errorMessage, interaction } =
             precheckArgs;
 
         if (!session) {
             if (interaction) {
-                tryCreateInteractionErrorAcknowledgement(
+                await tryCreateInteractionErrorAcknowledgement(
                     interaction,
                     i18n.translate(
                         messageContext.guildID,
@@ -50,7 +52,7 @@ export default class CommandPrechecks {
 
         if (session.isListeningSession() && interaction) {
             if (!userAndBotInSameChannel) {
-                tryCreateInteractionErrorAcknowledgement(
+                await tryCreateInteractionErrorAcknowledgement(
                     interaction,
                     i18n.translate(
                         messageContext.guildID,
@@ -98,7 +100,7 @@ export default class CommandPrechecks {
                 ),
             };
 
-            sendErrorMessage(messageContext, embedPayload, interaction);
+            await sendErrorMessage(messageContext, embedPayload, interaction);
 
             return false;
         }
@@ -106,7 +108,9 @@ export default class CommandPrechecks {
         return true;
     }
 
-    static notListeningPrecheck(precheckArgs: PrecheckArgs): boolean {
+    static async notListeningPrecheck(
+        precheckArgs: PrecheckArgs,
+    ): Promise<boolean> {
         const { session, messageContext, interaction } = precheckArgs;
         if (session && !session.isGameSession()) {
             const embedPayload: EmbedPayload = {
@@ -120,7 +124,7 @@ export default class CommandPrechecks {
                 ),
             };
 
-            sendErrorMessage(messageContext, embedPayload, interaction);
+            await sendErrorMessage(messageContext, embedPayload, interaction);
 
             return false;
         }
@@ -128,7 +132,9 @@ export default class CommandPrechecks {
         return true;
     }
 
-    static notInGamePrecheck(precheckArgs: PrecheckArgs): boolean {
+    static async notInGamePrecheck(
+        precheckArgs: PrecheckArgs,
+    ): Promise<boolean> {
         const { session, messageContext, interaction } = precheckArgs;
         if (session && session.isGameSession()) {
             const embedPayload: EmbedPayload = {
@@ -142,7 +148,7 @@ export default class CommandPrechecks {
                 ),
             };
 
-            sendErrorMessage(messageContext, embedPayload, interaction);
+            await sendErrorMessage(messageContext, embedPayload, interaction);
 
             return false;
         }
@@ -150,7 +156,9 @@ export default class CommandPrechecks {
         return true;
     }
 
-    static debugServerPrecheck(precheckArgs: PrecheckArgs): boolean {
+    static async debugServerPrecheck(
+        precheckArgs: PrecheckArgs,
+    ): Promise<boolean> {
         const { messageContext, errorMessage, interaction } = precheckArgs;
         const isDebugServer =
             process.env.DEBUG_SERVER_ID === messageContext.guildID;
@@ -173,7 +181,7 @@ export default class CommandPrechecks {
                 ),
             };
 
-            sendErrorMessage(messageContext, embedPayload, interaction);
+            await sendErrorMessage(messageContext, embedPayload, interaction);
 
             return false;
         }
@@ -181,7 +189,9 @@ export default class CommandPrechecks {
         return true;
     }
 
-    static maintenancePrecheck(precheckArgs: PrecheckArgs): boolean {
+    static async maintenancePrecheck(
+        precheckArgs: PrecheckArgs,
+    ): Promise<boolean> {
         const { messageContext, interaction } = precheckArgs;
         if (KmqConfiguration.Instance.maintenanceModeEnabled()) {
             const embedPayload: EmbedPayload = {
@@ -195,7 +205,7 @@ export default class CommandPrechecks {
                 ),
             };
 
-            sendErrorMessage(messageContext, embedPayload, interaction);
+            await sendErrorMessage(messageContext, embedPayload, interaction);
 
             return false;
         }
@@ -203,7 +213,9 @@ export default class CommandPrechecks {
         return true;
     }
 
-    static debugChannelPrecheck(precheckArgs: PrecheckArgs): boolean {
+    static async debugChannelPrecheck(
+        precheckArgs: PrecheckArgs,
+    ): Promise<boolean> {
         const { messageContext, errorMessage, interaction } = precheckArgs;
         const isDebugChannel =
             process.env.DEBUG_TEXT_CHANNEL_ID === messageContext.textChannelID;
@@ -226,7 +238,7 @@ export default class CommandPrechecks {
                 ),
             };
 
-            sendErrorMessage(messageContext, embedPayload, interaction);
+            await sendErrorMessage(messageContext, embedPayload, interaction);
 
             return false;
         }
@@ -274,7 +286,7 @@ export default class CommandPrechecks {
                 ),
             };
 
-            sendErrorMessage(messageContext, embedPayload, interaction);
+            await sendErrorMessage(messageContext, embedPayload, interaction);
 
             return false;
         }
@@ -334,14 +346,16 @@ export default class CommandPrechecks {
                 ),
             };
 
-            sendErrorMessage(messageContext, embedPayload, interaction);
+            await sendErrorMessage(messageContext, embedPayload, interaction);
             return false;
         }
 
         return true;
     }
 
-    static timerHiddenPrecheck(precheckArgs: PrecheckArgs): boolean {
+    static async timerHiddenPrecheck(
+        precheckArgs: PrecheckArgs,
+    ): Promise<boolean> {
         const { session } = precheckArgs;
         if (
             !session ||
@@ -386,7 +400,7 @@ export default class CommandPrechecks {
             ),
         };
 
-        sendErrorMessage(
+        await sendErrorMessage(
             precheckArgs.messageContext,
             embedPayload,
             precheckArgs.interaction,
@@ -394,7 +408,9 @@ export default class CommandPrechecks {
         return false;
     }
 
-    static notSuddenDeathPrecheck(precheckArgs: PrecheckArgs): boolean {
+    static async notSuddenDeathPrecheck(
+        precheckArgs: PrecheckArgs,
+    ): Promise<boolean> {
         if (
             !precheckArgs.session ||
             precheckArgs.session.isListeningSession() ||
@@ -415,7 +431,7 @@ export default class CommandPrechecks {
             ),
         };
 
-        sendErrorMessage(
+        await sendErrorMessage(
             precheckArgs.messageContext,
             embedPayload,
             precheckArgs.interaction,

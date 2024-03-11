@@ -169,22 +169,23 @@ export default class GameSession extends Session {
                 logger.info(
                     `gid: ${this.guildID} | answerType changed to multiple choice, re-sending mc buttons`,
                 );
-                this.sendMultipleChoiceOptionsMessage();
+                await this.sendMultipleChoiceOptionsMessage();
             } else if (this.isHiddenMode()) {
                 logger.info(
                     `gid: ${this.guildID} | answerType changed to hidden, re-sending hidden message`,
                 );
 
-                this.sendHiddenGuessMessage(
+                await this.sendHiddenGuessMessage(
                     new MessageContext(this.textChannelID, null, this.guildID),
                     round,
                 );
             } else {
                 round.interactionMessage = null;
-                this.stopHiddenUpdateTimer();
+                await this.stopHiddenUpdateTimer();
             }
         };
 
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.syncAllVoiceMembers();
     }
 
@@ -264,7 +265,7 @@ export default class GameSession extends Session {
             );
         }
 
-        this.stopHiddenUpdateTimer();
+        await this.stopHiddenUpdateTimer();
 
         if (this.isHiddenMode()) {
             if (!guessResult.correct && round.correctGuessers.length > 0) {
@@ -406,12 +407,12 @@ export default class GameSession extends Session {
         this.updateBookmarkSongList(round);
 
         if (this.scoreboard.gameFinished(this.guildPreference)) {
-            this.endSession("Game finished due to game options", false);
+            await this.endSession("Game finished due to game options", false);
         } else if (
             this.gameType === GameType.SUDDEN_DEATH &&
             !guessResult.correct
         ) {
-            this.endSession("Sudden death game ended", false);
+            await this.endSession("Sudden death game ended", false);
         }
     }
 
@@ -530,7 +531,7 @@ export default class GameSession extends Session {
                 );
             }
 
-            sendInfoMessage(
+            await sendInfoMessage(
                 new MessageContext(this.textChannelID, null, this.guildID),
                 {
                     title: i18n.translate(this.guildID, "misc.levelUp.title"),
@@ -614,7 +615,7 @@ export default class GameSession extends Session {
                 return;
             } else {
                 // Everyone guessed, end the round
-                this.stopHiddenUpdateTimer();
+                await this.stopHiddenUpdateTimer();
             }
         }
 
@@ -643,7 +644,7 @@ export default class GameSession extends Session {
             this.correctGuesses++;
 
             // update game session's lastActive
-            this.lastActiveNow();
+            await this.lastActiveNow();
 
             this.stopGuessTimeout();
 
@@ -690,7 +691,7 @@ export default class GameSession extends Session {
     }
 
     /** Updates owner to the first player to join the game that didn't leave VC */
-    updateOwner(): void {
+    async updateOwner(): Promise<void> {
         if (this.finished) {
             return;
         }
@@ -713,7 +714,7 @@ export default class GameSession extends Session {
 
         this.owner = new KmqMember(newOwnerID);
 
-        super.updateOwner();
+        await super.updateOwner();
     }
 
     async handleComponentInteraction(
@@ -722,10 +723,10 @@ export default class GameSession extends Session {
     ): Promise<void> {
         if (!this.round) return;
         if (
-            !this.handleInSessionInteractionFailures(
+            !(await this.handleInSessionInteractionFailures(
                 interaction,
                 messageContext,
-            )
+            ))
         ) {
             return;
         }
@@ -736,7 +737,7 @@ export default class GameSession extends Session {
             round.incorrectGuessers.has(interaction.member!.id) ||
             !this.guessEligible(messageContext, interaction.createdAt)
         ) {
-            tryCreateInteractionErrorAcknowledgement(
+            await tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 null,
                 i18n.translate(
@@ -748,7 +749,7 @@ export default class GameSession extends Session {
         }
 
         if (!round.isCorrectInteractionAnswer(interaction.data.custom_id)) {
-            tryCreateInteractionErrorAcknowledgement(
+            await tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 null,
                 i18n.translate(
@@ -761,17 +762,17 @@ export default class GameSession extends Session {
             round.interactionIncorrectAnswerUUIDs[interaction.data.custom_id]++;
 
             // Add the user as a participant
-            this.guessSong(messageContext, "", interaction.createdAt);
+            await this.guessSong(messageContext, "", interaction.createdAt);
             return;
         }
 
-        tryInteractionAcknowledge(interaction);
+        await tryInteractionAcknowledge(interaction);
 
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID,
         );
 
-        this.guessSong(
+        await this.guessSong(
             messageContext,
             guildPreference.gameOptions.guessModeType !== GuessModeType.ARTIST
                 ? round.song.songName
@@ -1081,7 +1082,7 @@ export default class GameSession extends Session {
         }
     }
 
-    updateGuessedMembersMessage(): void {
+    async updateGuessedMembersMessage(): Promise<void> {
         const round = this.round;
         if (
             this.finished ||
@@ -1095,7 +1096,7 @@ export default class GameSession extends Session {
         round.interactionMessageNeedsUpdate = false;
         if (round.interactionMessage) {
             try {
-                round.interactionMessage.edit({
+                await round.interactionMessage.edit({
                     embeds: [
                         {
                             ...this.generateRemainingPlayersMessage(round),
@@ -1554,16 +1555,16 @@ export default class GameSession extends Session {
     }
 
     private startHiddenUpdateTimer(): void {
-        this.hiddenUpdateTimer = setInterval(() => {
-            this.updateGuessedMembersMessage();
+        this.hiddenUpdateTimer = setInterval(async () => {
+            await this.updateGuessedMembersMessage();
         }, HIDDEN_UPDATE_INTERVAL);
     }
 
-    private stopHiddenUpdateTimer(): void {
+    private async stopHiddenUpdateTimer(): Promise<void> {
         if (this.hiddenUpdateTimer) {
             clearInterval(this.hiddenUpdateTimer);
             const round = this.round;
-            round?.interactionMessage?.delete();
+            await round?.interactionMessage?.delete();
             if (round) {
                 round.interactionMessage = null;
             }

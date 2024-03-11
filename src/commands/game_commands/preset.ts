@@ -735,7 +735,7 @@ export default class PresetCommand implements BaseCommand {
                 )} | Preset '${presetName}' successfully loaded`,
             );
 
-            sendOptionsMessage(
+            await sendOptionsMessage(
                 Session.getSession(guildID),
                 messageContext,
                 guildPreference,
@@ -991,7 +991,7 @@ export default class PresetCommand implements BaseCommand {
                 )} | Preset import failed; '${presetName}' already exists`,
             );
 
-            sendErrorMessage(
+            await sendErrorMessage(
                 messageContext,
                 {
                     title: i18n.translate(
@@ -1090,7 +1090,7 @@ export default class PresetCommand implements BaseCommand {
             )} | Preset '${presetName}' imported`,
         );
 
-        sendInfoMessage(
+        await sendInfoMessage(
             messageContext,
             {
                 title: i18n.translate(
@@ -1123,7 +1123,7 @@ export default class PresetCommand implements BaseCommand {
         interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const presets = await guildPreference.listPresets();
-        sendInfoMessage(
+        await sendInfoMessage(
             messageContext,
             {
                 title: i18n.translate(
@@ -1176,7 +1176,7 @@ export default class PresetCommand implements BaseCommand {
         );
 
         if (presetAction === PresetAction.LIST) {
-            PresetCommand.listPresets(
+            await PresetCommand.listPresets(
                 guildPreference,
                 messageContext,
                 interaction,
@@ -1185,8 +1185,8 @@ export default class PresetCommand implements BaseCommand {
             return;
         }
 
-        const missingPresetMessage = (): void => {
-            sendErrorMessage(
+        const missingPresetMessage = async (): Promise<void> => {
+            await sendErrorMessage(
                 messageContext,
                 {
                     title: i18n.translate(
@@ -1210,7 +1210,7 @@ export default class PresetCommand implements BaseCommand {
         };
 
         if (presetAction !== PresetAction.IMPORT && !presetName) {
-            missingPresetMessage();
+            await missingPresetMessage();
             return;
         }
 
@@ -1257,7 +1257,7 @@ export default class PresetCommand implements BaseCommand {
                 break;
             case PresetAction.IMPORT: {
                 if (!presetUUID) {
-                    sendErrorMessage(
+                    await sendErrorMessage(
                         messageContext,
                         {
                             title: i18n.translate(
@@ -1285,7 +1285,7 @@ export default class PresetCommand implements BaseCommand {
                 }
 
                 if (!presetName) {
-                    missingPresetMessage();
+                    await missingPresetMessage();
                     break;
                 }
 

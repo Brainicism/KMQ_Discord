@@ -334,7 +334,7 @@ export default class LimitCommand implements BaseCommand {
             logger.info(`${getDebugLogHeader(messageContext)} | Limit reset.`);
         } else {
             if (limitEnd === 0) {
-                sendErrorMessage(
+                await sendErrorMessage(
                     messageContext,
                     {
                         title: i18n.translate(
@@ -359,7 +359,7 @@ export default class LimitCommand implements BaseCommand {
             }
 
             if (limitEnd <= limitStart) {
-                sendErrorMessage(
+                await sendErrorMessage(
                     messageContext,
                     {
                         title: i18n.translate(

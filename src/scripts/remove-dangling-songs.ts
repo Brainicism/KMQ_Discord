@@ -14,6 +14,7 @@ config({ path: path.resolve(__dirname, "../../.env") });
 program.option("--delete", "Delete the songs");
 program.parse();
 
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
     const options = program.opts();
     const db = getNewConnection();

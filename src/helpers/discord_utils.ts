@@ -316,7 +316,7 @@ export async function textPermissionsCheck(
             )}] permissions`,
         );
 
-        sendMessage(channel.id, {
+        await sendMessage(channel.id, {
             content: missingPermissionsText(guildID, missingPermissions),
         });
         return false;
@@ -1434,10 +1434,10 @@ export function getNumParticipants(voiceChannelID: string): number {
  * @param interaction - The interaction
  * @returns whether the bot has permissions to join the message author's currently active voice channel
  */
-export function voicePermissionsCheck(
+export async function voicePermissionsCheck(
     messageContext: MessageContext,
     interaction?: Eris.CommandInteraction,
-): boolean {
+): Promise<boolean> {
     const voiceChannel = getUserVoiceChannel(messageContext);
 
     if (!voiceChannel) {
@@ -1461,7 +1461,7 @@ export function voicePermissionsCheck(
             )}] permissions`,
         );
 
-        sendErrorMessage(
+        await sendErrorMessage(
             messageContext,
             {
                 title: i18n.translate(
@@ -1485,7 +1485,7 @@ export function voicePermissionsCheck(
 
     if (channelFull) {
         logger.warn(`${getDebugLogHeader(messageContext)} | Channel full`);
-        sendInfoMessage(messageContext, {
+        await sendInfoMessage(messageContext, {
             title: i18n.translate(
                 messageContext.guildID,
                 "misc.failure.vcFull.title",
@@ -1506,7 +1506,7 @@ export function voicePermissionsCheck(
             )} | Attempted to start game in AFK voice channel`,
         );
 
-        sendInfoMessage(messageContext, {
+        await sendInfoMessage(messageContext, {
             title: i18n.translate(
                 messageContext.guildID,
                 "misc.failure.afkChannel.title",
@@ -1818,7 +1818,7 @@ export async function tryCreateInteractionErrorAcknowledgement(
 /**
  * Sends the power hour notification to the KMQ server
  */
-export function sendPowerHourNotification(): void {
+export async function sendPowerHourNotification(): Promise<void> {
     if (
         !process.env.POWER_HOUR_NOTIFICATION_CHANNEL_ID ||
         !process.env.POWER_HOUR_NOTIFICATION_ROLE_ID
@@ -1827,7 +1827,7 @@ export function sendPowerHourNotification(): void {
     }
 
     logger.info("Sending power hour notification");
-    sendInfoMessage(
+    await sendInfoMessage(
         new MessageContext(
             process.env.POWER_HOUR_NOTIFICATION_CHANNEL_ID,
             null,

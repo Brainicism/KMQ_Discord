@@ -221,7 +221,7 @@ describe("exp command", () => {
                     )) {
                         // eslint-disable-next-line @typescript-eslint/no-loop-func
                         it(`should return corresponding multiple choice penalty (${answerType})`, async () => {
-                            guildPreference.setAnswerType(
+                            await guildPreference.setAnswerType(
                                 answerType as AnswerType,
                             );
                             const modifiers =
@@ -406,7 +406,9 @@ describe("exp command", () => {
             });
 
             it("should return all bonuses/penalties", async () => {
-                guildPreference.setAnswerType(AnswerType.MULTIPLE_CHOICE_HARD);
+                await guildPreference.setAnswerType(
+                    AnswerType.MULTIPLE_CHOICE_HARD,
+                );
                 await guildPreference.setGuessModeType(GuessModeType.BOTH);
                 const modifiers = await calculateOptionsExpMultiplierInternal(
                     guildPreference,

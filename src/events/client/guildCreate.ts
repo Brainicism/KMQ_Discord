@@ -19,15 +19,15 @@ export default async function guildCreateHandler(
     );
 
     if (guild.preferredLocale === "ko") {
-        LocaleTypeCommand.updateLocale(guild.id, LocaleType.KO);
+        await LocaleTypeCommand.updateLocale(guild.id, LocaleType.KO);
     } else if (guild.preferredLocale === "es-ES") {
-        LocaleTypeCommand.updateLocale(guild.id, LocaleType.ES);
+        await LocaleTypeCommand.updateLocale(guild.id, LocaleType.ES);
     } else if (guild.preferredLocale === "fr") {
-        LocaleTypeCommand.updateLocale(guild.id, LocaleType.FR);
+        await LocaleTypeCommand.updateLocale(guild.id, LocaleType.FR);
     } else if (guild.preferredLocale === "ja") {
-        LocaleTypeCommand.updateLocale(guild.id, LocaleType.JA);
+        await LocaleTypeCommand.updateLocale(guild.id, LocaleType.JA);
     } else if (guild.preferredLocale === "zh-CN") {
-        LocaleTypeCommand.updateLocale(guild.id, LocaleType.ZH);
+        await LocaleTypeCommand.updateLocale(guild.id, LocaleType.ZH);
     }
 
     const kmqDebugChannel = await getDebugChannel();

@@ -48,22 +48,26 @@ export default class ServiceWorker extends BaseServiceWorker {
             this.news[range] = {};
         }
 
-        schedule.scheduleJob("0 * * * *", () => {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        this.loadCaches();
+        this.serviceReady();
+    }
+
+    loadCaches = async (): Promise<void> => {
+        schedule.scheduleJob("0 * * * *", async () => {
             // Use reddit and Gemini to generate news
-            this.reloadNews();
+            await this.reloadNews();
         });
 
-        schedule.scheduleJob("0 */6 * * *", () => {
-            this.reloadFactCache();
+        schedule.scheduleJob("0 */6 * * *", async () => {
+            await this.reloadFactCache();
         });
 
         if (process.env.MINIMAL_RUN !== "true") {
-            this.reloadNews();
-            this.reloadFactCache();
+            await this.reloadNews();
+            await this.reloadFactCache();
         }
-
-        this.serviceReady();
-    }
+    };
 
     // eslint-disable-next-line @typescript-eslint/require-await
     handleCommand = async (commandName: string): Promise<any> => {

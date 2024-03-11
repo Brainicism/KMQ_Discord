@@ -195,7 +195,7 @@ export default class GoalCommand implements BaseCommand {
                     )} | Goal update ignored.`,
                 );
 
-                sendErrorMessage(
+                await sendErrorMessage(
                     messageContext,
                     {
                         title: i18n.translate(
@@ -221,7 +221,7 @@ export default class GoalCommand implements BaseCommand {
                     } gameType.`,
                 );
 
-                sendErrorMessage(
+                await sendErrorMessage(
                     messageContext,
                     {
                         title: i18n.translate(

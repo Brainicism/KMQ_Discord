@@ -225,6 +225,7 @@ async function bootstrapDatabases(): Promise<void> {
     await db.destroy();
 }
 
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
     if (require.main === module) {
         if (process.env.NODE_ENV === EnvType.CI) return;

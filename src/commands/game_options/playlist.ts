@@ -270,7 +270,7 @@ export default class PlaylistCommand implements BaseCommand {
                 }`,
             );
 
-            sendErrorMessage(MessageContext.fromMessage(message), {
+            await sendErrorMessage(MessageContext.fromMessage(message), {
                 title: i18n.translate(
                     message.guildID,
                     "command.playlist.invalidURL.title",
@@ -319,7 +319,7 @@ export default class PlaylistCommand implements BaseCommand {
                 `Invalid URL in updateOption. playlistURL = ${playlistURL}`,
             );
 
-            sendErrorMessage(
+            await sendErrorMessage(
                 messageContext,
                 {
                     title: i18n.translate(
@@ -361,7 +361,7 @@ export default class PlaylistCommand implements BaseCommand {
                 )} | Unsupported URL in updateOption. playlistURL = ${playlistURL}`,
             );
 
-            sendErrorMessage(
+            await sendErrorMessage(
                 messageContext,
                 {
                     title: i18n.translate(
@@ -401,7 +401,7 @@ export default class PlaylistCommand implements BaseCommand {
                 )} | Failed to get playlist ID from playlist URL. playlistURL = ${playlistURL}. err = ${err}`,
             );
 
-            sendErrorMessage(
+            await sendErrorMessage(
                 messageContext,
                 {
                     title: i18n.translate(
@@ -447,7 +447,7 @@ export default class PlaylistCommand implements BaseCommand {
         );
 
         if (matchedPlaylist.matchedSongs.length === 0) {
-            sendErrorMessage(
+            await sendErrorMessage(
                 messageContext,
                 {
                     title: i18n.translate(

@@ -41,9 +41,9 @@ describe("command prechecks", () => {
 
     describe("inSessionCommandPrecheck", () => {
         describe("session is null", () => {
-            it("should return false", () => {
+            it("should return false", async () => {
                 assert.equal(
-                    CommandPrechecks.inSessionCommandPrecheck({
+                    await CommandPrechecks.inSessionCommandPrecheck({
                         session: null,
                         messageContext,
                     }),
@@ -62,13 +62,13 @@ describe("command prechecks", () => {
             );
 
             describe("user and bot are in the same vc", () => {
-                it("should return true", () => {
+                it("should return true", async () => {
                     sandbox
                         .stub(discord_utils, "areUserAndBotInSameVoiceChannel")
                         .callsFake(() => true);
 
                     assert.equal(
-                        CommandPrechecks.inSessionCommandPrecheck({
+                        await CommandPrechecks.inSessionCommandPrecheck({
                             session: listeningSession,
                             messageContext,
                         }),
@@ -78,13 +78,13 @@ describe("command prechecks", () => {
             });
 
             describe("user and bot are not in the same vc", () => {
-                it("should return false", () => {
+                it("should return false", async () => {
                     sandbox
                         .stub(discord_utils, "areUserAndBotInSameVoiceChannel")
                         .callsFake(() => false);
 
                     assert.equal(
-                        CommandPrechecks.inSessionCommandPrecheck({
+                        await CommandPrechecks.inSessionCommandPrecheck({
                             session: listeningSession,
                             messageContext,
                         }),
@@ -123,7 +123,7 @@ describe("command prechecks", () => {
             );
 
             describe("in the same voice channel", () => {
-                it("should return true", () => {
+                it("should return true", async () => {
                     sandbox
                         .stub(discord_utils, "areUserAndBotInSameVoiceChannel")
                         .callsFake(() => true);
@@ -133,7 +133,8 @@ describe("command prechecks", () => {
                         teamGameSession,
                     ]) {
                         assert.equal(
-                            CommandPrechecks.inSessionCommandPrecheck({
+                            // eslint-disable-next-line no-await-in-loop
+                            await CommandPrechecks.inSessionCommandPrecheck({
                                 session,
                                 messageContext,
                             }),
@@ -152,44 +153,52 @@ describe("command prechecks", () => {
 
                 describe("elimination or team mode", () => {
                     describe("initialized session", () => {
-                        it("should return false", () => {
+                        it("should return false", async () => {
                             eliminationGameSession.sessionInitialized = true;
                             teamGameSession.sessionInitialized = true;
                             assert.equal(
-                                CommandPrechecks.inSessionCommandPrecheck({
-                                    session: eliminationGameSession,
-                                    messageContext,
-                                }),
+                                await CommandPrechecks.inSessionCommandPrecheck(
+                                    {
+                                        session: eliminationGameSession,
+                                        messageContext,
+                                    },
+                                ),
                                 false,
                             );
 
                             assert.equal(
-                                CommandPrechecks.inSessionCommandPrecheck({
-                                    session: teamGameSession,
-                                    messageContext,
-                                }),
+                                await CommandPrechecks.inSessionCommandPrecheck(
+                                    {
+                                        session: teamGameSession,
+                                        messageContext,
+                                    },
+                                ),
                                 false,
                             );
                         });
                     });
 
                     describe("uninitialized session", () => {
-                        it("should return true", () => {
+                        it("should return true", async () => {
                             eliminationGameSession.sessionInitialized = false;
                             teamGameSession.sessionInitialized = false;
                             assert.equal(
-                                CommandPrechecks.inSessionCommandPrecheck({
-                                    session: eliminationGameSession,
-                                    messageContext,
-                                }),
+                                await CommandPrechecks.inSessionCommandPrecheck(
+                                    {
+                                        session: eliminationGameSession,
+                                        messageContext,
+                                    },
+                                ),
                                 true,
                             );
 
                             assert.equal(
-                                CommandPrechecks.inSessionCommandPrecheck({
-                                    session: teamGameSession,
-                                    messageContext,
-                                }),
+                                await CommandPrechecks.inSessionCommandPrecheck(
+                                    {
+                                        session: teamGameSession,
+                                        messageContext,
+                                    },
+                                ),
                                 true,
                             );
                         });
@@ -197,9 +206,9 @@ describe("command prechecks", () => {
                 });
 
                 describe("classic mode", () => {
-                    it("should return false", () => {
+                    it("should return false", async () => {
                         assert.equal(
-                            CommandPrechecks.inSessionCommandPrecheck({
+                            await CommandPrechecks.inSessionCommandPrecheck({
                                 session: classicGameSession,
                                 messageContext,
                             }),
@@ -230,9 +239,9 @@ describe("command prechecks", () => {
         );
 
         describe("session is null", () => {
-            it("should return true", () => {
+            it("should return true", async () => {
                 assert.strictEqual(
-                    CommandPrechecks.notListeningPrecheck({
+                    await CommandPrechecks.notListeningPrecheck({
                         session: mockGameSession,
                         messageContext,
                     }),
@@ -242,9 +251,9 @@ describe("command prechecks", () => {
         });
 
         describe("session is a listening session", () => {
-            it("should return false", () => {
+            it("should return false", async () => {
                 assert.strictEqual(
-                    CommandPrechecks.notListeningPrecheck({
+                    await CommandPrechecks.notListeningPrecheck({
                         session: listeningSession,
                         messageContext,
                     }),
@@ -254,9 +263,9 @@ describe("command prechecks", () => {
         });
 
         describe("session is not a listening session", () => {
-            it("should return true", () => {
+            it("should return true", async () => {
                 assert.strictEqual(
-                    CommandPrechecks.notListeningPrecheck({
+                    await CommandPrechecks.notListeningPrecheck({
                         session: gameSession,
                         messageContext,
                     }),
@@ -282,11 +291,11 @@ describe("command prechecks", () => {
         });
 
         describe("message originates in debug server", () => {
-            it("should return true", () => {
+            it("should return true", async () => {
                 process.env.DEBUG_SERVER_ID = debugServerId;
 
                 assert.strictEqual(
-                    CommandPrechecks.debugServerPrecheck({
+                    await CommandPrechecks.debugServerPrecheck({
                         session: gameSession,
                         messageContext: {
                             ...messageContext,
@@ -299,10 +308,10 @@ describe("command prechecks", () => {
         });
 
         describe("message does not originate in debug server", () => {
-            it("should return false", () => {
+            it("should return false", async () => {
                 process.env.DEBUG_SERVER_ID = debugServerId;
                 assert.strictEqual(
-                    CommandPrechecks.debugServerPrecheck({
+                    await CommandPrechecks.debugServerPrecheck({
                         session: gameSession,
                         messageContext,
                     }),
@@ -324,9 +333,9 @@ describe("command prechecks", () => {
                 sandbox.restore();
             });
 
-            it("should return false", () => {
+            it("should return false", async () => {
                 assert.strictEqual(
-                    CommandPrechecks.maintenancePrecheck({
+                    await CommandPrechecks.maintenancePrecheck({
                         session: mockGameSession,
                         messageContext,
                     }),
@@ -346,9 +355,9 @@ describe("command prechecks", () => {
                     .callsFake(() => false);
             });
 
-            it("should return true", () => {
+            it("should return true", async () => {
                 assert.strictEqual(
-                    CommandPrechecks.maintenancePrecheck({
+                    await CommandPrechecks.maintenancePrecheck({
                         session: mockGameSession,
                         messageContext,
                     }),
@@ -374,11 +383,11 @@ describe("command prechecks", () => {
         });
 
         describe("message originates in debug channel", () => {
-            it("should return true", () => {
+            it("should return true", async () => {
                 process.env.DEBUG_TEXT_CHANNEL_ID = debugChannelId;
 
                 assert.strictEqual(
-                    CommandPrechecks.debugChannelPrecheck({
+                    await CommandPrechecks.debugChannelPrecheck({
                         session: gameSession,
                         messageContext: {
                             ...messageContext,
@@ -391,11 +400,11 @@ describe("command prechecks", () => {
         });
 
         describe("message does not originate in debug channel", () => {
-            it("should return true", () => {
+            it("should return true", async () => {
                 process.env.DEBUG_TEXT_CHANNEL_ID = debugChannelId;
 
                 assert.strictEqual(
-                    CommandPrechecks.debugChannelPrecheck({
+                    await CommandPrechecks.debugChannelPrecheck({
                         session: gameSession,
                         messageContext,
                     }),
@@ -500,7 +509,10 @@ describe("command prechecks", () => {
 
         describe("hidden answer type", () => {
             const guildPreference = new GuildPreference(GUILD_ID);
-            guildPreference.setAnswerType(AnswerType.HIDDEN);
+            beforeEach(async () => {
+                await guildPreference.setAnswerType(AnswerType.HIDDEN);
+            });
+
             const session = new GameSession(
                 guildPreference,
                 "123",
@@ -511,9 +523,9 @@ describe("command prechecks", () => {
             );
 
             describe("change timer to another value", () => {
-                it("should return true", () => {
+                it("should return true", async () => {
                     assert.strictEqual(
-                        CommandPrechecks.timerHiddenPrecheck({
+                        await CommandPrechecks.timerHiddenPrecheck({
                             session,
                             messageContext,
                             parsedMessage: {
@@ -529,9 +541,9 @@ describe("command prechecks", () => {
             });
 
             describe("disable timer", () => {
-                it("should return false", () => {
+                it("should return false", async () => {
                     assert.strictEqual(
-                        CommandPrechecks.timerHiddenPrecheck({
+                        await CommandPrechecks.timerHiddenPrecheck({
                             session,
                             messageContext,
                             parsedMessage: {
@@ -547,9 +559,9 @@ describe("command prechecks", () => {
             });
 
             describe("changing non-timer option", () => {
-                it("should return true", () => {
+                it("should return true", async () => {
                     assert.strictEqual(
-                        CommandPrechecks.timerHiddenPrecheck({
+                        await CommandPrechecks.timerHiddenPrecheck({
                             session,
                             messageContext,
                             parsedMessage: {
@@ -565,9 +577,9 @@ describe("command prechecks", () => {
             });
         });
 
-        describe("non-hidden answer type", () => {
+        describe("non-hidden answer type", async () => {
             const guildPreference = new GuildPreference(GUILD_ID);
-            guildPreference.setAnswerType(AnswerType.MULTIPLE_CHOICE_MED);
+            await guildPreference.setAnswerType(AnswerType.MULTIPLE_CHOICE_MED);
             const session = new GameSession(
                 guildPreference,
                 "123",
@@ -578,9 +590,9 @@ describe("command prechecks", () => {
             );
 
             describe("change timer to another value", () => {
-                it("should return true", () => {
+                it("should return true", async () => {
                     assert.strictEqual(
-                        CommandPrechecks.timerHiddenPrecheck({
+                        await CommandPrechecks.timerHiddenPrecheck({
                             session,
                             messageContext,
                             parsedMessage: {
@@ -596,9 +608,9 @@ describe("command prechecks", () => {
             });
 
             describe("disable timer", () => {
-                it("should return true", () => {
+                it("should return true", async () => {
                     assert.strictEqual(
-                        CommandPrechecks.timerHiddenPrecheck({
+                        await CommandPrechecks.timerHiddenPrecheck({
                             session,
                             messageContext,
                             parsedMessage: {
@@ -614,9 +626,9 @@ describe("command prechecks", () => {
             });
 
             describe("changing non-timer option", () => {
-                it("should return true", () => {
+                it("should return true", async () => {
                     assert.strictEqual(
-                        CommandPrechecks.timerHiddenPrecheck({
+                        await CommandPrechecks.timerHiddenPrecheck({
                             session,
                             messageContext,
                             parsedMessage: {
@@ -635,9 +647,9 @@ describe("command prechecks", () => {
 
     describe("notSuddenDeathPrecheck", () => {
         describe("listening session", () => {
-            it("should return true", () => {
+            it("should return true", async () => {
                 assert.strictEqual(
-                    CommandPrechecks.notSuddenDeathPrecheck({
+                    await CommandPrechecks.notSuddenDeathPrecheck({
                         session: new ListeningSession(
                             new GuildPreference("12"),
                             "123",
@@ -653,9 +665,9 @@ describe("command prechecks", () => {
         });
 
         describe("non-sudden death game session", () => {
-            it("should return true", () => {
+            it("should return true", async () => {
                 assert.strictEqual(
-                    CommandPrechecks.notSuddenDeathPrecheck({
+                    await CommandPrechecks.notSuddenDeathPrecheck({
                         session: new GameSession(
                             new GuildPreference("12"),
                             "123",
@@ -672,9 +684,9 @@ describe("command prechecks", () => {
         });
 
         describe("sudden death game session", () => {
-            it("should return false", () => {
+            it("should return false", async () => {
                 assert.strictEqual(
-                    CommandPrechecks.notSuddenDeathPrecheck({
+                    await CommandPrechecks.notSuddenDeathPrecheck({
                         session: new GameSession(
                             new GuildPreference("12"),
                             "123",

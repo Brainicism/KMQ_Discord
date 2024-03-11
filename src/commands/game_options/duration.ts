@@ -368,7 +368,7 @@ export default class DurationCommand implements BaseCommand {
                 finalDuration = currentDuration + durationValue;
             } else if (action === DurationActionInternal.REMOVE) {
                 if (!guildPreference.isDurationSet()) {
-                    sendErrorMessage(
+                    await sendErrorMessage(
                         messageContext,
                         {
                             title: i18n.translate(
@@ -387,7 +387,7 @@ export default class DurationCommand implements BaseCommand {
 
                 finalDuration = currentDuration - durationValue;
                 if (finalDuration < 2) {
-                    sendErrorMessage(
+                    await sendErrorMessage(
                         messageContext,
                         {
                             title: i18n.translate(
