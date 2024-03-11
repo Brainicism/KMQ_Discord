@@ -582,9 +582,9 @@ describe("team scoreboard", () => {
 
     describe("game finished", () => {
         let guildPreference: GuildPreference;
-        beforeEach(() => {
+        beforeEach(async () => {
             guildPreference = new GuildPreference("1234");
-            guildPreference.setGoal(5);
+            await guildPreference.setGoal(5);
             scoreboard.addTeam(
                 FIRST_TEAM_NAME,
                 new Player(USER_IDS[0], GUILD_ID, AVATAR_URL, 0, USERNAMES[0]),

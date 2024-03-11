@@ -167,8 +167,8 @@ export default class BotWorker extends BaseClusterWorker {
                 logger.info(
                     `${this.logHeader()} | Reloading autocomplete data`,
                 );
-                reloadArtists();
-                reloadSongs();
+                await reloadArtists();
+                await reloadSongs();
                 return null;
             case "reload_app_commands":
                 State.commandToID = await updateAppCommands(
@@ -288,6 +288,7 @@ export default class BotWorker extends BaseClusterWorker {
             `${this.logHeader()} | Started worker ID: ${this.workerID} on cluster ID: ${this.clusterID}`,
         );
 
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.init();
     }
 

@@ -184,6 +184,7 @@ process.on("SIGINT", async () => {
     process.exit(0);
 });
 
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
     const options = program.opts();
     console.log(options);

@@ -70,12 +70,13 @@ function importKmqDatabase(fileWithPath: string): void {
     logger.info("Finished import");
 }
 
-(() => {
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
+(async () => {
     if (require.main === module) {
         if (options.import) {
             importKmqDatabase(options.import);
         } else {
-            backupKmqDatabase();
+            await backupKmqDatabase();
         }
     }
 })();

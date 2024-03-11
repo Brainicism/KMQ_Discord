@@ -42,7 +42,7 @@ export default class ListeningSession extends Session {
         this.round = null;
     }
 
-    updateOwner(): void {
+    async updateOwner(): Promise<void> {
         if (this.finished) {
             return;
         }
@@ -56,7 +56,7 @@ export default class ListeningSession extends Session {
 
         this.owner = new KmqMember(chooseRandom(voiceMembers)!.id);
 
-        super.updateOwner();
+        await super.updateOwner();
     }
 
     isListeningSession(): this is ListeningSession {
@@ -148,10 +148,10 @@ export default class ListeningSession extends Session {
         if (!this.round) return;
         if (
             interaction.data.custom_id !== "bookmark" &&
-            !this.handleInSessionInteractionFailures(
+            !(await this.handleInSessionInteractionFailures(
                 interaction,
                 messageContext,
-            )
+            ))
         ) {
             return;
         }
@@ -178,9 +178,9 @@ export default class ListeningSession extends Session {
                     ),
                 );
 
-                skipSong(messageContext, this);
+                await skipSong(messageContext, this);
             } else {
-                tryCreateInteractionSuccessAcknowledgement(
+                await tryCreateInteractionSuccessAcknowledgement(
                     interaction,
                     i18n.translate(guildID, "command.skip.vote.title"),
                     i18n.translate(guildID, "command.skip.vote.description", {

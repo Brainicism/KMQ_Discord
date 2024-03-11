@@ -176,7 +176,7 @@ export default class SkipCommand implements BaseCommand {
             session.round.skipAchieved ||
             session.round.finished
         ) {
-            sendErrorMessage(
+            await sendErrorMessage(
                 messageContext,
                 {
                     title: i18n.translate(
@@ -244,8 +244,8 @@ export default class SkipCommand implements BaseCommand {
         logger.info(`${getDebugLogHeader(messageContext)} | User skipped`);
 
         if (isSkipMajority(messageContext.guildID, session)) {
-            sendSkipMessage(messageContext, session.round, interaction);
-            skipSong(messageContext, session);
+            await sendSkipMessage(messageContext, session.round, interaction);
+            await skipSong(messageContext, session);
         } else {
             logger.info(
                 `${getDebugLogHeader(messageContext)} | Skip vote received.`,
@@ -258,7 +258,7 @@ export default class SkipCommand implements BaseCommand {
             );
         }
 
-        session.lastActiveNow();
+        await session.lastActiveNow();
     }
 
     /**

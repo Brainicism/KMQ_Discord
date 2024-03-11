@@ -70,7 +70,7 @@ export default async function messageCreateHandler(
             message.guildID,
         );
 
-        sendOptionsMessage(
+        await sendOptionsMessage(
             Session.getSession(message.guildID),
             messageContext,
             guildPreference,
@@ -141,7 +141,7 @@ export default async function messageCreateHandler(
         }
 
         if (
-            validate(
+            await validate(
                 message,
                 parsedMessage,
                 invokedCommand.validations ?? null,
@@ -251,6 +251,10 @@ export default async function messageCreateHandler(
             return;
         }
 
-        session.guessSong(messageContext, message.content, message.createdAt);
+        await session.guessSong(
+            messageContext,
+            message.content,
+            message.createdAt,
+        );
     }
 }

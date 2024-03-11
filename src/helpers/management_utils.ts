@@ -492,54 +492,54 @@ export function registerIntervals(clusterID: number): void {
     // busiest times for r/kpop are 6pm and midnight KST
     // 15:00 UTC => midnight KST (busiest time for r/kpop)
     // wait a couple hours for NA to upvote posts
-    schedule.scheduleJob("0 18 * * *", () => {
-        sendNewsNotifications(NewsRange.DAILY);
+    schedule.scheduleJob("0 18 * * *", async () => {
+        await sendNewsNotifications(NewsRange.DAILY);
     });
 
-    schedule.scheduleJob("5 18 * * 0", () => {
-        sendNewsNotifications(NewsRange.WEEKLY);
+    schedule.scheduleJob("5 18 * * 0", async () => {
+        await sendNewsNotifications(NewsRange.WEEKLY);
     });
 
-    schedule.scheduleJob("10 18 1 * *", () => {
-        sendNewsNotifications(NewsRange.MONTHLY);
+    schedule.scheduleJob("10 18 1 * *", async () => {
+        await sendNewsNotifications(NewsRange.MONTHLY);
     });
 
     // Everyday at 12am UTC => 7pm ET
-    schedule.scheduleJob("0 0 * * *", () => {
+    schedule.scheduleJob("0 0 * * *", async () => {
         // New bonus groups
-        reloadBonusGroups();
+        await reloadBonusGroups();
     });
 
     // Every hour
-    schedule.scheduleJob("0 * * * *", () => {
+    schedule.scheduleJob("0 * * * *", async () => {
         if (
             isPowerHour() &&
             !isWeekend() &&
             State.client.guilds.has(process.env.DEBUG_SERVER_ID as string)
         ) {
             // Ping a role in KMQ server notifying of power hour
-            sendPowerHourNotification();
+            await sendPowerHourNotification();
         }
     });
 
     // Every 10 minutes
-    schedule.scheduleJob("*/10 * * * *", () => {
+    schedule.scheduleJob("*/10 * * * *", async () => {
         // Cleanup inactive game sessions
-        cleanupInactiveGameSessions();
+        await cleanupInactiveGameSessions();
         // Cleanup inactive listening sessions
-        cleanupInactiveListeningSessions();
+        await cleanupInactiveListeningSessions();
         // Change bot's status (song playing, power hour, etc.)
-        updateBotStatus();
+        await updateBotStatus();
         // Clear any guilds stuck in parsing Playlist state
         cleanupPlaylistParsingLocks();
         // Reload ban data
-        reloadBanData();
+        await reloadBanData();
     });
 
     // Every 5 minutes
     schedule.scheduleJob("*/5 * * * *", async () => {
         // Update song/artist aliases
-        reloadAliases();
+        await reloadAliases();
         // Cleanup inactive Discord voice connections
         clearInactiveVoiceConnections();
 
@@ -555,7 +555,7 @@ export function registerIntervals(clusterID: number): void {
         // set up check for restart notifications
         const timeUntilRestart = getTimeUntilRestart();
         if (timeUntilRestart && State.restartNotification) {
-            updateBotStatus();
+            await updateBotStatus();
             await warnServersImpendingRestart(timeUntilRestart);
         }
     });

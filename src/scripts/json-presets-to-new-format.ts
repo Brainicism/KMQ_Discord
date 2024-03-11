@@ -38,6 +38,7 @@ async function exportJsonPresetsToNewTable(db: DatabaseContext): Promise<void> {
     );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
     const db = getNewConnection();
     try {

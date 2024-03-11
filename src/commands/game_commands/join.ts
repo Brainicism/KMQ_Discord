@@ -25,7 +25,7 @@ export default class JoinCommand implements BaseCommand {
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         if (parsedMessage.components.length === 0) {
             logger.warn(`${getDebugLogHeader(message)} | Missing team name.`);
-            sendErrorMessage(MessageContext.fromMessage(message), {
+            await sendErrorMessage(MessageContext.fromMessage(message), {
                 title: i18n.translate(
                     message.guildID,
                     "command.join.failure.joinError.title",

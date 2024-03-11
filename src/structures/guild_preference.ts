@@ -222,10 +222,11 @@ export default class GuildPreference {
     constructor(guildID: string, options?: GameOptions) {
         this.guildID = guildID;
         this.gameOptions = options || { ...GuildPreference.DEFAULT_OPTIONS };
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.validateGameOptions();
     }
 
-    validateGameOptions(): void {
+    async validateGameOptions(): Promise<void> {
         const validatedGameOptions = { ...this.gameOptions };
         let newDefaultOptionsAdded = 0;
         let extraneousKeysRemoved = 0;
@@ -262,7 +263,7 @@ export default class GuildPreference {
             logger.info(
                 `gid: ${this.guildID} | validateGameOptions: options modified during validation (+${newDefaultOptionsAdded} | -${extraneousKeysRemoved})`,
             );
-            this.updateGuildPreferences();
+            await this.updateGuildPreferences();
         }
     }
 
@@ -437,7 +438,7 @@ export default class GuildPreference {
 
         const oldOptions = this.gameOptions;
         this.gameOptions = preset as GameOptions;
-        this.validateGameOptions();
+        await this.validateGameOptions();
         const updatedOptions = Object.entries(this.gameOptions).filter(
             (option) =>
                 !_.isEqual(

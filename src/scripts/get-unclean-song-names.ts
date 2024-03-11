@@ -5,6 +5,7 @@ import type QueriedSong from "../interfaces/queried_song";
 
 const logger = new IPCLogger("get-unclean-song-names");
 
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
     const songs: Array<QueriedSong> = await dbContext.kmq
         .selectFrom("available_songs")

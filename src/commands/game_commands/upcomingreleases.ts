@@ -149,7 +149,7 @@ export default class UpcomingReleasesCommand implements BaseCommand {
                 .execute();
 
         if (upcomingReleases.length === 0) {
-            sendInfoMessage(
+            await sendInfoMessage(
                 messageContext,
                 {
                     title: i18n.translate(

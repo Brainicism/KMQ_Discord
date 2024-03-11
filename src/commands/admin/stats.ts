@@ -60,7 +60,7 @@ export default class StatsCommand implements BaseCommand {
             );
         } catch (e) {
             logger.error(`Error retrieving stats via IPC. err = ${e}`);
-            sendErrorMessage(messageContext, {
+            await sendErrorMessage(messageContext, {
                 title: i18n.translate(
                     messageContext.guildID,
                     "command.stats.failure.title",

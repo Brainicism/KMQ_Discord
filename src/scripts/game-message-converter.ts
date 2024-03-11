@@ -15,6 +15,7 @@ const koFile = JSON.parse(
     fs.readFileSync(path.resolve(__dirname, "../../i18n/ko.json")).toString(),
 );
 
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
     if (require.main === module) {
         for (const category of Object.keys(enFile.misc.gameMessages)) {

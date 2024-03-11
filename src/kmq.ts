@@ -101,7 +101,7 @@ function registerGlobalIntervals(fleet: Fleet): void {
     schedule.scheduleJob("0 0 * * *", async () => {
         if (await isPrimaryInstance()) {
             logger.info("Saving daily stats");
-            storeDailyStats(fleet.stats?.guilds as number);
+            await storeDailyStats(fleet.stats?.guilds as number);
         }
     });
 
@@ -189,7 +189,7 @@ function registerProcessEvents(fleet: Fleet): void {
             }
 
             // inform workers to begin accepting commands
-            fleet.ipc.allClustersCommand("activate");
+            await fleet.ipc.allClustersCommand("activate");
 
             await sendDebugAlertWebhook(
                 "Bot started successfully",

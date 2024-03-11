@@ -107,7 +107,7 @@ export default class RemoveCommand implements BaseCommand {
         }
 
         if (!currentMatchedArtists) {
-            sendErrorMessage(
+            await sendErrorMessage(
                 messageContext,
                 {
                     title: i18n.translate(

@@ -370,26 +370,29 @@ export default class ProfileCommand implements BaseCommand {
                 }
 
                 if (!requestedPlayer) {
-                    sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: i18n.translate(
-                            message.guildID,
-                            "command.profile.failure.notFound.title",
-                        ),
-                        description: i18n.translate(
-                            message.guildID,
-                            "command.profile.failure.notFound.description",
-                            {
-                                profileHelp: `${clickableSlashCommand(
-                                    "help",
-                                )} action:${COMMAND_NAME}`,
-                            },
-                        ),
-                    });
+                    await sendErrorMessage(
+                        MessageContext.fromMessage(message),
+                        {
+                            title: i18n.translate(
+                                message.guildID,
+                                "command.profile.failure.notFound.title",
+                            ),
+                            description: i18n.translate(
+                                message.guildID,
+                                "command.profile.failure.notFound.description",
+                                {
+                                    profileHelp: `${clickableSlashCommand(
+                                        "help",
+                                    )} action:${COMMAND_NAME}`,
+                                },
+                            ),
+                        },
+                    );
                     return;
                 }
             }
         } else {
-            sendErrorMessage(MessageContext.fromMessage(message), {
+            await sendErrorMessage(MessageContext.fromMessage(message), {
                 title: i18n.translate(
                     message.guildID,
                     "command.profile.failure.notFound.title",
@@ -410,7 +413,7 @@ export default class ProfileCommand implements BaseCommand {
         const fields = await getProfileFields(requestedPlayer, message.guildID);
 
         if (fields.length === 0) {
-            sendInfoMessage(MessageContext.fromMessage(message), {
+            await sendInfoMessage(MessageContext.fromMessage(message), {
                 title: i18n.translate(
                     message.guildID,
                     "command.profile.failure.notFound.title",
@@ -429,7 +432,7 @@ export default class ProfileCommand implements BaseCommand {
             )} | Profile retrieved`,
         );
 
-        sendInfoMessage(MessageContext.fromMessage(message), {
+        await sendInfoMessage(MessageContext.fromMessage(message), {
             title: await getUserTag(requestedPlayer.id),
             fields,
             author: {
@@ -481,7 +484,7 @@ export default class ProfileCommand implements BaseCommand {
     ): Promise<void> {
         const user = await State.ipc.fetchUser(userId);
         if (!user) {
-            tryCreateInteractionErrorAcknowledgement(
+            await tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 i18n.translate(
                     interaction.guildID as string,
@@ -512,7 +515,7 @@ export default class ProfileCommand implements BaseCommand {
         );
 
         if (fields.length === 0) {
-            tryCreateInteractionErrorAcknowledgement(
+            await tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 i18n.translate(
                     interaction.guildID as string,

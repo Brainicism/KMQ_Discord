@@ -34,7 +34,7 @@ export default async function voiceChannelSwitchHandler(
             `gid: ${newChannel.guild.id}, uid: ${member.id} | Voice channel is empty, ending session`,
         );
 
-        session.endSession(
+        await session.endSession(
             "Voice channel is empty, during voice channel switch",
             false,
         );
@@ -66,5 +66,5 @@ export default async function voiceChannelSwitchHandler(
     logger.info(
         `gid: ${newChannel.guild.id}, uid: ${member.id} | Updating owner`,
     );
-    session.updateOwner();
+    await session.updateOwner();
 }

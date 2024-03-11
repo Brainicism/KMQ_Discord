@@ -692,13 +692,13 @@ export default class PlayCommand implements BaseCommand {
         }
     }
 
-    static canStartTeamsGame(
+    static async canStartTeamsGame(
         gameSession: GameSession | null,
         messageContext: MessageContext,
         interaction?: Eris.CommandInteraction,
-    ): boolean {
+    ): Promise<boolean> {
         if (!gameSession || gameSession.gameType !== GameType.TEAMS) {
-            sendErrorMessage(
+            await sendErrorMessage(
                 messageContext,
                 {
                     title: i18n.translate(
@@ -718,7 +718,7 @@ export default class PlayCommand implements BaseCommand {
 
         const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
         if (teamScoreboard.getNumTeams() === 0) {
-            sendErrorMessage(
+            await sendErrorMessage(
                 messageContext,
                 {
                     title: i18n.translate(
@@ -754,11 +754,11 @@ export default class PlayCommand implements BaseCommand {
         ) as GameSession;
 
         if (
-            !PlayCommand.canStartTeamsGame(
+            !(await PlayCommand.canStartTeamsGame(
                 gameSession,
                 messageContext,
                 interaction,
-            )
+            ))
         ) {
             return;
         }
@@ -783,7 +783,7 @@ export default class PlayCommand implements BaseCommand {
                 logger.error("Voice channel unexpectedly not found");
             }
 
-            sendBeginGameSessionMessage(
+            await sendBeginGameSessionMessage(
                 channel.name,
                 voiceChannel!.name ?? "unknown",
                 messageContext,
@@ -792,7 +792,7 @@ export default class PlayCommand implements BaseCommand {
                 interaction,
             );
 
-            gameSession.startRound(messageContext);
+            await gameSession.startRound(messageContext);
 
             logger.info(
                 `${getDebugLogHeader(
@@ -812,7 +812,7 @@ export default class PlayCommand implements BaseCommand {
         ) as GameSession;
 
         if (!gameSession || gameSession.gameType !== GameType.TEAMS) {
-            sendErrorMessage(
+            await sendErrorMessage(
                 messageContext,
                 {
                     title: i18n.translate(
@@ -844,7 +844,8 @@ export default class PlayCommand implements BaseCommand {
                     .emojis.map((e) => e.id)
                     .includes(emojiID)
             ) {
-                sendErrorMessage(
+                // eslint-disable-next-line no-await-in-loop
+                await sendErrorMessage(
                     messageContext,
                     {
                         title: i18n.translate(
@@ -875,7 +876,7 @@ export default class PlayCommand implements BaseCommand {
                 )} | Team name contains unsupported characters.`,
             );
 
-            sendErrorMessage(
+            await sendErrorMessage(
                 messageContext,
                 {
                     title: i18n.translate(
@@ -913,7 +914,7 @@ export default class PlayCommand implements BaseCommand {
                 (_p1, _p2, p3) => p3,
             );
 
-            sendInfoMessage(
+            await sendInfoMessage(
                 messageContext,
                 {
                     title: i18n.translate(
@@ -965,7 +966,7 @@ export default class PlayCommand implements BaseCommand {
         } else {
             const team = teamScoreboard.getTeam(teamName);
             if (team.hasPlayer(messageContext.author.id)) {
-                sendErrorMessage(
+                await sendErrorMessage(
                     messageContext,
                     {
                         title: i18n.translate(
@@ -1002,7 +1003,7 @@ export default class PlayCommand implements BaseCommand {
                 ),
             );
 
-            sendInfoMessage(
+            await sendInfoMessage(
                 messageContext,
                 {
                     title: i18n.translate(
@@ -1097,7 +1098,7 @@ export default class PlayCommand implements BaseCommand {
             return;
         }
 
-        if (!voicePermissionsCheck(messageContext, interaction)) {
+        if (!(await voicePermissionsCheck(messageContext, interaction))) {
             return;
         }
 
@@ -1274,7 +1275,7 @@ export default class PlayCommand implements BaseCommand {
                     .executeTakeFirst();
 
                 if (!isModerator) {
-                    sendErrorMessage(messageContext, {
+                    await sendErrorMessage(messageContext, {
                         title: i18n.translate(
                             guildID,
                             "command.play.failure.hiddenGameMode.title",

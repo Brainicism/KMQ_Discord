@@ -53,7 +53,7 @@ export default class KmqWebServer {
      * */
     async startWebServer(fleet: Fleet): Promise<void> {
         const httpServer = fastify({});
-        httpServer.register(fastifyView, {
+        await httpServer.register(fastifyView, {
             engine: {
                 ejs,
             },
@@ -62,7 +62,7 @@ export default class KmqWebServer {
         httpServer.post("/announce-restart", {}, async (request, reply) => {
             if (request.ip !== "127.0.0.1") {
                 logger.error("Announce restart attempted by non-allowed IP");
-                reply.code(401).send();
+                await reply.code(401).send();
                 return;
             }
 
@@ -73,29 +73,29 @@ export default class KmqWebServer {
             await fleet.ipc.allClustersCommand(
                 `announce_restart|${restartMinutes}`,
             );
-            reply.code(200).send();
+            await reply.code(200).send();
         });
 
         httpServer.post("/clear-restart", {}, async (request, reply) => {
             if (request.ip !== "127.0.0.1") {
                 logger.error("Clear restart attempted by non-allowed IP");
-                reply.code(401).send();
+                await reply.code(401).send();
                 return;
             }
 
             await fleet.ipc.allClustersCommand("clear_restart");
-            reply.code(200).send();
+            await reply.code(200).send();
         });
 
         httpServer.post("/reload-config", {}, async (request, reply) => {
             if (request.ip !== "127.0.0.1") {
                 logger.error("Reload config attempted by non-allowed IP");
-                reply.code(401).send();
+                await reply.code(401).send();
                 return;
             }
 
             await fleet.ipc.allClustersCommand("reload_config");
-            reply.code(200).send();
+            await reply.code(200).send();
         });
 
         httpServer.post("/voted", {}, async (request, reply) => {
@@ -104,13 +104,13 @@ export default class KmqWebServer {
                 logger.warn(
                     "Webhook received with non-matching authorization token",
                 );
-                reply.code(401).send();
+                await reply.code(401).send();
                 return;
             }
 
             const userID = (request.body as any)["user"] as string;
             await userVoted(userID);
-            reply.code(200).send();
+            await reply.code(200).send();
         });
 
         // example: curl -X POST 127.0.0.1:5858/eval-central-request-handler  -H "Content-Type: text/plain" -d 'this.ratelimits
@@ -120,20 +120,20 @@ export default class KmqWebServer {
             async (request, reply) => {
                 if (request.ip !== "127.0.0.1") {
                     logger.error("eval attempted by non-allowed IP");
-                    reply.code(401).send();
+                    await reply.code(401).send();
                     return;
                 }
 
                 const query = request.body as string;
 
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                (function executeEval(command: string) {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-floating-promises
+                (async function executeEval(command: string) {
                     try {
                         // eslint-disable-next-line no-eval
                         const result = eval(command);
-                        reply.code(200).send({ result });
+                        await reply.code(200).send({ result });
                     } catch (e) {
-                        reply.code(400).send(`Error: ${e.message}`);
+                        await reply.code(400).send(`Error: ${e.message}`);
                     }
                 }).call(fleet.eris.requestHandler, query);
             },
@@ -142,7 +142,7 @@ export default class KmqWebServer {
         httpServer.get("/ping", async (request, reply) => {
             if (request.ip !== "127.0.0.1") {
                 logger.error("Ping attempted by non-allowed IP");
-                reply.code(401).send();
+                await reply.code(401).send();
                 return;
             }
 
@@ -157,21 +157,21 @@ export default class KmqWebServer {
                 ).every((x) => x === true);
 
                 if (allClustersReady) {
-                    reply.code(200).send("Pong");
+                    await reply.code(200).send("Pong");
                 } else {
                     logger.warn("Clusters not ready");
-                    reply.code(503).send();
+                    await reply.code(503).send();
                 }
             } catch (e) {
                 logger.error(`Health check on /ping failed with error: ${e}`);
-                reply.code(500).send(e);
+                await reply.code(500).send(e);
             }
         });
 
         httpServer.post("/reload_autocomplete", async (request, reply) => {
             if (request.ip !== "127.0.0.1") {
                 logger.error("Reload autocomplete attempted by non-allowed IP");
-                reply.code(401).send();
+                await reply.code(401).send();
                 return;
             }
 
@@ -180,10 +180,10 @@ export default class KmqWebServer {
                     "reload_autocomplete_data",
                     true,
                 );
-                reply.code(200).send();
+                await reply.code(200).send();
             } catch (e) {
                 logger.error(`reload_autocomplete failed with: ${e}`);
-                reply.code(500).send(e);
+                await reply.code(500).send(e);
             }
         });
 

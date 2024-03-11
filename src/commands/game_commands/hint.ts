@@ -128,24 +128,22 @@ async function sendHintNotification(
 /**
  * @param gameSession - The game session
  * @param guildPreference - The guild preference
- * @param gameRound - The game round
  * @param messageContext - The message context
  * @param interaction - The interaction
  * @returns whether the hint request was valid
  */
-export function validHintCheck(
+export async function validHintCheck(
     gameSession: GameSession,
     guildPreference: GuildPreference,
-    gameRound: GameRound | null,
     messageContext: MessageContext,
     interaction?: Eris.CommandInteraction,
-): gameRound is GameRound {
-    if (!gameSession || !gameRound) {
+): Promise<boolean> {
+    if (!gameSession) {
         logger.warn(
             `${getDebugLogHeader(messageContext)} | No active game session`,
         );
 
-        sendErrorMessage(
+        await sendErrorMessage(
             messageContext,
             {
                 title: i18n.translate(
@@ -170,7 +168,7 @@ export function validHintCheck(
         if (
             eliminationScoreboard.isPlayerEliminated(messageContext.author.id)
         ) {
-            sendErrorMessage(
+            await sendErrorMessage(
                 messageContext,
                 {
                     title: i18n.translate(
@@ -190,7 +188,7 @@ export function validHintCheck(
     }
 
     if (guildPreference.isMultipleChoiceMode()) {
-        sendErrorMessage(
+        await sendErrorMessage(
             messageContext,
             {
                 title: i18n.translate(
@@ -290,14 +288,17 @@ export default class HintCommand implements BaseCommand {
             messageContext.guildID,
         );
 
+        if (!gameRound) {
+            return;
+        }
+
         if (
-            !validHintCheck(
+            !(await validHintCheck(
                 gameSession,
                 guildPreference,
-                gameRound,
                 messageContext,
                 interaction,
-            )
+            ))
         )
             return;
 

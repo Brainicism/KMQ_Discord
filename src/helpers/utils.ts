@@ -392,7 +392,7 @@ export function retryWithExponentialBackoff<T>(
     logger.info(
         `Executing retry with exponential backoff for ${uuid.v4()}}. ${description}`,
     );
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         let retryCount = 0;
         let delayMs = initialDelayMs;
 
@@ -420,7 +420,7 @@ export function retryWithExponentialBackoff<T>(
             }
         }
 
-        attempt();
+        await attempt();
     });
 }
 

@@ -18,6 +18,7 @@ export default class KmqClient extends Eris.Client {
         this.commands = {};
         this.commandsHandlers = {};
         this.aliases = {};
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.registerCommands(true);
     }
 

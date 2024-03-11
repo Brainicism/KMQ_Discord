@@ -66,18 +66,18 @@ export default class ForceHintCommand implements BaseCommand {
         ) as GameSession;
 
         const gameRound = gameSession?.round;
+        if (!gameRound) return;
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID,
         );
 
         if (
-            !validHintCheck(
+            !(await validHintCheck(
                 gameSession,
                 guildPreference,
-                gameRound,
                 messageContext,
                 interaction,
-            )
+            ))
         ) {
             return;
         }

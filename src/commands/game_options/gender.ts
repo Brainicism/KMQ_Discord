@@ -295,7 +295,7 @@ export default class GenderCommand implements BaseCommand {
                 guildPreference.isGroupsMode() &&
                 guildPreference.getGroupIDs().length === 1
             ) {
-                sendErrorMessage(
+                await sendErrorMessage(
                     messageContext,
                     {
                         title: i18n.translate(

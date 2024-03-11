@@ -273,7 +273,7 @@ export default class GroupsCommand implements BaseCommand {
                 (x) => !intersection.has(x.name),
             );
             if (intersection.size > 0) {
-                sendErrorMessage(
+                await sendErrorMessage(
                     messageContext,
                     {
                         title: i18n.translate(

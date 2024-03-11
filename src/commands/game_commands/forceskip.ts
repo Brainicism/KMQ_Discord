@@ -92,7 +92,7 @@ export default class ForceSkipCommand implements BaseCommand {
             session.round.skipAchieved ||
             session.round.finished
         ) {
-            sendErrorMessage(
+            await sendErrorMessage(
                 messageContext,
                 {
                     title: i18n.translate(
@@ -130,7 +130,7 @@ export default class ForceSkipCommand implements BaseCommand {
         }
 
         session.round.skipAchieved = true;
-        sendInfoMessage(
+        await sendInfoMessage(
             messageContext,
             {
                 color: EMBED_SUCCESS_COLOR,
@@ -152,7 +152,7 @@ export default class ForceSkipCommand implements BaseCommand {
         });
 
         await session.startRound(messageContext);
-        session.lastActiveNow();
+        await session.lastActiveNow();
         logger.info(
             `${getDebugLogHeader(messageContext)} | Owner force-skipped.`,
         );

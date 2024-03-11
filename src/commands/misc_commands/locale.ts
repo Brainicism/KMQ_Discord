@@ -343,7 +343,7 @@ export default class LocaleTypeCommand implements BaseCommand {
             localeType,
         );
 
-        sendInfoMessage(
+        await sendInfoMessage(
             messageContext,
             {
                 title: i18n.translate(

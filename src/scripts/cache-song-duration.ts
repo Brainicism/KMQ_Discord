@@ -53,6 +53,7 @@ async function cacheSongDuration(db: DatabaseContext): Promise<void> {
     logger.info(`${cachedSongs} song durations were cached.`);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
     const db = getNewConnection();
     try {

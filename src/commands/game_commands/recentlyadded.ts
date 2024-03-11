@@ -89,7 +89,7 @@ export default class RecentlyAddedCommand implements BaseCommand {
             .execute();
 
         if (newSongs.length === 0) {
-            sendInfoMessage(
+            await sendInfoMessage(
                 messageContext,
                 {
                     title: i18n.translate(
