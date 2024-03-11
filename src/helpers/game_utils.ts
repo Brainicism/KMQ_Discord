@@ -321,28 +321,22 @@ export async function getMultipleChoiceOptions(
         guessMode === GuessModeType.BOTH
     ) {
         const pickNonEmpty = (results: {
-            clean_song_name_en: string;
-            clean_song_name_ko: string;
+            song_name_en: string;
+            song_name_ko: string;
         }): string => {
-            if (
-                locale === LocaleType.KO &&
-                results.clean_song_name_ko &&
-                useHangul
-            ) {
-                return results.clean_song_name_ko;
+            if (locale === LocaleType.KO && results.song_name_ko && useHangul) {
+                return results.song_name_ko;
             }
 
-            return results.clean_song_name_en;
+            return results.song_name_en;
         };
 
-        const songName = useHangul
-            ? "clean_song_name_ko"
-            : "clean_song_name_en";
+        const songName = useHangul ? "song_name_ko" : "song_name_en";
 
         easyNames = (
             await dbContext.kmq
                 .selectFrom("available_songs")
-                .select(["clean_song_name_en", "clean_song_name_ko"])
+                .select(["song_name_en", "song_name_ko"])
                 .groupBy(songName)
                 .where("members", "=", gender)
                 .where(songName, "!=", answer)
@@ -362,10 +356,7 @@ export async function getMultipleChoiceOptions(
                     (
                         await dbContext.kmq
                             .selectFrom("available_songs")
-                            .select([
-                                "clean_song_name_en",
-                                "clean_song_name_ko",
-                            ])
+                            .select(["song_name_en", "song_name_ko"])
                             .groupBy(songName)
                             .where("id_artist", "=", artistID)
                             .where(songName, "!=", answer)
@@ -378,10 +369,7 @@ export async function getMultipleChoiceOptions(
                     (
                         await dbContext.kmq
                             .selectFrom("available_songs")
-                            .select([
-                                "clean_song_name_en",
-                                "clean_song_name_ko",
-                            ])
+                            .select(["song_name_en", "song_name_ko"])
                             .groupBy(songName)
                             .where("members", "=", gender)
                             .where(songName, "not in", [
@@ -403,7 +391,7 @@ export async function getMultipleChoiceOptions(
                 names = (
                     await dbContext.kmq
                         .selectFrom("available_songs")
-                        .select(["clean_song_name_en", "clean_song_name_ko"])
+                        .select(["song_name_en", "song_name_ko"])
                         .groupBy(songName)
                         .where("id_artist", "=", artistID)
                         .where(songName, "!=", answer)
