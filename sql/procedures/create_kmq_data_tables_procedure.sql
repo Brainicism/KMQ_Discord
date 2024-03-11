@@ -23,10 +23,8 @@ BEGIN
 	DROP TABLE IF EXISTS available_songs_temp;
 	CREATE TABLE available_songs_temp (
 		song_name_en VARCHAR(255) NOT NULL,
-		clean_song_name_en VARCHAR(255) NOT NULL,
 		clean_song_name_alpha_numeric VARCHAR(255) NOT NULL,
 		song_name_ko VARCHAR(255) NOT NULL,
-		clean_song_name_ko VARCHAR(255) NOT NULL,
 		song_aliases VARCHAR(255) NOT NULL,
 		link VARCHAR(255) NOT NULL,
 		original_link VARCHAR(255),
@@ -52,10 +50,8 @@ BEGIN
 	INSERT INTO available_songs_temp
 	SELECT
 		kpop_videos.app_kpop.name AS song_name_en,
-		SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1) AS clean_song_name_en,
 		(CASE WHEN kpop_videos.app_kpop.name REGEXP '^[^a-zA-Z0-9]+$' THEN kpop_videos.app_kpop.name ELSE REGEXP_REPLACE(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1), '[^0-9a-zA-Z]', '') END) AS clean_song_name_alpha_numeric,
 		kpop_videos.app_kpop.kname AS song_name_ko,
-		(SUBSTRING_INDEX(kpop_videos.app_kpop.kname, '(', 1)) AS clean_song_name_ko,
 		kpop_videos.app_kpop.alias AS song_aliases,
 		vlink AS link,
 		kpop_videos.app_kpop.original_vlink AS original_link,
@@ -88,10 +84,8 @@ BEGIN
 	INSERT INTO available_songs_temp
 	SELECT
 		kpop_videos.app_kpop.name AS song_name_en,
-		SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1) AS clean_song_name_en,
 		(CASE WHEN kpop_videos.app_kpop.name REGEXP '^[^a-zA-Z0-9]+$' THEN kpop_videos.app_kpop.name ELSE REGEXP_REPLACE(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1), '[^0-9a-zA-Z]', '') END) AS clean_song_name_alpha_numeric,
 		kpop_videos.app_kpop.kname AS song_name_ko,
-		SUBSTRING_INDEX(kpop_videos.app_kpop.kname, '(', 1) AS clean_song_name_ko,
 		kpop_videos.app_kpop.alias AS song_aliases,
 		vlink AS link,
 		null,
@@ -120,7 +114,6 @@ BEGIN
 
 
 	CREATE INDEX available_songs_id_artist_index ON available_songs_temp (id_artist);
-	DELETE FROM available_songs_temp WHERE clean_song_name_en = '';
 
 	RENAME TABLE available_songs TO old, available_songs_temp TO available_songs;
 	DROP TABLE old;

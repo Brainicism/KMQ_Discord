@@ -802,8 +802,8 @@ export default class LookupCommand implements BaseCommand {
                     State.songLinkToEntry,
                 ).filter(
                     (x) =>
-                        x.cleanName.startsWith(cleanEnteredSongName) ||
-                        x.hangulCleanName?.startsWith(cleanEnteredSongName),
+                        x.name.startsWith(cleanEnteredSongName) ||
+                        x.hangulName?.startsWith(cleanEnteredSongName),
                 );
 
                 const matchingSongArtistIDs = matchingSongs.map(

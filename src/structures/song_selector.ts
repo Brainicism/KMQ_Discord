@@ -47,10 +47,8 @@ export default class SongSelector {
     } | null;
 
     public static QueriedSongFields = [
-        "available_songs.clean_song_name_en as songName",
-        "available_songs.song_name_en as originalSongName",
-        "available_songs.clean_song_name_ko as hangulSongName",
-        "available_songs.song_name_ko as originalHangulSongName",
+        "available_songs.song_name_en as songName",
+        "available_songs.song_name_ko as hangulSongName",
         "available_songs.artist_name_en as artistName",
         "available_songs.artist_name_ko as hangulArtistName",
         "available_songs.link as youtubeLink",

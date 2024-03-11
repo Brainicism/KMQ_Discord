@@ -1047,11 +1047,11 @@ export default abstract class Session {
 
             aliases.push(...round.artistAliases);
         } else {
-            if (round.song.originalHangulSongName) {
+            if (round.song.hangulSongName) {
                 if (locale === LocaleType.KO) {
-                    aliases.push(round.song.originalSongName);
+                    aliases.push(round.song.songName);
                 } else {
-                    aliases.push(round.song.originalHangulSongName);
+                    aliases.push(round.song.hangulSongName);
                 }
             }
 
