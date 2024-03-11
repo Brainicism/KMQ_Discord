@@ -1627,7 +1627,7 @@ export default class GameSession extends Session {
             this.guildPreference.gameOptions.guessModeType ===
             GuessModeType.ARTIST
                 ? getLocalizedArtistName(round.song, locale)
-                : getLocalizedSongName(round.song, locale, false);
+                : getLocalizedSongName(round.song, locale);
 
         const wrongChoices = await getMultipleChoiceOptions(
             this.guildPreference.gameOptions.answerType,

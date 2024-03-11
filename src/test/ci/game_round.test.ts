@@ -15,9 +15,7 @@ describe("game round", () => {
                 gameRound = new GameRound(
                     {
                         songName: "Song1",
-                        originalSongName: "Song1",
                         hangulSongName: "노래1",
-                        originalHangulSongName: "노래1",
                         artistName: "Jisoo",
                         hangulArtistName: "지수",
                         youtubeLink: "abcde",
@@ -66,9 +64,7 @@ describe("game round", () => {
                 gameRound = new GameRound(
                     {
                         songName: "Poggers Song",
-                        originalSongName: "Poggers Song",
                         hangulSongName: "리그마 포트나이트",
-                        originalHangulSongName: "리그마 포트나이트",
                         artistName: "IU + Blackpink",
                         hangulArtistName: "아이유+블랙핑크",
                         youtubeLink: "abcde",
@@ -101,9 +97,7 @@ describe("game round", () => {
                 gameRound = new GameRound(
                     {
                         songName: "Good Girls in the Dark",
-                        originalSongName: "Good Girls in the Dark",
                         hangulSongName: "상사병에 걸린 소녀들",
-                        originalHangulSongName: "상사병에 걸린 소녀들",
                         artistName: "Yena (Choi Yena)",
                         hangulArtistName: "최예나 (나)",
                         youtubeLink: "abcde",
@@ -134,9 +128,7 @@ describe("game round", () => {
                 gameRound = new GameRound(
                     {
                         songName: "Lovesick Girls",
-                        originalSongName: "Lovesick Girls",
                         hangulSongName: "상사병에 걸린 소녀들",
-                        originalHangulSongName: "상사병에 걸린 소녀들",
                         artistName: " Blackpink + IU             ",
                         hangulArtistName: "   블랙핑크+아이유                ",
                         youtubeLink: "abcde",
@@ -169,9 +161,7 @@ describe("game round", () => {
                 gameRound = new GameRound(
                     {
                         songName: "Sev en  !",
-                        originalSongName: "Sev en  !",
                         hangulSongName: "금  !요",
-                        originalHangulSongName: "금  !요",
                         artistName: "Jung  kook",
                         hangulArtistName: "정  국",
                         youtubeLink: "abcde",
@@ -225,9 +215,7 @@ describe("game round", () => {
                 gameRound = new GameRound(
                     {
                         songName: "?!",
-                        originalSongName: "?!",
                         hangulSongName: "@#",
-                        originalHangulSongName: "@#",
                         artistName: "a",
                         hangulArtistName: "a",
                         youtubeLink: "abcde",
@@ -267,9 +255,7 @@ describe("game round", () => {
                         gameRound = new GameRound(
                             {
                                 songName: "A really epic song",
-                                originalSongName: "A really epic song",
                                 hangulSongName: "정말 서사시 노래",
-                                originalHangulSongName: "정말 서사시 노래",
                                 artistName: "A really epic person",
                                 hangulArtistName: "정말 서사시인",
                                 youtubeLink: "abcde",
@@ -328,9 +314,7 @@ describe("game round", () => {
                         gameRound = new GameRound(
                             {
                                 songName: "A really epic song",
-                                originalSongName: "A really epic song",
                                 hangulSongName: "정말 서사시 노래",
-                                originalHangulSongName: "정말 서사시 노래",
                                 artistName: "Person2",
                                 hangulArtistName: "2인칭",
                                 youtubeLink: "abcde",
@@ -381,9 +365,7 @@ describe("game round", () => {
                 gameRound = new GameRound(
                     {
                         songName: "Perfect Night",
-                        originalSongName: "Perfect Night",
                         hangulSongName: "Perfect Night",
-                        originalHangulSongName: "Perfect Night",
                         artistName: "Le Sserafim",
                         hangulArtistName: "르세라핌",
                         youtubeLink: "abcde",
@@ -440,9 +422,7 @@ describe("game round", () => {
             gameRound = new GameRound(
                 {
                     songName: "1",
-                    originalSongName: "2",
                     hangulSongName: "3",
-                    originalHangulSongName: "4",
                     artistName: "5",
                     hangulArtistName: "6",
                     youtubeLink: "7",
@@ -503,9 +483,7 @@ describe("game round", () => {
             gameRound = new GameRound(
                 {
                     songName: "very cool song",
-                    originalSongName: "very cool song",
                     hangulSongName: "매우 시원한 노래",
-                    originalHangulSongName: "매우 시원한 노래",
                     artistName: "artist",
                     hangulArtistName: "예술가",
                     youtubeLink: "a1b2c3",
@@ -795,9 +773,7 @@ describe("game round", () => {
             gameRound = new GameRound(
                 {
                     songName: "very cool song",
-                    originalSongName: "very cool song",
                     hangulSongName: "매우 시원한 노래",
-                    originalHangulSongName: "매우 시원한 노래",
                     artistName: "artist",
                     hangulArtistName: "예술가",
                     youtubeLink: "a1b2c3",
@@ -849,9 +825,7 @@ describe("game round", () => {
             gameRound = new GameRound(
                 {
                     songName: "dalla dalla",
-                    originalSongName: "dalla dalla",
                     hangulSongName: "매우 시원한 노래",
-                    originalHangulSongName: "매우 시원한 노래",
                     artistName: "artist",
                     hangulArtistName: "예술가",
                     youtubeLink: "a1b2c3",

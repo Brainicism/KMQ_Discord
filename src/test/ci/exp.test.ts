@@ -441,9 +441,7 @@ describe("exp command", () => {
             gameRound = new GameRound(
                 {
                     songName: "x",
-                    originalSongName: "x",
                     hangulSongName: "x",
-                    originalHangulSongName: "x",
                     artistName: "x",
                     hangulArtistName: "x",
                     youtubeLink: "x",

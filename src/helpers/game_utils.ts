@@ -520,16 +520,13 @@ export async function isFirstGameOfDay(userID: string): Promise<boolean> {
 export function getLocalizedSongName(
     song: QueriedSong,
     locale: LocaleType,
-    original = true,
 ): string {
-    const songName = original ? song.originalSongName : song.songName;
+    const songName = song.songName;
     if (locale !== LocaleType.KO) {
         return songName;
     }
 
-    const hangulSongName = original
-        ? song.originalHangulSongName
-        : song.hangulSongName;
+    const hangulSongName = song.hangulSongName;
 
     return hangulSongName || songName;
 }
