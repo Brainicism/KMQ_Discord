@@ -5,7 +5,6 @@ export default interface QueriedSong {
     hangulSongName?: string;
     artistName: string;
     hangulArtistName: string | null;
-    artistFullName: string | null;
     youtubeLink: string;
     originalLink: string | null;
     publishDate: Date;
