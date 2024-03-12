@@ -7,6 +7,7 @@ export type Generated<T> =
 
 export interface AvailableSongs {
     artist_aliases: string;
+    artist_full_name: Generated<string | null>;
     artist_name_en: string;
     artist_name_ko: Generated<string | null>;
     clean_song_name_alpha_numeric: string;

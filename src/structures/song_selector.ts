@@ -51,6 +51,7 @@ export default class SongSelector {
         "available_songs.song_name_ko as hangulSongName",
         "available_songs.artist_name_en as artistName",
         "available_songs.artist_name_ko as hangulArtistName",
+        "available_songs.artist_full_name as artistFullName",
         "available_songs.link as youtubeLink",
         "available_songs.original_link as originalLink",
         "available_songs.publishedon as publishDate",

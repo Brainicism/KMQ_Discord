@@ -31,6 +31,7 @@ BEGIN
 		artist_name_en VARCHAR(255) NOT NULL,
 		original_artist_name_en VARCHAR(255) NOT NULL,
 		artist_name_ko VARCHAR(255),
+        artist_full_name VARCHAR(255),
 		artist_aliases VARCHAR(255) NOT NULL,
 		previous_name_en VARCHAR(255),
 		previous_name_ko VARCHAR(255),
@@ -58,6 +59,7 @@ BEGIN
 		kpop_videos.app_kpop_group.name AS artist_name_en,
 		kpop_videos.app_kpop_group.original_name AS original_artist_name_en,
 		kpop_videos.app_kpop_group.kname AS artist_name_ko,
+        kpop_videos.app_kpop_group.fname AS artist_full_name,
 		kpop_videos.app_kpop_group.alias AS artist_aliases,
 		kpop_videos.app_kpop_group.previous_name AS previous_name_en,
 		kpop_videos.app_kpop_group.previous_kname AS previous_name_ko,
@@ -92,6 +94,7 @@ BEGIN
 		kpop_videos.app_kpop_group.name AS artist_name_en,
 		kpop_videos.app_kpop_group.original_name AS original_artist_name_en,
 		kpop_videos.app_kpop_group.kname AS artist_name_ko,
+        kpop_videos.app_kpop_group.fname AS artist_full_name,
 		kpop_videos.app_kpop_group.alias AS artist_aliases,
 		kpop_videos.app_kpop_group.previous_name AS previous_name_en,
 		kpop_videos.app_kpop_group.previous_kname AS previous_name_ko,
@@ -124,7 +127,7 @@ BEGIN
 	INSERT INTO kpop_videos.app_kpop_group_temp
 	SELECT * FROM kpop_videos.app_kpop_group;
 
-	/* mark artists as not having songs */	
+	/* mark artists as not having songs */
 	ALTER TABLE kpop_videos.app_kpop_group_temp ADD COLUMN IF NOT EXISTS has_songs TINYINT(1) DEFAULT 0;
 	UPDATE kpop_videos.app_kpop_group_temp
 	SET has_songs = 1
