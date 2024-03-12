@@ -229,6 +229,7 @@ export async function reloadAliases(): Promise<void> {
         artist_aliases: string;
         previous_name_en: string | null;
         previous_name_ko: string | null;
+        full_artist_name: string | null;
     }[] = await dbContext.kpopVideos
         .selectFrom("app_kpop_group")
         .select([
@@ -236,6 +237,7 @@ export async function reloadAliases(): Promise<void> {
             "alias as artist_aliases",
             "previous_name as previous_name_en",
             "previous_kname as previous_name_ko",
+            "fname as full_artist_name",
         ])
         .distinct()
         .where(({ or, eb }) =>
@@ -243,6 +245,7 @@ export async function reloadAliases(): Promise<void> {
                 eb("alias", "<>", ""),
                 eb("previous_name", "<>", ""),
                 eb("previous_kname", "<>", ""),
+                eb("fname", "<>", ""),
             ]),
         )
         .execute();
@@ -264,9 +267,11 @@ export async function reloadAliases(): Promise<void> {
 
         const previousNameEn = mapping["previous_name_en"];
         const previousNameKo = mapping["previous_name_ko"];
+        const fullArtistName = mapping["full_artist_name"];
 
         if (previousNameEn) aliases.push(previousNameEn);
         if (previousNameKo) aliases.push(previousNameKo);
+        if (fullArtistName) aliases.push(fullArtistName);
 
         artistAliases[mapping["artist_name_en"]] = aliases;
     }

@@ -124,7 +124,7 @@ BEGIN
 	INSERT INTO kpop_videos.app_kpop_group_temp
 	SELECT * FROM kpop_videos.app_kpop_group;
 
-	/* mark artists as not having songs */	
+	/* mark artists as not having songs */
 	ALTER TABLE kpop_videos.app_kpop_group_temp ADD COLUMN IF NOT EXISTS has_songs TINYINT(1) DEFAULT 0;
 	UPDATE kpop_videos.app_kpop_group_temp
 	SET has_songs = 1
