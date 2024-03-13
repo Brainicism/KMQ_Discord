@@ -6,4 +6,5 @@ export interface MatchedPlaylist {
     metadata: PlaylistMetadata;
     truncated: boolean;
     unmatchedSongs: Array<string>;
+    ineligibleDueToCommonAlias?: number;
 }

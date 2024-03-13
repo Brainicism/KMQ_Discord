@@ -168,7 +168,7 @@ async function lookupByYoutubeID(
 
         includedInOptions = [
             ...(
-                await SongSelector.getFilteredSongList(
+                await SongSelector.getSelectedSongs(
                     await GuildPreference.getGuildPreference(guildID),
                     SHADOW_BANNED_ARTIST_IDS,
                 )

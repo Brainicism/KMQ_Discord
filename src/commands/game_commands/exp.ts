@@ -170,16 +170,16 @@ export async function calculateOptionsExpMultiplierInternal(
         });
     }
 
-    const { count, countBeforeLimit } = await getAvailableSongCount(
-        guildPreference,
-        messageContext,
-    );
+    const { count, countBeforeLimit, ineligibleDueToCommonAlias } =
+        await getAvailableSongCount(guildPreference);
 
     if (count === undefined || countBeforeLimit === undefined) {
         throw new Error("Error retrieving song count");
     }
 
-    if (count < 10) {
+    const eligibleSongCount = count - (ineligibleDueToCommonAlias || 0);
+
+    if (eligibleSongCount < 10) {
         modifiers.push({
             displayName: i18n.translate(
                 guildPreference.guildID,

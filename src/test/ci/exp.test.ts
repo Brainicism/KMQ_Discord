@@ -49,6 +49,7 @@ describe("exp command", () => {
                             Promise.resolve({
                                 count: 1,
                                 countBeforeLimit: 200,
+                                ineligibleDueToCommonAlias: 0,
                             }),
                         );
 
@@ -82,6 +83,7 @@ describe("exp command", () => {
                             Promise.resolve({
                                 count: 200,
                                 countBeforeLimit: 200,
+                                ineligibleDueToCommonAlias: 0,
                             }),
                         );
 
@@ -313,7 +315,11 @@ describe("exp command", () => {
                 sandbox
                     .stub(game_utils, "getAvailableSongCount")
                     .callsFake(() =>
-                        Promise.resolve({ count: 200, countBeforeLimit: 200 }),
+                        Promise.resolve({
+                            count: 200,
+                            countBeforeLimit: 200,
+                            ineligibleDueToCommonAlias: 0,
+                        }),
                     );
 
                 sandbox
@@ -393,7 +399,11 @@ describe("exp command", () => {
                 sandbox
                     .stub(game_utils, "getAvailableSongCount")
                     .callsFake(() =>
-                        Promise.resolve({ count: 1, countBeforeLimit: 200 }),
+                        Promise.resolve({
+                            count: 1,
+                            countBeforeLimit: 200,
+                            ineligibleDueToCommonAlias: 0,
+                        }),
                     );
 
                 sandbox
