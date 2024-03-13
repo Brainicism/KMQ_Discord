@@ -418,24 +418,12 @@ export default class PlaylistCommand implements BaseCommand {
             return;
         }
 
-        let matchedPlaylist: MatchedPlaylist;
-        if (session) {
-            matchedPlaylist = (await session.songSelector.reloadSongs(
-                guildPreference,
-                kmqPlaylistIdentifier,
-                true,
-                messageContext,
-                interaction,
-            )) as MatchedPlaylist;
-        } else {
-            matchedPlaylist = (await new SongSelector().reloadSongs(
-                guildPreference,
-                kmqPlaylistIdentifier,
-                true,
-                messageContext,
-                interaction,
-            )) as MatchedPlaylist;
-        }
+        const matchedPlaylist = (await guildPreference.songSelector.reloadSongs(
+            kmqPlaylistIdentifier,
+            true,
+            messageContext,
+            interaction,
+        )) as MatchedPlaylist;
 
         logger.info(
             `${getDebugLogHeader(messageContext)} | Matched ${

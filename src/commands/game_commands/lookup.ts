@@ -166,10 +166,12 @@ async function lookupByYoutubeID(
             songDuration = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
         }
 
+        const guildPreference =
+            await GuildPreference.getGuildPreference(guildID);
+
         includedInOptions = [
             ...(
-                await SongSelector.getSelectedSongs(
-                    await GuildPreference.getGuildPreference(guildID),
+                await guildPreference.songSelector.getSelectedSongs(
                     SHADOW_BANNED_ARTIST_IDS,
                 )
             ).songs,

@@ -51,12 +51,14 @@ export async function getAvailableSongCount(
     ineligibleDueToCommonAlias: number | undefined;
 }> {
     try {
-        const songSelector = new SongSelector();
+        const songSelector = guildPreference.songSelector;
 
-        await songSelector.reloadSongs(
-            guildPreference,
-            guildPreference.getKmqPlaylistID() ?? undefined,
-        );
+        // only reload if song selector has never loaded yet, otherwise used cached count
+        if (songSelector.getSongs().songs.size === 0) {
+            await songSelector.reloadSongs(
+                guildPreference.getKmqPlaylistID() ?? undefined,
+            );
+        }
 
         const songSelectorResults = songSelector.getSongs();
 

@@ -34,7 +34,6 @@ import ListeningRound from "./listening_round";
 import LocaleType from "../enums/locale_type";
 import MessageContext from "./message_context";
 import SeekType from "../enums/option_types/seek_type";
-import SongSelector from "./song_selector";
 import State from "../state";
 import dbContext from "../database_context";
 import fs from "fs";
@@ -84,8 +83,6 @@ export default abstract class Session {
     /** Whether the GameSession is active yet */
     public sessionInitialized: boolean;
 
-    public songSelector: SongSelector;
-
     /** The guild preference */
     protected guildPreference: GuildPreference;
 
@@ -123,18 +120,7 @@ export default abstract class Session {
         this.roundsPlayed = 0;
         this.songMessageIDs = [];
         this.bookmarkedSongs = {};
-        this.songSelector = new SongSelector();
-
-        this.guildPreference.reloadSongCallback = async () => {
-            logger.info(
-                `gid: ${this.guildID} | Game options modified, songs reloaded`,
-            );
-
-            await this.songSelector.reloadSongs(
-                this.guildPreference,
-                this.guildPreference.getKmqPlaylistID() ?? undefined,
-            );
-        };
+        this.guildPreference.songSelector.resetSessionState();
     }
 
     abstract sessionName(): string;
@@ -194,10 +180,9 @@ export default abstract class Session {
         }
 
         this.sessionInitialized = true;
-        if (this.songSelector.getSongs().songs.size === 0) {
+        if (this.guildPreference.songSelector.getSongs().songs.size === 0) {
             try {
-                await this.songSelector.reloadSongs(
-                    this.guildPreference,
+                await this.guildPreference.songSelector.reloadSongs(
                     this.guildPreference.getKmqPlaylistID() ?? undefined,
                     !this.sessionInitialized,
                 );
@@ -225,8 +210,10 @@ export default abstract class Session {
             }
         }
 
-        if (this.songSelector.checkUniqueSongQueue()) {
-            const totalSongCount = this.songSelector.getCurrentSongCount();
+        if (this.guildPreference.songSelector.checkUniqueSongQueue()) {
+            const totalSongCount =
+                this.guildPreference.songSelector.getCurrentSongCount();
+
             logger.info(
                 `${getDebugLogHeader(
                     messageContext,
@@ -247,10 +234,8 @@ export default abstract class Session {
             });
         }
 
-        this.songSelector.checkAlternatingGender(this.guildPreference);
-        const randomSong = this.songSelector.queryRandomSong(
-            this.guildPreference,
-        );
+        this.guildPreference.songSelector.checkAlternatingGender();
+        const randomSong = this.guildPreference.songSelector.queryRandomSong();
 
         if (randomSong === null) {
             await sendErrorMessage(messageContext, {
@@ -364,7 +349,6 @@ export default abstract class Session {
             `gid: ${this.guildID} | Session ended. endedDueToError: ${endedDueToError}. Reason: ${reason}`,
         );
 
-        this.guildPreference.reloadSongCallback = undefined;
         Session.deleteSession(this.guildID);
         await this.endRound(
             new MessageContext(this.textChannelID, null, this.guildID),
@@ -786,7 +770,7 @@ export default abstract class Session {
         countBeforeLimit: number;
         ineligibleDueToCommonAlias?: number;
     } {
-        const selectedSongs = this.songSelector.getSongs();
+        const selectedSongs = this.guildPreference.songSelector.getSongs();
         return {
             count: selectedSongs.songs.size,
             countBeforeLimit: selectedSongs.countBeforeLimit,

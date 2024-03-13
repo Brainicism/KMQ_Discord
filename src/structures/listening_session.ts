@@ -99,7 +99,7 @@ export default class ListeningSession extends Session {
 
             const description = `${round.getEndRoundDescription(
                 messageContext,
-                this.songSelector.getUniqueSongCounter(this.guildPreference),
+                this.guildPreference.songSelector.getUniqueSongCounter(),
                 [],
             )}`;
 

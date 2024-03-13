@@ -25,6 +25,7 @@ import AnswerType from "../enums/option_types/answer_type";
 import EnvType from "../enums/env_type";
 import GameOption from "../enums/game_option_name";
 import Session from "./session";
+import SongSelector from "./song_selector";
 import _ from "lodash";
 import dbContext from "../database_context";
 import type { AdvancedSettings } from "../types";
@@ -205,8 +206,8 @@ export default class GuildPreference {
     /** The Discord Guild ID */
     public readonly guildID: string;
 
-    /** Callback to reload songs */
-    public reloadSongCallback: (() => Promise<void>) | undefined;
+    /** The song selector */
+    public readonly songSelector: SongSelector;
 
     /** Callback to send song messages */
     public answerTypeChangeCallback: (() => Promise<void>) | undefined;
@@ -222,6 +223,7 @@ export default class GuildPreference {
     constructor(guildID: string, options?: GameOptions) {
         this.guildID = guildID;
         this.gameOptions = options || { ...GuildPreference.DEFAULT_OPTIONS };
+        this.songSelector = new SongSelector(this);
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.validateGameOptions();
     }
@@ -1026,15 +1028,13 @@ export default class GuildPreference {
             );
         });
 
-        if (this.reloadSongCallback) {
-            try {
-                await this.reloadSongCallback();
-            } catch (e) {
-                logger.error(
-                    `gid: ${this.guildID} | reloadSongCallback unexpectedly failed, session might not exist?`,
-                );
-            }
-        }
+        logger.info(
+            `gid: ${this.guildID} | Game options modified, songs reloaded`,
+        );
+
+        await this.songSelector.reloadSongs(
+            this.getKmqPlaylistID() ?? undefined,
+        );
 
         if (this.answerTypeChangeCallback) {
             if (
