@@ -635,7 +635,9 @@ export function mapTo<T, S extends T, K extends keyof T>(
     source: S,
     key: K,
 ): void {
-    if (typeof source[key] === "object") {
+    if (source[key] === null) {
+        target[key] = null as T[K];
+    } else if (typeof source[key] === "object") {
         target[key] = { ...source[key] };
     } else {
         target[key] = source[key];
