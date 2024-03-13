@@ -193,6 +193,20 @@ export const enum GameOptionInternal {
     PLAYLIST_ID = "spotifyPlaylistID",
 }
 
+export const NON_RELOAD_IMPACTING_GAME_OPTION_INTERNALS: Array<GameOptionInternal> =
+    [
+        GameOptionInternal.ADVANCED_SETTINGS,
+        GameOptionInternal.SEEK_TYPE,
+        GameOptionInternal.SPECIAL_TYPE,
+        GameOptionInternal.GUESS_MODE_TYPE,
+        GameOptionInternal.ANSWER_TYPE,
+        GameOptionInternal.SHUFFLE_TYPE,
+        GameOptionInternal.GOAL,
+        GameOptionInternal.GUESS_TIMEOUT,
+        GameOptionInternal.DURATION,
+        GameOptionInternal.MULTI_GUESS_TYPE,
+    ];
+
 export const GameOptionInternalToGameOption: { [option: string]: string } = {
     [GameOptionInternal.BEGINNING_YEAR]: GameOption.CUTOFF,
     [GameOptionInternal.END_YEAR]: GameOption.CUTOFF,
