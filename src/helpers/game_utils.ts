@@ -1,5 +1,4 @@
 import { IPCLogger } from "../logger";
-import { SHADOW_BANNED_ARTIST_IDS } from "../constants";
 import { containsHangul, md5Hash } from "./utils";
 import { normalizePunctuationInName } from "../structures/game_round";
 import { sql } from "kysely";
@@ -11,11 +10,9 @@ import State from "../state";
 import _ from "lodash";
 import dbContext from "../database_context";
 import type { AvailableGenders } from "../enums/option_types/gender";
-import type Eris from "eris";
 import type GameRound from "../structures/game_round";
 import type GuildPreference from "../structures/guild_preference";
 import type MatchedArtist from "../interfaces/matched_artist";
-import type MessageContext from "../structures/message_context";
 import type QueriedSong from "../interfaces/queried_song";
 import type Session from "../structures/session";
 

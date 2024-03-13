@@ -47,14 +47,12 @@ interface ExpModifier {
  * @param guildPreference - The guild preference
  * @param voteBonusExp - Whether bonus EXP should be applied to the modifier
  * @param playerID - the player's ID
- * @param messageContext - the message context
  * @returns an array describing the EXP modifiers activated and their numerical value
  */
 export async function calculateOptionsExpMultiplierInternal(
     guildPreference: GuildPreference,
     voteBonusExp: boolean,
     playerID: string,
-    messageContext?: MessageContext,
 ): Promise<Array<ExpModifier>> {
     const modifiers: Array<ExpModifier> = [];
     // bonus for voting
@@ -214,14 +212,12 @@ async function calculateOptionsExpMultiplier(
     guildPreference: GuildPreference,
     voteBonusExp: boolean,
     playerID: string,
-    messageContext?: MessageContext,
 ): Promise<number> {
     return (
         await calculateOptionsExpMultiplierInternal(
             guildPreference,
             voteBonusExp,
             playerID,
-            messageContext,
         )
     ).reduce((a, b) => ExpBonusModifierValues[b.name] * a, 1);
 }
@@ -362,14 +358,12 @@ export default class ExpCommand implements BaseCommand {
             guildPreference,
             voteBonusActive,
             messageContext.author.id,
-            messageContext,
         );
 
         const totalModifier = await calculateOptionsExpMultiplier(
             guildPreference,
             voteBonusActive,
             messageContext.author.id,
-            messageContext,
         );
 
         const modifierText: Array<string> = activeModifiers.map(
