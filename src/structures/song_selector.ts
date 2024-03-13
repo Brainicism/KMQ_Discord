@@ -239,10 +239,6 @@ export default class SongSelector {
         return this.selectedSongs ? this.selectedSongs.songs.size : 0;
     }
 
-    getSelectedSongsMetadata(): SelectedSongs | null {
-        return this.selectedSongs;
-    }
-
     async reloadSongs(
         guildPreference: GuildPreference,
         kmqPlaylistIdentifier?: string,
@@ -592,11 +588,11 @@ export default class SongSelector {
         });
 
         const aliasToCountMapping: { [alias: string]: number } = {};
-        for (let i = 0; i < songAliasByMatchedSong.length; i++) {
-            const dedupedAliasesForSong = songAliasByMatchedSong[i];
+        for (const dedupedAliasesForSong of songAliasByMatchedSong) {
             for (const dedupedAlias of dedupedAliasesForSong) {
                 if (!(dedupedAlias in aliasToCountMapping)) {
-                    aliasToCountMapping[dedupedAlias] = 0;
+                    aliasToCountMapping[dedupedAlias] = 1;
+                    continue;
                 }
 
                 aliasToCountMapping[dedupedAlias]++;

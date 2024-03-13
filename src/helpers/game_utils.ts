@@ -58,7 +58,7 @@ export async function getAvailableSongCount(
             guildPreference.getKmqPlaylistID() ?? undefined,
         );
 
-        const songSelectorResults = songSelector.getSelectedSongsMetadata()!;
+        const songSelectorResults = songSelector.getSongs();
 
         if (guildPreference.isPlaylist()) {
             return {
