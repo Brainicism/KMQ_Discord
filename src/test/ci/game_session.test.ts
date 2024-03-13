@@ -101,7 +101,8 @@ describe("game session", () => {
                 assert.ok(endSessionSpy.notCalled);
                 assert.ok(endRoundStub.notCalled);
                 assert.ok(
-                    gameSession.songSelector.getSongs().countBeforeLimit > 0,
+                    guildPreference.songSelector.getSongs().countBeforeLimit >
+                        0,
                 );
                 assert(gameSession.round);
 

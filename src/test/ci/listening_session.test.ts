@@ -88,7 +88,7 @@ describe("listening session", () => {
                 assert.ok(playSongSpy.called);
                 assert.ok(endSessionStub.notCalled);
                 assert.ok(
-                    listeningSession.songSelector.getSongs().countBeforeLimit >
+                    guildPreference.songSelector.getSongs().countBeforeLimit >
                         0,
                 );
             });

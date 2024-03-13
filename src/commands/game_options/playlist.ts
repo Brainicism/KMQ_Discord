@@ -34,7 +34,6 @@ import LimitCommand from "./limit";
 import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
-import SongSelector from "../../structures/song_selector";
 import State from "../../state";
 import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
@@ -418,24 +417,12 @@ export default class PlaylistCommand implements BaseCommand {
             return;
         }
 
-        let matchedPlaylist: MatchedPlaylist;
-        if (session) {
-            matchedPlaylist = (await session.songSelector.reloadSongs(
-                guildPreference,
-                kmqPlaylistIdentifier,
-                true,
-                messageContext,
-                interaction,
-            )) as MatchedPlaylist;
-        } else {
-            matchedPlaylist = (await new SongSelector().reloadSongs(
-                guildPreference,
-                kmqPlaylistIdentifier,
-                true,
-                messageContext,
-                interaction,
-            )) as MatchedPlaylist;
-        }
+        const matchedPlaylist = (await guildPreference.songSelector.reloadSongs(
+            kmqPlaylistIdentifier,
+            true,
+            messageContext,
+            interaction,
+        )) as MatchedPlaylist;
 
         logger.info(
             `${getDebugLogHeader(messageContext)} | Matched ${

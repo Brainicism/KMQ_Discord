@@ -67,13 +67,17 @@ export default class SongSelector {
     /** The last gender played when gender is set to alternating, can be null (in not alternating mode), GENDER.MALE, or GENDER.FEMALE */
     public lastAlternatingGender: GenderModeOptions | null;
 
-    constructor() {
+    /** The guild preference */
+    private guildPreference: GuildPreference;
+
+    constructor(guildPreference: GuildPreference) {
         this.selectedSongs = null;
         this.uniqueSongsPlayed = new Set();
         this.lastAlternatingGender = null;
+        this.guildPreference = guildPreference;
     }
 
-    getUniqueSongCounter(guildPreference: GuildPreference): UniqueSongCounter {
+    getUniqueSongCounter(): UniqueSongCounter {
         if (!this.selectedSongs) {
             return {
                 uniqueSongsPlayed: 0,
@@ -92,8 +96,8 @@ export default class SongSelector {
                     .size,
             totalSongs: Math.min(
                 this.selectedSongs.countBeforeLimit,
-                guildPreference.gameOptions.limitEnd -
-                    guildPreference.gameOptions.limitStart,
+                this.guildPreference.gameOptions.limitEnd -
+                    this.guildPreference.gameOptions.limitStart,
             ),
         };
     }
@@ -115,8 +119,13 @@ export default class SongSelector {
         return false;
     }
 
-    checkAlternatingGender(guildPreference: GuildPreference): void {
-        if (guildPreference.isGenderAlternating()) {
+    resetSessionState(): void {
+        this.uniqueSongsPlayed = new Set();
+        this.lastAlternatingGender = null;
+    }
+
+    checkAlternatingGender(): void {
+        if (this.guildPreference.isGenderAlternating()) {
             if (this.lastAlternatingGender === null) {
                 this.lastAlternatingGender =
                     Math.random() < 0.5 ? "male" : "female";
@@ -129,7 +138,7 @@ export default class SongSelector {
         }
     }
 
-    queryRandomSong(guildPreference: GuildPreference): QueriedSong | null {
+    queryRandomSong(): QueriedSong | null {
         const selectedSongs = this.getSongs().songs;
         let randomSong: QueriedSong | null;
         const ignoredSongs = new Set([...this.uniqueSongsPlayed]);
@@ -139,14 +148,14 @@ export default class SongSelector {
                 selectedSongs,
                 ignoredSongs,
                 this.lastAlternatingGender,
-                guildPreference.gameOptions.shuffleType,
+                this.guildPreference.gameOptions.shuffleType,
             );
         } else {
             randomSong = SongSelector.selectRandomSong(
                 selectedSongs,
                 ignoredSongs,
                 null,
-                guildPreference.gameOptions.shuffleType,
+                this.guildPreference.gameOptions.shuffleType,
             );
         }
 
@@ -240,7 +249,6 @@ export default class SongSelector {
     }
 
     async reloadSongs(
-        guildPreference: GuildPreference,
         kmqPlaylistIdentifier?: string,
         forceRefreshMetadata?: boolean,
         messageContext?: MessageContext,
@@ -248,10 +256,9 @@ export default class SongSelector {
     ): Promise<MatchedPlaylist | null> {
         if (
             !kmqPlaylistIdentifier ||
-            guildPreference.gameOptions.forcePlaySongID
+            this.guildPreference.gameOptions.forcePlaySongID
         ) {
-            this.selectedSongs = await SongSelector.getSelectedSongs(
-                guildPreference,
+            this.selectedSongs = await this.getSelectedSongs(
                 SHADOW_BANNED_ARTIST_IDS,
             );
 
@@ -259,7 +266,7 @@ export default class SongSelector {
         }
 
         const playlist = await SongSelector.getPlaylistSongList(
-            guildPreference.guildID,
+            this.guildPreference.guildID,
             kmqPlaylistIdentifier,
             forceRefreshMetadata || false,
             messageContext,
@@ -272,15 +279,13 @@ export default class SongSelector {
 
     /**
      * Returns a list of songs from the data store, narrowed down by the specified game options
-     * @param guildPreference - The GuildPreference
      * @param shadowBannedArtistIds - artist IDs that shouldn't be populated by subunit inclusion
      * @returns a list of songs, as well as the number of songs before the filter option was applied
      */
-    static async getSelectedSongs(
-        guildPreference: GuildPreference,
+    async getSelectedSongs(
         shadowBannedArtistIds: Array<number> = [],
     ): Promise<{ songs: Set<QueriedSong>; countBeforeLimit: number }> {
-        const gameOptions = guildPreference.gameOptions;
+        const gameOptions = this.guildPreference.gameOptions;
         let result: Array<QueriedSong> = [];
         let queryBuilder = dbContext.kmq
             .selectFrom("available_songs")
@@ -300,7 +305,7 @@ export default class SongSelector {
 
         let subunits: Array<number> = [];
         let collabGroupContainingSubunit: Array<number> = [];
-        const selectedGroupIDs = guildPreference.getGroupIDs();
+        const selectedGroupIDs = this.guildPreference.getGroupIDs();
         if (gameOptions.subunitPreference === SubunitsPreference.INCLUDE) {
             let subunitsQueryBuilder = dbContext.kpopVideos
                 .selectFrom("app_kpop_group")
@@ -351,9 +356,9 @@ export default class SongSelector {
                 Expression<SqlBool>
             > = [];
 
-            const includesGroupIDs = guildPreference.getIncludesGroupIDs();
+            const includesGroupIDs = this.guildPreference.getIncludesGroupIDs();
             if (includesGroupIDs.length) {
-                if (!guildPreference.isGroupsMode()) {
+                if (!this.guildPreference.isGroupsMode()) {
                     if (
                         gameOptions.subunitPreference ===
                         SubunitsPreference.EXCLUDE
@@ -378,13 +383,13 @@ export default class SongSelector {
                 eb(
                     "id_artist",
                     "not in",
-                    guildPreference.getExcludesGroupIDs(),
+                    this.guildPreference.getExcludesGroupIDs(),
                 ),
             );
 
-            if (!guildPreference.isGroupsMode()) {
+            if (!this.guildPreference.isGroupsMode()) {
                 const gender: Array<AvailableGenders> =
-                    guildPreference.isGenderAlternating()
+                    this.guildPreference.isGenderAlternating()
                         ? ["male", "female", "coed"]
                         : (gameOptions.gender as Array<AvailableGenders>);
 
