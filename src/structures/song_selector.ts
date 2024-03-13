@@ -611,6 +611,12 @@ export default class SongSelector {
             }
         }
 
+        if (ineligibleDueToCommonAlias) {
+            logger.info(
+                `gid: ${guildID}, pid: ${kmqPlaylistIdentifier} | Some songs were ineligible due to common aliases: ${JSON.stringify(aliasToCountMapping)}`,
+            );
+        }
+
         return {
             songs: result,
             countBeforeLimit: result.size,
