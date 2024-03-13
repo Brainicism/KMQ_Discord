@@ -31,10 +31,8 @@ export default class DebugCommand implements BaseCommand {
         );
 
         const messageContext = MessageContext.fromMessage(message);
-        const { count, countBeforeLimit } = await getAvailableSongCount(
-            guildPreference,
-            messageContext,
-        );
+        const { count, countBeforeLimit } =
+            await getAvailableSongCount(guildPreference);
 
         const fields: Array<Eris.EmbedField> = [];
         fields.push({

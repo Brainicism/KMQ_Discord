@@ -810,11 +810,7 @@ export async function generateOptionsMessage(
         optionStrings[GameOption.PLAYLIST_ID] = null;
     }
 
-    const totalSongs = await getAvailableSongCount(
-        guildPreference,
-        messageContext,
-        interaction,
-    );
+    const totalSongs = await getAvailableSongCount(guildPreference);
 
     if (
         totalSongs.count === undefined ||

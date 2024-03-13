@@ -1459,10 +1459,13 @@ export default class GameSession extends Session {
      */
     private calculateBaseExp(): number {
         const songCount = this.getSongCount();
+        const eligibleSongCount =
+            songCount.count - (songCount.ineligibleDueToCommonAlias || 0);
+
         const expBase =
-            songCount.count <= 10000
-                ? 2000 / (1 + Math.exp(1 - 0.0005 * (songCount.count - 1500)))
-                : 0.0359335908253 * songCount.count + 1566.01031706;
+            eligibleSongCount <= 10000
+                ? 2000 / (1 + Math.exp(1 - 0.0005 * (eligibleSongCount - 1500)))
+                : 0.0359335908253 * eligibleSongCount + 1566.01031706;
 
         let expJitter = expBase * (0.05 * Math.random());
         expJitter *= Math.round(Math.random()) ? 1 : -1;

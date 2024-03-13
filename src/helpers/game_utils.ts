@@ -1,5 +1,4 @@
 import { IPCLogger } from "../logger";
-import { SHADOW_BANNED_ARTIST_IDS } from "../constants";
 import { containsHangul, md5Hash } from "./utils";
 import { normalizePunctuationInName } from "../structures/game_round";
 import { sql } from "kysely";
@@ -11,11 +10,9 @@ import State from "../state";
 import _ from "lodash";
 import dbContext from "../database_context";
 import type { AvailableGenders } from "../enums/option_types/gender";
-import type Eris from "eris";
 import type GameRound from "../structures/game_round";
 import type GuildPreference from "../structures/guild_preference";
 import type MatchedArtist from "../interfaces/matched_artist";
-import type MessageContext from "../structures/message_context";
 import type QueriedSong from "../interfaces/queried_song";
 import type Session from "../structures/session";
 
@@ -44,46 +41,39 @@ export async function ensureVoiceConnection(session: Session): Promise<void> {
 
 /**
  * @param guildPreference - The GuildPreference
- * @param messageContext - The message which triggered the song count check
- * @param interaction - The interaction that triggered the song count check
  * @returns an object containing the total number of available songs before and after limit based on the GameOptions
  */
 export async function getAvailableSongCount(
     guildPreference: GuildPreference,
-    messageContext?: MessageContext,
-    interaction?: Eris.CommandInteraction,
 ): Promise<{
     count: number | undefined;
     countBeforeLimit: number | undefined;
+    ineligibleDueToCommonAlias: number | undefined;
 }> {
     try {
+        const songSelector = new SongSelector();
+
+        await songSelector.reloadSongs(
+            guildPreference,
+            guildPreference.getKmqPlaylistID() ?? undefined,
+        );
+
+        const songSelectorResults = songSelector.getSongs();
+
         if (guildPreference.isPlaylist()) {
-            const kmqPlaylistIdentifier = guildPreference.getKmqPlaylistID()!;
-
-            const playlistMetadata =
-                await State.playlistManager.getMatchedPlaylistMetadata(
-                    guildPreference.guildID,
-                    kmqPlaylistIdentifier,
-                    false,
-                    messageContext,
-                    interaction,
-                );
-
             return {
-                count: playlistMetadata.matchedSongsLength,
-                countBeforeLimit: playlistMetadata.matchedSongsLength,
+                count: songSelectorResults.songs.size,
+                countBeforeLimit: songSelectorResults.songs.size,
+                ineligibleDueToCommonAlias:
+                    songSelectorResults.ineligibleDueToCommonAlias,
             };
         }
 
-        const { songs, countBeforeLimit } =
-            await SongSelector.getFilteredSongList(
-                guildPreference,
-                SHADOW_BANNED_ARTIST_IDS,
-            );
-
         return {
-            count: songs.size,
-            countBeforeLimit,
+            count: songSelectorResults.songs.size,
+            countBeforeLimit: songSelectorResults.countBeforeLimit,
+            ineligibleDueToCommonAlias:
+                songSelectorResults.ineligibleDueToCommonAlias,
         };
     } catch (e) {
         logger.error(
@@ -92,6 +82,7 @@ export async function getAvailableSongCount(
         return {
             count: undefined,
             countBeforeLimit: undefined,
+            ineligibleDueToCommonAlias: undefined,
         };
     }
 }

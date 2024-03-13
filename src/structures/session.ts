@@ -781,11 +781,17 @@ export default abstract class Session {
         return true;
     }
 
-    protected getSongCount(): { count: number; countBeforeLimit: number } {
+    protected getSongCount(): {
+        count: number;
+        countBeforeLimit: number;
+        ineligibleDueToCommonAlias?: number;
+    } {
         const selectedSongs = this.songSelector.getSongs();
         return {
             count: selectedSongs.songs.size,
             countBeforeLimit: selectedSongs.countBeforeLimit,
+            ineligibleDueToCommonAlias:
+                selectedSongs.ineligibleDueToCommonAlias,
         };
     }
 

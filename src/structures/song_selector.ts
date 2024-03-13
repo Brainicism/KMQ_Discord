@@ -11,6 +11,7 @@ import {
     parseKmqPlaylistIdentifier,
     setDifference,
 } from "../helpers/utils";
+import { normalizePunctuationInName } from "./game_round";
 import { sql } from "kysely";
 import ArtistType from "../enums/option_types/artist_type";
 import LanguageType from "../enums/option_types/language_type";
@@ -34,17 +35,15 @@ import type UniqueSongCounter from "../interfaces/unique_song_counter";
 
 const logger = new IPCLogger("song_selector");
 
-interface QueriedSongList {
+interface SelectedSongs {
     songs: Set<QueriedSong>;
     countBeforeLimit: number;
+    ineligibleDueToCommonAlias?: number;
 }
 
 export default class SongSelector {
     /** List of songs matching the user's game options */
-    public filteredSongs: {
-        songs: Set<QueriedSong>;
-        countBeforeLimit: number;
-    } | null;
+    public selectedSongs: SelectedSongs | null;
 
     public static QueriedSongFields = [
         "available_songs.song_name_en as songName",
@@ -69,30 +68,30 @@ export default class SongSelector {
     public lastAlternatingGender: GenderModeOptions | null;
 
     constructor() {
-        this.filteredSongs = null;
+        this.selectedSongs = null;
         this.uniqueSongsPlayed = new Set();
         this.lastAlternatingGender = null;
     }
 
     getUniqueSongCounter(guildPreference: GuildPreference): UniqueSongCounter {
-        if (!this.filteredSongs) {
+        if (!this.selectedSongs) {
             return {
                 uniqueSongsPlayed: 0,
                 totalSongs: 0,
             };
         }
 
-        const filteredSongs = new Set(
-            [...this.filteredSongs.songs].map((x) => x.youtubeLink),
+        const selectedSongs = new Set(
+            [...this.selectedSongs.songs].map((x) => x.youtubeLink),
         );
 
         return {
             uniqueSongsPlayed:
                 this.uniqueSongsPlayed.size -
-                setDifference([...this.uniqueSongsPlayed], [...filteredSongs])
+                setDifference([...this.uniqueSongsPlayed], [...selectedSongs])
                     .size,
             totalSongs: Math.min(
-                this.filteredSongs.countBeforeLimit,
+                this.selectedSongs.countBeforeLimit,
                 guildPreference.gameOptions.limitEnd -
                     guildPreference.gameOptions.limitStart,
             ),
@@ -101,12 +100,12 @@ export default class SongSelector {
 
     checkUniqueSongQueue(): boolean {
         const selectedSongs = this.getSongs().songs;
-        const filteredSongs = new Set(
+        const selectedSongLinks = new Set(
             [...selectedSongs].map((x) => x.youtubeLink),
         );
 
         if (
-            setDifference([...filteredSongs], [...this.uniqueSongsPlayed])
+            setDifference([...selectedSongLinks], [...this.uniqueSongsPlayed])
                 .size === 0
         ) {
             this.resetUniqueSongs();
@@ -162,19 +161,19 @@ export default class SongSelector {
 
     /**
      * Selects a random song based on the GameOptions, avoiding recently played songs
-     * @param filteredSongs - The filtered songs to select from
+     * @param songList - The selected songs to select from
      * @param ignoredSongs - The union of last played songs and unique songs to not select from
      * @param alternatingGender - The gender to limit selecting from if /gender alternating
      * @param shuffleType - The shuffle type
      * @returns the QueriedSong
      */
     static selectRandomSong(
-        filteredSongs: Set<QueriedSong>,
+        songList: Set<QueriedSong>,
         ignoredSongs: Set<string>,
         alternatingGender: GenderModeOptions | null,
         shuffleType = ShuffleType.RANDOM,
     ): QueriedSong | null {
-        let queriedSongList = [...filteredSongs];
+        let queriedSongList = [...songList];
         if (ignoredSongs) {
             queriedSongList = queriedSongList.filter(
                 (x) => !ignoredSongs.has(x.youtubeLink),
@@ -225,19 +224,19 @@ export default class SongSelector {
         this.uniqueSongsPlayed.clear();
     }
 
-    getSongs(): { songs: Set<QueriedSong>; countBeforeLimit: number } {
-        if (!this.filteredSongs) {
+    getSongs(): SelectedSongs {
+        if (!this.selectedSongs) {
             return {
                 songs: new Set(),
                 countBeforeLimit: 0,
             };
         }
 
-        return this.filteredSongs;
+        return this.selectedSongs;
     }
 
     getCurrentSongCount(): number {
-        return this.filteredSongs ? this.filteredSongs.songs.size : 0;
+        return this.selectedSongs ? this.selectedSongs.songs.size : 0;
     }
 
     async reloadSongs(
@@ -251,7 +250,7 @@ export default class SongSelector {
             !kmqPlaylistIdentifier ||
             guildPreference.gameOptions.forcePlaySongID
         ) {
-            this.filteredSongs = await SongSelector.getFilteredSongList(
+            this.selectedSongs = await SongSelector.getSelectedSongs(
                 guildPreference,
                 SHADOW_BANNED_ARTIST_IDS,
             );
@@ -267,7 +266,7 @@ export default class SongSelector {
             interaction!,
         );
 
-        this.filteredSongs = playlist as QueriedSongList;
+        this.selectedSongs = playlist as SelectedSongs;
         return playlist;
     }
 
@@ -277,7 +276,7 @@ export default class SongSelector {
      * @param shadowBannedArtistIds - artist IDs that shouldn't be populated by subunit inclusion
      * @returns a list of songs, as well as the number of songs before the filter option was applied
      */
-    static async getFilteredSongList(
+    static async getSelectedSongs(
         guildPreference: GuildPreference,
         shadowBannedArtistIds: Array<number> = [],
     ): Promise<{ songs: Set<QueriedSong>; countBeforeLimit: number }> {
@@ -547,7 +546,7 @@ export default class SongSelector {
         forceRefreshMetadata: boolean,
         messageContext?: MessageContext,
         interaction?: Eris.CommandInteraction,
-    ): Promise<QueriedSongList & MatchedPlaylist> {
+    ): Promise<SelectedSongs & MatchedPlaylist> {
         const kmqPlaylistParsed = parseKmqPlaylistIdentifier(
             kmqPlaylistIdentifier,
         );
@@ -571,6 +570,42 @@ export default class SongSelector {
 
         const result = new Set(matchedSongs);
 
+        // map matched songs to list of aliases, then normalize/deduplicate to check for repeated song names
+        const songAliasByMatchedSong = matchedSongs.map((song) => {
+            const allNamesAndAliases = [
+                song.songName,
+                ...(song.hangulSongName ? [song.hangulSongName] : []),
+                ...(State.aliases.song[song.youtubeLink] || []),
+            ];
+
+            const normalizedDeduped = new Set(
+                allNamesAndAliases.map((name) =>
+                    normalizePunctuationInName(name),
+                ),
+            );
+
+            return Array.from(normalizedDeduped);
+        });
+
+        const aliasToCountMapping: { [alias: string]: number } = {};
+        for (const dedupedAliasesForSong of songAliasByMatchedSong) {
+            for (const dedupedAlias of dedupedAliasesForSong) {
+                if (!(dedupedAlias in aliasToCountMapping)) {
+                    aliasToCountMapping[dedupedAlias] = 1;
+                    continue;
+                }
+
+                aliasToCountMapping[dedupedAlias]++;
+            }
+        }
+
+        let ineligibleDueToCommonAlias = 0;
+        for (const alias in aliasToCountMapping) {
+            if (aliasToCountMapping[alias] > 10) {
+                ineligibleDueToCommonAlias += aliasToCountMapping[alias] - 1;
+            }
+        }
+
         return {
             songs: result,
             countBeforeLimit: result.size,
@@ -578,6 +613,7 @@ export default class SongSelector {
             metadata,
             truncated,
             unmatchedSongs,
+            ineligibleDueToCommonAlias,
         };
     }
 }
