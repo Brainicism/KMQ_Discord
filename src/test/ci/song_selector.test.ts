@@ -938,6 +938,7 @@ describe("song selector", () => {
                     guildPreference.songSelector.uniqueSongsPlayed.size,
                     1,
                 );
+
                 assert.strictEqual(
                     [...guildPreference.songSelector.uniqueSongsPlayed][0],
                     song.youtubeLink,

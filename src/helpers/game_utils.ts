@@ -5,7 +5,6 @@ import { sql } from "kysely";
 import AnswerType from "../enums/option_types/answer_type";
 import GuessModeType from "../enums/option_types/guess_mode_type";
 import LocaleType from "../enums/locale_type";
-import SongSelector from "../structures/song_selector";
 import State from "../state";
 import _ from "lodash";
 import dbContext from "../database_context";
