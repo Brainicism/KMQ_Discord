@@ -16,6 +16,7 @@ import {
     DEFAULT_SHUFFLE,
     DEFAULT_SUBUNIT_PREFERENCE,
     GameOptionInternal,
+    NON_RELOAD_IMPACTING_GAME_OPTION_INTERNALS,
 } from "../constants";
 import { IPCLogger } from "../logger";
 import { Mutex } from "async-mutex";
@@ -454,8 +455,11 @@ export default class GuildPreference {
             return [true, []];
         }
 
-        const updatedOptionsObj = updatedOptions.map((x) => {
-            const optionName = x[0];
+        const updatedOptionsObj: Array<{
+            name: GameOptionInternal;
+            value: GameOptionValue;
+        }> = updatedOptions.map((x) => {
+            const optionName = x[0] as GameOptionInternal;
             const optionValue = x[1];
             return { name: optionName, value: optionValue };
         });
@@ -989,7 +993,10 @@ export default class GuildPreference {
      * @param updatedOptionsObjects - An array of objects containing the names and values of updated options
      */
     async updateGuildPreferences(
-        updatedOptionsObjects?: Array<{ name: string; value: GameOptionValue }>,
+        updatedOptionsObjects?: Array<{
+            name: GameOptionInternal;
+            value: GameOptionValue;
+        }>,
     ): Promise<void> {
         let updatedOptions: Insertable<GameOptionsSchema>[] = [];
         if (updatedOptionsObjects) {
@@ -1028,13 +1035,21 @@ export default class GuildPreference {
             );
         });
 
-        logger.info(
-            `gid: ${this.guildID} | Game options modified, songs reloaded`,
+        const gameOptionsAreReloadImpacting = !updatedOptions.every((option) =>
+            NON_RELOAD_IMPACTING_GAME_OPTION_INTERNALS.includes(
+                option.option_name as GameOptionInternal,
+            ),
         );
 
-        await this.songSelector.reloadSongs(
-            this.getKmqPlaylistID() ?? undefined,
-        );
+        if (gameOptionsAreReloadImpacting) {
+            logger.info(
+                `gid: ${this.guildID} | Impactful game options modified, songs reloaded`,
+            );
+
+            await this.songSelector.reloadSongs(
+                this.getKmqPlaylistID() ?? undefined,
+            );
+        }
 
         if (this.answerTypeChangeCallback) {
             if (
@@ -1063,8 +1078,11 @@ export default class GuildPreference {
             }
         }
 
-        const options = Object.entries(this.gameOptions).map((x) => {
-            const optionName = x[0];
+        const options: Array<{
+            name: GameOptionInternal;
+            value: GameOptionValue;
+        }> = Object.entries(this.gameOptions).map((x) => {
+            const optionName = x[0] as GameOptionInternal;
             const optionValue = x[1];
             return { name: optionName, value: optionValue };
         });
