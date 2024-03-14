@@ -637,6 +637,8 @@ export function mapTo<T, S extends T, K extends keyof T>(
 ): void {
     if (source[key] === null) {
         target[key] = null as T[K];
+    } else if (Array.isArray(source[key])) {
+        target[key] = [...(source[key] as any)] as any;
     } else if (typeof source[key] === "object") {
         target[key] = { ...source[key] };
     } else {
