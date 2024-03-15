@@ -535,8 +535,8 @@ describe("song selector", () => {
                     );
 
                     // before adding shadowbanned artists
-                    await guildPreference.songSelector.reloadSongs();
                     guildPreference.songSelector.setShadowBannedArtists([]);
+                    await guildPreference.songSelector.reloadSongs();
                     const beforeSongList =
                         guildPreference.songSelector.getSongs().songs;
 
@@ -555,7 +555,6 @@ describe("song selector", () => {
                         shadowbannedArtists,
                     );
                     await guildPreference.songSelector.reloadSongs();
-                    guildPreference.songSelector.setShadowBannedArtists([]);
                     const afterSongList =
                         guildPreference.songSelector.getSongs().songs;
 
