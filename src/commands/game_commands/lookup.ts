@@ -1,5 +1,5 @@
 import { IPCLogger } from "../../logger";
-import { KmqImages, SHADOW_BANNED_ARTIST_IDS } from "../../constants";
+import { KmqImages } from "../../constants";
 import {
     chunkArray,
     clickableSlashCommand,
@@ -169,13 +169,8 @@ async function lookupByYoutubeID(
         const guildPreference =
             await GuildPreference.getGuildPreference(guildID);
 
-        includedInOptions = [
-            ...(
-                await guildPreference.songSelector.getSelectedSongs(
-                    SHADOW_BANNED_ARTIST_IDS,
-                )
-            ).songs,
-        ]
+        await guildPreference.songSelector.reloadSongs();
+        includedInOptions = [...guildPreference.songSelector.getSongs().songs]
             .map((x) => x.youtubeLink)
             .includes(videoID);
 
