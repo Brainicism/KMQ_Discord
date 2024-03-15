@@ -67,6 +67,9 @@ export default class SongSelector {
     /** The last gender played when gender is set to alternating, can be null (in not alternating mode), GENDER.MALE, or GENDER.FEMALE */
     public lastAlternatingGender: GenderModeOptions | null;
 
+    /** The shadowbanned artists */
+    public shadowBannedArtists: Array<number> = [];
+
     /** The guild preference */
     private guildPreference: GuildPreference;
 
@@ -75,6 +78,7 @@ export default class SongSelector {
         this.uniqueSongsPlayed = new Set();
         this.lastAlternatingGender = null;
         this.guildPreference = guildPreference;
+        this.shadowBannedArtists = SHADOW_BANNED_ARTIST_IDS;
     }
 
     getUniqueSongCounter(): UniqueSongCounter {
@@ -139,20 +143,17 @@ export default class SongSelector {
     }
 
     queryRandomSong(): QueriedSong | null {
-        const selectedSongs = this.getSongs().songs;
         let randomSong: QueriedSong | null;
         const ignoredSongs = new Set([...this.uniqueSongsPlayed]);
 
         if (this.lastAlternatingGender) {
-            randomSong = SongSelector.selectRandomSong(
-                selectedSongs,
+            randomSong = this.selectRandomSong(
                 ignoredSongs,
                 this.lastAlternatingGender,
                 this.guildPreference.gameOptions.shuffleType,
             );
         } else {
-            randomSong = SongSelector.selectRandomSong(
-                selectedSongs,
+            randomSong = this.selectRandomSong(
                 ignoredSongs,
                 null,
                 this.guildPreference.gameOptions.shuffleType,
@@ -170,19 +171,17 @@ export default class SongSelector {
 
     /**
      * Selects a random song based on the GameOptions, avoiding recently played songs
-     * @param songList - The selected songs to select from
      * @param ignoredSongs - The union of last played songs and unique songs to not select from
      * @param alternatingGender - The gender to limit selecting from if /gender alternating
      * @param shuffleType - The shuffle type
      * @returns the QueriedSong
      */
-    static selectRandomSong(
-        songList: Set<QueriedSong>,
+    selectRandomSong(
         ignoredSongs: Set<string>,
         alternatingGender: GenderModeOptions | null,
         shuffleType = ShuffleType.RANDOM,
     ): QueriedSong | null {
-        let queriedSongList = [...songList];
+        let queriedSongList = [...this.getSongs().songs];
         if (ignoredSongs) {
             queriedSongList = queriedSongList.filter(
                 (x) => !ignoredSongs.has(x.youtubeLink),
@@ -248,6 +247,10 @@ export default class SongSelector {
         return this.selectedSongs ? this.selectedSongs.songs.size : 0;
     }
 
+    setShadowBannedArtists(shadowBannedArtists: Array<number>): void {
+        this.shadowBannedArtists = shadowBannedArtists;
+    }
+
     async reloadSongs(
         kmqPlaylistIdentifier?: string,
         forceRefreshMetadata?: boolean,
@@ -258,15 +261,12 @@ export default class SongSelector {
             !kmqPlaylistIdentifier ||
             this.guildPreference.gameOptions.forcePlaySongID
         ) {
-            this.selectedSongs = await this.getSelectedSongs(
-                SHADOW_BANNED_ARTIST_IDS,
-            );
+            this.selectedSongs = await this.querySelectedSongs();
 
             return null;
         }
 
-        const playlist = await SongSelector.getPlaylistSongList(
-            this.guildPreference.guildID,
+        const playlist = await this.getPlaylistSongList(
             kmqPlaylistIdentifier,
             forceRefreshMetadata || false,
             messageContext,
@@ -277,14 +277,97 @@ export default class SongSelector {
         return playlist;
     }
 
+    async getPlaylistSongList(
+        kmqPlaylistIdentifier: string,
+        forceRefreshMetadata: boolean,
+        messageContext?: MessageContext,
+        interaction?: Eris.CommandInteraction,
+    ): Promise<SelectedSongs & MatchedPlaylist> {
+        const guildID = this.guildPreference.guildID;
+        const kmqPlaylistParsed = parseKmqPlaylistIdentifier(
+            kmqPlaylistIdentifier,
+        );
+
+        const { matchedSongs, metadata, truncated, unmatchedSongs } =
+            kmqPlaylistParsed.isSpotify
+                ? await State.playlistManager.getMatchedSpotifyPlaylist(
+                      guildID,
+                      kmqPlaylistParsed.playlistId,
+                      forceRefreshMetadata,
+                      messageContext,
+                      interaction,
+                  )
+                : await State.playlistManager.getMatchedYoutubePlaylist(
+                      guildID,
+                      kmqPlaylistParsed.playlistId,
+                      forceRefreshMetadata,
+                      messageContext,
+                      interaction,
+                  );
+
+        const result = new Set(matchedSongs);
+
+        // map matched songs to list of aliases, then normalize/deduplicate to check for repeated song names
+        const songAliasByMatchedSong = matchedSongs.map((song) => {
+            const allNamesAndAliases = [
+                song.songName,
+                ...(song.hangulSongName ? [song.hangulSongName] : []),
+                ...(State.aliases.song[song.youtubeLink] || []),
+            ];
+
+            const normalizedDeduped = new Set(
+                allNamesAndAliases.map((name) =>
+                    normalizePunctuationInName(name),
+                ),
+            );
+
+            return Array.from(normalizedDeduped);
+        });
+
+        const aliasToCountMapping: { [alias: string]: number } = {};
+        for (const dedupedAliasesForSong of songAliasByMatchedSong) {
+            for (const dedupedAlias of dedupedAliasesForSong) {
+                if (!(dedupedAlias in aliasToCountMapping)) {
+                    aliasToCountMapping[dedupedAlias] = 1;
+                    continue;
+                }
+
+                aliasToCountMapping[dedupedAlias]++;
+            }
+        }
+
+        let ineligibleDueToCommonAlias = 0;
+        for (const alias in aliasToCountMapping) {
+            if (aliasToCountMapping[alias] > 10) {
+                ineligibleDueToCommonAlias += aliasToCountMapping[alias] - 1;
+            }
+        }
+
+        if (ineligibleDueToCommonAlias) {
+            logger.info(
+                `gid: ${guildID}, pid: ${kmqPlaylistIdentifier} | Some songs were ineligible due to common aliases: ${JSON.stringify(aliasToCountMapping)}`,
+            );
+        }
+
+        return {
+            songs: result,
+            countBeforeLimit: result.size,
+            matchedSongs,
+            metadata,
+            truncated,
+            unmatchedSongs,
+            ineligibleDueToCommonAlias,
+        };
+    }
+
     /**
      * Returns a list of songs from the data store, narrowed down by the specified game options
-     * @param shadowBannedArtistIds - artist IDs that shouldn't be populated by subunit inclusion
      * @returns a list of songs, as well as the number of songs before the filter option was applied
      */
-    async getSelectedSongs(
-        shadowBannedArtistIds: Array<number> = [],
-    ): Promise<{ songs: Set<QueriedSong>; countBeforeLimit: number }> {
+    private async querySelectedSongs(): Promise<{
+        songs: Set<QueriedSong>;
+        countBeforeLimit: number;
+    }> {
         const gameOptions = this.guildPreference.gameOptions;
         let result: Array<QueriedSong> = [];
         let queryBuilder = dbContext.kmq
@@ -320,7 +403,7 @@ export default class SongSelector {
             subunitsQueryBuilder = subunitsQueryBuilder.where(
                 "id",
                 "not in",
-                shadowBannedArtistIds,
+                this.shadowBannedArtists,
             );
 
             subunits = (await subunitsQueryBuilder.execute()).map(
@@ -427,7 +510,7 @@ export default class SongSelector {
 
                 mainArtistFilterExpressions.push(
                     and([
-                        eb("id_artist", "not in", shadowBannedArtistIds),
+                        eb("id_artist", "not in", this.shadowBannedArtists),
                         or(mainArtistIdSearchExpressions),
                     ]),
                 );
@@ -542,89 +625,6 @@ export default class SongSelector {
         return {
             songs: new Set(result),
             countBeforeLimit: count,
-        };
-    }
-
-    static async getPlaylistSongList(
-        guildID: string,
-        kmqPlaylistIdentifier: string,
-        forceRefreshMetadata: boolean,
-        messageContext?: MessageContext,
-        interaction?: Eris.CommandInteraction,
-    ): Promise<SelectedSongs & MatchedPlaylist> {
-        const kmqPlaylistParsed = parseKmqPlaylistIdentifier(
-            kmqPlaylistIdentifier,
-        );
-
-        const { matchedSongs, metadata, truncated, unmatchedSongs } =
-            kmqPlaylistParsed.isSpotify
-                ? await State.playlistManager.getMatchedSpotifyPlaylist(
-                      guildID,
-                      kmqPlaylistParsed.playlistId,
-                      forceRefreshMetadata,
-                      messageContext,
-                      interaction,
-                  )
-                : await State.playlistManager.getMatchedYoutubePlaylist(
-                      guildID,
-                      kmqPlaylistParsed.playlistId,
-                      forceRefreshMetadata,
-                      messageContext,
-                      interaction,
-                  );
-
-        const result = new Set(matchedSongs);
-
-        // map matched songs to list of aliases, then normalize/deduplicate to check for repeated song names
-        const songAliasByMatchedSong = matchedSongs.map((song) => {
-            const allNamesAndAliases = [
-                song.songName,
-                ...(song.hangulSongName ? [song.hangulSongName] : []),
-                ...(State.aliases.song[song.youtubeLink] || []),
-            ];
-
-            const normalizedDeduped = new Set(
-                allNamesAndAliases.map((name) =>
-                    normalizePunctuationInName(name),
-                ),
-            );
-
-            return Array.from(normalizedDeduped);
-        });
-
-        const aliasToCountMapping: { [alias: string]: number } = {};
-        for (const dedupedAliasesForSong of songAliasByMatchedSong) {
-            for (const dedupedAlias of dedupedAliasesForSong) {
-                if (!(dedupedAlias in aliasToCountMapping)) {
-                    aliasToCountMapping[dedupedAlias] = 1;
-                    continue;
-                }
-
-                aliasToCountMapping[dedupedAlias]++;
-            }
-        }
-
-        let ineligibleDueToCommonAlias = 0;
-        for (const alias in aliasToCountMapping) {
-            if (aliasToCountMapping[alias] > 10) {
-                ineligibleDueToCommonAlias += aliasToCountMapping[alias] - 1;
-            }
-        }
-
-        if (ineligibleDueToCommonAlias) {
-            logger.info(
-                `gid: ${guildID}, pid: ${kmqPlaylistIdentifier} | Some songs were ineligible due to common aliases: ${JSON.stringify(aliasToCountMapping)}`,
-            );
-        }
-
-        return {
-            songs: result,
-            countBeforeLimit: result.size,
-            matchedSongs,
-            metadata,
-            truncated,
-            unmatchedSongs,
-            ineligibleDueToCommonAlias,
         };
     }
 }
