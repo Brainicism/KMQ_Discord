@@ -66,7 +66,6 @@ import TeamScoreboard from "./team_scoreboard";
 import i18n from "../helpers/localization_manager";
 import type { ButtonActionRow, GuildTextableMessage } from "../types";
 import type { CommandInteraction } from "eris";
-import type GuessResult from "../interfaces/guess_result";
 import type QueriedSong from "../interfaces/queried_song";
 import type Round from "./round";
 import type SuccessfulGuessResult from "../interfaces/success_guess_result";
@@ -237,12 +236,12 @@ export default class GameSession extends Session {
 
     /**
      * Ends an active GameRound
+     * @param isError - Whether the round ended due to an error
      * @param messageContext - An object containing relevant parts of Eris.Message
-     * @param guessResult - Whether the round ended via a correct guess (includes exp gain), or other (timeout, error, etc)
      */
     async endRound(
+        isError: boolean,
         messageContext: MessageContext,
-        guessResult: GuessResult,
     ): Promise<void> {
         if (this.round === null) {
             return;
@@ -254,40 +253,15 @@ export default class GameSession extends Session {
             return;
         }
 
-        const isHidden = this.isHiddenMode();
-        if (guessResult.correct) {
-            guessResult.correctGuessers = (
-                guessResult.correctGuessers ?? []
-            ).sort(
-                (a, b) =>
-                    getTimeToGuessMs(a, round, isHidden) -
-                    getTimeToGuessMs(b, round, isHidden),
-            );
-        }
+        const correctGuessers = round.correctGuessers;
+        const isCorrectGuess = correctGuessers.length > 0;
 
         await this.stopHiddenUpdateTimer();
 
-        if (this.isHiddenMode()) {
-            if (!guessResult.correct && round.correctGuessers.length > 0) {
-                // At least one person guessed correctly but someone didn't submit a /guess,
-                // which led to the timer ending and guessResult.correct being false
-                guessResult = {
-                    correct: true,
-                    correctGuessers: round.correctGuessers.sort(
-                        (a, b) =>
-                            getTimeToGuessMs(a, round, isHidden) -
-                            getTimeToGuessMs(b, round, isHidden),
-                    ),
-                };
-            }
-        }
-
-        await super.endRound(messageContext);
+        await super.endRound(false, messageContext);
 
         try {
-            await round.interactionMarkAnswers(
-                guessResult.correctGuessers?.length ?? 0,
-            );
+            await round.interactionMarkAnswers(correctGuessers.length ?? 0);
         } catch (e) {
             logger.warn(
                 `Failed to mark interaction answers. Bot potentially left server? e = ${e}`,
@@ -295,16 +269,14 @@ export default class GameSession extends Session {
         }
 
         const timePlayed = Date.now() - round.songStartedAt;
-        if (guessResult.correct) {
+        if (isCorrectGuess) {
             // update guessing streaks
             if (
-                guessResult.correctGuessers &&
-                (this.lastGuesser === null ||
-                    this.lastGuesser.userID !==
-                        guessResult.correctGuessers[0].id)
+                this.lastGuesser === null ||
+                this.lastGuesser.userID !== correctGuessers[0].id
             ) {
                 this.lastGuesser = {
-                    userID: guessResult.correctGuessers[0].id,
+                    userID: correctGuessers[0].id,
                     streak: 1,
                 };
             } else if (this.lastGuesser) {
@@ -314,11 +286,10 @@ export default class GameSession extends Session {
             this.guessTimes.push(timePlayed);
             await this.updateScoreboard(
                 round,
-                guessResult,
                 this.guildPreference,
                 messageContext,
             );
-        } else if (!guessResult.error) {
+        } else if (!isError) {
             this.lastGuesser = null;
             if (this.gameType === GameType.ELIMINATION) {
                 const eliminationScoreboard = this
@@ -330,7 +301,7 @@ export default class GameSession extends Session {
 
         this.incrementSongStats(
             round.song.youtubeLink,
-            guessResult.correct,
+            isCorrectGuess,
             round.skipAchieved,
             round.hintUsed,
             timePlayed,
@@ -408,10 +379,7 @@ export default class GameSession extends Session {
 
         if (this.scoreboard.gameFinished(this.guildPreference)) {
             await this.endSession("Game finished due to game options", false);
-        } else if (
-            this.gameType === GameType.SUDDEN_DEATH &&
-            !guessResult.correct
-        ) {
+        } else if (this.gameType === GameType.SUDDEN_DEATH && !isCorrectGuess) {
             await this.endSession("Sudden death game ended", false);
         }
     }
@@ -637,10 +605,7 @@ export default class GameSession extends Session {
             );
 
             // mark round as complete, so no more guesses can go through
-            await this.endRound(messageContext, {
-                correct: true,
-                correctGuessers: round.correctGuessers,
-            });
+            await this.endRound(false, messageContext);
             this.correctGuesses++;
 
             // update game session's lastActive
@@ -673,8 +638,8 @@ export default class GameSession extends Session {
                 ).size === 0
             ) {
                 await this.endRound(
+                    false,
                     new MessageContext(this.textChannelID, null, this.guildID),
-                    { correct: false },
                 );
 
                 await this.startRound(messageContext);
@@ -1484,66 +1449,85 @@ export default class GameSession extends Session {
 
     private async updateScoreboard(
         round: GameRound,
-        guessResult: GuessResult,
         guildPreference: GuildPreference,
         messageContext: MessageContext,
     ): Promise<void> {
         // update scoreboard
         const lastGuesserStreak = this.lastGuesser?.streak ?? 0;
+        const isHidden = this.isHiddenMode();
+        const isCorrect = round.correctGuessers.length > 0;
+        if (isCorrect) {
+            round.correctGuessers.sort(
+                (a, b) =>
+                    getTimeToGuessMs(a, round, isHidden) -
+                    getTimeToGuessMs(b, round, isHidden),
+            );
+        }
+
+        if (this.isHiddenMode()) {
+            if (!isCorrect && round.correctGuessers.length > 0) {
+                // At least one person guessed correctly but someone didn't submit a /guess,
+                // which led to the timer ending and guessResult.correct being false
+
+                round.correctGuessers.sort(
+                    (a, b) =>
+                        getTimeToGuessMs(a, round, isHidden) -
+                        getTimeToGuessMs(b, round, isHidden),
+                );
+            }
+        }
 
         const playerRoundResults = await Promise.all(
-            (guessResult.correctGuessers ?? []).map(
-                async (correctGuesser, idx) => {
-                    const guessPosition = idx + 1;
-                    const expGain = await calculateTotalRoundExp(
-                        guildPreference,
+            round.correctGuessers.map(async (correctGuesser, idx) => {
+                const guessPosition = idx + 1;
+                const expGain = await calculateTotalRoundExp(
+                    guildPreference,
+                    round,
+                    getNumParticipants(this.voiceChannelID),
+                    lastGuesserStreak,
+                    getTimeToGuessMs(
+                        correctGuesser,
                         round,
-                        getNumParticipants(this.voiceChannelID),
-                        lastGuesserStreak,
-                        getTimeToGuessMs(
-                            correctGuesser,
-                            round,
-                            this.isHiddenMode(),
-                        ),
-                        guessPosition,
-                        await userBonusIsActive(correctGuesser.id),
-                        correctGuesser.id,
+                        this.isHiddenMode(),
+                    ),
+                    guessPosition,
+                    await userBonusIsActive(correctGuesser.id),
+                    correctGuesser.id,
+                );
+
+                let streak = 0;
+                if (idx === 0) {
+                    streak = lastGuesserStreak;
+                    logger.info(
+                        `${getDebugLogHeader(messageContext)}, uid: ${
+                            correctGuesser.id
+                        } | Song correctly guessed. song = ${
+                            round.song.songName
+                        }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`,
                     );
+                } else {
+                    streak = 0;
+                    logger.info(
+                        `${getDebugLogHeader(messageContext)}, uid: ${
+                            correctGuesser.id
+                        } | Song correctly guessed ${getOrdinalNum(
+                            guessPosition,
+                        )}. song = ${
+                            round.song.songName
+                        }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`,
+                    );
+                }
 
-                    let streak = 0;
-                    if (idx === 0) {
-                        streak = lastGuesserStreak;
-                        logger.info(
-                            `${getDebugLogHeader(messageContext)}, uid: ${
-                                correctGuesser.id
-                            } | Song correctly guessed. song = ${
-                                round.song.songName
-                            }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`,
-                        );
-                    } else {
-                        streak = 0;
-                        logger.info(
-                            `${getDebugLogHeader(messageContext)}, uid: ${
-                                correctGuesser.id
-                            } | Song correctly guessed ${getOrdinalNum(
-                                guessPosition,
-                            )}. song = ${
-                                round.song.songName
-                            }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`,
-                        );
-                    }
-
-                    return {
-                        player: correctGuesser,
-                        pointsEarned:
-                            idx === 0
-                                ? correctGuesser.pointsAwarded
-                                : correctGuesser.pointsAwarded / 2,
-                        expGain,
-                        streak,
-                    };
-                },
-            ),
+                return {
+                    player: correctGuesser,
+                    pointsEarned:
+                        idx === 0
+                            ? correctGuesser.pointsAwarded
+                            : correctGuesser.pointsAwarded / 2,
+                    expGain,
+                    streak,
+                };
+            }),
         );
 
         round.playerRoundResults = playerRoundResults;
