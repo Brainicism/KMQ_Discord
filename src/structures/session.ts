@@ -41,7 +41,6 @@ import i18n from "../helpers/localization_manager";
 import type BookmarkedSong from "../interfaces/bookmarked_song";
 import type EmbedPayload from "../interfaces/embed_payload";
 import type GameSession from "./game_session";
-import type GuessResult from "../interfaces/guess_result";
 import type GuildPreference from "./guild_preference";
 import type KmqMember from "./kmq_member";
 import type ListeningSession from "./listening_session";
@@ -298,12 +297,12 @@ export default abstract class Session {
     /**
      * Ends an active Round
      * @param _messageContext - unused
-     * @param _guessResult - unused
+     * @param _isError - unused
      */
     // eslint-disable-next-line @typescript-eslint/require-await
     async endRound(
+        isError: boolean,
         _messageContext?: MessageContext,
-        _guessResult?: GuessResult,
     ): Promise<void> {
         if (this.round === null) {
             return;
@@ -335,7 +334,7 @@ export default abstract class Session {
 
         if (remainingDuration && remainingDuration < 0) {
             logger.info(`gid: ${this.guildID} | Game session duration reached`);
-            await this.endSession("Game session duration reached", false);
+            await this.endSession("Game session duration reached", isError);
         }
     }
 
@@ -351,8 +350,8 @@ export default abstract class Session {
 
         Session.deleteSession(this.guildID);
         await this.endRound(
+            false,
             new MessageContext(this.textChannelID, null, this.guildID),
-            { correct: false },
         );
 
         const voiceConnection = State.client.voiceConnections.get(this.guildID);
@@ -470,8 +469,8 @@ export default abstract class Session {
             );
 
             await this.endRound(
+                false,
                 new MessageContext(this.textChannelID, null, this.guildID),
-                { correct: false },
             );
 
             await this.startRound(messageContext);
@@ -740,8 +739,8 @@ export default abstract class Session {
             this.stopGuessTimeout();
 
             await this.endRound(
+                false,
                 new MessageContext(this.textChannelID, null, this.guildID),
-                { correct: false },
             );
 
             await this.startRound(messageContext);
@@ -1001,10 +1000,7 @@ export default abstract class Session {
             this.guildID,
         );
 
-        await this.endRound(messageContext, {
-            correct: false,
-            error: true,
-        });
+        await this.endRound(true, messageContext);
 
         await sendErrorMessage(messageContext, {
             title: i18n.translate(

@@ -134,7 +134,7 @@ export async function skipSong(
     }
 
     session.round.skipAchieved = true;
-    await session.endRound(messageContext, { correct: false });
+    await session.endRound(false, messageContext);
     await session.startRound(messageContext);
 }
 
