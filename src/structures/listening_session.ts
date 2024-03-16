@@ -13,7 +13,6 @@ import ListeningRound from "./listening_round";
 import Session from "./session";
 import i18n from "../helpers/localization_manager";
 import type Eris from "eris";
-import type GuessResult from "../interfaces/guess_result";
 import type GuildPreference from "./guild_preference";
 import type MessageContext from "./message_context";
 import type QueriedSong from "../interfaces/queried_song";
@@ -122,11 +121,11 @@ export default class ListeningSession extends Session {
     }
 
     async endRound(
+        isError: boolean,
         messageContext?: MessageContext,
-        guessResult?: GuessResult,
     ): Promise<void> {
         await this.round?.interactionMarkButtons();
-        await super.endRound(messageContext, guessResult);
+        await super.endRound(isError, messageContext);
     }
 
     async endSession(reason: string): Promise<void> {

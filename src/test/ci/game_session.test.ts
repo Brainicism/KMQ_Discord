@@ -132,12 +132,7 @@ describe("game session", () => {
                     Date.now(),
                 );
 
-                assert.ok(
-                    endRoundStub.calledWith(messageContext, {
-                        correct: true,
-                        correctGuessers: gameSession.round.correctGuessers,
-                    }),
-                );
+                assert.ok(endRoundStub.calledWith(false, messageContext));
 
                 // end session
                 const sendEndGameMessageStub = sandbox.stub(

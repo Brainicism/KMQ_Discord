@@ -200,7 +200,6 @@ export const NON_RELOAD_IMPACTING_GAME_OPTION_INTERNALS: Array<GameOptionInterna
         GameOptionInternal.SPECIAL_TYPE,
         GameOptionInternal.GUESS_MODE_TYPE,
         GameOptionInternal.ANSWER_TYPE,
-        GameOptionInternal.SHUFFLE_TYPE,
         GameOptionInternal.GOAL,
         GameOptionInternal.GUESS_TIMEOUT,
         GameOptionInternal.DURATION,
