@@ -147,9 +147,7 @@ export default class ForceSkipCommand implements BaseCommand {
             interaction,
         );
 
-        await session.endRound(messageContext, {
-            correct: false,
-        });
+        await session.endRound(false, messageContext);
 
         await session.startRound(messageContext);
         await session.lastActiveNow();
