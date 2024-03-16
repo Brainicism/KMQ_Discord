@@ -1455,27 +1455,12 @@ export default class GameSession extends Session {
         // update scoreboard
         const lastGuesserStreak = this.lastGuesser?.streak ?? 0;
         const isHidden = this.isHiddenMode();
-        const isCorrect = round.correctGuessers.length > 0;
-        if (isCorrect) {
-            round.correctGuessers.sort(
-                (a, b) =>
-                    getTimeToGuessMs(a, round, isHidden) -
-                    getTimeToGuessMs(b, round, isHidden),
-            );
-        }
 
-        if (this.isHiddenMode()) {
-            if (!isCorrect && round.correctGuessers.length > 0) {
-                // At least one person guessed correctly but someone didn't submit a /guess,
-                // which led to the timer ending and guessResult.correct being false
-
-                round.correctGuessers.sort(
-                    (a, b) =>
-                        getTimeToGuessMs(a, round, isHidden) -
-                        getTimeToGuessMs(b, round, isHidden),
-                );
-            }
-        }
+        round.correctGuessers.sort(
+            (a, b) =>
+                getTimeToGuessMs(a, round, isHidden) -
+                getTimeToGuessMs(b, round, isHidden),
+        );
 
         const playerRoundResults = await Promise.all(
             round.correctGuessers.map(async (correctGuesser, idx) => {
