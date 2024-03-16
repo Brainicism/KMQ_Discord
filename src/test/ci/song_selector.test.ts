@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import {
+    CHRONOLOGICAL_SHUFFLE_NUM_PARTITIONS,
     FOREIGN_LANGUAGE_TAGS,
     LAST_PLAYED_SONG_QUEUE_SIZE,
 } from "../../constants";
@@ -363,7 +364,7 @@ describe("song selector", () => {
 
         describe("shuffle mode chronological", () => {
             describe("chronological shuffle mode", () => {
-                it("should chronologically go through months, selecting randomly in each month", async () => {
+                it("should be roughly chronologically, with some randomness within each partition", async () => {
                     await guildPreference.setLimit(0, 10000);
                     await guildPreference.setShuffleType(
                         ShuffleType.CHRONOLOGICAL,
@@ -373,36 +374,38 @@ describe("song selector", () => {
 
                     assert.strict(songs.size > 0);
 
-                    // Months are increasing
-                    assert.ok(
-                        [...songs]
-                            .map(
-                                (x) =>
-                                    new Date(
-                                        x.publishDate.getFullYear(),
-                                        x.publishDate.getMonth(),
-                                    ),
-                            )
-                            .every(
-                                (value, i, arr) =>
-                                    i === 0 || value >= arr[i - 1],
-                            ),
+                    const songsArray = Array.from(songs);
+                    const partitionSize = Math.ceil(
+                        songs.size / CHRONOLOGICAL_SHUFFLE_NUM_PARTITIONS,
                     );
 
-                    // Songs are random within each month
+                    // songs in consecutive partitions are newer than the previous
+                    for (
+                        let i = 0;
+                        i < CHRONOLOGICAL_SHUFFLE_NUM_PARTITIONS - 1;
+                        i++
+                    ) {
+                        assert.ok(
+                            songsArray[partitionSize * i + 1].publishDate <
+                                songsArray[partitionSize * (i + 1) + 1]
+                                    .publishDate,
+                        );
+                    }
+
+                    // songs are not completely sorted
                     assert.notDeepStrictEqual(
                         [...songs].sort(
                             (a, b) =>
                                 a.publishDate.getTime() -
                                 b.publishDate.getTime(),
                         ),
-                        [...songs],
+                        songsArray,
                     );
                 });
             });
 
             describe("reverse chronological shuffle mode", () => {
-                it("should reverse-chronologically go through months, selecting randomly in each month", async () => {
+                it("should be roughly reverse chronologically, with some randomness within each partition", async () => {
                     await guildPreference.setLimit(0, 10000);
                     await guildPreference.setShuffleType(
                         ShuffleType.REVERSE_CHRONOLOGICAL,
@@ -411,31 +414,32 @@ describe("song selector", () => {
                     const { songs } = guildPreference.songSelector.getSongs();
 
                     assert.strict(songs.size > 0);
-
-                    // Months are decreasing
-                    assert.ok(
-                        [...songs]
-                            .map(
-                                (x) =>
-                                    new Date(
-                                        x.publishDate.getFullYear(),
-                                        x.publishDate.getMonth(),
-                                    ),
-                            )
-                            .every(
-                                (value, i, arr) =>
-                                    i === 0 || value <= arr[i - 1],
-                            ),
+                    const songsArray = Array.from(songs);
+                    const partitionSize = Math.ceil(
+                        songs.size / CHRONOLOGICAL_SHUFFLE_NUM_PARTITIONS,
                     );
 
-                    // Songs are random within each month
+                    // songs in consecutive partitions are older than the previous
+                    for (
+                        let i = 0;
+                        i < CHRONOLOGICAL_SHUFFLE_NUM_PARTITIONS - 1;
+                        i++
+                    ) {
+                        assert.ok(
+                            songsArray[partitionSize * i + 1].publishDate >
+                                songsArray[partitionSize * (i + 1) + 1]
+                                    .publishDate,
+                        );
+                    }
+
+                    // songs are not completely sorted
                     assert.notDeepStrictEqual(
-                        [...songs].sort(
+                        [...songsArray].sort(
                             (a, b) =>
                                 b.publishDate.getTime() -
                                 a.publishDate.getTime(),
                         ),
-                        [...songs],
+                        songsArray,
                     );
                 });
             });

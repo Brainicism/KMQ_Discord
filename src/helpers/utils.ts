@@ -730,3 +730,43 @@ export function hasAtLeastOneAlphanumeric(m: string): boolean {
     // eslint-disable-next-line no-control-regex
     return /[a-zA-Z0-9]/.test(m);
 }
+
+/**
+ * @param arr - the array
+ * @param numPartitions - the number of partition
+ * @returns the array sorted in individual partitions
+ */
+export function shufflePartitionedArray<T>(
+    arr: T[],
+    numPartitions: number,
+): T[] {
+    // Check if the number of partitions is valid
+    if (numPartitions <= 0 || numPartitions >= arr.length) {
+        throw new Error("Invalid number of partitions");
+    }
+
+    // Calculate the partition size
+    const partitionSize = Math.ceil(arr.length / numPartitions);
+
+    // Partition the array into chunks
+    const partitions: T[][] = [];
+    for (let i = 0; i < arr.length; i += partitionSize) {
+        partitions.push(arr.slice(i, i + partitionSize));
+    }
+
+    // Shuffle the elements within each partition
+    for (const partition of partitions) {
+        for (let i = partition.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [partition[i], partition[j]] = [partition[j], partition[i]];
+        }
+    }
+
+    // Flatten the shuffled partitions while keeping their order intact
+    const shuffledArray: T[] = [];
+    for (const partition of partitions) {
+        shuffledArray.push(...partition);
+    }
+
+    return shuffledArray;
+}

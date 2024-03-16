@@ -305,3 +305,4 @@ export const HIDDEN_DEFAULT_TIMER = 15;
 export const QUICK_GUESS_EMOJI = "⚡";
 
 export const QUICK_GUESS_MS = 3500;
+export const CHRONOLOGICAL_SHUFFLE_NUM_PARTITIONS = 7;

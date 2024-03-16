@@ -1,4 +1,5 @@
 import {
+    CHRONOLOGICAL_SHUFFLE_NUM_PARTITIONS,
     FOREIGN_LANGUAGE_TAGS,
     NON_OFFICIAL_VIDEO_TAGS,
     SELECTION_WEIGHT_VALUES_EASY,
@@ -10,9 +11,9 @@ import {
     chooseWeightedRandom,
     parseKmqPlaylistIdentifier,
     setDifference,
+    shufflePartitionedArray,
 } from "../helpers/utils";
 import { normalizePunctuationInName } from "./game_round";
-import { sql } from "kysely";
 import ArtistType from "../enums/option_types/artist_type";
 import LanguageType from "../enums/option_types/language_type";
 import OstPreference from "../enums/option_types/ost_preference";
@@ -584,12 +585,10 @@ export default class SongSelector {
                 ShuffleType.REVERSE_CHRONOLOGICAL,
             ].includes(shuffleType)
         ) {
-            queryBuilder = queryBuilder
-                .orderBy(
-                    sql`SUBSTRING(publishedon, 1, ${"YYYY-MM".length})`,
-                    shuffleType === ShuffleType.CHRONOLOGICAL ? "asc" : "desc",
-                )
-                .orderBy(sql`RAND()`);
+            queryBuilder = queryBuilder.orderBy(
+                "publishedon",
+                shuffleType === ShuffleType.CHRONOLOGICAL ? "asc" : "desc",
+            );
         } else {
             queryBuilder = queryBuilder.orderBy("views", "desc");
         }
@@ -598,7 +597,7 @@ export default class SongSelector {
 
         const count = result.length;
         result = result.slice(gameOptions.limitStart, gameOptions.limitEnd);
-        let selectionWeightValues: Array<number>;
+        let selectionWeightValues: Array<number> = [1];
 
         switch (shuffleType) {
             case ShuffleType.WEIGHTED_EASY:
@@ -607,8 +606,22 @@ export default class SongSelector {
             case ShuffleType.WEIGHTED_HARD:
                 selectionWeightValues = SELECTION_WEIGHT_VALUES_HARD;
                 break;
+            case ShuffleType.CHRONOLOGICAL:
+            case ShuffleType.REVERSE_CHRONOLOGICAL:
+                if (result.length > CHRONOLOGICAL_SHUFFLE_NUM_PARTITIONS * 2) {
+                    // shuffle songs within each partitions
+                    result = shufflePartitionedArray(
+                        result,
+                        Math.min(
+                            CHRONOLOGICAL_SHUFFLE_NUM_PARTITIONS,
+                            result.length,
+                        ),
+                    );
+                }
+
+                break;
             default:
-                selectionWeightValues = [1];
+                logger.error(`Unexpected shuffleType = ${shuffleType}`);
                 break;
         }
 
