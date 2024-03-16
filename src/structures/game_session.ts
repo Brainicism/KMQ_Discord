@@ -279,7 +279,7 @@ export default class GameSession extends Session {
                     userID: correctGuessers[0].id,
                     streak: 1,
                 };
-            } else if (this.lastGuesser) {
+            } else {
                 this.lastGuesser.streak++;
             }
 
