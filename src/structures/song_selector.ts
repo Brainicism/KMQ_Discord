@@ -612,10 +612,7 @@ export default class SongSelector {
                     // shuffle songs within each partitions
                     result = shufflePartitionedArray(
                         result,
-                        Math.min(
-                            CHRONOLOGICAL_SHUFFLE_NUM_PARTITIONS,
-                            result.length,
-                        ),
+                        CHRONOLOGICAL_SHUFFLE_NUM_PARTITIONS,
                     );
                 }
 
