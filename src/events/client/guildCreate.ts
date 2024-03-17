@@ -1,6 +1,6 @@
+import { DiscordPreferredLocaleToInternal } from "../../constants";
 import { IPCLogger } from "../../logger";
 import { getDebugChannel, sendInfoMessage } from "../../helpers/discord_utils";
-import LocaleType from "../../enums/locale_type";
 import LocaleTypeCommand from "../../commands/misc_commands/locale";
 import MessageContext from "../../structures/message_context";
 import type Eris from "eris";
@@ -18,16 +18,11 @@ export default async function guildCreateHandler(
         `New server joined: ${guild.id} with ${guild.memberCount} users`,
     );
 
-    if (guild.preferredLocale === "ko") {
-        await LocaleTypeCommand.updateLocale(guild.id, LocaleType.KO);
-    } else if (guild.preferredLocale === "es-ES") {
-        await LocaleTypeCommand.updateLocale(guild.id, LocaleType.ES);
-    } else if (guild.preferredLocale === "fr") {
-        await LocaleTypeCommand.updateLocale(guild.id, LocaleType.FR);
-    } else if (guild.preferredLocale === "ja") {
-        await LocaleTypeCommand.updateLocale(guild.id, LocaleType.JA);
-    } else if (guild.preferredLocale === "zh-CN") {
-        await LocaleTypeCommand.updateLocale(guild.id, LocaleType.ZH);
+    if (DiscordPreferredLocaleToInternal[guild.preferredLocale]) {
+        await LocaleTypeCommand.updateLocale(
+            guild.id,
+            DiscordPreferredLocaleToInternal[guild.preferredLocale],
+        );
     }
 
     const kmqDebugChannel = await getDebugChannel();
