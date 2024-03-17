@@ -618,7 +618,6 @@ export default class SongSelector {
 
                 break;
             default:
-                logger.error(`Unexpected shuffleType = ${shuffleType}`);
                 break;
         }
 
