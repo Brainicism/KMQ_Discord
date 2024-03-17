@@ -8,6 +8,8 @@ Welcome to KMQ, the K-Pop song guessing game. Type `/play` while in a voice chan
 
 Use `/options` to see all the options you can change to make your perfect game!
 
+Change from answering in multiple choice to various typing modes with `/answer`.
+
 Get a hint for the current song using `/hint`.
 
 Start a vote to skip the current song using `/skip`.
@@ -20,7 +22,7 @@ To reset all options, use `/reset`.
 
 Learn more about the bot's commands with `/help`.
 
-Change the language between English, 한국어, 日本語, Français, 中文, and Español with `/locale`.
+Change the language among 10+ languages with `/locale`.
 
 We update our songs frequently! Expect to see songs on the bot the same day they release on YouTube!
 
@@ -193,10 +195,6 @@ Team up with your friends and crush the competition with teams mode! Split up in
 
 To keep the game fair, switching teams mid-game forfeits your current points and EXP.
 
-## /play hidden
-
-Instead of guessing in chat, `/guess` directly to the bot. Everyone can take their time to think out what song is playing before the timer ends.
-
 ## /play suddendeath
 
 Everyone shares one life! If you can't guess the song in time, the game ends. No hints, no skips, no second chances.
@@ -239,11 +237,10 @@ Use `/help action:[command_name]` for more details about the following commands:
 -   `/cutoff`: Set a cutoff year for songs. Only songs released during and after the cutoff year will be chosen
 -   `/playlist`: Play songs from a Spotify/YouTube playlist
 -   `/artisttype`: Choose whether to hear from soloists, groups, or both
--   `/release`: Specify whether official releases are played, or to include b-sides, dance practices, acoustic versions, and remixes
+-   `/release`: Specify whether official releases are played, or to include b-sides, dance practices, and acoustic versions
 -   `/language`: Choose whether to include Japanese/English/Chinese songs, or only Korean songs
 -   `/subunits`: Choose whether to automatically include a group's subunits when using `/groups`
 -   `/ost`: Include, exclude, or exclusively play OST music videos
--   `/remix`: Include or exclude remixed songs
 -   `/multiguess`: Choose whether to allow multiple players to guess correctly in a round
 -   `/shuffle`: Choose whether songs should play in random order, or based on popularity
 -   `/seek`: Choose whether each song starts from the beginning, middle, or a random point
