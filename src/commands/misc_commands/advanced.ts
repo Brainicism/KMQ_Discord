@@ -115,7 +115,7 @@ export default class AdvancedSettingCommand implements BaseCommand {
                                         ),
 
                                     type: Eris.Constants
-                                        .ApplicationCommandOptionTypes.INTEGER,
+                                        .ApplicationCommandOptionTypes.NUMBER,
                                     required: true,
                                     max_value: MAX_MULTIGUESS_DELAY,
                                     min_value: 0,
@@ -168,7 +168,7 @@ export default class AdvancedSettingCommand implements BaseCommand {
                                         ),
 
                                     type: Eris.Constants
-                                        .ApplicationCommandOptionTypes.INTEGER,
+                                        .ApplicationCommandOptionTypes.NUMBER,
                                     required: true,
                                     max_value: MAX_SONG_START_DELAY,
                                     min_value: 0,
@@ -228,7 +228,7 @@ export default class AdvancedSettingCommand implements BaseCommand {
         } else {
             await guildPreference.updateAdvancedSetting(
                 settingName,
-                settingValue,
+                Math.round(settingValue * 10) / 10,
             );
 
             logger.info(
