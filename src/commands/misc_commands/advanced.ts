@@ -228,7 +228,7 @@ export default class AdvancedSettingCommand implements BaseCommand {
         } else {
             await guildPreference.updateAdvancedSetting(
                 settingName,
-                settingValue,
+                Math.round(settingValue * 10) / 10,
             );
 
             logger.info(
