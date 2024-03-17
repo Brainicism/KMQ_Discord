@@ -7,7 +7,7 @@ cp i18n/en.json i18n/en-latest.json
 git checkout $merge_base -- i18n/en.json
 if ! diff i18n/en-latest.json i18n/en.json; then
     echo "Updating translations..."
-    npx i18n-ai-translate diff -b i18n/en.json -a i18n/en-latest.json -l "English" --verbose
+    npx i18n-ai-translate diff -b i18n/en.json -a i18n/en-latest.json -l "English" --verbose --engine chatgpt
 else
     echo "No changes to translations"
 fi
