@@ -996,7 +996,8 @@ export default class PlaylistManager {
                 if (results.length === 1) {
                     result = results[0];
                 } else if (results.length > 1) {
-                    const properArtistNameMatch = results.find(
+                    // results may contain subgroups/parent groups, prioritize by original artist name
+                    const properArtistNameMatches = results.filter(
                         (x) =>
                             x.artistName
                                 .toLowerCase()
@@ -1006,7 +1007,19 @@ export default class PlaylistManager {
                                 .replace(/[^0-9a-z]/gi, ""),
                     );
 
-                    result = properArtistNameMatch || results[0];
+                    // if multiple matches with and without punctuation removal
+                    if (properArtistNameMatches.length > 1) {
+                        // filter by even exact-er match
+                        const sortedMatches = _.orderBy(
+                            properArtistNameMatches,
+                            ["artistName"],
+                            "asc",
+                        );
+
+                        result = sortedMatches[0];
+                    } else {
+                        result = properArtistNameMatches[0] || results[0];
+                    }
                 }
 
                 if (result) {
