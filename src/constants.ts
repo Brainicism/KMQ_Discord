@@ -305,3 +305,19 @@ export const QUICK_GUESS_EMOJI = "⚡";
 
 export const QUICK_GUESS_MS = 3500;
 export const CHRONOLOGICAL_SHUFFLE_NUM_PARTITIONS = 7;
+
+export const DiscordPreferredLocaleToInternal: {
+    [locale: string]: LocaleType;
+} = {
+    ko: LocaleType.KO,
+    ja: LocaleType.JA,
+    "es-ES": LocaleType.ES,
+    fr: LocaleType.FR,
+    "zh-CN": LocaleType.ZH,
+    nl: LocaleType.NL,
+    id: LocaleType.ID,
+    "pt-BR": LocaleType.PT,
+    ru: LocaleType.RU,
+    de: LocaleType.DE,
+    hi: LocaleType.HI,
+};
