@@ -22,7 +22,7 @@ To reset all options, use `/reset`.
 
 Learn more about the bot's commands with `/help`.
 
-Change the language among 10+ languages with `/locale`.
+Change the language among English, 한국어, 日本語, Français, 中文, Español, and many more with `/locale`.
 
 We update our songs frequently! Expect to see songs on the bot the same day they release on YouTube!
 
