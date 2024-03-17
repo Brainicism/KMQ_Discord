@@ -223,7 +223,8 @@ export default class GuildPreference {
 
     constructor(guildID: string, options?: GameOptions) {
         this.guildID = guildID;
-        this.gameOptions = options || { ...GuildPreference.DEFAULT_OPTIONS };
+        this.gameOptions =
+            options || _.cloneDeep(GuildPreference.DEFAULT_OPTIONS);
         this.songSelector = new SongSelector(this);
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.validateGameOptions();
@@ -333,9 +334,10 @@ export default class GuildPreference {
         gameOptionsJson?: Object,
     ): GuildPreference {
         if (!gameOptionsJson) {
-            return new GuildPreference(guildID, {
-                ...GuildPreference.DEFAULT_OPTIONS,
-            });
+            return new GuildPreference(
+                guildID,
+                _.cloneDeep(GuildPreference.DEFAULT_OPTIONS),
+            );
         }
 
         return new GuildPreference(guildID, gameOptionsJson as GameOptions);
@@ -1065,7 +1067,7 @@ export default class GuildPreference {
     /** Resets all options to the default value */
     async resetToDefault(): Promise<Array<GameOption>> {
         const oldOptions = this.gameOptions;
-        this.gameOptions = { ...GuildPreference.DEFAULT_OPTIONS };
+        this.gameOptions = _.cloneDeep(GuildPreference.DEFAULT_OPTIONS);
 
         // do not reset answerType
         this.gameOptions["answerType"] = oldOptions.answerType;
