@@ -993,18 +993,17 @@ export default class PlaylistManager {
                 if (results.length === 1) {
                     result = results[0];
                 } else if (results.length > 1) {
-                    // prioritize pre-bracket name
-                    const properNameMatch = results.find(
+                    const properArtistNameMatch = results.find(
                         (x) =>
-                            x.songName
+                            x.artistName
                                 .toLowerCase()
                                 .replace(/[^0-9a-z]/gi, "") ===
-                            songNames[0]
+                            song.artists[0]
                                 .toLowerCase()
                                 .replace(/[^0-9a-z]/gi, ""),
                     );
 
-                    result = properNameMatch || results[0];
+                    result = properArtistNameMatch || results[0];
                 }
 
                 if (result) {
