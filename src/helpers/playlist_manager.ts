@@ -969,7 +969,10 @@ export default class PlaylistManager {
                             "like",
                             song.artists[0],
                         ),
-                        eb("artist_aliases", "like", `%${song.artists[0]}%`),
+                        eb("artist_aliases", "like", `${song.artists[0]}`),
+                        eb("artist_aliases", "like", `${song.artists[0]};%`),
+                        eb("artist_aliases", "like", `%;${song.artists[0]};%`),
+                        eb("artist_aliases", "like", `%;${song.artists[0]}`),
                     ];
 
                     if (aliasIDs.length) {
