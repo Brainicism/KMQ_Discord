@@ -24,6 +24,7 @@ const logger = new IPCLogger(COMMAND_NAME);
 const MIN_GUESS_LENGTH = 1;
 const MAX_GUESS_LENGTH = 500;
 
+// eslint-disable-next-line import/no-unused-modules
 export default class GuessCommand implements BaseCommand {
     aliases = [];
     validations = {

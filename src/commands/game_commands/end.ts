@@ -16,6 +16,7 @@ import type HelpDocumentation from "../../interfaces/help";
 const COMMAND_NAME = "end";
 const logger = new IPCLogger(COMMAND_NAME);
 
+// eslint-disable-next-line import/no-unused-modules
 export default class EndCommand implements BaseCommand {
     aliases = ["stop", "e"];
 

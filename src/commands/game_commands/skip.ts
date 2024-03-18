@@ -138,6 +138,7 @@ export async function skipSong(
     await session.startRound(messageContext);
 }
 
+// eslint-disable-next-line import/no-unused-modules
 export default class SkipCommand implements BaseCommand {
     aliases = ["s"];
     preRunChecks = [

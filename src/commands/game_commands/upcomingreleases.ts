@@ -38,6 +38,7 @@ enum ReleaseType {
     Album = "album",
 }
 
+// eslint-disable-next-line import/no-unused-modules
 export default class UpcomingReleasesCommand implements BaseCommand {
     aliases = ["upcoming"];
 

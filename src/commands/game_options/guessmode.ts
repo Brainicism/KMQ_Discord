@@ -23,6 +23,7 @@ import type HelpDocumentation from "../../interfaces/help";
 const COMMAND_NAME = "guessmode";
 const logger = new IPCLogger(COMMAND_NAME);
 
+// eslint-disable-next-line import/no-unused-modules
 export default class GuessModeCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },

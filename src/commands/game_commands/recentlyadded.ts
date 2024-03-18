@@ -31,6 +31,7 @@ const logger = new IPCLogger(COMMAND_NAME);
 
 const FIELDS_PER_EMBED = 9;
 
+// eslint-disable-next-line import/no-unused-modules
 export default class RecentlyAddedCommand implements BaseCommand {
     aliases = ["recent"];
 

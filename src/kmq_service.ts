@@ -16,6 +16,7 @@ import type NewsSummary from "./interfaces/news_summary";
 
 const logger = new IPCLogger("kmq_service");
 
+// eslint-disable-next-line import/no-unused-modules
 export default class ServiceWorker extends BaseServiceWorker {
     news: {
         [range: string]: {

@@ -16,6 +16,7 @@ import type HelpDocumentation from "../../interfaces/help";
 const COMMAND_NAME = "options";
 const logger = new IPCLogger(COMMAND_NAME);
 
+// eslint-disable-next-line import/no-unused-modules
 export default class OptionsCommand implements BaseCommand {
     aliases = ["settings"];
 

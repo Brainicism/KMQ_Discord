@@ -24,6 +24,7 @@ const logger = new IPCLogger(COMMAND_NAME);
 const MAX_MULTIGUESS_DELAY = 60;
 const MAX_SONG_START_DELAY = 60;
 
+// eslint-disable-next-line import/no-unused-modules
 export default class AdvancedSettingCommand implements BaseCommand {
     validations = {
         arguments: [],

@@ -205,6 +205,7 @@ export async function validHintCheck(
     return true;
 }
 
+// eslint-disable-next-line import/no-unused-modules
 export default class HintCommand implements BaseCommand {
     aliases = ["h"];
 

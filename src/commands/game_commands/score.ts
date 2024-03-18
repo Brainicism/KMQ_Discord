@@ -16,6 +16,7 @@ import type MessageContext from "../../structures/message_context";
 const COMMAND_NAME = "score";
 const logger = new IPCLogger(COMMAND_NAME);
 
+// eslint-disable-next-line import/no-unused-modules
 export default class ScoreCommand implements BaseCommand {
     aliases = ["scoreboard", "sb"];
 

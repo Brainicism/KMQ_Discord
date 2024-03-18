@@ -38,6 +38,10 @@
         ],
         "@typescript-eslint/type-annotation-spacing": ["warn"],
         "import/no-cycle": ["warn"],
+        "import/no-unused-modules": [
+            1,
+            { "unusedExports": true, "ignoreExports": ["src/typings"] }
+        ],
         "@typescript-eslint/consistent-type-imports": ["warn"],
         "jsdoc/require-jsdoc": [
             "warn",

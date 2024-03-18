@@ -23,6 +23,7 @@ import type HelpDocumentation from "../../interfaces/help";
 const COMMAND_NAME = "forcehint";
 const logger = new IPCLogger(COMMAND_NAME);
 
+// eslint-disable-next-line import/no-unused-modules
 export default class ForceHintCommand implements BaseCommand {
     aliases = ["fhint", "fh"];
 
