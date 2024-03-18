@@ -43,12 +43,11 @@ import {
     VOTE_LINK,
 } from "../constants";
 import { IPCLogger } from "../logger";
-import { calculateTotalRoundExp } from "../commands/game_commands/exp";
-import { getRankNameByLevel } from "../commands/game_commands/profile";
 import { sql } from "kysely";
 import AnswerType from "../enums/option_types/answer_type";
 import EliminationPlayer from "./elimination_player";
 import EliminationScoreboard from "./elimination_scoreboard";
+import ExpCommand from "../commands/game_commands/exp";
 import GameRound from "./game_round";
 import GameType from "../enums/game_type";
 import GuessModeType from "../enums/option_types/guess_mode_type";
@@ -57,6 +56,7 @@ import KmqMember from "./kmq_member";
 import MessageContext from "./message_context";
 import MultiGuessType from "../enums/option_types/multiguess_type";
 import Player from "./player";
+import ProfileCommand from "../commands/game_commands/profile";
 import Scoreboard from "./scoreboard";
 import Session from "./session";
 import TeamScoreboard from "./team_scoreboard";
@@ -481,7 +481,7 @@ export default class GameSession extends Session {
                         ),
                         endLevel: codeLine(String(leveledUpPlayer.endLevel)),
                         rank: codeLine(
-                            getRankNameByLevel(
+                            ProfileCommand.getRankNameByLevel(
                                 leveledUpPlayer.endLevel,
                                 this.guildID,
                             ),
@@ -1462,7 +1462,7 @@ export default class GameSession extends Session {
         const playerRoundResults = await Promise.all(
             round.correctGuessers.map(async (correctGuesser, idx) => {
                 const guessPosition = idx + 1;
-                const expGain = await calculateTotalRoundExp(
+                const expGain = await ExpCommand.calculateTotalRoundExp(
                     guildPreference,
                     round,
                     getNumParticipants(this.voiceChannelID),

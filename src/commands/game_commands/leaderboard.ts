@@ -15,7 +15,6 @@ import {
     sendInfoMessage,
     sendPaginationedEmbed,
 } from "../../helpers/discord_utils";
-import { getRankNameByLevel } from "./profile";
 import { sendValidationErrorMessage } from "../../helpers/validate";
 import EnvType from "../../enums/env_type";
 import Eris from "eris";
@@ -25,6 +24,7 @@ import LeaderboardScope from "../../enums/option_types/leaderboard_scope";
 import LeaderboardType from "../../enums/option_types/leaderboard_type";
 import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
+import ProfileCommand from "./profile";
 import State from "../../state";
 import dbContext from "../../database_context";
 import i18n from "../../helpers/localization_manager";
@@ -828,10 +828,11 @@ export default class LeaderboardCommand implements BaseCommand {
                                                     friendlyFormattedNumber(
                                                         player.level,
                                                     ),
-                                                rankName: getRankNameByLevel(
-                                                    player.level,
-                                                    messageContext.guildID,
-                                                ),
+                                                rankName:
+                                                    ProfileCommand.getRankNameByLevel(
+                                                        player.level,
+                                                        messageContext.guildID,
+                                                    ),
                                             },
                                         );
                                     } else {

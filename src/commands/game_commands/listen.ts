@@ -28,72 +28,6 @@ import type HelpDocumentation from "../../interfaces/help";
 const COMMAND_NAME = "listen";
 const logger = new IPCLogger(COMMAND_NAME);
 
-/**
- * Sends the beginning of game session message
- * @param textChannelName - The name of the text channel to send the message to
- * @param voiceChannelName - The name of the voice channel to join
- * @param messageContext - The original message that triggered the command
- * @param guildPreference - The guild's preferences
- * @param interaction - The interaction
- */
-async function sendBeginListeningSessionMessage(
-    textChannelName: string,
-    voiceChannelName: string,
-    messageContext: MessageContext,
-    guildPreference: GuildPreference,
-    interaction?: Eris.CommandInteraction,
-): Promise<void> {
-    const startTitle = i18n.translate(
-        messageContext.guildID,
-        "command.listen.musicStarting",
-        {
-            textChannelName,
-            voiceChannelName,
-        },
-    );
-
-    const gameInfoMessage = await getGameInfoMessage(messageContext.guildID);
-
-    const fields: Eris.EmbedField[] = [];
-    if (gameInfoMessage) {
-        fields.push({
-            name: gameInfoMessage.title,
-            value: gameInfoMessage.message,
-            inline: false,
-        });
-    }
-
-    const optionsEmbedPayload = await generateOptionsMessage(
-        Session.getSession(messageContext.guildID),
-        messageContext,
-        guildPreference,
-        [],
-        false,
-        false,
-    );
-
-    const additionalPayloads = [];
-    if (optionsEmbedPayload) {
-        additionalPayloads.push(optionsEmbedPayload);
-    } else {
-        await notifyOptionsGenerationError(messageContext, "listen");
-    }
-
-    await sendInfoMessage(
-        messageContext,
-        {
-            title: startTitle,
-            color: EMBED_SUCCESS_BONUS_COLOR,
-            thumbnailUrl: KmqImages.HAPPY,
-            fields,
-        },
-        false,
-        undefined,
-        additionalPayloads,
-        interaction,
-    );
-}
-
 // eslint-disable-next-line import/no-unused-modules
 export default class ListenCommand implements BaseCommand {
     preRunChecks = [
@@ -191,7 +125,7 @@ export default class ListenCommand implements BaseCommand {
 
         State.listeningSessions[guildID] = listeningSession;
 
-        await sendBeginListeningSessionMessage(
+        await ListenCommand.sendBeginListeningSessionMessage(
             textChannel.name,
             voiceChannel.name,
             messageContext,
@@ -211,5 +145,73 @@ export default class ListenCommand implements BaseCommand {
         messageContext: MessageContext,
     ): Promise<void> {
         await ListenCommand.startListening(messageContext, interaction);
+    }
+
+    /**
+     * Sends the beginning of game session message
+     * @param textChannelName - The name of the text channel to send the message to
+     * @param voiceChannelName - The name of the voice channel to join
+     * @param messageContext - The original message that triggered the command
+     * @param guildPreference - The guild's preferences
+     * @param interaction - The interaction
+     */
+    static async sendBeginListeningSessionMessage(
+        textChannelName: string,
+        voiceChannelName: string,
+        messageContext: MessageContext,
+        guildPreference: GuildPreference,
+        interaction?: Eris.CommandInteraction,
+    ): Promise<void> {
+        const startTitle = i18n.translate(
+            messageContext.guildID,
+            "command.listen.musicStarting",
+            {
+                textChannelName,
+                voiceChannelName,
+            },
+        );
+
+        const gameInfoMessage = await getGameInfoMessage(
+            messageContext.guildID,
+        );
+
+        const fields: Eris.EmbedField[] = [];
+        if (gameInfoMessage) {
+            fields.push({
+                name: gameInfoMessage.title,
+                value: gameInfoMessage.message,
+                inline: false,
+            });
+        }
+
+        const optionsEmbedPayload = await generateOptionsMessage(
+            Session.getSession(messageContext.guildID),
+            messageContext,
+            guildPreference,
+            [],
+            false,
+            false,
+        );
+
+        const additionalPayloads = [];
+        if (optionsEmbedPayload) {
+            additionalPayloads.push(optionsEmbedPayload);
+        } else {
+            await notifyOptionsGenerationError(messageContext, "listen");
+        }
+
+        await sendInfoMessage(
+            messageContext,
+            {
+                title: startTitle,
+                color: EMBED_SUCCESS_BONUS_COLOR,
+                thumbnailUrl: KmqImages.HAPPY,
+                fields,
+            },
+            false,
+            undefined,
+            additionalPayloads,
+            interaction,
+        );
     }
 }

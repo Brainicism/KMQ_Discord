@@ -6,11 +6,11 @@ import {
     getMajorityCount,
     tryCreateInteractionSuccessAcknowledgement,
 } from "../helpers/discord_utils";
-import { isSkipMajority, skipSong } from "../commands/game_commands/skip";
 import { userBonusIsActive } from "../helpers/game_utils";
 import KmqMember from "./kmq_member";
 import ListeningRound from "./listening_round";
 import Session from "./session";
+import SkipCommand from "../commands/game_commands/skip";
 import i18n from "../helpers/localization_manager";
 import type Eris from "eris";
 import type GuildPreference from "./guild_preference";
@@ -161,7 +161,7 @@ export default class ListeningSession extends Session {
             await this.handleBookmarkInteraction(interaction);
         } else if (interaction.data.custom_id === round.interactionSkipUUID) {
             round.userSkipped(interaction.member!.id);
-            if (isSkipMajority(guildID, this)) {
+            if (SkipCommand.isSkipMajority(guildID, this)) {
                 await round.interactionSuccessfulSkip();
                 await tryCreateInteractionSuccessAcknowledgement(
                     interaction,
@@ -177,7 +177,7 @@ export default class ListeningSession extends Session {
                     ),
                 );
 
-                await skipSong(messageContext, this);
+                await SkipCommand.skipSong(messageContext, this);
             } else {
                 await tryCreateInteractionSuccessAcknowledgement(
                     interaction,
