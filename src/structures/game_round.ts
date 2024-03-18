@@ -41,6 +41,7 @@ type GuessResult = {
     timeToGuessMs: number;
     guess: string;
     correct: boolean;
+    pointsAwarded: number;
 };
 
 type PlayerToGuesses = {
@@ -56,9 +57,6 @@ export default class GameRound extends Round {
 
     /** Whether a hint was used */
     public hintUsed: boolean;
-
-    /** List of players who guessed correctly */
-    public readonly correctGuessers: Array<KmqMember>;
 
     /** The accepted answers for the song name */
     public readonly acceptedSongAnswers: Array<string>;
@@ -83,9 +81,6 @@ export default class GameRound extends Round {
 
     /** UUID associated with wrong guesses in multiple choice */
     public interactionIncorrectAnswerUUIDs: { [uuid: string]: number };
-
-    /** List of players who incorrectly guessed in the multiple choice */
-    public incorrectGuessers: Set<string>;
 
     /** Info about the players that won this GameRound */
     public playerRoundResults: Array<PlayerRoundResult>;
@@ -136,7 +131,6 @@ export default class GameRound extends Round {
         this.baseExp = baseExp;
         this.hintUsed = false;
         this.hintRequesters = new Set();
-        this.correctGuessers = [];
         this.finished = false;
         this.hints = {
             songHint: {
@@ -154,7 +148,6 @@ export default class GameRound extends Round {
         };
         this.interactionCorrectAnswerUUID = null;
         this.interactionIncorrectAnswerUUIDs = {};
-        this.incorrectGuessers = new Set();
         this.interactionMessage = null;
         this.playerRoundResults = [];
         this.warnTypoReceived = false;
@@ -176,6 +169,30 @@ export default class GameRound extends Round {
                   ]) as number)
                 : 1;
         this.guesses = {};
+    }
+
+    getCorrectGuessers(): Array<KmqMember> {
+        return Object.entries(this.guesses).flatMap((playerGuessResults) => {
+            const playerId = playerGuessResults[0];
+            const guessResults = playerGuessResults[1];
+            const correctGuess = guessResults.find((x) => x.correct);
+            if (correctGuess) {
+                return [new KmqMember(playerId, correctGuess?.pointsAwarded)];
+            }
+
+            return [];
+        });
+    }
+
+    getIncorrectGuessers(): Set<string> {
+        return new Set(
+            Object.entries(this.guesses)
+                .filter((playerGuessResults) => {
+                    const guessResults = playerGuessResults[1];
+                    return !guessResults.some((x) => x.correct);
+                })
+                .map((x) => x[0]),
+        );
     }
 
     /**
@@ -296,17 +313,8 @@ export default class GameRound extends Round {
             timeToGuessMs: createdAt - this.songStartedAt,
             guess,
             correct: pointsAwarded > 0,
+            pointsAwarded,
         });
-
-        if (
-            pointsAwarded > 0 &&
-            !this.correctGuessers.map((x) => x.id).includes(playerID)
-        ) {
-            this.incorrectGuessers.delete(playerID);
-            this.correctGuessers.push(new KmqMember(playerID, pointsAwarded));
-        } else if (pointsAwarded === 0) {
-            this.incorrectGuessers.add(playerID);
-        }
     }
 
     /**
@@ -588,29 +596,6 @@ export default class GameRound extends Round {
         return EMBED_ERROR_COLOR;
     }
 
-    getTimeToGuessMs(guesser: { id: string }, isHidden: boolean): number {
-        const playersGuess = this.getGuesses()[guesser.id];
-        if (!playersGuess) {
-            logger.error(
-                `Players guess result unexpectedly empty: ${guesser.id}. This should never happen!`,
-            );
-
-            return 99999999;
-        }
-
-        const correctGuessTimes = playersGuess
-            .filter((x) => x.correct)
-            .map((x) => x.timeToGuessMs);
-
-        if (isHidden) {
-            // Use the most recent guess time for hidden games, since they can be overwritten
-            return Math.max(...correctGuessTimes);
-        }
-
-        // Use the fastest guess time for normal games
-        return Math.min(...correctGuessTimes);
-    }
-
     getHint(
         guildID: string,
         guessMode: GuessModeType,
@@ -638,6 +623,34 @@ export default class GameRound extends Round {
                     ],
                 )}`;
         }
+    }
+
+    /**
+     * @param guesserId - The user ID to retrieve the time to guess for
+     * @param isHidden - Whether the answer type is hidden
+     * @returns the milliseconds it took for a player to enter their guess
+     */
+    getTimeToGuessMs(guesserId: string, isHidden: boolean): number {
+        const playersGuess = this.getGuesses()[guesserId];
+        if (!playersGuess) {
+            logger.error(
+                `Players guess result unexpectedly empty: ${guesserId}. This should never happen!`,
+            );
+
+            return 99999999;
+        }
+
+        const correctGuessTimes = playersGuess
+            .filter((x) => x.correct)
+            .map((x) => x.timeToGuessMs);
+
+        if (isHidden) {
+            // Use the most recent guess time for hidden games, since they can be overwritten
+            return Math.max(...correctGuessTimes);
+        }
+
+        // Use the fastest guess time for normal games
+        return Math.min(...correctGuessTimes);
     }
 
     /**

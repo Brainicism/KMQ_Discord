@@ -865,13 +865,15 @@ describe("game round", () => {
                     {
                         timeToGuessMs: createdAt - gameRound.songStartedAt!,
                         guess,
+                        pointsAwarded: 1,
                         correct: true,
                     },
                 ],
             });
-            assert.strictEqual(gameRound.correctGuessers.length, 1);
-            assert.strictEqual(gameRound.incorrectGuessers.size, 0);
-            assert.strictEqual(gameRound.correctGuessers[0]!.id, playerID);
+
+            assert.strictEqual(gameRound.getCorrectGuessers().length, 1);
+            assert.strictEqual(gameRound.getIncorrectGuessers().size, 0);
+            assert.strictEqual(gameRound.getCorrectGuessers()[0].id, playerID);
         });
 
         it("should allow users to overwrite their guesses", async () => {
@@ -895,12 +897,13 @@ describe("game round", () => {
                         timeToGuessMs:
                             firstGuessCreatedAt - gameRound.songStartedAt!,
                         guess: firstGuess,
+                        pointsAwarded: 0,
                         correct: false,
                     },
                 ],
             });
-            assert.strictEqual(gameRound.correctGuessers.length, 0);
-            assert.strictEqual(gameRound.incorrectGuessers.size, 1);
+            assert.strictEqual(gameRound.getCorrectGuessers().length, 0);
+            assert.strictEqual(gameRound.getIncorrectGuessers().size, 1);
             await delay(10);
 
             const secondGuess = "dalla dalla";
@@ -919,20 +922,22 @@ describe("game round", () => {
                     {
                         timeToGuessMs:
                             firstGuessCreatedAt - gameRound.songStartedAt!,
+                        pointsAwarded: 0,
                         guess: firstGuess,
                         correct: false,
                     },
                     {
                         timeToGuessMs:
                             secondGuessCreatedAt - gameRound.songStartedAt!,
+                        pointsAwarded: 1,
                         guess: secondGuess,
                         correct: true,
                     },
                 ],
             });
-            assert.strictEqual(gameRound.correctGuessers.length, 1);
-            assert.strictEqual(gameRound.incorrectGuessers.size, 0);
-            assert.strictEqual(gameRound.correctGuessers[0]!.id, playerID);
+            assert.strictEqual(gameRound.getCorrectGuessers().length, 1);
+            assert.strictEqual(gameRound.getIncorrectGuessers().size, 0);
+            assert.strictEqual(gameRound.getCorrectGuessers()[0].id, playerID);
         });
     });
 });

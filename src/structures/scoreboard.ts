@@ -271,7 +271,7 @@ export default class Scoreboard {
     }
 
     getRemainingPlayers(
-        correctGuessers: Array<{ id: string }>,
+        correctGuessers: Array<string>,
         incorrectGuessers: Set<string>,
     ): Array<Player> {
         return this.getPlayers()
@@ -279,7 +279,7 @@ export default class Scoreboard {
             .filter(
                 (player) =>
                     !incorrectGuessers.has(player.id) &&
-                    !correctGuessers.map((x) => x.id).includes(player.id),
+                    !correctGuessers.map((x) => x).includes(player.id),
             );
     }
 
