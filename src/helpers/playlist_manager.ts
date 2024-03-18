@@ -5,7 +5,6 @@ import {
     sendErrorMessage,
     sendInfoMessage,
 } from "./discord_utils";
-import { normalizePunctuationInName } from "../structures/game_round";
 import {
     parseKmqPlaylistIdentifier,
     pathExists,
@@ -16,6 +15,7 @@ import {
 } from "./utils";
 import { youtube_v3 } from "googleapis";
 import Axios from "axios";
+import GameRound from "../structures/game_round";
 import KmqConfiguration from "../kmq_configuration";
 import QueriedSong from "../structures/queried_song";
 import SongSelector from "../structures/song_selector";
@@ -892,7 +892,9 @@ export default class PlaylistManager {
         return new Promise(async (resolve, reject) => {
             const aliasIDs: Array<number> = [];
             for (const artist of song.artists) {
-                const lowercaseArtist = normalizePunctuationInName(artist);
+                const lowercaseArtist =
+                    GameRound.normalizePunctuationInName(artist);
+
                 const artistMapping = State.artistToEntry[lowercaseArtist];
                 if (artistMapping) {
                     aliasIDs.push(artistMapping.id);
@@ -901,7 +903,7 @@ export default class PlaylistManager {
                             lowercaseArtist
                         ]) {
                             const lowercaseAlias =
-                                normalizePunctuationInName(alias);
+                                GameRound.normalizePunctuationInName(alias);
 
                             if (lowercaseAlias in State.artistToEntry) {
                                 aliasIDs.push(

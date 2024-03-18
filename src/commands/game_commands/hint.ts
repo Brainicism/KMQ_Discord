@@ -1,6 +1,5 @@
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
-import { codeLine } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getMajorityCount,
@@ -10,9 +9,7 @@ import {
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameType from "../../enums/game_type";
-import GuessModeType from "../../enums/option_types/guess_mode_type";
 import GuildPreference from "../../structures/guild_preference";
-import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
@@ -22,7 +19,6 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type EliminationScoreboard from "../../structures/elimination_scoreboard";
 import type EmbedPayload from "../../interfaces/embed_payload";
-import type GameRound from "../../structures/game_round";
 import type GameSession from "../../structures/game_session";
 import type HelpDocumentation from "../../interfaces/help";
 
@@ -209,43 +205,6 @@ export async function validHintCheck(
     return true;
 }
 
-/**
- * @param guildID - The guild ID
- * @param guessMode - The guess mode
- * @param gameRound - The game round
- * @param locale - The locale
- * @returns the hint corresponding to the current game round
- */
-export function generateHint(
-    guildID: string,
-    guessMode: GuessModeType,
-    gameRound: GameRound,
-    locale: LocaleType,
-): string {
-    switch (guessMode) {
-        case GuessModeType.ARTIST:
-            return `${i18n.translate(
-                guildID,
-                "command.hint.artistName",
-            )}: ${codeLine(
-                gameRound.hints.artistHint[
-                    locale === LocaleType.KO ? LocaleType.KO : LocaleType.EN
-                ],
-            )}`;
-        case GuessModeType.SONG_NAME:
-        case GuessModeType.BOTH:
-        default:
-            return `${i18n.translate(
-                guildID,
-                "command.hint.songName",
-            )}: ${codeLine(
-                gameRound.hints.songHint[
-                    locale === LocaleType.KO ? LocaleType.KO : LocaleType.EN
-                ],
-            )}`;
-    }
-}
-
 export default class HintCommand implements BaseCommand {
     aliases = ["h"];
 
@@ -311,10 +270,9 @@ export default class HintCommand implements BaseCommand {
                     messageContext.guildID,
                     "command.hint.title",
                 ),
-                description: generateHint(
+                description: gameRound.getHint(
                     messageContext.guildID,
                     guildPreference.gameOptions.guessModeType,
-                    gameRound,
                     State.getGuildLocale(messageContext.guildID),
                 ),
                 thumbnailUrl: KmqImages.READING_BOOK,

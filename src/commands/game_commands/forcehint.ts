@@ -1,12 +1,12 @@
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
-import { generateHint, validHintCheck } from "./hint";
 import {
     getDebugLogHeader,
     sendErrorMessage,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
 import { getMention } from "../../helpers/utils";
+import { validHintCheck } from "./hint";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
@@ -110,10 +110,9 @@ export default class ForceHintCommand implements BaseCommand {
                     messageContext.guildID,
                     "command.hint.title",
                 ),
-                description: generateHint(
+                description: gameRound.getHint(
                     messageContext.guildID,
                     guildPreference.gameOptions.guessModeType,
-                    gameRound,
                     State.getGuildLocale(messageContext.guildID),
                 ),
                 thumbnailUrl: KmqImages.READING_BOOK,
