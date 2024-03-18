@@ -22,9 +22,9 @@ import {
 } from "../../helpers/discord_utils";
 import { getEmojisFromSongTags } from "../../helpers/game_utils";
 import { getVideoID, validateID } from "@distube/ytdl-core";
-import { normalizePunctuationInName } from "../../structures/game_round";
 import { sendValidationErrorMessage } from "../../helpers/validate";
 import Eris from "eris";
+import GameRound from "../../structures/game_round";
 import GuildPreference from "../../structures/guild_preference";
 import KmqMember from "../../structures/kmq_member";
 import LocaleType from "../../enums/locale_type";
@@ -702,7 +702,9 @@ export default class LookupCommand implements BaseCommand {
             let artistID: number | undefined;
             if (artistName) {
                 const matchingArtist =
-                    State.artistToEntry[normalizePunctuationInName(artistName)];
+                    State.artistToEntry[
+                        GameRound.normalizePunctuationInName(artistName)
+                    ];
 
                 if (matchingArtist) {
                     artistID = matchingArtist.id;
@@ -732,7 +734,9 @@ export default class LookupCommand implements BaseCommand {
 
         const focusedVal = interactionData.interactionOptions[focusedKey];
 
-        const lowercaseUserInput = normalizePunctuationInName(focusedVal);
+        const lowercaseUserInput =
+            GameRound.normalizePunctuationInName(focusedVal);
+
         const showPopular = lowercaseUserInput.length < 2;
         const showHangul =
             containsHangul(lowercaseUserInput) ||
@@ -746,8 +750,9 @@ export default class LookupCommand implements BaseCommand {
             let artistID: number | undefined;
             if (artistName) {
                 artistID =
-                    State.artistToEntry[normalizePunctuationInName(artistName)]
-                        ?.id;
+                    State.artistToEntry[
+                        GameRound.normalizePunctuationInName(artistName)
+                    ]?.id;
             }
 
             if (showPopular) {
@@ -775,7 +780,7 @@ export default class LookupCommand implements BaseCommand {
                             Object.values(State.songLinkToEntry).filter(
                                 (x) =>
                                     (!artistID || artistID === x.artistID) &&
-                                    normalizePunctuationInName(
+                                    GameRound.normalizePunctuationInName(
                                         (showHangul && x.hangulName) || x.name,
                                     ).startsWith(lowercaseUserInput),
                             ),
@@ -795,7 +800,7 @@ export default class LookupCommand implements BaseCommand {
             } else {
                 // only return artists that have a song that matches the entered one
                 const cleanEnteredSongName =
-                    normalizePunctuationInName(enteredSongName);
+                    GameRound.normalizePunctuationInName(enteredSongName);
 
                 const matchingSongs = Object.values(
                     State.songLinkToEntry,

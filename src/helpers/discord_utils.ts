@@ -38,12 +38,12 @@ import {
     underline,
 } from "./utils";
 import { getAvailableSongCount, userBonusIsActive } from "./game_utils";
-import { normalizePunctuationInName } from "../structures/game_round";
 import AppCommandsAction from "../enums/app_command_action";
 import EmbedPaginator from "eris-pagination";
 import EnvType from "../enums/env_type";
 import Eris from "eris";
 import GameOption from "../enums/game_option_name";
+import GameRound from "../structures/game_round";
 import GameType from "../enums/game_type";
 import LocaleType from "../enums/locale_type";
 import MessageContext from "../structures/message_context";
@@ -1906,7 +1906,9 @@ export function getMatchedArtists(enteredNames: Array<string>): {
     const unmatchedGroups: Array<string> = [];
     for (const artistName of enteredNames) {
         const match =
-            State.artistToEntry[normalizePunctuationInName(artistName)];
+            State.artistToEntry[
+                GameRound.normalizePunctuationInName(artistName)
+            ];
 
         if (match) {
             matchedGroups.push(match);
@@ -1981,7 +1983,7 @@ export async function processGroupAutocompleteInteraction(
     }
 
     const focusedVal = interactionData.interactionOptions[focusedKey];
-    const lowercaseUserInput = normalizePunctuationInName(focusedVal);
+    const lowercaseUserInput = GameRound.normalizePunctuationInName(focusedVal);
 
     const previouslyEnteredArtists = getMatchedArtists(
         Object.entries(interactionData.interactionOptions)

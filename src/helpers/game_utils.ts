@@ -1,15 +1,14 @@
 import { IPCLogger } from "../logger";
 import { containsHangul, md5Hash } from "./utils";
-import { normalizePunctuationInName } from "../structures/game_round";
 import { sql } from "kysely";
 import AnswerType from "../enums/option_types/answer_type";
+import GameRound from "../structures/game_round";
 import GuessModeType from "../enums/option_types/guess_mode_type";
 import LocaleType from "../enums/locale_type";
 import State from "../state";
 import _ from "lodash";
 import dbContext from "../database_context";
 import type { AvailableGenders } from "../enums/option_types/gender";
-import type GameRound from "../structures/game_round";
 import type GuildPreference from "../structures/guild_preference";
 import type MatchedArtist from "../interfaces/matched_artist";
 import type Session from "../structures/session";
@@ -254,8 +253,10 @@ export async function getMatchingGroupNames(
             const matchingAlias = Object.entries(State.aliases.artist).find(
                 (artistAliasTuple) =>
                     artistAliasTuple[1]
-                        .map((x) => normalizePunctuationInName(x))
-                        .includes(normalizePunctuationInName(groupName)),
+                        .map((x) => GameRound.normalizePunctuationInName(x))
+                        .includes(
+                            GameRound.normalizePunctuationInName(groupName),
+                        ),
             );
 
             if (matchingAlias) {
@@ -401,12 +402,12 @@ export async function getMultipleChoiceOptions(
         const uniqueResult = new Map();
         const removedResults: Array<string> = [];
         for (const song of result) {
-            if (uniqueResult.has(normalizePunctuationInName(song))) {
+            if (uniqueResult.has(GameRound.normalizePunctuationInName(song))) {
                 removedResults.push(song);
                 continue;
             }
 
-            uniqueResult.set(normalizePunctuationInName(song), song);
+            uniqueResult.set(GameRound.normalizePunctuationInName(song), song);
         }
 
         result = [...uniqueResult.values()];
@@ -554,29 +555,4 @@ export function isPowerHour(): boolean {
     return powerHours.some(
         (powerHour) => currentHour >= powerHour && currentHour <= powerHour + 1,
     );
-}
-
-/**
- * @param guesser - The user to retrieve the time to guess for
- * @param round - The finished game round
- * @param isHidden - Whether the answer type is hidden
- * @returns the milliseconds it took for a player to enter their guess
- */
-export function getTimeToGuessMs(
-    guesser: { id: string },
-    round: GameRound,
-    isHidden: boolean,
-): number {
-    const correctGuessTimes = round
-        .getGuesses()
-        [guesser.id].filter((x) => x.correct)
-        .map((x) => x.timeToGuessMs);
-
-    if (isHidden) {
-        // Use the most recent guess time for hidden games, since they can be overwritten
-        return Math.max(...correctGuessTimes);
-    }
-
-    // Use the fastest guess time for normal games
-    return Math.min(...correctGuessTimes);
 }
