@@ -145,7 +145,7 @@ export async function generateKmqDataTables(
  * Re-creates the KMQ data tables
  * @param db - The database context
  */
-export async function postSeedDataCleaning(db: DatabaseContext): Promise<void> {
+async function postSeedDataCleaning(db: DatabaseContext): Promise<void> {
     logger.info("Performing post seed data cleaning...");
     await sql`CALL PostSeedDataCleaning();`.execute(db.kmq);
 }
@@ -169,9 +169,7 @@ export async function loadStoredProcedures(): Promise<void> {
  * Update typings for Kyseley
  * @param db - The database context
  */
-export async function updateDaisukiSchemaTypings(
-    db: DatabaseContext,
-): Promise<void> {
+async function updateDaisukiSchemaTypings(db: DatabaseContext): Promise<void> {
     await db.kpopVideos.schema
         .alterTable("app_kpop_group")
         .modifyColumn("name", "varchar(255)", (cb) => cb.notNull())
@@ -584,7 +582,7 @@ async function updateKpopDatabase(
  * Regenerates the available group list
  * @param db - Database context
  */
-export async function updateGroupList(db: DatabaseContext): Promise<void> {
+async function updateGroupList(db: DatabaseContext): Promise<void> {
     const result = await db.kpopVideos
         .selectFrom("app_kpop_group")
         .select(["name", "members as gender"])

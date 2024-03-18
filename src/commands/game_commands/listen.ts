@@ -36,7 +36,7 @@ const logger = new IPCLogger(COMMAND_NAME);
  * @param guildPreference - The guild's preferences
  * @param interaction - The interaction
  */
-export async function sendBeginListeningSessionMessage(
+async function sendBeginListeningSessionMessage(
     textChannelName: string,
     voiceChannelName: string,
     messageContext: MessageContext,
@@ -94,6 +94,7 @@ export async function sendBeginListeningSessionMessage(
     );
 }
 
+// eslint-disable-next-line import/no-unused-modules
 export default class ListenCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.notRestartingPrecheck },

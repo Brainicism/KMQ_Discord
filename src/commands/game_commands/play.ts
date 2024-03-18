@@ -78,7 +78,7 @@ export const enum PlayTeamsAction {
  * @param guildPreference - The guild's game preferences
  * @param interaction - The interaction that started the game
  */
-export async function sendBeginGameSessionMessage(
+async function sendBeginGameSessionMessage(
     textChannelName: string,
     voiceChannelName: string,
     messageContext: MessageContext,

@@ -14,6 +14,7 @@ import type CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("join");
 
+// eslint-disable-next-line import/no-unused-modules
 export default class JoinCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },

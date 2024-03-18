@@ -320,6 +320,7 @@ export async function calculateTotalRoundExp(
     );
 }
 
+// eslint-disable-next-line import/no-unused-modules
 export default class ExpCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: COMMAND_NAME,

@@ -37,6 +37,7 @@ enum DurationActionInternal {
 const DURATION_DELTA_MIN = 2;
 const DURATION_DELTA_MAX = 600;
 
+// eslint-disable-next-line import/no-unused-modules
 export default class DurationCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 

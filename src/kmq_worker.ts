@@ -55,6 +55,7 @@ import type KmqClient from "./kmq_client";
 const logger = new IPCLogger("kmq");
 config({ path: path.resolve(__dirname, "../.env") });
 
+// eslint-disable-next-line import/no-unused-modules
 export default class BotWorker extends BaseClusterWorker {
     ready = false;
     logHeader = (): string => `Cluster #${this.clusterID}`;

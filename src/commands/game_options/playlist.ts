@@ -47,6 +47,7 @@ const enum PlaylistCommandAction {
     MATCHES = "matches",
 }
 
+// eslint-disable-next-line import/no-unused-modules
 export default class PlaylistCommand implements BaseCommand {
     aliases = ["spotify", "youtube"];
 

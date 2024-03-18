@@ -9,7 +9,7 @@ import path from "path";
 
 const logger = new IPCLogger("localization_manager");
 
-export class LocalizationManager {
+class LocalizationManager {
     internalLocalizer: typeof i18next;
 
     constructor() {
