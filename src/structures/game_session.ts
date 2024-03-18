@@ -690,7 +690,6 @@ export default class GameSession extends Session {
         interaction: Eris.ComponentInteraction<Eris.TextableChannel>,
         messageContext: MessageContext,
     ): Promise<void> {
-        if (!this.round) return;
         if (
             !(await this.handleInSessionInteractionFailures(
                 interaction,
@@ -700,6 +699,7 @@ export default class GameSession extends Session {
             return;
         }
 
+        if (!this.round) return;
         const round = this.round;
 
         if (
