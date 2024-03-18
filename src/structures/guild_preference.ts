@@ -1025,16 +1025,20 @@ export default class GuildPreference {
             });
         }
 
+        updatedOptions = _.sortBy(updatedOptions, ["optionName"]);
+
         await dbContext.kmq.transaction().execute(async (trx) => {
-            await Promise.all(
-                updatedOptions.map((x) =>
-                    trx
-                        .insertInto("game_options")
-                        .values(x)
-                        .onDuplicateKeyUpdate(x)
-                        .execute(),
-                ),
+            const inserts = updatedOptions.map((x) =>
+                trx
+                    .insertInto("game_options")
+                    .values(x)
+                    .onDuplicateKeyUpdate(x),
             );
+
+            for (const insert of inserts) {
+                // eslint-disable-next-line no-await-in-loop
+                await insert.execute();
+            }
         });
 
         const gameOptionsAreReloadImpacting = !updatedOptions.every((option) =>
