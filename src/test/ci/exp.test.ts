@@ -15,6 +15,7 @@ import ExpBonusModifier from "../../enums/exp_bonus_modifier";
 import GameRound from "../../structures/game_round";
 import GuessModeType from "../../enums/option_types/guess_mode_type";
 import GuildPreference from "../../structures/guild_preference";
+import QueriedSong from "../../structures/queried_song";
 import ShuffleType from "../../enums/option_types/shuffle_type";
 import assert from "assert";
 import sinon from "sinon";
@@ -449,7 +450,7 @@ describe("exp command", () => {
         let gameRound: GameRound;
         beforeEach(() => {
             gameRound = new GameRound(
-                {
+                new QueriedSong({
                     songName: "x",
                     hangulSongName: "x",
                     artistName: "x",
@@ -464,7 +465,7 @@ describe("exp command", () => {
                     tags: "",
                     vtype: "main",
                     selectionWeight: 1,
-                },
+                }),
                 5,
             );
             gameRound.bonusModifier = 1;

@@ -8,11 +8,7 @@ import {
     truncatedString,
     underline,
 } from "../helpers/utils";
-import {
-    ensureVoiceConnection,
-    getLocalizedArtistName,
-    getLocalizedSongName,
-} from "../helpers/game_utils";
+import { ensureVoiceConnection } from "../helpers/game_utils";
 import {
     generateEmbed,
     getCurrentVoiceMembers,
@@ -44,7 +40,7 @@ import type GameSession from "./game_session";
 import type GuildPreference from "./guild_preference";
 import type KmqMember from "./kmq_member";
 import type ListeningSession from "./listening_session";
-import type QueriedSong from "../interfaces/queried_song";
+import type QueriedSong from "./queried_song";
 import type Round from "./round";
 
 const BOOKMARK_MESSAGE_SIZE = 10;
@@ -596,8 +592,7 @@ export default abstract class Session {
                 this.guildID,
                 "misc.interaction.bookmarked.description",
                 {
-                    songName: getLocalizedSongName(
-                        song,
+                    songName: song.getLocalizedSongName(
                         State.getGuildLocale(this.guildID),
                     ),
                 },
@@ -875,10 +870,10 @@ export default abstract class Session {
         }
 
         const locale = State.getGuildLocale(messageContext.guildID);
-        const song = getLocalizedSongName(round.song, locale);
+        const song = round.song.getLocalizedSongName(locale);
 
         const artist = truncatedString(
-            getLocalizedArtistName(round.song, locale),
+            round.song.getLocalizedArtistName(locale),
             50,
         );
 
@@ -1050,7 +1045,7 @@ export default abstract class Session {
 
         // dont include the original song name as an alias
         aliases = aliases.filter(
-            (alias) => alias !== getLocalizedSongName(round.song, locale),
+            (alias) => alias !== round.song.getLocalizedSongName(locale),
         );
 
         if (aliases.length === 0) {

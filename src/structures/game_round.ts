@@ -23,7 +23,7 @@ import levenshtien from "damerau-levenshtein";
 import type Eris from "eris";
 import type MessageContext from "./message_context";
 import type PlayerRoundResult from "../interfaces/player_round_result";
-import type QueriedSong from "../interfaces/queried_song";
+import type QueriedSong from "./queried_song";
 import type UniqueSongCounter from "../interfaces/unique_song_counter";
 
 const logger = new IPCLogger("game_round");

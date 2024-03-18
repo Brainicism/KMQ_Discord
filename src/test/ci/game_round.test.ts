@@ -4,6 +4,7 @@ import { delay } from "../../helpers/utils";
 import ExpBonusModifier from "../../enums/exp_bonus_modifier";
 import GameRound from "../../structures/game_round";
 import GuessModeType from "../../enums/option_types/guess_mode_type";
+import QueriedSong from "../../structures/queried_song";
 import State from "../../state";
 import assert from "assert";
 
@@ -13,7 +14,7 @@ describe("game round", () => {
         describe("artist/song names without aliases", () => {
             it("adds the corresponding name as a correct answer", () => {
                 gameRound = new GameRound(
-                    {
+                    new QueriedSong({
                         songName: "Song1",
                         hangulSongName: "노래1",
                         artistName: "Jisoo",
@@ -28,7 +29,7 @@ describe("game round", () => {
                         tags: "",
                         vtype: "main",
                         selectionWeight: 1,
-                    },
+                    }),
                     5,
                 );
 
@@ -62,7 +63,7 @@ describe("game round", () => {
         describe("artist collabs", () => {
             it("should record them as two separate artists", () => {
                 gameRound = new GameRound(
-                    {
+                    new QueriedSong({
                         songName: "Poggers Song",
                         hangulSongName: "리그마 포트나이트",
                         artistName: "IU + Blackpink",
@@ -77,7 +78,7 @@ describe("game round", () => {
                         tags: "",
                         vtype: "main",
                         selectionWeight: 1,
-                    },
+                    }),
                     5,
                 );
 
@@ -95,7 +96,7 @@ describe("game round", () => {
         describe("artist name has a bracket (indicating alternative name)", () => {
             it("should add the alternative name as an accepted artist name", () => {
                 gameRound = new GameRound(
-                    {
+                    new QueriedSong({
                         songName: "Good Girls in the Dark",
                         hangulSongName: "상사병에 걸린 소녀들",
                         artistName: "Yena (Choi Yena)",
@@ -110,7 +111,7 @@ describe("game round", () => {
                         tags: "",
                         vtype: "main",
                         selectionWeight: 1,
-                    },
+                    }),
                     5,
                 );
 
@@ -126,7 +127,7 @@ describe("game round", () => {
         describe("artist name has trailing or leading spaces", () => {
             it("should remove them", () => {
                 gameRound = new GameRound(
-                    {
+                    new QueriedSong({
                         songName: "Lovesick Girls",
                         hangulSongName: "상사병에 걸린 소녀들",
                         artistName: " Blackpink + IU             ",
@@ -141,7 +142,7 @@ describe("game round", () => {
                         tags: "",
                         vtype: "main",
                         selectionWeight: 1,
-                    },
+                    }),
                     5,
                 );
 
@@ -159,7 +160,7 @@ describe("game round", () => {
         describe("names contains unwanted characters", () => {
             it("should remove the unwanted characters", () => {
                 gameRound = new GameRound(
-                    {
+                    new QueriedSong({
                         songName: "Sev en  !",
                         hangulSongName: "금  !요",
                         artistName: "Jung  kook",
@@ -174,7 +175,7 @@ describe("game round", () => {
                         tags: "",
                         vtype: "main",
                         selectionWeight: 1,
-                    },
+                    }),
                     5,
                 );
 
@@ -213,7 +214,7 @@ describe("game round", () => {
         describe("song name is solely unwanted characters", () => {
             it("should not clean the song name", () => {
                 gameRound = new GameRound(
-                    {
+                    new QueriedSong({
                         songName: "?!",
                         hangulSongName: "@#",
                         artistName: "a",
@@ -228,7 +229,7 @@ describe("game round", () => {
                         tags: "",
                         vtype: "main",
                         selectionWeight: 1,
-                    },
+                    }),
                     5,
                 );
 
@@ -253,7 +254,7 @@ describe("game round", () => {
                         ];
 
                         gameRound = new GameRound(
-                            {
+                            new QueriedSong({
                                 songName: "A really epic song",
                                 hangulSongName: "정말 서사시 노래",
                                 artistName: "A really epic person",
@@ -268,7 +269,7 @@ describe("game round", () => {
                                 tags: "",
                                 vtype: "main",
                                 selectionWeight: 1,
-                            },
+                            }),
                             5,
                         );
 
@@ -312,7 +313,7 @@ describe("game round", () => {
                         ];
 
                         gameRound = new GameRound(
-                            {
+                            new QueriedSong({
                                 songName: "A really epic song",
                                 hangulSongName: "정말 서사시 노래",
                                 artistName: "Person2",
@@ -327,7 +328,7 @@ describe("game round", () => {
                                 tags: "",
                                 vtype: "main",
                                 selectionWeight: 1,
-                            },
+                            }),
                             5,
                         );
 
@@ -363,7 +364,7 @@ describe("game round", () => {
         describe("typos", () => {
             it("should allow typos if enabled", () => {
                 gameRound = new GameRound(
-                    {
+                    new QueriedSong({
                         songName: "Perfect Night",
                         hangulSongName: "Perfect Night",
                         artistName: "Le Sserafim",
@@ -378,7 +379,7 @@ describe("game round", () => {
                         tags: "",
                         vtype: "main",
                         selectionWeight: 1,
-                    },
+                    }),
                     5,
                 );
 
@@ -420,7 +421,7 @@ describe("game round", () => {
     describe("skipping", () => {
         beforeEach(() => {
             gameRound = new GameRound(
-                {
+                new QueriedSong({
                     songName: "1",
                     hangulSongName: "3",
                     artistName: "5",
@@ -435,7 +436,7 @@ describe("game round", () => {
                     tags: "",
                     vtype: "main",
                     selectionWeight: 1,
-                },
+                }),
                 5,
             );
         });
@@ -481,7 +482,7 @@ describe("game round", () => {
     describe("check guess points", () => {
         beforeEach(() => {
             gameRound = new GameRound(
-                {
+                new QueriedSong({
                     songName: "very cool song",
                     hangulSongName: "매우 시원한 노래",
                     artistName: "artist",
@@ -496,7 +497,7 @@ describe("game round", () => {
                     tags: "",
                     vtype: "main",
                     selectionWeight: 1,
-                },
+                }),
                 5,
             );
         });
@@ -771,7 +772,7 @@ describe("game round", () => {
         const exp = 500;
         beforeEach(() => {
             gameRound = new GameRound(
-                {
+                new QueriedSong({
                     songName: "very cool song",
                     hangulSongName: "매우 시원한 노래",
                     artistName: "artist",
@@ -786,7 +787,7 @@ describe("game round", () => {
                     tags: "",
                     vtype: "main",
                     selectionWeight: 1,
-                },
+                }),
                 5,
             );
         });
@@ -823,7 +824,7 @@ describe("game round", () => {
     describe("storeGuess", () => {
         beforeEach(() => {
             gameRound = new GameRound(
-                {
+                new QueriedSong({
                     songName: "dalla dalla",
                     hangulSongName: "매우 시원한 노래",
                     artistName: "artist",
@@ -838,7 +839,7 @@ describe("game round", () => {
                     tags: "",
                     vtype: "main",
                     selectionWeight: 1,
-                },
+                }),
                 5,
             );
 

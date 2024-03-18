@@ -15,7 +15,7 @@ import i18n from "../helpers/localization_manager";
 import type Eris from "eris";
 import type GuildPreference from "./guild_preference";
 import type MessageContext from "./message_context";
-import type QueriedSong from "../interfaces/queried_song";
+import type QueriedSong from "./queried_song";
 import type Round from "./round";
 
 const logger = new IPCLogger("listening_session");
