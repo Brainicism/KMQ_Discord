@@ -44,14 +44,14 @@ import type HelpDocumentation from "../../interfaces/help";
 import type MatchedArtist from "src/interfaces/matched_artist";
 
 const COMMAND_NAME = "lookup";
-const SONG_NAME = "song_name";
-const SONG_LINK = "song_link";
-const ARTIST_NAME = "artist_name";
 const logger = new IPCLogger(COMMAND_NAME);
 
-const ENTRIES_PER_PAGE = 10;
-
 export default class LookupCommand implements BaseCommand {
+    static ENTRIES_PER_PAGE = 10;
+
+    static SONG_NAME = "song_name";
+    static SONG_LINK = "song_link";
+    static ARTIST_NAME = "artist_name";
     aliases = ["songinfo", "songlookup"];
     validations = {
         minArgCount: 1,
@@ -65,8 +65,8 @@ export default class LookupCommand implements BaseCommand {
             {
                 example: `${clickableSlashCommand(
                     COMMAND_NAME,
-                    SONG_NAME,
-                )} ${SONG_NAME}:love dive`,
+                    LookupCommand.SONG_NAME,
+                )} ${LookupCommand.SONG_NAME}:love dive`,
                 explanation: i18n.translate(
                     guildID,
                     "command.lookup.help.example.song",
@@ -76,8 +76,8 @@ export default class LookupCommand implements BaseCommand {
             {
                 example: `${clickableSlashCommand(
                     COMMAND_NAME,
-                    SONG_LINK,
-                )} ${SONG_LINK}:https://www.youtube.com/watch?v=4TWR90KJl84`,
+                    LookupCommand.SONG_LINK,
+                )} ${LookupCommand.SONG_LINK}:https://www.youtube.com/watch?v=4TWR90KJl84`,
                 explanation: i18n.translate(
                     guildID,
                     "command.lookup.help.example.song",
@@ -95,7 +95,7 @@ export default class LookupCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: SONG_NAME,
+                    name: LookupCommand.SONG_NAME,
                     description: i18n.translate(
                         LocaleType.EN,
                         "command.lookup.help.interaction.byName.description",
@@ -117,7 +117,7 @@ export default class LookupCommand implements BaseCommand {
                         .SUB_COMMAND,
                     options: [
                         {
-                            name: SONG_NAME,
+                            name: LookupCommand.SONG_NAME,
                             description: i18n.translate(
                                 LocaleType.EN,
                                 "command.lookup.help.interaction.byName.field.song",
@@ -140,7 +140,7 @@ export default class LookupCommand implements BaseCommand {
                             autocomplete: true,
                         },
                         {
-                            name: ARTIST_NAME,
+                            name: LookupCommand.ARTIST_NAME,
                             description: i18n.translate(
                                 LocaleType.EN,
                                 "command.lookup.help.interaction.byName.field.artist",
@@ -165,7 +165,7 @@ export default class LookupCommand implements BaseCommand {
                     ],
                 },
                 {
-                    name: SONG_LINK,
+                    name: LookupCommand.SONG_LINK,
                     description: i18n.translate(
                         LocaleType.EN,
                         "command.lookup.help.interaction.byLink.description",
@@ -187,7 +187,7 @@ export default class LookupCommand implements BaseCommand {
                         .SUB_COMMAND,
                     options: [
                         {
-                            name: SONG_LINK,
+                            name: LookupCommand.SONG_LINK,
                             description: i18n.translate(
                                 LocaleType.EN,
                                 "command.lookup.help.interaction.byLink.field",
@@ -347,15 +347,19 @@ export default class LookupCommand implements BaseCommand {
         _messageContext: MessageContext,
     ): Promise<void> {
         const interactionData = getInteractionValue(interaction);
-        if (interactionData.interactionName === SONG_LINK) {
+        if (interactionData.interactionName === LookupCommand.SONG_LINK) {
             await this.lookupSong(
                 interaction,
-                interactionData.interactionOptions[SONG_LINK],
+                interactionData.interactionOptions[LookupCommand.SONG_LINK],
             );
-        } else if (interactionData.interactionName === SONG_NAME) {
-            const songName = interactionData.interactionOptions[SONG_NAME];
+        } else if (
+            interactionData.interactionName === LookupCommand.SONG_NAME
+        ) {
+            const songName =
+                interactionData.interactionOptions[LookupCommand.SONG_NAME];
 
-            const artistName = interactionData.interactionOptions[ARTIST_NAME];
+            const artistName =
+                interactionData.interactionOptions[LookupCommand.ARTIST_NAME];
 
             let artistID: number | undefined;
             if (artistName) {
@@ -702,7 +706,11 @@ export default class LookupCommand implements BaseCommand {
             value: `https://youtu.be/${entry.youtubeLink}`,
         }));
 
-        const embedFieldSubsets = chunkArray(songEmbeds, ENTRIES_PER_PAGE);
+        const embedFieldSubsets = chunkArray(
+            songEmbeds,
+            LookupCommand.ENTRIES_PER_PAGE,
+        );
+
         const embeds: Array<EmbedOptions> = embedFieldSubsets.map(
             (embedFieldsSubset) => ({
                 title: i18n.translate(
@@ -750,8 +758,9 @@ export default class LookupCommand implements BaseCommand {
                 LocaleType.KO &&
                 showPopular);
 
-        if (focusedKey === SONG_NAME) {
-            const artistName = interactionData.interactionOptions[ARTIST_NAME];
+        if (focusedKey === LookupCommand.SONG_NAME) {
+            const artistName =
+                interactionData.interactionOptions[LookupCommand.ARTIST_NAME];
 
             let artistID: number | undefined;
             if (artistName) {
@@ -796,9 +805,9 @@ export default class LookupCommand implements BaseCommand {
                     ),
                 );
             }
-        } else if (focusedKey === ARTIST_NAME) {
+        } else if (focusedKey === LookupCommand.ARTIST_NAME) {
             const enteredSongName =
-                interactionData.interactionOptions[SONG_NAME];
+                interactionData.interactionOptions[LookupCommand.SONG_NAME];
 
             let matchingArtists: Array<MatchedArtist> = [];
             if (!enteredSongName) {

@@ -12,7 +12,8 @@ import i18n from "../../helpers/localization_manager";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 
-const logger = new IPCLogger("join");
+const COMMAND_NAME = "join";
+const logger = new IPCLogger(COMMAND_NAME);
 
 // eslint-disable-next-line import/no-unused-modules
 export default class JoinCommand implements BaseCommand {

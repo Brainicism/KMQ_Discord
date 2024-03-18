@@ -18,24 +18,24 @@ import type HelpDocumentation from "../../interfaces/help";
 const COMMAND_NAME = "feedback";
 const logger = new IPCLogger(COMMAND_NAME);
 
-const FEEDBACK_QUESTIONS: {
-    question: string;
-    placeholder: string;
-    required: boolean;
-}[] = [
-    {
-        question: "command.feedback.questions.likeKMQ.question",
-        placeholder: "command.feedback.questions.likeKMQ.placeholder",
-        required: false,
-    },
-    {
-        question: "command.feedback.questions.improveKMQ.question",
-        placeholder: "command.feedback.questions.improveKMQ.placeholder",
-        required: true,
-    },
-];
-
 export default class FeedbackCommand implements BaseCommand {
+    static FEEDBACK_QUESTIONS: {
+        question: string;
+        placeholder: string;
+        required: boolean;
+    }[] = [
+        {
+            question: "command.feedback.questions.likeKMQ.question",
+            placeholder: "command.feedback.questions.likeKMQ.placeholder",
+            required: false,
+        },
+        {
+            question: "command.feedback.questions.improveKMQ.question",
+            placeholder: "command.feedback.questions.improveKMQ.placeholder",
+            required: true,
+        },
+    ];
+
     validations = {
         arguments: [],
         maxArgCount: 0,
@@ -76,25 +76,27 @@ export default class FeedbackCommand implements BaseCommand {
                 "command.feedback.questions.title",
             ),
             custom_id: "feedback",
-            components: FEEDBACK_QUESTIONS.map((feedbackQuestion) => ({
-                type: Eris.Constants.ComponentTypes.ACTION_ROW,
-                components: [
-                    {
-                        type: Eris.Constants.ComponentTypes.TEXT_INPUT,
-                        style: Eris.Constants.TextInputStyles.PARAGRAPH,
-                        custom_id: uuid.v4() as string,
-                        label: i18n.translate(
-                            interaction.guildID as string,
-                            feedbackQuestion.question,
-                        ),
-                        placeholder: i18n.translate(
-                            interaction.guildID as string,
-                            feedbackQuestion.placeholder,
-                        ),
-                        required: feedbackQuestion.required,
-                    },
-                ],
-            })),
+            components: FeedbackCommand.FEEDBACK_QUESTIONS.map(
+                (feedbackQuestion) => ({
+                    type: Eris.Constants.ComponentTypes.ACTION_ROW,
+                    components: [
+                        {
+                            type: Eris.Constants.ComponentTypes.TEXT_INPUT,
+                            style: Eris.Constants.TextInputStyles.PARAGRAPH,
+                            custom_id: uuid.v4() as string,
+                            label: i18n.translate(
+                                interaction.guildID as string,
+                                feedbackQuestion.question,
+                            ),
+                            placeholder: i18n.translate(
+                                interaction.guildID as string,
+                                feedbackQuestion.placeholder,
+                            ),
+                            required: feedbackQuestion.required,
+                        },
+                    ],
+                }),
+            ),
         });
     };
 
@@ -126,7 +128,7 @@ export default class FeedbackCommand implements BaseCommand {
             feedbackResponse += "--------------------------------\n";
             feedbackResponse += `Q${questionIndex + 1}. ${i18n.translate(
                 interaction.guildID as string,
-                FEEDBACK_QUESTIONS[questionIndex].question,
+                FeedbackCommand.FEEDBACK_QUESTIONS[questionIndex].question,
             )}\n`;
             feedbackResponse += `${modalComponent.components[0].value}\n`;
         }

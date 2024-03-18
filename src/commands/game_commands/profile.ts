@@ -31,29 +31,29 @@ import type HelpDocumentation from "../../interfaces/help";
 const COMMAND_NAME = "profile";
 const logger = new IPCLogger(COMMAND_NAME);
 
-const RANK_TITLES = [
-    { title: "command.profile.rank.novice", req: 0 },
-    { title: "command.profile.rank.trainee", req: 10 },
-    { title: "command.profile.rank.preDebut", req: 20 },
-    { title: "command.profile.rank.nugu", req: 30 },
-    { title: "command.profile.rank.newAoty", req: 40 },
-    { title: "command.profile.rank.aoty", req: 50 },
-    { title: "command.profile.rank.bonsang", req: 60 },
-    { title: "command.profile.rank.daesang", req: 70 },
-    { title: "command.profile.rank.ceo", req: 80 },
-    { title: "command.profile.rank.president", req: 90 },
-    { title: "command.profile.rank.reuniter", req: 100 },
-    { title: "command.profile.rank.ruler", req: 110 },
-    { title: "command.profile.rank.supreme", req: 120 },
-    { title: "command.profile.rank.benevolent", req: 130 },
-    { title: "command.profile.rank.divine", req: 140 },
-    { title: "command.profile.rank.almighty", req: 150 },
-    { title: "command.profile.rank.enlightened", req: 160 },
-    { title: "command.profile.rank.immortal", req: 170 },
-    { title: "command.profile.rank.omniscient", req: 180 },
-];
-
 export default class ProfileCommand implements BaseCommand {
+    static RANK_TITLES = [
+        { title: "command.profile.rank.novice", req: 0 },
+        { title: "command.profile.rank.trainee", req: 10 },
+        { title: "command.profile.rank.preDebut", req: 20 },
+        { title: "command.profile.rank.nugu", req: 30 },
+        { title: "command.profile.rank.newAoty", req: 40 },
+        { title: "command.profile.rank.aoty", req: 50 },
+        { title: "command.profile.rank.bonsang", req: 60 },
+        { title: "command.profile.rank.daesang", req: 70 },
+        { title: "command.profile.rank.ceo", req: 80 },
+        { title: "command.profile.rank.president", req: 90 },
+        { title: "command.profile.rank.reuniter", req: 100 },
+        { title: "command.profile.rank.ruler", req: 110 },
+        { title: "command.profile.rank.supreme", req: 120 },
+        { title: "command.profile.rank.benevolent", req: 130 },
+        { title: "command.profile.rank.divine", req: 140 },
+        { title: "command.profile.rank.almighty", req: 150 },
+        { title: "command.profile.rank.enlightened", req: 160 },
+        { title: "command.profile.rank.immortal", req: 170 },
+        { title: "command.profile.rank.omniscient", req: 180 },
+    ];
+
     help = (guildID: string): HelpDocumentation => ({
         name: COMMAND_NAME,
         description: i18n.translate(
@@ -366,7 +366,9 @@ export default class ProfileCommand implements BaseCommand {
      * @returns a string describing the user's rank corresponding with their level
      */
     static getRankNameByLevel(level: number, guildID: string): string {
-        const highestRankTitle = RANK_TITLES[RANK_TITLES.length - 1];
+        const highestRankTitle =
+            ProfileCommand.RANK_TITLES[ProfileCommand.RANK_TITLES.length - 1];
+
         const levelsPastMaxRank = level - (highestRankTitle.req + 10);
         if (levelsPastMaxRank >= 0) {
             // add roman numeral suffix for every 5 levels above max rank title
@@ -376,13 +378,13 @@ export default class ProfileCommand implements BaseCommand {
             )}`;
         }
 
-        for (let i = RANK_TITLES.length - 1; i >= 0; i--) {
-            const rankTitle = RANK_TITLES[i];
+        for (let i = ProfileCommand.RANK_TITLES.length - 1; i >= 0; i--) {
+            const rankTitle = ProfileCommand.RANK_TITLES[i];
             if (level >= rankTitle.req)
                 return i18n.translate(guildID, rankTitle.title);
         }
 
-        return i18n.translate(guildID, RANK_TITLES[0].title);
+        return i18n.translate(guildID, ProfileCommand.RANK_TITLES[0].title);
     }
 
     static async getProfileFields(

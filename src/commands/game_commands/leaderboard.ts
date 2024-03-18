@@ -43,11 +43,6 @@ enum LeaderboardAction {
     UNENROLL = "unenroll",
 }
 
-const leaderboardQuotes = [
-    "command.leaderboard.quote.name",
-    "command.leaderboard.quote.nextPage",
-];
-
 interface TopPlayerBase {
     player_id: string;
     level: number;
@@ -60,6 +55,11 @@ type TopSongsGuessedPlayer = TopPlayerBase & {
 };
 
 export default class LeaderboardCommand implements BaseCommand {
+    static leaderboardQuotes = [
+        "command.leaderboard.quote.name",
+        "command.leaderboard.quote.nextPage",
+    ];
+
     aliases = ["lb"];
 
     validations = {
@@ -1072,7 +1072,9 @@ export default class LeaderboardCommand implements BaseCommand {
                             footer: {
                                 text: i18n.translate(
                                     messageContext.guildID,
-                                    chooseRandom(leaderboardQuotes),
+                                    chooseRandom(
+                                        LeaderboardCommand.leaderboardQuotes,
+                                    ),
                                     {
                                         command: `/help action:${COMMAND_NAME}`,
                                     },

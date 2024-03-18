@@ -30,8 +30,6 @@ import type HelpDocumentation from "../../interfaces/help";
 const COMMAND_NAME = "upcomingreleases";
 const logger = new IPCLogger(COMMAND_NAME);
 
-const FIELDS_PER_EMBED = 9;
-
 enum ReleaseType {
     EP = "ep",
     Single = "single",
@@ -40,6 +38,7 @@ enum ReleaseType {
 
 // eslint-disable-next-line import/no-unused-modules
 export default class UpcomingReleasesCommand implements BaseCommand {
+    static FIELDS_PER_EMBED = 9;
     aliases = ["upcoming"];
 
     help = (guildID: string): HelpDocumentation => ({
@@ -180,7 +179,11 @@ export default class UpcomingReleasesCommand implements BaseCommand {
             inline: true,
         }));
 
-        const embedFieldSubsets = chunkArray(fields, FIELDS_PER_EMBED);
+        const embedFieldSubsets = chunkArray(
+            fields,
+            UpcomingReleasesCommand.FIELDS_PER_EMBED,
+        );
+
         const embeds: Array<EmbedOptions> = embedFieldSubsets.map(
             (embedFieldsSubset) => ({
                 title: i18n.translate(

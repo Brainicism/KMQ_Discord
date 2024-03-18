@@ -21,11 +21,10 @@ import type HelpDocumentation from "../../interfaces/help";
 const COMMAND_NAME = "advanced";
 const logger = new IPCLogger(COMMAND_NAME);
 
-const MAX_MULTIGUESS_DELAY = 60;
-const MAX_SONG_START_DELAY = 60;
-
 // eslint-disable-next-line import/no-unused-modules
 export default class AdvancedSettingCommand implements BaseCommand {
+    static MAX_MULTIGUESS_DELAY = 60;
+    static MAX_SONG_START_DELAY = 60;
     validations = {
         arguments: [],
         maxArgCount: 0,
@@ -118,7 +117,8 @@ export default class AdvancedSettingCommand implements BaseCommand {
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.NUMBER,
                                     required: true,
-                                    max_value: MAX_MULTIGUESS_DELAY,
+                                    max_value:
+                                        AdvancedSettingCommand.MAX_MULTIGUESS_DELAY,
                                     min_value: 0,
                                 },
                             ],
@@ -171,7 +171,8 @@ export default class AdvancedSettingCommand implements BaseCommand {
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.NUMBER,
                                     required: true,
-                                    max_value: MAX_SONG_START_DELAY,
+                                    max_value:
+                                        AdvancedSettingCommand.MAX_SONG_START_DELAY,
                                     min_value: 0,
                                 },
                             ],
