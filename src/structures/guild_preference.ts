@@ -233,7 +233,6 @@ export default class GuildPreference {
     async validateGameOptions(): Promise<void> {
         const validatedGameOptions = { ...this.gameOptions };
         let newDefaultOptionsAdded = 0;
-        let extraneousKeysRemoved = 0;
         // apply default game option for empty
         for (const defaultOption in GuildPreference.DEFAULT_OPTIONS) {
             if (!(defaultOption in validatedGameOptions)) {
@@ -247,25 +246,11 @@ export default class GuildPreference {
             }
         }
 
-        // extraneous keys
-        // TODO: this doesn't actually remove the entries in the database
-        for (const option in validatedGameOptions) {
-            if (!(option in GuildPreference.DEFAULT_OPTIONS)) {
-                extraneousKeysRemoved++;
-                delete validatedGameOptions[
-                    option as keyof typeof validatedGameOptions
-                ];
-            }
-        }
-
         this.gameOptions = validatedGameOptions;
 
-        if (
-            (newDefaultOptionsAdded || extraneousKeysRemoved) &&
-            process.env.NODE_ENV !== EnvType.TEST
-        ) {
+        if (newDefaultOptionsAdded && process.env.NODE_ENV !== EnvType.TEST) {
             logger.info(
-                `gid: ${this.guildID} | validateGameOptions: options modified during validation (+${newDefaultOptionsAdded} | -${extraneousKeysRemoved})`,
+                `gid: ${this.guildID} | validateGameOptions: options modified during validation (+${newDefaultOptionsAdded})`,
             );
             await this.updateGuildPreferences();
         }
