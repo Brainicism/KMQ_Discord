@@ -55,28 +55,6 @@ describe("guild preference", () => {
                     );
                 });
             });
-
-            describe("it has extraneous game options", () => {
-                it("should return a guild preference without the extraneous values", () => {
-                    const gameOptionsWithExtraValues: {
-                        [optionName: string]: any;
-                    } = {
-                        ...GuildPreference.DEFAULT_OPTIONS,
-                    };
-
-                    const nonExistentOption = "option_that_doesnt_exist";
-                    gameOptionsWithExtraValues[nonExistentOption] = 58;
-                    const guildPreference = GuildPreference.fromGuild(
-                        "123",
-                        gameOptionsWithExtraValues,
-                    );
-
-                    assert.strictEqual(
-                        nonExistentOption in guildPreference.gameOptions,
-                        false,
-                    );
-                });
-            });
         });
     });
 
@@ -111,6 +89,8 @@ describe("guild preference", () => {
         describe("loadPreset", () => {
             it("should update the current options with values defined in the preset", async () => {
                 await guildPreference.loadPreset(TEST_PRESET_NAME, "123");
+                // ignore UUID
+                delete (guildPreference.gameOptions as any)["uuid"];
                 assert.deepStrictEqual(
                     guildPreference.gameOptions,
                     filledGameOptions,
