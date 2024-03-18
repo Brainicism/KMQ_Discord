@@ -26,7 +26,6 @@ import {
 } from "../helpers/discord_utils";
 import {
     getMultipleChoiceOptions,
-    getTimeToGuessMs,
     isFirstGameOfDay,
     userBonusIsActive,
 } from "../helpers/game_utils";
@@ -1456,8 +1455,8 @@ export default class GameSession extends Session {
 
         round.correctGuessers.sort(
             (a, b) =>
-                getTimeToGuessMs(a, round, isHidden) -
-                getTimeToGuessMs(b, round, isHidden),
+                round.getTimeToGuessMs(a, isHidden) -
+                round.getTimeToGuessMs(b, isHidden),
         );
 
         const playerRoundResults = await Promise.all(
@@ -1468,11 +1467,7 @@ export default class GameSession extends Session {
                     round,
                     getNumParticipants(this.voiceChannelID),
                     lastGuesserStreak,
-                    getTimeToGuessMs(
-                        correctGuesser,
-                        round,
-                        this.isHiddenMode(),
-                    ),
+                    round.getTimeToGuessMs(correctGuesser, this.isHiddenMode()),
                     guessPosition,
                     await userBonusIsActive(correctGuesser.id),
                     correctGuesser.id,

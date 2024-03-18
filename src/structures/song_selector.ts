@@ -13,8 +13,8 @@ import {
     setDifference,
     shufflePartitionedArray,
 } from "../helpers/utils";
-import { normalizePunctuationInName } from "./game_round";
 import ArtistType from "../enums/option_types/artist_type";
+import GameRound from "./game_round";
 import LanguageType from "../enums/option_types/language_type";
 import OstPreference from "../enums/option_types/ost_preference";
 import QueriedSong from "./queried_song";
@@ -318,7 +318,7 @@ export default class SongSelector {
 
             const normalizedDeduped = new Set(
                 allNamesAndAliases.map((name) =>
-                    normalizePunctuationInName(name),
+                    GameRound.normalizePunctuationInName(name),
                 ),
             );
 

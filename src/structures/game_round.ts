@@ -10,7 +10,11 @@ import {
     ROUND_MAX_RUNNERS_UP,
 } from "../constants";
 import { IPCLogger } from "../logger";
-import { friendlyFormattedNumber, getMention } from "../helpers/utils";
+import {
+    codeLine,
+    friendlyFormattedNumber,
+    getMention,
+} from "../helpers/utils";
 import ExpBonusModifier from "../enums/exp_bonus_modifier";
 import GuessModeType from "../enums/option_types/guess_mode_type";
 import KmqMember from "./kmq_member";
@@ -28,17 +32,6 @@ import type UniqueSongCounter from "../interfaces/unique_song_counter";
 
 const logger = new IPCLogger("game_round");
 
-/** List of characters to remove from song/artist names/guesses */
-// eslint-disable-next-line no-useless-escape
-const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★*´\(\)\+\u200B…]/g;
-/** Set of characters to replace in song names/guesses */
-const CHARACTER_REPLACEMENTS = [
-    { pattern: REMOVED_CHARACTERS, replacement: "" },
-    { pattern: /&/g, replacement: "and" },
-];
-
-const MAX_DISPLAYED_GUESS_LENGTH = 50;
-
 interface GuessCorrectness {
     exact: boolean;
     similar: boolean;
@@ -53,66 +46,6 @@ type GuessResult = {
 type PlayerToGuesses = {
     [playerID: string]: Array<GuessResult>;
 };
-
-/**
- * Takes in a song name and removes the characters in the predefined list
- * @param name - the song name
- * @returns The cleaned song name
- */
-export function normalizePunctuationInName(name: string): string {
-    let cleanName = name.toLowerCase();
-
-    // dont clean if string only contains the characters we're trying to remove
-    const matches = name.match(REMOVED_CHARACTERS);
-    const exclusivelyContainsRemovedChars =
-        matches !== null && matches.join("") === name;
-
-    if (exclusivelyContainsRemovedChars) {
-        return name;
-    }
-
-    for (const characterReplacement of CHARACTER_REPLACEMENTS) {
-        cleanName = cleanName.replace(
-            characterReplacement.pattern,
-            characterReplacement.replacement,
-        );
-    }
-
-    return cleanName;
-}
-
-/**
- * @param name - the name of the song/artist
- * @returns The hint for the round
- * */
-function generateHint(name: string): string {
-    const HIDDEN_CHARACTER_PERCENTAGE = 0.75;
-    const nameLength = name.length;
-    const eligibleCharacterIndicesToHide = _.range(0, nameLength).filter(
-        (x) => !name[x].match(REMOVED_CHARACTERS),
-    );
-
-    const hideMask = _.sampleSize(
-        eligibleCharacterIndicesToHide,
-        Math.max(
-            Math.floor(
-                eligibleCharacterIndicesToHide.length *
-                    HIDDEN_CHARACTER_PERCENTAGE,
-            ),
-            1,
-        ),
-    );
-
-    const hiddenName = name
-        .split("")
-        .map((char, idx) => {
-            if (hideMask.includes(idx)) return "_";
-            return char;
-        })
-        .join(" ");
-
-    return hiddenName;
-}
 
 export default class GameRound extends Round {
     /** Round bonus modifier */
@@ -166,6 +99,19 @@ export default class GameRound extends Round {
     /** Each player's guess */
     private guesses: PlayerToGuesses;
 
+    /** Max guess length to display before trunc */
+    private static MAX_DISPLAYED_GUESS_LENGTH = 50;
+
+    /** List of characters to remove from song/artist names/guesses */
+    // eslint-disable-next-line no-useless-escape
+    private static REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★*´\(\)\+\u200B…]/g;
+
+    /** Set of characters to replace in song names/guesses */
+    private static CHARACTER_REPLACEMENTS = [
+        { pattern: GameRound.REMOVED_CHARACTERS, replacement: "" },
+        { pattern: /&/g, replacement: "and" },
+    ];
+
     constructor(song: QueriedSong, baseExp: number) {
         super(song);
         this.acceptedSongAnswers = [song.songName, ...this.songAliases];
@@ -194,14 +140,14 @@ export default class GameRound extends Round {
         this.finished = false;
         this.hints = {
             songHint: {
-                [LocaleType.EN]: generateHint(song.songName),
-                [LocaleType.KO]: generateHint(
+                [LocaleType.EN]: this.generateHint(song.songName),
+                [LocaleType.KO]: this.generateHint(
                     song.hangulSongName || song.songName,
                 ),
             },
             artistHint: {
-                [LocaleType.EN]: generateHint(song.artistName),
-                [LocaleType.KO]: generateHint(
+                [LocaleType.EN]: this.generateHint(song.artistName),
+                [LocaleType.KO]: this.generateHint(
                     song.hangulArtistName || song.artistName,
                 ),
             },
@@ -509,10 +455,12 @@ export default class GameRound extends Round {
                 const timeToGuessMs = entry[1].timeToGuessMs;
                 const isCorrect = entry[1].correct;
                 let displayedGuess = entry[1].guess;
-                if (displayedGuess.length > MAX_DISPLAYED_GUESS_LENGTH) {
+                if (
+                    displayedGuess.length > GameRound.MAX_DISPLAYED_GUESS_LENGTH
+                ) {
                     displayedGuess = `${displayedGuess.substring(
                         0,
-                        MAX_DISPLAYED_GUESS_LENGTH,
+                        GameRound.MAX_DISPLAYED_GUESS_LENGTH,
                     )}...`;
                 }
 
@@ -636,6 +584,49 @@ export default class GameRound extends Round {
         return EMBED_ERROR_COLOR;
     }
 
+    getTimeToGuessMs(guesser: { id: string }, isHidden: boolean): number {
+        const correctGuessTimes = this.getGuesses()
+            [guesser.id].filter((x) => x.correct)
+            .map((x) => x.timeToGuessMs);
+
+        if (isHidden) {
+            // Use the most recent guess time for hidden games, since they can be overwritten
+            return Math.max(...correctGuessTimes);
+        }
+
+        // Use the fastest guess time for normal games
+        return Math.min(...correctGuessTimes);
+    }
+
+    getHint(
+        guildID: string,
+        guessMode: GuessModeType,
+        locale: LocaleType,
+    ): string {
+        switch (guessMode) {
+            case GuessModeType.ARTIST:
+                return `${i18n.translate(
+                    guildID,
+                    "command.hint.artistName",
+                )}: ${codeLine(
+                    this.hints.artistHint[
+                        locale === LocaleType.KO ? LocaleType.KO : LocaleType.EN
+                    ],
+                )}`;
+            case GuessModeType.SONG_NAME:
+            case GuessModeType.BOTH:
+            default:
+                return `${i18n.translate(
+                    guildID,
+                    "command.hint.songName",
+                )}: ${codeLine(
+                    this.hints.songHint[
+                        locale === LocaleType.KO ? LocaleType.KO : LocaleType.EN
+                    ],
+                )}`;
+        }
+    }
+
     /**
      * @param guess - The guessed string
      * @param correctChoices - The correct choices to check against
@@ -664,14 +655,41 @@ export default class GameRound extends Round {
     }
 
     /**
+     * Takes in a song name and removes the characters in the predefined list
+     * @param name - the song name
+     * @returns The cleaned song name
+     */
+    static normalizePunctuationInName(name: string): string {
+        let cleanName = name.toLowerCase();
+
+        // dont clean if string only contains the characters we're trying to remove
+        const matches = name.match(GameRound.REMOVED_CHARACTERS);
+        const exclusivelyContainsRemovedChars =
+            matches !== null && matches.join("") === name;
+
+        if (exclusivelyContainsRemovedChars) {
+            return name;
+        }
+
+        for (const characterReplacement of GameRound.CHARACTER_REPLACEMENTS) {
+            cleanName = cleanName.replace(
+                characterReplacement.pattern,
+                characterReplacement.replacement,
+            );
+        }
+
+        return cleanName;
+    }
+
+    /**
      * Checks whether the song guess matches the GameRound's song
      * @param message - The Message that contains the guess
      * @returns whether or not the guess was correct
      */
     private checkSongGuess(message: string): GuessCorrectness {
-        const guess = normalizePunctuationInName(message);
+        const guess = GameRound.normalizePunctuationInName(message);
         const cleanedSongAliases = this.acceptedSongAnswers.map((x) =>
-            normalizePunctuationInName(x),
+            GameRound.normalizePunctuationInName(x),
         );
 
         return {
@@ -686,9 +704,9 @@ export default class GameRound extends Round {
      * @returns whether or not the guess was correct
      */
     private checkArtistGuess(message: string): GuessCorrectness {
-        const guess = normalizePunctuationInName(message);
+        const guess = GameRound.normalizePunctuationInName(message);
         const cleanedArtistAliases = this.acceptedArtistAnswers.map((x) =>
-            normalizePunctuationInName(x),
+            GameRound.normalizePunctuationInName(x),
         );
 
         return {
@@ -706,5 +724,34 @@ export default class GameRound extends Round {
         } else {
             return [name];
         }
+    }
+
+    private generateHint(name: string): string {
+        const HIDDEN_CHARACTER_PERCENTAGE = 0.75;
+        const nameLength = name.length;
+        const eligibleCharacterIndicesToHide = _.range(0, nameLength).filter(
+            (x) => !name[x].match(GameRound.REMOVED_CHARACTERS),
+        );
+
+        const hideMask = _.sampleSize(
+            eligibleCharacterIndicesToHide,
+            Math.max(
+                Math.floor(
+                    eligibleCharacterIndicesToHide.length *
+                        HIDDEN_CHARACTER_PERCENTAGE,
+                ),
+                1,
+            ),
+        );
+
+        const hiddenName = name
+            .split("")
+            .map((char, idx) => {
+                if (hideMask.includes(idx)) return "_";
+                return char;
+            })
+            .join(" ");
+
+        return hiddenName;
     }
 }
