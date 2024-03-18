@@ -177,7 +177,7 @@ export default class GameRound extends Round {
             const guessResults = playerGuessResults[1];
             const correctGuess = guessResults.find((x) => x.correct);
             if (correctGuess) {
-                return [new KmqMember(playerId, correctGuess?.pointsAwarded)];
+                return [new KmqMember(playerId, correctGuess.pointsAwarded)];
             }
 
             return [];
