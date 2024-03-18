@@ -15,7 +15,6 @@ import {
     sendInfoMessage,
     sendPaginationedEmbed,
 } from "../../helpers/discord_utils";
-import { getRankNameByLevel } from "./profile";
 import { sendValidationErrorMessage } from "../../helpers/validate";
 import EnvType from "../../enums/env_type";
 import Eris from "eris";
@@ -25,6 +24,7 @@ import LeaderboardScope from "../../enums/option_types/leaderboard_scope";
 import LeaderboardType from "../../enums/option_types/leaderboard_type";
 import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
+import ProfileCommand from "./profile";
 import State from "../../state";
 import dbContext from "../../database_context";
 import i18n from "../../helpers/localization_manager";
@@ -43,11 +43,6 @@ enum LeaderboardAction {
     UNENROLL = "unenroll",
 }
 
-const leaderboardQuotes = [
-    "command.leaderboard.quote.name",
-    "command.leaderboard.quote.nextPage",
-];
-
 interface TopPlayerBase {
     player_id: string;
     level: number;
@@ -60,6 +55,11 @@ type TopSongsGuessedPlayer = TopPlayerBase & {
 };
 
 export default class LeaderboardCommand implements BaseCommand {
+    static leaderboardQuotes = [
+        "command.leaderboard.quote.name",
+        "command.leaderboard.quote.nextPage",
+    ];
+
     aliases = ["lb"];
 
     validations = {
@@ -828,10 +828,11 @@ export default class LeaderboardCommand implements BaseCommand {
                                                     friendlyFormattedNumber(
                                                         player.level,
                                                     ),
-                                                rankName: getRankNameByLevel(
-                                                    player.level,
-                                                    messageContext.guildID,
-                                                ),
+                                                rankName:
+                                                    ProfileCommand.getRankNameByLevel(
+                                                        player.level,
+                                                        messageContext.guildID,
+                                                    ),
                                             },
                                         );
                                     } else {
@@ -1071,7 +1072,9 @@ export default class LeaderboardCommand implements BaseCommand {
                             footer: {
                                 text: i18n.translate(
                                     messageContext.guildID,
-                                    chooseRandom(leaderboardQuotes),
+                                    chooseRandom(
+                                        LeaderboardCommand.leaderboardQuotes,
+                                    ),
                                     {
                                         command: `/help action:${COMMAND_NAME}`,
                                     },

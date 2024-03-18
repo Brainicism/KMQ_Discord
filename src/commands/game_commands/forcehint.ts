@@ -6,10 +6,10 @@ import {
     sendInfoMessage,
 } from "../../helpers/discord_utils";
 import { getMention } from "../../helpers/utils";
-import { validHintCheck } from "./hint";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
+import HintCommand from "./hint";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
@@ -73,7 +73,7 @@ export default class ForceHintCommand implements BaseCommand {
         );
 
         if (
-            !(await validHintCheck(
+            !(await HintCommand.validHintCheck(
                 gameSession,
                 guildPreference,
                 messageContext,

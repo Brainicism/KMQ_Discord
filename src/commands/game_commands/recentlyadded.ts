@@ -29,10 +29,9 @@ import type HelpDocumentation from "../../interfaces/help";
 const COMMAND_NAME = "recentlyadded";
 const logger = new IPCLogger(COMMAND_NAME);
 
-const FIELDS_PER_EMBED = 9;
-
 // eslint-disable-next-line import/no-unused-modules
 export default class RecentlyAddedCommand implements BaseCommand {
+    static FIELDS_PER_EMBED = 9;
     aliases = ["recent"];
 
     help = (guildID: string): HelpDocumentation => ({
@@ -126,7 +125,11 @@ export default class RecentlyAddedCommand implements BaseCommand {
             inline: true,
         }));
 
-        const embedFieldSubsets = chunkArray(fields, FIELDS_PER_EMBED);
+        const embedFieldSubsets = chunkArray(
+            fields,
+            RecentlyAddedCommand.FIELDS_PER_EMBED,
+        );
+
         const embeds: Array<EmbedOptions> = embedFieldSubsets.map(
             (embedFieldsSubset) => ({
                 title: i18n.translate(
