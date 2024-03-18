@@ -17,7 +17,7 @@ import _ from "lodash";
 import assert from "assert";
 import sinon from "sinon";
 import type { GenderModeOptions } from "../../enums/option_types/gender";
-import type QueriedSong from "../../interfaces/queried_song";
+import type QueriedSong from "../../structures/queried_song";
 
 async function getMockGuildPreference(): Promise<GuildPreference> {
     const guildPreference = new GuildPreference("test");

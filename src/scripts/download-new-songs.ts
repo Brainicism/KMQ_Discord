@@ -12,7 +12,7 @@ import fs from "fs";
 import path from "path";
 import ytdl from "@distube/ytdl-core";
 import type { DatabaseContext } from "../database_context";
-import type QueriedSong from "../interfaces/queried_song";
+import type QueriedSong from "../structures/queried_song";
 
 const logger = new IPCLogger("download-new-songs");
 const TARGET_AVERAGE_VOLUME = -30;

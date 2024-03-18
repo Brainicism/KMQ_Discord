@@ -17,6 +17,7 @@ import { normalizePunctuationInName } from "./game_round";
 import ArtistType from "../enums/option_types/artist_type";
 import LanguageType from "../enums/option_types/language_type";
 import OstPreference from "../enums/option_types/ost_preference";
+import QueriedSong from "./queried_song";
 import ReleaseType from "../enums/option_types/release_type";
 import ShuffleType from "../enums/option_types/shuffle_type";
 import State from "../state";
@@ -31,7 +32,6 @@ import type { MatchedPlaylist } from "../interfaces/matched_playlist";
 import type Eris from "eris";
 import type GuildPreference from "./guild_preference";
 import type MessageContext from "./message_context";
-import type QueriedSong from "../interfaces/queried_song";
 import type UniqueSongCounter from "../interfaces/unique_song_counter";
 
 const logger = new IPCLogger("song_selector");
@@ -382,7 +382,11 @@ export default class SongSelector {
                 gameOptions.forcePlaySongID,
             );
             return {
-                songs: new Set(await queryBuilder.execute()),
+                songs: new Set(
+                    (await queryBuilder.execute()).map(
+                        (x) => new QueriedSong(x),
+                    ),
+                ),
                 countBeforeLimit: 1,
             };
         }
@@ -593,7 +597,7 @@ export default class SongSelector {
             queryBuilder = queryBuilder.orderBy("views", "desc");
         }
 
-        result = await queryBuilder.execute();
+        result = (await queryBuilder.execute()).map((x) => new QueriedSong(x));
 
         const count = result.length;
         result = result.slice(gameOptions.limitStart, gameOptions.limitEnd);
@@ -621,15 +625,18 @@ export default class SongSelector {
                 break;
         }
 
-        result = result.map((song, index) => ({
-            ...song,
-            selectionWeight:
-                selectionWeightValues[
-                    Math.floor(
-                        (index / result.length) * selectionWeightValues.length,
-                    )
-                ],
-        }));
+        result = result
+            .map((song, index) => ({
+                ...song,
+                selectionWeight:
+                    selectionWeightValues[
+                        Math.floor(
+                            (index / result.length) *
+                                selectionWeightValues.length,
+                        )
+                    ],
+            }))
+            .map((x) => new QueriedSong(x));
 
         return {
             songs: new Set(result),

@@ -12,7 +12,6 @@ import type { AvailableGenders } from "../enums/option_types/gender";
 import type GameRound from "../structures/game_round";
 import type GuildPreference from "../structures/guild_preference";
 import type MatchedArtist from "../interfaces/matched_artist";
-import type QueriedSong from "../interfaces/queried_song";
 import type Session from "../structures/session";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 10;
@@ -500,44 +499,6 @@ export async function isFirstGameOfDay(userID: string): Promise<boolean> {
     const lastGameEndedDueError = player["last_game_played_errored"] === 1;
 
     return lastGameEndedDueError || isFirstGame;
-}
-
-/**
- * @param song - The song to retrieve the name from
- * @param locale - The guild's locale
- * @param original - Whether to return the original song name
- * @returns the song name in Hangul if the server is using the Korean locale and the song has a Hangul name;
- * the original song name otherwise
- */
-export function getLocalizedSongName(
-    song: QueriedSong,
-    locale: LocaleType,
-): string {
-    const songName = song.songName;
-    if (locale !== LocaleType.KO) {
-        return songName;
-    }
-
-    const hangulSongName = song.hangulSongName;
-
-    return hangulSongName || songName;
-}
-
-/**
- * @param song - The song to retrieve the artist from
- * @param locale - The guild's locale
- * @returns the artist's name in Hangul if the server is using the Korean locale and the artist has a Hangul name;
- * the artist's name otherwise
- */
-export function getLocalizedArtistName(
-    song: { artistName: string; hangulArtistName: string | null },
-    locale: LocaleType,
-): string {
-    if (locale !== LocaleType.KO) {
-        return song.artistName;
-    }
-
-    return song.hangulArtistName || song.artistName;
 }
 
 /**

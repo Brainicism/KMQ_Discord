@@ -17,6 +17,7 @@ import {
 import { youtube_v3 } from "googleapis";
 import Axios from "axios";
 import KmqConfiguration from "../kmq_configuration";
+import QueriedSong from "../structures/queried_song";
 import SongSelector from "../structures/song_selector";
 import State from "../state";
 import _ from "lodash";
@@ -30,7 +31,6 @@ import type { MatchedPlaylist } from "../interfaces/matched_playlist";
 import type { PlaylistMetadata } from "../interfaces/playlist_metadata";
 import type Eris from "eris";
 import type MessageContext from "../structures/message_context";
-import type QueriedSong from "../interfaces/queried_song";
 import type SpotifyTrack from "../interfaces/spotify_track";
 
 const logger = new IPCLogger("spotify_manager");
@@ -406,24 +406,26 @@ export default class PlaylistManager {
             }
 
             // Match songs with vlinks
-            matchedSongs = await dbContext.kmq
-                .selectFrom("available_songs")
-                .select(SongSelector.QueriedSongFields)
-                .where((eb) =>
-                    eb.or([
-                        eb(
-                            "link",
-                            "in",
-                            youtubePlaylistVideoIDs.map((x) => x.videoId),
-                        ),
-                        eb(
-                            "original_link",
-                            "in",
-                            youtubePlaylistVideoIDs.map((x) => x.videoId),
-                        ),
-                    ]),
-                )
-                .execute();
+            matchedSongs = (
+                await dbContext.kmq
+                    .selectFrom("available_songs")
+                    .select(SongSelector.QueriedSongFields)
+                    .where((eb) =>
+                        eb.or([
+                            eb(
+                                "link",
+                                "in",
+                                youtubePlaylistVideoIDs.map((x) => x.videoId),
+                            ),
+                            eb(
+                                "original_link",
+                                "in",
+                                youtubePlaylistVideoIDs.map((x) => x.videoId),
+                            ),
+                        ]),
+                    )
+                    .execute()
+            ).map((x) => new QueriedSong(x));
 
             unmatchedSongs = youtubePlaylistVideoIDs
                 .filter(
@@ -994,7 +996,7 @@ export default class PlaylistManager {
                 const results = await query.execute();
                 let result: QueriedSong | null = null;
                 if (results.length === 1) {
-                    result = results[0];
+                    result = new QueriedSong(results[0]);
                 } else if (results.length > 1) {
                     // results may contain subgroups/parent groups, prioritize by original artist name
                     const properArtistNameMatches = results.filter(
@@ -1016,9 +1018,11 @@ export default class PlaylistManager {
                             "asc",
                         );
 
-                        result = sortedMatches[0];
+                        result = new QueriedSong(sortedMatches[0]);
                     } else {
-                        result = properArtistNameMatches[0] || results[0];
+                        result = new QueriedSong(
+                            properArtistNameMatches[0] || results[0],
+                        );
                     }
                 }
 

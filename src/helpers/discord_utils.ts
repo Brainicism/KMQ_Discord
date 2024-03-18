@@ -37,12 +37,7 @@ import {
     truncatedString,
     underline,
 } from "./utils";
-import {
-    getAvailableSongCount,
-    getLocalizedArtistName,
-    getLocalizedSongName,
-    userBonusIsActive,
-} from "./game_utils";
+import { getAvailableSongCount, userBonusIsActive } from "./game_utils";
 import { normalizePunctuationInName } from "../structures/game_round";
 import AppCommandsAction from "../enums/app_command_action";
 import EmbedPaginator from "eris-pagination";
@@ -1612,11 +1607,9 @@ export async function sendBookmarkedSongs(
         }> = [...songs].map((bookmarkedSong) => ({
             name: `${bold(
                 truncatedString(
-                    `"${getLocalizedSongName(
-                        bookmarkedSong[1].song,
+                    `"${bookmarkedSong[1].song.getLocalizedSongName(
                         locale,
-                    )}" - ${getLocalizedArtistName(
-                        bookmarkedSong[1].song,
+                    )}" - ${bookmarkedSong[1].song.getLocalizedArtistName(
                         locale,
                     )}`,
                     256,

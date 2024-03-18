@@ -25,8 +25,6 @@ import {
     tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
 import {
-    getLocalizedArtistName,
-    getLocalizedSongName,
     getMultipleChoiceOptions,
     getTimeToGuessMs,
     isFirstGameOfDay,
@@ -66,7 +64,7 @@ import TeamScoreboard from "./team_scoreboard";
 import i18n from "../helpers/localization_manager";
 import type { ButtonActionRow, GuildTextableMessage } from "../types";
 import type { CommandInteraction } from "eris";
-import type QueriedSong from "../interfaces/queried_song";
+import type QueriedSong from "./queried_song";
 import type Round from "./round";
 import type SuccessfulGuessResult from "../interfaces/success_guess_result";
 
@@ -1598,8 +1596,8 @@ export default class GameSession extends Session {
         const correctChoice =
             this.guildPreference.gameOptions.guessModeType ===
             GuessModeType.ARTIST
-                ? getLocalizedArtistName(round.song, locale)
-                : getLocalizedSongName(round.song, locale);
+                ? round.song.getLocalizedArtistName(locale)
+                : round.song.getLocalizedSongName(locale);
 
         const wrongChoices = await getMultipleChoiceOptions(
             this.guildPreference.gameOptions.answerType,

@@ -20,11 +20,7 @@ import {
     sendPaginationedEmbed,
     tryAutocompleteInteractionAcknowledge,
 } from "../../helpers/discord_utils";
-import {
-    getEmojisFromSongTags,
-    getLocalizedArtistName,
-    getLocalizedSongName,
-} from "../../helpers/game_utils";
+import { getEmojisFromSongTags } from "../../helpers/game_utils";
 import { getVideoID, validateID } from "@distube/ytdl-core";
 import { normalizePunctuationInName } from "../../structures/game_round";
 import { sendValidationErrorMessage } from "../../helpers/validate";
@@ -33,6 +29,7 @@ import GuildPreference from "../../structures/guild_preference";
 import KmqMember from "../../structures/kmq_member";
 import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
+import QueriedSong from "../../structures/queried_song";
 import SongSelector from "../../structures/song_selector";
 import State from "../../state";
 import _ from "lodash";
@@ -45,7 +42,6 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import type MatchedArtist from "src/interfaces/matched_artist";
-import type QueriedSong from "../../interfaces/queried_song";
 
 const COMMAND_NAME = "lookup";
 const SONG_NAME = "song_name";
@@ -69,11 +65,15 @@ async function lookupByYoutubeID(
     locale: LocaleType,
 ): Promise<boolean> {
     const guildID = messageOrInteraction.guildID as string;
-    const kmqSongEntry: QueriedSong | undefined = await dbContext.kmq
+    const queriedSongRaw = await dbContext.kmq
         .selectFrom("available_songs")
         .select(SongSelector.QueriedSongFields)
         .where("link", "=", videoID)
         .executeTakeFirst();
+
+    const kmqSongEntry: QueriedSong | undefined = queriedSongRaw
+        ? new QueriedSong(queriedSongRaw)
+        : undefined;
 
     const daisukiEntry = await dbContext.kpopVideos
         .selectFrom("app_kpop")
@@ -127,8 +127,8 @@ async function lookupByYoutubeID(
         description = i18n.translate(guildID, "command.lookup.inKMQ", {
             link: daisukiLink,
         });
-        songName = getLocalizedSongName(kmqSongEntry, locale);
-        artistName = getLocalizedArtistName(kmqSongEntry, locale);
+        songName = kmqSongEntry.getLocalizedSongName(locale);
+        artistName = kmqSongEntry.getLocalizedArtistName(locale);
 
         songAliases.push(...(State.aliases.song[videoID] ?? []));
         artistAliases.push(
@@ -348,7 +348,10 @@ async function lookupBySongName(
         );
     }
 
-    const kmqSongEntries = await kmqSongEntriesQuery.execute();
+    const kmqSongEntries = (await kmqSongEntriesQuery.execute()).map(
+        (x) => new QueriedSong(x),
+    );
+
     if (kmqSongEntries.length === 0) {
         return false;
     }
@@ -363,10 +366,9 @@ async function lookupBySongName(
 
     const songEmbeds = kmqSongEntries.map((entry) => ({
         name: truncatedString(
-            `**"${getLocalizedSongName(
-                entry,
+            `**"${entry.getLocalizedSongName(
                 locale,
-            )}"** - ${getLocalizedArtistName(entry, locale)}${getEmojisFromSongTags(entry)}`,
+            )}"** - ${entry.getLocalizedArtistName(locale)}${getEmojisFromSongTags(entry)}`,
             100,
         ),
         value: `https://youtu.be/${entry.youtubeLink}`,
