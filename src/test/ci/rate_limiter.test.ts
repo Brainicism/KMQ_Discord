@@ -22,7 +22,7 @@ describe("rate limiter", () => {
                 }
 
                 assert.strictEqual(
-                    rateLimiter.limitMap[userID].length,
+                    rateLimiter.limitMap[userID]!.length,
                     queueCapacity - 1,
                 );
             });
@@ -35,7 +35,7 @@ describe("rate limiter", () => {
                 }
 
                 assert.strictEqual(
-                    rateLimiter.limitMap[userID].length,
+                    rateLimiter.limitMap[userID]!.length,
                     queueCapacity,
                 );
             });
@@ -53,7 +53,7 @@ describe("rate limiter", () => {
                 }
 
                 assert.strictEqual(
-                    rateLimiter.limitMap[userID].length,
+                    rateLimiter.limitMap[userID]!.length,
                     queueCapacity,
                 );
             });
@@ -70,7 +70,7 @@ describe("rate limiter", () => {
 
                     await delay(queueExpiryTime * expiryFudgeFactor * 1000);
                     assert.strictEqual(rateLimiter.check(userID), true);
-                    assert.strictEqual(rateLimiter.limitMap[userID].length, 1);
+                    assert.strictEqual(rateLimiter.limitMap[userID]!.length, 1);
                 });
             });
 
@@ -87,7 +87,7 @@ describe("rate limiter", () => {
                     }
 
                     assert.strictEqual(
-                        rateLimiter.limitMap[userID].length,
+                        rateLimiter.limitMap[userID]!.length,
                         queueCapacity,
                     );
                 });
@@ -105,7 +105,7 @@ describe("rate limiter", () => {
                     }
 
                     assert.strictEqual(
-                        rateLimiter.limitMap[userID].length,
+                        rateLimiter.limitMap[userID]!.length,
                         queueCapacity,
                     );
 
@@ -121,7 +121,7 @@ describe("rate limiter", () => {
                     assert.strictEqual(rateLimiter.check(userID), false);
                     assert.strictEqual(rateLimiter.check(userID), false);
                     assert.strictEqual(
-                        rateLimiter.limitMap[userID].length,
+                        rateLimiter.limitMap[userID]!.length,
                         queueCapacity,
                     );
                 });
@@ -135,7 +135,7 @@ describe("rate limiter", () => {
                     }
 
                     assert.strictEqual(
-                        rateLimiter.limitMap[userID].length,
+                        rateLimiter.limitMap[userID]!.length,
                         queueCapacity,
                     );
 
@@ -148,7 +148,7 @@ describe("rate limiter", () => {
                     assert.strictEqual(rateLimiter.check(userID), false);
                     assert.strictEqual(rateLimiter.check(userID), false);
                     assert.strictEqual(
-                        rateLimiter.limitMap[userID].length,
+                        rateLimiter.limitMap[userID]!.length,
                         queueCapacity,
                     );
                 });
@@ -169,13 +169,13 @@ describe("rate limiter", () => {
                 }
 
                 assert.strictEqual(
-                    rateLimiter.limitMap[userID].length,
+                    rateLimiter.limitMap[userID]!.length,
                     queueCapacity,
                 );
                 assert.strictEqual(rateLimiter.check(userID), false);
                 assert.strictEqual(rateLimiter.check(userID2), true);
                 assert.strictEqual(
-                    rateLimiter.limitMap[userID2].length,
+                    rateLimiter.limitMap[userID2]!.length,
                     queueCapacity / 2 + 1,
                 );
             });

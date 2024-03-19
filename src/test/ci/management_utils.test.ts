@@ -35,7 +35,7 @@ describe("management utils", () => {
 
                 assert.ok(
                     setIntersection(
-                        State.aliases.artist[artistName],
+                        State.aliases.artist[artistName]!,
                         expectedAliases,
                     ).size === expectedAliases.length,
                 );

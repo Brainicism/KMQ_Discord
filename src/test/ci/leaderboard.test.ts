@@ -223,7 +223,7 @@ describe("leaderboard command", () => {
 
                 // invoker has an indicator, every other entry doesn't
                 assert.strict(
-                    generatedEmbeds[0].fields!.every((field, idx) => {
+                    generatedEmbeds[0]!.fields!.every((field, idx) => {
                         if (idx === invokerPosition - 1) {
                             return field.name.includes("\\➡");
                         }

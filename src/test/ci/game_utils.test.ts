@@ -47,7 +47,7 @@ describe("game utils", () => {
 
                     // first result is exact artist match
                     assert.strictEqual(
-                        matchResults.matchedGroups[0].name,
+                        matchResults.matchedGroups[0]!.name,
                         artistName,
                     );
 
@@ -76,9 +76,9 @@ describe("game utils", () => {
                 it("should return the corresponding groups in matchedGroups", async () => {
                     const artistNames = ["Blackpink", "BTS", "Stray Kids"];
                     const matchResults = await getMatchingGroupNames([
-                        artistNames[0],
-                        artistNames[1],
-                        artistNames[2].toLowerCase(),
+                        artistNames[0]!,
+                        artistNames[1]!,
+                        artistNames[2]!.toLowerCase(),
                     ]);
 
                     assert.deepStrictEqual(
@@ -440,7 +440,7 @@ describe("game utils", () => {
                         const isSorted = (arr: number[]): boolean =>
                             arr.every(
                                 (val, index) =>
-                                    index === 0 || val >= arr[index - 1],
+                                    index === 0 || val >= arr[index - 1]!,
                             );
 
                         assert.ok(
