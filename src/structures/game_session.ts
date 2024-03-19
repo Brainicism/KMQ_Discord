@@ -273,7 +273,7 @@ export default class GameSession extends Session {
                 this.lastGuesser.userID !== correctGuessers[0]!.id
             ) {
                 this.lastGuesser = {
-                    userID: correctGuessers[0].id,
+                    userID: correctGuessers[0]!.id,
                     streak: 1,
                 };
             } else {
@@ -674,6 +674,11 @@ export default class GameSession extends Session {
         // Pick the first participant still in VC
         const newOwnerID = participantsInVC[0];
 
+        // nobody left in vc
+        if (!newOwnerID) {
+            return;
+        }
+
         this.owner = new KmqMember(newOwnerID);
 
         await super.updateOwner();
@@ -987,7 +992,7 @@ export default class GameSession extends Session {
                 {
                     color:
                         this.gameType !== GameType.TEAMS &&
-                        (await userBonusIsActive(winners[0].id))
+                        (await userBonusIsActive(winners[0]!.id))
                             ? EMBED_SUCCESS_BONUS_COLOR
                             : EMBED_SUCCESS_COLOR,
                     description: !useLargerScoreboard
@@ -998,7 +1003,7 @@ export default class GameSession extends Session {
                               ),
                           )
                         : undefined,
-                    thumbnailUrl: winners[0].getAvatarURL(),
+                    thumbnailUrl: winners[0]!.getAvatarURL(),
                     title: `🎉 ${winnerMessage} 🎉`,
                     fields,
                     footerText,
@@ -1287,7 +1292,7 @@ export default class GameSession extends Session {
         let newLevel = level;
 
         // check for level up
-        while (newExp > CUM_EXP_TABLE[newLevel + 1]) {
+        while (newExp > CUM_EXP_TABLE[newLevel + 1]!) {
             newLevel++;
         }
 
@@ -1361,19 +1366,20 @@ export default class GameSession extends Session {
             };
         }
 
-        this.songStats[vlink].timePlayed += timePlayed;
+        const songStats = this.songStats[vlink]!;
+        songStats.timePlayed += timePlayed;
 
         if (correct) {
-            this.songStats[vlink].correctGuesses++;
-            this.songStats[vlink].timeToGuess += timePlayed;
+            songStats.correctGuesses++;
+            songStats.timeToGuess += timePlayed;
         }
 
         if (skipped) {
-            this.songStats[vlink].skipCount++;
+            songStats.skipCount++;
         }
 
         if (hintRequested) {
-            this.songStats[vlink].hintCount++;
+            songStats.hintCount++;
         }
     }
 
@@ -1383,6 +1389,7 @@ export default class GameSession extends Session {
     private async storeSongStats(): Promise<void> {
         await Promise.allSettled(
             Object.keys(this.songStats).map(async (vlink) => {
+                const songStats = this.songStats[vlink];
                 await dbContext.kmq
                     .insertInto("song_metadata")
                     .values({
@@ -1399,16 +1406,23 @@ export default class GameSession extends Session {
                     .ignore()
                     .execute();
 
+                if (!songStats) {
+                    logger.warn(
+                        `Song stats for ${vlink} missing in storeSongStats`,
+                    );
+                    return;
+                }
+
                 await dbContext.kmq
                     .updateTable("song_metadata")
                     .where("vlink", "=", vlink)
                     .set({
-                        correct_guesses: sql`correct_guesses + ${this.songStats[vlink].correctGuesses}`,
-                        rounds_played: sql`rounds_played + ${this.songStats[vlink].roundsPlayed}`,
-                        skip_count: sql`skip_count + ${this.songStats[vlink].skipCount}`,
-                        hint_count: sql`hint_count + ${this.songStats[vlink].hintCount}`,
-                        time_to_guess_ms: sql`time_to_guess_ms + ${this.songStats[vlink].timeToGuess}`,
-                        time_played_ms: sql`time_played_ms + ${this.songStats[vlink].timePlayed}`,
+                        correct_guesses: sql`correct_guesses + ${songStats.correctGuesses}`,
+                        rounds_played: sql`rounds_played + ${songStats.roundsPlayed}`,
+                        skip_count: sql`skip_count + ${songStats.skipCount}`,
+                        hint_count: sql`hint_count + ${songStats.hintCount}`,
+                        time_to_guess_ms: sql`time_to_guess_ms + ${songStats.timeToGuess}`,
+                        time_played_ms: sql`time_played_ms + ${songStats.timePlayed}`,
                     })
                     .execute();
             }),

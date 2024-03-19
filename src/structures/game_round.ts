@@ -441,6 +441,8 @@ export default class GameRound extends Round {
             ],
         );
 
+        const fastestPlayerRoundResult = playerRoundResults[0]!;
+
         if (isHidden) {
             for (const entry of sortedGuesses
                 .map((x): [string, GuessResult] => {
@@ -471,7 +473,7 @@ export default class GameRound extends Round {
                 const streak =
                     playerResult && playerResult.streak >= 5
                         ? ` (🔥${friendlyFormattedNumber(
-                              playerRoundResults[0].streak,
+                              fastestPlayerRoundResult.streak,
                           )}) `
                         : " ";
 
@@ -494,11 +496,11 @@ export default class GameRound extends Round {
             }
         } else if (correctGuess) {
             const correctGuesser = `${getMention(
-                playerRoundResults[0].player.id,
+                fastestPlayerRoundResult.player.id,
             )} ${
-                playerRoundResults[0].streak >= 5
+                fastestPlayerRoundResult.streak >= 5
                     ? `(🔥${friendlyFormattedNumber(
-                          playerRoundResults[0].streak,
+                          fastestPlayerRoundResult.streak,
                       )})`
                     : ""
             }`;
@@ -525,10 +527,12 @@ export default class GameRound extends Round {
                 {
                     correctGuesser,
                     expGain: friendlyFormattedNumber(
-                        playerRoundResults[0].expGain,
+                        fastestPlayerRoundResult.expGain,
                     ),
                     timeToGuess:
-                        playerIDToTimeToGuess[playerRoundResults[0].player.id],
+                        playerIDToTimeToGuess[
+                            fastestPlayerRoundResult.player.id
+                        ]!,
                 },
             );
             if (playerRoundResults.length > 1) {
@@ -585,8 +589,17 @@ export default class GameRound extends Round {
     }
 
     getTimeToGuessMs(guesser: { id: string }, isHidden: boolean): number {
-        const correctGuessTimes = this.getGuesses()
-            [guesser.id].filter((x) => x.correct)
+        const playersGuess = this.getGuesses()[guesser.id];
+        if (!playersGuess) {
+            logger.error(
+                `Players guess result unexpectedly empty: ${guesser.id}. This should never happen!`,
+            );
+
+            return 99999999;
+        }
+
+        const correctGuessTimes = playersGuess
+            .filter((x) => x.correct)
             .map((x) => x.timeToGuessMs);
 
         if (isHidden) {
