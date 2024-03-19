@@ -413,9 +413,7 @@ async function sendMessageExceptionHandler(
         }
     } else {
         logger.error(
-            `Error sending message. Unknown error. textChannelID = ${channelID}. err = ${JSON.stringify(
-                e,
-            )}.body = ${JSON.stringify(messageContent)}`,
+            `Error sending message. Unknown error. textChannelID = ${channelID}. err = ${e} = ${JSON.stringify(messageContent)}`,
         );
     }
 }

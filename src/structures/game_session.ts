@@ -250,7 +250,7 @@ export default class GameSession extends Session {
             return;
         }
 
-        const correctGuessers = round.correctGuessers;
+        const correctGuessers = round.getCorrectGuessers();
         const isCorrectGuess = correctGuessers.length > 0;
 
         await this.stopHiddenUpdateTimer();
@@ -568,12 +568,14 @@ export default class GameSession extends Session {
             this.guildPreference.typosAllowed(),
         );
 
+        const correctGuessers = round.getCorrectGuessers();
+        const incorrectGuessers = round.getIncorrectGuessers();
         if (this.isHiddenMode()) {
             // Determine whether to wait for more guesses
             if (
                 this.scoreboard.getRemainingPlayers(
-                    round.correctGuessers,
-                    round.incorrectGuessers,
+                    correctGuessers.map((x) => x.id),
+                    incorrectGuessers,
                 ).length > 0
             ) {
                 // If there are still players who haven't guessed correctly, don't end the round
@@ -586,7 +588,7 @@ export default class GameSession extends Session {
 
         if (
             pointsEarned > 0 ||
-            (this.isHiddenMode() && round.correctGuessers.length > 0)
+            (this.isHiddenMode() && correctGuessers.length > 0)
         ) {
             // If not hidden, someone guessed correctly
             // If hidden, everyone guessed and at least one person was right
@@ -631,7 +633,7 @@ export default class GameSession extends Session {
                             ),
                         ),
                     ],
-                    [...round.incorrectGuessers],
+                    [...incorrectGuessers],
                 ).size === 0
             ) {
                 await this.endRound(
@@ -688,7 +690,6 @@ export default class GameSession extends Session {
         interaction: Eris.ComponentInteraction<Eris.TextableChannel>,
         messageContext: MessageContext,
     ): Promise<void> {
-        if (!this.round) return;
         if (
             !(await this.handleInSessionInteractionFailures(
                 interaction,
@@ -698,10 +699,11 @@ export default class GameSession extends Session {
             return;
         }
 
+        if (!this.round) return;
         const round = this.round;
 
         if (
-            round.incorrectGuessers.has(interaction.member!.id) ||
+            round.getIncorrectGuessers().has(interaction.member!.id) ||
             !this.guessEligible(messageContext, interaction.createdAt)
         ) {
             await tryCreateInteractionErrorAcknowledgement(
@@ -725,7 +727,6 @@ export default class GameSession extends Session {
                 ),
             );
 
-            round.incorrectGuessers.add(interaction.member!.id);
             round.interactionIncorrectAnswerUUIDs[interaction.data.custom_id]++;
 
             // Add the user as a participant
@@ -1119,11 +1120,15 @@ export default class GameSession extends Session {
     ): number {
         if (!this.round) return 0;
         const round = this.round;
-        if (multipleChoiceMode && round.incorrectGuessers.has(userID)) return 0;
+        const incorrectGuessers = round.getIncorrectGuessers();
+        if (multipleChoiceMode && incorrectGuessers.has(userID)) return 0;
 
         if (
-            !round.correctGuessers.map((x) => x.id).includes(userID) &&
-            !round.incorrectGuessers.has(userID)
+            !round
+                .getCorrectGuessers()
+                .map((x) => x.id)
+                .includes(userID) &&
+            !incorrectGuessers.has(userID)
         ) {
             if (round.interactionMessage) {
                 round.interactionMessageNeedsUpdate = true;
@@ -1467,21 +1472,26 @@ export default class GameSession extends Session {
         const lastGuesserStreak = this.lastGuesser?.streak ?? 0;
         const isHidden = this.isHiddenMode();
 
-        round.correctGuessers.sort(
-            (a, b) =>
-                round.getTimeToGuessMs(a, isHidden) -
-                round.getTimeToGuessMs(b, isHidden),
-        );
+        const correctGuessers = round
+            .getCorrectGuessers()
+            .sort(
+                (a, b) =>
+                    round.getTimeToGuessMs(a.id, isHidden) -
+                    round.getTimeToGuessMs(b.id, isHidden),
+            );
 
         const playerRoundResults = await Promise.all(
-            round.correctGuessers.map(async (correctGuesser, idx) => {
+            correctGuessers.map(async (correctGuesser, idx) => {
                 const guessPosition = idx + 1;
                 const expGain = await ExpCommand.calculateTotalRoundExp(
                     guildPreference,
                     round,
                     getNumParticipants(this.voiceChannelID),
                     lastGuesserStreak,
-                    round.getTimeToGuessMs(correctGuesser, this.isHiddenMode()),
+                    round.getTimeToGuessMs(
+                        correctGuesser.id,
+                        this.isHiddenMode(),
+                    ),
                     guessPosition,
                     await userBonusIsActive(correctGuesser.id),
                     correctGuesser.id,
@@ -1491,18 +1501,14 @@ export default class GameSession extends Session {
                 if (idx === 0) {
                     streak = lastGuesserStreak;
                     logger.info(
-                        `${getDebugLogHeader(messageContext)}, uid: ${
-                            correctGuesser.id
-                        } | Song correctly guessed. song = ${
+                        `${getDebugLogHeader(messageContext)}, uid: ${correctGuesser.id} | Song correctly guessed. song = ${
                             round.song.songName
                         }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`,
                     );
                 } else {
                     streak = 0;
                     logger.info(
-                        `${getDebugLogHeader(messageContext)}, uid: ${
-                            correctGuesser.id
-                        } | Song correctly guessed ${getOrdinalNum(
+                        `${getDebugLogHeader(messageContext)}, uid: ${correctGuesser.id} | Song correctly guessed ${getOrdinalNum(
                             guessPosition,
                         )}. song = ${
                             round.song.songName
@@ -1573,7 +1579,10 @@ export default class GameSession extends Session {
         )}:`;
 
         const remainingPlayers = this.scoreboard
-            .getRemainingPlayers(round.correctGuessers, round.incorrectGuessers)
+            .getRemainingPlayers(
+                round.getCorrectGuessers().map((x) => x.id),
+                round.getIncorrectGuessers(),
+            )
             .map((player) => player.username)
             .join("\n");
 
