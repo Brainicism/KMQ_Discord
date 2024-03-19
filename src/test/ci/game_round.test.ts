@@ -873,7 +873,7 @@ describe("game round", () => {
 
             assert.strictEqual(gameRound.getCorrectGuessers().length, 1);
             assert.strictEqual(gameRound.getIncorrectGuessers().size, 0);
-            assert.strictEqual(gameRound.getCorrectGuessers()[0].id, playerID);
+            assert.strictEqual(gameRound.getCorrectGuessers()[0]!.id, playerID);
         });
 
         it("should allow users to overwrite their guesses", async () => {
@@ -937,7 +937,7 @@ describe("game round", () => {
             });
             assert.strictEqual(gameRound.getCorrectGuessers().length, 1);
             assert.strictEqual(gameRound.getIncorrectGuessers().size, 0);
-            assert.strictEqual(gameRound.getCorrectGuessers()[0].id, playerID);
+            assert.strictEqual(gameRound.getCorrectGuessers()[0]!.id, playerID);
         });
     });
 });
