@@ -66,7 +66,7 @@ describe("exp command", () => {
 
                     assert.strictEqual(modifiers.length, 1);
                     assert.strictEqual(
-                        modifiers[0].name,
+                        modifiers[0]!.name,
                         ExpBonusModifier.BELOW_SONG_COUNT_THRESHOLD,
                     );
                 });
@@ -114,7 +114,7 @@ describe("exp command", () => {
 
                         assert.strictEqual(modifiers.length, 1);
                         assert.strictEqual(
-                            modifiers[0].name,
+                            modifiers[0]!.name,
                             ExpBonusModifier.VOTE,
                         );
                     });
@@ -135,7 +135,7 @@ describe("exp command", () => {
 
                         assert.strictEqual(modifiers.length, 1);
                         assert.strictEqual(
-                            modifiers[0].name,
+                            modifiers[0]!.name,
                             ExpBonusModifier.SHUFFLE_POPULARITY,
                         );
                     });
@@ -156,7 +156,7 @@ describe("exp command", () => {
 
                         assert.strictEqual(modifiers.length, 1);
                         assert.strictEqual(
-                            modifiers[0].name,
+                            modifiers[0]!.name,
                             ExpBonusModifier.SHUFFLE_WEIGHTED_EASY,
                         );
                     });
@@ -177,7 +177,7 @@ describe("exp command", () => {
 
                         assert.strictEqual(modifiers.length, 1);
                         assert.strictEqual(
-                            modifiers[0].name,
+                            modifiers[0]!.name,
                             ExpBonusModifier.SHUFFLE_CHRONOLOGICAL,
                         );
                     });
@@ -198,7 +198,7 @@ describe("exp command", () => {
 
                         assert.strictEqual(modifiers.length, 1);
                         assert.strictEqual(
-                            modifiers[0].name,
+                            modifiers[0]!.name,
                             ExpBonusModifier.SHUFFLE_CHRONOLOGICAL,
                         );
                     });
@@ -233,7 +233,7 @@ describe("exp command", () => {
 
                             assert.strictEqual(modifiers.length, 1);
                             assert.strictEqual(
-                                modifiers[0].name,
+                                modifiers[0]!.name,
                                 multipleChoicePenaltyMap[answerType],
                             );
                         });
@@ -255,7 +255,7 @@ describe("exp command", () => {
 
                             assert.strictEqual(modifiers.length, 1);
                             assert.strictEqual(
-                                modifiers[0].name,
+                                modifiers[0]!.name,
                                 ExpBonusModifier.ARTIST_GUESS,
                             );
                         });
@@ -275,7 +275,7 @@ describe("exp command", () => {
 
                             assert.strictEqual(modifiers.length, 1);
                             assert.strictEqual(
-                                modifiers[0].name,
+                                modifiers[0]!.name,
                                 ExpBonusModifier.ARTIST_GUESS,
                             );
                         });
@@ -299,7 +299,7 @@ describe("exp command", () => {
 
                             assert.strictEqual(modifiers.length, 1);
                             assert.strictEqual(
-                                modifiers[0].name,
+                                modifiers[0]!.name,
                                 ExpBonusModifier.ARTIST_GUESS_GROUPS_SELECTED,
                             );
                         });
@@ -337,7 +337,7 @@ describe("exp command", () => {
 
                     assert.strictEqual(modifiers.length, 1);
                     assert.strictEqual(
-                        modifiers[0].name,
+                        modifiers[0]!.name,
                         ExpBonusModifier.POWER_HOUR,
                     );
                 });
@@ -357,7 +357,7 @@ describe("exp command", () => {
 
                     assert.strictEqual(modifiers.length, 1);
                     assert.strictEqual(
-                        modifiers[0].name,
+                        modifiers[0]!.name,
                         ExpBonusModifier.POWER_HOUR,
                     );
                 });
@@ -385,7 +385,7 @@ describe("exp command", () => {
 
                 assert.strictEqual(modifiers.length, 1);
                 assert.strictEqual(
-                    modifiers[0].name,
+                    modifiers[0]!.name,
                     ExpBonusModifier.FIRST_GAME_OF_DAY,
                 );
             });

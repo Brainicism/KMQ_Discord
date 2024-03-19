@@ -321,15 +321,15 @@ describe("song selector", () => {
 
                         const songsArray = Array.from(songs);
                         assert.ok(
-                            songsArray[0].selectionWeight! >
-                                songsArray[songsArray.length - 1]
+                            songsArray[0]!.selectionWeight! >
+                                songsArray[songsArray.length - 1]!
                                     .selectionWeight!,
                         );
 
                         for (let i = 1; i < songsArray.length - 1; i++) {
                             assert.ok(
-                                songsArray[i - 1].selectionWeight! >=
-                                    songsArray[i].selectionWeight!,
+                                songsArray[i - 1]!.selectionWeight! >=
+                                    songsArray[i]!.selectionWeight!,
                             );
                         }
                     });
@@ -346,15 +346,15 @@ describe("song selector", () => {
 
                         const songsArray = Array.from(songs);
                         assert.ok(
-                            songsArray[0].selectionWeight! <
-                                songsArray[songsArray.length - 1]
+                            songsArray[0]!.selectionWeight! <
+                                songsArray[songsArray.length - 1]!
                                     .selectionWeight!,
                         );
 
                         for (let i = 1; i < songsArray.length - 1; i++) {
                             assert.ok(
-                                songsArray[i - 1].selectionWeight! <=
-                                    songsArray[i].selectionWeight!,
+                                songsArray[i - 1]!.selectionWeight! <=
+                                    songsArray[i]!.selectionWeight!,
                             );
                         }
                     });
@@ -386,8 +386,8 @@ describe("song selector", () => {
                         i++
                     ) {
                         assert.ok(
-                            songsArray[partitionSize * i + 1].publishDate <
-                                songsArray[partitionSize * (i + 1) + 1]
+                            songsArray[partitionSize * i + 1]!.publishDate <
+                                songsArray[partitionSize * (i + 1) + 1]!
                                     .publishDate,
                         );
                     }
@@ -426,8 +426,8 @@ describe("song selector", () => {
                         i++
                     ) {
                         assert.ok(
-                            songsArray[partitionSize * i + 1].publishDate >
-                                songsArray[partitionSize * (i + 1) + 1]
+                            songsArray[partitionSize * i + 1]!.publishDate >
+                                songsArray[partitionSize * (i + 1) + 1]!
                                     .publishDate,
                         );
                     }
@@ -460,7 +460,7 @@ describe("song selector", () => {
                     assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every(
-                            (song) => song.artistID === artists[0].id,
+                            (song) => song.artistID === artists[0]!.id,
                         ),
                         true,
                     );
@@ -484,7 +484,7 @@ describe("song selector", () => {
                     // all songs must be one of the artist, or the subunit's
                     assert.strictEqual(
                         Array.from(songs).every((song) =>
-                            [...expectedSubunitIds, artists[0].id].includes(
+                            [...expectedSubunitIds, artists[0]!.id].includes(
                                 song.artistID,
                             ),
                         ),
@@ -809,7 +809,7 @@ describe("song selector", () => {
                     const { songs } = guildPreference.songSelector.getSongs();
 
                     assert.strictEqual(songs.size, 1);
-                    assert.strictEqual([...songs][0].youtubeLink, songLink);
+                    assert.strictEqual([...songs][0]!.youtubeLink, songLink);
                 });
             });
 
@@ -984,7 +984,7 @@ describe("song selector", () => {
                 }
 
                 for (let i = 1; i < songs.length - 1; i++) {
-                    assert.ok(songs[i - 1].views > songs[i].views);
+                    assert.ok(songs[i - 1]!.views > songs[i]!.views);
                 }
             });
         });

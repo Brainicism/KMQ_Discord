@@ -23,7 +23,7 @@ describe("team scoreboard", () => {
         scoreboard = new TeamScoreboard(voiceChannelID);
         firstTeam = scoreboard.addTeam(
             FIRST_TEAM_NAME,
-            new Player(USER_IDS[0], GUILD_ID, AVATAR_URL, 0, USERNAMES[0]),
+            new Player(USER_IDS[0]!, GUILD_ID, AVATAR_URL, 0, USERNAMES[0]!),
             "dummy",
         );
     });
@@ -31,11 +31,11 @@ describe("team scoreboard", () => {
     describe("add a team", () => {
         it("should add the team to the scoreboard", () => {
             const player = new Player(
-                USER_IDS[1],
+                USER_IDS[1]!,
                 GUILD_ID,
                 AVATAR_URL,
                 0,
-                USERNAMES[1],
+                USERNAMES[1]!,
             );
 
             assert.strictEqual(scoreboard.hasTeam(SECOND_TEAM_NAME), false);
@@ -60,18 +60,18 @@ describe("team scoreboard", () => {
     describe("get team of player", () => {
         it("should get the team that corresponds to the player", () => {
             assert.deepStrictEqual(
-                scoreboard.getTeamOfPlayer(USER_IDS[0]),
+                scoreboard.getTeamOfPlayer(USER_IDS[0]!),
                 firstTeam,
             );
 
-            assert.strictEqual(scoreboard.getTeamOfPlayer(USER_IDS[1]), null);
+            assert.strictEqual(scoreboard.getTeamOfPlayer(USER_IDS[1]!), null);
 
             const player = new Player(
-                USER_IDS[1],
+                USER_IDS[1]!,
                 GUILD_ID,
                 AVATAR_URL,
                 0,
-                USERNAMES[1],
+                USERNAMES[1]!,
             );
 
             const secondTeam = scoreboard.addTeam(
@@ -90,11 +90,11 @@ describe("team scoreboard", () => {
     describe("team deletion", () => {
         it("should delete a team when it has no players in it", () => {
             const player = new Player(
-                USER_IDS[1],
+                USER_IDS[1]!,
                 GUILD_ID,
                 AVATAR_URL,
                 0,
-                USERNAMES[1],
+                USERNAMES[1]!,
             );
 
             const secondTeam = scoreboard.addTeam(
@@ -104,26 +104,26 @@ describe("team scoreboard", () => {
             );
 
             const anotherPlayer = new Player(
-                USER_IDS[2],
+                USER_IDS[2]!,
                 GUILD_ID,
                 AVATAR_URL,
                 0,
-                USERNAMES[2],
+                USERNAMES[2]!,
             );
 
             scoreboard.addTeamPlayer(SECOND_TEAM_NAME, anotherPlayer);
             const bestPlayer = new Player(
-                USER_IDS[3],
+                USER_IDS[3]!,
                 GUILD_ID,
                 AVATAR_URL,
                 0,
-                USERNAMES[3],
+                USERNAMES[3]!,
             );
 
             scoreboard.addTeamPlayer(FIRST_TEAM_NAME, bestPlayer);
             scoreboard.removePlayer(bestPlayer.id);
             scoreboard.removePlayer(player.id);
-            scoreboard.removePlayer(USER_IDS[0]);
+            scoreboard.removePlayer(USER_IDS[0]!);
             assert.deepStrictEqual(Object.values(scoreboard.getTeams()), [
                 secondTeam,
             ]);
@@ -137,19 +137,19 @@ describe("team scoreboard", () => {
                     for (let i = 0; i < 20; i++) {
                         scoreboard.update([
                             {
-                                userID: USER_IDS[0],
+                                userID: USER_IDS[0]!,
                                 pointsEarned: 1,
                                 expGain: 50,
                             },
                         ]);
 
                         assert.strictEqual(
-                            scoreboard.getPlayerScore(USER_IDS[0]),
+                            scoreboard.getPlayerScore(USER_IDS[0]!),
                             i + 1,
                         );
 
                         assert.strictEqual(
-                            scoreboard.getPlayerExpGain(USER_IDS[0]),
+                            scoreboard.getPlayerExpGain(USER_IDS[0]!),
                             50 * (i + 1),
                         );
                         assert.strictEqual(firstTeam.getScore(), i + 1);
@@ -160,12 +160,12 @@ describe("team scoreboard", () => {
             describe("user has not guessed yet", () => {
                 it("should not increment the user's score/xp", () => {
                     assert.strictEqual(
-                        scoreboard.getPlayerScore(USER_IDS[0]),
+                        scoreboard.getPlayerScore(USER_IDS[0]!),
                         0,
                     );
 
                     assert.strictEqual(
-                        scoreboard.getPlayerExpGain(USER_IDS[0]),
+                        scoreboard.getPlayerExpGain(USER_IDS[0]!),
                         0,
                     );
                     assert.strictEqual(firstTeam.getScore(), 0);
@@ -178,11 +178,11 @@ describe("team scoreboard", () => {
                 scoreboard.addTeamPlayer(
                     FIRST_TEAM_NAME,
                     new Player(
-                        USER_IDS[1],
+                        USER_IDS[1]!,
                         GUILD_ID,
                         AVATAR_URL,
                         0,
-                        USERNAMES[1],
+                        USERNAMES[1]!,
                     ),
                 );
             });
@@ -192,7 +192,7 @@ describe("team scoreboard", () => {
                     for (let i = 0; i < 20; i++) {
                         scoreboard.update([
                             {
-                                userID: USER_IDS[0],
+                                userID: USER_IDS[0]!,
                                 pointsEarned: 1,
                                 expGain: 50,
                             },
@@ -200,7 +200,7 @@ describe("team scoreboard", () => {
                         if (i % 2 === 0) {
                             scoreboard.update([
                                 {
-                                    userID: USER_IDS[1],
+                                    userID: USER_IDS[1]!,
                                     pointsEarned: 1,
                                     expGain: 50,
                                 },
@@ -209,22 +209,22 @@ describe("team scoreboard", () => {
                     }
 
                     assert.strictEqual(
-                        scoreboard.getPlayerScore(USER_IDS[0]),
+                        scoreboard.getPlayerScore(USER_IDS[0]!),
                         20,
                     );
 
                     assert.strictEqual(
-                        scoreboard.getPlayerExpGain(USER_IDS[0]),
+                        scoreboard.getPlayerExpGain(USER_IDS[0]!),
                         1000,
                     );
 
                     assert.strictEqual(
-                        scoreboard.getPlayerScore(USER_IDS[1]),
+                        scoreboard.getPlayerScore(USER_IDS[1]!),
                         10,
                     );
 
                     assert.strictEqual(
-                        scoreboard.getPlayerExpGain(USER_IDS[1]),
+                        scoreboard.getPlayerExpGain(USER_IDS[1]!),
                         500,
                     );
                     assert.strictEqual(firstTeam.getScore(), 30);
@@ -234,22 +234,22 @@ describe("team scoreboard", () => {
             describe("both users have not guessed yet", () => {
                 it("should not increment each user's score", () => {
                     assert.strictEqual(
-                        scoreboard.getPlayerScore(USER_IDS[0]),
+                        scoreboard.getPlayerScore(USER_IDS[0]!),
                         0,
                     );
 
                     assert.strictEqual(
-                        scoreboard.getPlayerExpGain(USER_IDS[0]),
+                        scoreboard.getPlayerExpGain(USER_IDS[0]!),
                         0,
                     );
 
                     assert.strictEqual(
-                        scoreboard.getPlayerScore(USER_IDS[1]),
+                        scoreboard.getPlayerScore(USER_IDS[1]!),
                         0,
                     );
 
                     assert.strictEqual(
-                        scoreboard.getPlayerExpGain(USER_IDS[1]),
+                        scoreboard.getPlayerExpGain(USER_IDS[1]!),
                         0,
                     );
                     assert.strictEqual(firstTeam.getScore(), 0);
@@ -263,22 +263,22 @@ describe("team scoreboard", () => {
                 scoreboard.addTeamPlayer(
                     FIRST_TEAM_NAME,
                     new Player(
-                        USER_IDS[1],
+                        USER_IDS[1]!,
                         GUILD_ID,
                         AVATAR_URL,
                         0,
-                        USERNAMES[1],
+                        USERNAMES[1]!,
                     ),
                 );
 
                 secondTeam = scoreboard.addTeam(
                     SECOND_TEAM_NAME,
                     new Player(
-                        USER_IDS[2],
+                        USER_IDS[2]!,
                         GUILD_ID,
                         AVATAR_URL,
                         0,
-                        USERNAMES[2],
+                        USERNAMES[2]!,
                     ),
                     "dummy",
                 );
@@ -286,11 +286,11 @@ describe("team scoreboard", () => {
                 scoreboard.addTeamPlayer(
                     SECOND_TEAM_NAME,
                     new Player(
-                        USER_IDS[3],
+                        USER_IDS[3]!,
                         GUILD_ID,
                         AVATAR_URL,
                         0,
-                        USERNAMES[3],
+                        USERNAMES[3]!,
                     ),
                 );
             });
@@ -300,7 +300,7 @@ describe("team scoreboard", () => {
                     for (let i = 0; i < 20; i++) {
                         scoreboard.update([
                             {
-                                userID: USER_IDS[0],
+                                userID: USER_IDS[0]!,
                                 pointsEarned: 1,
                                 expGain: 50,
                             },
@@ -308,7 +308,7 @@ describe("team scoreboard", () => {
                         if (i === 0) {
                             scoreboard.update([
                                 {
-                                    userID: USER_IDS[1],
+                                    userID: USER_IDS[1]!,
                                     pointsEarned: 1,
                                     expGain: 50,
                                 },
@@ -318,7 +318,7 @@ describe("team scoreboard", () => {
                         if (i % 10 === 0) {
                             scoreboard.update([
                                 {
-                                    userID: USER_IDS[2],
+                                    userID: USER_IDS[2]!,
                                     pointsEarned: 1,
                                     expGain: 50,
                                 },
@@ -327,42 +327,42 @@ describe("team scoreboard", () => {
                     }
 
                     assert.strictEqual(
-                        scoreboard.getPlayerScore(USER_IDS[0]),
+                        scoreboard.getPlayerScore(USER_IDS[0]!),
                         20,
                     );
 
                     assert.strictEqual(
-                        scoreboard.getPlayerExpGain(USER_IDS[0]),
+                        scoreboard.getPlayerExpGain(USER_IDS[0]!),
                         1000 * 1.1,
                     );
 
                     assert.strictEqual(
-                        scoreboard.getPlayerScore(USER_IDS[1]),
+                        scoreboard.getPlayerScore(USER_IDS[1]!),
                         1,
                     );
 
                     assert.strictEqual(
-                        scoreboard.getPlayerExpGain(USER_IDS[1]),
+                        scoreboard.getPlayerExpGain(USER_IDS[1]!),
                         50 * 1.1,
                     );
 
                     assert.strictEqual(
-                        scoreboard.getPlayerScore(USER_IDS[2]),
+                        scoreboard.getPlayerScore(USER_IDS[2]!),
                         2,
                     );
 
                     assert.strictEqual(
-                        scoreboard.getPlayerExpGain(USER_IDS[2]),
+                        scoreboard.getPlayerExpGain(USER_IDS[2]!),
                         100,
                     );
 
                     assert.strictEqual(
-                        scoreboard.getPlayerScore(USER_IDS[3]),
+                        scoreboard.getPlayerScore(USER_IDS[3]!),
                         0,
                     );
 
                     assert.strictEqual(
-                        scoreboard.getPlayerExpGain(USER_IDS[3]),
+                        scoreboard.getPlayerExpGain(USER_IDS[3]!),
                         0,
                     );
 
@@ -374,12 +374,12 @@ describe("team scoreboard", () => {
             describe("all users have not guessed yet", () => {
                 it("should not increment each user's score", () => {
                     assert.strictEqual(
-                        scoreboard.getPlayerScore(USER_IDS[0]),
+                        scoreboard.getPlayerScore(USER_IDS[0]!),
                         0,
                     );
 
                     assert.strictEqual(
-                        scoreboard.getPlayerExpGain(USER_IDS[0]),
+                        scoreboard.getPlayerExpGain(USER_IDS[0]!),
                         0,
                     );
 
@@ -395,22 +395,22 @@ describe("team scoreboard", () => {
                 scoreboard.addTeamPlayer(
                     FIRST_TEAM_NAME,
                     new Player(
-                        USER_IDS[1],
+                        USER_IDS[1]!,
                         GUILD_ID,
                         AVATAR_URL,
                         0,
-                        USERNAMES[1],
+                        USERNAMES[1]!,
                     ),
                 );
 
                 secondTeam = scoreboard.addTeam(
                     SECOND_TEAM_NAME,
                     new Player(
-                        USER_IDS[2],
+                        USER_IDS[2]!,
                         GUILD_ID,
                         AVATAR_URL,
                         0,
-                        USERNAMES[2],
+                        USERNAMES[2]!,
                     ),
                     "dummy",
                 );
@@ -418,18 +418,18 @@ describe("team scoreboard", () => {
                 scoreboard.addTeamPlayer(
                     SECOND_TEAM_NAME,
                     new Player(
-                        USER_IDS[3],
+                        USER_IDS[3]!,
                         GUILD_ID,
                         AVATAR_URL,
                         0,
-                        USERNAMES[3],
+                        USERNAMES[3]!,
                     ),
                 );
 
                 scoreboard.update([
-                    { userID: USER_IDS[0], pointsEarned: 1, expGain: 50 },
-                    { userID: USER_IDS[1], pointsEarned: 1, expGain: 25 },
-                    { userID: USER_IDS[2], pointsEarned: 1, expGain: 12 },
+                    { userID: USER_IDS[0]!, pointsEarned: 1, expGain: 50 },
+                    { userID: USER_IDS[1]!, pointsEarned: 1, expGain: 25 },
+                    { userID: USER_IDS[2]!, pointsEarned: 1, expGain: 12 },
                 ]);
             });
 
@@ -440,17 +440,17 @@ describe("team scoreboard", () => {
 
             it("should give everybody EXP", () => {
                 assert.strictEqual(
-                    scoreboard.getPlayerExpGain(USER_IDS[0]),
+                    scoreboard.getPlayerExpGain(USER_IDS[0]!),
                     50 * 1.1,
                 );
 
                 assert.strictEqual(
-                    scoreboard.getPlayerExpGain(USER_IDS[1]),
+                    scoreboard.getPlayerExpGain(USER_IDS[1]!),
                     25 * 1.1,
                 );
 
                 assert.strictEqual(
-                    scoreboard.getPlayerExpGain(USER_IDS[2]),
+                    scoreboard.getPlayerExpGain(USER_IDS[2]!),
                     12,
                 );
             });
@@ -462,18 +462,36 @@ describe("team scoreboard", () => {
         beforeEach(() => {
             scoreboard.addTeamPlayer(
                 FIRST_TEAM_NAME,
-                new Player(USER_IDS[1], GUILD_ID, AVATAR_URL, 0, USERNAMES[1]),
+                new Player(
+                    USER_IDS[1]!,
+                    GUILD_ID,
+                    AVATAR_URL,
+                    0,
+                    USERNAMES[1]!,
+                ),
             );
 
             secondTeam = scoreboard.addTeam(
                 SECOND_TEAM_NAME,
-                new Player(USER_IDS[2], GUILD_ID, AVATAR_URL, 0, USERNAMES[2]),
+                new Player(
+                    USER_IDS[2]!,
+                    GUILD_ID,
+                    AVATAR_URL,
+                    0,
+                    USERNAMES[2]!,
+                ),
                 "dummy",
             );
 
             scoreboard.addTeamPlayer(
                 SECOND_TEAM_NAME,
-                new Player(USER_IDS[3], GUILD_ID, AVATAR_URL, 0, USERNAMES[3]),
+                new Player(
+                    USER_IDS[3]!,
+                    GUILD_ID,
+                    AVATAR_URL,
+                    0,
+                    USERNAMES[3]!,
+                ),
             );
         });
 
@@ -486,11 +504,11 @@ describe("team scoreboard", () => {
         describe("single player, single team, has score", () => {
             it("should return the team", () => {
                 scoreboard.update([
-                    { userID: USER_IDS[0], pointsEarned: 10, expGain: 0 },
+                    { userID: USER_IDS[0]!, pointsEarned: 10, expGain: 0 },
                 ]);
                 assert.strictEqual(scoreboard.getWinners().length, 1);
                 assert.strictEqual(
-                    scoreboard.getWinners()[0].getName(),
+                    scoreboard.getWinners()[0]!.getName(),
                     FIRST_TEAM_NAME,
                 );
 
@@ -504,15 +522,15 @@ describe("team scoreboard", () => {
         describe("multiple players, single team, has different scores", () => {
             it("should return the team", () => {
                 scoreboard.update([
-                    { userID: USER_IDS[0], pointsEarned: 10, expGain: 0 },
+                    { userID: USER_IDS[0]!, pointsEarned: 10, expGain: 0 },
                 ]);
 
                 scoreboard.update([
-                    { userID: USER_IDS[1], pointsEarned: 15, expGain: 0 },
+                    { userID: USER_IDS[1]!, pointsEarned: 15, expGain: 0 },
                 ]);
                 assert.strictEqual(scoreboard.getWinners().length, 1);
                 assert.strictEqual(
-                    scoreboard.getWinners()[0].getName(),
+                    scoreboard.getWinners()[0]!.getName(),
                     FIRST_TEAM_NAME,
                 );
 
@@ -526,19 +544,19 @@ describe("team scoreboard", () => {
         describe("multiple players, multiple teams, has different scores", () => {
             it("should return the team with most points", () => {
                 scoreboard.update([
-                    { userID: USER_IDS[0], pointsEarned: 10, expGain: 0 },
+                    { userID: USER_IDS[0]!, pointsEarned: 10, expGain: 0 },
                 ]);
 
                 scoreboard.update([
-                    { userID: USER_IDS[1], pointsEarned: 15, expGain: 0 },
+                    { userID: USER_IDS[1]!, pointsEarned: 15, expGain: 0 },
                 ]);
 
                 scoreboard.update([
-                    { userID: USER_IDS[2], pointsEarned: 15, expGain: 0 },
+                    { userID: USER_IDS[2]!, pointsEarned: 15, expGain: 0 },
                 ]);
 
                 scoreboard.update([
-                    { userID: USER_IDS[3], pointsEarned: 15, expGain: 0 },
+                    { userID: USER_IDS[3]!, pointsEarned: 15, expGain: 0 },
                 ]);
                 assert.strictEqual(scoreboard.getWinners().length, 1);
                 assert.strictEqual(
@@ -551,19 +569,19 @@ describe("team scoreboard", () => {
         describe("multiple players, multiple teams, tied score", () => {
             it("should return the two tied teams", () => {
                 scoreboard.update([
-                    { userID: USER_IDS[0], pointsEarned: 5, expGain: 0 },
+                    { userID: USER_IDS[0]!, pointsEarned: 5, expGain: 0 },
                 ]);
 
                 scoreboard.update([
-                    { userID: USER_IDS[1], pointsEarned: 7, expGain: 0 },
+                    { userID: USER_IDS[1]!, pointsEarned: 7, expGain: 0 },
                 ]);
 
                 scoreboard.update([
-                    { userID: USER_IDS[2], pointsEarned: 7, expGain: 0 },
+                    { userID: USER_IDS[2]!, pointsEarned: 7, expGain: 0 },
                 ]);
 
                 scoreboard.update([
-                    { userID: USER_IDS[3], pointsEarned: 5, expGain: 0 },
+                    { userID: USER_IDS[3]!, pointsEarned: 5, expGain: 0 },
                 ]);
 
                 assert.deepStrictEqual(scoreboard.getWinners(), [
@@ -587,13 +605,25 @@ describe("team scoreboard", () => {
             await guildPreference.setGoal(5);
             scoreboard.addTeam(
                 FIRST_TEAM_NAME,
-                new Player(USER_IDS[0], GUILD_ID, AVATAR_URL, 0, USERNAMES[0]),
+                new Player(
+                    USER_IDS[0]!,
+                    GUILD_ID,
+                    AVATAR_URL,
+                    0,
+                    USERNAMES[0]!,
+                ),
                 "dummy",
             );
 
             scoreboard.addTeam(
                 SECOND_TEAM_NAME,
-                new Player(USER_IDS[1], GUILD_ID, AVATAR_URL, 0, USERNAMES[1]),
+                new Player(
+                    USER_IDS[1]!,
+                    GUILD_ID,
+                    AVATAR_URL,
+                    0,
+                    USERNAMES[1]!,
+                ),
                 "dummy",
             );
         });
@@ -621,11 +651,11 @@ describe("team scoreboard", () => {
             describe("first place is not equal/above the goal", () => {
                 it("should return false", () => {
                     scoreboard.update([
-                        { userID: USER_IDS[0], pointsEarned: 2, expGain: 0 },
+                        { userID: USER_IDS[0]!, pointsEarned: 2, expGain: 0 },
                     ]);
 
                     scoreboard.update([
-                        { userID: USER_IDS[1], pointsEarned: 4, expGain: 0 },
+                        { userID: USER_IDS[1]!, pointsEarned: 4, expGain: 0 },
                     ]);
 
                     assert.strictEqual(
@@ -638,11 +668,11 @@ describe("team scoreboard", () => {
             describe("first place is equal/above the goal", () => {
                 it("should return true", () => {
                     scoreboard.update([
-                        { userID: USER_IDS[0], pointsEarned: 5, expGain: 0 },
+                        { userID: USER_IDS[0]!, pointsEarned: 5, expGain: 0 },
                     ]);
 
                     scoreboard.update([
-                        { userID: USER_IDS[1], pointsEarned: 4, expGain: 0 },
+                        { userID: USER_IDS[1]!, pointsEarned: 4, expGain: 0 },
                     ]);
 
                     assert.strictEqual(
