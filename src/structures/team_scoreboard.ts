@@ -4,7 +4,6 @@ import Scoreboard from "./scoreboard";
 import Team from "./team";
 import type Player from "./player";
 import type SuccessfulGuessResult from "../interfaces/success_guess_result";
-import fastify from "fastify";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("team_scoreboard");

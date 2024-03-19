@@ -879,6 +879,7 @@ export default class PlayCommand implements BaseCommand {
         const guildID = messageContext.guildID;
         const guildPreference =
             await GuildPreference.getGuildPreference(guildID);
+
         const currentGameSession = State.gameSessions[guildID];
         const voiceChannel = getUserVoiceChannel(messageContext);
 
@@ -916,8 +917,6 @@ export default class PlayCommand implements BaseCommand {
         if (!(await voicePermissionsCheck(messageContext, interaction))) {
             return;
         }
-
-        const gameSessions = State.gameSessions;
 
         if (currentGameSession) {
             if (currentGameSession.sessionInitialized) {
