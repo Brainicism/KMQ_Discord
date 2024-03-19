@@ -170,7 +170,7 @@ export default class HelpCommand implements BaseCommand {
                 return;
             }
 
-            const helpManualFunc = commandFilesWithAliases[action]?.help;
+            const helpManualFunc = commandFilesWithAliases[action]!.help;
             if (!helpManualFunc) {
                 logger.error(`No help manual found for ${action}. Skipping.`);
                 return;
@@ -193,7 +193,7 @@ export default class HelpCommand implements BaseCommand {
                 value: example.explanation,
             }));
 
-            const aliases = commandFilesWithAliases[action].aliases;
+            const aliases = commandFilesWithAliases[action]!.aliases;
             if (aliases) {
                 embedFooter = {
                     text: `${i18n.translate(

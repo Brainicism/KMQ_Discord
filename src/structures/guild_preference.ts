@@ -262,8 +262,11 @@ export default class GuildPreference {
         }
 
         return this.locks.get(guildID)!.runExclusive(async () => {
-            if (guildID in GuildPreference.guildPreferencesCache) {
-                return GuildPreference.guildPreferencesCache[guildID];
+            const cachedGuildPreference =
+                GuildPreference.guildPreferencesCache[guildID];
+
+            if (cachedGuildPreference) {
+                return cachedGuildPreference;
             }
 
             const guildPreferences = await dbContext.kmq

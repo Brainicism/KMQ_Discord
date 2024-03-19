@@ -510,11 +510,11 @@ export default class PresetCommand implements BaseCommand {
         const presetName =
             parsedMessage.components[
                 presetAction !== PresetAction.IMPORT ? 1 : 2
-            ];
+            ]!;
 
         const presetUUID =
             presetAction === PresetAction.IMPORT
-                ? parsedMessage.components[1]
+                ? parsedMessage.components[1]!
                 : null;
 
         await PresetCommand.processPresetAction(
