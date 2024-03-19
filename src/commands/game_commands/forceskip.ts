@@ -88,6 +88,11 @@ export default class ForceSkipCommand implements BaseCommand {
         }
 
         const session = Session.getSession(messageContext.guildID);
+
+        if (!session) {
+            return;
+        }
+
         if (
             !session.round ||
             session.round.skipAchieved ||

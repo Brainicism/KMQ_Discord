@@ -572,7 +572,7 @@ export default class LookupCommand implements BaseCommand {
 
         const fields = [
             {
-                name: viewsString[0].toUpperCase() + viewsString.slice(1),
+                name: _.capitalize(viewsString),
                 value: friendlyFormattedNumber(views),
             },
             {
@@ -691,7 +691,7 @@ export default class LookupCommand implements BaseCommand {
         if (kmqSongEntries.length === 1) {
             return LookupCommand.lookupByYoutubeID(
                 messageOrInteraction,
-                kmqSongEntries[0].youtubeLink,
+                kmqSongEntries[0]!.youtubeLink,
                 locale,
             );
         }

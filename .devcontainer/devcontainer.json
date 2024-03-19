@@ -12,11 +12,12 @@
                 "lokalise.i18n-ally",
                 "hbenl.vscode-mocha-test-adapter",
                 "chamboug.js-auto-backticks",
-                "ms-azuretools.vscode-docker"
-            ]
-        }
+                "ms-azuretools.vscode-docker",
+                "eamodio.gitlens",
+            ],
+        },
     },
     "remoteUser": "node",
     "postCreateCommand": "/bin/sh .devcontainer/post_create_command.sh",
-    "postAttachCommand": "/bin/sh .devcontainer/post_attach_command.sh"
+    "postAttachCommand": "/bin/sh .devcontainer/post_attach_command.sh",
 }

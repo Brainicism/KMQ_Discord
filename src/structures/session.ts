@@ -120,7 +120,7 @@ export default abstract class Session {
 
     abstract sessionName(): string;
 
-    static getSession(guildID: string): Session {
+    static getSession(guildID: string): Session | undefined {
         return State.gameSessions[guildID] ?? State.listeningSessions[guildID];
     }
 
@@ -512,7 +512,7 @@ export default abstract class Session {
      * @param bookmarkedSong - The song to store
      */
     addBookmarkedSong(userID: string, bookmarkedSong: BookmarkedSong): void {
-        if (!userID || !bookmarkedSong) {
+        if (!userID) {
             return;
         }
 
@@ -520,7 +520,7 @@ export default abstract class Session {
             this.bookmarkedSongs[userID] = new Map();
         }
 
-        this.bookmarkedSongs[userID].set(
+        this.bookmarkedSongs[userID]!.set(
             bookmarkedSong.song.youtubeLink,
             bookmarkedSong,
         );

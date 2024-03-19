@@ -165,7 +165,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             timer = null;
         } else {
-            timer = parseInt(parsedMessage.components[0], 10);
+            timer = parseInt(parsedMessage.components[0]!, 10);
         }
 
         await GuessTimeoutCommand.updateOption(

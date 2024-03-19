@@ -128,9 +128,9 @@ export default class FeedbackCommand implements BaseCommand {
             feedbackResponse += "--------------------------------\n";
             feedbackResponse += `Q${questionIndex + 1}. ${i18n.translate(
                 interaction.guildID as string,
-                FeedbackCommand.FEEDBACK_QUESTIONS[questionIndex].question,
+                FeedbackCommand.FEEDBACK_QUESTIONS[questionIndex]!.question,
             )}\n`;
-            feedbackResponse += `${modalComponent.components[0].value}\n`;
+            feedbackResponse += `${modalComponent.components[0]!.value}\n`;
         }
 
         const FEEDBACK_DIR = path.join(__dirname, "../../../data/feedback");

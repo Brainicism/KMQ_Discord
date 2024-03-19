@@ -188,7 +188,7 @@ export default class OstCommand implements BaseCommand {
             ostPreference = null;
         } else {
             ostPreference =
-                parsedMessage.components[0].toLowerCase() as OstPreference;
+                parsedMessage.components[0]!.toLowerCase() as OstPreference;
         }
 
         await OstCommand.updateOption(

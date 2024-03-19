@@ -56,6 +56,9 @@ export default class SkipCommand implements BaseCommand {
         interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const session = Session.getSession(messageContext.guildID);
+        if (!session) {
+            return;
+        }
 
         if (
             !session.round ||

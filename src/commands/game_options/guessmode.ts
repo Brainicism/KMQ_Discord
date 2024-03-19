@@ -193,7 +193,7 @@ export default class GuessModeCommand implements BaseCommand {
             guessModeType = null;
         } else {
             guessModeType =
-                parsedMessage.components[0].toLowerCase() as GuessModeType;
+                parsedMessage.components[0]!.toLowerCase() as GuessModeType;
         }
 
         await GuessModeCommand.updateOption(

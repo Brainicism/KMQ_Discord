@@ -60,13 +60,13 @@ describe("team", () => {
             it("should increment their score and give the score of that player", () => {
                 const numIncrements = 25;
                 for (let i = 0; i < numIncrements; i++) {
-                    team.getPlayer(goodPlayer.id).incrementScore(1);
+                    team.getPlayer(goodPlayer.id)!.incrementScore(1);
                 }
 
                 assert.strictEqual(team.getScore(), numIncrements);
                 assert.strictEqual(
                     team.getScore(),
-                    team.getPlayer(goodPlayer.id).getScore(),
+                    team.getPlayer(goodPlayer.id)!.getScore(),
                 );
             });
         });
@@ -78,9 +78,9 @@ describe("team", () => {
                 team.addPlayer(subparPlayer);
                 const numIncrements = 25;
                 for (let i = 0; i < numIncrements; i++) {
-                    team.getPlayer(goodPlayer.id).incrementScore(1);
+                    team.getPlayer(goodPlayer.id)!.incrementScore(1);
                     if (i % 5 === 0) {
-                        team.getPlayer(goodPlayer.id).incrementScore(1);
+                        team.getPlayer(goodPlayer.id)!.incrementScore(1);
                     }
                 }
 

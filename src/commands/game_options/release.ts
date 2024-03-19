@@ -180,7 +180,7 @@ export default class ReleaseCommand implements BaseCommand {
             releaseType = null;
         } else {
             releaseType =
-                parsedMessage.components[0].toLowerCase() as ReleaseType;
+                parsedMessage.components[0]!.toLowerCase() as ReleaseType;
         }
 
         await ReleaseCommand.updateOption(

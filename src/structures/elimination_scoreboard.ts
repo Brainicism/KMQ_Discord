@@ -22,12 +22,12 @@ export default class EliminationScoreboard extends Scoreboard {
     update(guessResults: Array<SuccessfulGuessResult>): void {
         const previousRoundRanking = this.getScoreToRankingMap();
         for (const player of Object.values(this.players)) {
-            player.setPreviousRanking(previousRoundRanking[player.getScore()]);
+            player.setPreviousRanking(previousRoundRanking[player.getScore()]!);
         }
 
         // give everybody EXP
         for (const guessResult of guessResults) {
-            const correctGuesser = this.players[guessResult.userID];
+            const correctGuesser = this.players[guessResult.userID]!;
             correctGuesser.incrementExp(guessResult.expGain);
         }
 
@@ -53,7 +53,12 @@ export default class EliminationScoreboard extends Scoreboard {
      * @returns whether or not the player has ran out of lives
      */
     isPlayerEliminated(userID: string): boolean {
-        return this.players[userID].isEliminated();
+        const player = this.players[userID];
+        if (!player) {
+            return true;
+        }
+
+        return player.isEliminated();
     }
 
     /** Decrements the lives of all current players */
@@ -90,7 +95,9 @@ export default class EliminationScoreboard extends Scoreboard {
      * @returns the number of lives the player has remaining
      */
     getPlayerLives(userID: string): number {
-        return this.players[userID].getLives();
+        const player = this.players[userID];
+        if (!player) return 0;
+        return player.getLives();
     }
 
     /** @returns the number of lives of the player with the least amount of lives (who isn't dead) */

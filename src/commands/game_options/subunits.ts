@@ -195,7 +195,7 @@ export default class SubunitsCommand implements BaseCommand {
             subunitsPreference = null;
         } else {
             subunitsPreference =
-                parsedMessage.components[0].toLowerCase() as SubunitsPreference;
+                parsedMessage.components[0]!.toLowerCase() as SubunitsPreference;
         }
 
         await SubunitsCommand.updateOption(

@@ -62,8 +62,8 @@ export default class Team extends Player {
      * @param userID - The userID of the player to get
      * @returns the player associated with the given userID
      */
-    getPlayer(userID: string): Player {
-        return this.players[userID];
+    getPlayer(userID: string): Player | null {
+        return this.players[userID] ?? null;
     }
 
     /**
@@ -100,10 +100,8 @@ export default class Team extends Player {
 
     /** @returns a random team member's avatar URL */
     getAvatarURL(): string {
-        return (
-            chooseRandom(
-                Object.values(this.players).map((x) => x.getAvatarURL()),
-            ) ?? ""
+        return chooseRandom(
+            Object.values(this.players).map((x) => x.getAvatarURL()),
         );
     }
 

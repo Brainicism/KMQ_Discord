@@ -390,7 +390,7 @@ export default class LeaderboardCommand implements BaseCommand {
             return;
         }
 
-        let arg = parsedMessage.components[0];
+        let arg = parsedMessage.components[0] as string;
         const messageContext = MessageContext.fromMessage(message);
         if (
             Object.values(LeaderboardAction).includes(arg as LeaderboardAction)
@@ -463,7 +463,7 @@ export default class LeaderboardCommand implements BaseCommand {
             return;
         }
 
-        arg = parsedMessage.components[1];
+        arg = parsedMessage.components[1] as string;
         if (Object.values(LeaderboardScope).includes(arg as LeaderboardScope)) {
             scope = arg as LeaderboardScope;
         } else if (
@@ -502,7 +502,7 @@ export default class LeaderboardCommand implements BaseCommand {
             return;
         }
 
-        arg = parsedMessage.components[2];
+        arg = parsedMessage.components[2] as string;
         if (
             Object.values(LeaderboardDuration).includes(
                 arg as LeaderboardDuration,
@@ -557,6 +557,7 @@ export default class LeaderboardCommand implements BaseCommand {
         invokerId: string,
         date?: Date,
     ): Promise<{ embeds: Array<EmbedGenerator>; pageCount: number }> {
+        const session = State.gameSessions[messageContext.guildID];
         const embedsFns: Array<EmbedGenerator> = [];
         const permanentLb = duration === LeaderboardDuration.ALL_TIME;
         const dbTable = permanentLb
@@ -634,10 +635,9 @@ export default class LeaderboardCommand implements BaseCommand {
                 serverPlayers,
             );
         } else if (scope === LeaderboardScope.GAME) {
-            const participantIDs =
-                State.gameSessions[
-                    messageContext.guildID
-                ].scoreboard.getPlayerIDs();
+            const participantIDs = !session
+                ? []
+                : session.scoreboard.getPlayerIDs();
 
             const gamePlayers = (
                 await dbContext.kmq
@@ -1185,7 +1185,8 @@ export default class LeaderboardCommand implements BaseCommand {
         );
 
         if (scope === LeaderboardScope.GAME) {
-            if (!State.gameSessions[messageContext.guildID]) {
+            const session = State.gameSessions[messageContext.guildID];
+            if (!session) {
                 await sendErrorMessage(
                     messageContext,
                     {
@@ -1206,10 +1207,7 @@ export default class LeaderboardCommand implements BaseCommand {
                 return;
             }
 
-            const participantIDs =
-                State.gameSessions[
-                    messageContext.guildID
-                ].scoreboard.getPlayerIDs();
+            const participantIDs = session.scoreboard.getPlayerIDs();
 
             if (participantIDs.length === 0) {
                 await sendErrorMessage(

@@ -441,7 +441,7 @@ export default class PlayCommand implements BaseCommand {
             gameType,
             parsedMessage.components.length <= 1
                 ? null
-                : parsedMessage.components[1],
+                : parsedMessage.components[1]!,
             gameTypeRaw === AnswerType.HIDDEN,
         );
     };
@@ -775,6 +775,11 @@ export default class PlayCommand implements BaseCommand {
             );
         } else {
             const team = teamScoreboard.getTeam(teamName);
+            if (!team) {
+                logger.warn(`Team ${teamName} doesn't exist`);
+                return;
+            }
+
             if (team.hasPlayer(messageContext.author.id)) {
                 await sendErrorMessage(
                     messageContext,
@@ -875,6 +880,7 @@ export default class PlayCommand implements BaseCommand {
         const guildPreference =
             await GuildPreference.getGuildPreference(guildID);
 
+        const currentGameSession = State.gameSessions[guildID];
         const voiceChannel = getUserVoiceChannel(messageContext);
 
         if (!voiceChannel) {
@@ -912,10 +918,8 @@ export default class PlayCommand implements BaseCommand {
             return;
         }
 
-        const gameSessions = State.gameSessions;
-
-        if (gameSessions[guildID]) {
-            if (gameSessions[guildID]?.sessionInitialized) {
+        if (currentGameSession) {
+            if (currentGameSession.sessionInitialized) {
                 logger.warn(
                     `${getDebugLogHeader(
                         messageContext,
@@ -931,10 +935,7 @@ export default class PlayCommand implements BaseCommand {
                 return;
             }
 
-            if (
-                !gameSessions[guildID].sessionInitialized &&
-                gameType === GameType.TEAMS
-            ) {
+            if (gameType === GameType.TEAMS) {
                 // User sent /play teams twice, reset the GameSession
                 Session.deleteSession(guildID);
                 logger.info(
@@ -1014,9 +1015,9 @@ export default class PlayCommand implements BaseCommand {
             }
         } else {
             // (1 and 2) CLASSIC, ELIMINATION, and COMPETITION game creation
-            if (gameSessions[guildID]) {
+            if (currentGameSession) {
                 // (2) Let the user know they're starting a non-teams game
-                const oldGameType = gameSessions[guildID].gameType;
+                const oldGameType = currentGameSession.gameType;
                 const ignoringOldGameTypeTitle = i18n.translate(
                     guildID,
                     "command.play.failure.overrideTeams.title",
@@ -1125,8 +1126,8 @@ export default class PlayCommand implements BaseCommand {
         }
 
         // prevent any duplicate game sessions
-        if (gameSessions[guildID]) {
-            await gameSessions[guildID].endSession(
+        if (currentGameSession) {
+            await currentGameSession.endSession(
                 "Duplicate game session",
                 false,
             );
@@ -1296,7 +1297,7 @@ export default class PlayCommand implements BaseCommand {
                     .filter((x) => x)
                     .map((x) => ({
                         updateTime: new Date(
-                            x.split("\n")[0].replaceAll("*", ""),
+                            x.split("\n")[0]!.replaceAll("*", ""),
                         ),
                         entry: x,
                     }))
@@ -1322,7 +1323,7 @@ export default class PlayCommand implements BaseCommand {
 
             if (newsData.length > 0) {
                 const latestUpdate = durationDays(
-                    newsData[0].updateTime.getTime(),
+                    newsData[0]!.updateTime.getTime(),
                     Date.now(),
                 );
 

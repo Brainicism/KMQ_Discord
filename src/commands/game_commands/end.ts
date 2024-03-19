@@ -63,6 +63,10 @@ export default class EndCommand implements BaseCommand {
             );
         }
 
+        if (!session) {
+            return;
+        }
+
         await session.endSession("Ended by user", false);
         logger.info(`${getDebugLogHeader(messageContext)} | Session ended`);
     };

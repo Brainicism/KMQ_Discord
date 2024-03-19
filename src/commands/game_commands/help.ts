@@ -107,14 +107,23 @@ export default class HelpCommand implements BaseCommand {
             {};
 
         Object.assign(commandFilesWithAliases, commandFiles);
+
         const commandNamesWithAliases = Object.keys(commandFiles).filter(
-            (commandName) => commandFiles[commandName].aliases,
+            (commandName) => commandFiles[commandName]?.aliases,
         );
 
         for (const commandName of commandNamesWithAliases) {
-            const { aliases } = commandFiles[commandName];
+            const commandFile = commandFiles[commandName];
+            if (!commandFile) {
+                logger.error(
+                    `Unknown command name while accessing commandFiles: ${commandName}`,
+                );
+                continue;
+            }
+
+            const { aliases } = commandFile;
             for (const alias of aliases ?? []) {
-                commandFilesWithAliases[alias] = commandFiles[commandName];
+                commandFilesWithAliases[alias] = commandFile;
             }
         }
 
@@ -123,7 +132,7 @@ export default class HelpCommand implements BaseCommand {
             const commandNamesWithHelp = Object.keys(
                 commandFilesWithAliases,
             ).filter(
-                (commandName) => commandFilesWithAliases[commandName].help,
+                (commandName) => commandFilesWithAliases[commandName]?.help,
             );
 
             logger.info(
@@ -161,7 +170,7 @@ export default class HelpCommand implements BaseCommand {
                 return;
             }
 
-            const helpManualFunc = commandFilesWithAliases[action].help;
+            const helpManualFunc = commandFilesWithAliases[action]?.help;
             if (!helpManualFunc) {
                 logger.error(`No help manual found for ${action}. Skipping.`);
                 return;

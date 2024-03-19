@@ -180,7 +180,7 @@ export default class MultiGuessCommand implements BaseCommand {
             multiGuessType = null;
         } else {
             multiGuessType =
-                parsedMessage.components[0].toLowerCase() as MultiGuessType;
+                parsedMessage.components[0]!.toLowerCase() as MultiGuessType;
         }
 
         await MultiGuessCommand.updateOption(

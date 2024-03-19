@@ -96,14 +96,12 @@ export async function cleanupInactiveGameSessions(): Promise<void> {
     await Promise.allSettled(
         Object.keys(gameSessions).map(async (guildID) => {
             const gameSession = gameSessions[guildID];
+            if (!gameSession) return;
             const timeDiffMs = currentDate - gameSession.lastActive;
             const timeDiffMin = timeDiffMs / (1000 * 60);
             if (timeDiffMin > GAME_SESSION_INACTIVE_THRESHOLD) {
                 inactiveSessions++;
-                await gameSessions[guildID].endSession(
-                    "Inactive game session",
-                    false,
-                );
+                await gameSession.endSession("Inactive game session", false);
             }
         }),
     );
@@ -123,6 +121,7 @@ export async function cleanupInactiveListeningSessions(): Promise<void> {
     await Promise.allSettled(
         Object.keys(listeningSessions).map(async (guildID) => {
             const listeningSession = listeningSessions[guildID];
+            if (!listeningSession) return;
             if (listeningSession.getVoiceMembers().length === 0) {
                 await listeningSession.endSession("Empty listening session");
                 inactiveSessions++;
@@ -249,7 +248,7 @@ export async function getMatchingGroupNames(
         let aliasFound = false;
         // apply artist aliases for unmatched groups
         for (let i = 0; i < result.unmatchedGroups.length; i++) {
-            const groupName = result.unmatchedGroups[i];
+            const groupName = result.unmatchedGroups[i]!;
             const matchingAlias = Object.entries(State.aliases.artist).find(
                 (artistAliasTuple) =>
                     artistAliasTuple[1]

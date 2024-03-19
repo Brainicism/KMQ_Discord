@@ -17,9 +17,8 @@
         "resolveJsonModule": true,
         "esModuleInterop": true,
         "sourceMap": true,
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "noUncheckedIndexedAccess": false,
     },
-    "include": [
-        "./src/**/*"
-    ]
+    "include": ["./src/**/*"],
 }
