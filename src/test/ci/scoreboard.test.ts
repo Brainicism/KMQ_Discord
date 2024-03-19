@@ -141,6 +141,7 @@ describe("scoreboard", () => {
                     scoreboard.getPlayerExpGain(userIDs[0]!),
                     50,
                 );
+
                 assert.strictEqual(
                     scoreboard.getPlayerExpGain(userIDs[1]!),
                     25,
