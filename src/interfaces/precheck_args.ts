@@ -5,7 +5,7 @@ import type Session from "../structures/session";
 
 export default interface PrecheckArgs {
     messageContext: MessageContext;
-    session: Session | null;
+    session: Session | undefined;
     errorMessage?: string;
     interaction?: Eris.CommandInteraction;
     parsedMessage?: ParsedMessage;

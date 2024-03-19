@@ -86,6 +86,13 @@ export default class BotListingManager {
 
     private async postStat(siteConfigKeyName: string): Promise<void> {
         const botListing = BOT_LISTING_SITES[siteConfigKeyName];
+        if (!botListing) {
+            logger.error(
+                `Bot listing site config not found for ${siteConfigKeyName}`,
+            );
+            return;
+        }
+
         try {
             await Axios.post(
                 botListing.endpoint.replace(

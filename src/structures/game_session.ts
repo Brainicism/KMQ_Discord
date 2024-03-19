@@ -270,7 +270,7 @@ export default class GameSession extends Session {
             // update guessing streaks
             if (
                 this.lastGuesser === null ||
-                this.lastGuesser.userID !== correctGuessers[0].id
+                this.lastGuesser.userID !== correctGuessers[0]!.id
             ) {
                 this.lastGuesser = {
                     userID: correctGuessers[0].id,

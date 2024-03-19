@@ -210,19 +210,19 @@ export default class SongSelector {
             case ShuffleType.POPULARITY:
             case ShuffleType.CHRONOLOGICAL:
             case ShuffleType.REVERSE_CHRONOLOGICAL:
-                return queriedSongList[0];
+                return queriedSongList[0]!;
             case ShuffleType.WEIGHTED_EASY:
             case ShuffleType.WEIGHTED_HARD:
                 return chooseWeightedRandom(queriedSongList, "selectionWeight");
             case ShuffleType.RANDOM:
                 return queriedSongList[
                     Math.floor(Math.random() * queriedSongList.length)
-                ];
+                ]!;
             default:
                 logger.error(`Unexpected ShuffleType: ${shuffleType}`);
                 return queriedSongList[
                     Math.floor(Math.random() * queriedSongList.length)
-                ];
+                ]!;
         }
     }
 
@@ -338,9 +338,9 @@ export default class SongSelector {
         }
 
         let ineligibleDueToCommonAlias = 0;
-        for (const alias in aliasToCountMapping) {
-            if (aliasToCountMapping[alias] > 10) {
-                ineligibleDueToCommonAlias += aliasToCountMapping[alias] - 1;
+        for (const aliasCount of Object.values(aliasToCountMapping)) {
+            if (aliasCount > 10) {
+                ineligibleDueToCommonAlias += aliasCount - 1;
             }
         }
 
@@ -522,9 +522,9 @@ export default class SongSelector {
             }
 
             // Kyseley does not like it when you provide an empty array or array of size 1 to OR/AND
-            const finalExpressions = [];
+            const finalExpressions: Expression<SqlBool>[] = [];
             if (includesInnerArtistFilterExpressions.length === 1) {
-                finalExpressions.push(includesInnerArtistFilterExpressions[0]);
+                finalExpressions.push(includesInnerArtistFilterExpressions[0]!);
             } else if (includesInnerArtistFilterExpressions.length > 1) {
                 finalExpressions.push(
                     and(includesInnerArtistFilterExpressions),
@@ -532,7 +532,7 @@ export default class SongSelector {
             }
 
             if (mainArtistFilterExpressions.length === 1) {
-                finalExpressions.push(mainArtistFilterExpressions[0]);
+                finalExpressions.push(mainArtistFilterExpressions[0]!);
             } else if (mainArtistFilterExpressions.length > 1) {
                 finalExpressions.push(and(mainArtistFilterExpressions));
             }

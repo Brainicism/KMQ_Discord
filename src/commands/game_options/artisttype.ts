@@ -195,7 +195,7 @@ export default class ArtistTypeCommand implements BaseCommand {
             artistType = null;
         } else {
             artistType =
-                parsedMessage.components[0].toLowerCase() as ArtistType;
+                parsedMessage.components[0]!.toLowerCase() as ArtistType;
         }
 
         await ArtistTypeCommand.updateOption(

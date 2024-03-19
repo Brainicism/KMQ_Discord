@@ -302,10 +302,10 @@ export default class LimitCommand implements BaseCommand {
             limitEnd = null;
         } else if (parsedMessage.components.length === 1) {
             limitStart = 0;
-            limitEnd = parseInt(parsedMessage.components[0], 10);
+            limitEnd = parseInt(parsedMessage.components[0]!, 10);
         } else {
-            limitStart = parseInt(parsedMessage.components[0], 10);
-            limitEnd = parseInt(parsedMessage.components[1], 10);
+            limitStart = parseInt(parsedMessage.components[0]!, 10);
+            limitEnd = parseInt(parsedMessage.components[1]!, 10);
         }
 
         await LimitCommand.updateOption(

@@ -207,7 +207,7 @@ export default class ShuffleCommand implements BaseCommand {
             shuffleType = null;
         } else {
             shuffleType =
-                parsedMessage.components[0].toLowerCase() as ShuffleType;
+                parsedMessage.components[0]!.toLowerCase() as ShuffleType;
         }
 
         await ShuffleCommand.updateOption(

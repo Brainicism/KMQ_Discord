@@ -504,8 +504,8 @@ export default class PresetCommand implements BaseCommand {
     ];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const presetAction =
-            (parsedMessage.components[0] as PresetAction) ?? PresetAction.LIST;
+        const presetAction = (parsedMessage.components[0] ??
+            PresetAction.LIST) as PresetAction;
 
         const presetName =
             parsedMessage.components[

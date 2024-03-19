@@ -217,6 +217,11 @@ export default class KmqWebServer {
             const clusterData: Array<ClusterData> = [];
             for (let i = 0; i < fleetStats.clusters.length; i++) {
                 const fleetCluster = fleetStats.clusters[i];
+                if (!fleetCluster) {
+                    logger.error(`Cluster stats for cluster ${i} missing`);
+                    continue;
+                }
+
                 const shardData: Array<ShardData> = fleetCluster.shards.map(
                     (rawShardData) => {
                         let healthIndicator: HealthIndicator;

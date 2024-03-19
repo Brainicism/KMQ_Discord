@@ -71,6 +71,10 @@ function getNodeKeys(node: Node): void {
                 ? expression.arguments[1]
                 : expression.arguments[0];
 
+            if (!translationKeyNode) {
+                return;
+            }
+
             const keyText =
                 translationKeyNode.kind === SyntaxKind.StringLiteral
                     ? translationKeyNode.getText().slice(1, -1)

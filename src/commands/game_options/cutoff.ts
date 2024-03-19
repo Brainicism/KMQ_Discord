@@ -303,10 +303,10 @@ export default class CutoffCommand implements BaseCommand {
             beginningYear = null;
             endingYear = null;
         } else if (yearRange.length === 1) {
-            beginningYear = parseInt(yearRange[0], 10);
+            beginningYear = parseInt(yearRange[0]!, 10);
         } else {
-            beginningYear = parseInt(yearRange[0], 10);
-            endingYear = parseInt(yearRange[1], 10);
+            beginningYear = parseInt(yearRange[0]!, 10);
+            endingYear = parseInt(yearRange[1]!, 10);
         }
 
         await CutoffCommand.updateOption(

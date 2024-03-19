@@ -314,7 +314,7 @@ export default class DurationCommand implements BaseCommand {
             durationActionInternal =
                 (parsedMessage.components[1] as DurationActionInternal) ??
                 DurationActionInternal.SET;
-            durationValue = parseInt(parsedMessage.components[0], 10);
+            durationValue = parseInt(parsedMessage.components[0]!, 10);
         }
 
         await DurationCommand.updateOption(

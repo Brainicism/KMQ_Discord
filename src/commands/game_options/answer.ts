@@ -249,7 +249,7 @@ export default class AnswerCommand implements BaseCommand {
             answerType = null;
         } else {
             answerType =
-                parsedMessage.components[0].toLowerCase() as AnswerType;
+                parsedMessage.components[0]!.toLowerCase() as AnswerType;
         }
 
         await AnswerCommand.updateOption(

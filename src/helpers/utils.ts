@@ -215,7 +215,7 @@ export function parseJsonFileSync(filePath: string): any {
  */
 export function arrayToString(arr: Array<string>): string {
     const elements = arr.map((element) => `\`${element}\``);
-    if (elements.length === 1) return elements[0];
+    if (elements.length === 1) return elements[0]!;
     const lastElement = elements.splice(-1);
     return `${elements.join(", ")} and ${lastElement}`;
 }
@@ -250,7 +250,7 @@ export function weekOfYear(dateObj?: Date): number {
  * @returns the randomly selected element
  */
 export function chooseRandom<T>(list: Array<T>): T {
-    return list[Math.floor(Math.random() * list.length)];
+    return list[Math.floor(Math.random() * list.length)]!;
 }
 
 /**
@@ -275,9 +275,9 @@ export function chooseWeightedRandom(
         }
     }
 
-    const random = Math.random() * weights[weights.length - 1];
+    const random = Math.random() * weights[weights.length - 1]!;
     for (let i = 0; i < weights.length; i++) {
-        if (weights[i] > random) {
+        if (weights[i]! > random) {
             return list[i];
         }
     }
@@ -290,7 +290,7 @@ export function chooseWeightedRandom(
  * @returns the date in yyyy-mm-dd format
  */
 export function standardDateFormat(date: Date): string {
-    return date.toISOString().split("T")[0];
+    return date.toISOString().split("T")[0]!;
 }
 
 /**
@@ -712,13 +712,13 @@ export function parseKmqPlaylistIdentifier(kmqPlaylistIdentifier: string): {
     if (identifierComponents.length === 1) {
         return {
             isSpotify: true,
-            playlistId: identifierComponents[0],
+            playlistId: identifierComponents[0]!,
         };
     }
 
     return {
         isSpotify: identifierComponents[0] === "spotify",
-        playlistId: identifierComponents[1],
+        playlistId: identifierComponents[1]!,
     };
 }
 
@@ -758,7 +758,7 @@ export function shufflePartitionedArray<T>(
     for (const partition of partitions) {
         for (let i = partition.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [partition[i], partition[j]] = [partition[j], partition[i]];
+            [partition[i], partition[j]] = [partition[j]!, partition[i]!];
         }
     }
 

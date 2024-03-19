@@ -292,7 +292,7 @@ export default class GameRound extends Round {
         }
 
         this.guesses[playerID] = this.guesses[playerID] || [];
-        this.guesses[playerID].push({
+        this.guesses[playerID]!.push({
             timeToGuessMs: createdAt - this.songStartedAt,
             guess,
             correct: pointsAwarded > 0,
@@ -719,7 +719,7 @@ export default class GameRound extends Round {
         const match = name.match(/([^\s]+) \(([^)]+)\)/);
 
         if (match) {
-            const output = [match[1], match[2]];
+            const output = [match[1]!, match[2]!];
             return output;
         } else {
             return [name];
@@ -730,7 +730,7 @@ export default class GameRound extends Round {
         const HIDDEN_CHARACTER_PERCENTAGE = 0.75;
         const nameLength = name.length;
         const eligibleCharacterIndicesToHide = _.range(0, nameLength).filter(
-            (x) => !name[x].match(GameRound.REMOVED_CHARACTERS),
+            (x) => !name[x]!.match(GameRound.REMOVED_CHARACTERS),
         );
 
         const hideMask = _.sampleSize(

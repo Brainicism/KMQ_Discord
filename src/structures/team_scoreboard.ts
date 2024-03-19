@@ -4,6 +4,7 @@ import Scoreboard from "./scoreboard";
 import Team from "./team";
 import type Player from "./player";
 import type SuccessfulGuessResult from "../interfaces/success_guess_result";
+import fastify from "fastify";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("team_scoreboard");
@@ -29,9 +30,10 @@ export default class TeamScoreboard extends Scoreboard {
      * @param guessResults - Objects containing the user ID, points earned, and EXP gain
      */
     update(guessResults: Array<SuccessfulGuessResult>): void {
+        if (guessResults.length === 0) return;
         const previousRoundRanking = this.getScoreToRankingMap();
         for (const player of Object.values(this.players)) {
-            player.setPreviousRanking(previousRoundRanking[player.getScore()]);
+            player.setPreviousRanking(previousRoundRanking[player.getScore()]!);
         }
 
         // give everybody EXP
@@ -43,7 +45,7 @@ export default class TeamScoreboard extends Scoreboard {
         }
 
         // first guesser gets the point for their team
-        const firstGuessResult = guessResults[0];
+        const firstGuessResult = guessResults[0]!;
         const firstCorrectGuesser = this.getPlayer(firstGuessResult.userID);
 
         if (firstCorrectGuesser) {
@@ -78,8 +80,9 @@ export default class TeamScoreboard extends Scoreboard {
             this.removePlayer(player.id);
         }
 
-        this.players[name] = new Team(name, player, guildID);
-        return this.players[name];
+        const team = new Team(name, player, guildID);
+        this.players[name] = team;
+        return team;
     }
 
     /**
@@ -100,7 +103,7 @@ export default class TeamScoreboard extends Scoreboard {
      * @param name - The name of the team being accessed
      * @returns the Team corresponding to the given name, or null if it doesn't exist
      */
-    getTeam(name: string): Team {
+    getTeam(name: string): Team | null {
         return this.players[name] || null;
     }
 
@@ -116,7 +119,14 @@ export default class TeamScoreboard extends Scoreboard {
      * @returns whether the Team is in first place (or tied for first)
      */
     isTeamFirstPlace(name: string): boolean {
-        return this.firstPlace.includes(this.getTeam(name));
+        const team = this.getTeam(name);
+
+        if (!team) {
+            logger.warn(`Team ${name} doesn't exist in isTeamFirstPlace`);
+            return false;
+        }
+
+        return this.firstPlace.includes(team);
     }
 
     /**
@@ -147,7 +157,14 @@ export default class TeamScoreboard extends Scoreboard {
     addTeamPlayer(teamName: string, player: Player): void {
         // If the user is switching teams, remove them from their existing team first
         this.removePlayer(player.id);
-        this.players[teamName].addPlayer(player);
+
+        const team = this.players[teamName];
+        if (!team) {
+            logger.warn(`Team ${teamName} does not exist`);
+            return;
+        }
+
+        team.addPlayer(player);
     }
 
     /**

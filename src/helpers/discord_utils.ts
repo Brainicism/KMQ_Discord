@@ -749,7 +749,7 @@ function getFormattedLimit(
  *  @returns an embed of current game options
  */
 export async function generateOptionsMessage(
-    session: Session,
+    session: Session | undefined,
     messageContext: MessageContext,
     guildPreference: GuildPreference,
     updatedOptions: { option: GameOption; reset: boolean }[],
@@ -910,14 +910,22 @@ export async function generateOptionsMessage(
     for (const gameOptionConflictCheck of gameOptionConflictCheckMap) {
         const doesConflict = gameOptionConflictCheck.conflictCheck();
         if (doesConflict) {
-            for (const option of ConflictingGameOptions[
-                gameOptionConflictCheck.gameOption
-            ]) {
+            const conflictingGameOptionMapping =
+                ConflictingGameOptions[gameOptionConflictCheck.gameOption];
+
+            if (!conflictingGameOptionMapping) {
+                logger.error(
+                    `Missing conflicting game option mapping: ${gameOptionConflictCheck.gameOption}`,
+                );
+                continue;
+            }
+
+            for (const option of conflictingGameOptionMapping) {
                 const optionString = optionStrings[option];
                 if (optionString && !optionString.includes(conflictString)) {
                     optionStrings[option] = generateConflictingCommandEntry(
                         optionString,
-                        GameOptionCommand[gameOptionConflictCheck.gameOption],
+                        GameOptionCommand[gameOptionConflictCheck.gameOption]!,
                     );
                 }
             }
@@ -1013,7 +1021,7 @@ export async function generateOptionsMessage(
     )
         .map(
             (option) =>
-                `${clickableSlashCommand(GameOptionCommand[option])}: ${
+                `${clickableSlashCommand(GameOptionCommand[option]!)}: ${
                     optionStrings[option]
                 }`,
         )
@@ -1038,7 +1046,7 @@ export async function generateOptionsMessage(
         .slice(0, Math.ceil(fieldOptions.length / 3))
         .map(
             (option) =>
-                `${clickableSlashCommand(GameOptionCommand[option])}: ${
+                `${clickableSlashCommand(GameOptionCommand[option]!)}: ${
                     optionStrings[option]
                 }`,
         )
@@ -1054,7 +1062,7 @@ export async function generateOptionsMessage(
         )
         .map(
             (option) =>
-                `${clickableSlashCommand(GameOptionCommand[option])}: ${
+                `${clickableSlashCommand(GameOptionCommand[option]!)}: ${
                     optionStrings[option]
                 }`,
         )
@@ -1067,7 +1075,7 @@ export async function generateOptionsMessage(
         .slice(Math.ceil((2 * fieldOptions.length) / 3))
         .map(
             (option) =>
-                `${clickableSlashCommand(GameOptionCommand[option])}: ${
+                `${clickableSlashCommand(GameOptionCommand[option]!)}: ${
                     optionStrings[option]
                 }`,
         )
@@ -1124,7 +1132,7 @@ export async function generateOptionsMessage(
                 "command.options.preset",
             );
         } else {
-            title = updatedOptions[0].option;
+            title = updatedOptions[0]!.option;
         }
 
         title =
@@ -1168,7 +1176,7 @@ export async function generateOptionsMessage(
  * @param interaction - The interaction
  */
 export async function sendOptionsMessage(
-    session: Session,
+    session: Session | undefined,
     messageContext: MessageContext,
     guildPreference: GuildPreference,
     updatedOptions: { option: GameOption; reset: boolean }[],
@@ -1296,6 +1304,11 @@ export async function sendPaginationedEmbed(
     components?: Array<Eris.ActionRow>,
     startPage = 1,
 ): Promise<Eris.Message | null> {
+    if (embeds.length === 0) {
+        logger.warn("sendPaginationedEmbed received embed empty response");
+        return null;
+    }
+
     if (embeds.length > 1) {
         if (
             await textPermissionsCheck(
@@ -1324,7 +1337,7 @@ export async function sendPaginationedEmbed(
     if (typeof embeds[0] === "function") {
         embed = await embeds[0]();
     } else {
-        embed = embeds[0];
+        embed = embeds[0]!;
     }
 
     return sendMessage(
@@ -1860,15 +1873,16 @@ export function getInteractionValue(
     let parentInteractionDataName: string | null = null;
     const keys: Array<string> = [];
     while (options.length > 0) {
-        keys.push(options[0].name);
+        const option = options[0]!;
+        keys.push(option.name);
         if (
-            options[0].type ===
+            option.type ===
                 Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND ||
-            options[0].type ===
+            option.type ===
                 Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND_GROUP
         ) {
-            parentInteractionDataName = options[0].name;
-            const newOptions = options[0].options;
+            parentInteractionDataName = option.name;
+            const newOptions = option.options;
             if (!newOptions) break;
 
             options = newOptions;

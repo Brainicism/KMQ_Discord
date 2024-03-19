@@ -154,7 +154,7 @@ export default class ProfileCommand implements BaseCommand {
             requestedPlayer = message.author;
         } else if (parsedMessage.components.length === 1) {
             if (message.mentions.length === 1) {
-                requestedPlayer = message.mentions[0];
+                requestedPlayer = message.mentions[0]!;
             } else {
                 try {
                     requestedPlayer = await fetchUser(
@@ -367,7 +367,7 @@ export default class ProfileCommand implements BaseCommand {
      */
     static getRankNameByLevel(level: number, guildID: string): string {
         const highestRankTitle =
-            ProfileCommand.RANK_TITLES[ProfileCommand.RANK_TITLES.length - 1];
+            ProfileCommand.RANK_TITLES[ProfileCommand.RANK_TITLES.length - 1]!;
 
         const levelsPastMaxRank = level - (highestRankTitle.req + 10);
         if (levelsPastMaxRank >= 0) {
@@ -379,12 +379,12 @@ export default class ProfileCommand implements BaseCommand {
         }
 
         for (let i = ProfileCommand.RANK_TITLES.length - 1; i >= 0; i--) {
-            const rankTitle = ProfileCommand.RANK_TITLES[i];
+            const rankTitle = ProfileCommand.RANK_TITLES[i]!;
             if (level >= rankTitle.req)
                 return i18n.translate(guildID, rankTitle.title);
         }
 
-        return i18n.translate(guildID, ProfileCommand.RANK_TITLES[0].title);
+        return i18n.translate(guildID, ProfileCommand.RANK_TITLES[0]!.title);
     }
 
     static async getProfileFields(
@@ -487,10 +487,10 @@ export default class ProfileCommand implements BaseCommand {
             {
                 name: i18n.translate(guildID, "command.profile.experience"),
                 value: `${friendlyFormattedNumber(exp)}/${friendlyFormattedNumber(
-                    CUM_EXP_TABLE[level + 1],
+                    CUM_EXP_TABLE[level + 1]!,
                 )}\n${visualProgressBar(
-                    exp - CUM_EXP_TABLE[level],
-                    CUM_EXP_TABLE[level + 1] - CUM_EXP_TABLE[level],
+                    exp - CUM_EXP_TABLE[level]!,
+                    CUM_EXP_TABLE[level + 1]! - CUM_EXP_TABLE[level]!,
                 )}`,
                 inline: true,
             },
