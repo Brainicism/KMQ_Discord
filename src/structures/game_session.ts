@@ -1544,7 +1544,14 @@ export default class GameSession extends Session {
         if (this.hiddenUpdateTimer) {
             clearInterval(this.hiddenUpdateTimer);
             const round = this.round;
-            await round?.interactionMessage?.delete();
+            try {
+                await round?.interactionMessage?.delete();
+            } catch (e) {
+                logger.warn(
+                    `Failed to delete round interaction message. e = ${e}`,
+                );
+            }
+
             if (round) {
                 round.interactionMessage = null;
             }
