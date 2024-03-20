@@ -254,13 +254,19 @@ export default class GuessModeCommand implements BaseCommand {
         let guessModeValue: GuessModeType | null;
 
         const action = interactionName as OptionAction;
-        if (action === OptionAction.RESET) {
-            guessModeValue = null;
-        } else if (action === OptionAction.SET) {
-            guessModeValue = interactionOptions["guessmode"] as GuessModeType;
-        } else {
-            logger.error(`Unexpected interaction name: ${interactionName}`);
-            guessModeValue = null;
+        switch (action) {
+            case OptionAction.RESET:
+                guessModeValue = null;
+                break;
+            case OptionAction.SET:
+                guessModeValue = interactionOptions[
+                    "guessmode"
+                ] as GuessModeType;
+                break;
+            default:
+                logger.error(`Unexpected interaction name: ${interactionName}`);
+                guessModeValue = null;
+                break;
         }
 
         await GuessModeCommand.updateOption(

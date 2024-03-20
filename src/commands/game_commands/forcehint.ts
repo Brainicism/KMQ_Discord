@@ -62,11 +62,15 @@ export default class ForceHintCommand implements BaseCommand {
         messageContext: MessageContext,
         interaction?: Eris.CommandInteraction,
     ): Promise<void> => {
-        const gameSession = Session.getSession(
-            messageContext.guildID,
-        ) as GameSession;
+        const gameSession = Session.getSession(messageContext.guildID) as
+            | GameSession
+            | undefined;
 
-        const gameRound = gameSession?.round;
+        if (!gameSession) {
+            return;
+        }
+
+        const gameRound = gameSession.round;
         if (!gameRound) return;
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID,

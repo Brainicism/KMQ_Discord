@@ -260,7 +260,7 @@ export default class NewsCommand implements BaseCommand {
         interaction?: Eris.CommandInteraction,
     ): Promise<void> => {
         const locale = State.getGuildLocale(messageContext.guildID);
-        const summary: NewsSummary = await State.ipc.serviceCommand(
+        const summary: NewsSummary | null = await State.ipc.serviceCommand(
             "kmq_service",
             `getNews|${range}|${locale}`,
             true,

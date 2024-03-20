@@ -23,7 +23,7 @@ export default class MessageContext {
     ) {
         this.textChannelID = textChannelID;
         this.author = author ?? new KmqMember(State.client.user.id);
-        this.guildID = guildID ?? null;
+        this.guildID = guildID;
         this.referencedMessageID = referencedMessageID ?? null;
     }
 

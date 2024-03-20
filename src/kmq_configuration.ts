@@ -5,7 +5,7 @@ import { parseJsonFileSync, pathExistsSync } from "./helpers/utils";
 const logger = new IPCLogger("kmq_feature_switch");
 
 export default class KmqConfiguration {
-    private static instance: KmqConfiguration;
+    private static instance: KmqConfiguration | undefined;
     private config: { [featureSwitch: string]: boolean };
 
     private constructor() {

@@ -63,7 +63,7 @@
         "dotenv": "^16.4.1",
         "ejs": "^3.1.9",
         "eris": "https://github.com/Brainicism/eris#2225e1e",
-        "eris-fleet": "https://github.com/Brainicism/eris-fleet#e3af903",
+        "eris-fleet": "https://github.com/Brainicism/eris-fleet#9916334",
         "eris-pagination": "https://github.com/Brainicism/eris-pagination#9a112cb",
         "erlpack": "https://github.com/abalabahaha/erlpack.git",
         "fastify": "^4.26.0",

@@ -358,13 +358,17 @@ export default class GenderCommand implements BaseCommand {
         let selectedGenders: Array<GenderModeOptions>;
 
         const action = interactionName as OptionAction;
-        if (action === OptionAction.RESET) {
-            selectedGenders = [];
-        } else if (action === OptionAction.SET) {
-            selectedGenders = Object.values(interactionOptions);
-        } else {
-            logger.error(`Unexpected interaction name: ${interactionName}`);
-            selectedGenders = [];
+        switch (action) {
+            case OptionAction.RESET:
+                selectedGenders = [];
+                break;
+            case OptionAction.SET:
+                selectedGenders = Object.values(interactionOptions);
+                break;
+            default:
+                logger.error(`Unexpected interaction name: ${interactionName}`);
+                selectedGenders = [];
+                break;
         }
 
         await GenderCommand.updateOption(

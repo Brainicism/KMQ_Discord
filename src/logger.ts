@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable no-console */
 import { config } from "dotenv";
 import DailyRotateFile from "winston-daily-rotate-file";
