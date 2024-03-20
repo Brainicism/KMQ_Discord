@@ -14,14 +14,9 @@ import {
     isFirstGameOfDay,
     isPowerHour,
 } from "../../helpers/game_utils";
+import { bold, durationDays, getMention, isWeekend } from "../../helpers/utils";
 import {
-    bold,
     clickableSlashCommand,
-    durationDays,
-    getMention,
-    isWeekend,
-} from "../../helpers/utils";
-import {
     fetchChannel,
     fetchUser,
     generateOptionsMessage,

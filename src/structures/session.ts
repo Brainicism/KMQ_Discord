@@ -3,13 +3,6 @@ import { IPCLogger } from "../logger";
 import { KmqImages, specialFfmpegArgs } from "../constants";
 import {
     clickableSlashCommand,
-    friendlyFormattedNumber,
-    getMention,
-    truncatedString,
-    underline,
-} from "../helpers/utils";
-import { ensureVoiceConnection } from "../helpers/game_utils";
-import {
     generateEmbed,
     getCurrentVoiceMembers,
     getDebugLogHeader,
@@ -20,6 +13,13 @@ import {
     tryCreateInteractionSuccessAcknowledgement,
     tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
+import { ensureVoiceConnection } from "../helpers/game_utils";
+import {
+    friendlyFormattedNumber,
+    getMention,
+    truncatedString,
+    underline,
+} from "../helpers/utils";
 import { sql } from "kysely";
 import Eris from "eris";
 import FactGenerator from "../fact_generator";

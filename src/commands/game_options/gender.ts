@@ -1,8 +1,8 @@
 import { IPCLogger } from "../../logger";
 import { OptionAction } from "../../constants";
 import { availableGenders } from "../../enums/option_types/gender";
-import { clickableSlashCommand } from "../../helpers/utils";
 import {
+    clickableSlashCommand,
     getDebugLogHeader,
     getInteractionValue,
     sendErrorMessage,

@@ -24,7 +24,6 @@ import {
     bold,
     chooseWeightedRandom,
     chunkArray,
-    clickableSlashCommand,
     containsHangul,
     delay,
     friendlyFormattedNumber,
@@ -2396,4 +2395,63 @@ export function getAllClickableSlashCommands(commandName: string): string {
     }
 
     return results.join(" ");
+}
+
+/**
+ * @param commandName - The name of the slash command
+ * @param subcommandName - The suboption of the slash command
+ * @param subcommandGroupName - The suboption group of the slash command
+ * @returns a formatted version of the slash command, that allows users to click
+ */
+export function clickableSlashCommand(
+    commandName: string,
+    subcommandName?: string,
+    subcommandGroupName?: string,
+): string {
+    let commandAndSubcommand = commandName;
+
+    if (!subcommandName) {
+        if (Object.values(GameOptionCommand).includes(commandName)) {
+            subcommandName = "set";
+            if (commandName === GameOptionCommand[GameOption.LIMIT]) {
+                subcommandName = "set top";
+            } else if (commandName === GameOptionCommand[GameOption.CUTOFF]) {
+                subcommandName = "set earliest";
+            }
+        }
+
+        switch (commandName) {
+            case "play":
+                subcommandName = "classic";
+                break;
+            case "add":
+            case "remove":
+                commandName = "groups";
+                subcommandName = commandName;
+                break;
+            case "preset":
+                subcommandName = "list";
+                break;
+            case "leaderboard":
+                subcommandName = "show";
+                break;
+            case "lookup":
+                subcommandName = "song_name";
+                break;
+            case "news":
+                subcommandName = "daily";
+                break;
+            default:
+                break;
+        }
+    }
+
+    if (subcommandName) {
+        commandAndSubcommand = `${commandName} ${subcommandName}`;
+        if (subcommandGroupName) {
+            commandAndSubcommand = `${commandAndSubcommand} ${subcommandGroupName}`;
+        }
+    }
+
+    return `</${commandAndSubcommand}:${State.commandToID[commandName]}>`;
 }
