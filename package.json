@@ -100,7 +100,7 @@
         "eslint-plugin-only-warn": "^1.1.0",
         "eslint-plugin-sort-imports-es6-autofix": "^0.6.0",
         "eslint-plugin-tsdoc": "^0.2.17",
-        "i18n-ai-translate": "^1.2.5",
+        "i18n-ai-translate": "^2.0.2",
         "kysely-codegen": "^0.11.0",
         "prettier": "3.2.4",
         "typescript": "~5.3.3"
