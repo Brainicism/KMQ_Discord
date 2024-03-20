@@ -425,7 +425,7 @@ export default class GuildPreference {
             }))
             .reduce((total, curr) => Object.assign(total, curr), {});
 
-        if (!preset || Object.keys(preset).length === 0) {
+        if (Object.keys(preset).length === 0) {
             return [false, []];
         }
 

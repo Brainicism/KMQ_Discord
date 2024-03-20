@@ -86,36 +86,34 @@ export default class ListeningSession extends Session {
             return null;
         }
 
-        if (messageContext) {
-            const remainingDuration = this.getRemainingDuration(
-                this.guildPreference,
-            );
+        const remainingDuration = this.getRemainingDuration(
+            this.guildPreference,
+        );
 
-            const embedColor = round.getEndRoundColor(
-                false,
-                await userBonusIsActive(messageContext.author.id),
-            );
+        const embedColor = round.getEndRoundColor(
+            false,
+            await userBonusIsActive(messageContext.author.id),
+        );
 
-            const description = `${round.getEndRoundDescription(
-                messageContext,
-                this.guildPreference.songSelector.getUniqueSongCounter(),
-                [],
-            )}`;
+        const description = `${round.getEndRoundDescription(
+            messageContext,
+            this.guildPreference.songSelector.getUniqueSongCounter(),
+            [],
+        )}`;
 
-            const startRoundMessage = await this.sendRoundMessage(
-                messageContext,
-                [],
-                round,
-                description,
-                embedColor ?? undefined,
-                false,
-                remainingDuration,
-            );
+        const startRoundMessage = await this.sendRoundMessage(
+            messageContext,
+            [],
+            round,
+            description,
+            embedColor ?? undefined,
+            false,
+            remainingDuration,
+        );
 
-            round.interactionMessage = startRoundMessage;
-            round.roundMessageID = startRoundMessage?.id as string;
-            this.updateBookmarkSongList(round);
-        }
+        round.interactionMessage = startRoundMessage;
+        round.roundMessageID = startRoundMessage?.id as string;
+        this.updateBookmarkSongList(round);
 
         return round;
     }

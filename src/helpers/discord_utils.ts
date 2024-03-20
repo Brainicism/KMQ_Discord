@@ -178,11 +178,6 @@ export async function fetchUser(
         }
     }
 
-    if (!user) {
-        if (!silentErrors) logger.warn(`Could not fetch user: ${userID}`);
-        return null;
-    }
-
     // update cache
     client.users.update(user, client);
     return user;
@@ -196,11 +191,11 @@ export async function fetchUser(
 export async function fetchChannel(
     textChannelID: string,
 ): Promise<Eris.TextChannel | null> {
-    let channel: Eris.TextChannel | null = null;
+    let channel: Eris.TextChannel | undefined;
     const { client, ipc } = State;
 
     // fetch via cache
-    channel = client.getChannel(textChannelID) as Eris.TextChannel;
+    channel = client.getChannel(textChannelID) as Eris.TextChannel | undefined;
 
     // fetch via IPC from other clusters
     if (!channel) {
@@ -228,18 +223,12 @@ export async function fetchChannel(
         }
     }
 
-    if (!channel) {
-        logger.warn(`Could not fetch channel: ${textChannelID}`);
-        return null;
-    }
-
     // update cache
-    if (channel.guild) {
-        const guild = client.guilds.get(channel.guild.id);
-        if (guild) {
-            guild.channels.update(channel);
-            client.channelGuildMap[channel.id] = guild.id;
-        }
+
+    const guild = client.guilds.get(channel.guild.id);
+    if (guild) {
+        guild.channels.update(channel);
+        client.channelGuildMap[channel.id] = guild.id;
     }
 
     return channel;
@@ -325,7 +314,11 @@ async function sendMessageExceptionHandler(
     channelID: string,
     guildID: string | undefined,
     authorID: string | undefined,
-    messageContent: Eris.AdvancedMessageContent,
+    messageContent: Eris.AdvancedMessageContent | undefined,
+    messageOrInteraction:
+        | GuildTextableMessage
+        | Eris.CommandInteraction
+        | undefined,
 ): Promise<void> {
     if (typeof e === "string") {
         if (e.startsWith("Request timed out")) {
@@ -350,7 +343,7 @@ async function sendMessageExceptionHandler(
                 logger.error(
                     `Error sending message. Invalid form body. textChannelID = ${channelID}. e.message = ${
                         e.message
-                    }. msg_content = ${JSON.stringify(messageContent)}`,
+                    }. msg_content = ${JSON.stringify(messageContent)}. stack = ${new Error().stack}`,
                 );
                 break;
             }
@@ -403,6 +396,21 @@ async function sendMessageExceptionHandler(
                 break;
             }
 
+            case 10062: {
+                // Interaction too old
+                if (messageOrInteraction) {
+                    logger.warn(
+                        `Error sending message. Unknown interaction. textChannelID = ${channelID}. userID = ${authorID}. interaction_age: ${Date.now() - messageOrInteraction.createdAt}ms. stack = ${new Error().stack}`,
+                    );
+                } else {
+                    logger.warn(
+                        `Error sending message. Unknown interaction. textChannelID = ${channelID}. userID = ${authorID}. stack = ${new Error().stack}`,
+                    );
+                }
+
+                break;
+            }
+
             default: {
                 // Unknown error code
                 logger.error(
@@ -413,7 +421,7 @@ async function sendMessageExceptionHandler(
         }
     } else {
         logger.error(
-            `Error sending message. Unknown error. textChannelID = ${channelID}. err = ${e} = ${JSON.stringify(messageContent)}`,
+            `Error sending message. Unknown error. textChannelID = ${channelID}. err = ${e} = ${JSON.stringify(messageContent)}. stack = ${new Error().stack}`,
         );
     }
 }
@@ -537,6 +545,7 @@ export async function sendMessage(
                 channel.guild.id,
                 authorID,
                 messageContent,
+                undefined,
             );
         }
 
@@ -573,6 +582,7 @@ async function sendDmMessage(
             undefined,
             userID,
             messageContent,
+            undefined,
         );
         return null;
     }
@@ -590,7 +600,7 @@ export async function sendErrorMessage(
     interaction?: Eris.CommandInteraction,
 ): Promise<Eris.Message<Eris.TextableChannel> | null> {
     const author =
-        embedPayload.author == null || embedPayload.author
+        embedPayload.author == null
             ? embedPayload.author
             : messageContext.author;
 
@@ -637,7 +647,7 @@ export function generateEmbed(
     embedPayload: EmbedPayload,
 ): Eris.EmbedOptions {
     const author =
-        embedPayload.author == null || embedPayload.author
+        embedPayload.author == null
             ? embedPayload.author
             : messageContext.author;
 
@@ -1232,7 +1242,7 @@ export async function sendOptionsMessage(
 export async function getGameInfoMessage(
     guildID: string,
 ): Promise<GameInfoMessage | null> {
-    const endGameMessage: GameInfoMessage = chooseWeightedRandom(
+    const endGameMessage: GameInfoMessage | null = chooseWeightedRandom(
         await dbContext.kmq
             .selectFrom("game_messages")
             .select(["title", "message", "weight"])
@@ -1316,16 +1326,27 @@ export async function sendPaginationedEmbed(
                 [...REQUIRED_TEXT_PERMISSIONS, "readMessageHistory"],
             )
         ) {
-            return EmbedPaginator.createPaginationEmbed(
-                messageOrInteraction.channel as GuildTextableChannel,
-                messageOrInteraction.member!.id,
-                embeds,
-                { timeout: 60000, startPage, cycling: true },
-                components,
-                messageOrInteraction instanceof Eris.CommandInteraction
-                    ? messageOrInteraction
-                    : undefined,
-            );
+            try {
+                return await EmbedPaginator.createPaginationEmbed(
+                    messageOrInteraction.channel as GuildTextableChannel,
+                    messageOrInteraction.member!.id,
+                    embeds,
+                    { timeout: 60000, startPage, cycling: true },
+                    components,
+                    messageOrInteraction instanceof Eris.CommandInteraction
+                        ? messageOrInteraction
+                        : undefined,
+                );
+            } catch (e) {
+                await sendMessageExceptionHandler(
+                    e,
+                    messageOrInteraction.channel.id,
+                    messageOrInteraction.guildID,
+                    messageOrInteraction.member?.id,
+                    undefined,
+                    messageOrInteraction,
+                );
+            }
         }
 
         return null;
@@ -1368,7 +1389,7 @@ export function areUserAndBotInSameVoiceChannel(
     const member = State.client.guilds.get(guildID)?.members.get(userID);
     const botVoiceConnection = State.client.voiceConnections.get(guildID);
 
-    if (!member || !member.voiceState || !botVoiceConnection) {
+    if (!member || !botVoiceConnection) {
         return false;
     }
 
@@ -1397,7 +1418,9 @@ export function getUserVoiceChannel(
  * @param voiceChannelID - The voice channel ID
  * @returns the voice channel that the message's author is in
  */
-export function getVoiceChannel(voiceChannelID: string): Eris.VoiceChannel {
+export function getVoiceChannel(
+    voiceChannelID: string,
+): Eris.VoiceChannel | null {
     const voiceChannel = State.client.getChannel(
         voiceChannelID,
     ) as Eris.VoiceChannel;
@@ -1857,9 +1880,8 @@ export function getInteractionValue(
     interactionName: string | null;
     focusedKey: string | null;
 } {
-    let options = interaction.data.options as Eris.InteractionDataOptions[];
-
-    if (options == null) {
+    const options = interaction.data.options;
+    if (!options) {
         return {
             interactionKey: null,
             interactionOptions: {},
@@ -1870,8 +1892,10 @@ export function getInteractionValue(
 
     let parentInteractionDataName: string | null = null;
     const keys: Array<string> = [];
-    while (options.length > 0) {
-        const option = options[0]!;
+
+    let finalOptions = options;
+    while (finalOptions.length > 0) {
+        const option = finalOptions[0]!;
         keys.push(option.name);
         if (
             option.type ===
@@ -1883,7 +1907,7 @@ export function getInteractionValue(
             const newOptions = option.options;
             if (!newOptions) break;
 
-            options = newOptions;
+            finalOptions = newOptions;
         } else {
             break;
         }
@@ -1892,7 +1916,7 @@ export function getInteractionValue(
     return {
         interactionKey: keys.join("."),
         interactionOptions: (
-            options as Eris.InteractionDataOptionsWithValue[]
+            finalOptions as Eris.InteractionDataOptionsWithValue[]
         ).reduce(
             (result, filter: Eris.InteractionDataOptionsWithValue) => {
                 result[filter.name] = filter.value;
@@ -1901,7 +1925,7 @@ export function getInteractionValue(
             {} as { [name: string]: string | number | boolean },
         ),
         interactionName: parentInteractionDataName,
-        focusedKey: options.find((x) => x["focused"])?.name ?? null,
+        focusedKey: finalOptions.find((x) => x["focused"])?.name ?? null,
     };
 }
 
@@ -2103,43 +2127,46 @@ export const updateAppCommands = async (
                                 }),
                                 {},
                             );
-                    if (
-                        cmd.type ===
-                        Eris.Constants.ApplicationCommandTypes.CHAT_INPUT
-                    ) {
-                        if (!cmd.description) {
-                            let translationKey = `command.${commandName}.help.interaction.description`;
-                            const fallbackTranslationKey = `command.${commandName}.help.description`;
-                            if (!i18n.hasKey(translationKey)) {
-                                if (!i18n.hasKey(fallbackTranslationKey)) {
-                                    throw new Error(
-                                        `Missing slash command description: ${translationKey} or ${fallbackTranslationKey}`,
-                                    );
+
+                    switch (cmd.type) {
+                        case Eris.Constants.ApplicationCommandTypes.CHAT_INPUT:
+                            if (!cmd.description) {
+                                let translationKey = `command.${commandName}.help.interaction.description`;
+                                const fallbackTranslationKey = `command.${commandName}.help.description`;
+                                if (!i18n.hasKey(translationKey)) {
+                                    if (!i18n.hasKey(fallbackTranslationKey)) {
+                                        throw new Error(
+                                            `Missing slash command description: ${translationKey} or ${fallbackTranslationKey}`,
+                                        );
+                                    }
+
+                                    translationKey = fallbackTranslationKey;
                                 }
 
-                                translationKey = fallbackTranslationKey;
+                                cmd.description = i18n.translate(
+                                    LocaleType.EN,
+                                    translationKey,
+                                );
+
+                                cmd.descriptionLocalizations = Object.values(
+                                    LocaleType,
+                                )
+                                    .filter((x) => x !== LocaleType.EN)
+                                    .reduce(
+                                        (acc, locale) => ({
+                                            ...acc,
+                                            [locale]: i18n.translate(
+                                                locale,
+                                                translationKey,
+                                            ),
+                                        }),
+                                        {},
+                                    );
                             }
 
-                            cmd.description = i18n.translate(
-                                LocaleType.EN,
-                                translationKey,
-                            );
-
-                            cmd.descriptionLocalizations = Object.values(
-                                LocaleType,
-                            )
-                                .filter((x) => x !== LocaleType.EN)
-                                .reduce(
-                                    (acc, locale) => ({
-                                        ...acc,
-                                        [locale]: i18n.translate(
-                                            locale,
-                                            translationKey,
-                                        ),
-                                    }),
-                                    {},
-                                );
-                        }
+                            break;
+                        default:
+                            break;
                     }
 
                     if (!cmd.name) {

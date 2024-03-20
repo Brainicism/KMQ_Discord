@@ -204,10 +204,6 @@ export async function updateBotStatus(): Promise<void> {
         .execute();
 
     const randomPopularSong = chooseRandom(randomPopularSongs);
-    if (!randomPopularSong) {
-        client.editStatus("online");
-        return;
-    }
 
     client.editStatus("online", {
         name: `"${randomPopularSong["song_name_en"]}" by ${randomPopularSong["artist_name_en"]}`,

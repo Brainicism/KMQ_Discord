@@ -297,13 +297,17 @@ export default class GoalCommand implements BaseCommand {
         let goalValue: number | null;
 
         const action = interactionName as OptionAction;
-        if (action === OptionAction.RESET) {
-            goalValue = null;
-        } else if (action === OptionAction.SET) {
-            goalValue = interactionOptions["score"] as number;
-        } else {
-            logger.error(`Unexpected interaction name: ${interactionName}`);
-            goalValue = null;
+        switch (action) {
+            case OptionAction.RESET:
+                goalValue = null;
+                break;
+            case OptionAction.SET:
+                goalValue = interactionOptions["score"] as number;
+                break;
+            default:
+                logger.error(`Unexpected interaction name: ${interactionName}`);
+                goalValue = null;
+                break;
         }
 
         await GoalCommand.updateOption(messageContext, goalValue, interaction);

@@ -311,9 +311,8 @@ export default class DurationCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             durationActionInternal = DurationActionInternal.RESET;
         } else {
-            durationActionInternal =
-                (parsedMessage.components[1] as DurationActionInternal) ??
-                DurationActionInternal.SET;
+            durationActionInternal = (parsedMessage.components[1] ??
+                DurationActionInternal.SET) as DurationActionInternal;
             durationValue = parseInt(parsedMessage.components[0]!, 10);
         }
 
@@ -364,50 +363,56 @@ export default class DurationCommand implements BaseCommand {
                 ? guildPreference.gameOptions.duration
                 : 0;
 
-            if (action === DurationActionInternal.ADD) {
-                finalDuration = currentDuration + durationValue;
-            } else if (action === DurationActionInternal.REMOVE) {
-                if (!guildPreference.isDurationSet()) {
-                    await sendErrorMessage(
-                        messageContext,
-                        {
-                            title: i18n.translate(
-                                messageContext.guildID,
-                                "command.duration.failure.removingDuration.title",
-                            ),
-                            description: i18n.translate(
-                                messageContext.guildID,
-                                "command.duration.failure.removingDuration.notSet.description",
-                            ),
-                        },
-                        interaction,
-                    );
-                    return;
-                }
+            switch (action) {
+                case DurationActionInternal.ADD:
+                    finalDuration = currentDuration + durationValue;
+                    break;
+                case DurationActionInternal.REMOVE:
+                    if (!guildPreference.isDurationSet()) {
+                        await sendErrorMessage(
+                            messageContext,
+                            {
+                                title: i18n.translate(
+                                    messageContext.guildID,
+                                    "command.duration.failure.removingDuration.title",
+                                ),
+                                description: i18n.translate(
+                                    messageContext.guildID,
+                                    "command.duration.failure.removingDuration.notSet.description",
+                                ),
+                            },
+                            interaction,
+                        );
+                        return;
+                    }
 
-                finalDuration = currentDuration - durationValue;
-                if (finalDuration < 2) {
-                    await sendErrorMessage(
-                        messageContext,
-                        {
-                            title: i18n.translate(
-                                messageContext.guildID,
-                                "command.duration.failure.removingDuration.title",
-                            ),
-                            description: i18n.translate(
-                                messageContext.guildID,
-                                "command.duration.failure.removingDuration.tooShort.description",
-                            ),
-                        },
-                        interaction,
+                    finalDuration = currentDuration - durationValue;
+                    if (finalDuration < 2) {
+                        await sendErrorMessage(
+                            messageContext,
+                            {
+                                title: i18n.translate(
+                                    messageContext.guildID,
+                                    "command.duration.failure.removingDuration.title",
+                                ),
+                                description: i18n.translate(
+                                    messageContext.guildID,
+                                    "command.duration.failure.removingDuration.tooShort.description",
+                                ),
+                            },
+                            interaction,
+                        );
+                    }
+
+                    break;
+                case DurationActionInternal.SET:
+                    finalDuration = durationValue;
+                    break;
+                default:
+                    logger.error(
+                        `Unexpected duration action internal: ${action}`,
                     );
                     return;
-                }
-            } else if (action === DurationActionInternal.SET) {
-                finalDuration = durationValue;
-            } else {
-                logger.error(`Unexpected duration action internal: ${action}`);
-                return;
             }
 
             logger.info(

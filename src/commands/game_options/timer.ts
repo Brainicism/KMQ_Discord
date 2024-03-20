@@ -243,13 +243,18 @@ export default class GuessTimeoutCommand implements BaseCommand {
         let timerValue: number | null;
 
         const action = interactionName as OptionAction;
-        if (action === OptionAction.RESET) {
-            timerValue = null;
-        } else if (action === OptionAction.SET) {
-            timerValue = interactionOptions["timer"] as number;
-        } else {
-            logger.error(`Unexpected interaction name: ${interactionName}`);
-            timerValue = null;
+        switch (action) {
+            case OptionAction.RESET:
+                timerValue = null;
+                break;
+            case OptionAction.SET:
+                timerValue = interactionOptions["timer"] as number;
+
+                break;
+            default:
+                logger.error(`Unexpected interaction name: ${interactionName}`);
+                timerValue = null;
+                break;
         }
 
         await GuessTimeoutCommand.updateOption(

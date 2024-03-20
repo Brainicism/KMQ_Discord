@@ -183,7 +183,7 @@ export default class SongSelector {
         shuffleType = ShuffleType.RANDOM,
     ): QueriedSong | null {
         let queriedSongList = [...this.getSongs().songs];
-        if (ignoredSongs) {
+        if (ignoredSongs.size) {
             queriedSongList = queriedSongList.filter(
                 (x) => !ignoredSongs.has(x.youtubeLink),
             );

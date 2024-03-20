@@ -237,13 +237,18 @@ export default class LanguageCommand implements BaseCommand {
         let languageValue: LanguageType | null;
 
         const action = interactionName as OptionAction;
-        if (action === OptionAction.RESET) {
-            languageValue = null;
-        } else if (action === OptionAction.SET) {
-            languageValue = interactionOptions["language"] as LanguageType;
-        } else {
-            logger.error(`Unexpected interaction name: ${interactionName}`);
-            languageValue = null;
+        switch (action) {
+            case OptionAction.RESET:
+                languageValue = null;
+                break;
+            case OptionAction.SET:
+                languageValue = interactionOptions["language"] as LanguageType;
+
+                break;
+            default:
+                logger.error(`Unexpected interaction name: ${interactionName}`);
+                languageValue = null;
+                break;
         }
 
         await LanguageCommand.updateOption(

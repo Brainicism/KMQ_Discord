@@ -267,13 +267,17 @@ export default class ShuffleCommand implements BaseCommand {
         let shuffleValue: ShuffleType | null;
 
         const action = interactionName as OptionAction;
-        if (action === OptionAction.RESET) {
-            shuffleValue = null;
-        } else if (action === OptionAction.SET) {
-            shuffleValue = interactionOptions["shuffle"] as ShuffleType;
-        } else {
-            logger.error(`Unexpected interaction name: ${interactionName}`);
-            shuffleValue = null;
+        switch (action) {
+            case OptionAction.RESET:
+                shuffleValue = null;
+                break;
+            case OptionAction.SET:
+                shuffleValue = interactionOptions["shuffle"] as ShuffleType;
+                break;
+            default:
+                logger.error(`Unexpected interaction name: ${interactionName}`);
+                shuffleValue = null;
+                break;
         }
 
         await ShuffleCommand.updateOption(

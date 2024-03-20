@@ -287,13 +287,20 @@ export default class ArtistTypeCommand implements BaseCommand {
         let artistTypeValue: ArtistType | null;
 
         const action = interactionName as OptionAction;
-        if (action === OptionAction.RESET) {
-            artistTypeValue = null;
-        } else if (action === OptionAction.SET) {
-            artistTypeValue = interactionOptions["artisttype"] as ArtistType;
-        } else {
-            logger.error(`Unexpected interaction name: ${action}`);
-            artistTypeValue = null;
+
+        switch (action) {
+            case OptionAction.RESET:
+                artistTypeValue = null;
+                break;
+            case OptionAction.SET:
+                artistTypeValue = interactionOptions[
+                    "artisttype"
+                ] as ArtistType;
+                break;
+            default:
+                logger.error(`Unexpected interaction name: ${action}`);
+                artistTypeValue = null;
+                break;
         }
 
         await ArtistTypeCommand.updateOption(
