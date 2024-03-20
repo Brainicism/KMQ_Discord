@@ -2528,10 +2528,10 @@ humanize-ms@^1.2.1:
   dependencies:
     ms "^2.0.0"
 
-i18n-ai-translate@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/i18n-ai-translate/-/i18n-ai-translate-2.0.1.tgz#787f617166140e1c83c8494083aa200fe3b54be0"
-  integrity sha512-rctUy3yWrtTdmcUNaac01/19JEDeqEWGMjNy8E+m6r0Sw06q/0m50p14AP1ueDUEaSr/bCJ4GDqfFllOkeoaQw==
+i18n-ai-translate@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/i18n-ai-translate/-/i18n-ai-translate-2.0.2.tgz#7796e440cf81af1a97cf7ff461d260e420b3bedd"
+  integrity sha512-NjiIhiGVTFOLftAj14amUby7l+tN21K4ZGi0go5K2pVVoM9STSD2pEcGw0GQEiK8n4PepAWS8nVjWFyDu1knjA==
   dependencies:
     "@google/generative-ai" "^0.3.0"
     "@types/flat" "^5.0.5"
