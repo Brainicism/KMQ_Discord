@@ -831,6 +831,7 @@
             "notSet": "Não definido",
             "overview": "Tocando agora as {{limit}} melhores das {{totalSongs}} músicas disponíveis das seguintes opções:",
             "perCommandHelp": "Procurando informações sobre como usar um comando? Confira {{helpCommand}} action:[command] para saber mais.",
+            "playlistParseInProgress": "Nota: A análise da playlist está em andamento.",
             "preset": "Predefinido",
             "reset": "{{presetOrOption}} Redefinir",
             "spotify": "Tocando agora {{songCount}} músicas do Spotify com as seguintes opções:",

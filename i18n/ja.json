@@ -831,6 +831,7 @@
             "notSet": "未設定",
             "overview": "現在、以下のオプションから利用可能な{{totalSongs}}曲のうち、トップ{{limit}}曲を再生しています。",
             "perCommandHelp": "コマンドの使用方法についての情報をお探しですか？{{helpCommand}} action:[コマンド]をチェックして、詳細を学びましょう。",
+            "playlistParseInProgress": "注：プレイリストの解析が進行中です。",
             "preset": "プリセット",
             "reset": "{{presetOrOption}}をリセット",
             "spotify": "現在、以下のオプションでSpotifyから{{songCount}}曲を再生しています。",

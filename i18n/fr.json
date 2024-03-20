@@ -831,6 +831,7 @@
             "notSet": "Non défini",
             "overview": "En train de jouer les {{limit}} premières chansons parmi un total de {{totalSongs}} chansons disponibles à partir des options suivantes :",
             "perCommandHelp": "Vous cherchez des informations sur l'utilisation d'une commande ? Consultez {{helpCommand}} action:[commande] pour en savoir plus.",
+            "playlistParseInProgress": "Note : L'analyse de la playlist est en cours.",
             "preset": "Préréglage",
             "reset": "{{presetOrOption}} Réinitialiser",
             "spotify": "En train de jouer {{songCount}} chansons de Spotify avec les options suivantes :",

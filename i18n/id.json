@@ -831,6 +831,7 @@
             "notSet": "Tidak ditetapkan",
             "overview": "Sekarang memutar {{limit}} teratas dari {{totalSongs}} lagu yang tersedia dari opsi berikut:",
             "perCommandHelp": "Mencari informasi tentang cara menggunakan perintah? Periksa {{helpCommand}} action:[command] untuk mempelajari lebih lanjut.",
+            "playlistParseInProgress": "Catatan: Pemrosesan daftar putar sedang berlangsung.",
             "preset": "Pra Setel",
             "reset": "{{presetOrOption}} Diatur Ulang",
             "spotify": "Kini memutar {{songCount}} lagu dari Spotify dengan opsi berikut:",

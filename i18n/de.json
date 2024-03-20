@@ -831,6 +831,7 @@
             "notSet": "Nicht festgelegt",
             "overview": "Spielt jetzt die Top {{limit}} von {{totalSongs}} verfügbaren Songs aus den folgenden Optionen:",
             "perCommandHelp": "Suchst du nach Informationen zur Verwendung eines Befehls? Schau dir {{helpCommand}} action:[command] an, um mehr zu erfahren.",
+            "playlistParseInProgress": "Hinweis: Playlist-Parsing läuft.",
             "preset": "Voreinstellung",
             "reset": "{{presetOrOption}} Zurücksetzen",
             "spotify": "Spiele jetzt {{songCount}} Songs von Spotify mit den folgenden Optionen:",

@@ -831,6 +831,7 @@
             "notSet": "설정되지 않음",
             "overview": "이제 다음 옵션에서 사용 가능한 {{totalSongs}}곡 중 상위 {{limit}}곡을 재생합니다.",
             "perCommandHelp": "명령어 사용 방법에 대한 정보를 찾고 계십니까? 자세한 내용은 {{helpCommand}} action:[명령어]을(를) 확인하세요.",
+            "playlistParseInProgress": "참고: 재생 목록 분석이 진행 중입니다.",
             "preset": "사전 설정",
             "reset": "{{presetOrOption}}으(로) 재설정합니다",
             "spotify": "이제 다음 옵션으로 스포티파이의 {{songCount}}곡을 재생합니다.:",

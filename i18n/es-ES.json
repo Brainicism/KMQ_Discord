@@ -831,6 +831,7 @@
             "notSet": "No establecido",
             "overview": "Reproduciendo las mejores {{limit}} de {{totalSongs}} canciones disponibles de las siguientes opciones:",
             "perCommandHelp": "¿Buscas información sobre cómo usar un comando? Echa un vistazo a {{helpCommand}} action:[comando] para obtener más información.",
+            "playlistParseInProgress": "Nota: El análisis de la lista de reproducción está en curso.",
             "preset": "Preestablecido",
             "reset": "{{presetOrOption}} Restablecer",
             "spotify": "Reproduciendo {{songCount}} canciones de Spotify con las siguientes opciones:",
