@@ -41,9 +41,10 @@ describe("game utils", () => {
             describe("collabs", () => {
                 it("should return the group and any collabs they are a part of in matchedGroups", async () => {
                     const artistName = "IU";
-                    const matchResults = await getMatchingGroupNames([
-                        artistName,
-                    ]);
+                    const matchResults = await getMatchingGroupNames(
+                        State.aliases.artist,
+                        [artistName],
+                    );
 
                     // first result is exact artist match
                     assert.strictEqual(
@@ -75,11 +76,14 @@ describe("game utils", () => {
             describe("fully matching group names", () => {
                 it("should return the corresponding groups in matchedGroups", async () => {
                     const artistNames = ["Blackpink", "BTS", "Stray Kids"];
-                    const matchResults = await getMatchingGroupNames([
-                        artistNames[0]!,
-                        artistNames[1]!,
-                        artistNames[2]!.toLowerCase(),
-                    ]);
+                    const matchResults = await getMatchingGroupNames(
+                        State.aliases.artist,
+                        [
+                            artistNames[0]!,
+                            artistNames[1]!,
+                            artistNames[2]!.toLowerCase(),
+                        ],
+                    );
 
                     assert.deepStrictEqual(
                         matchResults.matchedGroups.map((x) => x.name),
@@ -93,10 +97,10 @@ describe("game utils", () => {
                 it("should return corresponding groups in unmatchedGroups/matchedGroups", async () => {
                     const artistNames = ["Blackpink", "BTS", "Stray Kids"];
                     const fakeNames = ["LinusTechTips", "Rihanna"];
-                    const matchResults = await getMatchingGroupNames([
-                        ...artistNames,
-                        ...fakeNames,
-                    ]);
+                    const matchResults = await getMatchingGroupNames(
+                        State.aliases.artist,
+                        [...artistNames, ...fakeNames],
+                    );
 
                     assert.deepStrictEqual(
                         matchResults.matchedGroups.map((x) => x.name),
@@ -114,7 +118,10 @@ describe("game utils", () => {
                 it("should return the groups in unmatchedGroups", async () => {
                     const fakeNames = ["LinusTechTips", "Rihanna"];
 
-                    const matchResults = await getMatchingGroupNames(fakeNames);
+                    const matchResults = await getMatchingGroupNames(
+                        State.aliases.artist,
+                        fakeNames,
+                    );
 
                     assert.deepStrictEqual(
                         matchResults.matchedGroups.length,
@@ -137,9 +144,10 @@ describe("game utils", () => {
                         State.aliases.artist[conflictingArtistActualName] = [
                             conflictingName,
                         ];
-                        const matchResults = await getMatchingGroupNames([
-                            conflictingName,
-                        ]);
+                        const matchResults = await getMatchingGroupNames(
+                            State.aliases.artist,
+                            [conflictingName],
+                        );
 
                         assert.deepStrictEqual(
                             matchResults.matchedGroups.map((x) => x.name),
@@ -157,9 +165,10 @@ describe("game utils", () => {
                     it("should not match any groups", async () => {
                         State.aliases.artist = {};
                         const artistBAlias = "B's other name";
-                        const matchResults = await getMatchingGroupNames([
-                            artistBAlias,
-                        ]);
+                        const matchResults = await getMatchingGroupNames(
+                            State.aliases.artist,
+                            [artistBAlias],
+                        );
 
                         assert.deepStrictEqual(
                             matchResults.matchedGroups.length,
@@ -184,9 +193,10 @@ describe("game utils", () => {
                             const conflictingName = "2YOON";
                             State.aliases.artist[conflictingArtistActualName] =
                                 [conflictingName];
-                            const matchResults = await getMatchingGroupNames([
-                                conflictingName,
-                            ]);
+                            const matchResults = await getMatchingGroupNames(
+                                State.aliases.artist,
+                                [conflictingName],
+                            );
 
                             assert.deepStrictEqual(
                                 matchResults.matchedGroups.map((x) => x.name),
@@ -210,10 +220,10 @@ describe("game utils", () => {
                                 artistNameAlias,
                             ];
 
-                            const matchResults = await getMatchingGroupNames([
-                                artistNameAlias,
-                                artistNameExactMatch,
-                            ]);
+                            const matchResults = await getMatchingGroupNames(
+                                State.aliases.artist,
+                                [artistNameAlias, artistNameExactMatch],
+                            );
 
                             assert.deepStrictEqual(
                                 matchResults.matchedGroups.map((x) => x.name),
@@ -232,9 +242,10 @@ describe("game utils", () => {
                             const artistName = "Blackpink";
                             const artistBAlias = "Blackpink alias";
                             State.aliases.artist["Blackpink"] = [artistBAlias];
-                            const matchResults = await getMatchingGroupNames([
-                                artistBAlias,
-                            ]);
+                            const matchResults = await getMatchingGroupNames(
+                                State.aliases.artist,
+                                [artistBAlias],
+                            );
 
                             assert.deepStrictEqual(
                                 matchResults.matchedGroups.map((x) => x.name),
@@ -255,9 +266,10 @@ describe("game utils", () => {
                             State.aliases.artist[artistName] = [
                                 artistNameAlias,
                             ];
-                            const matchResults = await getMatchingGroupNames([
-                                artistNameAlias,
-                            ]);
+                            const matchResults = await getMatchingGroupNames(
+                                State.aliases.artist,
+                                [artistNameAlias],
+                            );
 
                             assert.deepStrictEqual(
                                 matchResults.matchedGroups.map((x) => x.name),
@@ -277,10 +289,10 @@ describe("game utils", () => {
                             const artistAlias = "Twice alias";
                             State.aliases.artist[artistName] = [artistAlias];
                             const nonMatchArtist = "Weee";
-                            const matchResults = await getMatchingGroupNames([
-                                artistAlias,
-                                nonMatchArtist,
-                            ]);
+                            const matchResults = await getMatchingGroupNames(
+                                State.aliases.artist,
+                                [artistAlias, nonMatchArtist],
+                            );
 
                             assert.deepStrictEqual(
                                 matchResults.matchedGroups.map((x) => x.name),
@@ -298,9 +310,10 @@ describe("game utils", () => {
                         it("should not match any group", async () => {
                             State.aliases.artist = {};
                             const nonMatchArtist = "ampstyle";
-                            const matchResults = await getMatchingGroupNames([
-                                nonMatchArtist,
-                            ]);
+                            const matchResults = await getMatchingGroupNames(
+                                State.aliases.artist,
+                                [nonMatchArtist],
+                            );
 
                             assert.deepStrictEqual(
                                 matchResults.matchedGroups.length,
@@ -318,9 +331,10 @@ describe("game utils", () => {
                         it("should not match any group", async () => {
                             State.aliases.artist = {};
                             const nonMatchArtist = "PSY + Hyuna";
-                            const matchResults = await getMatchingGroupNames([
-                                nonMatchArtist,
-                            ]);
+                            const matchResults = await getMatchingGroupNames(
+                                State.aliases.artist,
+                                [nonMatchArtist],
+                            );
 
                             assert.deepStrictEqual(
                                 matchResults.matchedGroups.length,
@@ -506,7 +520,7 @@ describe("game utils", () => {
 
             describe("no inactive gamesessions", () => {
                 it("should not clean up", async () => {
-                    await cleanupInactiveGameSessions();
+                    await cleanupInactiveGameSessions(State.gameSessions);
                     assert.strictEqual(
                         State.gameSessions[guildId],
                         gameSession,
@@ -518,7 +532,7 @@ describe("game utils", () => {
             describe("has inactive gamesessions", () => {
                 it("should clean up", async () => {
                     gameSession.lastActive = Date.now() - 1000 * 60 * 60;
-                    await cleanupInactiveGameSessions();
+                    await cleanupInactiveGameSessions(State.gameSessions);
                     sinon.assert.called(endSessionStub);
                 });
             });

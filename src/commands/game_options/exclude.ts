@@ -232,8 +232,10 @@ export default class ExcludeCommand implements BaseCommand {
             .split(",")
             .map((groupName) => groupName.trim());
 
-        const { matchedGroups, unmatchedGroups } =
-            await getMatchingGroupNames(groupNames);
+        const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames(
+            State.aliases.artist,
+            groupNames,
+        );
 
         await ExcludeCommand.updateOption(
             MessageContext.fromMessage(message),

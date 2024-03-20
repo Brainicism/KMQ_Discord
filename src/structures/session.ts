@@ -264,7 +264,7 @@ export default abstract class Session {
 
         // join voice channel and start round
         try {
-            await ensureVoiceConnection(this);
+            await ensureVoiceConnection(State.client, this);
         } catch (err) {
             await this.endSession("Unable to obtain voice connection", true);
             logger.error(
