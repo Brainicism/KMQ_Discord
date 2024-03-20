@@ -5,16 +5,14 @@ import {
     GUESS_STREAK_THRESHOLD,
     PARTICIPANT_MODIFIER_MAX_PARTICIPANTS,
 } from "../../constants";
-import {
-    calculateOptionsExpMultiplierInternal,
-    calculateRoundExpMultiplier,
-    participantExpScalingModifier,
-} from "../../commands/game_commands/exp";
+
 import AnswerType from "../../enums/option_types/answer_type";
 import ExpBonusModifier from "../../enums/exp_bonus_modifier";
+import ExpCommand from "../../commands/game_commands/exp";
 import GameRound from "../../structures/game_round";
 import GuessModeType from "../../enums/option_types/guess_mode_type";
 import GuildPreference from "../../structures/guild_preference";
+import QueriedSong from "../../structures/queried_song";
 import ShuffleType from "../../enums/option_types/shuffle_type";
 import assert from "assert";
 import sinon from "sinon";
@@ -60,7 +58,7 @@ describe("exp command", () => {
 
                 it("should return insufficient song count penalty", async () => {
                     const modifiers =
-                        await calculateOptionsExpMultiplierInternal(
+                        await ExpCommand.calculateOptionsExpMultiplierInternal(
                             guildPreference,
                             false,
                             "dummy",
@@ -68,7 +66,7 @@ describe("exp command", () => {
 
                     assert.strictEqual(modifiers.length, 1);
                     assert.strictEqual(
-                        modifiers[0].name,
+                        modifiers[0]!.name,
                         ExpBonusModifier.BELOW_SONG_COUNT_THRESHOLD,
                     );
                 });
@@ -95,7 +93,7 @@ describe("exp command", () => {
                 describe("no active modifiers", () => {
                     it("should return empty array", async () => {
                         const modifiers =
-                            await calculateOptionsExpMultiplierInternal(
+                            await ExpCommand.calculateOptionsExpMultiplierInternal(
                                 guildPreference,
                                 false,
                                 "dummy",
@@ -108,7 +106,7 @@ describe("exp command", () => {
                 describe("vote bonus", () => {
                     it("should return vote bonus modifier", async () => {
                         const modifiers =
-                            await calculateOptionsExpMultiplierInternal(
+                            await ExpCommand.calculateOptionsExpMultiplierInternal(
                                 guildPreference,
                                 true,
                                 "dummy",
@@ -116,7 +114,7 @@ describe("exp command", () => {
 
                         assert.strictEqual(modifiers.length, 1);
                         assert.strictEqual(
-                            modifiers[0].name,
+                            modifiers[0]!.name,
                             ExpBonusModifier.VOTE,
                         );
                     });
@@ -129,7 +127,7 @@ describe("exp command", () => {
                         );
 
                         const modifiers =
-                            await calculateOptionsExpMultiplierInternal(
+                            await ExpCommand.calculateOptionsExpMultiplierInternal(
                                 guildPreference,
                                 false,
                                 "dummy",
@@ -137,7 +135,7 @@ describe("exp command", () => {
 
                         assert.strictEqual(modifiers.length, 1);
                         assert.strictEqual(
-                            modifiers[0].name,
+                            modifiers[0]!.name,
                             ExpBonusModifier.SHUFFLE_POPULARITY,
                         );
                     });
@@ -150,7 +148,7 @@ describe("exp command", () => {
                         );
 
                         const modifiers =
-                            await calculateOptionsExpMultiplierInternal(
+                            await ExpCommand.calculateOptionsExpMultiplierInternal(
                                 guildPreference,
                                 false,
                                 "dummy",
@@ -158,7 +156,7 @@ describe("exp command", () => {
 
                         assert.strictEqual(modifiers.length, 1);
                         assert.strictEqual(
-                            modifiers[0].name,
+                            modifiers[0]!.name,
                             ExpBonusModifier.SHUFFLE_WEIGHTED_EASY,
                         );
                     });
@@ -171,7 +169,7 @@ describe("exp command", () => {
                         );
 
                         const modifiers =
-                            await calculateOptionsExpMultiplierInternal(
+                            await ExpCommand.calculateOptionsExpMultiplierInternal(
                                 guildPreference,
                                 false,
                                 "dummy",
@@ -179,7 +177,7 @@ describe("exp command", () => {
 
                         assert.strictEqual(modifiers.length, 1);
                         assert.strictEqual(
-                            modifiers[0].name,
+                            modifiers[0]!.name,
                             ExpBonusModifier.SHUFFLE_CHRONOLOGICAL,
                         );
                     });
@@ -192,7 +190,7 @@ describe("exp command", () => {
                         );
 
                         const modifiers =
-                            await calculateOptionsExpMultiplierInternal(
+                            await ExpCommand.calculateOptionsExpMultiplierInternal(
                                 guildPreference,
                                 false,
                                 "dummy",
@@ -200,7 +198,7 @@ describe("exp command", () => {
 
                         assert.strictEqual(modifiers.length, 1);
                         assert.strictEqual(
-                            modifiers[0].name,
+                            modifiers[0]!.name,
                             ExpBonusModifier.SHUFFLE_CHRONOLOGICAL,
                         );
                     });
@@ -227,7 +225,7 @@ describe("exp command", () => {
                                 answerType as AnswerType,
                             );
                             const modifiers =
-                                await calculateOptionsExpMultiplierInternal(
+                                await ExpCommand.calculateOptionsExpMultiplierInternal(
                                     guildPreference,
                                     false,
                                     "dummy",
@@ -235,7 +233,7 @@ describe("exp command", () => {
 
                             assert.strictEqual(modifiers.length, 1);
                             assert.strictEqual(
-                                modifiers[0].name,
+                                modifiers[0]!.name,
                                 multipleChoicePenaltyMap[answerType],
                             );
                         });
@@ -249,7 +247,7 @@ describe("exp command", () => {
                                 GuessModeType.ARTIST,
                             );
                             const modifiers =
-                                await calculateOptionsExpMultiplierInternal(
+                                await ExpCommand.calculateOptionsExpMultiplierInternal(
                                     guildPreference,
                                     false,
                                     "dummy",
@@ -257,7 +255,7 @@ describe("exp command", () => {
 
                             assert.strictEqual(modifiers.length, 1);
                             assert.strictEqual(
-                                modifiers[0].name,
+                                modifiers[0]!.name,
                                 ExpBonusModifier.ARTIST_GUESS,
                             );
                         });
@@ -269,7 +267,7 @@ describe("exp command", () => {
                                 GuessModeType.BOTH,
                             );
                             const modifiers =
-                                await calculateOptionsExpMultiplierInternal(
+                                await ExpCommand.calculateOptionsExpMultiplierInternal(
                                     guildPreference,
                                     false,
                                     "dummy",
@@ -277,7 +275,7 @@ describe("exp command", () => {
 
                             assert.strictEqual(modifiers.length, 1);
                             assert.strictEqual(
-                                modifiers[0].name,
+                                modifiers[0]!.name,
                                 ExpBonusModifier.ARTIST_GUESS,
                             );
                         });
@@ -293,7 +291,7 @@ describe("exp command", () => {
                                 { id: 1, name: "aespa" },
                             ]);
                             const modifiers =
-                                await calculateOptionsExpMultiplierInternal(
+                                await ExpCommand.calculateOptionsExpMultiplierInternal(
                                     guildPreference,
                                     false,
                                     "dummy",
@@ -301,7 +299,7 @@ describe("exp command", () => {
 
                             assert.strictEqual(modifiers.length, 1);
                             assert.strictEqual(
-                                modifiers[0].name,
+                                modifiers[0]!.name,
                                 ExpBonusModifier.ARTIST_GUESS_GROUPS_SELECTED,
                             );
                         });
@@ -331,7 +329,7 @@ describe("exp command", () => {
                 it("should return power hour modifier", async () => {
                     sandbox.stub(utils, "isWeekend").callsFake(() => true);
                     const modifiers =
-                        await calculateOptionsExpMultiplierInternal(
+                        await ExpCommand.calculateOptionsExpMultiplierInternal(
                             guildPreference,
                             false,
                             "dummy",
@@ -339,7 +337,7 @@ describe("exp command", () => {
 
                     assert.strictEqual(modifiers.length, 1);
                     assert.strictEqual(
-                        modifiers[0].name,
+                        modifiers[0]!.name,
                         ExpBonusModifier.POWER_HOUR,
                     );
                 });
@@ -351,7 +349,7 @@ describe("exp command", () => {
                         .stub(game_utils, "isPowerHour")
                         .callsFake(() => true);
                     const modifiers =
-                        await calculateOptionsExpMultiplierInternal(
+                        await ExpCommand.calculateOptionsExpMultiplierInternal(
                             guildPreference,
                             false,
                             "dummy",
@@ -359,7 +357,7 @@ describe("exp command", () => {
 
                     assert.strictEqual(modifiers.length, 1);
                     assert.strictEqual(
-                        modifiers[0].name,
+                        modifiers[0]!.name,
                         ExpBonusModifier.POWER_HOUR,
                     );
                 });
@@ -378,15 +376,16 @@ describe("exp command", () => {
             });
 
             describe("is first game of day", async () => {
-                const modifiers = await calculateOptionsExpMultiplierInternal(
-                    guildPreference,
-                    false,
-                    "dummy",
-                );
+                const modifiers =
+                    await ExpCommand.calculateOptionsExpMultiplierInternal(
+                        guildPreference,
+                        false,
+                        "dummy",
+                    );
 
                 assert.strictEqual(modifiers.length, 1);
                 assert.strictEqual(
-                    modifiers[0].name,
+                    modifiers[0]!.name,
                     ExpBonusModifier.FIRST_GAME_OF_DAY,
                 );
             });
@@ -420,11 +419,12 @@ describe("exp command", () => {
                     AnswerType.MULTIPLE_CHOICE_HARD,
                 );
                 await guildPreference.setGuessModeType(GuessModeType.BOTH);
-                const modifiers = await calculateOptionsExpMultiplierInternal(
-                    guildPreference,
-                    true,
-                    "dummy",
-                );
+                const modifiers =
+                    await ExpCommand.calculateOptionsExpMultiplierInternal(
+                        guildPreference,
+                        true,
+                        "dummy",
+                    );
 
                 const expectedModifiers = [
                     ExpBonusModifier.VOTE,
@@ -445,11 +445,11 @@ describe("exp command", () => {
         });
     });
 
-    describe("calculateRoundExpMultiplier", () => {
+    describe("ExpCommand.calculateRoundExpMultiplier", () => {
         let gameRound: GameRound;
         beforeEach(() => {
             gameRound = new GameRound(
-                {
+                new QueriedSong({
                     songName: "x",
                     hangulSongName: "x",
                     artistName: "x",
@@ -464,7 +464,7 @@ describe("exp command", () => {
                     tags: "",
                     vtype: "main",
                     selectionWeight: 1,
-                },
+                }),
                 5,
             );
             gameRound.bonusModifier = 1;
@@ -478,7 +478,7 @@ describe("exp command", () => {
 
         describe("participant exp scaling", () => {
             it("should increase EXP until a limit", () => {
-                let roundExp = calculateRoundExpMultiplier(
+                let roundExp = ExpCommand.calculateRoundExpMultiplier(
                     gameRound,
                     1,
                     0,
@@ -491,7 +491,7 @@ describe("exp command", () => {
                     i <= PARTICIPANT_MODIFIER_MAX_PARTICIPANTS;
                     i++
                 ) {
-                    const newRoundExp = calculateRoundExpMultiplier(
+                    const newRoundExp = ExpCommand.calculateRoundExpMultiplier(
                         gameRound,
                         i,
                         0,
@@ -503,7 +503,7 @@ describe("exp command", () => {
                     roundExp = newRoundExp;
                 }
 
-                const finalRoundExp = calculateRoundExpMultiplier(
+                const finalRoundExp = ExpCommand.calculateRoundExpMultiplier(
                     gameRound,
                     PARTICIPANT_MODIFIER_MAX_PARTICIPANTS + 1,
                     0,
@@ -517,7 +517,7 @@ describe("exp command", () => {
 
         describe("fast guess", () => {
             it("should apply fast guess bonus", () => {
-                const slowGuessExp = calculateRoundExpMultiplier(
+                const slowGuessExp = ExpCommand.calculateRoundExpMultiplier(
                     gameRound,
                     1,
                     0,
@@ -525,7 +525,7 @@ describe("exp command", () => {
                     1,
                 );
 
-                const fastGuessExp = calculateRoundExpMultiplier(
+                const fastGuessExp = ExpCommand.calculateRoundExpMultiplier(
                     gameRound,
                     1,
                     0,
@@ -543,7 +543,7 @@ describe("exp command", () => {
 
         describe("guess streak", () => {
             it("should apply guess streak bonus", () => {
-                let roundExp = calculateRoundExpMultiplier(
+                let roundExp = ExpCommand.calculateRoundExpMultiplier(
                     gameRound,
                     1,
                     0,
@@ -552,7 +552,7 @@ describe("exp command", () => {
                 );
 
                 for (let i = 2; i < GUESS_STREAK_THRESHOLD; i++) {
-                    const newRoundExp = calculateRoundExpMultiplier(
+                    const newRoundExp = ExpCommand.calculateRoundExpMultiplier(
                         gameRound,
                         1,
                         i,
@@ -564,7 +564,7 @@ describe("exp command", () => {
                     roundExp = newRoundExp;
                 }
 
-                const finalRoundExp = calculateRoundExpMultiplier(
+                const finalRoundExp = ExpCommand.calculateRoundExpMultiplier(
                     gameRound,
                     1,
                     GUESS_STREAK_THRESHOLD,
@@ -582,7 +582,7 @@ describe("exp command", () => {
 
         describe("bonus artist", () => {
             it("should apply bonus artist bonus", () => {
-                const regularExp = calculateRoundExpMultiplier(
+                const regularExp = ExpCommand.calculateRoundExpMultiplier(
                     gameRound,
                     1,
                     0,
@@ -591,7 +591,7 @@ describe("exp command", () => {
                 );
 
                 sandbox.stub(gameRound, "isBonusArtist").callsFake(() => true);
-                const bonusArtistExp = calculateRoundExpMultiplier(
+                const bonusArtistExp = ExpCommand.calculateRoundExpMultiplier(
                     gameRound,
                     1,
                     0,
@@ -610,7 +610,7 @@ describe("exp command", () => {
         describe("round bonus", () => {
             it("should apply round bonus", () => {
                 const roundBonus = 25;
-                const regularExp = calculateRoundExpMultiplier(
+                const regularExp = ExpCommand.calculateRoundExpMultiplier(
                     gameRound,
                     1,
                     0,
@@ -619,7 +619,7 @@ describe("exp command", () => {
                 );
 
                 gameRound.bonusModifier = roundBonus;
-                const bonusArtistExp = calculateRoundExpMultiplier(
+                const bonusArtistExp = ExpCommand.calculateRoundExpMultiplier(
                     gameRound,
                     1,
                     0,
@@ -634,7 +634,7 @@ describe("exp command", () => {
         describe("guess placement", () => {
             it("should apply guess placement penalty", () => {
                 const place = 7;
-                const regularExp = calculateRoundExpMultiplier(
+                const regularExp = ExpCommand.calculateRoundExpMultiplier(
                     gameRound,
                     1,
                     0,
@@ -642,13 +642,14 @@ describe("exp command", () => {
                     1,
                 );
 
-                const lowerPlacementExp = calculateRoundExpMultiplier(
-                    gameRound,
-                    1,
-                    0,
-                    1000,
-                    place,
-                );
+                const lowerPlacementExp =
+                    ExpCommand.calculateRoundExpMultiplier(
+                        gameRound,
+                        1,
+                        0,
+                        1000,
+                        place,
+                    );
 
                 assert.strictEqual(lowerPlacementExp, regularExp / place);
             });
@@ -664,7 +665,7 @@ describe("exp command", () => {
                 const guessStreak = GUESS_STREAK_THRESHOLD + 1;
                 gameRound.bonusModifier = roundBonus;
                 sandbox.stub(gameRound, "isBonusArtist").callsFake(() => true);
-                const expModifier = calculateRoundExpMultiplier(
+                const expModifier = ExpCommand.calculateRoundExpMultiplier(
                     gameRound,
                     numParticipants,
                     guessStreak,
@@ -674,7 +675,7 @@ describe("exp command", () => {
 
                 assert.strictEqual(
                     expModifier,
-                    (participantExpScalingModifier(numParticipants) *
+                    (ExpCommand.participantExpScalingModifier(numParticipants) *
                         ExpBonusModifierValues[ExpBonusModifier.QUICK_GUESS] *
                         ExpBonusModifierValues[ExpBonusModifier.GUESS_STREAK] *
                         ExpBonusModifierValues[ExpBonusModifier.BONUS_ARTIST] *

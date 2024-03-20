@@ -20,6 +20,7 @@ import type HelpDocumentation from "../../interfaces/help";
 const COMMAND_NAME = "forceskip";
 const logger = new IPCLogger(COMMAND_NAME);
 
+// eslint-disable-next-line import/no-unused-modules
 export default class ForceSkipCommand implements BaseCommand {
     aliases = ["fskip", "fs"];
 
@@ -87,6 +88,11 @@ export default class ForceSkipCommand implements BaseCommand {
         }
 
         const session = Session.getSession(messageContext.guildID);
+
+        if (!session) {
+            return;
+        }
+
         if (
             !session.round ||
             session.round.skipAchieved ||

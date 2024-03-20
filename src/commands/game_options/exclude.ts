@@ -388,10 +388,10 @@ export default class ExcludeCommand implements BaseCommand {
             );
 
             if (
-                unmatchedGroups[0].startsWith("add") ||
-                unmatchedGroups[0].startsWith("remove")
+                unmatchedGroups[0]!.startsWith("add") ||
+                unmatchedGroups[0]!.startsWith("remove")
             ) {
-                const misplacedPrefix = unmatchedGroups[0].startsWith("add")
+                const misplacedPrefix = unmatchedGroups[0]!.startsWith("add")
                     ? "add"
                     : "remove";
 
@@ -408,7 +408,7 @@ export default class ExcludeCommand implements BaseCommand {
             let suggestionsText: string | undefined;
             if (unmatchedGroups.length === 1) {
                 const suggestions = await getSimilarGroupNames(
-                    unmatchedGroups[0],
+                    unmatchedGroups[0]!,
                     State.getGuildLocale(messageContext.guildID),
                 );
 
@@ -473,7 +473,7 @@ export default class ExcludeCommand implements BaseCommand {
             if (embeds.length > 0) {
                 await sendInfoMessage(
                     messageContext,
-                    embeds[0],
+                    embeds[0]!,
                     false,
                     undefined,
                     embeds.slice(1),

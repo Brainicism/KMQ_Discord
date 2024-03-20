@@ -25,6 +25,7 @@ import type HelpDocumentation from "../../interfaces/help";
 const COMMAND_NAME = "stats";
 const logger = new IPCLogger(COMMAND_NAME);
 
+// eslint-disable-next-line import/no-unused-modules
 export default class StatsCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: COMMAND_NAME,

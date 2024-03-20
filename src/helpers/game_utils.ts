@@ -1,18 +1,16 @@
 import { IPCLogger } from "../logger";
 import { containsHangul, md5Hash } from "./utils";
-import { normalizePunctuationInName } from "../structures/game_round";
 import { sql } from "kysely";
 import AnswerType from "../enums/option_types/answer_type";
+import GameRound from "../structures/game_round";
 import GuessModeType from "../enums/option_types/guess_mode_type";
 import LocaleType from "../enums/locale_type";
 import State from "../state";
 import _ from "lodash";
 import dbContext from "../database_context";
 import type { AvailableGenders } from "../enums/option_types/gender";
-import type GameRound from "../structures/game_round";
 import type GuildPreference from "../structures/guild_preference";
 import type MatchedArtist from "../interfaces/matched_artist";
-import type QueriedSong from "../interfaces/queried_song";
 import type Session from "../structures/session";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 10;
@@ -98,14 +96,12 @@ export async function cleanupInactiveGameSessions(): Promise<void> {
     await Promise.allSettled(
         Object.keys(gameSessions).map(async (guildID) => {
             const gameSession = gameSessions[guildID];
+            if (!gameSession) return;
             const timeDiffMs = currentDate - gameSession.lastActive;
             const timeDiffMin = timeDiffMs / (1000 * 60);
             if (timeDiffMin > GAME_SESSION_INACTIVE_THRESHOLD) {
                 inactiveSessions++;
-                await gameSessions[guildID].endSession(
-                    "Inactive game session",
-                    false,
-                );
+                await gameSession.endSession("Inactive game session", false);
             }
         }),
     );
@@ -125,6 +121,7 @@ export async function cleanupInactiveListeningSessions(): Promise<void> {
     await Promise.allSettled(
         Object.keys(listeningSessions).map(async (guildID) => {
             const listeningSession = listeningSessions[guildID];
+            if (!listeningSession) return;
             if (listeningSession.getVoiceMembers().length === 0) {
                 await listeningSession.endSession("Empty listening session");
                 inactiveSessions++;
@@ -251,12 +248,14 @@ export async function getMatchingGroupNames(
         let aliasFound = false;
         // apply artist aliases for unmatched groups
         for (let i = 0; i < result.unmatchedGroups.length; i++) {
-            const groupName = result.unmatchedGroups[i];
+            const groupName = result.unmatchedGroups[i]!;
             const matchingAlias = Object.entries(State.aliases.artist).find(
                 (artistAliasTuple) =>
                     artistAliasTuple[1]
-                        .map((x) => normalizePunctuationInName(x))
-                        .includes(normalizePunctuationInName(groupName)),
+                        .map((x) => GameRound.normalizePunctuationInName(x))
+                        .includes(
+                            GameRound.normalizePunctuationInName(groupName),
+                        ),
             );
 
             if (matchingAlias) {
@@ -402,12 +401,12 @@ export async function getMultipleChoiceOptions(
         const uniqueResult = new Map();
         const removedResults: Array<string> = [];
         for (const song of result) {
-            if (uniqueResult.has(normalizePunctuationInName(song))) {
+            if (uniqueResult.has(GameRound.normalizePunctuationInName(song))) {
                 removedResults.push(song);
                 continue;
             }
 
-            uniqueResult.set(normalizePunctuationInName(song), song);
+            uniqueResult.set(GameRound.normalizePunctuationInName(song), song);
         }
 
         result = [...uniqueResult.values()];
@@ -503,44 +502,6 @@ export async function isFirstGameOfDay(userID: string): Promise<boolean> {
 }
 
 /**
- * @param song - The song to retrieve the name from
- * @param locale - The guild's locale
- * @param original - Whether to return the original song name
- * @returns the song name in Hangul if the server is using the Korean locale and the song has a Hangul name;
- * the original song name otherwise
- */
-export function getLocalizedSongName(
-    song: QueriedSong,
-    locale: LocaleType,
-): string {
-    const songName = song.songName;
-    if (locale !== LocaleType.KO) {
-        return songName;
-    }
-
-    const hangulSongName = song.hangulSongName;
-
-    return hangulSongName || songName;
-}
-
-/**
- * @param song - The song to retrieve the artist from
- * @param locale - The guild's locale
- * @returns the artist's name in Hangul if the server is using the Korean locale and the artist has a Hangul name;
- * the artist's name otherwise
- */
-export function getLocalizedArtistName(
-    song: { artistName: string; hangulArtistName: string | null },
-    locale: LocaleType,
-): string {
-    if (locale !== LocaleType.KO) {
-        return song.artistName;
-    }
-
-    return song.hangulArtistName || song.artistName;
-}
-
-/**
  * @param daisukiEntry - The song to retrieve the tags from
  * @returns the tags in the form of discord emoji's in a string;
  * Tags are language tags.
@@ -593,29 +554,4 @@ export function isPowerHour(): boolean {
     return powerHours.some(
         (powerHour) => currentHour >= powerHour && currentHour <= powerHour + 1,
     );
-}
-
-/**
- * @param guesser - The user to retrieve the time to guess for
- * @param round - The finished game round
- * @param isHidden - Whether the answer type is hidden
- * @returns the milliseconds it took for a player to enter their guess
- */
-export function getTimeToGuessMs(
-    guesser: { id: string },
-    round: GameRound,
-    isHidden: boolean,
-): number {
-    const correctGuessTimes = round
-        .getGuesses()
-        [guesser.id].filter((x) => x.correct)
-        .map((x) => x.timeToGuessMs);
-
-    if (isHidden) {
-        // Use the most recent guess time for hidden games, since they can be overwritten
-        return Math.max(...correctGuessTimes);
-    }
-
-    // Use the fastest guess time for normal games
-    return Math.min(...correctGuessTimes);
 }

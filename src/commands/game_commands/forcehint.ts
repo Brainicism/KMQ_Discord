@@ -1,6 +1,5 @@
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
-import { generateHint, validHintCheck } from "./hint";
 import {
     getDebugLogHeader,
     sendErrorMessage,
@@ -10,6 +9,7 @@ import { getMention } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
+import HintCommand from "./hint";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
@@ -23,6 +23,7 @@ import type HelpDocumentation from "../../interfaces/help";
 const COMMAND_NAME = "forcehint";
 const logger = new IPCLogger(COMMAND_NAME);
 
+// eslint-disable-next-line import/no-unused-modules
 export default class ForceHintCommand implements BaseCommand {
     aliases = ["fhint", "fh"];
 
@@ -72,7 +73,7 @@ export default class ForceHintCommand implements BaseCommand {
         );
 
         if (
-            !(await validHintCheck(
+            !(await HintCommand.validHintCheck(
                 gameSession,
                 guildPreference,
                 messageContext,
@@ -110,10 +111,9 @@ export default class ForceHintCommand implements BaseCommand {
                     messageContext.guildID,
                     "command.hint.title",
                 ),
-                description: generateHint(
+                description: gameRound.getHint(
                     messageContext.guildID,
                     guildPreference.gameOptions.guessModeType,
-                    gameRound,
                     State.getGuildLocale(messageContext.guildID),
                 ),
                 thumbnailUrl: KmqImages.READING_BOOK,

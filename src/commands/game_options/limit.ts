@@ -23,17 +23,17 @@ import type HelpDocumentation from "../../interfaces/help";
 const COMMAND_NAME = "limit";
 const logger = new IPCLogger(COMMAND_NAME);
 
-const LIMIT_START_MIN = 0;
-const LIMIT_START_MAX = 100000;
-const LIMIT_END_MIN = 1;
-const LIMIT_END_MAX = 100000;
-
 enum LimitAppCommandAction {
     RANGE = "range",
     TOP = "top",
 }
 
 export default class LimitCommand implements BaseCommand {
+    static LIMIT_START_MIN = 0;
+    static LIMIT_START_MAX = 100000;
+    static LIMIT_END_MIN = 1;
+    static LIMIT_END_MAX = 100000;
+
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
         { checkFn: CommandPrechecks.notPlaylistPrecheck },
@@ -46,14 +46,14 @@ export default class LimitCommand implements BaseCommand {
             {
                 name: "limit_1",
                 type: "number" as const,
-                minValue: LIMIT_START_MIN,
-                maxValue: LIMIT_START_MAX,
+                minValue: LimitCommand.LIMIT_START_MIN,
+                maxValue: LimitCommand.LIMIT_START_MAX,
             },
             {
                 name: "limit_2",
                 type: "number" as const,
-                minValue: LIMIT_END_MIN,
-                maxValue: LIMIT_END_MAX,
+                minValue: LimitCommand.LIMIT_END_MIN,
+                maxValue: LimitCommand.LIMIT_END_MAX,
             },
         ],
     };
@@ -179,8 +179,8 @@ export default class LimitCommand implements BaseCommand {
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,
                                     required: true,
-                                    max_value: LIMIT_END_MAX,
-                                    min_value: LIMIT_END_MIN,
+                                    max_value: LimitCommand.LIMIT_END_MAX,
+                                    min_value: LimitCommand.LIMIT_END_MIN,
                                 },
                             ],
                         },
@@ -232,8 +232,8 @@ export default class LimitCommand implements BaseCommand {
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,
                                     required: true,
-                                    max_value: LIMIT_START_MAX,
-                                    min_value: LIMIT_START_MIN,
+                                    max_value: LimitCommand.LIMIT_START_MAX,
+                                    min_value: LimitCommand.LIMIT_START_MIN,
                                 },
                                 {
                                     name: "limit_end",
@@ -259,8 +259,8 @@ export default class LimitCommand implements BaseCommand {
                                     type: Eris.Constants
                                         .ApplicationCommandOptionTypes.INTEGER,
                                     required: true,
-                                    max_value: LIMIT_END_MAX,
-                                    min_value: LIMIT_END_MIN,
+                                    max_value: LimitCommand.LIMIT_END_MAX,
+                                    min_value: LimitCommand.LIMIT_END_MIN,
                                 },
                             ],
                         },
@@ -302,10 +302,10 @@ export default class LimitCommand implements BaseCommand {
             limitEnd = null;
         } else if (parsedMessage.components.length === 1) {
             limitStart = 0;
-            limitEnd = parseInt(parsedMessage.components[0], 10);
+            limitEnd = parseInt(parsedMessage.components[0]!, 10);
         } else {
-            limitStart = parseInt(parsedMessage.components[0], 10);
-            limitEnd = parseInt(parsedMessage.components[1], 10);
+            limitStart = parseInt(parsedMessage.components[0]!, 10);
+            limitEnd = parseInt(parsedMessage.components[1]!, 10);
         }
 
         await LimitCommand.updateOption(

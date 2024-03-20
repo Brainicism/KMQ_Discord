@@ -235,7 +235,7 @@ export default class LocaleTypeCommand implements BaseCommand {
             localeType = DEFAULT_LOCALE;
         } else {
             switch (
-                parsedMessage.components[0].toLowerCase() as LocaleArgument
+                parsedMessage.components[0]!.toLowerCase() as LocaleArgument
             ) {
                 case LocaleArgument.EN:
                 case LocaleArgument.ENGLISH:

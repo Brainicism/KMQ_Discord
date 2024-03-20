@@ -79,7 +79,7 @@ export default async (
     for (let i = 0; i < args.length; i++) {
         const validation = validations.arguments[i];
         if (!validation) continue;
-        let arg = args[i];
+        let arg = args[i]!;
         // check arg type
         switch (validation.type) {
             case "number": {

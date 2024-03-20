@@ -5,7 +5,7 @@ import type { ButtonActionRow } from "../types";
 import type Eris from "eris";
 import type MessageContext from "./message_context";
 import type PlayerRoundResult from "../interfaces/player_round_result";
-import type QueriedSong from "../interfaces/queried_song";
+import type QueriedSong from "./queried_song";
 import type UniqueSongCounter from "../interfaces/unique_song_counter";
 
 export default abstract class Round {

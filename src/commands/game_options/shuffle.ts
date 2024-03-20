@@ -28,6 +28,7 @@ import type HelpDocumentation from "../../interfaces/help";
 const COMMAND_NAME = "shuffle";
 const logger = new IPCLogger(COMMAND_NAME);
 
+// eslint-disable-next-line import/no-unused-modules
 export default class ShuffleCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
@@ -206,7 +207,7 @@ export default class ShuffleCommand implements BaseCommand {
             shuffleType = null;
         } else {
             shuffleType =
-                parsedMessage.components[0].toLowerCase() as ShuffleType;
+                parsedMessage.components[0]!.toLowerCase() as ShuffleType;
         }
 
         await ShuffleCommand.updateOption(

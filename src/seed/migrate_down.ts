@@ -67,7 +67,7 @@ async function performMigrationDown(db: DatabaseContext): Promise<void> {
         process.exit(1);
     }
 
-    const selectedRollbackMigration = currentMigrations[choice];
+    const selectedRollbackMigration = currentMigrations[choice]!;
     console.log(
         `Selected migration rollback: ${selectedRollbackMigration.name}`,
     );

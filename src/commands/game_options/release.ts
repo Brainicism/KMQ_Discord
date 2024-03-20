@@ -23,6 +23,7 @@ import type HelpDocumentation from "../../interfaces/help";
 const COMMAND_NAME = "release";
 const logger = new IPCLogger(COMMAND_NAME);
 
+// eslint-disable-next-line import/no-unused-modules
 export default class ReleaseCommand implements BaseCommand {
     aliases = ["releases", "videotype"];
 
@@ -179,7 +180,7 @@ export default class ReleaseCommand implements BaseCommand {
             releaseType = null;
         } else {
             releaseType =
-                parsedMessage.components[0].toLowerCase() as ReleaseType;
+                parsedMessage.components[0]!.toLowerCase() as ReleaseType;
         }
 
         await ReleaseCommand.updateOption(

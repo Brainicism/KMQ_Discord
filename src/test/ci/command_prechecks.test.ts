@@ -44,7 +44,7 @@ describe("command prechecks", () => {
             it("should return false", async () => {
                 assert.equal(
                     await CommandPrechecks.inSessionCommandPrecheck({
-                        session: null,
+                        session: undefined,
                         messageContext,
                     }),
                     false,

@@ -25,6 +25,7 @@ import type HelpDocumentation from "../../interfaces/help";
 const COMMAND_NAME = "artisttype";
 const logger = new IPCLogger(COMMAND_NAME);
 
+// eslint-disable-next-line import/no-unused-modules
 export default class ArtistTypeCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
@@ -194,7 +195,7 @@ export default class ArtistTypeCommand implements BaseCommand {
             artistType = null;
         } else {
             artistType =
-                parsedMessage.components[0].toLowerCase() as ArtistType;
+                parsedMessage.components[0]!.toLowerCase() as ArtistType;
         }
 
         await ArtistTypeCommand.updateOption(

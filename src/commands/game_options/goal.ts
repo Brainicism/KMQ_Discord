@@ -25,6 +25,7 @@ import type HelpDocumentation from "../../interfaces/help";
 const COMMAND_NAME = "goal";
 const logger = new IPCLogger(COMMAND_NAME);
 
+// eslint-disable-next-line import/no-unused-modules
 export default class GoalCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
@@ -160,7 +161,7 @@ export default class GoalCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             userGoal = null;
         } else {
-            userGoal = parseInt(parsedMessage.components[0], 10);
+            userGoal = parseInt(parsedMessage.components[0]!, 10);
         }
 
         await GoalCommand.updateOption(
@@ -179,15 +180,15 @@ export default class GoalCommand implements BaseCommand {
             messageContext.guildID,
         );
 
-        const gameSession = Session.getSession(
-            messageContext.guildID,
-        ) as GameSession;
+        const gameSession = Session.getSession(messageContext.guildID) as
+            | GameSession
+            | undefined;
 
         if (gameSession) {
+            const currentWinner = gameSession.scoreboard.getWinners()[0];
             if (
                 userGoal !== null &&
-                gameSession.scoreboard.getWinners().length > 0 &&
-                userGoal <= gameSession.scoreboard.getWinners()[0].getScore()
+                userGoal <= (currentWinner?.getScore() || 0)
             ) {
                 logger.info(
                     `${getDebugLogHeader(

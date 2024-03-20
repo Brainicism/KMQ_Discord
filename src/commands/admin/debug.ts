@@ -18,6 +18,7 @@ import type Eris from "eris";
 
 const logger = new IPCLogger("debug");
 
+// eslint-disable-next-line import/no-unused-modules
 export default class DebugCommand implements BaseCommand {
     call = async ({ message, channel }: CommandArgs): Promise<void> => {
         const debugChannel = await getDebugChannel();

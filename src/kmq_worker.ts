@@ -55,6 +55,7 @@ import type KmqClient from "./kmq_client";
 const logger = new IPCLogger("kmq");
 config({ path: path.resolve(__dirname, "../.env") });
 
+// eslint-disable-next-line import/no-unused-modules
 export default class BotWorker extends BaseClusterWorker {
     ready = false;
     logHeader = (): string => `Cluster #${this.clusterID}`;
@@ -76,7 +77,7 @@ export default class BotWorker extends BaseClusterWorker {
             const components = commandName.split("|");
             components.shift();
 
-            const restartMinutes = parseInt(components[0], 10);
+            const restartMinutes = parseInt(components[0]!, 10);
 
             const restartDate = new Date();
             restartDate.setMinutes(restartDate.getMinutes() + restartMinutes);
@@ -237,6 +238,10 @@ export default class BotWorker extends BaseClusterWorker {
         const endSessionPromises = Object.keys(State.gameSessions).map(
             async (guildID) => {
                 const session = Session.getSession(guildID);
+                if (!session) {
+                    return;
+                }
+
                 logger.debug(
                     `${this.logHeader()} |  gid: ${guildID} | Forcing session end`,
                 );

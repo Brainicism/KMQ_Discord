@@ -43,99 +43,6 @@ enum PresetAction {
     IMPORT = "import",
 }
 
-const isValidPresetName = async (
-    presetName: string,
-    messageContext: MessageContext,
-    interaction?: Eris.CommandInteraction,
-): Promise<boolean> => {
-    if (presetName.length > PRESET_NAME_MAX_LENGTH) {
-        logger.warn(
-            `${getDebugLogHeader(
-                messageContext,
-            )} | Can't add preset, character limit reached.`,
-        );
-
-        await sendErrorMessage(
-            messageContext,
-            {
-                title: i18n.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.lengthyName.title",
-                ),
-                description: i18n.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.lengthyName.description",
-                    { presetNameMaxLength: String(PRESET_NAME_MAX_LENGTH) },
-                ),
-            },
-            interaction,
-        );
-        return false;
-    }
-
-    if (presetName.startsWith("KMQ-")) {
-        logger.warn(
-            `${getDebugLogHeader(
-                messageContext,
-            )} | Can't add preset, illegal prefix.`,
-        );
-
-        await sendErrorMessage(
-            messageContext,
-            {
-                title: i18n.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.illegalPrefix.title",
-                ),
-                description: i18n.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.illegalPrefix.description",
-                    { importPrefix: "`KMQ-`" },
-                ),
-            },
-            interaction,
-        );
-        return false;
-    }
-
-    return true;
-};
-
-const canSavePreset = async (
-    presetName: string,
-    guildPreference: GuildPreference,
-    messageContext: MessageContext,
-    interaction?: Eris.CommandInteraction,
-): Promise<boolean> => {
-    const presets = await guildPreference.listPresets();
-    if (presets.length >= MAX_NUM_PRESETS) {
-        logger.warn(
-            `${getDebugLogHeader(
-                messageContext,
-            )} | Can't add preset, maximum reached.`,
-        );
-
-        await sendErrorMessage(
-            messageContext,
-            {
-                title: i18n.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.tooMany.title",
-                ),
-                description: i18n.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.tooMany.description",
-                    { maxNumPresets: String(MAX_NUM_PRESETS) },
-                ),
-            },
-            interaction,
-        );
-        return false;
-    }
-
-    return isValidPresetName(presetName, messageContext, interaction);
-};
-
 export default class PresetCommand implements BaseCommand {
     aliases = ["presets"];
 
@@ -597,17 +504,17 @@ export default class PresetCommand implements BaseCommand {
     ];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const presetAction =
-            (parsedMessage.components[0] as PresetAction) ?? PresetAction.LIST;
+        const presetAction = (parsedMessage.components[0] ??
+            PresetAction.LIST) as PresetAction;
 
         const presetName =
             parsedMessage.components[
                 presetAction !== PresetAction.IMPORT ? 1 : 2
-            ];
+            ]!;
 
         const presetUUID =
             presetAction === PresetAction.IMPORT
-                ? parsedMessage.components[1]
+                ? parsedMessage.components[1]!
                 : null;
 
         await PresetCommand.processPresetAction(
@@ -780,7 +687,7 @@ export default class PresetCommand implements BaseCommand {
         interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         if (
-            !(await canSavePreset(
+            !(await PresetCommand.canSavePreset(
                 presetName,
                 guildPreference,
                 messageContext,
@@ -868,7 +775,11 @@ export default class PresetCommand implements BaseCommand {
         }
 
         if (
-            !(await isValidPresetName(presetName, messageContext, interaction))
+            !(await PresetCommand.isValidPresetName(
+                presetName,
+                messageContext,
+                interaction,
+            ))
         ) {
             return;
         }
@@ -1363,6 +1274,103 @@ export default class PresetCommand implements BaseCommand {
                 )
                 .map((x) => ({ name: x, value: x }))
                 .slice(0, MAX_AUTOCOMPLETE_FIELDS),
+        );
+    }
+
+    static async isValidPresetName(
+        presetName: string,
+        messageContext: MessageContext,
+        interaction?: Eris.CommandInteraction,
+    ): Promise<boolean> {
+        if (presetName.length > PRESET_NAME_MAX_LENGTH) {
+            logger.warn(
+                `${getDebugLogHeader(
+                    messageContext,
+                )} | Can't add preset, character limit reached.`,
+            );
+
+            await sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "command.preset.failure.lengthyName.title",
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "command.preset.failure.lengthyName.description",
+                        { presetNameMaxLength: String(PRESET_NAME_MAX_LENGTH) },
+                    ),
+                },
+                interaction,
+            );
+            return false;
+        }
+
+        if (presetName.startsWith("KMQ-")) {
+            logger.warn(
+                `${getDebugLogHeader(
+                    messageContext,
+                )} | Can't add preset, illegal prefix.`,
+            );
+
+            await sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "command.preset.failure.illegalPrefix.title",
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "command.preset.failure.illegalPrefix.description",
+                        { importPrefix: "`KMQ-`" },
+                    ),
+                },
+                interaction,
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    static async canSavePreset(
+        presetName: string,
+        guildPreference: GuildPreference,
+        messageContext: MessageContext,
+        interaction?: Eris.CommandInteraction,
+    ): Promise<boolean> {
+        const presets = await guildPreference.listPresets();
+        if (presets.length >= MAX_NUM_PRESETS) {
+            logger.warn(
+                `${getDebugLogHeader(
+                    messageContext,
+                )} | Can't add preset, maximum reached.`,
+            );
+
+            await sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "command.preset.failure.tooMany.title",
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "command.preset.failure.tooMany.description",
+                        { maxNumPresets: String(MAX_NUM_PRESETS) },
+                    ),
+                },
+                interaction,
+            );
+            return false;
+        }
+
+        return PresetCommand.isValidPresetName(
+            presetName,
+            messageContext,
+            interaction,
         );
     }
 }

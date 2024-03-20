@@ -145,7 +145,7 @@ export async function generateKmqDataTables(
  * Re-creates the KMQ data tables
  * @param db - The database context
  */
-export async function postSeedDataCleaning(db: DatabaseContext): Promise<void> {
+async function postSeedDataCleaning(db: DatabaseContext): Promise<void> {
     logger.info("Performing post seed data cleaning...");
     await sql`CALL PostSeedDataCleaning();`.execute(db.kmq);
 }
@@ -169,9 +169,7 @@ export async function loadStoredProcedures(): Promise<void> {
  * Update typings for Kyseley
  * @param db - The database context
  */
-export async function updateDaisukiSchemaTypings(
-    db: DatabaseContext,
-): Promise<void> {
+async function updateDaisukiSchemaTypings(db: DatabaseContext): Promise<void> {
     await db.kpopVideos.schema
         .alterTable("app_kpop_group")
         .modifyColumn("name", "varchar(255)", (cb) => cb.notNull())
@@ -514,38 +512,6 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
     );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function hasRecentDump(): Promise<boolean> {
-    const dumpPath = `${DATABASE_DOWNLOAD_DIR}/sql`;
-    let files: string[];
-    try {
-        files = await fs.promises.readdir(dumpPath);
-    } catch (err) {
-        // If the directory doesn't exist, we don't have a recent dump.
-        if (err.code === "ENOENT") return false;
-        // Otherwise just throw.
-        throw err;
-    }
-
-    if (files.length === 0) return false;
-
-    const seedFiles = files[files.length - 1].match(
-        /mainbackup_([0-9]{4}-[0-9]{2}-[0-9]{2}).sql/,
-    );
-
-    if (!seedFiles) {
-        logger.error("No matching seed files found");
-        return false;
-    }
-
-    const seedFileDateString = seedFiles[1];
-    logger.info(`Most recent seed file has date: ${seedFileDateString}`);
-    const daysDiff =
-        (new Date().getTime() - Date.parse(seedFileDateString)) / 86400000;
-
-    return daysDiff < 6;
-}
-
 async function pruneSqlDumps(): Promise<void> {
     try {
         await exec(
@@ -584,7 +550,7 @@ async function updateKpopDatabase(
  * Regenerates the available group list
  * @param db - Database context
  */
-export async function updateGroupList(db: DatabaseContext): Promise<void> {
+async function updateGroupList(db: DatabaseContext): Promise<void> {
     const result = await db.kpopVideos
         .selectFrom("app_kpop_group")
         .select(["name", "members as gender"])

@@ -12,12 +12,12 @@ import {
     sendInfoMessage,
     sendPaginationedEmbed,
 } from "../../helpers/discord_utils";
-import { getLocalizedArtistName } from "../../helpers/game_utils";
 import Eris from "eris";
 import KmqMember from "../../structures/kmq_member";
 import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
+import UpcomingRelease from "../../structures/upcoming_release";
 import dbContext from "../../database_context";
 import i18n from "../../helpers/localization_manager";
 import type { CommandInteraction, EmbedOptions } from "eris";
@@ -30,24 +30,15 @@ import type HelpDocumentation from "../../interfaces/help";
 const COMMAND_NAME = "upcomingreleases";
 const logger = new IPCLogger(COMMAND_NAME);
 
-const FIELDS_PER_EMBED = 9;
-
-interface UpcomingRelease {
-    name: string;
-    artistName: string;
-    hangulArtistName: string | null;
-    releaseType: "album" | "ep" | "single" | "undefined";
-    releaseDate: Date;
-    artistID: number;
-}
-
 enum ReleaseType {
     EP = "ep",
     Single = "single",
     Album = "album",
 }
 
+// eslint-disable-next-line import/no-unused-modules
 export default class UpcomingReleasesCommand implements BaseCommand {
+    static FIELDS_PER_EMBED = 9;
     aliases = ["upcoming"];
 
     help = (guildID: string): HelpDocumentation => ({
@@ -121,7 +112,7 @@ export default class UpcomingReleasesCommand implements BaseCommand {
             messageOrInteraction.guildID as string,
         );
 
-        const upcomingReleases: Array<UpcomingRelease> =
+        const upcomingReleases: Array<UpcomingRelease> = (
             await dbContext.kpopVideos
                 .selectFrom("app_upcoming")
                 .innerJoin(
@@ -146,7 +137,8 @@ export default class UpcomingReleasesCommand implements BaseCommand {
                     "in",
                     releaseType ? [releaseType] : Object.values(ReleaseType),
                 )
-                .execute();
+                .execute()
+        ).map((x) => new UpcomingRelease(x));
 
         if (upcomingReleases.length === 0) {
             await sendInfoMessage(
@@ -174,8 +166,7 @@ export default class UpcomingReleasesCommand implements BaseCommand {
 
         const locale = State.getGuildLocale(messageContext.guildID);
         const fields = upcomingReleases.map((release) => ({
-            name: `"${release.name}" - ${getLocalizedArtistName(
-                release,
+            name: `"${release.name}" - ${release.getLocalizedArtistName(
                 locale,
             )}`,
             value: `${discordDateFormat(
@@ -188,7 +179,11 @@ export default class UpcomingReleasesCommand implements BaseCommand {
             inline: true,
         }));
 
-        const embedFieldSubsets = chunkArray(fields, FIELDS_PER_EMBED);
+        const embedFieldSubsets = chunkArray(
+            fields,
+            UpcomingReleasesCommand.FIELDS_PER_EMBED,
+        );
+
         const embeds: Array<EmbedOptions> = embedFieldSubsets.map(
             (embedFieldsSubset) => ({
                 title: i18n.translate(

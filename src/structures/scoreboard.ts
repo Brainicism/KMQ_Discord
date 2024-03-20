@@ -86,11 +86,12 @@ export default class Scoreboard {
     update(guessResults: Array<SuccessfulGuessResult>): void {
         const previousRoundRanking = this.getScoreToRankingMap();
         for (const player of Object.values(this.players)) {
-            player.setPreviousRanking(previousRoundRanking[player.getScore()]);
+            player.setPreviousRanking(previousRoundRanking[player.getScore()]!);
         }
 
         for (const guessResult of guessResults) {
-            if (!this.players[guessResult.userID]) {
+            const player = this.players[guessResult.userID];
+            if (!player) {
                 logger.warn(
                     `Player ${
                         guessResult.userID
@@ -103,21 +104,19 @@ export default class Scoreboard {
                 continue;
             }
 
-            this.players[guessResult.userID].incrementScore(
-                guessResult.pointsEarned,
-            );
+            player.incrementScore(guessResult.pointsEarned);
 
-            this.players[guessResult.userID].incrementCorrectGuessCount();
-            this.players[guessResult.userID].incrementExp(guessResult.expGain);
+            player.incrementCorrectGuessCount();
+            player.incrementExp(guessResult.expGain);
 
-            const winnerScore = this.players[guessResult.userID].getScore();
+            const winnerScore = player.getScore();
             if (winnerScore === this.highestScore) {
                 // If user is tied for first, add them to the first place array
-                this.firstPlace.push(this.players[guessResult.userID]);
+                this.firstPlace.push(player);
             } else if (winnerScore > this.highestScore) {
                 // If user is first, reset first place array and add them
                 this.highestScore = winnerScore;
-                this.firstPlace = [this.players[guessResult.userID]];
+                this.firstPlace = [player];
             }
         }
     }
@@ -179,7 +178,7 @@ export default class Scoreboard {
         return (
             guildPreference.isGoalSet() &&
             this.firstPlace.length > 0 &&
-            this.firstPlace[0].getScore() >= guildPreference.gameOptions.goal
+            this.firstPlace[0]!.getScore() >= guildPreference.gameOptions.goal
         );
     }
 
@@ -222,7 +221,7 @@ export default class Scoreboard {
         ].sort((a, b) => b - a);
 
         for (let i = 0; i < sortedUniqueScores.length; i++) {
-            rankingToScore[sortedUniqueScores[i]] = i;
+            rankingToScore[sortedUniqueScores[i]!] = i;
         }
 
         return rankingToScore;
@@ -255,7 +254,7 @@ export default class Scoreboard {
             .filter((x) => x.shouldIncludeInScoreboard())
             .map((x) => ({
                 name: `${x.getRankingPrefix(
-                    currentRanking[x.getScore()],
+                    currentRanking[x.getScore()]!,
                     inProgress,
                 )} ${x.getDisplayedName(
                     roundWinnerIDs && roundWinnerIDs[0] === x.id,
@@ -272,7 +271,7 @@ export default class Scoreboard {
     }
 
     getRemainingPlayers(
-        correctGuessers: Array<{ id: string }>,
+        correctGuessers: Array<string>,
         incorrectGuessers: Set<string>,
     ): Array<Player> {
         return this.getPlayers()
@@ -280,7 +279,7 @@ export default class Scoreboard {
             .filter(
                 (player) =>
                     !incorrectGuessers.has(player.id) &&
-                    !correctGuessers.map((x) => x.id).includes(player.id),
+                    !correctGuessers.map((x) => x).includes(player.id),
             );
     }
 
@@ -308,7 +307,7 @@ export default class Scoreboard {
                 (x) =>
                     `${bold(
                         x.getRankingPrefix(
-                            currentRanking[x.getScore()],
+                            currentRanking[x.getScore()]!,
                             inProgress,
                         ),
                     )} ${x.getDisplayedName(

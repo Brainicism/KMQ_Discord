@@ -4,6 +4,7 @@ import PlayCommand from "./play";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 
+// eslint-disable-next-line import/no-unused-modules
 export default class BeginCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },

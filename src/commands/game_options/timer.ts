@@ -22,9 +22,10 @@ import type HelpDocumentation from "../../interfaces/help";
 const COMMAND_NAME = "timer";
 const logger = new IPCLogger("guessTimeout");
 
-const TIMER_MIN_VALUE = 2;
-const TIMER_MAX_VALUE = 180;
+// eslint-disable-next-line import/no-unused-modules
 export default class GuessTimeoutCommand implements BaseCommand {
+    static TIMER_MIN_VALUE = 2;
+    static TIMER_MAX_VALUE = 180;
     aliases = ["time", "timeout", "t"];
 
     preRunChecks = [
@@ -40,8 +41,8 @@ export default class GuessTimeoutCommand implements BaseCommand {
             {
                 name: "timer",
                 type: "number" as const,
-                minValue: TIMER_MIN_VALUE,
-                maxValue: TIMER_MAX_VALUE,
+                minValue: GuessTimeoutCommand.TIMER_MIN_VALUE,
+                maxValue: GuessTimeoutCommand.TIMER_MAX_VALUE,
             },
         ],
     };
@@ -125,8 +126,8 @@ export default class GuessTimeoutCommand implements BaseCommand {
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .INTEGER,
                             required: true,
-                            min_value: TIMER_MIN_VALUE,
-                            max_value: TIMER_MAX_VALUE,
+                            min_value: GuessTimeoutCommand.TIMER_MIN_VALUE,
+                            max_value: GuessTimeoutCommand.TIMER_MAX_VALUE,
                         },
                     ],
                 },
@@ -164,7 +165,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             timer = null;
         } else {
-            timer = parseInt(parsedMessage.components[0], 10);
+            timer = parseInt(parsedMessage.components[0]!, 10);
         }
 
         await GuessTimeoutCommand.updateOption(

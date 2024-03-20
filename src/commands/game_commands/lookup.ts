@@ -20,19 +20,16 @@ import {
     sendPaginationedEmbed,
     tryAutocompleteInteractionAcknowledge,
 } from "../../helpers/discord_utils";
-import {
-    getEmojisFromSongTags,
-    getLocalizedArtistName,
-    getLocalizedSongName,
-} from "../../helpers/game_utils";
+import { getEmojisFromSongTags } from "../../helpers/game_utils";
 import { getVideoID, validateID } from "@distube/ytdl-core";
-import { normalizePunctuationInName } from "../../structures/game_round";
 import { sendValidationErrorMessage } from "../../helpers/validate";
 import Eris from "eris";
+import GameRound from "../../structures/game_round";
 import GuildPreference from "../../structures/guild_preference";
 import KmqMember from "../../structures/kmq_member";
 import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
+import QueriedSong from "../../structures/queried_song";
 import SongSelector from "../../structures/song_selector";
 import State from "../../state";
 import _ from "lodash";
@@ -45,353 +42,16 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import type MatchedArtist from "src/interfaces/matched_artist";
-import type QueriedSong from "../../interfaces/queried_song";
 
 const COMMAND_NAME = "lookup";
-const SONG_NAME = "song_name";
-const SONG_LINK = "song_link";
-const ARTIST_NAME = "artist_name";
 const logger = new IPCLogger(COMMAND_NAME);
 
-const ENTRIES_PER_PAGE = 10;
-
-const getDaisukiLink = (id: number, isMV: boolean): string => {
-    if (isMV) {
-        return `https://kpop.daisuki.com.br/mv.html?id=${id}`;
-    }
-
-    return `https://kpop.daisuki.com.br/audio_videos.html?playid=${id}`;
-};
-
-async function lookupByYoutubeID(
-    messageOrInteraction: GuildTextableMessage | CommandInteraction,
-    videoID: string,
-    locale: LocaleType,
-): Promise<boolean> {
-    const guildID = messageOrInteraction.guildID as string;
-    const kmqSongEntry: QueriedSong | undefined = await dbContext.kmq
-        .selectFrom("available_songs")
-        .select(SongSelector.QueriedSongFields)
-        .where("link", "=", videoID)
-        .executeTakeFirst();
-
-    const daisukiEntry = await dbContext.kpopVideos
-        .selectFrom("app_kpop")
-        .select([
-            "name",
-            "kname",
-            "publishedon",
-            "alias",
-            "views",
-            "id_artist",
-            "id",
-            "tags",
-        ])
-        .where("vlink", "=", videoID)
-        .executeTakeFirst();
-
-    if (!daisukiEntry) {
-        // maybe it was falsely parsed as video ID? fallback to song name lookup
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        const found = await lookupBySongName(
-            messageOrInteraction,
-            videoID,
-            locale,
-        );
-
-        if (found) {
-            logger.info(
-                `Lookup succeeded through fallback lookup for: ${videoID}`,
-            );
-            return true;
-        }
-
-        return false;
-    }
-
-    const daisukiLink = getDaisukiLink(daisukiEntry.id, !!daisukiEntry);
-
-    let description: string;
-    let songName: string;
-    let artistName: string;
-    const songAliases: string[] = [];
-    const artistAliases: string[] = [];
-    const tags: string = getEmojisFromSongTags(daisukiEntry);
-    let views: number;
-    let publishDate: Date;
-    let songDuration: string | null = null;
-    let includedInOptions = false;
-    const isKorean = locale === LocaleType.KO;
-
-    if (kmqSongEntry) {
-        description = i18n.translate(guildID, "command.lookup.inKMQ", {
-            link: daisukiLink,
-        });
-        songName = getLocalizedSongName(kmqSongEntry, locale);
-        artistName = getLocalizedArtistName(kmqSongEntry, locale);
-
-        songAliases.push(...(State.aliases.song[videoID] ?? []));
-        artistAliases.push(
-            ...(State.aliases.artist[kmqSongEntry.artistName] ?? []),
-        );
-
-        if (isKorean) {
-            songAliases.push(kmqSongEntry.songName);
-            artistAliases.push(kmqSongEntry.artistName);
-        } else {
-            if (kmqSongEntry.hangulSongName) {
-                songAliases.push(kmqSongEntry.hangulSongName);
-            }
-
-            if (kmqSongEntry.hangulArtistName) {
-                artistAliases.push(kmqSongEntry.hangulArtistName);
-            }
-        }
-
-        views = kmqSongEntry.views;
-        publishDate = kmqSongEntry.publishDate;
-
-        const durationInSeconds = (
-            await dbContext.kmq
-                .selectFrom("cached_song_duration")
-                .select("duration")
-                .where("vlink", "=", videoID)
-                .executeTakeFirst()
-        )?.duration;
-
-        // duration in minutes and seconds
-        if (durationInSeconds) {
-            const minutes = Math.floor(durationInSeconds / 60);
-            const seconds = durationInSeconds % 60;
-            songDuration = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
-        }
-
-        const guildPreference =
-            await GuildPreference.getGuildPreference(guildID);
-
-        await guildPreference.songSelector.reloadSongs();
-        includedInOptions = [...guildPreference.songSelector.getSongs().songs]
-            .map((x) => x.youtubeLink)
-            .includes(videoID);
-
-        logger.info(
-            `${getDebugLogHeader(
-                messageOrInteraction,
-            )} | KMQ song lookup. videoID = ${videoID}. Included in options = ${includedInOptions}.`,
-        );
-    } else {
-        description = i18n.translate(guildID, "command.lookup.notInKMQ", {
-            link: daisukiLink,
-        });
-
-        songName =
-            daisukiEntry.kname && isKorean
-                ? daisukiEntry.kname
-                : daisukiEntry.name;
-
-        const artistNameResult = await dbContext.kpopVideos
-            .selectFrom("app_kpop_group")
-            .select(["name", "kname"])
-            .where("id", "=", daisukiEntry.id_artist)
-            .executeTakeFirst();
-
-        if (!artistNameResult) {
-            const errMsg = `Result of artist lookup in app_kpop_group unexpected null for artist: ${daisukiEntry.id_artist}`;
-            logger.error(errMsg);
-            throw new Error(errMsg);
-        }
-
-        artistName =
-            artistNameResult.kname && isKorean
-                ? artistNameResult.kname
-                : artistNameResult.name;
-
-        if (daisukiEntry.alias) {
-            songAliases.push(...daisukiEntry.alias.split(";"));
-        }
-
-        artistAliases.push(
-            ...(State.aliases.artist[artistNameResult.name] ?? []),
-        );
-
-        if (isKorean) {
-            songAliases.push(daisukiEntry.name);
-            artistAliases.push(artistNameResult.name);
-        } else {
-            if (daisukiEntry.kname) {
-                songAliases.push(daisukiEntry.kname);
-            }
-
-            if (artistNameResult.kname) {
-                artistAliases.push(artistNameResult.kname);
-            }
-        }
-
-        views = daisukiEntry.views;
-        publishDate = new Date(daisukiEntry.publishedon);
-
-        logger.info(
-            `${getDebugLogHeader(
-                messageOrInteraction,
-            )} | Non-KMQ song lookup. videoID = ${videoID}.`,
-        );
-    }
-
-    const viewsString = i18n.translate(guildID, "misc.views");
-
-    const fields = [
-        {
-            name: viewsString[0].toUpperCase() + viewsString.slice(1),
-            value: friendlyFormattedNumber(views),
-        },
-        {
-            name: i18n.translate(guildID, "misc.releaseDate"),
-            value: friendlyFormattedDate(publishDate, guildID),
-        },
-        {
-            name: i18n.translate(guildID, "misc.songAliases"),
-            value:
-                songAliases.join(", ") || i18n.translate(guildID, "misc.none"),
-        },
-        {
-            name: i18n.translate(guildID, "misc.artistAliases"),
-            value:
-                artistAliases.join(", ") ||
-                i18n.translate(guildID, "misc.none"),
-        },
-    ];
-
-    if (kmqSongEntry) {
-        fields.push(
-            {
-                name: i18n.translate(guildID, "misc.duration"),
-                value:
-                    songDuration ||
-                    i18n.translate(guildID, "misc.notApplicable"),
-            },
-            {
-                name: i18n.translate(
-                    guildID,
-                    "command.lookup.inCurrentGameOptions",
-                ),
-                value: i18n.translate(
-                    guildID,
-                    includedInOptions ? "misc.yes" : "misc.no",
-                ),
-            },
-        );
-    }
-
-    const messageContext = new MessageContext(
-        messageOrInteraction.channel.id,
-        new KmqMember(messageOrInteraction.member!.id),
-        messageOrInteraction.guildID as string,
-    );
-
-    await sendInfoMessage(
-        messageContext,
-        {
-            title: `"${songName}" - ${artistName}${tags}`,
-            url: `https://youtu.be/${videoID}`,
-            description,
-            thumbnailUrl: `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`,
-            fields: fields.map((x) => ({
-                name: x.name,
-                value: x.value,
-                inline: true,
-            })),
-        },
-        false,
-        undefined,
-        [],
-        messageOrInteraction instanceof Eris.CommandInteraction
-            ? messageOrInteraction
-            : undefined,
-    );
-
-    return true;
-}
-
-async function lookupBySongName(
-    messageOrInteraction: GuildTextableMessage | CommandInteraction,
-    songName: string,
-    locale: LocaleType,
-    artistID?: number,
-): Promise<boolean> {
-    let kmqSongEntriesQuery = dbContext.kmq
-        .selectFrom("available_songs")
-        .select(SongSelector.QueriedSongFields)
-        .limit(100);
-
-    if (songName !== "") {
-        kmqSongEntriesQuery = kmqSongEntriesQuery
-            .where(({ or, eb }) =>
-                or([
-                    eb("song_name_en", "like", `%${songName}%`),
-                    eb("song_name_ko", "like", `%${songName}%`),
-                ]),
-            )
-            .orderBy((eb) => eb.fn("CHAR_LENGTH", ["song_name_en"]), "asc")
-            .orderBy("views", "desc");
-    } else {
-        kmqSongEntriesQuery = kmqSongEntriesQuery.orderBy(
-            "publishedon",
-            "desc",
-        );
-    }
-
-    if (artistID) {
-        kmqSongEntriesQuery = kmqSongEntriesQuery.where(
-            "id_artist",
-            "=",
-            artistID,
-        );
-    }
-
-    const kmqSongEntries = await kmqSongEntriesQuery.execute();
-    if (kmqSongEntries.length === 0) {
-        return false;
-    }
-
-    if (kmqSongEntries.length === 1) {
-        return lookupByYoutubeID(
-            messageOrInteraction,
-            kmqSongEntries[0].youtubeLink,
-            locale,
-        );
-    }
-
-    const songEmbeds = kmqSongEntries.map((entry) => ({
-        name: truncatedString(
-            `**"${getLocalizedSongName(
-                entry,
-                locale,
-            )}"** - ${getLocalizedArtistName(entry, locale)}${getEmojisFromSongTags(entry)}`,
-            100,
-        ),
-        value: `https://youtu.be/${entry.youtubeLink}`,
-    }));
-
-    const embedFieldSubsets = chunkArray(songEmbeds, ENTRIES_PER_PAGE);
-    const embeds: Array<EmbedOptions> = embedFieldSubsets.map(
-        (embedFieldsSubset) => ({
-            title: i18n.translate(
-                messageOrInteraction.guildID as string,
-                "command.lookup.songNameSearchResult.title",
-            ),
-            description: i18n.translate(
-                messageOrInteraction.guildID as string,
-                "command.lookup.songNameSearchResult.successDescription",
-            ),
-            fields: embedFieldsSubset,
-        }),
-    );
-
-    await sendPaginationedEmbed(messageOrInteraction, embeds);
-    return true;
-}
-
 export default class LookupCommand implements BaseCommand {
+    static ENTRIES_PER_PAGE = 10;
+
+    static SONG_NAME = "song_name";
+    static SONG_LINK = "song_link";
+    static ARTIST_NAME = "artist_name";
     aliases = ["songinfo", "songlookup"];
     validations = {
         minArgCount: 1,
@@ -405,8 +65,8 @@ export default class LookupCommand implements BaseCommand {
             {
                 example: `${clickableSlashCommand(
                     COMMAND_NAME,
-                    SONG_NAME,
-                )} ${SONG_NAME}:love dive`,
+                    LookupCommand.SONG_NAME,
+                )} ${LookupCommand.SONG_NAME}:love dive`,
                 explanation: i18n.translate(
                     guildID,
                     "command.lookup.help.example.song",
@@ -416,8 +76,8 @@ export default class LookupCommand implements BaseCommand {
             {
                 example: `${clickableSlashCommand(
                     COMMAND_NAME,
-                    SONG_LINK,
-                )} ${SONG_LINK}:https://www.youtube.com/watch?v=4TWR90KJl84`,
+                    LookupCommand.SONG_LINK,
+                )} ${LookupCommand.SONG_LINK}:https://www.youtube.com/watch?v=4TWR90KJl84`,
                 explanation: i18n.translate(
                     guildID,
                     "command.lookup.help.example.song",
@@ -435,7 +95,7 @@ export default class LookupCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: SONG_NAME,
+                    name: LookupCommand.SONG_NAME,
                     description: i18n.translate(
                         LocaleType.EN,
                         "command.lookup.help.interaction.byName.description",
@@ -457,7 +117,7 @@ export default class LookupCommand implements BaseCommand {
                         .SUB_COMMAND,
                     options: [
                         {
-                            name: SONG_NAME,
+                            name: LookupCommand.SONG_NAME,
                             description: i18n.translate(
                                 LocaleType.EN,
                                 "command.lookup.help.interaction.byName.field.song",
@@ -480,7 +140,7 @@ export default class LookupCommand implements BaseCommand {
                             autocomplete: true,
                         },
                         {
-                            name: ARTIST_NAME,
+                            name: LookupCommand.ARTIST_NAME,
                             description: i18n.translate(
                                 LocaleType.EN,
                                 "command.lookup.help.interaction.byName.field.artist",
@@ -505,7 +165,7 @@ export default class LookupCommand implements BaseCommand {
                     ],
                 },
                 {
-                    name: SONG_LINK,
+                    name: LookupCommand.SONG_LINK,
                     description: i18n.translate(
                         LocaleType.EN,
                         "command.lookup.help.interaction.byLink.description",
@@ -527,7 +187,7 @@ export default class LookupCommand implements BaseCommand {
                         .SUB_COMMAND,
                     options: [
                         {
-                            name: SONG_LINK,
+                            name: LookupCommand.SONG_LINK,
                             description: i18n.translate(
                                 LocaleType.EN,
                                 "command.lookup.help.interaction.byLink.field",
@@ -613,7 +273,7 @@ export default class LookupCommand implements BaseCommand {
             }
 
             if (
-                !(await lookupByYoutubeID(
+                !(await LookupCommand.lookupByYoutubeID(
                     messageOrInteraction,
                     videoID,
                     locale,
@@ -645,7 +305,7 @@ export default class LookupCommand implements BaseCommand {
             }
         } else if (
             // lookup by song name
-            !(await lookupBySongName(
+            !(await LookupCommand.lookupBySongName(
                 messageOrInteraction,
                 linkOrName,
                 locale,
@@ -687,20 +347,26 @@ export default class LookupCommand implements BaseCommand {
         _messageContext: MessageContext,
     ): Promise<void> {
         const interactionData = getInteractionValue(interaction);
-        if (interactionData.interactionName === SONG_LINK) {
+        if (interactionData.interactionName === LookupCommand.SONG_LINK) {
             await this.lookupSong(
                 interaction,
-                interactionData.interactionOptions[SONG_LINK],
+                interactionData.interactionOptions[LookupCommand.SONG_LINK],
             );
-        } else if (interactionData.interactionName === SONG_NAME) {
-            const songName = interactionData.interactionOptions[SONG_NAME];
+        } else if (
+            interactionData.interactionName === LookupCommand.SONG_NAME
+        ) {
+            const songName =
+                interactionData.interactionOptions[LookupCommand.SONG_NAME];
 
-            const artistName = interactionData.interactionOptions[ARTIST_NAME];
+            const artistName =
+                interactionData.interactionOptions[LookupCommand.ARTIST_NAME];
 
             let artistID: number | undefined;
             if (artistName) {
                 const matchingArtist =
-                    State.artistToEntry[normalizePunctuationInName(artistName)];
+                    State.artistToEntry[
+                        GameRound.normalizePunctuationInName(artistName)
+                    ];
 
                 if (matchingArtist) {
                     artistID = matchingArtist.id;
@@ -709,6 +375,358 @@ export default class LookupCommand implements BaseCommand {
 
             await this.lookupSong(interaction, songName, artistID);
         }
+    }
+
+    static getDaisukiLink(id: number, isMV: boolean): string {
+        if (isMV) {
+            return `https://kpop.daisuki.com.br/mv.html?id=${id}`;
+        }
+
+        return `https://kpop.daisuki.com.br/audio_videos.html?playid=${id}`;
+    }
+
+    static async lookupByYoutubeID(
+        messageOrInteraction: GuildTextableMessage | CommandInteraction,
+        videoID: string,
+        locale: LocaleType,
+    ): Promise<boolean> {
+        const guildID = messageOrInteraction.guildID as string;
+        const queriedSongRaw = await dbContext.kmq
+            .selectFrom("available_songs")
+            .select(SongSelector.QueriedSongFields)
+            .where("link", "=", videoID)
+            .executeTakeFirst();
+
+        const kmqSongEntry: QueriedSong | undefined = queriedSongRaw
+            ? new QueriedSong(queriedSongRaw)
+            : undefined;
+
+        const daisukiEntry = await dbContext.kpopVideos
+            .selectFrom("app_kpop")
+            .select([
+                "name",
+                "kname",
+                "publishedon",
+                "alias",
+                "views",
+                "id_artist",
+                "id",
+                "tags",
+            ])
+            .where("vlink", "=", videoID)
+            .executeTakeFirst();
+
+        if (!daisukiEntry) {
+            // maybe it was falsely parsed as video ID? fallback to song name lookup
+            // eslint-disable-next-line @typescript-eslint/no-use-before-define
+            const found = await LookupCommand.lookupBySongName(
+                messageOrInteraction,
+                videoID,
+                locale,
+            );
+
+            if (found) {
+                logger.info(
+                    `Lookup succeeded through fallback lookup for: ${videoID}`,
+                );
+                return true;
+            }
+
+            return false;
+        }
+
+        const daisukiLink = LookupCommand.getDaisukiLink(
+            daisukiEntry.id,
+            !!daisukiEntry,
+        );
+
+        let description: string;
+        let songName: string;
+        let artistName: string;
+        const songAliases: string[] = [];
+        const artistAliases: string[] = [];
+        const tags: string = getEmojisFromSongTags(daisukiEntry);
+        let views: number;
+        let publishDate: Date;
+        let songDuration: string | null = null;
+        let includedInOptions = false;
+        const isKorean = locale === LocaleType.KO;
+
+        if (kmqSongEntry) {
+            description = i18n.translate(guildID, "command.lookup.inKMQ", {
+                link: daisukiLink,
+            });
+            songName = kmqSongEntry.getLocalizedSongName(locale);
+            artistName = kmqSongEntry.getLocalizedArtistName(locale);
+
+            songAliases.push(...(State.aliases.song[videoID] ?? []));
+            artistAliases.push(
+                ...(State.aliases.artist[kmqSongEntry.artistName] ?? []),
+            );
+
+            if (isKorean) {
+                songAliases.push(kmqSongEntry.songName);
+                artistAliases.push(kmqSongEntry.artistName);
+            } else {
+                if (kmqSongEntry.hangulSongName) {
+                    songAliases.push(kmqSongEntry.hangulSongName);
+                }
+
+                if (kmqSongEntry.hangulArtistName) {
+                    artistAliases.push(kmqSongEntry.hangulArtistName);
+                }
+            }
+
+            views = kmqSongEntry.views;
+            publishDate = kmqSongEntry.publishDate;
+
+            const durationInSeconds = (
+                await dbContext.kmq
+                    .selectFrom("cached_song_duration")
+                    .select("duration")
+                    .where("vlink", "=", videoID)
+                    .executeTakeFirst()
+            )?.duration;
+
+            // duration in minutes and seconds
+            if (durationInSeconds) {
+                const minutes = Math.floor(durationInSeconds / 60);
+                const seconds = durationInSeconds % 60;
+                songDuration = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+            }
+
+            const guildPreference =
+                await GuildPreference.getGuildPreference(guildID);
+
+            await guildPreference.songSelector.reloadSongs();
+            includedInOptions = [
+                ...guildPreference.songSelector.getSongs().songs,
+            ]
+                .map((x) => x.youtubeLink)
+                .includes(videoID);
+
+            logger.info(
+                `${getDebugLogHeader(
+                    messageOrInteraction,
+                )} | KMQ song lookup. videoID = ${videoID}. Included in options = ${includedInOptions}.`,
+            );
+        } else {
+            description = i18n.translate(guildID, "command.lookup.notInKMQ", {
+                link: daisukiLink,
+            });
+
+            songName =
+                daisukiEntry.kname && isKorean
+                    ? daisukiEntry.kname
+                    : daisukiEntry.name;
+
+            const artistNameResult = await dbContext.kpopVideos
+                .selectFrom("app_kpop_group")
+                .select(["name", "kname"])
+                .where("id", "=", daisukiEntry.id_artist)
+                .executeTakeFirst();
+
+            if (!artistNameResult) {
+                const errMsg = `Result of artist lookup in app_kpop_group unexpected null for artist: ${daisukiEntry.id_artist}`;
+                logger.error(errMsg);
+                throw new Error(errMsg);
+            }
+
+            artistName =
+                artistNameResult.kname && isKorean
+                    ? artistNameResult.kname
+                    : artistNameResult.name;
+
+            if (daisukiEntry.alias) {
+                songAliases.push(...daisukiEntry.alias.split(";"));
+            }
+
+            artistAliases.push(
+                ...(State.aliases.artist[artistNameResult.name] ?? []),
+            );
+
+            if (isKorean) {
+                songAliases.push(daisukiEntry.name);
+                artistAliases.push(artistNameResult.name);
+            } else {
+                if (daisukiEntry.kname) {
+                    songAliases.push(daisukiEntry.kname);
+                }
+
+                if (artistNameResult.kname) {
+                    artistAliases.push(artistNameResult.kname);
+                }
+            }
+
+            views = daisukiEntry.views;
+            publishDate = new Date(daisukiEntry.publishedon);
+
+            logger.info(
+                `${getDebugLogHeader(
+                    messageOrInteraction,
+                )} | Non-KMQ song lookup. videoID = ${videoID}.`,
+            );
+        }
+
+        const viewsString = i18n.translate(guildID, "misc.views");
+
+        const fields = [
+            {
+                name: _.capitalize(viewsString),
+                value: friendlyFormattedNumber(views),
+            },
+            {
+                name: i18n.translate(guildID, "misc.releaseDate"),
+                value: friendlyFormattedDate(publishDate, guildID),
+            },
+            {
+                name: i18n.translate(guildID, "misc.songAliases"),
+                value:
+                    songAliases.join(", ") ||
+                    i18n.translate(guildID, "misc.none"),
+            },
+            {
+                name: i18n.translate(guildID, "misc.artistAliases"),
+                value:
+                    artistAliases.join(", ") ||
+                    i18n.translate(guildID, "misc.none"),
+            },
+        ];
+
+        if (kmqSongEntry) {
+            fields.push(
+                {
+                    name: i18n.translate(guildID, "misc.duration"),
+                    value:
+                        songDuration ||
+                        i18n.translate(guildID, "misc.notApplicable"),
+                },
+                {
+                    name: i18n.translate(
+                        guildID,
+                        "command.lookup.inCurrentGameOptions",
+                    ),
+                    value: i18n.translate(
+                        guildID,
+                        includedInOptions ? "misc.yes" : "misc.no",
+                    ),
+                },
+            );
+        }
+
+        const messageContext = new MessageContext(
+            messageOrInteraction.channel.id,
+            new KmqMember(messageOrInteraction.member!.id),
+            messageOrInteraction.guildID as string,
+        );
+
+        await sendInfoMessage(
+            messageContext,
+            {
+                title: `"${songName}" - ${artistName}${tags}`,
+                url: `https://youtu.be/${videoID}`,
+                description,
+                thumbnailUrl: `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`,
+                fields: fields.map((x) => ({
+                    name: x.name,
+                    value: x.value,
+                    inline: true,
+                })),
+            },
+            false,
+            undefined,
+            [],
+            messageOrInteraction instanceof Eris.CommandInteraction
+                ? messageOrInteraction
+                : undefined,
+        );
+
+        return true;
+    }
+
+    static async lookupBySongName(
+        messageOrInteraction: GuildTextableMessage | CommandInteraction,
+        songName: string,
+        locale: LocaleType,
+        artistID?: number,
+    ): Promise<boolean> {
+        let kmqSongEntriesQuery = dbContext.kmq
+            .selectFrom("available_songs")
+            .select(SongSelector.QueriedSongFields)
+            .limit(100);
+
+        if (songName !== "") {
+            kmqSongEntriesQuery = kmqSongEntriesQuery
+                .where(({ or, eb }) =>
+                    or([
+                        eb("song_name_en", "like", `%${songName}%`),
+                        eb("song_name_ko", "like", `%${songName}%`),
+                    ]),
+                )
+                .orderBy((eb) => eb.fn("CHAR_LENGTH", ["song_name_en"]), "asc")
+                .orderBy("views", "desc");
+        } else {
+            kmqSongEntriesQuery = kmqSongEntriesQuery.orderBy(
+                "publishedon",
+                "desc",
+            );
+        }
+
+        if (artistID) {
+            kmqSongEntriesQuery = kmqSongEntriesQuery.where(
+                "id_artist",
+                "=",
+                artistID,
+            );
+        }
+
+        const kmqSongEntries = (await kmqSongEntriesQuery.execute()).map(
+            (x) => new QueriedSong(x),
+        );
+
+        if (kmqSongEntries.length === 0) {
+            return false;
+        }
+
+        if (kmqSongEntries.length === 1) {
+            return LookupCommand.lookupByYoutubeID(
+                messageOrInteraction,
+                kmqSongEntries[0]!.youtubeLink,
+                locale,
+            );
+        }
+
+        const songEmbeds = kmqSongEntries.map((entry) => ({
+            name: truncatedString(
+                `**"${entry.getLocalizedSongName(
+                    locale,
+                )}"** - ${entry.getLocalizedArtistName(locale)}${getEmojisFromSongTags(entry)}`,
+                100,
+            ),
+            value: `https://youtu.be/${entry.youtubeLink}`,
+        }));
+
+        const embedFieldSubsets = chunkArray(
+            songEmbeds,
+            LookupCommand.ENTRIES_PER_PAGE,
+        );
+
+        const embeds: Array<EmbedOptions> = embedFieldSubsets.map(
+            (embedFieldsSubset) => ({
+                title: i18n.translate(
+                    messageOrInteraction.guildID as string,
+                    "command.lookup.songNameSearchResult.title",
+                ),
+                description: i18n.translate(
+                    messageOrInteraction.guildID as string,
+                    "command.lookup.songNameSearchResult.successDescription",
+                ),
+                fields: embedFieldsSubset,
+            }),
+        );
+
+        await sendPaginationedEmbed(messageOrInteraction, embeds);
+        return true;
     }
 
     /**
@@ -730,7 +748,9 @@ export default class LookupCommand implements BaseCommand {
 
         const focusedVal = interactionData.interactionOptions[focusedKey];
 
-        const lowercaseUserInput = normalizePunctuationInName(focusedVal);
+        const lowercaseUserInput =
+            GameRound.normalizePunctuationInName(focusedVal);
+
         const showPopular = lowercaseUserInput.length < 2;
         const showHangul =
             containsHangul(lowercaseUserInput) ||
@@ -738,14 +758,16 @@ export default class LookupCommand implements BaseCommand {
                 LocaleType.KO &&
                 showPopular);
 
-        if (focusedKey === SONG_NAME) {
-            const artistName = interactionData.interactionOptions[ARTIST_NAME];
+        if (focusedKey === LookupCommand.SONG_NAME) {
+            const artistName =
+                interactionData.interactionOptions[LookupCommand.ARTIST_NAME];
 
             let artistID: number | undefined;
             if (artistName) {
                 artistID =
-                    State.artistToEntry[normalizePunctuationInName(artistName)]
-                        ?.id;
+                    State.artistToEntry[
+                        GameRound.normalizePunctuationInName(artistName)
+                    ]?.id;
             }
 
             if (showPopular) {
@@ -773,7 +795,7 @@ export default class LookupCommand implements BaseCommand {
                             Object.values(State.songLinkToEntry).filter(
                                 (x) =>
                                     (!artistID || artistID === x.artistID) &&
-                                    normalizePunctuationInName(
+                                    GameRound.normalizePunctuationInName(
                                         (showHangul && x.hangulName) || x.name,
                                     ).startsWith(lowercaseUserInput),
                             ),
@@ -783,9 +805,9 @@ export default class LookupCommand implements BaseCommand {
                     ),
                 );
             }
-        } else if (focusedKey === ARTIST_NAME) {
+        } else if (focusedKey === LookupCommand.ARTIST_NAME) {
             const enteredSongName =
-                interactionData.interactionOptions[SONG_NAME];
+                interactionData.interactionOptions[LookupCommand.SONG_NAME];
 
             let matchingArtists: Array<MatchedArtist> = [];
             if (!enteredSongName) {
@@ -793,7 +815,7 @@ export default class LookupCommand implements BaseCommand {
             } else {
                 // only return artists that have a song that matches the entered one
                 const cleanEnteredSongName =
-                    normalizePunctuationInName(enteredSongName);
+                    GameRound.normalizePunctuationInName(enteredSongName);
 
                 const matchingSongs = Object.values(
                     State.songLinkToEntry,

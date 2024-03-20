@@ -13,6 +13,7 @@ import type CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("forceplay");
 
+// eslint-disable-next-line import/no-unused-modules
 export default class ForcePlayCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.debugChannelPrecheck }];
 
@@ -36,7 +37,7 @@ export default class ForcePlayCommand implements BaseCommand {
             return;
         }
 
-        const forcePlaySongID = parsedMessage.components[0];
+        const forcePlaySongID = parsedMessage.components[0] as string;
         await guildPreference.setForcePlaySong(forcePlaySongID);
         await sendOptionsMessage(
             Session.getSession(message.guildID),

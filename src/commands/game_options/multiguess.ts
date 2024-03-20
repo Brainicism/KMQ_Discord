@@ -23,6 +23,7 @@ import type HelpDocumentation from "../../interfaces/help";
 const COMMAND_NAME = "multiguess";
 const logger = new IPCLogger(COMMAND_NAME);
 
+// eslint-disable-next-line import/no-unused-modules
 export default class MultiGuessCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
@@ -179,7 +180,7 @@ export default class MultiGuessCommand implements BaseCommand {
             multiGuessType = null;
         } else {
             multiGuessType =
-                parsedMessage.components[0].toLowerCase() as MultiGuessType;
+                parsedMessage.components[0]!.toLowerCase() as MultiGuessType;
         }
 
         await MultiGuessCommand.updateOption(

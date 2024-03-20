@@ -34,10 +34,10 @@ enum DurationActionInternal {
     SET = "set",
 }
 
-const DURATION_DELTA_MIN = 2;
-const DURATION_DELTA_MAX = 600;
-
+// eslint-disable-next-line import/no-unused-modules
 export default class DurationCommand implements BaseCommand {
+    static DURATION_DELTA_MIN = 2;
+    static DURATION_DELTA_MAX = 600;
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -47,8 +47,8 @@ export default class DurationCommand implements BaseCommand {
             {
                 name: "duration",
                 type: "number" as const,
-                minValue: DURATION_DELTA_MIN,
-                maxValue: DURATION_DELTA_MAX,
+                minValue: DurationCommand.DURATION_DELTA_MIN,
+                maxValue: DurationCommand.DURATION_DELTA_MAX,
             },
             {
                 name: "action",
@@ -168,8 +168,8 @@ export default class DurationCommand implements BaseCommand {
                                 ),
 
                             required: true,
-                            min_value: DURATION_DELTA_MIN,
-                            max_value: DURATION_DELTA_MAX,
+                            min_value: DurationCommand.DURATION_DELTA_MIN,
+                            max_value: DurationCommand.DURATION_DELTA_MAX,
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .INTEGER,
                         },
@@ -219,8 +219,8 @@ export default class DurationCommand implements BaseCommand {
                                 ),
 
                             required: true,
-                            min_value: DURATION_DELTA_MIN,
-                            max_value: DURATION_DELTA_MAX,
+                            min_value: DurationCommand.DURATION_DELTA_MIN,
+                            max_value: DurationCommand.DURATION_DELTA_MAX,
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .INTEGER,
                         },
@@ -270,8 +270,8 @@ export default class DurationCommand implements BaseCommand {
                                 ),
 
                             required: true,
-                            min_value: DURATION_DELTA_MIN,
-                            max_value: DURATION_DELTA_MAX,
+                            min_value: DurationCommand.DURATION_DELTA_MIN,
+                            max_value: DurationCommand.DURATION_DELTA_MAX,
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .INTEGER,
                         },
@@ -314,7 +314,7 @@ export default class DurationCommand implements BaseCommand {
             durationActionInternal =
                 (parsedMessage.components[1] as DurationActionInternal) ??
                 DurationActionInternal.SET;
-            durationValue = parseInt(parsedMessage.components[0], 10);
+            durationValue = parseInt(parsedMessage.components[0]!, 10);
         }
 
         await DurationCommand.updateOption(

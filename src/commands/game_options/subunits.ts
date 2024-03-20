@@ -23,6 +23,7 @@ import type HelpDocumentation from "../../interfaces/help";
 const COMMAND_NAME = "subunits";
 const logger = new IPCLogger(COMMAND_NAME);
 
+// eslint-disable-next-line import/no-unused-modules
 export default class SubunitsCommand implements BaseCommand {
     aliases = ["subunit", "su"];
 
@@ -194,7 +195,7 @@ export default class SubunitsCommand implements BaseCommand {
             subunitsPreference = null;
         } else {
             subunitsPreference =
-                parsedMessage.components[0].toLowerCase() as SubunitsPreference;
+                parsedMessage.components[0]!.toLowerCase() as SubunitsPreference;
         }
 
         await SubunitsCommand.updateOption(

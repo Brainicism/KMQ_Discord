@@ -5,7 +5,6 @@ import {
     sendErrorMessage,
     sendInfoMessage,
 } from "./discord_utils";
-import { normalizePunctuationInName } from "../structures/game_round";
 import {
     parseKmqPlaylistIdentifier,
     pathExists,
@@ -16,7 +15,9 @@ import {
 } from "./utils";
 import { youtube_v3 } from "googleapis";
 import Axios from "axios";
+import GameRound from "../structures/game_round";
 import KmqConfiguration from "../kmq_configuration";
+import QueriedSong from "../structures/queried_song";
 import SongSelector from "../structures/song_selector";
 import State from "../state";
 import _ from "lodash";
@@ -30,7 +31,6 @@ import type { MatchedPlaylist } from "../interfaces/matched_playlist";
 import type { PlaylistMetadata } from "../interfaces/playlist_metadata";
 import type Eris from "eris";
 import type MessageContext from "../structures/message_context";
-import type QueriedSong from "../interfaces/queried_song";
 import type SpotifyTrack from "../interfaces/spotify_track";
 
 const logger = new IPCLogger("spotify_manager");
@@ -406,24 +406,26 @@ export default class PlaylistManager {
             }
 
             // Match songs with vlinks
-            matchedSongs = await dbContext.kmq
-                .selectFrom("available_songs")
-                .select(SongSelector.QueriedSongFields)
-                .where((eb) =>
-                    eb.or([
-                        eb(
-                            "link",
-                            "in",
-                            youtubePlaylistVideoIDs.map((x) => x.videoId),
-                        ),
-                        eb(
-                            "original_link",
-                            "in",
-                            youtubePlaylistVideoIDs.map((x) => x.videoId),
-                        ),
-                    ]),
-                )
-                .execute();
+            matchedSongs = (
+                await dbContext.kmq
+                    .selectFrom("available_songs")
+                    .select(SongSelector.QueriedSongFields)
+                    .where((eb) =>
+                        eb.or([
+                            eb(
+                                "link",
+                                "in",
+                                youtubePlaylistVideoIDs.map((x) => x.videoId),
+                            ),
+                            eb(
+                                "original_link",
+                                "in",
+                                youtubePlaylistVideoIDs.map((x) => x.videoId),
+                            ),
+                        ]),
+                    )
+                    .execute()
+            ).map((x) => new QueriedSong(x));
 
             unmatchedSongs = youtubePlaylistVideoIDs
                 .filter(
@@ -782,14 +784,14 @@ export default class PlaylistManager {
      * Remove any guilds that have been stuck parsing for more than 10 minutes
      */
     cleanupPlaylistParsingLocks(): void {
-        for (const guildID in this.guildsParseInProgress) {
-            if (
-                this.guildsParseInProgress[guildID] <
-                new Date(Date.now() - 1000 * 60 * 10)
-            ) {
+        for (const guildID of Object.keys(this.guildsParseInProgress)) {
+            const guildParse = this.guildsParseInProgress[guildID];
+            if (!guildParse) return;
+            if (guildParse < new Date(Date.now() - 1000 * 60 * 10)) {
                 logger.warn(
-                    `Guild ${guildID} got stuck parsing Playlist at ${this.guildsParseInProgress[guildID]}`,
+                    `Guild ${guildID} got stuck parsing Playlist at ${guildParse}`,
                 );
+
                 delete this.guildsParseInProgress[guildID];
             }
         }
@@ -890,20 +892,21 @@ export default class PlaylistManager {
         return new Promise(async (resolve, reject) => {
             const aliasIDs: Array<number> = [];
             for (const artist of song.artists) {
-                const lowercaseArtist = normalizePunctuationInName(artist);
+                const lowercaseArtist =
+                    GameRound.normalizePunctuationInName(artist);
+
                 const artistMapping = State.artistToEntry[lowercaseArtist];
                 if (artistMapping) {
                     aliasIDs.push(artistMapping.id);
-                    if (State.aliases.artist[lowercaseArtist]) {
-                        for (const alias of State.aliases.artist[
-                            lowercaseArtist
-                        ]) {
+                    const artistAliases = State.aliases.artist[lowercaseArtist];
+                    if (artistAliases) {
+                        for (const alias of artistAliases) {
                             const lowercaseAlias =
-                                normalizePunctuationInName(alias);
+                                GameRound.normalizePunctuationInName(alias);
 
                             if (lowercaseAlias in State.artistToEntry) {
                                 aliasIDs.push(
-                                    State.artistToEntry[lowercaseAlias].id,
+                                    State.artistToEntry[lowercaseAlias]!.id,
                                 );
                             }
                         }
@@ -913,14 +916,15 @@ export default class PlaylistManager {
 
             // handle songs with brackets in name, consider all components separately
             const songNameBracketComponents = song.name.split("(");
-            const songNames = [songNameBracketComponents[0].trim()];
+            const songNames = [songNameBracketComponents[0]!.trim()];
             if (songNameBracketComponents.length > 1) {
                 songNames.push(
-                    songNameBracketComponents[1].replace(")", "").trim(),
+                    songNameBracketComponents[1]!.replace(")", "").trim(),
                 );
                 songNames.push(song.name);
             }
 
+            const artistName = song.artists[0]!;
             const query = dbContext.kmq
                 .selectFrom("available_songs")
                 .leftJoin(
@@ -950,7 +954,7 @@ export default class PlaylistManager {
                         eb(
                             "available_songs.original_artist_name_en",
                             "like",
-                            song.artists[0],
+                            artistName,
                         ),
                         and([
                             eb(
@@ -961,18 +965,18 @@ export default class PlaylistManager {
                             eb(
                                 "available_songs.original_artist_name_en",
                                 "like",
-                                `%${song.artists[0]}%`,
+                                `%${artistName}%`,
                             ),
                         ]),
                         eb(
                             "available_songs.previous_name_en",
                             "like",
-                            song.artists[0],
+                            artistName,
                         ),
-                        eb("artist_aliases", "like", `${song.artists[0]}`),
-                        eb("artist_aliases", "like", `${song.artists[0]};%`),
-                        eb("artist_aliases", "like", `%;${song.artists[0]};%`),
-                        eb("artist_aliases", "like", `%;${song.artists[0]}`),
+                        eb("artist_aliases", "like", `${artistName}`),
+                        eb("artist_aliases", "like", `${artistName};%`),
+                        eb("artist_aliases", "like", `%;${artistName};%`),
+                        eb("artist_aliases", "like", `%;${artistName}`),
                     ];
 
                     if (aliasIDs.length) {
@@ -994,7 +998,7 @@ export default class PlaylistManager {
                 const results = await query.execute();
                 let result: QueriedSong | null = null;
                 if (results.length === 1) {
-                    result = results[0];
+                    result = new QueriedSong(results[0]!);
                 } else if (results.length > 1) {
                     // results may contain subgroups/parent groups, prioritize by original artist name
                     const properArtistNameMatches = results.filter(
@@ -1002,9 +1006,7 @@ export default class PlaylistManager {
                             x.artistName
                                 .toLowerCase()
                                 .replace(/[^0-9a-z]/gi, "") ===
-                            song.artists[0]
-                                .toLowerCase()
-                                .replace(/[^0-9a-z]/gi, ""),
+                            artistName.toLowerCase().replace(/[^0-9a-z]/gi, ""),
                     );
 
                     // if multiple matches with and without punctuation removal
@@ -1016,9 +1018,11 @@ export default class PlaylistManager {
                             "asc",
                         );
 
-                        result = sortedMatches[0];
+                        result = new QueriedSong(sortedMatches[0]!);
                     } else {
-                        result = properArtistNameMatches[0] || results[0];
+                        result = new QueriedSong(
+                            properArtistNameMatches[0] || results[0]!,
+                        );
                     }
                 }
 
@@ -1107,8 +1111,8 @@ export default class PlaylistManager {
             return null;
         }
 
-        const playlistResponse = response.items;
-        if (!playlistResponse) {
+        const playlistResponseRaw = response.items;
+        if (!playlistResponseRaw) {
             logger.error(
                 `Unable to fetch playlist metadata for ${playlistId}. resp = ${JSON.stringify(
                     response,
@@ -1118,19 +1122,19 @@ export default class PlaylistManager {
             return null;
         }
 
-        if (playlistResponse.length === 0) {
+        if (playlistResponseRaw.length === 0) {
             logger.warn(`Could not find playlist metadata for ${playlistId}`);
             return null;
         }
 
-        const playlistName = playlistResponse[0].snippet!.title as string;
+        const playlistResponse = playlistResponseRaw[0]!;
+        const playlistName = playlistResponse.snippet!.title as string;
         const playlistChangeHash = response.etag as string;
-        const thumbnailUrl = playlistResponse[0].snippet!.thumbnails?.default
+        const thumbnailUrl = playlistResponse.snippet!.thumbnails?.default
             ?.url as string;
 
         const limit = response.pageInfo!.resultsPerPage as number;
-        const songCount = playlistResponse[0].contentDetails!
-            .itemCount as number;
+        const songCount = playlistResponse.contentDetails!.itemCount as number;
 
         return {
             playlistId,

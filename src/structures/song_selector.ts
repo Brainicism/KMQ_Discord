@@ -13,10 +13,11 @@ import {
     setDifference,
     shufflePartitionedArray,
 } from "../helpers/utils";
-import { normalizePunctuationInName } from "./game_round";
 import ArtistType from "../enums/option_types/artist_type";
+import GameRound from "./game_round";
 import LanguageType from "../enums/option_types/language_type";
 import OstPreference from "../enums/option_types/ost_preference";
+import QueriedSong from "./queried_song";
 import ReleaseType from "../enums/option_types/release_type";
 import ShuffleType from "../enums/option_types/shuffle_type";
 import State from "../state";
@@ -31,7 +32,6 @@ import type { MatchedPlaylist } from "../interfaces/matched_playlist";
 import type Eris from "eris";
 import type GuildPreference from "./guild_preference";
 import type MessageContext from "./message_context";
-import type QueriedSong from "../interfaces/queried_song";
 import type UniqueSongCounter from "../interfaces/unique_song_counter";
 
 const logger = new IPCLogger("song_selector");
@@ -210,19 +210,19 @@ export default class SongSelector {
             case ShuffleType.POPULARITY:
             case ShuffleType.CHRONOLOGICAL:
             case ShuffleType.REVERSE_CHRONOLOGICAL:
-                return queriedSongList[0];
+                return queriedSongList[0]!;
             case ShuffleType.WEIGHTED_EASY:
             case ShuffleType.WEIGHTED_HARD:
                 return chooseWeightedRandom(queriedSongList, "selectionWeight");
             case ShuffleType.RANDOM:
                 return queriedSongList[
                     Math.floor(Math.random() * queriedSongList.length)
-                ];
+                ]!;
             default:
                 logger.error(`Unexpected ShuffleType: ${shuffleType}`);
                 return queriedSongList[
                     Math.floor(Math.random() * queriedSongList.length)
-                ];
+                ]!;
         }
     }
 
@@ -318,7 +318,7 @@ export default class SongSelector {
 
             const normalizedDeduped = new Set(
                 allNamesAndAliases.map((name) =>
-                    normalizePunctuationInName(name),
+                    GameRound.normalizePunctuationInName(name),
                 ),
             );
 
@@ -338,9 +338,9 @@ export default class SongSelector {
         }
 
         let ineligibleDueToCommonAlias = 0;
-        for (const alias in aliasToCountMapping) {
-            if (aliasToCountMapping[alias] > 10) {
-                ineligibleDueToCommonAlias += aliasToCountMapping[alias] - 1;
+        for (const aliasCount of Object.values(aliasToCountMapping)) {
+            if (aliasCount > 10) {
+                ineligibleDueToCommonAlias += aliasCount - 1;
             }
         }
 
@@ -382,7 +382,11 @@ export default class SongSelector {
                 gameOptions.forcePlaySongID,
             );
             return {
-                songs: new Set(await queryBuilder.execute()),
+                songs: new Set(
+                    (await queryBuilder.execute()).map(
+                        (x) => new QueriedSong(x),
+                    ),
+                ),
                 countBeforeLimit: 1,
             };
         }
@@ -518,9 +522,9 @@ export default class SongSelector {
             }
 
             // Kyseley does not like it when you provide an empty array or array of size 1 to OR/AND
-            const finalExpressions = [];
+            const finalExpressions: Expression<SqlBool>[] = [];
             if (includesInnerArtistFilterExpressions.length === 1) {
-                finalExpressions.push(includesInnerArtistFilterExpressions[0]);
+                finalExpressions.push(includesInnerArtistFilterExpressions[0]!);
             } else if (includesInnerArtistFilterExpressions.length > 1) {
                 finalExpressions.push(
                     and(includesInnerArtistFilterExpressions),
@@ -528,7 +532,7 @@ export default class SongSelector {
             }
 
             if (mainArtistFilterExpressions.length === 1) {
-                finalExpressions.push(mainArtistFilterExpressions[0]);
+                finalExpressions.push(mainArtistFilterExpressions[0]!);
             } else if (mainArtistFilterExpressions.length > 1) {
                 finalExpressions.push(and(mainArtistFilterExpressions));
             }
@@ -593,7 +597,7 @@ export default class SongSelector {
             queryBuilder = queryBuilder.orderBy("views", "desc");
         }
 
-        result = await queryBuilder.execute();
+        result = (await queryBuilder.execute()).map((x) => new QueriedSong(x));
 
         const count = result.length;
         result = result.slice(gameOptions.limitStart, gameOptions.limitEnd);
@@ -621,15 +625,18 @@ export default class SongSelector {
                 break;
         }
 
-        result = result.map((song, index) => ({
-            ...song,
-            selectionWeight:
-                selectionWeightValues[
-                    Math.floor(
-                        (index / result.length) * selectionWeightValues.length,
-                    )
-                ],
-        }));
+        result = result
+            .map((song, index) => ({
+                ...song,
+                selectionWeight:
+                    selectionWeightValues[
+                        Math.floor(
+                            (index / result.length) *
+                                selectionWeightValues.length,
+                        )
+                    ],
+            }))
+            .map((x) => new QueriedSong(x));
 
         return {
             songs: new Set(result),

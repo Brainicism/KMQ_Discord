@@ -25,10 +25,7 @@ import {
     tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
 import {
-    getLocalizedArtistName,
-    getLocalizedSongName,
     getMultipleChoiceOptions,
-    getTimeToGuessMs,
     isFirstGameOfDay,
     userBonusIsActive,
 } from "../helpers/game_utils";
@@ -46,12 +43,11 @@ import {
     VOTE_LINK,
 } from "../constants";
 import { IPCLogger } from "../logger";
-import { calculateTotalRoundExp } from "../commands/game_commands/exp";
-import { getRankNameByLevel } from "../commands/game_commands/profile";
 import { sql } from "kysely";
 import AnswerType from "../enums/option_types/answer_type";
 import EliminationPlayer from "./elimination_player";
 import EliminationScoreboard from "./elimination_scoreboard";
+import ExpCommand from "../commands/game_commands/exp";
 import GameRound from "./game_round";
 import GameType from "../enums/game_type";
 import GuessModeType from "../enums/option_types/guess_mode_type";
@@ -60,13 +56,14 @@ import KmqMember from "./kmq_member";
 import MessageContext from "./message_context";
 import MultiGuessType from "../enums/option_types/multiguess_type";
 import Player from "./player";
+import ProfileCommand from "../commands/game_commands/profile";
 import Scoreboard from "./scoreboard";
 import Session from "./session";
 import TeamScoreboard from "./team_scoreboard";
 import i18n from "../helpers/localization_manager";
 import type { ButtonActionRow, GuildTextableMessage } from "../types";
 import type { CommandInteraction } from "eris";
-import type QueriedSong from "../interfaces/queried_song";
+import type QueriedSong from "./queried_song";
 import type Round from "./round";
 import type SuccessfulGuessResult from "../interfaces/success_guess_result";
 
@@ -253,7 +250,7 @@ export default class GameSession extends Session {
             return;
         }
 
-        const correctGuessers = round.correctGuessers;
+        const correctGuessers = round.getCorrectGuessers();
         const isCorrectGuess = correctGuessers.length > 0;
 
         await this.stopHiddenUpdateTimer();
@@ -273,10 +270,10 @@ export default class GameSession extends Session {
             // update guessing streaks
             if (
                 this.lastGuesser === null ||
-                this.lastGuesser.userID !== correctGuessers[0].id
+                this.lastGuesser.userID !== correctGuessers[0]!.id
             ) {
                 this.lastGuesser = {
-                    userID: correctGuessers[0].id,
+                    userID: correctGuessers[0]!.id,
                     streak: 1,
                 };
             } else {
@@ -484,7 +481,7 @@ export default class GameSession extends Session {
                         ),
                         endLevel: codeLine(String(leveledUpPlayer.endLevel)),
                         rank: codeLine(
-                            getRankNameByLevel(
+                            ProfileCommand.getRankNameByLevel(
                                 leveledUpPlayer.endLevel,
                                 this.guildID,
                             ),
@@ -571,12 +568,14 @@ export default class GameSession extends Session {
             this.guildPreference.typosAllowed(),
         );
 
+        const correctGuessers = round.getCorrectGuessers();
+        const incorrectGuessers = round.getIncorrectGuessers();
         if (this.isHiddenMode()) {
             // Determine whether to wait for more guesses
             if (
                 this.scoreboard.getRemainingPlayers(
-                    round.correctGuessers,
-                    round.incorrectGuessers,
+                    correctGuessers.map((x) => x.id),
+                    incorrectGuessers,
                 ).length > 0
             ) {
                 // If there are still players who haven't guessed correctly, don't end the round
@@ -589,7 +588,7 @@ export default class GameSession extends Session {
 
         if (
             pointsEarned > 0 ||
-            (this.isHiddenMode() && round.correctGuessers.length > 0)
+            (this.isHiddenMode() && correctGuessers.length > 0)
         ) {
             // If not hidden, someone guessed correctly
             // If hidden, everyone guessed and at least one person was right
@@ -634,7 +633,7 @@ export default class GameSession extends Session {
                             ),
                         ),
                     ],
-                    [...round.incorrectGuessers],
+                    [...incorrectGuessers],
                 ).size === 0
             ) {
                 await this.endRound(
@@ -677,6 +676,11 @@ export default class GameSession extends Session {
         // Pick the first participant still in VC
         const newOwnerID = participantsInVC[0];
 
+        // nobody left in vc
+        if (!newOwnerID) {
+            return;
+        }
+
         this.owner = new KmqMember(newOwnerID);
 
         await super.updateOwner();
@@ -686,7 +690,6 @@ export default class GameSession extends Session {
         interaction: Eris.ComponentInteraction<Eris.TextableChannel>,
         messageContext: MessageContext,
     ): Promise<void> {
-        if (!this.round) return;
         if (
             !(await this.handleInSessionInteractionFailures(
                 interaction,
@@ -696,10 +699,11 @@ export default class GameSession extends Session {
             return;
         }
 
+        if (!this.round) return;
         const round = this.round;
 
         if (
-            round.incorrectGuessers.has(interaction.member!.id) ||
+            round.getIncorrectGuessers().has(interaction.member!.id) ||
             !this.guessEligible(messageContext, interaction.createdAt)
         ) {
             await tryCreateInteractionErrorAcknowledgement(
@@ -723,7 +727,6 @@ export default class GameSession extends Session {
                 ),
             );
 
-            round.incorrectGuessers.add(interaction.member!.id);
             round.interactionIncorrectAnswerUUIDs[interaction.data.custom_id]++;
 
             // Add the user as a participant
@@ -990,7 +993,7 @@ export default class GameSession extends Session {
                 {
                     color:
                         this.gameType !== GameType.TEAMS &&
-                        (await userBonusIsActive(winners[0].id))
+                        (await userBonusIsActive(winners[0]!.id))
                             ? EMBED_SUCCESS_BONUS_COLOR
                             : EMBED_SUCCESS_COLOR,
                     description: !useLargerScoreboard
@@ -1001,7 +1004,7 @@ export default class GameSession extends Session {
                               ),
                           )
                         : undefined,
-                    thumbnailUrl: winners[0].getAvatarURL(),
+                    thumbnailUrl: winners[0]!.getAvatarURL(),
                     title: `🎉 ${winnerMessage} 🎉`,
                     fields,
                     footerText,
@@ -1117,11 +1120,15 @@ export default class GameSession extends Session {
     ): number {
         if (!this.round) return 0;
         const round = this.round;
-        if (multipleChoiceMode && round.incorrectGuessers.has(userID)) return 0;
+        const incorrectGuessers = round.getIncorrectGuessers();
+        if (multipleChoiceMode && incorrectGuessers.has(userID)) return 0;
 
         if (
-            !round.correctGuessers.map((x) => x.id).includes(userID) &&
-            !round.incorrectGuessers.has(userID)
+            !round
+                .getCorrectGuessers()
+                .map((x) => x.id)
+                .includes(userID) &&
+            !incorrectGuessers.has(userID)
         ) {
             if (round.interactionMessage) {
                 round.interactionMessageNeedsUpdate = true;
@@ -1290,7 +1297,7 @@ export default class GameSession extends Session {
         let newLevel = level;
 
         // check for level up
-        while (newExp > CUM_EXP_TABLE[newLevel + 1]) {
+        while (newExp > CUM_EXP_TABLE[newLevel + 1]!) {
             newLevel++;
         }
 
@@ -1364,19 +1371,20 @@ export default class GameSession extends Session {
             };
         }
 
-        this.songStats[vlink].timePlayed += timePlayed;
+        const songStats = this.songStats[vlink]!;
+        songStats.timePlayed += timePlayed;
 
         if (correct) {
-            this.songStats[vlink].correctGuesses++;
-            this.songStats[vlink].timeToGuess += timePlayed;
+            songStats.correctGuesses++;
+            songStats.timeToGuess += timePlayed;
         }
 
         if (skipped) {
-            this.songStats[vlink].skipCount++;
+            songStats.skipCount++;
         }
 
         if (hintRequested) {
-            this.songStats[vlink].hintCount++;
+            songStats.hintCount++;
         }
     }
 
@@ -1386,6 +1394,7 @@ export default class GameSession extends Session {
     private async storeSongStats(): Promise<void> {
         await Promise.allSettled(
             Object.keys(this.songStats).map(async (vlink) => {
+                const songStats = this.songStats[vlink];
                 await dbContext.kmq
                     .insertInto("song_metadata")
                     .values({
@@ -1402,16 +1411,23 @@ export default class GameSession extends Session {
                     .ignore()
                     .execute();
 
+                if (!songStats) {
+                    logger.warn(
+                        `Song stats for ${vlink} missing in storeSongStats`,
+                    );
+                    return;
+                }
+
                 await dbContext.kmq
                     .updateTable("song_metadata")
                     .where("vlink", "=", vlink)
                     .set({
-                        correct_guesses: sql`correct_guesses + ${this.songStats[vlink].correctGuesses}`,
-                        rounds_played: sql`rounds_played + ${this.songStats[vlink].roundsPlayed}`,
-                        skip_count: sql`skip_count + ${this.songStats[vlink].skipCount}`,
-                        hint_count: sql`hint_count + ${this.songStats[vlink].hintCount}`,
-                        time_to_guess_ms: sql`time_to_guess_ms + ${this.songStats[vlink].timeToGuess}`,
-                        time_played_ms: sql`time_played_ms + ${this.songStats[vlink].timePlayed}`,
+                        correct_guesses: sql`correct_guesses + ${songStats.correctGuesses}`,
+                        rounds_played: sql`rounds_played + ${songStats.roundsPlayed}`,
+                        skip_count: sql`skip_count + ${songStats.skipCount}`,
+                        hint_count: sql`hint_count + ${songStats.hintCount}`,
+                        time_to_guess_ms: sql`time_to_guess_ms + ${songStats.timeToGuess}`,
+                        time_played_ms: sql`time_played_ms + ${songStats.timePlayed}`,
                     })
                     .execute();
             }),
@@ -1456,23 +1472,24 @@ export default class GameSession extends Session {
         const lastGuesserStreak = this.lastGuesser?.streak ?? 0;
         const isHidden = this.isHiddenMode();
 
-        round.correctGuessers.sort(
-            (a, b) =>
-                getTimeToGuessMs(a, round, isHidden) -
-                getTimeToGuessMs(b, round, isHidden),
-        );
+        const correctGuessers = round
+            .getCorrectGuessers()
+            .sort(
+                (a, b) =>
+                    round.getTimeToGuessMs(a.id, isHidden) -
+                    round.getTimeToGuessMs(b.id, isHidden),
+            );
 
         const playerRoundResults = await Promise.all(
-            round.correctGuessers.map(async (correctGuesser, idx) => {
+            correctGuessers.map(async (correctGuesser, idx) => {
                 const guessPosition = idx + 1;
-                const expGain = await calculateTotalRoundExp(
+                const expGain = await ExpCommand.calculateTotalRoundExp(
                     guildPreference,
                     round,
                     getNumParticipants(this.voiceChannelID),
                     lastGuesserStreak,
-                    getTimeToGuessMs(
-                        correctGuesser,
-                        round,
+                    round.getTimeToGuessMs(
+                        correctGuesser.id,
                         this.isHiddenMode(),
                     ),
                     guessPosition,
@@ -1484,18 +1501,14 @@ export default class GameSession extends Session {
                 if (idx === 0) {
                     streak = lastGuesserStreak;
                     logger.info(
-                        `${getDebugLogHeader(messageContext)}, uid: ${
-                            correctGuesser.id
-                        } | Song correctly guessed. song = ${
+                        `${getDebugLogHeader(messageContext)}, uid: ${correctGuesser.id} | Song correctly guessed. song = ${
                             round.song.songName
                         }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`,
                     );
                 } else {
                     streak = 0;
                     logger.info(
-                        `${getDebugLogHeader(messageContext)}, uid: ${
-                            correctGuesser.id
-                        } | Song correctly guessed ${getOrdinalNum(
+                        `${getDebugLogHeader(messageContext)}, uid: ${correctGuesser.id} | Song correctly guessed ${getOrdinalNum(
                             guessPosition,
                         )}. song = ${
                             round.song.songName
@@ -1566,7 +1579,10 @@ export default class GameSession extends Session {
         )}:`;
 
         const remainingPlayers = this.scoreboard
-            .getRemainingPlayers(round.correctGuessers, round.incorrectGuessers)
+            .getRemainingPlayers(
+                round.getCorrectGuessers().map((x) => x.id),
+                round.getIncorrectGuessers(),
+            )
             .map((player) => player.username)
             .join("\n");
 
@@ -1598,8 +1614,8 @@ export default class GameSession extends Session {
         const correctChoice =
             this.guildPreference.gameOptions.guessModeType ===
             GuessModeType.ARTIST
-                ? getLocalizedArtistName(round.song, locale)
-                : getLocalizedSongName(round.song, locale);
+                ? round.song.getLocalizedArtistName(locale)
+                : round.song.getLocalizedSongName(locale);
 
         const wrongChoices = await getMultipleChoiceOptions(
             this.guildPreference.gameOptions.answerType,

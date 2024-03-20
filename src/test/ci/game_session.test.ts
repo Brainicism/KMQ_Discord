@@ -106,7 +106,7 @@ describe("game session", () => {
                 );
                 assert(gameSession.round);
 
-                const correctGuess = gameSession.round.acceptedSongAnswers[0];
+                const correctGuess = gameSession.round.acceptedSongAnswers[0]!;
                 const gameStarter = new KmqMember("123");
                 const messageContext = new MessageContext(
                     "",

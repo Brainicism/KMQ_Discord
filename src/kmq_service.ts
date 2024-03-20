@@ -16,6 +16,7 @@ import type NewsSummary from "./interfaces/news_summary";
 
 const logger = new IPCLogger("kmq_service");
 
+// eslint-disable-next-line import/no-unused-modules
 export default class ServiceWorker extends BaseServiceWorker {
     news: {
         [range: string]: {
@@ -75,9 +76,9 @@ export default class ServiceWorker extends BaseServiceWorker {
         const components = commandName.split("|");
         components.shift();
         if (commandName.startsWith("getNews")) {
-            const newsRange = components[0];
-            const locale = components[1];
-            const news = this.news[newsRange][locale];
+            const newsRange = components[0]!;
+            const locale = components[1]!;
+            const news = this.news[newsRange]![locale];
             if (!news) {
                 logger.error(
                     `News for ${components.join("-")} not yet generated`,
@@ -87,18 +88,26 @@ export default class ServiceWorker extends BaseServiceWorker {
 
             return news;
         } else if (commandName.startsWith("getFact")) {
-            const factType = components[0];
-            const locale = components[1];
+            const factType = components[0]!;
+            const locale = components[1]!;
             let factGroup: string[][] | null;
+            const factGroupByLocale = this.facts[locale];
+            if (!factGroupByLocale) {
+                logger.error(
+                    `Facts for ${components.join("-")} not yet generated`,
+                );
+                return null;
+            }
+
             switch (factType) {
                 case "fun":
-                    factGroup = this.facts[locale].funFacts;
+                    factGroup = factGroupByLocale.funFacts;
                     break;
                 case "kmq":
-                    factGroup = this.facts[locale].kmqFacts;
+                    factGroup = factGroupByLocale.kmqFacts;
                     break;
                 case "news":
-                    factGroup = this.facts[locale].newsFacts;
+                    factGroup = factGroupByLocale.newsFacts;
                     break;
                 default:
                     logger.error(`Unexpected factType: ${factType}`);
@@ -169,7 +178,8 @@ export default class ServiceWorker extends BaseServiceWorker {
                     // eslint-disable-next-line no-await-in-loop
                     await retryJob<void | Error>(
                         async () => {
-                            if (!rangeToTopPosts[range]) {
+                            const topPosts = rangeToTopPosts[range];
+                            if (!topPosts) {
                                 logger.warn(
                                     `Skipping generating news for ${locale} ${range} because topPosts is null`,
                                 );
@@ -179,7 +189,7 @@ export default class ServiceWorker extends BaseServiceWorker {
                             const summary = await geminiClient.getPostSummary(
                                 locale as LocaleType,
                                 range as NewsRange,
-                                rangeToTopPosts[range],
+                                topPosts,
                             );
 
                             if (summary === "") {
@@ -201,7 +211,7 @@ export default class ServiceWorker extends BaseServiceWorker {
                                 );
                             }
 
-                            this.news[range][locale] = {
+                            this.news[range]![locale] = {
                                 text: summary,
                                 generatedAt: Date.now(),
                             };

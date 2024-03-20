@@ -11,6 +11,7 @@ import type CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("app_commands");
 
+// eslint-disable-next-line import/no-unused-modules
 export default class AppCommandsCommand implements BaseCommand {
     validations = {
         minArgCount: 1,

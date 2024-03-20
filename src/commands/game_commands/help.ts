@@ -24,10 +24,10 @@ import type HelpDocumentation from "../../interfaces/help";
 
 const COMMAND_NAME = "help";
 const logger = new IPCLogger(COMMAND_NAME);
-const FIELDS_PER_EMBED = 8;
-const excludedCommands: Array<string> = [];
 
 export default class HelpCommand implements BaseCommand {
+    static FIELDS_PER_EMBED = 8;
+    static excludedCommands: Array<string> = [];
     help = (guildID: string): HelpDocumentation => ({
         name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.help.help.description"),
@@ -93,7 +93,7 @@ export default class HelpCommand implements BaseCommand {
             [];
 
         const commandFiles = State.client.commands;
-        for (const command of excludedCommands) {
+        for (const command of HelpCommand.excludedCommands) {
             delete commandFiles[command];
         }
 
@@ -107,14 +107,23 @@ export default class HelpCommand implements BaseCommand {
             {};
 
         Object.assign(commandFilesWithAliases, commandFiles);
+
         const commandNamesWithAliases = Object.keys(commandFiles).filter(
-            (commandName) => commandFiles[commandName].aliases,
+            (commandName) => commandFiles[commandName]?.aliases,
         );
 
         for (const commandName of commandNamesWithAliases) {
-            const { aliases } = commandFiles[commandName];
+            const commandFile = commandFiles[commandName];
+            if (!commandFile) {
+                logger.error(
+                    `Unknown command name while accessing commandFiles: ${commandName}`,
+                );
+                continue;
+            }
+
+            const { aliases } = commandFile;
             for (const alias of aliases ?? []) {
-                commandFilesWithAliases[alias] = commandFiles[commandName];
+                commandFilesWithAliases[alias] = commandFile;
             }
         }
 
@@ -123,7 +132,7 @@ export default class HelpCommand implements BaseCommand {
             const commandNamesWithHelp = Object.keys(
                 commandFilesWithAliases,
             ).filter(
-                (commandName) => commandFilesWithAliases[commandName].help,
+                (commandName) => commandFilesWithAliases[commandName]?.help,
             );
 
             logger.info(
@@ -161,7 +170,7 @@ export default class HelpCommand implements BaseCommand {
                 return;
             }
 
-            const helpManualFunc = commandFilesWithAliases[action].help;
+            const helpManualFunc = commandFilesWithAliases[action]!.help;
             if (!helpManualFunc) {
                 logger.error(`No help manual found for ${action}. Skipping.`);
                 return;
@@ -184,7 +193,7 @@ export default class HelpCommand implements BaseCommand {
                 value: example.explanation,
             }));
 
-            const aliases = commandFilesWithAliases[action].aliases;
+            const aliases = commandFilesWithAliases[action]!.aliases;
             if (aliases) {
                 embedFooter = {
                     text: `${i18n.translate(
@@ -269,7 +278,11 @@ export default class HelpCommand implements BaseCommand {
         }
 
         if (embedFields.length > 0) {
-            const embedFieldSubsets = chunkArray(embedFields, FIELDS_PER_EMBED);
+            const embedFieldSubsets = chunkArray(
+                embedFields,
+                HelpCommand.FIELDS_PER_EMBED,
+            );
+
             const embeds: Array<EmbedOptions> = embedFieldSubsets.map(
                 (embedFieldsSubset) => ({
                     title: embedTitle,
@@ -354,7 +367,7 @@ export default class HelpCommand implements BaseCommand {
         const commands = Object.values(State.client.commands)
             .filter((x) => x.help)
             .map((x) => x.help!(interaction.guildID as string))
-            .filter((x) => !excludedCommands.includes(x.name))
+            .filter((x) => !HelpCommand.excludedCommands.includes(x.name))
             .sort((a, b) => b.priority - a.priority);
 
         if (!lowercaseUserInput) {

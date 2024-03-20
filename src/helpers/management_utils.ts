@@ -7,9 +7,9 @@ import {
     cleanupInactiveListeningSessions,
     isPowerHour,
 } from "./game_utils";
-import { normalizePunctuationInName } from "../structures/game_round";
 import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
 import { sql } from "kysely";
+import GameRound from "../structures/game_round";
 import KmqConfiguration from "../kmq_configuration";
 import MessageContext from "../structures/message_context";
 import NewsCommand from "../commands/misc_commands/news";
@@ -335,7 +335,7 @@ export async function reloadArtists(): Promise<void> {
         } as MatchedArtist;
 
         State.artistToEntry[
-            normalizePunctuationInName(mapping["artist_name_en"])
+            GameRound.normalizePunctuationInName(mapping["artist_name_en"])
         ] = artistEntry;
 
         if (mapping["artist_name_ko"]) {
@@ -344,8 +344,9 @@ export async function reloadArtists(): Promise<void> {
 
         for (const alias in aliases) {
             if (alias.length > 0) {
-                State.artistToEntry[normalizePunctuationInName(alias)] =
-                    artistEntry;
+                State.artistToEntry[
+                    GameRound.normalizePunctuationInName(alias)
+                ] = artistEntry;
             }
         }
     }

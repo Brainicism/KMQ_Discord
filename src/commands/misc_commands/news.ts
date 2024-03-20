@@ -34,12 +34,11 @@ enum Action {
     MONTHLY = "monthly",
 }
 
-const RANGE_OPTION = "range";
-
 const COMMAND_NAME = "news";
 const logger = new IPCLogger(COMMAND_NAME);
 
 export default class NewsCommand implements BaseCommand {
+    static RANGE_OPTION = "range";
     help = (guildID: string): HelpDocumentation => ({
         name: COMMAND_NAME,
         description: i18n.translate(guildID, "command.news.help.description"),
@@ -55,7 +54,7 @@ export default class NewsCommand implements BaseCommand {
                 example: `${clickableSlashCommand(
                     COMMAND_NAME,
                     Action.SUBSCRIBE,
-                )} ${RANGE_OPTION}:${NewsRange.WEEKLY}`,
+                )} ${NewsCommand.RANGE_OPTION}:${NewsRange.WEEKLY}`,
                 explanation: i18n.translate(
                     guildID,
                     "command.news.help.example.subscribe",
@@ -65,7 +64,7 @@ export default class NewsCommand implements BaseCommand {
                 example: `${clickableSlashCommand(
                     COMMAND_NAME,
                     Action.UNSUBSCRIBE,
-                )} ${RANGE_OPTION}:${NewsRange.DAILY}`,
+                )} ${NewsCommand.RANGE_OPTION}:${NewsRange.DAILY}`,
                 explanation: i18n.translate(
                     guildID,
                     "command.news.help.example.unsubscribe",
@@ -170,7 +169,7 @@ export default class NewsCommand implements BaseCommand {
                         .SUB_COMMAND,
                     options: [
                         {
-                            name: RANGE_OPTION,
+                            name: NewsCommand.RANGE_OPTION,
                             description: i18n.translate(
                                 LocaleType.EN,
                                 "command.news.help.interaction.range",
@@ -221,7 +220,7 @@ export default class NewsCommand implements BaseCommand {
                         .SUB_COMMAND,
                     options: [
                         {
-                            name: RANGE_OPTION,
+                            name: NewsCommand.RANGE_OPTION,
                             description: i18n.translate(
                                 LocaleType.EN,
                                 "command.news.help.interaction.range",
@@ -506,10 +505,16 @@ export default class NewsCommand implements BaseCommand {
             getInteractionValue(interaction);
 
         if (interactionName === Action.SUBSCRIBE) {
-            const range = interactionOptions[RANGE_OPTION] as NewsRange;
+            const range = interactionOptions[
+                NewsCommand.RANGE_OPTION
+            ] as NewsRange;
+
             await NewsCommand.subscribeNews(messageContext, range, interaction);
         } else if (interactionName === Action.UNSUBSCRIBE) {
-            const range = interactionOptions[RANGE_OPTION] as NewsRange;
+            const range = interactionOptions[
+                NewsCommand.RANGE_OPTION
+            ] as NewsRange;
+
             await NewsCommand.unsubscribeNews(
                 messageContext,
                 range,

@@ -23,6 +23,7 @@ import type HelpDocumentation from "../../interfaces/help";
 const COMMAND_NAME = "ost";
 const logger = new IPCLogger(COMMAND_NAME);
 
+// eslint-disable-next-line import/no-unused-modules
 export default class OstCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
@@ -187,7 +188,7 @@ export default class OstCommand implements BaseCommand {
             ostPreference = null;
         } else {
             ostPreference =
-                parsedMessage.components[0].toLowerCase() as OstPreference;
+                parsedMessage.components[0]!.toLowerCase() as OstPreference;
         }
 
         await OstCommand.updateOption(

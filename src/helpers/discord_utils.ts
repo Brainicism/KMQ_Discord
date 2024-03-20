@@ -37,18 +37,13 @@ import {
     truncatedString,
     underline,
 } from "./utils";
-import {
-    getAvailableSongCount,
-    getLocalizedArtistName,
-    getLocalizedSongName,
-    userBonusIsActive,
-} from "./game_utils";
-import { normalizePunctuationInName } from "../structures/game_round";
+import { getAvailableSongCount, userBonusIsActive } from "./game_utils";
 import AppCommandsAction from "../enums/app_command_action";
 import EmbedPaginator from "eris-pagination";
 import EnvType from "../enums/env_type";
 import Eris from "eris";
 import GameOption from "../enums/game_option_name";
+import GameRound from "../structures/game_round";
 import GameType from "../enums/game_type";
 import LocaleType from "../enums/locale_type";
 import MessageContext from "../structures/message_context";
@@ -418,9 +413,7 @@ async function sendMessageExceptionHandler(
         }
     } else {
         logger.error(
-            `Error sending message. Unknown error. textChannelID = ${channelID}. err = ${JSON.stringify(
-                e,
-            )}.body = ${JSON.stringify(messageContent)}`,
+            `Error sending message. Unknown error. textChannelID = ${channelID}. err = ${e} = ${JSON.stringify(messageContent)}`,
         );
     }
 }
@@ -754,7 +747,7 @@ function getFormattedLimit(
  *  @returns an embed of current game options
  */
 export async function generateOptionsMessage(
-    session: Session,
+    session: Session | undefined,
     messageContext: MessageContext,
     guildPreference: GuildPreference,
     updatedOptions: { option: GameOption; reset: boolean }[],
@@ -915,14 +908,22 @@ export async function generateOptionsMessage(
     for (const gameOptionConflictCheck of gameOptionConflictCheckMap) {
         const doesConflict = gameOptionConflictCheck.conflictCheck();
         if (doesConflict) {
-            for (const option of ConflictingGameOptions[
-                gameOptionConflictCheck.gameOption
-            ]) {
+            const conflictingGameOptionMapping =
+                ConflictingGameOptions[gameOptionConflictCheck.gameOption];
+
+            if (!conflictingGameOptionMapping) {
+                logger.error(
+                    `Missing conflicting game option mapping: ${gameOptionConflictCheck.gameOption}`,
+                );
+                continue;
+            }
+
+            for (const option of conflictingGameOptionMapping) {
                 const optionString = optionStrings[option];
                 if (optionString && !optionString.includes(conflictString)) {
                     optionStrings[option] = generateConflictingCommandEntry(
                         optionString,
-                        GameOptionCommand[gameOptionConflictCheck.gameOption],
+                        GameOptionCommand[gameOptionConflictCheck.gameOption]!,
                     );
                 }
             }
@@ -1018,7 +1019,7 @@ export async function generateOptionsMessage(
     )
         .map(
             (option) =>
-                `${clickableSlashCommand(GameOptionCommand[option])}: ${
+                `${clickableSlashCommand(GameOptionCommand[option]!)}: ${
                     optionStrings[option]
                 }`,
         )
@@ -1043,7 +1044,7 @@ export async function generateOptionsMessage(
         .slice(0, Math.ceil(fieldOptions.length / 3))
         .map(
             (option) =>
-                `${clickableSlashCommand(GameOptionCommand[option])}: ${
+                `${clickableSlashCommand(GameOptionCommand[option]!)}: ${
                     optionStrings[option]
                 }`,
         )
@@ -1059,7 +1060,7 @@ export async function generateOptionsMessage(
         )
         .map(
             (option) =>
-                `${clickableSlashCommand(GameOptionCommand[option])}: ${
+                `${clickableSlashCommand(GameOptionCommand[option]!)}: ${
                     optionStrings[option]
                 }`,
         )
@@ -1072,7 +1073,7 @@ export async function generateOptionsMessage(
         .slice(Math.ceil((2 * fieldOptions.length) / 3))
         .map(
             (option) =>
-                `${clickableSlashCommand(GameOptionCommand[option])}: ${
+                `${clickableSlashCommand(GameOptionCommand[option]!)}: ${
                     optionStrings[option]
                 }`,
         )
@@ -1129,7 +1130,7 @@ export async function generateOptionsMessage(
                 "command.options.preset",
             );
         } else {
-            title = updatedOptions[0].option;
+            title = updatedOptions[0]!.option;
         }
 
         title =
@@ -1173,7 +1174,7 @@ export async function generateOptionsMessage(
  * @param interaction - The interaction
  */
 export async function sendOptionsMessage(
-    session: Session,
+    session: Session | undefined,
     messageContext: MessageContext,
     guildPreference: GuildPreference,
     updatedOptions: { option: GameOption; reset: boolean }[],
@@ -1301,6 +1302,11 @@ export async function sendPaginationedEmbed(
     components?: Array<Eris.ActionRow>,
     startPage = 1,
 ): Promise<Eris.Message | null> {
+    if (embeds.length === 0) {
+        logger.warn("sendPaginationedEmbed received embed empty response");
+        return null;
+    }
+
     if (embeds.length > 1) {
         if (
             await textPermissionsCheck(
@@ -1329,7 +1335,7 @@ export async function sendPaginationedEmbed(
     if (typeof embeds[0] === "function") {
         embed = await embeds[0]();
     } else {
-        embed = embeds[0];
+        embed = embeds[0]!;
     }
 
     return sendMessage(
@@ -1612,11 +1618,9 @@ export async function sendBookmarkedSongs(
         }> = [...songs].map((bookmarkedSong) => ({
             name: `${bold(
                 truncatedString(
-                    `"${getLocalizedSongName(
-                        bookmarkedSong[1].song,
+                    `"${bookmarkedSong[1].song.getLocalizedSongName(
                         locale,
-                    )}" - ${getLocalizedArtistName(
-                        bookmarkedSong[1].song,
+                    )}" - ${bookmarkedSong[1].song.getLocalizedArtistName(
                         locale,
                     )}`,
                     256,
@@ -1867,15 +1871,16 @@ export function getInteractionValue(
     let parentInteractionDataName: string | null = null;
     const keys: Array<string> = [];
     while (options.length > 0) {
-        keys.push(options[0].name);
+        const option = options[0]!;
+        keys.push(option.name);
         if (
-            options[0].type ===
+            option.type ===
                 Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND ||
-            options[0].type ===
+            option.type ===
                 Eris.Constants.ApplicationCommandOptionTypes.SUB_COMMAND_GROUP
         ) {
-            parentInteractionDataName = options[0].name;
-            const newOptions = options[0].options;
+            parentInteractionDataName = option.name;
+            const newOptions = option.options;
             if (!newOptions) break;
 
             options = newOptions;
@@ -1913,7 +1918,9 @@ export function getMatchedArtists(enteredNames: Array<string>): {
     const unmatchedGroups: Array<string> = [];
     for (const artistName of enteredNames) {
         const match =
-            State.artistToEntry[normalizePunctuationInName(artistName)];
+            State.artistToEntry[
+                GameRound.normalizePunctuationInName(artistName)
+            ];
 
         if (match) {
             matchedGroups.push(match);
@@ -1988,7 +1995,7 @@ export async function processGroupAutocompleteInteraction(
     }
 
     const focusedVal = interactionData.interactionOptions[focusedKey];
-    const lowercaseUserInput = normalizePunctuationInName(focusedVal);
+    const lowercaseUserInput = GameRound.normalizePunctuationInName(focusedVal);
 
     const previouslyEnteredArtists = getMatchedArtists(
         Object.entries(interactionData.interactionOptions)

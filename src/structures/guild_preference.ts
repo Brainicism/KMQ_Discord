@@ -233,7 +233,6 @@ export default class GuildPreference {
     async validateGameOptions(): Promise<void> {
         const validatedGameOptions = { ...this.gameOptions };
         let newDefaultOptionsAdded = 0;
-        let extraneousKeysRemoved = 0;
         // apply default game option for empty
         for (const defaultOption in GuildPreference.DEFAULT_OPTIONS) {
             if (!(defaultOption in validatedGameOptions)) {
@@ -247,25 +246,11 @@ export default class GuildPreference {
             }
         }
 
-        // extraneous keys
-        // TODO: this doesn't actually remove the entries in the database
-        for (const option in validatedGameOptions) {
-            if (!(option in GuildPreference.DEFAULT_OPTIONS)) {
-                extraneousKeysRemoved++;
-                delete validatedGameOptions[
-                    option as keyof typeof validatedGameOptions
-                ];
-            }
-        }
-
         this.gameOptions = validatedGameOptions;
 
-        if (
-            (newDefaultOptionsAdded || extraneousKeysRemoved) &&
-            process.env.NODE_ENV !== EnvType.TEST
-        ) {
+        if (newDefaultOptionsAdded && process.env.NODE_ENV !== EnvType.TEST) {
             logger.info(
-                `gid: ${this.guildID} | validateGameOptions: options modified during validation (+${newDefaultOptionsAdded} | -${extraneousKeysRemoved})`,
+                `gid: ${this.guildID} | validateGameOptions: options modified during validation (+${newDefaultOptionsAdded})`,
             );
             await this.updateGuildPreferences();
         }
@@ -277,8 +262,11 @@ export default class GuildPreference {
         }
 
         return this.locks.get(guildID)!.runExclusive(async () => {
-            if (guildID in GuildPreference.guildPreferencesCache) {
-                return GuildPreference.guildPreferencesCache[guildID];
+            const cachedGuildPreference =
+                GuildPreference.guildPreferencesCache[guildID];
+
+            if (cachedGuildPreference) {
+                return cachedGuildPreference;
             }
 
             const guildPreferences = await dbContext.kmq
@@ -1025,16 +1013,20 @@ export default class GuildPreference {
             });
         }
 
+        updatedOptions = _.sortBy(updatedOptions, ["optionName"]);
+
         await dbContext.kmq.transaction().execute(async (trx) => {
-            await Promise.all(
-                updatedOptions.map((x) =>
-                    trx
-                        .insertInto("game_options")
-                        .values(x)
-                        .onDuplicateKeyUpdate(x)
-                        .execute(),
-                ),
+            const inserts = updatedOptions.map((x) =>
+                trx
+                    .insertInto("game_options")
+                    .values(x)
+                    .onDuplicateKeyUpdate(x),
             );
+
+            for (const insert of inserts) {
+                // eslint-disable-next-line no-await-in-loop
+                await insert.execute();
+            }
         });
 
         const gameOptionsAreReloadImpacting = !updatedOptions.every((option) =>

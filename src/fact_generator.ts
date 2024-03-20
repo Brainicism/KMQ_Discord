@@ -674,8 +674,8 @@ export default class FactGenerator {
             .limit(25)
             .execute();
 
-        const groupViews = result[0].views;
-        const soloViews = result[1].views;
+        const groupViews = result[0]!.views;
+        const soloViews = result[1]!.views;
         const totalViews = groupViews + soloViews;
         const data = {
             group: {
@@ -783,7 +783,7 @@ export default class FactGenerator {
         );
 
         const proportion =
-            (100 * bigThreeViews) / totalViewsResult[0].total_views;
+            (100 * bigThreeViews) / totalViewsResult[0]!.total_views;
 
         return [
             i18n.internalLocalizer.t("fact.fun.bigThreeDominance", {
@@ -846,7 +846,7 @@ export default class FactGenerator {
             .execute();
 
         if (result.length === 0) return [];
-        const longestKmqGame = result[0];
+        const longestKmqGame = result[0]!;
         return [
             i18n.internalLocalizer.t("fact.kmq.longestGame", {
                 sessionLength: friendlyFormattedNumber(
@@ -875,7 +875,7 @@ export default class FactGenerator {
             .execute();
 
         if (result.length === 0) return [];
-        const mostGamesPlayed = result[0];
+        const mostGamesPlayed = result[0]!;
         return [
             i18n.internalLocalizer.t("fact.kmq.mostActiveServer", {
                 gamesPlayed: friendlyFormattedNumber(
@@ -898,7 +898,7 @@ export default class FactGenerator {
             .execute();
 
         if (result.length === 0) return [];
-        const mostGamesPlayed = result[0];
+        const mostGamesPlayed = result[0]!;
         return [
             i18n.internalLocalizer.t("fact.kmq.mostCorrectGuessesServer", {
                 gamesPlayed: friendlyFormattedNumber(
@@ -919,7 +919,7 @@ export default class FactGenerator {
             .execute();
 
         if (result.length === 0) return [];
-        const totalGamesPlayed = result[0].count;
+        const totalGamesPlayed = result[0]!.count;
         return [
             i18n.internalLocalizer.t("fact.kmq.totalGames", {
                 totalGamesPlayed: friendlyFormattedNumber(totalGamesPlayed),
@@ -1007,7 +1007,7 @@ export default class FactGenerator {
         return [
             i18n.internalLocalizer.t("fact.kmq.mostActivePlayerSongsGuessed", {
                 songsGuessed: friendlyFormattedNumber(
-                    result[0].songs_guessed as number,
+                    result[0]!.songs_guessed as number,
                 ),
                 lng,
             }),
@@ -1026,7 +1026,7 @@ export default class FactGenerator {
         return [
             i18n.internalLocalizer.t("fact.kmq.mostActivePlayerGamesPlayed", {
                 gamesPlayed: friendlyFormattedNumber(
-                    result[0].games_played as number,
+                    result[0]!.games_played as number,
                 ),
                 lng,
             }),
@@ -1121,11 +1121,11 @@ export default class FactGenerator {
 
         return parsedResults.map((x) =>
             i18n.internalLocalizer.t("fact.fun.historicalGaonWeekly", {
-                year: x[0].year,
+                year: x[0]!.year,
                 songName: FactGenerator.generateSongArtistHyperlink(
                     lng,
-                    x[0].songName,
-                    x[0].artistName,
+                    x[0]!.songName,
+                    x[0]!.artistName,
                 ),
                 lng,
             }),
@@ -1142,8 +1142,8 @@ export default class FactGenerator {
             .execute();
 
         const parsedResult = FactGenerator.parseGaonWeeklyRankList(
-            result[0].ranklist,
-            result[0].year,
+            result[0]!.ranklist,
+            result[0]!.year,
         );
 
         return parsedResult.slice(0, 10).map((x, idx) =>

@@ -36,6 +36,7 @@ enum ListType {
     INCLUDES = "includes",
 }
 
+// eslint-disable-next-line import/no-unused-modules
 export default class ListCommand implements BaseCommand {
     validations = {
         minArgCount: 1,

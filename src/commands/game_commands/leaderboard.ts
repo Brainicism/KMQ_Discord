@@ -15,7 +15,6 @@ import {
     sendInfoMessage,
     sendPaginationedEmbed,
 } from "../../helpers/discord_utils";
-import { getRankNameByLevel } from "./profile";
 import { sendValidationErrorMessage } from "../../helpers/validate";
 import EnvType from "../../enums/env_type";
 import Eris from "eris";
@@ -25,6 +24,7 @@ import LeaderboardScope from "../../enums/option_types/leaderboard_scope";
 import LeaderboardType from "../../enums/option_types/leaderboard_type";
 import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
+import ProfileCommand from "./profile";
 import State from "../../state";
 import dbContext from "../../database_context";
 import i18n from "../../helpers/localization_manager";
@@ -43,11 +43,6 @@ enum LeaderboardAction {
     UNENROLL = "unenroll",
 }
 
-const leaderboardQuotes = [
-    "command.leaderboard.quote.name",
-    "command.leaderboard.quote.nextPage",
-];
-
 interface TopPlayerBase {
     player_id: string;
     level: number;
@@ -60,6 +55,11 @@ type TopSongsGuessedPlayer = TopPlayerBase & {
 };
 
 export default class LeaderboardCommand implements BaseCommand {
+    static leaderboardQuotes = [
+        "command.leaderboard.quote.name",
+        "command.leaderboard.quote.nextPage",
+    ];
+
     aliases = ["lb"];
 
     validations = {
@@ -390,7 +390,7 @@ export default class LeaderboardCommand implements BaseCommand {
             return;
         }
 
-        let arg = parsedMessage.components[0];
+        let arg = parsedMessage.components[0] as string;
         const messageContext = MessageContext.fromMessage(message);
         if (
             Object.values(LeaderboardAction).includes(arg as LeaderboardAction)
@@ -463,7 +463,7 @@ export default class LeaderboardCommand implements BaseCommand {
             return;
         }
 
-        arg = parsedMessage.components[1];
+        arg = parsedMessage.components[1] as string;
         if (Object.values(LeaderboardScope).includes(arg as LeaderboardScope)) {
             scope = arg as LeaderboardScope;
         } else if (
@@ -502,7 +502,7 @@ export default class LeaderboardCommand implements BaseCommand {
             return;
         }
 
-        arg = parsedMessage.components[2];
+        arg = parsedMessage.components[2] as string;
         if (
             Object.values(LeaderboardDuration).includes(
                 arg as LeaderboardDuration,
@@ -557,6 +557,7 @@ export default class LeaderboardCommand implements BaseCommand {
         invokerId: string,
         date?: Date,
     ): Promise<{ embeds: Array<EmbedGenerator>; pageCount: number }> {
+        const session = State.gameSessions[messageContext.guildID];
         const embedsFns: Array<EmbedGenerator> = [];
         const permanentLb = duration === LeaderboardDuration.ALL_TIME;
         const dbTable = permanentLb
@@ -634,10 +635,9 @@ export default class LeaderboardCommand implements BaseCommand {
                 serverPlayers,
             );
         } else if (scope === LeaderboardScope.GAME) {
-            const participantIDs =
-                State.gameSessions[
-                    messageContext.guildID
-                ].scoreboard.getPlayerIDs();
+            const participantIDs = !session
+                ? []
+                : session.scoreboard.getPlayerIDs();
 
             const gamePlayers = (
                 await dbContext.kmq
@@ -828,10 +828,11 @@ export default class LeaderboardCommand implements BaseCommand {
                                                     friendlyFormattedNumber(
                                                         player.level,
                                                     ),
-                                                rankName: getRankNameByLevel(
-                                                    player.level,
-                                                    messageContext.guildID,
-                                                ),
+                                                rankName:
+                                                    ProfileCommand.getRankNameByLevel(
+                                                        player.level,
+                                                        messageContext.guildID,
+                                                    ),
                                             },
                                         );
                                     } else {
@@ -1071,7 +1072,9 @@ export default class LeaderboardCommand implements BaseCommand {
                             footer: {
                                 text: i18n.translate(
                                     messageContext.guildID,
-                                    chooseRandom(leaderboardQuotes),
+                                    chooseRandom(
+                                        LeaderboardCommand.leaderboardQuotes,
+                                    ),
                                     {
                                         command: `/help action:${COMMAND_NAME}`,
                                     },
@@ -1182,7 +1185,8 @@ export default class LeaderboardCommand implements BaseCommand {
         );
 
         if (scope === LeaderboardScope.GAME) {
-            if (!State.gameSessions[messageContext.guildID]) {
+            const session = State.gameSessions[messageContext.guildID];
+            if (!session) {
                 await sendErrorMessage(
                     messageContext,
                     {
@@ -1203,10 +1207,7 @@ export default class LeaderboardCommand implements BaseCommand {
                 return;
             }
 
-            const participantIDs =
-                State.gameSessions[
-                    messageContext.guildID
-                ].scoreboard.getPlayerIDs();
+            const participantIDs = session.scoreboard.getPlayerIDs();
 
             if (participantIDs.length === 0) {
                 await sendErrorMessage(

@@ -19,14 +19,14 @@ const dynamicTranslationKeyAllowlist = [
     "`command.locale.language.${localeType}`",
     "highestRankTitle.title",
     "rankTitle.title",
-    "RANK_TITLES[0].title",
+    "ProfileCommand.RANK_TITLES[0]!.title",
     'x["badge_name"]',
     "endGameMessage.title",
     "endGameMessage.message",
-    "chooseRandom(leaderboardQuotes)",
+    `chooseRandom(LeaderboardCommand.leaderboardQuotes,)`,
     "gameInfoMessage.message",
     "gameInfoMessage.title",
-    "getOrdinalNum(idx + 1)",
+    "getOrdinalNum(idx+1)",
     "`command.groups.interaction.${action}.perGroupDescription`",
     "`command.groups.interaction.${action}.description`",
     "`command.exclude.interaction.${action}.perGroupDescription`",
@@ -37,7 +37,7 @@ const dynamicTranslationKeyAllowlist = [
     "translationKey",
     "feedbackQuestion.question",
     "feedbackQuestion.placeholder",
-    "FEEDBACK_QUESTIONS[questionIndex].question",
+    "FeedbackCommand.FEEDBACK_QUESTIONS[questionIndex]!.question",
     "`command.upcomingreleases.${release.releaseType}`",
     "`command.include.help.interaction.${action}.description`",
     "`command.include.help.interaction.${action}.perGroupDescription`",
@@ -71,6 +71,10 @@ function getNodeKeys(node: Node): void {
                 ? expression.arguments[1]
                 : expression.arguments[0];
 
+            if (!translationKeyNode) {
+                return;
+            }
+
             const keyText =
                 translationKeyNode.kind === SyntaxKind.StringLiteral
                     ? translationKeyNode.getText().slice(1, -1)
@@ -98,8 +102,12 @@ function getNodeKeys(node: Node): void {
 
                     translationKeys.add(nestedChildKeyText);
                 }
-            } else if (!dynamicTranslationKeyAllowlist.includes(keyText)) {
-                dynamicTranslationKeys.add(keyText);
+            } else if (
+                !dynamicTranslationKeyAllowlist.includes(
+                    keyText.replace(/\s/g, ""),
+                )
+            ) {
+                dynamicTranslationKeys.add(keyText.replace(/\s/g, ""));
             }
 
             logger.info(

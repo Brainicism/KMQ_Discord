@@ -21,10 +21,10 @@ import type HelpDocumentation from "../../interfaces/help";
 const COMMAND_NAME = "guess";
 const logger = new IPCLogger(COMMAND_NAME);
 
-const MIN_GUESS_LENGTH = 1;
-const MAX_GUESS_LENGTH = 500;
-
+// eslint-disable-next-line import/no-unused-modules
 export default class GuessCommand implements BaseCommand {
+    static MIN_GUESS_LENGTH = 1;
+    static MAX_GUESS_LENGTH = 500;
     aliases = [];
     validations = {
         minArgCount: 1,
@@ -67,8 +67,8 @@ export default class GuessCommand implements BaseCommand {
                     },
                     type: Eris.Constants.ApplicationCommandOptionTypes.STRING,
                     required: true,
-                    min_length: MIN_GUESS_LENGTH,
-                    max_length: MAX_GUESS_LENGTH,
+                    min_length: GuessCommand.MIN_GUESS_LENGTH,
+                    max_length: GuessCommand.MAX_GUESS_LENGTH,
                 },
             ],
         },

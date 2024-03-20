@@ -22,10 +22,6 @@ import {
     sendMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import {
-    getLocalizedArtistName,
-    getLocalizedSongName,
-} from "../../helpers/game_utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameOption from "../../enums/game_option_name";
@@ -51,6 +47,7 @@ const enum PlaylistCommandAction {
     MATCHES = "matches",
 }
 
+// eslint-disable-next-line import/no-unused-modules
 export default class PlaylistCommand implements BaseCommand {
     aliases = ["spotify", "youtube"];
 
@@ -582,10 +579,9 @@ export default class PlaylistCommand implements BaseCommand {
 
         const matchedSongs = playlist.matchedSongs.map(
             (song, index) =>
-                `${index + 1}. "${getLocalizedSongName(
-                    song,
+                `${index + 1}. "${song.getLocalizedSongName(
                     locale,
-                )}" - ${getLocalizedArtistName(song, locale)}${
+                )}" - ${song.getLocalizedArtistName(locale)}${
                     showLink ? ` (${song.youtubeLink})` : ""
                 }`,
         );

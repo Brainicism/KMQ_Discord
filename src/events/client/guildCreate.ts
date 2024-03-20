@@ -21,7 +21,7 @@ export default async function guildCreateHandler(
     if (DiscordPreferredLocaleToInternal[guild.preferredLocale]) {
         await LocaleTypeCommand.updateLocale(
             guild.id,
-            DiscordPreferredLocaleToInternal[guild.preferredLocale],
+            DiscordPreferredLocaleToInternal[guild.preferredLocale]!,
         );
     }
 
