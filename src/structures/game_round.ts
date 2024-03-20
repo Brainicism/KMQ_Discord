@@ -247,13 +247,21 @@ export default class GameRound extends Round {
             artistGuessResult.exact ||
             (typosAllowed && artistGuessResult.similar);
 
-        if (guessModeType === GuessModeType.SONG_NAME) {
-            pointReward = isSongGuessCorrect ? 1 : 0;
-        } else if (guessModeType === GuessModeType.ARTIST) {
-            pointReward = isArtistGuessCorrect ? 1 : 0;
-        } else if (guessModeType === GuessModeType.BOTH) {
-            if (isSongGuessCorrect) pointReward = 1;
-            if (isArtistGuessCorrect) pointReward = 0.2;
+        switch (guessModeType) {
+            case GuessModeType.SONG_NAME:
+                pointReward = isSongGuessCorrect ? 1 : 0;
+                break;
+            case GuessModeType.ARTIST:
+                pointReward = isArtistGuessCorrect ? 1 : 0;
+                break;
+            case GuessModeType.BOTH:
+                if (isSongGuessCorrect) pointReward = 1;
+                if (isArtistGuessCorrect) pointReward = 0.2;
+                break;
+            default:
+                logger.error(`Unexpected guessModeType: ${guessModeType}`);
+                pointReward = isSongGuessCorrect ? 1 : 0;
+                break;
         }
 
         return this.hintUsed ? pointReward / 2 : pointReward;

@@ -240,13 +240,17 @@ export default class ReleaseCommand implements BaseCommand {
         let releaseValue: ReleaseType | null;
 
         const action = interactionName as OptionAction;
-        if (action === OptionAction.RESET) {
-            releaseValue = null;
-        } else if (action === OptionAction.SET) {
-            releaseValue = interactionOptions["release"] as ReleaseType;
-        } else {
-            logger.error(`Unexpected interaction name: ${interactionName}`);
-            releaseValue = null;
+        switch (action) {
+            case OptionAction.RESET:
+                releaseValue = null;
+                break;
+            case OptionAction.SET:
+                releaseValue = interactionOptions["release"] as ReleaseType;
+                break;
+            default:
+                logger.error(`Unexpected interaction name: ${interactionName}`);
+                releaseValue = null;
+                break;
         }
 
         await ReleaseCommand.updateOption(

@@ -323,13 +323,17 @@ export default class AnswerCommand implements BaseCommand {
 
         let answerType: AnswerType | null;
         const action = interactionName as OptionAction;
-        if (action === OptionAction.RESET) {
-            answerType = null;
-        } else if (action === OptionAction.SET) {
-            answerType = interactionOptions["answer"] as AnswerType;
-        } else {
-            logger.error(`Unexpected interaction name: ${action}`);
-            answerType = null;
+        switch (action) {
+            case OptionAction.RESET:
+                answerType = null;
+                break;
+            case OptionAction.SET:
+                answerType = interactionOptions["answer"] as AnswerType;
+                break;
+            default:
+                logger.error(`Unexpected interaction name: ${action}`);
+                answerType = null;
+                break;
         }
 
         await AnswerCommand.updateOption(

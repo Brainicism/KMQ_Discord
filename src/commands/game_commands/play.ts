@@ -463,9 +463,9 @@ export default class PlayCommand implements BaseCommand {
             return;
         }
 
-        const gameSession = Session.getSession(
-            interaction.guildID!,
-        ) as GameSession;
+        const gameSession = Session.getSession(interaction.guildID!) as
+            | GameSession
+            | undefined;
 
         if (!gameSession || gameSession.gameType !== GameType.TEAMS) {
             await tryAutocompleteInteractionAcknowledge(interaction, []);
@@ -595,7 +595,7 @@ export default class PlayCommand implements BaseCommand {
 
             await PlayCommand.sendBeginGameSessionMessage(
                 channel.name,
-                voiceChannel!.name ?? "unknown",
+                voiceChannel?.name ?? "unknown",
                 messageContext,
                 participantIDs,
                 guildPreference,
@@ -617,9 +617,9 @@ export default class PlayCommand implements BaseCommand {
         teamName: string,
         interaction?: Eris.CommandInteraction,
     ): Promise<void> {
-        const gameSession = Session.getSession(
-            messageContext.guildID,
-        ) as GameSession;
+        const gameSession = Session.getSession(messageContext.guildID) as
+            | GameSession
+            | undefined;
 
         if (!gameSession || gameSession.gameType !== GameType.TEAMS) {
             await sendErrorMessage(

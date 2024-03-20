@@ -213,7 +213,7 @@ export default class GameSession extends Session {
             return null;
         }
 
-        const round = (await super.startRound(messageContext)) as GameRound;
+        const round = await super.startRound(messageContext);
 
         if (!round) {
             return null;
@@ -221,7 +221,10 @@ export default class GameSession extends Session {
 
         if (this.isHiddenMode()) {
             // Show players that haven't guessed and a button to guess
-            await this.sendHiddenGuessMessage(messageContext, round);
+            await this.sendHiddenGuessMessage(
+                messageContext,
+                round as GameRound,
+            );
         }
 
         if (this.isMultipleChoiceMode()) {
@@ -258,7 +261,7 @@ export default class GameSession extends Session {
         await super.endRound(false, messageContext);
 
         try {
-            await round.interactionMarkAnswers(correctGuessers.length ?? 0);
+            await round.interactionMarkAnswers(correctGuessers.length || 0);
         } catch (e) {
             logger.warn(
                 `Failed to mark interaction answers. Bot potentially left server? e = ${e}`,
@@ -308,69 +311,65 @@ export default class GameSession extends Session {
             this.guildPreference,
         );
 
-        if (messageContext) {
-            let roundResultIDs: Array<string>;
-            const playerRoundResults = round.playerRoundResults;
+        let roundResultIDs: Array<string>;
+        const playerRoundResults = round.playerRoundResults;
 
-            if (this.scoreboard instanceof TeamScoreboard) {
-                const teamScoreboard = this.scoreboard as TeamScoreboard;
-                roundResultIDs = playerRoundResults.map(
-                    (x) => teamScoreboard.getTeamOfPlayer(x.player.id)!.id,
-                );
-            } else {
-                roundResultIDs = playerRoundResults.map((x) => x.player.id);
-            }
+        if (this.scoreboard instanceof TeamScoreboard) {
+            const teamScoreboard = this.scoreboard as TeamScoreboard;
+            roundResultIDs = playerRoundResults.map(
+                (x) => teamScoreboard.getTeamOfPlayer(x.player.id)!.id,
+            );
+        } else {
+            roundResultIDs = playerRoundResults.map((x) => x.player.id);
+        }
 
-            const useLargerScoreboard =
-                this.scoreboard.shouldUseLargerScoreboard();
+        const useLargerScoreboard = this.scoreboard.shouldUseLargerScoreboard();
 
-            const fields: Eris.EmbedField[] =
-                this.scoreboard.getScoreboardEmbedFields(
-                    false,
-                    true,
+        const fields: Eris.EmbedField[] =
+            this.scoreboard.getScoreboardEmbedFields(
+                false,
+                true,
+                messageContext.guildID,
+                roundResultIDs,
+            );
+
+        let scoreboardTitle = "";
+        if (!useLargerScoreboard) {
+            scoreboardTitle = "\n\n";
+            scoreboardTitle += bold(
+                i18n.translate(
                     messageContext.guildID,
-                    roundResultIDs,
-                );
-
-            let scoreboardTitle = "";
-            if (!useLargerScoreboard) {
-                scoreboardTitle = "\n\n";
-                scoreboardTitle += bold(
-                    i18n.translate(
-                        messageContext.guildID,
-                        "command.score.scoreboardTitle",
-                    ),
-                );
-            }
-
-            const description = `${round.getEndRoundDescription(
-                messageContext,
-                this.guildPreference.songSelector.getUniqueSongCounter(),
-                playerRoundResults,
-                this.isHiddenMode(),
-            )}${scoreboardTitle}`;
-
-            const correctGuess = playerRoundResults.length > 0;
-            const embedColor = round.getEndRoundColor(
-                correctGuess,
-                await userBonusIsActive(
-                    playerRoundResults[0]?.player.id ??
-                        messageContext.author.id,
+                    "command.score.scoreboardTitle",
                 ),
             );
-
-            const endRoundMessage = await this.sendRoundMessage(
-                messageContext,
-                fields,
-                round,
-                description,
-                embedColor,
-                correctGuess && !this.isMultipleChoiceMode(),
-                remainingDuration,
-            );
-
-            round.roundMessageID = endRoundMessage?.id as string;
         }
+
+        const description = `${round.getEndRoundDescription(
+            messageContext,
+            this.guildPreference.songSelector.getUniqueSongCounter(),
+            playerRoundResults,
+            this.isHiddenMode(),
+        )}${scoreboardTitle}`;
+
+        const correctGuess = playerRoundResults.length > 0;
+        const embedColor = round.getEndRoundColor(
+            correctGuess,
+            await userBonusIsActive(
+                playerRoundResults[0]?.player.id ?? messageContext.author.id,
+            ),
+        );
+
+        const endRoundMessage = await this.sendRoundMessage(
+            messageContext,
+            fields,
+            round,
+            description,
+            embedColor,
+            correctGuess && !this.isMultipleChoiceMode(),
+            remainingDuration,
+        );
+
+        round.roundMessageID = endRoundMessage?.id as string;
 
         this.updateBookmarkSongList(round);
 
@@ -755,10 +754,6 @@ export default class GameSession extends Session {
      * @param inVC - Whether the player is currently in the voice channel
      */
     async setPlayerInVC(userID: string, inVC: boolean): Promise<void> {
-        if (!this.scoreboard) {
-            return;
-        }
-
         const user = await fetchUser(userID);
         if (
             inVC &&

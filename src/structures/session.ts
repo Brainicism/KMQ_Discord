@@ -252,7 +252,7 @@ export default abstract class Session {
 
         const voiceChannel = State.client.getChannel(
             this.voiceChannelID,
-        ) as Eris.VoiceChannel;
+        ) as Eris.VoiceChannel | null;
 
         if (!voiceChannel || voiceChannel.voiceMembers.size === 0) {
             await this.endSession(
@@ -357,7 +357,7 @@ export default abstract class Session {
             voiceConnection.stopPlaying();
             const voiceChannel = State.client.getChannel(
                 voiceConnection.channelID,
-            ) as Eris.VoiceChannel;
+            ) as Eris.VoiceChannel | null;
 
             if (voiceChannel) {
                 try {
@@ -664,14 +664,17 @@ export default abstract class Session {
             songDuration = 60;
         }
 
-        if (seekType === SeekType.BEGINNING) {
-            seekLocation = 0;
-        } else {
-            if (seekType === SeekType.RANDOM) {
-                seekLocation = songDuration * (0.6 * Math.random());
-            } else if (seekType === SeekType.MIDDLE) {
+        switch (seekType) {
+            case SeekType.BEGINNING:
+                seekLocation = 0;
+                break;
+            case SeekType.MIDDLE:
                 seekLocation = songDuration * (0.4 + 0.2 * Math.random());
-            }
+                break;
+            case SeekType.RANDOM:
+            default:
+                seekLocation = songDuration * (0.6 * Math.random());
+                break;
         }
 
         const stream = fs.createReadStream(songLocation);

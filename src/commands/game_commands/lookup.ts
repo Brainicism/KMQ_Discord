@@ -224,7 +224,7 @@ export default class LookupCommand implements BaseCommand {
         arg: string,
         artistID?: number,
     ): Promise<void> {
-        let linkOrName = arg ?? "";
+        let linkOrName = arg || "";
         if (linkOrName.startsWith("<") && linkOrName.endsWith(">")) {
             // Trim <> if user didn't want to show YouTube embed
             linkOrName = linkOrName.slice(1, -1);

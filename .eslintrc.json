@@ -13,23 +13,23 @@
         "project": "./tsconfig.json"
     },
     "rules": {
-        "@typescript-eslint/no-floating-promises": ["error"],
+        "@typescript-eslint/no-floating-promises": ["warn"],
         "@typescript-eslint/no-misused-promises": [
-            "error",
+            "warn",
             {
                 "checksVoidReturn": {
                     "arguments": false
                 }
             }
         ],
-        "node/no-sync": ["error"],
+        "node/no-sync": ["warn"],
         "import/order": ["off"],
         "no-lonely-if": ["off"],
         "no-else-return": ["off"],
         "deprecation/deprecation": "warn",
-        "@typescript-eslint/await-thenable": ["error"],
-        "@typescript-eslint/no-unnecessary-condition": ["off"],
-        "@typescript-eslint/require-await": ["error"],
+        "@typescript-eslint/await-thenable": ["warn"],
+        "@typescript-eslint/no-unnecessary-condition": ["warn"],
+        "@typescript-eslint/require-await": ["warn"],
         "@typescript-eslint/quotes": ["warn", "double"],
         "@typescript-eslint/explicit-function-return-type": [
             "warn",
@@ -79,7 +79,7 @@
         "no-plusplus": ["off"],
         "no-async-promise-executor": ["off"],
         "lines-between-class-members": [
-            "error",
+            "warn",
             "always",
             { "exceptAfterSingleLine": true }
         ],

@@ -283,13 +283,17 @@ export default class SpecialCommand implements BaseCommand {
         let specialValue: SpecialType | null;
 
         const action = interactionName as OptionAction;
-        if (action === OptionAction.RESET) {
-            specialValue = null;
-        } else if (action === OptionAction.SET) {
-            specialValue = interactionOptions["special"] as SpecialType;
-        } else {
-            logger.error(`Unexpected interaction name: ${interactionName}`);
-            specialValue = null;
+        switch (action) {
+            case OptionAction.RESET:
+                specialValue = null;
+                break;
+            case OptionAction.SET:
+                specialValue = interactionOptions["special"] as SpecialType;
+                break;
+            default:
+                logger.error(`Unexpected interaction name: ${interactionName}`);
+                specialValue = null;
+                break;
         }
 
         await SpecialCommand.updateOption(

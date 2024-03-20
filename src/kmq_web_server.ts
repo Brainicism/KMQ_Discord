@@ -227,7 +227,10 @@ export default class KmqWebServer {
                         let healthIndicator: HealthIndicator;
                         if (rawShardData.ready === false)
                             healthIndicator = HealthIndicator.UNHEALTHY;
-                        else if (rawShardData.latency > 300)
+                        else if (
+                            rawShardData.latency &&
+                            rawShardData.latency > 300
+                        )
                             healthIndicator = HealthIndicator.WARNING;
                         else healthIndicator = HealthIndicator.HEALTHY;
                         return {

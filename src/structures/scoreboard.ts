@@ -257,8 +257,8 @@ export default class Scoreboard {
                     currentRanking[x.getScore()]!,
                     inProgress,
                 )} ${x.getDisplayedName(
-                    roundWinnerIDs && roundWinnerIDs[0] === x.id,
-                    roundWinnerIDs?.includes(x.id),
+                    roundWinnerIDs.length > 0 && roundWinnerIDs[0] === x.id,
+                    roundWinnerIDs.includes(x.id),
                     false,
                 )}`,
                 value: `${x.getDisplayedScore()}${
@@ -311,8 +311,8 @@ export default class Scoreboard {
                             inProgress,
                         ),
                     )} ${x.getDisplayedName(
-                        roundWinnerIDs && roundWinnerIDs[0] === x.id,
-                        roundWinnerIDs?.includes(x.id),
+                        roundWinnerIDs.length > 0 && roundWinnerIDs[0] === x.id,
+                        roundWinnerIDs.includes(x.id),
                         true,
                     )}: ${x.getDisplayedScore()}${
                         showExp

@@ -257,15 +257,19 @@ export default class SubunitsCommand implements BaseCommand {
         let subunitsValue: SubunitsPreference | null;
 
         const action = interactionName as OptionAction;
-        if (action === OptionAction.RESET) {
-            subunitsValue = null;
-        } else if (action === OptionAction.SET) {
-            subunitsValue = interactionOptions[
-                "subunits"
-            ] as SubunitsPreference;
-        } else {
-            logger.error(`Unexpected interaction name: ${interactionName}`);
-            subunitsValue = null;
+        switch (action) {
+            case OptionAction.RESET:
+                subunitsValue = null;
+                break;
+            case OptionAction.SET:
+                subunitsValue = interactionOptions[
+                    "subunits"
+                ] as SubunitsPreference;
+                break;
+            default:
+                logger.error(`Unexpected interaction name: ${interactionName}`);
+                subunitsValue = null;
+                break;
         }
 
         await SubunitsCommand.updateOption(

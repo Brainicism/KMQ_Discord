@@ -246,15 +246,19 @@ export default class OstCommand implements BaseCommand {
             getInteractionValue(interaction);
 
         let ostValue: OstPreference | null;
-
         const action = interactionName as OptionAction;
-        if (action === OptionAction.RESET) {
-            ostValue = null;
-        } else if (action === OptionAction.SET) {
-            ostValue = interactionOptions["ost"] as OstPreference;
-        } else {
-            logger.error(`Unexpected interaction name: ${interactionName}`);
-            ostValue = null;
+        switch (action) {
+            case OptionAction.RESET:
+                ostValue = null;
+                break;
+            case OptionAction.SET:
+                ostValue = interactionOptions["ost"] as OstPreference;
+
+                break;
+            default:
+                logger.error(`Unexpected interaction name: ${interactionName}`);
+                ostValue = null;
+                break;
         }
 
         await OstCommand.updateOption(messageContext, ostValue, interaction);

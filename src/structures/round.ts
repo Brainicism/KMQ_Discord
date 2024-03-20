@@ -105,7 +105,7 @@ export default abstract class Round {
         messageContext: MessageContext,
         uniqueSongCounter: UniqueSongCounter,
     ): string {
-        if (!uniqueSongCounter || uniqueSongCounter.uniqueSongsPlayed === 0) {
+        if (uniqueSongCounter.uniqueSongsPlayed === 0) {
             return "";
         }
 

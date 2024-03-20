@@ -241,15 +241,19 @@ export default class MultiGuessCommand implements BaseCommand {
         let multiguessValue: MultiGuessType | null;
 
         const action = interactionName as OptionAction;
-        if (action === OptionAction.RESET) {
-            multiguessValue = null;
-        } else if (action === OptionAction.SET) {
-            multiguessValue = interactionOptions[
-                "multiguess"
-            ] as MultiGuessType;
-        } else {
-            logger.error(`Unexpected interaction name: ${interactionName}`);
-            multiguessValue = null;
+        switch (action) {
+            case OptionAction.RESET:
+                multiguessValue = null;
+                break;
+            case OptionAction.SET:
+                multiguessValue = interactionOptions[
+                    "multiguess"
+                ] as MultiGuessType;
+                break;
+            default:
+                logger.error(`Unexpected interaction name: ${interactionName}`);
+                multiguessValue = null;
+                break;
         }
 
         await MultiGuessCommand.updateOption(

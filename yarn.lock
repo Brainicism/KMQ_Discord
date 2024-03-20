@@ -1437,9 +1437,9 @@ enabled@2.0.x:
   resolved "https://registry.yarnpkg.com/enabled/-/enabled-2.0.0.tgz#f9dd92ec2d6f4bbc0d5d1e64e21d61cd4665e7c2"
   integrity sha512-AKrN98kuwOzMIdAizXGI86UFBoo26CL21UM763y1h/GMSJ4/OHU9k2YlsmBpyScFo/wbLzWQJBMCW4+IO3/+OQ==
 
-"eris-fleet@https://github.com/Brainicism/eris-fleet#e3af903":
+"eris-fleet@https://github.com/Brainicism/eris-fleet#9916334":
   version "1.0.2"
-  resolved "https://github.com/Brainicism/eris-fleet#e3af9038059e51463db334c7c1b12b0ad525b57d"
+  resolved "https://github.com/Brainicism/eris-fleet#99163340e4637d7b216b6727d80584e53f161f93"
 
 "eris-pagination@https://github.com/Brainicism/eris-pagination#9a112cb":
   version "0.5.2"

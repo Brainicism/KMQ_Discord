@@ -64,22 +64,10 @@ export class DatabaseContext {
     }
 
     async destroy(): Promise<void> {
-        if (this.kmq) {
-            await this.kmq.destroy();
-        }
-
-        if (this.kpopVideos) {
-            await this.kpopVideos.destroy();
-        }
-
-        if (this.agnostic) {
-            await this.agnostic.destroy();
-        }
-
-        if (this.kpopVideosValidation) {
-            await this.kpopVideosValidation.destroy();
-        }
-
+        await this.kmq.destroy();
+        await this.kpopVideos.destroy();
+        await this.agnostic.destroy();
+        await this.kpopVideosValidation.destroy();
         await this.infoSchema.destroy();
     }
 }
