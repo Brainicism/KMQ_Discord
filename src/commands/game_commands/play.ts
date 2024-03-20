@@ -946,6 +946,24 @@ export default class PlayCommand implements BaseCommand {
             }
         }
 
+        if (State.playlistManager.isParseInProgress(guildID)) {
+            await sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        guildID,
+                        "command.play.failure.playlistParseInProgress.title",
+                    ),
+                    description: i18n.translate(
+                        guildID,
+                        "command.play.failure.playlistParseInProgress.description",
+                    ),
+                },
+                interaction,
+            );
+            return;
+        }
+
         if (hiddenMode) {
             await AnswerCommand.setAnswerHidden(guildPreference);
         }

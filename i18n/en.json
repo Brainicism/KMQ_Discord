@@ -878,6 +878,10 @@
                         "join": "{{join}} team_name:[team name] a team"
                     },
                     "title": "Ignoring {{playOldGameType}}"
+                },
+                "playlistParseInProgress": {
+                    "description": "Please wait for the current playlist to finish loading before starting a new game.",
+                    "title": "Playlist Parsing in Progress"
                 }
             },
             "gameStarting": "Game Starting in #{{textChannelName}} in 🔊 {{voiceChannelName}}",

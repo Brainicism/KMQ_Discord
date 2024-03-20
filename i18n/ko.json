@@ -878,6 +878,10 @@
                         "join": "{{join}} team_name:[팀 이름] 팀에 입장하셨습니다."
                     },
                     "title": "{{playOldGameType}} 무시"
+                },
+                "playlistParseInProgress": {
+                    "description": "새 게임을 시작하기 전에 현재 재생 목록이 완전히 로드될 때까지 기다려 주세요.",
+                    "title": "재생 목록 분석 중"
                 }
             },
             "gameStarting": "#{{textChannelName}}의 🔊 {{voiceChannelName}}에서 게임 시작",

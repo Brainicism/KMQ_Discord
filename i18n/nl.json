@@ -831,7 +831,7 @@
             "notSet": "Niet ingesteld",
             "overview": "Nu wordt afgespeeld: de top {{limit}} van {{totalSongs}} beschikbare nummers met de volgende opties:",
             "perCommandHelp": "Zoek je informatie over het gebruik van een opdracht? Bekijk {{helpCommand}} action:[command] voor meer informatie.",
-            "playlistParseInProgress": "Opmerking: Het parsen van afspeellijsten is bezig.",
+            "playlistParseInProgress": "Opmerking: Playlist parsing is bezig.",
             "preset": "Voorinstelling",
             "reset": "{{presetOrOption}} reset",
             "spotify": "Nu worden {{songCount}} nummers van Spotify afgespeeld met de volgende opties:",
@@ -878,6 +878,10 @@
                         "join": "{{join}} team_name:[teamnaam] een team"
                     },
                     "title": "Negeer {{playOldGameType}}"
+                },
+                "playlistParseInProgress": {
+                    "description": "Gelieve te wachten tot de huidige playlist volledig is geladen voordat u een nieuw spel start.",
+                    "title": "Playlist Parsing in Uitvoering"
                 }
             },
             "gameStarting": "Spel start in #{{textChannelName}} in 🔊 {{voiceChannelName}}",
