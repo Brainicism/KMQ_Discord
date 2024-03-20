@@ -1,11 +1,8 @@
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
+import { chooseRandom, discordDateFormat } from "../../helpers/utils";
 import {
-    chooseRandom,
     clickableSlashCommand,
-    discordDateFormat,
-} from "../../helpers/utils";
-import {
     getDebugLogHeader,
     getInteractionValue,
     sendDeprecatedTextCommandMessage,

@@ -5,8 +5,8 @@ import {
     OptionAction,
 } from "../../constants";
 import { IPCLogger } from "../../logger";
-import { clickableSlashCommand, setIntersection } from "../../helpers/utils";
 import {
+    clickableSlashCommand,
     generateOptionsMessage,
     getDebugLogHeader,
     notifyOptionsGenerationError,
@@ -17,6 +17,7 @@ import {
     getMatchingGroupNames,
     getSimilarGroupNames,
 } from "../../helpers/game_utils";
+import { setIntersection } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";

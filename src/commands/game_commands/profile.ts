@@ -3,12 +3,6 @@ import { CUM_EXP_TABLE, EPHEMERAL_MESSAGE_FLAG } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     clickableSlashCommand,
-    discordDateFormat,
-    friendlyFormattedNumber,
-    romanize,
-    visualProgressBar,
-} from "../../helpers/utils";
-import {
     fetchUser,
     getDebugLogHeader,
     getInteractionValue,
@@ -17,6 +11,12 @@ import {
     sendInfoMessage,
     tryCreateInteractionErrorAcknowledgement,
 } from "../../helpers/discord_utils";
+import {
+    discordDateFormat,
+    friendlyFormattedNumber,
+    romanize,
+    visualProgressBar,
+} from "../../helpers/utils";
 import Eris from "eris";
 import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
