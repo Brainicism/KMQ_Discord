@@ -6,12 +6,6 @@ import {
 } from "../../constants";
 import {
     clickableSlashCommand,
-    friendlyFormattedNumber,
-    isValidURL,
-    italicize,
-    standardDateFormat,
-} from "../../helpers/utils";
-import {
     generateEmbed,
     generateOptionsMessage,
     getDebugLogHeader,
@@ -22,6 +16,12 @@ import {
     sendMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
+import {
+    friendlyFormattedNumber,
+    isValidURL,
+    italicize,
+    standardDateFormat,
+} from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameOption from "../../enums/game_option_name";

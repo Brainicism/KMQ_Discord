@@ -2,7 +2,6 @@ import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import {
     chunkArray,
-    clickableSlashCommand,
     containsHangul,
     friendlyFormattedDate,
     friendlyFormattedNumber,
@@ -10,6 +9,7 @@ import {
     truncatedString,
 } from "../../helpers/utils";
 import {
+    clickableSlashCommand,
     getAllClickableSlashCommands,
     getDebugLogHeader,
     getInteractionValue,

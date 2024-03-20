@@ -1,11 +1,8 @@
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
+import { chunkArray, discordDateFormat } from "../../helpers/utils";
 import {
-    chunkArray,
     clickableSlashCommand,
-    discordDateFormat,
-} from "../../helpers/utils";
-import {
     getDebugLogHeader,
     getInteractionValue,
     sendDeprecatedTextCommandMessage,

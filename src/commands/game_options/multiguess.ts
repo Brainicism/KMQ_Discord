@@ -1,7 +1,7 @@
 import { DEFAULT_MULTIGUESS_TYPE, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
-import { clickableSlashCommand } from "../../helpers/utils";
 import {
+    clickableSlashCommand,
     getDebugLogHeader,
     getInteractionValue,
     sendOptionsMessage,

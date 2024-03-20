@@ -6,8 +6,8 @@ import {
     OptionAction,
 } from "../../constants";
 import { IPCLogger } from "../../logger";
-import { clickableSlashCommand, getOrdinalNum } from "../../helpers/utils";
 import {
+    clickableSlashCommand,
     generateOptionsMessage,
     getDebugLogHeader,
     getInteractionValue,
@@ -22,6 +22,7 @@ import {
     getMatchingGroupNames,
     getSimilarGroupNames,
 } from "../../helpers/game_utils";
+import { getOrdinalNum } from "../../helpers/utils";
 import AddCommand, { AddType } from "./add";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";

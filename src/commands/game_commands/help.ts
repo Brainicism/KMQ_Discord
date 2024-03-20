@@ -1,7 +1,8 @@
 import { IPCLogger } from "../../logger";
 import { KmqImages, MAX_AUTOCOMPLETE_FIELDS } from "../../constants";
-import { chunkArray, clickableSlashCommand } from "../../helpers/utils";
+import { chunkArray } from "../../helpers/utils";
 import {
+    clickableSlashCommand,
     getDebugLogHeader,
     getInteractionValue,
     sendErrorMessage,

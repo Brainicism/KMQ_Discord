@@ -2,11 +2,11 @@ import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import {
     chunkArray,
-    clickableSlashCommand,
     discordDateFormat,
     friendlyFormattedNumber,
 } from "../../helpers/utils";
 import {
+    clickableSlashCommand,
     getDebugLogHeader,
     sendInfoMessage,
     sendPaginationedEmbed,

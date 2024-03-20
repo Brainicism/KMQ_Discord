@@ -6,13 +6,13 @@ import type Eris from "eris";
 import {
     bold,
     chunkArray,
-    clickableSlashCommand,
     codeLine,
     delay,
     getOrdinalNum,
     setDifference,
 } from "../helpers/utils";
 import {
+    clickableSlashCommand,
     fetchUser,
     getCurrentVoiceMembers,
     getDebugLogHeader,

@@ -2,12 +2,12 @@ import { IPCLogger } from "./logger";
 import { OptionAction } from "./constants";
 import {
     areUserAndBotInSameVoiceChannel,
+    clickableSlashCommand,
     getDebugLogHeader,
     getInteractionValue,
     sendErrorMessage,
     tryCreateInteractionErrorAcknowledgement,
 } from "./helpers/discord_utils";
-import { clickableSlashCommand } from "./helpers/utils";
 import { getTimeUntilRestart } from "./helpers/management_utils";
 import GameType from "./enums/game_type";
 import GuildPreference from "./structures/guild_preference";
