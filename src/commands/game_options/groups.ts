@@ -222,7 +222,11 @@ export default class GroupsCommand implements BaseCommand {
             .split(",")
             .map((groupName) => groupName.trim());
 
-        const groups = await getMatchingGroupNames(groupNames);
+        const groups = await getMatchingGroupNames(
+            State.aliases.artist,
+            groupNames,
+        );
+
         const { matchedGroups, unmatchedGroups } = groups;
 
         await GroupsCommand.updateOption(

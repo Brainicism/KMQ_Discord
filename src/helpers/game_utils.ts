@@ -5,11 +5,13 @@ import AnswerType from "../enums/option_types/answer_type";
 import GameRound from "../structures/game_round";
 import GuessModeType from "../enums/option_types/guess_mode_type";
 import LocaleType from "../enums/locale_type";
-import State from "../state";
 import _ from "lodash";
 import dbContext from "../database_context";
 import type { AvailableGenders } from "../enums/option_types/gender";
+import type GameSession from "../structures/game_session";
 import type GuildPreference from "../structures/guild_preference";
+import type KmqClient from "../kmq_client";
+import type ListeningSession from "../structures/listening_session";
 import type MatchedArtist from "../interfaces/matched_artist";
 import type Session from "../structures/session";
 
@@ -23,10 +25,13 @@ interface GroupMatchResults {
 
 /**
  * Joins the VoiceChannel specified by GameSession, and stores the VoiceConnection
+ * @param client - The bot instance
  * @param session - The active Session
  */
-export async function ensureVoiceConnection(session: Session): Promise<void> {
-    const { client } = State;
+export async function ensureVoiceConnection(
+    client: KmqClient,
+    session: Session,
+): Promise<void> {
     if (session.connection && session.connection.ready) return;
     const connection = await client.joinVoiceChannel(session.voiceChannelID, {
         opusOnly: true,
@@ -86,9 +91,12 @@ export async function getAvailableSongCount(
     }
 }
 
-/** Cleans up inactive GameSessions */
-export async function cleanupInactiveGameSessions(): Promise<void> {
-    const { gameSessions } = State;
+/** Cleans up inactive GameSessions
+ * @param gameSessions - All game sessions
+ */
+export async function cleanupInactiveGameSessions(gameSessions: {
+    [guildID: string]: GameSession;
+}): Promise<void> {
     const currentDate = Date.now();
     let inactiveSessions = 0;
     const totalSessions = Object.keys(gameSessions).length;
@@ -113,9 +121,12 @@ export async function cleanupInactiveGameSessions(): Promise<void> {
     }
 }
 
-/** Cleans up inactive ListeningSessions */
-export async function cleanupInactiveListeningSessions(): Promise<void> {
-    const { listeningSessions } = State;
+/** Cleans up inactive ListeningSessions
+ * @param listeningSessions - All listening sessions
+ */
+export async function cleanupInactiveListeningSessions(listeningSessions: {
+    [guildID: string]: ListeningSession;
+}): Promise<void> {
     let inactiveSessions = 0;
     const totalSessions = Object.keys(listeningSessions).length;
     await Promise.allSettled(
@@ -194,11 +205,13 @@ export async function getSimilarGroupNames(
 }
 
 /**
+ * @param artistAliases - A list of aliases for every artist
  * @param rawGroupNames - List of user-inputted group names
  * @param aliasApplied - Whether aliases have been applied
  * @returns a list of recognized/unrecognized groups
  */
 export async function getMatchingGroupNames(
+    artistAliases: { [artistName: string]: Array<string> },
     rawGroupNames: Array<string>,
     aliasApplied = false,
 ): Promise<GroupMatchResults> {
@@ -249,7 +262,7 @@ export async function getMatchingGroupNames(
         // apply artist aliases for unmatched groups
         for (let i = 0; i < result.unmatchedGroups.length; i++) {
             const groupName = result.unmatchedGroups[i]!;
-            const matchingAlias = Object.entries(State.aliases.artist).find(
+            const matchingAlias = Object.entries(artistAliases).find(
                 (artistAliasTuple) =>
                     artistAliasTuple[1]
                         .map((x) => GameRound.normalizePunctuationInName(x))
@@ -267,7 +280,7 @@ export async function getMatchingGroupNames(
 
         if (aliasFound) {
             // try again but with aliases
-            return getMatchingGroupNames(rawGroupNames, true);
+            return getMatchingGroupNames(artistAliases, rawGroupNames, true);
         }
     }
 

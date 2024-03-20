@@ -514,9 +514,9 @@ export function registerIntervals(clusterID: number): void {
     // Every 10 minutes
     schedule.scheduleJob("*/10 * * * *", async () => {
         // Cleanup inactive game sessions
-        await cleanupInactiveGameSessions();
+        await cleanupInactiveGameSessions(State.gameSessions);
         // Cleanup inactive listening sessions
-        await cleanupInactiveListeningSessions();
+        await cleanupInactiveListeningSessions(State.listeningSessions);
         // Change bot's status (song playing, power hour, etc.)
         await updateBotStatus();
         // Clear any guilds stuck in parsing Playlist state

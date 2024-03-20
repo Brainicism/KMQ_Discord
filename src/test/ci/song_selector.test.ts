@@ -12,6 +12,7 @@ import OstPreference from "../../enums/option_types/ost_preference";
 import ReleaseType from "../../enums/option_types/release_type";
 import ShuffleType from "../../enums/option_types/shuffle_type";
 import SongSelector from "../../structures/song_selector";
+import State from "../../state";
 import SubunitsPreference from "../../enums/option_types/subunit_preference";
 import _ from "lodash";
 import assert from "assert";
@@ -603,7 +604,7 @@ describe("song selector", () => {
                     ];
 
                     const { matchedGroups, unmatchedGroups } =
-                        await getMatchingGroupNames([
+                        await getMatchingGroupNames(State.aliases.artist, [
                             artistWithCollabingSubunit.name,
                         ]);
 
