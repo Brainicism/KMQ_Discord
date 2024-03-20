@@ -1,12 +1,21 @@
-import { reloadAliases } from "../../helpers/management_utils";
+import {
+    reloadArtistAliases,
+    reloadSongAliases,
+} from "../../helpers/management_utils";
 import { setIntersection } from "../../helpers/utils";
-import State from "../../state";
 import assert from "assert";
+import type {
+    ArtistAliasCache,
+    SongAliasCache,
+} from "../../interfaces/worker_cache";
 
 describe("management utils", () => {
     describe("reloadAliases", () => {
+        let songAliases: SongAliasCache;
+        let artistAliases: ArtistAliasCache;
         before(async () => {
-            await reloadAliases();
+            songAliases = await reloadSongAliases();
+            artistAliases = await reloadArtistAliases();
         });
 
         describe("song aliases", () => {
@@ -14,10 +23,7 @@ describe("management utils", () => {
                 const videoID = "lQaclKRINdA";
                 const expectedAliases = ["It Is War", "It's War"];
 
-                assert.deepStrictEqual(
-                    State.aliases.song[videoID],
-                    expectedAliases,
-                );
+                assert.deepStrictEqual(songAliases[videoID], expectedAliases);
             });
         });
 
@@ -34,10 +40,8 @@ describe("management utils", () => {
                 ];
 
                 assert.ok(
-                    setIntersection(
-                        State.aliases.artist[artistName]!,
-                        expectedAliases,
-                    ).size === expectedAliases.length,
+                    setIntersection(artistAliases[artistName]!, expectedAliases)
+                        .size === expectedAliases.length,
                 );
             });
         });

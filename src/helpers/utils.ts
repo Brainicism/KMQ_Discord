@@ -662,7 +662,7 @@ export function parseKmqPlaylistIdentifier(kmqPlaylistIdentifier: string): {
 
 /**
  * @param m: the string
- * @returns whether the string contains atleast one alphanum char
+ * @returns whether the string contains at least one alphanum char
  */
 export function hasAtLeastOneAlphanumeric(m: string): boolean {
     // eslint-disable-next-line no-control-regex

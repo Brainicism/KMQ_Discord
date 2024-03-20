@@ -31,9 +31,9 @@ export default class State {
     static rateLimiter = new RateLimiter(15, 30);
     static bonusArtists: Set<string> = new Set<string>();
     static locales: { [guildID: string]: LocaleType } = {};
-    static artistToEntry: { [artistNameOrAlias: string]: MatchedArtist } = {};
+    static artists: { [artistNameOrAlias: string]: MatchedArtist } = {};
     static topArtists: Array<MatchedArtist> = [];
-    static songLinkToEntry: {
+    static songs: {
         [songLink: string]: {
             name: string;
             hangulName: string | null;

@@ -6,6 +6,7 @@ import {
     getSimilarGroupNames,
 } from "../../helpers/game_utils";
 import { describe } from "mocha";
+import { reloadArtistAliases } from "../../helpers/management_utils";
 import GameSession from "../../structures/game_session";
 import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";
@@ -13,10 +14,10 @@ import KmqMember from "../../structures/kmq_member";
 import LocaleType from "../../enums/locale_type";
 import OstPreference from "../../enums/option_types/ost_preference";
 import ReleaseType from "../../enums/option_types/release_type";
-import State from "../../state";
 import SubunitsPreference from "../../enums/option_types/subunit_preference";
 import assert from "assert";
 import sinon from "sinon";
+import type { ArtistAliasCache } from "../../interfaces/worker_cache";
 
 async function getMockGuildPreference(): Promise<GuildPreference> {
     const guildPreference = new GuildPreference("test");
@@ -33,6 +34,11 @@ describe("game utils", () => {
 
     describe("song query", () => {
         let guildPreference: GuildPreference;
+        let artistAliases: ArtistAliasCache;
+        before(async () => {
+            artistAliases = await reloadArtistAliases();
+        });
+
         beforeEach(async () => {
             guildPreference = await getMockGuildPreference();
         });
@@ -42,7 +48,7 @@ describe("game utils", () => {
                 it("should return the group and any collabs they are a part of in matchedGroups", async () => {
                     const artistName = "IU";
                     const matchResults = await getMatchingGroupNames(
-                        State.aliases.artist,
+                        artistAliases,
                         [artistName],
                     );
 
@@ -77,7 +83,7 @@ describe("game utils", () => {
                 it("should return the corresponding groups in matchedGroups", async () => {
                     const artistNames = ["Blackpink", "BTS", "Stray Kids"];
                     const matchResults = await getMatchingGroupNames(
-                        State.aliases.artist,
+                        artistAliases,
                         [
                             artistNames[0]!,
                             artistNames[1]!,
@@ -98,7 +104,7 @@ describe("game utils", () => {
                     const artistNames = ["Blackpink", "BTS", "Stray Kids"];
                     const fakeNames = ["LinusTechTips", "Rihanna"];
                     const matchResults = await getMatchingGroupNames(
-                        State.aliases.artist,
+                        artistAliases,
                         [...artistNames, ...fakeNames],
                     );
 
@@ -119,7 +125,7 @@ describe("game utils", () => {
                     const fakeNames = ["LinusTechTips", "Rihanna"];
 
                     const matchResults = await getMatchingGroupNames(
-                        State.aliases.artist,
+                        artistAliases,
                         fakeNames,
                     );
 
@@ -141,11 +147,11 @@ describe("game utils", () => {
                         // exact 'WANNA.B' guess should be prioritized over hypothetical alias of 'Super Five' to 'WANNA.B'
                         const conflictingArtistActualName = "Super Five";
                         const conflictingName = "WANNA.B";
-                        State.aliases.artist[conflictingArtistActualName] = [
+                        artistAliases[conflictingArtistActualName] = [
                             conflictingName,
                         ];
                         const matchResults = await getMatchingGroupNames(
-                            State.aliases.artist,
+                            artistAliases,
                             [conflictingName],
                         );
 
@@ -163,10 +169,10 @@ describe("game utils", () => {
 
                 describe("no alias is specified", () => {
                     it("should not match any groups", async () => {
-                        State.aliases.artist = {};
+                        artistAliases = {};
                         const artistBAlias = "B's other name";
                         const matchResults = await getMatchingGroupNames(
-                            State.aliases.artist,
+                            artistAliases,
                             [artistBAlias],
                         );
 
@@ -183,7 +189,7 @@ describe("game utils", () => {
 
                 describe("alias is specified", () => {
                     beforeEach(() => {
-                        State.aliases.artist = {};
+                        artistAliases = {};
                     });
 
                     describe("an artist name and an artist alias conflict", () => {
@@ -191,10 +197,11 @@ describe("game utils", () => {
                             // Artist '2YOON', Artist '2PM' with hypothetical conflicting alias '2YOON'
                             const conflictingArtistActualName = "2PM";
                             const conflictingName = "2YOON";
-                            State.aliases.artist[conflictingArtistActualName] =
-                                [conflictingName];
+                            artistAliases[conflictingArtistActualName] = [
+                                conflictingName,
+                            ];
                             const matchResults = await getMatchingGroupNames(
-                                State.aliases.artist,
+                                artistAliases,
                                 [conflictingName],
                             );
 
@@ -216,12 +223,12 @@ describe("game utils", () => {
                             const artistNameAliasMatch = "Hyuk (Han Sanghyuk)";
                             const artistNameAlias = "Hyuk ALIAS";
                             const artistNameExactMatch = "REDSQUARE";
-                            State.aliases.artist[artistNameAliasMatch] = [
+                            artistAliases[artistNameAliasMatch] = [
                                 artistNameAlias,
                             ];
 
                             const matchResults = await getMatchingGroupNames(
-                                State.aliases.artist,
+                                artistAliases,
                                 [artistNameAlias, artistNameExactMatch],
                             );
 
@@ -241,9 +248,9 @@ describe("game utils", () => {
                         it("should match group", async () => {
                             const artistName = "Blackpink";
                             const artistBAlias = "Blackpink alias";
-                            State.aliases.artist["Blackpink"] = [artistBAlias];
+                            artistAliases["Blackpink"] = [artistBAlias];
                             const matchResults = await getMatchingGroupNames(
-                                State.aliases.artist,
+                                artistAliases,
                                 [artistBAlias],
                             );
 
@@ -263,11 +270,9 @@ describe("game utils", () => {
                         it("should match group", async () => {
                             const artistName = "Girl's Day";
                             const artistNameAlias = "Girl's Day Alias";
-                            State.aliases.artist[artistName] = [
-                                artistNameAlias,
-                            ];
+                            artistAliases[artistName] = [artistNameAlias];
                             const matchResults = await getMatchingGroupNames(
-                                State.aliases.artist,
+                                artistAliases,
                                 [artistNameAlias],
                             );
 
@@ -287,10 +292,10 @@ describe("game utils", () => {
                         it("should have one match, and one non-match", async () => {
                             const artistName = "Twice";
                             const artistAlias = "Twice alias";
-                            State.aliases.artist[artistName] = [artistAlias];
+                            artistAliases[artistName] = [artistAlias];
                             const nonMatchArtist = "Weee";
                             const matchResults = await getMatchingGroupNames(
-                                State.aliases.artist,
+                                artistAliases,
                                 [artistAlias, nonMatchArtist],
                             );
 
@@ -308,10 +313,10 @@ describe("game utils", () => {
 
                     describe("Artist without songs fail", () => {
                         it("should not match any group", async () => {
-                            State.aliases.artist = {};
+                            artistAliases = {};
                             const nonMatchArtist = "ampstyle";
                             const matchResults = await getMatchingGroupNames(
-                                State.aliases.artist,
+                                artistAliases,
                                 [nonMatchArtist],
                             );
 
@@ -329,10 +334,10 @@ describe("game utils", () => {
 
                     describe("Collab should fail", () => {
                         it("should not match any group", async () => {
-                            State.aliases.artist = {};
+                            artistAliases = {};
                             const nonMatchArtist = "PSY + Hyuna";
                             const matchResults = await getMatchingGroupNames(
-                                State.aliases.artist,
+                                artistAliases,
                                 [nonMatchArtist],
                             );
 
@@ -508,23 +513,21 @@ describe("game utils", () => {
             sandbox.restore();
             const endSandbox = sinon.createSandbox();
             const endSessionStub = sandbox.stub(gameSession, "endSession");
+            let gameSessions: { [guildID: string]: GameSession } = {};
             after(() => {
                 endSandbox.restore();
             });
 
             beforeEach(() => {
-                State.gameSessions = {
+                gameSessions = {
                     [guildId]: gameSession,
                 };
             });
 
             describe("no inactive gamesessions", () => {
                 it("should not clean up", async () => {
-                    await cleanupInactiveGameSessions(State.gameSessions);
-                    assert.strictEqual(
-                        State.gameSessions[guildId],
-                        gameSession,
-                    );
+                    await cleanupInactiveGameSessions(gameSessions);
+                    assert.strictEqual(gameSessions[guildId], gameSession);
                     sinon.assert.notCalled(endSessionStub);
                 });
             });
@@ -532,7 +535,7 @@ describe("game utils", () => {
             describe("has inactive gamesessions", () => {
                 it("should clean up", async () => {
                     gameSession.lastActive = Date.now() - 1000 * 60 * 60;
-                    await cleanupInactiveGameSessions(State.gameSessions);
+                    await cleanupInactiveGameSessions(gameSessions);
                     sinon.assert.called(endSessionStub);
                 });
             });

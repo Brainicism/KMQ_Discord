@@ -1951,9 +1951,7 @@ export function getMatchedArtists(enteredNames: Array<string>): {
     const unmatchedGroups: Array<string> = [];
     for (const artistName of enteredNames) {
         const match =
-            State.artistToEntry[
-                GameRound.normalizePunctuationInName(artistName)
-            ];
+            State.artists[GameRound.normalizePunctuationInName(artistName)];
 
         if (match) {
             matchedGroups.push(match);
@@ -1984,7 +1982,7 @@ export function searchArtists(
         );
     }
 
-    return Object.entries(State.artistToEntry)
+    return Object.entries(State.artists)
         .filter((x) => x[0].startsWith(lowercaseUserInput))
         .sort((a, b) => a[0].localeCompare(b[0]))
         .filter((x) => !excludedArtistNames.includes(x[1].name))

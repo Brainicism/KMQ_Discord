@@ -2,24 +2,41 @@
 import { BaseClusterWorker } from "eris-fleet";
 import { IPCLogger } from "./logger";
 import { RedditClient } from "./helpers/reddit_client";
+import {
+    cleanupInactiveGameSessions,
+    cleanupInactiveListeningSessions,
+    isPowerHour,
+} from "./helpers/game_utils";
+import {
+    cleanupPlaylistParsingLocks,
+    clearInactiveVoiceConnections,
+    getTimeUntilRestart,
+    reloadArtistAliases,
+    reloadArtists,
+    reloadBannedPlayers,
+    reloadBannedServers,
+    reloadBonusGroups,
+    reloadCaches,
+    reloadSongAliases,
+    reloadSongs,
+    sendNewsNotifications,
+    updateBotStatus,
+    updateSystemStats,
+    warnServersImpendingRestart,
+} from "./helpers/management_utils";
 import { config } from "dotenv";
-import { durationSeconds } from "./helpers/utils";
+import { durationSeconds, isPrimaryInstance, isWeekend } from "./helpers/utils";
 import {
     getCachedAppCommandIds,
+    sendPowerHourNotification,
     updateAppCommands,
 } from "./helpers/discord_utils";
-import {
-    registerIntervals,
-    reloadArtists,
-    reloadCaches,
-    reloadSongs,
-    updateBotStatus,
-} from "./helpers/management_utils";
 import AppCommandsAction from "./enums/app_command_action";
 import EnvType from "./enums/env_type";
 import EvalCommand from "./commands/admin/eval";
 import GeminiClient from "./helpers/gemini_client";
 import KmqConfiguration from "./kmq_configuration";
+import NewsRange from "./enums/news_range";
 import PlaylistManager from "./helpers/playlist_manager";
 import ReloadCommand from "./commands/admin/reload";
 import SIGINTHandler from "./events/process/SIGINT";
@@ -51,6 +68,7 @@ import voiceChannelSwitchHandler from "./events/client/voiceChannelSwitch";
 import warnHandler from "./events/client/warn";
 import type { Setup } from "eris-fleet/dist/clusters/BaseClusterWorker";
 import type KmqClient from "./kmq_client";
+import type WorkerCache from "./interfaces/worker_cache";
 
 const logger = new IPCLogger("kmq");
 config({ path: path.resolve(__dirname, "../.env") });
@@ -315,7 +333,7 @@ export default class BotWorker extends BaseClusterWorker {
 
         try {
             logger.info(`${this.logHeader()} | Registering cron tasks...`);
-            registerIntervals(this.clusterID);
+            BotWorker.registerIntervals(this.clusterID);
 
             logger.info(
                 `${this.logHeader()} | Initializing Playlist manager...`,
@@ -334,7 +352,7 @@ export default class BotWorker extends BaseClusterWorker {
                     `${this.logHeader()} | Loading cached application data...`,
                 );
 
-                await reloadCaches();
+                BotWorker.updateCache(await reloadCaches());
             }
 
             State.commandToID = await getCachedAppCommandIds();
@@ -344,7 +362,7 @@ export default class BotWorker extends BaseClusterWorker {
                 AppCommandsAction.RELOAD,
             );
             logger.info(`${this.logHeader()} | Updating bot's status..`);
-            await updateBotStatus();
+            await updateBotStatus(State.client, State.restartNotification);
         } catch (e) {
             if (e instanceof Error) {
                 logger.error(
@@ -373,5 +391,104 @@ export default class BotWorker extends BaseClusterWorker {
             logger.info(`${this.logHeader()} | Dry run finished successfully.`);
             State.ipc.totalShutdown();
         }
+    }
+
+    static registerIntervals(clusterID: number): void {
+        // busiest times for r/kpop are 6pm and midnight KST
+        // 15:00 UTC => midnight KST (busiest time for r/kpop)
+        // wait a couple hours for NA to upvote posts
+        schedule.scheduleJob("0 18 * * *", async () => {
+            await sendNewsNotifications(NewsRange.DAILY);
+        });
+
+        schedule.scheduleJob("5 18 * * 0", async () => {
+            await sendNewsNotifications(NewsRange.WEEKLY);
+        });
+
+        schedule.scheduleJob("10 18 1 * *", async () => {
+            await sendNewsNotifications(NewsRange.MONTHLY);
+        });
+
+        // Everyday at 12am UTC => 7pm ET
+        schedule.scheduleJob("0 0 * * *", async () => {
+            // New bonus groups
+            State.bonusArtists = await reloadBonusGroups();
+        });
+
+        // Every hour
+        schedule.scheduleJob("0 * * * *", async () => {
+            if (
+                isPowerHour() &&
+                !isWeekend() &&
+                State.client.guilds.has(process.env.DEBUG_SERVER_ID as string)
+            ) {
+                // Ping a role in KMQ server notifying of power hour
+                await sendPowerHourNotification();
+            }
+        });
+
+        // Every 10 minutes
+        schedule.scheduleJob("*/10 * * * *", async () => {
+            // Cleanup inactive game sessions
+            await cleanupInactiveGameSessions(State.gameSessions);
+            // Cleanup inactive listening sessions
+            await cleanupInactiveListeningSessions(State.listeningSessions);
+            // Change bot's status (song playing, power hour, etc.)
+            await updateBotStatus(State.client, State.restartNotification);
+            // Clear any guilds stuck in parsing Playlist state
+            cleanupPlaylistParsingLocks(State.playlistManager);
+            // Reload ban data
+            State.bannedPlayers = await reloadBannedPlayers();
+            State.bannedServers = await reloadBannedServers();
+        });
+
+        // Every 5 minutes
+        schedule.scheduleJob("*/5 * * * *", async () => {
+            // Update song/artist aliases
+            State.aliases.artist = await reloadArtistAliases();
+            State.aliases.song = await reloadSongAliases();
+            // Cleanup inactive Discord voice connections
+            clearInactiveVoiceConnections(
+                State.client,
+                State.gameSessions,
+                State.listeningSessions,
+            );
+
+            if (await isPrimaryInstance()) {
+                // Store per-cluster stats
+                await updateSystemStats(State.client, clusterID);
+            }
+        });
+
+        // Every minute
+        schedule.scheduleJob("* * * * *", async () => {
+            KmqConfiguration.reload();
+            // set up check for restart notifications
+            const timeUntilRestart = getTimeUntilRestart(
+                State.restartNotification,
+            );
+
+            if (timeUntilRestart && State.restartNotification) {
+                await updateBotStatus(State.client, State.restartNotification);
+                await warnServersImpendingRestart(
+                    State.gameSessions,
+                    State.listeningSessions,
+                    timeUntilRestart,
+                );
+            }
+        });
+    }
+
+    static updateCache(cache: WorkerCache): void {
+        State.aliases.artist = cache.artistAliases;
+        State.aliases.song = cache.songAliases;
+        State.artists = cache.artists;
+        State.topArtists = cache.topArtists;
+        State.bonusArtists = cache.bonusGroups;
+        State.locales = cache.locales;
+        State.songs = cache.songs;
+        State.newSongs = cache.newSongs;
+        State.bannedPlayers = cache.bannedPlayers;
+        State.bannedServers = cache.bannedServers;
     }
 }

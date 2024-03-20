@@ -12,6 +12,7 @@ import { getTimeUntilRestart } from "./helpers/management_utils";
 import GameType from "./enums/game_type";
 import GuildPreference from "./structures/guild_preference";
 import KmqConfiguration from "./kmq_configuration";
+import State from "./state";
 import dbContext from "./database_context";
 import i18n from "./helpers/localization_manager";
 import type EmbedPayload from "./interfaces/embed_payload";
@@ -297,7 +298,7 @@ export default class CommandPrechecks {
     static async notRestartingPrecheck(
         precheckArgs: PrecheckArgs,
     ): Promise<boolean> {
-        const timeUntilRestart = getTimeUntilRestart();
+        const timeUntilRestart = getTimeUntilRestart(State.restartNotification);
         if (timeUntilRestart !== null) {
             const { messageContext, interaction } = precheckArgs;
             const embedPayload: EmbedPayload = {
