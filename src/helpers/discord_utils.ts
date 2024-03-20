@@ -1158,6 +1158,16 @@ export async function generateOptionsMessage(
 
     let description = "";
 
+    if (State.playlistManager.isParseInProgress(guildID)) {
+        description += italicize(
+            i18n.translate(
+                messageContext.guildID,
+                "command.options.playlistParseInProgress",
+            ),
+        );
+        description += "\n\n";
+    }
+
     description += optionsOverview;
     description += "\n\n";
     description += priorityOptions;

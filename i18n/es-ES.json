@@ -831,6 +831,7 @@
             "notSet": "No establecido",
             "overview": "Reproduciendo las mejores {{limit}} de {{totalSongs}} canciones disponibles de las siguientes opciones:",
             "perCommandHelp": "¿Buscas información sobre cómo usar un comando? Echa un vistazo a {{helpCommand}} action:[comando] para obtener más información.",
+            "playlistParseInProgress": "Nota: El análisis de la lista de reproducción está en progreso.",
             "preset": "Preestablecido",
             "reset": "{{presetOrOption}} Restablecer",
             "spotify": "Reproduciendo {{songCount}} canciones de Spotify con las siguientes opciones:",
@@ -877,6 +878,10 @@
                         "join": "{{join}} team_name:[nombre del equipo] un equipo"
                     },
                     "title": "Ignorando {{playOldGameType}}"
+                },
+                "playlistParseInProgress": {
+                    "description": "Espere a que la lista de reproducción actual termine de cargar antes de iniciar un nuevo juego.",
+                    "title": "Análisis de la Lista de Reproducción en Progreso"
                 }
             },
             "gameStarting": "Juego comenzando en #{{textChannelName}} en 🔊 {{voiceChannelName}}",
