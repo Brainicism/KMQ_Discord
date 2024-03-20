@@ -7,10 +7,6 @@ import {
 import { IPCLogger } from "../../logger";
 import {
     clickableSlashCommand,
-    getOrdinalNum,
-    setIntersection,
-} from "../../helpers/utils";
-import {
     generateOptionsMessage,
     getDebugLogHeader,
     getInteractionValue,
@@ -25,6 +21,7 @@ import {
     getMatchingGroupNames,
     getSimilarGroupNames,
 } from "../../helpers/game_utils";
+import { getOrdinalNum, setIntersection } from "../../helpers/utils";
 import AddCommand, { AddType } from "./add";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";

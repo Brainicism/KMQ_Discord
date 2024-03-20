@@ -1,7 +1,7 @@
 import { EMBED_ERROR_COLOR, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
-import { clickableSlashCommand } from "../../helpers/utils";
 import {
+    clickableSlashCommand,
     generateOptionsMessage,
     getDebugLogHeader,
     notifyOptionsGenerationError,

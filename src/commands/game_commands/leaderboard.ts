@@ -3,10 +3,10 @@ import { KmqImages, LEADERBOARD_ENTRIES_PER_PAGE } from "../../constants";
 import {
     arrayToString,
     chooseRandom,
-    clickableSlashCommand,
     friendlyFormattedNumber,
 } from "../../helpers/utils";
 import {
+    clickableSlashCommand,
     getAllClickableSlashCommands,
     getDebugLogHeader,
     getInteractionValue,

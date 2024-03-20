@@ -831,6 +831,7 @@
             "notSet": "Tidak ditetapkan",
             "overview": "Sekarang memutar {{limit}} teratas dari {{totalSongs}} lagu yang tersedia dari opsi berikut:",
             "perCommandHelp": "Mencari informasi tentang cara menggunakan perintah? Periksa {{helpCommand}} action:[command] untuk mempelajari lebih lanjut.",
+            "playlistParseInProgress": "Catatan: Penguraian daftar putar sedang berlangsung.",
             "preset": "Pra Setel",
             "reset": "{{presetOrOption}} Diatur Ulang",
             "spotify": "Kini memutar {{songCount}} lagu dari Spotify dengan opsi berikut:",
@@ -877,6 +878,10 @@
                         "join": "{{join}} team_name:[nama tim] sebuah tim"
                     },
                     "title": "Mengabaikan {{playOldGameType}}"
+                },
+                "playlistParseInProgress": {
+                    "description": "Harap tunggu daftar putar saat ini selesai memuat sebelum memulai permainan baru.",
+                    "title": "Penguraian Daftar Putar sedang Berlangsung"
                 }
             },
             "gameStarting": "Permainan Dimulai di #{{textChannelName}} di {{voiceChannelName}}",

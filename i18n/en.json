@@ -831,6 +831,7 @@
             "notSet": "Not set",
             "overview": "Now playing the top {{limit}} out of {{totalSongs}} available songs from the following options:",
             "perCommandHelp": "Looking for information on how to use a command? Check out {{helpCommand}} action:[command] to learn more.",
+            "playlistParseInProgress": "Note: Playlist parsing is in progress.",
             "preset": "Preset",
             "reset": "{{presetOrOption}} Reset",
             "spotify": "Now playing {{songCount}} songs from Spotify with the following options:",
@@ -877,6 +878,10 @@
                         "join": "{{join}} team_name:[team name] a team"
                     },
                     "title": "Ignoring {{playOldGameType}}"
+                },
+                "playlistParseInProgress": {
+                    "description": "Please wait for the current playlist to finish loading before starting a new game.",
+                    "title": "Playlist Parsing in Progress"
                 }
             },
             "gameStarting": "Game Starting in #{{textChannelName}} in 🔊 {{voiceChannelName}}",

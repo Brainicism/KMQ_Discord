@@ -1,7 +1,7 @@
 import { GameOptionInternalToGameOption } from "../../constants";
 import { IPCLogger } from "../../logger";
-import { clickableSlashCommand } from "../../helpers/utils";
 import {
+    clickableSlashCommand,
     getDebugLogHeader,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";

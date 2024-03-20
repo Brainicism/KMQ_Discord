@@ -14,14 +14,9 @@ import {
     isFirstGameOfDay,
     isPowerHour,
 } from "../../helpers/game_utils";
+import { bold, durationDays, getMention, isWeekend } from "../../helpers/utils";
 import {
-    bold,
     clickableSlashCommand,
-    durationDays,
-    getMention,
-    isWeekend,
-} from "../../helpers/utils";
-import {
     fetchChannel,
     fetchUser,
     generateOptionsMessage,
@@ -944,6 +939,24 @@ export default class PlayCommand implements BaseCommand {
                     )} | Teams game session was in progress, has been reset.`,
                 );
             }
+        }
+
+        if (State.playlistManager.isParseInProgress(guildID)) {
+            await sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        guildID,
+                        "command.play.failure.playlistParseInProgress.title",
+                    ),
+                    description: i18n.translate(
+                        guildID,
+                        "command.play.failure.playlistParseInProgress.description",
+                    ),
+                },
+                interaction,
+            );
+            return;
         }
 
         if (hiddenMode) {

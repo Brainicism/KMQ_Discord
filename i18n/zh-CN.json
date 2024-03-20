@@ -831,6 +831,7 @@
             "notSet": "未设置",
             "overview": "现在播放以下选项中可用的前{{limit}}首歌曲中的前{{totalSongs}}首：",
             "perCommandHelp": "需要了解如何使用命令吗？查看{{helpCommand}} action:[命令]以了解更多信息。",
+            "playlistParseInProgress": "注意：正在进行播放列表解析。",
             "preset": "预设",
             "reset": "{{presetOrOption}} 重置",
             "spotify": "现在使用以下选项从Spotify播放{{songCount}}首歌曲：",
@@ -877,6 +878,10 @@
                         "join": "{{join}} team_name:[队伍名称] 一个团队"
                     },
                     "title": "忽略 {{playOldGameType}}"
+                },
+                "playlistParseInProgress": {
+                    "description": "请等待当前播放列表加载完毕后再开始新游戏。",
+                    "title": "播放列表解析中"
                 }
             },
             "gameStarting": "游戏将在 #{{textChannelName}} 🔊 {{voiceChannelName}} 中开始",

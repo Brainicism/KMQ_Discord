@@ -1,7 +1,7 @@
 import { IPCLogger } from "../../logger";
 import { OptionAction } from "../../constants";
-import { clickableSlashCommand } from "../../helpers/utils";
 import {
+    clickableSlashCommand,
     getDebugLogHeader,
     getInteractionValue,
     sendErrorMessage,

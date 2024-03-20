@@ -1,7 +1,11 @@
 /* eslint-disable no-await-in-loop */
 import { IPCLogger } from "../logger";
-import { arrayToString, clickableSlashCommand } from "./utils";
-import { getDebugLogHeader, sendErrorMessage } from "./discord_utils";
+import { arrayToString } from "./utils";
+import {
+    clickableSlashCommand,
+    getDebugLogHeader,
+    sendErrorMessage,
+} from "./discord_utils";
 import MessageContext from "../structures/message_context";
 import i18n from "./localization_manager";
 import type { GuildTextableMessage } from "../types";
