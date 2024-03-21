@@ -26,14 +26,13 @@ const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
             isGameOptionsResponse: true,
         },
         {
-            command: ",groups blackpink, twice",
+            command: ",groups blackpink, bts",
             responseValidator: (
                 title: string,
                 description: string,
                 parsedGameOptions?: ParsedGameOptionValues,
             ) =>
-                parsedGameOptions!["groups set"]!.value ===
-                    "Blackpink, Twice" &&
+                parsedGameOptions!["groups set"]!.value === "Blackpink, BTS" &&
                 parsedGameOptions!["groups set"]!.updated,
             isGameOptionsResponse: true,
         },
@@ -208,26 +207,26 @@ const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
             isGameOptionsResponse: true,
         },
         {
-            command: ",exclude ive",
+            command: ",exclude psy",
             responseValidator: (
                 title: string,
                 description: string,
                 parsedGameOptions?: ParsedGameOptionValues,
             ) =>
-                parsedGameOptions!["exclude set"]!.value === "IVE" &&
+                parsedGameOptions!["exclude set"]!.value === "PSY" &&
                 parsedGameOptions!["exclude set"]!.updated,
 
             isGameOptionsResponse: true,
         },
         {
-            command: ",exclude aespa",
+            command: ",include bts",
             responseValidator: (
                 title: string,
                 description: string,
                 parsedGameOptions?: ParsedGameOptionValues,
             ) =>
-                parsedGameOptions!["exclude set"]!.value === "Aespa" &&
-                parsedGameOptions!["exclude set"]!.updated,
+                parsedGameOptions!["include set"]!.value === "BTS" &&
+                parsedGameOptions!["include set"]!.updated,
 
             isGameOptionsResponse: true,
         },
