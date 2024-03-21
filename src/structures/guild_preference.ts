@@ -1040,9 +1040,7 @@ export default class GuildPreference {
                 `gid: ${this.guildID} | Impactful game options modified, songs reloaded`,
             );
 
-            await this.songSelector.reloadSongs(
-                this.getKmqPlaylistID() ?? undefined,
-            );
+            await this.songSelector.reloadSongs();
         }
 
         if (this.answerTypeChangeCallback) {

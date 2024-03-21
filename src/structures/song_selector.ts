@@ -253,17 +253,16 @@ export default class SongSelector {
     }
 
     async reloadSongs(
-        kmqPlaylistIdentifier?: string,
         forceRefreshMetadata?: boolean,
         messageContext?: MessageContext,
         interaction?: Eris.CommandInteraction,
     ): Promise<MatchedPlaylist | null> {
+        const kmqPlaylistIdentifier = this.guildPreference.getKmqPlaylistID();
         if (
             !kmqPlaylistIdentifier ||
             this.guildPreference.gameOptions.forcePlaySongID
         ) {
             this.selectedSongs = await this.querySelectedSongs();
-
             return null;
         }
 
