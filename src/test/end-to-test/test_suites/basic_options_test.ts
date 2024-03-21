@@ -1,7 +1,9 @@
 import type ParsedGameOptionValues from "../parsed_game_options_value";
 import type TestSuite from "./test_suite";
 
+// basic tests to validate most popular user facing options
 const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
+    name: "Basic Options Test",
     tests: [
         {
             command: ",limit 2",

@@ -1,11 +1,17 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-console */
 /* eslint-disable no-await-in-loop */
 import * as Eris from "eris";
+import { EMBED_ERROR_COLOR, KmqImages } from "../../constants";
 import { delay } from "../../helpers/utils";
+import { sendDebugAlertWebhook } from "../../helpers/discord_utils";
 import BASIC_OPTIONS_TEST_SUITE from "./test_suites/basic_options_test";
 import crypto from "crypto";
 import type ParsedGameOptionValues from "./parsed_game_options_value";
 import type TestSuite from "./test_suites/test_suite";
+
+import { program } from "commander";
+import HEALTH_CHECK_TEST_SUITE from "./test_suites/healthcheck_test";
 
 const bot = new Eris.Client(process.env.END_TO_END_TEST_BOT_TOKEN!, {
     gateway: {
@@ -13,8 +19,13 @@ const bot = new Eris.Client(process.env.END_TO_END_TEST_BOT_TOKEN!, {
     },
 });
 
+program.option("-t, --test-suite <suite>", "The test suite");
+
+program.parse();
+const options = program.opts();
+
 const failedTests: string[] = [];
-let TEST_SUITE: TestSuite | undefined;
+let TEST_SUITE: TestSuite = BASIC_OPTIONS_TEST_SUITE;
 let CURRENT_STAGE: number | null = null;
 
 const RUN_ID = crypto.randomBytes(8).toString("hex");
@@ -63,12 +74,35 @@ async function sendCommand(message: string): Promise<void> {
     });
 }
 
-async function mainLoop(): Promise<void> {
-    if (TEST_SUITE === undefined) {
-        console.error("Test suite not specified");
-        process.exit(1);
+let stageTimeout: NodeJS.Timeout | undefined;
+
+async function proceedNextStage(): Promise<void> {
+    if (CURRENT_STAGE === null) return;
+    const totalTests = TEST_SUITE.tests.length;
+    CURRENT_STAGE += 1;
+    if (CURRENT_STAGE === TEST_SUITE.tests.length) {
+        console.log(
+            "========================================Test suite completed========================================",
+        );
+
+        console.log(`Passed ${totalTests - failedTests.length}/${totalTests}`);
+        if (failedTests.length) {
+            await sendDebugAlertWebhook(
+                `Test Suite '${TEST_SUITE.name}' Failed`,
+                `Passed ${totalTests - failedTests.length}/${totalTests}   ${failedTests.length > 0 ? `\nFailed Tests:\n ${failedTests.join("\n ")}` : ""} `,
+                EMBED_ERROR_COLOR,
+                KmqImages.DEAD,
+            );
+        }
+
+        process.exit(failedTests.length > 0 ? 1 : 0);
     }
 
+    await delay(2000);
+    await mainLoop();
+}
+
+async function mainLoop(): Promise<void> {
     if (CURRENT_STAGE === null) {
         console.log(
             `========================================\nBeginning test, RUN_ID = ${RUN_ID} \n========================================`,
@@ -80,7 +114,7 @@ async function mainLoop(): Promise<void> {
         `=====================STAGE ${CURRENT_STAGE}===================`,
     );
 
-    const stageData = BASIC_OPTIONS_TEST_SUITE.tests[CURRENT_STAGE]!;
+    const stageData = TEST_SUITE.tests[CURRENT_STAGE]!;
     const command = stageData.command;
     if (TEST_SUITE.resetEachStage) {
         await sendCommand(",reset");
@@ -91,7 +125,16 @@ async function mainLoop(): Promise<void> {
         await delay(2000);
     }
 
+    if (stageTimeout) {
+        clearTimeout(stageTimeout);
+    }
+
     console.log(`STAGE ${CURRENT_STAGE} | Sending command: '${command}'`);
+    stageTimeout = setTimeout(async () => {
+        console.error(`STAGE ${CURRENT_STAGE} | Timed out.`);
+        failedTests.push(stageData.command);
+        await proceedNextStage();
+    }, 15000);
     await sendCommand(command);
 }
 
@@ -137,8 +180,7 @@ bot.on("messageCreate", async (msg) => {
         process.exit(1);
     }
 
-    const totalTests = BASIC_OPTIONS_TEST_SUITE.tests.length;
-    const testStage = BASIC_OPTIONS_TEST_SUITE.tests[CURRENT_STAGE]!;
+    const testStage = TEST_SUITE.tests[CURRENT_STAGE]!;
     console.log(`STAGE ${CURRENT_STAGE} | Checking output`);
     const stageOutputValidator = testStage.responseValidator;
 
@@ -164,28 +206,25 @@ bot.on("messageCreate", async (msg) => {
         failedTests.push(testStage.command);
     }
 
-    CURRENT_STAGE += 1;
-    if (CURRENT_STAGE === BASIC_OPTIONS_TEST_SUITE.tests.length) {
-        console.log(
-            "========================================Test suite completed========================================",
-        );
-
-        await bot.createMessage(
-            process.env.END_TO_END_TEST_BOT_CHANNEL!,
-            `Passed ${totalTests - failedTests.length}/${totalTests}   ${failedTests.length > 0 ? `\nFailed Tests:\n ${failedTests.join("\n ")}` : ""} `,
-        );
-
-        console.log(`Passed ${totalTests - failedTests.length}/${totalTests}`);
-        process.exit(failedTests.length > 0 ? 1 : 0);
-    }
-
-    await delay(2000);
-    await mainLoop();
+    await proceedNextStage();
 });
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
-    TEST_SUITE = BASIC_OPTIONS_TEST_SUITE;
+    const selectedTestSuite = options.testSuite as string | undefined;
+    switch (selectedTestSuite) {
+        case "BASIC_OPTIONS":
+            TEST_SUITE = BASIC_OPTIONS_TEST_SUITE;
+            break;
+        case "HEALTH_CHECK":
+            TEST_SUITE = HEALTH_CHECK_TEST_SUITE;
+            break;
+        default:
+            console.log(`Test suite not found, name = ${selectedTestSuite}`);
+            TEST_SUITE = BASIC_OPTIONS_TEST_SUITE;
+            break;
+    }
+
     if (!process.env.BOT_CLIENT_ID) {
         console.error("BOT_CLIENT_ID not specified");
         process.exit(1);
