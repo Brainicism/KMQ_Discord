@@ -1,6 +1,6 @@
-import { reloadAliases } from "../../helpers/management_utils";
-import { setIntersection } from "../../helpers/utils";
-import State from "../../state";
+import { reloadAliases } from "../../../helpers/management_utils";
+import { setIntersection } from "../../../helpers/utils";
+import State from "../../../state";
 import assert from "assert";
 
 describe("management utils", () => {

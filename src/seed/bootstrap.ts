@@ -26,7 +26,7 @@ import type { DatabaseContext } from "../database_context";
 
 const logger = new IPCLogger("bootstrap");
 
-const SONG_DOWNLOAD_THRESHOLD = 3;
+const SONG_DOWNLOAD_THRESHOLD = 5;
 
 config({ path: path.resolve(__dirname, "../../.env") });
 

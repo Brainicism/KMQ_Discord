@@ -2,13 +2,13 @@ FROM node:18 AS build
 ARG TARGETARCH
 
 RUN apt-get update && apt-get install -y git \
-    python3 \
-    make \
-    g++ \
-    autoconf \
-    automake \
-    libtool \
-    && rm -rf /var/lib/apt/lists/*
+  python3 \
+  make \
+  g++ \
+  autoconf \
+  automake \
+  libtool \
+  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 COPY yarn.lock package.json ./
@@ -28,12 +28,12 @@ RUN npx tsc
 # ================================================================= #
 FROM node:18-slim
 RUN apt-get update && apt-get install -y default-mysql-client \
-    ffmpeg \
-    curl \
-    unzip \
-    less \
-    vim \
-    && rm -rf /var/lib/apt/lists/*
+  ffmpeg \
+  curl \
+  unzip \
+  less \
+  vim \
+  && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /app /app
 WORKDIR /app

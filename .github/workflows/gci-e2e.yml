@@ -35,6 +35,10 @@ jobs:
             - name: Copy .env for CI
               env:
                   BOT_TOKEN: ${{ secrets.KMQ_CI_BOT_TOKEN }}
+                  BOT_CLIENT: ${{ secrets.BOT_CLIENT }}
+                  END_TO_END_TEST_BOT_TOKEN: ${{ secrets.END_TO_END_TEST_BOT_TOKEN }}
+                  END_TO_END_TEST_BOT_CLIENT: ${{ secrets.END_TO_END_TEST_BOT_CLIENT }}
+                  END_TO_END_TEST_BOT_CHANNEL: ${{ secrets.END_TO_END_TEST_BOT_CHANNEL }}
               run: |
                   echo "DB_USER=$DB_USER_CI" >> .env
                   echo "DB_PASS=$DB_PASS_CI" >> .env
@@ -43,11 +47,14 @@ jobs:
                   echo "BOT_TOKEN=$BOT_TOKEN" >> .env
                   echo "WEB_SERVER_PORT=5858" >> .env
                   echo "SONG_DOWNLOAD_DIR=/songs" >> .env
-                  echo "BOT_CLIENT_ID=123" >> .env
+                  echo "BOT_CLIENT_ID=$BOT_CLIENT" >> .env
                   echo "BOT_PREFIX=." >> .env
                   echo "APP_NAME=kmq-gci" >> .env
                   echo "DAISUKI_DB_PASSWORD=unusedpw" >> .env
                   echo "DEBUG_SERVER_ID=${{ secrets.DEBUG_SERVER_ID }}" >> .env
+                  echo "END_TO_END_TEST_BOT_TOKEN=$END_TO_END_TEST_BOT_TOKEN" >> .env
+                  echo "END_TO_END_TEST_BOT_CLIENT=$END_TO_END_TEST_BOT_CLIENT" >> .env
+                  echo "END_TO_END_TEST_BOT_CHANNEL=$END_TO_END_TEST_BOT_CHANNEL" >> .env
             - name: Install node dependencies
               run: yarn install --frozen-lockfile
             - name: Extract metadata (tags, labels) for Docker
@@ -75,14 +82,14 @@ jobs:
                   file: docker/kmq/Dockerfile
                   push: true
                   tags: ghcr.io/brainicism/kmq_discord:gci
-                  cache-from: type=gha
-                  cache-to: type=gha,mode=max
             - name: Dry-run bootstrap
               run: . ./.env && docker run -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} -v ${PWD}/data:/app/data -v ${PWD}/.env:/app/.env -v ${PWD}/logs:/app/logs --env NODE_ENV=dry-run --network=host --name kmq-gci ghcr.io/brainicism/kmq_discord:gci && docker rm -f kmq-gci
             - name: Pre-upgrade run
               run: . ./.env && docker run -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} -v ${PWD}/data:/app/data -v ${PWD}/.env:/app/.env -v ${PWD}/logs:/app/logs --env NODE_ENV=production --network=host --name kmq-gci ghcr.io/brainicism/kmq_discord:gci &
             - name: Check pre-upgrade KMQ healthiness
               run: while [[ "$(docker inspect --format='{{json .State.Health.Status}}' kmq-gci)" != "\"healthy\"" ]]; do sleep 1; done
+            - name: Run test runner on live instance
+              run: docker exec --env-file	./.env kmq-gci sh -c 'npx ts-node --swc src/test/end-to-test/test-runner-bot.ts; exit $?'
             - name: Check for errors
               run: docker logs kmq-gci 2>&1 | grep -i "\[Error\]" && echo "Errors found in container logs." && exit 1 || echo "No errors found in container logs." && exit 0
             - name: Print logs
@@ -97,7 +104,7 @@ jobs:
                   docker ps
                   echo OLD_CONTAINER_ID=$(sudo docker ps -aqf "name=kmq-gci") > $GITHUB_OUTPUT
             - name: Begin upgrade
-              run: npx ts-node src/scripts/announce-restart.ts --docker-image=ghcr.io/brainicism/kmq_discord:gci --timer=0 --provisioning-timeout=15
+              run: npx ts-node --swc src/scripts/announce-restart.ts --docker-image=ghcr.io/brainicism/kmq_discord:gci --timer=0 --provisioning-timeout=15
             - name: Check post-upgrade KMQ healthiness
               run: while [[ "$(docker inspect --format='{{json .State.Health.Status}}' kmq-gci)" != "\"healthy\"" ]]; do sleep 1; done
             - name: Check old primary no longer exists
@@ -106,4 +113,4 @@ jobs:
                   [ $(docker ps -aq | grep -c ${{ steps.old-container-id.outputs.OLD_CONTAINER_ID }}) -eq 0 ]
             - name: Validate available_songs
               run: |
-                  [[ $(mysql kmq -s -N -h 127.0.0.1 -u $DB_USER_CI -p$DB_PASS_CI -e 'select count(1) from available_songs') -eq 3 ]]
+                  [[ $(mysql kmq -s -N -h 127.0.0.1 -u $DB_USER_CI -p$DB_PASS_CI -e 'select count(1) from available_songs') -eq 5 ]]

@@ -1,20 +1,20 @@
-import * as discordUtils from "../../helpers/discord_utils";
+import * as discordUtils from "../../../helpers/discord_utils";
 import {
     cleanupInactiveGameSessions,
     getAvailableSongCount,
     getMatchingGroupNames,
     getSimilarGroupNames,
-} from "../../helpers/game_utils";
+} from "../../../helpers/game_utils";
 import { describe } from "mocha";
-import GameSession from "../../structures/game_session";
-import GameType from "../../enums/game_type";
-import GuildPreference from "../../structures/guild_preference";
-import KmqMember from "../../structures/kmq_member";
-import LocaleType from "../../enums/locale_type";
-import OstPreference from "../../enums/option_types/ost_preference";
-import ReleaseType from "../../enums/option_types/release_type";
-import State from "../../state";
-import SubunitsPreference from "../../enums/option_types/subunit_preference";
+import GameSession from "../../../structures/game_session";
+import GameType from "../../../enums/game_type";
+import GuildPreference from "../../../structures/guild_preference";
+import KmqMember from "../../../structures/kmq_member";
+import LocaleType from "../../../enums/locale_type";
+import OstPreference from "../../../enums/option_types/ost_preference";
+import ReleaseType from "../../../enums/option_types/release_type";
+import State from "../../../state";
+import SubunitsPreference from "../../../enums/option_types/subunit_preference";
 import assert from "assert";
 import sinon from "sinon";
 

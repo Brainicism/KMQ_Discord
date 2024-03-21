@@ -1,6 +1,6 @@
-import { ExpBonusModifierValues } from "../../constants";
-import ExpBonusModifier from "../../enums/exp_bonus_modifier";
-import Player from "../../structures/player";
+import { ExpBonusModifierValues } from "../../../constants";
+import ExpBonusModifier from "../../../enums/exp_bonus_modifier";
+import Player from "../../../structures/player";
 import assert from "assert";
 
 describe("player", () => {

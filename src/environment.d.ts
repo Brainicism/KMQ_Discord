@@ -36,5 +36,8 @@ declare namespace NodeJS {
         MINIMAL_RUN?: string | undefined;
         YOUTUBE_API_KEY?: string | undefined;
         CENTRAL_REQUEST_HANDLER_ENABLED?: string | undefined;
+        END_TO_END_TEST_BOT_CLIENT: string | undefined;
+        END_TO_END_TEST_BOT_TOKEN: string | undefined;
+        END_TO_END_TEST_BOT_CHANNEL: string | undefined;
     }
 }

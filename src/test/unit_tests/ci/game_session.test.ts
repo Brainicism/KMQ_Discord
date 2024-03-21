@@ -1,17 +1,17 @@
 /* eslint-disable no-await-in-loop */
-import * as discord_utils from "../../helpers/discord_utils";
-import * as game_utils from "../../helpers/game_utils";
-import * as utils from "../../helpers/utils";
-import AnswerType from "../../enums/option_types/answer_type";
+import * as discord_utils from "../../../helpers/discord_utils";
+import * as game_utils from "../../../helpers/game_utils";
+import * as utils from "../../../helpers/utils";
+import AnswerType from "../../../enums/option_types/answer_type";
 import Eris, { Collection } from "eris";
-import GameSession from "../../structures/game_session";
-import GameType from "../../enums/game_type";
-import GuildPreference from "../../structures/guild_preference";
-import KmqClient from "../../kmq_client";
-import KmqMember from "../../structures/kmq_member";
-import MessageContext from "../../structures/message_context";
-import Session from "../../structures/session";
-import State from "../../state";
+import GameSession from "../../../structures/game_session";
+import GameType from "../../../enums/game_type";
+import GuildPreference from "../../../structures/guild_preference";
+import KmqClient from "../../../kmq_client";
+import KmqMember from "../../../structures/kmq_member";
+import MessageContext from "../../../structures/message_context";
+import Session from "../../../structures/session";
+import State from "../../../state";
 import assert from "assert";
 import sinon from "sinon";
 

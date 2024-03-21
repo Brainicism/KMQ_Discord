@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/dot-notation */
-import GuildPreference from "../../structures/guild_preference";
+import GuildPreference from "../../../structures/guild_preference";
 import assert from "assert";
 
 describe("guild preference", () => {
