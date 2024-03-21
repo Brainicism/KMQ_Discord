@@ -158,9 +158,6 @@ bot.on("messageCreate", async (msg) => {
     }
 
     if (embeds[0]?.footer?.text !== RUN_ID) {
-        console.warn(
-            `Skipping message that did not contain RUN_ID. embed = ${JSON.stringify(embeds[0])}`,
-        );
         return;
     }
 
