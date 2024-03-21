@@ -68,7 +68,6 @@ import voiceChannelSwitchHandler from "./events/client/voiceChannelSwitch";
 import warnHandler from "./events/client/warn";
 import type { Setup } from "eris-fleet/dist/clusters/BaseClusterWorker";
 import type KmqClient from "./kmq_client";
-import type WorkerCache from "./interfaces/worker_cache";
 
 const logger = new IPCLogger("kmq");
 config({ path: path.resolve(__dirname, "../.env") });
@@ -352,7 +351,7 @@ export default class BotWorker extends BaseClusterWorker {
                     `${this.logHeader()} | Loading cached application data...`,
                 );
 
-                BotWorker.updateCache(await reloadCaches());
+                State.updateCache(await reloadCaches());
             }
 
             State.commandToID = await getCachedAppCommandIds();
@@ -477,18 +476,5 @@ export default class BotWorker extends BaseClusterWorker {
                 );
             }
         });
-    }
-
-    static updateCache(cache: WorkerCache): void {
-        State.aliases.artist = cache.artistAliases;
-        State.aliases.song = cache.songAliases;
-        State.artists = cache.artists;
-        State.topArtists = cache.topArtists;
-        State.bonusArtists = cache.bonusGroups;
-        State.locales = cache.locales;
-        State.songs = cache.songs;
-        State.newSongs = cache.newSongs;
-        State.bannedPlayers = cache.bannedPlayers;
-        State.bannedServers = cache.bannedServers;
     }
 }
