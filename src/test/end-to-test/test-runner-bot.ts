@@ -106,7 +106,8 @@ bot.on("messageCreate", async (msg) => {
     }
 
     // ignore resets
-    if (msg.referencedMessage?.content === ",reset") return;
+    if (msg.referencedMessage?.content === `${process.env.BOT_PREFIX!}reset`)
+        return;
 
     const embed = embeds[0]!;
     const { title, description, fields } = embed;
