@@ -447,7 +447,11 @@ export async function sendMessage(
         )?.getMessage(messageContent.messageReference.messageID);
 
         // test bot request, reply with same run ID
-        if (message && message.embeds[0]) {
+        if (
+            message &&
+            message.author.id === process.env.END_TO_END_TEST_BOT_CLIENT &&
+            message.embeds[0]
+        ) {
             messageContent.embeds![0]!.footer = {
                 text: message.embeds[0].footer?.text!,
             };
