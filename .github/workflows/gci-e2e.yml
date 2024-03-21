@@ -90,6 +90,8 @@ jobs:
               run: . ./.env && docker run -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} -v ${PWD}/data:/app/data -v ${PWD}/.env:/app/.env -v ${PWD}/logs:/app/logs --env NODE_ENV=production --network=host --name kmq-gci ghcr.io/brainicism/kmq_discord:gci &
             - name: Check pre-upgrade KMQ healthiness
               run: while [[ "$(docker inspect --format='{{json .State.Health.Status}}' kmq-gci)" != "\"healthy\"" ]]; do sleep 1; done
+            - name: Run test runner on live instance
+              run: . ./.env && npx ts-node --swc src/test/end-to-test/test-runner-bot.ts
             - name: Check for errors
               run: docker logs kmq-gci 2>&1 | grep -i "\[Error\]" && echo "Errors found in container logs." && exit 1 || echo "No errors found in container logs." && exit 0
             - name: Print logs
@@ -98,8 +100,6 @@ jobs:
                   docker logs kmq-gci 2>&1
                   docker inspect kmq-gci | jq '.[].State'
                   docker --version
-            - name: Run test runner on live instance
-              run: npx ts-node --swc src/test/end-to-test/test-runner-bot.ts
             - name: Parse pre-upgrade container ID
               id: old-container-id
               run: |
