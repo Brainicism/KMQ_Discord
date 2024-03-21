@@ -50,8 +50,19 @@ const parseMessage = (message: string): ParsedMessage | null => {
 export default async function messageCreateHandler(
     message: Eris.Message,
 ): Promise<void> {
-    if (message.author.id === process.env.BOT_CLIENT_ID || message.author.bot)
+    // dont respond to self
+    if (message.author.id === process.env.BOT_CLIENT_ID) {
         return;
+    }
+
+    // dont respond to bots unless test bot
+    if (
+        message.author.bot &&
+        message.author.id !== process.env.END_TO_END_TEST_BOT_CLIENT
+    ) {
+        return;
+    }
+
     if (!isGuildMessage(message)) return;
     if (State.client.unavailableGuilds.has(message.guildID)) {
         logger.warn(`Server was unavailable. id = ${message.guildID}`);

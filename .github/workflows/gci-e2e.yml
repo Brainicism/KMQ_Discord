@@ -35,6 +35,9 @@ jobs:
             - name: Copy .env for CI
               env:
                   BOT_TOKEN: ${{ secrets.KMQ_CI_BOT_TOKEN }}
+                  BOT_CLIENT: ${{ secrets.BOT_CLIENT }}
+                  END_TO_END_TEST_BOT_TOKEN: ${{ secrets.END_TO_END_TEST_BOT_TOKEN }}
+                  END_TO_END_TEST_BOT_CLIENT: ${{ secrets.END_TO_END_TEST_BOT_CLIENT }}
               run: |
                   echo "DB_USER=$DB_USER_CI" >> .env
                   echo "DB_PASS=$DB_PASS_CI" >> .env
@@ -43,11 +46,13 @@ jobs:
                   echo "BOT_TOKEN=$BOT_TOKEN" >> .env
                   echo "WEB_SERVER_PORT=5858" >> .env
                   echo "SONG_DOWNLOAD_DIR=/songs" >> .env
-                  echo "BOT_CLIENT_ID=123" >> .env
+                  echo "BOT_CLIENT_ID=$BOT_CLIENT" >> .env
                   echo "BOT_PREFIX=." >> .env
                   echo "APP_NAME=kmq-gci" >> .env
                   echo "DAISUKI_DB_PASSWORD=unusedpw" >> .env
                   echo "DEBUG_SERVER_ID=${{ secrets.DEBUG_SERVER_ID }}" >> .env
+                  echo "END_TO_END_TEST_BOT_TOKEN=$END_TO_END_TEST_BOT_TOKEN" >> .env
+                  echo "END_TO_END_TEST_BOT_CLIENT=$END_TO_END_TEST_BOT_CLIENT" >> .env
             - name: Install node dependencies
               run: yarn install --frozen-lockfile
             - name: Extract metadata (tags, labels) for Docker
@@ -91,13 +96,15 @@ jobs:
                   docker logs kmq-gci 2>&1
                   docker inspect kmq-gci | jq '.[].State'
                   docker --version
+            - name: Run test runner on live instance
+              run: npx ts-node --swc src/test/end-to-test/test-runner-bot.ts
             - name: Parse pre-upgrade container ID
               id: old-container-id
               run: |
                   docker ps
                   echo OLD_CONTAINER_ID=$(sudo docker ps -aqf "name=kmq-gci") > $GITHUB_OUTPUT
             - name: Begin upgrade
-              run: npx ts-node src/scripts/announce-restart.ts --docker-image=ghcr.io/brainicism/kmq_discord:gci --timer=0 --provisioning-timeout=15
+              run: npx ts-node --swc src/scripts/announce-restart.ts --docker-image=ghcr.io/brainicism/kmq_discord:gci --timer=0 --provisioning-timeout=15
             - name: Check post-upgrade KMQ healthiness
               run: while [[ "$(docker inspect --format='{{json .State.Health.Status}}' kmq-gci)" != "\"healthy\"" ]]; do sleep 1; done
             - name: Check old primary no longer exists
