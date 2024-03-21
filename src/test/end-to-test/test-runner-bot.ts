@@ -67,7 +67,11 @@ async function mainLoop(): Promise<void> {
     const stageData = BASIC_OPTIONS_TEST_SUITE.tests[CURRENT_STAGE]!;
     const command = stageData.command;
     if (TEST_SUITE.resetEachStage) {
-        await bot.createMessage(process.env.END_TO_END_TEST_CHANNEL!, ",reset");
+        await bot.createMessage(
+            process.env.END_TO_END_TEST_BOT_CHANNEL!,
+            ",reset",
+        );
+
         console.log(
             `STAGE ${CURRENT_STAGE} | Sending pre-test command: ',reset'`,
         );
@@ -75,7 +79,7 @@ async function mainLoop(): Promise<void> {
     }
 
     console.log(`STAGE ${CURRENT_STAGE} | Sending command: '${command}'`);
-    await bot.createMessage(process.env.END_TO_END_TEST_CHANNEL!, command);
+    await bot.createMessage(process.env.END_TO_END_TEST_BOT_CHANNEL!, command);
 }
 
 bot.on("ready", async () => {
@@ -146,7 +150,7 @@ bot.on("messageCreate", async (msg) => {
         );
 
         await bot.createMessage(
-            process.env.END_TO_END_TEST_CHANNEL!,
+            process.env.END_TO_END_TEST_BOT_CHANNEL!,
             `Passed ${totalTests - failedTests.length}/${totalTests}   ${failedTests.length > 0 ? `\nFailed Tests:\n ${failedTests.join("\n ")}` : ""} `,
         );
 
@@ -172,7 +176,7 @@ bot.on("messageCreate", async (msg) => {
         !process.env.END_TO_END_TEST_BOT_CHANNEL
     ) {
         console.error(
-            "END_TO_END_TEST_BOT_TOKEN, END_TO_END_TEST_BOT_CLIENT or END_TO_END_TEST_CHANNEL not specified",
+            "END_TO_END_TEST_BOT_TOKEN, END_TO_END_TEST_BOT_CLIENT or END_TO_END_TEST_BOT_CHANNEL not specified",
         );
         process.exit(1);
     }
