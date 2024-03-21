@@ -7,7 +7,6 @@ import {
     STATUS_COOKIE,
 } from "./constants";
 import { Fleet } from "eris-fleet";
-import { clearRestartNotification } from "./helpers/management_utils";
 import { config } from "dotenv";
 import { delay, isPrimaryInstance, pathExists } from "./helpers/utils";
 import { getInternalLogger } from "./logger";
@@ -21,6 +20,7 @@ import dbContext from "./database_context";
 import fs from "fs";
 
 import KmqWebServer from "./kmq_web_server";
+import State from "./state";
 import path from "path";
 import schedule from "node-schedule";
 import storeDailyStats from "./scripts/store-daily-stats";
@@ -208,7 +208,7 @@ function registerProcessEvents(fleet: Fleet): void {
             registerProcessEvents(fleet);
 
             logger.info("Clearing existing restart notifications...");
-            clearRestartNotification();
+            State.restartNotification = null;
 
             logger.info("Registering global intervals");
             registerGlobalIntervals(fleet);

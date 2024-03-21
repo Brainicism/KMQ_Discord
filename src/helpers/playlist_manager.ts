@@ -895,7 +895,7 @@ export default class PlaylistManager {
                 const lowercaseArtist =
                     GameRound.normalizePunctuationInName(artist);
 
-                const artistMapping = State.artistToEntry[lowercaseArtist];
+                const artistMapping = State.artists[lowercaseArtist];
                 if (artistMapping) {
                     aliasIDs.push(artistMapping.id);
                     const artistAliases = State.aliases.artist[lowercaseArtist];
@@ -904,9 +904,9 @@ export default class PlaylistManager {
                             const lowercaseAlias =
                                 GameRound.normalizePunctuationInName(alias);
 
-                            if (lowercaseAlias in State.artistToEntry) {
+                            if (lowercaseAlias in State.artists) {
                                 aliasIDs.push(
-                                    State.artistToEntry[lowercaseAlias]!.id,
+                                    State.artists[lowercaseAlias]!.id,
                                 );
                             }
                         }

@@ -1,39 +1,53 @@
 /* eslint-disable global-require */
 /* eslint-disable import/no-dynamic-require */
 import { IPCLogger } from "../logger";
-import { chooseRandom, delay, isPrimaryInstance, isWeekend } from "./utils";
-import {
-    cleanupInactiveGameSessions,
-    cleanupInactiveListeningSessions,
-    isPowerHour,
-} from "./game_utils";
-import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
+import { chooseRandom, delay, isWeekend } from "./utils";
+import { isPowerHour } from "./game_utils";
+import { sendInfoMessage } from "./discord_utils";
 import { sql } from "kysely";
 import GameRound from "../structures/game_round";
 import KmqConfiguration from "../kmq_configuration";
 import MessageContext from "../structures/message_context";
 import NewsCommand from "../commands/misc_commands/news";
-import NewsRange from "../enums/news_range";
-import State from "../state";
 import _ from "lodash";
 import dbContext from "../database_context";
 import i18n from "./localization_manager";
-import schedule from "node-schedule";
+import type {
+    ArtistAliasCache,
+    ArtistCache,
+    BannedPlayerCache,
+    BannedServerCache,
+    BonusGroupCache,
+    LocaleCache,
+    NewSongCache,
+    SongAliasCache,
+    SongCache,
+    TopArtistCache,
+} from "../interfaces/worker_cache";
+import type GameSession from "../structures/game_session";
+import type KmqClient from "../kmq_client";
+import type ListeningSession from "../structures/listening_session";
 import type LocaleType from "../enums/locale_type";
 import type MatchedArtist from "../interfaces/matched_artist";
+import type NewsRange from "../enums/news_range";
 import type NewsSubscription from "../interfaces/news_subscription";
+import type PlaylistManager from "./playlist_manager";
+import type RestartNotification from "../interfaces/restart_notification";
+import type WorkerCache from "../interfaces/worker_cache";
 
 const logger = new IPCLogger("management_utils");
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 3, 2, 1]);
 
 /**
  * Gets the remaining time until the next server restart
+ * @param restartNotification - The restart notification
  * @returns null if no restart is imminent, a date in epoch milliseconds
  */
-export function getTimeUntilRestart(): number | null {
-    if (!State.restartNotification?.restartDate) return null;
-    const restartNotificationTime =
-        State.restartNotification.restartDate.getTime();
+export function getTimeUntilRestart(
+    restartNotification: RestartNotification | null,
+): number | null {
+    if (!restartNotification?.restartDate) return null;
+    const restartNotificationTime = restartNotification.restartDate.getTime();
 
     return Math.ceil(
         (restartNotificationTime - new Date().getTime()) / (1000 * 60),
@@ -42,16 +56,20 @@ export function getTimeUntilRestart(): number | null {
 
 /**
  * Sends a warning message to all active GameSessions for impending restarts at predefined intervals
+ * @param gameSessions - The active game sessions
+ * @param listeningSessions - The active listening sessions
  * @param timeUntilRestart - time until the restart
  */
 export async function warnServersImpendingRestart(
+    gameSessions: { [guildID: string]: GameSession },
+    listeningSessions: { [guildID: string]: ListeningSession },
     timeUntilRestart: number,
 ): Promise<void> {
     let serversWarned = 0;
     if (RESTART_WARNING_INTERVALS.has(timeUntilRestart)) {
         for (const session of [
-            ...Object.values(State.gameSessions),
-            ...Object.values(State.listeningSessions),
+            ...Object.values(gameSessions),
+            ...Object.values(listeningSessions),
         ]) {
             if (session.finished) continue;
             // eslint-disable-next-line no-await-in-loop
@@ -89,18 +107,26 @@ export async function warnServersImpendingRestart(
     }
 }
 
-/** Clear inactive voice connections */
-function clearInactiveVoiceConnections(): void {
+/** Clear inactive voice connections
+ * @param client - The bot client
+ * @param gameSessions - Existing game sessions
+ * @param listeningSessions - Existing listening sessions
+ */
+export function clearInactiveVoiceConnections(
+    client: KmqClient,
+    gameSessions: { [guildID: string]: GameSession },
+    listeningSessions: { [guildID: string]: ListeningSession },
+): void {
     const existingVoiceChannelGuildIDs = Array.from(
-        State.client.voiceConnections.keys(),
+        client.voiceConnections.keys(),
     ) as Array<string>;
 
     const activeGameVoiceChannelGuildIDs = new Set(
-        Object.values(State.gameSessions).map((x) => x.guildID),
+        Object.values(gameSessions).map((x) => x.guildID),
     );
 
     const activeListeningVoiceChannelGuildIDs = new Set(
-        Object.values(State.listeningSessions).map((x) => x.guildID),
+        Object.values(listeningSessions).map((x) => x.guildID),
     );
 
     for (const existingVoiceChannelGuildID of existingVoiceChannelGuildIDs) {
@@ -110,7 +136,7 @@ function clearInactiveVoiceConnections(): void {
                 existingVoiceChannelGuildID,
             )
         ) {
-            const voiceConnection = State.client.voiceConnections.get(
+            const voiceConnection = client.voiceConnections.get(
                 existingVoiceChannelGuildID,
             );
 
@@ -122,9 +148,7 @@ function clearInactiveVoiceConnections(): void {
                 );
 
                 try {
-                    State.client.voiceConnections.leave(
-                        existingVoiceChannelGuildID,
-                    );
+                    client.voiceConnections.leave(existingVoiceChannelGuildID);
                 } catch (e) {
                     logger.error(
                         `Failed to disconnect inactive voice connection for gid: ${existingVoiceChannelGuildID}. err = ${e}`,
@@ -135,9 +159,14 @@ function clearInactiveVoiceConnections(): void {
     }
 }
 
-/* Updates system statistics */
-async function updateSystemStats(clusterID: number): Promise<void> {
-    const { client } = State;
+/** Updates system statistics
+ * @param client - The bot client
+ * @param clusterID - The cluster ID
+ */
+export async function updateSystemStats(
+    client: KmqClient,
+    clusterID: number,
+): Promise<void> {
     const latencies = client.shards.map((x) => x.latency);
     const meanLatency = _.mean(latencies);
     const maxLatency = _.max(latencies) as number;
@@ -176,10 +205,15 @@ async function updateSystemStats(clusterID: number): Promise<void> {
         .execute();
 }
 
-/** Updates the bot's song listening status */
-export async function updateBotStatus(): Promise<void> {
-    const { client } = State;
-    const timeUntilRestart = getTimeUntilRestart();
+/** Updates the bot's song listening status
+ * @param client - The bot client
+ * @param restartNotification - The restart notification
+ */
+export async function updateBotStatus(
+    client: KmqClient,
+    restartNotification: RestartNotification | null,
+): Promise<void> {
+    const timeUntilRestart = getTimeUntilRestart(restartNotification);
     if (timeUntilRestart) {
         client.editStatus("dnd", {
             name: `Restarting in ${timeUntilRestart} minutes...`,
@@ -212,14 +246,10 @@ export async function updateBotStatus(): Promise<void> {
     });
 }
 
-/** Reload song/artist aliases */
-export async function reloadAliases(): Promise<void> {
-    const songAliasMapping = await dbContext.kpopVideos
-        .selectFrom("app_kpop")
-        .select(["vlink as link", "alias as song_aliases"])
-        .where("alias", "<>", "")
-        .execute();
-
+/** Reload artist aliases
+ * @returns the updated artist aliases
+ */
+export async function reloadArtistAliases(): Promise<ArtistAliasCache> {
     const artistAliasMapping: {
         artist_name_en: string;
         artist_aliases: string;
@@ -246,14 +276,6 @@ export async function reloadAliases(): Promise<void> {
         )
         .execute();
 
-    const songAliases: { [songName: string]: string[] } = {};
-    for (const mapping of songAliasMapping) {
-        songAliases[mapping["link"]] = mapping["song_aliases"]
-            .split(";")
-            .map((x) => x.trim())
-            .filter((x: string) => x);
-    }
-
     const artistAliases: { [artistName: string]: string[] } = {};
     for (const mapping of artistAliasMapping) {
         const aliases: Array<string> = mapping["artist_aliases"]
@@ -272,13 +294,35 @@ export async function reloadAliases(): Promise<void> {
         artistAliases[mapping["artist_name_en"]] = aliases;
     }
 
-    State.aliases.artist = artistAliases;
-    State.aliases.song = songAliases;
-    logger.info("Reloaded alias data");
+    return artistAliases;
 }
 
-/** Reload bonus groups (same groups chosen on the same day) */
-export async function reloadBonusGroups(): Promise<void> {
+/** Reload song aliases
+ * @returns the updated song aliases
+ */
+export async function reloadSongAliases(): Promise<SongAliasCache> {
+    const songAliasMapping = await dbContext.kpopVideos
+        .selectFrom("app_kpop")
+        .select(["vlink as link", "alias as song_aliases"])
+        .where("alias", "<>", "")
+        .execute();
+
+    const songAliases: { [songName: string]: string[] } = {};
+    for (const mapping of songAliasMapping) {
+        songAliases[mapping["link"]] = mapping["song_aliases"]
+            .split(";")
+            .map((x) => x.trim())
+            .filter((x: string) => x);
+    }
+
+    logger.info("Reloaded alias data");
+    return songAliases;
+}
+
+/** Reload bonus groups (same groups chosen on the same day)
+ * @returns the updated bonus groups
+ */
+export async function reloadBonusGroups(): Promise<BonusGroupCache> {
     const bonusGroupCount = 10;
     const date = new Date();
     const artistNameQuery: string[] = (
@@ -300,13 +344,14 @@ export async function reloadBonusGroups(): Promise<void> {
         .map((x) => x.name)
         .sort();
 
-    State.bonusArtists = new Set(artistNameQuery);
+    return new Set(artistNameQuery);
 }
 
 /**
  *Reload artist name data for autocomplete
+ @returns the updated artists and top artists
  */
-export async function reloadArtists(): Promise<void> {
+export async function reloadArtists(): Promise<ArtistCache> {
     const artistAliasMapping = await dbContext.kmq
         .selectFrom("available_songs")
         .select([
@@ -319,6 +364,8 @@ export async function reloadArtists(): Promise<void> {
         .where("artist_name_en", "not like", "%+%")
         .execute();
 
+    const artistToEntry: { [artistNameOrAlias: string]: MatchedArtist } = {};
+
     for (const mapping of artistAliasMapping) {
         const aliases = mapping["artist_aliases"]
             .split(";")
@@ -330,24 +377,31 @@ export async function reloadArtists(): Promise<void> {
             id: mapping["id_artist"],
         } as MatchedArtist;
 
-        State.artistToEntry[
+        artistToEntry[
             GameRound.normalizePunctuationInName(mapping["artist_name_en"])
         ] = artistEntry;
 
         if (mapping["artist_name_ko"]) {
-            State.artistToEntry[mapping["artist_name_ko"]] = artistEntry;
+            artistToEntry[mapping["artist_name_ko"]] = artistEntry;
         }
 
         for (const alias in aliases) {
             if (alias.length > 0) {
-                State.artistToEntry[
-                    GameRound.normalizePunctuationInName(alias)
-                ] = artistEntry;
+                artistToEntry[GameRound.normalizePunctuationInName(alias)] =
+                    artistEntry;
             }
         }
     }
 
-    State.topArtists = await dbContext.kmq
+    return artistToEntry;
+}
+
+/**
+ * Reloads the top artists
+ * @returns the updated top artists
+ */
+export async function reloadTopArtists(): Promise<TopArtistCache> {
+    return dbContext.kmq
         .selectFrom("available_songs")
         .innerJoin(
             "kpop_videos.app_kpop_group",
@@ -367,12 +421,21 @@ export async function reloadArtists(): Promise<void> {
 
 /**
  * Reload song names for autocomplete
+ * @returns the updated songs mapping
  */
-export async function reloadSongs(): Promise<void> {
+export async function reloadSongs(): Promise<SongCache> {
     const songMapping = await dbContext.kmq
         .selectFrom("available_songs")
         .select(["link", "song_name_en", "song_name_ko", "id_artist"])
         .execute();
+
+    const songLinkToEntry: {
+        [songLink: string]: {
+            name: string;
+            hangulName: string | null;
+            artistID: number;
+        };
+    } = {};
 
     for (const mapping of songMapping) {
         const songEntry = {
@@ -382,10 +445,18 @@ export async function reloadSongs(): Promise<void> {
             songLink: mapping["link"],
         };
 
-        State.songLinkToEntry[songEntry.songLink] = songEntry;
+        songLinkToEntry[songEntry.songLink] = songEntry;
     }
 
-    State.newSongs = await dbContext.kmq
+    return songLinkToEntry;
+}
+
+/**
+ * Reloads new songs
+ * @returns newly added songs
+ */
+export async function reloadNewSongs(): Promise<NewSongCache> {
+    return dbContext.kmq
         .selectFrom("available_songs")
         .select([
             "link as songLink",
@@ -398,43 +469,65 @@ export async function reloadSongs(): Promise<void> {
         .execute();
 }
 
-async function reloadLocales(): Promise<void> {
+/**
+ * Reloads server locales
+ * @returns the updated locales
+ */
+export async function reloadLocales(): Promise<LocaleCache> {
     const updatedLocales = await dbContext.kmq
         .selectFrom("locale")
         .select(["locale", "guild_id"])
         .execute();
 
+    const locales: { [guildID: string]: LocaleType } = {};
     for (const l of updatedLocales) {
-        State.locales[l.guild_id] = l.locale as LocaleType;
+        locales[l.guild_id] = l.locale as LocaleType;
     }
-}
 
-function cleanupPlaylistParsingLocks(): void {
-    State.playlistManager.cleanupPlaylistParsingLocks();
+    return locales;
 }
 
 /**
- * Clears any existing restart timers
+ * Removes any stale playlist locks
+ * @param playlistManager - The playlist manager
  */
-export function clearRestartNotification(): void {
-    State.restartNotification = null;
+export function cleanupPlaylistParsingLocks(
+    playlistManager: PlaylistManager,
+): void {
+    playlistManager.cleanupPlaylistParsingLocks();
 }
 
-async function reloadBanData(): Promise<void> {
+/**
+ * Reloads the banned servers
+ * @returns the updated banned servers
+ */
+export async function reloadBannedServers(): Promise<BannedServerCache> {
     const bannedServers = (
         await dbContext.kmq.selectFrom("banned_servers").select("id").execute()
     ).map((x) => x.id);
 
-    State.bannedServers = new Set(bannedServers);
+    return new Set(bannedServers);
+}
 
+/**
+ * Reloads the banned players
+ * @returns the updated banned players
+ */
+export async function reloadBannedPlayers(): Promise<BannedPlayerCache> {
     const bannedPlayers = (
         await dbContext.kmq.selectFrom("banned_players").select("id").execute()
     ).map((x) => x.id);
 
-    State.bannedPlayers = new Set(bannedPlayers);
+    return new Set(bannedPlayers);
 }
 
-async function sendNewsNotifications(newsRange: NewsRange): Promise<void> {
+/**
+ * Sends news notifications to all subscribed channels
+ * @param newsRange - The news range
+ */
+export async function sendNewsNotifications(
+    newsRange: NewsRange,
+): Promise<void> {
     if (!KmqConfiguration.Instance.newsSubscriptionsEnabled()) {
         return;
     }
@@ -474,88 +567,20 @@ async function sendNewsNotifications(newsRange: NewsRange): Promise<void> {
 }
 
 /**
- * @param clusterID - The cluster ID
- *  Sets up recurring cron-based tasks
+ * Fetches up-to-date caches
+ * @returns the latest caches
  * */
-export function registerIntervals(clusterID: number): void {
-    // busiest times for r/kpop are 6pm and midnight KST
-    // 15:00 UTC => midnight KST (busiest time for r/kpop)
-    // wait a couple hours for NA to upvote posts
-    schedule.scheduleJob("0 18 * * *", async () => {
-        await sendNewsNotifications(NewsRange.DAILY);
-    });
-
-    schedule.scheduleJob("5 18 * * 0", async () => {
-        await sendNewsNotifications(NewsRange.WEEKLY);
-    });
-
-    schedule.scheduleJob("10 18 1 * *", async () => {
-        await sendNewsNotifications(NewsRange.MONTHLY);
-    });
-
-    // Everyday at 12am UTC => 7pm ET
-    schedule.scheduleJob("0 0 * * *", async () => {
-        // New bonus groups
-        await reloadBonusGroups();
-    });
-
-    // Every hour
-    schedule.scheduleJob("0 * * * *", async () => {
-        if (
-            isPowerHour() &&
-            !isWeekend() &&
-            State.client.guilds.has(process.env.DEBUG_SERVER_ID as string)
-        ) {
-            // Ping a role in KMQ server notifying of power hour
-            await sendPowerHourNotification();
-        }
-    });
-
-    // Every 10 minutes
-    schedule.scheduleJob("*/10 * * * *", async () => {
-        // Cleanup inactive game sessions
-        await cleanupInactiveGameSessions(State.gameSessions);
-        // Cleanup inactive listening sessions
-        await cleanupInactiveListeningSessions(State.listeningSessions);
-        // Change bot's status (song playing, power hour, etc.)
-        await updateBotStatus();
-        // Clear any guilds stuck in parsing Playlist state
-        cleanupPlaylistParsingLocks();
-        // Reload ban data
-        await reloadBanData();
-    });
-
-    // Every 5 minutes
-    schedule.scheduleJob("*/5 * * * *", async () => {
-        // Update song/artist aliases
-        await reloadAliases();
-        // Cleanup inactive Discord voice connections
-        clearInactiveVoiceConnections();
-
-        if (await isPrimaryInstance()) {
-            // Store per-cluster stats
-            await updateSystemStats(clusterID);
-        }
-    });
-
-    // Every minute
-    schedule.scheduleJob("* * * * *", async () => {
-        KmqConfiguration.reload();
-        // set up check for restart notifications
-        const timeUntilRestart = getTimeUntilRestart();
-        if (timeUntilRestart && State.restartNotification) {
-            await updateBotStatus();
-            await warnServersImpendingRestart(timeUntilRestart);
-        }
-    });
-}
-
-/** Reloads caches */
-export async function reloadCaches(): Promise<void> {
-    await reloadAliases();
-    await reloadArtists();
-    await reloadBonusGroups();
-    await reloadLocales();
-    await reloadSongs();
-    await reloadBanData();
+export async function reloadCaches(): Promise<WorkerCache> {
+    return {
+        artistAliases: await reloadArtistAliases(),
+        songAliases: await reloadSongAliases(),
+        artists: await reloadArtists(),
+        topArtists: await reloadTopArtists(),
+        bonusGroups: await reloadBonusGroups(),
+        locales: await reloadLocales(),
+        songs: await reloadSongs(),
+        newSongs: await reloadNewSongs(),
+        bannedPlayers: await reloadBannedPlayers(),
+        bannedServers: await reloadBannedServers(),
+    };
 }

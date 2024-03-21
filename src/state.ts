@@ -10,6 +10,7 @@ import type LocaleType from "./enums/locale_type";
 import type MatchedArtist from "./interfaces/matched_artist";
 import type PlaylistManager from "./helpers/playlist_manager";
 import type RestartNotification from "./interfaces/restart_notification";
+import type WorkerCache from "./interfaces/worker_cache";
 
 export default class State {
     static version: string;
@@ -31,9 +32,9 @@ export default class State {
     static rateLimiter = new RateLimiter(15, 30);
     static bonusArtists: Set<string> = new Set<string>();
     static locales: { [guildID: string]: LocaleType } = {};
-    static artistToEntry: { [artistNameOrAlias: string]: MatchedArtist } = {};
+    static artists: { [artistNameOrAlias: string]: MatchedArtist } = {};
     static topArtists: Array<MatchedArtist> = [];
-    static songLinkToEntry: {
+    static songs: {
         [songLink: string]: {
             name: string;
             hangulName: string | null;
@@ -56,5 +57,18 @@ export default class State {
     static commandToID: { [commandName: string]: string } = {};
     static getGuildLocale(guildID: string): LocaleType {
         return State.locales[guildID] ?? DEFAULT_LOCALE;
+    }
+
+    static updateCache(cache: WorkerCache): void {
+        State.aliases.artist = cache.artistAliases;
+        State.aliases.song = cache.songAliases;
+        State.artists = cache.artists;
+        State.topArtists = cache.topArtists;
+        State.bonusArtists = cache.bonusGroups;
+        State.locales = cache.locales;
+        State.songs = cache.songs;
+        State.newSongs = cache.newSongs;
+        State.bannedPlayers = cache.bannedPlayers;
+        State.bannedServers = cache.bannedServers;
     }
 }

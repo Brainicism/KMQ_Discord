@@ -364,7 +364,7 @@ export default class LookupCommand implements BaseCommand {
             let artistID: number | undefined;
             if (artistName) {
                 const matchingArtist =
-                    State.artistToEntry[
+                    State.artists[
                         GameRound.normalizePunctuationInName(artistName)
                     ];
 
@@ -765,7 +765,7 @@ export default class LookupCommand implements BaseCommand {
             let artistID: number | undefined;
             if (artistName) {
                 artistID =
-                    State.artistToEntry[
+                    State.artists[
                         GameRound.normalizePunctuationInName(artistName)
                     ]?.id;
             }
@@ -776,9 +776,7 @@ export default class LookupCommand implements BaseCommand {
                     localizedAutocompleteFormat(
                         _.uniqBy(
                             Object.values(
-                                artistID
-                                    ? State.songLinkToEntry
-                                    : State.newSongs,
+                                artistID ? State.songs : State.newSongs,
                             ).filter(
                                 (x) => !artistID || artistID === x.artistID,
                             ),
@@ -792,7 +790,7 @@ export default class LookupCommand implements BaseCommand {
                     interaction,
                     localizedAutocompleteFormat(
                         _.uniqBy(
-                            Object.values(State.songLinkToEntry).filter(
+                            Object.values(State.songs).filter(
                                 (x) =>
                                     (!artistID || artistID === x.artistID) &&
                                     GameRound.normalizePunctuationInName(
@@ -817,9 +815,7 @@ export default class LookupCommand implements BaseCommand {
                 const cleanEnteredSongName =
                     GameRound.normalizePunctuationInName(enteredSongName);
 
-                const matchingSongs = Object.values(
-                    State.songLinkToEntry,
-                ).filter(
+                const matchingSongs = Object.values(State.songs).filter(
                     (x) =>
                         x.name.startsWith(cleanEnteredSongName) ||
                         x.hangulName?.startsWith(cleanEnteredSongName),
@@ -830,7 +826,7 @@ export default class LookupCommand implements BaseCommand {
                 );
 
                 matchingArtists = _.uniq(
-                    Object.values(State.artistToEntry)
+                    Object.values(State.artists)
                         .filter((x) => matchingSongArtistIDs.includes(x.id))
                         .filter((x) =>
                             (showHangul && x.hangulName ? x.hangulName : x.name)
