@@ -160,7 +160,7 @@ bot.on("messageCreate", async (msg) => {
         );
 
         console.log(`Passed ${totalTests - failedTests.length}/${totalTests}`);
-        process.exit(failedTests.length > 0 ? 0 : 1);
+        process.exit(failedTests.length > 0 ? 1 : 0);
     }
 
     await delay(2000);
