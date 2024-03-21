@@ -20,6 +20,10 @@ const bot = new Eris.Client(process.env.END_TO_END_TEST_BOT_TOKEN!, {
 });
 
 program.option("-t, --test-suite <suite>", "The test suite");
+program.option(
+    "-s, --source <source>",
+    "The execution source (i.e: gci, cronjob)",
+);
 
 program.parse();
 const options = program.opts();
@@ -28,7 +32,7 @@ const failedTests: string[] = [];
 let TEST_SUITE: TestSuite = BASIC_OPTIONS_TEST_SUITE;
 let CURRENT_STAGE: number | null = null;
 
-const RUN_ID = crypto.randomBytes(8).toString("hex");
+let RUN_ID = crypto.randomBytes(8).toString("hex");
 
 function convertGameOptionsMessage(
     inputString: string,
@@ -236,6 +240,10 @@ bot.on("messageCreate", async (msg) => {
             "END_TO_END_TEST_BOT_TOKEN, END_TO_END_TEST_BOT_CLIENT or END_TO_END_TEST_BOT_CHANNEL not specified",
         );
         process.exit(1);
+    }
+
+    if (options.source) {
+        RUN_ID += `-${options.source}`;
     }
 
     await bot.connect();
