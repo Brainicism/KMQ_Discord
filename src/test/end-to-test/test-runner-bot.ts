@@ -3,6 +3,7 @@
 import * as Eris from "eris";
 import { delay } from "../../helpers/utils";
 import BASIC_OPTIONS_TEST_SUITE from "./test_suites/basic_options_test";
+import crypto from "crypto";
 import type ParsedGameOptionValues from "./parsed_game_options_value";
 import type TestSuite from "./test_suites/test_suite";
 
@@ -15,6 +16,8 @@ const bot = new Eris.Client(process.env.END_TO_END_TEST_BOT_TOKEN!, {
 const failedTests: string[] = [];
 let TEST_SUITE: TestSuite | undefined;
 let CURRENT_STAGE: number | null = null;
+
+const RUN_ID = crypto.randomBytes(8).toString("hex");
 
 function convertGameOptionsMessage(
     inputString: string,
@@ -48,10 +51,16 @@ function convertGameOptionsMessage(
 }
 
 async function sendCommand(message: string): Promise<void> {
-    await bot.createMessage(
-        process.env.END_TO_END_TEST_BOT_CHANNEL!,
-        message.replace(",", process.env.BOT_PREFIX!),
-    );
+    await bot.createMessage(process.env.END_TO_END_TEST_BOT_CHANNEL!, {
+        content: message.replace(",", process.env.BOT_PREFIX!),
+        embeds: [
+            {
+                footer: {
+                    text: RUN_ID,
+                },
+            },
+        ],
+    });
 }
 
 async function mainLoop(): Promise<void> {
@@ -62,7 +71,7 @@ async function mainLoop(): Promise<void> {
 
     if (CURRENT_STAGE === null) {
         console.log(
-            "========================================\nBeginning test\n========================================",
+            `========================================\nBeginning test, RUN_ID = ${RUN_ID} \n========================================`,
         );
         CURRENT_STAGE = 0;
     }
@@ -102,6 +111,13 @@ bot.on("messageCreate", async (msg) => {
     // When a message is created
     const embeds = msg.embeds;
     if (!embeds.length) {
+        return;
+    }
+
+    if (embeds[0]?.footer?.text !== RUN_ID) {
+        console.warn(
+            `Skipping message that did not contain RUN_ID. embed = ${JSON.stringify(embeds[0])}`,
+        );
         return;
     }
 
