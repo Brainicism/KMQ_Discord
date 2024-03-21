@@ -1,15 +1,15 @@
 /* eslint-disable node/no-sync */
 import * as cp from "child_process";
-import { DATABASE_DOWNLOAD_DIR } from "../constants";
-import { IPCLogger } from "../logger";
+import { DATABASE_DOWNLOAD_DIR } from "../../constants";
+import { IPCLogger } from "../../logger";
 import {
     importCachedDump,
     performMigrationDown,
     performMigrations,
-} from "../seed/bootstrap";
+} from "../../seed/bootstrap";
 import { sql } from "kysely";
-import EnvType from "../enums/env_type";
-import dbContext, { getNewConnection } from "../database_context";
+import EnvType from "../../enums/env_type";
+import dbContext, { getNewConnection } from "../../database_context";
 import path from "path";
 import sinon from "sinon";
 
@@ -56,12 +56,12 @@ before(async function () {
     // create post seed data cleaning procedure
     const originalPostSeedDataCleaningSqlPath = path.join(
         __dirname,
-        "../../sql/procedures/post_seed_data_cleaning_procedure.sql",
+        "../../../sql/procedures/post_seed_data_cleaning_procedure.sql",
     );
 
     const testPostSeedDataCleaningSqlPath = path.join(
         __dirname,
-        "../../sql/post_seed_data_cleaning_procedure.validation.sql",
+        "../../../sql/post_seed_data_cleaning_procedure.validation.sql",
     );
 
     cp.execSync(
@@ -80,12 +80,12 @@ before(async function () {
     // create kmq data generation procedure
     const originalCreateKmqTablesProcedureSqlPath = path.join(
         __dirname,
-        "../../sql/procedures/create_kmq_data_tables_procedure.sql",
+        "../../../sql/procedures/create_kmq_data_tables_procedure.sql",
     );
 
     const testCreateKmqTablesProcedureSqlPath = path.join(
         __dirname,
-        "../../sql/create_kmq_data_tables_procedure.test.sql",
+        "../../../sql/create_kmq_data_tables_procedure.test.sql",
     );
 
     cp.execSync(

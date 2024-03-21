@@ -1,14 +1,14 @@
-import * as discord_utils from "../../helpers/discord_utils";
-import * as game_utils from "../../helpers/game_utils";
-import * as utils from "../../helpers/utils";
+import * as discord_utils from "../../../helpers/discord_utils";
+import * as game_utils from "../../../helpers/game_utils";
+import * as utils from "../../../helpers/utils";
 import Eris, { Collection } from "eris";
-import GuildPreference from "../../structures/guild_preference";
-import KmqClient from "../../kmq_client";
-import KmqMember from "../../structures/kmq_member";
-import ListeningSession from "../../structures/listening_session";
-import MessageContext from "../../structures/message_context";
-import Session from "../../structures/session";
-import State from "../../state";
+import GuildPreference from "../../../structures/guild_preference";
+import KmqClient from "../../../kmq_client";
+import KmqMember from "../../../structures/kmq_member";
+import ListeningSession from "../../../structures/listening_session";
+import MessageContext from "../../../structures/message_context";
+import Session from "../../../structures/session";
+import State from "../../../state";
 import assert from "assert";
 import sinon from "sinon";
 

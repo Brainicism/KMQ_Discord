@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/dot-notation */
-import { ExpBonusModifierValues } from "../../constants";
-import { delay } from "../../helpers/utils";
-import ExpBonusModifier from "../../enums/exp_bonus_modifier";
-import GameRound from "../../structures/game_round";
-import GuessModeType from "../../enums/option_types/guess_mode_type";
-import QueriedSong from "../../structures/queried_song";
-import State from "../../state";
+import { ExpBonusModifierValues } from "../../../constants";
+import { delay } from "../../../helpers/utils";
+import ExpBonusModifier from "../../../enums/exp_bonus_modifier";
+import GameRound from "../../../structures/game_round";
+import GuessModeType from "../../../enums/option_types/guess_mode_type";
+import QueriedSong from "../../../structures/queried_song";
+import State from "../../../state";
 import assert from "assert";
 
 describe("game round", () => {

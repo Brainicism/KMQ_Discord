@@ -1,14 +1,14 @@
-import * as discord_utils from "../../helpers/discord_utils";
-import * as management_utils from "../../helpers/management_utils";
-import AnswerType from "../../enums/option_types/answer_type";
-import CommandPrechecks from "../../command_prechecks";
-import GameSession from "../../structures/game_session";
-import GameType from "../../enums/game_type";
-import GuildPreference from "../../structures/guild_preference";
-import KmqConfiguration from "../../kmq_configuration";
-import KmqMember from "../../structures/kmq_member";
-import ListeningSession from "../../structures/listening_session";
-import MessageContext from "../../structures/message_context";
+import * as discord_utils from "../../../helpers/discord_utils";
+import * as management_utils from "../../../helpers/management_utils";
+import AnswerType from "../../../enums/option_types/answer_type";
+import CommandPrechecks from "../../../command_prechecks";
+import GameSession from "../../../structures/game_session";
+import GameType from "../../../enums/game_type";
+import GuildPreference from "../../../structures/guild_preference";
+import KmqConfiguration from "../../../kmq_configuration";
+import KmqMember from "../../../structures/kmq_member";
+import ListeningSession from "../../../structures/listening_session";
+import MessageContext from "../../../structures/message_context";
 import assert from "assert";
 import sinon from "sinon";
 

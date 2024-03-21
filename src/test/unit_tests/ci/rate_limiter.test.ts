@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
-import { delay } from "../../helpers/utils";
-import RateLimiter from "../../rate_limiter";
+import { delay } from "../../../helpers/utils";
+import RateLimiter from "../../../rate_limiter";
 import assert from "assert";
 
 describe("rate limiter", () => {

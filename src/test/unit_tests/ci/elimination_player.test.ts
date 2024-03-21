@@ -1,4 +1,4 @@
-import EliminationPlayer from "../../structures/elimination_player";
+import EliminationPlayer from "../../../structures/elimination_player";
 import assert from "assert";
 
 describe("elimination player", () => {
