@@ -47,6 +47,13 @@ function convertGameOptionsMessage(
     return result;
 }
 
+async function sendCommand(message: string): Promise<void> {
+    await bot.createMessage(
+        process.env.END_TO_END_TEST_BOT_CHANNEL!,
+        message.replace(",", process.env.BOT_PREFIX!),
+    );
+}
+
 async function mainLoop(): Promise<void> {
     if (TEST_SUITE === undefined) {
         console.error("Test suite not specified");
@@ -67,10 +74,7 @@ async function mainLoop(): Promise<void> {
     const stageData = BASIC_OPTIONS_TEST_SUITE.tests[CURRENT_STAGE]!;
     const command = stageData.command;
     if (TEST_SUITE.resetEachStage) {
-        await bot.createMessage(
-            process.env.END_TO_END_TEST_BOT_CHANNEL!,
-            ",reset",
-        );
+        await sendCommand(",reset");
 
         console.log(
             `STAGE ${CURRENT_STAGE} | Sending pre-test command: ',reset'`,
@@ -79,7 +83,7 @@ async function mainLoop(): Promise<void> {
     }
 
     console.log(`STAGE ${CURRENT_STAGE} | Sending command: '${command}'`);
-    await bot.createMessage(process.env.END_TO_END_TEST_BOT_CHANNEL!, command);
+    await sendCommand(command);
 }
 
 bot.on("ready", async () => {
