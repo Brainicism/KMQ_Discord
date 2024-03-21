@@ -140,7 +140,10 @@ export default async function messageCreateHandler(
             return;
         }
 
-        if (!State.rateLimiter.check(message.author.id)) {
+        if (
+            message.author.id !== process.env.END_TO_END_TEST_BOT_CLIENT &&
+            !State.rateLimiter.check(message.author.id)
+        ) {
             logger.error(
                 `User ${
                     message.author.id

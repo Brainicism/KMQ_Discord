@@ -57,9 +57,7 @@ export async function getAvailableSongCount(
 
         // only reload if song selector has never loaded yet, otherwise used cached count
         if (songSelector.getSongs().songs.size === 0) {
-            await songSelector.reloadSongs(
-                guildPreference.getKmqPlaylistID() ?? undefined,
-            );
+            await songSelector.reloadSongs();
         }
 
         const songSelectorResults = songSelector.getSongs();

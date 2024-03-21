@@ -414,8 +414,8 @@ export default class PlaylistCommand implements BaseCommand {
             return;
         }
 
+        await guildPreference.setKmqPlaylistID(kmqPlaylistIdentifier);
         const matchedPlaylist = (await guildPreference.songSelector.reloadSongs(
-            kmqPlaylistIdentifier,
             true,
             messageContext,
             interaction,
@@ -446,10 +446,10 @@ export default class PlaylistCommand implements BaseCommand {
                 interaction,
             );
 
+            // reset playlist if invalid
+            await guildPreference.reset(GameOption.PLAYLIST_ID);
             return;
         }
-
-        await guildPreference.setKmqPlaylistID(kmqPlaylistIdentifier);
 
         await LimitCommand.updateOption(
             messageContext,

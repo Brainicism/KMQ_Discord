@@ -178,7 +178,6 @@ export default abstract class Session {
         if (this.guildPreference.songSelector.getSongs().songs.size === 0) {
             try {
                 await this.guildPreference.songSelector.reloadSongs(
-                    this.guildPreference.getKmqPlaylistID() ?? undefined,
                     !this.sessionInitialized,
                 );
             } catch (err) {
