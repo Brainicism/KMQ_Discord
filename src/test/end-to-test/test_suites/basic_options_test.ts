@@ -4,13 +4,13 @@ import type TestSuite from "./test_suite";
 const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
     tests: [
         {
-            command: ",limit 10",
+            command: ",limit 2",
             responseValidator: (
                 title: string,
                 description: string,
                 parsedGameOptions?: ParsedGameOptionValues,
             ) =>
-                parsedGameOptions!["limit set top"]!.value.startsWith("10 /") &&
+                parsedGameOptions!["limit set top"]!.value.startsWith("2 /") &&
                 parsedGameOptions!["limit set top"]!.updated,
             isGameOptionsResponse: true,
         },
