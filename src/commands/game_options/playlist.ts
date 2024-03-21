@@ -447,7 +447,7 @@ export default class PlaylistCommand implements BaseCommand {
             );
 
             // reset playlist if invalid
-            await guildPreference.setKmqPlaylistID(null);
+            await guildPreference.reset(GameOption.PLAYLIST_ID);
             return;
         }
 
