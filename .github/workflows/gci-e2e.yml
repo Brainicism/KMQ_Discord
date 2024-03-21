@@ -38,6 +38,7 @@ jobs:
                   BOT_CLIENT: ${{ secrets.BOT_CLIENT }}
                   END_TO_END_TEST_BOT_TOKEN: ${{ secrets.END_TO_END_TEST_BOT_TOKEN }}
                   END_TO_END_TEST_BOT_CLIENT: ${{ secrets.END_TO_END_TEST_BOT_CLIENT }}
+                  END_TO_END_TEST_BOT_CHANNEL: ${{ secrets.END_TO_END_TEST_BOT_CHANNEL }}
               run: |
                   echo "DB_USER=$DB_USER_CI" >> .env
                   echo "DB_PASS=$DB_PASS_CI" >> .env
@@ -53,6 +54,7 @@ jobs:
                   echo "DEBUG_SERVER_ID=${{ secrets.DEBUG_SERVER_ID }}" >> .env
                   echo "END_TO_END_TEST_BOT_TOKEN=$END_TO_END_TEST_BOT_TOKEN" >> .env
                   echo "END_TO_END_TEST_BOT_CLIENT=$END_TO_END_TEST_BOT_CLIENT" >> .env
+                  echo "END_TO_END_TEST_BOT_CHANNEL=$END_TO_END_TEST_BOT_CHANNEL" >> .env
             - name: Install node dependencies
               run: yarn install --frozen-lockfile
             - name: Extract metadata (tags, labels) for Docker
