@@ -83,7 +83,7 @@ bot.on("ready", async () => {
 });
 
 bot.on("error", (err) => {
-    console.error(err); // or your preferred logger
+    console.error(err);
 });
 
 bot.on("messageCreate", async (msg) => {

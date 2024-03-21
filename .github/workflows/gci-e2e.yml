@@ -91,7 +91,7 @@ jobs:
             - name: Check pre-upgrade KMQ healthiness
               run: while [[ "$(docker inspect --format='{{json .State.Health.Status}}' kmq-gci)" != "\"healthy\"" ]]; do sleep 1; done
             - name: Run test runner on live instance
-              run: . ./.env && npx ts-node --swc src/test/end-to-test/test-runner-bot.ts
+              run: docker exec kmq-gci npx ts-node --swc src/test/end-to-test/test-runner-bot.ts
             - name: Check for errors
               run: docker logs kmq-gci 2>&1 | grep -i "\[Error\]" && echo "Errors found in container logs." && exit 1 || echo "No errors found in container logs." && exit 0
             - name: Print logs
