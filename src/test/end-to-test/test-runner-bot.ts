@@ -169,7 +169,7 @@ bot.on("messageCreate", async (msg) => {
     if (
         !process.env.END_TO_END_TEST_BOT_TOKEN ||
         !process.env.END_TO_END_TEST_BOT_CLIENT ||
-        !process.env.END_TO_END_TEST_CHANNEL
+        !process.env.END_TO_END_TEST_BOT_CHANNEL
     ) {
         console.error(
             "END_TO_END_TEST_BOT_TOKEN, END_TO_END_TEST_BOT_CLIENT or END_TO_END_TEST_CHANNEL not specified",
