@@ -82,8 +82,6 @@ jobs:
                   file: docker/kmq/Dockerfile
                   push: true
                   tags: ghcr.io/brainicism/kmq_discord:gci
-                  cache-from: type=gha
-                  cache-to: type=gha,mode=max
             - name: Dry-run bootstrap
               run: . ./.env && docker run -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} -v ${PWD}/data:/app/data -v ${PWD}/.env:/app/.env -v ${PWD}/logs:/app/logs --env NODE_ENV=dry-run --network=host --name kmq-gci ghcr.io/brainicism/kmq_discord:gci && docker rm -f kmq-gci
             - name: Pre-upgrade run

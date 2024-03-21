@@ -55,6 +55,10 @@ export default async function messageCreateHandler(
         return;
     }
 
+    console.log(
+        `Received message from: ${message.author.id} | ${process.env.END_TO_END_TEST_BOT_CLIENT}`,
+    );
+
     // dont respond to bots unless test bot
     if (
         message.author.bot &&
