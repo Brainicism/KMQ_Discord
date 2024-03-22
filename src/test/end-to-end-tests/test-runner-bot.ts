@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-console */
 /* eslint-disable no-await-in-loop */
@@ -39,6 +40,7 @@ const failedTests: string[] = [];
 let TEST_SUITE: TestSuite = BASIC_OPTIONS_TEST_SUITE;
 let CURRENT_STAGE: {
     stage: number;
+    messageId: string | null;
     processed: boolean;
     ready: boolean;
 } | null = null;
@@ -77,17 +79,19 @@ function convertGameOptionsMessage(
     return result;
 }
 
-async function sendCommand(message: string): Promise<void> {
-    await bot.createMessage(process.env.END_TO_END_TEST_BOT_CHANNEL!, {
-        content: message.replace(",", process.env.BOT_PREFIX!),
-        embeds: [
-            {
-                footer: {
-                    text: RUN_ID,
+async function sendCommand(message: string): Promise<string> {
+    return (
+        await bot.createMessage(process.env.END_TO_END_TEST_BOT_CHANNEL!, {
+            content: message.replace(",", process.env.BOT_PREFIX!),
+            embeds: [
+                {
+                    footer: {
+                        text: RUN_ID,
+                    },
                 },
-            },
-        ],
-    });
+            ],
+        })
+    ).id;
 }
 
 let stageTimeout: NodeJS.Timeout | undefined;
@@ -96,8 +100,9 @@ async function proceedNextStage(): Promise<void> {
     if (CURRENT_STAGE === null) return;
     const totalTests = TEST_SUITE.tests.length;
     CURRENT_STAGE.stage += 1;
-    CURRENT_STAGE.processed = false;
+    CURRENT_STAGE.messageId = null;
     CURRENT_STAGE.ready = false;
+    CURRENT_STAGE.processed = false;
     if (CURRENT_STAGE.stage === TEST_SUITE.tests.length) {
         console.log(
             "========================================Test suite completed========================================",
@@ -125,7 +130,6 @@ async function proceedNextStage(): Promise<void> {
         process.exit(failedTests.length > 0 ? 1 : 0);
     }
 
-    await delay(2000);
     await mainLoop();
 }
 
@@ -138,6 +142,7 @@ async function mainLoop(): Promise<void> {
         CURRENT_STAGE = {
             stage: 0,
             processed: false,
+            messageId: null,
             ready: false,
         };
     }
@@ -148,15 +153,6 @@ async function mainLoop(): Promise<void> {
 
     const testStage = TEST_SUITE.tests[CURRENT_STAGE.stage]!;
     const command = testStage.command;
-    if (TEST_SUITE.resetEachStage) {
-        // use capitalized RESET to indicate reset as part of resetEachStage
-        await sendCommand(",RESET");
-
-        console.log(
-            `STAGE ${CURRENT_STAGE.stage} | Sending pre-test command: ',reset'`,
-        );
-        await delay(2000);
-    }
 
     if (stageTimeout) {
         clearTimeout(stageTimeout);
@@ -175,9 +171,13 @@ async function mainLoop(): Promise<void> {
         failedTests.push(testStage.command);
         await proceedNextStage();
     }, 15000);
-    CURRENT_STAGE.ready = true;
-    await sendCommand(command);
 
+    CURRENT_STAGE.ready = true;
+    if (testStage.preCommandDelay) {
+        await delay(testStage.preCommandDelay);
+    }
+
+    CURRENT_STAGE.messageId = await sendCommand(command);
     switch (testStage.expectedResponseType) {
         case KmqResponseType.GAME_OPTIONS_RESPONSE:
         case KmqResponseType.RAW:
@@ -279,20 +279,22 @@ bot.on("messageCreate", async (msg) => {
         return;
     }
 
-    // ignore resets
-    if (msg.referencedMessage?.content === `${process.env.BOT_PREFIX!}RESET`)
-        return;
-
     if (CURRENT_STAGE === null) {
         console.error("messageCreate called before test began.");
         process.exit(1);
     }
 
-    // already processed a message for the current stage, or the stage hasnt executed yet
-    if (CURRENT_STAGE.processed || !CURRENT_STAGE.ready) return;
+    // response was for a different nessage, already processed a message for the current stage, or the stage hasnt executed yet
+    console.log(msg.referencedMessage?.id, CURRENT_STAGE.messageId);
+    if (
+        msg.referencedMessage?.id !== CURRENT_STAGE.messageId ||
+        CURRENT_STAGE.processed ||
+        !CURRENT_STAGE.ready
+    ) {
+        return;
+    }
 
     CURRENT_STAGE.processed = true;
-
     const embed = embeds[0]!;
     const { title, description, fields, footer } = embed;
     let combinedDescription = `${description}\n`;
@@ -358,6 +360,25 @@ async function ensureVoiceConnection(): Promise<void> {
             console.log(`Test suite not found, name = ${selectedTestSuite}`);
             TEST_SUITE = BASIC_OPTIONS_TEST_SUITE;
             break;
+    }
+
+    if (TEST_SUITE.resetEachStage) {
+        const resetStep = {
+            command: ",reset",
+            responseValidator: (
+                title: string,
+                description: string,
+                parsedGameOptions?: ParsedGameOptionValues,
+                client?: Eris.Client,
+            ) => title === "Options",
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
+            requiresVoiceConnection: true,
+        };
+
+        // put a reset step before each step
+        TEST_SUITE.tests = TEST_SUITE.tests
+            .map((item) => [resetStep, item])
+            .flat();
     }
 
     if (!process.env.BOT_CLIENT_ID) {

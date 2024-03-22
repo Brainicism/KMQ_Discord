@@ -13,6 +13,7 @@ export default interface TestSuite {
         ) => boolean;
         expectedResponseType: KmqResponseType;
         requiresVoiceConnection?: boolean;
+        preCommandDelay?: number;
     }[];
     resetEachStage: boolean;
 }

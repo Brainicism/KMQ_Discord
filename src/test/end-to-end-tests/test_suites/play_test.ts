@@ -87,6 +87,7 @@ const PLAY_TEST_SUITE: TestSuite = {
             ) => description.includes("guessed correctly"),
             expectedResponseType: KmqResponseType.RAW,
             requiresVoiceConnection: true,
+            preCommandDelay: 2000,
         },
         {
             command: ",guessmode artist",
@@ -111,6 +112,7 @@ const PLAY_TEST_SUITE: TestSuite = {
             ) => description.includes("guessed correctly"),
             expectedResponseType: KmqResponseType.RAW,
             requiresVoiceConnection: true,
+            preCommandDelay: 2000,
         },
         {
             command: ",guessmode both",
@@ -135,6 +137,7 @@ const PLAY_TEST_SUITE: TestSuite = {
             ) => description.includes("guessed correctly"),
             expectedResponseType: KmqResponseType.RAW,
             requiresVoiceConnection: true,
+            preCommandDelay: 2000,
         },
         {
             command: "dynamite", // dynamite - bts
@@ -146,6 +149,7 @@ const PLAY_TEST_SUITE: TestSuite = {
             ) => description.includes("guessed correctly"),
             expectedResponseType: KmqResponseType.RAW,
             requiresVoiceConnection: true,
+            preCommandDelay: 2000,
         },
         {
             command: "boy with luv", // boy with luv - bts, now with a guess streak
@@ -159,6 +163,7 @@ const PLAY_TEST_SUITE: TestSuite = {
                 description.includes("(🔥5)"),
             expectedResponseType: KmqResponseType.RAW,
             requiresVoiceConnection: true,
+            preCommandDelay: 2000,
         },
         {
             command: ",skip",
@@ -183,6 +188,7 @@ const PLAY_TEST_SUITE: TestSuite = {
                 !description.includes("🔥"),
             expectedResponseType: KmqResponseType.RAW,
             requiresVoiceConnection: true,
+            preCommandDelay: 2500,
         },
         {
             command: ",score",
