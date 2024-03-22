@@ -214,7 +214,7 @@ async function evaluateStage(messageResponse?: {
     parsedGameOptions?: ParsedGameOptionValues;
 }): Promise<void> {
     if (CURRENT_STAGE === null) {
-        console.error("messageCreate called before test began.");
+        console.error("evaluateStage called before test began.");
         process.exit(1);
     }
 
