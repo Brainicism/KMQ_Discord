@@ -39,6 +39,7 @@ jobs:
                   END_TO_END_TEST_BOT_TOKEN: ${{ secrets.END_TO_END_TEST_BOT_TOKEN }}
                   END_TO_END_TEST_BOT_CLIENT: ${{ secrets.END_TO_END_TEST_BOT_CLIENT }}
                   END_TO_END_TEST_BOT_CHANNEL: ${{ secrets.END_TO_END_TEST_BOT_CHANNEL }}
+                  END_TO_END_TEST_BOT_VOICE_CHANNEL: ${{ secrets.END_TO_END_TEST_BOT_VOICE_CHANNEL }}
               run: |
                   echo "DB_USER=$DB_USER_CI" >> .env
                   echo "DB_PASS=$DB_PASS_CI" >> .env
@@ -55,6 +56,7 @@ jobs:
                   echo "END_TO_END_TEST_BOT_TOKEN=$END_TO_END_TEST_BOT_TOKEN" >> .env
                   echo "END_TO_END_TEST_BOT_CLIENT=$END_TO_END_TEST_BOT_CLIENT" >> .env
                   echo "END_TO_END_TEST_BOT_CHANNEL=$END_TO_END_TEST_BOT_CHANNEL" >> .env
+                  echo "END_TO_END_TEST_BOT_VOICE_CHANNEL=$END_TO_END_TEST_BOT_VOICE_CHANNEL" >> .env
             - name: Install node dependencies
               run: yarn install --frozen-lockfile
             - name: Extract metadata (tags, labels) for Docker
@@ -88,8 +90,10 @@ jobs:
               run: . ./.env && docker run -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} -v ${PWD}/data:/app/data -v ${PWD}/.env:/app/.env -v ${PWD}/logs:/app/logs --env NODE_ENV=production --network=host --name kmq-gci ghcr.io/brainicism/kmq_discord:gci &
             - name: Check pre-upgrade KMQ healthiness
               run: while [[ "$(docker inspect --format='{{json .State.Health.Status}}' kmq-gci)" != "\"healthy\"" ]]; do sleep 1; done
-            - name: Run test runner on live instance
+            - name: Run test runner on live instance (game options test)
               run: docker exec --env-file	./.env kmq-gci sh -c 'npx ts-node --swc src/test/end-to-end-tests/test-runner-bot.ts --test-suite=BASIC_OPTIONS --source=gci; exit $?'
+            - name: Run test runner on live instance (gameplay test)
+              run: docker exec --env-file	./.env kmq-gci sh -c 'npx ts-node --swc src/test/end-to-end-tests/test-runner-bot.ts --test-suite=PLAY --source=gci; exit $?'
             - name: Check for errors
               run: docker logs kmq-gci 2>&1 | grep -i "\[Error\]" && echo "Errors found in container logs." && exit 1 || echo "No errors found in container logs." && exit 0
             - name: Print logs
