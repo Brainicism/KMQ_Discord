@@ -440,27 +440,33 @@ export async function sendMessage(
     interaction?: Eris.ComponentInteraction | Eris.CommandInteraction,
 ): Promise<Eris.Message | null> {
     if (messageContent.messageReference) {
-        const message: Message<TextChannel> | undefined = await (
-            State.client.getChannel(textChannelID!) as
-                | Eris.TextChannel
-                | undefined
-        )?.getMessage(messageContent.messageReference.messageID);
+        try {
+            const message: Message<TextChannel> | undefined = await (
+                State.client.getChannel(textChannelID!) as
+                    | Eris.TextChannel
+                    | undefined
+            )?.getMessage(messageContent.messageReference.messageID);
 
-        // test bot request, reply with same run ID
-        if (
-            message &&
-            message.author.id === process.env.END_TO_END_TEST_BOT_CLIENT &&
-            message.embeds[0]
-        ) {
-            const runId = message.embeds[0].footer?.text!;
-            const messageFooter = messageContent.embeds![0]!.footer;
-            if (messageFooter) {
-                messageFooter.text += `\n ${runId}`;
-            } else {
-                messageContent.embeds![0]!.footer = {
-                    text: runId,
-                };
+            // test bot request, reply with same run ID
+            if (
+                message &&
+                message.author.id === process.env.END_TO_END_TEST_BOT_CLIENT &&
+                message.embeds[0]
+            ) {
+                const runId = message.embeds[0].footer?.text!;
+                const messageFooter = messageContent.embeds![0]!.footer;
+                if (messageFooter) {
+                    messageFooter.text += `\n ${runId}`;
+                } else {
+                    messageContent.embeds![0]!.footer = {
+                        text: runId,
+                    };
+                }
             }
+        } catch (e) {
+            logger.warn(
+                `Failed to get message reference for ${messageContent.messageReference.messageID} for test runner, probably not important. e = ${e}`,
+            );
         }
     }
 
