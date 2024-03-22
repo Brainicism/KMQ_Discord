@@ -4,7 +4,7 @@ import type TestSuite from "./test_suite";
 
 // lightweight check to see that bot is still alive and responding to messages
 const HEALTH_CHECK_TEST_SUITE: TestSuite = {
-    name: "Healthcheck",
+    name: "Healthcheck Test",
     tests: [
         {
             command: ",options",
@@ -23,6 +23,7 @@ const HEALTH_CHECK_TEST_SUITE: TestSuite = {
             expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
     ],
+    cascadingFailures: true,
     resetEachStage: true,
 };
 
