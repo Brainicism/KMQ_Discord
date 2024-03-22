@@ -232,7 +232,7 @@ async function evaluateStage(messageResponse?: {
     switch (testStage.expectedResponseType) {
         case KmqResponseType.GAME_OPTIONS_RESPONSE:
         case KmqResponseType.RAW:
-            // stage validator is invoked via messageCreate, waiting for bot to reply
+            // stage validator is invoked via messageCreate, no need to wait
             break;
         case KmqResponseType.NONE:
             // if no response was expected, delay to ensure that command was received
