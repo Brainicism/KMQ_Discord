@@ -254,6 +254,10 @@ async function getSongsFromDb(databaseContext: DatabaseContext): Promise<any> {
         ])
         .where("vtype", "=", "main")
         .where("tags", "not like", "%c%")
+        .where("tags", "not like", "%d%")
+        .where("tags", "not like", "%a%")
+        .where("tags", "not like", "%r%")
+        .where("tags", "not like", "%h%")
         .where("vlink", "not in", deadLinks)
         .orderBy("views", "desc")
         .execute();
