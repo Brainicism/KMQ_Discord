@@ -215,7 +215,8 @@ async function pollVoiceConnectionReady(): Promise<void> {
     // wait up to 2 minutes for vc to be ready
     for (let i = 0; i < 12; i++) {
         if (voiceChannel.voiceMembers.size === 0) {
-            break;
+            console.log("Voice channel ready!");
+            return;
         }
 
         console.log(
@@ -228,7 +229,8 @@ async function pollVoiceConnectionReady(): Promise<void> {
         await delay(10000);
     }
 
-    console.log("Voice channel ready!");
+    console.log("Timed out waiting for voice channel to be ready");
+    process.exit(1);
 }
 
 bot.on("ready", async () => {
