@@ -122,11 +122,7 @@ async function proceedNextStage(): Promise<void> {
         }
 
         if (voiceConnection) {
-            (
-                bot.getChannel(
-                    process.env.END_TO_END_TEST_BOT_VOICE_CHANNEL!,
-                ) as Eris.VoiceChannel
-            ).leave();
+            getVoiceChannel().leave();
             await delay(1000);
         }
 
@@ -134,6 +130,21 @@ async function proceedNextStage(): Promise<void> {
     }
 
     await mainLoop();
+}
+
+function getVoiceChannel(): Eris.VoiceChannel {
+    const voiceChannel = bot.getChannel(
+        process.env.END_TO_END_TEST_BOT_VOICE_CHANNEL!,
+    ) as Eris.VoiceChannel | undefined;
+
+    if (!voiceChannel) {
+        console.error(
+            `Failed to get voice channel ID: ${process.env.END_TO_END_TEST_BOT_VOICE_CHANNEL}`,
+        );
+        process.exit(1);
+    }
+
+    return voiceChannel;
 }
 
 async function mainLoop(): Promise<void> {
@@ -161,12 +172,7 @@ async function mainLoop(): Promise<void> {
         clearTimeout(stageTimeout);
     }
 
-    if (testStage.requiresVoiceConnection) {
-        console.log(
-            `STAGE ${CURRENT_STAGE.stage} | Obtaining voice connection`,
-        );
-        await ensureVoiceConnection();
-    }
+    await ensureVoiceConnection();
 
     console.log(`STAGE ${CURRENT_STAGE.stage} | Sending command: '${command}'`);
     stageTimeout = setTimeout(async () => {
@@ -203,7 +209,30 @@ async function mainLoop(): Promise<void> {
     }
 }
 
+async function pollVoiceConnectionReady(): Promise<void> {
+    const voiceChannel = getVoiceChannel();
+
+    // wait up to 2 minutes for vc to be ready
+    for (let i = 0; i < 12; i++) {
+        if (voiceChannel.voiceMembers.size === 0) {
+            break;
+        }
+
+        console.log(
+            `Voice channel still occupied, waiting... [${Array.from(
+                voiceChannel.voiceMembers,
+            )
+                .map((x) => x[1].username)
+                .join(",")}]`,
+        );
+        await delay(10000);
+    }
+
+    console.log("Voice channel ready!");
+}
+
 bot.on("ready", async () => {
+    await pollVoiceConnectionReady();
     await mainLoop();
 });
 

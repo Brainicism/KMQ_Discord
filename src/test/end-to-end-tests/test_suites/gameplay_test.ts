@@ -19,7 +19,6 @@ const PLAY_TEST_SUITE: TestSuite = {
                 client?: Eris.Client,
             ) => title === "Options",
             expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
-            requiresVoiceConnection: true,
         },
         {
             command: ",limit 6",
@@ -32,7 +31,6 @@ const PLAY_TEST_SUITE: TestSuite = {
                 parsedGameOptions!["limit set top"]!.value.startsWith("6 /") &&
                 parsedGameOptions!["limit set top"]!.updated,
             expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
-            requiresVoiceConnection: true,
         },
         {
             command: ",shuffle popularity", // deterministic ordering so we can figure out how to guess
@@ -45,7 +43,6 @@ const PLAY_TEST_SUITE: TestSuite = {
                 parsedGameOptions!["shuffle set"]!.value === "popularity" &&
                 parsedGameOptions!["shuffle set"]!.updated,
             expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
-            requiresVoiceConnection: true,
         },
         {
             command: ",play",
@@ -65,7 +62,6 @@ const PLAY_TEST_SUITE: TestSuite = {
                 return voiceMembers.includes(process.env.BOT_CLIENT_ID!);
             },
             expectedResponseType: KmqResponseType.NONE,
-            requiresVoiceConnection: true,
         },
         {
             command: ",hint",
@@ -76,7 +72,6 @@ const PLAY_TEST_SUITE: TestSuite = {
                 client?: Eris.Client,
             ) => title === "Hint",
             expectedResponseType: KmqResponseType.RAW,
-            requiresVoiceConnection: true,
         },
         {
             command: "gangnam style", // gangnam style - psy
@@ -87,7 +82,6 @@ const PLAY_TEST_SUITE: TestSuite = {
                 client?: Eris.Client,
             ) => description.includes("guessed correctly"),
             expectedResponseType: KmqResponseType.RAW,
-            requiresVoiceConnection: true,
             preCommandDelay: 2500,
         },
         {
@@ -101,7 +95,6 @@ const PLAY_TEST_SUITE: TestSuite = {
                 parsedGameOptions!["guessmode set"]!.value === "artist" &&
                 parsedGameOptions!["guessmode set"]!.updated,
             expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
-            requiresVoiceConnection: true,
         },
         {
             command: "blackpink", // ddu du ddu du - blackpink
@@ -112,7 +105,6 @@ const PLAY_TEST_SUITE: TestSuite = {
                 client?: Eris.Client,
             ) => description.includes("guessed correctly"),
             expectedResponseType: KmqResponseType.RAW,
-            requiresVoiceConnection: true,
             preCommandDelay: 2500,
         },
         {
@@ -126,7 +118,6 @@ const PLAY_TEST_SUITE: TestSuite = {
                 parsedGameOptions!["guessmode set"]!.value === "both" &&
                 parsedGameOptions!["guessmode set"]!.updated,
             expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
-            requiresVoiceConnection: true,
         },
         {
             command: "blackpink", // kill this love - blackpink
@@ -137,7 +128,7 @@ const PLAY_TEST_SUITE: TestSuite = {
                 client?: Eris.Client,
             ) => description.includes("guessed correctly"),
             expectedResponseType: KmqResponseType.RAW,
-            requiresVoiceConnection: true,
+
             preCommandDelay: 2500,
         },
         {
@@ -149,7 +140,7 @@ const PLAY_TEST_SUITE: TestSuite = {
                 client?: Eris.Client,
             ) => description.includes("guessed correctly"),
             expectedResponseType: KmqResponseType.RAW,
-            requiresVoiceConnection: true,
+
             preCommandDelay: 2500,
         },
         {
@@ -163,7 +154,7 @@ const PLAY_TEST_SUITE: TestSuite = {
                 description.includes("guessed correctly") &&
                 description.includes("(🔥5)"),
             expectedResponseType: KmqResponseType.RAW,
-            requiresVoiceConnection: true,
+
             preCommandDelay: 2500,
         },
         {
@@ -175,7 +166,6 @@ const PLAY_TEST_SUITE: TestSuite = {
                 client?: Eris.Client,
             ) => true,
             expectedResponseType: KmqResponseType.RAW,
-            requiresVoiceConnection: true,
         },
         {
             command: "gangnma style", // gangnam style - psy, lost guess streak, unique songs reset, allow typo
@@ -188,7 +178,7 @@ const PLAY_TEST_SUITE: TestSuite = {
                 description.includes("guessed correctly") &&
                 !description.includes("🔥"),
             expectedResponseType: KmqResponseType.RAW,
-            requiresVoiceConnection: true,
+
             preCommandDelay: 2500,
         },
         {
@@ -206,7 +196,6 @@ const PLAY_TEST_SUITE: TestSuite = {
                 );
             },
             expectedResponseType: KmqResponseType.RAW,
-            requiresVoiceConnection: true,
         },
         {
             command: ",end",
@@ -226,7 +215,6 @@ const PLAY_TEST_SUITE: TestSuite = {
                 return !voiceMembers.includes(process.env.BOT_CLIENT_ID!);
             },
             expectedResponseType: KmqResponseType.NONE,
-            requiresVoiceConnection: true,
         },
     ],
     resetEachStage: false,
