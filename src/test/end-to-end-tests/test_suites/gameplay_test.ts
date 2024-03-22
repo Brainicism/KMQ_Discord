@@ -74,7 +74,7 @@ const PLAY_TEST_SUITE: TestSuite = {
                 description: string,
                 parsedGameOptions?: ParsedGameOptionValues,
                 client?: Eris.Client,
-            ) => title === "Hintsss",
+            ) => title === "Hint",
             expectedResponseType: KmqResponseType.RAW,
             requiresVoiceConnection: true,
         },
