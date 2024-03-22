@@ -82,7 +82,7 @@ BEGIN
 	AND tags NOT LIKE "%h%" -- no dance performances
 	AND tags NOT LIKE "%a%" -- no acoustic
 	AND tags NOT LIKE "%r%" -- no relay dances
-	AND tags NOT LIKE "%x%"; -- no remixes
+	AND tags NOT LIKE "%x%" -- no remixes
 	AND vlink IN (SELECT vlink FROM kmq.cached_song_duration);
 
 	/* audio-only videos */
