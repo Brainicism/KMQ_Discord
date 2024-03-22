@@ -452,9 +452,15 @@ export async function sendMessage(
             message.author.id === process.env.END_TO_END_TEST_BOT_CLIENT &&
             message.embeds[0]
         ) {
-            messageContent.embeds![0]!.footer = {
-                text: message.embeds[0].footer?.text!,
-            };
+            const runId = message.embeds[0].footer?.text!;
+            const messageFooter = messageContent.embeds![0]!.footer;
+            if (messageFooter) {
+                messageFooter.text += `\n ${runId}`;
+            } else {
+                messageContent.embeds![0]!.footer = {
+                    text: runId,
+                };
+            }
         }
     }
 
@@ -710,6 +716,10 @@ export async function sendInfoMessage(
     interaction?: Eris.CommandInteraction,
 ): Promise<Eris.Message<Eris.TextableChannel> | null> {
     const embeds = [embedPayload, ...additionalEmbeds];
+    if (messageContext.author.id === process.env.END_TO_END_TEST_BOT_CLIENT) {
+        reply = true;
+    }
+
     return sendMessage(
         messageContext.textChannelID,
         {
@@ -1388,7 +1398,11 @@ export async function sendPaginationedEmbed(
 
     return sendMessage(
         messageOrInteraction.channel.id,
-        { embeds: [embed], components },
+        {
+            embeds: [embed],
+            components,
+            messageReference: { messageID: messageOrInteraction.id },
+        },
         messageOrInteraction.member?.id,
         messageOrInteraction instanceof Eris.CommandInteraction
             ? messageOrInteraction
@@ -1469,7 +1483,9 @@ export function getCurrentVoiceMembers(
     }
 
     return voiceChannel.voiceMembers
-        .filter((x) => !x.bot)
+        .filter(
+            (x) => !x.bot || x.id === process.env.END_TO_END_TEST_BOT_CLIENT,
+        )
         .filter((x) => !State.bannedPlayers.has(x.id));
 }
 

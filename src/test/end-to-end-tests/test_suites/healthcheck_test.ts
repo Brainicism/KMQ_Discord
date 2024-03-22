@@ -1,3 +1,4 @@
+import { KmqResponseType } from "./test_suite";
 import type ParsedGameOptionValues from "../parsed_game_options_value";
 import type TestSuite from "./test_suite";
 
@@ -19,7 +20,7 @@ const HEALTH_CHECK_TEST_SUITE: TestSuite = {
                         ?.trim()!,
                     10,
                 ) > 0,
-            isGameOptionsResponse: true,
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
     ],
     resetEachStage: true,

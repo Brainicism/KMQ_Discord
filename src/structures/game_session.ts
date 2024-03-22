@@ -194,11 +194,16 @@ export default class GameSession extends Session {
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
     async startRound(messageContext: MessageContext): Promise<Round | null> {
-        const multiGuessDelayMs =
-            this.guildPreference.getMultiGuessDelay() * 1000;
+        const isEndToEndBotRun =
+            messageContext.author.id === process.env.END_TO_END_TEST_BOT_CLIENT;
 
-        const songStartDelayMs =
-            this.guildPreference.getSongStartDelay() * 1000;
+        const multiGuessDelayMs = isEndToEndBotRun
+            ? 0
+            : this.guildPreference.getMultiGuessDelay() * 1000;
+
+        const songStartDelayMs = isEndToEndBotRun
+            ? 0
+            : this.guildPreference.getSongStartDelay() * 1000;
 
         if (this.sessionInitialized) {
             // Only add a delay if the game has already started

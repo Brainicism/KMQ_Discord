@@ -1,3 +1,4 @@
+import { KmqResponseType } from "./test_suite";
 import type ParsedGameOptionValues from "../parsed_game_options_value";
 import type TestSuite from "./test_suite";
 
@@ -14,7 +15,7 @@ const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
             ) =>
                 parsedGameOptions!["limit set top"]!.value.startsWith("2 /") &&
                 parsedGameOptions!["limit set top"]!.updated,
-            isGameOptionsResponse: true,
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
         {
             command: ",gender coed male",
@@ -25,7 +26,7 @@ const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
             ) =>
                 parsedGameOptions!["gender set"]!.value === "coed, male" &&
                 parsedGameOptions!["gender set"]!.updated,
-            isGameOptionsResponse: true,
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
         {
             command: ",groups blackpink, bts",
@@ -36,7 +37,7 @@ const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
             ) =>
                 parsedGameOptions!["groups set"]!.value === "Blackpink, BTS" &&
                 parsedGameOptions!["groups set"]!.updated,
-            isGameOptionsResponse: true,
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
         {
             command: ",answer typingtypos",
@@ -48,7 +49,7 @@ const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
                 parsedGameOptions!["answer set"]!.value === "typingtypos" &&
                 parsedGameOptions!["answer set"]!.updated,
 
-            isGameOptionsResponse: true,
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
         {
             command: ",cutoff 2012 2014",
@@ -61,7 +62,7 @@ const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
                     "2012 - 2014" &&
                 parsedGameOptions!["cutoff set earliest"]!.updated,
 
-            isGameOptionsResponse: true,
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
         {
             command: ",artisttype soloists",
@@ -73,7 +74,7 @@ const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
                 parsedGameOptions!["artisttype set"]!.value === "soloists" &&
                 parsedGameOptions!["artisttype set"]!.updated,
 
-            isGameOptionsResponse: true,
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
         {
             command: ",release official",
@@ -85,7 +86,7 @@ const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
                 parsedGameOptions!["release set"]!.value === "official" &&
                 parsedGameOptions!["release set"]!.updated,
 
-            isGameOptionsResponse: true,
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
         {
             command: ",language korean",
@@ -97,7 +98,7 @@ const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
                 parsedGameOptions!["language set"]!.value === "korean" &&
                 parsedGameOptions!["language set"]!.updated,
 
-            isGameOptionsResponse: true,
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
         {
             command: ",subunits exclude",
@@ -109,7 +110,7 @@ const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
                 parsedGameOptions!["subunits set"]!.value === "exclude" &&
                 parsedGameOptions!["subunits set"]!.updated,
 
-            isGameOptionsResponse: true,
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
         {
             command: ",ost exclusive",
@@ -121,7 +122,7 @@ const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
                 parsedGameOptions!["ost set"]!.value === "exclusive" &&
                 parsedGameOptions!["ost set"]!.updated,
 
-            isGameOptionsResponse: true,
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
         {
             command: ",multiguess off",
@@ -133,7 +134,7 @@ const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
                 parsedGameOptions!["multiguess set"]!.value === "off" &&
                 parsedGameOptions!["multiguess set"]!.updated,
 
-            isGameOptionsResponse: true,
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
 
         {
@@ -146,7 +147,7 @@ const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
                 parsedGameOptions!["seek set"]!.value === "beginning" &&
                 parsedGameOptions!["seek set"]!.updated,
 
-            isGameOptionsResponse: true,
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
         {
             command: ",special faster",
@@ -158,7 +159,7 @@ const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
                 parsedGameOptions!["special set"]!.value === "faster" &&
                 parsedGameOptions!["special set"]!.updated,
 
-            isGameOptionsResponse: true,
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
         {
             command: ",guessmode both",
@@ -170,7 +171,7 @@ const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
                 parsedGameOptions!["guessmode set"]!.value === "both" &&
                 parsedGameOptions!["guessmode set"]!.updated,
 
-            isGameOptionsResponse: true,
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
         {
             command: ",goal 7",
@@ -182,7 +183,7 @@ const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
                 parsedGameOptions!["goal set"]!.value === "7" &&
                 parsedGameOptions!["goal set"]!.updated,
 
-            isGameOptionsResponse: true,
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
         {
             command: ",timer 24",
@@ -194,7 +195,7 @@ const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
                 parsedGameOptions!["timer set"]!.value === "24 sec" &&
                 parsedGameOptions!["timer set"]!.updated,
 
-            isGameOptionsResponse: true,
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
         {
             command: ",duration 100",
@@ -206,7 +207,7 @@ const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
                 parsedGameOptions!["duration set"]!.value === "100 mins" &&
                 parsedGameOptions!["duration set"]!.updated,
 
-            isGameOptionsResponse: true,
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
         {
             command: ",exclude psy",
@@ -218,7 +219,7 @@ const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
                 parsedGameOptions!["exclude set"]!.value === "PSY" &&
                 parsedGameOptions!["exclude set"]!.updated,
 
-            isGameOptionsResponse: true,
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
         {
             command: ",include bts",
@@ -230,7 +231,7 @@ const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
                 parsedGameOptions!["include set"]!.value === "BTS" &&
                 parsedGameOptions!["include set"]!.updated,
 
-            isGameOptionsResponse: true,
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
     ],
     resetEachStage: true,
