@@ -1481,7 +1481,7 @@ export default class GameSession extends Session {
                     guildPreference,
                     round,
                     getNumParticipants(this.voiceChannelID),
-                    lastGuesserStreak,
+                    idx === 0 ? lastGuesserStreak : 0,
                     round.getTimeToGuessMs(correctGuesser.id, isHidden),
                     guessPosition,
                     await userBonusIsActive(correctGuesser.id),
