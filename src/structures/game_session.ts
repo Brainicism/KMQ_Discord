@@ -258,7 +258,7 @@ export default class GameSession extends Session {
             return;
         }
 
-        const correctGuessers = round.getCorrectGuessers();
+        const correctGuessers = round.getCorrectGuessers(this.isHiddenMode());
         const isCorrectGuess = correctGuessers.length > 0;
 
         await this.stopHiddenUpdateTimer();
@@ -572,7 +572,7 @@ export default class GameSession extends Session {
             this.guildPreference.typosAllowed(),
         );
 
-        const correctGuessers = round.getCorrectGuessers();
+        const correctGuessers = round.getCorrectGuessers(this.isHiddenMode());
         const incorrectGuessers = round.getIncorrectGuessers();
         if (this.isHiddenMode()) {
             // Determine whether to wait for more guesses
@@ -1125,7 +1125,7 @@ export default class GameSession extends Session {
 
         if (
             !round
-                .getCorrectGuessers()
+                .getCorrectGuessers(this.isHiddenMode())
                 .map((x) => x.id)
                 .includes(userID) &&
             !incorrectGuessers.has(userID)
@@ -1472,13 +1472,7 @@ export default class GameSession extends Session {
         const lastGuesserStreak = this.lastGuesser?.streak ?? 0;
         const isHidden = this.isHiddenMode();
 
-        const correctGuessers = round
-            .getCorrectGuessers()
-            .sort(
-                (a, b) =>
-                    round.getTimeToGuessMs(a.id, isHidden) -
-                    round.getTimeToGuessMs(b.id, isHidden),
-            );
+        const correctGuessers = round.getCorrectGuessers(isHidden);
 
         const playerRoundResults = await Promise.all(
             correctGuessers.map(async (correctGuesser, idx) => {
@@ -1488,10 +1482,7 @@ export default class GameSession extends Session {
                     round,
                     getNumParticipants(this.voiceChannelID),
                     lastGuesserStreak,
-                    round.getTimeToGuessMs(
-                        correctGuesser.id,
-                        this.isHiddenMode(),
-                    ),
+                    round.getTimeToGuessMs(correctGuesser.id, isHidden),
                     guessPosition,
                     await userBonusIsActive(correctGuesser.id),
                     correctGuesser.id,
@@ -1587,7 +1578,7 @@ export default class GameSession extends Session {
 
         const remainingPlayers = this.scoreboard
             .getRemainingPlayers(
-                round.getCorrectGuessers().map((x) => x.id),
+                round.getCorrectGuessers(this.isHiddenMode()).map((x) => x.id),
                 round.getIncorrectGuessers(),
             )
             .map((player) => player.username)

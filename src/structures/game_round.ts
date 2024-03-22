@@ -171,17 +171,25 @@ export default class GameRound extends Round {
         this.guesses = {};
     }
 
-    getCorrectGuessers(): Array<KmqMember> {
-        return Object.entries(this.guesses).flatMap((playerGuessResults) => {
-            const playerId = playerGuessResults[0];
-            const guessResults = playerGuessResults[1];
-            const correctGuess = guessResults.find((x) => x.correct);
-            if (correctGuess) {
-                return [new KmqMember(playerId, correctGuess.pointsAwarded)];
-            }
+    getCorrectGuessers(isHidden: boolean): Array<KmqMember> {
+        return Object.entries(this.guesses)
+            .flatMap((playerGuessResults) => {
+                const playerId = playerGuessResults[0];
+                const guessResults = playerGuessResults[1];
+                const correctGuess = guessResults.find((x) => x.correct);
+                if (correctGuess) {
+                    return [
+                        new KmqMember(playerId, correctGuess.pointsAwarded),
+                    ];
+                }
 
-            return [];
-        });
+                return [];
+            })
+            .sort(
+                (a, b) =>
+                    this.getTimeToGuessMs(a.id, isHidden) -
+                    this.getTimeToGuessMs(b.id, isHidden),
+            );
     }
 
     getIncorrectGuessers(): Set<string> {
