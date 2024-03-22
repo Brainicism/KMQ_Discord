@@ -7,7 +7,8 @@ import type TestSuite from "./test_suite";
 
 // lightweight check to see that bot is still alive and responding to messages
 const PLAY_TEST_SUITE: TestSuite = {
-    name: "Healthcheck",
+    name: "Gameplay Test",
+    cascadingFailures: true,
     tests: [
         {
             command: ",reset",

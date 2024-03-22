@@ -15,6 +15,7 @@ export default interface TestSuite {
         requiresVoiceConnection?: boolean;
         preCommandDelay?: number;
     }[];
+    cascadingFailures: boolean;
     resetEachStage: boolean;
 }
 

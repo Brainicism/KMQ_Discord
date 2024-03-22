@@ -14,7 +14,7 @@ import type TestSuite from "./test_suites/test_suite";
 import { KmqResponseType } from "./test_suites/test_suite";
 import { program } from "commander";
 import HEALTH_CHECK_TEST_SUITE from "./test_suites/healthcheck_test";
-import PLAY_TEST_SUITE from "./test_suites/play_test";
+import PLAY_TEST_SUITE from "./test_suites/gameplay_test";
 
 const bot = new Eris.Client(process.env.END_TO_END_TEST_BOT_TOKEN!, {
     gateway: {
@@ -103,7 +103,10 @@ async function proceedNextStage(): Promise<void> {
     CURRENT_STAGE.messageId = null;
     CURRENT_STAGE.ready = false;
     CURRENT_STAGE.processed = false;
-    if (CURRENT_STAGE.stage === TEST_SUITE.tests.length) {
+    if (
+        CURRENT_STAGE.stage === TEST_SUITE.tests.length ||
+        (TEST_SUITE.cascadingFailures && failedTests.length > 0)
+    ) {
         console.log(
             "========================================Test suite completed========================================",
         );
@@ -372,7 +375,6 @@ async function ensureVoiceConnection(): Promise<void> {
                 client?: Eris.Client,
             ) => title === "Options",
             expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
-            requiresVoiceConnection: true,
         };
 
         // put a reset step before each step
