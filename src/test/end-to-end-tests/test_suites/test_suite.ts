@@ -12,7 +12,6 @@ export default interface TestSuite {
             client?: Eris.Client,
         ) => boolean;
         expectedResponseType: KmqResponseType;
-        requiresVoiceConnection?: boolean;
         preCommandDelay?: number;
     }[];
     cascadingFailures: boolean;

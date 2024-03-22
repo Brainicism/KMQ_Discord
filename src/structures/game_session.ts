@@ -413,59 +413,8 @@ export default class GameSession extends Session {
             );
         }
 
-        const leveledUpPlayers: Array<LevelUpResult> = [];
-
-        // commit player stats
-        await Promise.allSettled(
-            this.scoreboard.getPlayerIDs().map(async (participant) => {
-                const isFirstGame = await isFirstGameOfDay(participant);
-                await this.ensurePlayerStat(participant);
-                await this.incrementPlayerGamesPlayed(participant);
-                const playerCorrectGuessCount =
-                    this.scoreboard.getPlayerCorrectGuessCount(participant);
-
-                if (playerCorrectGuessCount > 0) {
-                    await this.incrementPlayerSongsGuessed(
-                        participant,
-                        playerCorrectGuessCount,
-                    );
-                }
-
-                const playerExpGain =
-                    this.scoreboard.getPlayerExpGain(participant);
-
-                let levelUpResult: LevelUpResult | null = null;
-                if (playerExpGain > 0) {
-                    levelUpResult = await this.incrementPlayerExp(
-                        participant,
-                        playerExpGain,
-                    );
-                    if (levelUpResult) {
-                        leveledUpPlayers.push(levelUpResult);
-                    }
-                }
-
-                await this.insertPerSessionStats(
-                    participant,
-                    playerCorrectGuessCount,
-                    playerExpGain,
-                    levelUpResult
-                        ? levelUpResult.endLevel - levelUpResult.startLevel
-                        : 0,
-                );
-
-                // if game ended erroneously during player's FGOTD, mark it as errored to allow
-                // for bonus to continue next game
-                await dbContext.kmq
-                    .updateTable("player_stats")
-                    .where("player_id", "=", participant)
-                    .set({
-                        last_game_played_errored:
-                            isFirstGame && endedDueToError ? 1 : 0,
-                    })
-                    .execute();
-            }),
-        );
+        const leveledUpPlayers: Array<LevelUpResult> =
+            await this.updatePlayerStats(endedDueToError);
 
         // send level up message
         if (leveledUpPlayers.length > 0) {
@@ -518,20 +467,7 @@ export default class GameSession extends Session {
                   (this.guessTimes.length * 1000)
                 : -1;
 
-        await dbContext.kmq
-            .insertInto("game_sessions")
-            .values({
-                start_date: new Date(this.startedAt),
-                guild_id: this.guildID,
-                num_participants: this.scoreboard
-                    .getPlayers()
-                    .map((x) => x.inVC).length,
-                avg_guess_time: averageGuessTime,
-                session_length: sessionLength,
-                rounds_played: this.roundsPlayed,
-                correct_guesses: this.correctGuesses,
-            })
-            .execute();
+        await this.persistGameSession(averageGuessTime, sessionLength);
 
         // commit session's song plays and correct guesses
         if (!this.isMultipleChoiceMode()) {
@@ -616,14 +552,7 @@ export default class GameSession extends Session {
 
             this.stopGuessTimeout();
 
-            // increment guild's song guess count
-            await dbContext.kmq
-                .updateTable("guilds")
-                .where("guild_id", "=", this.guildID)
-                .set({
-                    songs_guessed: sql`songs_guessed + 1`,
-                })
-                .execute();
+            await this.incrementGuildSongGuessCount();
 
             await this.startRound(messageContext);
         } else if (this.isMultipleChoiceMode() || this.isHiddenMode()) {
@@ -1211,11 +1140,39 @@ export default class GameSession extends Session {
         return true;
     }
 
+    private async persistGameSession(
+        averageGuessTime: number,
+        sessionLength: number,
+    ): Promise<void> {
+        if (this.textChannelID === process.env.END_TO_END_TEST_BOT_CHANNEL) {
+            return;
+        }
+
+        await dbContext.kmq
+            .insertInto("game_sessions")
+            .values({
+                start_date: new Date(this.startedAt),
+                guild_id: this.guildID,
+                num_participants: this.scoreboard
+                    .getPlayers()
+                    .map((x) => x.inVC).length,
+                avg_guess_time: averageGuessTime,
+                session_length: sessionLength,
+                rounds_played: this.roundsPlayed,
+                correct_guesses: this.correctGuesses,
+            })
+            .execute();
+    }
+
     /**
      * Creates/updates a user's activity in the data store
      * @param userID - The player's Discord user ID
      */
     private async ensurePlayerStat(userID: string): Promise<void> {
+        if (this.textChannelID === process.env.END_TO_END_TEST_BOT_CHANNEL) {
+            return;
+        }
+
         const currentDateString = new Date();
         await dbContext.kmq
             .insertInto("player_stats")
@@ -1247,6 +1204,10 @@ export default class GameSession extends Session {
         userID: string,
         score: number,
     ): Promise<void> {
+        if (this.textChannelID === process.env.END_TO_END_TEST_BOT_CHANNEL) {
+            return;
+        }
+
         await dbContext.kmq
             .updateTable("player_stats")
             .where("player_id", "=", userID)
@@ -1263,6 +1224,10 @@ export default class GameSession extends Session {
      * @param userID - The player's Discord user ID
      */
     private async incrementPlayerGamesPlayed(userID: string): Promise<void> {
+        if (this.textChannelID === process.env.END_TO_END_TEST_BOT_CHANNEL) {
+            return;
+        }
+
         await dbContext.kmq
             .updateTable("player_stats")
             .where("player_id", "=", userID)
@@ -1280,6 +1245,10 @@ export default class GameSession extends Session {
         userID: string,
         expGain: number,
     ): Promise<LevelUpResult | null> {
+        if (this.textChannelID === process.env.END_TO_END_TEST_BOT_CHANNEL) {
+            return null;
+        }
+
         const playerStats = await dbContext.kmq
             .selectFrom("player_stats")
             .select(["exp", "level"])
@@ -1333,6 +1302,10 @@ export default class GameSession extends Session {
         expGain: number,
         levelsGained: number,
     ): Promise<void> {
+        if (this.textChannelID === process.env.END_TO_END_TEST_BOT_CHANNEL) {
+            return;
+        }
+
         await dbContext.kmq
             .insertInto("player_game_session_stats")
             .values({
@@ -1360,6 +1333,10 @@ export default class GameSession extends Session {
         hintRequested: boolean,
         timePlayed: number,
     ): void {
+        if (this.textChannelID === process.env.END_TO_END_TEST_BOT_CHANNEL) {
+            return;
+        }
+
         if (!(vlink in this.songStats)) {
             this.songStats[vlink] = {
                 correctGuesses: 0,
@@ -1392,6 +1369,10 @@ export default class GameSession extends Session {
      * Stores song metadata in the database
      */
     private async storeSongStats(): Promise<void> {
+        if (this.textChannelID === process.env.END_TO_END_TEST_BOT_CHANNEL) {
+            return;
+        }
+
         await Promise.allSettled(
             Object.keys(this.songStats).map(async (vlink) => {
                 const songStats = this.songStats[vlink];
@@ -1432,6 +1413,85 @@ export default class GameSession extends Session {
                     .execute();
             }),
         );
+    }
+
+    private async updatePlayerStats(
+        endedDueToError: boolean,
+    ): Promise<Array<LevelUpResult>> {
+        const leveledUpPlayers: Array<LevelUpResult> = [];
+
+        if (this.textChannelID === process.env.END_TO_END_TEST_BOT_CHANNEL) {
+            return [];
+        }
+
+        // commit player stats
+        await Promise.allSettled(
+            this.scoreboard.getPlayerIDs().map(async (participant) => {
+                const isFirstGame = await isFirstGameOfDay(participant);
+                await this.ensurePlayerStat(participant);
+                await this.incrementPlayerGamesPlayed(participant);
+                const playerCorrectGuessCount =
+                    this.scoreboard.getPlayerCorrectGuessCount(participant);
+
+                if (playerCorrectGuessCount > 0) {
+                    await this.incrementPlayerSongsGuessed(
+                        participant,
+                        playerCorrectGuessCount,
+                    );
+                }
+
+                const playerExpGain =
+                    this.scoreboard.getPlayerExpGain(participant);
+
+                let levelUpResult: LevelUpResult | null = null;
+                if (playerExpGain > 0) {
+                    levelUpResult = await this.incrementPlayerExp(
+                        participant,
+                        playerExpGain,
+                    );
+                    if (levelUpResult) {
+                        leveledUpPlayers.push(levelUpResult);
+                    }
+                }
+
+                await this.insertPerSessionStats(
+                    participant,
+                    playerCorrectGuessCount,
+                    playerExpGain,
+                    levelUpResult
+                        ? levelUpResult.endLevel - levelUpResult.startLevel
+                        : 0,
+                );
+
+                // if game ended erroneously during player's FGOTD, mark it as errored to allow
+                // for bonus to continue next game
+                await dbContext.kmq
+                    .updateTable("player_stats")
+                    .where("player_id", "=", participant)
+                    .set({
+                        last_game_played_errored:
+                            isFirstGame && endedDueToError ? 1 : 0,
+                    })
+                    .execute();
+            }),
+        );
+
+        return leveledUpPlayers;
+    }
+
+    private async incrementGuildSongGuessCount(): Promise<void> {
+        if (this.textChannelID === process.env.END_TO_END_TEST_BOT_CHANNEL) {
+            return;
+        }
+
+        // increment guild's song guess count
+        await dbContext.kmq
+            .updateTable("guilds")
+            .where("guild_id", "=", this.guildID)
+            .set({
+                songs_guessed: sql`songs_guessed + 1`,
+            })
+            .execute();
     }
 
     /**
