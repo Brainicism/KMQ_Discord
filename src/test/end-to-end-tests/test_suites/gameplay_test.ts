@@ -45,6 +45,18 @@ const PLAY_TEST_SUITE: TestSuite = {
             expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
         {
+            command: ",answer typingtypos",
+            responseValidator: (
+                title: string,
+                description: string,
+                parsedGameOptions?: ParsedGameOptionValues,
+                client?: Eris.Client,
+            ) =>
+                parsedGameOptions!["answer set"]!.value === "typingtypos" &&
+                parsedGameOptions!["answer set"]!.updated,
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
+        },
+        {
             command: ",play",
             responseValidator: (
                 title: string,
