@@ -322,8 +322,7 @@ bot.on("messageCreate", async (msg) => {
     }
 
     if (CURRENT_STAGE === null) {
-        console.error("messageCreate called before test began.");
-        process.exit(1);
+        return;
     }
 
     // response was for a different nessage, already processed a message for the current stage, or the stage hasnt executed yet
