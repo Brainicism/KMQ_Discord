@@ -98,7 +98,6 @@ export const specialFfmpegArgs = {
 
 // z = chinese, j = japanese, e = english, s = spanish
 export const FOREIGN_LANGUAGE_TAGS = ["z", "j", "e", "s"];
-export const NON_OFFICIAL_VIDEO_TAGS = ["c", "d", "a", "r", "v", "x", "p"];
 export const DEFAULT_LOCALE = LocaleType.EN;
 
 const EXP_TABLE = [...Array(1000).keys()].map((level) => {

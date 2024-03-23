@@ -1,7 +1,6 @@
 import {
     CHRONOLOGICAL_SHUFFLE_NUM_PARTITIONS,
     FOREIGN_LANGUAGE_TAGS,
-    NON_OFFICIAL_VIDEO_TAGS,
     SELECTION_WEIGHT_VALUES_EASY,
     SELECTION_WEIGHT_VALUES_HARD,
     SHADOW_BANNED_ARTIST_IDS,
@@ -560,13 +559,8 @@ export default class SongSelector {
 
         if (gameOptions.releaseType === ReleaseType.OFFICIAL) {
             queryBuilder = queryBuilder.where("vtype", "=", "main");
-            for (const tag of NON_OFFICIAL_VIDEO_TAGS) {
-                queryBuilder = queryBuilder.where(
-                    "tags",
-                    "not like",
-                    `%${tag}%`,
-                );
-            }
+        } else if (gameOptions.releaseType === ReleaseType.BSIDE) {
+            queryBuilder = queryBuilder.where("vtype", "=", "audio");
         }
 
         queryBuilder = queryBuilder
