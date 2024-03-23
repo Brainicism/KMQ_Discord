@@ -77,7 +77,12 @@ BEGIN
 	AND kpop_videos.app_kpop.is_audio = 'n'
 	AND vlink NOT IN (SELECT vlink FROM kmq.dead_links)
 	AND vtype = 'main'
-	AND tags NOT LIKE "%c%"
+	AND tags NOT LIKE "%c%" -- no covers
+	AND tags NOT LIKE "%d%" -- no dance practices
+	AND tags NOT LIKE "%h%" -- no dance performances
+	AND tags NOT LIKE "%a%" -- no acoustic
+	AND tags NOT LIKE "%r%" -- no relay dances
+	AND tags NOT LIKE "%x%" -- no remixes
 	AND vlink IN (SELECT vlink FROM kmq.cached_song_duration);
 
 	/* audio-only videos */
@@ -110,7 +115,12 @@ BEGIN
 	WHERE kmq.not_downloaded.vlink IS NULL
 	AND kpop_videos.app_kpop.is_audio = 'y'
 	AND vlink NOT IN (SELECT vlink FROM kmq.dead_links)
-	AND tags NOT LIKE "%c%";
+	AND tags NOT LIKE "%c%" -- no covers
+	AND tags NOT LIKE "%d%" -- no dance practices
+	AND tags NOT LIKE "%h%" -- no dance performances
+	AND tags NOT LIKE "%a%" -- no acoustic
+	AND tags NOT LIKE "%r%" -- no relay dances
+	AND tags NOT LIKE "%x%"; -- no remixes
 
 
 	CREATE INDEX available_songs_id_artist_index ON available_songs_temp (id_artist);
