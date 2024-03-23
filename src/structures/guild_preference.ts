@@ -1013,7 +1013,9 @@ export default class GuildPreference {
             });
         }
 
-        updatedOptions = _.sortBy(updatedOptions, ["optionName"]);
+        updatedOptions = updatedOptions.sort((a, b) =>
+            a.option_name.localeCompare(b.option_name),
+        );
 
         await dbContext.kmq.transaction().execute(async (trx) => {
             const inserts = updatedOptions.map((x) =>
