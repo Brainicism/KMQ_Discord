@@ -309,10 +309,6 @@ bot.on("messageCreate", async (msg) => {
         return;
     }
 
-    if (!embeds[0]?.footer?.text.includes(RUN_ID)) {
-        return;
-    }
-
     if (CURRENT_STAGE === null) {
         console.error("messageCreate called before test began.");
         process.exit(1);
@@ -336,7 +332,9 @@ bot.on("messageCreate", async (msg) => {
         combinedDescription += `${field.value}\n`;
     }
 
-    combinedDescription += `\n${footer!.text}`;
+    if (footer) {
+        combinedDescription += `\n${footer.text}`;
+    }
 
     console.log({ title, description, fields, footer });
 
