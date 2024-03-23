@@ -218,7 +218,6 @@ export async function getMatchingGroupNames(
             .selectFrom("app_kpop_group")
             .select(["id"])
             .where("name", "in", rawGroupNames)
-            .where("is_collab", "=", "n")
             .where("has_songs", "=", 1)
             .execute()
     ).map((x) => x.id);
@@ -243,7 +242,13 @@ export async function getMatchingGroupNames(
             )
             .orderBy("name", "asc")
             .execute()
-    ).map((x) => ({ id: x.id, name: x.name }));
+    ).map((x) => {
+        if (artistIds.includes(x.id)) {
+            return { id: x.id, name: x.name, added_by_user: "y" };
+        } else {
+            return { id: x.id, name: x.name, added_by_user: "n" };
+        }
+    });
 
     const matchingGroupNames = matchingGroups.map((x) => x.name.toUpperCase());
     const unrecognizedGroups = rawGroupNames.filter(
