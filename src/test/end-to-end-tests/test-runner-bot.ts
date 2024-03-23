@@ -27,7 +27,15 @@ const bot = new Eris.Client(process.env.END_TO_END_TEST_BOT_TOKEN!, {
     },
 });
 
-program.option("-t, --test-suite <suite>", "The test suite");
+program
+    .option("-t, --test-suite <suite>", "The test suite")
+    .option(
+        "--stage-delay <seconds>",
+        "Delay between test stages",
+        (x) => parseFloat(x),
+        0,
+    );
+
 program.option(
     "-s, --source <source>",
     "The execution source (i.e: gci, cronjob)",
@@ -129,6 +137,11 @@ async function proceedNextStage(): Promise<void> {
         process.exit(failedTests.length > 0 ? 1 : 0);
     }
 
+    if (options.stageDelay) {
+        console.log(`Waiting ${options.stageDelay * 1000}ms`);
+        await delay(options.stageDelay * 1000);
+    }
+
     await mainLoop();
 }
 
@@ -153,6 +166,7 @@ async function mainLoop(): Promise<void> {
             `========================================\nBeginning test, RUN_ID = ${RUN_ID} \n========================================`,
         );
 
+        await ensureVoiceConnection();
         CURRENT_STAGE = {
             stage: 0,
             processed: false,
@@ -171,8 +185,6 @@ async function mainLoop(): Promise<void> {
     if (stageTimeout) {
         clearTimeout(stageTimeout);
     }
-
-    await ensureVoiceConnection();
 
     console.log(`STAGE ${CURRENT_STAGE.stage} | Sending command: '${command}'`);
     stageTimeout = setTimeout(async () => {
@@ -435,3 +447,13 @@ async function ensureVoiceConnection(): Promise<void> {
 
     await bot.connect();
 })();
+
+process.on("SIGINT", async () => {
+    console.log("Caught SIGINT, leaving voice channel");
+    if (voiceConnection) {
+        getVoiceChannel().leave();
+        await delay(1000);
+    }
+
+    process.exit(1);
+});
