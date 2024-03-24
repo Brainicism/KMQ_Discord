@@ -7,7 +7,6 @@ import {
     retryJob,
 } from "../helpers/utils";
 import { getNewConnection } from "../database_context";
-import { sql } from "kysely";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import path from "path";
@@ -243,8 +242,6 @@ async function getSongsFromDb(db: DatabaseContext): Promise<
         youtubeLink: string;
     }[]
 > {
-    await sql.raw("CALL GenerateExpectedAvailableSongs();").execute(db.kmq);
-
     const deadLinks = (
         await db.kmq.selectFrom("dead_links").select("vlink").execute()
     ).map((x) => x.vlink);
