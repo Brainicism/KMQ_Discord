@@ -20,6 +20,12 @@ function log(msg: string): void {
     console.log(`${new Date().toISOString()} | ${msg}`);
 }
 
+function debug(msg: string): void {
+    if (options.debug) {
+        console.log(`DEBUG: ${new Date().toISOString()} | ${msg}`);
+    }
+}
+
 function logError(msg: string): void {
     console.error(`${new Date().toISOString()} | ${msg}`);
 }
@@ -37,17 +43,14 @@ const bot = new Eris.Client(process.env.END_TO_END_TEST_BOT_TOKEN!, {
 
 program
     .option("-t, --test-suite <suite>", "The test suite")
+    .option("-d, --debug")
+    .option("--stage-delay <seconds>", "Delay between test stages", (x) =>
+        parseFloat(x),
+    )
     .option(
-        "--stage-delay <seconds>",
-        "Delay between test stages",
-        (x) => parseFloat(x),
-        0,
+        "-s, --source <source>",
+        "The execution source (i.e: gci, cronjob)",
     );
-
-program.option(
-    "-s, --source <source>",
-    "The execution source (i.e: gci, cronjob)",
-);
 
 program.parse();
 const options = program.opts();
@@ -199,11 +202,11 @@ async function mainLoop(): Promise<void> {
         await proceedNextStage();
     }, 15000);
 
-    CURRENT_STAGE.ready = true;
     if (testStage.preCommandDelay) {
         await delay(testStage.preCommandDelay);
     }
 
+    CURRENT_STAGE.ready = true;
     CURRENT_STAGE.messageId = await sendCommand(command);
     switch (testStage.expectedResponseType) {
         case KmqResponseType.GAME_OPTIONS_RESPONSE:
@@ -327,9 +330,16 @@ bot.on("messageCreate", async (msg) => {
         return;
     }
 
+    const embed = embeds[0]!;
+    debug(
+        `Received messageCreate.\nMatching referenceMessage = ${msg.referencedMessage?.id === CURRENT_STAGE!.messageId}\nProcessed: ${CURRENT_STAGE!.processed}\nStage Ready:${CURRENT_STAGE!.ready}\ntitle = ${embed.title}`,
+    );
+
     if (CURRENT_STAGE === null) {
         return;
     }
+
+    const { title, description, fields, footer } = embed;
 
     // response was for a different nessage, already processed a message for the current stage, or the stage hasnt executed yet
     if (
@@ -341,8 +351,6 @@ bot.on("messageCreate", async (msg) => {
     }
 
     CURRENT_STAGE.processed = true;
-    const embed = embeds[0]!;
-    const { title, description, fields, footer } = embed;
     let combinedDescription = `${description}\n`;
     for (const field of fields ?? []) {
         combinedDescription += `${field.value}\n`;
