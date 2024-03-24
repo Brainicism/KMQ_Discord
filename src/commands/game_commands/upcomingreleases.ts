@@ -113,14 +113,14 @@ export default class UpcomingReleasesCommand implements BaseCommand {
             await dbContext.kpopVideos
                 .selectFrom("app_upcoming")
                 .innerJoin(
-                    "app_kpop_group",
+                    "app_kpop_group_safe",
                     "app_upcoming.id_artist",
-                    "app_kpop_group.id",
+                    "app_kpop_group_safe.id",
                 )
                 .select([
                     "app_upcoming.name",
-                    "app_kpop_group.name as artistName",
-                    "app_kpop_group.id as artistID",
+                    "app_kpop_group_safe.name as artistName",
+                    "app_kpop_group_safe.id as artistID",
                     "kname as hangulArtistName",
                     "rtype as releaseType",
                     "rdate as releaseDate",
