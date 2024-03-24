@@ -95,9 +95,9 @@ jobs:
             - name: Check pre-upgrade KMQ healthiness
               run: while [[ "$(docker inspect --format='{{json .State.Health.Status}}' kmq-gci)" != "\"healthy\"" ]]; do sleep 1; done
             - name: Run test runner on live instance (game options test)
-              run: docker exec --env-file	./.env kmq-gci sh -c 'npx ts-node --swc src/test/end-to-end-tests/test-runner-bot.ts --test-suite=BASIC_OPTIONS --source=gci; exit $?'
+              run: docker exec --env-file	./.env kmq-gci sh -c 'npx ts-node --swc src/test/end-to-end-tests/test-runner-bot.ts --test-suite=BASIC_OPTIONS --debug --source=gci; exit $?'
             - name: Run test runner on live instance (gameplay test)
-              run: docker exec --env-file	./.env kmq-gci sh -c 'npx ts-node --swc src/test/end-to-end-tests/test-runner-bot.ts --test-suite=PLAY --source=gci; exit $?'
+              run: docker exec --env-file	./.env kmq-gci sh -c 'npx ts-node --swc src/test/end-to-end-tests/test-runner-bot.ts --test-suite=PLAY --debug --source=gci; exit $?'
             - name: Check for errors
               run: docker logs kmq-gci 2>&1 | grep -i "\[Error\]" && echo "Errors found in container logs." && exit 1 || echo "No errors found in container logs." && exit 0
             - name: Print logs

@@ -130,11 +130,16 @@ async function proceedNextStage(): Promise<void> {
             "========================================Test suite completed========================================",
         );
 
-        log(`Passed ${totalTests - failedTests.length}/${totalTests}`);
         if (failedTests.length) {
+            const message = !TEST_SUITE.cascadingFailures
+                ? `Passed ${totalTests - failedTests.length}/${totalTests}   ${failedTests.length > 0 ? `\nFailed Tests:\n ${failedTests.join("\n ")}` : ""} `
+                : `Failed Test During Step: ${failedTests.join("\n")}`;
+
+            log(message);
+
             await sendDebugAlertWebhook(
                 `Test Suite '${TEST_SUITE.name}' Failed`,
-                `Passed ${totalTests - failedTests.length}/${totalTests}   ${failedTests.length > 0 ? `\nFailed Tests:\n ${failedTests.join("\n ")}` : ""} `,
+                message,
                 EMBED_ERROR_COLOR,
                 KmqImages.DEAD,
             );
