@@ -471,7 +471,7 @@ export default class GameRound extends Round {
             for (const entry of sortedGuesses
                 .map((x): [string, GuessResult] => {
                     const playerID = x[0];
-                    const mostRecentGuess = x[1].pop()!;
+                    const mostRecentGuess = x[1].at(-1)!;
 
                     return [playerID, mostRecentGuess];
                 })
