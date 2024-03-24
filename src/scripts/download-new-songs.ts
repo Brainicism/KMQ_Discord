@@ -7,12 +7,12 @@ import {
     retryJob,
 } from "../helpers/utils";
 import { getNewConnection } from "../database_context";
+import { sql } from "kysely";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import path from "path";
 import ytdl from "@distube/ytdl-core";
 import type { DatabaseContext } from "../database_context";
-import type QueriedSong from "../structures/queried_song";
 
 const logger = new IPCLogger("download-new-songs");
 const TARGET_AVERAGE_VOLUME = -30;
@@ -235,28 +235,29 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
     });
 };
 
-async function getSongsFromDb(databaseContext: DatabaseContext): Promise<any> {
+async function getSongsFromDb(db: DatabaseContext): Promise<
+    {
+        songName: string;
+        views: number;
+        artistName: string;
+        youtubeLink: string;
+    }[]
+> {
+    await sql.raw("CALL GenerateExpectedAvailableSongs();").execute(db.kmq);
+
     const deadLinks = (
-        await databaseContext.kmq
-            .selectFrom("dead_links")
-            .select("vlink")
-            .execute()
+        await db.kmq.selectFrom("dead_links").select("vlink").execute()
     ).map((x) => x.vlink);
 
-    return databaseContext.kpopVideos
-        .selectFrom("app_kpop")
-        .innerJoin("app_kpop_group", "app_kpop.id_artist", "app_kpop_group.id")
+    return db.kmq
+        .selectFrom("expected_available_songs" as any)
         .select([
-            "app_kpop.name as songName",
-            "app_kpop_group.name as artistName",
-            "app_kpop.vlink as youtubeLink",
-            "app_kpop.views as views",
+            "song_name_en as songName",
+            "artist_name_en as artistName",
+            "link as youtubeLink",
+            "views",
         ])
-        .where("vtype", "=", "main")
-        .where("tags", "not like", "%c%")
-        .where("tags", "not like", "%r%")
-        .where("tags", "not like", "%x%")
-        .where("vlink", "not in", deadLinks)
+        .where("link", "not in", deadLinks)
         .orderBy("views", "desc")
         .execute();
 }
@@ -271,7 +272,12 @@ async function getCurrentlyDownloadedFiles(): Promise<Set<string>> {
 
 async function updateNotDownloaded(
     db: DatabaseContext,
-    songs: Array<QueriedSong>,
+    songs: Array<{
+        songName: string;
+        views: number;
+        artistName: string;
+        youtubeLink: string;
+    }>,
 ): Promise<void> {
     // update list of non-downloaded songs
     const currentlyDownloadedFiles = await getCurrentlyDownloadedFiles();
@@ -296,7 +302,13 @@ const downloadNewSongs = async (
     limit?: number,
     songOverrides?: string[],
 ): Promise<number> => {
-    const allSongs: Array<QueriedSong> = await getSongsFromDb(db);
+    const allSongs: Array<{
+        songName: string;
+        views: number;
+        artistName: string;
+        youtubeLink: string;
+    }> = await getSongsFromDb(db);
+
     let songsToDownload = limit ? allSongs.slice(0, limit) : allSongs.slice();
     if (songOverrides) {
         songsToDownload = songsToDownload.filter((x) =>

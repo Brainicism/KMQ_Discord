@@ -374,6 +374,29 @@ async function validateSqlDump(
                 .raw("CALL PostSeedDataCleaning();")
                 .execute(db.kpopVideosValidation);
 
+            // generate expected available songs
+            const originalGenerateExpectedSongsSqlPath = path.join(
+                __dirname,
+                "../../sql/procedures/generate_expected_available_songs_procedure.sql",
+            );
+
+            const validationGenerateExpectedSongsSqlPath = path.join(
+                __dirname,
+                "../../sql/generate_expected_available_songs_procedure.validation.sql",
+            );
+
+            await exec(
+                `sed 's/kpop_videos/kpop_videos_validation/g' ${originalGenerateExpectedSongsSqlPath} > ${validationGenerateExpectedSongsSqlPath}`,
+            );
+
+            await exec(
+                `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${validationGenerateExpectedSongsSqlPath}`,
+            );
+
+            await sql
+                .raw("CALL GenerateExpectedAvailableSongs();")
+                .execute(db.kpopVideosValidation);
+
             logger.info("Validating creation of data tables");
             const originalCreateKmqTablesProcedureSqlPath = path.join(
                 __dirname,
@@ -399,7 +422,7 @@ async function validateSqlDump(
         }
     } catch (e) {
         throw new Error(
-            `SQL dump validation failed. ${e.sqlMessage || e.stderr || e}`,
+            `SQL dump validation failed. ${e.sqlMessage || e.stderr || e}. stack = ${new Error().stack}`,
         );
     }
 
