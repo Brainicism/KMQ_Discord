@@ -53,7 +53,7 @@ import dbContext from "../database_context";
 import fs from "fs";
 import i18n from "./localization_manager";
 import type { EmbedGenerator, GuildTextableMessage } from "../types";
-import type { GuildTextableChannel } from "eris";
+import type { GuildTextableChannel, Message, TextChannel } from "eris";
 import type AutocompleteEntry from "../interfaces/autocomplete_entry";
 import type BookmarkedSong from "../interfaces/bookmarked_song";
 import type EmbedPayload from "../interfaces/embed_payload";
@@ -439,6 +439,31 @@ export async function sendMessage(
     authorID?: string,
     interaction?: Eris.ComponentInteraction | Eris.CommandInteraction,
 ): Promise<Eris.Message | null> {
+    if (messageContent.messageReference) {
+        const message: Message<TextChannel> | undefined = await (
+            State.client.getChannel(textChannelID!) as
+                | Eris.TextChannel
+                | undefined
+        )?.getMessage(messageContent.messageReference.messageID);
+
+        // test bot request, reply with same run ID
+        if (
+            message &&
+            message.author.id === process.env.END_TO_END_TEST_BOT_CLIENT &&
+            message.embeds[0]
+        ) {
+            const runIdAndCommand = `${message.embeds[0].footer?.text!}|${message.content}`;
+            const messageFooter = messageContent.embeds![0]!.footer;
+            if (messageFooter) {
+                messageFooter.text += `\n ${runIdAndCommand}`;
+            } else {
+                messageContent.embeds![0]!.footer = {
+                    text: runIdAndCommand,
+                };
+            }
+        }
+    }
+
     if (interaction) {
         if (!withinInteractionInterval(interaction)) {
             return null;
@@ -691,9 +716,6 @@ export async function sendInfoMessage(
     interaction?: Eris.CommandInteraction,
 ): Promise<Eris.Message<Eris.TextableChannel> | null> {
     const embeds = [embedPayload, ...additionalEmbeds];
-    if (messageContext.author.id === process.env.END_TO_END_TEST_BOT_CLIENT) {
-        reply = true;
-    }
 
     return sendMessage(
         messageContext.textChannelID,
