@@ -16,6 +16,14 @@ import { program } from "commander";
 import HEALTH_CHECK_TEST_SUITE from "./test_suites/healthcheck_test";
 import PLAY_TEST_SUITE from "./test_suites/gameplay_test";
 
+function log(msg: string): void {
+    console.log(`${new Date().toISOString()} | ${msg}`);
+}
+
+function logError(msg: string): void {
+    console.error(`${new Date().toISOString()} | ${msg}`);
+}
+
 const bot = new Eris.Client(process.env.END_TO_END_TEST_BOT_TOKEN!, {
     gateway: {
         intents: [
@@ -115,11 +123,11 @@ async function proceedNextStage(): Promise<void> {
         CURRENT_STAGE.stage === TEST_SUITE.tests.length ||
         (TEST_SUITE.cascadingFailures && failedTests.length > 0)
     ) {
-        console.log(
+        log(
             "========================================Test suite completed========================================",
         );
 
-        console.log(`Passed ${totalTests - failedTests.length}/${totalTests}`);
+        log(`Passed ${totalTests - failedTests.length}/${totalTests}`);
         if (failedTests.length) {
             await sendDebugAlertWebhook(
                 `Test Suite '${TEST_SUITE.name}' Failed`,
@@ -138,7 +146,7 @@ async function proceedNextStage(): Promise<void> {
     }
 
     if (options.stageDelay) {
-        console.log(`Waiting ${options.stageDelay * 1000}ms`);
+        log(`Waiting ${options.stageDelay * 1000}ms`);
         await delay(options.stageDelay * 1000);
     }
 
@@ -151,7 +159,7 @@ function getVoiceChannel(): Eris.VoiceChannel {
     ) as Eris.VoiceChannel | undefined;
 
     if (!voiceChannel) {
-        console.error(
+        logError(
             `Failed to get voice channel ID: ${process.env.END_TO_END_TEST_BOT_VOICE_CHANNEL}`,
         );
         process.exit(1);
@@ -162,7 +170,7 @@ function getVoiceChannel(): Eris.VoiceChannel {
 
 async function mainLoop(): Promise<void> {
     if (CURRENT_STAGE === null) {
-        console.log(
+        log(
             `========================================\nBeginning test, RUN_ID = ${RUN_ID} \n========================================`,
         );
 
@@ -175,9 +183,7 @@ async function mainLoop(): Promise<void> {
         };
     }
 
-    console.log(
-        `=====================STAGE ${CURRENT_STAGE.stage}===================`,
-    );
+    log(`=====================STAGE ${CURRENT_STAGE.stage}===================`);
 
     const testStage = TEST_SUITE.tests[CURRENT_STAGE.stage]!;
     const command = testStage.command;
@@ -186,9 +192,9 @@ async function mainLoop(): Promise<void> {
         clearTimeout(stageTimeout);
     }
 
-    console.log(`STAGE ${CURRENT_STAGE.stage} | Sending command: '${command}'`);
+    log(`STAGE ${CURRENT_STAGE.stage} | Sending command: '${command}'`);
     stageTimeout = setTimeout(async () => {
-        console.error(`STAGE ${CURRENT_STAGE!.stage} | Timed out.`);
+        logError(`STAGE ${CURRENT_STAGE!.stage} | Timed out.`);
         failedTests.push(testStage.command);
         await proceedNextStage();
     }, 15000);
@@ -202,19 +208,19 @@ async function mainLoop(): Promise<void> {
     switch (testStage.expectedResponseType) {
         case KmqResponseType.GAME_OPTIONS_RESPONSE:
         case KmqResponseType.RAW:
-            console.log(
+            log(
                 `STAGE ${CURRENT_STAGE.stage} | Expecting response from KMQ before stage validation...`,
             );
             break;
         case KmqResponseType.NONE:
-            console.log(
+            log(
                 `STAGE ${CURRENT_STAGE.stage} | Not expecting response.. validate stage immediately`,
             );
             CURRENT_STAGE.processed = true;
             await evaluateStage();
             return;
         default:
-            console.error(
+            logError(
                 `Unhandled KmqResponseType in mainLoop: ${testStage.expectedResponseType}`,
             );
             break;
@@ -227,11 +233,11 @@ async function pollVoiceConnectionReady(): Promise<void> {
     // wait up to 2 minutes for vc to be ready
     for (let i = 0; i < 12; i++) {
         if (voiceChannel.voiceMembers.size === 0) {
-            console.log("Voice channel ready!");
+            log("Voice channel ready!");
             return;
         }
 
-        console.log(
+        log(
             `Voice channel still occupied, waiting... [${Array.from(
                 voiceChannel.voiceMembers,
             )
@@ -241,7 +247,7 @@ async function pollVoiceConnectionReady(): Promise<void> {
         await delay(10000);
     }
 
-    console.log("Timed out waiting for voice channel to be ready");
+    log("Timed out waiting for voice channel to be ready");
     process.exit(1);
 }
 
@@ -251,7 +257,7 @@ bot.on("ready", async () => {
 });
 
 bot.on("error", (err) => {
-    console.error(err);
+    logError(JSON.stringify(err));
 });
 
 async function evaluateStage(messageResponse?: {
@@ -260,7 +266,7 @@ async function evaluateStage(messageResponse?: {
     parsedGameOptions?: ParsedGameOptionValues;
 }): Promise<void> {
     if (CURRENT_STAGE === null) {
-        console.error("evaluateStage called before test began.");
+        logError("evaluateStage called before test began.");
         process.exit(1);
     }
 
@@ -270,7 +276,7 @@ async function evaluateStage(messageResponse?: {
             .map((x) => `${x[0]}: ${x[1].value}`);
 
         if (updatedOptions.length) {
-            console.log(`Updated Options:\n ${updatedOptions.join("\n")}`);
+            log(`Updated Options:\n ${updatedOptions.join("\n")}`);
         }
     }
 
@@ -285,13 +291,13 @@ async function evaluateStage(messageResponse?: {
             await delay(2500);
             break;
         default:
-            console.error(
+            logError(
                 `Unhandled KmqResponseType in evaluateStage: ${testStage.expectedResponseType}`,
             );
             break;
     }
 
-    console.log(`STAGE ${CURRENT_STAGE.stage} | Validating stage`);
+    log(`STAGE ${CURRENT_STAGE.stage} | Validating stage`);
     const stageOutputValidator = testStage.responseValidator;
     if (
         stageOutputValidator(
@@ -301,9 +307,9 @@ async function evaluateStage(messageResponse?: {
             bot,
         )
     ) {
-        console.log(`STAGE ${CURRENT_STAGE.stage} | Passed check!`);
+        log(`STAGE ${CURRENT_STAGE.stage} | Passed check!`);
     } else {
-        console.log(`STAGE ${CURRENT_STAGE.stage} | Failed check!`);
+        log(`STAGE ${CURRENT_STAGE.stage} | Failed check!`);
         failedTests.push(testStage.command);
     }
 
@@ -326,7 +332,6 @@ bot.on("messageCreate", async (msg) => {
     }
 
     // response was for a different nessage, already processed a message for the current stage, or the stage hasnt executed yet
-    console.log(msg.referencedMessage?.id, CURRENT_STAGE.messageId);
     if (
         msg.referencedMessage?.id !== CURRENT_STAGE.messageId ||
         CURRENT_STAGE.processed ||
@@ -347,7 +352,9 @@ bot.on("messageCreate", async (msg) => {
         combinedDescription += `\n${footer.text}`;
     }
 
-    console.log({ title, description, fields, footer });
+    log(
+        `STAGE ${CURRENT_STAGE.stage} | Received response: ${JSON.stringify({ title, description, fields, footer })}}`,
+    );
 
     const testStage = TEST_SUITE.tests[CURRENT_STAGE.stage]!;
 
@@ -363,7 +370,7 @@ bot.on("messageCreate", async (msg) => {
         case KmqResponseType.RAW:
             break;
         default:
-            console.error(
+            logError(
                 `Unhandled KmqResponseType in messageCreate: ${testStage.expectedResponseType}`,
             );
             break;
@@ -400,7 +407,7 @@ async function ensureVoiceConnection(): Promise<void> {
             TEST_SUITE = PLAY_TEST_SUITE;
             break;
         default:
-            console.log(`Test suite not found, name = ${selectedTestSuite}`);
+            log(`Test suite not found, name = ${selectedTestSuite}`);
             TEST_SUITE = BASIC_OPTIONS_TEST_SUITE;
             break;
     }
@@ -424,7 +431,7 @@ async function ensureVoiceConnection(): Promise<void> {
     }
 
     if (!process.env.BOT_CLIENT_ID) {
-        console.error("BOT_CLIENT_ID not specified");
+        logError("BOT_CLIENT_ID not specified");
         process.exit(1);
     }
 
@@ -434,7 +441,7 @@ async function ensureVoiceConnection(): Promise<void> {
         !process.env.END_TO_END_TEST_BOT_CHANNEL ||
         !process.env.END_TO_END_TEST_BOT_VOICE_CHANNEL
     ) {
-        console.error(
+        logError(
             "END_TO_END_TEST_BOT_TOKEN, END_TO_END_TEST_BOT_CLIENT, END_TO_END_TEST_BOT_VOICE_CHANNEL, or END_TO_END_TEST_BOT_CHANNEL not specified",
         );
         process.exit(1);
@@ -448,7 +455,7 @@ async function ensureVoiceConnection(): Promise<void> {
 })();
 
 process.on("SIGINT", async () => {
-    console.log("Caught SIGINT, leaving voice channel");
+    log("Caught SIGINT, leaving voice channel");
     if (voiceConnection) {
         getVoiceChannel().leave();
         await delay(1000);
