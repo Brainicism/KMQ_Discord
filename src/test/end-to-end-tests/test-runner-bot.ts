@@ -99,9 +99,15 @@ function convertGameOptionsMessage(
 }
 
 async function sendCommand(message: string): Promise<string> {
+    if (!CURRENT_STAGE) {
+        return "";
+    }
+
+    const command = message.replace(",", process.env.BOT_PREFIX!);
+    CURRENT_STAGE.commandExecuted = command;
     return (
         await bot.createMessage(process.env.END_TO_END_TEST_BOT_CHANNEL!, {
-            content: message.replace(",", process.env.BOT_PREFIX!),
+            content: command,
             embeds: [
                 {
                     footer: {
@@ -214,7 +220,6 @@ async function mainLoop(): Promise<void> {
     }
 
     CURRENT_STAGE.ready = true;
-    CURRENT_STAGE.commandExecuted = command;
     CURRENT_STAGE.processed = false;
     log(`STAGE ${CURRENT_STAGE.stage} | Sending command: '${command}'`);
     await sendCommand(command);
