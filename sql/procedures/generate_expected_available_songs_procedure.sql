@@ -70,7 +70,6 @@ BEGIN
 	JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
 	AND vtype = 'main'
 	AND tags NOT LIKE "%c%" -- no covers
-	AND tags NOT LIKE "%r%" -- no relay dances
 	AND tags NOT LIKE "%x%"; -- no remixes
 
 END //
