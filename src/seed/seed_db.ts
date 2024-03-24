@@ -9,10 +9,18 @@ import {
 } from "../constants";
 import { IPCLogger } from "../logger";
 import { config } from "dotenv";
+import {
+    discordDateFormat,
+    parseJsonFile,
+    pathExists,
+    standardDateFormat,
+} from "../helpers/utils";
 import { getNewConnection } from "../database_context";
-import { parseJsonFile, pathExists } from "../helpers/utils";
 import { program } from "commander";
-import { sendDebugAlertWebhook } from "../helpers/discord_utils";
+import {
+    sendDebugAlertFileWebhook,
+    sendDebugAlertWebhook,
+} from "../helpers/discord_utils";
 import { sql } from "kysely";
 import Axios from "axios";
 import EnvType from "../enums/env_type";
@@ -148,6 +156,17 @@ export async function generateKmqDataTables(
 async function postSeedDataCleaning(db: DatabaseContext): Promise<void> {
     logger.info("Performing post seed data cleaning...");
     await sql`CALL PostSeedDataCleaning();`.execute(db.kmq);
+}
+
+/**
+ * Re-creates the KMQ data tables
+ * @param db - The database context
+ */
+async function generateExpectedAvailableSongs(
+    db: DatabaseContext,
+): Promise<void> {
+    logger.info("Performing generate expected available songs...");
+    await sql.raw("CALL GenerateExpectedAvailableSongs();").execute(db.kmq);
 }
 
 /**
@@ -564,6 +583,7 @@ async function updateKpopDatabase(
     if (!options.skipReseed) {
         await seedDb(db, bootstrap);
         await postSeedDataCleaning(db);
+        await generateExpectedAvailableSongs(db);
     } else {
         logger.info("Skipping reseed");
     }
@@ -653,6 +673,12 @@ async function reloadAutocompleteData(): Promise<void> {
     if (require.main === module) {
         logger.info(JSON.stringify(options));
         const db = getNewConnection();
+        const availableSongsBefore = await db.kmq
+            .selectFrom("available_songs")
+            .select(["song_name_en", "artist_name_en", "link", "publishedon"])
+            .orderBy("publishedon", "desc")
+            .execute();
+
         try {
             await loadStoredProcedures();
             await seedAndDownloadNewSongs(db);
@@ -664,6 +690,62 @@ async function reloadAutocompleteData(): Promise<void> {
 
             if (process.env.NODE_ENV !== EnvType.PROD) {
                 await updateDaisukiSchemaTypings(db);
+            }
+
+            const availableSongsAfter = await db.kmq
+                .selectFrom("available_songs")
+                .select([
+                    "song_name_en",
+                    "artist_name_en",
+                    "link",
+                    "publishedon",
+                ])
+                .orderBy("publishedon", "desc")
+                .execute();
+
+            const songsRemoved = availableSongsBefore
+                .filter(
+                    (before) =>
+                        !availableSongsAfter
+                            .map((after) => after.link)
+                            .includes(before.link),
+                )
+                .map(
+                    (x) =>
+                        `'${x.song_name_en}' - ${x.artist_name_en}  (${standardDateFormat(x.publishedon)}) | ${x.link}`,
+                );
+
+            const songsAdded = availableSongsAfter
+                .filter(
+                    (after) =>
+                        !availableSongsBefore
+                            .map((before) => before.link)
+                            .includes(after.link),
+                )
+                .map(
+                    (x) =>
+                        `'${x.song_name_en}' - ${x.artist_name_en}  (${standardDateFormat(x.publishedon)}) | ${x.link}`,
+                );
+
+            const currentDate = new Date();
+            if (songsRemoved.length) {
+                logger.info(`${songsRemoved.length} songs removed.`);
+                await sendDebugAlertFileWebhook(
+                    discordDateFormat(currentDate, "f"),
+                    process.env.SONG_UPDATES_WEBHOOK_URL!,
+                    `Songs Removed:\n${songsRemoved.join("\n")}`,
+                    "removed_songs.txt",
+                );
+            }
+
+            if (songsAdded.length) {
+                logger.info(`${songsRemoved.length} songs added.`);
+                await sendDebugAlertFileWebhook(
+                    discordDateFormat(currentDate, "f"),
+                    process.env.SONG_UPDATES_WEBHOOK_URL!,
+                    `Songs Added:\n${songsAdded.join("\n")}`,
+                    "added_songs.txt",
+                );
             }
         } catch (e) {
             logger.error(e);

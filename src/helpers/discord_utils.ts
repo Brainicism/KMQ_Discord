@@ -1640,6 +1640,46 @@ export async function sendDebugAlertWebhook(
 }
 
 /**
+ * Sends an file to the webhook
+ * @param message - The message
+ * @param webhookURL - The webhook URL
+ * @param fileContents - The string file contents
+ * @param fileName - The filename
+ */
+export async function sendDebugAlertFileWebhook(
+    message: string | null,
+    webhookURL: string,
+    fileContents: string,
+    fileName: string,
+): Promise<void> {
+    if (!webhookURL) {
+        logger.warn(
+            "sendDebugAlertFileWebhook failed due to non specified webhookURL",
+        );
+        return;
+    }
+
+    const fileContent = Buffer.from(fileContents, "utf-8");
+
+    const formData = new FormData();
+    if (message) {
+        formData.append("content", message);
+    }
+
+    formData.append("file", new Blob([fileContent]), fileName);
+
+    try {
+        await axios.post(webhookURL, formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+    } catch (e) {
+        logger.error(`Error sending webhook: ${e}`);
+    }
+}
+
+/**
  * Send the bookmarked songs to the corresponding users
  * @param guildID - The guild where the songs were bookmarked
  * @param bookmarkedSongs - The bookmarked songs
