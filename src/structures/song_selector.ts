@@ -394,7 +394,7 @@ export default class SongSelector {
         const selectedGroupIDs = this.guildPreference.getGroupIDs();
         if (gameOptions.subunitPreference === SubunitsPreference.INCLUDE) {
             let subunitsQueryBuilder = dbContext.kpopVideos
-                .selectFrom("app_kpop_group")
+                .selectFrom("app_kpop_group_safe")
                 .select("id");
 
             subunitsQueryBuilder = subunitsQueryBuilder.where(
@@ -417,13 +417,13 @@ export default class SongSelector {
                 let collabGroupBuilder = dbContext.kpopVideos // collab matches
                     .selectFrom("app_kpop_agrelation")
                     .innerJoin(
-                        "app_kpop_group",
+                        "app_kpop_group_safe",
                         "app_kpop_agrelation.id_subgroup",
-                        "app_kpop_group.id",
+                        "app_kpop_group_safe.id",
                     )
                     .select(["id", "name"])
                     .distinct()
-                    .where("app_kpop_group.is_collab", "=", "y");
+                    .where("app_kpop_group_safe.is_collab", "=", "y");
 
                 collabGroupBuilder = collabGroupBuilder.where(
                     "app_kpop_agrelation.id_artist",

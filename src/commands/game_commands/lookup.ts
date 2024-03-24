@@ -521,7 +521,7 @@ export default class LookupCommand implements BaseCommand {
                     : daisukiEntry.name;
 
             const artistNameResult = await dbContext.kpopVideos
-                .selectFrom("app_kpop_group")
+                .selectFrom("app_kpop_group_safe")
                 .select(["name", "kname"])
                 .where("id", "=", daisukiEntry.id_artist)
                 .executeTakeFirst();

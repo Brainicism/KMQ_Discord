@@ -256,6 +256,7 @@ export interface KmqDB {
     "kpop_videos.app_kpop_company": AppKpopCompany;
     "kpop_videos.app_kpop_gaondigi": AppKpopGaondigi;
     "kpop_videos.app_kpop_group": AppKpopGroup;
+    "kpop_videos.app_kpop_group_safe": AppKpopGroupSafe;
     "kpop_videos.app_kpop_ms": AppKpopMs;
     "kpop_videos.app_upcoming": AppUpcoming;
     available_songs: AvailableSongs;

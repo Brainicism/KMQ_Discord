@@ -171,7 +171,7 @@ export async function loadStoredProcedures(): Promise<void> {
  */
 async function updateDaisukiSchemaTypings(db: DatabaseContext): Promise<void> {
     await db.kpopVideos.schema
-        .alterTable("app_kpop_group")
+        .alterTable("app_kpop_group_safe")
         .modifyColumn("name", "varchar(255)", (cb) => cb.notNull())
         .execute();
 
@@ -575,7 +575,7 @@ async function updateKpopDatabase(
  */
 async function updateGroupList(db: DatabaseContext): Promise<void> {
     const result = await db.kpopVideos
-        .selectFrom("app_kpop_group")
+        .selectFrom("app_kpop_group_safe")
         .select(["name", "members as gender"])
         .where("is_collab", "=", "n")
         .where("has_songs", "=", 1)

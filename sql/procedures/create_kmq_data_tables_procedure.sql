@@ -55,8 +55,10 @@ BEGIN
 	WHERE id in (SELECT DISTINCT(id_artist) FROM available_songs
 	RIGHT JOIN kpop_videos.app_kpop_group_temp ON available_songs.id_artist = kpop_videos.app_kpop_group_temp.id);
 
-	RENAME TABLE kpop_videos.app_kpop_group TO old, kpop_videos.app_kpop_group_temp TO kpop_videos.app_kpop_group;
-	DROP TABLE old;
+
+	CREATE TABLE IF NOT EXISTS kpop_videos.app_kpop_group_safe LIKE kpop_videos.app_kpop_group_temp;
+	RENAME TABLE kpop_videos.app_kpop_group_safe TO kpop_videos.old, kpop_videos.app_kpop_group_temp TO kpop_videos.app_kpop_group_safe;
+	DROP TABLE kpop_videos.old;
 
 END //
 DELIMITER ;
