@@ -22,7 +22,7 @@ function log(msg: string): void {
 
 function debug(msg: string): void {
     if (options.debug) {
-        console.log(`${new Date().toISOString()} | ${msg}`);
+        console.log(`DEBUG: ${new Date().toISOString()} | ${msg}`);
     }
 }
 
@@ -332,7 +332,7 @@ bot.on("messageCreate", async (msg) => {
 
     const embed = embeds[0]!;
     debug(
-        `DEBUG: Received messageCreate.\nMatching referenceMessage = ${msg.referencedMessage?.id === CURRENT_STAGE!.messageId}\nProcessed: ${CURRENT_STAGE!.processed}\nStage Ready:${CURRENT_STAGE!.ready}\ntitle = ${embed.title}`,
+        `Received messageCreate.\nMatching referenceMessage = ${msg.referencedMessage?.id === CURRENT_STAGE!.messageId}\nProcessed: ${CURRENT_STAGE!.processed}\nStage Ready:${CURRENT_STAGE!.ready}\ntitle = ${embed.title}`,
     );
 
     if (CURRENT_STAGE === null) {
