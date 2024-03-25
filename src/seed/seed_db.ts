@@ -583,6 +583,7 @@ async function updateKpopDatabase(
     if (!options.skipReseed) {
         await seedDb(db, bootstrap);
         await postSeedDataCleaning(db);
+        await generateExpectedAvailableSongs(db);
     } else {
         logger.info("Skipping reseed");
     }
@@ -702,29 +703,33 @@ async function reloadAutocompleteData(): Promise<void> {
                 .orderBy("publishedon", "desc")
                 .execute();
 
+            const availableSongsAfterSet = new Set(
+                availableSongsAfter.map((x) => x.link),
+            );
+
+            const availableSongsBeforeSet = new Set(
+                availableSongsBefore.map((x) => x.link),
+            );
+
+            logger.info("Calculating songs removed...");
             const songsRemoved = availableSongsBefore
-                .filter(
-                    (before) =>
-                        !availableSongsAfter
-                            .map((after) => after.link)
-                            .includes(before.link),
-                )
+                .filter((before) => !availableSongsAfterSet.has(before.link))
                 .map(
                     (x) =>
                         `'${x.song_name_en}' - ${x.artist_name_en}  (${standardDateFormat(x.publishedon)}) | ${x.link}`,
                 );
 
+            logger.info("Calculating songs added...");
             const songsAdded = availableSongsAfter
-                .filter(
-                    (after) =>
-                        !availableSongsBefore
-                            .map((before) => before.link)
-                            .includes(after.link),
-                )
+                .filter((after) => !availableSongsBeforeSet.has(after.link))
                 .map(
                     (x) =>
                         `'${x.song_name_en}' - ${x.artist_name_en}  (${standardDateFormat(x.publishedon)}) | ${x.link}`,
                 );
+
+            logger.info(
+                `Songs changed: ${songsAdded.length + songsRemoved.length}...`,
+            );
 
             const currentDate = new Date();
             if (songsRemoved.length) {
@@ -738,7 +743,7 @@ async function reloadAutocompleteData(): Promise<void> {
             }
 
             if (songsAdded.length) {
-                logger.info(`${songsRemoved.length} songs added.`);
+                logger.info(`${songsAdded.length} songs added.`);
                 await sendDebugAlertFileWebhook(
                     discordDateFormat(currentDate, "f"),
                     process.env.SONG_UPDATES_WEBHOOK_URL!,
