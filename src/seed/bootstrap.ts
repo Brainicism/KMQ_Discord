@@ -198,6 +198,8 @@ async function bootstrapDatabases(): Promise<void> {
         await updateKpopDatabase(db, true);
     }
 
+    await generateExpectedAvailableSongs(db);
+
     if (!(await songThresholdReached(db))) {
         logger.info(
             `Downloading minimum threshold (${SONG_DOWNLOAD_THRESHOLD}) songs`,
@@ -208,7 +210,6 @@ async function bootstrapDatabases(): Promise<void> {
 
     if (process.env.NODE_ENV === EnvType.PROD) {
         if (!KmqConfiguration.Instance.disallowMigrations()) {
-            await generateExpectedAvailableSongs(db);
             await generateKmqDataTables(db);
         } else {
             logger.info(
