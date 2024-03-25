@@ -439,14 +439,22 @@ export async function sendMessage(
     authorID?: string,
     interaction?: Eris.ComponentInteraction | Eris.CommandInteraction,
 ): Promise<Eris.Message | null> {
-    if (messageContent.messageReference) {
-        const message: Message<TextChannel> | undefined = await (
-            State.client.getChannel(textChannelID!) as
-                | Eris.TextChannel
-                | undefined
-        )?.getMessage(messageContent.messageReference.messageID);
+    // test bot request, reply with same run ID
+    if (!interaction && messageContent.messageReference) {
+        let message: Message<TextChannel> | undefined;
 
-        // test bot request, reply with same run ID
+        try {
+            message = await (
+                State.client.getChannel(textChannelID!) as
+                    | Eris.TextChannel
+                    | undefined
+            )?.getMessage(messageContent.messageReference.messageID);
+        } catch (e) {
+            logger.warn(
+                `Error fetching channel ${textChannelID} for test runner response`,
+            );
+        }
+
         if (
             message &&
             message.author.id === process.env.END_TO_END_TEST_BOT_CLIENT &&
