@@ -97,21 +97,21 @@ export default class AddCommand implements BaseCommand {
             case AddType.GROUP:
             case AddType.ARTIST:
             case AddType.ARTISTS:
-                groupNamesString = guildPreference.getDisplayedGroupNames(true);
+                groupNamesString = guildPreference.getDisplayedGroupNames();
                 break;
             case AddType.INCLUDE:
             case AddType.INCLUDES:
                 groupNamesString =
-                    guildPreference.getDisplayedIncludesGroupNames(true);
+                    guildPreference.getDisplayedIncludesGroupNames();
                 break;
             case AddType.EXCLUDE:
             case AddType.EXCLUDES:
                 groupNamesString =
-                    guildPreference.getDisplayedExcludesGroupNames(true);
+                    guildPreference.getDisplayedExcludesGroupNames();
                 break;
             default:
                 logger.error(`Unexpected addType: ${addType}`);
-                groupNamesString = guildPreference.getDisplayedGroupNames(true);
+                groupNamesString = guildPreference.getDisplayedGroupNames();
                 break;
         }
 

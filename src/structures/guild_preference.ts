@@ -552,7 +552,6 @@ export default class GuildPreference {
     }
 
     /**
-     * @param original - Whether to include collabs or not
      * @returns a friendly, potentially truncated, string displaying the currently selected groups option
      * */
     getDisplayedGroupNames(): string | null {
@@ -589,7 +588,6 @@ export default class GuildPreference {
     }
 
     /**
-     * @param original - Whether to include collabs or not
      * @returns a friendly, potentially truncated, string displaying the currently selected exclude option
      * */
     getDisplayedExcludesGroupNames(): string | null {
@@ -620,7 +618,6 @@ export default class GuildPreference {
     }
 
     /**
-     * @param original - Whether to include collabs or not
      * @returns a friendly, potentially truncated, string displaying the currently selected include option
      * */
     getDisplayedIncludesGroupNames(): string | null {
