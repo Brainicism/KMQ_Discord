@@ -162,7 +162,7 @@ async function postSeedDataCleaning(db: DatabaseContext): Promise<void> {
  * Re-creates the KMQ data tables
  * @param db - The database context
  */
-async function generateExpectedAvailableSongs(
+export async function generateExpectedAvailableSongs(
     db: DatabaseContext,
 ): Promise<void> {
     logger.info("Performing generate expected available songs...");
@@ -583,7 +583,6 @@ async function updateKpopDatabase(
     if (!options.skipReseed) {
         await seedDb(db, bootstrap);
         await postSeedDataCleaning(db);
-        await generateExpectedAvailableSongs(db);
     } else {
         logger.info("Skipping reseed");
     }
