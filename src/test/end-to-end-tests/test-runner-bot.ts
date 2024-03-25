@@ -59,7 +59,7 @@ const failedTests: string[] = [];
 let TEST_SUITE: TestSuite = BASIC_OPTIONS_TEST_SUITE;
 let CURRENT_STAGE: {
     stage: number;
-    messageId: string | null;
+    commandExecuted: string | null;
     processed: boolean;
     ready: boolean;
 } | null = null;
@@ -99,9 +99,15 @@ function convertGameOptionsMessage(
 }
 
 async function sendCommand(message: string): Promise<string> {
+    if (!CURRENT_STAGE) {
+        return "";
+    }
+
+    const command = message.replace(",", process.env.BOT_PREFIX!);
+    CURRENT_STAGE.commandExecuted = command;
     return (
         await bot.createMessage(process.env.END_TO_END_TEST_BOT_CHANNEL!, {
-            content: message.replace(",", process.env.BOT_PREFIX!),
+            content: command,
             embeds: [
                 {
                     footer: {
@@ -119,7 +125,7 @@ async function proceedNextStage(): Promise<void> {
     if (CURRENT_STAGE === null) return;
     const totalTests = TEST_SUITE.tests.length;
     CURRENT_STAGE.stage += 1;
-    CURRENT_STAGE.messageId = null;
+    CURRENT_STAGE.commandExecuted = null;
     CURRENT_STAGE.ready = false;
     CURRENT_STAGE.processed = false;
     if (
@@ -130,11 +136,16 @@ async function proceedNextStage(): Promise<void> {
             "========================================Test suite completed========================================",
         );
 
-        log(`Passed ${totalTests - failedTests.length}/${totalTests}`);
         if (failedTests.length) {
+            const message = !TEST_SUITE.cascadingFailures
+                ? `Passed ${totalTests - failedTests.length}/${totalTests}   ${failedTests.length > 0 ? `\nFailed Tests:\n ${failedTests.join("\n ")}` : ""} `
+                : `Failed Test During Step: ${failedTests.join("\n")}`;
+
+            log(message);
+
             await sendDebugAlertWebhook(
                 `Test Suite '${TEST_SUITE.name}' Failed`,
-                `Passed ${totalTests - failedTests.length}/${totalTests}   ${failedTests.length > 0 ? `\nFailed Tests:\n ${failedTests.join("\n ")}` : ""} `,
+                message,
                 EMBED_ERROR_COLOR,
                 KmqImages.DEAD,
             );
@@ -181,7 +192,7 @@ async function mainLoop(): Promise<void> {
         CURRENT_STAGE = {
             stage: 0,
             processed: false,
-            messageId: null,
+            commandExecuted: null,
             ready: false,
         };
     }
@@ -195,7 +206,6 @@ async function mainLoop(): Promise<void> {
         clearTimeout(stageTimeout);
     }
 
-    log(`STAGE ${CURRENT_STAGE.stage} | Sending command: '${command}'`);
     stageTimeout = setTimeout(async () => {
         logError(`STAGE ${CURRENT_STAGE!.stage} | Timed out.`);
         failedTests.push(testStage.command);
@@ -203,11 +213,16 @@ async function mainLoop(): Promise<void> {
     }, 15000);
 
     if (testStage.preCommandDelay) {
+        log(
+            `STAGE ${CURRENT_STAGE.stage} | Waiting ${testStage.preCommandDelay}ms`,
+        );
         await delay(testStage.preCommandDelay);
     }
 
     CURRENT_STAGE.ready = true;
-    CURRENT_STAGE.messageId = await sendCommand(command);
+    CURRENT_STAGE.processed = false;
+    log(`STAGE ${CURRENT_STAGE.stage} | Sending command: '${command}'`);
+    await sendCommand(command);
     switch (testStage.expectedResponseType) {
         case KmqResponseType.GAME_OPTIONS_RESPONSE:
         case KmqResponseType.RAW:
@@ -320,6 +335,10 @@ async function evaluateStage(messageResponse?: {
 }
 
 bot.on("messageCreate", async (msg) => {
+    if (!CURRENT_STAGE) {
+        return;
+    }
+
     if (msg.author.id !== process.env.BOT_CLIENT_ID) {
         return;
     }
@@ -331,22 +350,13 @@ bot.on("messageCreate", async (msg) => {
     }
 
     const embed = embeds[0]!;
+    const { title, description, fields, footer } = embed;
     debug(
-        `Received messageCreate.\nMatching referenceMessage = ${msg.referencedMessage?.id === CURRENT_STAGE!.messageId}\nProcessed: ${CURRENT_STAGE!.processed}\nStage Ready:${CURRENT_STAGE!.ready}\ntitle = ${embed.title}`,
+        `Received messageCreate. \nProcessed: ${CURRENT_STAGE.processed}\nStage Ready:${CURRENT_STAGE!.ready}\ntitle = ${embed.title}\nFooter=${footer?.text}\nCurrent Command:${CURRENT_STAGE.commandExecuted}`,
     );
 
-    if (CURRENT_STAGE === null) {
-        return;
-    }
-
-    const { title, description, fields, footer } = embed;
-
     // response was for a different nessage, already processed a message for the current stage, or the stage hasnt executed yet
-    if (
-        msg.referencedMessage?.id !== CURRENT_STAGE.messageId ||
-        CURRENT_STAGE.processed ||
-        !CURRENT_STAGE.ready
-    ) {
+    if (CURRENT_STAGE.processed || !CURRENT_STAGE.ready) {
         return;
     }
 
@@ -363,6 +373,13 @@ bot.on("messageCreate", async (msg) => {
     log(
         `STAGE ${CURRENT_STAGE.stage} | Received response: ${JSON.stringify({ title, description, fields, footer })}}`,
     );
+
+    if (
+        footer &&
+        !footer.text.includes(`${RUN_ID}|${CURRENT_STAGE.commandExecuted}`)
+    ) {
+        return;
+    }
 
     const testStage = TEST_SUITE.tests[CURRENT_STAGE.stage]!;
 
