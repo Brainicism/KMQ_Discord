@@ -10,6 +10,7 @@ import {
 import { config } from "dotenv";
 import {
     databaseExists,
+    generateExpectedAvailableSongs,
     generateKmqDataTables,
     loadStoredProcedures,
     tableExists,
@@ -207,6 +208,7 @@ async function bootstrapDatabases(): Promise<void> {
 
     if (process.env.NODE_ENV === EnvType.PROD) {
         if (!KmqConfiguration.Instance.disallowMigrations()) {
+            await generateExpectedAvailableSongs(db);
             await generateKmqDataTables(db);
         } else {
             logger.info(
