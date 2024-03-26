@@ -2,123 +2,43 @@ DELIMITER //
 DROP PROCEDURE IF EXISTS CreateKmqDataTables //
 CREATE PROCEDURE CreateKmqDataTables()
 BEGIN
-	/* replace songs with better audio counterpart */
-	ALTER TABLE kpop_videos.app_kpop ADD COLUMN IF NOT EXISTS original_vlink VARCHAR(255);
-	DROP TEMPORARY TABLE IF EXISTS temp_tbl;
-	CREATE TEMPORARY TABLE temp_tbl
-	SELECT a.id as original_id, a.original_name as original_name, a.vlink as original_link, b.vlink as better_audio_link
-	FROM kpop_videos.app_kpop as a
-	LEFT JOIN kpop_videos.app_kpop as b ON a.id_better_audio = b.id
-	WHERE b.vlink is not null
-	AND a.vtype IN ('main', 'audio');
-
-	DELETE kpop_videos.app_kpop FROM kpop_videos.app_kpop
-	JOIN temp_tbl tt on kpop_videos.app_kpop.vlink = tt.better_audio_link
-	WHERE kpop_videos.app_kpop.vlink = tt.better_audio_link;
-
-	UPDATE kpop_videos.app_kpop JOIN temp_tbl tt on kpop_videos.app_kpop.id = tt.original_id
-	SET kpop_videos.app_kpop.vlink = tt.better_audio_link, kpop_videos.app_kpop.original_vlink = tt.original_link;
-
 	/* update available_songs table */
 	DROP TABLE IF EXISTS available_songs_temp;
-	CREATE TABLE available_songs_temp (
-		song_name_en VARCHAR(255) NOT NULL,
-		clean_song_name_alpha_numeric VARCHAR(255) NOT NULL,
-		song_name_ko VARCHAR(255) NOT NULL,
-		song_aliases VARCHAR(255) NOT NULL,
-		link VARCHAR(255) NOT NULL,
-		original_link VARCHAR(255),
-		artist_name_en VARCHAR(255) NOT NULL,
-		original_artist_name_en VARCHAR(255) NOT NULL,
-		artist_name_ko VARCHAR(255),
-		artist_aliases VARCHAR(255) NOT NULL,
-		previous_name_en VARCHAR(255),
-		previous_name_ko VARCHAR(255),
-		members ENUM('female','male','coed') NOT NULL,
-		views BIGINT NOT NULL,
-		publishedon DATE NOT NULL,
-		id_artist INT(11) NOT NULL,
-		issolo ENUM('y', 'n') NOT NULL,
-		id_parent_artist INT(11) NOT NULL,
-		vtype ENUM('main', 'audio') NOT NULL,
-		tags VARCHAR(25)
-	) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
+	CREATE TABLE available_songs_temp LIKE expected_available_songs;
 	CREATE TABLE IF NOT EXISTS available_songs LIKE available_songs_temp;
 
-	/* music videos */
 	INSERT INTO available_songs_temp
 	SELECT
-		kpop_videos.app_kpop.name AS song_name_en,
-		(CASE WHEN kpop_videos.app_kpop.name REGEXP '^[^a-zA-Z0-9]+$' THEN kpop_videos.app_kpop.name ELSE REGEXP_REPLACE(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1), '[^0-9a-zA-Z]', '') END) AS clean_song_name_alpha_numeric,
-		kpop_videos.app_kpop.kname AS song_name_ko,
-		kpop_videos.app_kpop.alias AS song_aliases,
-		vlink AS link,
-		kpop_videos.app_kpop.original_vlink AS original_link,
-		kpop_videos.app_kpop_group.name AS artist_name_en,
-		kpop_videos.app_kpop_group.original_name AS original_artist_name_en,
-		kpop_videos.app_kpop_group.kname AS artist_name_ko,
-		REPLACE(kpop_videos.app_kpop_group.alias, '; ', ';') AS artist_aliases,
-		kpop_videos.app_kpop_group.previous_name AS previous_name_en,
-		kpop_videos.app_kpop_group.previous_kname AS previous_name_ko,
-		kpop_videos.app_kpop_group.members AS members,
-		kpop_videos.app_kpop.views AS views,
-		releasedate as publishedon,
-		kpop_videos.app_kpop_group.id as id_artist,
+		song_name_en,
+		clean_song_name_alpha_numeric,
+		song_name_ko,
+		song_aliases,
+		link,
+		original_link,
+		artist_name_en,
+		original_artist_name_en,
+		artist_name_ko,
+		artist_aliases,
+		previous_name_en,
+		previous_name_ko,
+		members,
+		views,
+		publishedon,
+		id_artist,
 		issolo,
-		id_parentgroup,
+		id_parent_artist,
 		vtype,
 		tags
-	FROM kpop_videos.app_kpop
-	JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
-	INNER JOIN kmq.cached_song_duration USING (vlink)
-	LEFT JOIN kmq.not_downloaded USING (vlink)
+	FROM expected_available_songs
+	INNER JOIN kmq.cached_song_duration ON expected_available_songs.link = kmq.cached_song_duration.vlink
+	LEFT JOIN kmq.not_downloaded ON expected_available_songs.link = kmq.not_downloaded.vlink
 	WHERE kmq.not_downloaded.vlink IS NULL
-	AND kpop_videos.app_kpop.is_audio = 'n'
-	AND vlink NOT IN (SELECT vlink FROM kmq.dead_links)
-	AND vtype = 'main'
-	AND tags NOT LIKE "%c%" -- no covers
-	AND tags NOT LIKE "%r%" -- no relay dances
-	AND tags NOT LIKE "%x%" -- no remixes
-	AND vlink IN (SELECT vlink FROM kmq.cached_song_duration);
-
-	/* audio-only videos */
-	INSERT INTO available_songs_temp
-	SELECT
-		kpop_videos.app_kpop.name AS song_name_en,
-		(CASE WHEN kpop_videos.app_kpop.name REGEXP '^[^a-zA-Z0-9]+$' THEN kpop_videos.app_kpop.name ELSE REGEXP_REPLACE(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1), '[^0-9a-zA-Z]', '') END) AS clean_song_name_alpha_numeric,
-		kpop_videos.app_kpop.kname AS song_name_ko,
-		kpop_videos.app_kpop.alias AS song_aliases,
-		vlink AS link,
-		null,
-		kpop_videos.app_kpop_group.name AS artist_name_en,
-		kpop_videos.app_kpop_group.original_name AS original_artist_name_en,
-		kpop_videos.app_kpop_group.kname AS artist_name_ko,
-		REPLACE(kpop_videos.app_kpop_group.alias, '; ', ';') AS artist_aliases,
-		kpop_videos.app_kpop_group.previous_name AS previous_name_en,
-		kpop_videos.app_kpop_group.previous_kname AS previous_name_ko,
-		kpop_videos.app_kpop_group.members AS members,
-		kpop_videos.app_kpop.views AS views,
-		releasedate as publishedon,
-		kpop_videos.app_kpop_group.id AS id_artist,
-		issolo,
-		id_parentgroup,
-		'audio' AS vtype,
-		tags
-	FROM kpop_videos.app_kpop
-	JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
-	INNER JOIN kmq.cached_song_duration USING (vlink)
-	LEFT JOIN kmq.not_downloaded USING (vlink)
-	WHERE kmq.not_downloaded.vlink IS NULL
-	AND kpop_videos.app_kpop.is_audio = 'y'
-	AND vlink NOT IN (SELECT vlink FROM kmq.dead_links)
-	AND tags NOT LIKE "%c%" -- no covers
-	AND tags NOT LIKE "%r%" -- no relay dances
-	AND tags NOT LIKE "%x%"; -- no remixes
+	AND expected_available_songs.link NOT IN (SELECT vlink FROM kmq.dead_links);
 
 
 	CREATE INDEX available_songs_id_artist_index ON available_songs_temp (id_artist);
 
+	DROP TABLE IF EXISTS old;
 	RENAME TABLE available_songs TO old, available_songs_temp TO available_songs;
 	DROP TABLE old;
 
@@ -135,8 +55,10 @@ BEGIN
 	WHERE id in (SELECT DISTINCT(id_artist) FROM available_songs
 	RIGHT JOIN kpop_videos.app_kpop_group_temp ON available_songs.id_artist = kpop_videos.app_kpop_group_temp.id);
 
-	RENAME TABLE kpop_videos.app_kpop_group TO old, kpop_videos.app_kpop_group_temp TO kpop_videos.app_kpop_group;
-	DROP TABLE old;
+
+	CREATE TABLE IF NOT EXISTS kpop_videos.app_kpop_group_safe LIKE kpop_videos.app_kpop_group_temp;
+	RENAME TABLE kpop_videos.app_kpop_group_safe TO kpop_videos.old, kpop_videos.app_kpop_group_temp TO kpop_videos.app_kpop_group_safe;
+	DROP TABLE kpop_videos.old;
 
 END //
 DELIMITER ;

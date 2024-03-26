@@ -18,6 +18,7 @@ declare namespace NodeJS {
         NODE_ENV: string | undefined;
         WEB_SERVER_PORT: string | undefined;
         ALERT_WEBHOOK_URL?: string | undefined;
+        SONG_UPDATES_WEBHOOK_URL?: string | undefined;
         DEBUG_LOGGING?: string | undefined;
         POWER_HOUR_NOTIFICATION_CHANNEL_ID?: string | undefined;
         POWER_HOUR_NOTIFICATION_ROLE_ID?: string | undefined;

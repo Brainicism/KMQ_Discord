@@ -171,13 +171,13 @@ export default class FactGenerator {
         const result = await dbContext.kpopVideos
             .selectFrom("app_kpop")
             .innerJoin(
-                "app_kpop_group",
-                "app_kpop_group.id",
+                "app_kpop_group_safe",
+                "app_kpop_group_safe.id",
                 "app_kpop.id_artist",
             )
             .select([
                 "app_kpop.name",
-                "app_kpop_group.name as artist",
+                "app_kpop_group_safe.name as artist",
                 "vlink as youtubeLink",
                 "publishedon",
                 "id_artist",
@@ -211,16 +211,16 @@ export default class FactGenerator {
         const result = await dbContext.kpopVideos
             .selectFrom("app_kpop_ms")
             .innerJoin(
-                "app_kpop_group",
+                "app_kpop_group_safe",
                 "app_kpop_ms.id_artist",
-                "app_kpop_group.id",
+                "app_kpop_group_safe.id",
             )
             .innerJoin("app_kpop", "app_kpop_ms.id_musicvideo", "app_kpop.id")
             .select([
                 "app_kpop_ms.musicshow as music_show",
                 "app_kpop_ms.date as win_date",
                 "app_kpop_ms.musicname as winning_song",
-                "app_kpop_group.name as artist_name",
+                "app_kpop_group_safe.name as artist_name",
                 "app_kpop.vlink as link",
             ])
             .where("date", ">", twoWeeksPriorDate)
@@ -252,12 +252,12 @@ export default class FactGenerator {
         const result = await dbContext.kpopVideos
             .selectFrom("app_kpop_ms")
             .innerJoin(
-                "app_kpop_group",
+                "app_kpop_group_safe",
                 "app_kpop_ms.id_artist",
-                "app_kpop_group.id",
+                "app_kpop_group_safe.id",
             )
             .groupBy("app_kpop_ms.id_artist")
-            .select(["app_kpop_group.name as artist_name"])
+            .select(["app_kpop_group_safe.name as artist_name"])
             .select((eb) => eb.fn.count<number>("id_artist").as("count"))
             .having(dbContext.kpopVideos.fn.count<number>("id_artist"), ">=", 5)
             .orderBy("count", "desc")
@@ -280,11 +280,11 @@ export default class FactGenerator {
         const result = await dbContext.kpopVideos
             .selectFrom("app_kpop")
             .innerJoin(
-                "app_kpop_group",
+                "app_kpop_group_safe",
                 "app_kpop.id_artist",
-                "app_kpop_group.id",
+                "app_kpop_group_safe.id",
             )
-            .select(["app_kpop_group.name as artist_name"])
+            .select(["app_kpop_group_safe.name as artist_name"])
             .groupBy("app_kpop.id_artist")
             .select(
                 dbContext.kpopVideos.fn
@@ -312,11 +312,11 @@ export default class FactGenerator {
         const result = await dbContext.kpopVideos
             .selectFrom("app_kpop")
             .innerJoin(
-                "app_kpop_group",
+                "app_kpop_group_safe",
                 "app_kpop.id_artist",
-                "app_kpop_group.id",
+                "app_kpop_group_safe.id",
             )
-            .select(["app_kpop_group.name as artist_name"])
+            .select(["app_kpop_group_safe.name as artist_name"])
             .groupBy("app_kpop.id_artist")
             .select(
                 dbContext.kpopVideos.fn
@@ -344,12 +344,12 @@ export default class FactGenerator {
         const result = await dbContext.kpopVideos
             .selectFrom("app_kpop")
             .innerJoin(
-                "app_kpop_group",
+                "app_kpop_group_safe",
                 "app_kpop.id_artist",
-                "app_kpop_group.id",
+                "app_kpop_group_safe.id",
             )
             .select([
-                "app_kpop_group.name as artist_name",
+                "app_kpop_group_safe.name as artist_name",
                 "app_kpop.name as song_name",
                 "app_kpop.views as views",
                 "app_kpop.vlink as link",
@@ -380,12 +380,12 @@ export default class FactGenerator {
         const result = await dbContext.kpopVideos
             .selectFrom("app_kpop")
             .innerJoin(
-                "app_kpop_group",
+                "app_kpop_group_safe",
                 "app_kpop.id_artist",
-                "app_kpop_group.id",
+                "app_kpop_group_safe.id",
             )
             .select([
-                "app_kpop_group.name as artist_name",
+                "app_kpop_group_safe.name as artist_name",
                 "app_kpop.name as song_name",
                 "app_kpop.vlink as link",
                 "app_kpop.releasedate as releasedate",
@@ -416,12 +416,12 @@ export default class FactGenerator {
         const result = await dbContext.kpopVideos
             .selectFrom("app_kpop")
             .innerJoin(
-                "app_kpop_group",
+                "app_kpop_group_safe",
                 "app_kpop.id_artist",
-                "app_kpop_group.id",
+                "app_kpop_group_safe.id",
             )
             .select([
-                "app_kpop_group.name as artist_name",
+                "app_kpop_group_safe.name as artist_name",
                 "app_kpop.name as song_name",
                 "app_kpop.likes as likes",
                 "app_kpop.vlink as link",
@@ -453,17 +453,17 @@ export default class FactGenerator {
         const result = await dbContext.kpopVideos
             .selectFrom("app_kpop")
             .innerJoin(
-                "app_kpop_group",
+                "app_kpop_group_safe",
                 "app_kpop.id_artist",
-                "app_kpop_group.id",
+                "app_kpop_group_safe.id",
             )
             .innerJoin(
                 "app_kpop_company",
                 "app_kpop_company.id",
-                "app_kpop_group.id_company",
+                "app_kpop_group_safe.id_company",
             )
             .select(["app_kpop_company.name as name"])
-            .groupBy("app_kpop_group.id_company")
+            .groupBy("app_kpop_group_safe.id_company")
             .select((eb) => eb.fn.sum<number>("app_kpop.views").as("views"))
             .orderBy("views", "desc")
             .limit(15)
@@ -485,15 +485,15 @@ export default class FactGenerator {
         lng: LocaleType,
     ): Promise<string[]> {
         const result = await dbContext.kpopVideos
-            .selectFrom("app_kpop_group")
+            .selectFrom("app_kpop_group_safe")
             .innerJoin(
                 "app_kpop_company",
                 "app_kpop_company.id",
-                "app_kpop_group.id_company",
+                "app_kpop_group_safe.id_company",
             )
             .select(["app_kpop_company.name as name"])
             .where("is_collab", "=", "n")
-            .groupBy("app_kpop_group.id_company")
+            .groupBy("app_kpop_group_safe.id_company")
             .select((eb) => eb.fn.countAll<number>().as("count"))
             .orderBy("count", "desc")
             .limit(15)
@@ -515,11 +515,11 @@ export default class FactGenerator {
         const result = await dbContext.kpopVideos
             .selectFrom("app_kpop")
             .innerJoin(
-                "app_kpop_group",
+                "app_kpop_group_safe",
                 "app_kpop.id_artist",
-                "app_kpop_group.id",
+                "app_kpop_group_safe.id",
             )
-            .select(["app_kpop_group.name as artist_name"])
+            .select(["app_kpop_group_safe.name as artist_name"])
             .where("vtype", "=", "main")
             .groupBy("id_artist")
             .select((eb) => eb.fn.count<number>("id_artist").as("count"))
@@ -541,12 +541,12 @@ export default class FactGenerator {
 
     static async yearWithMostDebuts(lng: LocaleType): Promise<string[]> {
         const result = await dbContext.kpopVideos
-            .selectFrom("app_kpop_group")
-            .select("app_kpop_group.formation as formation_year")
+            .selectFrom("app_kpop_group_safe")
+            .select("app_kpop_group_safe.formation as formation_year")
             .where("formation", "!=", 0)
             .groupBy("formation")
             .select((eb) =>
-                eb.fn.count<number>("app_kpop_group.id").as("count"),
+                eb.fn.count<number>("app_kpop_group_safe.id").as("count"),
             )
             .orderBy("count", "desc")
             .limit(15)
@@ -591,12 +591,12 @@ export default class FactGenerator {
         const result = await dbContext.kpopVideos
             .selectFrom("app_kpop")
             .innerJoin(
-                "app_kpop_group",
+                "app_kpop_group_safe",
                 "app_kpop.id_artist",
-                "app_kpop_group.id",
+                "app_kpop_group_safe.id",
             )
-            .select(["app_kpop_group.members as gender"])
-            .groupBy("app_kpop_group.members")
+            .select(["app_kpop_group_safe.members as gender"])
+            .groupBy("app_kpop_group_safe.members")
             .select((eb) => eb.fn.sum<number>("app_kpop.views").as("views"))
             .orderBy("views", "desc")
             .limit(25)
@@ -633,16 +633,16 @@ export default class FactGenerator {
         const result = await dbContext.kpopVideos
             .selectFrom("app_kpop")
             .innerJoin(
-                "app_kpop_group",
+                "app_kpop_group_safe",
                 "app_kpop.id_artist",
-                "app_kpop_group.id",
+                "app_kpop_group_safe.id",
             )
-            .select(["app_kpop_group.name as artist_name"])
+            .select(["app_kpop_group_safe.name as artist_name"])
             .groupBy("app_kpop.id_artist")
             .select((eb) =>
                 eb.fn.sum<number>("app_kpop.views").as("total_views"),
             )
-            .where("app_kpop_group.issolo", "=", "y")
+            .where("app_kpop_group_safe.issolo", "=", "y")
             .orderBy("total_views", "desc")
             .limit(25)
             .execute();
@@ -663,11 +663,11 @@ export default class FactGenerator {
         const result = await dbContext.kpopVideos
             .selectFrom("app_kpop")
             .innerJoin(
-                "app_kpop_group",
+                "app_kpop_group_safe",
                 "app_kpop.id_artist",
-                "app_kpop_group.id",
+                "app_kpop_group_safe.id",
             )
-            .select(["app_kpop_group.issolo as issolo"])
+            .select(["app_kpop_group_safe.issolo as issolo"])
             .groupBy("issolo")
             .select((eb) => eb.fn.sum<number>("app_kpop.views").as("views"))
             .orderBy("views", "desc")
@@ -759,16 +759,20 @@ export default class FactGenerator {
         const result = await dbContext.kpopVideos
             .selectFrom("app_kpop")
             .innerJoin(
-                "app_kpop_group",
+                "app_kpop_group_safe",
                 "app_kpop.id_artist",
-                "app_kpop_group.id",
+                "app_kpop_group_safe.id",
             )
-            .select(["app_kpop_group.name as artist_name"])
+            .select(["app_kpop_group_safe.name as artist_name"])
             .groupBy("app_kpop.id_artist")
             .select((eb) =>
                 eb.fn.sum<number>("app_kpop.views").as("total_views"),
             )
-            .where("app_kpop_group.name", "in", ["Blackpink", "Twice", "BTS"])
+            .where("app_kpop_group_safe.name", "in", [
+                "Blackpink",
+                "Twice",
+                "BTS",
+            ])
             .orderBy("total_views", "desc")
             .execute();
 
@@ -796,7 +800,7 @@ export default class FactGenerator {
 
     static async fanclubName(lng: LocaleType): Promise<Array<string>> {
         const result = await dbContext.kpopVideos
-            .selectFrom("app_kpop_group")
+            .selectFrom("app_kpop_group_safe")
             .select(["name", "fanclub"])
             .where("fanclub", "!=", "")
             .orderBy(sql`RAND()`)
@@ -814,7 +818,7 @@ export default class FactGenerator {
 
     static async closeBirthdays(lng: LocaleType): Promise<Array<string>> {
         const result = await dbContext.kpopVideos
-            .selectFrom("app_kpop_group")
+            .selectFrom("app_kpop_group_safe")
             .select(["name"])
             .select((eb) => eb.fn("MONTH", ["date_birth"]).as("birth_month"))
             .select(sql`DATE_FORMAT(date_birth, '%M %e')`.as("formatted_bday"))
@@ -1035,7 +1039,7 @@ export default class FactGenerator {
 
     static async mostGaonFirsts(lng: LocaleType): Promise<string[]> {
         const result = await dbContext.kpopVideos
-            .selectFrom("app_kpop_group")
+            .selectFrom("app_kpop_group_safe")
             .select(["name as artist_name", "gaondigital_firsts as firsts"])
             .orderBy("firsts", "desc")
             .limit(25)
@@ -1055,7 +1059,7 @@ export default class FactGenerator {
 
     static async mostGaonAppearances(lng: LocaleType): Promise<string[]> {
         const result = await dbContext.kpopVideos
-            .selectFrom("app_kpop_group")
+            .selectFrom("app_kpop_group_safe")
             .select(["name as artist_name", "gaondigital_times as appearances"])
             .orderBy("appearances", "desc")
             .limit(25)
@@ -1075,7 +1079,7 @@ export default class FactGenerator {
 
     static async mostAnnualAwardShowWins(lng: LocaleType): Promise<string[]> {
         const result = await dbContext.kpopVideos
-            .selectFrom("app_kpop_group")
+            .selectFrom("app_kpop_group_safe")
             .select(["name as artist_name", "yawards_total as wins"])
             .orderBy("wins", "desc")
             .limit(25)
@@ -1190,15 +1194,15 @@ export default class FactGenerator {
         const result = await dbContext.kpopVideos
             .selectFrom("app_upcoming")
             .innerJoin(
-                "app_kpop_group",
+                "app_kpop_group_safe",
                 "app_upcoming.id_artist",
-                "app_kpop_group.id",
+                "app_kpop_group_safe.id",
             )
             .select([
                 "app_upcoming.rdate as release_date",
                 "app_upcoming.rtype as release_type",
                 "app_upcoming.name as release_name",
-                "app_kpop_group.name as artist_name",
+                "app_kpop_group_safe.name as artist_name",
             ])
             .select(sql`DATEDIFF(rdate, NOW())`.as("diff"))
             .where(sql<boolean>`DATEDIFF(rdate, NOW()) >= 1`)

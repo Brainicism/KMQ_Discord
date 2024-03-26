@@ -81,6 +81,29 @@ export interface DeadLinks {
     vlink: string;
 }
 
+export interface ExpectedAvailableSongs {
+    artist_aliases: string;
+    artist_name_en: string;
+    artist_name_ko: Generated<string | null>;
+    clean_song_name_alpha_numeric: string;
+    id_artist: number;
+    id_parent_artist: number;
+    issolo: "n" | "y";
+    link: string;
+    members: "coed" | "female" | "male";
+    original_artist_name_en: string;
+    original_link: Generated<string | null>;
+    previous_name_en: Generated<string | null>;
+    previous_name_ko: Generated<string | null>;
+    publishedon: Date;
+    song_aliases: string;
+    song_name_en: string;
+    song_name_ko: string;
+    tags: Generated<string | null>;
+    views: number;
+    vtype: "audio" | "main";
+}
+
 export interface GameMessages {
     category: string;
     id: Generated<number>;
@@ -233,6 +256,7 @@ export interface KmqDB {
     "kpop_videos.app_kpop_company": AppKpopCompany;
     "kpop_videos.app_kpop_gaondigi": AppKpopGaondigi;
     "kpop_videos.app_kpop_group": AppKpopGroup;
+    "kpop_videos.app_kpop_group_safe": AppKpopGroupSafe;
     "kpop_videos.app_kpop_ms": AppKpopMs;
     "kpop_videos.app_upcoming": AppUpcoming;
     available_songs: AvailableSongs;
@@ -245,6 +269,7 @@ export interface KmqDB {
     competition_moderators: CompetitionModerators;
     daily_stats: DailyStats;
     dead_links: DeadLinks;
+    expected_available_songs: ExpectedAvailableSongs;
     game_messages: GameMessages;
     game_option_presets: GameOptionPresets;
     game_option_presets_json: GameOptionPresetsJson;

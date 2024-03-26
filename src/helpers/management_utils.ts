@@ -227,7 +227,7 @@ export async function reloadAliases(): Promise<void> {
         previous_name_ko: string | null;
         full_artist_name: string | null;
     }[] = await dbContext.kpopVideos
-        .selectFrom("app_kpop_group")
+        .selectFrom("app_kpop_group_safe")
         .select([
             "name as artist_name_en",
             "alias as artist_aliases",
@@ -283,7 +283,7 @@ export async function reloadBonusGroups(): Promise<void> {
     const date = new Date();
     const artistNameQuery: string[] = (
         await dbContext.kpopVideos
-            .selectFrom("app_kpop_group")
+            .selectFrom("app_kpop_group_safe")
             .select(["name"])
             .where("is_collab", "=", "n")
             .where("has_songs", "=", 1)

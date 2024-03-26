@@ -182,7 +182,7 @@ export async function getSimilarGroupNames(
     locale: LocaleType,
 ): Promise<Array<string>> {
     const similarGroups = await dbContext.kpopVideos
-        .selectFrom("app_kpop_group")
+        .selectFrom("app_kpop_group_safe")
         .select(["id", "name", "kname"])
         .where("is_collab", "=", "n")
         .where("has_songs", "=", 1)
@@ -215,7 +215,7 @@ export async function getMatchingGroupNames(
 ): Promise<GroupMatchResults> {
     const artistIds = (
         await dbContext.kpopVideos
-            .selectFrom("app_kpop_group")
+            .selectFrom("app_kpop_group_safe")
             .select(["id"])
             .where("name", "in", rawGroupNames)
             .where("has_songs", "=", 1)
@@ -226,19 +226,19 @@ export async function getMatchingGroupNames(
         await dbContext.kpopVideos // collab matches
             .selectFrom("app_kpop_agrelation")
             .innerJoin(
-                "app_kpop_group",
+                "app_kpop_group_safe",
                 "app_kpop_agrelation.id_subgroup",
-                "app_kpop_group.id",
+                "app_kpop_group_safe.id",
             )
             .select(["id", "name"])
             .where("app_kpop_agrelation.id_artist", "in", artistIds)
-            .where("app_kpop_group.is_collab", "=", "y")
+            .where("app_kpop_group_safe.is_collab", "=", "y")
             // artist matches
             .unionAll(
                 dbContext.kpopVideos
-                    .selectFrom("app_kpop_group")
+                    .selectFrom("app_kpop_group_safe")
                     .select(["id", "name"])
-                    .where("app_kpop_group.id", "in", artistIds),
+                    .where("app_kpop_group_safe.id", "in", artistIds),
             )
             .orderBy("name", "asc")
             .execute()

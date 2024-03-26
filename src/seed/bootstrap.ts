@@ -10,6 +10,7 @@ import {
 import { config } from "dotenv";
 import {
     databaseExists,
+    generateExpectedAvailableSongs,
     generateKmqDataTables,
     loadStoredProcedures,
     tableExists,
@@ -196,6 +197,8 @@ async function bootstrapDatabases(): Promise<void> {
         logger.info("Seeding K-pop data database");
         await updateKpopDatabase(db, true);
     }
+
+    await generateExpectedAvailableSongs(db);
 
     if (!(await songThresholdReached(db))) {
         logger.info(

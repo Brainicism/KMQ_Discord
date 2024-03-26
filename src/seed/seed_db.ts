@@ -9,10 +9,18 @@ import {
 } from "../constants";
 import { IPCLogger } from "../logger";
 import { config } from "dotenv";
+import {
+    discordDateFormat,
+    parseJsonFile,
+    pathExists,
+    standardDateFormat,
+} from "../helpers/utils";
 import { getNewConnection } from "../database_context";
-import { parseJsonFile, pathExists } from "../helpers/utils";
 import { program } from "commander";
-import { sendDebugAlertWebhook } from "../helpers/discord_utils";
+import {
+    sendDebugAlertFileWebhook,
+    sendDebugAlertWebhook,
+} from "../helpers/discord_utils";
 import { sql } from "kysely";
 import Axios from "axios";
 import EnvType from "../enums/env_type";
@@ -151,6 +159,17 @@ async function postSeedDataCleaning(db: DatabaseContext): Promise<void> {
 }
 
 /**
+ * Re-creates the KMQ data tables
+ * @param db - The database context
+ */
+export async function generateExpectedAvailableSongs(
+    db: DatabaseContext,
+): Promise<void> {
+    logger.info("Performing generate expected available songs...");
+    await sql.raw("CALL GenerateExpectedAvailableSongs();").execute(db.kmq);
+}
+
+/**
  * Reloads all existing stored procedures
  */
 export async function loadStoredProcedures(): Promise<void> {
@@ -171,7 +190,7 @@ export async function loadStoredProcedures(): Promise<void> {
  */
 async function updateDaisukiSchemaTypings(db: DatabaseContext): Promise<void> {
     await db.kpopVideos.schema
-        .alterTable("app_kpop_group")
+        .alterTable("app_kpop_group_safe")
         .modifyColumn("name", "varchar(255)", (cb) => cb.notNull())
         .execute();
 
@@ -374,6 +393,29 @@ async function validateSqlDump(
                 .raw("CALL PostSeedDataCleaning();")
                 .execute(db.kpopVideosValidation);
 
+            // generate expected available songs
+            const originalGenerateExpectedSongsSqlPath = path.join(
+                __dirname,
+                "../../sql/procedures/generate_expected_available_songs_procedure.sql",
+            );
+
+            const validationGenerateExpectedSongsSqlPath = path.join(
+                __dirname,
+                "../../sql/generate_expected_available_songs_procedure.validation.sql",
+            );
+
+            await exec(
+                `sed 's/kpop_videos/kpop_videos_validation/g' ${originalGenerateExpectedSongsSqlPath} > ${validationGenerateExpectedSongsSqlPath}`,
+            );
+
+            await exec(
+                `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${validationGenerateExpectedSongsSqlPath}`,
+            );
+
+            await sql
+                .raw("CALL GenerateExpectedAvailableSongs();")
+                .execute(db.kpopVideosValidation);
+
             logger.info("Validating creation of data tables");
             const originalCreateKmqTablesProcedureSqlPath = path.join(
                 __dirname,
@@ -399,7 +441,7 @@ async function validateSqlDump(
         }
     } catch (e) {
         throw new Error(
-            `SQL dump validation failed. ${e.sqlMessage || e.stderr || e}`,
+            `SQL dump validation failed. ${e.sqlMessage || e.stderr || e}. stack = ${new Error().stack}`,
         );
     }
 
@@ -541,6 +583,7 @@ async function updateKpopDatabase(
     if (!options.skipReseed) {
         await seedDb(db, bootstrap);
         await postSeedDataCleaning(db);
+        await generateExpectedAvailableSongs(db);
     } else {
         logger.info("Skipping reseed");
     }
@@ -552,7 +595,7 @@ async function updateKpopDatabase(
  */
 async function updateGroupList(db: DatabaseContext): Promise<void> {
     const result = await db.kpopVideos
-        .selectFrom("app_kpop_group")
+        .selectFrom("app_kpop_group_safe")
         .select(["name", "members as gender"])
         .where("is_collab", "=", "n")
         .where("has_songs", "=", 1)
@@ -630,6 +673,12 @@ async function reloadAutocompleteData(): Promise<void> {
     if (require.main === module) {
         logger.info(JSON.stringify(options));
         const db = getNewConnection();
+        const availableSongsBefore = await db.kmq
+            .selectFrom("available_songs")
+            .select(["song_name_en", "artist_name_en", "link", "publishedon"])
+            .orderBy("publishedon", "desc")
+            .execute();
+
         try {
             await loadStoredProcedures();
             await seedAndDownloadNewSongs(db);
@@ -641,6 +690,66 @@ async function reloadAutocompleteData(): Promise<void> {
 
             if (process.env.NODE_ENV !== EnvType.PROD) {
                 await updateDaisukiSchemaTypings(db);
+            }
+
+            const availableSongsAfter = await db.kmq
+                .selectFrom("available_songs")
+                .select([
+                    "song_name_en",
+                    "artist_name_en",
+                    "link",
+                    "publishedon",
+                ])
+                .orderBy("publishedon", "desc")
+                .execute();
+
+            const availableSongsAfterSet = new Set(
+                availableSongsAfter.map((x) => x.link),
+            );
+
+            const availableSongsBeforeSet = new Set(
+                availableSongsBefore.map((x) => x.link),
+            );
+
+            logger.info("Calculating songs removed...");
+            const songsRemoved = availableSongsBefore
+                .filter((before) => !availableSongsAfterSet.has(before.link))
+                .map(
+                    (x) =>
+                        `'${x.song_name_en}' - ${x.artist_name_en}  (${standardDateFormat(x.publishedon)}) | ${x.link}`,
+                );
+
+            logger.info("Calculating songs added...");
+            const songsAdded = availableSongsAfter
+                .filter((after) => !availableSongsBeforeSet.has(after.link))
+                .map(
+                    (x) =>
+                        `'${x.song_name_en}' - ${x.artist_name_en}  (${standardDateFormat(x.publishedon)}) | ${x.link}`,
+                );
+
+            logger.info(
+                `Songs changed: ${songsAdded.length + songsRemoved.length}...`,
+            );
+
+            const currentDate = new Date();
+            if (songsRemoved.length) {
+                logger.info(`${songsRemoved.length} songs removed.`);
+                await sendDebugAlertFileWebhook(
+                    discordDateFormat(currentDate, "f"),
+                    process.env.SONG_UPDATES_WEBHOOK_URL!,
+                    `Songs Removed:\n${songsRemoved.join("\n")}`,
+                    "removed_songs.txt",
+                );
+            }
+
+            if (songsAdded.length) {
+                logger.info(`${songsAdded.length} songs added.`);
+                await sendDebugAlertFileWebhook(
+                    discordDateFormat(currentDate, "f"),
+                    process.env.SONG_UPDATES_WEBHOOK_URL!,
+                    `Songs Added:\n${songsAdded.join("\n")}`,
+                    "added_songs.txt",
+                );
             }
         } catch (e) {
             logger.error(e);

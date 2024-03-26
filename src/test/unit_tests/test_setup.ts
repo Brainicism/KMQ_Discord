@@ -48,11 +48,6 @@ before(async function () {
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_test < ${dbSeedFilePath}`,
     );
 
-    // simulate cached song duration table, so that available_songs table can be created
-    await sql`INSERT IGNORE INTO kmq_test.cached_song_duration SELECT vlink, 1 FROM kpop_videos_test.app_kpop;`.execute(
-        db.agnostic,
-    );
-
     // create post seed data cleaning procedure
     const originalPostSeedDataCleaningSqlPath = path.join(
         __dirname,
@@ -61,7 +56,7 @@ before(async function () {
 
     const testPostSeedDataCleaningSqlPath = path.join(
         __dirname,
-        "../../../sql/post_seed_data_cleaning_procedure.validation.sql",
+        "../../../sql/post_seed_data_cleaning_procedure.test.sql",
     );
 
     cp.execSync(
@@ -75,6 +70,34 @@ before(async function () {
 
     cp.execSync(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test -e "CALL PostSeedDataCleaning()"`,
+    );
+
+    const originalGenerateExpectedSongsSqlPath = path.join(
+        __dirname,
+        "../../../sql/procedures/generate_expected_available_songs_procedure.sql",
+    );
+
+    const testGenerateExpectedSongsSqlPath = path.join(
+        __dirname,
+        "../../../sql/generate_expected_available_songs_procedure.test.sql",
+    );
+
+    cp.execSync(
+        `sed 's/kpop_videos/kpop_videos_test/g' ${originalGenerateExpectedSongsSqlPath} > ${testGenerateExpectedSongsSqlPath}`,
+    );
+
+    cp.execSync(
+        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test < ${testGenerateExpectedSongsSqlPath}`,
+        { stdio: "inherit" },
+    );
+
+    cp.execSync(
+        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test -e "CALL GenerateExpectedAvailableSongs()"`,
+    );
+
+    // simulate cached song duration table, so that available_songs table can be created
+    await sql`INSERT IGNORE INTO kmq_test.cached_song_duration SELECT link, 1 FROM kmq_test.expected_available_songs;`.execute(
+        db.agnostic,
     );
 
     // create kmq data generation procedure

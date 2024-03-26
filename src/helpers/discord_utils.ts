@@ -53,7 +53,7 @@ import dbContext from "../database_context";
 import fs from "fs";
 import i18n from "./localization_manager";
 import type { EmbedGenerator, GuildTextableMessage } from "../types";
-import type { GuildTextableChannel } from "eris";
+import type { GuildTextableChannel, Message, TextChannel } from "eris";
 import type AutocompleteEntry from "../interfaces/autocomplete_entry";
 import type BookmarkedSong from "../interfaces/bookmarked_song";
 import type EmbedPayload from "../interfaces/embed_payload";
@@ -439,6 +439,39 @@ export async function sendMessage(
     authorID?: string,
     interaction?: Eris.ComponentInteraction | Eris.CommandInteraction,
 ): Promise<Eris.Message | null> {
+    // test bot request, reply with same run ID
+    if (!interaction && messageContent.messageReference) {
+        let message: Message<TextChannel> | undefined;
+
+        try {
+            message = await (
+                State.client.getChannel(textChannelID!) as
+                    | Eris.TextChannel
+                    | undefined
+            )?.getMessage(messageContent.messageReference.messageID);
+        } catch (e) {
+            logger.warn(
+                `Error fetching channel ${textChannelID} for test runner response`,
+            );
+        }
+
+        if (
+            message &&
+            message.author.id === process.env.END_TO_END_TEST_BOT_CLIENT &&
+            message.embeds[0]
+        ) {
+            const runIdAndCommand = `${message.embeds[0].footer?.text!}|${message.content}`;
+            const messageFooter = messageContent.embeds![0]!.footer;
+            if (messageFooter) {
+                messageFooter.text += `\n ${runIdAndCommand}`;
+            } else {
+                messageContent.embeds![0]!.footer = {
+                    text: runIdAndCommand,
+                };
+            }
+        }
+    }
+
     if (interaction) {
         if (!withinInteractionInterval(interaction)) {
             return null;
@@ -691,9 +724,6 @@ export async function sendInfoMessage(
     interaction?: Eris.CommandInteraction,
 ): Promise<Eris.Message<Eris.TextableChannel> | null> {
     const embeds = [embedPayload, ...additionalEmbeds];
-    if (messageContext.author.id === process.env.END_TO_END_TEST_BOT_CLIENT) {
-        reply = true;
-    }
 
     return sendMessage(
         messageContext.textChannelID,
@@ -1637,6 +1667,46 @@ export async function sendDebugAlertWebhook(
         avatar_url: avatarUrl,
         footerText: State.version,
     });
+}
+
+/**
+ * Sends an file to the webhook
+ * @param message - The message
+ * @param webhookURL - The webhook URL
+ * @param fileContents - The string file contents
+ * @param fileName - The filename
+ */
+export async function sendDebugAlertFileWebhook(
+    message: string | null,
+    webhookURL: string,
+    fileContents: string,
+    fileName: string,
+): Promise<void> {
+    if (!webhookURL) {
+        logger.warn(
+            "sendDebugAlertFileWebhook failed due to non specified webhookURL",
+        );
+        return;
+    }
+
+    const fileContent = Buffer.from(fileContents, "utf-8");
+
+    const formData = new FormData();
+    if (message) {
+        formData.append("content", message);
+    }
+
+    formData.append("file", new Blob([fileContent]), fileName);
+
+    try {
+        await axios.post(webhookURL, formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+    } catch (e) {
+        logger.error(`Error sending webhook: ${e}`);
+    }
 }
 
 /**

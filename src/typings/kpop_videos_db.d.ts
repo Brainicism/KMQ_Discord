@@ -76,6 +76,36 @@ export interface AppKpopGroup {
     formation: Generated<number | null>;
     gaondigital_firsts: Generated<number>;
     gaondigital_times: Generated<number>;
+    id: number;
+    id_company: Generated<number>;
+    id_country: Generated<number>;
+    id_debut: Generated<number | null>;
+    id_parentgroup: Generated<number>;
+    is_collab: Generated<"n" | "y">;
+    is_deceased: Generated<"n" | "y">;
+    issolo: Generated<"n" | "y">;
+    kname: Generated<string | null>;
+    members: "coed" | "female" | "male";
+    mslevel: Generated<number>;
+    name: Generated<string | null>;
+    original_name: Generated<string | null>;
+    previous_kname: Generated<string>;
+    previous_name: Generated<string>;
+    sales: Generated<number>;
+    social: Generated<string>;
+    yawards_total: Generated<number>;
+}
+
+export interface AppKpopGroupSafe {
+    alias: Generated<string>;
+    date_birth: Generated<Date | null>;
+    debut_date: Generated<Date | null>;
+    disband: Generated<string>;
+    fanclub: Generated<string | null>;
+    fname: Generated<string>;
+    formation: Generated<number | null>;
+    gaondigital_firsts: Generated<number>;
+    gaondigital_times: Generated<number>;
     has_songs: Generated<number | null>;
     id: number;
     id_company: Generated<number>;
@@ -126,6 +156,7 @@ export interface KpopVideosDB {
     app_kpop_company: AppKpopCompany;
     app_kpop_gaondigi: AppKpopGaondigi;
     app_kpop_group: AppKpopGroup;
+    app_kpop_group_safe: AppKpopGroupSafe;
     app_kpop_ms: AppKpopMs;
     app_upcoming: AppUpcoming;
 }
