@@ -124,13 +124,13 @@ export default class RemoveCommand implements BaseCommand {
             return;
         }
 
+        currentMatchedArtists = currentMatchedArtists.filter((groups) =>
+            groups.added_by_user.includes("y"),
+        );
+
         const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames(
             State.aliases.artist,
             rawGroupsToRemove,
-        );
-
-        const remainingGroups = currentMatchedArtists.filter(
-            (group) => !matchedGroups.some((x) => x.id === group.id),
         );
 
         const embeds: Array<EmbedPayload> = [];
@@ -206,6 +206,14 @@ export default class RemoveCommand implements BaseCommand {
             return;
         }
 
+        const remainingGroups = currentMatchedArtists.filter(
+            (group) => !matchedGroups.some((x) => x.id === group.id),
+        );
+        const groups = await getMatchingGroupNames(
+            State.aliases.artist,
+            remainingGroups.map((x) => x.name),
+        ); // This should not have any unmatched groups right?
+
         let gameOption: GameOption;
         switch (removeType) {
             case RemoveType.GROUPS:
@@ -213,17 +221,17 @@ export default class RemoveCommand implements BaseCommand {
             case RemoveType.ARTIST:
             case RemoveType.ARTISTS:
                 gameOption = GameOption.GROUPS;
-                await guildPreference.setGroups(remainingGroups);
+                await guildPreference.setGroups(groups.matchedGroups);
                 break;
             case RemoveType.INCLUDE:
             case RemoveType.INCLUDES:
                 gameOption = GameOption.INCLUDE;
-                await guildPreference.setIncludes(remainingGroups);
+                await guildPreference.setIncludes(groups.matchedGroups);
                 break;
             case RemoveType.EXCLUDE:
             case RemoveType.EXCLUDES:
                 gameOption = GameOption.EXCLUDE;
-                await guildPreference.setExcludes(remainingGroups);
+                await guildPreference.setExcludes(groups.matchedGroups);
                 break;
             default:
                 logger.error(`Unexpected removeType: ${removeType}`);
