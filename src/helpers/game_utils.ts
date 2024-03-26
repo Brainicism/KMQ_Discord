@@ -234,7 +234,7 @@ export async function getMatchingGroupNames(
             .where("app_kpop_agrelation.id_artist", "in", artistIds)
             .where("app_kpop_group_safe.is_collab", "=", "y")
             // artist matches
-            .unionAll(
+            .union(
                 dbContext.kpopVideos
                     .selectFrom("app_kpop_group_safe")
                     .select(["id", "name"])
