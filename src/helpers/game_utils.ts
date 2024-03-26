@@ -230,25 +230,19 @@ export async function getMatchingGroupNames(
                 "app_kpop_agrelation.id_subgroup",
                 "app_kpop_group_safe.id",
             )
-            .select(["id", "name"])
+            .select(["id", "name", sql<string>`'n'`.as("addedByUser")])
             .where("app_kpop_agrelation.id_artist", "in", artistIds)
             .where("app_kpop_group_safe.is_collab", "=", "y")
             // artist matches
             .union(
                 dbContext.kpopVideos
                     .selectFrom("app_kpop_group_safe")
-                    .select(["id", "name"])
+                    .select(["id", "name", sql<string>`'y'`.as("addedByUser")])
                     .where("app_kpop_group_safe.id", "in", artistIds),
             )
             .orderBy("name", "asc")
             .execute()
-    ).map((x) => {
-        if (artistIds.includes(x.id)) {
-            return { id: x.id, name: x.name, added_by_user: "y" };
-        } else {
-            return { id: x.id, name: x.name, added_by_user: "n" };
-        }
-    });
+    ).map((x) => ({ id: x.id, name: x.name, added_by_user: x.addedByUser }));
 
     const matchingGroupNames = matchingGroups.map((x) => x.name.toUpperCase());
     const unrecognizedGroups = rawGroupNames.filter(
