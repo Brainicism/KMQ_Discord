@@ -327,23 +327,23 @@ describe("game utils", () => {
                         });
                     });
 
-                    describe("Collab should fail", () => {
-                        it("should not match any group", async () => {
-                            State.aliases.artist = {};
-                            const nonMatchArtist = "PSY + Hyuna";
+                    describe("Collab should match", () => {
+                        it("should match group", async () => {
+                            const artistName = "PSY + Hyuna";
+
                             const matchResults = await getMatchingGroupNames(
                                 State.aliases.artist,
-                                [nonMatchArtist],
+                                [artistName],
                             );
 
                             assert.deepStrictEqual(
-                                matchResults.matchedGroups.length,
+                                matchResults.matchedGroups.map((x) => x.name),
+                                [artistName],
+                            );
+
+                            assert.deepStrictEqual(
+                                matchResults.unmatchedGroups.length,
                                 0,
-                            );
-
-                            assert.deepStrictEqual(
-                                matchResults.unmatchedGroups,
-                                [nonMatchArtist],
                             );
                         });
                     });

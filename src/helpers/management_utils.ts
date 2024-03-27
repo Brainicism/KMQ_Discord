@@ -358,6 +358,7 @@ export async function reloadArtists(): Promise<void> {
             "id_artist as id",
             "artist_name_en as name",
             "artist_name_ko as hangulName",
+            sql<string>`'n'`.as("added_by_user"),
         ])
         .orderBy((eb) => eb.fn("SUM", ["views"]), "desc")
         .groupBy("id_artist")
