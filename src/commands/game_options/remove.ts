@@ -209,6 +209,8 @@ export default class RemoveCommand implements BaseCommand {
         const remainingGroups = currentMatchedArtists.filter(
             (group) => !matchedGroups.some((x) => x.id === group.id),
         );
+
+        // Rematch the remaining groups to make sure collabs are not removed by accident.
         const groups = await getMatchingGroupNames(
             State.aliases.artist,
             remainingGroups.map((x) => x.name),
