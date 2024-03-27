@@ -82,8 +82,8 @@ function getGroupNamesString(
     spaceDelimiter = true,
 ): string {
     let displayedGroupNames = groups
+        .filter((group) => group.addedByUser === true)
         .map((x) => x.name)
-        .filter((name) => !name.includes("+"))
         .join(spaceDelimiter ? ", " : ",");
 
     if (truncate && displayedGroupNames.length > 200) {
@@ -552,26 +552,11 @@ export default class GuildPreference {
     }
 
     /**
-     * @param original - Whether to include collabs or not
      * @returns a friendly, potentially truncated, string displaying the currently selected groups option
      * */
-    getDisplayedGroupNames(original = false): string | null {
+    getDisplayedGroupNames(): string | null {
         if (this.gameOptions.groups === null) return null;
-        if (original) {
-            return getGroupNamesString(
-                this.gameOptions.groups.filter(
-                    (group) => !group.name.includes("+"),
-                ),
-                false,
-                false,
-            );
-        }
-
-        const displayedGroupNames = getGroupNamesString(
-            this.gameOptions.groups,
-        );
-
-        return displayedGroupNames;
+        return getGroupNamesString(this.gameOptions.groups);
     }
 
     /** @returns whether the exclude option is active */
@@ -603,26 +588,11 @@ export default class GuildPreference {
     }
 
     /**
-     * @param original - Whether to include collabs or not
      * @returns a friendly, potentially truncated, string displaying the currently selected exclude option
      * */
-    getDisplayedExcludesGroupNames(original = false): string | null {
+    getDisplayedExcludesGroupNames(): string | null {
         if (this.gameOptions.excludes === null) return null;
-        if (original) {
-            return getGroupNamesString(
-                this.gameOptions.excludes.filter(
-                    (group) => !group.name.includes("+"),
-                ),
-                false,
-                false,
-            );
-        }
-
-        const displayedGroupNames = getGroupNamesString(
-            this.gameOptions.excludes,
-        );
-
-        return displayedGroupNames;
+        return getGroupNamesString(this.gameOptions.excludes);
     }
 
     /** @returns whether the exclude option is active */
@@ -648,26 +618,11 @@ export default class GuildPreference {
     }
 
     /**
-     * @param original - Whether to include collabs or not
      * @returns a friendly, potentially truncated, string displaying the currently selected include option
      * */
-    getDisplayedIncludesGroupNames(original = false): string | null {
+    getDisplayedIncludesGroupNames(): string | null {
         if (this.gameOptions.includes === null) return null;
-        if (original) {
-            return getGroupNamesString(
-                this.gameOptions.includes.filter(
-                    (group) => !group.name.includes("+"),
-                ),
-                false,
-                false,
-            );
-        }
-
-        const displayedGroupNames = getGroupNamesString(
-            this.gameOptions.includes,
-        );
-
-        return displayedGroupNames;
+        return getGroupNamesString(this.gameOptions.includes);
     }
 
     /**

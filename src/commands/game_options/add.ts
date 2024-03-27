@@ -29,6 +29,7 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type EmbedPayload from "../../interfaces/embed_payload";
 import type Eris from "eris";
+import type MatchedArtist from "../../interfaces/matched_artist";
 
 const COMMAND_NAME = "add";
 const logger = new IPCLogger(COMMAND_NAME);
@@ -91,33 +92,35 @@ export default class AddCommand implements BaseCommand {
 
         const embeds: Array<EmbedPayload> = [];
 
-        let groupNamesString: string | null;
+        let currentMatchedArtists: MatchedArtist[] | null;
         switch (addType) {
             case AddType.GROUPS:
             case AddType.GROUP:
             case AddType.ARTIST:
             case AddType.ARTISTS:
-                groupNamesString = guildPreference.getDisplayedGroupNames(true);
+                currentMatchedArtists = guildPreference.gameOptions.groups;
                 break;
             case AddType.INCLUDE:
             case AddType.INCLUDES:
-                groupNamesString =
-                    guildPreference.getDisplayedIncludesGroupNames(true);
+                currentMatchedArtists = guildPreference.gameOptions.includes;
+
                 break;
             case AddType.EXCLUDE:
             case AddType.EXCLUDES:
-                groupNamesString =
-                    guildPreference.getDisplayedExcludesGroupNames(true);
+                currentMatchedArtists = guildPreference.gameOptions.excludes;
+
                 break;
             default:
                 logger.error(`Unexpected addType: ${addType}`);
-                groupNamesString = guildPreference.getDisplayedGroupNames(true);
+                currentMatchedArtists = guildPreference.gameOptions.groups;
                 break;
         }
 
-        const currentGroupNames = !groupNamesString
+        const currentGroupNames = !currentMatchedArtists
             ? []
-            : groupNamesString.split(",");
+            : currentMatchedArtists
+                  .filter((x) => x.addedByUser === true)
+                  .map((x) => x.name);
 
         const groups = await getMatchingGroupNames(
             State.aliases.artist,

@@ -146,17 +146,15 @@ export default class ListCommand implements BaseCommand {
             case ListType.GROUP:
             case ListType.ARTIST:
             case ListType.ARTISTS:
-                optionValue = guildPreference.getDisplayedGroupNames(true);
+                optionValue = guildPreference.getDisplayedGroupNames();
                 break;
             case ListType.INCLUDE:
             case ListType.INCLUDES:
-                optionValue =
-                    guildPreference.getDisplayedIncludesGroupNames(true);
+                optionValue = guildPreference.getDisplayedIncludesGroupNames();
                 break;
             case ListType.EXCLUDE:
             case ListType.EXCLUDES:
-                optionValue =
-                    guildPreference.getDisplayedExcludesGroupNames(true);
+                optionValue = guildPreference.getDisplayedExcludesGroupNames();
                 break;
             default:
                 optionValue = null;
