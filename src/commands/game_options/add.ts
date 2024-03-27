@@ -117,7 +117,7 @@ export default class AddCommand implements BaseCommand {
 
         const currentGroupNames = !groupNamesString
             ? []
-            : groupNamesString.split(",");
+            : groupNamesString.split(",").map((x) => x.trim());
 
         const groups = await getMatchingGroupNames(
             State.aliases.artist,
