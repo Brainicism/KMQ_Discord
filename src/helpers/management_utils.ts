@@ -347,23 +347,30 @@ export async function reloadArtists(): Promise<void> {
         }
     }
 
-    State.topArtists = await dbContext.kmq
-        .selectFrom("available_songs")
-        .innerJoin(
-            "kpop_videos.app_kpop_group",
-            "available_songs.id_artist",
-            "app_kpop_group.id",
-        )
-        .select([
-            "id_artist as id",
-            "artist_name_en as name",
-            "artist_name_ko as hangulName",
-            sql<boolean>`true`.as("addedByUser"),
-        ])
-        .orderBy((eb) => eb.fn("SUM", ["views"]), "desc")
-        .groupBy("id_artist")
-        .limit(25)
-        .execute();
+    State.topArtists = (
+        await dbContext.kmq
+            .selectFrom("available_songs")
+            .innerJoin(
+                "kpop_videos.app_kpop_group",
+                "available_songs.id_artist",
+                "app_kpop_group.id",
+            )
+            .select([
+                "id_artist as id",
+                "artist_name_en as name",
+                "artist_name_ko as hangulName",
+                sql<number>`1`.as("addedByUser"),
+            ])
+            .orderBy((eb) => eb.fn("SUM", ["views"]), "desc")
+            .groupBy("id_artist")
+            .limit(25)
+            .execute()
+    ).map((x) => ({
+        id: x.id,
+        name: x.name,
+        hangulName: x.hangulName,
+        addedByUser: !!x.addedByUser,
+    }));
 }
 
 /**

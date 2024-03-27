@@ -119,7 +119,7 @@ export default class AddCommand implements BaseCommand {
         const currentGroupNames = !currentMatchedArtists
             ? []
             : currentMatchedArtists
-                  .filter((x) => x.addedByUser == true)
+                  .filter((x) => x.addedByUser === true)
                   .map((x) => x.name);
 
         const groups = await getMatchingGroupNames(

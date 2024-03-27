@@ -96,6 +96,7 @@ describe("song selector", () => {
                         name: "Twice",
                         addedByUser: true,
                     };
+
                     await guildPreference.setGroups([selectedArtist]);
                     await guildPreference.songSelector.reloadSongs();
                     const { songs } = guildPreference.songSelector.getSongs();
