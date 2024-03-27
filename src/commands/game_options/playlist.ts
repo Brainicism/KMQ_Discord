@@ -415,22 +415,19 @@ export default class PlaylistCommand implements BaseCommand {
         }
 
         await guildPreference.setKmqPlaylistID(kmqPlaylistIdentifier);
-        const matchedPlaylist = (await guildPreference.songSelector.reloadSongs(
+        const matchedPlaylist = await guildPreference.songSelector.reloadSongs(
             true,
             messageContext,
             interaction,
-        )) as MatchedPlaylist;
-
-        logger.info(
-            `${getDebugLogHeader(messageContext)} | Matched ${
-                matchedPlaylist.metadata.matchedSongsLength
-            }/${matchedPlaylist.metadata.playlistLength} (${(
-                (100.0 * matchedPlaylist.metadata.matchedSongsLength) /
-                matchedPlaylist.metadata.playlistLength
-            ).toFixed(2)}%) songs from ${kmqPlaylistIdentifier}`,
         );
 
-        if (matchedPlaylist.matchedSongs.length === 0) {
+        if (!matchedPlaylist || matchedPlaylist.matchedSongs.length === 0) {
+            if (!matchedPlaylist) {
+                logger.error(
+                    `matchPlaylist unexpectedly null. kmqPlaylistIdentifier: ${kmqPlaylistIdentifier}. forceplay = ${guildPreference.gameOptions.forcePlaySongID}`,
+                );
+            }
+
             await sendErrorMessage(
                 messageContext,
                 {
@@ -450,6 +447,15 @@ export default class PlaylistCommand implements BaseCommand {
             await guildPreference.reset(GameOption.PLAYLIST_ID);
             return;
         }
+
+        logger.info(
+            `${getDebugLogHeader(messageContext)} | Matched ${
+                matchedPlaylist.metadata.matchedSongsLength
+            }/${matchedPlaylist.metadata.playlistLength} (${(
+                (100.0 * matchedPlaylist.metadata.matchedSongsLength) /
+                matchedPlaylist.metadata.playlistLength
+            ).toFixed(2)}%) songs from ${kmqPlaylistIdentifier}`,
+        );
 
         await LimitCommand.updateOption(
             messageContext,
