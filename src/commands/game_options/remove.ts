@@ -124,8 +124,8 @@ export default class RemoveCommand implements BaseCommand {
             return;
         }
 
-        currentMatchedArtists = currentMatchedArtists.filter((groups) =>
-            groups.added_by_user.includes("y"),
+        currentMatchedArtists = currentMatchedArtists.filter(
+            (groups) => groups.addedByUser == true,
         );
 
         const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames(

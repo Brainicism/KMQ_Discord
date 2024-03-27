@@ -1,6 +1,6 @@
 export default interface MatchedArtist {
     id: number;
     name: string;
-    added_by_user: string;
+    addedByUser: boolean;
     hangulName?: string | null;
 }

@@ -94,7 +94,7 @@ describe("song selector", () => {
                     const selectedArtist = {
                         id: 208,
                         name: "Twice",
-                        added_by_user: "y",
+                        addedByUser: true,
                     };
                     await guildPreference.setGroups([selectedArtist]);
                     await guildPreference.songSelector.reloadSongs();
@@ -113,9 +113,9 @@ describe("song selector", () => {
             describe("multi-selected groups", () => {
                 it("should only return the songs matching the specified groups", async () => {
                     const selectedArtists = [
-                        { id: 208, name: "Twice", added_by_user: "y" },
-                        { id: 40, name: "BTS", added_by_user: "y" },
-                        { id: 61, name: "EXO", added_by_user: "y" },
+                        { id: 208, name: "Twice", addedByUser: true },
+                        { id: 40, name: "BTS", addedByUser: true },
+                        { id: 61, name: "EXO", addedByUser: true },
                     ];
 
                     await guildPreference.setGroups(selectedArtists);
@@ -137,9 +137,9 @@ describe("song selector", () => {
 
         describe("includes", () => {
             const includedArtists = [
-                { id: 208, name: "Twice", added_by_user: "y" },
-                { id: 40, name: "BTS", added_by_user: "y" },
-                { id: 61, name: "EXO", added_by_user: "y" },
+                { id: 208, name: "Twice", addedByUser: true },
+                { id: 40, name: "BTS", addedByUser: true },
+                { id: 61, name: "EXO", addedByUser: true },
             ];
 
             describe("female gender, include 2 male groups", () => {
@@ -166,8 +166,8 @@ describe("song selector", () => {
 
         describe("excludes", () => {
             const excludeArtists = [
-                { id: 208, name: "Twice", added_by_user: "y" },
-                { id: 31, name: "Blackpink", added_by_user: "y" },
+                { id: 208, name: "Twice", addedByUser: true },
+                { id: 31, name: "Blackpink", addedByUser: true },
             ];
 
             describe("female gender, exclude 2 female groups", () => {
@@ -451,7 +451,7 @@ describe("song selector", () => {
         });
 
         describe("subunits", () => {
-            const artists = [{ id: 16, name: "AOA", added_by_user: "y" }];
+            const artists = [{ id: 16, name: "AOA", addedByUser: true }];
 
             describe("exclude subunits", () => {
                 it("should only return the songs by the specified group, excluding subunits", async () => {
@@ -509,7 +509,7 @@ describe("song selector", () => {
                     const group = {
                         id: 4897,
                         name: "AP Alchemy",
-                        added_by_user: "y",
+                        addedByUser: true,
                     };
 
                     await guildPreference.setGroups([group]);
@@ -536,7 +536,7 @@ describe("song selector", () => {
             describe("include subunits with shadowbanned artist", () => {
                 it("should exclude the shadowbanned artist", async () => {
                     const groups = [
-                        { id: 288, name: "Stray Kids", added_by_user: "y" },
+                        { id: 288, name: "Stray Kids", addedByUser: true },
                     ];
 
                     await guildPreference.setGroups(groups);
