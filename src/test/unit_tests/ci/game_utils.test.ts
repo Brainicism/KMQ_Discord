@@ -349,6 +349,81 @@ describe("game utils", () => {
                     });
                 });
             });
+
+            describe("addedByUser", () => {
+                describe("addedByUser is true for artist set by player", () => {
+                    it("should match group", async () => {
+                        const artistName = "PSY";
+
+                        const matchResults = await getMatchingGroupNames(
+                            State.aliases.artist,
+                            [artistName],
+                        );
+
+                        assert.deepStrictEqual(
+                            matchResults.matchedGroups
+                                .filter((groups) => groups.name === artistName)
+                                .map((x) => x.addedByUser),
+                            [true],
+                        );
+
+                        assert.deepStrictEqual(
+                            matchResults.unmatchedGroups.length,
+                            0,
+                        );
+                    });
+                });
+
+                describe("addedByUser is true for collab set by player", () => {
+                    it("should match group", async () => {
+                        const artistName = "PSY + Hyuna";
+
+                        const matchResults = await getMatchingGroupNames(
+                            State.aliases.artist,
+                            [artistName],
+                        );
+
+                        assert.deepStrictEqual(
+                            matchResults.matchedGroups
+                                .filter((groups) => groups.name === artistName)
+                                .map((x) => x.addedByUser),
+                            [true],
+                        );
+
+                        assert.deepStrictEqual(
+                            matchResults.unmatchedGroups.length,
+                            0,
+                        );
+                    });
+                });
+
+                describe("addedByUser is false for collab included by artist", () => {
+                    it("should match group", async () => {
+                        const artistName = "PSY";
+
+                        const matchResults = await getMatchingGroupNames(
+                            State.aliases.artist,
+                            [artistName],
+                        );
+
+                        const falseArray: boolean[] = new Array(
+                            matchResults.matchedGroups.length - 1,
+                        ).fill(false);
+
+                        assert.deepStrictEqual(
+                            matchResults.matchedGroups
+                                .filter((groups) => groups.name !== artistName)
+                                .map((x) => x.addedByUser),
+                            falseArray,
+                        );
+
+                        assert.deepStrictEqual(
+                            matchResults.unmatchedGroups.length,
+                            0,
+                        );
+                    });
+                });
+            });
         });
 
         describe("getSimilarGroupNames", () => {
