@@ -33,7 +33,6 @@ import Session from "../../structures/session";
 import State from "../../state";
 import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type { MatchedPlaylist } from "../../interfaces/matched_playlist";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -415,22 +414,19 @@ export default class PlaylistCommand implements BaseCommand {
         }
 
         await guildPreference.setKmqPlaylistID(kmqPlaylistIdentifier);
-        const matchedPlaylist = (await guildPreference.songSelector.reloadSongs(
+        const matchedPlaylist = await guildPreference.songSelector.reloadSongs(
             true,
             messageContext,
             interaction,
-        )) as MatchedPlaylist;
-
-        logger.info(
-            `${getDebugLogHeader(messageContext)} | Matched ${
-                matchedPlaylist.metadata.matchedSongsLength
-            }/${matchedPlaylist.metadata.playlistLength} (${(
-                (100.0 * matchedPlaylist.metadata.matchedSongsLength) /
-                matchedPlaylist.metadata.playlistLength
-            ).toFixed(2)}%) songs from ${kmqPlaylistIdentifier}`,
         );
 
-        if (matchedPlaylist.matchedSongs.length === 0) {
+        if (!matchedPlaylist || matchedPlaylist.matchedSongs.length === 0) {
+            if (!matchedPlaylist) {
+                logger.error(
+                    `matchPlaylist unexpectedly null. kmqPlaylistIdentifier: ${kmqPlaylistIdentifier}. forceplay = ${guildPreference.gameOptions.forcePlaySongID}`,
+                );
+            }
+
             await sendErrorMessage(
                 messageContext,
                 {
@@ -450,6 +446,15 @@ export default class PlaylistCommand implements BaseCommand {
             await guildPreference.reset(GameOption.PLAYLIST_ID);
             return;
         }
+
+        logger.info(
+            `${getDebugLogHeader(messageContext)} | Matched ${
+                matchedPlaylist.metadata.matchedSongsLength
+            }/${matchedPlaylist.metadata.playlistLength} (${(
+                (100.0 * matchedPlaylist.metadata.matchedSongsLength) /
+                matchedPlaylist.metadata.playlistLength
+            ).toFixed(2)}%) songs from ${kmqPlaylistIdentifier}`,
+        );
 
         await LimitCommand.updateOption(
             messageContext,

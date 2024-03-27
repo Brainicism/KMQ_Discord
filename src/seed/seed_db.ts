@@ -737,7 +737,7 @@ async function reloadAutocompleteData(): Promise<void> {
                 await sendDebugAlertFileWebhook(
                     discordDateFormat(currentDate, "f"),
                     process.env.SONG_UPDATES_WEBHOOK_URL!,
-                    `Songs Removed:\n${songsRemoved.join("\n")}`,
+                    `${songsRemoved.length} songs removed:\n${songsRemoved.join("\n")}`,
                     "removed_songs.txt",
                 );
             }
@@ -747,7 +747,7 @@ async function reloadAutocompleteData(): Promise<void> {
                 await sendDebugAlertFileWebhook(
                     discordDateFormat(currentDate, "f"),
                     process.env.SONG_UPDATES_WEBHOOK_URL!,
-                    `Songs Added:\n${songsAdded.join("\n")}`,
+                    `${songsAdded.length} songs added:\n${songsAdded.join("\n")}`,
                     "added_songs.txt",
                 );
             }
