@@ -33,7 +33,6 @@ import Session from "../../structures/session";
 import State from "../../state";
 import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type { MatchedPlaylist } from "../../interfaces/matched_playlist";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
