@@ -134,18 +134,30 @@ export default class GameRound extends Round {
         this.finished = false;
         this.hints = {
             songHint: {
-                [LocaleType.EN]: this.generateHint(song.songName),
-                [LocaleType.KO]: this.generateHint(
-                    song.hangulSongName || song.songName,
-                ),
+                [LocaleType.KO]: "",
+                [LocaleType.EN]: "",
             },
             artistHint: {
-                [LocaleType.EN]: this.generateHint(song.artistName),
-                [LocaleType.KO]: this.generateHint(
-                    song.hangulArtistName || song.artistName,
-                ),
+                [LocaleType.KO]: "",
+                [LocaleType.EN]: "",
             },
         };
+
+        this.hints.songHint[LocaleType.EN] = this.generateHint(song.songName);
+        this.hints.songHint[LocaleType.KO] =
+            song.hangulSongName && song.hangulSongName !== song.songName
+                ? this.generateHint(song.songName)
+                : this.hints.songHint[LocaleType.EN];
+
+        this.hints.artistHint[LocaleType.EN] = this.generateHint(
+            song.artistName,
+        );
+
+        this.hints.artistHint[LocaleType.KO] =
+            song.hangulArtistName && song.hangulArtistName !== song.artistName
+                ? this.generateHint(song.artistName)
+                : this.hints.artistHint[LocaleType.EN];
+
         this.interactionCorrectAnswerUUID = null;
         this.interactionIncorrectAnswerUUIDs = {};
         this.interactionMessage = null;
