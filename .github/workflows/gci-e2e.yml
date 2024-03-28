@@ -90,6 +90,9 @@ jobs:
                   tags: ghcr.io/brainicism/kmq_discord:gci
             - name: Dry-run bootstrap
               run: . ./.env && docker run -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} -v ${PWD}/data:/app/data -v ${PWD}/.env:/app/.env -v ${PWD}/logs:/app/logs --env NODE_ENV=dry-run --network=host --name kmq-gci ghcr.io/brainicism/kmq_discord:gci && docker rm -f kmq-gci
+            - name: Validate available_songs
+              run: |
+                  [[ $(mysql kmq -s -N -h 127.0.0.1 -u $DB_USER_CI -p$DB_PASS_CI -e 'select count(1) from available_songs') -eq 6 ]]
             - name: Pre-upgrade run
               run: . ./.env && docker run -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} -v ${PWD}/data:/app/data -v ${PWD}/.env:/app/.env -v ${PWD}/logs:/app/logs --env NODE_ENV=production --network=host --name kmq-gci ghcr.io/brainicism/kmq_discord:gci &
             - name: Check pre-upgrade KMQ healthiness
@@ -119,6 +122,3 @@ jobs:
               run: |
                   docker ps
                   [ $(docker ps -aq | grep -c ${{ steps.old-container-id.outputs.OLD_CONTAINER_ID }}) -eq 0 ]
-            - name: Validate available_songs
-              run: |
-                  [[ $(mysql kmq -s -N -h 127.0.0.1 -u $DB_USER_CI -p$DB_PASS_CI -e 'select count(1) from available_songs') -eq 6 ]]
