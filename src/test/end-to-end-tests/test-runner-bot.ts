@@ -27,6 +27,7 @@ function debug(msg: string): void {
     }
 }
 
+// eslint-disable-next-line consistent-return
 async function getKmqRunId(): Promise<string> {
     try {
         return (
