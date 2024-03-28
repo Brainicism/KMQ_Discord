@@ -2018,11 +2018,11 @@ export function getInteractionValue(
 }
 
 /**
- * Retrieve artist names from the interaction options
+ * Retrieve artist names purely for interaction autocomplete
  * @param enteredNames - Artist names the user has entered
  * @returns the matched artists
  */
-export function getMatchedArtists(enteredNames: Array<string>): {
+function getMatchedArtistsForAutocomplete(enteredNames: Array<string>): {
     matchedGroups: Array<MatchedArtist>;
     unmatchedGroups: Array<string>;
 } {
@@ -2109,7 +2109,7 @@ export async function processGroupAutocompleteInteraction(
     const focusedVal = interactionData.interactionOptions[focusedKey];
     const lowercaseUserInput = GameRound.normalizePunctuationInName(focusedVal);
 
-    const previouslyEnteredArtists = getMatchedArtists(
+    const previouslyEnteredArtists = getMatchedArtistsForAutocomplete(
         Object.entries(interactionData.interactionOptions)
             .filter((x) => x[0] !== focusedKey)
             .map((x) => x[1]),

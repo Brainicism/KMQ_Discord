@@ -5,7 +5,6 @@ import {
     generateOptionsMessage,
     getDebugLogHeader,
     getInteractionValue,
-    getMatchedArtists,
     notifyOptionsGenerationError,
     processGroupAutocompleteInteraction,
     sendErrorMessage,
@@ -452,8 +451,10 @@ export default class GroupsCommand implements BaseCommand {
 
         const action = interactionName as GroupAction;
         const enteredGroupNames = Object.values(interactionOptions);
-        const { matchedGroups, unmatchedGroups } =
-            getMatchedArtists(enteredGroupNames);
+        const { unmatchedGroups, matchedGroups } = await getMatchingGroupNames(
+            State.aliases.artist,
+            enteredGroupNames,
+        );
 
         if (action === GroupAction.ADD) {
             await AddCommand.updateOption(
