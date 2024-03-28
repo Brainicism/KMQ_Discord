@@ -265,10 +265,30 @@ export default async function messageCreateHandler(
             return;
         }
 
-        await session.guessSong(
-            messageContext,
-            message.content,
-            message.createdAt,
-        );
+        try {
+            await session.guessSong(
+                messageContext,
+                message.content,
+                message.createdAt,
+            );
+        } catch (e) {
+            const debugId = uuid.v4();
+
+            logger.error(
+                `Error during session.guessSong(). Debug ID: ${debugId}. Name: ${e.name}. Reason: ${e.message}. Trace: ${e.stack}}}`,
+            );
+
+            await sendErrorMessage(messageContext, {
+                title: i18n.translate(
+                    messageContext.guildID,
+                    "misc.failure.command.title",
+                ),
+                description: i18n.translate(
+                    messageContext.guildID,
+                    "misc.failure.command.description",
+                    { debugId },
+                ),
+            });
+        }
     }
 }
