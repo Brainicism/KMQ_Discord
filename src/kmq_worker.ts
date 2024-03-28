@@ -359,6 +359,8 @@ export default class BotWorker extends BaseClusterWorker {
             this.ready = true;
         }
 
+        logger.info(`Run ID is ${process.env.RUN_ID}`);
+
         logger.info(
             `${this.logHeader()} | Logged in as '${State.client.user.username}'! in '${
                 process.env.NODE_ENV

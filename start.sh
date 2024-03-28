@@ -6,6 +6,8 @@ rebuild () {
     npx tsc
 }
 
+RUN_ID=$(cat /proc/sys/kernel/random/uuid)
+
 if [ "${MINIMAL_RUN}" != "true" ]; then
     echo "Bootstrapping..."
     npx ts-node --swc src/seed/bootstrap.ts
@@ -14,7 +16,7 @@ fi
 # run with ts-node + swc, no transpile needed
 if [ "${NODE_ENV}" == "development_ts_node" ]; then
     cd src/
-    exec npx ts-node --swc kmq.ts
+    exec env RUN_ID=$RUN_ID npx ts-node --swc kmq.ts
 fi
 
 # transpile project
@@ -38,9 +40,9 @@ echo "Starting bot in ${NODE_ENV}..."
 
 cd build/
 if [ "${NODE_ENV}" == "dry-run" ] || [ "${NODE_ENV}" == "ci" ]; then
-    exec node --trace-warnings "${PWD}/kmq.js"
+    exec env RUN_ID=$RUN_ID node --trace-warnings "${PWD}/kmq.js"
     elif [ "${NODE_ENV}" == "development" ]; then
-    exec node --trace-warnings --inspect=9229 "${PWD}/kmq.js"
+    exec env RUN_ID=$RUN_ID node --trace-warnings --inspect=9229 "${PWD}/kmq.js"
     elif [ "${NODE_ENV}" == "production" ]; then
-    exec node --trace-warnings "${PWD}/kmq.js"
+    exec env RUN_ID=$RUN_ID node --trace-warnings "${PWD}/kmq.js"
 fi
