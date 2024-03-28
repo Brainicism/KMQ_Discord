@@ -4,6 +4,7 @@ import { delay } from "../../../helpers/utils";
 import ExpBonusModifier from "../../../enums/exp_bonus_modifier";
 import GameRound from "../../../structures/game_round";
 import GuessModeType from "../../../enums/option_types/guess_mode_type";
+import LocaleType from "../../../enums/locale_type";
 import QueriedSong from "../../../structures/queried_song";
 import State from "../../../state";
 import assert from "assert";
@@ -944,6 +945,114 @@ describe("game round", () => {
                 gameRound.getCorrectGuessers(false)[0]!.id,
                 playerID,
             );
+        });
+    });
+
+    describe("hint generation", () => {
+        describe("songs have differing english and korean names", () => {
+            it("should generate unique hints", () => {
+                gameRound = new GameRound(
+                    new QueriedSong({
+                        songName: "long song name to prevent rng collision",
+                        hangulSongName: "충돌을 피하기 위해 긴 노래 이름",
+                        artistName: "long artist name to prevent rng collision",
+                        hangulArtistName: "충돌 방지를 위해 긴 아티스트 이름",
+                        youtubeLink: "a1b2c3",
+                        originalLink: null,
+                        publishDate: new Date(2015, 0),
+                        members: "male",
+                        artistID: 4,
+                        isSolo: "n",
+                        views: 3141592653589,
+                        tags: "",
+                        vtype: "main",
+                        selectionWeight: 1,
+                    }),
+                    5,
+                );
+
+                // hints have been generated
+                assert.notEqual(gameRound.hints.artistHint[LocaleType.EN], "");
+                assert.notEqual(gameRound.hints.artistHint[LocaleType.KO], "");
+                assert.notEqual(gameRound.hints.songHint[LocaleType.EN], "");
+                assert.notEqual(gameRound.hints.songHint[LocaleType.KO], "");
+
+                // hints of differing locales are different
+                assert.notEqual(
+                    gameRound.hints.artistHint[LocaleType.EN],
+                    gameRound.hints.artistHint[LocaleType.KO],
+                );
+
+                assert.notEqual(
+                    gameRound.hints.songHint[LocaleType.EN],
+                    gameRound.hints.songHint[LocaleType.KO],
+                );
+            });
+        });
+
+        describe("songs have the same english and korean names, or missing korean name", () => {
+            it("should generate the same hint", () => {
+                const songName = "long song name to prevent rng collision";
+                const artistName = "long artist name to prevent rng collision";
+                for (const [koSongName, koArtistName] of [
+                    [songName, artistName],
+                    [songName, ""],
+                    ["", artistName],
+                    ["", ""],
+                ]) {
+                    gameRound = new GameRound(
+                        new QueriedSong({
+                            songName,
+                            hangulSongName: koSongName!,
+                            artistName,
+                            hangulArtistName: koArtistName!,
+                            youtubeLink: "a1b2c3",
+                            originalLink: null,
+                            publishDate: new Date(2015, 0),
+                            members: "male",
+                            artistID: 4,
+                            isSolo: "n",
+                            views: 3141592653589,
+                            tags: "",
+                            vtype: "main",
+                            selectionWeight: 1,
+                        }),
+                        5,
+                    );
+
+                    // hints have been generated
+                    assert.notEqual(
+                        gameRound.hints.artistHint[LocaleType.EN],
+                        "",
+                    );
+
+                    assert.notEqual(
+                        gameRound.hints.artistHint[LocaleType.KO],
+                        "",
+                    );
+
+                    assert.notEqual(
+                        gameRound.hints.songHint[LocaleType.EN],
+                        "",
+                    );
+
+                    assert.notEqual(
+                        gameRound.hints.songHint[LocaleType.KO],
+                        "",
+                    );
+
+                    // hints of differing locales are the same
+                    assert.equal(
+                        gameRound.hints.artistHint[LocaleType.EN],
+                        gameRound.hints.artistHint[LocaleType.KO],
+                    );
+
+                    assert.equal(
+                        gameRound.hints.songHint[LocaleType.EN],
+                        gameRound.hints.songHint[LocaleType.KO],
+                    );
+                }
+            });
         });
     });
 });
