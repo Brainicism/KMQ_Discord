@@ -991,9 +991,10 @@ export default class GameSession extends Session {
         }
 
         round.interactionMessageNeedsUpdate = false;
-        if (round.interactionMessage) {
+        const interactionMessage = round.interactionMessage;
+        if (interactionMessage) {
             try {
-                await round.interactionMessage.edit({
+                await interactionMessage.edit({
                     embeds: [
                         {
                             ...this.generateRemainingPlayersMessage(round),
@@ -1003,7 +1004,7 @@ export default class GameSession extends Session {
                 });
             } catch (e) {
                 logger.warn(
-                    `Error editing updateGuessedMembersMessage interaction. gid = ${round.interactionMessage.guildID}. e = ${e}}`,
+                    `Error editing updateGuessedMembersMessage interaction. gid = ${this.guildID}. e = ${e}}`,
                 );
             }
         }
