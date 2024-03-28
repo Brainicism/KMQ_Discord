@@ -460,10 +460,10 @@ export async function sendMessage(
             message.author.id === process.env.END_TO_END_TEST_BOT_CLIENT &&
             message.embeds[0]
         ) {
-            const runIdAndCommand = `${message.embeds[0].footer?.text!}|${message.content}`;
+            const runIdAndCommand = `${process.env.RUN_ID}|${message.content}`;
             const messageFooter = messageContent.embeds![0]!.footer;
             if (messageFooter) {
-                messageFooter.text += `\n ${runIdAndCommand}`;
+                messageFooter.text += `\n${runIdAndCommand}`;
             } else {
                 messageContent.embeds![0]!.footer = {
                     text: runIdAndCommand,

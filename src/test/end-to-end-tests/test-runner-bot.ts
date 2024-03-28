@@ -61,10 +61,6 @@ program
     .option("-d, --debug")
     .option("--stage-delay <seconds>", "Delay between test stages", (x) =>
         parseFloat(x),
-    )
-    .option(
-        "-s, --source <source>",
-        "The execution source (i.e: gci, cronjob)",
     );
 
 program.parse();
@@ -488,10 +484,6 @@ async function ensureVoiceConnection(): Promise<void> {
     }
 
     RUN_ID = await getKmqRunId();
-    if (options.source) {
-        RUN_ID += `-${options.source}`;
-    }
-
     await bot.connect();
 })();
 
