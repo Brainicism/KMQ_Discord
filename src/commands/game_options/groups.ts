@@ -32,7 +32,6 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type EmbedPayload from "../../interfaces/embed_payload";
 import type HelpDocumentation from "../../interfaces/help";
-import type MatchedArtist from "../../interfaces/matched_artist";
 
 const COMMAND_NAME = "groups";
 const logger = new IPCLogger(COMMAND_NAME);
