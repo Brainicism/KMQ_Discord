@@ -210,7 +210,6 @@ export default class GroupsCommand implements BaseCommand {
             await GroupsCommand.updateOption(
                 MessageContext.fromMessage(message),
                 [],
-                [],
                 undefined,
                 true,
             );
@@ -221,30 +220,29 @@ export default class GroupsCommand implements BaseCommand {
             .split(",")
             .map((groupName) => groupName.trim());
 
-        const groups = await getMatchingGroupNames(
-            State.aliases.artist,
-            groupNames,
-        );
-
-        const { matchedGroups, unmatchedGroups } = groups;
-
         await GroupsCommand.updateOption(
             MessageContext.fromMessage(message),
-            matchedGroups,
-            unmatchedGroups,
+            groupNames,
         );
     };
 
     static async updateOption(
         messageContext: MessageContext,
-        matchedGroups: MatchedArtist[],
-        unmatchedGroups: string[],
+        enteredGroupNames: Array<string>,
         interaction?: Eris.CommandInteraction,
         reset = false,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID,
         );
+
+        const matchingGroupNames = await getMatchingGroupNames(
+            State.aliases.artist,
+            enteredGroupNames,
+        );
+
+        let matchedGroups = matchingGroupNames.matchedGroups;
+        const unmatchedGroups = matchingGroupNames.unmatchedGroups;
 
         if (reset) {
             await guildPreference.reset(GameOption.GROUPS);
@@ -451,10 +449,6 @@ export default class GroupsCommand implements BaseCommand {
 
         const action = interactionName as GroupAction;
         const enteredGroupNames = Object.values(interactionOptions);
-        const { unmatchedGroups, matchedGroups } = await getMatchingGroupNames(
-            State.aliases.artist,
-            enteredGroupNames,
-        );
 
         if (action === GroupAction.ADD) {
             await AddCommand.updateOption(
@@ -473,8 +467,7 @@ export default class GroupsCommand implements BaseCommand {
         } else {
             await GroupsCommand.updateOption(
                 messageContext,
-                matchedGroups,
-                unmatchedGroups,
+                enteredGroupNames,
                 interaction,
                 action === GroupAction.RESET,
             );
