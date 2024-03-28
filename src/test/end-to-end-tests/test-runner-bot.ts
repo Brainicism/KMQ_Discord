@@ -13,6 +13,7 @@ import type TestSuite from "./test_suites/test_suite";
 
 import { KmqResponseType } from "./test_suites/test_suite";
 import { program } from "commander";
+import Axios from "axios";
 import HEALTH_CHECK_TEST_SUITE from "./test_suites/healthcheck_test";
 import PLAY_TEST_SUITE from "./test_suites/gameplay_test";
 
@@ -23,6 +24,20 @@ function log(msg: string): void {
 function debug(msg: string): void {
     if (options.debug) {
         console.log(`DEBUG: ${new Date().toISOString()} | ${msg}`);
+    }
+}
+
+// eslint-disable-next-line consistent-return
+async function getKmqRunId(): Promise<string> {
+    try {
+        return (
+            await Axios.get(
+                `http://127.0.0.1:${process.env.WEB_SERVER_PORT}/run_id`,
+            )
+        ).data;
+    } catch (e) {
+        console.error(`Error fetching RUN_ID, is KMQ running? e = ${e}`);
+        process.exit(1);
     }
 }
 
@@ -64,7 +79,7 @@ let CURRENT_STAGE: {
     ready: boolean;
 } | null = null;
 
-let RUN_ID = crypto.randomBytes(8).toString("hex");
+let RUN_ID: string;
 let voiceConnection: Eris.VoiceConnection | undefined;
 
 function convertGameOptionsMessage(
@@ -472,6 +487,7 @@ async function ensureVoiceConnection(): Promise<void> {
         process.exit(1);
     }
 
+    RUN_ID = await getKmqRunId();
     if (options.source) {
         RUN_ID += `-${options.source}`;
     }

@@ -59,6 +59,16 @@ export default class KmqWebServer {
             },
         });
 
+        httpServer.get("/run_id", {}, async (request, reply) => {
+            if (request.ip !== "127.0.0.1") {
+                logger.error("Fetch RUN_ID attempted by non-allowed IP");
+                await reply.code(401).send();
+                return;
+            }
+
+            await reply.code(200).send(process.env.RUN_ID);
+        });
+
         httpServer.post("/announce-restart", {}, async (request, reply) => {
             if (request.ip !== "127.0.0.1") {
                 logger.error("Announce restart attempted by non-allowed IP");
