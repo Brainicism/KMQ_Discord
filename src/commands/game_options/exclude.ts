@@ -10,7 +10,6 @@ import {
     generateOptionsMessage,
     getDebugLogHeader,
     getInteractionValue,
-    getMatchedArtists,
     notifyOptionsGenerationError,
     processGroupAutocompleteInteraction,
     sendErrorMessage,
@@ -263,7 +262,10 @@ export default class ExcludeCommand implements BaseCommand {
             matchedGroups = [];
             unmatchedGroups = [];
         } else {
-            const groups = getMatchedArtists(enteredGroupNames);
+            const groups = await getMatchingGroupNames(
+                State.aliases.artist,
+                enteredGroupNames,
+            );
 
             matchedGroups = groups.matchedGroups;
             unmatchedGroups = groups.unmatchedGroups;
