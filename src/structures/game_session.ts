@@ -22,6 +22,7 @@ import {
     sendInfoMessage,
     sendPaginationedEmbed,
     tryCreateInteractionErrorAcknowledgement,
+    tryCreateInteractionSuccessAcknowledgement,
     tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
 import {
@@ -45,6 +46,8 @@ import {
 import { IPCLogger } from "../logger";
 import { sql } from "kysely";
 import AnswerType from "../enums/option_types/answer_type";
+import ClipAction from "../enums/clip_action";
+import ClipGameRound from "./clip_game_round";
 import EliminationPlayer from "./elimination_player";
 import EliminationScoreboard from "./elimination_scoreboard";
 import ExpCommand from "../commands/game_commands/exp";
@@ -230,6 +233,8 @@ export default class GameSession extends Session {
                 messageContext,
                 round as GameRound,
             );
+        } else if (this.isClipMode()) {
+            await this.sendClipMessage(messageContext, round as GameRound);
         }
 
         if (this.isMultipleChoiceMode()) {
@@ -636,50 +641,156 @@ export default class GameSession extends Session {
         const round = this.round;
 
         if (
-            round.getIncorrectGuessers().has(interaction.member!.id) ||
-            !this.guessEligible(messageContext, interaction.createdAt)
+            this.isClipMode() &&
+            Object.values(ClipAction).includes(
+                interaction.data.custom_id as ClipAction,
+            )
         ) {
-            await tryCreateInteractionErrorAcknowledgement(
-                interaction,
-                null,
-                i18n.translate(
-                    this.guildID,
-                    "misc.failure.interaction.alreadyEliminated",
-                ),
+            if (
+                Date.now() - round.songStartedAt! <
+                this.guildPreference.gameOptions.guessTimeout! * 1000
+            ) {
+                await tryCreateInteractionErrorAcknowledgement(
+                    interaction,
+                    i18n.translate(
+                        this.guildID,
+                        "misc.failure.interaction.clipActionTooEarly.title",
+                    ),
+                    i18n.translate(
+                        this.guildID,
+                        "misc.failure.interaction.clipActionTooEarly.description",
+                    ),
+                );
+                return;
+            }
+
+            const clipRound = round as ClipGameRound;
+            const clipAction = interaction.data.custom_id as ClipAction;
+            switch (clipAction) {
+                case ClipAction.REPLAY:
+                    clipRound.replayRequested(messageContext.author.id);
+                    if (clipRound.isReplayMajority()) {
+                        await tryCreateInteractionSuccessAcknowledgement(
+                            interaction,
+                            i18n.translate(
+                                this.guildID,
+                                "misc.replay.success.title",
+                            ),
+                            i18n.translate(
+                                this.guildID,
+                                "misc.replay.success.description",
+                            ),
+                            true,
+                        );
+
+                        await this.playSong(messageContext, clipAction);
+                        clipRound.resetRequesters();
+                    } else {
+                        await tryCreateInteractionSuccessAcknowledgement(
+                            interaction,
+                            i18n.translate(
+                                this.guildID,
+                                "misc.replay.requested.title",
+                            ),
+                            i18n.translate(
+                                this.guildID,
+                                "misc.replay.requested.description",
+                            ),
+                            true,
+                        );
+                    }
+
+                    break;
+                case ClipAction.NEW_CLIP:
+                    clipRound.newClipRequested(messageContext.author.id);
+                    if (clipRound.isNewClipMajority()) {
+                        await tryCreateInteractionSuccessAcknowledgement(
+                            interaction,
+                            i18n.translate(
+                                this.guildID,
+                                "misc.newClip.success.title",
+                            ),
+                            i18n.translate(
+                                this.guildID,
+                                "misc.newClip.success.description",
+                            ),
+                            true,
+                        );
+
+                        await this.playSong(messageContext, clipAction);
+                        clipRound.resetRequesters();
+                    } else {
+                        await tryCreateInteractionSuccessAcknowledgement(
+                            interaction,
+                            i18n.translate(
+                                this.guildID,
+                                "misc.newClip.requested.title",
+                            ),
+                            i18n.translate(
+                                this.guildID,
+                                "misc.newClip.requested.description",
+                            ),
+                            true,
+                        );
+                    }
+
+                    break;
+                default:
+                    logger.warn(
+                        `gid: ${this.guildID} | Invalid clip action: ${clipAction}`,
+                    );
+                    break;
+            }
+        } else {
+            if (
+                round.getIncorrectGuessers().has(interaction.member!.id) ||
+                !this.guessEligible(messageContext, interaction.createdAt)
+            ) {
+                await tryCreateInteractionErrorAcknowledgement(
+                    interaction,
+                    null,
+                    i18n.translate(
+                        this.guildID,
+                        "misc.failure.interaction.alreadyEliminated",
+                    ),
+                );
+                return;
+            }
+
+            if (!round.isCorrectInteractionAnswer(interaction.data.custom_id)) {
+                await tryCreateInteractionErrorAcknowledgement(
+                    interaction,
+                    null,
+                    i18n.translate(
+                        this.guildID,
+                        "misc.failure.interaction.eliminated",
+                    ),
+                );
+
+                round.interactionIncorrectAnswerUUIDs[
+                    interaction.data.custom_id
+                ]++;
+
+                // Add the user as a participant
+                await this.guessSong(messageContext, "", interaction.createdAt);
+                return;
+            }
+
+            await tryInteractionAcknowledge(interaction);
+
+            const guildPreference = await GuildPreference.getGuildPreference(
+                messageContext.guildID,
             );
-            return;
-        }
 
-        if (!round.isCorrectInteractionAnswer(interaction.data.custom_id)) {
-            await tryCreateInteractionErrorAcknowledgement(
-                interaction,
-                null,
-                i18n.translate(
-                    this.guildID,
-                    "misc.failure.interaction.eliminated",
-                ),
+            await this.guessSong(
+                messageContext,
+                guildPreference.gameOptions.guessModeType !==
+                    GuessModeType.ARTIST
+                    ? round.song.songName
+                    : round.song.artistName,
+                interaction.createdAt,
             );
-
-            round.interactionIncorrectAnswerUUIDs[interaction.data.custom_id]++;
-
-            // Add the user as a participant
-            await this.guessSong(messageContext, "", interaction.createdAt);
-            return;
         }
-
-        await tryInteractionAcknowledge(interaction);
-
-        const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID,
-        );
-
-        await this.guessSong(
-            messageContext,
-            guildPreference.gameOptions.guessModeType !== GuessModeType.ARTIST
-                ? round.song.songName
-                : round.song.artistName,
-            interaction.createdAt,
-        );
     }
 
     /**
@@ -1020,13 +1131,25 @@ export default class GameSession extends Session {
         return this.guildPreference.isHiddenMode();
     }
 
+    /** @returns if clip mode is active */
+    isClipMode(): boolean {
+        return this.gameType === GameType.CLIP;
+    }
+
     /**
      * Prepares a new GameRound
      * @param randomSong - The queried song
      * @returns the new GameRound
      */
     protected prepareRound(randomSong: QueriedSong): Round {
-        const gameRound = new GameRound(randomSong, this.calculateBaseExp());
+        const gameRound = this.isClipMode()
+            ? new ClipGameRound(
+                  randomSong,
+                  this.calculateBaseExp(),
+                  this.guildID,
+              )
+            : new GameRound(randomSong, this.calculateBaseExp());
+
         return gameRound;
     }
 
@@ -1775,5 +1898,53 @@ export default class GameSession extends Session {
         );
 
         this.startHiddenUpdateTimer();
+    }
+
+    private async sendClipMessage(
+        messageContext: MessageContext,
+        round: GameRound,
+    ): Promise<void> {
+        round.interactionMessage = await sendInfoMessage(messageContext, {
+            title: i18n.translate(
+                this.guildID,
+                "misc.interaction.guess.title",
+                {
+                    songOrArtist:
+                        this.guildPreference.gameOptions.guessModeType ===
+                        GuessModeType.ARTIST
+                            ? i18n.translate(this.guildID, "misc.artist")
+                            : i18n.translate(this.guildID, "misc.song"),
+                },
+            ),
+            description: i18n.translate(this.guildID, "misc.inGame.clipMode"),
+            thumbnailUrl: KmqImages.LISTENING,
+            components: [
+                {
+                    type: 1,
+                    components: [
+                        {
+                            type: 2,
+                            style: 1,
+                            custom_id: ClipAction.REPLAY,
+                            label: i18n.translate(
+                                this.guildID,
+                                "misc.interaction.replay",
+                            ),
+                            emoji: { name: "🔁", id: null },
+                        },
+                        {
+                            type: 2,
+                            style: 1,
+                            custom_id: ClipAction.NEW_CLIP,
+                            label: i18n.translate(
+                                this.guildID,
+                                "misc.interaction.newClip",
+                            ),
+                            emoji: { name: "🎬", id: null },
+                        },
+                    ],
+                },
+            ],
+        });
     }
 }

@@ -21,6 +21,7 @@ import {
     underline,
 } from "../helpers/utils";
 import { sql } from "kysely";
+import ClipAction from "../enums/clip_action";
 import EnvVariableManager from "../env_variable_manager";
 import Eris from "eris";
 import FactGenerator from "../fact_generator";
@@ -36,6 +37,7 @@ import dbContext from "../database_context";
 import fs from "fs";
 import i18n from "../helpers/localization_manager";
 import type BookmarkedSong from "../interfaces/bookmarked_song";
+import type ClipGameRound from "./clip_game_round";
 import type EmbedPayload from "../interfaces/embed_payload";
 import type GameSession from "./game_session";
 import type GuildPreference from "./guild_preference";
@@ -286,7 +288,13 @@ export default abstract class Session {
             return null;
         }
 
-        const voiceConnectionSuccess = await this.playSong(messageContext);
+        const voiceConnectionSuccess = await this.playSong(
+            messageContext,
+            this.isGameSession() && this.isClipMode()
+                ? ClipAction.NEW_CLIP
+                : null,
+        );
+
         return voiceConnectionSuccess ? this.round : null;
     }
 
@@ -464,6 +472,10 @@ export default abstract class Session {
                 )} | Song finished without being guessed, timer of: ${time} seconds.`,
             );
 
+            if (this.isGameSession() && this.isClipMode()) {
+                return;
+            }
+
             await this.endRound(
                 false,
                 new MessageContext(this.textChannelID, null, this.guildID),
@@ -625,9 +637,13 @@ export default abstract class Session {
     /**
      * Begin playing the Round's song in the VoiceChannel, listen on VoiceConnection events
      * @param messageContext - An object containing relevant parts of Eris.Message
+     * @param clipAction - For clip mode, whether to replay same clip or get a new one -- null for normal game
      * @returns whether the song streaming began successfully
      */
-    protected async playSong(messageContext: MessageContext): Promise<boolean> {
+    protected async playSong(
+        messageContext: MessageContext,
+        clipAction: ClipAction | null = null,
+    ): Promise<boolean> {
         const isGodMode = EnvVariableManager.isGodMode();
         const { round } = this;
         if (round === null) {
@@ -638,13 +654,17 @@ export default abstract class Session {
             logger.error(
                 `${getDebugLogHeader(
                     messageContext,
-                )} | Unexpectedly null connection in playSong`,
+                )} | Unexpectedly null connection in playSong. clipAction = ${clipAction}`,
             );
             return false;
         }
 
         let songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${round.song.youtubeLink}.ogg`;
-        let seekLocation = 0;
+        let seekLocation: number | null = null;
+        if (this.isGameSession() && this.isClipMode()) {
+            seekLocation = (round as ClipGameRound).seekLocation;
+        }
+
         const seekType = this.isListeningSession()
             ? SeekType.BEGINNING
             : this.guildPreference.gameOptions.seekType;
@@ -667,17 +687,24 @@ export default abstract class Session {
             songDuration = 60;
         }
 
-        switch (seekType) {
-            case SeekType.BEGINNING:
-                seekLocation = 0;
-                break;
-            case SeekType.MIDDLE:
-                seekLocation = songDuration * (0.4 + 0.2 * Math.random());
-                break;
-            case SeekType.RANDOM:
-            default:
-                seekLocation = songDuration * (0.6 * Math.random());
-                break;
+        if (!round.songStartedAt) {
+            switch (seekType) {
+                case SeekType.BEGINNING:
+                    seekLocation = 0;
+                    break;
+                case SeekType.MIDDLE:
+                    seekLocation = songDuration * (0.4 + 0.2 * Math.random());
+                    break;
+                case SeekType.RANDOM:
+                default:
+                    seekLocation = songDuration * (0.6 * Math.random());
+                    break;
+            }
+        } else if (clipAction === ClipAction.NEW_CLIP) {
+            // Clip mode and the user requested another segment
+            seekLocation = songDuration * (0.6 * Math.random());
+        } else if (clipAction === ClipAction.REPLAY) {
+            // Replay the same segment by not modifying seekLocation
         }
 
         if (isGodMode) {
@@ -711,7 +738,7 @@ export default abstract class Session {
         this.connection.stopPlaying();
 
         try {
-            let inputArgs = ["-ss", seekLocation.toString()];
+            let inputArgs = ["-ss", seekLocation!.toString()];
             let encoderArgs: Array<string> = [];
             const specialType = this.isListeningSession()
                 ? null
@@ -719,12 +746,19 @@ export default abstract class Session {
 
             if (specialType) {
                 const ffmpegArgs = specialFfmpegArgs[specialType](
-                    seekLocation,
+                    seekLocation!,
                     songDuration,
                 );
 
                 inputArgs = ffmpegArgs.inputArgs;
                 encoderArgs = ffmpegArgs.encoderArgs;
+            }
+
+            if (clipAction) {
+                const durationLimit =
+                    this.guildPreference.gameOptions.guessTimeout;
+
+                encoderArgs.push("-t", durationLimit!.toString());
             }
 
             round.songStartedAt = Date.now();
@@ -738,6 +772,10 @@ export default abstract class Session {
             logger.error(`Erroring playing on voice connection. err = ${e}`);
             await this.errorRestartRound();
             return false;
+        }
+
+        if (this.isGameSession() && this.isClipMode()) {
+            (round as ClipGameRound).seekLocation = seekLocation;
         }
 
         this.startGuessTimeout(messageContext);
@@ -756,6 +794,10 @@ export default abstract class Session {
             }
 
             this.stopGuessTimeout();
+
+            if (this.isGameSession() && this.isClipMode()) {
+                return;
+            }
 
             await this.endRound(
                 false,

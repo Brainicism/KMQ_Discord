@@ -1,9 +1,11 @@
+import { EMBED_WARNING_COLOR, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
-import { OptionAction } from "../../constants";
 import {
     clickableSlashCommand,
     getDebugLogHeader,
     getInteractionValue,
+    sendErrorMessage,
+    sendInfoMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
@@ -24,7 +26,8 @@ const logger = new IPCLogger("guessTimeout");
 
 // eslint-disable-next-line import/no-unused-modules
 export default class GuessTimeoutCommand implements BaseCommand {
-    static TIMER_MIN_VALUE = 2;
+    static TIMER_MIN_VALUE = 0.25;
+    static TIMER_MIN_VALUE_NON_CLIP = 2;
     static TIMER_MAX_VALUE = 180;
     aliases = ["time", "timeout", "t"];
 
@@ -124,7 +127,8 @@ export default class GuessTimeoutCommand implements BaseCommand {
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
-                                .INTEGER,
+                                .NUMBER, // TODO
+                            // Math.round(settingValue * 10) / 10,
                             required: true,
                             min_value: GuessTimeoutCommand.TIMER_MIN_VALUE,
                             max_value: GuessTimeoutCommand.TIMER_MAX_VALUE,
@@ -199,6 +203,38 @@ export default class GuessTimeoutCommand implements BaseCommand {
                 )} | Guess timeout disabled.`,
             );
         } else {
+            if (timer < GuessTimeoutCommand.TIMER_MIN_VALUE_NON_CLIP) {
+                if (session) {
+                    if (!session.isGameSession() || !session.isClipMode()) {
+                        await sendErrorMessage(
+                            messageContext,
+                            {
+                                title: "command.timer.failure.tooLowTimer.title",
+                                description:
+                                    "command.timer.failure.tooLowTimer.description",
+                            },
+                            interaction,
+                        );
+                        return;
+                    }
+                } else {
+                    // Warn the user but still change the value
+                    await sendInfoMessage(
+                        messageContext,
+                        {
+                            title: "command.timer.warning.lowTimerOnlyForClip.title",
+                            description:
+                                "command.timer.warning.lowTimerOnlyForClip.description",
+                            color: EMBED_WARNING_COLOR,
+                        },
+                        false,
+                        undefined,
+                        [],
+                        interaction,
+                    );
+                }
+            }
+
             await guildPreference.setGuessTimeout(timer);
 
             logger.info(

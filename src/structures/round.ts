@@ -36,7 +36,7 @@ export default abstract class Round {
     /**  The Discord ID of the end round message */
     public roundMessageID: string | null;
 
-    /** List of players who have opted to skip the current Round */
+    /** List of players who have voted to skip the current Round */
     public skippers: Set<string>;
 
     /** Whether the Round has been skipped */

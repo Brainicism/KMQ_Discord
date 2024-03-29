@@ -415,14 +415,14 @@ export default class GameRound extends Round {
     }
 
     /**
-     * @param interactionUUID - the UUID of an interaction
-     * @returns true if the given UUID is one of the interactions (i.e. guesses) of the current game round
+     * @param interactionID - the ID of an interaction
+     * @returns true if the given ID is one of the interactions (i.e. guesses) of the current game round
      */
-    isValidInteraction(interactionUUID: string): boolean {
+    isValidInteraction(interactionID: string): boolean {
         return (
-            interactionUUID === this.interactionCorrectAnswerUUID ||
+            interactionID === this.interactionCorrectAnswerUUID ||
             Object.keys(this.interactionIncorrectAnswerUUIDs).includes(
-                interactionUUID,
+                interactionID,
             )
         );
     }

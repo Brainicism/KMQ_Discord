@@ -154,6 +154,7 @@ export const PROFILE_COMMAND_NAME = "Profile";
 export const EMBED_ERROR_COLOR = 0xed4245; // Red
 export const EMBED_SUCCESS_COLOR = 0x57f287; // Green
 export const EMBED_SUCCESS_BONUS_COLOR = 0xfee75c; // Gold
+export const EMBED_WARNING_COLOR = 0xffa500; // Orange
 
 export const DATABASE_DOWNLOAD_DIR = path.join(
     __dirname,

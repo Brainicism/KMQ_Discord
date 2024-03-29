@@ -39,6 +39,7 @@ import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameSession from "../../structures/game_session";
 import GameType from "../../enums/game_type";
+import GuessTimeoutCommand from "../game_options/timer";
 import GuildPreference from "../../structures/guild_preference";
 import KmqMember from "../../structures/kmq_member";
 import LocaleType from "../../enums/locale_type";
@@ -143,6 +144,13 @@ export default class PlayCommand implements BaseCommand {
                 explanation: i18n.translate(
                     guildID,
                     "command.play.help.example.suddenDeath",
+                ),
+            },
+            {
+                example: clickableSlashCommand(COMMAND_NAME, GameType.CLIP),
+                explanation: i18n.translate(
+                    guildID,
+                    "command.play.help.example.clip",
                 ),
             },
         ],
@@ -371,6 +379,26 @@ export default class PlayCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "command.play.help.example.suddenDeath",
+                                ),
+                            }),
+                            {},
+                        ),
+                    type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+                },
+                {
+                    name: GameType.CLIP,
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "command.play.help.example.clip",
+                    ),
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.play.help.example.clip",
                                 ),
                             }),
                             {},
@@ -1151,6 +1179,17 @@ export default class PlayCommand implements BaseCommand {
             if (!guildPreference.isGuessTimeoutSet()) {
                 await guildPreference.setGuessTimeout(HIDDEN_DEFAULT_TIMER);
             }
+        }
+
+        if (
+            gameType !== GameType.CLIP &&
+            guildPreference.isGuessTimeoutSet() &&
+            guildPreference.gameOptions.guessTimeout <
+                GuessTimeoutCommand.TIMER_MIN_VALUE_NON_CLIP
+        ) {
+            await guildPreference.setGuessTimeout(
+                GuessTimeoutCommand.TIMER_MIN_VALUE_NON_CLIP,
+            );
         }
 
         if (gameType !== GameType.TEAMS) {
