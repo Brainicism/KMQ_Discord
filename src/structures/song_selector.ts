@@ -352,16 +352,20 @@ export default class SongSelector {
             }
         }
 
-        let ineligibleDueToCommonAlias = 0;
-        for (const aliasCount of Object.values(aliasToCountMapping)) {
+        const ineligibleDueToCommonAlias: { [alias: string]: number } = {};
+        let ineligibleDueToCommonAliasCount = 0;
+        for (const alias of Object.entries(aliasToCountMapping)) {
+            const aliasName = alias[0];
+            const aliasCount = alias[1];
             if (aliasCount > 10) {
-                ineligibleDueToCommonAlias += aliasCount - 1;
+                ineligibleDueToCommonAlias[aliasName] = aliasCount;
+                ineligibleDueToCommonAliasCount += aliasCount - 1;
             }
         }
 
-        if (ineligibleDueToCommonAlias) {
+        if (ineligibleDueToCommonAliasCount > 0) {
             logger.info(
-                `gid: ${guildID}, pid: ${kmqPlaylistIdentifier} | Some songs were ineligible due to common aliases: ${JSON.stringify(aliasToCountMapping)}`,
+                `gid: ${guildID}, pid: ${kmqPlaylistIdentifier} | Some songs were ineligible due to common aliases: ${JSON.stringify(ineligibleDueToCommonAlias)}`,
             );
         }
 
@@ -372,7 +376,7 @@ export default class SongSelector {
             metadata,
             truncated,
             unmatchedSongs,
-            ineligibleDueToCommonAlias,
+            ineligibleDueToCommonAlias: ineligibleDueToCommonAliasCount,
         };
     }
 
