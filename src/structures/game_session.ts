@@ -622,17 +622,26 @@ export default class GameSession extends Session {
     async handleComponentInteraction(
         interaction: Eris.ComponentInteraction<Eris.TextableChannel>,
         messageContext: MessageContext,
-    ): Promise<void> {
+    ): Promise<boolean> {
+        const interactionHandled = await super.handleComponentInteraction(
+            interaction,
+            messageContext,
+        );
+
+        if (interactionHandled) {
+            return true;
+        }
+
         if (
             !(await this.handleInSessionInteractionFailures(
                 interaction,
                 messageContext,
             ))
         ) {
-            return;
+            return true;
         }
 
-        if (!this.round) return;
+        if (!this.round) return false;
         const round = this.round;
 
         if (
@@ -647,7 +656,7 @@ export default class GameSession extends Session {
                     "misc.failure.interaction.alreadyEliminated",
                 ),
             );
-            return;
+            return true;
         }
 
         if (!round.isCorrectInteractionAnswer(interaction.data.custom_id)) {
@@ -664,7 +673,7 @@ export default class GameSession extends Session {
 
             // Add the user as a participant
             await this.guessSong(messageContext, "", interaction.createdAt);
-            return;
+            return true;
         }
 
         await tryInteractionAcknowledge(interaction);
@@ -680,6 +689,7 @@ export default class GameSession extends Session {
                 : round.song.artistName,
             interaction.createdAt,
         );
+        return true;
     }
 
     /**

@@ -141,8 +141,17 @@ export default class ListeningSession extends Session {
     async handleComponentInteraction(
         interaction: Eris.ComponentInteraction,
         messageContext: MessageContext,
-    ): Promise<void> {
-        if (!this.round) return;
+    ): Promise<boolean> {
+        const interactionHandled = await super.handleComponentInteraction(
+            interaction,
+            messageContext,
+        );
+
+        if (interactionHandled) {
+            return true;
+        }
+
+        if (!this.round) return false;
         if (
             interaction.data.custom_id !== "bookmark" &&
             !(await this.handleInSessionInteractionFailures(
@@ -150,13 +159,14 @@ export default class ListeningSession extends Session {
                 messageContext,
             ))
         ) {
-            return;
+            return true;
         }
 
         const round = this.round;
         const guildID = interaction.guildID as string;
         if (interaction.data.custom_id === "bookmark") {
             await this.handleBookmarkInteraction(interaction);
+            return true;
         } else if (interaction.data.custom_id === round.interactionSkipUUID) {
             round.userSkipped(interaction.member!.id);
             if (SkipCommand.isSkipMajority(guildID, this)) {
@@ -176,6 +186,7 @@ export default class ListeningSession extends Session {
                 );
 
                 await SkipCommand.skipSong(messageContext, this);
+                return true;
             } else {
                 await tryCreateInteractionSuccessAcknowledgement(
                     interaction,
@@ -192,8 +203,12 @@ export default class ListeningSession extends Session {
                         messageContext,
                     )} | Skip vote received.`,
                 );
+
+                return true;
             }
         }
+
+        return false;
     }
 
     /**

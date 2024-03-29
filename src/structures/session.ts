@@ -610,10 +610,22 @@ export default abstract class Session {
         return this.roundsPlayed;
     }
 
-    abstract handleComponentInteraction(
-        _interaction: Eris.ComponentInteraction,
+    /**
+     * @param interaction - The interaction
+     * @param _messageContext - The message context
+     * @returns whether the interaction has been handled
+     */
+    async handleComponentInteraction(
+        interaction: Eris.ComponentInteraction,
         _messageContext: MessageContext,
-    ): Promise<void>;
+    ): Promise<boolean> {
+        if (interaction.data.custom_id === "bookmark") {
+            await this.handleBookmarkInteraction(interaction);
+            return true;
+        }
+
+        return false;
+    }
 
     /**
      * Prepares a new Round
@@ -931,6 +943,19 @@ export default abstract class Session {
 
         let footerText = `${views}${aliases}${duration}`;
         const thumbnailUrl = `https://img.youtube.com/vi/${youtubeLink}/hqdefault.jpg`;
+        const buttons: Array<Eris.InteractionButton> = [];
+
+        // add bookmark button
+        buttons.push({
+            type: 2,
+            style: 1,
+            custom_id: "bookmark",
+            emoji: {
+                id: null,
+                name: "❤️",
+            },
+        });
+
         if (round instanceof GameRound) {
             if (round.warnTypoReceived) {
                 footerText += `\n/${i18n.translate(
@@ -958,26 +983,20 @@ export default abstract class Session {
                 return round.interactionMessage;
             }
         } else if (round instanceof ListeningRound) {
-            const buttons: Array<Eris.InteractionButton> = [];
             round.interactionSkipUUID = uuid.v4() as string;
             buttons.push({
                 type: 2,
                 style: 1,
-                label: i18n.translate(messageContext.guildID, "misc.skip"),
                 custom_id: round.interactionSkipUUID,
+                emoji: {
+                    id: null,
+                    name: "⏩",
+                },
             });
-
-            buttons.push({
-                type: 2,
-                style: 1,
-                label: i18n.translate(messageContext.guildID, "misc.bookmark"),
-                custom_id: "bookmark",
-            });
-
-            round.interactionComponents = [{ type: 1, components: buttons }];
-            embed.components = round.interactionComponents;
         }
 
+        round.interactionComponents = [{ type: 1, components: buttons }];
+        embed.components = round.interactionComponents;
         embed.thumbnailUrl = thumbnailUrl;
         embed.footerText = footerText;
         return sendInfoMessage(messageContext, embed, shouldReply);
