@@ -44,8 +44,6 @@ import type ListeningSession from "./listening_session";
 import type QueriedSong from "./queried_song";
 import type Round from "./round";
 
-const BOOKMARK_MESSAGE_SIZE = 10;
-
 const logger = new IPCLogger("session");
 
 export default abstract class Session {
@@ -304,19 +302,7 @@ export default abstract class Session {
             return;
         }
 
-        const round = this.round;
         this.round = null;
-
-        if (Object.keys(this.songMessageIDs).length === BOOKMARK_MESSAGE_SIZE) {
-            this.songMessageIDs.shift();
-        }
-
-        if (round.roundMessageID) {
-            this.songMessageIDs.push({
-                messageID: round.roundMessageID,
-                song: round.song,
-            });
-        }
 
         // cleanup
         this.stopGuessTimeout();
@@ -563,24 +549,23 @@ export default abstract class Session {
     async handleBookmarkInteraction(
         interaction: Eris.CommandInteraction | Eris.ComponentInteraction,
     ): Promise<void> {
-        let song: QueriedSong | null = null;
+        let messageId: string;
         if (interaction instanceof Eris.CommandInteraction) {
-            song = this.getSongFromMessageID(
-                interaction.data.target_id as string,
-            );
+            messageId = interaction.data.target_id as string;
         } else if (interaction instanceof Eris.ComponentInteraction) {
-            song = this.getSongFromMessageID(interaction.message.id);
+            messageId = interaction.message.id;
+        } else {
+            logger.error(
+                `Unexpected interactionType in handleBookmarkInteraction: ${typeof interaction}`,
+            );
+            return;
         }
 
+        const song = this.getSongFromMessageID(messageId);
+
         if (!song) {
-            await tryCreateInteractionErrorAcknowledgement(
-                interaction,
-                null,
-                i18n.translate(
-                    this.guildID,
-                    "misc.failure.interaction.invalidBookmark",
-                    { BOOKMARK_MESSAGE_SIZE: String(BOOKMARK_MESSAGE_SIZE) },
-                ),
+            logger.error(
+                `Failed to get song from Session.songMessageIDs. messageId = ${messageId}. songMessageIDs = ${Object.keys(this.songMessageIDs).join(", ")}`,
             );
             return;
         }
@@ -849,10 +834,6 @@ export default abstract class Session {
     }
 
     protected updateBookmarkSongList(round: Round): void {
-        if (Object.keys(this.songMessageIDs).length === BOOKMARK_MESSAGE_SIZE) {
-            this.songMessageIDs.shift();
-        }
-
         if (round.roundMessageID) {
             this.songMessageIDs.push({
                 messageID: round.roundMessageID,
