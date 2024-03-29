@@ -1,3 +1,4 @@
+/* eslint-disable no-case-declarations */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-console */
@@ -245,7 +246,6 @@ async function mainLoop(): Promise<void> {
             log(
                 `STAGE ${CURRENT_STAGE.stage} | Not expecting response.. validate stage immediately`,
             );
-            CURRENT_STAGE.processed = true;
             await evaluateStage();
             return;
         default:
@@ -337,6 +337,8 @@ async function evaluateStage(messageResponse?: {
         )
     ) {
         log(`STAGE ${CURRENT_STAGE.stage} | Passed check!`);
+        CURRENT_STAGE.processed = true;
+        await proceedNextStage();
         return true;
     } else {
         log(
@@ -413,16 +415,11 @@ bot.on("messageCreate", async (msg) => {
             break;
     }
 
-    const stagePass = await evaluateStage({
+    await evaluateStage({
         title: title!,
         description: combinedDescription,
         parsedGameOptions,
     });
-
-    if (stagePass) {
-        CURRENT_STAGE.processed = true;
-        await proceedNextStage();
-    }
 });
 
 async function ensureVoiceConnection(): Promise<void> {
