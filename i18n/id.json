@@ -1575,7 +1575,7 @@
         },
         "interaction": {
             "bookmarked": {
-                "description": "Anda akan menerima pesan langsung dengan tautan ke {{songName}} di akhir permainan.",
+                "description": "Anda akan menerima pesan langsung dengan tautan ke '{{songName}}' di akhir permainan.",
                 "message": {
                     "playedOn": "Diputar pada {{date}}",
                     "title": "Lagu yang Di-bookmark"

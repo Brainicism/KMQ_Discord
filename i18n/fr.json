@@ -1575,7 +1575,7 @@
         },
         "interaction": {
             "bookmarked": {
-                "description": "Vous recevrez un message direct avec un lien vers {{songName}} à la fin du jeu.",
+                "description": "Vous recevrez un message direct avec un lien vers '{{songName}}' à la fin du jeu.",
                 "message": {
                     "playedOn": "Joué le {{date}}",
                     "title": "Chansons enregistrées"

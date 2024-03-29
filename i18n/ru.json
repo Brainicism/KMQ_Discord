@@ -1575,7 +1575,7 @@
         },
         "interaction": {
             "bookmarked": {
-                "description": "Вы получите прямое сообщение со ссылкой на {{songName}} в конце игры.",
+                "description": "Вы получите прямое сообщение со ссылкой на '{{songName}}' по окончании игры.",
                 "message": {
                     "playedOn": "Сыграно {{date}}",
                     "title": "Песни в закладках"
