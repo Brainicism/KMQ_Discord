@@ -54,10 +54,10 @@ export default class FactGenerator {
             FactGenerator.mostViewedSoloArtist,
             FactGenerator.viewsBySolo,
             FactGenerator.bigThreeDominance,
-            FactGenerator.mostGaonFirsts,
-            FactGenerator.mostGaonAppearances,
-            FactGenerator.historicalGaonWeekly,
-            FactGenerator.recentGaonWeekly,
+            FactGenerator.mostCircleDigitalFirsts,
+            FactGenerator.mostCircleDigitalAppearances,
+            FactGenerator.historicalCircleDigitalWeekly,
+            FactGenerator.recentCircleDigitalWeekly,
             FactGenerator.fanclubName,
             FactGenerator.closeBirthdays,
             FactGenerator.mostArtistsEntertainmentCompany,
@@ -1037,7 +1037,7 @@ export default class FactGenerator {
         ];
     }
 
-    static async mostGaonFirsts(lng: LocaleType): Promise<string[]> {
+    static async mostCircleDigitalFirsts(lng: LocaleType): Promise<string[]> {
         const result = await dbContext.kpopVideos
             .selectFrom("app_kpop_group_safe")
             .select(["name as artist_name", "gaondigital_firsts as firsts"])
@@ -1046,7 +1046,7 @@ export default class FactGenerator {
             .execute();
 
         return result.map((x, idx) =>
-            i18n.internalLocalizer.t("fact.fun.mostGaonFirsts", {
+            i18n.internalLocalizer.t("fact.fun.mostCircleDigitalFirsts", {
                 artistName: x["artist_name"],
                 ordinalNum: i18n.internalLocalizer.t(getOrdinalNum(idx + 1), {
                     lng,
@@ -1057,7 +1057,9 @@ export default class FactGenerator {
         );
     }
 
-    static async mostGaonAppearances(lng: LocaleType): Promise<string[]> {
+    static async mostCircleDigitalAppearances(
+        lng: LocaleType,
+    ): Promise<string[]> {
         const result = await dbContext.kpopVideos
             .selectFrom("app_kpop_group_safe")
             .select(["name as artist_name", "gaondigital_times as appearances"])
@@ -1066,7 +1068,7 @@ export default class FactGenerator {
             .execute();
 
         return result.map((x, idx) =>
-            i18n.internalLocalizer.t("fact.fun.mostGaonAppearances", {
+            i18n.internalLocalizer.t("fact.fun.mostCircleDigitalAppearances", {
                 artistName: x["artist_name"],
                 ordinalNum: i18n.internalLocalizer.t(getOrdinalNum(idx + 1), {
                     lng,
@@ -1097,7 +1099,9 @@ export default class FactGenerator {
         );
     }
 
-    static async historicalGaonWeekly(lng: LocaleType): Promise<Array<string>> {
+    static async historicalCircleDigitalWeekly(
+        lng: LocaleType,
+    ): Promise<Array<string>> {
         const startYear = 2010;
         const endYear = new Date().getFullYear() - 1;
         let week = weekOfYear();
@@ -1124,7 +1128,7 @@ export default class FactGenerator {
         );
 
         return parsedResults.map((x) =>
-            i18n.internalLocalizer.t("fact.fun.historicalGaonWeekly", {
+            i18n.internalLocalizer.t("fact.fun.historicalCircleDigitalWeekly", {
                 year: x[0]!.year,
                 songName: FactGenerator.generateSongArtistHyperlink(
                     lng,
@@ -1136,7 +1140,9 @@ export default class FactGenerator {
         );
     }
 
-    static async recentGaonWeekly(lng: LocaleType): Promise<Array<string>> {
+    static async recentCircleDigitalWeekly(
+        lng: LocaleType,
+    ): Promise<Array<string>> {
         const result = await dbContext.kpopVideos
             .selectFrom("app_kpop_gaondigi")
             .select(["ranklist", "year", "week"])
@@ -1151,7 +1157,7 @@ export default class FactGenerator {
         );
 
         return parsedResult.slice(0, 10).map((x, idx) =>
-            i18n.internalLocalizer.t("fact.fun.recentGaonWeekly", {
+            i18n.internalLocalizer.t("fact.fun.recentCircleDigitalWeekly", {
                 songName: FactGenerator.generateSongArtistHyperlink(
                     lng,
                     x["songName"],
