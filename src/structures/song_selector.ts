@@ -47,19 +47,35 @@ export default class SongSelector {
     public selectedSongs: SelectedSongs | null;
 
     public static QueriedSongFields = [
-        "song_name_en as songName",
-        "song_name_ko as hangulSongName",
-        "artist_name_en as artistName",
-        "artist_name_ko as hangulArtistName",
-        "link as youtubeLink",
-        "original_link as originalLink",
-        "publishedon as publishDate",
-        "members",
-        "id_artist as artistID",
-        "issolo as isSolo",
-        "tags",
-        "views",
-        "vtype",
+        "available_songs.song_name_en as songName",
+        "available_songs.song_name_ko as hangulSongName",
+        "available_songs.artist_name_en as artistName",
+        "available_songs.artist_name_ko as hangulArtistName",
+        "available_songs.link as youtubeLink",
+        "available_songs.original_link as originalLink",
+        "available_songs.publishedon as publishDate",
+        "available_songs.members",
+        "available_songs.id_artist as artistID",
+        "available_songs.issolo as isSolo",
+        "available_songs.tags",
+        "available_songs.views",
+        "available_songs.vtype",
+    ] as const;
+
+    public static ExpectedQueriedSongFields = [
+        "expected_available_songs.song_name_en as songName",
+        "expected_available_songs.song_name_ko as hangulSongName",
+        "expected_available_songs.artist_name_en as artistName",
+        "expected_available_songs.artist_name_ko as hangulArtistName",
+        "expected_available_songs.link as youtubeLink",
+        "expected_available_songs.original_link as originalLink",
+        "expected_available_songs.publishedon as publishDate",
+        "expected_available_songs.members",
+        "expected_available_songs.id_artist as artistID",
+        "expected_available_songs.issolo as isSolo",
+        "expected_available_songs.tags",
+        "expected_available_songs.views",
+        "expected_available_songs.vtype",
     ] as const;
 
     /** List of songs played with /shuffle unique enabled */
@@ -376,7 +392,11 @@ export default class SongSelector {
                     ? "expected_available_songs"
                     : "available_songs",
             )
-            .select(SongSelector.QueriedSongFields);
+            .select(
+                EnvVariableManager.isGodMode()
+                    ? SongSelector.ExpectedQueriedSongFields
+                    : SongSelector.QueriedSongFields,
+            );
 
         if (gameOptions.forcePlaySongID) {
             queryBuilder = queryBuilder.where(
