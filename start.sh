@@ -16,7 +16,7 @@ fi
 # run with ts-node + swc, no transpile needed
 if [ "${NODE_ENV}" == "development_ts_node" ]; then
     cd src/
-    exec env RUN_ID=$RUN_ID GOD_MODE=true npx ts-node --swc kmq.ts
+    exec env RUN_ID=$RUN_ID npx ts-node --swc kmq.ts
 fi
 
 # transpile project
@@ -42,7 +42,7 @@ cd build/
 if [ "${NODE_ENV}" == "dry-run" ] || [ "${NODE_ENV}" == "ci" ]; then
     exec env RUN_ID=$RUN_ID node --trace-warnings "${PWD}/kmq.js"
     elif [ "${NODE_ENV}" == "development" ]; then
-    exec env RUN_ID=$RUN_ID GOD_MODE=true node --trace-warnings --inspect=9229 "${PWD}/kmq.js"
+    exec env RUN_ID=$RUN_ID node --trace-warnings --inspect=9229 "${PWD}/kmq.js"
     elif [ "${NODE_ENV}" == "production" ]; then
     exec env RUN_ID=$RUN_ID node --trace-warnings "${PWD}/kmq.js"
 fi
