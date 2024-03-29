@@ -93,7 +93,7 @@ function convertGameOptionsMessage(
         const match = line.match(regex);
         if (match) {
             const capturedText = match[1];
-            const optionValue = splitLine.at(-1)!.trim();
+            const optionValue = splitLine.slice(2).join(":").trim();
             const isUpdated =
                 optionValue.startsWith("__") && optionValue.endsWith("__");
 
@@ -371,27 +371,23 @@ bot.on("messageCreate", async (msg) => {
         return;
     }
 
-    CURRENT_STAGE.processed = true;
     let combinedDescription = `${description}\n`;
     for (const field of fields ?? []) {
         combinedDescription += `${field.value}\n`;
     }
 
-    if (footer) {
-        combinedDescription += `\n${footer.text}`;
-    }
+    if (!footer) return;
+    combinedDescription += `\n${footer.text}`;
 
     log(
         `STAGE ${CURRENT_STAGE.stage} | Received response: ${JSON.stringify({ title, description, fields, footer })}}`,
     );
 
-    if (
-        footer &&
-        !footer.text.includes(`${RUN_ID}|${CURRENT_STAGE.commandExecuted}`)
-    ) {
+    if (!footer.text.includes(`${RUN_ID}|${CURRENT_STAGE.commandExecuted}`)) {
         return;
     }
 
+    CURRENT_STAGE.processed = true;
     const testStage = TEST_SUITE.tests[CURRENT_STAGE.stage]!;
 
     let parsedGameOptions: ParsedGameOptionValues | undefined;

@@ -234,6 +234,18 @@ const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
 
             expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
+        {
+            command:
+                ",playlist https://open.spotify.com/playlist/2FJjCCjZ3war3hXypFzJeL",
+            responseValidator: (
+                title: string,
+                description: string,
+                parsedGameOptions?: ParsedGameOptionValues,
+            ) =>
+                parsedGameOptions!["playlist set"]!.value.includes("[kpoop]") &&
+                parsedGameOptions!["playlist set"]!.updated,
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
+        },
     ],
     resetEachStage: true,
 };
