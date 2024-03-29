@@ -374,9 +374,9 @@ export default class GameSession extends Session {
             remainingDuration,
         );
 
-        round.roundMessageID = endRoundMessage?.id as string;
-
-        this.updateBookmarkSongList(round);
+        if (endRoundMessage) {
+            this.updateBookmarkSongList(endRoundMessage.id, round.song);
+        }
 
         if (this.scoreboard.gameFinished(this.guildPreference)) {
             await this.endSession("Game finished due to game options", false);

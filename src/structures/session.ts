@@ -833,13 +833,14 @@ export default abstract class Session {
         return true;
     }
 
-    protected updateBookmarkSongList(round: Round): void {
-        if (round.roundMessageID) {
-            this.songMessageIDs.push({
-                messageID: round.roundMessageID,
-                song: round.song,
-            });
-        }
+    protected updateBookmarkSongList(
+        messageId: string,
+        song: QueriedSong,
+    ): void {
+        this.songMessageIDs.push({
+            messageID: messageId,
+            song,
+        });
     }
 
     /**
