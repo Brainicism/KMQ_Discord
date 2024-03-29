@@ -13,7 +13,38 @@
             "envFile": "${workspaceFolder}/.env",
             "outputCapture": "std",
             "env": {
-                "NODE_ENV": "development_ts_node"
+                "NODE_ENV": "development_ts_node",
+                "RUN_ID": "12345",
+                "GOD_MODE": "true"
+            }
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch KMQ (Minimal)",
+            "runtimeArgs": ["-r", "@swc-node/register"],
+            "args": ["${workspaceFolder}/src/kmq.ts"],
+            "envFile": "${workspaceFolder}/.env",
+            "outputCapture": "std",
+            "env": {
+                "NODE_ENV": "development_ts_node",
+                "MINIMAL_RUN": "true",
+                "RUN_ID": "12345"
+            }
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch KMQ (Minimal + God Mode)",
+            "runtimeArgs": ["-r", "@swc-node/register"],
+            "args": ["${workspaceFolder}/src/kmq.ts"],
+            "envFile": "${workspaceFolder}/.env",
+            "outputCapture": "std",
+            "env": {
+                "NODE_ENV": "development_ts_node",
+                "MINIMAL_RUN": "true",
+                "RUN_ID": "12345",
+                "GOD_MODE": "true"
             }
         }
     ]

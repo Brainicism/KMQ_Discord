@@ -363,11 +363,17 @@ export default class BotWorker extends BaseClusterWorker {
         logger.info(`Run ID is ${process.env.RUN_ID}`);
 
         if (EnvVariableManager.isGodMode()) {
-            logger.info("============================================");
             logger.info(
-                "Running in god mode. All songs are available for selection, but their corresponding audio will not play",
+                "========================================================================================",
             );
-            logger.info("============================================");
+
+            logger.info(
+                "Running in god mode. All songs are available for selection, but their corresponding audio will not play. Run `npm run dev-no-god` for normal behavior.",
+            );
+
+            logger.info(
+                "========================================================================================",
+            );
         }
 
         logger.info(
