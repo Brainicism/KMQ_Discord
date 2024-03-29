@@ -17,6 +17,7 @@ import {
 } from "./helpers/management_utils";
 import AppCommandsAction from "./enums/app_command_action";
 import EnvType from "./enums/env_type";
+import EnvVariableManager from "./env_variable_manager";
 import EvalCommand from "./commands/admin/eval";
 import GeminiClient from "./helpers/gemini_client";
 import KmqConfiguration from "./kmq_configuration";
@@ -329,7 +330,7 @@ export default class BotWorker extends BaseClusterWorker {
             logger.info(`${this.logHeader()} | Initializing Gemini Client...`);
             State.geminiClient = new GeminiClient();
 
-            if (process.env.MINIMAL_RUN !== "true") {
+            if (!EnvVariableManager.isMinimalRun()) {
                 logger.info(
                     `${this.logHeader()} | Loading cached application data...`,
                 );
@@ -360,6 +361,14 @@ export default class BotWorker extends BaseClusterWorker {
         }
 
         logger.info(`Run ID is ${process.env.RUN_ID}`);
+
+        if (EnvVariableManager.isGodMode()) {
+            logger.info("============================================");
+            logger.info(
+                "Running in god mode. All songs are available for selection, but their corresponding audio will not play",
+            );
+            logger.info("============================================");
+        }
 
         logger.info(
             `${this.logHeader()} | Logged in as '${State.client.user.username}'! in '${

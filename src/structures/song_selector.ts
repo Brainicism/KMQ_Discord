@@ -13,6 +13,7 @@ import {
     shufflePartitionedArray,
 } from "../helpers/utils";
 import ArtistType from "../enums/option_types/artist_type";
+import EnvVariableManager from "../env_variable_manager";
 import GameRound from "./game_round";
 import LanguageType from "../enums/option_types/language_type";
 import OstPreference from "../enums/option_types/ost_preference";
@@ -46,19 +47,19 @@ export default class SongSelector {
     public selectedSongs: SelectedSongs | null;
 
     public static QueriedSongFields = [
-        "available_songs.song_name_en as songName",
-        "available_songs.song_name_ko as hangulSongName",
-        "available_songs.artist_name_en as artistName",
-        "available_songs.artist_name_ko as hangulArtistName",
-        "available_songs.link as youtubeLink",
-        "available_songs.original_link as originalLink",
-        "available_songs.publishedon as publishDate",
-        "available_songs.members",
-        "available_songs.id_artist as artistID",
-        "available_songs.issolo as isSolo",
-        "available_songs.tags",
-        "available_songs.views",
-        "available_songs.vtype",
+        "song_name_en as songName",
+        "song_name_ko as hangulSongName",
+        "artist_name_en as artistName",
+        "artist_name_ko as hangulArtistName",
+        "link as youtubeLink",
+        "original_link as originalLink",
+        "publishedon as publishDate",
+        "members",
+        "id_artist as artistID",
+        "issolo as isSolo",
+        "tags",
+        "views",
+        "vtype",
     ] as const;
 
     /** List of songs played with /shuffle unique enabled */
@@ -370,7 +371,11 @@ export default class SongSelector {
         const gameOptions = this.guildPreference.gameOptions;
         let result: Array<QueriedSong> = [];
         let queryBuilder = dbContext.kmq
-            .selectFrom("available_songs")
+            .selectFrom(
+                EnvVariableManager.isGodMode()
+                    ? "expected_available_songs"
+                    : "available_songs",
+            )
             .select(SongSelector.QueriedSongFields);
 
         if (gameOptions.forcePlaySongID) {

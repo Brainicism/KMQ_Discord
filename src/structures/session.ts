@@ -21,6 +21,7 @@ import {
     underline,
 } from "../helpers/utils";
 import { sql } from "kysely";
+import EnvVariableManager from "../env_variable_manager";
 import Eris from "eris";
 import FactGenerator from "../fact_generator";
 import GameRound from "./game_round";
@@ -627,6 +628,7 @@ export default abstract class Session {
      * @returns whether the song streaming began successfully
      */
     protected async playSong(messageContext: MessageContext): Promise<boolean> {
+        const isGodMode = EnvVariableManager.isGodMode();
         const { round } = this;
         if (round === null) {
             return false;
@@ -641,8 +643,7 @@ export default abstract class Session {
             return false;
         }
 
-        const songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${round.song.youtubeLink}.ogg`;
-
+        let songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${round.song.youtubeLink}.ogg`;
         let seekLocation = 0;
         const seekType = this.isListeningSession()
             ? SeekType.BEGINNING
@@ -657,9 +658,12 @@ export default abstract class Session {
         )?.duration;
 
         if (!songDuration) {
-            logger.error(
-                `Song duration for ${round.song.youtubeLink} unexpectedly uncached. Defaulting to 60s`,
-            );
+            if (!isGodMode) {
+                logger.error(
+                    `Song duration for ${round.song.youtubeLink} unexpectedly uncached. Defaulting to 60s`,
+                );
+            }
+
             songDuration = 60;
         }
 
@@ -674,6 +678,24 @@ export default abstract class Session {
             default:
                 seekLocation = songDuration * (0.6 * Math.random());
                 break;
+        }
+
+        if (isGodMode) {
+            /*
+                오빤 강남스타일
+                강남스타일
+                오빤 강남스타일
+                강남스타일
+                오빤 강남스타일
+
+                Eh- Sexy Lady
+                오빤 강남스타일
+                Eh- Sexy Lady
+                오오오오
+            */
+            songLocation = `${process.env.SONG_DOWNLOAD_DIR}/9bZkp7q19f0.ogg`;
+            songDuration = 252;
+            seekLocation = 70;
         }
 
         const stream = fs.createReadStream(songLocation);
