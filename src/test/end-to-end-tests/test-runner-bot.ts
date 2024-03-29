@@ -293,7 +293,7 @@ async function evaluateStage(messageResponse?: {
     title: string;
     description: string;
     parsedGameOptions?: ParsedGameOptionValues;
-}): Promise<void> {
+}): Promise<boolean> {
     if (CURRENT_STAGE === null) {
         logError("evaluateStage called before test began.");
         process.exit(1);
@@ -337,12 +337,13 @@ async function evaluateStage(messageResponse?: {
         )
     ) {
         log(`STAGE ${CURRENT_STAGE.stage} | Passed check!`);
+        return true;
     } else {
-        log(`STAGE ${CURRENT_STAGE.stage} | Failed check!`);
-        failedTests.push(testStage.command);
+        log(
+            `STAGE ${CURRENT_STAGE.stage} | Current message failed check, waiting for next...`,
+        );
+        return false;
     }
-
-    await proceedNextStage();
 }
 
 bot.on("messageCreate", async (msg) => {
@@ -387,7 +388,6 @@ bot.on("messageCreate", async (msg) => {
         return;
     }
 
-    CURRENT_STAGE.processed = true;
     const testStage = TEST_SUITE.tests[CURRENT_STAGE.stage]!;
 
     let parsedGameOptions: ParsedGameOptionValues | undefined;
@@ -395,6 +395,11 @@ bot.on("messageCreate", async (msg) => {
     switch (testStage.expectedResponseType) {
         case KmqResponseType.GAME_OPTIONS_RESPONSE:
             parsedGameOptions = convertGameOptionsMessage(combinedDescription);
+            if (Object.keys(parsedGameOptions).length === 0) {
+                debug("Non-game options message received, skipping..");
+                return;
+            }
+
             break;
         case KmqResponseType.NONE:
             // if no response was expected, dont process incoming ones
@@ -408,11 +413,16 @@ bot.on("messageCreate", async (msg) => {
             break;
     }
 
-    await evaluateStage({
+    const stagePass = await evaluateStage({
         title: title!,
         description: combinedDescription,
         parsedGameOptions,
     });
+
+    if (stagePass) {
+        CURRENT_STAGE.processed = true;
+        await proceedNextStage();
+    }
 });
 
 async function ensureVoiceConnection(): Promise<void> {
