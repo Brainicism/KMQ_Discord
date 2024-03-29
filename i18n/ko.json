@@ -1575,7 +1575,7 @@
         },
         "interaction": {
             "bookmarked": {
-                "description": "게임이 끝나면 {{songName}}에 대한 링크가 포함된 다이렉트 메시지를 받게 됩니다.",
+                "description": "게임이 끝나면 '{{songName}}'에 대한 링크가 포함된 다이렉트 메시지를 받게 됩니다.",
                 "message": {
                     "playedOn": "{{date}}에 플레이함.",
                     "title": "북마크된 노래들"

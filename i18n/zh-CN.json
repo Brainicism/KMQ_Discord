@@ -1575,7 +1575,7 @@
         },
         "interaction": {
             "bookmarked": {
-                "description": "游戏结束后，您将收到一条包含 {{songName}} 链接的直接消息。",
+                "description": "游戏结束时，您将收到一条直接消息，其中包含指向 '{{songName}}' 的链接。",
                 "message": {
                     "playedOn": "{{date}} 播放",
                     "title": "收藏的歌曲"

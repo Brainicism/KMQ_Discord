@@ -1575,7 +1575,7 @@
         },
         "interaction": {
             "bookmarked": {
-                "description": "Je ontvangt aan het einde van het spel een direct bericht met een link naar {{songName}}.",
+                "description": "Je ontvangt een direct bericht met een link naar '{{songName}}' aan het einde van het spel.",
                 "message": {
                     "playedOn": "Gespeeld op {{date}}",
                     "title": "Nummers met bladwijzer"

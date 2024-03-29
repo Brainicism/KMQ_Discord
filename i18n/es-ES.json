@@ -1575,7 +1575,7 @@
         },
         "interaction": {
             "bookmarked": {
-                "description": "Recibirás un mensaje directo con un enlace a {{songName}} al final del juego.",
+                "description": "Recibirás un mensaje directo con un enlace a '{{songName}}' al final del juego.",
                 "message": {
                     "playedOn": "Reproducido en {{date}}",
                     "title": "Canciones marcadas como favoritas"
