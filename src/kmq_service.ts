@@ -5,6 +5,7 @@ import { RedditClient } from "./helpers/reddit_client";
 import { chooseRandom, retryJob } from "./helpers/utils";
 import BotListingManager from "./helpers/bot_listing_manager";
 import EnvType from "./enums/env_type";
+import EnvVariableManager from "./env_variable_manager";
 import FactGenerator from "./fact_generator";
 import GeminiClient from "./helpers/gemini_client";
 import LocaleType from "./enums/locale_type";
@@ -64,7 +65,7 @@ export default class ServiceWorker extends BaseServiceWorker {
             await this.reloadFactCache();
         });
 
-        if (process.env.MINIMAL_RUN !== "true") {
+        if (EnvVariableManager.isMinimalRun()) {
             await this.reloadNews();
             await this.reloadFactCache();
         }

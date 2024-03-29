@@ -19,6 +19,7 @@ import {
 import { getNewConnection } from "../database_context";
 import { pathExists } from "../helpers/utils";
 import EnvType from "../enums/env_type";
+import EnvVariableManager from "../env_variable_manager";
 import KmqConfiguration from "../kmq_configuration";
 import downloadAndConvertSongs from "../scripts/download-new-songs";
 import fs, { promises as fsp } from "fs";
@@ -238,7 +239,7 @@ async function bootstrapDatabases(): Promise<void> {
             process.exit(1);
         }
 
-        if (process.env.IS_STANDBY === "true") {
+        if (EnvVariableManager.isStandby()) {
             const alreadyPromoted = await pathExists(PROMOTED_COOKIE);
             if (!alreadyPromoted) {
                 logger.info("Preparing standby instance");

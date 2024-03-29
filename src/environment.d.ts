@@ -42,5 +42,6 @@ declare namespace NodeJS {
         END_TO_END_TEST_BOT_CHANNEL: string | undefined;
         END_TO_END_TEST_BOT_VOICE_CHANNEL: string | undefined;
         RUN_ID: string | undefined;
+        GOD_MODE: string | undefined;
     }
 }
