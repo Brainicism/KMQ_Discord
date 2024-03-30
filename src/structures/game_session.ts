@@ -633,15 +633,13 @@ export default class GameSession extends Session {
             Date.now() - round.songStartedAt! <
             this.guildPreference.gameOptions.guessTimeout! * 1000
         ) {
+            // Prevent spamming clip actions
             await tryCreateInteractionErrorAcknowledgement(
                 interaction,
+                null,
                 i18n.translate(
                     this.guildID,
-                    "misc.failure.interaction.clipActionTooEarly.title",
-                ),
-                i18n.translate(
-                    this.guildID,
-                    "misc.failure.interaction.clipActionTooEarly.description",
+                    "misc.failure.interaction.clipActionTooEarly",
                 ),
             );
             return true;
@@ -652,77 +650,52 @@ export default class GameSession extends Session {
         switch (clipAction) {
             case ClipAction.REPLAY:
                 clipRound.replayRequested(messageContext.author.id);
-                if (clipRound.isReplayMajority()) {
-                    await tryCreateInteractionSuccessAcknowledgement(
-                        interaction,
-                        i18n.translate(
-                            this.guildID,
-                            "misc.replay.success.title",
-                        ),
-                        i18n.translate(
-                            this.guildID,
-                            "misc.replay.success.description",
-                        ),
-                        true,
-                    );
-
-                    await this.playSong(messageContext, clipAction);
-                    clipRound.resetRequesters();
-                } else {
-                    await tryCreateInteractionSuccessAcknowledgement(
-                        interaction,
-                        i18n.translate(
-                            this.guildID,
-                            "misc.replay.requested.title",
-                        ),
-                        i18n.translate(
-                            this.guildID,
-                            "misc.replay.requested.description",
-                        ),
-                        true,
-                    );
-                }
-
+                await tryCreateInteractionSuccessAcknowledgement(
+                    interaction,
+                    i18n.translate(
+                        this.guildID,
+                        clipRound.isReplayMajority()
+                            ? "misc.replay"
+                            : "misc.clip.replayRequest",
+                    ),
+                    i18n.translate(
+                        this.guildID,
+                        clipRound.isReplayMajority()
+                            ? "misc.clip.success"
+                            : "misc.clip.requested",
+                    ),
+                    !clipRound.isReplayMajority(),
+                );
                 break;
             case ClipAction.NEW_CLIP:
                 clipRound.newClipRequested(messageContext.author.id);
-                if (clipRound.isNewClipMajority()) {
-                    await tryCreateInteractionSuccessAcknowledgement(
-                        interaction,
-                        i18n.translate(
-                            this.guildID,
-                            "misc.newClip.success.title",
-                        ),
-                        i18n.translate(
-                            this.guildID,
-                            "misc.newClip.success.description",
-                        ),
-                        true,
-                    );
-
-                    await this.playSong(messageContext, clipAction);
-                    clipRound.resetRequesters();
-                } else {
-                    await tryCreateInteractionSuccessAcknowledgement(
-                        interaction,
-                        i18n.translate(
-                            this.guildID,
-                            "misc.newClip.requested.title",
-                        ),
-                        i18n.translate(
-                            this.guildID,
-                            "misc.newClip.requested.description",
-                        ),
-                        true,
-                    );
-                }
-
+                await tryCreateInteractionSuccessAcknowledgement(
+                    interaction,
+                    i18n.translate(
+                        this.guildID,
+                        clipRound.isNewClipMajority()
+                            ? "misc.newClip"
+                            : "misc.clip.newClipRequest",
+                    ),
+                    i18n.translate(
+                        this.guildID,
+                        clipRound.isNewClipMajority()
+                            ? "misc.clip.success"
+                            : "misc.clip.requested",
+                    ),
+                    !clipRound.isNewClipMajority(),
+                );
                 break;
             default:
                 logger.warn(
                     `gid: ${this.guildID} | Invalid clip action: ${clipAction}`,
                 );
                 break;
+        }
+
+        if (clipRound.isReplayMajority()) {
+            await this.playSong(messageContext, clipAction);
+            clipRound.resetRequesters();
         }
 
         return true;
@@ -1949,7 +1922,6 @@ export default class GameSession extends Session {
                             : i18n.translate(this.guildID, "misc.song"),
                 },
             ),
-            description: i18n.translate(this.guildID, "misc.inGame.clipMode"),
             thumbnailUrl: KmqImages.LISTENING,
             components: [
                 {
@@ -1966,14 +1938,14 @@ export default class GameSession extends Session {
                 type: 2,
                 style: 1,
                 custom_id: ClipAction.REPLAY,
-                label: i18n.translate(this.guildID, "misc.interaction.replay"),
+                label: i18n.translate(this.guildID, "misc.replay"),
                 emoji: { name: "🔁", id: null },
             },
             {
                 type: 2,
                 style: 1,
                 custom_id: ClipAction.NEW_CLIP,
-                label: i18n.translate(this.guildID, "misc.interaction.newClip"),
+                label: i18n.translate(this.guildID, "misc.newClip"),
                 emoji: { name: "🎬", id: null },
             },
         ];

@@ -367,55 +367,58 @@ export default class GameRound extends Round {
      */
     async interactionMarkAnswers(correctGuesses: number): Promise<void> {
         if (!this.interactionMessage) return;
+        const components = this.interactionComponents.map((x) => ({
+            type: 1,
+            components: x.components.map((y: Eris.InteractionButton) => {
+                if (
+                    Object.values(ClipAction).includes(
+                        y.custom_id as ClipAction,
+                    )
+                ) {
+                    // TODO heart here
+                    return {
+                        label: y.label,
+                        custom_id: y.custom_id,
+                        style: y.style,
+                        type: 2,
+                        disabled: true,
+                    };
+                }
+
+                const noGuesses =
+                    this.interactionIncorrectAnswerUUIDs[y.custom_id] === 0;
+
+                let label = y.label;
+                let style: 1 | 3 | 4;
+                if (this.interactionCorrectAnswerUUID === y.custom_id) {
+                    if (correctGuesses) {
+                        label += ` (${correctGuesses})`;
+                    }
+
+                    style = 3;
+                } else if (noGuesses) {
+                    style = 1;
+                } else {
+                    label += ` (${
+                        this.interactionIncorrectAnswerUUIDs[y.custom_id]
+                    })`;
+                    style = 4;
+                }
+
+                return {
+                    label,
+                    custom_id: y.custom_id,
+                    style,
+                    type: 2,
+                    disabled: true,
+                };
+            }),
+        }));
+
         try {
             await this.interactionMessage.edit({
                 embeds: this.interactionMessage.embeds,
-                components: this.interactionComponents.map((x) => ({
-                    type: 1,
-                    components: x.components
-                        .filter(
-                            (y) =>
-                                !Object.values(ClipAction).includes(
-                                    y.custom_id as ClipAction,
-                                ),
-                        )
-                        .map((z: Eris.InteractionButton) => {
-                            const noGuesses =
-                                this.interactionIncorrectAnswerUUIDs[
-                                    z.custom_id
-                                ] === 0;
-
-                            let label = z.label;
-                            let style: 1 | 3 | 4;
-                            if (
-                                this.interactionCorrectAnswerUUID ===
-                                z.custom_id
-                            ) {
-                                if (correctGuesses) {
-                                    label += ` (${correctGuesses})`;
-                                }
-
-                                style = 3;
-                            } else if (noGuesses) {
-                                style = 1;
-                            } else {
-                                label += ` (${
-                                    this.interactionIncorrectAnswerUUIDs[
-                                        z.custom_id
-                                    ]
-                                })`;
-                                style = 4;
-                            }
-
-                            return {
-                                label,
-                                custom_id: z.custom_id,
-                                style,
-                                type: 2,
-                                disabled: true,
-                            };
-                        }),
-                })),
+                components,
             });
         } catch (e) {
             logger.warn(

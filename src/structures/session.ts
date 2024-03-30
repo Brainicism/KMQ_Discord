@@ -657,10 +657,7 @@ export default abstract class Session {
         }
 
         let songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${round.song.youtubeLink}.ogg`;
-        let seekLocation: number | null = null;
-        if (this.isGameSession() && this.isClipMode()) {
-            seekLocation = (round as ClipGameRound).seekLocation;
-        }
+        let seekLocation = 0;
 
         const seekType = this.isListeningSession()
             ? SeekType.BEGINNING
@@ -701,7 +698,7 @@ export default abstract class Session {
             // Clip mode and the user requested another segment
             seekLocation = songDuration * (0.6 * Math.random());
         } else if (clipAction === ClipAction.REPLAY) {
-            // Replay the same segment by not modifying seekLocation
+            seekLocation = (round as ClipGameRound).seekLocation!;
         }
 
         if (isGodMode) {

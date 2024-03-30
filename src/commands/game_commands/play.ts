@@ -1181,6 +1181,12 @@ export default class PlayCommand implements BaseCommand {
             }
         }
 
+        if (gameType === GameType.CLIP) {
+            await guildPreference.setGuessTimeout(
+                GuessTimeoutCommand.TIMER_DEFAULT_VALUE,
+            );
+        }
+
         if (
             gameType !== GameType.CLIP &&
             guildPreference.isGuessTimeoutSet() &&
