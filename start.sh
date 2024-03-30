@@ -6,7 +6,7 @@ rebuild () {
     npx tsc
 }
 
-RUN_ID=$(cat /proc/sys/kernel/random/uuid)
+RUN_ID=$(openssl rand -hex 12)
 
 if [ "${MINIMAL_RUN}" != "true" ]; then
     echo "Bootstrapping..."
@@ -24,7 +24,7 @@ if [[ $1 == 'native' ]]
 then
     echo "Killing running instances..."
     ps x | grep node | grep "${PWD}/" | grep -E "kmq\.js|cluster_manager\.js|kmq\.ts" | awk '{print $1}' | xargs kill &> /dev/null || echo "No running instances to kill"
-    
+
     if [ "${NODE_ENV}" == "production" ]; then
         echo "Cleaning project..."
         npm run clean
