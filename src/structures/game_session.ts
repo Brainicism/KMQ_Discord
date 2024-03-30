@@ -652,7 +652,7 @@ export default class GameSession extends Session {
                             ? "misc.clip.success"
                             : "misc.clip.requested",
                         {
-                            voteCounter: clipRound.newClipVoteCounter(),
+                            voteCounter: clipRound.replayVoteCounter(),
                         },
                     ),
                     !clipRound.isReplayMajority(),
