@@ -889,7 +889,7 @@
                 "description": "Memulai permainan KMQ.",
                 "example": {
                     "classic": "Mulai permainan KMQ klasik (ketik tebakan Anda terlebih dahulu untuk mendapatkan poin)",
-                    "clip": "Tebak lagu berdasarkan penggalan singkat",
+                    "clip": "Tebak lagu berdasarkan cuplikan singkat",
                     "elimination": "Mulai permainan eliminasi KMQ di mana setiap pemain memulai dengan {{lives}} nyawa",
                     "hidden": "Mulai permainan KMQ tersembunyi, tempat pemain hanya bisa menjawab dengan /tebak",
                     "suddenDeath": "Mulai game sudden death KMQ, tebak lagunya atau game berakhir",
@@ -1331,6 +1331,18 @@
                 "name": "pengaturwaktu",
                 "usage": {
                     "seconds": "detik"
+                },
+                "failure": {
+                    "tooLowTimer": {
+                        "description": "Nilai timer yang diberikan terlalu rendah. Silakan masukkan nilai yang lebih besar dari {{minTimer}}.",
+                        "title": "Timer Terlalu Rendah"
+                    }
+                },
+                "warning": {
+                    "lowTimerOnlyForClip": {
+                        "description": "Nilai timer sekecil ini hanya didukung untuk {{playClip}}. Ini akan direset di luar mode permainan tersebut.",
+                        "title": "Timer Rendah Hanya Untuk Mode Permainan Klip"
+                    }
                 }
             }
         },
@@ -1438,7 +1450,14 @@
             "newClipRequest": "Permintaan Klip Baru",
             "replayRequest": "Permintaan Putar Ulang",
             "requested": "{{voteCounter}} suara diterima.",
-            "success": "{{voteCounter}} suara diterima. Memutar..."
+            "success": "{{voteCounter}} suara diterima. Memutar...",
+            "newClip": {
+                "request": {
+                    "description": "{{voteCounter}} suara klip baru diterima.",
+                    "title": "Permintaan Klip Baru"
+                },
+                "success": "{{voteCounter}} suara klip baru diterima. Memutar..."
+            }
         },
         "conflict": "konflik",
         "duration": "Durasi",
@@ -1482,7 +1501,7 @@
             "interaction": {
                 "alreadyEliminated": "Anda sudah tereliminasi pada ronde ini.",
                 "bookmarkOutsideGame": "Anda hanya dapat menandai lagu selama permainan.",
-                "clipActionTooEarly": "Tunggu sebentar sebelum memutar klip.",
+                "clipActionTooEarly": "Tunggu sebentar sebelum memainkan klip.",
                 "eliminated": "Anda telah tereliminasi pada ronde ini.",
                 "guildBanned": "Server ini dilarang menggunakan KMQ. Untuk banding, hubungi server dukungan resmi KMQ di {{supportServer}}.",
                 "guildOnly": "KMQ hanya dapat digunakan di server.",

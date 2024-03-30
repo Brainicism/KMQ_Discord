@@ -889,7 +889,7 @@
                 "description": "KMQ 게임을 시작합니다.",
                 "example": {
                     "classic": "KMQ의 클래식 게임을 시작합니다. (포인트를 얻으려면 먼저 추측을 입력하십시오.)",
-                    "clip": "짧은 스니펫을 바탕으로 노래 제목 맞추기",
+                    "clip": "짧은 스니펫을 바탕으로 노래를 맞혀 보세요",
                     "elimination": "각 플레이어가 {{lives}}개의 생명으로 시작하는 KMQ의 목숨 게임을 시작합니다.",
                     "hidden": "플레이어가 /맞혀봐 로만 대답할 수 있는 KMQ의 숨겨진 게임을 시작합니다",
                     "suddenDeath": "누군가 노래를 맞혀야 하거나 게임이 끝나는 폭사 게임을 시작하세요",
@@ -1331,6 +1331,18 @@
                 "name": "타이머",
                 "usage": {
                     "seconds": "초"
+                },
+                "failure": {
+                    "tooLowTimer": {
+                        "description": "주어진 타이머 값이 너무 낮습니다. {{minTimer}}보다 큰 값을 입력해 주세요.",
+                        "title": "너무 낮은 타이머"
+                    }
+                },
+                "warning": {
+                    "lowTimerOnlyForClip": {
+                        "description": "이렇게 작은 타이머 값은 {{playClip}}에만 지원됩니다. 해당 게임 모드를 벗어나면 재설정됩니다.",
+                        "title": "클립 게임 모드 전용 저타이머"
+                    }
                 }
             }
         },
@@ -1438,7 +1450,14 @@
             "newClipRequest": "새 클립 요청",
             "replayRequest": "다시 보기 요청",
             "requested": "{{voteCounter}}표를 받았습니다.",
-            "success": "{{voteCounter}}표를 받았습니다. 재생 중..."
+            "success": "{{voteCounter}}표를 받았습니다. 재생 중...",
+            "newClip": {
+                "request": {
+                    "description": "{{voteCounter}}개의 새 클립 투표를 받았습니다.",
+                    "title": "새 클립 요청"
+                },
+                "success": "{{voteCounter}}개의 새 클립 투표를 받았습니다. 재생 중..."
+            }
         },
         "conflict": "conflict",
         "duration": "시간",
@@ -1482,7 +1501,7 @@
             "interaction": {
                 "alreadyEliminated": "당신은 이미 이번 라운드에서 탈락했습니다.",
                 "bookmarkOutsideGame": "게임 중에만 노래를 북마크할 수 있습니다.",
-                "clipActionTooEarly": "클립을 재생하기 전에 잠시 기다리세요.",
+                "clipActionTooEarly": "클립을 재생하기 전에 잠시 기다려 주세요.",
                 "eliminated": "당신은 이번 라운드에서 탈락했습니다.",
                 "guildBanned": "이 서버는 KMQ 사용이 금지되었습니다. 항소하려면 {{supportServer}}의 공식 KMQ 지원 서버에 연락하세요.",
                 "guildOnly": "KMQ는 서버에서만 사용할 수 있습니다.",
@@ -1661,7 +1680,7 @@
             "title": "잠시만 기다려주십시오..."
         },
         "releaseDate": "발매 날짜",
-        "replay": "다시 보기",
+        "replay": "재생",
         "restart": {
             "description_hard": "작동 중지 시간은 약 몇 초입니다. 진행 상황이 저장되었는지 확인하려면 현재 게임을 종료하세요!",
             "title": "{{timeUntilRestart}} 분 후 재시동 예정"

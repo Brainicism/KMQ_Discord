@@ -1331,6 +1331,18 @@
                 "name": "timer",
                 "usage": {
                     "seconds": "seconden"
+                },
+                "failure": {
+                    "tooLowTimer": {
+                        "description": "De gegeven timerwaarde is te laag. Voer een waarde in die groter is dan {{minTimer}}.",
+                        "title": "Te Lage Timer"
+                    }
+                },
+                "warning": {
+                    "lowTimerOnlyForClip": {
+                        "description": "Een timerwaarde zo klein wordt alleen ondersteund voor {{playClip}}. Buiten die spelmodus wordt het gereset.",
+                        "title": "Alleen lage timer voor de Clip-spelmodus"
+                    }
                 }
             }
         },
@@ -1438,7 +1450,14 @@
             "newClipRequest": "Verzoek voor nieuwe clip",
             "replayRequest": "Verzoek tot opnieuw afspelen",
             "requested": "{{voteCounter}} stemmen ontvangen.",
-            "success": "{{voteCounter}} stemmen ontvangen. Aan het afspelen..."
+            "success": "{{voteCounter}} stemmen ontvangen. Aan het afspelen...",
+            "newClip": {
+                "request": {
+                    "description": "{{voteCounter}} nieuwe clipstemmen ontvangen.",
+                    "title": "Nieuw Clipverzoek"
+                },
+                "success": "{{voteCounter}} nieuwe clipstemmen ontvangen. Speelt af..."
+            }
         },
         "conflict": "conflict",
         "duration": "Tijdsduur",
@@ -1618,7 +1637,7 @@
             "title": "🚀 Upgrade!"
         },
         "listOfGroups": "lijst van groepen",
-        "newClip": "Nieuwe clip",
+        "newClip": "Nieuwe Clip",
         "no": "Nee",
         "none": "Geen",
         "notApplicable": "N/B",
@@ -1661,7 +1680,7 @@
             "title": "Wachten..."
         },
         "releaseDate": "Uitgavedatum",
-        "replay": "Opnieuw afspelen",
+        "replay": "Herhaling",
         "restart": {
             "description_hard": "De downtime zal ongeveer een paar seconden zijn. Beëindig het huidige spel om ervoor te zorgen dat uw voortgang wordt opgeslagen!",
             "title": "Aankomende herstart over {{timeUntilRestart}} minuten."

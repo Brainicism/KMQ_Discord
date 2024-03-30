@@ -889,7 +889,7 @@
                 "description": "Startet ein Spiel von KMQ.",
                 "example": {
                     "classic": "Starte ein klassisches Spiel von KMQ (gib zuerst deinen Tipp ein, um einen Punkt zu erhalten)",
-                    "clip": "Errate das Lied anhand eines kurzen Ausschnitts",
+                    "clip": "Rate das Lied anhand eines kurzen Ausschnitts",
                     "elimination": "Starte ein Eliminierungs-Spiel von KMQ, bei dem jeder Spieler mit {{lives}} Leben beginnt",
                     "hidden": "Starte ein verstecktes Spiel von KMQ, bei dem die Spieler nur mit /guess antworten können",
                     "suddenDeath": "Starte ein KMQ-Sudden-Death-Spiel: Ein Fehlversuch beendet es",
@@ -1331,6 +1331,18 @@
                 "name": "timer",
                 "usage": {
                     "seconds": "Sekunden"
+                },
+                "failure": {
+                    "tooLowTimer": {
+                        "description": "Der angegebene Timerwert ist zu niedrig. Bitte gib einen Wert ein, der größer als {{minTimer}} ist.",
+                        "title": "Zu niedriger Timer"
+                    }
+                },
+                "warning": {
+                    "lowTimerOnlyForClip": {
+                        "description": "Ein Timerwert dieser Größe wird nur für {{playClip}} unterstützt. Außerhalb dieses Spielmodus wird er zurückgesetzt.",
+                        "title": "Niedriger Timer nur für Clip-Spielmodus"
+                    }
                 }
             }
         },
@@ -1438,7 +1450,14 @@
             "newClipRequest": "Neue Clipanfrage",
             "replayRequest": "Wiederholungsanfrage",
             "requested": "{{voteCounter}} Stimmen erhalten.",
-            "success": "{{voteCounter}} Stimmen erhalten. Wiedergabe..."
+            "success": "{{voteCounter}} Stimmen erhalten. Wiedergabe...",
+            "newClip": {
+                "request": {
+                    "description": "{{voteCounter}} neue Clip-Stimmen erhalten.",
+                    "title": "Neue Clip-Anfrage"
+                },
+                "success": "{{voteCounter}} neue Clip-Stimmen erhalten. Wird abgespielt..."
+            }
         },
         "conflict": "Konflikt",
         "duration": "Dauer",

@@ -889,7 +889,7 @@
                 "description": "Comienza un juego de KMQ.",
                 "example": {
                     "classic": "Comienza un juego clásico de KMQ (escribe tu respuesta primero para obtener un punto)",
-                    "clip": "Adivina la canción basándote en un breve fragmento",
+                    "clip": "Adivina la canción con base en un fragmento corto",
                     "elimination": "Comienza un juego de eliminación de KMQ donde cada jugador comienza con {{lives}} vidas",
                     "hidden": "Comienza un juego oculto de KMQ, donde los jugadores solo pueden responder con /guess",
                     "suddenDeath": "Inicia un juego de muerte súbita en KMQ: acierta la canción o la partida termina",
@@ -1331,6 +1331,18 @@
                 "name": "temporizador",
                 "usage": {
                     "seconds": "segundos"
+                },
+                "failure": {
+                    "tooLowTimer": {
+                        "description": "El valor del temporizador dado es demasiado bajo. Por favor, introduce un valor mayor que {{minTimer}}.",
+                        "title": "Temporizador Demasiado Bajo"
+                    }
+                },
+                "warning": {
+                    "lowTimerOnlyForClip": {
+                        "description": "Un valor de temporizador tan pequeño solo se admite para {{playClip}}. Se restablecerá fuera de ese modo de juego.",
+                        "title": "Solo Temporizador Bajo Para el Modo de Juego de Clip"
+                    }
                 }
             }
         },
@@ -1438,7 +1450,14 @@
             "newClipRequest": "Solicitud de Nuevo Clip",
             "replayRequest": "Solicitud de Repetición",
             "requested": "{{voteCounter}} votos recibidos.",
-            "success": "{{voteCounter}} votos recibidos. Reproduciendo..."
+            "success": "{{voteCounter}} votos recibidos. Reproduciendo...",
+            "newClip": {
+                "request": {
+                    "description": "{{voteCounter}} votos nuevos de clip recibidos.",
+                    "title": "Solicitud de Nuevo Clip"
+                },
+                "success": "{{voteCounter}} votos nuevos de clip recibidos. Reproduciendo..."
+            }
         },
         "conflict": "conflicto",
         "duration": "Duración",

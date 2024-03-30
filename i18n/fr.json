@@ -1331,6 +1331,18 @@
                 "name": "minuteur",
                 "usage": {
                     "seconds": "secondes"
+                },
+                "failure": {
+                    "tooLowTimer": {
+                        "description": "La valeur de la minuterie donnée est trop basse. Veuillez entrer une valeur supérieure à {{minTimer}}.",
+                        "title": "Minuterie trop basse"
+                    }
+                },
+                "warning": {
+                    "lowTimerOnlyForClip": {
+                        "description": "Une valeur de minuterie aussi basse est uniquement prise en charge pour {{playClip}}. Elle sera réinitialisée en dehors de ce mode de jeu.",
+                        "title": "Minuterie basse uniquement pour le mode de jeu Clip"
+                    }
                 }
             }
         },
@@ -1438,7 +1450,14 @@
             "newClipRequest": "Nouvelle Demande de Clip",
             "replayRequest": "Demande de Rejouer",
             "requested": "{{voteCounter}} votes reçus.",
-            "success": "{{voteCounter}} votes reçus. Lecture en cours..."
+            "success": "{{voteCounter}} votes reçus. Lecture en cours...",
+            "newClip": {
+                "request": {
+                    "description": "{{voteCounter}} nouveaux votes pour le clip reçus.",
+                    "title": "Demande de nouveau clip"
+                },
+                "success": "{{voteCounter}} nouveaux votes pour le clip reçus. Lecture..."
+            }
         },
         "conflict": "conflit",
         "duration": "Durée",
@@ -1482,7 +1501,7 @@
             "interaction": {
                 "alreadyEliminated": "Vous avez déjà été éliminé(e) ce tour.",
                 "bookmarkOutsideGame": "Vous ne pouvez marquer des chansons que pendant une partie.",
-                "clipActionTooEarly": "Attendez un peu avant de lancer le clip.",
+                "clipActionTooEarly": "Attendez un peu avant de jouer le clip.",
                 "eliminated": "Vous avez été éliminé(e) ce tour.",
                 "guildBanned": "Ce serveur est banni de l'utilisation de KMQ. Pour faire appel, contactez le serveur de support officiel de KMQ à {{supportServer}}.",
                 "guildOnly": "KMQ ne peut être utilisé que dans les serveurs.",

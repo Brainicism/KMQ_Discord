@@ -889,7 +889,7 @@
                 "description": "开始一场 KMQ 游戏。",
                 "example": {
                     "classic": "开始一场经典模式的 KMQ 游戏(首先输入你的猜测以获得一分)",
-                    "clip": "根据一小段音乐猜歌曲",
+                    "clip": "根据一个短片段猜歌曲",
                     "elimination": "开始一场淘汰模式的 KMQ 游戏，每个玩家都有 {{lives}} 条命",
                     "hidden": "开始一个KMQ的隐藏游戏，玩家只能用/guess命令回答问题。",
                     "suddenDeath": "开始 KMQ 突然死亡游戏，需要有人猜对歌曲，否则游戏结束",
@@ -1331,6 +1331,18 @@
                 "name": "计时器",
                 "usage": {
                     "seconds": "秒"
+                },
+                "failure": {
+                    "tooLowTimer": {
+                        "description": "给定的计时器值太低。请输入一个大于 {{minTimer}} 的值。",
+                        "title": "计时器太低"
+                    }
+                },
+                "warning": {
+                    "lowTimerOnlyForClip": {
+                        "description": "这么小的计时器值只支持 {{playClip}}。在那个游戏模式之外将会被重置。",
+                        "title": "低计时器只适用于剪辑游戏模式"
+                    }
                 }
             }
         },
@@ -1438,7 +1450,14 @@
             "newClipRequest": "新剪辑请求",
             "replayRequest": "重播请求",
             "requested": "收到了 {{voteCounter}} 票。",
-            "success": "收到了 {{voteCounter}} 票。正在播放..."
+            "success": "收到了 {{voteCounter}} 票。正在播放...",
+            "newClip": {
+                "request": {
+                    "description": "收到 {{voteCounter}} 个新剪辑投票。",
+                    "title": "新剪辑请求"
+                },
+                "success": "收到 {{voteCounter}} 个新剪辑投票。正在播放..."
+            }
         },
         "conflict": "冲突",
         "duration": "时长",
@@ -1482,7 +1501,7 @@
             "interaction": {
                 "alreadyEliminated": "你已经在本轮比赛中被淘汰了。",
                 "bookmarkOutsideGame": "你只能在游戏期间收藏歌曲。",
-                "clipActionTooEarly": "播放剪辑前稍等片刻。",
+                "clipActionTooEarly": "播放剪辑前稍等。",
                 "eliminated": "你已经在本轮比赛中被淘汰了。",
                 "guildBanned": "此服务器被禁止使用KMQ。如需申诉，请联系{{supportServer}}的官方KMQ支持服务器。",
                 "guildOnly": "KMQ只能在服务器中使用。",

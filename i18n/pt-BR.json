@@ -889,7 +889,7 @@
                 "description": "Iniciar partida de KMQ.",
                 "example": {
                     "classic": "Começar um jogo clássico de KMQ (digite seu palpite primeiro para ganhar um ponto)",
-                    "clip": "Adivinhe a música com base em um trecho curto",
+                    "clip": "Adivinhe a música com base em um curto trecho",
                     "elimination": "Iniciar uma partida de eliminação do KMQ, onde cada jogador começa com {{lives}} vidas",
                     "hidden": "Iniciar um jogo oculto de KMQ, onde os jogadores só podem responder com /guess",
                     "suddenDeath": "Iniciar um jogo de KMQ mata-mata, onde alguém deve acertar a música ou o jogo termina",
@@ -1331,6 +1331,18 @@
                 "name": "temporizador",
                 "usage": {
                     "seconds": "segundos"
+                },
+                "failure": {
+                    "tooLowTimer": {
+                        "description": "O valor do temporizador fornecido é muito baixo. Por favor, insira um valor maior que {{minTimer}}.",
+                        "title": "Temporizador Muito Baixo"
+                    }
+                },
+                "warning": {
+                    "lowTimerOnlyForClip": {
+                        "description": "Um valor de temporizador tão pequeno só é suportado para {{playClip}}. Ele será redefinido fora desse modo de jogo.",
+                        "title": "Temporizador Baixo Apenas Para o Modo de Jogo de Trecho"
+                    }
                 }
             }
         },
@@ -1438,7 +1450,14 @@
             "newClipRequest": "Solicitação de Novo Trecho",
             "replayRequest": "Solicitação de Repetição",
             "requested": "{{voteCounter}} votos recebidos.",
-            "success": "{{voteCounter}} votos recebidos. Reproduzindo..."
+            "success": "{{voteCounter}} votos recebidos. Reproduzindo...",
+            "newClip": {
+                "request": {
+                    "description": "{{voteCounter}} novos votos de trecho recebidos.",
+                    "title": "Pedido de Novo Trecho"
+                },
+                "success": "{{voteCounter}} novos votos de trecho recebidos. Reproduzindo..."
+            }
         },
         "conflict": "conflito",
         "duration": "Duração",

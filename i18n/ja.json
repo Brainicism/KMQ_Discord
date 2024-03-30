@@ -889,7 +889,7 @@
                 "description": "KMQのゲームを開始します。",
                 "example": {
                     "classic": "クラシックなKMQゲームを開始します（最初に推測してポイントを獲得してください）",
-                    "clip": "短いスニペットで曲を当ててください",
+                    "clip": "短いスニペットから曲を当ててみてください",
                     "elimination": "エリミネーションモードのKMQゲームを開始します。各プレイヤーは{{lives}}つのライフでスタートします",
                     "hidden": "KMQの非公開ゲームを開始し、プレイヤーは/guessでしか回答できません",
                     "suddenDeath": "サドンデス形式のKMQを開始します。誰か一人が曲を当てるか、ゲームが終了します。",
@@ -1331,6 +1331,18 @@
                 "name": "タイマー",
                 "usage": {
                     "seconds": "秒"
+                },
+                "failure": {
+                    "tooLowTimer": {
+                        "description": "指定されたタイマー値が低すぎます。{{minTimer}}より大きい値を入力してください。",
+                        "title": "タイマーが低すぎます"
+                    }
+                },
+                "warning": {
+                    "lowTimerOnlyForClip": {
+                        "description": "このような小さいタイマー値は{{playClip}}でのみサポートされています。そのゲームモードの外ではリセットされます。",
+                        "title": "低タイマーはクリップゲームモードのみのためです"
+                    }
                 }
             }
         },
@@ -1438,7 +1450,14 @@
             "newClipRequest": "新しいクリップリクエスト",
             "replayRequest": "リプレイリクエスト",
             "requested": "{{voteCounter}}票が受け取られました。",
-            "success": "{{voteCounter}}票を受け取りました。再生中..."
+            "success": "{{voteCounter}}票を受け取りました。再生中...",
+            "newClip": {
+                "request": {
+                    "description": "{{voteCounter}}件の新しいクリップ投票を受け取りました。",
+                    "title": "新しいクリップのリクエスト"
+                },
+                "success": "{{voteCounter}}件の新しいクリップ投票を受け取りました。再生中..."
+            }
         },
         "conflict": "競合",
         "duration": "期間",
