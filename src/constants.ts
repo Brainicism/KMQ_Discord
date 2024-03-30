@@ -63,7 +63,7 @@ export const DEFAULT_ADVANCED_SETTINGS = {
 };
 
 export const CLIP_REPLAY_DELAY = 1000;
-export const MAX_REPLAYS = 5;
+export const MAX_REPLAYS = 2;
 
 export const KMQ_USER_AGENT = "KMQ (K-pop Music Quiz)";
 export const specialFfmpegArgs = {
