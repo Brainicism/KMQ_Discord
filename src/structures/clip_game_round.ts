@@ -67,6 +67,20 @@ export default class ClipGameRound extends GameRound {
     }
 
     /**
+     * @returns a formatted string of the replay vote count
+     */
+    replayVoteCounter(): string {
+        return `${this.replayRequesters.size}/${getMajorityCount(this.guildID)}`;
+    }
+
+    /**
+     * @returns a formatted string of the new clip vote count
+     */
+    newClipVoteCounter(): string {
+        return `${this.newClipRequesters.size}/${getMajorityCount(this.guildID)}`;
+    }
+
+    /**
      * Resets the requesters for replay and new clip
      */
     resetRequesters(): void {

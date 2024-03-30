@@ -663,6 +663,9 @@ export default class GameSession extends Session {
                         clipRound.isReplayMajority()
                             ? "misc.clip.success"
                             : "misc.clip.requested",
+                        {
+                            voteCounter: clipRound.newClipVoteCounter(),
+                        },
                     ),
                     !clipRound.isReplayMajority(),
                 );
@@ -682,6 +685,9 @@ export default class GameSession extends Session {
                         clipRound.isNewClipMajority()
                             ? "misc.clip.success"
                             : "misc.clip.requested",
+                        {
+                            voteCounter: clipRound.newClipVoteCounter(),
+                        },
                     ),
                     !clipRound.isNewClipMajority(),
                 );
