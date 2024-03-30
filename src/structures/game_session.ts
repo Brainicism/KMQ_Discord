@@ -227,19 +227,7 @@ export default class GameSession extends Session {
             return null;
         }
 
-        if (this.isHiddenMode()) {
-            // Show players that haven't guessed and a button to guess
-            await this.sendHiddenGuessMessage(
-                messageContext,
-                round as GameRound,
-            );
-        } else if (this.isClipMode() && !this.isMultipleChoiceMode()) {
-            await this.sendClipMessage(messageContext, round as GameRound);
-        }
-
-        if (this.isMultipleChoiceMode()) {
-            await this.sendMultipleChoiceOptionsMessage();
-        }
+        await this.sendStartRoundMessage(messageContext, round);
 
         return round;
     }
@@ -700,6 +688,7 @@ export default class GameSession extends Session {
         }
 
         if (clipRound.isReplayMajority() || clipRound.isNewClipMajority()) {
+            await this.sendStartRoundMessage(messageContext, clipRound);
             await this.playSong(messageContext, clipAction);
             clipRound.resetRequesters();
         }
@@ -1955,5 +1944,24 @@ export default class GameSession extends Session {
                 emoji: { name: "🎬", id: null },
             },
         ];
+    }
+
+    private async sendStartRoundMessage(
+        messageContext: MessageContext,
+        round: Round,
+    ): Promise<void> {
+        if (this.isHiddenMode()) {
+            // Show players that haven't guessed and a button to guess
+            await this.sendHiddenGuessMessage(
+                messageContext,
+                round as GameRound,
+            );
+        } else if (this.isClipMode() && !this.isMultipleChoiceMode()) {
+            await this.sendClipMessage(messageContext, round as GameRound);
+        }
+
+        if (this.isMultipleChoiceMode()) {
+            await this.sendMultipleChoiceOptionsMessage();
+        }
     }
 }
