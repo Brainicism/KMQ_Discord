@@ -101,8 +101,8 @@ export default async (
                     return false;
                 }
 
-                // parse as integer for now, might cause problems later?
-                const intArg = parseInt(arg, 10);
+                // parse as float for now, might cause problems later? :O
+                const intArg = parseFloat(arg);
                 if (
                     validation.minValue != null &&
                     intArg < validation.minValue
