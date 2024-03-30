@@ -1,6 +1,11 @@
 import * as uuid from "uuid";
+import {
+    CLIP_REPLAY_DELAY,
+    KmqImages,
+    MAX_REPLAYS,
+    specialFfmpegArgs,
+} from "../constants";
 import { IPCLogger } from "../logger";
-import { KmqImages, specialFfmpegArgs } from "../constants";
 import {
     clickableSlashCommand,
     generateEmbed,
@@ -13,13 +18,14 @@ import {
     tryCreateInteractionSuccessAcknowledgement,
     tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
-import { ensureVoiceConnection } from "../helpers/game_utils";
 import {
+    delay,
     friendlyFormattedNumber,
     getMention,
     truncatedString,
     underline,
 } from "../helpers/utils";
+import { ensureVoiceConnection } from "../helpers/game_utils";
 import { sql } from "kysely";
 import ClipAction from "../enums/clip_action";
 import EnvVariableManager from "../env_variable_manager";
@@ -790,7 +796,14 @@ export default abstract class Session {
             this.stopGuessTimeout();
 
             if (this.isGameSession() && this.isClipMode()) {
-                return;
+                await delay(CLIP_REPLAY_DELAY);
+                if (
+                    !round.finished &&
+                    (round as ClipGameRound).replays < MAX_REPLAYS
+                ) {
+                    await this.playSong(messageContext, ClipAction.REPLAY);
+                    return;
+                }
             }
 
             await this.endRound(

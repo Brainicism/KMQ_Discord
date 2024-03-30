@@ -62,6 +62,9 @@ export const DEFAULT_ADVANCED_SETTINGS = {
     [AdvancedCommandAction.SONG_START_DELAY]: 3,
 };
 
+export const CLIP_REPLAY_DELAY = 1000;
+export const MAX_REPLAYS = 5;
+
 export const KMQ_USER_AGENT = "KMQ (K-pop Music Quiz)";
 export const specialFfmpegArgs = {
     [SpecialType.REVERSE]: (seek: number, duration: number) => ({

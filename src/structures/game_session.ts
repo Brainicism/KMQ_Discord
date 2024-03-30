@@ -635,59 +635,28 @@ export default class GameSession extends Session {
 
         const clipRound = round as ClipGameRound;
         const clipAction = interaction.data.custom_id as ClipAction;
-        switch (clipAction) {
-            case ClipAction.REPLAY:
-                clipRound.replayRequested(messageContext.author.id);
-                await tryCreateInteractionSuccessAcknowledgement(
-                    interaction,
-                    i18n.translate(
-                        this.guildID,
-                        clipRound.isReplayMajority()
-                            ? "misc.replay"
-                            : "misc.clip.replayRequest",
-                    ),
-                    i18n.translate(
-                        this.guildID,
-                        clipRound.isReplayMajority()
-                            ? "misc.clip.success"
-                            : "misc.clip.requested",
-                        {
-                            voteCounter: clipRound.replayVoteCounter(),
-                        },
-                    ),
-                    !clipRound.isReplayMajority(),
-                );
-                break;
-            case ClipAction.NEW_CLIP:
-                clipRound.newClipRequested(messageContext.author.id);
-                await tryCreateInteractionSuccessAcknowledgement(
-                    interaction,
-                    i18n.translate(
-                        this.guildID,
-                        clipRound.isNewClipMajority()
-                            ? "misc.newClip"
-                            : "misc.clip.newClipRequest",
-                    ),
-                    i18n.translate(
-                        this.guildID,
-                        clipRound.isNewClipMajority()
-                            ? "misc.clip.success"
-                            : "misc.clip.requested",
-                        {
-                            voteCounter: clipRound.newClipVoteCounter(),
-                        },
-                    ),
-                    !clipRound.isNewClipMajority(),
-                );
-                break;
-            default:
-                logger.warn(
-                    `gid: ${this.guildID} | Invalid clip action: ${clipAction}`,
-                );
-                break;
-        }
+        clipRound.newClipRequested(messageContext.author.id);
+        await tryCreateInteractionSuccessAcknowledgement(
+            interaction,
+            i18n.translate(
+                this.guildID,
+                clipRound.isNewClipMajority()
+                    ? "misc.newClip"
+                    : "misc.clip.newClipRequest",
+            ),
+            i18n.translate(
+                this.guildID,
+                clipRound.isNewClipMajority()
+                    ? "misc.clip.success"
+                    : "misc.clip.requested",
+                {
+                    voteCounter: clipRound.newClipVoteCounter(),
+                },
+            ),
+            !clipRound.isNewClipMajority(),
+        );
 
-        if (clipRound.isReplayMajority() || clipRound.isNewClipMajority()) {
+        if (clipRound.isNewClipMajority()) {
             await this.sendStartRoundMessage(messageContext, clipRound);
             await this.playSong(messageContext, clipAction);
             clipRound.resetRequesters();
@@ -1859,9 +1828,9 @@ export default class GameSession extends Session {
         }
 
         if (this.isClipMode()) {
-            actionRows.unshift({
+            actionRows.push({
                 type: 1,
-                components: this.generateClipButtons(),
+                components: this.generateClipButton(),
             });
         }
 
@@ -1894,7 +1863,7 @@ export default class GameSession extends Session {
         round.interactionMessage = await sendInfoMessage(messageContext, {
             ...this.generateRemainingPlayersMessage(round),
             components: this.isClipMode()
-                ? [{ type: 1, components: this.generateClipButtons() }]
+                ? [{ type: 1, components: this.generateClipButton() }]
                 : undefined,
         });
 
@@ -1921,21 +1890,14 @@ export default class GameSession extends Session {
             components: [
                 {
                     type: 1,
-                    components: this.generateClipButtons(),
+                    components: this.generateClipButton(),
                 },
             ],
         });
     }
 
-    private generateClipButtons(): Eris.InteractionButton[] {
+    private generateClipButton(): Eris.InteractionButton[] {
         return [
-            {
-                type: 2,
-                style: 1,
-                custom_id: ClipAction.REPLAY,
-                label: i18n.translate(this.guildID, "misc.replay"),
-                emoji: { name: "🔁", id: null },
-            },
             {
                 type: 2,
                 style: 1,
