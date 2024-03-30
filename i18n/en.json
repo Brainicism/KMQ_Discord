@@ -1435,10 +1435,13 @@
             "yourScore": "Your score is {{score}}."
         },
         "clip": {
-            "newClipRequest": "New Clip Request",
-            "replayRequest": "Replay Request",
-            "requested": "{{voteCounter}} votes received.",
-            "success": "{{voteCounter}} votes received. Playing..."
+            "newClip": {
+                "request": {
+                    "title": "New Clip Request",
+                    "description": "{{voteCounter}} new clip votes received."
+                },
+                "success": "{{voteCounter}} new clip votes received. Playing..."
+            }
         },
         "conflict": "conflict",
         "duration": "Duration",
