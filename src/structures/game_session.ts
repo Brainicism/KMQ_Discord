@@ -699,7 +699,7 @@ export default class GameSession extends Session {
                 break;
         }
 
-        if (clipRound.isReplayMajority()) {
+        if (clipRound.isReplayMajority() || clipRound.isNewClipMajority()) {
             await this.playSong(messageContext, clipAction);
             clipRound.resetRequesters();
         }
