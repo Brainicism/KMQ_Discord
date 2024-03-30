@@ -129,8 +129,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
-                                .NUMBER, // TODO
-                            // Math.round(settingValue * 10) / 10,
+                                .NUMBER,
                             required: true,
                             min_value: GuessTimeoutCommand.TIMER_MIN_VALUE,
                             max_value: GuessTimeoutCommand.TIMER_MAX_VALUE,
@@ -171,7 +170,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             timer = null;
         } else {
-            timer = parseInt(parsedMessage.components[0]!, 10);
+            timer = parseFloat(parsedMessage.components[0]!);
         }
 
         await GuessTimeoutCommand.updateOption(
@@ -205,6 +204,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
                 )} | Guess timeout disabled.`,
             );
         } else {
+            timer = Math.round(timer! * 10) / 10;
             if (timer < GuessTimeoutCommand.TIMER_MIN_VALUE_NON_CLIP) {
                 if (session) {
                     if (!session.isGameSession() || !session.isClipMode()) {
