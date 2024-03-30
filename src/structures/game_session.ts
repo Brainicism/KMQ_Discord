@@ -621,16 +621,19 @@ export default class GameSession extends Session {
             Date.now() - round.songStartedAt! <
             this.guildPreference.gameOptions.guessTimeout! * 1000
         ) {
-            // Prevent spamming clip actions
-            await tryCreateInteractionErrorAcknowledgement(
-                interaction,
-                null,
-                i18n.translate(
-                    this.guildID,
-                    "misc.failure.interaction.clipActionTooEarly",
-                ),
-            );
-            return true;
+            const clipGameRound = round as ClipGameRound;
+            if (clipGameRound.getReplays() < 1) {
+                // Prevent spamming clip actions
+                await tryCreateInteractionErrorAcknowledgement(
+                    interaction,
+                    null,
+                    i18n.translate(
+                        this.guildID,
+                        "misc.failure.interaction.clipActionTooEarly",
+                    ),
+                );
+                return true;
+            }
         }
 
         const clipRound = round as ClipGameRound;
