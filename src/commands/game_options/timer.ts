@@ -27,9 +27,10 @@ const logger = new IPCLogger("guessTimeout");
 // eslint-disable-next-line import/no-unused-modules
 export default class GuessTimeoutCommand implements BaseCommand {
     static TIMER_MIN_VALUE = 0.25;
-    static TIMER_DEFAULT_VALUE = 1;
+    static TIMER_DEFAULT_VALUE = 2;
     static TIMER_MIN_VALUE_NON_CLIP = 2;
     static TIMER_MAX_VALUE = 180;
+    static TIMER_MAX_ACCEPTABLE_CLIP_BEFORE_RESET = 5;
     aliases = ["time", "timeout", "t"];
 
     preRunChecks = [
