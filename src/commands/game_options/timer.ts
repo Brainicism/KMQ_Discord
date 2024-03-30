@@ -26,7 +26,7 @@ const logger = new IPCLogger("guessTimeout");
 
 // eslint-disable-next-line import/no-unused-modules
 export default class GuessTimeoutCommand implements BaseCommand {
-    static TIMER_MIN_VALUE = 0.25;
+    static TIMER_MIN_VALUE = 0.75;
     static TIMER_DEFAULT_VALUE = 2;
     static TIMER_MIN_VALUE_NON_CLIP = 2;
     static TIMER_MAX_VALUE = 180;
@@ -204,7 +204,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
                 )} | Guess timeout disabled.`,
             );
         } else {
-            timer = Math.round(timer! * 10) / 10;
+            timer = Math.round(timer! * 100) / 100;
             if (timer < GuessTimeoutCommand.TIMER_MIN_VALUE_NON_CLIP) {
                 if (session) {
                     if (!session.isGameSession() || !session.isClipMode()) {
