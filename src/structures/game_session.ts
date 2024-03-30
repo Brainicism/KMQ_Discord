@@ -233,7 +233,7 @@ export default class GameSession extends Session {
                 messageContext,
                 round as GameRound,
             );
-        } else if (this.isClipMode()) {
+        } else if (this.isClipMode() && !this.isMultipleChoiceMode()) {
             await this.sendClipMessage(messageContext, round as GameRound);
         }
 
@@ -1866,6 +1866,13 @@ export default class GameSession extends Session {
                 break;
         }
 
+        if (this.isClipMode()) {
+            actionRows.unshift({
+                type: 1,
+                components: this.generateClipButtons(),
+            });
+        }
+
         round.interactionComponents = actionRows;
 
         round.interactionMessage = await sendInfoMessage(
@@ -1892,10 +1899,12 @@ export default class GameSession extends Session {
         messageContext: MessageContext,
         round: GameRound,
     ): Promise<void> {
-        round.interactionMessage = await sendInfoMessage(
-            messageContext,
-            this.generateRemainingPlayersMessage(round),
-        );
+        round.interactionMessage = await sendInfoMessage(messageContext, {
+            ...this.generateRemainingPlayersMessage(round),
+            components: this.isClipMode()
+                ? [{ type: 1, components: this.generateClipButtons() }]
+                : undefined,
+        });
 
         this.startHiddenUpdateTimer();
     }
@@ -1921,30 +1930,28 @@ export default class GameSession extends Session {
             components: [
                 {
                     type: 1,
-                    components: [
-                        {
-                            type: 2,
-                            style: 1,
-                            custom_id: ClipAction.REPLAY,
-                            label: i18n.translate(
-                                this.guildID,
-                                "misc.interaction.replay",
-                            ),
-                            emoji: { name: "🔁", id: null },
-                        },
-                        {
-                            type: 2,
-                            style: 1,
-                            custom_id: ClipAction.NEW_CLIP,
-                            label: i18n.translate(
-                                this.guildID,
-                                "misc.interaction.newClip",
-                            ),
-                            emoji: { name: "🎬", id: null },
-                        },
-                    ],
+                    components: this.generateClipButtons(),
                 },
             ],
         });
+    }
+
+    private generateClipButtons(): Eris.InteractionButton[] {
+        return [
+            {
+                type: 2,
+                style: 1,
+                custom_id: ClipAction.REPLAY,
+                label: i18n.translate(this.guildID, "misc.interaction.replay"),
+                emoji: { name: "🔁", id: null },
+            },
+            {
+                type: 2,
+                style: 1,
+                custom_id: ClipAction.NEW_CLIP,
+                label: i18n.translate(this.guildID, "misc.interaction.newClip"),
+                emoji: { name: "🎬", id: null },
+            },
+        ];
     }
 }

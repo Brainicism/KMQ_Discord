@@ -15,6 +15,7 @@ import {
     friendlyFormattedNumber,
     getMention,
 } from "../helpers/utils";
+import ClipAction from "../enums/clip_action";
 import ExpBonusModifier from "../enums/exp_bonus_modifier";
 import GuessModeType from "../enums/option_types/guess_mode_type";
 import KmqMember from "./kmq_member";
@@ -371,40 +372,49 @@ export default class GameRound extends Round {
                 embeds: this.interactionMessage.embeds,
                 components: this.interactionComponents.map((x) => ({
                     type: 1,
-                    components: x.components.map((y) => {
-                        const z = y as Eris.InteractionButton;
-                        const noGuesses =
-                            this.interactionIncorrectAnswerUUIDs[
-                                z.custom_id
-                            ] === 0;
-
-                        let label = z.label;
-                        let style: 1 | 3 | 4;
-                        if (this.interactionCorrectAnswerUUID === z.custom_id) {
-                            if (correctGuesses) {
-                                label += ` (${correctGuesses})`;
-                            }
-
-                            style = 3;
-                        } else if (noGuesses) {
-                            style = 1;
-                        } else {
-                            label += ` (${
+                    components: x.components
+                        .filter(
+                            (y) =>
+                                !Object.values(ClipAction).includes(
+                                    y.custom_id as ClipAction,
+                                ),
+                        )
+                        .map((z: Eris.InteractionButton) => {
+                            const noGuesses =
                                 this.interactionIncorrectAnswerUUIDs[
                                     z.custom_id
-                                ]
-                            })`;
-                            style = 4;
-                        }
+                                ] === 0;
 
-                        return {
-                            label,
-                            custom_id: z.custom_id,
-                            style,
-                            type: 2,
-                            disabled: true,
-                        };
-                    }),
+                            let label = z.label;
+                            let style: 1 | 3 | 4;
+                            if (
+                                this.interactionCorrectAnswerUUID ===
+                                z.custom_id
+                            ) {
+                                if (correctGuesses) {
+                                    label += ` (${correctGuesses})`;
+                                }
+
+                                style = 3;
+                            } else if (noGuesses) {
+                                style = 1;
+                            } else {
+                                label += ` (${
+                                    this.interactionIncorrectAnswerUUIDs[
+                                        z.custom_id
+                                    ]
+                                })`;
+                                style = 4;
+                            }
+
+                            return {
+                                label,
+                                custom_id: z.custom_id,
+                                style,
+                                type: 2,
+                                disabled: true,
+                            };
+                        }),
                 })),
             });
         } catch (e) {
