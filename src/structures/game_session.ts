@@ -379,9 +379,9 @@ export default class GameSession extends Session {
             remainingDuration,
         );
 
-        round.roundMessageID = endRoundMessage?.id as string;
-
-        this.updateBookmarkSongList(round);
+        if (endRoundMessage) {
+            this.updateBookmarkSongList(endRoundMessage.id, round.song);
+        }
 
         if (this.scoreboard.gameFinished(this.guildPreference)) {
             await this.endSession("Game finished due to game options", false);
@@ -624,20 +624,133 @@ export default class GameSession extends Session {
         await super.updateOwner();
     }
 
+    async handleClipComponentInteraction(
+        round: GameRound,
+        interaction: Eris.ComponentInteraction<Eris.TextableChannel>,
+        messageContext: MessageContext,
+    ): Promise<boolean> {
+        if (
+            Date.now() - round.songStartedAt! <
+            this.guildPreference.gameOptions.guessTimeout! * 1000
+        ) {
+            await tryCreateInteractionErrorAcknowledgement(
+                interaction,
+                i18n.translate(
+                    this.guildID,
+                    "misc.failure.interaction.clipActionTooEarly.title",
+                ),
+                i18n.translate(
+                    this.guildID,
+                    "misc.failure.interaction.clipActionTooEarly.description",
+                ),
+            );
+            return true;
+        }
+
+        const clipRound = round as ClipGameRound;
+        const clipAction = interaction.data.custom_id as ClipAction;
+        switch (clipAction) {
+            case ClipAction.REPLAY:
+                clipRound.replayRequested(messageContext.author.id);
+                if (clipRound.isReplayMajority()) {
+                    await tryCreateInteractionSuccessAcknowledgement(
+                        interaction,
+                        i18n.translate(
+                            this.guildID,
+                            "misc.replay.success.title",
+                        ),
+                        i18n.translate(
+                            this.guildID,
+                            "misc.replay.success.description",
+                        ),
+                        true,
+                    );
+
+                    await this.playSong(messageContext, clipAction);
+                    clipRound.resetRequesters();
+                } else {
+                    await tryCreateInteractionSuccessAcknowledgement(
+                        interaction,
+                        i18n.translate(
+                            this.guildID,
+                            "misc.replay.requested.title",
+                        ),
+                        i18n.translate(
+                            this.guildID,
+                            "misc.replay.requested.description",
+                        ),
+                        true,
+                    );
+                }
+
+                break;
+            case ClipAction.NEW_CLIP:
+                clipRound.newClipRequested(messageContext.author.id);
+                if (clipRound.isNewClipMajority()) {
+                    await tryCreateInteractionSuccessAcknowledgement(
+                        interaction,
+                        i18n.translate(
+                            this.guildID,
+                            "misc.newClip.success.title",
+                        ),
+                        i18n.translate(
+                            this.guildID,
+                            "misc.newClip.success.description",
+                        ),
+                        true,
+                    );
+
+                    await this.playSong(messageContext, clipAction);
+                    clipRound.resetRequesters();
+                } else {
+                    await tryCreateInteractionSuccessAcknowledgement(
+                        interaction,
+                        i18n.translate(
+                            this.guildID,
+                            "misc.newClip.requested.title",
+                        ),
+                        i18n.translate(
+                            this.guildID,
+                            "misc.newClip.requested.description",
+                        ),
+                        true,
+                    );
+                }
+
+                break;
+            default:
+                logger.warn(
+                    `gid: ${this.guildID} | Invalid clip action: ${clipAction}`,
+                );
+                break;
+        }
+
+        return true;
+    }
+
     async handleComponentInteraction(
         interaction: Eris.ComponentInteraction<Eris.TextableChannel>,
         messageContext: MessageContext,
-    ): Promise<void> {
+    ): Promise<boolean> {
+        const interactionHandled = await super.handleComponentInteraction(
+            interaction,
+            messageContext,
+        );
+
+        if (interactionHandled) {
+            return true;
+        }
+
         if (
             !(await this.handleInSessionInteractionFailures(
                 interaction,
                 messageContext,
             ))
         ) {
-            return;
+            return true;
         }
 
-        if (!this.round) return;
+        if (!this.round) return false;
         const round = this.round;
 
         if (
@@ -646,101 +759,11 @@ export default class GameSession extends Session {
                 interaction.data.custom_id as ClipAction,
             )
         ) {
-            if (
-                Date.now() - round.songStartedAt! <
-                this.guildPreference.gameOptions.guessTimeout! * 1000
-            ) {
-                await tryCreateInteractionErrorAcknowledgement(
-                    interaction,
-                    i18n.translate(
-                        this.guildID,
-                        "misc.failure.interaction.clipActionTooEarly.title",
-                    ),
-                    i18n.translate(
-                        this.guildID,
-                        "misc.failure.interaction.clipActionTooEarly.description",
-                    ),
-                );
-                return;
-            }
-
-            const clipRound = round as ClipGameRound;
-            const clipAction = interaction.data.custom_id as ClipAction;
-            switch (clipAction) {
-                case ClipAction.REPLAY:
-                    clipRound.replayRequested(messageContext.author.id);
-                    if (clipRound.isReplayMajority()) {
-                        await tryCreateInteractionSuccessAcknowledgement(
-                            interaction,
-                            i18n.translate(
-                                this.guildID,
-                                "misc.replay.success.title",
-                            ),
-                            i18n.translate(
-                                this.guildID,
-                                "misc.replay.success.description",
-                            ),
-                            true,
-                        );
-
-                        await this.playSong(messageContext, clipAction);
-                        clipRound.resetRequesters();
-                    } else {
-                        await tryCreateInteractionSuccessAcknowledgement(
-                            interaction,
-                            i18n.translate(
-                                this.guildID,
-                                "misc.replay.requested.title",
-                            ),
-                            i18n.translate(
-                                this.guildID,
-                                "misc.replay.requested.description",
-                            ),
-                            true,
-                        );
-                    }
-
-                    break;
-                case ClipAction.NEW_CLIP:
-                    clipRound.newClipRequested(messageContext.author.id);
-                    if (clipRound.isNewClipMajority()) {
-                        await tryCreateInteractionSuccessAcknowledgement(
-                            interaction,
-                            i18n.translate(
-                                this.guildID,
-                                "misc.newClip.success.title",
-                            ),
-                            i18n.translate(
-                                this.guildID,
-                                "misc.newClip.success.description",
-                            ),
-                            true,
-                        );
-
-                        await this.playSong(messageContext, clipAction);
-                        clipRound.resetRequesters();
-                    } else {
-                        await tryCreateInteractionSuccessAcknowledgement(
-                            interaction,
-                            i18n.translate(
-                                this.guildID,
-                                "misc.newClip.requested.title",
-                            ),
-                            i18n.translate(
-                                this.guildID,
-                                "misc.newClip.requested.description",
-                            ),
-                            true,
-                        );
-                    }
-
-                    break;
-                default:
-                    logger.warn(
-                        `gid: ${this.guildID} | Invalid clip action: ${clipAction}`,
-                    );
-                    break;
-            }
+            return this.handleClipComponentInteraction(
+                round,
+                interaction,
+                messageContext,
+            );
         } else {
             if (
                 round.getIncorrectGuessers().has(interaction.member!.id) ||
@@ -754,7 +777,7 @@ export default class GameSession extends Session {
                         "misc.failure.interaction.alreadyEliminated",
                     ),
                 );
-                return;
+                return true;
             }
 
             if (!round.isCorrectInteractionAnswer(interaction.data.custom_id)) {
@@ -773,7 +796,7 @@ export default class GameSession extends Session {
 
                 // Add the user as a participant
                 await this.guessSong(messageContext, "", interaction.createdAt);
-                return;
+                return true;
             }
 
             await tryInteractionAcknowledge(interaction);
@@ -790,6 +813,7 @@ export default class GameSession extends Session {
                     : round.song.artistName,
                 interaction.createdAt,
             );
+            return true;
         }
     }
 

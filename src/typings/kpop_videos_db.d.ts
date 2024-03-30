@@ -8,6 +8,7 @@ export type Generated<T> =
 export interface AppKpop {
     alias: Generated<string>;
     awards: Generated<number>;
+    dead: Generated<"n" | "y">;
     has_pak: Generated<"n" | "y">;
     id: number;
     id_artist: number;

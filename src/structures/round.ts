@@ -33,10 +33,7 @@ export default abstract class Round {
     /**  Whether the round has ended */
     public finished: boolean;
 
-    /**  The Discord ID of the end round message */
-    public roundMessageID: string | null;
-
-    /** List of players who have voted to skip the current Round */
+    /** List of players who have opted to skip the current Round */
     public skippers: Set<string>;
 
     /** Whether the Round has been skipped */
@@ -65,7 +62,6 @@ export default abstract class Round {
         this.finished = false;
         this.interactionMessage = null;
         this.interactionMessageNeedsUpdate = false;
-        this.roundMessageID = null;
         this.skippers = new Set();
         this.skipAchieved = false;
         this.interactionComponents = [];

@@ -28,7 +28,8 @@ BEGIN
 		issolo,
 		id_parent_artist,
 		vtype,
-		tags
+		tags,
+		dead
 	FROM expected_available_songs
 	INNER JOIN kmq.cached_song_duration ON expected_available_songs.link = kmq.cached_song_duration.vlink
 	LEFT JOIN kmq.not_downloaded ON expected_available_songs.link = kmq.not_downloaded.vlink

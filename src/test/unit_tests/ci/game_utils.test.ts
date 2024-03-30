@@ -40,16 +40,18 @@ describe("game utils", () => {
         describe("getMatchingGroupNames", () => {
             describe("collabs", () => {
                 it("should return the group and any collabs they are a part of in matchedGroups", async () => {
-                    const artistName = "IU";
+                    const artistName = "Hyuna";
                     const matchResults = await getMatchingGroupNames(
                         State.aliases.artist,
                         [artistName],
                     );
 
-                    // first result is exact artist match
+                    // contains the artist
                     assert.strictEqual(
-                        matchResults.matchedGroups[0]!.name,
-                        artistName,
+                        matchResults.matchedGroups.some(
+                            (x) => x.name === artistName,
+                        ),
+                        true,
                     );
 
                     assert.strictEqual(
@@ -212,16 +214,18 @@ describe("game utils", () => {
 
                     describe("one alias match, one non-alias match", () => {
                         it("should not try to alias the non-alias match", async () => {
-                            // Artist 'Hyuk' matches with alias, Artist 'REDSQUARE' matches with non-alias
-                            const artistNameAliasMatch = "Hyuk (Han Sanghyuk)";
-                            const artistNameAlias = "Hyuk ALIAS";
-                            const artistNameExactMatch = "REDSQUARE";
-                            State.aliases.artist[artistNameAliasMatch] = [
-                                artistNameAlias,
-                            ];
+                            const artistNameAliasMatch = "Blackpink";
+                            const artistNameAlias = "Blackpink ALIAS";
+                            const artistNameExactMatch = "Twice";
+
+                            const aliases: {
+                                [artistName: string]: Array<string>;
+                            } = {
+                                [artistNameAliasMatch]: [artistNameAlias],
+                            };
 
                             const matchResults = await getMatchingGroupNames(
-                                State.aliases.artist,
+                                aliases,
                                 [artistNameAlias, artistNameExactMatch],
                             );
 

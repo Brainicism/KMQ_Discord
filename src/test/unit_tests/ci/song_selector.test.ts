@@ -483,7 +483,9 @@ describe("song selector", () => {
                     await guildPreference.songSelector.reloadSongs();
                     const { songs } = guildPreference.songSelector.getSongs();
 
-                    const expectedSubunitIds = [17, 43, 105, 248, 4531];
+                    const expectedSubunitIds = [
+                        17, 43, 105, 248, 1648, 4531, 6426,
+                    ];
 
                     assert.strict(songs.size > 0);
 

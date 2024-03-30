@@ -1575,7 +1575,7 @@
         },
         "interaction": {
             "bookmarked": {
-                "description": "ゲーム終了時に{{songName}}へのリンクが直接メッセージで送信されます。",
+                "description": "ゲームの終わりに'{{songName}}'へのリンクが含まれたダイレクトメッセージを受け取ります。",
                 "message": {
                     "playedOn": "{{date}}に再生されました。",
                     "title": "ブックマークされた曲"

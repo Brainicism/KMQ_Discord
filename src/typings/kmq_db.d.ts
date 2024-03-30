@@ -10,6 +10,7 @@ export interface AvailableSongs {
     artist_name_en: string;
     artist_name_ko: Generated<string | null>;
     clean_song_name_alpha_numeric: string;
+    dead: "n" | "y";
     id_artist: number;
     id_parent_artist: number;
     issolo: "n" | "y";
@@ -86,6 +87,7 @@ export interface ExpectedAvailableSongs {
     artist_name_en: string;
     artist_name_ko: Generated<string | null>;
     clean_song_name_alpha_numeric: string;
+    dead: "n" | "y";
     id_artist: number;
     id_parent_artist: number;
     issolo: "n" | "y";

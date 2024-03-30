@@ -46,8 +46,6 @@ import type ListeningSession from "./listening_session";
 import type QueriedSong from "./queried_song";
 import type Round from "./round";
 
-const BOOKMARK_MESSAGE_SIZE = 10;
-
 const logger = new IPCLogger("session");
 
 export default abstract class Session {
@@ -312,19 +310,7 @@ export default abstract class Session {
             return;
         }
 
-        const round = this.round;
         this.round = null;
-
-        if (Object.keys(this.songMessageIDs).length === BOOKMARK_MESSAGE_SIZE) {
-            this.songMessageIDs.shift();
-        }
-
-        if (round.roundMessageID) {
-            this.songMessageIDs.push({
-                messageID: round.roundMessageID,
-                song: round.song,
-            });
-        }
 
         // cleanup
         this.stopGuessTimeout();
@@ -575,24 +561,23 @@ export default abstract class Session {
     async handleBookmarkInteraction(
         interaction: Eris.CommandInteraction | Eris.ComponentInteraction,
     ): Promise<void> {
-        let song: QueriedSong | null = null;
+        let messageId: string;
         if (interaction instanceof Eris.CommandInteraction) {
-            song = this.getSongFromMessageID(
-                interaction.data.target_id as string,
-            );
+            messageId = interaction.data.target_id as string;
         } else if (interaction instanceof Eris.ComponentInteraction) {
-            song = this.getSongFromMessageID(interaction.message.id);
+            messageId = interaction.message.id;
+        } else {
+            logger.error(
+                `Unexpected interactionType in handleBookmarkInteraction: ${typeof interaction}`,
+            );
+            return;
         }
 
+        const song = this.getSongFromMessageID(messageId);
+
         if (!song) {
-            await tryCreateInteractionErrorAcknowledgement(
-                interaction,
-                null,
-                i18n.translate(
-                    this.guildID,
-                    "misc.failure.interaction.invalidBookmark",
-                    { BOOKMARK_MESSAGE_SIZE: String(BOOKMARK_MESSAGE_SIZE) },
-                ),
+            logger.error(
+                `Failed to get song from Session.songMessageIDs. messageId = ${messageId}. songMessageIDs = ${Object.keys(this.songMessageIDs).join(", ")}`,
             );
             return;
         }
@@ -622,10 +607,22 @@ export default abstract class Session {
         return this.roundsPlayed;
     }
 
-    abstract handleComponentInteraction(
-        _interaction: Eris.ComponentInteraction,
+    /**
+     * @param interaction - The interaction
+     * @param _messageContext - The message context
+     * @returns whether the interaction has been handled
+     */
+    async handleComponentInteraction(
+        interaction: Eris.ComponentInteraction,
         _messageContext: MessageContext,
-    ): Promise<void>;
+    ): Promise<boolean> {
+        if (interaction.data.custom_id === "bookmark") {
+            await this.handleBookmarkInteraction(interaction);
+            return true;
+        }
+
+        return false;
+    }
 
     /**
      * Prepares a new Round
@@ -878,17 +875,14 @@ export default abstract class Session {
         return true;
     }
 
-    protected updateBookmarkSongList(round: Round): void {
-        if (Object.keys(this.songMessageIDs).length === BOOKMARK_MESSAGE_SIZE) {
-            this.songMessageIDs.shift();
-        }
-
-        if (round.roundMessageID) {
-            this.songMessageIDs.push({
-                messageID: round.roundMessageID,
-                song: round.song,
-            });
-        }
+    protected updateBookmarkSongList(
+        messageId: string,
+        song: QueriedSong,
+    ): void {
+        this.songMessageIDs.push({
+            messageID: messageId,
+            song,
+        });
     }
 
     /**
@@ -973,6 +967,19 @@ export default abstract class Session {
 
         let footerText = `${views}${aliases}${duration}`;
         const thumbnailUrl = `https://img.youtube.com/vi/${youtubeLink}/hqdefault.jpg`;
+        const buttons: Array<Eris.InteractionButton> = [];
+
+        // add bookmark button
+        buttons.push({
+            type: 2,
+            style: 1,
+            custom_id: "bookmark",
+            emoji: {
+                id: null,
+                name: "❤️",
+            },
+        });
+
         if (round instanceof GameRound) {
             if (round.warnTypoReceived) {
                 footerText += `\n/${i18n.translate(
@@ -1000,26 +1007,20 @@ export default abstract class Session {
                 return round.interactionMessage;
             }
         } else if (round instanceof ListeningRound) {
-            const buttons: Array<Eris.InteractionButton> = [];
             round.interactionSkipUUID = uuid.v4() as string;
             buttons.push({
                 type: 2,
                 style: 1,
-                label: i18n.translate(messageContext.guildID, "misc.skip"),
                 custom_id: round.interactionSkipUUID,
+                emoji: {
+                    id: null,
+                    name: "⏩",
+                },
             });
-
-            buttons.push({
-                type: 2,
-                style: 1,
-                label: i18n.translate(messageContext.guildID, "misc.bookmark"),
-                custom_id: "bookmark",
-            });
-
-            round.interactionComponents = [{ type: 1, components: buttons }];
-            embed.components = round.interactionComponents;
         }
 
+        round.interactionComponents = [{ type: 1, components: buttons }];
+        embed.components = round.interactionComponents;
         embed.thumbnailUrl = thumbnailUrl;
         embed.footerText = footerText;
         return sendInfoMessage(messageContext, embed, shouldReply);
