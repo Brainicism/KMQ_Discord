@@ -259,8 +259,8 @@ async function mainLoop(): Promise<void> {
 async function pollVoiceConnectionReady(): Promise<void> {
     const voiceChannel = getVoiceChannel();
 
-    // wait up to 2 minutes for vc to be ready
-    for (let i = 0; i < 12; i++) {
+    // wait up to 5 minutes for vc to be ready
+    for (let i = 0; i < 30; i++) {
         if (voiceChannel.voiceMembers.size === 0) {
             log("Voice channel ready!");
             return;
