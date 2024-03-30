@@ -889,11 +889,11 @@
                 "description": "Startet ein Spiel von KMQ.",
                 "example": {
                     "classic": "Starte ein klassisches Spiel von KMQ (gib zuerst deinen Tipp ein, um einen Punkt zu erhalten)",
+                    "clip": "Errate das Lied anhand eines kurzen Ausschnitts",
                     "elimination": "Starte ein Eliminierungs-Spiel von KMQ, bei dem jeder Spieler mit {{lives}} Leben beginnt",
                     "hidden": "Starte ein verstecktes Spiel von KMQ, bei dem die Spieler nur mit /guess antworten können",
                     "suddenDeath": "Starte ein KMQ-Sudden-Death-Spiel: Ein Fehlversuch beendet es",
-                    "teams": "Bilde beliebig viele Teams und finde heraus, wer zum Sieg beiträgt!",
-                    "clip": "Errate das Lied anhand eines kurzen Ausschnitts"
+                    "teams": "Bilde beliebig viele Teams und finde heraus, wer zum Sieg beiträgt!"
                 },
                 "interaction": {
                     "lives": "Wähle aus, mit wie vielen Leben jeder Spieler beginnt"
@@ -1434,6 +1434,12 @@
         "classic": {
             "yourScore": "Deine Punktzahl ist {{score}}."
         },
+        "clip": {
+            "newClipRequest": "Neue Clipanfrage",
+            "replayRequest": "Wiederholungsanfrage",
+            "requested": "{{voteCounter}} Stimmen erhalten.",
+            "success": "{{voteCounter}} Stimmen erhalten. Wiedergabe..."
+        },
         "conflict": "Konflikt",
         "duration": "Dauer",
         "elimination": {
@@ -1476,13 +1482,13 @@
             "interaction": {
                 "alreadyEliminated": "Du wurdest in dieser Runde bereits eliminiert.",
                 "bookmarkOutsideGame": "Du kannst Songs nur während eines Spiels als Lesezeichen setzen.",
+                "clipActionTooEarly": "Warte kurz, bevor du den Clip abspielst.",
                 "eliminated": "Du wurdest in dieser Runde eliminiert.",
                 "guildBanned": "Dieser Server darf KMQ nicht verwenden. Wende dich für Einsprüche an den offiziellen KMQ-Support-Server unter {{supportServer}}.",
                 "guildOnly": "KMQ kann nur auf Servern verwendet werden.",
                 "invalidBookmark": "Du kannst nur Songs mit Lesezeichen versehen, die in den letzten {{BOOKMARK_MESSAGE_SIZE}} Runden gespielt wurden. Du musst die vom Bot gesendete Nachricht mit dem Song mit einem Lesezeichen versehen.",
                 "optionFromPreviousRound": "Du versuchst, eine Option aus einer bereits abgeschlossenen Runde auszuwählen.",
-                "playerBanned": "Du bist von der Nutzung von KMQ ausgeschlossen. Für Einsprüche wende dich an den offiziellen KMQ-Support-Server unter {{supportServer}}.",
-                "clipActionTooEarly": "Warte kurz, bevor du den Clip abspielst."
+                "playerBanned": "Du bist von der Nutzung von KMQ ausgeschlossen. Für Einsprüche wende dich an den offiziellen KMQ-Support-Server unter {{supportServer}}."
             },
             "maintenanceMode": {
                 "description": "KMQ wird derzeit gewartet. Schauen Sie später noch einmal nach!",
@@ -1612,6 +1618,7 @@
             "title": "🚀 Aufrüsten!"
         },
         "listOfGroups": "Liste der Gruppen",
+        "newClip": "Neuer Clip",
         "no": "Nein",
         "none": "Keiner",
         "notApplicable": "/A",
@@ -1654,6 +1661,7 @@
             "title": "Warten..."
         },
         "releaseDate": "Erscheinungsdatum",
+        "replay": "Wiederholen",
         "restart": {
             "description_hard": "Die Ausfallzeit beträgt etwa einige Sekunden. Bitte beende das aktuelle Spiel, um sicherzustellen, dass dein Fortschritt gespeichert wird!",
             "title": "Neustart in {{timeUntilRestart}} Minuten."
@@ -1681,14 +1689,6 @@
                 "footer": "Wolltest du {{command}} {{addOrRemove}} verwenden?"
             }
         },
-        "yes": "Ja",
-        "clip": {
-            "newClipRequest": "Neue Clipanfrage",
-            "replayRequest": "Wiederholungsanfrage",
-            "requested": "{{voteCounter}} Stimmen erhalten.",
-            "success": "{{voteCounter}} Stimmen erhalten. Wiedergabe..."
-        },
-        "newClip": "Neuer Clip",
-        "replay": "Wiederholen"
+        "yes": "Ja"
     }
 }

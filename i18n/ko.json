@@ -889,11 +889,11 @@
                 "description": "KMQ 게임을 시작합니다.",
                 "example": {
                     "classic": "KMQ의 클래식 게임을 시작합니다. (포인트를 얻으려면 먼저 추측을 입력하십시오.)",
+                    "clip": "짧은 스니펫을 바탕으로 노래 제목 맞추기",
                     "elimination": "각 플레이어가 {{lives}}개의 생명으로 시작하는 KMQ의 목숨 게임을 시작합니다.",
                     "hidden": "플레이어가 /맞혀봐 로만 대답할 수 있는 KMQ의 숨겨진 게임을 시작합니다",
                     "suddenDeath": "누군가 노래를 맞혀야 하거나 게임이 끝나는 폭사 게임을 시작하세요",
-                    "teams": "원하는 만큼 팀을 나누고 우승을 위해 누구에게 의지할 수 있는지 확인해 보십시오!",
-                    "clip": "짧은 스니펫을 바탕으로 노래 제목 맞추기"
+                    "teams": "원하는 만큼 팀을 나누고 우승을 위해 누구에게 의지할 수 있는지 확인해 보십시오!"
                 },
                 "interaction": {
                     "lives": "각 플레이어가 몇 개의 목숨으로 시작하는지 선택합니다."
@@ -1434,6 +1434,12 @@
         "classic": {
             "yourScore": "당신의 점수는 {{score}}점 입니다."
         },
+        "clip": {
+            "newClipRequest": "새 클립 요청",
+            "replayRequest": "다시 보기 요청",
+            "requested": "{{voteCounter}}표를 받았습니다.",
+            "success": "{{voteCounter}}표를 받았습니다. 재생 중..."
+        },
         "conflict": "conflict",
         "duration": "시간",
         "elimination": {
@@ -1476,13 +1482,13 @@
             "interaction": {
                 "alreadyEliminated": "당신은 이미 이번 라운드에서 탈락했습니다.",
                 "bookmarkOutsideGame": "게임 중에만 노래를 북마크할 수 있습니다.",
+                "clipActionTooEarly": "클립을 재생하기 전에 잠시 기다리세요.",
                 "eliminated": "당신은 이번 라운드에서 탈락했습니다.",
                 "guildBanned": "이 서버는 KMQ 사용이 금지되었습니다. 항소하려면 {{supportServer}}의 공식 KMQ 지원 서버에 연락하세요.",
                 "guildOnly": "KMQ는 서버에서만 사용할 수 있습니다.",
                 "invalidBookmark": "최근 {{BOOKMARK_MESSAGE_SIZE}} 라운드에서 재생한 노래만 북마크에 추가할 수 있습니다. 노래가 포함된 봇이 보낸 메시지를 북마크해야 합니다.",
                 "optionFromPreviousRound": "이미 완료된 라운드에서 옵션을 선택하려고 합니다.",
-                "playerBanned": "당신은 KMQ 사용이 금지되었습니다. 항소하려면 {{supportServer}}의 공식 KMQ 지원 서버에 연락하세요.",
-                "clipActionTooEarly": "클립을 재생하기 전에 잠시 기다리세요."
+                "playerBanned": "당신은 KMQ 사용이 금지되었습니다. 항소하려면 {{supportServer}}의 공식 KMQ 지원 서버에 연락하세요."
             },
             "maintenanceMode": {
                 "description": "KMQ는 현재 유지보수 중입니다. 나중에 다시 확인하세요!",
@@ -1612,6 +1618,7 @@
             "title": "🚀 레벨 업을 축하합니다! 🚀"
         },
         "listOfGroups": "그룹 목록",
+        "newClip": "새 클립",
         "no": "아니요",
         "none": "없음",
         "notApplicable": "해당 없음",
@@ -1654,6 +1661,7 @@
             "title": "잠시만 기다려주십시오..."
         },
         "releaseDate": "발매 날짜",
+        "replay": "다시 보기",
         "restart": {
             "description_hard": "작동 중지 시간은 약 몇 초입니다. 진행 상황이 저장되었는지 확인하려면 현재 게임을 종료하세요!",
             "title": "{{timeUntilRestart}} 분 후 재시동 예정"
@@ -1681,14 +1689,6 @@
                 "footer": "{{command}} {{addOrRemove}}을(를) 사용하려고 했습니까?"
             }
         },
-        "yes": "예",
-        "clip": {
-            "newClipRequest": "새 클립 요청",
-            "replayRequest": "다시 보기 요청",
-            "requested": "{{voteCounter}}표를 받았습니다.",
-            "success": "{{voteCounter}}표를 받았습니다. 재생 중..."
-        },
-        "newClip": "새 클립",
-        "replay": "다시 보기"
+        "yes": "예"
     }
 }

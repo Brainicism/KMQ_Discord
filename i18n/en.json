@@ -1434,13 +1434,11 @@
         "classic": {
             "yourScore": "Your score is {{score}}."
         },
-        "replay": "Replay",
-        "newClip": "New Clip",
         "clip": {
-            "replayRequest": "Replay Request",
             "newClipRequest": "New Clip Request",
-            "success": "{{voteCounter}} votes received. Playing...",
-            "requested": "{{voteCounter}} votes received."
+            "replayRequest": "Replay Request",
+            "requested": "{{voteCounter}} votes received.",
+            "success": "{{voteCounter}} votes received. Playing..."
         },
         "conflict": "conflict",
         "duration": "Duration",
@@ -1620,6 +1618,7 @@
             "title": "🚀 Power Up!"
         },
         "listOfGroups": "list of groups",
+        "newClip": "New Clip",
         "no": "No",
         "none": "None",
         "notApplicable": "N/A",
@@ -1662,6 +1661,7 @@
             "title": "Wait..."
         },
         "releaseDate": "Release Date",
+        "replay": "Replay",
         "restart": {
             "description_hard": "Downtime will be approximately a few seconds. Please end the current game to ensure your progress is saved!",
             "title": "Upcoming Restart in {{timeUntilRestart}} Minutes."

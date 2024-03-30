@@ -889,11 +889,11 @@
                 "description": "KMQのゲームを開始します。",
                 "example": {
                     "classic": "クラシックなKMQゲームを開始します（最初に推測してポイントを獲得してください）",
+                    "clip": "短いスニペットで曲を当ててください",
                     "elimination": "エリミネーションモードのKMQゲームを開始します。各プレイヤーは{{lives}}つのライフでスタートします",
                     "hidden": "KMQの非公開ゲームを開始し、プレイヤーは/guessでしか回答できません",
                     "suddenDeath": "サドンデス形式のKMQを開始します。誰か一人が曲を当てるか、ゲームが終了します。",
-                    "teams": "チームを分割し、勝利に役立つ人物を見つけましょう！",
-                    "clip": "短いスニペットで曲を当ててください"
+                    "teams": "チームを分割し、勝利に役立つ人物を見つけましょう！"
                 },
                 "interaction": {
                     "lives": "各プレイヤーがスタートするライフの数を選択してください"
@@ -1434,6 +1434,12 @@
         "classic": {
             "yourScore": "あなたのスコアは{{score}}です。"
         },
+        "clip": {
+            "newClipRequest": "新しいクリップリクエスト",
+            "replayRequest": "リプレイリクエスト",
+            "requested": "{{voteCounter}}票が受け取られました。",
+            "success": "{{voteCounter}}票を受け取りました。再生中..."
+        },
         "conflict": "競合",
         "duration": "期間",
         "elimination": {
@@ -1476,13 +1482,13 @@
             "interaction": {
                 "alreadyEliminated": "あなたはすでにこのラウンドで敗退しています。",
                 "bookmarkOutsideGame": "ゲーム中には曲をブックマークできません。",
+                "clipActionTooEarly": "クリップを再生する前に少し待ってください。",
                 "eliminated": "あなたはこのラウンドで敗退しました。",
                 "guildBanned": "このサーバーはKMQの使用が禁止されています。異議申し立ては、{{supportServer}}の公式KMQサポートサーバーまでご連絡ください。",
                 "guildOnly": "KMQはサーバーでのみ使用できます。",
                 "invalidBookmark": "最近の{{BOOKMARK_MESSAGE_SIZE}}ラウンドで再生された曲のみブックマークできます。ボットから送信されたメッセージに含まれる曲をブックマークする必要があります。",
                 "optionFromPreviousRound": "すでに完了したラウンドからオプションを選択しようとしています。",
-                "playerBanned": "あなたはKMQの使用が禁止されています。異議申し立ては、{{supportServer}}の公式KMQサポートサーバーまでご連絡ください。",
-                "clipActionTooEarly": "クリップを再生する前に少し待ってください。"
+                "playerBanned": "あなたはKMQの使用が禁止されています。異議申し立ては、{{supportServer}}の公式KMQサポートサーバーまでご連絡ください。"
             },
             "maintenanceMode": {
                 "description": "KMQは現在メンテナンス中です。後で確認してください！",
@@ -1612,6 +1618,7 @@
             "title": "🚀 パワーアップ！"
         },
         "listOfGroups": "グループのリスト",
+        "newClip": "新しいクリップ",
         "no": "いいえ",
         "none": "なし",
         "notApplicable": "N/A",
@@ -1654,6 +1661,7 @@
             "title": "お待ちください..."
         },
         "releaseDate": "リリース日",
+        "replay": "リプレイ",
         "restart": {
             "description_hard": "ダウンタイムは数秒程度です。進行中のゲームを終了して、進行状況が保存されるようにしてください！",
             "title": "{{timeUntilRestart}} 分後に再起動が予定されています。"
@@ -1681,14 +1689,6 @@
                 "footer": "{{command}} {{addOrRemove}} を使用するつもりでしたか？"
             }
         },
-        "yes": "はい",
-        "clip": {
-            "newClipRequest": "新しいクリップリクエスト",
-            "replayRequest": "リプレイリクエスト",
-            "requested": "{{voteCounter}}票が受け取られました。",
-            "success": "{{voteCounter}}票を受け取りました。再生中..."
-        },
-        "newClip": "新しいクリップ",
-        "replay": "リプレイ"
+        "yes": "はい"
     }
 }

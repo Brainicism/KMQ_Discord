@@ -889,11 +889,11 @@
                 "description": "Memulai permainan KMQ.",
                 "example": {
                     "classic": "Mulai permainan KMQ klasik (ketik tebakan Anda terlebih dahulu untuk mendapatkan poin)",
+                    "clip": "Tebak lagu berdasarkan penggalan singkat",
                     "elimination": "Mulai permainan eliminasi KMQ di mana setiap pemain memulai dengan {{lives}} nyawa",
                     "hidden": "Mulai permainan KMQ tersembunyi, tempat pemain hanya bisa menjawab dengan /tebak",
                     "suddenDeath": "Mulai game sudden death KMQ, tebak lagunya atau game berakhir",
-                    "teams": "Bergabunglah dengan tim sesuai keinginan dan temukan siapa yang dapat membantu Anda menang!",
-                    "clip": "Tebak lagu berdasarkan penggalan singkat"
+                    "teams": "Bergabunglah dengan tim sesuai keinginan dan temukan siapa yang dapat membantu Anda menang!"
                 },
                 "interaction": {
                     "lives": "Pilih berapa banyak nyawa yang dimiliki setiap pemain di awal"
@@ -1434,6 +1434,12 @@
         "classic": {
             "yourScore": "Skor Anda adalah {{score}}"
         },
+        "clip": {
+            "newClipRequest": "Permintaan Klip Baru",
+            "replayRequest": "Permintaan Putar Ulang",
+            "requested": "{{voteCounter}} suara diterima.",
+            "success": "{{voteCounter}} suara diterima. Memutar..."
+        },
         "conflict": "konflik",
         "duration": "Durasi",
         "elimination": {
@@ -1476,13 +1482,13 @@
             "interaction": {
                 "alreadyEliminated": "Anda sudah tereliminasi pada ronde ini.",
                 "bookmarkOutsideGame": "Anda hanya dapat menandai lagu selama permainan.",
+                "clipActionTooEarly": "Tunggu sebentar sebelum memutar klip.",
                 "eliminated": "Anda telah tereliminasi pada ronde ini.",
                 "guildBanned": "Server ini dilarang menggunakan KMQ. Untuk banding, hubungi server dukungan resmi KMQ di {{supportServer}}.",
                 "guildOnly": "KMQ hanya dapat digunakan di server.",
                 "invalidBookmark": "Anda hanya dapat menandai lagu yang baru-baru ini diputar dalam {{BOOKMARK_MESSAGE_SIZE}} ronde terakhir. Anda harus menandai pesan yang dikirim oleh bot yang berisi lagu.",
                 "optionFromPreviousRound": "Anda mencoba memilih opsi dari ronde yang sudah selesai.",
-                "playerBanned": "Anda dilarang menggunakan KMQ. Untuk banding, hubungi server dukungan KMQ resmi di {{supportServer}}.",
-                "clipActionTooEarly": "Tunggu sebentar sebelum memutar klip."
+                "playerBanned": "Anda dilarang menggunakan KMQ. Untuk banding, hubungi server dukungan KMQ resmi di {{supportServer}}."
             },
             "maintenanceMode": {
                 "description": "KMQ saat ini sedang dalam pemeliharaan. Periksa lagi nanti!",
@@ -1612,6 +1618,7 @@
             "title": "🚀 Nyalakan!"
         },
         "listOfGroups": "daftar grup",
+        "newClip": "Klip Baru",
         "no": "Tidak",
         "none": "Tidak Ada",
         "notApplicable": "Tidak tersedia",
@@ -1654,6 +1661,7 @@
             "title": "Tunggu dulu..."
         },
         "releaseDate": "Tanggal Rilis",
+        "replay": "Putar Ulang",
         "restart": {
             "description_hard": "Waktu henti akan berlangsung kira-kira beberapa detik. Harap akhiri permainan saat ini untuk memastikan kemajuan Anda tersimpan!",
             "title": "Pemulaan Ulang Mendatang dalam {{timeUntilRestart}} Menit"
@@ -1681,14 +1689,6 @@
                 "footer": "Apakah Anda ingin menggunakan {{command}} {{addOrRemove}}?"
             }
         },
-        "yes": "Ya",
-        "clip": {
-            "newClipRequest": "Permintaan Klip Baru",
-            "replayRequest": "Permintaan Putar Ulang",
-            "requested": "{{voteCounter}} suara diterima.",
-            "success": "{{voteCounter}} suara diterima. Memutar..."
-        },
-        "newClip": "Klip Baru",
-        "replay": "Putar Ulang"
+        "yes": "Ya"
     }
 }
