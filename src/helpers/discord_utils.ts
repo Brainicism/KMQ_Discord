@@ -725,6 +725,11 @@ export async function sendInfoMessage(
 ): Promise<Eris.Message<Eris.TextableChannel> | null> {
     const embeds = [embedPayload, ...additionalEmbeds];
 
+    // always reply if during test-run
+    reply =
+        reply ||
+        messageContext.author.id === process.env.END_TO_END_TEST_BOT_CLIENT;
+
     return sendMessage(
         messageContext.textChannelID,
         {

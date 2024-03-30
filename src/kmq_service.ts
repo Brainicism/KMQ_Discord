@@ -56,16 +56,16 @@ export default class ServiceWorker extends BaseServiceWorker {
     }
 
     loadCaches = async (): Promise<void> => {
-        schedule.scheduleJob("0 * * * *", async () => {
-            // Use reddit and Gemini to generate news
-            await this.reloadNews();
-        });
+        if (!EnvVariableManager.isMinimalRun()) {
+            schedule.scheduleJob("0 * * * *", async () => {
+                // Use reddit and Gemini to generate news
+                await this.reloadNews();
+            });
 
-        schedule.scheduleJob("0 */6 * * *", async () => {
-            await this.reloadFactCache();
-        });
+            schedule.scheduleJob("0 */6 * * *", async () => {
+                await this.reloadFactCache();
+            });
 
-        if (EnvVariableManager.isMinimalRun()) {
             await this.reloadNews();
             await this.reloadFactCache();
         }

@@ -234,6 +234,31 @@ const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
 
             expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
+        {
+            command:
+                ",playlist https://open.spotify.com/playlist/2FJjCCjZ3war3hXypFzJeL",
+            responseValidator: (
+                title: string,
+                description: string,
+                parsedGameOptions?: ParsedGameOptionValues,
+            ) =>
+                parsedGameOptions!["playlist set"]!.value.includes("[kpoop]") &&
+                parsedGameOptions!["playlist set"]!.updated,
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
+        },
+        {
+            command:
+                ",playlist https://www.youtube.com/watch?v=Gqfq_8jPw8Q&list=PLf3CwmneIZFFkYpy9YC0-tUxD3JrR-3Hs",
+            responseValidator: (
+                title: string,
+                description: string,
+                parsedGameOptions?: ParsedGameOptionValues,
+            ) =>
+                parsedGameOptions!["playlist set"]!.value.includes("[kpoop]") &&
+                parsedGameOptions!["playlist set"]!.updated &&
+                description.includes("YouTube"),
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
+        },
     ],
     resetEachStage: true,
 };

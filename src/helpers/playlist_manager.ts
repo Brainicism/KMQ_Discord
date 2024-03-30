@@ -33,7 +33,7 @@ import type Eris from "eris";
 import type MessageContext from "../structures/message_context";
 import type SpotifyTrack from "../interfaces/spotify_track";
 
-const logger = new IPCLogger("spotify_manager");
+const logger = new IPCLogger("playlist_manager");
 
 const BASE_URL = "https://api.spotify.com/v1";
 
@@ -1106,7 +1106,7 @@ export default class PlaylistManager {
             ).data;
         } catch (e) {
             logger.error(
-                `Error calling client.playlists.list for ${playlistId}. err = e`,
+                `Error calling client.playlists.list for ${playlistId}. err = ${e}`,
             );
             return null;
         }

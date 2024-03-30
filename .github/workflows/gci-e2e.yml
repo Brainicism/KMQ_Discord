@@ -44,6 +44,9 @@ jobs:
                   END_TO_END_TEST_BOT_CLIENT: ${{ secrets.END_TO_END_TEST_BOT_CLIENT }}
                   END_TO_END_TEST_BOT_CHANNEL: ${{ secrets.END_TO_END_TEST_BOT_CHANNEL }}
                   END_TO_END_TEST_BOT_VOICE_CHANNEL: ${{ secrets.END_TO_END_TEST_BOT_VOICE_CHANNEL }}
+                  SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+                  SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
+                  YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
               run: |
                   echo "DB_USER=$DB_USER_CI" >> .env
                   echo "DB_PASS=$DB_PASS_CI" >> .env
@@ -61,6 +64,9 @@ jobs:
                   echo "END_TO_END_TEST_BOT_CLIENT=$END_TO_END_TEST_BOT_CLIENT" >> .env
                   echo "END_TO_END_TEST_BOT_CHANNEL=$END_TO_END_TEST_BOT_CHANNEL" >> .env
                   echo "END_TO_END_TEST_BOT_VOICE_CHANNEL=$END_TO_END_TEST_BOT_VOICE_CHANNEL" >> .env
+                  echo "SPOTIFY_CLIENT_ID=$SPOTIFY_CLIENT_ID" >> .env
+                  echo "SPOTIFY_CLIENT_SECRET=$SPOTIFY_CLIENT_SECRET" >> .env
+                  echo "YOUTUBE_API_KEY=$YOUTUBE_API_KEY" >> .env
             - name: Install node dependencies
               run: yarn install --frozen-lockfile
             - name: Extract metadata (tags, labels) for Docker
