@@ -11,9 +11,9 @@ export default class ClipGameRound extends GameRound {
     public seekLocation: number | null;
 
     /** List of players who have voted for a new clip of the current song */
-    public newClipRequesters: Set<string>;
+    private newClipRequesters: Set<string>;
 
-    public replays: number;
+    private replays: number;
 
     constructor(song: QueriedSong, baseExp: number, guildID: string) {
         super(song, baseExp);
@@ -58,9 +58,24 @@ export default class ClipGameRound extends GameRound {
     }
 
     /**
-     * Resets the requesters for replay and new clip
+     * Increments the replay count
      */
-    resetRequesters(): void {
+    incrementReplays(): void {
+        this.replays++;
+    }
+
+    /**
+     * @returns the number of replays
+     */
+    getReplays(): number {
+        return this.replays;
+    }
+
+    /**
+     * Resets the requesters for new clip and replays
+     */
+    reset(): void {
         this.newClipRequesters.clear();
+        this.replays = 0;
     }
 }

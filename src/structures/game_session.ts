@@ -659,7 +659,7 @@ export default class GameSession extends Session {
         if (clipRound.isNewClipMajority()) {
             await this.sendStartRoundMessage(messageContext, clipRound);
             await this.playSong(messageContext, clipAction);
-            clipRound.resetRequesters();
+            clipRound.reset();
         }
 
         return true;

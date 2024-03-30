@@ -796,11 +796,13 @@ export default abstract class Session {
             this.stopGuessTimeout();
 
             if (this.isGameSession() && this.isClipMode()) {
+                const clipGameRound = round as ClipGameRound;
                 await delay(CLIP_REPLAY_DELAY);
                 if (
                     !round.finished &&
-                    (round as ClipGameRound).replays < MAX_REPLAYS
+                    clipGameRound.getReplays() < MAX_REPLAYS
                 ) {
+                    clipGameRound.incrementReplays();
                     await this.playSong(messageContext, ClipAction.REPLAY);
                     return;
                 }
