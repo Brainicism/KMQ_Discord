@@ -1318,6 +1318,12 @@
             }
         },
         "timer": {
+            "failure": {
+                "tooLowTimer": {
+                    "description": "De gegeven timerwaarde is te laag. Voer een waarde in die groter is dan {{minTimer}}.",
+                    "title": "Te Lage Timer"
+                }
+            },
             "help": {
                 "description": "Doe je best om correct te raden voordat de timer afloopt! Voer een tijd in seconden in of geef geen argumenten op om uit te schakelen.",
                 "example": {
@@ -1331,18 +1337,12 @@
                 "name": "timer",
                 "usage": {
                     "seconds": "seconden"
-                },
-                "failure": {
-                    "tooLowTimer": {
-                        "description": "De gegeven timerwaarde is te laag. Voer een waarde in die groter is dan {{minTimer}}.",
-                        "title": "Te Lage Timer"
-                    }
-                },
-                "warning": {
-                    "lowTimerOnlyForClip": {
-                        "description": "Een timerwaarde zo klein wordt alleen ondersteund voor {{playClip}}. Buiten die spelmodus wordt het gereset.",
-                        "title": "Alleen lage timer voor de Clip-spelmodus"
-                    }
+                }
+            },
+            "warning": {
+                "lowTimerOnlyForClip": {
+                    "description": "Een timerwaarde zo klein wordt alleen ondersteund voor {{playClip}}. Buiten die spelmodus wordt het gereset.",
+                    "title": "Alleen lage timer voor de Clip-spelmodus"
                 }
             }
         },
@@ -1447,10 +1447,6 @@
             "yourScore": "Je score is {{score}}."
         },
         "clip": {
-            "newClipRequest": "Verzoek voor nieuwe clip",
-            "replayRequest": "Verzoek tot opnieuw afspelen",
-            "requested": "{{voteCounter}} stemmen ontvangen.",
-            "success": "{{voteCounter}} stemmen ontvangen. Aan het afspelen...",
             "newClip": {
                 "request": {
                     "description": "{{voteCounter}} nieuwe clipstemmen ontvangen.",

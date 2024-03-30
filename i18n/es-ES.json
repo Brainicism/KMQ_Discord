@@ -1318,6 +1318,12 @@
             }
         },
         "timer": {
+            "failure": {
+                "tooLowTimer": {
+                    "description": "El valor del temporizador dado es demasiado bajo. Por favor, introduce un valor mayor que {{minTimer}}.",
+                    "title": "Temporizador Demasiado Bajo"
+                }
+            },
             "help": {
                 "description": "¡Intenta adivinar correctamente antes de que se acabe el tiempo! Ingresa un tiempo en segundos, o no ingreses argumentos para desactivarlo.",
                 "example": {
@@ -1331,18 +1337,12 @@
                 "name": "temporizador",
                 "usage": {
                     "seconds": "segundos"
-                },
-                "failure": {
-                    "tooLowTimer": {
-                        "description": "El valor del temporizador dado es demasiado bajo. Por favor, introduce un valor mayor que {{minTimer}}.",
-                        "title": "Temporizador Demasiado Bajo"
-                    }
-                },
-                "warning": {
-                    "lowTimerOnlyForClip": {
-                        "description": "Un valor de temporizador tan pequeño solo se admite para {{playClip}}. Se restablecerá fuera de ese modo de juego.",
-                        "title": "Solo Temporizador Bajo Para el Modo de Juego de Clip"
-                    }
+                }
+            },
+            "warning": {
+                "lowTimerOnlyForClip": {
+                    "description": "Un valor de temporizador tan pequeño solo se admite para {{playClip}}. Se restablecerá fuera de ese modo de juego.",
+                    "title": "Solo Temporizador Bajo Para el Modo de Juego de Clip"
                 }
             }
         },
@@ -1447,10 +1447,6 @@
             "yourScore": "Tu puntuación es {{score}}."
         },
         "clip": {
-            "newClipRequest": "Solicitud de Nuevo Clip",
-            "replayRequest": "Solicitud de Repetición",
-            "requested": "{{voteCounter}} votos recibidos.",
-            "success": "{{voteCounter}} votos recibidos. Reproduciendo...",
             "newClip": {
                 "request": {
                     "description": "{{voteCounter}} votos nuevos de clip recibidos.",

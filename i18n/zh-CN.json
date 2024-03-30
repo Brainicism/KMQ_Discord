@@ -1318,6 +1318,12 @@
             }
         },
         "timer": {
+            "failure": {
+                "tooLowTimer": {
+                    "description": "给定的计时器值太低。请输入一个大于 {{minTimer}} 的值。",
+                    "title": "计时器太低"
+                }
+            },
             "help": {
                 "description": "在计时器结束前尽力猜对！输入秒数以设定计时器，或不输入参数以禁用计时器。",
                 "example": {
@@ -1331,18 +1337,12 @@
                 "name": "计时器",
                 "usage": {
                     "seconds": "秒"
-                },
-                "failure": {
-                    "tooLowTimer": {
-                        "description": "给定的计时器值太低。请输入一个大于 {{minTimer}} 的值。",
-                        "title": "计时器太低"
-                    }
-                },
-                "warning": {
-                    "lowTimerOnlyForClip": {
-                        "description": "这么小的计时器值只支持 {{playClip}}。在那个游戏模式之外将会被重置。",
-                        "title": "低计时器只适用于剪辑游戏模式"
-                    }
+                }
+            },
+            "warning": {
+                "lowTimerOnlyForClip": {
+                    "description": "这么小的计时器值只支持 {{playClip}}。在那个游戏模式之外将会被重置。",
+                    "title": "低计时器只适用于剪辑游戏模式"
                 }
             }
         },
@@ -1447,10 +1447,6 @@
             "yourScore": "你的得分是{{score}}。"
         },
         "clip": {
-            "newClipRequest": "新剪辑请求",
-            "replayRequest": "重播请求",
-            "requested": "收到了 {{voteCounter}} 票。",
-            "success": "收到了 {{voteCounter}} 票。正在播放...",
             "newClip": {
                 "request": {
                     "description": "收到 {{voteCounter}} 个新剪辑投票。",

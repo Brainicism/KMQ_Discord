@@ -1318,6 +1318,12 @@
             }
         },
         "timer": {
+            "failure": {
+                "tooLowTimer": {
+                    "description": "指定されたタイマー値が低すぎます。{{minTimer}}より大きい値を入力してください。",
+                    "title": "タイマーが低すぎます"
+                }
+            },
             "help": {
                 "description": "タイマーが切れる前に正しく推測してください！秒数を入力するか、引数を指定しない場合はタイマーを無効にします。",
                 "example": {
@@ -1331,18 +1337,12 @@
                 "name": "タイマー",
                 "usage": {
                     "seconds": "秒"
-                },
-                "failure": {
-                    "tooLowTimer": {
-                        "description": "指定されたタイマー値が低すぎます。{{minTimer}}より大きい値を入力してください。",
-                        "title": "タイマーが低すぎます"
-                    }
-                },
-                "warning": {
-                    "lowTimerOnlyForClip": {
-                        "description": "このような小さいタイマー値は{{playClip}}でのみサポートされています。そのゲームモードの外ではリセットされます。",
-                        "title": "低タイマーはクリップゲームモードのみのためです"
-                    }
+                }
+            },
+            "warning": {
+                "lowTimerOnlyForClip": {
+                    "description": "このような小さいタイマー値は{{playClip}}でのみサポートされています。そのゲームモードの外ではリセットされます。",
+                    "title": "低タイマーはクリップゲームモードのみのためです"
                 }
             }
         },
@@ -1447,10 +1447,6 @@
             "yourScore": "あなたのスコアは{{score}}です。"
         },
         "clip": {
-            "newClipRequest": "新しいクリップリクエスト",
-            "replayRequest": "リプレイリクエスト",
-            "requested": "{{voteCounter}}票が受け取られました。",
-            "success": "{{voteCounter}}票を受け取りました。再生中...",
             "newClip": {
                 "request": {
                     "description": "{{voteCounter}}件の新しいクリップ投票を受け取りました。",

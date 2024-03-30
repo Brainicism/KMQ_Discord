@@ -1318,6 +1318,12 @@
             }
         },
         "timer": {
+            "failure": {
+                "tooLowTimer": {
+                    "description": "La valeur de la minuterie donnée est trop basse. Veuillez entrer une valeur supérieure à {{minTimer}}.",
+                    "title": "Minuterie trop basse"
+                }
+            },
             "help": {
                 "description": "Essayez de deviner correctement avant que le temps ne s'écoule! Entrez un temps en secondes, ou ne donnez aucun argument pour désactiver.",
                 "example": {
@@ -1331,18 +1337,12 @@
                 "name": "minuteur",
                 "usage": {
                     "seconds": "secondes"
-                },
-                "failure": {
-                    "tooLowTimer": {
-                        "description": "La valeur de la minuterie donnée est trop basse. Veuillez entrer une valeur supérieure à {{minTimer}}.",
-                        "title": "Minuterie trop basse"
-                    }
-                },
-                "warning": {
-                    "lowTimerOnlyForClip": {
-                        "description": "Une valeur de minuterie aussi basse est uniquement prise en charge pour {{playClip}}. Elle sera réinitialisée en dehors de ce mode de jeu.",
-                        "title": "Minuterie basse uniquement pour le mode de jeu Clip"
-                    }
+                }
+            },
+            "warning": {
+                "lowTimerOnlyForClip": {
+                    "description": "Une valeur de minuterie aussi basse est uniquement prise en charge pour {{playClip}}. Elle sera réinitialisée en dehors de ce mode de jeu.",
+                    "title": "Minuterie basse uniquement pour le mode de jeu Clip"
                 }
             }
         },
@@ -1447,10 +1447,6 @@
             "yourScore": "Votre score est de {{score}}."
         },
         "clip": {
-            "newClipRequest": "Nouvelle Demande de Clip",
-            "replayRequest": "Demande de Rejouer",
-            "requested": "{{voteCounter}} votes reçus.",
-            "success": "{{voteCounter}} votes reçus. Lecture en cours...",
             "newClip": {
                 "request": {
                     "description": "{{voteCounter}} nouveaux votes pour le clip reçus.",

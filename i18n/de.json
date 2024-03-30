@@ -1318,6 +1318,12 @@
             }
         },
         "timer": {
+            "failure": {
+                "tooLowTimer": {
+                    "description": "Der angegebene Timerwert ist zu niedrig. Bitte gib einen Wert ein, der größer als {{minTimer}} ist.",
+                    "title": "Zu niedriger Timer"
+                }
+            },
             "help": {
                 "description": "Versuche dein Bestes, um richtig zu raten, bevor der Timer abläuft! Gib eine Zeit in Sekunden ein oder gib keine Argumente an, um die Funktion zu deaktivieren.",
                 "example": {
@@ -1331,18 +1337,12 @@
                 "name": "timer",
                 "usage": {
                     "seconds": "Sekunden"
-                },
-                "failure": {
-                    "tooLowTimer": {
-                        "description": "Der angegebene Timerwert ist zu niedrig. Bitte gib einen Wert ein, der größer als {{minTimer}} ist.",
-                        "title": "Zu niedriger Timer"
-                    }
-                },
-                "warning": {
-                    "lowTimerOnlyForClip": {
-                        "description": "Ein Timerwert dieser Größe wird nur für {{playClip}} unterstützt. Außerhalb dieses Spielmodus wird er zurückgesetzt.",
-                        "title": "Niedriger Timer nur für Clip-Spielmodus"
-                    }
+                }
+            },
+            "warning": {
+                "lowTimerOnlyForClip": {
+                    "description": "Ein Timerwert dieser Größe wird nur für {{playClip}} unterstützt. Außerhalb dieses Spielmodus wird er zurückgesetzt.",
+                    "title": "Niedriger Timer nur für Clip-Spielmodus"
                 }
             }
         },
@@ -1447,10 +1447,6 @@
             "yourScore": "Deine Punktzahl ist {{score}}."
         },
         "clip": {
-            "newClipRequest": "Neue Clipanfrage",
-            "replayRequest": "Wiederholungsanfrage",
-            "requested": "{{voteCounter}} Stimmen erhalten.",
-            "success": "{{voteCounter}} Stimmen erhalten. Wiedergabe...",
             "newClip": {
                 "request": {
                     "description": "{{voteCounter}} neue Clip-Stimmen erhalten.",

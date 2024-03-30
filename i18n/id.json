@@ -1318,6 +1318,12 @@
             }
         },
         "timer": {
+            "failure": {
+                "tooLowTimer": {
+                    "description": "Nilai timer yang diberikan terlalu rendah. Silakan masukkan nilai yang lebih besar dari {{minTimer}}.",
+                    "title": "Timer Terlalu Rendah"
+                }
+            },
             "help": {
                 "description": "Berusaha semampu Anda untuk menebak dengan benar sebelum waktu habis! Masukkan waktu dalam detik, atau jangan berikan argumen untuk menonaktifkan.",
                 "example": {
@@ -1331,18 +1337,12 @@
                 "name": "pengaturwaktu",
                 "usage": {
                     "seconds": "detik"
-                },
-                "failure": {
-                    "tooLowTimer": {
-                        "description": "Nilai timer yang diberikan terlalu rendah. Silakan masukkan nilai yang lebih besar dari {{minTimer}}.",
-                        "title": "Timer Terlalu Rendah"
-                    }
-                },
-                "warning": {
-                    "lowTimerOnlyForClip": {
-                        "description": "Nilai timer sekecil ini hanya didukung untuk {{playClip}}. Ini akan direset di luar mode permainan tersebut.",
-                        "title": "Timer Rendah Hanya Untuk Mode Permainan Klip"
-                    }
+                }
+            },
+            "warning": {
+                "lowTimerOnlyForClip": {
+                    "description": "Nilai timer sekecil ini hanya didukung untuk {{playClip}}. Ini akan direset di luar mode permainan tersebut.",
+                    "title": "Timer Rendah Hanya Untuk Mode Permainan Klip"
                 }
             }
         },
@@ -1447,10 +1447,6 @@
             "yourScore": "Skor Anda adalah {{score}}"
         },
         "clip": {
-            "newClipRequest": "Permintaan Klip Baru",
-            "replayRequest": "Permintaan Putar Ulang",
-            "requested": "{{voteCounter}} suara diterima.",
-            "success": "{{voteCounter}} suara diterima. Memutar...",
             "newClip": {
                 "request": {
                     "description": "{{voteCounter}} suara klip baru diterima.",
