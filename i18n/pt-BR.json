@@ -892,7 +892,8 @@
                     "elimination": "Iniciar uma partida de eliminação do KMQ, onde cada jogador começa com {{lives}} vidas",
                     "hidden": "Iniciar um jogo oculto de KMQ, onde os jogadores só podem responder com /guess",
                     "suddenDeath": "Iniciar um jogo de KMQ mata-mata, onde alguém deve acertar a música ou o jogo termina",
-                    "teams": "Divida-se em quantas equipes quiser e veja em quem você pode confiar para ajudá-lo a vencer!"
+                    "teams": "Divida-se em quantas equipes quiser e veja em quem você pode confiar para ajudá-lo a vencer!",
+                    "clip": "Adivinhe a música com base em um trecho curto"
                 },
                 "interaction": {
                     "lives": "Escolha com quantas vidas cada jogador começa"
@@ -1480,7 +1481,8 @@
                 "guildOnly": "KMQ só pode ser utilizado em servidores.",
                 "invalidBookmark": "Você só pode marcar as músicas recentemente tocadas nas últimas {{BOOKMARK_MESSAGE_SIZE}} rodadas. Você deve marcar a mensagem enviada pelo bot contendo a música.",
                 "optionFromPreviousRound": "Você está tentando escolher uma opção de uma rodada já concluída.",
-                "playerBanned": "Você está banido de usar KMQ. Para apelações, entre em contato com o servidor oficial de suporte do KMQ em {{supportServer}}."
+                "playerBanned": "Você está banido de usar KMQ. Para apelações, entre em contato com o servidor oficial de suporte do KMQ em {{supportServer}}.",
+                "clipActionTooEarly": "Aguarde um pouco antes de tocar o trecho."
             },
             "maintenanceMode": {
                 "description": "O KMQ está atualmente em manutenção. Verifique novamente mais tarde!",
@@ -1679,6 +1681,14 @@
                 "footer": "Você quis dizer usar {{command}} {{addOrRemove}}?"
             }
         },
-        "yes": "Sim."
+        "yes": "Sim.",
+        "clip": {
+            "newClipRequest": "Solicitação de Novo Trecho",
+            "replayRequest": "Solicitação de Repetição",
+            "requested": "{{voteCounter}} votos recebidos.",
+            "success": "{{voteCounter}} votos recebidos. Reproduzindo..."
+        },
+        "newClip": "Novo Trecho",
+        "replay": "Repetir"
     }
 }

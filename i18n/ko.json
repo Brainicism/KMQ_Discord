@@ -892,7 +892,8 @@
                     "elimination": "각 플레이어가 {{lives}}개의 생명으로 시작하는 KMQ의 목숨 게임을 시작합니다.",
                     "hidden": "플레이어가 /맞혀봐 로만 대답할 수 있는 KMQ의 숨겨진 게임을 시작합니다",
                     "suddenDeath": "누군가 노래를 맞혀야 하거나 게임이 끝나는 폭사 게임을 시작하세요",
-                    "teams": "원하는 만큼 팀을 나누고 우승을 위해 누구에게 의지할 수 있는지 확인해 보십시오!"
+                    "teams": "원하는 만큼 팀을 나누고 우승을 위해 누구에게 의지할 수 있는지 확인해 보십시오!",
+                    "clip": "짧은 스니펫을 바탕으로 노래 제목 맞추기"
                 },
                 "interaction": {
                     "lives": "각 플레이어가 몇 개의 목숨으로 시작하는지 선택합니다."
@@ -1480,7 +1481,8 @@
                 "guildOnly": "KMQ는 서버에서만 사용할 수 있습니다.",
                 "invalidBookmark": "최근 {{BOOKMARK_MESSAGE_SIZE}} 라운드에서 재생한 노래만 북마크에 추가할 수 있습니다. 노래가 포함된 봇이 보낸 메시지를 북마크해야 합니다.",
                 "optionFromPreviousRound": "이미 완료된 라운드에서 옵션을 선택하려고 합니다.",
-                "playerBanned": "당신은 KMQ 사용이 금지되었습니다. 항소하려면 {{supportServer}}의 공식 KMQ 지원 서버에 연락하세요."
+                "playerBanned": "당신은 KMQ 사용이 금지되었습니다. 항소하려면 {{supportServer}}의 공식 KMQ 지원 서버에 연락하세요.",
+                "clipActionTooEarly": "클립을 재생하기 전에 잠시 기다리세요."
             },
             "maintenanceMode": {
                 "description": "KMQ는 현재 유지보수 중입니다. 나중에 다시 확인하세요!",
@@ -1679,6 +1681,14 @@
                 "footer": "{{command}} {{addOrRemove}}을(를) 사용하려고 했습니까?"
             }
         },
-        "yes": "예"
+        "yes": "예",
+        "clip": {
+            "newClipRequest": "새 클립 요청",
+            "replayRequest": "다시 보기 요청",
+            "requested": "{{voteCounter}}표를 받았습니다.",
+            "success": "{{voteCounter}}표를 받았습니다. 재생 중..."
+        },
+        "newClip": "새 클립",
+        "replay": "다시 보기"
     }
 }

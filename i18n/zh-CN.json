@@ -892,7 +892,8 @@
                     "elimination": "开始一场淘汰模式的 KMQ 游戏，每个玩家都有 {{lives}} 条命",
                     "hidden": "开始一个KMQ的隐藏游戏，玩家只能用/guess命令回答问题。",
                     "suddenDeath": "开始 KMQ 突然死亡游戏，需要有人猜对歌曲，否则游戏结束",
-                    "teams": "分成尽可能多的团队，看看谁可以帮助你赢得胜利！"
+                    "teams": "分成尽可能多的团队，看看谁可以帮助你赢得胜利！",
+                    "clip": "根据一小段音乐猜歌曲"
                 },
                 "interaction": {
                     "lives": "选择每个玩家开始的生命值"
@@ -1480,7 +1481,8 @@
                 "guildOnly": "KMQ只能在服务器中使用。",
                 "invalidBookmark": "你只能收藏最近播放的{{BOOKMARK_MESSAGE_SIZE}}轮歌曲。你必须收藏机器人发送的包含歌曲的消息。",
                 "optionFromPreviousRound": "您正在尝试从已经完成的回合中选择选项。",
-                "playerBanned": "您被禁止使用KMQ。如需申诉，请联系{{supportServer}}的官方KMQ支持服务器。"
+                "playerBanned": "您被禁止使用KMQ。如需申诉，请联系{{supportServer}}的官方KMQ支持服务器。",
+                "clipActionTooEarly": "播放剪辑前稍等片刻。"
             },
             "maintenanceMode": {
                 "description": "KMQ目前正在维护中。稍后再试！",
@@ -1679,6 +1681,14 @@
                 "footer": "您是否想使用{{command}} {{addOrRemove}}？"
             }
         },
-        "yes": "是的"
+        "yes": "是的",
+        "clip": {
+            "newClipRequest": "新剪辑请求",
+            "replayRequest": "重播请求",
+            "requested": "收到了 {{voteCounter}} 票。",
+            "success": "收到了 {{voteCounter}} 票。正在播放..."
+        },
+        "newClip": "新剪辑",
+        "replay": "重播"
     }
 }

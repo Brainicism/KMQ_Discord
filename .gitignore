@@ -16,3 +16,4 @@ data/
 *.test.sql
 .eslintcache
 *.bak
+.DS_Store

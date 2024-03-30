@@ -892,7 +892,8 @@
                     "elimination": "エリミネーションモードのKMQゲームを開始します。各プレイヤーは{{lives}}つのライフでスタートします",
                     "hidden": "KMQの非公開ゲームを開始し、プレイヤーは/guessでしか回答できません",
                     "suddenDeath": "サドンデス形式のKMQを開始します。誰か一人が曲を当てるか、ゲームが終了します。",
-                    "teams": "チームを分割し、勝利に役立つ人物を見つけましょう！"
+                    "teams": "チームを分割し、勝利に役立つ人物を見つけましょう！",
+                    "clip": "短いスニペットで曲を当ててください"
                 },
                 "interaction": {
                     "lives": "各プレイヤーがスタートするライフの数を選択してください"
@@ -1480,7 +1481,8 @@
                 "guildOnly": "KMQはサーバーでのみ使用できます。",
                 "invalidBookmark": "最近の{{BOOKMARK_MESSAGE_SIZE}}ラウンドで再生された曲のみブックマークできます。ボットから送信されたメッセージに含まれる曲をブックマークする必要があります。",
                 "optionFromPreviousRound": "すでに完了したラウンドからオプションを選択しようとしています。",
-                "playerBanned": "あなたはKMQの使用が禁止されています。異議申し立ては、{{supportServer}}の公式KMQサポートサーバーまでご連絡ください。"
+                "playerBanned": "あなたはKMQの使用が禁止されています。異議申し立ては、{{supportServer}}の公式KMQサポートサーバーまでご連絡ください。",
+                "clipActionTooEarly": "クリップを再生する前に少し待ってください。"
             },
             "maintenanceMode": {
                 "description": "KMQは現在メンテナンス中です。後で確認してください！",
@@ -1679,6 +1681,14 @@
                 "footer": "{{command}} {{addOrRemove}} を使用するつもりでしたか？"
             }
         },
-        "yes": "はい"
+        "yes": "はい",
+        "clip": {
+            "newClipRequest": "新しいクリップリクエスト",
+            "replayRequest": "リプレイリクエスト",
+            "requested": "{{voteCounter}}票が受け取られました。",
+            "success": "{{voteCounter}}票を受け取りました。再生中..."
+        },
+        "newClip": "新しいクリップ",
+        "replay": "リプレイ"
     }
 }

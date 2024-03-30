@@ -183,7 +183,7 @@ List all the server's presets.
 
 # Game Modes
 
-Getting tired of classic KMQ? Try out elimination, teams, and hidden mode!
+Getting tired of classic KMQ? Try out some of our game modes!
 
 ## /play elimination
 
@@ -198,6 +198,10 @@ To keep the game fair, switching teams mid-game forfeits your current points and
 ## /play suddendeath
 
 Everyone shares one life! If you can't guess the song in time, the game ends. No hints, no skips, no second chances.
+
+## /play clip
+
+Do your best to guess the song by a short snippet. If you need some help, replay the current clip, or hear another section of the song.
 
 # Full Command List
 

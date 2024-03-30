@@ -892,7 +892,8 @@
                     "elimination": "Démarrez une partie d'élimination de KMQ où chaque joueur commence avec {{lives}} vies",
                     "hidden": "Démarrer une partie cachée de KMQ, où les joueurs ne peuvent répondre qu'avec /guess",
                     "suddenDeath": "Lancez un jeu de mort subite KMQ, où il faut deviner le morceau, ou la partie s'achève",
-                    "teams": "Divisez-vous en d'équipes et voyez sur qui vous pouvez compter pour vous aider à gagner!"
+                    "teams": "Divisez-vous en d'équipes et voyez sur qui vous pouvez compter pour vous aider à gagner!",
+                    "clip": "Devinez la chanson à partir d'un court extrait"
                 },
                 "interaction": {
                     "lives": "Choisissez le nombre de vies avec lequel chaque joueur commence"
@@ -1480,7 +1481,8 @@
                 "guildOnly": "KMQ ne peut être utilisé que dans les serveurs.",
                 "invalidBookmark": "Vous ne pouvez marquer que les chansons récemment jouées dans les {{BOOKMARK_MESSAGE_SIZE}} derniers tours. Vous devez marquer le message envoyé par le bot contenant la chanson.",
                 "optionFromPreviousRound": "Vous essayez de choisir une option d'un tour déjà terminé.",
-                "playerBanned": "Vous êtes banni de l'utilisation de KMQ. Pour faire appel, contactez le serveur de support officiel de KMQ à {{supportServer}}."
+                "playerBanned": "Vous êtes banni de l'utilisation de KMQ. Pour faire appel, contactez le serveur de support officiel de KMQ à {{supportServer}}.",
+                "clipActionTooEarly": "Attendez un peu avant de lancer le clip."
             },
             "maintenanceMode": {
                 "description": "KMQ est actuellement en maintenance. Revenez plus tard !",
@@ -1679,6 +1681,14 @@
                 "footer": "Vouliez-vous utiliser {{command}} {{addOrRemove}} ?"
             }
         },
-        "yes": "Oui"
+        "yes": "Oui",
+        "clip": {
+            "newClipRequest": "Nouvelle Demande de Clip",
+            "replayRequest": "Demande de Rejouer",
+            "requested": "{{voteCounter}} votes reçus.",
+            "success": "{{voteCounter}} votes reçus. Lecture en cours..."
+        },
+        "newClip": "Nouveau Clip",
+        "replay": "Rejouer"
     }
 }
