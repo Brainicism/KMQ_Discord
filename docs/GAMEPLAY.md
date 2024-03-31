@@ -201,7 +201,7 @@ Everyone shares one life! If you can't guess the song in time, the game ends. No
 
 ## /play clip
 
-Do your best to guess the song by a short snippet. If you need some help, replay the current clip, or hear another section of the song.
+Can you figure out the song from just a few seconds? Try `/play clip` to find out!
 
 # Full Command List
 
