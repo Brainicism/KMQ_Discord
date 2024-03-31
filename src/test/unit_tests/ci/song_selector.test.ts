@@ -1313,7 +1313,7 @@ describe("song selector", () => {
         });
     });
 
-    describe.only("song selector snapshots", () => {
+    describe("song selector snapshots", () => {
         describe("non-playlist", () => {
             const snapshotPayloads = [
                 {
