@@ -86,65 +86,7 @@ export default async (
         let arg = args[i]!;
         // check arg type
         switch (validation.type) {
-            case "int": {
-                if (Number.isNaN(Number(arg))) {
-                    await sendValidationErrorMessage(
-                        messageContext,
-                        i18n.translate(
-                            message.guildID,
-                            "misc.failure.validation.number.notNumber",
-                            { argument: `\`${validation.name}\`` },
-                        ),
-                        arg,
-                        usage,
-                    );
-                    return false;
-                }
-
-                const intArg = parseInt(arg, 10);
-                if (
-                    validation.minValue != null &&
-                    intArg < validation.minValue
-                ) {
-                    await sendValidationErrorMessage(
-                        messageContext,
-                        i18n.translate(
-                            message.guildID,
-                            "misc.failure.validation.number.min",
-                            {
-                                min: `\`${validation.minValue}\``,
-                                argument: `\`${validation.name}\``,
-                            },
-                        ),
-                        arg,
-                        usage,
-                    );
-                    return false;
-                }
-
-                if (
-                    validation.maxValue != null &&
-                    intArg > validation.maxValue
-                ) {
-                    await sendValidationErrorMessage(
-                        messageContext,
-                        i18n.translate(
-                            message.guildID,
-                            "misc.failure.validation.number.max",
-                            {
-                                max: `\`${validation.maxValue}\``,
-                                argument: `\`${validation.name}\``,
-                            },
-                        ),
-                        arg,
-                        usage,
-                    );
-                    return false;
-                }
-
-                break;
-            }
-
+            case "int":
             case "float": {
                 if (Number.isNaN(Number(arg))) {
                     await sendValidationErrorMessage(
@@ -160,10 +102,14 @@ export default async (
                     return false;
                 }
 
-                const floatArg = parseFloat(arg);
+                const numArg =
+                    validation.type === "int"
+                        ? parseInt(arg, 10)
+                        : parseFloat(arg);
+
                 if (
                     validation.minValue != null &&
-                    floatArg < validation.minValue
+                    numArg < validation.minValue
                 ) {
                     await sendValidationErrorMessage(
                         messageContext,
@@ -183,7 +129,7 @@ export default async (
 
                 if (
                     validation.maxValue != null &&
-                    floatArg > validation.maxValue
+                    numArg > validation.maxValue
                 ) {
                     await sendValidationErrorMessage(
                         messageContext,
