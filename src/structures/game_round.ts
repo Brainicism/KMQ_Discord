@@ -397,26 +397,29 @@ export default class GameRound extends Round {
                             ] === 0;
 
                         let label = button.label;
-                        let style: 1 | 3 | 4;
-                        if (
-                            showCorrectAnswer &&
-                            this.interactionCorrectAnswerUUID ===
+                        let style: 1 | 3 | 4 = 1;
+                        if (showCorrectAnswer) {
+                            if (
+                                this.interactionCorrectAnswerUUID ===
                                 button.custom_id
-                        ) {
-                            if (correctGuesses) {
-                                label += ` (${correctGuesses})`;
-                            }
+                            ) {
+                                if (correctGuesses) {
+                                    label += ` (${correctGuesses})`;
+                                }
 
-                            style = 3;
-                        } else if (noGuesses) {
-                            style = 1;
+                                style = 3;
+                            } else if (noGuesses) {
+                                style = 1;
+                            } else {
+                                label += ` (${
+                                    this.interactionIncorrectAnswerUUIDs[
+                                        button.custom_id
+                                    ]
+                                })`;
+                                style = 4;
+                            }
                         } else {
-                            label += ` (${
-                                this.interactionIncorrectAnswerUUIDs[
-                                    button.custom_id
-                                ]
-                            })`;
-                            style = 4;
+                            style = 1;
                         }
 
                         return {
