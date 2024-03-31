@@ -418,6 +418,9 @@ export default class PlayCommand implements BaseCommand {
                     description: i18n.translate(
                         LocaleType.EN,
                         "command.play.help.example.clip",
+                        {
+                            clipTimer: `\`${ELIMINATION_DEFAULT_LIVES}\``,
+                        },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -427,6 +430,9 @@ export default class PlayCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "command.play.help.example.clip",
+                                    {
+                                        clipTimer: `\`${ELIMINATION_DEFAULT_LIVES}\``,
+                                    },
                                 ),
                             }),
                             {},
