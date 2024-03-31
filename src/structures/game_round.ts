@@ -388,6 +388,7 @@ export default class GameRound extends Round {
                                 style: button.style,
                                 type: 2,
                                 disabled: true,
+                                emoji: button.emoji,
                             };
                         }
 
@@ -428,6 +429,7 @@ export default class GameRound extends Round {
                             style,
                             type: 2,
                             disabled: true,
+                            emoji: button.emoji,
                         };
                     },
                 ),
