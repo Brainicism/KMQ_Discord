@@ -1,3 +1,5 @@
+/* eslint-disable sort-imports-es6-autofix/sort-imports-es6 */
+/* eslint-disable no-console */
 /* eslint-disable no-await-in-loop */
 import {
     CHRONOLOGICAL_SHUFFLE_NUM_PARTITIONS,
@@ -15,10 +17,12 @@ import SongSelector from "../../../structures/song_selector";
 import State from "../../../state";
 import SubunitsPreference from "../../../enums/option_types/subunit_preference";
 import _ from "lodash";
+import fs from "fs";
 import assert from "assert";
 import sinon from "sinon";
 import type { GenderModeOptions } from "../../../enums/option_types/gender";
 import type QueriedSong from "../../../structures/queried_song";
+import { parseJsonFile, pathExistsSync } from "../../../helpers/utils";
 
 async function getMockGuildPreference(): Promise<GuildPreference> {
     const guildPreference = new GuildPreference("test");
@@ -1305,6 +1309,107 @@ describe("song selector", () => {
                         );
                     });
                 });
+            });
+        });
+    });
+
+    describe("song selector snapshots", () => {
+        describe("non-playlist", () => {
+            const snapshotPayloads = [
+                {
+                    name: "regular",
+                    guildPreferenceModifierFn: async (gp: GuildPreference) => {
+                        await gp.resetToDefault();
+                        await gp.setBeginningCutoffYear(2014);
+                        await gp.setEndCutoffYear(2019);
+                        await gp.setGender(["female"]);
+                        await gp.setLimit(0, 2000);
+                        await gp.setArtistType(ArtistType.SOLOIST);
+                        await gp.setReleaseType(ReleaseType.BSIDE);
+                        await gp.setSubunitPreference(
+                            SubunitsPreference.INCLUDE,
+                        );
+                        const includesGroups = await getMatchingGroupNames({}, [
+                            "G-DRAGON",
+                        ]);
+
+                        await gp.setIncludes(includesGroups.matchedGroups);
+                        await gp.setOstPreference(OstPreference.INCLUDE);
+                        await gp.songSelector.reloadSongs();
+                    },
+                },
+                {
+                    name: "groups",
+                    guildPreferenceModifierFn: async (gp: GuildPreference) => {
+                        await gp.resetToDefault();
+                        const groups = await getMatchingGroupNames({}, [
+                            "IU",
+                            "Twice",
+                            "BTS",
+                            "NewJeans",
+                            "Taeyeon",
+                        ]);
+
+                        await gp.setLimit(0, 2000);
+                        await gp.setGroups(groups.matchedGroups);
+                        const excludeGroups = await getMatchingGroupNames({}, [
+                            "Jungkook",
+                        ]);
+
+                        await gp.setExcludes(excludeGroups.matchedGroups);
+                    },
+                },
+            ];
+
+            it("should match the snapshot", async () => {
+                for (const snapshotPayload of snapshotPayloads) {
+                    console.log(
+                        `Testing snapshot payload: ${snapshotPayload.name}`,
+                    );
+
+                    await snapshotPayload.guildPreferenceModifierFn(
+                        guildPreference,
+                    );
+                    await guildPreference.songSelector.reloadSongs();
+
+                    const path = `src/test/unit_tests/snapshots/${snapshotPayload.name}-snapshot.json`;
+                    let snapshot: Array<string> | null;
+                    if (pathExistsSync(path)) {
+                        snapshot = (await parseJsonFile(path)) as string[];
+                        console.log(
+                            `Snapshot found with ${snapshot.length} entries`,
+                        );
+                    } else {
+                        snapshot = null;
+                        console.log("No snapshot detected... generating");
+                    }
+
+                    await guildPreference.songSelector.reloadSongs();
+                    const { songs } = guildPreference.songSelector.getSongs();
+                    const selectedSongIds = Array.from(songs)
+                        .map(
+                            (x) =>
+                                `${x.youtubeLink} | ${x.songName} | ${x.artistName}`,
+                        )
+                        .sort();
+
+                    if (snapshot) {
+                        assert.deepStrictEqual(
+                            snapshot,
+                            selectedSongIds,
+                            `Snapshot (${snapshotPayload.name}) files don't match! ${snapshot.length} != ${selectedSongIds.length}. If bootstrap was updated, update the snapshot file. If not, song selector behavior may have changed`,
+                        );
+                    } else {
+                        console.log(
+                            `Writing ${selectedSongIds.length} IDs to ${path}`,
+                        );
+
+                        await fs.promises.writeFile(
+                            path,
+                            JSON.stringify(selectedSongIds, null, 4),
+                        );
+                    }
+                }
             });
         });
     });
