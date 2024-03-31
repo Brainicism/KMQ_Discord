@@ -89,6 +89,9 @@ export default class GameRound extends Round {
     /** Let players know their guess would have been accepted if they were using /answer typingtypos */
     public warnTypoReceived: boolean;
 
+    /** The multiple choice options for the current round */
+    public multipleChoiceOptions: Array<Eris.InteractionButton>;
+
     /** The base EXP for this GameRound */
     private baseExp: number;
 
@@ -182,6 +185,7 @@ export default class GameRound extends Round {
                   ]) as number)
                 : 1;
         this.guesses = {};
+        this.multipleChoiceOptions = [];
     }
 
     getCorrectGuessers(isHidden: boolean): Array<KmqMember> {

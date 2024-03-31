@@ -233,7 +233,7 @@ export default class GameSession extends Session {
             return null;
         }
 
-        await this.sendStartRoundMessage(messageContext, round);
+        await this.sendStartRoundMessage(messageContext, round, false);
 
         return round;
     }
@@ -664,7 +664,7 @@ export default class GameSession extends Session {
 
         if (clipRound.isNewClipMajority()) {
             await round.interactionMarkAnswers(0, false);
-            await this.sendStartRoundMessage(messageContext, clipRound);
+            await this.sendStartRoundMessage(messageContext, clipRound, true);
             await this.playSong(messageContext, clipAction);
             clipRound.reset();
         }
@@ -1753,50 +1753,65 @@ export default class GameSession extends Session {
         };
     }
 
-    private async sendMultipleChoiceOptionsMessage(): Promise<void> {
+    /**
+     * @param reuseExistingChoices - Whether to reuse the existing multiple choice options
+     * Sends a message with multiple choice options for the current round
+     */
+    private async sendMultipleChoiceOptionsMessage(
+        reuseExistingChoices: boolean,
+    ): Promise<void> {
         const locale = State.getGuildLocale(this.guildID);
         const round = this.round;
         if (!round) {
             return;
         }
 
-        const randomSong = round.song;
-        const correctChoice =
-            this.guildPreference.gameOptions.guessModeType ===
-            GuessModeType.ARTIST
-                ? round.song.getLocalizedArtistName(locale)
-                : round.song.getLocalizedSongName(locale);
-
-        const wrongChoices = await getMultipleChoiceOptions(
-            this.guildPreference.gameOptions.answerType,
-            this.guildPreference.gameOptions.guessModeType,
-            randomSong.members,
-            correctChoice,
-            randomSong.artistID,
-            locale,
-        );
+        if (reuseExistingChoices && round.multipleChoiceOptions.length === 0) {
+            logger.error(
+                "Expected to re-use multiple choice buttons, but none were set for the round. Falling back to generating new ones.",
+            );
+        }
 
         let buttons: Array<Eris.InteractionButton> = [];
-        for (const choice of wrongChoices) {
-            const id = uuid.v4();
-            round.interactionIncorrectAnswerUUIDs[id] = 0;
+        if (reuseExistingChoices && round.multipleChoiceOptions.length > 0) {
+            buttons = round.multipleChoiceOptions;
+        } else {
+            const correctChoice =
+                this.guildPreference.gameOptions.guessModeType ===
+                GuessModeType.ARTIST
+                    ? round.song.getLocalizedArtistName(locale)
+                    : round.song.getLocalizedSongName(locale);
+
+            const wrongChoices = await getMultipleChoiceOptions(
+                this.guildPreference.gameOptions.answerType,
+                this.guildPreference.gameOptions.guessModeType,
+                round.song.members,
+                correctChoice,
+                round.song.artistID,
+                locale,
+            );
+
+            for (const choice of wrongChoices) {
+                const id = uuid.v4();
+                round.interactionIncorrectAnswerUUIDs[id] = 0;
+                buttons.push({
+                    type: 2,
+                    style: 1,
+                    label: choice.substring(0, 70),
+                    custom_id: id,
+                });
+            }
+
+            round.interactionCorrectAnswerUUID = uuid.v4() as string;
             buttons.push({
                 type: 2,
                 style: 1,
-                label: choice.substring(0, 70),
-                custom_id: id,
+                label: correctChoice.substring(0, 70),
+                custom_id: round.interactionCorrectAnswerUUID,
             });
+
+            buttons = _.shuffle(buttons);
         }
-
-        round.interactionCorrectAnswerUUID = uuid.v4() as string;
-        buttons.push({
-            type: 2,
-            style: 1,
-            label: correctChoice.substring(0, 70),
-            custom_id: round.interactionCorrectAnswerUUID,
-        });
-
-        buttons = _.shuffle(buttons);
 
         let actionRows: Array<ButtonActionRow>;
         switch (this.guildPreference.gameOptions.answerType) {
@@ -1918,6 +1933,7 @@ export default class GameSession extends Session {
     private async sendStartRoundMessage(
         messageContext: MessageContext,
         round: Round,
+        reuseExistingChoices: boolean,
     ): Promise<void> {
         if (this.isHiddenMode()) {
             // Show players that haven't guessed and a button to guess
@@ -1930,7 +1946,7 @@ export default class GameSession extends Session {
         }
 
         if (this.isMultipleChoiceMode()) {
-            await this.sendMultipleChoiceOptionsMessage();
+            await this.sendMultipleChoiceOptionsMessage(reuseExistingChoices);
         }
     }
 }
