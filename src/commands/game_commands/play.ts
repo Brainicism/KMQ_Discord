@@ -437,7 +437,7 @@ export default class PlayCommand implements BaseCommand {
                             name: "timer",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.play.help.clip.timer",
+                                "command.play.help.interaction.clipTimer",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -446,7 +446,7 @@ export default class PlayCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.play.help.clip.timer",
+                                            "command.play.help.interaction.clipTimer",
                                         ),
                                     }),
                                     {},

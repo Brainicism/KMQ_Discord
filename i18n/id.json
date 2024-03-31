@@ -896,6 +896,7 @@
                     "teams": "Bergabunglah dengan tim sesuai keinginan dan temukan siapa yang dapat membantu Anda menang!"
                 },
                 "interaction": {
+                    "clipTimer": "Pilih berapa lama setiap klip akan diputar",
                     "lives": "Pilih berapa banyak nyawa yang dimiliki setiap pemain di awal"
                 },
                 "name": "putar",

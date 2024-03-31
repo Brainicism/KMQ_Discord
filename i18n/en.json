@@ -896,6 +896,7 @@
                     "teams": "Split up into as many teams as you want and see who you can depend on to help you win!"
                 },
                 "interaction": {
+                    "clipTimer": "Choose how long each clip will play for",
                     "lives": "Choose how many lives each player starts with"
                 },
                 "name": "play",

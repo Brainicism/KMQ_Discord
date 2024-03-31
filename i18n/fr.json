@@ -896,6 +896,7 @@
                     "teams": "Divisez-vous en d'équipes et voyez sur qui vous pouvez compter pour vous aider à gagner!"
                 },
                 "interaction": {
+                    "clipTimer": "Choisissez la durée de lecture de chaque clip",
                     "lives": "Choisissez le nombre de vies avec lequel chaque joueur commence"
                 },
                 "name": "jouer",

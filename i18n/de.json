@@ -896,6 +896,7 @@
                     "teams": "Bilde beliebig viele Teams und finde heraus, wer zum Sieg beiträgt!"
                 },
                 "interaction": {
+                    "clipTimer": "Wähle, wie lange jeder Clip abgespielt wird",
                     "lives": "Wähle aus, mit wie vielen Leben jeder Spieler beginnt"
                 },
                 "name": "spielen",

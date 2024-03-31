@@ -896,6 +896,7 @@
                     "teams": "Splits op in zoveel teams als je wilt en kijk van wie je afhankelijk kunt zijn om te winnen!"
                 },
                 "interaction": {
+                    "clipTimer": "Kies hoe lang elke clip zal afspelen",
                     "lives": "Kies met hoeveel levens elke speler begint"
                 },
                 "name": "spelen",
