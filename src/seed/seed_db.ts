@@ -3,7 +3,9 @@ import * as cp from "child_process";
 import {
     DATABASE_DOWNLOAD_DIR,
     DataFiles,
+    EMBED_DESCRIPTION_MAX_LENGTH,
     EMBED_ERROR_COLOR,
+    EMBED_SUCCESS_COLOR,
     KMQ_USER_AGENT,
     KmqImages,
 } from "../constants";
@@ -14,12 +16,13 @@ import {
     parseJsonFile,
     pathExists,
     standardDateFormat,
+    truncatedString,
 } from "../helpers/utils";
 import { getNewConnection } from "../database_context";
 import { program } from "commander";
 import {
     sendDebugAlertFileWebhook,
-    sendDebugAlertWebhook,
+    sendInfoWebhook,
 } from "../helpers/discord_utils";
 import { sql } from "kysely";
 import Axios from "axios";
@@ -646,11 +649,13 @@ async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
         );
     } catch (e) {
         logger.error(`Download/seed failure: ${e}`);
-        await sendDebugAlertWebhook(
+        await sendInfoWebhook(
+            process.env.ALERT_WEBHOOK_URL!,
             "Download and seed failure",
             e.toString(),
             EMBED_ERROR_COLOR,
             KmqImages.NOT_IMPRESSED,
+            "Kimiqo",
         );
     }
 }
@@ -734,22 +739,56 @@ async function reloadAutocompleteData(): Promise<void> {
             const currentDate = new Date();
             if (songsRemoved.length) {
                 logger.info(`${songsRemoved.length} songs removed.`);
-                await sendDebugAlertFileWebhook(
-                    discordDateFormat(currentDate, "f"),
+                const description = `**${songsRemoved.length} songs removed**:\n${songsRemoved.join("\n")}`;
+
+                await sendInfoWebhook(
                     process.env.SONG_UPDATES_WEBHOOK_URL!,
-                    `${songsRemoved.length} songs removed:\n${songsRemoved.join("\n")}`,
-                    "removed_songs.txt",
+                    discordDateFormat(currentDate, "f"),
+                    truncatedString(
+                        description,
+                        EMBED_DESCRIPTION_MAX_LENGTH - 1,
+                    ),
+                    EMBED_ERROR_COLOR,
+                    KmqImages.NOT_IMPRESSED,
+                    undefined,
                 );
+
+                if (description.length >= EMBED_DESCRIPTION_MAX_LENGTH) {
+                    // if description was too long, send full file
+                    await sendDebugAlertFileWebhook(
+                        `${discordDateFormat(currentDate, "f")}\nFull List:`,
+                        process.env.SONG_UPDATES_WEBHOOK_URL!,
+                        `${songsRemoved.length} songs removed:\n${songsRemoved.map((x) => `- ${x}`).join("\n")}`,
+                        "removed_songs.txt",
+                    );
+                }
             }
 
             if (songsAdded.length) {
                 logger.info(`${songsAdded.length} songs added.`);
-                await sendDebugAlertFileWebhook(
-                    discordDateFormat(currentDate, "f"),
+                const description = `**${songsAdded.length} songs added**:\n${songsAdded.map((x) => `- ${x}`).join("\n")}`;
+
+                await sendInfoWebhook(
                     process.env.SONG_UPDATES_WEBHOOK_URL!,
-                    `${songsAdded.length} songs added:\n${songsAdded.join("\n")}`,
-                    "added_songs.txt",
+                    discordDateFormat(currentDate, "f"),
+                    truncatedString(
+                        description,
+                        EMBED_DESCRIPTION_MAX_LENGTH - 1,
+                    ),
+                    EMBED_SUCCESS_COLOR,
+                    KmqImages.HAPPY,
+                    undefined,
                 );
+
+                if (description.length >= EMBED_DESCRIPTION_MAX_LENGTH) {
+                    // if description was too long, send full file
+                    await sendDebugAlertFileWebhook(
+                        `${discordDateFormat(currentDate, "f")}\nFull List:`,
+                        process.env.SONG_UPDATES_WEBHOOK_URL!,
+                        `${songsAdded.length} songs added:\n${songsAdded.join("\n")}`,
+                        "added_songs.txt",
+                    );
+                }
             }
         } catch (e) {
             logger.error(e);

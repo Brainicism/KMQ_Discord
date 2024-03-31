@@ -160,6 +160,8 @@ export const DATABASE_DOWNLOAD_DIR = path.join(
     "../sql_dumps/daisuki",
 );
 
+export const EMBED_DESCRIPTION_MAX_LENGTH = 4096;
+
 export const ELIMINATION_DEFAULT_LIVES = 10;
 export const ELIMINATION_MAX_LIVES = 10000;
 export const ELIMINATION_MIN_LIVES = 1;

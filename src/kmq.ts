@@ -11,7 +11,6 @@ import { clearRestartNotification } from "./helpers/management_utils";
 import { config } from "dotenv";
 import { delay, isPrimaryInstance, pathExists } from "./helpers/utils";
 import { getInternalLogger } from "./logger";
-import { sendDebugAlertWebhook } from "./helpers/discord_utils";
 import EnvType from "./enums/env_type";
 import Eris from "eris";
 import KmqClient from "./kmq_client";
@@ -20,6 +19,7 @@ import cluster from "cluster";
 import dbContext from "./database_context";
 import fs from "fs";
 
+import { sendInfoWebhook } from "./helpers/discord_utils";
 import KmqWebServer from "./kmq_web_server";
 import path from "path";
 import schedule from "node-schedule";
@@ -191,11 +191,13 @@ function registerProcessEvents(fleet: Fleet): void {
             // inform workers to begin accepting commands
             await fleet.ipc.allClustersCommand("activate");
 
-            await sendDebugAlertWebhook(
+            await sendInfoWebhook(
+                process.env.ALERT_WEBHOOK_URL!,
                 "Bot started successfully",
                 "Shards have connected!",
                 EMBED_SUCCESS_COLOR,
                 KmqImages.HAPPY,
+                "Kimiqo",
             );
 
             logger.info("Starting web server...");
