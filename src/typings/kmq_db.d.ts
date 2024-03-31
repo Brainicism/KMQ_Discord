@@ -41,13 +41,13 @@ export interface BadgesPlayers {
 }
 
 export interface BannedPlayers {
-    created_at: Date;
+    created_at: Generated<Date>;
     id: string;
     reason: string;
 }
 
 export interface BannedServers {
-    created_at: Date;
+    created_at: Generated<Date>;
     id: string;
     reason: string;
 }
@@ -128,7 +128,7 @@ export interface GameOptionPresetsJson {
 }
 
 export interface GameOptions {
-    client_id: string;
+    client_id: Generated<string>;
     guild_id: string;
     last_updated: Generated<Date | null>;
     option_name: string;
@@ -183,7 +183,7 @@ export interface Locale {
 }
 
 export interface NewsSubscriptions {
-    created_at: Date;
+    created_at: Generated<Date>;
     guild_id: string;
     range: string;
     text_channel_id: string;
@@ -217,6 +217,13 @@ export interface PlayerStats {
     player_id: string;
     rank_ineligible: Generated<number>;
     songs_guessed: Generated<number>;
+}
+
+export interface PremiumUsers {
+    active: number;
+    first_subscribed: Date;
+    source: "loyalty" | "patreon";
+    user_id: string;
 }
 
 export interface SongMetadata {
@@ -281,6 +288,7 @@ export interface KmqDB {
     player_game_session_stats: PlayerGameSessionStats;
     player_servers: PlayerServers;
     player_stats: PlayerStats;
+    premium_users: PremiumUsers;
     song_metadata: SongMetadata;
     system_stats: SystemStats;
     top_gg_user_votes: TopGgUserVotes;
