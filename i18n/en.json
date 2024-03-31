@@ -889,7 +889,7 @@
                 "description": "Starts a game of KMQ.",
                 "example": {
                     "classic": "Start a classic game of KMQ (type in your guess first to get a point)",
-                    "clip": "Guess the song based on a short snippet",
+                    "clip": "Guess the song based on a repeated snippet, played for {{clipTimer}} seconds",
                     "elimination": "Start an elimination game of KMQ where each player starts with {{lives}} lives",
                     "hidden": "Start a hidden game of KMQ, where players can only answer with /guess",
                     "suddenDeath": "Start a sudden death game of KMQ, where someone has to get the song right, or the game ends",
