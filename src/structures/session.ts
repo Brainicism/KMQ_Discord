@@ -1,8 +1,8 @@
 import * as uuid from "uuid";
 import {
-    CLIP_REPLAY_DELAY,
+    CLIP_MAX_REPLAY_COUNT,
+    CLIP_REPLAY_DELAY_MS,
     KmqImages,
-    MAX_REPLAYS,
     specialFfmpegArgs,
 } from "../constants";
 import { IPCLogger } from "../logger";
@@ -754,11 +754,9 @@ export default abstract class Session {
                 encoderArgs = ffmpegArgs.encoderArgs;
             }
 
-            if (clipAction) {
-                const durationLimit =
-                    this.guildPreference.gameOptions.guessTimeout;
-
-                encoderArgs.push("-t", durationLimit!.toString());
+            if (this.isGameSession() && clipAction) {
+                const clipTimerLength = this.clipTimerLength;
+                encoderArgs.push("-t", clipTimerLength.toString());
             }
 
             round.songStartedAt = Date.now();
@@ -797,10 +795,10 @@ export default abstract class Session {
 
             if (this.isGameSession() && this.isClipMode()) {
                 const clipGameRound = round as ClipGameRound;
-                await delay(CLIP_REPLAY_DELAY);
+                await delay(CLIP_REPLAY_DELAY_MS);
                 if (
                     !round.finished &&
-                    clipGameRound.getReplayCount() < MAX_REPLAYS
+                    clipGameRound.getReplayCount() < CLIP_MAX_REPLAY_COUNT
                 ) {
                     clipGameRound.incrementReplays();
                     await this.playSong(messageContext, ClipAction.REPLAY);

@@ -1,4 +1,7 @@
 import {
+    CLIP_DEFAULT_TIMER,
+    CLIP_MAX_TIMER,
+    CLIP_MIN_TIMER,
     DataFiles,
     ELIMINATION_DEFAULT_LIVES,
     ELIMINATION_MAX_LIVES,
@@ -39,7 +42,6 @@ import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameSession from "../../structures/game_session";
 import GameType from "../../enums/game_type";
-import GuessTimeoutCommand from "../game_options/timer";
 import GuildPreference from "../../structures/guild_preference";
 import KmqMember from "../../structures/kmq_member";
 import LocaleType from "../../enums/locale_type";
@@ -75,7 +77,17 @@ export default class PlayCommand implements BaseCommand {
     validations = {
         minArgCount: 0,
         maxArgCount: 2,
-        arguments: [],
+        arguments: [
+            {
+                name: "gameType",
+                type: "enum" as const,
+                enums: Object.values(GameType),
+            },
+            {
+                name: "gameArg",
+                type: "number" as const,
+            },
+        ],
     };
 
     aliases = ["random", "start", "p"];
@@ -151,6 +163,29 @@ export default class PlayCommand implements BaseCommand {
                 explanation: i18n.translate(
                     guildID,
                     "command.play.help.example.clip",
+                ),
+            },
+            {
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    GameType.CLIP,
+                )} timer:0.75`,
+                explanation: i18n.translate(
+                    guildID,
+                    "command.play.help.example.clip",
+                    {
+                        clipTimer: "`0.75`",
+                    },
+                ),
+            },
+            {
+                example: clickableSlashCommand(COMMAND_NAME, GameType.CLIP),
+                explanation: i18n.translate(
+                    guildID,
+                    "command.play.help.example.clip",
+                    {
+                        clipTimer: `\`${ELIMINATION_DEFAULT_LIVES}\``,
+                    },
                 ),
             },
         ],
@@ -404,6 +439,31 @@ export default class PlayCommand implements BaseCommand {
                             {},
                         ),
                     type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+                    options: [
+                        {
+                            name: "timer",
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.play.help.clip.timer",
+                            ),
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.play.help.clip.timer",
+                                        ),
+                                    }),
+                                    {},
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .NUMBER,
+                            min_value: CLIP_MIN_TIMER,
+                            max_value: CLIP_MAX_TIMER,
+                        },
+                    ],
                 },
             ],
         },
@@ -441,6 +501,7 @@ export default class PlayCommand implements BaseCommand {
                 messageContext,
                 gameType,
                 interactionOptions["lives"],
+                interactionOptions["timer"],
                 interactionKey === AnswerType.HIDDEN,
                 interaction,
             );
@@ -459,12 +520,16 @@ export default class PlayCommand implements BaseCommand {
             gameType = gameTypeRaw as GameType;
         }
 
+        const firstArg =
+            parsedMessage.components.length <= 1
+                ? null
+                : parsedMessage.components[1]!;
+
         await PlayCommand.startGame(
             MessageContext.fromMessage(message),
             gameType,
-            parsedMessage.components.length <= 1
-                ? null
-                : parsedMessage.components[1]!,
+            firstArg,
+            firstArg,
             gameTypeRaw === AnswerType.HIDDEN,
         );
     };
@@ -896,6 +961,7 @@ export default class PlayCommand implements BaseCommand {
         messageContext: MessageContext,
         gameType: GameType,
         livesArg: string | null,
+        clipTimerArg: string | null,
         hiddenMode: boolean,
         interaction?: Eris.CommandInteraction,
     ): Promise<void> {
@@ -1155,6 +1221,17 @@ export default class PlayCommand implements BaseCommand {
                 }
             }
 
+            let clipTimer: number;
+            if (clipTimerArg == null) {
+                clipTimer = CLIP_DEFAULT_TIMER;
+            } else {
+                clipTimer = parseFloat(clipTimerArg);
+                clipTimer = Math.round(clipTimer! * 100) / 100;
+                if (clipTimer < CLIP_MIN_TIMER || clipTimer > CLIP_MAX_TIMER) {
+                    clipTimer = CLIP_DEFAULT_TIMER;
+                }
+            }
+
             gameSession = new GameSession(
                 guildPreference,
                 textChannel.id,
@@ -1163,6 +1240,7 @@ export default class PlayCommand implements BaseCommand {
                 gameOwner,
                 gameType,
                 lives,
+                clipTimer,
             );
         }
 
@@ -1178,30 +1256,6 @@ export default class PlayCommand implements BaseCommand {
         if (gameSession.isHiddenMode()) {
             if (!guildPreference.isGuessTimeoutSet()) {
                 await guildPreference.setGuessTimeout(HIDDEN_DEFAULT_TIMER);
-            }
-        }
-
-        if (gameType === GameType.CLIP) {
-            if (
-                !guildPreference.isGuessTimeoutSet() ||
-                guildPreference.gameOptions.guessTimeout >
-                    GuessTimeoutCommand.TIMER_MAX_ACCEPTABLE_CLIP
-            ) {
-                // If timer is sufficiently large and a clip game is starting, set it to the default clip value
-                await guildPreference.setGuessTimeout(
-                    GuessTimeoutCommand.TIMER_DEFAULT_VALUE_CLIP,
-                );
-            }
-        } else {
-            if (
-                guildPreference.isGuessTimeoutSet() &&
-                guildPreference.gameOptions.guessTimeout <
-                    GuessTimeoutCommand.TIMER_MIN_VALUE_NON_CLIP
-            ) {
-                // Remove a low timer from clip mode when starting a non-clip game
-                await guildPreference.setGuessTimeout(
-                    GuessTimeoutCommand.TIMER_MIN_VALUE_NON_CLIP,
-                );
             }
         }
 

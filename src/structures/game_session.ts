@@ -92,6 +92,9 @@ export default class GameSession extends Session {
     /** The Scoreboard object keeping track of players and scoring */
     public readonly scoreboard: Scoreboard;
 
+    /** How long a clip should be played for in the clip game mode */
+    public readonly clipTimerLength: number;
+
     /** The current GameRound */
     public round: GameRound | null;
 
@@ -116,6 +119,7 @@ export default class GameSession extends Session {
     /** The most recent Guesser, including their current streak */
     private lastGuesser: LastGuesser | null;
 
+    /** Manages updating a message with current guessers with hidden enabled */
     private hiddenUpdateTimer: NodeJS.Timeout | null;
 
     constructor(
@@ -126,6 +130,7 @@ export default class GameSession extends Session {
         gameSessionCreator: KmqMember,
         gameType: GameType,
         eliminationLives?: number,
+        clipTimerLength?: number,
     ) {
         super(
             guildPreference,
@@ -143,6 +148,7 @@ export default class GameSession extends Session {
         this.songStats = {};
         this.lastGuesser = null;
         this.hiddenUpdateTimer = null;
+        this.clipTimerLength = clipTimerLength ?? 0;
 
         switch (this.gameType) {
             case GameType.TEAMS:

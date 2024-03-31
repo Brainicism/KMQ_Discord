@@ -62,9 +62,6 @@ export const DEFAULT_ADVANCED_SETTINGS = {
     [AdvancedCommandAction.SONG_START_DELAY]: 3,
 };
 
-export const CLIP_REPLAY_DELAY = 1000;
-export const MAX_REPLAYS = 2;
-
 export const KMQ_USER_AGENT = "KMQ (K-pop Music Quiz)";
 export const specialFfmpegArgs = {
     [SpecialType.REVERSE]: (seek: number, duration: number) => ({
@@ -157,7 +154,6 @@ export const PROFILE_COMMAND_NAME = "Profile";
 export const EMBED_ERROR_COLOR = 0xed4245; // Red
 export const EMBED_SUCCESS_COLOR = 0x57f287; // Green
 export const EMBED_SUCCESS_BONUS_COLOR = 0xfee75c; // Gold
-export const EMBED_WARNING_COLOR = 0xffa500; // Orange
 
 export const DATABASE_DOWNLOAD_DIR = path.join(
     __dirname,
@@ -167,6 +163,12 @@ export const DATABASE_DOWNLOAD_DIR = path.join(
 export const ELIMINATION_DEFAULT_LIVES = 10;
 export const ELIMINATION_MAX_LIVES = 10000;
 export const ELIMINATION_MIN_LIVES = 1;
+
+export const CLIP_REPLAY_DELAY_MS = 1000;
+export const CLIP_MIN_TIMER = 0.75;
+export const CLIP_DEFAULT_TIMER = 2;
+export const CLIP_MAX_TIMER = 15;
+export const CLIP_MAX_REPLAY_COUNT = 2;
 
 export const enum GameOptionInternal {
     ADVANCED_SETTINGS = "advancedSettings",

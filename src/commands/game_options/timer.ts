@@ -1,11 +1,9 @@
-import { EMBED_WARNING_COLOR, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { OptionAction } from "../../constants";
 import {
     clickableSlashCommand,
     getDebugLogHeader,
     getInteractionValue,
-    sendErrorMessage,
-    sendInfoMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
@@ -27,16 +25,8 @@ const logger = new IPCLogger("guessTimeout");
 
 // eslint-disable-next-line import/no-unused-modules
 export default class GuessTimeoutCommand implements BaseCommand {
-    static TIMER_MIN_VALUE_CLIP = 0.75;
-    static TIMER_MIN_VALUE_NON_CLIP = 2;
-    static TIMER_MIN_VALUE = Math.min(
-        GuessTimeoutCommand.TIMER_MIN_VALUE_CLIP,
-        GuessTimeoutCommand.TIMER_MIN_VALUE_NON_CLIP,
-    );
-
+    static TIMER_MIN_VALUE = 2;
     static TIMER_MAX_VALUE = 180;
-    static TIMER_MAX_ACCEPTABLE_CLIP = 5;
-    static TIMER_DEFAULT_VALUE_CLIP = 2;
     aliases = ["time", "timeout", "t"];
 
     preRunChecks = [
@@ -213,41 +203,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
             );
         } else {
             timer = Math.round(timer! * 100) / 100;
-            if (timer < GuessTimeoutCommand.TIMER_MIN_VALUE_NON_CLIP) {
-                if (session) {
-                    // Only clip mode is allowed with low timers -- error out otherwise
-                    if (!session.isClipMode()) {
-                        await sendErrorMessage(
-                            messageContext,
-                            {
-                                title: "command.timer.failure.tooLowTimer.title",
-                                description:
-                                    "command.timer.failure.tooLowTimer.description",
-                            },
-                            interaction,
-                        );
-                        return;
-                    }
-                } else {
-                    // Outside of a session, warn the user but still change the value
-                    await sendInfoMessage(
-                        messageContext,
-                        {
-                            title: "command.timer.warning.lowTimerOnlyForClip.title",
-                            description:
-                                "command.timer.warning.lowTimerOnlyForClip.description",
-                            color: EMBED_WARNING_COLOR,
-                        },
-                        false,
-                        undefined,
-                        [],
-                        interaction,
-                    );
-                }
-            }
-
             await guildPreference.setGuessTimeout(timer);
-
             logger.info(
                 `${getDebugLogHeader(messageContext)} | Guess timeout set to ${
                     guildPreference.gameOptions.guessTimeout
