@@ -363,9 +363,13 @@ export default class GameRound extends Round {
 
     /**
      * @param correctGuesses - The number of correct guesses
-     * Marks button guesses as correct or incorrect in a multiple choice game
+     * @param showCorrectAnswer - Whether to show the correct answer
+     * Disables buttons in a multiple choice game
      */
-    async interactionMarkAnswers(correctGuesses: number): Promise<void> {
+    async interactionMarkAnswers(
+        correctGuesses: number,
+        showCorrectAnswer: boolean,
+    ): Promise<void> {
         if (!this.interactionMessage) return;
         const actionRows: Eris.ActionRow[] = this.interactionComponents.map(
             (actionRow) => ({
@@ -395,8 +399,9 @@ export default class GameRound extends Round {
                         let label = button.label;
                         let style: 1 | 3 | 4;
                         if (
+                            showCorrectAnswer &&
                             this.interactionCorrectAnswerUUID ===
-                            button.custom_id
+                                button.custom_id
                         ) {
                             if (correctGuesses) {
                                 label += ` (${correctGuesses})`;

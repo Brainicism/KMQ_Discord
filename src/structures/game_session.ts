@@ -265,7 +265,10 @@ export default class GameSession extends Session {
         await super.endRound(false, messageContext);
 
         try {
-            await round.interactionMarkAnswers(correctGuessers.length || 0);
+            await round.interactionMarkAnswers(
+                correctGuessers.length || 0,
+                true,
+            );
         } catch (e) {
             logger.warn(
                 `Failed to mark interaction answers. Bot potentially left server? e = ${e}`,
@@ -664,7 +667,7 @@ export default class GameSession extends Session {
         );
 
         if (clipRound.isNewClipMajority()) {
-            await round.interactionMarkAnswers(0);
+            await round.interactionMarkAnswers(0, false);
             await this.sendStartRoundMessage(messageContext, clipRound);
             await this.playSong(messageContext, clipAction);
             clipRound.reset();
