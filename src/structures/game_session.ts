@@ -658,6 +658,7 @@ export default class GameSession extends Session {
         );
 
         if (clipRound.isNewClipMajority()) {
+            await round.interactionMarkAnswers(0);
             await this.sendStartRoundMessage(messageContext, clipRound);
             await this.playSong(messageContext, clipAction);
             clipRound.reset();
