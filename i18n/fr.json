@@ -889,7 +889,7 @@
                 "description": "Démarre une partie de KMQ.",
                 "example": {
                     "classic": "Démarrez une partie classique de KMQ (tapez d'abord votre réponse pour obtenir un point)",
-                    "clip": "Devinez la chanson à partir d'un court extrait",
+                    "clip": "Devinez la chanson à partir d'un extrait répété, joué pendant {{clipTimer}} secondes",
                     "elimination": "Démarrez une partie d'élimination de KMQ où chaque joueur commence avec {{lives}} vies",
                     "hidden": "Démarrer une partie cachée de KMQ, où les joueurs ne peuvent répondre qu'avec /guess",
                     "suddenDeath": "Lancez un jeu de mort subite KMQ, où il faut deviner le morceau, ou la partie s'achève",

@@ -889,7 +889,7 @@
                 "description": "Iniciar partida de KMQ.",
                 "example": {
                     "classic": "Começar um jogo clássico de KMQ (digite seu palpite primeiro para ganhar um ponto)",
-                    "clip": "Adivinhe a música com base em um curto trecho",
+                    "clip": "Adivinhe a música com base em um trecho repetido, tocado por {{clipTimer}} segundos",
                     "elimination": "Iniciar uma partida de eliminação do KMQ, onde cada jogador começa com {{lives}} vidas",
                     "hidden": "Iniciar um jogo oculto de KMQ, onde os jogadores só podem responder com /guess",
                     "suddenDeath": "Iniciar um jogo de KMQ mata-mata, onde alguém deve acertar a música ou o jogo termina",

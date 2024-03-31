@@ -1,6 +1,15 @@
 # !/bin/bash
-current_branch=$(git rev-parse --abbrev-ref HEAD)
-merge_base=$(git merge-base $current_branch master)
+use_last_commit=$1
+current_branch=$(git rev-parse HEAD)
+merge_base=""
+
+if [ -z "$use_last_commit" ]; then
+    echo "Checking out the latest commit on master"
+    merge_base=$(git merge-base $current_branch master)
+else
+    echo "Checking out the last commit on the current branch"
+    merge_base=$(git rev-parse HEAD~)
+fi
 
 pushd $(git rev-parse --show-toplevel)
 cp i18n/en.json i18n/en-latest.json

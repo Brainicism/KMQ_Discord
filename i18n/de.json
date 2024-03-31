@@ -889,7 +889,7 @@
                 "description": "Startet ein Spiel von KMQ.",
                 "example": {
                     "classic": "Starte ein klassisches Spiel von KMQ (gib zuerst deinen Tipp ein, um einen Punkt zu erhalten)",
-                    "clip": "Rate das Lied anhand eines kurzen Ausschnitts",
+                    "clip": "Errate das Lied anhand eines wiederholten Ausschnitts, der für {{clipTimer}} Sekunden gespielt wird",
                     "elimination": "Starte ein Eliminierungs-Spiel von KMQ, bei dem jeder Spieler mit {{lives}} Leben beginnt",
                     "hidden": "Starte ein verstecktes Spiel von KMQ, bei dem die Spieler nur mit /guess antworten können",
                     "suddenDeath": "Starte ein KMQ-Sudden-Death-Spiel: Ein Fehlversuch beendet es",
