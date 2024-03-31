@@ -931,10 +931,11 @@ export default abstract class Session {
         buttons.push({
             type: 2,
             style: 1,
+            label: i18n.translate(locale, "misc.bookmark"),
             custom_id: "bookmark",
             emoji: {
                 id: null,
-                name: "❤️",
+                name: "🔖",
             },
         });
 
