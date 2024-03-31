@@ -622,15 +622,11 @@ export default class GameSession extends Session {
     }
 
     async handleClipComponentInteraction(
-        round: GameRound,
+        round: ClipGameRound,
         interaction: Eris.ComponentInteraction<Eris.TextableChannel>,
         messageContext: MessageContext,
     ): Promise<boolean> {
-        if (
-            !round.songStartedAt ||
-            Date.now() - round.songStartedAt! <
-                this.guildPreference.gameOptions.guessTimeout! * 1000
-        ) {
+        if (!round.songStartedAt || round.getReplayCount() === 0) {
             // Prevent spamming clip actions
             await tryCreateInteractionErrorAcknowledgement(
                 interaction,
@@ -708,7 +704,7 @@ export default class GameSession extends Session {
             )
         ) {
             return this.handleClipComponentInteraction(
-                round,
+                round as ClipGameRound,
                 interaction,
                 messageContext,
             );
