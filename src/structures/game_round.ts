@@ -146,7 +146,7 @@ export default class GameRound extends Round {
         this.hints.songHint[LocaleType.EN] = this.generateHint(song.songName);
         this.hints.songHint[LocaleType.KO] =
             song.hangulSongName && song.hangulSongName !== song.songName
-                ? this.generateHint(song.songName)
+                ? this.generateHint(song.hangulSongName)
                 : this.hints.songHint[LocaleType.EN];
 
         this.hints.artistHint[LocaleType.EN] = this.generateHint(
@@ -155,7 +155,7 @@ export default class GameRound extends Round {
 
         this.hints.artistHint[LocaleType.KO] =
             song.hangulArtistName && song.hangulArtistName !== song.artistName
-                ? this.generateHint(song.artistName)
+                ? this.generateHint(song.hangulArtistName)
                 : this.hints.artistHint[LocaleType.EN];
 
         this.interactionCorrectAnswerUUID = null;
