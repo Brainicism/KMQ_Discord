@@ -3,6 +3,7 @@ import * as uuid from "uuid";
 import {
     BOOKMARK_COMMAND_NAME,
     DataFiles,
+    EMBED_DESCRIPTION_MAX_LENGTH,
     EMBED_ERROR_COLOR,
     EMBED_SUCCESS_BONUS_COLOR,
     EMBED_SUCCESS_COLOR,
@@ -517,7 +518,7 @@ export async function sendMessage(
             }
 
             if (embed.description) {
-                if (embed.description.length > 4096) {
+                if (embed.description.length > EMBED_DESCRIPTION_MAX_LENGTH) {
                     logger.error(
                         `Description was too long. title = ${embed.description}`,
                     );
@@ -1648,19 +1649,23 @@ export function getMajorityCount(guildID: string): number {
 
 /**
  * Sends an alert to the message webhook
+ * @param webhookURL - The webhook URL
  * @param title - The embed title
  * @param description - the embed description
  * @param color - The embed color
- * @param avatarUrl - The avatar URl to show on the embed
+ * @param avatarUrl - The avatar URL to show on the embed
+ * @param username - The username to show on the embed
  */
-export async function sendDebugAlertWebhook(
+export async function sendInfoWebhook(
+    webhookURL: string,
     title: string,
     description: string,
     color: number,
-    avatarUrl: string,
+    avatarUrl: string | undefined,
+    username: string | undefined,
 ): Promise<void> {
-    if (!process.env.ALERT_WEBHOOK_URL) return;
-    await axios.post(process.env.ALERT_WEBHOOK_URL, {
+    if (!webhookURL) return;
+    await axios.post(webhookURL, {
         embeds: [
             {
                 title,
@@ -1668,7 +1673,7 @@ export async function sendDebugAlertWebhook(
                 color,
             },
         ],
-        username: "Kimiqo",
+        username,
         avatar_url: avatarUrl,
         footerText: State.version,
     });

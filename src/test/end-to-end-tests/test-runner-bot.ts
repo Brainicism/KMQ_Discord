@@ -6,7 +6,7 @@
 import * as Eris from "eris";
 import { EMBED_ERROR_COLOR, KmqImages } from "../../constants";
 import { delay } from "../../helpers/utils";
-import { sendDebugAlertWebhook } from "../../helpers/discord_utils";
+import { sendInfoWebhook } from "../../helpers/discord_utils";
 import BASIC_OPTIONS_TEST_SUITE from "./test_suites/basic_options_test";
 import crypto from "crypto";
 import type ParsedGameOptionValues from "./parsed_game_options_value";
@@ -155,11 +155,13 @@ async function proceedNextStage(): Promise<void> {
 
             log(message);
 
-            await sendDebugAlertWebhook(
+            await sendInfoWebhook(
+                process.env.ALERT_WEBHOOK_URL!,
                 `Test Suite '${TEST_SUITE.name}' Failed`,
                 message,
                 EMBED_ERROR_COLOR,
                 KmqImages.DEAD,
+                "Kimiqo",
             );
         }
 
