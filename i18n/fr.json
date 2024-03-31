@@ -1319,12 +1319,6 @@
             }
         },
         "timer": {
-            "failure": {
-                "tooLowTimer": {
-                    "description": "La valeur de la minuterie donnée est trop basse. Veuillez entrer une valeur supérieure à {{minTimer}}.",
-                    "title": "Minuterie trop basse"
-                }
-            },
             "help": {
                 "description": "Essayez de deviner correctement avant que le temps ne s'écoule! Entrez un temps en secondes, ou ne donnez aucun argument pour désactiver.",
                 "example": {
@@ -1338,12 +1332,6 @@
                 "name": "minuteur",
                 "usage": {
                     "seconds": "secondes"
-                }
-            },
-            "warning": {
-                "lowTimerOnlyForClip": {
-                    "description": "Une valeur de minuterie aussi basse est uniquement prise en charge pour {{playClip}}. Elle sera réinitialisée en dehors de ce mode de jeu.",
-                    "title": "Minuterie basse uniquement pour le mode de jeu Clip"
                 }
             }
         },

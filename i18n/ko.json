@@ -1319,12 +1319,6 @@
             }
         },
         "timer": {
-            "failure": {
-                "tooLowTimer": {
-                    "description": "주어진 타이머 값이 너무 낮습니다. {{minTimer}}보다 큰 값을 입력해 주세요.",
-                    "title": "너무 낮은 타이머"
-                }
-            },
             "help": {
                 "description": "타이머가 다 떨어지기 전에 정확하게 추측하기 위해 최선을 다하십시오! 시간을 초 단위로 입력하거나 비활성화할 인수를 제공하지 마십시오.",
                 "example": {
@@ -1338,12 +1332,6 @@
                 "name": "타이머",
                 "usage": {
                     "seconds": "초"
-                }
-            },
-            "warning": {
-                "lowTimerOnlyForClip": {
-                    "description": "이렇게 작은 타이머 값은 {{playClip}}에만 지원됩니다. 해당 게임 모드를 벗어나면 재설정됩니다.",
-                    "title": "클립 게임 모드 전용 저타이머"
                 }
             }
         },

@@ -1319,12 +1319,6 @@
             }
         },
         "timer": {
-            "failure": {
-                "tooLowTimer": {
-                    "description": "El valor del temporizador dado es demasiado bajo. Por favor, introduce un valor mayor que {{minTimer}}.",
-                    "title": "Temporizador Demasiado Bajo"
-                }
-            },
             "help": {
                 "description": "¡Intenta adivinar correctamente antes de que se acabe el tiempo! Ingresa un tiempo en segundos, o no ingreses argumentos para desactivarlo.",
                 "example": {
@@ -1338,12 +1332,6 @@
                 "name": "temporizador",
                 "usage": {
                     "seconds": "segundos"
-                }
-            },
-            "warning": {
-                "lowTimerOnlyForClip": {
-                    "description": "Un valor de temporizador tan pequeño solo se admite para {{playClip}}. Se restablecerá fuera de ese modo de juego.",
-                    "title": "Solo Temporizador Bajo Para el Modo de Juego de Clip"
                 }
             }
         },

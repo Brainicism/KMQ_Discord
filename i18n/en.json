@@ -1319,12 +1319,6 @@
             }
         },
         "timer": {
-            "failure": {
-                "tooLowTimer": {
-                    "description": "The given timer value is too low. Please enter a value greater than {{minTimer}}.",
-                    "title": "Too Low Timer"
-                }
-            },
             "help": {
                 "description": "Try your best to guess correctly before the timer runs out! Enter a time in seconds, or give no arguments to disable.",
                 "example": {
@@ -1338,12 +1332,6 @@
                 "name": "timer",
                 "usage": {
                     "seconds": "seconds"
-                }
-            },
-            "warning": {
-                "lowTimerOnlyForClip": {
-                    "description": "A timer value this small is only supported for {{playClip}}. It will be reset outside of that game mode.",
-                    "title": "Low Timer Only For Clip Game Mode"
                 }
             }
         },
