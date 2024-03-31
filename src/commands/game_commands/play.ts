@@ -159,13 +159,6 @@ export default class PlayCommand implements BaseCommand {
                 ),
             },
             {
-                example: clickableSlashCommand(COMMAND_NAME, GameType.CLIP),
-                explanation: i18n.translate(
-                    guildID,
-                    "command.play.help.example.clip",
-                ),
-            },
-            {
                 example: `${clickableSlashCommand(
                     COMMAND_NAME,
                     GameType.CLIP,
