@@ -1181,26 +1181,28 @@ export default class PlayCommand implements BaseCommand {
             }
         }
 
-        if (
-            gameType === GameType.CLIP &&
-            (!guildPreference.gameOptions.guessTimeout ||
+        if (gameType === GameType.CLIP) {
+            if (
+                !guildPreference.isGuessTimeoutSet() ||
                 guildPreference.gameOptions.guessTimeout >
-                    GuessTimeoutCommand.TIMER_MAX_ACCEPTABLE_CLIP_BEFORE_RESET)
-        ) {
-            await guildPreference.setGuessTimeout(
-                GuessTimeoutCommand.TIMER_DEFAULT_VALUE,
-            );
-        }
-
-        if (
-            gameType !== GameType.CLIP &&
-            guildPreference.isGuessTimeoutSet() &&
-            guildPreference.gameOptions.guessTimeout <
-                GuessTimeoutCommand.TIMER_MIN_VALUE_NON_CLIP
-        ) {
-            await guildPreference.setGuessTimeout(
-                GuessTimeoutCommand.TIMER_MIN_VALUE_NON_CLIP,
-            );
+                    GuessTimeoutCommand.TIMER_MAX_ACCEPTABLE_CLIP
+            ) {
+                // If timer is sufficiently large and a clip game is starting, set it to the default clip value
+                await guildPreference.setGuessTimeout(
+                    GuessTimeoutCommand.TIMER_DEFAULT_VALUE_CLIP,
+                );
+            }
+        } else {
+            if (
+                guildPreference.isGuessTimeoutSet() &&
+                guildPreference.gameOptions.guessTimeout <
+                    GuessTimeoutCommand.TIMER_MIN_VALUE_NON_CLIP
+            ) {
+                // Remove a low timer from clip mode when starting a non-clip game
+                await guildPreference.setGuessTimeout(
+                    GuessTimeoutCommand.TIMER_MIN_VALUE_NON_CLIP,
+                );
+            }
         }
 
         if (gameType !== GameType.TEAMS) {

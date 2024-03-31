@@ -21,6 +21,9 @@ export default abstract class Round {
     /** Timestamp of the creation of the Round in epoch milliseconds */
     public readonly startedAt: number;
 
+    /** The Discord Guild ID */
+    public readonly guildID: string;
+
     /** Timestamp of when the song started playing in epoch milliseconds */
     public songStartedAt: number | null;
 
@@ -48,7 +51,7 @@ export default abstract class Round {
     /** Whether the data shown in the message has changed since it was last updated */
     public interactionMessageNeedsUpdate: boolean;
 
-    constructor(song: QueriedSong) {
+    constructor(song: QueriedSong, guildID: string) {
         this.song = song;
         this.songAliases = State.aliases.song[song.youtubeLink] || [];
         const artistNames = song.artistName.split("+").map((x) => x.trim());
@@ -65,6 +68,7 @@ export default abstract class Round {
         this.skippers = new Set();
         this.skipAchieved = false;
         this.interactionComponents = [];
+        this.guildID = guildID;
     }
 
     abstract getEndRoundDescription(

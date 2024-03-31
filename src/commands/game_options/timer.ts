@@ -19,6 +19,7 @@ import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
+import type GameSession from "src/structures/game_session";
 import type HelpDocumentation from "../../interfaces/help";
 
 const COMMAND_NAME = "timer";
@@ -26,11 +27,16 @@ const logger = new IPCLogger("guessTimeout");
 
 // eslint-disable-next-line import/no-unused-modules
 export default class GuessTimeoutCommand implements BaseCommand {
-    static TIMER_MIN_VALUE = 0.75;
-    static TIMER_DEFAULT_VALUE = 2;
+    static TIMER_MIN_VALUE_CLIP = 0.75;
     static TIMER_MIN_VALUE_NON_CLIP = 2;
+    static TIMER_MIN_VALUE = Math.min(
+        GuessTimeoutCommand.TIMER_MIN_VALUE_CLIP,
+        GuessTimeoutCommand.TIMER_MIN_VALUE_NON_CLIP,
+    );
+
     static TIMER_MAX_VALUE = 180;
-    static TIMER_MAX_ACCEPTABLE_CLIP_BEFORE_RESET = 5;
+    static TIMER_MAX_ACCEPTABLE_CLIP = 5;
+    static TIMER_DEFAULT_VALUE_CLIP = 2;
     aliases = ["time", "timeout", "t"];
 
     preRunChecks = [
@@ -189,7 +195,9 @@ export default class GuessTimeoutCommand implements BaseCommand {
             messageContext.guildID,
         );
 
-        const session = Session.getSession(messageContext.guildID);
+        const session = Session.getSession(messageContext.guildID) as
+            | GameSession
+            | undefined;
 
         const reset = timer == null;
         if (reset) {
@@ -207,7 +215,8 @@ export default class GuessTimeoutCommand implements BaseCommand {
             timer = Math.round(timer! * 100) / 100;
             if (timer < GuessTimeoutCommand.TIMER_MIN_VALUE_NON_CLIP) {
                 if (session) {
-                    if (!session.isGameSession() || !session.isClipMode()) {
+                    // Only clip mode is allowed with low timers -- error out otherwise
+                    if (!session.isClipMode()) {
                         await sendErrorMessage(
                             messageContext,
                             {
@@ -220,7 +229,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
                         return;
                     }
                 } else {
-                    // Warn the user but still change the value
+                    // Outside of a session, warn the user but still change the value
                     await sendInfoMessage(
                         messageContext,
                         {

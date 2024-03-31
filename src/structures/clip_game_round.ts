@@ -4,9 +4,6 @@ import GameRound from "./game_round";
 import type QueriedSong from "./queried_song";
 
 export default class ClipGameRound extends GameRound {
-    /** The Discord Guild ID */
-    public readonly guildID: string;
-
     /** The location of where the song was started */
     public seekLocation: number | null;
 
@@ -16,11 +13,10 @@ export default class ClipGameRound extends GameRound {
     private replays: number;
 
     constructor(song: QueriedSong, baseExp: number, guildID: string) {
-        super(song, baseExp);
+        super(song, baseExp, guildID);
 
         this.seekLocation = null;
         this.newClipRequesters = new Set();
-        this.guildID = guildID;
         this.replays = 0;
     }
 
@@ -67,7 +63,7 @@ export default class ClipGameRound extends GameRound {
     /**
      * @returns the number of replays
      */
-    getReplays(): number {
+    getReplayCount(): number {
         return this.replays;
     }
 

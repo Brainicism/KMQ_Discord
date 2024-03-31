@@ -738,7 +738,7 @@ export default abstract class Session {
         this.connection.stopPlaying();
 
         try {
-            let inputArgs = ["-ss", seekLocation!.toString()];
+            let inputArgs = ["-ss", seekLocation.toString()];
             let encoderArgs: Array<string> = [];
             const specialType = this.isListeningSession()
                 ? null
@@ -800,7 +800,7 @@ export default abstract class Session {
                 await delay(CLIP_REPLAY_DELAY);
                 if (
                     !round.finished &&
-                    clipGameRound.getReplays() < MAX_REPLAYS
+                    clipGameRound.getReplayCount() < MAX_REPLAYS
                 ) {
                     clipGameRound.incrementReplays();
                     await this.playSong(messageContext, ClipAction.REPLAY);

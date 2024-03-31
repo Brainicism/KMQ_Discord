@@ -618,22 +618,20 @@ export default class GameSession extends Session {
         messageContext: MessageContext,
     ): Promise<boolean> {
         if (
+            !round.songStartedAt ||
             Date.now() - round.songStartedAt! <
-            this.guildPreference.gameOptions.guessTimeout! * 1000
+                this.guildPreference.gameOptions.guessTimeout! * 1000
         ) {
-            const clipGameRound = round as ClipGameRound;
-            if (clipGameRound.getReplays() < 1) {
-                // Prevent spamming clip actions
-                await tryCreateInteractionErrorAcknowledgement(
-                    interaction,
-                    null,
-                    i18n.translate(
-                        this.guildID,
-                        "misc.failure.interaction.clipActionTooEarly",
-                    ),
-                );
-                return true;
-            }
+            // Prevent spamming clip actions
+            await tryCreateInteractionErrorAcknowledgement(
+                interaction,
+                null,
+                i18n.translate(
+                    this.guildID,
+                    "misc.failure.interaction.clipActionTooEarly",
+                ),
+            );
+            return true;
         }
 
         const clipRound = round as ClipGameRound;
@@ -1112,7 +1110,7 @@ export default class GameSession extends Session {
                   this.calculateBaseExp(),
                   this.guildID,
               )
-            : new GameRound(randomSong, this.calculateBaseExp());
+            : new GameRound(randomSong, this.calculateBaseExp(), this.guildID);
 
         return gameRound;
     }
@@ -1903,7 +1901,7 @@ export default class GameSession extends Session {
         return [
             {
                 type: 2,
-                style: 1,
+                style: 2,
                 custom_id: ClipAction.NEW_CLIP,
                 label: i18n.translate(this.guildID, "misc.newClip"),
                 emoji: { name: "🎬", id: null },
