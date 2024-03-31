@@ -98,7 +98,6 @@ describe("song selector", () => {
                     const selectedArtist = {
                         id: 208,
                         name: "Twice",
-                        addedByUser: true,
                     };
 
                     await guildPreference.setGroups([selectedArtist]);
@@ -118,9 +117,9 @@ describe("song selector", () => {
             describe("multi-selected groups", () => {
                 it("should only return the songs matching the specified groups", async () => {
                     const selectedArtists = [
-                        { id: 208, name: "Twice", addedByUser: true },
-                        { id: 40, name: "BTS", addedByUser: true },
-                        { id: 61, name: "EXO", addedByUser: true },
+                        { id: 208, name: "Twice" },
+                        { id: 40, name: "BTS" },
+                        { id: 31, name: "Blackpink" },
                     ];
 
                     await guildPreference.setGroups(selectedArtists);
@@ -142,9 +141,9 @@ describe("song selector", () => {
 
         describe("includes", () => {
             const includedArtists = [
-                { id: 208, name: "Twice", addedByUser: true },
-                { id: 40, name: "BTS", addedByUser: true },
-                { id: 61, name: "EXO", addedByUser: true },
+                { id: 208, name: "Twice" },
+                { id: 40, name: "BTS" },
+                { id: 31, name: "Blackpink" },
             ];
 
             describe("female gender, include 2 male groups", () => {
@@ -171,8 +170,8 @@ describe("song selector", () => {
 
         describe("excludes", () => {
             const excludeArtists = [
-                { id: 208, name: "Twice", addedByUser: true },
-                { id: 31, name: "Blackpink", addedByUser: true },
+                { id: 208, name: "Twice" },
+                { id: 31, name: "Blackpink" },
             ];
 
             describe("female gender, exclude 2 female groups", () => {
@@ -456,7 +455,7 @@ describe("song selector", () => {
         });
 
         describe("subunits", () => {
-            const artists = [{ id: 16, name: "AOA", addedByUser: true }];
+            const artists = [{ id: 16, name: "AOA" }];
 
             describe("exclude subunits", () => {
                 it("should only return the songs by the specified group, excluding subunits", async () => {
@@ -1334,6 +1333,12 @@ describe("song selector", () => {
                         ]);
 
                         await gp.setIncludes(includesGroups.matchedGroups);
+
+                        const excludesGroups = await getMatchingGroupNames({}, [
+                            "Taeyeon",
+                        ]);
+
+                        await gp.setExcludes(excludesGroups.matchedGroups);
                         await gp.setOstPreference(OstPreference.INCLUDE);
                         await gp.songSelector.reloadSongs();
                     },

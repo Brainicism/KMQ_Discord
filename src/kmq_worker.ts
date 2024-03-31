@@ -330,20 +330,20 @@ export default class BotWorker extends BaseClusterWorker {
             logger.info(`${this.logHeader()} | Initializing Gemini Client...`);
             State.geminiClient = new GeminiClient();
 
+            State.commandToID = await getCachedAppCommandIds();
             if (!EnvVariableManager.isMinimalRun()) {
                 logger.info(
                     `${this.logHeader()} | Loading cached application data...`,
                 );
 
                 await reloadCaches();
+
+                logger.info(`${this.logHeader()} | Reloading app commands`);
+                State.commandToID = await updateAppCommands(
+                    AppCommandsAction.RELOAD,
+                );
             }
 
-            State.commandToID = await getCachedAppCommandIds();
-
-            logger.info(`${this.logHeader()} | Reloading app commands`);
-            State.commandToID = await updateAppCommands(
-                AppCommandsAction.RELOAD,
-            );
             logger.info(`${this.logHeader()} | Updating bot's status..`);
             await updateBotStatus();
         } catch (e) {

@@ -288,7 +288,7 @@ describe("exp command", () => {
                             );
 
                             await guildPreference.setGroups([
-                                { id: 1, name: "aespa", addedByUser: true },
+                                { id: 1, name: "aespa" },
                             ]);
                             const modifiers =
                                 await ExpCommand.calculateOptionsExpMultiplierInternal(
