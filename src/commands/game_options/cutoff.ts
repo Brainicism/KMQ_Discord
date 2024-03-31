@@ -46,13 +46,13 @@ export default class CutoffCommand implements BaseCommand {
         arguments: [
             {
                 name: "cutoff_start",
-                type: "number" as const,
+                type: "int" as const,
                 minValue: EARLIEST_BEGINNING_SEARCH_YEAR,
                 maxValue: DEFAULT_ENDING_SEARCH_YEAR,
             },
             {
                 name: "cutoff_end",
-                type: "number" as const,
+                type: "int" as const,
                 minValue: EARLIEST_BEGINNING_SEARCH_YEAR,
                 maxValue: DEFAULT_ENDING_SEARCH_YEAR,
             },
