@@ -383,12 +383,8 @@ export default class GameRound extends Round {
                         ) {
                             // TODO heart here
                             return {
-                                label: button.label,
-                                custom_id: button.custom_id,
-                                style: button.style,
-                                type: 2,
+                                ...button,
                                 disabled: true,
-                                emoji: button.emoji,
                             };
                         }
 
