@@ -741,7 +741,7 @@ export default abstract class Session {
 
             if (specialType) {
                 const ffmpegArgs = specialFfmpegArgs[specialType](
-                    seekLocation!,
+                    seekLocation,
                     songDuration,
                 );
 
