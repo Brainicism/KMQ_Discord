@@ -380,6 +380,25 @@ export default class SongSelector {
         };
     }
 
+    private async getCollabGroupIds(
+        groupIds: Array<number>,
+    ): Promise<number[]> {
+        return (
+            await dbContext.kpopVideos
+                .selectFrom("app_kpop_agrelation")
+                .innerJoin(
+                    "app_kpop_group_safe",
+                    "app_kpop_agrelation.id_subgroup",
+                    "app_kpop_group_safe.id",
+                )
+                .select(["id", "name"])
+                .distinct()
+                .where("app_kpop_group_safe.is_collab", "=", "y")
+                .where("app_kpop_agrelation.id_artist", "in", groupIds)
+                .execute()
+        ).map((x) => x.id);
+    }
+
     /**
      * Returns a list of songs from the data store, narrowed down by the specified game options
      * @returns a list of songs, as well as the number of songs before the filter option was applied
@@ -421,6 +440,20 @@ export default class SongSelector {
         let subunits: Array<number> = [];
         let collabGroupContainingSubunit: Array<number> = [];
         const selectedGroupIDs = this.guildPreference.getGroupIDs();
+        selectedGroupIDs.push(
+            ...(await this.getCollabGroupIds(selectedGroupIDs)),
+        );
+
+        const includesGroupIDs = this.guildPreference.getIncludesGroupIDs();
+        includesGroupIDs.push(
+            ...(await this.getCollabGroupIds(includesGroupIDs)),
+        );
+
+        const excludesGroupIDs = this.guildPreference.getExcludesGroupIDs();
+        excludesGroupIDs.push(
+            ...(await this.getCollabGroupIds(excludesGroupIDs)),
+        );
+
         if (gameOptions.subunitPreference === SubunitsPreference.INCLUDE) {
             let subunitsQueryBuilder = dbContext.kpopVideos
                 .selectFrom("app_kpop_group_safe")
@@ -471,7 +504,6 @@ export default class SongSelector {
                 Expression<SqlBool>
             > = [];
 
-            const includesGroupIDs = this.guildPreference.getIncludesGroupIDs();
             if (includesGroupIDs.length) {
                 if (!this.guildPreference.isGroupsMode()) {
                     if (
@@ -495,11 +527,7 @@ export default class SongSelector {
             const mainArtistFilterExpressions: Array<Expression<SqlBool>> = [];
 
             mainArtistFilterExpressions.push(
-                eb(
-                    "id_artist",
-                    "not in",
-                    this.guildPreference.getExcludesGroupIDs(),
-                ),
+                eb("id_artist", "not in", excludesGroupIDs),
             );
 
             if (!this.guildPreference.isGroupsMode()) {

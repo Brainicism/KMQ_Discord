@@ -213,36 +213,15 @@ export async function getMatchingGroupNames(
     rawGroupNames: Array<string>,
     aliasApplied = false,
 ): Promise<GroupMatchResults> {
-    const artistIds = (
+    const matchingGroups = (
         await dbContext.kpopVideos
             .selectFrom("app_kpop_group_safe")
-            .select(["id"])
+            .select(["id", "name"])
             .where("name", "in", rawGroupNames)
             .where("has_songs", "=", 1)
-            .execute()
-    ).map((x) => x.id);
-
-    const matchingGroups = (
-        await dbContext.kpopVideos // collab matches
-            .selectFrom("app_kpop_agrelation")
-            .innerJoin(
-                "app_kpop_group_safe",
-                "app_kpop_agrelation.id_subgroup",
-                "app_kpop_group_safe.id",
-            )
-            .select(["id", "name", sql<number>`0`.as("addedByUser")])
-            .where("app_kpop_agrelation.id_artist", "in", artistIds)
-            .where("app_kpop_group_safe.is_collab", "=", "y")
-            // artist matches
-            .union(
-                dbContext.kpopVideos
-                    .selectFrom("app_kpop_group_safe")
-                    .select(["id", "name", sql<number>`1`.as("addedByUser")])
-                    .where("app_kpop_group_safe.id", "in", artistIds),
-            )
             .orderBy("name", "asc")
             .execute()
-    ).map((x) => ({ id: x.id, name: x.name, addedByUser: !!x.addedByUser }));
+    ).map((x) => ({ id: x.id, name: x.name }));
 
     const matchingGroupNames = matchingGroups.map((x) => x.name.toUpperCase());
     const unrecognizedGroups = rawGroupNames.filter(
