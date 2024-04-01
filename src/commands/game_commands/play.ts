@@ -177,7 +177,7 @@ export default class PlayCommand implements BaseCommand {
                     guildID,
                     "command.play.help.example.clip",
                     {
-                        clipTimer: `\`${ELIMINATION_DEFAULT_LIVES}\``,
+                        clipTimer: `\`${CLIP_DEFAULT_TIMER}\``,
                     },
                 ),
             },
@@ -419,7 +419,7 @@ export default class PlayCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.play.help.example.clip",
                         {
-                            clipTimer: `\`${ELIMINATION_DEFAULT_LIVES}\``,
+                            clipTimer: `\`${CLIP_DEFAULT_TIMER}\``,
                         },
                     ),
                     description_localizations: Object.values(LocaleType)
@@ -431,7 +431,7 @@ export default class PlayCommand implements BaseCommand {
                                     locale,
                                     "command.play.help.example.clip",
                                     {
-                                        clipTimer: `\`${ELIMINATION_DEFAULT_LIVES}\``,
+                                        clipTimer: `\`${CLIP_DEFAULT_TIMER}\``,
                                     },
                                 ),
                             }),
