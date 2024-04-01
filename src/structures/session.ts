@@ -682,24 +682,30 @@ export default abstract class Session {
             songDuration = 60;
         }
 
-        if (!round.songStartedAt) {
-            switch (seekType) {
-                case SeekType.BEGINNING:
-                    seekLocation = 0;
-                    break;
-                case SeekType.MIDDLE:
-                    seekLocation = songDuration * (0.4 + 0.2 * Math.random());
-                    break;
-                case SeekType.RANDOM:
-                default:
-                    seekLocation = songDuration * (0.6 * Math.random());
-                    break;
+        switch (seekType) {
+            case SeekType.BEGINNING:
+                seekLocation = 0;
+                break;
+            case SeekType.MIDDLE:
+                seekLocation = songDuration * (0.4 + 0.2 * Math.random());
+                break;
+            case SeekType.RANDOM:
+            default:
+                seekLocation = songDuration * (0.6 * Math.random());
+                break;
+        }
+
+        const isClipMode = this.isGameSession() && this.isClipMode();
+        if (isClipMode) {
+            const clipGameRound = round as ClipGameRound;
+            if (clipAction === ClipAction.NEW_CLIP) {
+                // Clip mode and the user requested another segment
+                seekLocation = songDuration * (0.6 * Math.random());
+            } else if (clipAction === ClipAction.REPLAY) {
+                seekLocation = clipGameRound.seekLocation!;
             }
-        } else if (clipAction === ClipAction.NEW_CLIP) {
-            // Clip mode and the user requested another segment
-            seekLocation = songDuration * (0.6 * Math.random());
-        } else if (clipAction === ClipAction.REPLAY) {
-            seekLocation = (round as ClipGameRound).seekLocation!;
+
+            clipGameRound.seekLocation = seekLocation;
         }
 
         if (isGodMode) {
@@ -749,7 +755,7 @@ export default abstract class Session {
                 encoderArgs = ffmpegArgs.encoderArgs;
             }
 
-            if (this.isGameSession() && clipAction) {
+            if (isClipMode) {
                 const clipTimerLength = this.clipTimerLength;
                 encoderArgs.push("-t", clipTimerLength.toString());
             }
@@ -765,10 +771,6 @@ export default abstract class Session {
             logger.error(`Erroring playing on voice connection. err = ${e}`);
             await this.errorRestartRound();
             return false;
-        }
-
-        if (this.isGameSession() && this.isClipMode()) {
-            (round as ClipGameRound).seekLocation = seekLocation;
         }
 
         this.startGuessTimeout(messageContext);
