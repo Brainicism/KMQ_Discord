@@ -292,12 +292,7 @@ export default abstract class Session {
             return null;
         }
 
-        const voiceConnectionSuccess = await this.playSong(
-            messageContext,
-            this.isGameSession() && this.isClipMode()
-                ? ClipAction.NEW_CLIP
-                : null,
-        );
+        const voiceConnectionSuccess = await this.playSong(messageContext);
 
         return voiceConnectionSuccess ? this.round : null;
     }

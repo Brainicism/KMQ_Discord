@@ -640,7 +640,6 @@ export default class GameSession extends Session {
         }
 
         const clipRound = round as ClipGameRound;
-        const clipAction = interaction.data.custom_id as ClipAction;
         clipRound.newClipRequested(messageContext.author.id);
         await tryCreateInteractionSuccessAcknowledgement(
             interaction,
@@ -665,7 +664,7 @@ export default class GameSession extends Session {
         if (clipRound.isNewClipMajority()) {
             await round.interactionMarkAnswers(0, false);
             await this.sendStartRoundMessage(messageContext, clipRound, true);
-            await this.playSong(messageContext, clipAction);
+            await this.playSong(messageContext, ClipAction.NEW_CLIP);
             clipRound.reset();
         }
 
