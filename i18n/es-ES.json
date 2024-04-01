@@ -889,12 +889,14 @@
                 "description": "Comienza un juego de KMQ.",
                 "example": {
                     "classic": "Comienza un juego clásico de KMQ (escribe tu respuesta primero para obtener un punto)",
+                    "clip": "Adivina la canción basada en un fragmento repetido, reproducido durante {{clipTimer}} segundos",
                     "elimination": "Comienza un juego de eliminación de KMQ donde cada jugador comienza con {{lives}} vidas",
                     "hidden": "Comienza un juego oculto de KMQ, donde los jugadores solo pueden responder con /guess",
                     "suddenDeath": "Inicia un juego de muerte súbita en KMQ: acierta la canción o la partida termina",
                     "teams": "Divídete en tantos equipos como quieras y ve quién puede ayudarte a ganar!"
                 },
                 "interaction": {
+                    "clipTimer": "Elige cuánto tiempo se reproducirá cada clip",
                     "lives": "Elige cuántas vidas comienza cada jugador"
                 },
                 "name": "jugar",
@@ -1433,6 +1435,15 @@
         "classic": {
             "yourScore": "Tu puntuación es {{score}}."
         },
+        "clip": {
+            "newClip": {
+                "request": {
+                    "description": "{{voteCounter}} votos nuevos de clip recibidos.",
+                    "title": "Solicitud de Nuevo Clip"
+                },
+                "success": "{{voteCounter}} votos nuevos de clip recibidos. Reproduciendo..."
+            }
+        },
         "conflict": "conflicto",
         "duration": "Duración",
         "elimination": {
@@ -1475,6 +1486,7 @@
             "interaction": {
                 "alreadyEliminated": "Ya has sido eliminado en esta ronda.",
                 "bookmarkOutsideGame": "Solo puedes marcar canciones durante un juego.",
+                "clipActionTooEarly": "Espera un poco antes de reproducir el clip.",
                 "eliminated": "Has sido eliminado en esta ronda.",
                 "guildBanned": "Este servidor está prohibido de usar KMQ. Para apelaciones, contacta al servidor de soporte oficial de KMQ en {{supportServer}}.",
                 "guildOnly": "KMQ sólo puede ser utilizado en servidores.",
@@ -1610,6 +1622,7 @@
             "title": "🚀 ¡Potencia!"
         },
         "listOfGroups": "lista de grupos",
+        "newClip": "Nuevo Clip",
         "no": "No",
         "none": "Ninguno",
         "notApplicable": "N/A",
@@ -1652,6 +1665,7 @@
             "title": "Espera..."
         },
         "releaseDate": "Fecha de lanzamiento",
+        "replay": "Repetir",
         "restart": {
             "description_hard": "El tiempo de inactividad será de aproximadamente unos segundos. ¡Por favor, termina el juego actual para asegurarte de que se guarde tu progreso!",
             "title": "Reinicio próximo en {{timeUntilRestart}} minutos."

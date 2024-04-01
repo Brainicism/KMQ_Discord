@@ -889,12 +889,14 @@
                 "description": "Start een spelletje KMQ.",
                 "example": {
                     "classic": "Start een klassiek spelletje KMQ (typ je gok als eerste om een punt te krijgen)",
+                    "clip": "Raad het lied op basis van een herhaald fragment, afgespeeld gedurende {{clipTimer}} seconden",
                     "elimination": "Start een KMQ-eliminatiespel waarin elke speler begint met {{lives}} levens",
                     "hidden": "Start een verborgen spelletje KMQ, waarbij spelers alleen kunnen antwoorden met /raad",
                     "suddenDeath": "Start een plotselinge dood-game van KMQ, waarbij iemand het liedje moet raden, of de game eindigt",
                     "teams": "Splits op in zoveel teams als je wilt en kijk van wie je afhankelijk kunt zijn om te winnen!"
                 },
                 "interaction": {
+                    "clipTimer": "Kies hoe lang elke clip zal afspelen",
                     "lives": "Kies met hoeveel levens elke speler begint"
                 },
                 "name": "spelen",
@@ -1433,6 +1435,15 @@
         "classic": {
             "yourScore": "Je score is {{score}}."
         },
+        "clip": {
+            "newClip": {
+                "request": {
+                    "description": "{{voteCounter}} nieuwe clipstemmen ontvangen.",
+                    "title": "Nieuw Clipverzoek"
+                },
+                "success": "{{voteCounter}} nieuwe clipstemmen ontvangen. Speelt af..."
+            }
+        },
         "conflict": "conflict",
         "duration": "Tijdsduur",
         "elimination": {
@@ -1475,6 +1486,7 @@
             "interaction": {
                 "alreadyEliminated": "Je bent deze ronde al uitgeschakeld.",
                 "bookmarkOutsideGame": "Je kunt alleen nummers een bladwijzer geven tijdens een spel.",
+                "clipActionTooEarly": "Wacht even voordat je de clip afspeelt.",
                 "eliminated": "Je bent deze ronde uitgeschakeld.",
                 "guildBanned": "Deze server mag KMQ niet gebruiken. Voor bezwaren kun je contact opnemen met de officiële KMQ-ondersteuningsserver op {{supportServer}}.",
                 "guildOnly": "KMQ kan alleen op servers worden gebruikt.",
@@ -1610,6 +1622,7 @@
             "title": "🚀 Upgrade!"
         },
         "listOfGroups": "lijst van groepen",
+        "newClip": "Nieuwe Clip",
         "no": "Nee",
         "none": "Geen",
         "notApplicable": "N/B",
@@ -1652,6 +1665,7 @@
             "title": "Wachten..."
         },
         "releaseDate": "Uitgavedatum",
+        "replay": "Herhaling",
         "restart": {
             "description_hard": "De downtime zal ongeveer een paar seconden zijn. Beëindig het huidige spel om ervoor te zorgen dat uw voortgang wordt opgeslagen!",
             "title": "Aankomende herstart over {{timeUntilRestart}} minuten."

@@ -889,12 +889,14 @@
                 "description": "Démarre une partie de KMQ.",
                 "example": {
                     "classic": "Démarrez une partie classique de KMQ (tapez d'abord votre réponse pour obtenir un point)",
+                    "clip": "Devinez la chanson à partir d'un extrait répété, joué pendant {{clipTimer}} secondes",
                     "elimination": "Démarrez une partie d'élimination de KMQ où chaque joueur commence avec {{lives}} vies",
                     "hidden": "Démarrer une partie cachée de KMQ, où les joueurs ne peuvent répondre qu'avec /guess",
                     "suddenDeath": "Lancez un jeu de mort subite KMQ, où il faut deviner le morceau, ou la partie s'achève",
                     "teams": "Divisez-vous en d'équipes et voyez sur qui vous pouvez compter pour vous aider à gagner!"
                 },
                 "interaction": {
+                    "clipTimer": "Choisissez la durée de lecture de chaque clip",
                     "lives": "Choisissez le nombre de vies avec lequel chaque joueur commence"
                 },
                 "name": "jouer",
@@ -1433,6 +1435,15 @@
         "classic": {
             "yourScore": "Votre score est de {{score}}."
         },
+        "clip": {
+            "newClip": {
+                "request": {
+                    "description": "{{voteCounter}} nouveaux votes pour le clip reçus.",
+                    "title": "Demande de nouveau clip"
+                },
+                "success": "{{voteCounter}} nouveaux votes pour le clip reçus. Lecture..."
+            }
+        },
         "conflict": "conflit",
         "duration": "Durée",
         "elimination": {
@@ -1475,6 +1486,7 @@
             "interaction": {
                 "alreadyEliminated": "Vous avez déjà été éliminé(e) ce tour.",
                 "bookmarkOutsideGame": "Vous ne pouvez marquer des chansons que pendant une partie.",
+                "clipActionTooEarly": "Attendez un peu avant de jouer le clip.",
                 "eliminated": "Vous avez été éliminé(e) ce tour.",
                 "guildBanned": "Ce serveur est banni de l'utilisation de KMQ. Pour faire appel, contactez le serveur de support officiel de KMQ à {{supportServer}}.",
                 "guildOnly": "KMQ ne peut être utilisé que dans les serveurs.",
@@ -1610,6 +1622,7 @@
             "title": "🚀 Booster!"
         },
         "listOfGroups": "liste des groupes",
+        "newClip": "Nouveau Clip",
         "no": "Non",
         "none": "Aucun",
         "notApplicable": "N/A",
@@ -1652,6 +1665,7 @@
             "title": "Attendez..."
         },
         "releaseDate": "Date de sortie",
+        "replay": "Rejouer",
         "restart": {
             "description_hard": "L'arrêt sera d'environ quelques secondes. Veuillez terminer la partie en cours pour vous assurer que votre progression est enregistrée !",
             "title": "Redémarrage à venir dans {{timeUntilRestart}} minutes."

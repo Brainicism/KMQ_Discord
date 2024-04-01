@@ -177,7 +177,7 @@ export default class PlayCommand implements BaseCommand {
                     guildID,
                     "command.play.help.example.clip",
                     {
-                        clipTimer: `\`${ELIMINATION_DEFAULT_LIVES}\``,
+                        clipTimer: `\`${CLIP_DEFAULT_TIMER}\``,
                     },
                 ),
             },
@@ -418,6 +418,9 @@ export default class PlayCommand implements BaseCommand {
                     description: i18n.translate(
                         LocaleType.EN,
                         "command.play.help.example.clip",
+                        {
+                            clipTimer: `\`${CLIP_DEFAULT_TIMER}\``,
+                        },
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -427,6 +430,9 @@ export default class PlayCommand implements BaseCommand {
                                 [locale]: i18n.translate(
                                     locale,
                                     "command.play.help.example.clip",
+                                    {
+                                        clipTimer: `\`${CLIP_DEFAULT_TIMER}\``,
+                                    },
                                 ),
                             }),
                             {},
@@ -437,7 +443,7 @@ export default class PlayCommand implements BaseCommand {
                             name: "timer",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.play.help.clip.timer",
+                                "command.play.help.interaction.clipTimer",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -446,7 +452,7 @@ export default class PlayCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.play.help.clip.timer",
+                                            "command.play.help.interaction.clipTimer",
                                         ),
                                     }),
                                     {},

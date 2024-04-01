@@ -889,12 +889,14 @@
                 "description": "KMQのゲームを開始します。",
                 "example": {
                     "classic": "クラシックなKMQゲームを開始します（最初に推測してポイントを獲得してください）",
+                    "clip": "{{clipTimer}}秒間繰り返されるスニペットを聞いて、その曲を当ててください",
                     "elimination": "エリミネーションモードのKMQゲームを開始します。各プレイヤーは{{lives}}つのライフでスタートします",
                     "hidden": "KMQの非公開ゲームを開始し、プレイヤーは/guessでしか回答できません",
                     "suddenDeath": "サドンデス形式のKMQを開始します。誰か一人が曲を当てるか、ゲームが終了します。",
                     "teams": "チームを分割し、勝利に役立つ人物を見つけましょう！"
                 },
                 "interaction": {
+                    "clipTimer": "各クリップの再生時間を選択してください",
                     "lives": "各プレイヤーがスタートするライフの数を選択してください"
                 },
                 "name": "プレイ",
@@ -1433,6 +1435,15 @@
         "classic": {
             "yourScore": "あなたのスコアは{{score}}です。"
         },
+        "clip": {
+            "newClip": {
+                "request": {
+                    "description": "{{voteCounter}}件の新しいクリップ投票を受け取りました。",
+                    "title": "新しいクリップのリクエスト"
+                },
+                "success": "{{voteCounter}}件の新しいクリップ投票を受け取りました。再生中..."
+            }
+        },
         "conflict": "競合",
         "duration": "期間",
         "elimination": {
@@ -1475,6 +1486,7 @@
             "interaction": {
                 "alreadyEliminated": "あなたはすでにこのラウンドで敗退しています。",
                 "bookmarkOutsideGame": "ゲーム中には曲をブックマークできません。",
+                "clipActionTooEarly": "クリップを再生する前に少し待ってください。",
                 "eliminated": "あなたはこのラウンドで敗退しました。",
                 "guildBanned": "このサーバーはKMQの使用が禁止されています。異議申し立ては、{{supportServer}}の公式KMQサポートサーバーまでご連絡ください。",
                 "guildOnly": "KMQはサーバーでのみ使用できます。",
@@ -1610,6 +1622,7 @@
             "title": "🚀 パワーアップ！"
         },
         "listOfGroups": "グループのリスト",
+        "newClip": "新しいクリップ",
         "no": "いいえ",
         "none": "なし",
         "notApplicable": "N/A",
@@ -1652,6 +1665,7 @@
             "title": "お待ちください..."
         },
         "releaseDate": "リリース日",
+        "replay": "リプレイ",
         "restart": {
             "description_hard": "ダウンタイムは数秒程度です。進行中のゲームを終了して、進行状況が保存されるようにしてください！",
             "title": "{{timeUntilRestart}} 分後に再起動が予定されています。"

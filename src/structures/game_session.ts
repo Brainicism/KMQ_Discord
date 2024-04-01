@@ -648,13 +648,13 @@ export default class GameSession extends Session {
                 this.guildID,
                 clipRound.isNewClipMajority()
                     ? "misc.newClip"
-                    : "misc.clip.newClipRequest",
+                    : "misc.clip.newClip.request.title",
             ),
             i18n.translate(
                 this.guildID,
                 clipRound.isNewClipMajority()
-                    ? "misc.clip.success"
-                    : "misc.clip.requested",
+                    ? "misc.clip.newClip.success"
+                    : "misc.clip.newClip.request.description",
                 {
                     voteCounter: clipRound.newClipVoteCounter(),
                 },

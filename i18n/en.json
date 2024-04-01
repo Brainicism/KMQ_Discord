@@ -889,12 +889,14 @@
                 "description": "Starts a game of KMQ.",
                 "example": {
                     "classic": "Start a classic game of KMQ (type in your guess first to get a point)",
+                    "clip": "Guess the song based on a repeated snippet, played for {{clipTimer}} seconds",
                     "elimination": "Start an elimination game of KMQ where each player starts with {{lives}} lives",
                     "hidden": "Start a hidden game of KMQ, where players can only answer with /guess",
                     "suddenDeath": "Start a sudden death game of KMQ, where someone has to get the song right, or the game ends",
                     "teams": "Split up into as many teams as you want and see who you can depend on to help you win!"
                 },
                 "interaction": {
+                    "clipTimer": "Choose how long each clip will play for",
                     "lives": "Choose how many lives each player starts with"
                 },
                 "name": "play",
@@ -1433,6 +1435,15 @@
         "classic": {
             "yourScore": "Your score is {{score}}."
         },
+        "clip": {
+            "newClip": {
+                "request": {
+                    "description": "{{voteCounter}} new clip votes received.",
+                    "title": "New Clip Request"
+                },
+                "success": "{{voteCounter}} new clip votes received. Playing..."
+            }
+        },
         "conflict": "conflict",
         "duration": "Duration",
         "elimination": {
@@ -1475,6 +1486,7 @@
             "interaction": {
                 "alreadyEliminated": "You've already been eliminated this round.",
                 "bookmarkOutsideGame": "You can only bookmark songs during a game.",
+                "clipActionTooEarly": "Wait a bit before playing the clip.",
                 "eliminated": "You've been eliminated this round.",
                 "guildBanned": "This server is banned from using KMQ. For appeals, contact the official KMQ support server at {{supportServer}}.",
                 "guildOnly": "KMQ can only be used in servers.",
@@ -1610,6 +1622,7 @@
             "title": "🚀 Power Up!"
         },
         "listOfGroups": "list of groups",
+        "newClip": "New Clip",
         "no": "No",
         "none": "None",
         "notApplicable": "N/A",
@@ -1652,6 +1665,7 @@
             "title": "Wait..."
         },
         "releaseDate": "Release Date",
+        "replay": "Replay",
         "restart": {
             "description_hard": "Downtime will be approximately a few seconds. Please end the current game to ensure your progress is saved!",
             "title": "Upcoming Restart in {{timeUntilRestart}} Minutes."

@@ -889,12 +889,14 @@
                 "description": "Iniciar partida de KMQ.",
                 "example": {
                     "classic": "Começar um jogo clássico de KMQ (digite seu palpite primeiro para ganhar um ponto)",
+                    "clip": "Adivinhe a música com base em um trecho repetido, tocado por {{clipTimer}} segundos",
                     "elimination": "Iniciar uma partida de eliminação do KMQ, onde cada jogador começa com {{lives}} vidas",
                     "hidden": "Iniciar um jogo oculto de KMQ, onde os jogadores só podem responder com /guess",
                     "suddenDeath": "Iniciar um jogo de KMQ mata-mata, onde alguém deve acertar a música ou o jogo termina",
                     "teams": "Divida-se em quantas equipes quiser e veja em quem você pode confiar para ajudá-lo a vencer!"
                 },
                 "interaction": {
+                    "clipTimer": "Escolha por quanto tempo cada clipe será reproduzido",
                     "lives": "Escolha com quantas vidas cada jogador começa"
                 },
                 "name": "play",
@@ -1433,6 +1435,15 @@
         "classic": {
             "yourScore": "Sua pontuação é {{score}}."
         },
+        "clip": {
+            "newClip": {
+                "request": {
+                    "description": "{{voteCounter}} novos votos de trecho recebidos.",
+                    "title": "Pedido de Novo Trecho"
+                },
+                "success": "{{voteCounter}} novos votos de trecho recebidos. Reproduzindo..."
+            }
+        },
         "conflict": "conflito",
         "duration": "Duração",
         "elimination": {
@@ -1475,6 +1486,7 @@
             "interaction": {
                 "alreadyEliminated": "Você já foi eliminado desta rodada.",
                 "bookmarkOutsideGame": "Você só pode marcar músicas durante o jogo.",
+                "clipActionTooEarly": "Aguarde um pouco antes de tocar o trecho.",
                 "eliminated": "Você foi eliminado desta rodada.",
                 "guildBanned": "Este servidor está banido de usar o KMQ. Para apelações, entre em contato com o servidor oficial de suporte do KMQ em {{supportServer}}.",
                 "guildOnly": "KMQ só pode ser utilizado em servidores.",
@@ -1610,6 +1622,7 @@
             "title": "Foguete Potência Acima!"
         },
         "listOfGroups": "lista de grupos",
+        "newClip": "Novo Trecho",
         "no": "Não",
         "none": "Nenhum",
         "notApplicable": "N/D",
@@ -1652,6 +1665,7 @@
             "title": "Espere..."
         },
         "releaseDate": "Data de Lançamento",
+        "replay": "Repetir",
         "restart": {
             "description_hard": "O tempo de inatividade será de aproximadamente alguns segundos. Encerre a partida atual para garantir que seu progresso seja salvo!",
             "title": "Próxima Reinicialização em {{timeUntilRestart}} minutos."

@@ -889,12 +889,14 @@
                 "description": "Memulai permainan KMQ.",
                 "example": {
                     "classic": "Mulai permainan KMQ klasik (ketik tebakan Anda terlebih dahulu untuk mendapatkan poin)",
+                    "clip": "Tebak lagu berdasarkan potongan yang diulang-ulang, diputar selama {{clipTimer}} detik",
                     "elimination": "Mulai permainan eliminasi KMQ di mana setiap pemain memulai dengan {{lives}} nyawa",
                     "hidden": "Mulai permainan KMQ tersembunyi, tempat pemain hanya bisa menjawab dengan /tebak",
                     "suddenDeath": "Mulai game sudden death KMQ, tebak lagunya atau game berakhir",
                     "teams": "Bergabunglah dengan tim sesuai keinginan dan temukan siapa yang dapat membantu Anda menang!"
                 },
                 "interaction": {
+                    "clipTimer": "Pilih berapa lama setiap klip akan diputar",
                     "lives": "Pilih berapa banyak nyawa yang dimiliki setiap pemain di awal"
                 },
                 "name": "putar",
@@ -1433,6 +1435,15 @@
         "classic": {
             "yourScore": "Skor Anda adalah {{score}}"
         },
+        "clip": {
+            "newClip": {
+                "request": {
+                    "description": "{{voteCounter}} suara klip baru diterima.",
+                    "title": "Permintaan Klip Baru"
+                },
+                "success": "{{voteCounter}} suara klip baru diterima. Memutar..."
+            }
+        },
         "conflict": "konflik",
         "duration": "Durasi",
         "elimination": {
@@ -1475,6 +1486,7 @@
             "interaction": {
                 "alreadyEliminated": "Anda sudah tereliminasi pada ronde ini.",
                 "bookmarkOutsideGame": "Anda hanya dapat menandai lagu selama permainan.",
+                "clipActionTooEarly": "Tunggu sebentar sebelum memainkan klip.",
                 "eliminated": "Anda telah tereliminasi pada ronde ini.",
                 "guildBanned": "Server ini dilarang menggunakan KMQ. Untuk banding, hubungi server dukungan resmi KMQ di {{supportServer}}.",
                 "guildOnly": "KMQ hanya dapat digunakan di server.",
@@ -1610,6 +1622,7 @@
             "title": "🚀 Nyalakan!"
         },
         "listOfGroups": "daftar grup",
+        "newClip": "Klip Baru",
         "no": "Tidak",
         "none": "Tidak Ada",
         "notApplicable": "Tidak tersedia",
@@ -1652,6 +1665,7 @@
             "title": "Tunggu dulu..."
         },
         "releaseDate": "Tanggal Rilis",
+        "replay": "Putar Ulang",
         "restart": {
             "description_hard": "Waktu henti akan berlangsung kira-kira beberapa detik. Harap akhiri permainan saat ini untuk memastikan kemajuan Anda tersimpan!",
             "title": "Pemulaan Ulang Mendatang dalam {{timeUntilRestart}} Menit"
