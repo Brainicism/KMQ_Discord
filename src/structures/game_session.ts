@@ -174,7 +174,7 @@ export default class GameSession extends Session {
                 logger.info(
                     `gid: ${this.guildID} | answerType changed to multiple choice, re-sending mc buttons`,
                 );
-                await this.sendMultipleChoiceOptionsMessage();
+                await this.sendMultipleChoiceOptionsMessage(false);
             } else if (this.isHiddenMode()) {
                 logger.info(
                     `gid: ${this.guildID} | answerType changed to hidden, re-sending hidden message`,
