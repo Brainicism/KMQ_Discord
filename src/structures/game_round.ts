@@ -398,7 +398,7 @@ export default class GameRound extends Round {
                             ] === 0;
 
                         let label = button.label;
-                        let style: 1 | 3 | 4 = 1;
+                        let style: 1 | 3 | 4;
                         if (showCorrectAnswer) {
                             if (
                                 this.interactionCorrectAnswerUUID ===
