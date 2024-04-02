@@ -14,6 +14,7 @@ program
         "--no-restart",
         "Automatically restart process when countdown is over",
     )
+    .option("--skip-tests", "Skip test-runner tests")
     .option("--docker-image <docker_image>", "Docker image")
     .option(
         "--timer <minutes>",
@@ -92,6 +93,7 @@ function serverShutdown(
     restart: boolean,
     dockerImage: string,
     provisioningTimeout: number,
+    skipTests: boolean,
 ): Promise<void> {
     return new Promise(async () => {
         // if stopping server, inform immediately
@@ -181,13 +183,15 @@ function serverShutdown(
                         "Running post-upgrade test suite: BASIC_OPTIONS...",
                     );
 
-                    cp.execSync(
-                        `docker exec ${appName} sh -c '. ./.env && npx ts-node --swc src/test/end-to-end-tests/test-runner-bot.ts --test-suite=BASIC_OPTIONS --debug --stage-delay=5'`,
-                    );
-                    console.log("Running post-upgrade test suite: PLAY...");
-                    cp.execSync(
-                        `docker exec ${appName} sh -c '. ./.env && npx ts-node --swc src/test/end-to-end-tests/test-runner-bot.ts --test-suite=PLAY --debug --stage-delay=5'`,
-                    );
+                    if (!skipTests) {
+                        cp.execSync(
+                            `docker exec ${appName} sh -c '. ./.env && npx ts-node --swc src/test/end-to-end-tests/test-runner-bot.ts --test-suite=BASIC_OPTIONS --debug --stage-delay=5'`,
+                        );
+                        console.log("Running post-upgrade test suite: PLAY...");
+                        cp.execSync(
+                            `docker exec ${appName} sh -c '. ./.env && npx ts-node --swc src/test/end-to-end-tests/test-runner-bot.ts --test-suite=PLAY --debug --stage-delay=5'`,
+                        );
+                    }
                 },
                 restartMinutes * 1000 * 60,
             );
@@ -205,6 +209,7 @@ process.on("SIGINT", async () => {
     const options = program.opts();
     console.log(options);
     const restartMinutes = options.timer;
+    const skipTests = options.skipTests;
     const provisioningTimeout = options.provisioningTimeout;
     const dockerImage = options.dockerImage;
 
@@ -213,5 +218,6 @@ process.on("SIGINT", async () => {
         options.restart,
         dockerImage,
         provisioningTimeout,
+        skipTests,
     );
 })();
