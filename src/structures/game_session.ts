@@ -1680,18 +1680,20 @@ export default class GameSession extends Session {
         }
 
         const randomSong = round.song;
-        const correctChoice =
-            this.guildPreference.gameOptions.guessModeType ===
-            GuessModeType.ARTIST
-                ? round.song.getLocalizedArtistName(locale)
-                : round.song.getLocalizedSongName(locale);
+        const correctChoice = {
+            displayedName:
+                this.guildPreference.gameOptions.guessModeType ===
+                GuessModeType.ARTIST
+                    ? round.song.getLocalizedArtistName(locale)
+                    : round.song.getLocalizedSongName(locale),
+            song: randomSong,
+        };
 
         const wrongChoices = await getMultipleChoiceOptions(
             this.guildPreference.gameOptions.answerType,
             this.guildPreference.gameOptions.guessModeType,
             randomSong.members,
             correctChoice,
-            randomSong.artistID,
             locale,
         );
 
@@ -1711,7 +1713,7 @@ export default class GameSession extends Session {
         buttons.push({
             type: 2,
             style: 1,
-            label: correctChoice.substring(0, 70),
+            label: correctChoice.displayedName.substring(0, 70),
             custom_id: round.interactionCorrectAnswerUUID,
         });
 
