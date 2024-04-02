@@ -162,7 +162,7 @@ function serverShutdown(
             await announceRestart(restartMinutes, restartDate, restart);
 
             setTimeout(
-                () => {
+                async () => {
                     // drop old primary
                     console.log("Dropping old primary...");
                     cp.execSync(`docker rm -f ${oldAppName}`);
@@ -171,6 +171,22 @@ function serverShutdown(
                     console.log("Promoting standby to primary...");
                     cp.execSync(
                         `docker exec ${appName} /bin/sh -c "mv standby promoted"`,
+                    );
+
+                    // wait for all event listeners to be set-up
+                    await delay(5000);
+
+                    console.log("Running post-upgrade health checks...");
+                    console.log(
+                        "Running post-upgrade test suite: BASIC_OPTIONS...",
+                    );
+
+                    cp.execSync(
+                        `docker exec ${appName} sh -c '. ./.env && npx ts-node --swc src/test/end-to-end-tests/test-runner-bot.ts --test-suite=BASIC_OPTIONS --debug --stage-delay=5'`,
+                    );
+                    console.log("Running post-upgrade test suite: PLAY...");
+                    cp.execSync(
+                        `docker exec ${appName} sh -c '. ./.env && npx ts-node --swc src/test/end-to-end-tests/test-runner-bot.ts --test-suite=PLAY --debug --stage-delay=5'`,
                     );
                 },
                 restartMinutes * 1000 * 60,
