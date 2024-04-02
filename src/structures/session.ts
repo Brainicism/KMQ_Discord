@@ -771,7 +771,17 @@ export default abstract class Session {
                         ? this.clipDurationLength
                         : this.guildPreference.getSongStartDelay() * 1000;
 
-                encoderArgs.push("-t", clipDurationLength!.toString());
+                const delayMs = 1500;
+                const endPaddingMs = 250;
+                encoderArgs.push(
+                    "-af",
+                    `adelay=delays=${delayMs}:all=1,apad=pad_dur=${endPaddingMs / 1000}`,
+                );
+
+                encoderArgs.push(
+                    "-t",
+                    (clipDurationLength! + delayMs / 1000).toString(),
+                );
             }
 
             round.songStartedAt = Date.now();
@@ -779,7 +789,7 @@ export default abstract class Session {
             this.connection.play(stream, {
                 inputArgs,
                 encoderArgs,
-                opusPassthrough: specialType === null,
+                opusPassthrough: specialType === null && !isClipMode,
             });
         } catch (e) {
             logger.error(`Erroring playing on voice connection. err = ${e}`);
