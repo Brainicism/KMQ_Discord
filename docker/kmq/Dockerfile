@@ -11,9 +11,10 @@ RUN apt-get update && apt-get install -y git \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY yarn.lock package.json ./
-RUN yarn global add node-gyp@9.4.0
-RUN yarn install --frozen-lockfile
+COPY bun.lockb package.json ./
+RUN npm install -g bun
+RUN bun add node-gyp@9.4.0 --global
+RUN bun install
 
 COPY start.sh tsconfig.json ./
 COPY i18n/ i18n/

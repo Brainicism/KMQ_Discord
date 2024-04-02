@@ -30,7 +30,7 @@ up (see below). The docker-compose file forwards ports for mysql.
 
 ---
 
-1. `yarn install`
+1. `bun install`
     - `libsodium` might require the following packages: `autoconf automake g++ libtool`
 2. `.env` contains application specific settings. See `.env.example` to see parameters, and `environment.d.ts` to see which are required.
 3. `npm run dev` to start the bot. Upon first run, the bot will bootstrap the database, as well as download 5 songs to have a minimally working bot

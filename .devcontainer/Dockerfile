@@ -12,4 +12,5 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     ffmpeg
 
 RUN npm install -g yarn
+RUN npm install -g bun
 RUN mkdir /songs && chown node:node /songs

@@ -10,13 +10,13 @@ RUN_ID=$(openssl rand -hex 12)
 
 if [ "${MINIMAL_RUN}" != "true" ]; then
     echo "Bootstrapping..."
-    npx ts-node --swc src/seed/bootstrap.ts
+    bun src/seed/bootstrap.ts
 fi
 
 # run with ts-node + swc, no transpile needed
 if [ "${NODE_ENV}" == "development_ts_node" ]; then
     cd src/
-    exec env RUN_ID=$RUN_ID npx ts-node --swc kmq.ts
+    exec env RUN_ID=$RUN_ID bun kmq.ts
 fi
 
 # transpile project
@@ -30,7 +30,7 @@ then
         npm run clean
         echo "Installing dependencies..."
         rm -rf node_modules/
-        yarn install --frozen-lockfile
+        bun install
         git log -n 1 --pretty=format:"%H" > ../version
     fi
     rebuild

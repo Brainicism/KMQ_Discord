@@ -1,1 +1,1 @@
-yarn install --frozen-lockfile;
+bun install;

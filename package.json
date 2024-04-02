@@ -59,6 +59,7 @@
         "async-mutex": "^0.4.1",
         "axios": "^1.6.7",
         "bufferutil": "^4.0.8",
+        "bun-types": "^1.1.0",
         "commander": "^11.1.0",
         "damerau-levenshtein": "^1.0.8",
         "dotenv": "^16.4.1",
