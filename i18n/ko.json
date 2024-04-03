@@ -1665,7 +1665,6 @@
             "title": "잠시만 기다려주십시오..."
         },
         "releaseDate": "발매 날짜",
-        "replay": "재생",
         "restart": {
             "description_hard": "작동 중지 시간은 약 몇 초입니다. 진행 상황이 저장되었는지 확인하려면 현재 게임을 종료하세요!",
             "title": "{{timeUntilRestart}} 분 후 재시동 예정"

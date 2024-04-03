@@ -1665,7 +1665,6 @@
             "title": "お待ちください..."
         },
         "releaseDate": "リリース日",
-        "replay": "リプレイ",
         "restart": {
             "description_hard": "ダウンタイムは数秒程度です。進行中のゲームを終了して、進行状況が保存されるようにしてください！",
             "title": "{{timeUntilRestart}} 分後に再起動が予定されています。"

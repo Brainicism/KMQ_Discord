@@ -1665,7 +1665,6 @@
             "title": "Espere..."
         },
         "releaseDate": "Data de Lançamento",
-        "replay": "Repetir",
         "restart": {
             "description_hard": "O tempo de inatividade será de aproximadamente alguns segundos. Encerre a partida atual para garantir que seu progresso seja salvo!",
             "title": "Próxima Reinicialização em {{timeUntilRestart}} minutos."

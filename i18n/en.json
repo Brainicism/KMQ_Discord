@@ -1665,7 +1665,6 @@
             "title": "Wait..."
         },
         "releaseDate": "Release Date",
-        "replay": "Replay",
         "restart": {
             "description_hard": "Downtime will be approximately a few seconds. Please end the current game to ensure your progress is saved!",
             "title": "Upcoming Restart in {{timeUntilRestart}} Minutes."

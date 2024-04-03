@@ -1665,7 +1665,6 @@
             "title": "Warten..."
         },
         "releaseDate": "Erscheinungsdatum",
-        "replay": "Wiederholen",
         "restart": {
             "description_hard": "Die Ausfallzeit beträgt etwa einige Sekunden. Bitte beende das aktuelle Spiel, um sicherzustellen, dass dein Fortschritt gespeichert wird!",
             "title": "Neustart in {{timeUntilRestart}} Minuten."

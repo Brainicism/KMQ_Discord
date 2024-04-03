@@ -1665,7 +1665,6 @@
             "title": "Attendez..."
         },
         "releaseDate": "Date de sortie",
-        "replay": "Rejouer",
         "restart": {
             "description_hard": "L'arrêt sera d'environ quelques secondes. Veuillez terminer la partie en cours pour vous assurer que votre progression est enregistrée !",
             "title": "Redémarrage à venir dans {{timeUntilRestart}} minutes."

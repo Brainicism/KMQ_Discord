@@ -1665,7 +1665,6 @@
             "title": "Wachten..."
         },
         "releaseDate": "Uitgavedatum",
-        "replay": "Herhaling",
         "restart": {
             "description_hard": "De downtime zal ongeveer een paar seconden zijn. Beëindig het huidige spel om ervoor te zorgen dat uw voortgang wordt opgeslagen!",
             "title": "Aankomende herstart over {{timeUntilRestart}} minuten."

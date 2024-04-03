@@ -1665,7 +1665,6 @@
             "title": "请稍等..."
         },
         "releaseDate": "发布日期",
-        "replay": "重播",
         "restart": {
             "description_hard": "停机时间大约几秒钟。请结束当前游戏以确保您的进度已保存！",
             "title": "即将在{{timeUntilRestart}}分钟内重新启动。"

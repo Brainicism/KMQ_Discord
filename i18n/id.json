@@ -1665,7 +1665,6 @@
             "title": "Tunggu dulu..."
         },
         "releaseDate": "Tanggal Rilis",
-        "replay": "Putar Ulang",
         "restart": {
             "description_hard": "Waktu henti akan berlangsung kira-kira beberapa detik. Harap akhiri permainan saat ini untuk memastikan kemajuan Anda tersimpan!",
             "title": "Pemulaan Ulang Mendatang dalam {{timeUntilRestart}} Menit"
