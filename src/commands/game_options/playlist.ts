@@ -624,6 +624,29 @@ export default class PlaylistCommand implements BaseCommand {
             });
         }
 
+        if (attachments.length === 0) {
+            logger.warn(
+                `Playlist ${kmqPlaylistIdentifier} unexpectedly has 0 matched/unmatched songs. playlist = ${JSON.stringify(playlist)}`,
+            );
+
+            await sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        guildID,
+                        "command.playlist.noMatches.title",
+                    ),
+                    description: i18n.translate(
+                        guildID,
+                        "command.playlist.noMatches.description",
+                    ),
+                },
+                interaction,
+            );
+
+            return;
+        }
+
         if (interaction.acknowledged) {
             await interaction.createFollowup({
                 attachments,

@@ -12,6 +12,7 @@ import {
     setDifference,
     shufflePartitionedArray,
 } from "../helpers/utils";
+import { getDebugLogHeader } from "../helpers/discord_utils";
 import ArtistType from "../enums/option_types/artist_type";
 import EnvVariableManager from "../env_variable_manager";
 import GameRound from "./game_round";
@@ -279,6 +280,12 @@ export default class SongSelector {
             this.guildPreference.gameOptions.forcePlaySongID
         ) {
             this.selectedSongs = await this.querySelectedSongs();
+            if (messageContext) {
+                logger.error(
+                    `${getDebugLogHeader(messageContext)} | Returning null matchedPlaylist for either non-playlist ${!kmqPlaylistIdentifier} or forceplay is active ${this.guildPreference.gameOptions.forcePlaySongID}`,
+                );
+            }
+
             return null;
         }
 
