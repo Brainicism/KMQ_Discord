@@ -1396,6 +1396,8 @@ export default class GameSession extends Session {
         if (hintRequested) {
             songStats.hintCount++;
         }
+
+        songStats.roundsPlayed++;
     }
 
     /**
