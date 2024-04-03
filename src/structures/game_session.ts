@@ -93,7 +93,7 @@ export default class GameSession extends Session {
     public readonly scoreboard: Scoreboard;
 
     /** How long a clip should be played for in the clip game mode */
-    public readonly clipDurationLength: number;
+    public readonly clipDurationLength: number | null;
 
     /** The current GameRound */
     public round: GameRound | null;
@@ -148,7 +148,7 @@ export default class GameSession extends Session {
         this.songStats = {};
         this.lastGuesser = null;
         this.hiddenUpdateTimer = null;
-        this.clipDurationLength = clipDurationLength ?? 0;
+        this.clipDurationLength = clipDurationLength || null;
 
         switch (this.gameType) {
             case GameType.TEAMS:
