@@ -757,7 +757,7 @@ export default abstract class Session {
 
             if (isClipMode) {
                 const clipDurationLength = this.clipDurationLength;
-                encoderArgs.push("-t", clipDurationLength.toString());
+                encoderArgs.push("-t", clipDurationLength!.toString());
             }
 
             round.songStartedAt = Date.now();
