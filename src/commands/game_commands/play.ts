@@ -162,12 +162,12 @@ export default class PlayCommand implements BaseCommand {
                 example: `${clickableSlashCommand(
                     COMMAND_NAME,
                     GameType.CLIP,
-                )} timer:0.75`,
+                )} timer:3`,
                 explanation: i18n.translate(
                     guildID,
                     "command.play.help.example.clip",
                     {
-                        clipDuration: "`0.75`",
+                        clipDuration: "`3`",
                     },
                 ),
             },
