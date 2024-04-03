@@ -644,6 +644,7 @@ export default class PlaylistCommand implements BaseCommand {
                 interaction,
             );
 
+            await guildPreference.reset(GameOption.PLAYLIST_ID);
             return;
         }
 
