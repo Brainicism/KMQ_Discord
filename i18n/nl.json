@@ -889,14 +889,14 @@
                 "description": "Start een spelletje KMQ.",
                 "example": {
                     "classic": "Start een klassiek spelletje KMQ (typ je gok als eerste om een punt te krijgen)",
-                    "clip": "Raad het lied op basis van een herhaald fragment, afgespeeld gedurende {{clipTimer}} seconden",
+                    "clip": "Raad het lied op basis van een herhaald fragment, afgespeeld gedurende {{clipDuration}} seconden",
                     "elimination": "Start een KMQ-eliminatiespel waarin elke speler begint met {{lives}} levens",
                     "hidden": "Start een verborgen spelletje KMQ, waarbij spelers alleen kunnen antwoorden met /raad",
                     "suddenDeath": "Start een plotselinge dood-game van KMQ, waarbij iemand het liedje moet raden, of de game eindigt",
                     "teams": "Splits op in zoveel teams als je wilt en kijk van wie je afhankelijk kunt zijn om te winnen!"
                 },
                 "interaction": {
-                    "clipTimer": "Kies hoe lang elke clip zal afspelen",
+                    "clipDuration": "Kies hoe lang elke clip zal afspelen",
                     "lives": "Kies met hoeveel levens elke speler begint"
                 },
                 "name": "spelen",

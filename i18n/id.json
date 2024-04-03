@@ -889,14 +889,14 @@
                 "description": "Memulai permainan KMQ.",
                 "example": {
                     "classic": "Mulai permainan KMQ klasik (ketik tebakan Anda terlebih dahulu untuk mendapatkan poin)",
-                    "clip": "Tebak lagu berdasarkan potongan yang diulang-ulang, diputar selama {{clipTimer}} detik",
+                    "clip": "Tebak lagu berdasarkan potongan yang diulang-ulang, diputar selama {{clipDuration}} detik",
                     "elimination": "Mulai permainan eliminasi KMQ di mana setiap pemain memulai dengan {{lives}} nyawa",
                     "hidden": "Mulai permainan KMQ tersembunyi, tempat pemain hanya bisa menjawab dengan /tebak",
                     "suddenDeath": "Mulai game sudden death KMQ, tebak lagunya atau game berakhir",
                     "teams": "Bergabunglah dengan tim sesuai keinginan dan temukan siapa yang dapat membantu Anda menang!"
                 },
                 "interaction": {
-                    "clipTimer": "Pilih berapa lama setiap klip akan diputar",
+                    "clipDuration": "Pilih berapa lama setiap klip akan diputar",
                     "lives": "Pilih berapa banyak nyawa yang dimiliki setiap pemain di awal"
                 },
                 "name": "putar",

@@ -1,7 +1,7 @@
 import {
-    CLIP_DEFAULT_TIMER,
-    CLIP_MAX_TIMER,
-    CLIP_MIN_TIMER,
+    CLIP_DEFAULT_DURATION,
+    CLIP_MAX_DURATION,
+    CLIP_MIN_DURATION,
     DataFiles,
     ELIMINATION_DEFAULT_LIVES,
     ELIMINATION_MAX_LIVES,
@@ -167,7 +167,7 @@ export default class PlayCommand implements BaseCommand {
                     guildID,
                     "command.play.help.example.clip",
                     {
-                        clipTimer: "`0.75`",
+                        clipDuration: "`0.75`",
                     },
                 ),
             },
@@ -177,7 +177,7 @@ export default class PlayCommand implements BaseCommand {
                     guildID,
                     "command.play.help.example.clip",
                     {
-                        clipTimer: `\`${CLIP_DEFAULT_TIMER}\``,
+                        clipDuration: `\`${CLIP_DEFAULT_DURATION}\``,
                     },
                 ),
             },
@@ -419,7 +419,7 @@ export default class PlayCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.play.help.example.clip",
                         {
-                            clipTimer: `\`${CLIP_DEFAULT_TIMER}\``,
+                            clipDuration: `\`${CLIP_DEFAULT_DURATION}\``,
                         },
                     ),
                     description_localizations: Object.values(LocaleType)
@@ -431,7 +431,7 @@ export default class PlayCommand implements BaseCommand {
                                     locale,
                                     "command.play.help.example.clip",
                                     {
-                                        clipTimer: `\`${CLIP_DEFAULT_TIMER}\``,
+                                        clipDuration: `\`${CLIP_DEFAULT_DURATION}\``,
                                     },
                                 ),
                             }),
@@ -440,10 +440,10 @@ export default class PlayCommand implements BaseCommand {
                     type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
                     options: [
                         {
-                            name: "timer",
+                            name: "duration",
                             description: i18n.translate(
                                 LocaleType.EN,
-                                "command.play.help.interaction.clipTimer",
+                                "command.play.help.interaction.clipDuration",
                             ),
                             description_localizations: Object.values(LocaleType)
                                 .filter((x) => x !== LocaleType.EN)
@@ -452,15 +452,15 @@ export default class PlayCommand implements BaseCommand {
                                         ...acc,
                                         [locale]: i18n.translate(
                                             locale,
-                                            "command.play.help.interaction.clipTimer",
+                                            "command.play.help.interaction.clipDuration",
                                         ),
                                     }),
                                     {},
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .NUMBER,
-                            min_value: CLIP_MIN_TIMER,
-                            max_value: CLIP_MAX_TIMER,
+                            min_value: CLIP_MIN_DURATION,
+                            max_value: CLIP_MAX_DURATION,
                         },
                     ],
                 },
@@ -500,7 +500,7 @@ export default class PlayCommand implements BaseCommand {
                 messageContext,
                 gameType,
                 interactionOptions["lives"],
-                interactionOptions["timer"],
+                interactionOptions["duration"],
                 interactionKey === AnswerType.HIDDEN,
                 interaction,
             );
@@ -960,7 +960,7 @@ export default class PlayCommand implements BaseCommand {
         messageContext: MessageContext,
         gameType: GameType,
         livesArg: string | null,
-        clipTimerArg: string | null,
+        clipDurationArg: string | null,
         hiddenMode: boolean,
         interaction?: Eris.CommandInteraction,
     ): Promise<void> {
@@ -1220,14 +1220,17 @@ export default class PlayCommand implements BaseCommand {
                 }
             }
 
-            let clipTimer: number;
-            if (clipTimerArg == null) {
-                clipTimer = CLIP_DEFAULT_TIMER;
+            let clipDuration: number;
+            if (clipDurationArg == null) {
+                clipDuration = CLIP_DEFAULT_DURATION;
             } else {
-                clipTimer = parseFloat(clipTimerArg);
-                clipTimer = Math.round(clipTimer! * 100) / 100;
-                if (clipTimer < CLIP_MIN_TIMER || clipTimer > CLIP_MAX_TIMER) {
-                    clipTimer = CLIP_DEFAULT_TIMER;
+                clipDuration = parseFloat(clipDurationArg);
+                clipDuration = Math.round(clipDuration! * 100) / 100;
+                if (
+                    clipDuration < CLIP_MIN_DURATION ||
+                    clipDuration > CLIP_MAX_DURATION
+                ) {
+                    clipDuration = CLIP_DEFAULT_DURATION;
                 }
             }
 
@@ -1239,7 +1242,7 @@ export default class PlayCommand implements BaseCommand {
                 gameOwner,
                 gameType,
                 lives,
-                clipTimer,
+                clipDuration,
             );
         }
 

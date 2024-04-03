@@ -93,7 +93,7 @@ export default class GameSession extends Session {
     public readonly scoreboard: Scoreboard;
 
     /** How long a clip should be played for in the clip game mode */
-    public readonly clipTimerLength: number;
+    public readonly clipDurationLength: number;
 
     /** The current GameRound */
     public round: GameRound | null;
@@ -130,7 +130,7 @@ export default class GameSession extends Session {
         gameSessionCreator: KmqMember,
         gameType: GameType,
         eliminationLives?: number,
-        clipTimerLength?: number,
+        clipDurationLength?: number,
     ) {
         super(
             guildPreference,
@@ -148,7 +148,7 @@ export default class GameSession extends Session {
         this.songStats = {};
         this.lastGuesser = null;
         this.hiddenUpdateTimer = null;
-        this.clipTimerLength = clipTimerLength ?? 0;
+        this.clipDurationLength = clipDurationLength ?? 0;
 
         switch (this.gameType) {
             case GameType.TEAMS:
