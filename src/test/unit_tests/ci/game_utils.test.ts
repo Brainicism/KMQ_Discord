@@ -38,43 +38,6 @@ describe("game utils", () => {
         });
 
         describe("getMatchingGroupNames", () => {
-            describe("collabs", () => {
-                it("should return the group and any collabs they are a part of in matchedGroups", async () => {
-                    const artistName = "Hyuna";
-                    const matchResults = await getMatchingGroupNames(
-                        State.aliases.artist,
-                        [artistName],
-                    );
-
-                    // contains the artist
-                    assert.strictEqual(
-                        matchResults.matchedGroups.some(
-                            (x) => x.name === artistName,
-                        ),
-                        true,
-                    );
-
-                    assert.strictEqual(
-                        matchResults.matchedGroups.length > 1,
-                        true,
-                    );
-
-                    // all results (including collabs) include the artist
-                    assert.deepStrictEqual(
-                        matchResults.matchedGroups
-                            .map((x) =>
-                                x.name
-                                    .split("+")
-                                    .some((y) => y.trim() === artistName),
-                            )
-                            .every((z) => z),
-                        true,
-                    );
-
-                    assert.strictEqual(matchResults.unmatchedGroups.length, 0);
-                });
-            });
-
             describe("fully matching group names", () => {
                 it("should return the corresponding groups in matchedGroups", async () => {
                     const artistNames = ["Blackpink", "BTS", "Stray Kids"];
@@ -350,81 +313,6 @@ describe("game utils", () => {
                                 0,
                             );
                         });
-                    });
-                });
-            });
-
-            describe("addedByUser", () => {
-                describe("addedByUser is true for artist set by player", () => {
-                    it("should match group", async () => {
-                        const artistName = "PSY";
-
-                        const matchResults = await getMatchingGroupNames(
-                            State.aliases.artist,
-                            [artistName],
-                        );
-
-                        assert.deepStrictEqual(
-                            matchResults.matchedGroups
-                                .filter((groups) => groups.name === artistName)
-                                .map((x) => x.addedByUser),
-                            [true],
-                        );
-
-                        assert.deepStrictEqual(
-                            matchResults.unmatchedGroups.length,
-                            0,
-                        );
-                    });
-                });
-
-                describe("addedByUser is true for collab set by player", () => {
-                    it("should match group", async () => {
-                        const artistName = "PSY + Hyuna";
-
-                        const matchResults = await getMatchingGroupNames(
-                            State.aliases.artist,
-                            [artistName],
-                        );
-
-                        assert.deepStrictEqual(
-                            matchResults.matchedGroups
-                                .filter((groups) => groups.name === artistName)
-                                .map((x) => x.addedByUser),
-                            [true],
-                        );
-
-                        assert.deepStrictEqual(
-                            matchResults.unmatchedGroups.length,
-                            0,
-                        );
-                    });
-                });
-
-                describe("addedByUser is false for collab included by artist", () => {
-                    it("should match group", async () => {
-                        const artistName = "PSY";
-
-                        const matchResults = await getMatchingGroupNames(
-                            State.aliases.artist,
-                            [artistName],
-                        );
-
-                        const falseArray: boolean[] = new Array(
-                            matchResults.matchedGroups.length - 1,
-                        ).fill(false);
-
-                        assert.deepStrictEqual(
-                            matchResults.matchedGroups
-                                .filter((groups) => groups.name !== artistName)
-                                .map((x) => x.addedByUser),
-                            falseArray,
-                        );
-
-                        assert.deepStrictEqual(
-                            matchResults.unmatchedGroups.length,
-                            0,
-                        );
                     });
                 });
             });

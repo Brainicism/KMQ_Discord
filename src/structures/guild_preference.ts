@@ -82,7 +82,6 @@ function getGroupNamesString(
     spaceDelimiter = true,
 ): string {
     let displayedGroupNames = groups
-        .filter((group) => group.addedByUser === true)
         .map((x) => x.name)
         .join(spaceDelimiter ? ", " : ",");
 

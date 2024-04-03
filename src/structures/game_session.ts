@@ -507,6 +507,12 @@ export default class GameSession extends Session {
             this.guildPreference.typosAllowed(),
         );
 
+        if (pointsEarned) {
+            logger.info(
+                `${getDebugLogHeader(messageContext)} | Correct guess submitted: '${guess}'`,
+            );
+        }
+
         const correctGuessers = round.getCorrectGuessers(this.isHiddenMode());
         const incorrectGuessers = round.getIncorrectGuessers();
         if (this.isHiddenMode()) {
@@ -517,10 +523,19 @@ export default class GameSession extends Session {
                     incorrectGuessers,
                 ).length > 0
             ) {
+                if (pointsEarned) {
+                    logger.info(
+                        `${getDebugLogHeader(messageContext)} | Correct guess submitted, but in hidden mode and waiting on other guesses`,
+                    );
+                }
+
                 // If there are still players who haven't guessed correctly, don't end the round
                 return;
             } else {
                 // Everyone guessed, end the round
+                logger.info(
+                    `${getDebugLogHeader(messageContext)} | No remaining guessers in hidden mode.`,
+                );
                 await this.stopHiddenUpdateTimer();
             }
         }
@@ -532,6 +547,9 @@ export default class GameSession extends Session {
             // If not hidden, someone guessed correctly
             // If hidden, everyone guessed and at least one person was right
             if (round.finished) {
+                logger.info(
+                    `${getDebugLogHeader(messageContext)} | Correct guess submitted, but round is already finished.`,
+                );
                 return;
             }
 
@@ -568,6 +586,10 @@ export default class GameSession extends Session {
                     [...incorrectGuessers],
                 ).size === 0
             ) {
+                logger.info(
+                    `${getDebugLogHeader(messageContext)} | Everybody guessed, but nobody was correct`,
+                );
+
                 await this.endRound(
                     false,
                     new MessageContext(this.textChannelID, null, this.guildID),
@@ -1772,18 +1794,21 @@ export default class GameSession extends Session {
         if (reuseExistingChoices && round.multipleChoiceOptions.length > 0) {
             buttons = round.multipleChoiceOptions;
         } else {
-            const correctChoice =
-                this.guildPreference.gameOptions.guessModeType ===
-                GuessModeType.ARTIST
-                    ? round.song.getLocalizedArtistName(locale)
-                    : round.song.getLocalizedSongName(locale);
+            const randomSong = round.song;
+            const correctChoice = {
+                displayedName:
+                    this.guildPreference.gameOptions.guessModeType ===
+                    GuessModeType.ARTIST
+                        ? round.song.getLocalizedArtistName(locale)
+                        : round.song.getLocalizedSongName(locale),
+                song: randomSong,
+            };
 
             const wrongChoices = await getMultipleChoiceOptions(
                 this.guildPreference.gameOptions.answerType,
                 this.guildPreference.gameOptions.guessModeType,
-                round.song.members,
+                randomSong.members,
                 correctChoice,
-                round.song.artistID,
                 locale,
             );
 
@@ -1802,7 +1827,7 @@ export default class GameSession extends Session {
             buttons.push({
                 type: 2,
                 style: 1,
-                label: correctChoice.substring(0, 70),
+                label: correctChoice.displayedName.substring(0, 70),
                 custom_id: round.interactionCorrectAnswerUUID,
             });
 

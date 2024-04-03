@@ -14,6 +14,7 @@ program
         "--no-restart",
         "Automatically restart process when countdown is over",
     )
+    .option("--skip-tests", "Skip test-runner tests")
     .option("--docker-image <docker_image>", "Docker image")
     .option(
         "--timer <minutes>",
@@ -92,6 +93,7 @@ function serverShutdown(
     restart: boolean,
     dockerImage: string,
     provisioningTimeout: number,
+    skipTests: boolean,
 ): Promise<void> {
     return new Promise(async () => {
         // if stopping server, inform immediately
@@ -162,7 +164,7 @@ function serverShutdown(
             await announceRestart(restartMinutes, restartDate, restart);
 
             setTimeout(
-                () => {
+                async () => {
                     // drop old primary
                     console.log("Dropping old primary...");
                     cp.execSync(`docker rm -f ${oldAppName}`);
@@ -172,6 +174,24 @@ function serverShutdown(
                     cp.execSync(
                         `docker exec ${appName} /bin/sh -c "mv standby promoted"`,
                     );
+
+                    // wait for all event listeners to be set-up
+                    await delay(5000);
+
+                    console.log("Running post-upgrade health checks...");
+                    console.log(
+                        "Running post-upgrade test suite: BASIC_OPTIONS...",
+                    );
+
+                    if (!skipTests) {
+                        cp.execSync(
+                            `docker exec ${appName} sh -c '. ./.env && npx ts-node --swc src/test/end-to-end-tests/test-runner-bot.ts --test-suite=BASIC_OPTIONS --debug --stage-delay=5'`,
+                        );
+                        console.log("Running post-upgrade test suite: PLAY...");
+                        cp.execSync(
+                            `docker exec ${appName} sh -c '. ./.env && npx ts-node --swc src/test/end-to-end-tests/test-runner-bot.ts --test-suite=PLAY --debug --stage-delay=5'`,
+                        );
+                    }
                 },
                 restartMinutes * 1000 * 60,
             );
@@ -189,6 +209,7 @@ process.on("SIGINT", async () => {
     const options = program.opts();
     console.log(options);
     const restartMinutes = options.timer;
+    const skipTests = options.skipTests;
     const provisioningTimeout = options.provisioningTimeout;
     const dockerImage = options.dockerImage;
 
@@ -197,5 +218,6 @@ process.on("SIGINT", async () => {
         options.restart,
         dockerImage,
         provisioningTimeout,
+        skipTests,
     );
 })();

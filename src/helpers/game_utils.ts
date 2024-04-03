@@ -13,6 +13,7 @@ import type GuildPreference from "../structures/guild_preference";
 import type KmqClient from "../kmq_client";
 import type ListeningSession from "../structures/listening_session";
 import type MatchedArtist from "../interfaces/matched_artist";
+import type QueriedSong from "../structures/queried_song";
 import type Session from "../structures/session";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 10;
@@ -213,36 +214,15 @@ export async function getMatchingGroupNames(
     rawGroupNames: Array<string>,
     aliasApplied = false,
 ): Promise<GroupMatchResults> {
-    const artistIds = (
+    const matchingGroups = (
         await dbContext.kpopVideos
             .selectFrom("app_kpop_group_safe")
-            .select(["id"])
+            .select(["id", "name"])
             .where("name", "in", rawGroupNames)
             .where("has_songs", "=", 1)
-            .execute()
-    ).map((x) => x.id);
-
-    const matchingGroups = (
-        await dbContext.kpopVideos // collab matches
-            .selectFrom("app_kpop_agrelation")
-            .innerJoin(
-                "app_kpop_group_safe",
-                "app_kpop_agrelation.id_subgroup",
-                "app_kpop_group_safe.id",
-            )
-            .select(["id", "name", sql<number>`0`.as("addedByUser")])
-            .where("app_kpop_agrelation.id_artist", "in", artistIds)
-            .where("app_kpop_group_safe.is_collab", "=", "y")
-            // artist matches
-            .union(
-                dbContext.kpopVideos
-                    .selectFrom("app_kpop_group_safe")
-                    .select(["id", "name", sql<number>`1`.as("addedByUser")])
-                    .where("app_kpop_group_safe.id", "in", artistIds),
-            )
             .orderBy("name", "asc")
             .execute()
-    ).map((x) => ({ id: x.id, name: x.name, addedByUser: !!x.addedByUser }));
+    ).map((x) => ({ id: x.id, name: x.name }));
 
     const matchingGroupNames = matchingGroups.map((x) => x.name.toUpperCase());
     const unrecognizedGroups = rawGroupNames.filter(
@@ -288,8 +268,7 @@ export async function getMatchingGroupNames(
  * @param answerType - The answer type
  * @param guessMode - The guess mode
  * @param gender - The correct answer's group's gender
- * @param answer - The correct answer
- * @param artistID - The correct answer's group's ID
+ * @param correctSongPayload - The correct song payload
  * @param locale - The server's locale
  * @returns unshuffled incorrect choices based on difficulty
  */
@@ -297,11 +276,16 @@ export async function getMultipleChoiceOptions(
     answerType: AnswerType,
     guessMode: GuessModeType,
     gender: AvailableGenders,
-    answer: string,
-    artistID: number,
+    correctSongPayload: { displayedName: string; song: QueriedSong },
     locale: LocaleType,
 ): Promise<string[]> {
-    const useHangul = locale === LocaleType.KO && containsHangul(answer);
+    const artistID = correctSongPayload.song.artistID;
+    const correctChoiceViews = correctSongPayload.song.views;
+
+    const useHangul =
+        locale === LocaleType.KO &&
+        containsHangul(correctSongPayload.displayedName);
+
     let easyNames: string[];
     let names: string[];
     let result: string[];
@@ -340,48 +324,49 @@ export async function getMultipleChoiceOptions(
                 .select(["song_name_en", "song_name_ko"])
                 .groupBy(songName)
                 .where("members", "=", gender)
-                .where(songName, "!=", answer)
+                .where(songName, "!=", correctSongPayload.displayedName)
                 .where("id_artist", "!=", artistID)
+                .orderBy(sql`RAND()`)
                 .execute()
         ).map((x) => pickNonEmpty(x));
         switch (answerType) {
             case AnswerType.MULTIPLE_CHOICE_EASY: {
                 // Easy: EASY_CHOICES from same gender as chosen artist
-                result = _.sampleSize(easyNames, EASY_CHOICES);
+                result = easyNames.slice(0, EASY_CHOICES);
                 break;
             }
 
             case AnswerType.MULTIPLE_CHOICE_MED: {
                 // Medium: MEDIUM_CHOICES - MEDIUM_SAME_ARIST_CHOICES from same gender as chosen artist, MEDIUM_SAME_ARIST_CHOICES from chosen artist
-                const sameArtistSongs = _.sampleSize(
-                    (
-                        await dbContext.kmq
-                            .selectFrom("available_songs")
-                            .select(["song_name_en", "song_name_ko"])
-                            .groupBy(songName)
-                            .where("id_artist", "=", artistID)
-                            .where(songName, "!=", answer)
-                            .execute()
-                    ).map((x) => pickNonEmpty(x)),
-                    MEDIUM_SAME_ARTIST_CHOICES,
-                );
+                const sameArtistSongs = (
+                    await dbContext.kmq
+                        .selectFrom("available_songs")
+                        .select(["song_name_en", "song_name_ko"])
+                        .groupBy(songName)
+                        .where("id_artist", "=", artistID)
+                        .where(songName, "!=", correctSongPayload.displayedName)
+                        .orderBy(sql`RAND()`)
+                        .execute()
+                )
+                    .map((x) => pickNonEmpty(x))
+                    .slice(0, MEDIUM_SAME_ARTIST_CHOICES);
 
-                const sameGenderSongs = _.sampleSize(
-                    (
-                        await dbContext.kmq
-                            .selectFrom("available_songs")
-                            .select(["song_name_en", "song_name_ko"])
-                            .groupBy(songName)
-                            .where("members", "=", gender)
-                            .where(songName, "not in", [
-                                ...sameArtistSongs,
-                                answer,
-                            ])
-                            .where("id_artist", "=", artistID)
-                            .execute()
-                    ).map((x) => pickNonEmpty(x)),
-                    MEDIUM_CHOICES - MEDIUM_SAME_ARTIST_CHOICES,
-                );
+                const sameGenderSongs = (
+                    await dbContext.kmq
+                        .selectFrom("available_songs")
+                        .select(["song_name_en", "song_name_ko"])
+                        .groupBy(songName)
+                        .where("members", "=", gender)
+                        .where(songName, "not in", [
+                            ...sameArtistSongs,
+                            correctSongPayload.displayedName,
+                        ])
+                        .where("id_artist", "=", artistID)
+                        .orderBy(sql`RAND()`)
+                        .execute()
+                )
+                    .map((x) => pickNonEmpty(x))
+                    .slice(0, MEDIUM_CHOICES - MEDIUM_SAME_ARTIST_CHOICES);
 
                 result = [...sameArtistSongs, ...sameGenderSongs];
                 break;
@@ -395,16 +380,17 @@ export async function getMultipleChoiceOptions(
                         .select(["song_name_en", "song_name_ko"])
                         .groupBy(songName)
                         .where("id_artist", "=", artistID)
-                        .where(songName, "!=", answer)
+                        .where(songName, "!=", correctSongPayload.displayedName)
+                        .orderBy(sql`ABS(views - ${correctChoiceViews})`, "asc") // pick songs closest in popularity
                         .execute()
                 ).map((x) => pickNonEmpty(x));
-                result = _.sampleSize(names, HARD_CHOICES);
+                result = names.slice(0, HARD_CHOICES);
                 break;
             }
 
             default:
                 logger.error(`Unexpected answer type: ${answerType}`);
-                result = _.sampleSize(easyNames, EASY_CHOICES);
+                result = easyNames.slice(0, EASY_CHOICES);
                 break;
         }
 
@@ -456,13 +442,14 @@ export async function getMultipleChoiceOptions(
             await dbContext.kmq
                 .selectFrom("available_songs")
                 .select(["artist_name_en", "artist_name_ko"])
-                .where(artistName, "!=", answer)
+                .where(artistName, "!=", correctSongPayload.displayedName)
+                .orderBy(sql`RAND()`)
                 .execute()
         ).map((x) => pickNonEmpty(x));
         switch (answerType) {
             case AnswerType.MULTIPLE_CHOICE_EASY:
                 // Easy: EASY_CHOICES from any artist
-                result = _.sampleSize(easyNames, EASY_CHOICES);
+                result = easyNames.slice(0, EASY_CHOICES);
                 break;
             case AnswerType.MULTIPLE_CHOICE_MED:
             case AnswerType.MULTIPLE_CHOICE_HARD:
@@ -472,15 +459,21 @@ export async function getMultipleChoiceOptions(
                     await dbContext.kmq
                         .selectFrom("available_songs")
                         .select(["artist_name_en", "artist_name_ko"])
+                        .distinct()
                         .where("members", "=", gender)
-                        .where(artistName, "!=", answer)
+                        .where(
+                            artistName,
+                            "!=",
+                            correctSongPayload.displayedName,
+                        )
+                        .orderBy(sql`RAND()`)
                         .execute()
                 ).map((x) => pickNonEmpty(x));
-                result = _.sampleSize(names, CHOICES_BY_DIFFICULTY[answerType]);
+                result = names.slice(0, CHOICES_BY_DIFFICULTY[answerType]);
                 break;
             default:
                 logger.error(`Unexpected answerType: ${answerType}`);
-                result = _.sampleSize(easyNames, EASY_CHOICES);
+                result = easyNames.slice(0, EASY_CHOICES);
                 break;
         }
     }

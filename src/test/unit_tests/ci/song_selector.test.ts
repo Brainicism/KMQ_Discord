@@ -95,20 +95,22 @@ describe("song selector", () => {
 
             describe("single-selected group", () => {
                 it("should only return the songs matching the specified group", async () => {
-                    const selectedArtist = {
-                        id: 208,
-                        name: "Twice",
-                        addedByUser: true,
-                    };
+                    const selectedArtists = await getMatchingGroupNames({}, [
+                        "Twice",
+                    ]);
 
-                    await guildPreference.setGroups([selectedArtist]);
+                    await guildPreference.setGroups(
+                        selectedArtists.matchedGroups,
+                    );
                     await guildPreference.songSelector.reloadSongs();
                     const { songs } = guildPreference.songSelector.getSongs();
 
                     assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every(
-                            (song) => song.artistID === selectedArtist.id,
+                            (song) =>
+                                song.artistID ===
+                                selectedArtists.matchedGroups[0]!.id,
                         ),
                         true,
                     );
@@ -117,20 +119,22 @@ describe("song selector", () => {
 
             describe("multi-selected groups", () => {
                 it("should only return the songs matching the specified groups", async () => {
-                    const selectedArtists = [
-                        { id: 208, name: "Twice", addedByUser: true },
-                        { id: 40, name: "BTS", addedByUser: true },
-                        { id: 61, name: "EXO", addedByUser: true },
-                    ];
+                    const selectedArtists = await getMatchingGroupNames({}, [
+                        "Twice",
+                        "BTS",
+                        "Blackpink",
+                    ]);
 
-                    await guildPreference.setGroups(selectedArtists);
+                    await guildPreference.setGroups(
+                        selectedArtists.matchedGroups,
+                    );
                     await guildPreference.songSelector.reloadSongs();
                     const { songs } = guildPreference.songSelector.getSongs();
 
                     assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every((song) =>
-                            selectedArtists
+                            selectedArtists.matchedGroups
                                 .map((x) => x.id)
                                 .includes(song.artistID),
                         ),
@@ -141,16 +145,18 @@ describe("song selector", () => {
         });
 
         describe("includes", () => {
-            const includedArtists = [
-                { id: 208, name: "Twice", addedByUser: true },
-                { id: 40, name: "BTS", addedByUser: true },
-                { id: 61, name: "EXO", addedByUser: true },
-            ];
-
             describe("female gender, include 2 male groups", () => {
                 it("should only return the songs matching the specified gender, and the explicitly included artists", async () => {
+                    const includedArtists = await getMatchingGroupNames({}, [
+                        "Twice",
+                        "BTS",
+                        "Blackpink",
+                    ]);
+
                     await guildPreference.setGender(["female"]);
-                    await guildPreference.setIncludes(includedArtists);
+                    await guildPreference.setIncludes(
+                        includedArtists.matchedGroups,
+                    );
                     await guildPreference.songSelector.reloadSongs();
                     const { songs } = guildPreference.songSelector.getSongs();
 
@@ -159,7 +165,7 @@ describe("song selector", () => {
                         Array.from(songs).every(
                             (song) =>
                                 song.members === "female" ||
-                                includedArtists
+                                includedArtists.matchedGroups
                                     .map((x) => x.id)
                                     .includes(song.artistID),
                         ),
@@ -170,15 +176,17 @@ describe("song selector", () => {
         });
 
         describe("excludes", () => {
-            const excludeArtists = [
-                { id: 208, name: "Twice", addedByUser: true },
-                { id: 31, name: "Blackpink", addedByUser: true },
-            ];
-
             describe("female gender, exclude 2 female groups", () => {
                 it("should only return the songs matching the specified gender, explicitly excluding excluded artists ", async () => {
+                    const excludeArtists = await getMatchingGroupNames({}, [
+                        "Twice",
+                        "Blackpink",
+                    ]);
+
                     await guildPreference.setGender(["female"]);
-                    await guildPreference.setExcludes(excludeArtists);
+                    await guildPreference.setExcludes(
+                        excludeArtists.matchedGroups,
+                    );
                     await guildPreference.songSelector.reloadSongs();
                     const { songs } = guildPreference.songSelector.getSongs();
 
@@ -187,7 +195,7 @@ describe("song selector", () => {
                         Array.from(songs).every(
                             (song) =>
                                 song.members === "female" &&
-                                excludeArtists
+                                excludeArtists.matchedGroups
                                     .map((x) => x.id)
                                     .every((x) => x !== song.artistID),
                         ),
@@ -455,12 +463,12 @@ describe("song selector", () => {
             });
         });
 
-        describe("subunits", () => {
-            const artists = [{ id: 16, name: "AOA", addedByUser: true }];
+        describe("subunits", async () => {
+            const artists = await getMatchingGroupNames({}, ["AOA"]);
 
             describe("exclude subunits", () => {
                 it("should only return the songs by the specified group, excluding subunits", async () => {
-                    await guildPreference.setGroups(artists);
+                    await guildPreference.setGroups(artists.matchedGroups);
                     await guildPreference.setSubunitPreference(
                         SubunitsPreference.EXCLUDE,
                     );
@@ -470,7 +478,8 @@ describe("song selector", () => {
                     assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every(
-                            (song) => song.artistID === artists[0]!.id,
+                            (song) =>
+                                song.artistID === artists.matchedGroups[0]!.id,
                         ),
                         true,
                     );
@@ -479,7 +488,7 @@ describe("song selector", () => {
 
             describe("include subunits", () => {
                 it("should only return the songs by the specified group, including subunits", async () => {
-                    await guildPreference.setGroups(artists);
+                    await guildPreference.setGroups(artists.matchedGroups);
                     await guildPreference.setSubunitPreference(
                         SubunitsPreference.INCLUDE,
                     );
@@ -496,9 +505,10 @@ describe("song selector", () => {
                     // all songs must be one of the artist, or the subunit's
                     assert.strictEqual(
                         Array.from(songs).every((song) =>
-                            [...expectedSubunitIds, artists[0]!.id].includes(
-                                song.artistID,
-                            ),
+                            [
+                                ...expectedSubunitIds,
+                                artists.matchedGroups[0]!.id,
+                            ].includes(song.artistID),
                         ),
                         true,
                     );
@@ -513,11 +523,9 @@ describe("song selector", () => {
                 });
 
                 it("should not include any subunits if group has no subunits", async () => {
-                    const group = {
-                        id: 4897,
-                        name: "AP Alchemy",
-                        addedByUser: true,
-                    };
+                    const group = (
+                        await getMatchingGroupNames({}, ["AP Alchemy"])
+                    ).matchedGroups[0]!;
 
                     await guildPreference.setGroups([group]);
 
@@ -542,12 +550,18 @@ describe("song selector", () => {
 
             describe("include subunits with shadowbanned artist", () => {
                 it("should exclude the shadowbanned artist", async () => {
-                    const groups = [
-                        { id: 288, name: "Stray Kids", addedByUser: true },
-                    ];
+                    const groups = await getMatchingGroupNames({}, [
+                        "Stray Kids",
+                    ]);
 
-                    await guildPreference.setGroups(groups);
-                    const shadowbannedArtists = [2149];
+                    const shadowBannedArtist = await getMatchingGroupNames({}, [
+                        "Changbin",
+                    ]);
+
+                    await guildPreference.setGroups(groups.matchedGroups);
+                    const shadowbannedArtists = [
+                        shadowBannedArtist.matchedGroups[0]?.id!,
+                    ];
 
                     await guildPreference.setSubunitPreference(
                         SubunitsPreference.INCLUDE,
@@ -1334,6 +1348,12 @@ describe("song selector", () => {
                         ]);
 
                         await gp.setIncludes(includesGroups.matchedGroups);
+
+                        const excludesGroups = await getMatchingGroupNames({}, [
+                            "Taeyeon",
+                        ]);
+
+                        await gp.setExcludes(excludesGroups.matchedGroups);
                         await gp.setOstPreference(OstPreference.INCLUDE);
                         await gp.songSelector.reloadSongs();
                     },
