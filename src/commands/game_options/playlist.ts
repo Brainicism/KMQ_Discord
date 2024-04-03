@@ -626,7 +626,7 @@ export default class PlaylistCommand implements BaseCommand {
 
         if (attachments.length === 0) {
             logger.warn(
-                `Playlist ${kmqPlaylistIdentifier} unexpectedly has 0 matched/unmatched songs. playlist = ${JSON.stringify(playlist)}`,
+                `Playlist ${kmqPlaylistIdentifier} unexpectedly empty in sendMatchedSongsFile. playlist = ${JSON.stringify(playlist)}`,
             );
 
             await sendErrorMessage(
@@ -644,7 +644,6 @@ export default class PlaylistCommand implements BaseCommand {
                 interaction,
             );
 
-            await guildPreference.reset(GameOption.PLAYLIST_ID);
             return;
         }
 

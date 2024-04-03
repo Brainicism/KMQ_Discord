@@ -34,6 +34,7 @@ import type Eris from "eris";
 import type GuildPreference from "./guild_preference";
 import type MessageContext from "./message_context";
 import type UniqueSongCounter from "../interfaces/unique_song_counter";
+import GameOption from "../enums/game_option_name";
 
 const logger = new IPCLogger("song_selector");
 
@@ -295,6 +296,17 @@ export default class SongSelector {
             messageContext,
             interaction!,
         );
+
+        if (
+            playlist.unmatchedSongs.length === 0 &&
+            playlist.matchedSongs.length === 0
+        ) {
+            logger.warn(
+                `Playlist ${kmqPlaylistIdentifier} unexpectedly has 0 matched/unmatched songs in reloadSongs, resetting playlist. playlist = ${JSON.stringify(playlist)}`,
+            );
+
+            await this.guildPreference.reset(GameOption.PLAYLIST_ID);
+        }
 
         this.selectedSongs = playlist as SelectedSongs;
         return playlist;
