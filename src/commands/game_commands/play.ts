@@ -496,11 +496,13 @@ export default class PlayCommand implements BaseCommand {
                 interaction,
             );
         } else {
+            const livesOrClipDuration =
+                interactionOptions["lives"] || interactionOptions["duration"];
+
             await PlayCommand.startGame(
                 messageContext,
                 gameType,
-                interactionOptions["lives"],
-                interactionOptions["duration"],
+                livesOrClipDuration,
                 interactionKey === AnswerType.HIDDEN,
                 interaction,
             );
@@ -519,7 +521,7 @@ export default class PlayCommand implements BaseCommand {
             gameType = gameTypeRaw as GameType;
         }
 
-        const firstArg =
+        const livesOrClipDuration =
             parsedMessage.components.length <= 1
                 ? null
                 : parsedMessage.components[1]!;
@@ -527,8 +529,7 @@ export default class PlayCommand implements BaseCommand {
         await PlayCommand.startGame(
             MessageContext.fromMessage(message),
             gameType,
-            firstArg,
-            firstArg,
+            livesOrClipDuration,
             gameTypeRaw === AnswerType.HIDDEN,
         );
     };
@@ -959,8 +960,7 @@ export default class PlayCommand implements BaseCommand {
     static async startGame(
         messageContext: MessageContext,
         gameType: GameType,
-        livesArg: string | null,
-        clipDurationArg: string | null,
+        livesOrClipDurationArg: string | null,
         hiddenMode: boolean,
         interaction?: Eris.CommandInteraction,
     ): Promise<void> {
@@ -1207,30 +1207,34 @@ export default class PlayCommand implements BaseCommand {
                 }
             }
 
-            let lives: number;
-            if (livesArg == null) {
-                lives = ELIMINATION_DEFAULT_LIVES;
-            } else {
-                lives = parseInt(livesArg, 10);
-                if (
-                    lives < ELIMINATION_MIN_LIVES ||
-                    lives > ELIMINATION_MAX_LIVES
-                ) {
+            let lives: number | undefined;
+            if (gameType === GameType.ELIMINATION) {
+                if (livesOrClipDurationArg == null) {
                     lives = ELIMINATION_DEFAULT_LIVES;
+                } else {
+                    lives = parseInt(livesOrClipDurationArg, 10);
+                    if (
+                        lives < ELIMINATION_MIN_LIVES ||
+                        lives > ELIMINATION_MAX_LIVES
+                    ) {
+                        lives = ELIMINATION_DEFAULT_LIVES;
+                    }
                 }
             }
 
-            let clipDuration: number;
-            if (clipDurationArg == null) {
-                clipDuration = CLIP_DEFAULT_DURATION;
-            } else {
-                clipDuration = parseFloat(clipDurationArg);
-                clipDuration = Math.round(clipDuration! * 100) / 100;
-                if (
-                    clipDuration < CLIP_MIN_DURATION ||
-                    clipDuration > CLIP_MAX_DURATION
-                ) {
+            let clipDuration: number | undefined;
+            if (gameType === GameType.CLIP) {
+                if (livesOrClipDurationArg == null) {
                     clipDuration = CLIP_DEFAULT_DURATION;
+                } else {
+                    clipDuration = parseFloat(livesOrClipDurationArg);
+                    clipDuration = Math.round(clipDuration! * 100) / 100;
+                    if (
+                        clipDuration < CLIP_MIN_DURATION ||
+                        clipDuration > CLIP_MAX_DURATION
+                    ) {
+                        clipDuration = CLIP_DEFAULT_DURATION;
+                    }
                 }
             }
 
