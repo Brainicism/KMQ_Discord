@@ -265,10 +265,7 @@ export default class GameSession extends Session {
         await super.endRound(false, messageContext);
 
         try {
-            await round.interactionMarkAnswers(
-                correctGuessers.length || 0,
-                true,
-            );
+            await round.interactionMarkAnswers(correctGuessers.length, true);
         } catch (e) {
             logger.warn(
                 `Failed to mark interaction answers. Bot potentially left server? e = ${e}`,
