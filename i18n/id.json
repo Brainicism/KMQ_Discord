@@ -1486,11 +1486,11 @@
             "interaction": {
                 "alreadyEliminated": "Anda sudah tereliminasi pada ronde ini.",
                 "bookmarkOutsideGame": "Anda hanya dapat menandai lagu selama permainan.",
-                "clipActionTooEarly": "Tunggu sebentar sebelum memainkan klip.",
                 "eliminated": "Anda telah tereliminasi pada ronde ini.",
                 "guildBanned": "Server ini dilarang menggunakan KMQ. Untuk banding, hubungi server dukungan resmi KMQ di {{supportServer}}.",
                 "guildOnly": "KMQ hanya dapat digunakan di server.",
                 "invalidBookmark": "Anda hanya dapat menandai lagu yang baru-baru ini diputar dalam {{BOOKMARK_MESSAGE_SIZE}} ronde terakhir. Anda harus menandai pesan yang dikirim oleh bot yang berisi lagu.",
+                "newClipTooEarly": "Tunggu sebentar sebelum meminta klip baru.",
                 "optionFromPreviousRound": "Anda mencoba memilih opsi dari ronde yang sudah selesai.",
                 "playerBanned": "Anda dilarang menggunakan KMQ. Untuk banding, hubungi server dukungan KMQ resmi di {{supportServer}}."
             },

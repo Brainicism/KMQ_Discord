@@ -633,7 +633,7 @@ export default class GameSession extends Session {
                 null,
                 i18n.translate(
                     this.guildID,
-                    "misc.failure.interaction.clipActionTooEarly",
+                    "misc.failure.interaction.newClipTooEarly",
                 ),
             );
             return true;

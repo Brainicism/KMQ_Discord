@@ -1486,11 +1486,11 @@
             "interaction": {
                 "alreadyEliminated": "Вы уже были исключены из этого раунда.",
                 "bookmarkOutsideGame": "Вы можете добавлять песни в закладки только во время игры.",
-                "clipActionTooEarly": "Подождите немного перед воспроизведением клипа.",
                 "eliminated": "Вы исключены из этого раунда.",
                 "guildBanned": "Este servidor no puede utilizar KMQ. As appeals, contacta con el servidor oficial de asistencia de KMQ en {{supportServer}}.",
                 "guildOnly": "KMQ можно использовать только на серверах.",
                 "invalidBookmark": "Вы можете добавлять в закладки только песни, которые были недавно воспроизведены в последних {{BOOKMARK_MESSAGE_SIZE}} раундах. Вы должны добавить в закладки сообщение, отправленное ботом, содержащее песню.",
+                "newClipTooEarly": "Подождите немного, прежде чем запросить новый клип.",
                 "optionFromPreviousRound": "Вы пытаетесь выбрать опцию из уже завершенного раунда.",
                 "playerBanned": "Вам запрещено использовать KMQ. Для подачи апелляции обратитесь на официальный сервер поддержки KMQ по адресу {{supportServer}}."
             },

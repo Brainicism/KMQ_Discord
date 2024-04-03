@@ -1486,11 +1486,11 @@
             "interaction": {
                 "alreadyEliminated": "Je bent deze ronde al uitgeschakeld.",
                 "bookmarkOutsideGame": "Je kunt alleen nummers een bladwijzer geven tijdens een spel.",
-                "clipActionTooEarly": "Wacht even voordat je de clip afspeelt.",
                 "eliminated": "Je bent deze ronde uitgeschakeld.",
                 "guildBanned": "Deze server mag KMQ niet gebruiken. Voor bezwaren kun je contact opnemen met de officiële KMQ-ondersteuningsserver op {{supportServer}}.",
                 "guildOnly": "KMQ kan alleen op servers worden gebruikt.",
                 "invalidBookmark": "Je kunt alleen nummers een bladwijzer geven die recentelijk in de laatste {{BOOKMARK_MESSAGE_SIZE}} ronden zijn afgespeeld. Je moet een bladwijzer plaatsen voor het bericht dat door de bot is verzonden en het nummer bevat.",
+                "newClipTooEarly": "Wacht even voordat je een nieuwe clip aanvraagt.",
                 "optionFromPreviousRound": "Je probeert een optie te kiezen uit een ronde die al is voltooid.",
                 "playerBanned": "U bent verbannen van het gebruik van KMQ. Voor bezwaren kunt u contact opnemen met de officiële KMQ-ondersteuningsserver op {{supportServer}}."
             },

@@ -1486,11 +1486,11 @@
             "interaction": {
                 "alreadyEliminated": "あなたはすでにこのラウンドで敗退しています。",
                 "bookmarkOutsideGame": "ゲーム中には曲をブックマークできません。",
-                "clipActionTooEarly": "クリップを再生する前に少し待ってください。",
                 "eliminated": "あなたはこのラウンドで敗退しました。",
                 "guildBanned": "このサーバーはKMQの使用が禁止されています。異議申し立ては、{{supportServer}}の公式KMQサポートサーバーまでご連絡ください。",
                 "guildOnly": "KMQはサーバーでのみ使用できます。",
                 "invalidBookmark": "最近の{{BOOKMARK_MESSAGE_SIZE}}ラウンドで再生された曲のみブックマークできます。ボットから送信されたメッセージに含まれる曲をブックマークする必要があります。",
+                "newClipTooEarly": "新しいクリップをリクエストする前に少し待ってください。",
                 "optionFromPreviousRound": "すでに完了したラウンドからオプションを選択しようとしています。",
                 "playerBanned": "あなたはKMQの使用が禁止されています。異議申し立ては、{{supportServer}}の公式KMQサポートサーバーまでご連絡ください。"
             },
