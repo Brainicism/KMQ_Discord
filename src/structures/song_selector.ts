@@ -15,6 +15,7 @@ import {
 import { getDebugLogHeader } from "../helpers/discord_utils";
 import ArtistType from "../enums/option_types/artist_type";
 import EnvVariableManager from "../env_variable_manager";
+import GameOption from "../enums/game_option_name";
 import GameRound from "./game_round";
 import LanguageType from "../enums/option_types/language_type";
 import OstPreference from "../enums/option_types/ost_preference";
@@ -34,7 +35,6 @@ import type Eris from "eris";
 import type GuildPreference from "./guild_preference";
 import type MessageContext from "./message_context";
 import type UniqueSongCounter from "../interfaces/unique_song_counter";
-import GameOption from "../enums/game_option_name";
 
 const logger = new IPCLogger("song_selector");
 
