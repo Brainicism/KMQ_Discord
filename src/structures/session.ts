@@ -698,11 +698,21 @@ export default abstract class Session {
         const isClipMode = this.isGameSession() && this.isClipMode();
         if (isClipMode) {
             const clipGameRound = round as ClipGameRound;
-            if (clipAction === ClipAction.NEW_CLIP) {
-                // Clip mode and the user requested another segment
-                seekLocation = songDuration * (0.6 * Math.random());
-            } else if (clipAction === ClipAction.REPLAY) {
-                seekLocation = clipGameRound.seekLocation!;
+            switch (clipAction) {
+                case ClipAction.NEW_CLIP:
+                    // Clip mode and the user requested another segment
+                    seekLocation = songDuration * (0.6 * Math.random());
+                    break;
+                case ClipAction.REPLAY:
+                    seekLocation = clipGameRound.seekLocation!;
+                    break;
+                case ClipAction.END_ROUND:
+                    seekLocation =
+                        clipGameRound.seekLocation! + this.clipDurationLength!;
+                    break;
+                default:
+                    // We enter here when the round is first started in clip mode
+                    break;
             }
 
             clipGameRound.seekLocation = seekLocation;
@@ -756,7 +766,11 @@ export default abstract class Session {
             }
 
             if (isClipMode) {
-                const clipDurationLength = this.clipDurationLength;
+                const clipDurationLength =
+                    clipAction !== ClipAction.END_ROUND
+                        ? this.clipDurationLength
+                        : this.guildPreference.getSongStartDelay() * 1000;
+
                 encoderArgs.push("-t", clipDurationLength!.toString());
             }
 

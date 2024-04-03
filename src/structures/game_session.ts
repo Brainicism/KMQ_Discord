@@ -262,8 +262,6 @@ export default class GameSession extends Session {
 
         await this.stopHiddenUpdateTimer();
 
-        await super.endRound(false, messageContext);
-
         try {
             await round.interactionMarkAnswers(correctGuessers.length, true);
         } catch (e) {
@@ -377,9 +375,36 @@ export default class GameSession extends Session {
             this.updateBookmarkSongList(endRoundMessage.id, round.song);
         }
 
-        if (this.scoreboard.gameFinished(this.guildPreference)) {
+        const gameFinishedDueToGameOptions = this.scoreboard.gameFinished(
+            this.guildPreference,
+        );
+
+        const gameFinishedDueToSuddenDeath =
+            this.gameType === GameType.SUDDEN_DEATH && !isCorrectGuess;
+
+        const gameFinished =
+            gameFinishedDueToGameOptions || gameFinishedDueToSuddenDeath;
+
+        if (this.isClipMode() && !gameFinished) {
+            // Play what immediately follows the clip after the round ends
+            const songStartDelay = this.guildPreference.getSongStartDelay();
+            if (songStartDelay > 0 && !isError) {
+                const playSuccess = await this.playSong(
+                    messageContext,
+                    ClipAction.END_ROUND,
+                );
+
+                if (playSuccess) {
+                    await delay(songStartDelay * 1000);
+                }
+            }
+        }
+
+        await super.endRound(false, messageContext);
+
+        if (gameFinishedDueToGameOptions) {
             await this.endSession("Game finished due to game options", false);
-        } else if (this.gameType === GameType.SUDDEN_DEATH && !isCorrectGuess) {
+        } else if (gameFinishedDueToSuddenDeath) {
             await this.endSession("Sudden death game ended", false);
         }
     }
