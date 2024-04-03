@@ -233,7 +233,7 @@ export default class GameSession extends Session {
             return null;
         }
 
-        await this.sendStartRoundMessage(messageContext, round, false);
+        await this.sendStartRoundMessage(messageContext, round, true);
 
         return round;
     }
@@ -663,7 +663,7 @@ export default class GameSession extends Session {
 
         if (clipRound.isNewClipMajority()) {
             await round.interactionMarkAnswers(0, false);
-            await this.sendStartRoundMessage(messageContext, clipRound, true);
+            await this.sendStartRoundMessage(messageContext, clipRound, false);
             await this.playSong(messageContext, ClipAction.NEW_CLIP);
             clipRound.reset();
         }
@@ -1932,9 +1932,9 @@ export default class GameSession extends Session {
     private async sendStartRoundMessage(
         messageContext: MessageContext,
         round: Round,
-        reuseExistingChoices: boolean,
+        firstMessageOfRound: boolean,
     ): Promise<void> {
-        if (this.isHiddenMode()) {
+        if (this.isHiddenMode() && firstMessageOfRound) {
             // Show players that haven't guessed and a button to guess
             await this.sendHiddenGuessMessage(
                 messageContext,
@@ -1945,7 +1945,7 @@ export default class GameSession extends Session {
         }
 
         if (this.isMultipleChoiceMode()) {
-            await this.sendMultipleChoiceOptionsMessage(reuseExistingChoices);
+            await this.sendMultipleChoiceOptionsMessage(!firstMessageOfRound);
         }
     }
 }
