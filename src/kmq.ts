@@ -123,13 +123,13 @@ function registerGlobalIntervals(fleet: Fleet): void {
 function registerProcessEvents(fleet: Fleet): void {
     process.on("unhandledRejection", (err: Error) => {
         logger.error(
-            `Admiral Unhandled Rejection | Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}}`,
+            `Admiral Unhandled Rejection | Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}`,
         );
     });
 
     process.on("uncaughtException", (err: Error) => {
         logger.error(
-            `Admiral Uncaught Exception | Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}}`,
+            `Admiral Uncaught Exception | Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}`,
         );
     });
 
