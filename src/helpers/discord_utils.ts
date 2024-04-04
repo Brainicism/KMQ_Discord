@@ -41,7 +41,7 @@ import { getAvailableSongCount, userBonusIsActive } from "./game_utils";
 import AppCommandsAction from "../enums/app_command_action";
 import EmbedPaginator from "eris-pagination";
 import EnvType from "../enums/env_type";
-import Eris from "eris";
+import Eris, { DiscordHTTPError, DiscordRESTError } from "eris";
 import GameOption from "../enums/game_option_name";
 import GameRound from "../structures/game_round";
 import GameType from "../enums/game_type";
@@ -327,7 +327,7 @@ async function sendMessageExceptionHandler(
                 `Error sending message. Request timed out. textChannelID = ${channelID}.`,
             );
         }
-    } else if (e.code) {
+    } else if (e instanceof DiscordRESTError || e instanceof DiscordHTTPError) {
         const errCode = e.code;
         switch (errCode) {
             case 500: {
@@ -419,9 +419,36 @@ async function sendMessageExceptionHandler(
                 break;
             }
         }
-    } else {
+    } else if (e instanceof Error) {
+        if (e.message.includes("Request timed out")) {
+            logger.warn(
+                `Error sending message. Request timed out. textChannelID = ${channelID}. Name: ${e.name}. Reason: ${e.message}. Stack: ${e.stack}`,
+            );
+
+            return;
+        }
+
         logger.error(
-            `Error sending message. Unknown error. textChannelID = ${channelID}. err = ${e} = ${JSON.stringify(messageContent)}. stack = ${new Error().stack}`,
+            `Error sending message. Unknown generic error. textChannelID = ${channelID}. Name: ${e.name}. Reason: ${e.message}. Stack: ${e.stack}`,
+        );
+    } else {
+        let details = "";
+        // pray that it has a toString()
+        if (e.toString) {
+            details += e.toString();
+        }
+
+        // maybe we can stringify it too
+        try {
+            details += JSON.stringify(e);
+        } catch (err) {
+            logger.warn(
+                `Couldn't stringify error of unknown type: ${typeof e}`,
+            );
+        }
+
+        logger.error(
+            `Error sending message. Error of unknown type? type = ${typeof e}. details = ${details}. textChannelID = ${channelID}`,
         );
     }
 }
