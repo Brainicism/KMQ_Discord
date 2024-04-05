@@ -422,8 +422,8 @@ export default class PlaylistCommand implements BaseCommand {
 
         if (!matchedPlaylist || matchedPlaylist.matchedSongs.length === 0) {
             if (!matchedPlaylist) {
-                logger.error(
-                    `matchPlaylist unexpectedly null. kmqPlaylistIdentifier: ${kmqPlaylistIdentifier}. forceplay = ${guildPreference.gameOptions.forcePlaySongID}`,
+                logger.warn(
+                    `matchPlaylist unexpectedly null. expected_kmqPlaylistIdentifier: ${kmqPlaylistIdentifier}. actual_kmqPlaylistIdentifier = ${guildPreference.getKmqPlaylistID()} forceplay = ${guildPreference.gameOptions.forcePlaySongID}`,
                 );
             }
 

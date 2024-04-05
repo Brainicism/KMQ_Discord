@@ -282,7 +282,7 @@ export default class SongSelector {
         ) {
             this.selectedSongs = await this.querySelectedSongs();
             if (messageContext) {
-                logger.error(
+                logger.warn(
                     `${getDebugLogHeader(messageContext)} | Returning null matchedPlaylist for either non-playlist ${!kmqPlaylistIdentifier} or forceplay is active ${this.guildPreference.gameOptions.forcePlaySongID}`,
                 );
             }
