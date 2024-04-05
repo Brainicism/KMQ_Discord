@@ -1827,21 +1827,51 @@ function interactionRejectionHandler(
         | Eris.ComponentInteraction
         | Eris.CommandInteraction
         | Eris.AutocompleteInteraction,
-    err: Error & { code: number },
+    err: any,
 ): void {
-    if (err.code === 10062) {
-        logger.warn(
-            `${getDebugLogHeader(
-                interaction,
-            )} | Interaction acknowledge (unknown interaction)`,
-        );
-    } else {
+    if (err instanceof DiscordRESTError || err instanceof DiscordHTTPError) {
+        if (err.code === 10062) {
+            logger.warn(
+                `${getDebugLogHeader(
+                    interaction,
+                )} | Interaction acknowledge (unknown interaction)`,
+            );
+            return;
+        }
+
         logger.error(
             `${getDebugLogHeader(
                 interaction,
-            )} | Interaction acknowledge (failure message) failed. err.code = ${
-                err.code
-            } err = ${JSON.stringify(err)}`,
+            )} | Unknown Discord error acknowledging interaction. code = ${err.code}. name = ${err.name} message = ${err.message}. stack = ${err.stack}`,
+        );
+    } else if (err instanceof Error) {
+        logger.error(
+            `${getDebugLogHeader(
+                interaction,
+            )} | Unknown generic error acknowledging interaction. name: ${err.name}. message: ${err.message}. stack: ${err.stack}`,
+        );
+    } else {
+        let details = "";
+        // pray that it has a toString()
+        if (err.toString) {
+            details += err.toString();
+        }
+
+        // maybe we can stringify it too
+        try {
+            details += JSON.stringify(err);
+        } catch (e) {
+            logger.warn(
+                `${getDebugLogHeader(
+                    interaction,
+                )} | Couldn't stringify error of unknown type in interactionRejectionHandler: ${typeof err}`,
+            );
+        }
+
+        logger.error(
+            `${getDebugLogHeader(
+                interaction,
+            )} | Error acknowledging interaction. Error of unknown type? type = ${typeof err}. details = ${details}`,
         );
     }
 }
