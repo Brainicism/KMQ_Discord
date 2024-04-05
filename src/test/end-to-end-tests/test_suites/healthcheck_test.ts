@@ -24,7 +24,6 @@ const HEALTH_CHECK_TEST_SUITE: TestSuite = {
         },
     ],
     cascadingFailures: true,
-    resetEachStage: true,
 };
 
 export default HEALTH_CHECK_TEST_SUITE;

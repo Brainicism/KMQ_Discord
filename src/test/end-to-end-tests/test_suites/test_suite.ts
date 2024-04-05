@@ -15,7 +15,6 @@ export default interface TestSuite {
         preCommandDelay?: number;
     }[];
     cascadingFailures: boolean;
-    resetEachStage: boolean;
 }
 
 export enum KmqResponseType {
