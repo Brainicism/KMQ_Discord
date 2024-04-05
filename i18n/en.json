@@ -1559,6 +1559,7 @@
             "description": "The new game owner is {{newGameOwner}}. They are in charge of {{forcehintCommand}} and {{forceskipCommand}}.",
             "title": "Game Owner Changed"
         },
+        "guessRate": "Guess Rate",
         "inGame": {
             "aliases": "Aliases",
             "bonusArtistRound": "BONUS ARTIST ROUND",
