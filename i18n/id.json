@@ -1559,6 +1559,7 @@
             "description": "Pemilik permainan baru adalah {{newGameOwner}}. Mereka bertanggung jawab atas {{forcehintCommand}} dan {{forceskipCommand}}.",
             "title": "Pemilik Permainan Berubah"
         },
+        "guessRate": "Rate Tebakan",
         "inGame": {
             "aliases": "Alias",
             "bonusArtistRound": "RONDE ARTIS BONUS",
