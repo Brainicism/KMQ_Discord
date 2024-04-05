@@ -1559,6 +1559,7 @@
             "description": "El nuevo dueño del juego es {{newGameOwner}}. Ellos están a cargo de {{forcehintCommand}} y {{forceskipCommand}}.",
             "title": "Dueño del juego cambiado"
         },
+        "guessRate": "Porcentaje de acierto",
         "inGame": {
             "aliases": "Alias",
             "bonusArtistRound": "RONDA DE ARTISTA BONUS",

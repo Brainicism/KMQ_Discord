@@ -1559,6 +1559,7 @@
             "description": "새 게임 소유자는 {{newGameOwner}}입니다. {{forcehintCommand}} 및 {{forceskipCommand}}을(를) 담당합니다.",
             "title": "게임 소유자 변경"
         },
+        "guessRate": "추측 비율",
         "inGame": {
             "aliases": "별칭",
             "bonusArtistRound": "보너스 아티스트 라운드",

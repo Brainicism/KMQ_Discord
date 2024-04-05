@@ -1559,6 +1559,7 @@
             "description": "De nieuwe eigenaar van het spel is {{newGameOwner}}. Zij zijn verantwoordelijk voor {{forcehintCommand}} en {{forceskipCommand}}.",
             "title": "Eigenaar van het spel gewijzigd"
         },
+        "guessRate": "Raadspercentage",
         "inGame": {
             "aliases": "Aliassen",
             "bonusArtistRound": "BONUSRONDE ARTIEST",
