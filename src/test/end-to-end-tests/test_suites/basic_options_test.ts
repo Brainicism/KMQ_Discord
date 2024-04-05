@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { KmqResponseType } from "./test_suite";
 import type ParsedGameOptionValues from "../parsed_game_options_value";
 import type TestSuite from "./test_suite";
@@ -63,6 +64,15 @@ const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
                     "2012 - 2014" &&
                 parsedGameOptions!["cutoff set earliest"]!.updated,
 
+            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
+        },
+        {
+            command: ",reset",
+            responseValidator: (
+                title: string,
+                description: string,
+                parsedGameOptions?: ParsedGameOptionValues,
+            ) => title === "Options",
             expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
         {
@@ -260,7 +270,6 @@ const BASIC_OPTIONS_TEST_SUITE: TestSuite = {
             expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
         },
     ],
-    resetEachStage: true,
 };
 
 export default BASIC_OPTIONS_TEST_SUITE;

@@ -11,16 +11,6 @@ const PLAY_TEST_SUITE: TestSuite = {
     cascadingFailures: true,
     tests: [
         {
-            command: ",reset",
-            responseValidator: (
-                title: string,
-                description: string,
-                parsedGameOptions?: ParsedGameOptionValues,
-                client?: Eris.Client,
-            ) => title === "Options",
-            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
-        },
-        {
             command: ",limit 6",
             responseValidator: (
                 title: string,
@@ -229,7 +219,6 @@ const PLAY_TEST_SUITE: TestSuite = {
             expectedResponseType: KmqResponseType.NONE,
         },
     ],
-    resetEachStage: false,
 };
 
 export default PLAY_TEST_SUITE;
