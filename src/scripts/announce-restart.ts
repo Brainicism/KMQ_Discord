@@ -186,7 +186,9 @@ function serverShutdown(
                     const basicOptionsTestCmd = `docker exec ${appName} sh -c '. ./.env && npx ts-node --swc src/test/end-to-end-tests/test-runner-bot.ts --test-suite=BASIC_OPTIONS --debug --stage-delay=5'`;
                     const gameplayTestCmd = `docker exec ${appName} sh -c '. ./.env && npx ts-node --swc src/test/end-to-end-tests/test-runner-bot.ts --test-suite=PLAY --debug --stage-delay=5'`;
                     if (!skipTests) {
-                        cp.exec(`${basicOptionsTestCmd} && ${gameplayTestCmd}`);
+                        cp.exec(
+                            `${basicOptionsTestCmd} && ${gameplayTestCmd}`,
+                        ).unref();
                     }
                 },
                 restartMinutes * 1000 * 60,
