@@ -54,7 +54,7 @@ import dbContext from "../database_context";
 import fs from "fs";
 import i18n from "./localization_manager";
 import type { EmbedGenerator, GuildTextableMessage } from "../types";
-import type { GuildTextableChannel, Message, TextChannel } from "eris";
+import type { GuildTextableChannel } from "eris";
 import type AutocompleteEntry from "../interfaces/autocomplete_entry";
 import type BookmarkedSong from "../interfaces/bookmarked_song";
 import type EmbedPayload from "../interfaces/embed_payload";
@@ -476,19 +476,13 @@ export async function sendMessage(
 ): Promise<Eris.Message | null> {
     // test bot request, reply with same run ID
     if (!interaction && messageContent.messageReference) {
-        let message: Message<TextChannel> | undefined;
+        const testRunnerChannel = State.client.getChannel(textChannelID!) as
+            | Eris.TextChannel
+            | undefined;
 
-        try {
-            message = await (
-                State.client.getChannel(textChannelID!) as
-                    | Eris.TextChannel
-                    | undefined
-            )?.getMessage(messageContent.messageReference.messageID);
-        } catch (e) {
-            logger.warn(
-                `Error fetching channel ${textChannelID} for test runner response`,
-            );
-        }
+        const message = testRunnerChannel?.messages.get(
+            messageContent.messageReference.messageID,
+        );
 
         if (
             message &&
