@@ -423,7 +423,11 @@ async function sendMessageExceptionHandler(
             }
         }
     } else if (e instanceof Error) {
-        if (e.message.includes("Request timed out")) {
+        if (
+            ["Request timed out", "connect ETIMEDOUT"].some((errString) =>
+                e.message.includes(errString),
+            )
+        ) {
             logger.warn(
                 `Error sending message. Request timed out. textChannelID = ${channelID}. Name: ${e.name}. Reason: ${e.message}. Stack: ${e.stack}`,
             );
@@ -1838,6 +1842,13 @@ function interactionRejectionHandler(
                 `${getDebugLogHeader(
                     interaction,
                 )} | Interaction acknowledge (unknown interaction)`,
+            );
+            return;
+        } else if (err.code === 40060) {
+            logger.warn(
+                `${getDebugLogHeader(
+                    interaction,
+                )} | Interaction already acknowledged`,
             );
             return;
         }
