@@ -50,6 +50,7 @@ import voiceChannelJoinHandler from "./events/client/voiceChannelJoin";
 import voiceChannelLeaveHandler from "./events/client/voiceChannelLeave";
 import voiceChannelSwitchHandler from "./events/client/voiceChannelSwitch";
 import warnHandler from "./events/client/warn";
+import type * as Eris from "eris";
 import type { Setup } from "eris-fleet/dist/clusters/BaseClusterWorker";
 import type KmqClient from "./kmq_client";
 
@@ -389,6 +390,15 @@ export default class BotWorker extends BaseClusterWorker {
         ) {
             logger.info(`${this.logHeader()} | Dry run finished successfully.`);
             State.ipc.totalShutdown();
+        }
+
+        // test runner needs to fetch messages from cache
+        const testRunnerChannel = State.client.getChannel(
+            process.env.END_TO_END_TEST_BOT_CHANNEL!,
+        ) as Eris.TextChannel | undefined;
+
+        if (testRunnerChannel) {
+            testRunnerChannel.messages.limit = 10;
         }
     }
 }
