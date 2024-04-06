@@ -1844,6 +1844,13 @@ function interactionRejectionHandler(
                 )} | Interaction acknowledge (unknown interaction)`,
             );
             return;
+        } else if (err.code === 40060) {
+            logger.warn(
+                `${getDebugLogHeader(
+                    interaction,
+                )} | Interaction already acknowledged`,
+            );
+            return;
         }
 
         logger.error(
