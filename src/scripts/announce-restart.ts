@@ -183,14 +183,12 @@ function serverShutdown(
                         "Running post-upgrade test suite: BASIC_OPTIONS...",
                     );
 
+                    const basicOptionsTestCmd = `docker exec ${appName} sh -c '. ./.env && npx ts-node --swc src/test/end-to-end-tests/test-runner-bot.ts --test-suite=BASIC_OPTIONS --debug --stage-delay=5'`;
+                    const gameplayTestCmd = `docker exec ${appName} sh -c '. ./.env && npx ts-node --swc src/test/end-to-end-tests/test-runner-bot.ts --test-suite=PLAY --debug --stage-delay=5'`;
                     if (!skipTests) {
-                        cp.execSync(
-                            `docker exec ${appName} sh -c '. ./.env && npx ts-node --swc src/test/end-to-end-tests/test-runner-bot.ts --test-suite=BASIC_OPTIONS --debug --stage-delay=5'`,
-                        );
-                        console.log("Running post-upgrade test suite: PLAY...");
-                        cp.execSync(
-                            `docker exec ${appName} sh -c '. ./.env && npx ts-node --swc src/test/end-to-end-tests/test-runner-bot.ts --test-suite=PLAY --debug --stage-delay=5'`,
-                        );
+                        cp.exec(
+                            `${basicOptionsTestCmd} && ${gameplayTestCmd}`,
+                        ).unref();
                     }
                 },
                 restartMinutes * 1000 * 60,

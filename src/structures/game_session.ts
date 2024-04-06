@@ -1498,6 +1498,8 @@ export default class GameSession extends Session {
         if (hintRequested) {
             songStats.hintCount++;
         }
+
+        songStats.roundsPlayed++;
     }
 
     /**
@@ -1516,8 +1518,6 @@ export default class GameSession extends Session {
                     .values({
                         vlink,
                         correct_guesses: 0,
-                        correct_guesses_legacy: 0,
-                        rounds_played_legacy: 0,
                         rounds_played: 0,
                         skip_count: 0,
                         hint_count: 0,

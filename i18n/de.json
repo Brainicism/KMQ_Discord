@@ -1571,6 +1571,7 @@
             "description": "Der neue Spielbesitzer ist {{newGameOwner}}. Er ist verantwortlich für {{forcehintCommand}} und {{forceskipCommand}}.",
             "title": "Spielbesitzer gewechselt"
         },
+        "guessRate": "Schätzrate",
         "inGame": {
             "aliases": "Aliase",
             "bonusArtistRound": "BONUS-KÜNSTLER-RUNDE",

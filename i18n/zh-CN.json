@@ -1571,6 +1571,7 @@
             "description": "新的游戏所有者是 {{newGameOwner}}。他们负责 {{forcehintCommand}} 和 {{forceskipCommand}}。",
             "title": "游戏所有者已更改"
         },
+        "guessRate": "猜测率",
         "inGame": {
             "aliases": "别名",
             "bonusArtistRound": "额外艺术家回合",

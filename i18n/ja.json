@@ -1571,6 +1571,7 @@
             "description": "新しいゲームオーナーは{{newGameOwner}}です。彼らは{{forcehintCommand}}と{{forceskipCommand}}を担当しています。",
             "title": "ゲームオーナーが変更されました"
         },
+        "guessRate": "推定率",
         "inGame": {
             "aliases": "エイリアス",
             "bonusArtistRound": "ボーナスアーティストラウンド",

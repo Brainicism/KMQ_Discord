@@ -228,10 +228,8 @@ export interface PremiumUsers {
 
 export interface SongMetadata {
     correct_guesses: Generated<number>;
-    correct_guesses_legacy: number;
     hint_count: Generated<number>;
     rounds_played: Generated<number>;
-    rounds_played_legacy: number;
     skip_count: Generated<number>;
     time_played_ms: Generated<number>;
     time_to_guess_ms: Generated<number>;

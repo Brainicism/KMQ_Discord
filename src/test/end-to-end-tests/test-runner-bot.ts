@@ -449,27 +449,21 @@ async function ensureVoiceConnection(): Promise<void> {
             break;
         default:
             log(`Test suite not found, name = ${selectedTestSuite}`);
-            TEST_SUITE = BASIC_OPTIONS_TEST_SUITE;
-            break;
+            process.exit(1);
     }
 
-    if (TEST_SUITE.resetEachStage) {
-        const resetStep = {
-            command: ",reset",
-            responseValidator: (
-                title: string,
-                description: string,
-                parsedGameOptions?: ParsedGameOptionValues,
-                client?: Eris.Client,
-            ) => title === "Options",
-            expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
-        };
+    const resetStep = {
+        command: ",reset",
+        responseValidator: (
+            title: string,
+            description: string,
+            parsedGameOptions?: ParsedGameOptionValues,
+            client?: Eris.Client,
+        ) => title === "Options",
+        expectedResponseType: KmqResponseType.GAME_OPTIONS_RESPONSE,
+    };
 
-        // put a reset step before each step
-        TEST_SUITE.tests = TEST_SUITE.tests
-            .map((item) => [resetStep, item])
-            .flat();
-    }
+    TEST_SUITE.tests.unshift(resetStep);
 
     if (!process.env.BOT_CLIENT_ID) {
         logError("BOT_CLIENT_ID not specified");

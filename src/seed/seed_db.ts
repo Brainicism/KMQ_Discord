@@ -739,7 +739,7 @@ async function reloadAutocompleteData(): Promise<void> {
             const currentDate = new Date();
             if (songsRemoved.length) {
                 logger.info(`${songsRemoved.length} songs removed.`);
-                const description = `**${songsRemoved.length} songs removed**:\n${songsRemoved.join("\n")}`;
+                const description = `**${songsRemoved.length} songs removed**:\n${songsRemoved.map((x) => `- ${x}`).join("\n")}`;
 
                 await sendInfoWebhook(
                     process.env.SONG_UPDATES_WEBHOOK_URL!,
@@ -758,7 +758,7 @@ async function reloadAutocompleteData(): Promise<void> {
                     await sendDebugAlertFileWebhook(
                         `${discordDateFormat(currentDate, "f")}\nFull List:`,
                         process.env.SONG_UPDATES_WEBHOOK_URL!,
-                        `${songsRemoved.length} songs removed:\n${songsRemoved.map((x) => `- ${x}`).join("\n")}`,
+                        description,
                         "removed_songs.txt",
                     );
                 }
@@ -785,7 +785,7 @@ async function reloadAutocompleteData(): Promise<void> {
                     await sendDebugAlertFileWebhook(
                         `${discordDateFormat(currentDate, "f")}\nFull List:`,
                         process.env.SONG_UPDATES_WEBHOOK_URL!,
-                        `${songsAdded.length} songs added:\n${songsAdded.join("\n")}`,
+                        description,
                         "added_songs.txt",
                     );
                 }

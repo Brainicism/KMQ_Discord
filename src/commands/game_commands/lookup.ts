@@ -614,6 +614,24 @@ export default class LookupCommand implements BaseCommand {
             );
         }
 
+        const songMetadata = await dbContext.kmq
+            .selectFrom("song_metadata")
+            .select(["correct_guesses", "rounds_played"])
+            .where("vlink", "=", videoID)
+            .executeTakeFirst();
+
+        if (songMetadata && songMetadata.rounds_played > 0) {
+            const guessRate = (
+                (100.0 * songMetadata.correct_guesses) /
+                songMetadata.rounds_played
+            ).toFixed(2);
+
+            fields.push({
+                name: i18n.translate(guildID, "misc.guessRate"),
+                value: `${guessRate}% (${songMetadata.correct_guesses}/${songMetadata.rounds_played})`,
+            });
+        }
+
         const messageContext = new MessageContext(
             messageOrInteraction.channel.id,
             new KmqMember(messageOrInteraction.member!.id),

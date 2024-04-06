@@ -1571,6 +1571,7 @@
             "description": "Le nouveau propriétaire du jeu est {{newGameOwner}}. Ils sont responsables de {{forcehintCommand}} et {{forceskipCommand}}.",
             "title": "Propriétaire du jeu changé"
         },
+        "guessRate": "Taux de supposition",
         "inGame": {
             "aliases": "Alias",
             "bonusArtistRound": "TOUR ARTISTE BONUS",

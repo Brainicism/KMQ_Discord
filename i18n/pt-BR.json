@@ -1571,6 +1571,7 @@
             "description": "O novo dono do jogo é {{newGameOwner}}. Ele é o responsável pelo {{forcehintCommand}} e {{forceskipCommand}}.",
             "title": "Dono do Jogo Alterado"
         },
+        "guessRate": "Taxa de Adivinhação",
         "inGame": {
             "aliases": "Apelidos",
             "bonusArtistRound": "RODADA DE ARTISTA BÔNUS",

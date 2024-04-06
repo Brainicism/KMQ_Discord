@@ -1571,6 +1571,7 @@
             "description": "Новый владелец игры – {{newGameOwner}}. Он отвечает за {{forcehintCommand}} и {{forceskipCommand}}.",
             "title": "Владелец игры изменен"
         },
+        "guessRate": "Частота Угадывания",
         "inGame": {
             "aliases": "Псевдонимы",
             "bonusArtistRound": "БОНУСНЫЙ РАУНД С АРТИСТОМ",

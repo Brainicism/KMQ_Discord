@@ -1571,6 +1571,7 @@
             "description": "नए गेम के मालिक {{newGameOwner}} हैं। वे {{forcehintCommand}} और {{forceskipCommand}} के प्रभारी हैं।",
             "title": "गेम स्वामी बदल गया"
         },
+        "guessRate": "अनुमान दर",
         "inGame": {
             "aliases": "उपनाम",
             "bonusArtistRound": "बोनस कलाकार राउंड",

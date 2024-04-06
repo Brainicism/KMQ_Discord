@@ -12,8 +12,10 @@ import {
     setDifference,
     shufflePartitionedArray,
 } from "../helpers/utils";
+import { getDebugLogHeader } from "../helpers/discord_utils";
 import ArtistType from "../enums/option_types/artist_type";
 import EnvVariableManager from "../env_variable_manager";
+import GameOption from "../enums/game_option_name";
 import GameRound from "./game_round";
 import LanguageType from "../enums/option_types/language_type";
 import OstPreference from "../enums/option_types/ost_preference";
@@ -279,6 +281,12 @@ export default class SongSelector {
             this.guildPreference.gameOptions.forcePlaySongID
         ) {
             this.selectedSongs = await this.querySelectedSongs();
+            if (messageContext) {
+                logger.warn(
+                    `${getDebugLogHeader(messageContext)} | Returning null matchedPlaylist for either non-playlist ${!kmqPlaylistIdentifier} or forceplay is active ${this.guildPreference.gameOptions.forcePlaySongID}`,
+                );
+            }
+
             return null;
         }
 
@@ -288,6 +296,17 @@ export default class SongSelector {
             messageContext,
             interaction!,
         );
+
+        if (
+            playlist.unmatchedSongs.length === 0 &&
+            playlist.matchedSongs.length === 0
+        ) {
+            logger.warn(
+                `Playlist ${kmqPlaylistIdentifier} unexpectedly has 0 matched/unmatched songs in reloadSongs, resetting playlist. playlist = ${JSON.stringify(playlist)}`,
+            );
+
+            await this.guildPreference.reset(GameOption.PLAYLIST_ID);
+        }
 
         this.selectedSongs = playlist as SelectedSongs;
         return playlist;
