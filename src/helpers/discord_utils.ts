@@ -54,7 +54,7 @@ import dbContext from "../database_context";
 import fs from "fs";
 import i18n from "./localization_manager";
 import type { EmbedGenerator, GuildTextableMessage } from "../types";
-import type { GuildTextableChannel, Message, TextChannel } from "eris";
+import type { GuildTextableChannel } from "eris";
 import type AutocompleteEntry from "../interfaces/autocomplete_entry";
 import type BookmarkedSong from "../interfaces/bookmarked_song";
 import type EmbedPayload from "../interfaces/embed_payload";
