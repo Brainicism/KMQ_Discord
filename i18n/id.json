@@ -1658,6 +1658,7 @@
             "debugChannel": "Anda tidak dapat melakukan itu di saluran ini.",
             "debugServer": "Anda tidak dapat melakukan itu di server ini.",
             "differentVC": "Anda harus berada di saluran suara yang sama dengan bot untuk menggunakan perintah ini.",
+            "notClipMode": "Anda tidak bisa melakukan itu saat dalam mode klip.",
             "notGameSession": "Anda tidak dapat melakukan itu saat dalam sesi permainan.",
             "notHidden": "Kamu tidak bisa melakukan itu selama babak tersembunyi.",
             "notListeningSession": "Anda tidak dapat melakukan itu saat dalam sesi mendengarkan.",

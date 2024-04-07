@@ -92,7 +92,7 @@ export default class GameSession extends Session {
     /** The Scoreboard object keeping track of players and scoring */
     public readonly scoreboard: Scoreboard;
 
-    /** How long a clip should be played for in the clip game mode */
+    /** How long a clip should be played for in the clip game mode, in seconds */
     public readonly clipDurationLength: number | null;
 
     /** The current GameRound */

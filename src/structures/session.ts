@@ -741,9 +741,9 @@ export default abstract class Session {
         logger.info(
             `${getDebugLogHeader(
                 messageContext,
-            )} | Playing song in voice connection. seek = ${seekType}. song = ${this.getDebugSongDetails()}. guess mode = ${
+            )} | Playing song in voice connection. seek = ${seekType}. song = ${this.getDebugSongDetails(round)}. guess mode = ${
                 this.guildPreference.gameOptions.guessModeType
-            }`,
+            }. clip mode = ${isClipMode}. clip action = ${clipAction}.`,
         );
         this.connection.removeAllListeners();
         this.connection.stopPlaying();
@@ -865,7 +865,7 @@ export default abstract class Session {
             logger.error(
                 `${getDebugLogHeader(
                     messageContext,
-                )} | Unknown error with stream dispatcher. song = ${this.getDebugSongDetails()}. err = ${err}`,
+                )} | Unknown error with stream dispatcher. song = ${this.getDebugSongDetails(round)}. err = ${err}`,
             );
             await this.errorRestartRound();
         });
@@ -937,11 +937,11 @@ export default abstract class Session {
     }
 
     /**
+     * @param round - The round to fetch song details from
      * @returns Debug string containing basic information about the Round
      */
-    private getDebugSongDetails(): string {
-        if (!this.round) return "No active game round";
-        return `${this.round.song.songName}:${this.round.song.artistName}:${this.round.song.youtubeLink}`;
+    private getDebugSongDetails(round: Round): string {
+        return `${round.song.songName}:${round.song.artistName}:${round.song.youtubeLink}`;
     }
 
     /**
@@ -1041,7 +1041,6 @@ export default abstract class Session {
             }
 
             if (
-                this.guildPreference.isMultipleChoiceMode() &&
                 round.interactionMessage
             ) {
                 embed.thumbnailUrl = thumbnailUrl;

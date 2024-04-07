@@ -33,6 +33,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
         { checkFn: CommandPrechecks.competitionPrecheck },
         { checkFn: CommandPrechecks.notListeningPrecheck },
         { checkFn: CommandPrechecks.timerHiddenPrecheck },
+        { checkFn: CommandPrechecks.notClipModePrecheck },
     ];
 
     validations = {

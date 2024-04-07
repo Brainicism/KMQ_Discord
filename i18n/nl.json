@@ -1658,6 +1658,7 @@
             "debugChannel": "Je kunt dat niet doen in dit kanaal.",
             "debugServer": "Je kunt dat niet doen op deze server.",
             "differentVC": "Je moet in hetzelfde spraakkanaal zijn als de bot om deze opdracht te gebruiken.",
+            "notClipMode": "Je kunt dat niet doen terwijl je in clipmodus bent.",
             "notGameSession": "Je kunt dat niet doen tijdens een spelsessie.",
             "notHidden": "Dat kan je niet doen tijdens een verborgen ronde.",
             "notListeningSession": "Je kunt dat niet doen tijdens een luistersessie.",

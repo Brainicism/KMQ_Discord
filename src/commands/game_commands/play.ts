@@ -81,7 +81,7 @@ export default class PlayCommand implements BaseCommand {
             {
                 name: "gameType",
                 type: "enum" as const,
-                enums: Object.values(GameType),
+                enums: [...Object.values(GameType), AnswerType.HIDDEN],
             },
             {
                 name: "gameArg",
@@ -1260,6 +1260,12 @@ export default class PlayCommand implements BaseCommand {
         if (gameSession.isHiddenMode()) {
             if (!guildPreference.isGuessTimeoutSet()) {
                 await guildPreference.setGuessTimeout(HIDDEN_DEFAULT_TIMER);
+            }
+        }
+
+        if (gameType === GameType.CLIP) {
+            if (guildPreference.isGuessTimeoutSet()) {
+                await guildPreference.setGuessTimeout(null);
             }
         }
 

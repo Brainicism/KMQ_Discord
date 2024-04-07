@@ -1658,6 +1658,7 @@
             "debugChannel": "Vous ne pouvez pas faire cela dans ce canal.",
             "debugServer": "Vous ne pouvez pas faire cela dans ce serveur.",
             "differentVC": "Vous devez être dans le même canal vocal que le bot pour utiliser cette commande.",
+            "notClipMode": "Vous ne pouvez pas faire cela en mode clip.",
             "notGameSession": "Vous ne pouvez pas faire cela pendant une session de jeu.",
             "notHidden": "Vous ne pouvez pas faire ça pendant une manche cachée",
             "notListeningSession": "Vous ne pouvez pas faire cela pendant une session d'écoute.",

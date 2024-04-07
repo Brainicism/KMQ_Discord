@@ -1658,6 +1658,7 @@
             "debugChannel": "您不能在此频道进行此操作。",
             "debugServer": "您不能在此服务器进行此操作。",
             "differentVC": "您必须与机器人在同一个语音频道中才能使用此命令。",
+            "notClipMode": "你在剪辑模式下不能这么做。",
             "notGameSession": "您不能在游戏会话中进行此操作。",
             "notHidden": "你在隐藏回合期间无法执行此操作。",
             "notListeningSession": "您不能在听歌会话中进行此操作。",
