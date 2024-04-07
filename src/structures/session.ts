@@ -252,8 +252,8 @@ export default abstract class Session {
         }
 
         // create a new round with randomly chosen song
-        this.round = this.prepareRound(randomSong);
-        const round = this.round;
+        const round = this.prepareRound(randomSong);
+        this.round = round;
 
         const voiceChannel = State.client.getChannel(
             this.voiceChannelID,
