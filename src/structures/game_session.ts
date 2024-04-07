@@ -262,6 +262,8 @@ export default class GameSession extends Session {
 
         await this.stopHiddenUpdateTimer();
 
+        await super.endRound(false, messageContext);
+
         try {
             await round.interactionMarkAnswers(correctGuessers.length, true);
         } catch (e) {
@@ -391,6 +393,7 @@ export default class GameSession extends Session {
             if (songStartDelay > 0 && !isError) {
                 const playSuccess = await this.playSong(
                     messageContext,
+                    round,
                     ClipAction.END_ROUND,
                 );
 
@@ -399,8 +402,6 @@ export default class GameSession extends Session {
                 }
             }
         }
-
-        await super.endRound(false, messageContext);
 
         if (gameFinishedDueToGameOptions) {
             await this.endSession("Game finished due to game options", false);
@@ -708,7 +709,7 @@ export default class GameSession extends Session {
         if (clipRound.isNewClipMajority()) {
             await round.interactionMarkAnswers(0, false);
             await this.sendStartRoundMessage(messageContext, clipRound, false);
-            await this.playSong(messageContext, ClipAction.NEW_CLIP);
+            await this.playSong(messageContext, round, ClipAction.NEW_CLIP);
             clipRound.reset();
         }
 

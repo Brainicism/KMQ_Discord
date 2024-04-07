@@ -1,7 +1,6 @@
 import * as uuid from "uuid";
 import {
     CLIP_MAX_REPLAY_COUNT,
-    CLIP_REPLAY_DELAY_MS,
     KmqImages,
     specialFfmpegArgs,
 } from "../constants";
@@ -18,14 +17,13 @@ import {
     tryCreateInteractionSuccessAcknowledgement,
     tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
+import { ensureVoiceConnection } from "../helpers/game_utils";
 import {
-    delay,
     friendlyFormattedNumber,
     getMention,
     truncatedString,
     underline,
 } from "../helpers/utils";
-import { ensureVoiceConnection } from "../helpers/game_utils";
 import { sql } from "kysely";
 import ClipAction from "../enums/clip_action";
 import EnvVariableManager from "../env_variable_manager";
@@ -255,6 +253,7 @@ export default abstract class Session {
 
         // create a new round with randomly chosen song
         this.round = this.prepareRound(randomSong);
+        const round = this.round;
 
         const voiceChannel = State.client.getChannel(
             this.voiceChannelID,
@@ -292,7 +291,10 @@ export default abstract class Session {
             return null;
         }
 
-        const voiceConnectionSuccess = await this.playSong(messageContext);
+        const voiceConnectionSuccess = await this.playSong(
+            messageContext,
+            round,
+        );
 
         return voiceConnectionSuccess ? this.round : null;
     }
@@ -635,16 +637,17 @@ export default abstract class Session {
     /**
      * Begin playing the Round's song in the VoiceChannel, listen on VoiceConnection events
      * @param messageContext - An object containing relevant parts of Eris.Message
+     * @param round - The round associated with the played song
      * @param clipAction - For clip mode, whether to replay same clip or get a new one -- null for normal game
      * @returns whether the song streaming began successfully
      */
     protected async playSong(
         messageContext: MessageContext,
+        round: Round,
         clipAction: ClipAction | null = null,
     ): Promise<boolean> {
         const isGodMode = EnvVariableManager.isGodMode();
-        const { round } = this;
-        if (round === null) {
+        if (round.finished && clipAction !== ClipAction.END_ROUND) {
             return false;
         }
 
@@ -704,11 +707,8 @@ export default abstract class Session {
                     seekLocation = songDuration * (0.6 * Math.random());
                     break;
                 case ClipAction.REPLAY:
-                    seekLocation = clipGameRound.seekLocation!;
-                    break;
                 case ClipAction.END_ROUND:
-                    seekLocation =
-                        clipGameRound.seekLocation! + this.clipDurationLength!;
+                    seekLocation = clipGameRound.seekLocation!;
                     break;
                 default:
                     // We enter here when the round is first started in clip mode
@@ -766,22 +766,29 @@ export default abstract class Session {
             }
 
             if (isClipMode) {
-                const clipDurationLength =
-                    clipAction !== ClipAction.END_ROUND
-                        ? this.clipDurationLength
-                        : this.guildPreference.getSongStartDelay() * 1000;
+                if (clipAction === ClipAction.END_ROUND) {
+                    encoderArgs.push(
+                        "-t",
+                        (
+                            this.guildPreference.getSongStartDelay() +
+                            this.clipDurationLength!
+                        ).toString(),
+                    );
+                } else {
+                    const delayMs = 250;
+                    const endPaddingMs = 250;
+                    encoderArgs.push(
+                        "-af",
+                        `adelay=delays=${delayMs}:all=1,apad=pad_dur=${endPaddingMs / 1000}`,
 
-                const delayMs = 1500;
-                const endPaddingMs = 250;
-                encoderArgs.push(
-                    "-af",
-                    `adelay=delays=${delayMs}:all=1,apad=pad_dur=${endPaddingMs / 1000}`,
-                );
-
-                encoderArgs.push(
-                    "-t",
-                    (clipDurationLength! + delayMs / 1000).toString(),
-                );
+                        "-t",
+                        (
+                            this.clipDurationLength! +
+                            delayMs / 1000 +
+                            endPaddingMs / 1000
+                        ).toString(),
+                    );
+                }
             }
 
             round.songStartedAt = Date.now();
@@ -805,24 +812,33 @@ export default abstract class Session {
             if (this.connection) {
                 this.connection.removeAllListeners("end");
                 this.connection.on("end", () => {});
-                logger.info(
-                    `${getDebugLogHeader(
-                        messageContext,
-                    )} | Song finished without being guessed.`,
-                );
+                if (clipAction !== ClipAction.END_ROUND) {
+                    logger.info(
+                        `${getDebugLogHeader(
+                            messageContext,
+                        )} | Song finished without being guessed.`,
+                    );
+                }
+            }
+
+            if (clipAction === ClipAction.END_ROUND) {
+                return;
             }
 
             this.stopGuessTimeout();
 
             if (this.isGameSession() && this.isClipMode()) {
                 const clipGameRound = round as ClipGameRound;
-                await delay(CLIP_REPLAY_DELAY_MS);
                 if (
                     !round.finished &&
                     clipGameRound.getReplayCount() < CLIP_MAX_REPLAY_COUNT
                 ) {
                     clipGameRound.incrementReplays();
-                    await this.playSong(messageContext, ClipAction.REPLAY);
+                    await this.playSong(
+                        messageContext,
+                        round,
+                        ClipAction.REPLAY,
+                    );
                     return;
                 }
             }
@@ -840,6 +856,10 @@ export default abstract class Session {
                 // replace listener with no-op to catch any exceptions thrown after this event
                 this.connection.removeAllListeners("error");
                 this.connection.on("error", () => {});
+            }
+
+            if (clipAction === ClipAction.END_ROUND) {
+                return;
             }
 
             logger.error(
