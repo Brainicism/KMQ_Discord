@@ -41,7 +41,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
         arguments: [
             {
                 name: "timer",
-                type: "number" as const,
+                type: "float" as const,
                 minValue: GuessTimeoutCommand.TIMER_MIN_VALUE,
                 maxValue: GuessTimeoutCommand.TIMER_MAX_VALUE,
             },

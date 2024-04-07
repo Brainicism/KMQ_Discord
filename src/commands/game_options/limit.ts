@@ -45,13 +45,13 @@ export default class LimitCommand implements BaseCommand {
         arguments: [
             {
                 name: "limit_1",
-                type: "number" as const,
+                type: "int" as const,
                 minValue: LimitCommand.LIMIT_START_MIN,
                 maxValue: LimitCommand.LIMIT_START_MAX,
             },
             {
                 name: "limit_2",
-                type: "number" as const,
+                type: "int" as const,
                 minValue: LimitCommand.LIMIT_END_MIN,
                 maxValue: LimitCommand.LIMIT_END_MAX,
             },

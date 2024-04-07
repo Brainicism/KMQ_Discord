@@ -85,7 +85,7 @@ export default class PlayCommand implements BaseCommand {
             },
             {
                 name: "gameArg",
-                type: "number" as const,
+                type: "float" as const,
             },
         ],
     };
