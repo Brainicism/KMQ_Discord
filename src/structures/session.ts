@@ -1,6 +1,9 @@
 import * as uuid from "uuid";
 import {
     CLIP_MAX_REPLAY_COUNT,
+    CLIP_PADDING_BEGINNING,
+    CLIP_PADDING_END,
+    CLIP_VC_END_TIMEOUT_MS,
     KmqImages,
     specialFfmpegArgs,
 } from "../constants";
@@ -775,17 +778,15 @@ export default abstract class Session {
                         ).toString(),
                     );
                 } else {
-                    const delayMs = 250;
-                    const endPaddingMs = 250;
                     encoderArgs.push(
                         "-af",
-                        `adelay=delays=${delayMs}:all=1,apad=pad_dur=${endPaddingMs / 1000}`,
+                        `adelay=delays=${CLIP_PADDING_BEGINNING}s:all=1,apad=pad_dur=${CLIP_PADDING_END}`,
 
                         "-t",
                         (
                             this.clipDurationLength! +
-                            delayMs / 1000 +
-                            endPaddingMs / 1000
+                            CLIP_PADDING_BEGINNING +
+                            CLIP_PADDING_END
                         ).toString(),
                     );
                 }
@@ -797,6 +798,9 @@ export default abstract class Session {
                 inputArgs,
                 encoderArgs,
                 opusPassthrough: specialType === null && !isClipMode,
+                voiceDataTimeout: isClipMode
+                    ? CLIP_VC_END_TIMEOUT_MS
+                    : undefined,
             });
         } catch (e) {
             logger.error(`Erroring playing on voice connection. err = ${e}`);
@@ -1040,9 +1044,7 @@ export default abstract class Session {
                 )} set typingtypos?`;
             }
 
-            if (
-                round.interactionMessage
-            ) {
+            if (round.interactionMessage) {
                 embed.thumbnailUrl = thumbnailUrl;
                 embed.footerText = footerText;
                 try {

@@ -34,6 +34,10 @@ import State from "../state";
 import dbContext from "../database_context";
 
 import {
+    CLIP_MAX_REPLAY_COUNT,
+    CLIP_PADDING_BEGINNING,
+    CLIP_PADDING_END,
+    CLIP_VC_END_TIMEOUT_MS,
     CUM_EXP_TABLE,
     ELIMINATION_DEFAULT_LIVES,
     EMBED_FIELDS_PER_PAGE,
@@ -1755,16 +1759,32 @@ export default class GameSession extends Session {
         description: string;
         thumbnailUrl: string;
     } {
+        let timestamp: number;
+        if (this.isClipMode()) {
+            timestamp = Math.ceil(
+                (round.songStartedAt! +
+                    (CLIP_MAX_REPLAY_COUNT + 1) *
+                        (this.clipDurationLength! +
+                            CLIP_PADDING_BEGINNING +
+                            CLIP_PADDING_END +
+                            CLIP_VC_END_TIMEOUT_MS / 1000) *
+                        1000) /
+                    1000,
+            );
+        } else {
+            timestamp = Math.floor(
+                (round.timerStartedAt +
+                    this.guildPreference.gameOptions.guessTimeout! * 1000) /
+                    1000,
+            );
+        }
+
         const hiddenTimerInfo = i18n.translate(
             this.guildID,
             "misc.inGame.hiddenTimerInfo",
             {
                 guessButton: clickableSlashCommand("guess"),
-                timestamp: `<t:${Math.floor(
-                    (round.timerStartedAt +
-                        this.guildPreference.gameOptions.guessTimeout! * 1000) /
-                        1000,
-                )}:R>`,
+                timestamp: `<t:${timestamp}:R>`,
             },
         );
 

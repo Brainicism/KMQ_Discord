@@ -170,6 +170,9 @@ export const CLIP_MIN_DURATION = 0.75;
 export const CLIP_DEFAULT_DURATION = 2;
 export const CLIP_MAX_DURATION = 15;
 export const CLIP_MAX_REPLAY_COUNT = 2;
+export const CLIP_PADDING_BEGINNING = 0.25;
+export const CLIP_PADDING_END = 0.25;
+export const CLIP_VC_END_TIMEOUT_MS = 250;
 
 export const enum GameOptionInternal {
     ADVANCED_SETTINGS = "advancedSettings",

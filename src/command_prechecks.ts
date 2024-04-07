@@ -439,7 +439,9 @@ export default class CommandPrechecks {
         return false;
     }
 
-    static async notClipModePrecheck(precheckArgs: PrecheckArgs): Promise<boolean> {
+    static async notClipModePrecheck(
+        precheckArgs: PrecheckArgs,
+    ): Promise<boolean> {
         if (
             !precheckArgs.session ||
             precheckArgs.session.isListeningSession() ||
