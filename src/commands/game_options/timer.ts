@@ -17,7 +17,7 @@ import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
-import type GameSession from "src/structures/game_session";
+import type GameSession from "../../structures/game_session";
 import type HelpDocumentation from "../../interfaces/help";
 
 const COMMAND_NAME = "timer";
