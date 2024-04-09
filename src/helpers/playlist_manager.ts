@@ -1000,7 +1000,6 @@ export default class PlaylistManager {
                 .orderBy("views", "desc");
 
             try {
-                const y = query.compile();
                 const results = await query.execute();
                 let result: QueriedSong | null = null;
                 if (results.length === 1) {

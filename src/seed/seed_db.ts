@@ -715,8 +715,9 @@ async function reloadAutocompleteData(): Promise<void> {
                 .orderBy("publishedon", "desc")
                 .execute();
 
-            const generateSongArtistIdentifier = (x: AvailableSongDeltaData) =>
-                `${x.song_name_en},${x.artist_name_en}`;
+            const generateSongArtistIdentifier = (
+                x: AvailableSongDeltaData,
+            ): string => `${x.song_name_en},${x.artist_name_en}`;
 
             const availableSongsAfterSet = new Set(
                 availableSongsAfter.map(
