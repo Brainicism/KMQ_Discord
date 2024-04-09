@@ -720,14 +720,12 @@ async function reloadAutocompleteData(): Promise<void> {
             ): string => `${x.song_name_en},${x.artist_name_en}`;
 
             const availableSongsAfterSet = new Set(
-                availableSongsAfter.map(
-                    (x) => `${generateSongArtistIdentifier(x)}`,
-                ),
+                availableSongsAfter.map((x) => generateSongArtistIdentifier(x)),
             );
 
             const availableSongsBeforeSet = new Set(
-                availableSongsBefore.map(
-                    (x) => `${generateSongArtistIdentifier(x)}`,
+                availableSongsBefore.map((x) =>
+                    generateSongArtistIdentifier(x),
                 ),
             );
 
@@ -757,7 +755,7 @@ async function reloadAutocompleteData(): Promise<void> {
                 const description = `**${songsRemoved.length} songs removed**:\n${songsRemoved
                     .map(
                         (x) =>
-                            `- '${x.song_name_en}' - ${x.artist_name_en}  (${standardDateFormat(x.publishedon)}) | ${x.link}`,
+                            `- '${x.song_name_en}' - ${x.artist_name_en} (${standardDateFormat(x.publishedon)}) | ${x.link}`,
                     )
                     .join("\n")}`;
 
@@ -789,7 +787,7 @@ async function reloadAutocompleteData(): Promise<void> {
                 const description = `**${songsAdded.length} songs added**:\n${songsAdded
                     .map(
                         (x) =>
-                            `- '${x.song_name_en}' - ${x.artist_name_en}  (${standardDateFormat(x.publishedon)}) | ${x.link}`,
+                            `- '${x.song_name_en}' - ${x.artist_name_en} (${standardDateFormat(x.publishedon)}) | ${x.link}`,
                     )
                     .join("\n")}`;
 
