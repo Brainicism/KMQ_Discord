@@ -697,7 +697,14 @@ async function reloadAutocompleteData(): Promise<void> {
                 await updateDaisukiSchemaTypings(db);
             }
 
-            const availableSongsAfter = await db.kmq
+            interface AvailableSongDeltaData {
+                song_name_en: string;
+                artist_name_en: string;
+                link: string;
+                publishedon: Date;
+            }
+
+            const availableSongsAfter: AvailableSongDeltaData[] = await db.kmq
                 .selectFrom("available_songs")
                 .select([
                     "song_name_en",
@@ -708,29 +715,36 @@ async function reloadAutocompleteData(): Promise<void> {
                 .orderBy("publishedon", "desc")
                 .execute();
 
+            const generateSongArtistIdentifier = (x: AvailableSongDeltaData) =>
+                `${x.song_name_en},${x.artist_name_en}`;
+
             const availableSongsAfterSet = new Set(
-                availableSongsAfter.map((x) => x.link),
+                availableSongsAfter.map(
+                    (x) => `${generateSongArtistIdentifier(x)}`,
+                ),
             );
 
             const availableSongsBeforeSet = new Set(
-                availableSongsBefore.map((x) => x.link),
+                availableSongsBefore.map(
+                    (x) => `${generateSongArtistIdentifier(x)}`,
+                ),
             );
 
             logger.info("Calculating songs removed...");
-            const songsRemoved = availableSongsBefore
-                .filter((before) => !availableSongsAfterSet.has(before.link))
-                .map(
-                    (x) =>
-                        `'${x.song_name_en}' - ${x.artist_name_en}  (${standardDateFormat(x.publishedon)}) | ${x.link}`,
-                );
+            const songsRemoved = availableSongsBefore.filter(
+                (before) =>
+                    !availableSongsAfterSet.has(
+                        generateSongArtistIdentifier(before),
+                    ),
+            );
 
             logger.info("Calculating songs added...");
-            const songsAdded = availableSongsAfter
-                .filter((after) => !availableSongsBeforeSet.has(after.link))
-                .map(
-                    (x) =>
-                        `'${x.song_name_en}' - ${x.artist_name_en}  (${standardDateFormat(x.publishedon)}) | ${x.link}`,
-                );
+            const songsAdded = availableSongsAfter.filter(
+                (after) =>
+                    !availableSongsBeforeSet.has(
+                        generateSongArtistIdentifier(after),
+                    ),
+            );
 
             logger.info(
                 `Songs changed: ${songsAdded.length + songsRemoved.length}...`,
@@ -739,7 +753,12 @@ async function reloadAutocompleteData(): Promise<void> {
             const currentDate = new Date();
             if (songsRemoved.length) {
                 logger.info(`${songsRemoved.length} songs removed.`);
-                const description = `**${songsRemoved.length} songs removed**:\n${songsRemoved.map((x) => `- ${x}`).join("\n")}`;
+                const description = `**${songsRemoved.length} songs removed**:\n${songsRemoved
+                    .map(
+                        (x) =>
+                            `- '${x.song_name_en}' - ${x.artist_name_en}  (${standardDateFormat(x.publishedon)}) | ${x.link}`,
+                    )
+                    .join("\n")}`;
 
                 await sendInfoWebhook(
                     process.env.SONG_UPDATES_WEBHOOK_URL!,
@@ -766,7 +785,12 @@ async function reloadAutocompleteData(): Promise<void> {
 
             if (songsAdded.length) {
                 logger.info(`${songsAdded.length} songs added.`);
-                const description = `**${songsAdded.length} songs added**:\n${songsAdded.map((x) => `- ${x}`).join("\n")}`;
+                const description = `**${songsAdded.length} songs added**:\n${songsAdded
+                    .map(
+                        (x) =>
+                            `- '${x.song_name_en}' - ${x.artist_name_en}  (${standardDateFormat(x.publishedon)}) | ${x.link}`,
+                    )
+                    .join("\n")}`;
 
                 await sendInfoWebhook(
                     process.env.SONG_UPDATES_WEBHOOK_URL!,
