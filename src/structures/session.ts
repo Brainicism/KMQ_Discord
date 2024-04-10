@@ -1,8 +1,7 @@
 import * as uuid from "uuid";
 import {
     CLIP_MAX_REPLAY_COUNT,
-    CLIP_PADDING_BEGINNING,
-    CLIP_PADDING_END,
+    CLIP_PADDING_BEGINNING_SECONDS,
     CLIP_VC_END_TIMEOUT_MS,
     KmqImages,
     specialFfmpegArgs,
@@ -780,13 +779,12 @@ export default abstract class Session {
                 } else {
                     encoderArgs.push(
                         "-af",
-                        `adelay=delays=${CLIP_PADDING_BEGINNING}s:all=1,apad=pad_dur=${CLIP_PADDING_END}`,
+                        `adelay=delays=${CLIP_PADDING_BEGINNING_SECONDS}s:all=1`,
 
                         "-t",
                         (
                             this.clipDurationLength! +
-                            CLIP_PADDING_BEGINNING +
-                            CLIP_PADDING_END
+                            CLIP_PADDING_BEGINNING_SECONDS
                         ).toString(),
                     );
                 }

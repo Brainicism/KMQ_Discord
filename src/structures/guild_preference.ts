@@ -811,7 +811,7 @@ export default class GuildPreference {
         ];
     }
 
-    /** @returns whether the goal option is set */
+    /** @returns whether the time before a song starts in seconds */
     getSongStartDelay(): number {
         return this.gameOptions.advancedSettings[
             AdvancedCommandActionName.SONG_START_DELAY

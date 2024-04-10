@@ -166,12 +166,11 @@ export const ELIMINATION_DEFAULT_LIVES = 10;
 export const ELIMINATION_MAX_LIVES = 10000;
 export const ELIMINATION_MIN_LIVES = 1;
 
-export const CLIP_MIN_DURATION = 0.75;
-export const CLIP_DEFAULT_DURATION = 2;
-export const CLIP_MAX_DURATION = 15;
+export const CLIP_MIN_DURATION = 0.25;
+export const CLIP_DEFAULT_DURATION = 1;
+export const CLIP_MAX_DURATION = 5;
 export const CLIP_MAX_REPLAY_COUNT = 2;
-export const CLIP_PADDING_BEGINNING = 0.25;
-export const CLIP_PADDING_END = 0.25;
+export const CLIP_PADDING_BEGINNING_SECONDS = 0.25;
 export const CLIP_VC_END_TIMEOUT_MS = 250;
 
 export const enum GameOptionInternal {
