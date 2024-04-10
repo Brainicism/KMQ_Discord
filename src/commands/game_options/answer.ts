@@ -296,7 +296,6 @@ export default class AnswerCommand implements BaseCommand {
             [{ option: GameOption.ANSWER_TYPE, reset }],
             false,
             undefined,
-            undefined,
             interaction,
         );
     }

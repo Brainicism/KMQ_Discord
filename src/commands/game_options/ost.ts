@@ -229,7 +229,6 @@ export default class OstCommand implements BaseCommand {
             [{ option: GameOption.OST_PREFERENCE, reset }],
             false,
             undefined,
-            undefined,
             interaction,
         );
     }

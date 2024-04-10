@@ -253,7 +253,6 @@ export default class GroupsCommand implements BaseCommand {
                 [{ option: GameOption.GROUPS, reset: true }],
                 false,
                 undefined,
-                undefined,
                 interaction,
             );
 

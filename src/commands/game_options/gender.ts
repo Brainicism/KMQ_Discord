@@ -243,7 +243,6 @@ export default class GenderCommand implements BaseCommand {
                 [{ option: GameOption.GENDER, reset: true }],
                 false,
                 undefined,
-                undefined,
                 interaction,
             );
 
@@ -330,7 +329,6 @@ export default class GenderCommand implements BaseCommand {
             guildPreference,
             [{ option: GameOption.GENDER, reset: false }],
             false,
-            undefined,
             undefined,
             interaction,
         );

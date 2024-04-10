@@ -268,7 +268,6 @@ export default class ArtistTypeCommand implements BaseCommand {
             [{ option: GameOption.ARTIST_TYPE, reset }],
             false,
             undefined,
-            undefined,
             interaction,
         );
     }

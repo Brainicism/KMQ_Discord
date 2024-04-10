@@ -652,7 +652,6 @@ export default class PresetCommand implements BaseCommand {
                 })),
                 true,
                 false,
-                undefined,
                 interaction,
             );
         } else {
