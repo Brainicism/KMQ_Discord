@@ -1853,6 +1853,19 @@ function interactionRejectionHandler(
             )} | Unknown Discord error acknowledging interaction. code = ${err.code}. name = ${err.name} message = ${err.message}. stack = ${err.stack}`,
         );
     } else if (err instanceof Error) {
+        if (
+            ["Request timed out"].some((errString) =>
+                err.message.includes(errString),
+            )
+        ) {
+            logger.warn(
+                `${getDebugLogHeader(
+                    interaction,
+                )} | Request timeout while acknowledging interaction. name: ${err.name}. message: ${err.message}. stack: ${err.stack}`,
+            );
+            return;
+        }
+
         logger.error(
             `${getDebugLogHeader(
                 interaction,
