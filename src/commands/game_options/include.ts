@@ -261,7 +261,6 @@ export default class IncludeCommand implements BaseCommand {
                 [{ option: GameOption.INCLUDE, reset: true }],
                 false,
                 undefined,
-                undefined,
                 interaction,
             );
 

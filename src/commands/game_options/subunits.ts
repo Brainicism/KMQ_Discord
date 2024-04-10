@@ -238,7 +238,6 @@ export default class SubunitsCommand implements BaseCommand {
             [{ option: GameOption.SUBUNIT_PREFERENCE, reset }],
             false,
             undefined,
-            undefined,
             interaction,
         );
     }

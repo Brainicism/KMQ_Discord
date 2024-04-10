@@ -222,7 +222,6 @@ export default class MultiGuessCommand implements BaseCommand {
             [{ option: GameOption.MULTIGUESS, reset }],
             false,
             undefined,
-            undefined,
             interaction,
         );
     }

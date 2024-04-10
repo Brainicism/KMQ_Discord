@@ -264,7 +264,6 @@ export default class SpecialCommand implements BaseCommand {
             [{ option: GameOption.SPECIAL_TYPE, reset }],
             false,
             undefined,
-            undefined,
             interaction,
         );
     }

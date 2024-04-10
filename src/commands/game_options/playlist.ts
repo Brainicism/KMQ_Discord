@@ -303,7 +303,6 @@ export default class PlaylistCommand implements BaseCommand {
                 [{ option: GameOption.PLAYLIST_ID, reset }],
                 false,
                 undefined,
-                undefined,
                 interaction,
             );
             return;
@@ -507,7 +506,6 @@ export default class PlaylistCommand implements BaseCommand {
                 [{ option: GameOption.PLAYLIST_ID, reset }],
                 false,
                 undefined,
-                undefined,
                 interaction,
             );
 
@@ -525,7 +523,6 @@ export default class PlaylistCommand implements BaseCommand {
                 guildPreference,
                 [{ option: GameOption.PLAYLIST_ID, reset }],
                 false,
-                undefined,
                 undefined,
                 interaction,
             );

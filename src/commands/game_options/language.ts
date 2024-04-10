@@ -218,7 +218,6 @@ export default class LanguageCommand implements BaseCommand {
             [{ option: GameOption.LANGUAGE_TYPE, reset }],
             false,
             undefined,
-            undefined,
             interaction,
         );
     }

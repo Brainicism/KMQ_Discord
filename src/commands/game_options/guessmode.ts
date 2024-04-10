@@ -235,7 +235,6 @@ export default class GuessModeCommand implements BaseCommand {
             [{ option: GameOption.GUESS_MODE_TYPE, reset }],
             false,
             undefined,
-            undefined,
             interaction,
         );
     }
