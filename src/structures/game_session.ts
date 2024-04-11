@@ -248,11 +248,19 @@ export default class GameSession extends Session {
         isError: boolean,
         messageContext: MessageContext,
     ): Promise<void> {
-        if (this.round === null) {
+        if (this.round === null || this.round.finished) {
             return;
         }
 
         const round = this.round;
+        this.round.finished = true;
+        await super.endRound(false, messageContext);
+
+        await delay(
+            this.multiguessDelayIsActive(this.guildPreference)
+                ? this.guildPreference.getMultiGuessDelay() * 1000
+                : 0,
+        );
 
         if (round.songStartedAt === null) {
             return;
@@ -262,8 +270,6 @@ export default class GameSession extends Session {
         const isCorrectGuess = correctGuessers.length > 0;
 
         await this.stopHiddenUpdateTimer();
-
-        await super.endRound(false, messageContext);
 
         try {
             await round.interactionMarkAnswers(correctGuessers.length || 0);
@@ -553,13 +559,6 @@ export default class GameSession extends Session {
                 );
                 return;
             }
-
-            round.finished = true;
-            await delay(
-                this.multiguessDelayIsActive(this.guildPreference)
-                    ? this.guildPreference.getMultiGuessDelay() * 1000
-                    : 0,
-            );
 
             // mark round as complete, so no more guesses can go through
             await this.endRound(false, messageContext);
