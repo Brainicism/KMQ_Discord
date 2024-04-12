@@ -248,19 +248,24 @@ export default class GameSession extends Session {
         isError: boolean,
         messageContext: MessageContext,
     ): Promise<void> {
-        if (this.round === null || this.round.finished) {
-            return;
-        }
-
-        const round = this.round;
-        this.round.finished = true;
-        await super.endRound(false, messageContext);
-
+        // wait and accept multiguess results
         await delay(
             this.multiguessDelayIsActive(this.guildPreference)
                 ? this.guildPreference.getMultiGuessDelay() * 1000
                 : 0,
         );
+
+        const round = this.round;
+
+        // ensure that only one invocation can proceed
+        if (round === null || round.finished) {
+            return;
+        }
+
+        round.finished = true;
+
+        // sets the round to null
+        await super.endRound(false, messageContext);
 
         if (round.songStartedAt === null) {
             return;
