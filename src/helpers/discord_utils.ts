@@ -1445,14 +1445,6 @@ export async function sendPaginationedEmbed(
 }
 
 /**
- * Disconnects the bot from the voice channel of the  message's originating guild
- * @param message - The Message object
- */
-export function disconnectVoiceConnection(message: GuildTextableMessage): void {
-    State.client.closeVoiceConnection(message.guildID);
-}
-
-/**
  * @param userID - the user's ID
  * @param guildID - the guild ID
  * @returns whether the message's author and the bot are in the same voice channel
