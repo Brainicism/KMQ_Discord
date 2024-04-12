@@ -39,6 +39,12 @@ export async function ensureVoiceConnection(
         selfDeaf: true,
     });
 
+    connection.on("error", (err) => {
+        logger.warn(
+            `Error receiving from voice connection WS. name = ${err.name} msg = ${err.message}. stack = ${err.stack}`,
+        );
+    });
+
     session.connection = connection;
 }
 
