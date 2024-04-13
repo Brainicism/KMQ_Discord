@@ -243,11 +243,20 @@ export default class GameSession extends Session {
      * Ends an active GameRound
      * @param isError - Whether the round ended due to an error
      * @param messageContext - An object containing relevant parts of Eris.Message
+     * @param gameRound - The round to end
      */
     async endRound(
         isError: boolean,
         messageContext: MessageContext,
+        gameRound?: GameRound,
     ): Promise<void> {
+        // if round ending due to correct song guess, ensure that we are operating on the provided
+        // game round to ensure we don't end the same round twice (since this.round is modified)
+        let round = gameRound ?? this.round;
+        if (!round) {
+            round = this.round;
+        }
+
         // wait and accept multiguess results
         await delay(
             this.multiguessDelayIsActive(this.guildPreference)
@@ -255,10 +264,8 @@ export default class GameSession extends Session {
                 : 0,
         );
 
-        const round = this.round;
-
         // ensure that only one invocation can proceed
-        if (round === null || round.finished) {
+        if (!round || round.finished) {
             return;
         }
 
@@ -394,6 +401,8 @@ export default class GameSession extends Session {
         } else if (this.gameType === GameType.SUDDEN_DEATH && !isCorrectGuess) {
             await this.endSession("Sudden death game ended", false);
         }
+
+        await this.startRound(messageContext);
     }
 
     /**
@@ -565,18 +574,15 @@ export default class GameSession extends Session {
                 return;
             }
 
-            // mark round as complete, so no more guesses can go through
-            await this.endRound(false, messageContext);
+            this.stopGuessTimeout();
             this.correctGuesses++;
+            // mark round as complete, so no more guesses can go through
+            await this.endRound(false, messageContext, round);
 
             // update game session's lastActive
             await this.lastActiveNow();
 
-            this.stopGuessTimeout();
-
             await this.incrementGuildSongGuessCount();
-
-            await this.startRound(messageContext);
         } else if (this.isMultipleChoiceMode() || this.isHiddenMode()) {
             // If hidden or multiple choice, everyone guessed and no one was right
             if (
