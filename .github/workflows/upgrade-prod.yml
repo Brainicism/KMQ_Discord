@@ -19,7 +19,7 @@ jobs:
         env:
             KMQ_DIR: /home/kmq/prod
         runs-on: ubuntu-latest
-        timeout-minutes: 10
+        timeout-minutes: 20
         steps:
             - name: Install SSH Keys
               run: |
@@ -29,3 +29,8 @@ jobs:
                   ssh-keyscan ${{ secrets.PROD_SSH_ADDRESS }} > ~/.ssh/known_hosts
             - name: Redeploy over SSH
               run: ssh ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_ADDRESS }} "source ~/.zshrc; ./.github/workflows/redeploy_prod.sh $KMQ_DIR ${{ inputs.image-name }}"
+           - name: Run basic options test
+              run: ssh ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_ADDRESS }} "docker exec kmq-prod sh -c '. ./.env && npx ts-node --swc src/test/end-to-end-tests/test-runner-bot.ts --test-suite=BASIC_OPTIONS --debug --stage-delay=5'"
+           - name: Run basic gameplay test
+              run: ssh ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_ADDRESS }} "docker exec kmq-prod sh -c '. ./.env && npx ts-node --swc src/test/end-to-end-tests/test-runner-bot.ts --test-suite=PLAY --debug --stage-delay=5'"
+          
