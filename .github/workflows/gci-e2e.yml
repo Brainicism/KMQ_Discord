@@ -108,6 +108,7 @@ jobs:
             - name: Run test runner on live instance (gameplay test)
               run: docker exec --env-file	./.env kmq-gci sh -c 'npx ts-node --swc src/test/end-to-end-tests/test-runner-bot.ts --test-suite=PLAY --debug; exit $?'
             - name: Check for errors
+              if: always()
               run: docker logs kmq-gci 2>&1 | grep -i "\[Error\]" && echo "Errors found in container logs." && exit 1 || echo "No errors found in container logs." && exit 0
             - name: Print logs
               if: always()
@@ -121,7 +122,7 @@ jobs:
                   docker ps
                   echo OLD_CONTAINER_ID=$(sudo docker ps -aqf "name=kmq-gci") > $GITHUB_OUTPUT
             - name: Begin upgrade
-              run: npx ts-node --swc src/scripts/announce-restart.ts --docker-image=ghcr.io/brainicism/kmq_discord:gci --timer=0 --provisioning-timeout=15 --skip-tests
+              run: npx ts-node --swc src/scripts/announce-restart.ts --docker-image=ghcr.io/brainicism/kmq_discord:gci --timer=0 --provisioning-timeout=15
             - name: Check post-upgrade KMQ healthiness
               run: while [[ "$(docker inspect --format='{{json .State.Health.Status}}' kmq-gci)" != "\"healthy\"" ]]; do sleep 1; done
             - name: Check old primary no longer exists
