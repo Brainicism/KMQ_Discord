@@ -330,6 +330,10 @@ async function evaluateStage(messageResponse?: {
 
     log(`STAGE ${CURRENT_STAGE.stage} | Validating stage`);
     const stageOutputValidator = testStage.responseValidator;
+    if (testStage.prevalidationDelay) {
+        await delay(testStage.prevalidationDelay);
+    }
+
     if (
         stageOutputValidator(
             messageResponse?.title!,

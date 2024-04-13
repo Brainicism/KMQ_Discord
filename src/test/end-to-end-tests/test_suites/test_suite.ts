@@ -12,6 +12,7 @@ export default interface TestSuite {
             client?: Eris.Client,
         ) => boolean;
         expectedResponseType: KmqResponseType;
+        prevalidationDelay?: number;
         preCommandDelay?: number;
     }[];
     cascadingFailures: boolean;
