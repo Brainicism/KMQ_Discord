@@ -162,7 +162,7 @@ function serverShutdown(
             await announceRestart(restartMinutes, restartDate, restart);
 
             setTimeout(
-                async () => {
+                () => {
                     // drop old primary
                     console.log("Dropping old primary...");
                     cp.execSync(`docker rm -f ${oldAppName}`);
