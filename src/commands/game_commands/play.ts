@@ -1265,12 +1265,6 @@ export default class PlayCommand implements BaseCommand {
             }
         }
 
-        if (gameType === GameType.CLIP) {
-            if (guildPreference.isGuessTimeoutSet()) {
-                await guildPreference.setGuessTimeout(null);
-            }
-        }
-
         if (gameType !== GameType.TEAMS) {
             await PlayCommand.sendBeginGameSessionMessage(
                 textChannel.name,

@@ -449,7 +449,8 @@ export default abstract class Session {
     startGuessTimeout(messageContext: MessageContext): void {
         if (
             this.isListeningSession() ||
-            !this.guildPreference.isGuessTimeoutSet()
+            !this.guildPreference.isGuessTimeoutSet() ||
+            (this.isGameSession() && this.isClipMode())
         ) {
             return;
         }
