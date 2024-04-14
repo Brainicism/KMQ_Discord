@@ -1969,9 +1969,8 @@ export default class GameSession extends Session {
 
     private async sendClipMessage(
         messageContext: MessageContext,
-        round: GameRound,
     ): Promise<void> {
-        round.interactionMessage = await sendInfoMessage(messageContext, {
+        await sendInfoMessage(messageContext, {
             title: i18n.translate(
                 this.guildID,
                 "misc.interaction.guess.title",
@@ -2017,7 +2016,7 @@ export default class GameSession extends Session {
                 round as GameRound,
             );
         } else if (this.isClipMode() && !this.isMultipleChoiceMode()) {
-            await this.sendClipMessage(messageContext, round as GameRound);
+            await this.sendClipMessage(messageContext);
         }
 
         if (this.isMultipleChoiceMode()) {
