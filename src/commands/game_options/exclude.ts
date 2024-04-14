@@ -320,7 +320,6 @@ export default class ExcludeCommand implements BaseCommand {
                 [{ option: GameOption.EXCLUDE, reset: true }],
                 false,
                 undefined,
-                undefined,
                 interaction,
             );
 

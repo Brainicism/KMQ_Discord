@@ -278,7 +278,6 @@ export default class GoalCommand implements BaseCommand {
             [{ option: GameOption.GOAL, reset }],
             false,
             undefined,
-            undefined,
             interaction,
         );
     }

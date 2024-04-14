@@ -341,7 +341,6 @@ export default class CutoffCommand implements BaseCommand {
                 [{ option: GameOption.CUTOFF, reset: true }],
                 false,
                 undefined,
-                undefined,
                 interaction,
             );
 
@@ -393,7 +392,6 @@ export default class CutoffCommand implements BaseCommand {
             guildPreference,
             [{ option: GameOption.CUTOFF, reset: false }],
             false,
-            undefined,
             undefined,
             interaction,
         );

@@ -349,7 +349,6 @@ export default class DurationCommand implements BaseCommand {
                 [{ option: GameOption.DURATION, reset: true }],
                 false,
                 undefined,
-                undefined,
                 interaction,
             );
             return;
@@ -429,7 +428,6 @@ export default class DurationCommand implements BaseCommand {
             guildPreference,
             [{ option: GameOption.DURATION, reset: false }],
             false,
-            undefined,
             undefined,
             interaction,
         );

@@ -818,7 +818,6 @@ function getFormattedLimit(
  * @param updatedOptions - The GameOptions which were modified
  * @param preset - Specifies whether the GameOptions were modified by a preset
  * @param allReset - Specifies whether all GameOptions were reset
- * @param footerText - The footer text
  * @param interaction - The interaction
  *  @returns an embed of current game options
  */
@@ -829,14 +828,12 @@ export async function generateOptionsMessage(
     updatedOptions: { option: GameOption; reset: boolean }[],
     preset = false,
     allReset = false,
-    footerText?: string,
     interaction?: Eris.CommandInteraction,
 ): Promise<EmbedPayload | null> {
     if (guildPreference.gameOptions.forcePlaySongID) {
         return {
             title: "[DEBUG] Force Play Mode Active",
             description: `Force playing video ID: ${guildPreference.gameOptions.forcePlaySongID}`,
-            footerText,
             thumbnailUrl: KmqImages.READING_BOOK,
         };
     }
@@ -1178,6 +1175,7 @@ export async function generateOptionsMessage(
         },
     ];
 
+    let footerText: string = "";
     if (
         updatedOptions.length > 0 &&
         !allReset &&
@@ -1256,7 +1254,6 @@ export async function generateOptionsMessage(
  * @param updatedOptions - The GameOptions which were modified
  * @param preset - Specifies whether the GameOptions were modified by a preset
  * @param allReset - Specifies whether all GameOptions were reset
- * @param footerText - The footer text
  * @param interaction - The interaction
  */
 export async function sendOptionsMessage(
@@ -1266,7 +1263,6 @@ export async function sendOptionsMessage(
     updatedOptions: { option: GameOption; reset: boolean }[],
     preset = false,
     allReset = false,
-    footerText?: string,
     interaction?: Eris.CommandInteraction,
 ): Promise<void> {
     const optionsEmbed = await generateOptionsMessage(
@@ -1276,7 +1272,6 @@ export async function sendOptionsMessage(
         updatedOptions,
         preset,
         allReset,
-        footerText,
         interaction,
     );
 
@@ -1447,14 +1442,6 @@ export async function sendPaginationedEmbed(
             ? messageOrInteraction
             : undefined,
     );
-}
-
-/**
- * Disconnects the bot from the voice channel of the  message's originating guild
- * @param message - The Message object
- */
-export function disconnectVoiceConnection(message: GuildTextableMessage): void {
-    State.client.closeVoiceConnection(message.guildID);
 }
 
 /**
@@ -1853,6 +1840,19 @@ function interactionRejectionHandler(
             )} | Unknown Discord error acknowledging interaction. code = ${err.code}. name = ${err.name} message = ${err.message}. stack = ${err.stack}`,
         );
     } else if (err instanceof Error) {
+        if (
+            ["Request timed out"].some((errString) =>
+                err.message.includes(errString),
+            )
+        ) {
+            logger.warn(
+                `${getDebugLogHeader(
+                    interaction,
+                )} | Request timeout while acknowledging interaction. name: ${err.name}. message: ${err.message}. stack: ${err.stack}`,
+            );
+            return;
+        }
+
         logger.error(
             `${getDebugLogHeader(
                 interaction,

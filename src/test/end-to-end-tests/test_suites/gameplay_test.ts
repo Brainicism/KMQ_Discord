@@ -216,6 +216,7 @@ const PLAY_TEST_SUITE: TestSuite = {
                 console.log(`voiceMembers: ${voiceMembers.join(", ")}`);
                 return !voiceMembers.includes(process.env.BOT_CLIENT_ID!);
             },
+            prevalidationDelay: 3000,
             expectedResponseType: KmqResponseType.NONE,
         },
     ],

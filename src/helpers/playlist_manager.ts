@@ -15,6 +15,7 @@ import {
 } from "./utils";
 import { youtube_v3 } from "googleapis";
 import Axios from "axios";
+import EnvVariableManager from "../env_variable_manager";
 import GameRound from "../structures/game_round";
 import KmqConfiguration from "../kmq_configuration";
 import QueriedSong from "../structures/queried_song";
@@ -408,8 +409,16 @@ export default class PlaylistManager {
             // Match songs with vlinks
             matchedSongs = (
                 await dbContext.kmq
-                    .selectFrom("available_songs")
-                    .select(SongSelector.QueriedSongFields)
+                    .selectFrom(
+                        EnvVariableManager.isGodMode()
+                            ? "expected_available_songs"
+                            : "available_songs",
+                    )
+                    .select(
+                        EnvVariableManager.isGodMode()
+                            ? SongSelector.ExpectedQueriedSongFields
+                            : SongSelector.QueriedSongFields,
+                    )
                     .where((eb) =>
                         eb.or([
                             eb(
@@ -926,23 +935,31 @@ export default class PlaylistManager {
 
             const artistName = song.artists[0]!;
             const query = dbContext.kmq
-                .selectFrom("available_songs")
+                .selectFrom(
+                    EnvVariableManager.isGodMode()
+                        ? "expected_available_songs"
+                        : "available_songs",
+                )
                 .leftJoin(
                     "kpop_videos.app_kpop_group as a",
                     "a.id",
-                    "available_songs.id_artist",
+                    "id_artist",
                 )
                 .leftJoin(
                     "kpop_videos.app_kpop_group as b",
                     "b.id",
-                    "available_songs.id_parent_artist",
+                    "id_parent_artist",
                 )
-                .select(SongSelector.QueriedSongFields)
+                .select(
+                    EnvVariableManager.isGodMode()
+                        ? SongSelector.ExpectedQueriedSongFields
+                        : SongSelector.QueriedSongFields,
+                )
                 .where(({ eb, or }) =>
                     or(
                         songNames.map((songName) =>
                             eb(
-                                "available_songs.clean_song_name_alpha_numeric",
+                                "clean_song_name_alpha_numeric",
                                 "like",
                                 songName.replace(/[^0-9a-z]/gi, "") || songName,
                             ),
@@ -951,28 +968,16 @@ export default class PlaylistManager {
                 )
                 .where(({ or, eb, and }) => {
                     const expressions = [
-                        eb(
-                            "available_songs.original_artist_name_en",
-                            "like",
-                            artistName,
-                        ),
+                        eb("original_artist_name_en", "like", artistName),
                         and([
+                            eb("original_artist_name_en", "like", "%+%"),
                             eb(
-                                "available_songs.original_artist_name_en",
-                                "like",
-                                "%+%",
-                            ),
-                            eb(
-                                "available_songs.original_artist_name_en",
+                                "original_artist_name_en",
                                 "like",
                                 `%${artistName}%`,
                             ),
                         ]),
-                        eb(
-                            "available_songs.previous_name_en",
-                            "like",
-                            artistName,
-                        ),
+                        eb("previous_name_en", "like", artistName),
                         eb("artist_aliases", "like", `${artistName}`),
                         eb("artist_aliases", "like", `${artistName};%`),
                         eb("artist_aliases", "like", `%;${artistName};%`),

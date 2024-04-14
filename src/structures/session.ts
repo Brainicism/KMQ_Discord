@@ -808,7 +808,6 @@ export default abstract class Session {
 
         this.startGuessTimeout(messageContext);
 
-        // song finished without being guessed
         this.connection.once("end", async () => {
             // replace listener with no-op to catch any exceptions thrown after this event
             if (this.connection) {

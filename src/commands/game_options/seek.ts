@@ -228,7 +228,6 @@ export default class SeekCommand implements BaseCommand {
             [{ option: GameOption.SEEK_TYPE, reset }],
             false,
             undefined,
-            undefined,
             interaction,
         );
     }

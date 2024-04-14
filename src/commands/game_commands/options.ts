@@ -59,7 +59,6 @@ export default class OptionsCommand implements BaseCommand {
             [],
             false,
             false,
-            undefined,
             interaction,
         );
 

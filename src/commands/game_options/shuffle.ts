@@ -248,7 +248,6 @@ export default class ShuffleCommand implements BaseCommand {
             [{ option: GameOption.SHUFFLE_TYPE, reset }],
             false,
             undefined,
-            undefined,
             interaction,
         );
     }

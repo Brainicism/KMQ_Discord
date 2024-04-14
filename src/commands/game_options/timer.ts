@@ -228,7 +228,6 @@ export default class GuessTimeoutCommand implements BaseCommand {
             [{ option: GameOption.TIMER, reset }],
             false,
             undefined,
-            undefined,
             interaction,
         );
     }

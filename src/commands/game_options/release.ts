@@ -221,7 +221,6 @@ export default class ReleaseCommand implements BaseCommand {
             [{ option: GameOption.RELEASE_TYPE, reset }],
             false,
             undefined,
-            undefined,
             interaction,
         );
     }

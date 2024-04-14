@@ -470,7 +470,7 @@ export default class ExpCommand implements BaseCommand {
         expModifier *=
             ExpCommand.participantExpScalingModifier(numParticipants);
         // bonus for quick guess
-        if (guessSpeedMs < QUICK_GUESS_MS) {
+        if (guessSpeedMs <= QUICK_GUESS_MS) {
             expModifier *= ExpBonusModifierValues[ExpBonusModifier.QUICK_GUESS];
         }
 

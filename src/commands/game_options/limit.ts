@@ -393,7 +393,6 @@ export default class LimitCommand implements BaseCommand {
                 [{ option: GameOption.LIMIT, reset }],
                 false,
                 undefined,
-                undefined,
                 interaction,
             );
         }

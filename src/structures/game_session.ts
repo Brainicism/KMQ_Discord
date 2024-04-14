@@ -245,16 +245,36 @@ export default class GameSession extends Session {
      * Ends an active GameRound
      * @param isError - Whether the round ended due to an error
      * @param messageContext - An object containing relevant parts of Eris.Message
+     * @param gameRound - The round to end
      */
     async endRound(
         isError: boolean,
         messageContext: MessageContext,
+        gameRound?: GameRound,
     ): Promise<void> {
-        if (this.round === null) {
+        // if round ending due to correct song guess, ensure that we are operating on the provided
+        // game round to ensure we don't end the same round twice (since this.round is modified)
+        let round = gameRound ?? this.round;
+        if (!round) {
+            round = this.round;
+        }
+
+        // wait and accept multiguess results
+        await delay(
+            this.multiguessDelayIsActive(this.guildPreference)
+                ? this.guildPreference.getMultiGuessDelay() * 1000
+                : 0,
+        );
+
+        // ensure that only one invocation can proceed
+        if (!round || round.finished) {
             return;
         }
 
-        const round = this.round;
+        round.finished = true;
+
+        // sets the round to null
+        await super.endRound(false, messageContext);
 
         if (round.songStartedAt === null) {
             return;
@@ -264,8 +284,6 @@ export default class GameSession extends Session {
         const isCorrectGuess = correctGuessers.length > 0;
 
         await this.stopHiddenUpdateTimer();
-
-        await super.endRound(false, messageContext);
 
         try {
             await round.interactionMarkAnswers(correctGuessers.length, true);
@@ -411,6 +429,8 @@ export default class GameSession extends Session {
         } else if (gameFinishedDueToSuddenDeath) {
             await this.endSession("Sudden death game ended", false);
         }
+
+        await this.startRound(messageContext);
     }
 
     /**
@@ -582,25 +602,15 @@ export default class GameSession extends Session {
                 return;
             }
 
-            round.finished = true;
-            await delay(
-                this.multiguessDelayIsActive(this.guildPreference)
-                    ? this.guildPreference.getMultiGuessDelay() * 1000
-                    : 0,
-            );
-
-            // mark round as complete, so no more guesses can go through
-            await this.endRound(false, messageContext);
+            this.stopGuessTimeout();
             this.correctGuesses++;
+            // mark round as complete, so no more guesses can go through
+            await this.endRound(false, messageContext, round);
 
             // update game session's lastActive
             await this.lastActiveNow();
 
-            this.stopGuessTimeout();
-
             await this.incrementGuildSongGuessCount();
-
-            await this.startRound(messageContext);
         } else if (this.isMultipleChoiceMode() || this.isHiddenMode()) {
             // If hidden or multiple choice, everyone guessed and no one was right
             if (
