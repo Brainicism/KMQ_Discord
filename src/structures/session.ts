@@ -823,6 +823,7 @@ export default abstract class Session {
             }
 
             if (clipAction === ClipAction.END_ROUND) {
+                // The end round clip doesn't deal with round state, it just plays and ends
                 return;
             }
 
@@ -860,6 +861,7 @@ export default abstract class Session {
             }
 
             if (clipAction === ClipAction.END_ROUND) {
+                // Don't restart the round if the end round clip failed to play
                 return;
             }
 
