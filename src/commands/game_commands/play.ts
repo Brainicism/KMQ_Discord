@@ -419,7 +419,7 @@ export default class PlayCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.play.help.example.clip",
                         {
-                            clipDuration: `\`${CLIP_DEFAULT_DURATION}\``,
+                            clipDuration: String(CLIP_DEFAULT_DURATION),
                         },
                     ),
                     description_localizations: Object.values(LocaleType)
@@ -431,7 +431,9 @@ export default class PlayCommand implements BaseCommand {
                                     locale,
                                     "command.play.help.example.clip",
                                     {
-                                        clipDuration: `\`${CLIP_DEFAULT_DURATION}\``,
+                                        clipDuration: String(
+                                            CLIP_DEFAULT_DURATION,
+                                        ),
                                     },
                                 ),
                             }),
