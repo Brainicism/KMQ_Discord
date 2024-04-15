@@ -14,6 +14,7 @@
                 "chamboug.js-auto-backticks",
                 "ms-azuretools.vscode-docker",
                 "eamodio.gitlens",
+                "github.vscode-pull-request-github",
             ],
         },
     },

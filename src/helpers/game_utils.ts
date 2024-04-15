@@ -220,17 +220,27 @@ export async function getMatchingGroupNames(
     rawGroupNames: Array<string>,
     aliasApplied = false,
 ): Promise<GroupMatchResults> {
-    const matchingGroups = (
+    const matchingGroups: Array<MatchedArtist> = (
         await dbContext.kpopVideos
             .selectFrom("app_kpop_group_safe")
-            .select(["id", "name"])
-            .where("name", "in", rawGroupNames)
+            .select(["id", "name", "kname"])
+            .where(({ or, eb }) =>
+                or([
+                    eb("name", "in", rawGroupNames),
+                    eb("kname", "in", rawGroupNames),
+                ]),
+            )
             .where("has_songs", "=", 1)
             .orderBy("name", "asc")
             .execute()
-    ).map((x) => ({ id: x.id, name: x.name }));
+    ).map((x) => ({ id: x.id, name: x.name, hangulName: x.kname }));
 
-    const matchingGroupNames = matchingGroups.map((x) => x.name.toUpperCase());
+    const matchingGroupNames = matchingGroups.flatMap((x) =>
+        x.hangulName
+            ? [x.name.toUpperCase(), x.hangulName.toUpperCase()]
+            : [x.name.toUpperCase()],
+    );
+
     const unrecognizedGroups = rawGroupNames.filter(
         (x) => !matchingGroupNames.includes(x.toUpperCase()),
     );

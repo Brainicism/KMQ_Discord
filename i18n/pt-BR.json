@@ -257,7 +257,7 @@
             },
             "questions": {
                 "improveKMQ": {
-                    "placeholder": "KMQ é MUITO viciante. Minha família e amigos sentem minha falta.",
+                    "placeholder": "KMQ é MUITO viciante. Minha família e amigos sentem minha falta. \nNão use este formulário para perguntas/ajuda.",
                     "question": "O que pode ser melhorado no KMQ?"
                 },
                 "likeKMQ": {

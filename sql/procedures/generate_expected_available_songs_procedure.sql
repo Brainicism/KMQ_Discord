@@ -42,7 +42,8 @@ BEGIN
 		id_parent_artist INT(11) NOT NULL,
 		vtype ENUM('main', 'audio') NOT NULL,
 		tags VARCHAR(25),
-		dead ENUM('y', 'n') NOT NULL
+		dead ENUM('y', 'n') NOT NULL,
+		daisuki_id INT(11) NOT NULL
 	) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 	INSERT INTO expected_available_songs
@@ -67,7 +68,8 @@ BEGIN
 		id_parentgroup,
 		IF(kpop_videos.app_kpop.is_audio = 'n', 'main', 'audio'),
 		tags,
-		kpop_videos.app_kpop.dead AS dead
+		kpop_videos.app_kpop.dead AS dead,
+		kpop_videos.app_kpop.id as daisuki_id
 	FROM kpop_videos.app_kpop
 	JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
 	AND vtype = 'main'
