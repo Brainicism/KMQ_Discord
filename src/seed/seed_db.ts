@@ -680,7 +680,13 @@ async function reloadAutocompleteData(): Promise<void> {
         const db = getNewConnection();
         const availableSongsBefore = await db.kmq
             .selectFrom("available_songs")
-            .select(["song_name_en", "artist_name_en", "link", "publishedon"])
+            .select([
+                "song_name_en",
+                "artist_name_en",
+                "link",
+                "publishedon",
+                "daisuki_id",
+            ])
             .orderBy("publishedon", "desc")
             .execute();
 
@@ -702,6 +708,7 @@ async function reloadAutocompleteData(): Promise<void> {
                 artist_name_en: string;
                 link: string;
                 publishedon: Date;
+                daisuki_id: number;
             }
 
             const availableSongsAfter: AvailableSongDeltaData[] = await db.kmq
@@ -711,38 +718,27 @@ async function reloadAutocompleteData(): Promise<void> {
                     "artist_name_en",
                     "link",
                     "publishedon",
+                    "daisuki_id",
                 ])
                 .orderBy("publishedon", "desc")
                 .execute();
 
-            const generateSongArtistIdentifier = (
-                x: AvailableSongDeltaData,
-            ): string => `${x.song_name_en},${x.artist_name_en}`;
-
             const availableSongsAfterSet = new Set(
-                availableSongsAfter.map((x) => generateSongArtistIdentifier(x)),
+                availableSongsAfter.map((x) => x.daisuki_id),
             );
 
             const availableSongsBeforeSet = new Set(
-                availableSongsBefore.map((x) =>
-                    generateSongArtistIdentifier(x),
-                ),
+                availableSongsBefore.map((x) => x.daisuki_id),
             );
 
             logger.info("Calculating songs removed...");
             const songsRemoved = availableSongsBefore.filter(
-                (before) =>
-                    !availableSongsAfterSet.has(
-                        generateSongArtistIdentifier(before),
-                    ),
+                (before) => !availableSongsAfterSet.has(before.daisuki_id),
             );
 
             logger.info("Calculating songs added...");
             const songsAdded = availableSongsAfter.filter(
-                (after) =>
-                    !availableSongsBeforeSet.has(
-                        generateSongArtistIdentifier(after),
-                    ),
+                (after) => !availableSongsBeforeSet.has(after.daisuki_id),
             );
 
             logger.info(
