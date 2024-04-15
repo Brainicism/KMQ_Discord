@@ -721,8 +721,8 @@ export default class GameSession extends Session {
 
         if (clipRound.isNewClipMajority()) {
             await round.interactionMarkAnswers(0, false);
-            await this.sendStartRoundMessage(messageContext, clipRound, false);
             await this.playSong(messageContext, round, ClipAction.NEW_CLIP);
+            await this.sendStartRoundMessage(messageContext, clipRound, false);
             clipRound.reset();
         }
 
@@ -1137,6 +1137,9 @@ export default class GameSession extends Session {
                             thumbnail: { url: KmqImages.THUMBS_UP },
                         },
                     ],
+                    components: this.isClipMode()
+                        ? [{ type: 1, components: this.generateClipButton() }]
+                        : undefined,
                 });
             } catch (e) {
                 logger.warn(
@@ -1768,10 +1771,18 @@ export default class GameSession extends Session {
         description: string;
         thumbnailUrl: string;
     } {
+        let songStartedAt: number;
+        if (this.isClipMode()) {
+            const clipGameRound = round as ClipGameRound;
+            songStartedAt = clipGameRound.clipStartedAt!;
+        } else {
+            songStartedAt = round.songStartedAt!;
+        }
+
         let timestamp: number;
         if (this.isClipMode()) {
             timestamp = Math.ceil(
-                (round.songStartedAt! +
+                (songStartedAt +
                     (CLIP_MAX_REPLAY_COUNT + 1) *
                         (this.clipDurationLength! +
                             CLIP_PADDING_BEGINNING_SECONDS +
@@ -2009,7 +2020,7 @@ export default class GameSession extends Session {
         round: Round,
         firstMessageOfRound: boolean,
     ): Promise<void> {
-        if (this.isHiddenMode() && firstMessageOfRound) {
+        if (this.isHiddenMode()) {
             // Show players that haven't guessed and a button to guess
             await this.sendHiddenGuessMessage(
                 messageContext,

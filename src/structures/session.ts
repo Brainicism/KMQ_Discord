@@ -789,6 +789,12 @@ export default abstract class Session {
                         ).toString(),
                     );
                 }
+
+                // Set the time the clip started either at the start of the round, or when a new clip is selected
+                if (!clipAction || clipAction === ClipAction.NEW_CLIP) {
+                    const clipGameRound = round as ClipGameRound;
+                    clipGameRound.clipStartedAt = Date.now();
+                }
             }
 
             round.songStartedAt = Date.now();
