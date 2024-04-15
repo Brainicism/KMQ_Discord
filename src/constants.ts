@@ -148,8 +148,9 @@ export const ExpBonusModifierValues = {
 
 export const LEADERBOARD_ENTRIES_PER_PAGE = 10;
 
-export const BOOKMARK_COMMAND_NAME = "Bookmark Song";
 export const PROFILE_COMMAND_NAME = "Profile";
+
+export const BOOKMARK_BUTTON_PREFIX = "bookmark";
 
 export const EMBED_ERROR_COLOR = 0xed4245; // Red
 export const EMBED_SUCCESS_COLOR = 0x57f287; // Green

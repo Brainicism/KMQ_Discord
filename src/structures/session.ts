@@ -1,5 +1,6 @@
 import * as uuid from "uuid";
 import {
+    BOOKMARK_BUTTON_PREFIX,
     CLIP_MAX_REPLAY_COUNT,
     CLIP_PADDING_BEGINNING_SECONDS,
     CLIP_VC_END_TIMEOUT_MS,
@@ -29,7 +30,6 @@ import {
 import { sql } from "kysely";
 import ClipAction from "../enums/clip_action";
 import EnvVariableManager from "../env_variable_manager";
-import Eris from "eris";
 import FactGenerator from "../fact_generator";
 import GameRound from "./game_round";
 import GuessModeType from "../enums/option_types/guess_mode_type";
@@ -38,6 +38,7 @@ import ListeningRound from "./listening_round";
 import LocaleType from "../enums/locale_type";
 import MessageContext from "./message_context";
 import SeekType from "../enums/option_types/seek_type";
+import SongSelector from "./song_selector";
 import State from "../state";
 import dbContext from "../database_context";
 import fs from "fs";
@@ -45,6 +46,7 @@ import i18n from "../helpers/localization_manager";
 import type BookmarkedSong from "../interfaces/bookmarked_song";
 import type ClipGameRound from "./clip_game_round";
 import type EmbedPayload from "../interfaces/embed_payload";
+import type Eris from "eris";
 import type GameSession from "./game_session";
 import type GuildPreference from "./guild_preference";
 import type KmqMember from "./kmq_member";
@@ -91,9 +93,6 @@ export default abstract class Session {
     /** The number of Rounds played */
     protected roundsPlayed: number;
 
-    /** Array of previous songs by messageID for bookmarking songs */
-    private songMessageIDs: { messageID: string; song: QueriedSong }[];
-
     /** Mapping of user ID to bookmarked songs, uses Map since Set doesn't remove QueriedSong duplicates */
     private bookmarkedSongs: {
         [userID: string]: Map<string, BookmarkedSong>;
@@ -120,7 +119,6 @@ export default abstract class Session {
         this.round = null;
         this.sessionInitialized = false;
         this.roundsPlayed = 0;
-        this.songMessageIDs = [];
         this.bookmarkedSongs = {};
         this.guildPreference.songSelector.resetSessionState();
     }
@@ -499,18 +497,6 @@ export default abstract class Session {
     }
 
     /**
-     * Finds the song associated with the endRoundMessage via messageID, if it exists
-     * @param messageID - The Discord message ID used to locate the song
-     * @returns the queried song, or null if it doesn't exist
-     */
-    getSongFromMessageID(messageID: string): QueriedSong | null {
-        return (
-            this.songMessageIDs.find((x) => x.messageID === messageID)?.song ??
-            null
-        );
-    }
-
-    /**
      * Stores a song with a user so they can receive it later
      * @param userID - The user that wants to bookmark the song
      * @param bookmarkedSong - The song to store
@@ -565,25 +551,13 @@ export default abstract class Session {
     }
 
     async handleBookmarkInteraction(
-        interaction: Eris.CommandInteraction | Eris.ComponentInteraction,
+        interaction: Eris.ComponentInteraction,
     ): Promise<void> {
-        let messageId: string;
-        if (interaction instanceof Eris.CommandInteraction) {
-            messageId = interaction.data.target_id as string;
-        } else if (interaction instanceof Eris.ComponentInteraction) {
-            messageId = interaction.message.id;
-        } else {
-            logger.error(
-                `Unexpected interactionType in handleBookmarkInteraction: ${typeof interaction}`,
-            );
-            return;
-        }
-
-        const song = this.getSongFromMessageID(messageId);
-
+        const youtubeLink = interaction.data.custom_id.split(":")[1]!;
+        const song = await SongSelector.getSongByLink(youtubeLink);
         if (!song) {
             logger.error(
-                `Failed to get song from Session.songMessageIDs. messageId = ${messageId}. songMessageIDs = ${Object.keys(this.songMessageIDs).join(", ")}`,
+                `Failed to get song from bookmark. youtubeLink = ${youtubeLink}`,
             );
             return;
         }
@@ -622,7 +596,7 @@ export default abstract class Session {
         interaction: Eris.ComponentInteraction,
         _messageContext: MessageContext,
     ): Promise<boolean> {
-        if (interaction.data.custom_id === "bookmark") {
+        if (interaction.data.custom_id.startsWith(BOOKMARK_BUTTON_PREFIX)) {
             await this.handleBookmarkInteraction(interaction);
             return true;
         }
@@ -936,22 +910,26 @@ export default abstract class Session {
         return true;
     }
 
-    protected updateBookmarkSongList(
-        messageId: string,
-        song: QueriedSong,
-    ): void {
-        this.songMessageIDs.push({
-            messageID: messageId,
-            song,
-        });
-    }
-
     /**
-     * @param round - The round to fetch song details from
-     * @returns Debug string containing basic information about the Round
+     * Generates a bookmark button
+     * @param round - The round
+     * @param locale - The locale
+     * @returns the button
      */
-    private getDebugSongDetails(round: Round): string {
-        return `${round.song.songName}:${round.song.artistName}:${round.song.youtubeLink}`;
+    protected generateBookmarkButton(
+        round: Round,
+        locale: LocaleType,
+    ): Eris.InteractionButton {
+        return {
+            type: 2,
+            style: 1,
+            label: i18n.translate(locale, "misc.bookmark"),
+            custom_id: `${BOOKMARK_BUTTON_PREFIX}:${round.song.youtubeLink}`,
+            emoji: {
+                id: null,
+                name: "🔖",
+            },
+        };
     }
 
     /**
@@ -1031,16 +1009,7 @@ export default abstract class Session {
         const buttons: Array<Eris.InteractionButton> = [];
 
         // add bookmark button
-        buttons.push({
-            type: 2,
-            style: 1,
-            label: i18n.translate(locale, "misc.bookmark"),
-            custom_id: "bookmark",
-            emoji: {
-                id: null,
-                name: "🔖",
-            },
-        });
+        buttons.push(this.generateBookmarkButton(round, locale));
 
         if (round instanceof GameRound) {
             if (round.warnTypoReceived) {
@@ -1083,6 +1052,14 @@ export default abstract class Session {
         embed.thumbnailUrl = thumbnailUrl;
         embed.footerText = footerText;
         return sendInfoMessage(messageContext, embed, shouldReply);
+    }
+
+    /**
+     * @param round - The round
+     * @returns Debug string containing basic information about the Round
+     */
+    private getDebugSongDetails(round: Round): string {
+        return `${round.song.songName}:${round.song.artistName}:${round.song.youtubeLink}`;
     }
 
     private getDurationFooter(
