@@ -249,27 +249,27 @@ export default class HelpCommand implements BaseCommand {
 
             embedActionRowComponents = [
                 {
-                    style: 5,
+                    style: Eris.Constants.ButtonStyles.LINK,
                     url: "https://discord.gg/RCuzwYV",
-                    type: 2,
+                    type: Eris.Constants.ComponentTypes.BUTTON,
                     label: i18n.translate(
                         messageContext.guildID,
                         "misc.interaction.officialKmqServer",
                     ),
                 },
                 {
-                    style: 5,
+                    style: Eris.Constants.ButtonStyles.LINK,
                     url: "https://brainicism.github.io/KMQ_Discord/GAMEPLAY",
-                    type: 2,
+                    type: Eris.Constants.ComponentTypes.BUTTON,
                     label: i18n.translate(
                         messageContext.guildID,
                         "misc.interaction.howToPlay",
                     ),
                 },
                 {
-                    style: 5,
+                    style: Eris.Constants.ButtonStyles.LINK,
                     url: "https://brainicism.github.io/KMQ_Discord/FAQ",
-                    type: 2,
+                    type: Eris.Constants.ComponentTypes.BUTTON,
                     label: i18n.translate(
                         messageContext.guildID,
                         "misc.interaction.faq",
@@ -311,8 +311,14 @@ export default class HelpCommand implements BaseCommand {
                     description: embedDesc,
                     footerText: embedFooter ? embedFooter.text : undefined,
                     thumbnailUrl: KmqImages.READING_BOOK,
-                    components: embedActionRowComponents
-                        ? [{ type: 1, components: embedActionRowComponents }]
+                    actionRows: embedActionRowComponents
+                        ? [
+                              {
+                                  type: Eris.Constants.ComponentTypes
+                                      .ACTION_ROW,
+                                  components: embedActionRowComponents,
+                              },
+                          ]
                         : undefined,
                 },
                 false,

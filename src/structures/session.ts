@@ -1032,8 +1032,8 @@ export default abstract class Session {
 
         // add bookmark button
         buttons.push({
-            type: 2,
-            style: 1,
+            type: Eris.Constants.ComponentTypes.BUTTON,
+            style: Eris.Constants.ButtonStyles.PRIMARY,
             label: i18n.translate(locale, "misc.bookmark"),
             custom_id: "bookmark",
             emoji: {
@@ -1068,8 +1068,8 @@ export default abstract class Session {
         } else if (round instanceof ListeningRound) {
             round.interactionSkipUUID = uuid.v4() as string;
             buttons.push({
-                type: 2,
-                style: 1,
+                type: Eris.Constants.ComponentTypes.BUTTON,
+                style: Eris.Constants.ButtonStyles.PRIMARY,
                 custom_id: round.interactionSkipUUID,
                 emoji: {
                     id: null,
@@ -1078,8 +1078,13 @@ export default abstract class Session {
             });
         }
 
-        round.interactionComponents = [{ type: 1, components: buttons }];
-        embed.components = round.interactionComponents;
+        round.interactionComponents = [
+            {
+                type: Eris.Constants.ComponentTypes.ACTION_ROW,
+                components: buttons,
+            },
+        ];
+        embed.actionRows = round.interactionComponents;
         embed.thumbnailUrl = thumbnailUrl;
         embed.footerText = footerText;
         return sendInfoMessage(messageContext, embed, shouldReply);

@@ -173,9 +173,9 @@ export default class VoteCommand implements BaseCommand {
                 },
             )} `,
             thumbnailUrl: KmqImages.THUMBS_UP,
-            components: [
+            actionRows: [
                 {
-                    type: 1,
+                    type: Eris.Constants.ComponentTypes.ACTION_ROW,
                     components: [
                         {
                             type: Eris.Constants.ComponentTypes.BUTTON,

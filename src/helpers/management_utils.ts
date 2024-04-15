@@ -1,4 +1,5 @@
 /* eslint-disable global-require */
+import Eris from "eris";
 /* eslint-disable import/no-dynamic-require */
 import { IPCLogger } from "../logger";
 import { chooseRandom, delay, isPrimaryInstance, isWeekend } from "./utils";
@@ -183,7 +184,7 @@ export async function updateBotStatus(): Promise<void> {
     if (timeUntilRestart) {
         client.editStatus("dnd", {
             name: `Restarting in ${timeUntilRestart} minutes...`,
-            type: 1,
+            type: Eris.Constants.ActivityTypes.STREAMING,
         });
         return;
     }
@@ -191,7 +192,7 @@ export async function updateBotStatus(): Promise<void> {
     if (isPowerHour() && !isWeekend()) {
         client.editStatus("online", {
             name: "🎶 Power Hour! 🎶",
-            type: 5,
+            type: Eris.Constants.ActivityTypes.COMPETING,
         });
         return;
     }
@@ -207,7 +208,7 @@ export async function updateBotStatus(): Promise<void> {
 
     client.editStatus("online", {
         name: `"${randomPopularSong["song_name_en"]}" by ${randomPopularSong["artist_name_en"]}`,
-        type: 1,
+        type: Eris.Constants.ActivityTypes.STREAMING,
         url: `https://www.youtube.com/watch?v=${randomPopularSong["link"]}`,
     });
 }
