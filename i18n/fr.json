@@ -257,7 +257,7 @@
             },
             "questions": {
                 "improveKMQ": {
-                    "placeholder": "KMQ est TROP addictif. Ma famille et mes amis me manquent.",
+                    "placeholder": "KMQ est TROP addictif. Ma famille et mes amis me manquent. \nNe pas utiliser ce formulaire pour des questions/aide.",
                     "question": "Que peut-on améliorer à propos de KMQ ?"
                 },
                 "likeKMQ": {
