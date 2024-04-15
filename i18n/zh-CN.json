@@ -257,7 +257,7 @@
             },
             "questions": {
                 "improveKMQ": {
-                    "placeholder": "KMQ太过于让人上瘾，我的家人和朋友都想念我。",
+                    "placeholder": "KMQ 太上瘾了。我的家人和朋友们都想念我。\n请勿使用此表格询问/寻求帮助。",
                     "question": "KMQ有哪些可以改进的地方？"
                 },
                 "likeKMQ": {

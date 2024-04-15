@@ -257,7 +257,7 @@
             },
             "questions": {
                 "improveKMQ": {
-                    "placeholder": "KMQ is TOO addictive. My family and friends miss me.",
+                    "placeholder": "KMQ is TOO addictive. My family and friends miss me. \nDo not use this form for questions/help.",
                     "question": "What can be improved about KMQ?"
                 },
                 "likeKMQ": {

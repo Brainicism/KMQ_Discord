@@ -257,7 +257,7 @@
             },
             "questions": {
                 "improveKMQ": {
-                    "placeholder": "KMQ는 너무 중독성이 있습니다. 가족과 친구들이 저를 그리워합니다.",
+                    "placeholder": "KMQ는 너무 중독성이 있어요. 제 가족과 친구들이 저를 그리워해요. \n이 양식을 질문이나 도움을 요청하는 데 사용하지 마세요.",
                     "question": "KMQ에서 개선할 수 있는 점은 무엇입니까?"
                 },
                 "likeKMQ": {
