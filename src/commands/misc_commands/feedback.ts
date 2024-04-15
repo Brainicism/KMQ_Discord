@@ -1,15 +1,14 @@
 import * as uuid from "uuid";
+import { EMBED_SUCCESS_COLOR, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getUserTag,
     sendDeprecatedTextCommandMessage,
+    sendInfoWebhook,
 } from "../../helpers/discord_utils";
-import { pathExists } from "../../helpers/utils";
 import Eris from "eris";
 import MessageContext from "../../structures/message_context";
-import fs from "fs";
 import i18n from "../../helpers/localization_manager";
-import path from "path";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -133,19 +132,20 @@ export default class FeedbackCommand implements BaseCommand {
             feedbackResponse += `${modalComponent.components[0]!.value}\n`;
         }
 
-        const FEEDBACK_DIR = path.join(__dirname, "../../../data/feedback");
-
-        if (!(await pathExists(FEEDBACK_DIR))) {
-            await fs.promises.mkdir(FEEDBACK_DIR);
+        if (!process.env.ALERT_WEBHOOK_URL) {
+            logger.warn("ALERT_WEBHOOK_URL not specified");
+            logger.info(feedbackResponse);
+            return;
         }
 
-        const feedbackResponseFilePath = path.resolve(
-            __dirname,
-            FEEDBACK_DIR,
-            `${new Date().toISOString()}-${user.id}.txt`,
+        await sendInfoWebhook(
+            process.env.ALERT_WEBHOOK_URL,
+            "KMQ Feedback",
+            `\`\`\`\n${feedbackResponse}\n\`\`\``,
+            EMBED_SUCCESS_COLOR,
+            KmqImages.HAPPY,
+            "Kimiqo",
         );
-
-        await fs.promises.writeFile(feedbackResponseFilePath, feedbackResponse);
 
         logger.info(`Feedback logged by ${user.id}`);
         await interaction.acknowledge();
