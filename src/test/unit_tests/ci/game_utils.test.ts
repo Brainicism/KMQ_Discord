@@ -38,6 +38,22 @@ describe("game utils", () => {
         });
 
         describe("getMatchingGroupNames", () => {
+            describe("hangul group name", () => {
+                it("should return the corresponding groups in matchedGroups", async () => {
+                    const artistNames = ["(여자)아이들", "블랙핑크"];
+                    const matchResults = await getMatchingGroupNames({}, [
+                        artistNames[0]!,
+                        artistNames[1]!,
+                    ]);
+
+                    assert.deepStrictEqual(
+                        matchResults.matchedGroups.map((x) => x.hangulName),
+                        artistNames,
+                    );
+                    assert.strictEqual(matchResults.unmatchedGroups.length, 0);
+                });
+            });
+
             describe("fully matching group names", () => {
                 it("should return the corresponding groups in matchedGroups", async () => {
                     const artistNames = ["Blackpink", "BTS", "Stray Kids"];
