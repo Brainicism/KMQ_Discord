@@ -541,8 +541,11 @@ export default class GameSession extends Session {
         guess: string,
         createdAt: number,
     ): Promise<void> {
-        if (!this.connection) return;
-        if (this.connection.listenerCount("end") === 0) return;
+        if (!this.isClipMode()) {
+            if (!this.connection) return;
+            if (this.connection.listenerCount("end") === 0) return;
+        }
+
         if (!this.round) return;
         if (!this.guessEligible(messageContext, createdAt)) return;
 
