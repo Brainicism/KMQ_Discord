@@ -150,7 +150,7 @@ export default async function interactionCreateHandler(
     let interactionName: string | null = null;
     try {
         if (interaction instanceof Eris.ComponentInteraction) {
-            if (!session || !session.round) {
+            if (!session) {
                 if (
                     interaction.data.custom_id.startsWith(
                         BOOKMARK_BUTTON_PREFIX,
