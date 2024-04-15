@@ -4,6 +4,7 @@ enum GameType {
     TEAMS = "teams",
     COMPETITION = "competition",
     SUDDEN_DEATH = "suddendeath",
+    CLIP = "clip",
 }
 
 export default GameType;

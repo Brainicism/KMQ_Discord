@@ -1,6 +1,12 @@
 import * as uuid from "uuid";
+import {
+    CLIP_MAX_REPLAY_COUNT,
+    CLIP_PADDING_BEGINNING_SECONDS,
+    CLIP_VC_END_TIMEOUT_MS,
+    KmqImages,
+    specialFfmpegArgs,
+} from "../constants";
 import { IPCLogger } from "../logger";
-import { KmqImages, specialFfmpegArgs } from "../constants";
 import {
     clickableSlashCommand,
     generateEmbed,
@@ -21,6 +27,7 @@ import {
     underline,
 } from "../helpers/utils";
 import { sql } from "kysely";
+import ClipAction from "../enums/clip_action";
 import EnvVariableManager from "../env_variable_manager";
 import Eris from "eris";
 import FactGenerator from "../fact_generator";
@@ -36,6 +43,7 @@ import dbContext from "../database_context";
 import fs from "fs";
 import i18n from "../helpers/localization_manager";
 import type BookmarkedSong from "../interfaces/bookmarked_song";
+import type ClipGameRound from "./clip_game_round";
 import type EmbedPayload from "../interfaces/embed_payload";
 import type GameSession from "./game_session";
 import type GuildPreference from "./guild_preference";
@@ -246,7 +254,8 @@ export default abstract class Session {
         }
 
         // create a new round with randomly chosen song
-        this.round = this.prepareRound(randomSong);
+        const round = this.prepareRound(randomSong);
+        this.round = round;
 
         const voiceChannel = State.client.getChannel(
             this.voiceChannelID,
@@ -284,7 +293,11 @@ export default abstract class Session {
             return null;
         }
 
-        const voiceConnectionSuccess = await this.playSong(messageContext);
+        const voiceConnectionSuccess = await this.playSong(
+            messageContext,
+            round,
+        );
+
         return voiceConnectionSuccess ? this.round : null;
     }
 
@@ -436,7 +449,8 @@ export default abstract class Session {
     startGuessTimeout(messageContext: MessageContext): void {
         if (
             this.isListeningSession() ||
-            !this.guildPreference.isGuessTimeoutSet()
+            !this.guildPreference.isGuessTimeoutSet() ||
+            (this.isGameSession() && this.isClipMode())
         ) {
             return;
         }
@@ -449,6 +463,10 @@ export default abstract class Session {
                     messageContext,
                 )} | Song finished without being guessed, timer of: ${time} seconds.`,
             );
+
+            if (this.isGameSession() && this.isClipMode()) {
+                return;
+            }
 
             await this.endRound(
                 false,
@@ -622,12 +640,17 @@ export default abstract class Session {
     /**
      * Begin playing the Round's song in the VoiceChannel, listen on VoiceConnection events
      * @param messageContext - An object containing relevant parts of Eris.Message
+     * @param round - The round associated with the played song
+     * @param clipAction - For clip mode, whether to replay same clip or get a new one -- null for normal game
      * @returns whether the song streaming began successfully
      */
-    protected async playSong(messageContext: MessageContext): Promise<boolean> {
+    protected async playSong(
+        messageContext: MessageContext,
+        round: Round,
+        clipAction: ClipAction | null = null,
+    ): Promise<boolean> {
         const isGodMode = EnvVariableManager.isGodMode();
-        const { round } = this;
-        if (round === null) {
+        if (round.finished && clipAction !== ClipAction.END_ROUND) {
             return false;
         }
 
@@ -635,13 +658,14 @@ export default abstract class Session {
             logger.error(
                 `${getDebugLogHeader(
                     messageContext,
-                )} | Unexpectedly null connection in playSong`,
+                )} | Unexpectedly null connection in playSong. clipAction = ${clipAction}`,
             );
             return false;
         }
 
         let songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${round.song.youtubeLink}.ogg`;
         let seekLocation = 0;
+
         const seekType = this.isListeningSession()
             ? SeekType.BEGINNING
             : this.guildPreference.gameOptions.seekType;
@@ -677,6 +701,26 @@ export default abstract class Session {
                 break;
         }
 
+        const isClipMode = this.isGameSession() && this.isClipMode();
+        if (isClipMode) {
+            const clipGameRound = round as ClipGameRound;
+            switch (clipAction) {
+                case ClipAction.NEW_CLIP:
+                    // Clip mode and the user requested another segment
+                    seekLocation = songDuration * (0.6 * Math.random());
+                    break;
+                case ClipAction.REPLAY:
+                case ClipAction.END_ROUND:
+                    seekLocation = clipGameRound.seekLocation!;
+                    break;
+                default:
+                    // We enter here when the round is first started in clip mode
+                    break;
+            }
+
+            clipGameRound.seekLocation = seekLocation;
+        }
+
         if (isGodMode) {
             /*
                 오빤 강남스타일
@@ -700,9 +744,9 @@ export default abstract class Session {
         logger.info(
             `${getDebugLogHeader(
                 messageContext,
-            )} | Playing song in voice connection. seek = ${seekType}. song = ${this.getDebugSongDetails()}. guess mode = ${
+            )} | Playing song in voice connection. seek = ${seekType}. song = ${this.getDebugSongDetails(round)}. guess mode = ${
                 this.guildPreference.gameOptions.guessModeType
-            }`,
+            }. clip mode = ${isClipMode}. clip action = ${clipAction}.`,
         );
         this.connection.removeAllListeners();
         this.connection.stopPlaying();
@@ -724,12 +768,44 @@ export default abstract class Session {
                 encoderArgs = ffmpegArgs.encoderArgs;
             }
 
+            if (isClipMode) {
+                if (clipAction === ClipAction.END_ROUND) {
+                    encoderArgs.push(
+                        "-t",
+                        (
+                            this.guildPreference.getSongStartDelay() +
+                            this.clipDurationLength!
+                        ).toString(),
+                    );
+                } else {
+                    encoderArgs.push(
+                        "-af",
+                        `adelay=delays=${CLIP_PADDING_BEGINNING_SECONDS}s:all=1`,
+
+                        "-t",
+                        (
+                            this.clipDurationLength! +
+                            CLIP_PADDING_BEGINNING_SECONDS
+                        ).toString(),
+                    );
+                }
+
+                // Set the time the clip started either at the start of the round, or when a new clip is selected
+                if (!clipAction || clipAction === ClipAction.NEW_CLIP) {
+                    const clipGameRound = round as ClipGameRound;
+                    clipGameRound.clipStartedAt = Date.now();
+                }
+            }
+
             round.songStartedAt = Date.now();
 
             this.connection.play(stream, {
                 inputArgs,
                 encoderArgs,
-                opusPassthrough: specialType === null,
+                opusPassthrough: specialType === null && !isClipMode,
+                voiceDataTimeout: isClipMode
+                    ? CLIP_VC_END_TIMEOUT_MS
+                    : undefined,
             });
         } catch (e) {
             logger.error(`Erroring playing on voice connection. err = ${e}`);
@@ -744,14 +820,37 @@ export default abstract class Session {
             if (this.connection) {
                 this.connection.removeAllListeners("end");
                 this.connection.on("end", () => {});
-                logger.info(
-                    `${getDebugLogHeader(
-                        messageContext,
-                    )} | Song finished without being guessed.`,
-                );
+                if (clipAction !== ClipAction.END_ROUND) {
+                    logger.info(
+                        `${getDebugLogHeader(
+                            messageContext,
+                        )} | Song finished without being guessed.`,
+                    );
+                }
+            }
+
+            if (clipAction === ClipAction.END_ROUND) {
+                // The end round clip doesn't deal with round state, it just plays and ends
+                return;
             }
 
             this.stopGuessTimeout();
+
+            if (this.isGameSession() && this.isClipMode()) {
+                const clipGameRound = round as ClipGameRound;
+                if (
+                    !round.finished &&
+                    clipGameRound.getReplayCount() < CLIP_MAX_REPLAY_COUNT
+                ) {
+                    clipGameRound.incrementReplays();
+                    await this.playSong(
+                        messageContext,
+                        round,
+                        ClipAction.REPLAY,
+                    );
+                    return;
+                }
+            }
 
             await this.endRound(
                 false,
@@ -768,10 +867,15 @@ export default abstract class Session {
                 this.connection.on("error", () => {});
             }
 
+            if (clipAction === ClipAction.END_ROUND) {
+                // Don't restart the round if the end round clip failed to play
+                return;
+            }
+
             logger.error(
                 `${getDebugLogHeader(
                     messageContext,
-                )} | Unknown error with stream dispatcher. song = ${this.getDebugSongDetails()}. err = ${err}`,
+                )} | Unknown error with stream dispatcher. song = ${this.getDebugSongDetails(round)}. err = ${err}`,
             );
             await this.errorRestartRound();
         });
@@ -843,11 +947,11 @@ export default abstract class Session {
     }
 
     /**
+     * @param round - The round to fetch song details from
      * @returns Debug string containing basic information about the Round
      */
-    private getDebugSongDetails(): string {
-        if (!this.round) return "No active game round";
-        return `${this.round.song.songName}:${this.round.song.artistName}:${this.round.song.youtubeLink}`;
+    private getDebugSongDetails(round: Round): string {
+        return `${round.song.songName}:${round.song.artistName}:${round.song.youtubeLink}`;
     }
 
     /**
@@ -946,10 +1050,7 @@ export default abstract class Session {
                 )} set typingtypos?`;
             }
 
-            if (
-                this.guildPreference.isMultipleChoiceMode() &&
-                round.interactionMessage
-            ) {
+            if (round.interactionMessage) {
                 embed.thumbnailUrl = thumbnailUrl;
                 embed.footerText = footerText;
                 try {

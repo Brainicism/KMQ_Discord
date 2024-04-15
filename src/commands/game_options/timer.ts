@@ -17,6 +17,7 @@ import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
+import type GameSession from "../../structures/game_session";
 import type HelpDocumentation from "../../interfaces/help";
 
 const COMMAND_NAME = "timer";
@@ -32,6 +33,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
         { checkFn: CommandPrechecks.competitionPrecheck },
         { checkFn: CommandPrechecks.notListeningPrecheck },
         { checkFn: CommandPrechecks.timerHiddenPrecheck },
+        { checkFn: CommandPrechecks.notClipModePrecheck },
     ];
 
     validations = {
@@ -40,7 +42,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
         arguments: [
             {
                 name: "timer",
-                type: "number" as const,
+                type: "float" as const,
                 minValue: GuessTimeoutCommand.TIMER_MIN_VALUE,
                 maxValue: GuessTimeoutCommand.TIMER_MAX_VALUE,
             },
@@ -124,7 +126,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
                                 ),
 
                             type: Eris.Constants.ApplicationCommandOptionTypes
-                                .INTEGER,
+                                .NUMBER,
                             required: true,
                             min_value: GuessTimeoutCommand.TIMER_MIN_VALUE,
                             max_value: GuessTimeoutCommand.TIMER_MAX_VALUE,
@@ -165,7 +167,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             timer = null;
         } else {
-            timer = parseInt(parsedMessage.components[0]!, 10);
+            timer = parseFloat(parsedMessage.components[0]!);
         }
 
         await GuessTimeoutCommand.updateOption(
@@ -184,7 +186,9 @@ export default class GuessTimeoutCommand implements BaseCommand {
             messageContext.guildID,
         );
 
-        const session = Session.getSession(messageContext.guildID);
+        const session = Session.getSession(messageContext.guildID) as
+            | GameSession
+            | undefined;
 
         const reset = timer == null;
         if (reset) {
@@ -199,8 +203,8 @@ export default class GuessTimeoutCommand implements BaseCommand {
                 )} | Guess timeout disabled.`,
             );
         } else {
+            timer = Math.round(timer! * 100) / 100;
             await guildPreference.setGuessTimeout(timer);
-
             logger.info(
                 `${getDebugLogHeader(messageContext)} | Guess timeout set to ${
                     guildPreference.gameOptions.guessTimeout

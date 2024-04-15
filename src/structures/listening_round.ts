@@ -13,8 +13,8 @@ export default class ListeningRound extends Round {
     /** UUID associated with skip interaction custom_id */
     public interactionSkipUUID: string | null;
 
-    constructor(song: QueriedSong) {
-        super(song);
+    constructor(song: QueriedSong, guildID: string) {
+        super(song, guildID);
         this.interactionSkipUUID = null;
     }
 

@@ -889,12 +889,14 @@
                 "description": "Starts a game of KMQ.",
                 "example": {
                     "classic": "Start a classic game of KMQ (type in your guess first to get a point)",
+                    "clip": "Guess the song based on a repeated snippet, played for {{clipDuration}} seconds",
                     "elimination": "Start an elimination game of KMQ where each player starts with {{lives}} lives",
                     "hidden": "Start a hidden game of KMQ, where players can only answer with /guess",
                     "suddenDeath": "Start a sudden death game of KMQ, where someone has to get the song right, or the game ends",
                     "teams": "Split up into as many teams as you want and see who you can depend on to help you win!"
                 },
                 "interaction": {
+                    "clipDuration": "Choose how long each clip will play for",
                     "lives": "Choose how many lives each player starts with"
                 },
                 "name": "play",
@@ -1433,6 +1435,15 @@
         "classic": {
             "yourScore": "Your score is {{score}}."
         },
+        "clip": {
+            "newClip": {
+                "request": {
+                    "description": "{{voteCounter}} new clip votes received.",
+                    "title": "New Clip Request"
+                },
+                "success": "{{voteCounter}} new clip votes received. Playing..."
+            }
+        },
         "conflict": "conflict",
         "duration": "Duration",
         "elimination": {
@@ -1479,6 +1490,7 @@
                 "guildBanned": "This server is banned from using KMQ. For appeals, contact the official KMQ support server at {{supportServer}}.",
                 "guildOnly": "KMQ can only be used in servers.",
                 "invalidBookmark": "You can only bookmark songs recently played in the last {{BOOKMARK_MESSAGE_SIZE}} rounds. You must bookmark the message sent by the bot containing the song.",
+                "newClipTooEarly": "Wait a bit before requesting a new clip.",
                 "optionFromPreviousRound": "You are attempting to pick an option from an already completed round.",
                 "playerBanned": "You are banned from using KMQ. For appeals, contact the official KMQ support server at {{supportServer}}."
             },
@@ -1611,6 +1623,7 @@
             "title": "🚀 Power Up!"
         },
         "listOfGroups": "list of groups",
+        "newClip": "New Clip",
         "no": "No",
         "none": "None",
         "notApplicable": "N/A",
@@ -1645,6 +1658,7 @@
             "debugChannel": "You can't do that in this channel.",
             "debugServer": "You can't do that in this server.",
             "differentVC": "You must be in the same voice channel as the bot to use this command.",
+            "notClipMode": "You can't do that while in clip mode.",
             "notGameSession": "You can't do that while in a game session.",
             "notHidden": "You can't do that during a hidden round.",
             "notListeningSession": "You can't do that while in a listening session.",

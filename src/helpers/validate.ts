@@ -86,7 +86,8 @@ export default async (
         let arg = args[i]!;
         // check arg type
         switch (validation.type) {
-            case "number": {
+            case "int":
+            case "float": {
                 if (Number.isNaN(Number(arg))) {
                     await sendValidationErrorMessage(
                         messageContext,
@@ -101,11 +102,14 @@ export default async (
                     return false;
                 }
 
-                // parse as integer for now, might cause problems later?
-                const intArg = parseInt(arg, 10);
+                const numArg =
+                    validation.type === "int"
+                        ? parseInt(arg, 10)
+                        : parseFloat(arg);
+
                 if (
                     validation.minValue != null &&
-                    intArg < validation.minValue
+                    numArg < validation.minValue
                 ) {
                     await sendValidationErrorMessage(
                         messageContext,
@@ -125,7 +129,7 @@ export default async (
 
                 if (
                     validation.maxValue != null &&
-                    intArg > validation.maxValue
+                    numArg > validation.maxValue
                 ) {
                     await sendValidationErrorMessage(
                         messageContext,

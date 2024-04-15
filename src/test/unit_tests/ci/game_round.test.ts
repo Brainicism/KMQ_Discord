@@ -11,6 +11,7 @@ import assert from "assert";
 
 describe("game round", () => {
     let gameRound: GameRound;
+    const guildID = "guildID";
     describe("checkGuess", () => {
         describe("artist/song names without aliases", () => {
             it("adds the corresponding name as a correct answer", () => {
@@ -32,6 +33,7 @@ describe("game round", () => {
                         selectionWeight: 1,
                     }),
                     5,
+                    guildID,
                 );
 
                 assert.ok(gameRound.checkGuess("Jisoo", GuessModeType.ARTIST));
@@ -81,6 +83,7 @@ describe("game round", () => {
                         selectionWeight: 1,
                     }),
                     5,
+                    guildID,
                 );
 
                 assert.ok(gameRound.checkGuess("IU", GuessModeType.ARTIST));
@@ -114,6 +117,7 @@ describe("game round", () => {
                         selectionWeight: 1,
                     }),
                     5,
+                    guildID,
                 );
 
                 assert.ok(gameRound.checkGuess("Yena", GuessModeType.ARTIST));
@@ -145,6 +149,7 @@ describe("game round", () => {
                         selectionWeight: 1,
                     }),
                     5,
+                    guildID,
                 );
 
                 assert.ok(
@@ -178,6 +183,7 @@ describe("game round", () => {
                         selectionWeight: 1,
                     }),
                     5,
+                    guildID,
                 );
 
                 assert.ok(
@@ -232,6 +238,7 @@ describe("game round", () => {
                         selectionWeight: 1,
                     }),
                     5,
+                    guildID,
                 );
 
                 assert.ok(gameRound.checkGuess("?!", GuessModeType.SONG_NAME));
@@ -272,6 +279,7 @@ describe("game round", () => {
                                 selectionWeight: 1,
                             }),
                             5,
+                            guildID,
                         );
 
                         assert.ok(
@@ -331,6 +339,7 @@ describe("game round", () => {
                                 selectionWeight: 1,
                             }),
                             5,
+                            guildID,
                         );
 
                         assert.ok(
@@ -382,6 +391,7 @@ describe("game round", () => {
                         selectionWeight: 1,
                     }),
                     5,
+                    guildID,
                 );
 
                 assert.ok(
@@ -439,6 +449,7 @@ describe("game round", () => {
                     selectionWeight: 1,
                 }),
                 5,
+                guildID,
             );
         });
 
@@ -500,6 +511,7 @@ describe("game round", () => {
                     selectionWeight: 1,
                 }),
                 5,
+                guildID,
             );
         });
 
@@ -790,6 +802,7 @@ describe("game round", () => {
                     selectionWeight: 1,
                 }),
                 5,
+                guildID,
             );
         });
 
@@ -842,6 +855,7 @@ describe("game round", () => {
                     selectionWeight: 1,
                 }),
                 5,
+                guildID,
             );
 
             gameRound.songStartedAt = gameRound.startedAt + 500;
@@ -969,6 +983,7 @@ describe("game round", () => {
                         selectionWeight: 1,
                     }),
                     5,
+                    guildID,
                 );
 
                 // hints have been generated
@@ -1018,6 +1033,7 @@ describe("game round", () => {
                             selectionWeight: 1,
                         }),
                         5,
+                        guildID,
                     );
 
                     // hints have been generated

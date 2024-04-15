@@ -889,12 +889,14 @@
                 "description": "开始一场 KMQ 游戏。",
                 "example": {
                     "classic": "开始一场经典模式的 KMQ 游戏(首先输入你的猜测以获得一分)",
+                    "clip": "根据重复的片段猜测歌曲名，片段播放{{clipDuration}}秒",
                     "elimination": "开始一场淘汰模式的 KMQ 游戏，每个玩家都有 {{lives}} 条命",
                     "hidden": "开始一个KMQ的隐藏游戏，玩家只能用/guess命令回答问题。",
                     "suddenDeath": "开始 KMQ 突然死亡游戏，需要有人猜对歌曲，否则游戏结束",
                     "teams": "分成尽可能多的团队，看看谁可以帮助你赢得胜利！"
                 },
                 "interaction": {
+                    "clipDuration": "选择每个剪辑的播放时长",
                     "lives": "选择每个玩家开始的生命值"
                 },
                 "name": "玩",
@@ -1433,6 +1435,15 @@
         "classic": {
             "yourScore": "你的得分是{{score}}。"
         },
+        "clip": {
+            "newClip": {
+                "request": {
+                    "description": "收到 {{voteCounter}} 个新剪辑投票。",
+                    "title": "新剪辑请求"
+                },
+                "success": "收到 {{voteCounter}} 个新剪辑投票。正在播放..."
+            }
+        },
         "conflict": "冲突",
         "duration": "时长",
         "elimination": {
@@ -1479,6 +1490,7 @@
                 "guildBanned": "此服务器被禁止使用KMQ。如需申诉，请联系{{supportServer}}的官方KMQ支持服务器。",
                 "guildOnly": "KMQ只能在服务器中使用。",
                 "invalidBookmark": "你只能收藏最近播放的{{BOOKMARK_MESSAGE_SIZE}}轮歌曲。你必须收藏机器人发送的包含歌曲的消息。",
+                "newClipTooEarly": "等一会儿再请求新的剪辑。",
                 "optionFromPreviousRound": "您正在尝试从已经完成的回合中选择选项。",
                 "playerBanned": "您被禁止使用KMQ。如需申诉，请联系{{supportServer}}的官方KMQ支持服务器。"
             },
@@ -1611,6 +1623,7 @@
             "title": "🚀 动力加倍！"
         },
         "listOfGroups": "群组列表",
+        "newClip": "新剪辑",
         "no": "否",
         "none": "无",
         "notApplicable": "不适用",
@@ -1645,6 +1658,7 @@
             "debugChannel": "您不能在此频道进行此操作。",
             "debugServer": "您不能在此服务器进行此操作。",
             "differentVC": "您必须与机器人在同一个语音频道中才能使用此命令。",
+            "notClipMode": "你在剪辑模式下不能这么做。",
             "notGameSession": "您不能在游戏会话中进行此操作。",
             "notHidden": "你在隐藏回合期间无法执行此操作。",
             "notListeningSession": "您不能在听歌会话中进行此操作。",

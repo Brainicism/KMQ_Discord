@@ -926,12 +926,6 @@ export async function generateOptionsMessage(
     optionStrings[GameOption.GUESS_MODE_TYPE] = gameOptions.guessModeType;
     optionStrings[GameOption.SPECIAL_TYPE] = gameOptions.specialType;
 
-    optionStrings[GameOption.TIMER] = guildPreference.isGuessTimeoutSet()
-        ? i18n.translate(guildID, "command.options.timer", {
-              timerInSeconds: String(gameOptions.guessTimeout),
-          })
-        : null;
-
     optionStrings[GameOption.DURATION] = guildPreference.isDurationSet()
         ? i18n.translate(guildID, "command.options.duration", {
               durationInMinutes: String(gameOptions.duration),
@@ -966,6 +960,27 @@ export async function generateOptionsMessage(
             optionStrings[GameOption.GOAL] = generateConflictingCommandEntry(
                 optionStrings[GameOption.GOAL] as string,
                 `play ${GameType.ELIMINATION}`,
+            );
+        }
+    }
+
+    const isClipMode =
+        session?.isGameSession() && session.gameType === GameType.CLIP;
+
+    // Special case: timer is conflicting only when current game is clip
+    if (guildPreference.isGuessTimeoutSet()) {
+        optionStrings[GameOption.TIMER] = i18n.translate(
+            guildID,
+            "command.options.timer",
+            {
+                timerInSeconds: String(gameOptions.guessTimeout),
+            },
+        );
+
+        if (isClipMode) {
+            optionStrings[GameOption.TIMER] = generateConflictingCommandEntry(
+                optionStrings[GameOption.TIMER] as string,
+                `play ${GameType.CLIP}`,
             );
         }
     }

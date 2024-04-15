@@ -20,6 +20,7 @@ import sinon from "sinon";
 describe("exp command", () => {
     let guildPreference: GuildPreference;
     const sandbox = sinon.createSandbox();
+    const guildID = "guildID";
     describe("calculateOptionsMultiplier", () => {
         beforeEach(async () => {
             guildPreference = GuildPreference.fromGuild("123");
@@ -466,6 +467,7 @@ describe("exp command", () => {
                     selectionWeight: 1,
                 }),
                 5,
+                guildID,
             );
             gameRound.bonusModifier = 1;
             guildPreference = GuildPreference.fromGuild("123");

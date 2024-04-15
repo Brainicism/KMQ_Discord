@@ -46,7 +46,7 @@ export default class DurationCommand implements BaseCommand {
         arguments: [
             {
                 name: "duration",
-                type: "number" as const,
+                type: "int" as const,
                 minValue: DurationCommand.DURATION_DELTA_MIN,
                 maxValue: DurationCommand.DURATION_DELTA_MAX,
             },

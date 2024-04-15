@@ -33,7 +33,8 @@
         "test-ci": "NODE_ENV=test mocha -- --forbid-only -r ts-node/register 'src/test/unit_tests/**/*.ts'",
         "prepare-schema": "bash src/scripts/prepare-kysely-schema.sh",
         "prettier": "prettier --write '**/*.{js,ts}'",
-        "prettier-ci": "prettier --check '**/*.{js,ts}'"
+        "prettier-ci": "prettier --check '**/*.{js,ts}'",
+        "missing-i18n": "ts-node src/ci_checks/missing_i18n.ts $(find src -name '*.ts' -print)"
     },
     "author": "Brian Le",
     "license": "GPL-3.0",

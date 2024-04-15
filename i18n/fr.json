@@ -889,12 +889,14 @@
                 "description": "Démarre une partie de KMQ.",
                 "example": {
                     "classic": "Démarrez une partie classique de KMQ (tapez d'abord votre réponse pour obtenir un point)",
+                    "clip": "Devinez la chanson à partir d'un extrait répété, joué pendant {{clipDuration}} secondes",
                     "elimination": "Démarrez une partie d'élimination de KMQ où chaque joueur commence avec {{lives}} vies",
                     "hidden": "Démarrer une partie cachée de KMQ, où les joueurs ne peuvent répondre qu'avec /guess",
                     "suddenDeath": "Lancez un jeu de mort subite KMQ, où il faut deviner le morceau, ou la partie s'achève",
                     "teams": "Divisez-vous en d'équipes et voyez sur qui vous pouvez compter pour vous aider à gagner!"
                 },
                 "interaction": {
+                    "clipDuration": "Choisissez la durée de lecture de chaque clip",
                     "lives": "Choisissez le nombre de vies avec lequel chaque joueur commence"
                 },
                 "name": "jouer",
@@ -1433,6 +1435,15 @@
         "classic": {
             "yourScore": "Votre score est de {{score}}."
         },
+        "clip": {
+            "newClip": {
+                "request": {
+                    "description": "{{voteCounter}} nouveaux votes pour le clip reçus.",
+                    "title": "Demande de nouveau clip"
+                },
+                "success": "{{voteCounter}} nouveaux votes pour le clip reçus. Lecture..."
+            }
+        },
         "conflict": "conflit",
         "duration": "Durée",
         "elimination": {
@@ -1479,6 +1490,7 @@
                 "guildBanned": "Ce serveur est banni de l'utilisation de KMQ. Pour faire appel, contactez le serveur de support officiel de KMQ à {{supportServer}}.",
                 "guildOnly": "KMQ ne peut être utilisé que dans les serveurs.",
                 "invalidBookmark": "Vous ne pouvez marquer que les chansons récemment jouées dans les {{BOOKMARK_MESSAGE_SIZE}} derniers tours. Vous devez marquer le message envoyé par le bot contenant la chanson.",
+                "newClipTooEarly": "Attendez un peu avant de demander un nouveau clip.",
                 "optionFromPreviousRound": "Vous essayez de choisir une option d'un tour déjà terminé.",
                 "playerBanned": "Vous êtes banni de l'utilisation de KMQ. Pour faire appel, contactez le serveur de support officiel de KMQ à {{supportServer}}."
             },
@@ -1611,6 +1623,7 @@
             "title": "🚀 Booster!"
         },
         "listOfGroups": "liste des groupes",
+        "newClip": "Nouveau Clip",
         "no": "Non",
         "none": "Aucun",
         "notApplicable": "N/A",
@@ -1645,6 +1658,7 @@
             "debugChannel": "Vous ne pouvez pas faire cela dans ce canal.",
             "debugServer": "Vous ne pouvez pas faire cela dans ce serveur.",
             "differentVC": "Vous devez être dans le même canal vocal que le bot pour utiliser cette commande.",
+            "notClipMode": "Vous ne pouvez pas faire cela en mode clip.",
             "notGameSession": "Vous ne pouvez pas faire cela pendant une session de jeu.",
             "notHidden": "Vous ne pouvez pas faire ça pendant une manche cachée",
             "notListeningSession": "Vous ne pouvez pas faire cela pendant une session d'écoute.",

@@ -15,6 +15,7 @@ import {
     friendlyFormattedNumber,
     getMention,
 } from "../helpers/utils";
+import ClipAction from "../enums/clip_action";
 import ExpBonusModifier from "../enums/exp_bonus_modifier";
 import GuessModeType from "../enums/option_types/guess_mode_type";
 import KmqMember from "./kmq_member";
@@ -88,6 +89,9 @@ export default class GameRound extends Round {
     /** Let players know their guess would have been accepted if they were using /answer typingtypos */
     public warnTypoReceived: boolean;
 
+    /** The multiple choice options for the current round */
+    public multipleChoiceOptions: Array<Eris.InteractionButton>;
+
     /** The base EXP for this GameRound */
     private baseExp: number;
 
@@ -107,8 +111,8 @@ export default class GameRound extends Round {
         { pattern: /&/g, replacement: "and" },
     ];
 
-    constructor(song: QueriedSong, baseExp: number) {
-        super(song);
+    constructor(song: QueriedSong, baseExp: number, guildID: string) {
+        super(song, guildID);
         this.acceptedSongAnswers = [song.songName, ...this.songAliases];
         if (song.hangulSongName) {
             this.acceptedSongAnswers.push(song.hangulSongName);
@@ -181,6 +185,7 @@ export default class GameRound extends Round {
                   ]) as number)
                 : 1;
         this.guesses = {};
+        this.multipleChoiceOptions = [];
     }
 
     getCorrectGuessers(isHidden: boolean): Array<KmqMember> {
@@ -362,50 +367,79 @@ export default class GameRound extends Round {
 
     /**
      * @param correctGuesses - The number of correct guesses
-     * Marks button guesses as correct or incorrect in a multiple choice game
+     * @param showCorrectAnswer - Whether to show the correct answer
+     * Disables buttons in a multiple choice game
      */
-    async interactionMarkAnswers(correctGuesses: number): Promise<void> {
+    async interactionMarkAnswers(
+        correctGuesses: number,
+        showCorrectAnswer: boolean,
+    ): Promise<void> {
         if (!this.interactionMessage) return;
-        try {
-            await this.interactionMessage.edit({
-                embeds: this.interactionMessage.embeds,
-                components: this.interactionComponents.map((x) => ({
-                    type: 1,
-                    components: x.components.map((y) => {
-                        const z = y as Eris.InteractionButton;
+        const actionRows: Eris.ActionRow[] = this.interactionComponents.map(
+            (actionRow) => ({
+                type: 1,
+                components: actionRow.components.map(
+                    (button: Eris.InteractionButton) => {
+                        if (
+                            Object.values(ClipAction).includes(
+                                button.custom_id as ClipAction,
+                            )
+                        ) {
+                            // TODO heart here
+                            return {
+                                ...button,
+                                disabled: true,
+                            };
+                        }
+
                         const noGuesses =
                             this.interactionIncorrectAnswerUUIDs[
-                                z.custom_id
+                                button.custom_id
                             ] === 0;
 
-                        let label = z.label;
+                        let label = button.label;
                         let style: 1 | 3 | 4;
-                        if (this.interactionCorrectAnswerUUID === z.custom_id) {
-                            if (correctGuesses) {
-                                label += ` (${correctGuesses})`;
-                            }
+                        if (showCorrectAnswer) {
+                            if (
+                                this.interactionCorrectAnswerUUID ===
+                                button.custom_id
+                            ) {
+                                if (correctGuesses) {
+                                    label += ` (${correctGuesses})`;
+                                }
 
-                            style = 3;
-                        } else if (noGuesses) {
-                            style = 1;
+                                style = 3;
+                            } else if (noGuesses) {
+                                style = 1;
+                            } else {
+                                label += ` (${
+                                    this.interactionIncorrectAnswerUUIDs[
+                                        button.custom_id
+                                    ]
+                                })`;
+                                style = 4;
+                            }
                         } else {
-                            label += ` (${
-                                this.interactionIncorrectAnswerUUIDs[
-                                    z.custom_id
-                                ]
-                            })`;
-                            style = 4;
+                            style = 1;
                         }
 
                         return {
                             label,
-                            custom_id: z.custom_id,
+                            custom_id: button.custom_id,
                             style,
                             type: 2,
                             disabled: true,
+                            emoji: button.emoji,
                         };
-                    }),
-                })),
+                    },
+                ),
+            }),
+        );
+
+        try {
+            await this.interactionMessage.edit({
+                embeds: this.interactionMessage.embeds,
+                components: actionRows,
             });
         } catch (e) {
             logger.warn(

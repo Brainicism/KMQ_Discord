@@ -219,6 +219,6 @@ export default class ListeningSession extends Session {
      * @returns the new GameRound
      */
     protected prepareRound(randomSong: QueriedSong): Round {
-        return new ListeningRound(randomSong);
+        return new ListeningRound(randomSong, this.guildID);
     }
 }

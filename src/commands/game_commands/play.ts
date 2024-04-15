@@ -1,4 +1,7 @@
 import {
+    CLIP_DEFAULT_DURATION,
+    CLIP_MAX_DURATION,
+    CLIP_MIN_DURATION,
     DataFiles,
     ELIMINATION_DEFAULT_LIVES,
     ELIMINATION_MAX_LIVES,
@@ -74,7 +77,17 @@ export default class PlayCommand implements BaseCommand {
     validations = {
         minArgCount: 0,
         maxArgCount: 2,
-        arguments: [],
+        arguments: [
+            {
+                name: "gameType",
+                type: "enum" as const,
+                enums: [...Object.values(GameType), AnswerType.HIDDEN],
+            },
+            {
+                name: "gameArg",
+                type: "float" as const,
+            },
+        ],
     };
 
     aliases = ["random", "start", "p"];
@@ -143,6 +156,29 @@ export default class PlayCommand implements BaseCommand {
                 explanation: i18n.translate(
                     guildID,
                     "command.play.help.example.suddenDeath",
+                ),
+            },
+            {
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    GameType.CLIP,
+                )} timer:3`,
+                explanation: i18n.translate(
+                    guildID,
+                    "command.play.help.example.clip",
+                    {
+                        clipDuration: "`3`",
+                    },
+                ),
+            },
+            {
+                example: clickableSlashCommand(COMMAND_NAME, GameType.CLIP),
+                explanation: i18n.translate(
+                    guildID,
+                    "command.play.help.example.clip",
+                    {
+                        clipDuration: `\`${CLIP_DEFAULT_DURATION}\``,
+                    },
                 ),
             },
         ],
@@ -377,6 +413,59 @@ export default class PlayCommand implements BaseCommand {
                         ),
                     type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
                 },
+                {
+                    name: GameType.CLIP,
+                    description: i18n.translate(
+                        LocaleType.EN,
+                        "command.play.help.example.clip",
+                        {
+                            clipDuration: String(CLIP_DEFAULT_DURATION),
+                        },
+                    ),
+                    description_localizations: Object.values(LocaleType)
+                        .filter((x) => x !== LocaleType.EN)
+                        .reduce(
+                            (acc, locale) => ({
+                                ...acc,
+                                [locale]: i18n.translate(
+                                    locale,
+                                    "command.play.help.example.clip",
+                                    {
+                                        clipDuration: String(
+                                            CLIP_DEFAULT_DURATION,
+                                        ),
+                                    },
+                                ),
+                            }),
+                            {},
+                        ),
+                    type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
+                    options: [
+                        {
+                            name: "duration",
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.play.help.interaction.clipDuration",
+                            ),
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.play.help.interaction.clipDuration",
+                                        ),
+                                    }),
+                                    {},
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .NUMBER,
+                            min_value: CLIP_MIN_DURATION,
+                            max_value: CLIP_MAX_DURATION,
+                        },
+                    ],
+                },
             ],
         },
     ];
@@ -409,10 +498,13 @@ export default class PlayCommand implements BaseCommand {
                 interaction,
             );
         } else {
+            const livesOrClipDuration =
+                interactionOptions["lives"] || interactionOptions["duration"];
+
             await PlayCommand.startGame(
                 messageContext,
                 gameType,
-                interactionOptions["lives"],
+                livesOrClipDuration,
                 interactionKey === AnswerType.HIDDEN,
                 interaction,
             );
@@ -431,12 +523,15 @@ export default class PlayCommand implements BaseCommand {
             gameType = gameTypeRaw as GameType;
         }
 
+        const livesOrClipDuration =
+            parsedMessage.components.length <= 1
+                ? null
+                : parsedMessage.components[1]!;
+
         await PlayCommand.startGame(
             MessageContext.fromMessage(message),
             gameType,
-            parsedMessage.components.length <= 1
-                ? null
-                : parsedMessage.components[1]!,
+            livesOrClipDuration,
             gameTypeRaw === AnswerType.HIDDEN,
         );
     };
@@ -867,7 +962,7 @@ export default class PlayCommand implements BaseCommand {
     static async startGame(
         messageContext: MessageContext,
         gameType: GameType,
-        livesArg: string | null,
+        livesOrClipDurationArg: string | null,
         hiddenMode: boolean,
         interaction?: Eris.CommandInteraction,
     ): Promise<void> {
@@ -1114,16 +1209,32 @@ export default class PlayCommand implements BaseCommand {
                 }
             }
 
-            let lives: number;
-            if (livesArg == null) {
-                lives = ELIMINATION_DEFAULT_LIVES;
-            } else {
-                lives = parseInt(livesArg, 10);
-                if (
-                    lives < ELIMINATION_MIN_LIVES ||
-                    lives > ELIMINATION_MAX_LIVES
-                ) {
+            let lives: number | undefined;
+            if (gameType === GameType.ELIMINATION) {
+                if (livesOrClipDurationArg == null) {
                     lives = ELIMINATION_DEFAULT_LIVES;
+                } else {
+                    lives = parseInt(livesOrClipDurationArg, 10);
+                    if (lives < ELIMINATION_MAX_LIVES) {
+                        lives = ELIMINATION_MIN_LIVES;
+                    } else if (lives > ELIMINATION_MAX_LIVES) {
+                        lives = ELIMINATION_MAX_LIVES;
+                    }
+                }
+            }
+
+            let clipDuration: number | undefined;
+            if (gameType === GameType.CLIP) {
+                if (livesOrClipDurationArg == null) {
+                    clipDuration = CLIP_DEFAULT_DURATION;
+                } else {
+                    clipDuration = parseFloat(livesOrClipDurationArg);
+                    clipDuration = Math.round(clipDuration! * 100) / 100;
+                    if (clipDuration < CLIP_MIN_DURATION) {
+                        clipDuration = CLIP_MIN_DURATION;
+                    } else if (clipDuration > CLIP_MAX_DURATION) {
+                        clipDuration = CLIP_MAX_DURATION;
+                    }
                 }
             }
 
@@ -1135,6 +1246,7 @@ export default class PlayCommand implements BaseCommand {
                 gameOwner,
                 gameType,
                 lives,
+                clipDuration,
             );
         }
 

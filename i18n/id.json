@@ -889,12 +889,14 @@
                 "description": "Memulai permainan KMQ.",
                 "example": {
                     "classic": "Mulai permainan KMQ klasik (ketik tebakan Anda terlebih dahulu untuk mendapatkan poin)",
+                    "clip": "Tebak lagu berdasarkan potongan yang diulang-ulang, diputar selama {{clipDuration}} detik",
                     "elimination": "Mulai permainan eliminasi KMQ di mana setiap pemain memulai dengan {{lives}} nyawa",
                     "hidden": "Mulai permainan KMQ tersembunyi, tempat pemain hanya bisa menjawab dengan /tebak",
                     "suddenDeath": "Mulai game sudden death KMQ, tebak lagunya atau game berakhir",
                     "teams": "Bergabunglah dengan tim sesuai keinginan dan temukan siapa yang dapat membantu Anda menang!"
                 },
                 "interaction": {
+                    "clipDuration": "Pilih berapa lama setiap klip akan diputar",
                     "lives": "Pilih berapa banyak nyawa yang dimiliki setiap pemain di awal"
                 },
                 "name": "putar",
@@ -1433,6 +1435,15 @@
         "classic": {
             "yourScore": "Skor Anda adalah {{score}}"
         },
+        "clip": {
+            "newClip": {
+                "request": {
+                    "description": "{{voteCounter}} suara klip baru diterima.",
+                    "title": "Permintaan Klip Baru"
+                },
+                "success": "{{voteCounter}} suara klip baru diterima. Memutar..."
+            }
+        },
         "conflict": "konflik",
         "duration": "Durasi",
         "elimination": {
@@ -1479,6 +1490,7 @@
                 "guildBanned": "Server ini dilarang menggunakan KMQ. Untuk banding, hubungi server dukungan resmi KMQ di {{supportServer}}.",
                 "guildOnly": "KMQ hanya dapat digunakan di server.",
                 "invalidBookmark": "Anda hanya dapat menandai lagu yang baru-baru ini diputar dalam {{BOOKMARK_MESSAGE_SIZE}} ronde terakhir. Anda harus menandai pesan yang dikirim oleh bot yang berisi lagu.",
+                "newClipTooEarly": "Tunggu sebentar sebelum meminta klip baru.",
                 "optionFromPreviousRound": "Anda mencoba memilih opsi dari ronde yang sudah selesai.",
                 "playerBanned": "Anda dilarang menggunakan KMQ. Untuk banding, hubungi server dukungan KMQ resmi di {{supportServer}}."
             },
@@ -1611,6 +1623,7 @@
             "title": "🚀 Nyalakan!"
         },
         "listOfGroups": "daftar grup",
+        "newClip": "Klip Baru",
         "no": "Tidak",
         "none": "Tidak Ada",
         "notApplicable": "Tidak tersedia",
@@ -1645,6 +1658,7 @@
             "debugChannel": "Anda tidak dapat melakukan itu di saluran ini.",
             "debugServer": "Anda tidak dapat melakukan itu di server ini.",
             "differentVC": "Anda harus berada di saluran suara yang sama dengan bot untuk menggunakan perintah ini.",
+            "notClipMode": "Anda tidak bisa melakukan itu saat dalam mode klip.",
             "notGameSession": "Anda tidak dapat melakukan itu saat dalam sesi permainan.",
             "notHidden": "Kamu tidak bisa melakukan itu selama babak tersembunyi.",
             "notListeningSession": "Anda tidak dapat melakukan itu saat dalam sesi mendengarkan.",

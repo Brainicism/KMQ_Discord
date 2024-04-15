@@ -38,7 +38,7 @@ export default class GoalCommand implements BaseCommand {
         arguments: [
             {
                 name: "goal",
-                type: "number" as const,
+                type: "int" as const,
                 minValue: 1,
             },
         ],

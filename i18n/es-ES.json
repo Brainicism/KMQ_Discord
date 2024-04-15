@@ -889,12 +889,14 @@
                 "description": "Comienza un juego de KMQ.",
                 "example": {
                     "classic": "Comienza un juego clásico de KMQ (escribe tu respuesta primero para obtener un punto)",
+                    "clip": "Adivina la canción basada en un fragmento repetido, reproducido durante {{clipDuration}} segundos",
                     "elimination": "Comienza un juego de eliminación de KMQ donde cada jugador comienza con {{lives}} vidas",
                     "hidden": "Comienza un juego oculto de KMQ, donde los jugadores solo pueden responder con /guess",
                     "suddenDeath": "Inicia un juego de muerte súbita en KMQ: acierta la canción o la partida termina",
                     "teams": "Divídete en tantos equipos como quieras y ve quién puede ayudarte a ganar!"
                 },
                 "interaction": {
+                    "clipDuration": "Elige cuánto tiempo se reproducirá cada clip",
                     "lives": "Elige cuántas vidas comienza cada jugador"
                 },
                 "name": "jugar",
@@ -1433,6 +1435,15 @@
         "classic": {
             "yourScore": "Tu puntuación es {{score}}."
         },
+        "clip": {
+            "newClip": {
+                "request": {
+                    "description": "{{voteCounter}} votos nuevos de clip recibidos.",
+                    "title": "Solicitud de Nuevo Clip"
+                },
+                "success": "{{voteCounter}} votos nuevos de clip recibidos. Reproduciendo..."
+            }
+        },
         "conflict": "conflicto",
         "duration": "Duración",
         "elimination": {
@@ -1479,6 +1490,7 @@
                 "guildBanned": "Este servidor está prohibido de usar KMQ. Para apelaciones, contacta al servidor de soporte oficial de KMQ en {{supportServer}}.",
                 "guildOnly": "KMQ sólo puede ser utilizado en servidores.",
                 "invalidBookmark": "Solo puedes marcar canciones que hayan sido reproducidas en las últimas {{BOOKMARK_MESSAGE_SIZE}} rondas. Debes marcar el mensaje enviado por el bot que contiene la canción.",
+                "newClipTooEarly": "Espera un poco antes de solicitar un nuevo clip.",
                 "optionFromPreviousRound": "Estás intentando elegir una opción de una ronda que ya ha sido completada.",
                 "playerBanned": "Estás prohibido de usar KMQ. Para apelaciones, contacta al servidor de soporte oficial de KMQ en {{supportServer}}."
             },
@@ -1611,6 +1623,7 @@
             "title": "🚀 ¡Potencia!"
         },
         "listOfGroups": "lista de grupos",
+        "newClip": "Nuevo Clip",
         "no": "No",
         "none": "Ninguno",
         "notApplicable": "N/A",
@@ -1645,6 +1658,7 @@
             "debugChannel": "No puedes hacer eso en este canal.",
             "debugServer": "No puedes hacer eso en este servidor.",
             "differentVC": "Debes estar en el mismo canal de voz que el bot para usar este comando.",
+            "notClipMode": "No puedes hacer eso mientras estás en modo de recorte.",
             "notGameSession": "No puedes hacer eso mientras estás en una sesión de juego.",
             "notHidden": "No puedes hacer eso durante una ronda oculta",
             "notListeningSession": "No puedes hacer eso mientras estás en una sesión de escucha.",
