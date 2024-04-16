@@ -291,11 +291,14 @@ bot.on("error", (err) => {
     logError(JSON.stringify(err));
 });
 
-async function evaluateStage(messageResponse?: {
-    title: string;
-    description: string;
-    parsedGameOptions?: ParsedGameOptionValues;
-}): Promise<boolean> {
+async function evaluateStage(
+    messageResponse?: {
+        title: string;
+        description: string;
+        parsedGameOptions?: ParsedGameOptionValues;
+    },
+    isRetry = false,
+): Promise<boolean> {
     if (CURRENT_STAGE === null) {
         logError("evaluateStage called before test began.");
         process.exit(1);
@@ -347,8 +350,22 @@ async function evaluateStage(messageResponse?: {
         await proceedNextStage();
         return true;
     } else {
+        if (
+            !isRetry &&
+            testStage.expectedResponseType === KmqResponseType.NONE
+        ) {
+            // for stages that are waiting for some async property to change (i.e voice members), allow retry
+            log(
+                `STAGE ${CURRENT_STAGE.stage} | Stage validation failed, retrying after 5s...`,
+            );
+
+            await delay(5000);
+            return evaluateStage(messageResponse, true);
+        }
+
+        // for stages that are waiting for a message response, wait for next message
         log(
-            `STAGE ${CURRENT_STAGE.stage} | Current message failed check, waiting for next...`,
+            `STAGE ${CURRENT_STAGE.stage} | Stage validation failed, waiting for next...`,
         );
         return false;
     }
