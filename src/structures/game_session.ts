@@ -1902,25 +1902,6 @@ export default class GameSession extends Session {
         this.startHiddenUpdateTimer();
     }
 
-    private async sendClipMessage(
-        messageContext: MessageContext,
-    ): Promise<void> {
-        await sendInfoMessage(messageContext, {
-            title: i18n.translate(
-                this.guildID,
-                "misc.interaction.guess.title",
-                {
-                    songOrArtist:
-                        this.guildPreference.gameOptions.guessModeType ===
-                        GuessModeType.ARTIST
-                            ? i18n.translate(this.guildID, "misc.artist")
-                            : i18n.translate(this.guildID, "misc.song"),
-                },
-            ),
-            thumbnailUrl: KmqImages.LISTENING,
-        });
-    }
-
     private async sendStartRoundMessage(
         messageContext: MessageContext,
         round: Round,
@@ -1932,11 +1913,7 @@ export default class GameSession extends Session {
                 messageContext,
                 round as GameRound,
             );
-        } else if (this.isClipMode() && !this.isMultipleChoiceMode()) {
-            await this.sendClipMessage(messageContext);
-        }
-
-        if (this.isMultipleChoiceMode()) {
+        } else if (this.isMultipleChoiceMode()) {
             await this.sendMultipleChoiceOptionsMessage(!firstMessageOfRound);
         }
     }
