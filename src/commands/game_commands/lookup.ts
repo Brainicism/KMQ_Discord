@@ -391,16 +391,7 @@ export default class LookupCommand implements BaseCommand {
         locale: LocaleType,
     ): Promise<boolean> {
         const guildID = messageOrInteraction.guildID as string;
-        const queriedSongRaw = await dbContext.kmq
-            .selectFrom("available_songs")
-            .select(SongSelector.QueriedSongFields)
-            .where("link", "=", videoID)
-            .executeTakeFirst();
-
-        const kmqSongEntry: QueriedSong | undefined = queriedSongRaw
-            ? new QueriedSong(queriedSongRaw)
-            : undefined;
-
+        const kmqSongEntry = await SongSelector.getSongByLink(videoID);
         const daisukiEntry = await dbContext.kpopVideos
             .selectFrom("app_kpop")
             .select([

@@ -1,3 +1,4 @@
+import { BOOKMARK_BUTTON_PREFIX } from "../constants";
 import { IPCLogger } from "../logger";
 import { chooseRandom } from "../helpers/utils";
 import {
@@ -112,11 +113,6 @@ export default class ListeningSession extends Session {
         );
 
         round.interactionMessage = startRoundMessage;
-
-        if (startRoundMessage) {
-            this.updateBookmarkSongList(startRoundMessage.id, round.song);
-        }
-
         return round;
     }
 
@@ -155,7 +151,7 @@ export default class ListeningSession extends Session {
 
         if (!this.round) return false;
         if (
-            interaction.data.custom_id !== "bookmark" &&
+            !interaction.data.custom_id.startsWith(BOOKMARK_BUTTON_PREFIX) &&
             !(await this.handleInSessionInteractionFailures(
                 interaction,
                 messageContext,
@@ -166,7 +162,7 @@ export default class ListeningSession extends Session {
 
         const round = this.round;
         const guildID = interaction.guildID as string;
-        if (interaction.data.custom_id === "bookmark") {
+        if (interaction.data.custom_id.startsWith(BOOKMARK_BUTTON_PREFIX)) {
             await this.handleBookmarkInteraction(interaction);
             return true;
         } else if (interaction.data.custom_id === round.interactionSkipUUID) {

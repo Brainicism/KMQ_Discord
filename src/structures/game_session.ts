@@ -384,7 +384,7 @@ export default class GameSession extends Session {
             ),
         );
 
-        const endRoundMessage = await this.sendRoundMessage(
+        await this.sendRoundMessage(
             messageContext,
             fields,
             round,
@@ -393,10 +393,6 @@ export default class GameSession extends Session {
             correctGuess && !this.isMultipleChoiceMode(),
             remainingDuration,
         );
-
-        if (endRoundMessage) {
-            this.updateBookmarkSongList(endRoundMessage.id, round.song);
-        }
 
         const gameFinishedDueToGameOptions = this.scoreboard.gameFinished(
             this.guildPreference,
@@ -1142,7 +1138,7 @@ export default class GameSession extends Session {
                         },
                     ],
                     components: this.isClipMode()
-                        ? [{ type: 1, components: this.generateClipButton() }]
+                        ? [{ type: 1, components: [this.generateClipButton()] }]
                         : undefined,
                 });
             } catch (e) {
@@ -1939,12 +1935,21 @@ export default class GameSession extends Session {
                 break;
         }
 
+        const lastRow: Eris.InteractionButton[] = [
+            this.generateBookmarkButton(
+                round,
+                State.getGuildLocale(this.guildID),
+            ),
+        ];
+
         if (this.isClipMode()) {
-            actionRows.push({
-                type: 1,
-                components: this.generateClipButton(),
-            });
+            lastRow.push(this.generateClipButton());
         }
+
+        actionRows.push({
+            type: 1,
+            components: lastRow,
+        });
 
         round.interactionComponents = actionRows;
 
@@ -1975,7 +1980,7 @@ export default class GameSession extends Session {
         round.interactionMessage = await sendInfoMessage(messageContext, {
             ...this.generateRemainingPlayersMessage(round),
             components: this.isClipMode()
-                ? [{ type: 1, components: this.generateClipButton() }]
+                ? [{ type: 1, components: [this.generateClipButton()] }]
                 : undefined,
         });
 
@@ -2001,22 +2006,20 @@ export default class GameSession extends Session {
             components: [
                 {
                     type: 1,
-                    components: this.generateClipButton(),
+                    components: [this.generateClipButton()],
                 },
             ],
         });
     }
 
-    private generateClipButton(): Eris.InteractionButton[] {
-        return [
-            {
-                type: 2,
-                style: 2,
-                custom_id: ClipAction.NEW_CLIP,
-                label: i18n.translate(this.guildID, "misc.newClip"),
-                emoji: { name: "🎬", id: null },
-            },
-        ];
+    private generateClipButton(): Eris.InteractionButton {
+        return {
+            type: 2,
+            style: 2,
+            custom_id: ClipAction.NEW_CLIP,
+            label: i18n.translate(this.guildID, "misc.newClip"),
+            emoji: { name: "🎬", id: null },
+        };
     }
 
     private async sendStartRoundMessage(
