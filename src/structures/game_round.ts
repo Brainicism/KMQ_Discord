@@ -1,4 +1,5 @@
 import {
+    BOOKMARK_BUTTON_PREFIX,
     CORRECT_GUESS_EMOJI,
     EMBED_ERROR_COLOR,
     EMBED_SUCCESS_BONUS_COLOR,
@@ -385,11 +386,17 @@ export default class GameRound extends Round {
                                 button.custom_id as ClipAction,
                             )
                         ) {
-                            // TODO heart here
                             return {
                                 ...button,
                                 disabled: true,
                             };
+                        }
+
+                        if (
+                            button.custom_id.startsWith(BOOKMARK_BUTTON_PREFIX)
+                        ) {
+                            // Users should still be able to bookmark songs from previous rounds
+                            return button;
                         }
 
                         const noGuesses =

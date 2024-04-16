@@ -28,6 +28,7 @@ export default class SeekCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
         { checkFn: CommandPrechecks.notListeningPrecheck },
+        { checkFn: CommandPrechecks.notClipModePrecheck },
     ];
 
     validations = {

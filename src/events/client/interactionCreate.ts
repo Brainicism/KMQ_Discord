@@ -1,5 +1,5 @@
 import * as uuid from "uuid";
-import { BOOKMARK_COMMAND_NAME, PROFILE_COMMAND_NAME } from "../../constants";
+import { BOOKMARK_BUTTON_PREFIX, PROFILE_COMMAND_NAME } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -150,11 +150,24 @@ export default async function interactionCreateHandler(
     let interactionName: string | null = null;
     try {
         if (interaction instanceof Eris.ComponentInteraction) {
-            if (
-                !session ||
-                (!session.round && interaction.data.custom_id !== "bookmark")
-            ) {
-                await tryInteractionAcknowledge(interaction);
+            if (!session) {
+                if (
+                    interaction.data.custom_id.startsWith(
+                        BOOKMARK_BUTTON_PREFIX,
+                    )
+                ) {
+                    await tryCreateInteractionErrorAcknowledgement(
+                        interaction,
+                        null,
+                        i18n.translate(
+                            interaction.guildID as string,
+                            "misc.failure.interaction.bookmarkOutsideGame",
+                        ),
+                    );
+                } else {
+                    await tryInteractionAcknowledge(interaction);
+                }
+
                 return;
             }
 
@@ -248,26 +261,6 @@ export default async function interactionCreateHandler(
                             );
                         }
 
-                        break;
-                    }
-
-                    case BOOKMARK_COMMAND_NAME: {
-                        if (!session) {
-                            await tryCreateInteractionErrorAcknowledgement(
-                                interaction as Eris.CommandInteraction,
-                                null,
-                                i18n.translate(
-                                    interaction.guildID as string,
-                                    "misc.failure.interaction.bookmarkOutsideGame",
-                                ),
-                            );
-                            return;
-                        }
-
-                        interactionName = `Application Command for '${interaction.data.name}'`;
-                        await session.handleBookmarkInteraction(
-                            interaction as Eris.CommandInteraction,
-                        );
                         break;
                     }
 

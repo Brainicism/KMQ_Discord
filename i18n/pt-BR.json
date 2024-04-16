@@ -1435,15 +1435,6 @@
         "classic": {
             "yourScore": "Sua pontuação é {{score}}."
         },
-        "clip": {
-            "newClip": {
-                "request": {
-                    "description": "{{voteCounter}} novos votos de trecho recebidos.",
-                    "title": "Pedido de Novo Trecho"
-                },
-                "success": "{{voteCounter}} novos votos de trecho recebidos. Reproduzindo..."
-            }
-        },
         "conflict": "conflito",
         "duration": "Duração",
         "elimination": {
@@ -1490,7 +1481,6 @@
                 "guildBanned": "Este servidor está banido de usar o KMQ. Para apelações, entre em contato com o servidor oficial de suporte do KMQ em {{supportServer}}.",
                 "guildOnly": "KMQ só pode ser utilizado em servidores.",
                 "invalidBookmark": "Você só pode marcar as músicas recentemente tocadas nas últimas {{BOOKMARK_MESSAGE_SIZE}} rodadas. Você deve marcar a mensagem enviada pelo bot contendo a música.",
-                "newClipTooEarly": "Aguarde um pouco antes de solicitar um novo clipe.",
                 "optionFromPreviousRound": "Você está tentando escolher uma opção de uma rodada já concluída.",
                 "playerBanned": "Você está banido de usar KMQ. Para apelações, entre em contato com o servidor oficial de suporte do KMQ em {{supportServer}}."
             },
@@ -1623,7 +1613,6 @@
             "title": "Foguete Potência Acima!"
         },
         "listOfGroups": "lista de grupos",
-        "newClip": "Novo Trecho",
         "no": "Não",
         "none": "Nenhum",
         "notApplicable": "N/D",

@@ -399,6 +399,27 @@ export default class SongSelector {
         };
     }
 
+    static async getSongByLink(
+        youtubeLink: string,
+    ): Promise<QueriedSong | null> {
+        const song = await dbContext.kmq
+            .selectFrom("available_songs")
+            .select(SongSelector.QueriedSongFields)
+            .where((eb) =>
+                eb.or([
+                    eb("link", "=", youtubeLink),
+                    eb("original_link", "=", youtubeLink),
+                ]),
+            )
+            .executeTakeFirst();
+
+        if (!song) {
+            return null;
+        }
+
+        return new QueriedSong(song);
+    }
+
     private async getCollabGroupIds(
         groupIds: Array<number>,
     ): Promise<number[]> {

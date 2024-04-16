@@ -22,7 +22,6 @@ import {
     sendInfoMessage,
     sendPaginationedEmbed,
     tryCreateInteractionErrorAcknowledgement,
-    tryCreateInteractionSuccessAcknowledgement,
     tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
 import {
@@ -384,7 +383,7 @@ export default class GameSession extends Session {
             ),
         );
 
-        const endRoundMessage = await this.sendRoundMessage(
+        await this.sendRoundMessage(
             messageContext,
             fields,
             round,
@@ -393,10 +392,6 @@ export default class GameSession extends Session {
             correctGuess && !this.isMultipleChoiceMode(),
             remainingDuration,
         );
-
-        if (endRoundMessage) {
-            this.updateBookmarkSongList(endRoundMessage.id, round.song);
-        }
 
         const gameFinishedDueToGameOptions = this.scoreboard.gameFinished(
             this.guildPreference,
@@ -541,8 +536,12 @@ export default class GameSession extends Session {
         guess: string,
         createdAt: number,
     ): Promise<void> {
-        if (!this.connection) return;
-        if (this.connection.listenerCount("end") === 0) return;
+        // Allow clip mode guesses in between clip replays
+        if (!this.isClipMode()) {
+            if (!this.connection) return;
+            if (this.connection.listenerCount("end") === 0) return;
+        }
+
         if (!this.round) return;
         if (!this.guessEligible(messageContext, createdAt)) return;
 
@@ -679,56 +678,6 @@ export default class GameSession extends Session {
         await super.updateOwner();
     }
 
-    async handleClipComponentInteraction(
-        round: ClipGameRound,
-        interaction: Eris.ComponentInteraction<Eris.TextableChannel>,
-        messageContext: MessageContext,
-    ): Promise<boolean> {
-        if (!round.songStartedAt || round.getReplayCount() === 0) {
-            // Prevent spamming clip actions
-            await tryCreateInteractionErrorAcknowledgement(
-                interaction,
-                null,
-                i18n.translate(
-                    this.guildID,
-                    "misc.failure.interaction.newClipTooEarly",
-                ),
-            );
-            return true;
-        }
-
-        const clipRound = round as ClipGameRound;
-        clipRound.newClipRequested(messageContext.author.id);
-        await tryCreateInteractionSuccessAcknowledgement(
-            interaction,
-            i18n.translate(
-                this.guildID,
-                clipRound.isNewClipMajority()
-                    ? "misc.newClip"
-                    : "misc.clip.newClip.request.title",
-            ),
-            i18n.translate(
-                this.guildID,
-                clipRound.isNewClipMajority()
-                    ? "misc.clip.newClip.success"
-                    : "misc.clip.newClip.request.description",
-                {
-                    voteCounter: clipRound.newClipVoteCounter(),
-                },
-            ),
-            !clipRound.isNewClipMajority(),
-        );
-
-        if (clipRound.isNewClipMajority()) {
-            await round.interactionMarkAnswers(0, false);
-            await this.playSong(messageContext, round, ClipAction.NEW_CLIP);
-            await this.sendStartRoundMessage(messageContext, clipRound, false);
-            clipRound.reset();
-        }
-
-        return true;
-    }
-
     async handleComponentInteraction(
         interaction: Eris.ComponentInteraction<Eris.TextableChannel>,
         messageContext: MessageContext,
@@ -755,67 +704,51 @@ export default class GameSession extends Session {
         const round = this.round;
 
         if (
-            this.isClipMode() &&
-            Object.values(ClipAction).includes(
-                interaction.data.custom_id as ClipAction,
-            )
+            round.getIncorrectGuessers().has(interaction.member!.id) ||
+            !this.guessEligible(messageContext, interaction.createdAt)
         ) {
-            return this.handleClipComponentInteraction(
-                round as ClipGameRound,
+            await tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                messageContext,
-            );
-        } else {
-            if (
-                round.getIncorrectGuessers().has(interaction.member!.id) ||
-                !this.guessEligible(messageContext, interaction.createdAt)
-            ) {
-                await tryCreateInteractionErrorAcknowledgement(
-                    interaction,
-                    null,
-                    i18n.translate(
-                        this.guildID,
-                        "misc.failure.interaction.alreadyEliminated",
-                    ),
-                );
-                return true;
-            }
-
-            if (!round.isCorrectInteractionAnswer(interaction.data.custom_id)) {
-                await tryCreateInteractionErrorAcknowledgement(
-                    interaction,
-                    null,
-                    i18n.translate(
-                        this.guildID,
-                        "misc.failure.interaction.eliminated",
-                    ),
-                );
-
-                round.interactionIncorrectAnswerUUIDs[
-                    interaction.data.custom_id
-                ]++;
-
-                // Add the user as a participant
-                await this.guessSong(messageContext, "", interaction.createdAt);
-                return true;
-            }
-
-            await tryInteractionAcknowledge(interaction);
-
-            const guildPreference = await GuildPreference.getGuildPreference(
-                messageContext.guildID,
-            );
-
-            await this.guessSong(
-                messageContext,
-                guildPreference.gameOptions.guessModeType !==
-                    GuessModeType.ARTIST
-                    ? round.song.songName
-                    : round.song.artistName,
-                interaction.createdAt,
+                null,
+                i18n.translate(
+                    this.guildID,
+                    "misc.failure.interaction.alreadyEliminated",
+                ),
             );
             return true;
         }
+
+        if (!round.isCorrectInteractionAnswer(interaction.data.custom_id)) {
+            await tryCreateInteractionErrorAcknowledgement(
+                interaction,
+                null,
+                i18n.translate(
+                    this.guildID,
+                    "misc.failure.interaction.eliminated",
+                ),
+            );
+
+            round.interactionIncorrectAnswerUUIDs[interaction.data.custom_id]++;
+
+            // Add the user as a participant
+            await this.guessSong(messageContext, "", interaction.createdAt);
+            return true;
+        }
+
+        await tryInteractionAcknowledge(interaction);
+
+        const guildPreference = await GuildPreference.getGuildPreference(
+            messageContext.guildID,
+        );
+
+        await this.guessSong(
+            messageContext,
+            guildPreference.gameOptions.guessModeType !== GuessModeType.ARTIST
+                ? round.song.songName
+                : round.song.artistName,
+            interaction.createdAt,
+        );
+        return true;
     }
 
     /**
@@ -1137,9 +1070,6 @@ export default class GameSession extends Session {
                             thumbnail: { url: KmqImages.THUMBS_UP },
                         },
                     ],
-                    components: this.isClipMode()
-                        ? [{ type: 1, components: this.generateClipButton() }]
-                        : undefined,
                 });
             } catch (e) {
                 logger.warn(
@@ -1771,18 +1701,10 @@ export default class GameSession extends Session {
         description: string;
         thumbnailUrl: string;
     } {
-        let songStartedAt: number;
-        if (this.isClipMode()) {
-            const clipGameRound = round as ClipGameRound;
-            songStartedAt = clipGameRound.clipStartedAt!;
-        } else {
-            songStartedAt = round.songStartedAt!;
-        }
-
         let timestamp: number;
         if (this.isClipMode()) {
             timestamp = Math.ceil(
-                (songStartedAt +
+                (round.songStartedAt! +
                     (CLIP_MAX_REPLAY_COUNT + 1) *
                         (this.clipDurationLength! +
                             CLIP_PADDING_BEGINNING_SECONDS +
@@ -1935,12 +1857,17 @@ export default class GameSession extends Session {
                 break;
         }
 
-        if (this.isClipMode()) {
-            actionRows.push({
-                type: Eris.Constants.ComponentTypes.ACTION_ROW,
-                components: this.generateClipButton(),
-            });
-        }
+        const lastRow: Eris.InteractionButton[] = [
+            this.generateBookmarkButton(
+                round,
+                State.getGuildLocale(this.guildID),
+            ),
+        ];
+
+        actionRows.push({
+            type: Eris.Constants.ComponentTypes.ACTION_ROW,
+            components: lastRow,
+        });
 
         round.interactionComponents = actionRows;
 
@@ -1970,14 +1897,6 @@ export default class GameSession extends Session {
     ): Promise<void> {
         round.interactionMessage = await sendInfoMessage(messageContext, {
             ...this.generateRemainingPlayersMessage(round),
-            actionRows: this.isClipMode()
-                ? [
-                      {
-                          type: Eris.Constants.ComponentTypes.ACTION_ROW,
-                          components: this.generateClipButton(),
-                      },
-                  ]
-                : undefined,
         });
 
         this.startHiddenUpdateTimer();
@@ -1999,25 +1918,7 @@ export default class GameSession extends Session {
                 },
             ),
             thumbnailUrl: KmqImages.LISTENING,
-            actionRows: [
-                {
-                    type: Eris.Constants.ComponentTypes.ACTION_ROW,
-                    components: this.generateClipButton(),
-                },
-            ],
         });
-    }
-
-    private generateClipButton(): Eris.InteractionButton[] {
-        return [
-            {
-                type: Eris.Constants.ComponentTypes.BUTTON,
-                style: Eris.Constants.ButtonStyles.SECONDARY,
-                custom_id: ClipAction.NEW_CLIP,
-                label: i18n.translate(this.guildID, "misc.newClip"),
-                emoji: { name: "🎬", id: null },
-            },
-        ];
     }
 
     private async sendStartRoundMessage(
