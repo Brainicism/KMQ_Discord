@@ -678,18 +678,9 @@ export default abstract class Session {
         const isClipMode = this.isGameSession() && this.isClipMode();
         if (isClipMode) {
             const clipGameRound = round as ClipGameRound;
-            switch (clipAction) {
-                case ClipAction.NEW_CLIP:
-                    // Clip mode and the user requested another segment
-                    seekLocation = songDuration * (0.6 * Math.random());
-                    break;
-                case ClipAction.REPLAY:
-                case ClipAction.END_ROUND:
-                    seekLocation = clipGameRound.seekLocation!;
-                    break;
-                default:
-                    // We enter here when the round is first started in clip mode
-                    break;
+            if (clipAction) {
+                // Set to the previous play's seek location if replaying
+                seekLocation = clipGameRound.seekLocation!;
             }
 
             clipGameRound.seekLocation = seekLocation;
@@ -762,12 +753,6 @@ export default abstract class Session {
                             CLIP_PADDING_BEGINNING_SECONDS
                         ).toString(),
                     );
-                }
-
-                // Set the time the clip started either at the start of the round, or when a new clip is selected
-                if (!clipAction || clipAction === ClipAction.NEW_CLIP) {
-                    const clipGameRound = round as ClipGameRound;
-                    clipGameRound.clipStartedAt = Date.now();
                 }
             }
 
