@@ -1435,15 +1435,6 @@
         "classic": {
             "yourScore": "Deine Punktzahl ist {{score}}."
         },
-        "clip": {
-            "newClip": {
-                "request": {
-                    "description": "{{voteCounter}} neue Clip-Stimmen erhalten.",
-                    "title": "Neue Clip-Anfrage"
-                },
-                "success": "{{voteCounter}} neue Clip-Stimmen erhalten. Wird abgespielt..."
-            }
-        },
         "conflict": "Konflikt",
         "duration": "Dauer",
         "elimination": {
@@ -1490,7 +1481,6 @@
                 "guildBanned": "Dieser Server darf KMQ nicht verwenden. Wende dich für Einsprüche an den offiziellen KMQ-Support-Server unter {{supportServer}}.",
                 "guildOnly": "KMQ kann nur auf Servern verwendet werden.",
                 "invalidBookmark": "Du kannst nur Songs mit Lesezeichen versehen, die in den letzten {{BOOKMARK_MESSAGE_SIZE}} Runden gespielt wurden. Du musst die vom Bot gesendete Nachricht mit dem Song mit einem Lesezeichen versehen.",
-                "newClipTooEarly": "Warte kurz, bevor du einen neuen Clip anforderst.",
                 "optionFromPreviousRound": "Du versuchst, eine Option aus einer bereits abgeschlossenen Runde auszuwählen.",
                 "playerBanned": "Du bist von der Nutzung von KMQ ausgeschlossen. Für Einsprüche wende dich an den offiziellen KMQ-Support-Server unter {{supportServer}}."
             },
@@ -1623,7 +1613,6 @@
             "title": "🚀 Aufrüsten!"
         },
         "listOfGroups": "Liste der Gruppen",
-        "newClip": "Neuer Clip",
         "no": "Nein",
         "none": "Keiner",
         "notApplicable": "/A",
