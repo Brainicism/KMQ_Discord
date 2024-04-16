@@ -667,10 +667,12 @@ export default abstract class Session {
                 seekLocation = 0;
                 break;
             case SeekType.MIDDLE:
+                // Play from [0.4, 0.6]
                 seekLocation = songDuration * (0.4 + 0.2 * Math.random());
                 break;
             case SeekType.RANDOM:
             default:
+                // Play from [0, 0.6]
                 seekLocation = songDuration * (0.6 * Math.random());
                 break;
         }
@@ -689,6 +691,8 @@ export default abstract class Session {
                     break;
                 default:
                     // We enter here when the round is first started in clip mode
+                    // Ignore seek above and play from [0.2, 0.8]
+                    seekLocation = songDuration * (0.2 + 0.6 * Math.random());
                     break;
             }
 

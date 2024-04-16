@@ -984,6 +984,14 @@ export async function generateOptionsMessage(
         }
     }
 
+    // Special case: seek is conflicting only when current game is clip
+    if (isClipMode) {
+        optionStrings[GameOption.SEEK_TYPE] = generateConflictingCommandEntry(
+            optionStrings[GameOption.SEEK_TYPE] as string,
+            `play ${GameType.CLIP}`,
+        );
+    }
+
     const gameOptionConflictCheckMap = [
         {
             conflictCheck: guildPreference.isGroupsMode.bind(guildPreference),
