@@ -3,8 +3,8 @@ import {
     EMBED_SUCCESS_BONUS_COLOR,
 } from "../constants";
 import { IPCLogger } from "../logger";
+import Eris from "eris";
 import Round from "./round";
-import type Eris from "eris";
 import type MessageContext from "./message_context";
 import type PlayerRoundResult from "../interfaces/player_round_result";
 import type QueriedSong from "./queried_song";
@@ -57,12 +57,13 @@ export default class ListeningRound extends Round {
     async interactionSuccessfulSkip(): Promise<void> {
         if (!this.interactionMessage) return;
         this.interactionComponents = this.interactionComponents.map((x) => ({
-            type: 1,
+            type: Eris.Constants.ComponentTypes.ACTION_ROW,
             components: x.components.map((y: Eris.InteractionButton) => ({
-                label: y.label,
-                custom_id: y.custom_id,
-                style: y.custom_id === this.interactionSkipUUID ? 3 : y.style,
-                type: y.type,
+                ...y,
+                style:
+                    y.custom_id === this.interactionSkipUUID
+                        ? Eris.Constants.ButtonStyles.SUCCESS
+                        : y.style,
                 disabled: y.custom_id === this.interactionSkipUUID,
             })),
         }));
@@ -81,15 +82,14 @@ export default class ListeningRound extends Round {
 
     async interactionMarkButtons(): Promise<void> {
         if (!this.interactionMessage) return;
-        this.interactionComponents = this.interactionComponents.map((x) => ({
-            type: 1,
-            components: x.components.map((y: Eris.InteractionButton) => ({
-                label: y.label,
-                custom_id: y.custom_id,
-                style: y.style,
-                type: y.type,
-                disabled: y.custom_id === this.interactionSkipUUID,
-            })),
+        this.interactionComponents = this.interactionComponents.map((row) => ({
+            type: Eris.Constants.ComponentTypes.ACTION_ROW,
+            components: row.components.map(
+                (button: Eris.InteractionButton) => ({
+                    ...button,
+                    disabled: button.custom_id === this.interactionSkipUUID,
+                }),
+            ),
         }));
 
         try {

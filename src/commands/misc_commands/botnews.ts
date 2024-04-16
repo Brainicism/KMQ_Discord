@@ -68,9 +68,9 @@ export default class BotNewsCommand implements BaseCommand {
                     messageContext.guildID,
                     "command.botnews.updates.footer",
                 )}`,
-                components: [
+                actionRows: [
                     {
-                        type: 1,
+                        type: Eris.Constants.ComponentTypes.ACTION_ROW,
                         components: [
                             {
                                 style: 5,

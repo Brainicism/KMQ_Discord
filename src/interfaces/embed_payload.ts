@@ -13,5 +13,5 @@ export default interface EmbedPayload {
         avatarUrl: string;
     };
     color?: number;
-    components?: Eris.ActionRow[];
+    actionRows?: Eris.ActionRow[];
 }

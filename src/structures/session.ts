@@ -30,6 +30,7 @@ import {
 import { sql } from "kysely";
 import ClipAction from "../enums/clip_action";
 import EnvVariableManager from "../env_variable_manager";
+import Eris from "eris";
 import FactGenerator from "../fact_generator";
 import GameRound from "./game_round";
 import GuessModeType from "../enums/option_types/guess_mode_type";
@@ -46,7 +47,6 @@ import i18n from "../helpers/localization_manager";
 import type BookmarkedSong from "../interfaces/bookmarked_song";
 import type ClipGameRound from "./clip_game_round";
 import type EmbedPayload from "../interfaces/embed_payload";
-import type Eris from "eris";
 import type GameSession from "./game_session";
 import type GuildPreference from "./guild_preference";
 import type KmqMember from "./kmq_member";
@@ -912,8 +912,8 @@ export default abstract class Session {
         locale: LocaleType,
     ): Eris.InteractionButton {
         return {
-            type: 2,
-            style: 1,
+            type: Eris.Constants.ComponentTypes.BUTTON,
+            style: Eris.Constants.ButtonStyles.PRIMARY,
             label: i18n.translate(locale, "misc.bookmark"),
             custom_id: `${BOOKMARK_BUTTON_PREFIX}:${round.song.youtubeLink}`,
             emoji: {
@@ -1028,8 +1028,8 @@ export default abstract class Session {
         } else if (round instanceof ListeningRound) {
             round.interactionSkipUUID = uuid.v4() as string;
             buttons.push({
-                type: 2,
-                style: 1,
+                type: Eris.Constants.ComponentTypes.BUTTON,
+                style: Eris.Constants.ButtonStyles.PRIMARY,
                 custom_id: round.interactionSkipUUID,
                 emoji: {
                     id: null,
@@ -1038,8 +1038,13 @@ export default abstract class Session {
             });
         }
 
-        round.interactionComponents = [{ type: 1, components: buttons }];
-        embed.components = round.interactionComponents;
+        round.interactionComponents = [
+            {
+                type: Eris.Constants.ComponentTypes.ACTION_ROW,
+                components: buttons,
+            },
+        ];
+        embed.actionRows = round.interactionComponents;
         embed.thumbnailUrl = thumbnailUrl;
         embed.footerText = footerText;
         return sendInfoMessage(messageContext, embed, shouldReply);

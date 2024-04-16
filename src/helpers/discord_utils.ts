@@ -688,7 +688,7 @@ export async function sendErrorMessage(
                     url: embedPayload.url,
                 },
             ],
-            components: embedPayload.components,
+            components: embedPayload.actionRows,
         },
         messageContext.author.id,
         interaction,
@@ -769,7 +769,7 @@ export async function sendInfoMessage(
                           failIfNotExists: false,
                       }
                     : undefined,
-            components: embedPayload.components,
+            components: embedPayload.actionRows,
             content: content || undefined,
         },
         messageContext.author.id,
