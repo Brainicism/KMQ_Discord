@@ -1,7 +1,7 @@
 /* eslint-disable no-return-assign */
 import * as uuid from "uuid";
+import Eris from "eris";
 import _ from "lodash";
-import type Eris from "eris";
 
 import {
     bold,
@@ -1006,14 +1006,14 @@ export default class GameSession extends Session {
                     title: `🎉 ${winnerMessage} 🎉`,
                     fields,
                     footerText,
-                    components: [
+                    actionRows: [
                         {
-                            type: 1,
+                            type: Eris.Constants.ComponentTypes.ACTION_ROW,
                             components: [
                                 {
-                                    style: 5,
+                                    style: Eris.Constants.ButtonStyles.LINK,
                                     url: VOTE_LINK,
-                                    type: 2 as const,
+                                    type: Eris.Constants.ComponentTypes.BUTTON,
                                     emoji: { name: "✅", id: null },
                                     label: i18n.translate(
                                         this.guildID,
@@ -1021,9 +1021,9 @@ export default class GameSession extends Session {
                                     ),
                                 },
                                 {
-                                    style: 5,
+                                    style: Eris.Constants.ButtonStyles.LINK,
                                     url: REVIEW_LINK,
-                                    type: 2 as const,
+                                    type: Eris.Constants.ComponentTypes.BUTTON,
                                     emoji: { name: "📖", id: null },
                                     label: i18n.translate(
                                         this.guildID,
@@ -1031,9 +1031,9 @@ export default class GameSession extends Session {
                                     ),
                                 },
                                 {
-                                    style: 5,
+                                    style: Eris.Constants.ButtonStyles.LINK,
                                     url: "https://discord.gg/RCuzwYV",
-                                    type: 2,
+                                    type: Eris.Constants.ComponentTypes.BUTTON,
                                     emoji: { name: "🎵", id: null },
                                     label: i18n.translate(
                                         this.guildID,
@@ -1812,8 +1812,8 @@ export default class GameSession extends Session {
 
             round.interactionCorrectAnswerUUID = uuid.v4() as string;
             buttons.push({
-                type: 2,
-                style: 1,
+                type: Eris.Constants.ComponentTypes.BUTTON,
+                style: Eris.Constants.ButtonStyles.PRIMARY,
                 label: correctChoice.displayedName.substring(0, 70),
                 custom_id: round.interactionCorrectAnswerUUID,
             });
@@ -1826,20 +1826,20 @@ export default class GameSession extends Session {
             case AnswerType.MULTIPLE_CHOICE_EASY:
                 actionRows = [
                     {
-                        type: 1,
+                        type: Eris.Constants.ComponentTypes.ACTION_ROW,
                         components: buttons,
                     },
                 ];
                 break;
             case AnswerType.MULTIPLE_CHOICE_MED:
                 actionRows = chunkArray(buttons, 3).map((x) => ({
-                    type: 1,
+                    type: Eris.Constants.ComponentTypes.ACTION_ROW,
                     components: x,
                 }));
                 break;
             case AnswerType.MULTIPLE_CHOICE_HARD:
                 actionRows = chunkArray(buttons, 4).map((x) => ({
-                    type: 1,
+                    type: Eris.Constants.ComponentTypes.ACTION_ROW,
                     components: x,
                 }));
                 break;
@@ -1850,7 +1850,7 @@ export default class GameSession extends Session {
 
                 actionRows = [
                     {
-                        type: 1,
+                        type: Eris.Constants.ComponentTypes.ACTION_ROW,
                         components: buttons,
                     },
                 ];
@@ -1865,7 +1865,7 @@ export default class GameSession extends Session {
         ];
 
         actionRows.push({
-            type: 1,
+            type: Eris.Constants.ComponentTypes.ACTION_ROW,
             components: lastRow,
         });
 
@@ -1885,7 +1885,7 @@ export default class GameSession extends Session {
                                 : i18n.translate(this.guildID, "misc.song"),
                     },
                 ),
-                components: actionRows,
+                actionRows,
                 thumbnailUrl: KmqImages.LISTENING,
             },
         );

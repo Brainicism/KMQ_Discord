@@ -17,6 +17,7 @@ import {
     getMention,
 } from "../helpers/utils";
 import ClipAction from "../enums/clip_action";
+import Eris from "eris";
 import ExpBonusModifier from "../enums/exp_bonus_modifier";
 import GuessModeType from "../enums/option_types/guess_mode_type";
 import KmqMember from "./kmq_member";
@@ -26,7 +27,6 @@ import State from "../state";
 import _ from "lodash";
 import i18n from "../helpers/localization_manager";
 import levenshtien from "damerau-levenshtein";
-import type Eris from "eris";
 import type MessageContext from "./message_context";
 import type PlayerRoundResult from "../interfaces/player_round_result";
 import type QueriedSong from "./queried_song";
@@ -378,7 +378,7 @@ export default class GameRound extends Round {
         if (!this.interactionMessage) return;
         const actionRows: Eris.ActionRow[] = this.interactionComponents.map(
             (actionRow) => ({
-                type: 1,
+                type: Eris.Constants.ComponentTypes.ACTION_ROW,
                 components: actionRow.components.map(
                     (button: Eris.InteractionButton) => {
                         if (
@@ -405,7 +405,11 @@ export default class GameRound extends Round {
                             ] === 0;
 
                         let label = button.label;
-                        let style: 1 | 3 | 4;
+                        let style:
+                            | typeof Eris.Constants.ButtonStyles.PRIMARY
+                            | typeof Eris.Constants.ButtonStyles.SUCCESS
+                            | typeof Eris.Constants.ButtonStyles.DANGER;
+
                         if (showCorrectAnswer) {
                             if (
                                 this.interactionCorrectAnswerUUID ===
@@ -415,26 +419,26 @@ export default class GameRound extends Round {
                                     label += ` (${correctGuesses})`;
                                 }
 
-                                style = 3;
+                                style = Eris.Constants.ButtonStyles.SUCCESS;
                             } else if (noGuesses) {
-                                style = 1;
+                                style = Eris.Constants.ButtonStyles.PRIMARY;
                             } else {
                                 label += ` (${
                                     this.interactionIncorrectAnswerUUIDs[
                                         button.custom_id
                                     ]
                                 })`;
-                                style = 4;
+                                style = Eris.Constants.ButtonStyles.DANGER;
                             }
                         } else {
-                            style = 1;
+                            style = Eris.Constants.ButtonStyles.PRIMARY;
                         }
 
                         return {
                             label,
                             custom_id: button.custom_id,
                             style,
-                            type: 2,
+                            type: Eris.Constants.ComponentTypes.BUTTON,
                             disabled: true,
                             emoji: button.emoji,
                         };
