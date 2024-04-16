@@ -679,14 +679,17 @@ export default abstract class Session {
 
         const isClipMode = this.isGameSession() && this.isClipMode();
         if (isClipMode) {
+            const clipGameRound = round as ClipGameRound;
             if (clipAction) {
                 // Set to the previous play's seek location if replaying
-                seekLocation = (round as ClipGameRound).seekLocation!;
+                seekLocation = clipGameRound.seekLocation!;
             } else {
                 // We enter here when the round is first started in clip mode
                 // Ignore seek above and play from [0.2, 0.8]
                 seekLocation = songDuration * (0.2 + 0.6 * Math.random());
             }
+
+            clipGameRound.seekLocation = seekLocation;
         }
 
         if (isGodMode) {
