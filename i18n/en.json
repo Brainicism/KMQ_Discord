@@ -1435,15 +1435,6 @@
         "classic": {
             "yourScore": "Your score is {{score}}."
         },
-        "clip": {
-            "newClip": {
-                "request": {
-                    "description": "{{voteCounter}} new clip votes received.",
-                    "title": "New Clip Request"
-                },
-                "success": "{{voteCounter}} new clip votes received. Playing..."
-            }
-        },
         "conflict": "conflict",
         "duration": "Duration",
         "elimination": {
@@ -1490,7 +1481,6 @@
                 "guildBanned": "This server is banned from using KMQ. For appeals, contact the official KMQ support server at {{supportServer}}.",
                 "guildOnly": "KMQ can only be used in servers.",
                 "invalidBookmark": "You can only bookmark songs recently played in the last {{BOOKMARK_MESSAGE_SIZE}} rounds. You must bookmark the message sent by the bot containing the song.",
-                "newClipTooEarly": "Wait a bit before requesting a new clip.",
                 "optionFromPreviousRound": "You are attempting to pick an option from an already completed round.",
                 "playerBanned": "You are banned from using KMQ. For appeals, contact the official KMQ support server at {{supportServer}}."
             },
@@ -1623,7 +1613,6 @@
             "title": "🚀 Power Up!"
         },
         "listOfGroups": "list of groups",
-        "newClip": "New Clip",
         "no": "No",
         "none": "None",
         "notApplicable": "N/A",

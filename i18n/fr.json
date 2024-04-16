@@ -1435,15 +1435,6 @@
         "classic": {
             "yourScore": "Votre score est de {{score}}."
         },
-        "clip": {
-            "newClip": {
-                "request": {
-                    "description": "{{voteCounter}} nouveaux votes pour le clip reçus.",
-                    "title": "Demande de nouveau clip"
-                },
-                "success": "{{voteCounter}} nouveaux votes pour le clip reçus. Lecture..."
-            }
-        },
         "conflict": "conflit",
         "duration": "Durée",
         "elimination": {
@@ -1490,7 +1481,6 @@
                 "guildBanned": "Ce serveur est banni de l'utilisation de KMQ. Pour faire appel, contactez le serveur de support officiel de KMQ à {{supportServer}}.",
                 "guildOnly": "KMQ ne peut être utilisé que dans les serveurs.",
                 "invalidBookmark": "Vous ne pouvez marquer que les chansons récemment jouées dans les {{BOOKMARK_MESSAGE_SIZE}} derniers tours. Vous devez marquer le message envoyé par le bot contenant la chanson.",
-                "newClipTooEarly": "Attendez un peu avant de demander un nouveau clip.",
                 "optionFromPreviousRound": "Vous essayez de choisir une option d'un tour déjà terminé.",
                 "playerBanned": "Vous êtes banni de l'utilisation de KMQ. Pour faire appel, contactez le serveur de support officiel de KMQ à {{supportServer}}."
             },
@@ -1623,7 +1613,6 @@
             "title": "🚀 Booster!"
         },
         "listOfGroups": "liste des groupes",
-        "newClip": "Nouveau Clip",
         "no": "Non",
         "none": "Aucun",
         "notApplicable": "N/A",
