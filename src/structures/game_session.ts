@@ -537,8 +537,12 @@ export default class GameSession extends Session {
         guess: string,
         createdAt: number,
     ): Promise<void> {
-        if (!this.connection) return;
-        if (this.connection.listenerCount("end") === 0) return;
+        // Allow clip mode guesses in between clip replays
+        if (!this.isClipMode()) {
+            if (!this.connection) return;
+            if (this.connection.listenerCount("end") === 0) return;
+        }
+
         if (!this.round) return;
         if (!this.guessEligible(messageContext, createdAt)) return;
 
