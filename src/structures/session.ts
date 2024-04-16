@@ -771,7 +771,10 @@ export default abstract class Session {
                 }
             }
 
-            round.songStartedAt = Date.now();
+            // Only set songStartedAt for clip mode at the start of the round
+            if (!isClipMode || round.songStartedAt === null) {
+                round.songStartedAt = Date.now();
+            }
 
             this.connection.play(stream, {
                 inputArgs,
