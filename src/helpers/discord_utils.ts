@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import * as uuid from "uuid";
 import {
-    BOOKMARK_COMMAND_NAME,
+    ConflictingGameOptions,
+    GameOptionCommand,
+    PriorityGameOption,
+} from "../types";
+import {
     DataFiles,
     EMBED_DESCRIPTION_MAX_LENGTH,
     EMBED_ERROR_COLOR,
@@ -15,11 +19,6 @@ import {
     SPOTIFY_BASE_URL,
     YOUTUBE_PLAYLIST_BASE_URL,
 } from "../constants";
-import {
-    ConflictingGameOptions,
-    GameOptionCommand,
-    PriorityGameOption,
-} from "../types";
 import { IPCLogger } from "../logger";
 import {
     bold,
@@ -2267,10 +2266,6 @@ export const updateAppCommands = async (
 
     if (appCommandType === AppCommandsAction.RELOAD) {
         commandStructures = [
-            {
-                name: BOOKMARK_COMMAND_NAME,
-                type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
-            },
             {
                 name: PROFILE_COMMAND_NAME,
                 type: Eris.Constants.ApplicationCommandTypes.MESSAGE,

@@ -1,4 +1,7 @@
-import { EMBED_SUCCESS_BONUS_COLOR } from "../constants";
+import {
+    BOOKMARK_BUTTON_PREFIX,
+    EMBED_SUCCESS_BONUS_COLOR,
+} from "../constants";
 import { IPCLogger } from "../logger";
 import Round from "./round";
 import type Eris from "eris";
@@ -47,7 +50,7 @@ export default class ListeningRound extends Round {
     isValidInteraction(interactionID: string): boolean {
         return (
             interactionID === this.interactionSkipUUID ||
-            interactionID === "bookmark"
+            interactionID.startsWith(BOOKMARK_BUTTON_PREFIX)
         );
     }
 
