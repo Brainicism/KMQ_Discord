@@ -667,23 +667,26 @@ export default abstract class Session {
                 seekLocation = 0;
                 break;
             case SeekType.MIDDLE:
+                // Play from [0.4, 0.6]
                 seekLocation = songDuration * (0.4 + 0.2 * Math.random());
                 break;
             case SeekType.RANDOM:
             default:
+                // Play from [0, 0.6]
                 seekLocation = songDuration * (0.6 * Math.random());
                 break;
         }
 
         const isClipMode = this.isGameSession() && this.isClipMode();
         if (isClipMode) {
-            const clipGameRound = round as ClipGameRound;
             if (clipAction) {
                 // Set to the previous play's seek location if replaying
-                seekLocation = clipGameRound.seekLocation!;
+                seekLocation = (round as ClipGameRound).seekLocation!;
+            } else {
+                // We enter here when the round is first started in clip mode
+                // Ignore seek above and play from [0.2, 0.8]
+                seekLocation = songDuration * (0.2 + 0.6 * Math.random());
             }
-
-            clipGameRound.seekLocation = seekLocation;
         }
 
         if (isGodMode) {
@@ -756,7 +759,10 @@ export default abstract class Session {
                 }
             }
 
-            round.songStartedAt = Date.now();
+            // Only set songStartedAt for clip mode at the start of the round
+            if (!isClipMode || round.songStartedAt === null) {
+                round.songStartedAt = Date.now();
+            }
 
             this.connection.play(stream, {
                 inputArgs,
