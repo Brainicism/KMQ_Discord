@@ -1435,15 +1435,6 @@
         "classic": {
             "yourScore": "Tu puntuación es {{score}}."
         },
-        "clip": {
-            "newClip": {
-                "request": {
-                    "description": "{{voteCounter}} votos nuevos de clip recibidos.",
-                    "title": "Solicitud de Nuevo Clip"
-                },
-                "success": "{{voteCounter}} votos nuevos de clip recibidos. Reproduciendo..."
-            }
-        },
         "conflict": "conflicto",
         "duration": "Duración",
         "elimination": {
@@ -1490,7 +1481,6 @@
                 "guildBanned": "Este servidor está prohibido de usar KMQ. Para apelaciones, contacta al servidor de soporte oficial de KMQ en {{supportServer}}.",
                 "guildOnly": "KMQ sólo puede ser utilizado en servidores.",
                 "invalidBookmark": "Solo puedes marcar canciones que hayan sido reproducidas en las últimas {{BOOKMARK_MESSAGE_SIZE}} rondas. Debes marcar el mensaje enviado por el bot que contiene la canción.",
-                "newClipTooEarly": "Espera un poco antes de solicitar un nuevo clip.",
                 "optionFromPreviousRound": "Estás intentando elegir una opción de una ronda que ya ha sido completada.",
                 "playerBanned": "Estás prohibido de usar KMQ. Para apelaciones, contacta al servidor de soporte oficial de KMQ en {{supportServer}}."
             },
@@ -1623,7 +1613,6 @@
             "title": "🚀 ¡Potencia!"
         },
         "listOfGroups": "lista de grupos",
-        "newClip": "Nuevo Clip",
         "no": "No",
         "none": "Ninguno",
         "notApplicable": "N/A",

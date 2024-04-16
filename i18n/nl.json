@@ -1435,15 +1435,6 @@
         "classic": {
             "yourScore": "Je score is {{score}}."
         },
-        "clip": {
-            "newClip": {
-                "request": {
-                    "description": "{{voteCounter}} nieuwe clipstemmen ontvangen.",
-                    "title": "Nieuw Clipverzoek"
-                },
-                "success": "{{voteCounter}} nieuwe clipstemmen ontvangen. Speelt af..."
-            }
-        },
         "conflict": "conflict",
         "duration": "Tijdsduur",
         "elimination": {
@@ -1490,7 +1481,6 @@
                 "guildBanned": "Deze server mag KMQ niet gebruiken. Voor bezwaren kun je contact opnemen met de officiële KMQ-ondersteuningsserver op {{supportServer}}.",
                 "guildOnly": "KMQ kan alleen op servers worden gebruikt.",
                 "invalidBookmark": "Je kunt alleen nummers een bladwijzer geven die recentelijk in de laatste {{BOOKMARK_MESSAGE_SIZE}} ronden zijn afgespeeld. Je moet een bladwijzer plaatsen voor het bericht dat door de bot is verzonden en het nummer bevat.",
-                "newClipTooEarly": "Wacht even voordat je een nieuwe clip aanvraagt.",
                 "optionFromPreviousRound": "Je probeert een optie te kiezen uit een ronde die al is voltooid.",
                 "playerBanned": "U bent verbannen van het gebruik van KMQ. Voor bezwaren kunt u contact opnemen met de officiële KMQ-ondersteuningsserver op {{supportServer}}."
             },
@@ -1623,7 +1613,6 @@
             "title": "🚀 Upgrade!"
         },
         "listOfGroups": "lijst van groepen",
-        "newClip": "Nieuwe Clip",
         "no": "Nee",
         "none": "Geen",
         "notApplicable": "N/B",

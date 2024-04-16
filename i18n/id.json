@@ -1435,15 +1435,6 @@
         "classic": {
             "yourScore": "Skor Anda adalah {{score}}"
         },
-        "clip": {
-            "newClip": {
-                "request": {
-                    "description": "{{voteCounter}} suara klip baru diterima.",
-                    "title": "Permintaan Klip Baru"
-                },
-                "success": "{{voteCounter}} suara klip baru diterima. Memutar..."
-            }
-        },
         "conflict": "konflik",
         "duration": "Durasi",
         "elimination": {
@@ -1490,7 +1481,6 @@
                 "guildBanned": "Server ini dilarang menggunakan KMQ. Untuk banding, hubungi server dukungan resmi KMQ di {{supportServer}}.",
                 "guildOnly": "KMQ hanya dapat digunakan di server.",
                 "invalidBookmark": "Anda hanya dapat menandai lagu yang baru-baru ini diputar dalam {{BOOKMARK_MESSAGE_SIZE}} ronde terakhir. Anda harus menandai pesan yang dikirim oleh bot yang berisi lagu.",
-                "newClipTooEarly": "Tunggu sebentar sebelum meminta klip baru.",
                 "optionFromPreviousRound": "Anda mencoba memilih opsi dari ronde yang sudah selesai.",
                 "playerBanned": "Anda dilarang menggunakan KMQ. Untuk banding, hubungi server dukungan KMQ resmi di {{supportServer}}."
             },
@@ -1623,7 +1613,6 @@
             "title": "🚀 Nyalakan!"
         },
         "listOfGroups": "daftar grup",
-        "newClip": "Klip Baru",
         "no": "Tidak",
         "none": "Tidak Ada",
         "notApplicable": "Tidak tersedia",
