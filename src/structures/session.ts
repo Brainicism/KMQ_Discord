@@ -821,6 +821,7 @@ export default abstract class Session {
                         return;
                     } else {
                         // Give some time to guess the song after the last replay has happened
+                        // In addition to the time to receive this "end" event defined by CLIP_VC_END_TIMEOUT_MS
                         await delay(CLIP_LAST_REPLAY_DELAY_MS);
                     }
                 }
