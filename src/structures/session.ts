@@ -3,7 +3,7 @@ import {
     BOOKMARK_BUTTON_PREFIX,
     CLIP_LAST_REPLAY_DELAY_MS,
     CLIP_MAX_REPLAY_COUNT,
-    CLIP_PADDING_BEGINNING_SECONDS,
+    CLIP_PADDING_BEGINNING_MS,
     CLIP_VC_END_TIMEOUT_MS,
     KmqImages,
     specialFfmpegArgs,
@@ -753,12 +753,12 @@ export default abstract class Session {
                 } else {
                     encoderArgs.push(
                         "-af",
-                        `adelay=delays=${CLIP_PADDING_BEGINNING_SECONDS}s:all=1`,
+                        `adelay=delays=${CLIP_PADDING_BEGINNING_MS}ms:all=1`,
 
                         "-t",
                         (
                             this.clipDurationLength! +
-                            CLIP_PADDING_BEGINNING_SECONDS
+                            CLIP_PADDING_BEGINNING_MS / 1000
                         ).toString(),
                     );
                 }

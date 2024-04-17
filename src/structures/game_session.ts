@@ -35,7 +35,7 @@ import dbContext from "../database_context";
 import {
     CLIP_LAST_REPLAY_DELAY_MS,
     CLIP_MAX_REPLAY_COUNT,
-    CLIP_PADDING_BEGINNING_SECONDS,
+    CLIP_PADDING_BEGINNING_MS,
     CLIP_VC_END_TIMEOUT_MS,
     CUM_EXP_TABLE,
     ELIMINATION_DEFAULT_LIVES,
@@ -1708,7 +1708,7 @@ export default class GameSession extends Session {
                 (round.songStartedAt! +
                     (CLIP_MAX_REPLAY_COUNT + 1) *
                         (this.clipDurationLength! * 1000 +
-                            CLIP_PADDING_BEGINNING_SECONDS * 1000 +
+                            CLIP_PADDING_BEGINNING_MS +
                             CLIP_LAST_REPLAY_DELAY_MS +
                             CLIP_VC_END_TIMEOUT_MS)) /
                     1000,
