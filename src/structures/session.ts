@@ -1,8 +1,9 @@
 import * as uuid from "uuid";
 import {
     BOOKMARK_BUTTON_PREFIX,
+    CLIP_LAST_REPLAY_DELAY_MS,
     CLIP_MAX_REPLAY_COUNT,
-    CLIP_PADDING_BEGINNING_SECONDS,
+    CLIP_PADDING_BEGINNING_MS,
     CLIP_VC_END_TIMEOUT_MS,
     KmqImages,
     specialFfmpegArgs,
@@ -20,13 +21,14 @@ import {
     tryCreateInteractionSuccessAcknowledgement,
     tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
-import { ensureVoiceConnection } from "../helpers/game_utils";
 import {
+    delay,
     friendlyFormattedNumber,
     getMention,
     truncatedString,
     underline,
 } from "../helpers/utils";
+import { ensureVoiceConnection } from "../helpers/game_utils";
 import { sql } from "kysely";
 import ClipAction from "../enums/clip_action";
 import EnvVariableManager from "../env_variable_manager";
@@ -751,12 +753,12 @@ export default abstract class Session {
                 } else {
                     encoderArgs.push(
                         "-af",
-                        `adelay=delays=${CLIP_PADDING_BEGINNING_SECONDS}s:all=1`,
+                        `adelay=delays=${CLIP_PADDING_BEGINNING_MS}ms:all=1`,
 
                         "-t",
                         (
                             this.clipDurationLength! +
-                            CLIP_PADDING_BEGINNING_SECONDS
+                            CLIP_PADDING_BEGINNING_MS / 1000
                         ).toString(),
                     );
                 }
@@ -806,17 +808,22 @@ export default abstract class Session {
 
             if (this.isGameSession() && this.isClipMode()) {
                 const clipGameRound = round as ClipGameRound;
-                if (
-                    !round.finished &&
-                    clipGameRound.getReplayCount() < CLIP_MAX_REPLAY_COUNT
-                ) {
-                    clipGameRound.incrementReplays();
-                    await this.playSong(
-                        messageContext,
-                        round,
-                        ClipAction.REPLAY,
-                    );
-                    return;
+                if (!round.finished) {
+                    if (
+                        clipGameRound.getReplayCount() < CLIP_MAX_REPLAY_COUNT
+                    ) {
+                        clipGameRound.incrementReplays();
+                        await this.playSong(
+                            messageContext,
+                            round,
+                            ClipAction.REPLAY,
+                        );
+                        return;
+                    } else {
+                        // Give some time to guess the song after the last replay has happened
+                        // In addition to the time to receive this "end" event defined by CLIP_VC_END_TIMEOUT_MS
+                        await delay(CLIP_LAST_REPLAY_DELAY_MS);
+                    }
                 }
             }
 

@@ -1,7 +1,7 @@
 import {
-    CLIP_DEFAULT_DURATION,
-    CLIP_MAX_DURATION,
-    CLIP_MIN_DURATION,
+    CLIP_DEFAULT_DURATION_SEC,
+    CLIP_MAX_DURATION_SEC,
+    CLIP_MIN_DURATION_SEC,
     DataFiles,
     ELIMINATION_DEFAULT_LIVES,
     ELIMINATION_MAX_LIVES,
@@ -177,7 +177,7 @@ export default class PlayCommand implements BaseCommand {
                     guildID,
                     "command.play.help.example.clip",
                     {
-                        clipDuration: `\`${CLIP_DEFAULT_DURATION}\``,
+                        clipDuration: `\`${CLIP_DEFAULT_DURATION_SEC}\``,
                     },
                 ),
             },
@@ -419,7 +419,7 @@ export default class PlayCommand implements BaseCommand {
                         LocaleType.EN,
                         "command.play.help.example.clip",
                         {
-                            clipDuration: String(CLIP_DEFAULT_DURATION),
+                            clipDuration: String(CLIP_DEFAULT_DURATION_SEC),
                         },
                     ),
                     description_localizations: Object.values(LocaleType)
@@ -432,7 +432,7 @@ export default class PlayCommand implements BaseCommand {
                                     "command.play.help.example.clip",
                                     {
                                         clipDuration: String(
-                                            CLIP_DEFAULT_DURATION,
+                                            CLIP_DEFAULT_DURATION_SEC,
                                         ),
                                     },
                                 ),
@@ -461,8 +461,8 @@ export default class PlayCommand implements BaseCommand {
                                 ),
                             type: Eris.Constants.ApplicationCommandOptionTypes
                                 .NUMBER,
-                            min_value: CLIP_MIN_DURATION,
-                            max_value: CLIP_MAX_DURATION,
+                            min_value: CLIP_MIN_DURATION_SEC,
+                            max_value: CLIP_MAX_DURATION_SEC,
                         },
                     ],
                 },
@@ -1226,14 +1226,14 @@ export default class PlayCommand implements BaseCommand {
             let clipDuration: number | undefined;
             if (gameType === GameType.CLIP) {
                 if (livesOrClipDurationArg == null) {
-                    clipDuration = CLIP_DEFAULT_DURATION;
+                    clipDuration = CLIP_DEFAULT_DURATION_SEC;
                 } else {
                     clipDuration = parseFloat(livesOrClipDurationArg);
                     clipDuration = Math.round(clipDuration! * 100) / 100;
-                    if (clipDuration < CLIP_MIN_DURATION) {
-                        clipDuration = CLIP_MIN_DURATION;
-                    } else if (clipDuration > CLIP_MAX_DURATION) {
-                        clipDuration = CLIP_MAX_DURATION;
+                    if (clipDuration < CLIP_MIN_DURATION_SEC) {
+                        clipDuration = CLIP_MIN_DURATION_SEC;
+                    } else if (clipDuration > CLIP_MAX_DURATION_SEC) {
+                        clipDuration = CLIP_MAX_DURATION_SEC;
                     }
                 }
             }

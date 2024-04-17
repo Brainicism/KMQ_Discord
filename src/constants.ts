@@ -167,12 +167,13 @@ export const ELIMINATION_DEFAULT_LIVES = 10;
 export const ELIMINATION_MAX_LIVES = 10000;
 export const ELIMINATION_MIN_LIVES = 1;
 
-export const CLIP_MIN_DURATION = 0.25;
-export const CLIP_DEFAULT_DURATION = 1;
-export const CLIP_MAX_DURATION = 5;
+export const CLIP_MIN_DURATION_SEC = 0.25;
+export const CLIP_DEFAULT_DURATION_SEC = 1;
+export const CLIP_MAX_DURATION_SEC = 5;
 export const CLIP_MAX_REPLAY_COUNT = 2;
-export const CLIP_PADDING_BEGINNING_SECONDS = 0.25;
-export const CLIP_VC_END_TIMEOUT_MS = 2000;
+export const CLIP_PADDING_BEGINNING_MS = 250;
+export const CLIP_VC_END_TIMEOUT_MS = 3000;
+export const CLIP_LAST_REPLAY_DELAY_MS = 2000;
 
 export const enum GameOptionInternal {
     ADVANCED_SETTINGS = "advancedSettings",
