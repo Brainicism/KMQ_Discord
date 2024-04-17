@@ -33,6 +33,7 @@ import State from "../state";
 import dbContext from "../database_context";
 
 import {
+    CLIP_LAST_REPLAY_DELAY_MS,
     CLIP_MAX_REPLAY_COUNT,
     CLIP_PADDING_BEGINNING_SECONDS,
     CLIP_VC_END_TIMEOUT_MS,
@@ -1707,9 +1708,9 @@ export default class GameSession extends Session {
                 (round.songStartedAt! +
                     (CLIP_MAX_REPLAY_COUNT + 1) *
                         (this.clipDurationLength! +
-                            CLIP_PADDING_BEGINNING_SECONDS +
-                            CLIP_VC_END_TIMEOUT_MS / 1000) *
-                        1000) /
+                            CLIP_PADDING_BEGINNING_SECONDS * 1000 +
+                            CLIP_LAST_REPLAY_DELAY_MS +
+                            CLIP_VC_END_TIMEOUT_MS)) /
                     1000,
             );
         } else {
