@@ -1707,7 +1707,7 @@ export default class GameSession extends Session {
             timestamp = Math.ceil(
                 (round.songStartedAt! +
                     (CLIP_MAX_REPLAY_COUNT + 1) *
-                        (this.clipDurationLength! +
+                        (this.clipDurationLength! * 1000 +
                             CLIP_PADDING_BEGINNING_SECONDS * 1000 +
                             CLIP_LAST_REPLAY_DELAY_MS +
                             CLIP_VC_END_TIMEOUT_MS)) /
