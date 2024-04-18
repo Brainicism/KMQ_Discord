@@ -727,10 +727,7 @@ export default abstract class Session {
         try {
             let inputArgs = ["-ss", seekLocation.toString()];
             let encoderArgs: Array<string> = [];
-            const specialType = this.isListeningSession()
-                ? null
-                : this.guildPreference.gameOptions.specialType;
-
+            const specialType = this.guildPreference.gameOptions.specialType;
             if (specialType) {
                 const ffmpegArgs = specialFfmpegArgs[specialType](
                     seekLocation,
