@@ -752,15 +752,27 @@ export default abstract class Session {
                     );
                 } else {
                     encoderArgs.push(
-                        "-af",
-                        `adelay=delays=${CLIP_PADDING_BEGINNING_MS}ms:all=1`,
-
                         "-t",
                         (
                             this.clipDurationLength! +
                             CLIP_PADDING_BEGINNING_MS / 1000
                         ).toString(),
                     );
+
+                    if (specialType) {
+                        for (let i = 0; i < encoderArgs.length; i++) {
+                            if (encoderArgs[i] === "-af") {
+                                encoderArgs[i + 1] +=
+                                    `,adelay=delays=${CLIP_PADDING_BEGINNING_MS}ms:all=1`;
+                                break;
+                            }
+                        }
+                    } else {
+                        encoderArgs.push(
+                            "-af",
+                            `adelay=delays=${CLIP_PADDING_BEGINNING_MS}ms:all=1`,
+                        );
+                    }
                 }
             }
 
