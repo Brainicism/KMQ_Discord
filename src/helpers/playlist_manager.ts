@@ -901,6 +901,17 @@ export default class PlaylistManager {
         return new Promise(async (resolve, reject) => {
             const aliasIDs: Array<number> = [];
             for (const artist of song.artists) {
+                if (!artist) {
+                    logger.warn(
+                        `Failed matching Spotify song due to empty artist. song = ${JSON.stringify(
+                            song,
+                        )}.`,
+                    );
+
+                    resolve(`"${song.name}" - ${song.artists.join(", ")}`);
+                    return;
+                }
+
                 const lowercaseArtist =
                     GameRound.normalizePunctuationInName(artist);
 
