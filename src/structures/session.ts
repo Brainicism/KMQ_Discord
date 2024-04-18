@@ -1041,6 +1041,7 @@ export default abstract class Session {
                 type: Eris.Constants.ComponentTypes.BUTTON,
                 style: Eris.Constants.ButtonStyles.PRIMARY,
                 custom_id: round.interactionSkipUUID,
+                label: i18n.translate(locale, "misc.skip"),
                 emoji: {
                     id: null,
                     name: "⏩",
