@@ -17,11 +17,13 @@ import {
     getCurrentVoiceMembers,
     getDebugLogHeader,
     getGameInfoMessage,
+    getMajorityCount,
     getNumParticipants,
     getUserVoiceChannel,
     sendInfoMessage,
     sendPaginationedEmbed,
     tryCreateInteractionErrorAcknowledgement,
+    tryCreateInteractionSuccessAcknowledgement,
     tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
 import {
@@ -44,6 +46,7 @@ import {
     EMBED_SUCCESS_COLOR,
     KmqImages,
     REVIEW_LINK,
+    SKIP_BUTTON_PREFIX,
     VOTE_LINK,
 } from "../constants";
 import { IPCLogger } from "../logger";
@@ -65,6 +68,7 @@ import Player from "./player";
 import ProfileCommand from "../commands/game_commands/profile";
 import Scoreboard from "./scoreboard";
 import Session from "./session";
+import SkipCommand from "../commands/game_commands/skip";
 import TeamScoreboard from "./team_scoreboard";
 import i18n from "../helpers/localization_manager";
 import type { ButtonActionRow, GuildTextableMessage } from "../types";
@@ -703,6 +707,47 @@ export default class GameSession extends Session {
 
         if (!this.round) return false;
         const round = this.round;
+        if (interaction.data.custom_id.startsWith(SKIP_BUTTON_PREFIX)) {
+            const guildID = interaction.guildID as string;
+            round.userSkipped(interaction.member!.id);
+            if (SkipCommand.isSkipMajority(guildID, this)) {
+                await round.interactionSuccessfulSkip();
+                await tryCreateInteractionSuccessAcknowledgement(
+                    interaction,
+                    i18n.translate(guildID, "misc.skip"),
+                    i18n.translate(
+                        guildID,
+                        "command.skip.success.description",
+                        {
+                            skipCounter: `${round.getSkipCount()}/${getMajorityCount(
+                                guildID,
+                            )}`,
+                        },
+                    ),
+                );
+
+                await SkipCommand.skipSong(messageContext, this);
+                return true;
+            } else {
+                await tryCreateInteractionSuccessAcknowledgement(
+                    interaction,
+                    i18n.translate(guildID, "command.skip.vote.title"),
+                    i18n.translate(guildID, "command.skip.vote.description", {
+                        skipCounter: `${round.getSkipCount()}/${getMajorityCount(
+                            guildID,
+                        )}`,
+                    }),
+                );
+
+                logger.info(
+                    `${getDebugLogHeader(
+                        messageContext,
+                    )} | Skip vote received.`,
+                );
+
+                return true;
+            }
+        }
 
         if (
             round.getIncorrectGuessers().has(interaction.member!.id) ||
@@ -1859,10 +1904,8 @@ export default class GameSession extends Session {
         }
 
         const lastRow: Eris.InteractionButton[] = [
-            this.generateBookmarkButton(
-                round,
-                State.getGuildLocale(this.guildID),
-            ),
+            Session.generateBookmarkButton(round, locale),
+            Session.generateSkipButton(round, locale),
         ];
 
         actionRows.push({
