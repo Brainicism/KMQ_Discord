@@ -773,7 +773,7 @@ export default class GuildPreference {
     /**
      * Sets the advanced settings value
      * @param settingName - The advanced setting's name
-     * @param settingValue - The setting's vlaue
+     * @param settingValue - The setting's value
      */
     async updateAdvancedSetting(
         settingName: AdvancedCommandAction,

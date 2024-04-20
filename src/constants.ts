@@ -151,6 +151,7 @@ export const LEADERBOARD_ENTRIES_PER_PAGE = 10;
 export const PROFILE_COMMAND_NAME = "Profile";
 
 export const BOOKMARK_BUTTON_PREFIX = "bookmark";
+export const SKIP_BUTTON_PREFIX = "skip";
 
 export const EMBED_ERROR_COLOR = 0xed4245; // Red
 export const EMBED_SUCCESS_COLOR = 0x57f287; // Green
@@ -273,7 +274,7 @@ export const DataFiles = {
     CACHED_APP_CMD_IDS: path.join(__dirname, "../data/cached_app_cmd_ids.json"),
 };
 
-// ephermeral to the docker container, not mounted from host
+// ephemeral to the docker container, not mounted from host
 export const STANDBY_COOKIE = path.join(__dirname, "../standby");
 export const PROMOTED_COOKIE = path.join(__dirname, "../promoted");
 export const STATUS_COOKIE = path.join(__dirname, "../status");

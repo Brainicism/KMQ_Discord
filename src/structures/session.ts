@@ -1,4 +1,3 @@
-import * as uuid from "uuid";
 import {
     BOOKMARK_BUTTON_PREFIX,
     CLIP_LAST_REPLAY_DELAY_MS,
@@ -6,6 +5,7 @@ import {
     CLIP_PADDING_BEGINNING_MS,
     CLIP_VC_END_TIMEOUT_MS,
     KmqImages,
+    SKIP_BUTTON_PREFIX,
     specialFfmpegArgs,
 } from "../constants";
 import { IPCLogger } from "../logger";
@@ -591,13 +591,18 @@ export default abstract class Session {
 
     /**
      * @param interaction - The interaction
-     * @param _messageContext - The message context
+     * @param _messageContext - Unused
      * @returns whether the interaction has been handled
      */
     async handleComponentInteraction(
         interaction: Eris.ComponentInteraction,
         _messageContext: MessageContext,
     ): Promise<boolean> {
+        const round = this.round;
+        if (!round) {
+            return false;
+        }
+
         if (interaction.data.custom_id.startsWith(BOOKMARK_BUTTON_PREFIX)) {
             await this.handleBookmarkInteraction(interaction);
             return true;
@@ -879,11 +884,12 @@ export default abstract class Session {
         interaction: Eris.ComponentInteraction,
         _messageContext: MessageContext,
     ): Promise<boolean> {
-        if (!this.round) {
+        const round = this.round;
+
+        if (!round) {
             return false;
         }
 
-        const round = this.round;
         if (
             !getCurrentVoiceMembers(this.voiceChannelID)
                 .map((x) => x.id)
@@ -914,7 +920,7 @@ export default abstract class Session {
      * @param locale - The locale
      * @returns the button
      */
-    protected generateBookmarkButton(
+    protected static generateBookmarkButton(
         round: Round,
         locale: LocaleType,
     ): Eris.InteractionButton {
@@ -926,6 +932,28 @@ export default abstract class Session {
             emoji: {
                 id: null,
                 name: "🔖",
+            },
+        };
+    }
+
+    /**
+     * Generates a skip button
+     * @param round - The round
+     * @param locale - The locale
+     * @returns the button
+     */
+    protected static generateSkipButton(
+        round: Round,
+        locale: LocaleType,
+    ): Eris.InteractionButton {
+        return {
+            type: Eris.Constants.ComponentTypes.BUTTON,
+            style: Eris.Constants.ButtonStyles.PRIMARY,
+            custom_id: `${SKIP_BUTTON_PREFIX}:${round.song.youtubeLink}`,
+            label: i18n.translate(locale, "misc.skip"),
+            emoji: {
+                id: null,
+                name: "⏩",
             },
         };
     }
@@ -1007,7 +1035,7 @@ export default abstract class Session {
         const buttons: Array<Eris.InteractionButton> = [];
 
         // add bookmark button
-        buttons.push(this.generateBookmarkButton(round, locale));
+        buttons.push(Session.generateBookmarkButton(round, locale));
 
         if (round instanceof GameRound) {
             if (round.warnTypoReceived) {
@@ -1033,17 +1061,7 @@ export default abstract class Session {
                 return round.interactionMessage;
             }
         } else if (round instanceof ListeningRound) {
-            round.interactionSkipUUID = uuid.v4() as string;
-            buttons.push({
-                type: Eris.Constants.ComponentTypes.BUTTON,
-                style: Eris.Constants.ButtonStyles.PRIMARY,
-                custom_id: round.interactionSkipUUID,
-                label: i18n.translate(locale, "misc.skip"),
-                emoji: {
-                    id: null,
-                    name: "⏩",
-                },
-            });
+            buttons.push(Session.generateSkipButton(round, locale));
         }
 
         round.interactionComponents = [
