@@ -727,10 +727,7 @@ export default abstract class Session {
         try {
             let inputArgs = ["-ss", seekLocation.toString()];
             let encoderArgs: { [arg: string]: Array<string> } = {};
-            const specialType = this.isListeningSession()
-                ? null
-                : this.guildPreference.gameOptions.specialType;
-
+            const specialType = this.guildPreference.gameOptions.specialType;
             if (specialType) {
                 const ffmpegArgs = specialFfmpegArgs[specialType](
                     seekLocation,
@@ -1049,6 +1046,7 @@ export default abstract class Session {
                 type: Eris.Constants.ComponentTypes.BUTTON,
                 style: Eris.Constants.ButtonStyles.PRIMARY,
                 custom_id: round.interactionSkipUUID,
+                label: i18n.translate(locale, "misc.skip"),
                 emoji: {
                     id: null,
                     name: "⏩",
