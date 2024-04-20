@@ -731,7 +731,7 @@ export default abstract class Session {
 
         try {
             let inputArgs = ["-ss", seekLocation.toString()];
-            let encoderArgs: Array<string> = [];
+            let encoderArgs: { [arg: string]: Array<string> } = {};
             const specialType = this.guildPreference.gameOptions.specialType;
             if (specialType) {
                 const ffmpegArgs = specialFfmpegArgs[specialType](
@@ -745,24 +745,29 @@ export default abstract class Session {
 
             if (isClipMode) {
                 if (clipAction === ClipAction.END_ROUND) {
-                    encoderArgs.push(
-                        "-t",
+                    encoderArgs["-t"] = [
                         (
                             this.guildPreference.getSongStartDelay() +
                             this.clipDurationLength!
                         ).toString(),
-                    );
+                    ];
                 } else {
-                    encoderArgs.push(
-                        "-af",
-                        `adelay=delays=${CLIP_PADDING_BEGINNING_MS}ms:all=1`,
-
-                        "-t",
+                    encoderArgs["-t"] = [
                         (
                             this.clipDurationLength! +
                             CLIP_PADDING_BEGINNING_MS / 1000
                         ).toString(),
-                    );
+                    ];
+
+                    if (encoderArgs["-af"]) {
+                        encoderArgs["-af"].push(
+                            `adelay=delays=${CLIP_PADDING_BEGINNING_MS}ms:all=1`,
+                        );
+                    } else {
+                        encoderArgs["-af"] = [
+                            `adelay=delays=${CLIP_PADDING_BEGINNING_MS}ms:all=1`,
+                        ];
+                    }
                 }
             }
 
@@ -773,7 +778,10 @@ export default abstract class Session {
 
             this.connection.play(stream, {
                 inputArgs,
-                encoderArgs,
+                encoderArgs: Object.entries(encoderArgs).flatMap((x) => [
+                    x[0],
+                    x[1].join(","),
+                ]),
                 opusPassthrough: specialType === null && !isClipMode,
                 voiceDataTimeout: isClipMode
                     ? CLIP_VC_END_TIMEOUT_MS

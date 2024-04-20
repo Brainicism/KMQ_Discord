@@ -66,33 +66,47 @@ export const KMQ_USER_AGENT = "KMQ (K-pop Music Quiz)";
 export const specialFfmpegArgs = {
     [SpecialType.REVERSE]: (seek: number, duration: number) => ({
         inputArgs: [],
-        encoderArgs: ["-af", `atrim=end=${duration - seek},areverse`],
+        encoderArgs: {
+            "-af": [`atrim=end=${duration - seek}`, "areverse"],
+        },
     }),
     [SpecialType.SLOW]: (seek: number) => ({
         inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "rubberband=tempo=0.5"],
+        encoderArgs: {
+            "-af": ["rubberband=tempo=0.5"],
+        },
     }),
     [SpecialType.FAST]: (seek: number) => ({
         inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "rubberband=tempo=1.5"],
+        encoderArgs: {
+            "-af": ["rubberband=tempo=1.5"],
+        },
     }),
     [SpecialType.FASTER]: (seek: number) => ({
         inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "rubberband=tempo=2"],
+        encoderArgs: {
+            "-af": ["rubberband=tempo=2"],
+        },
     }),
     [SpecialType.LOW_PITCH]: (seek: number) => ({
         // 3 semitones lower
         inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "rubberband=pitch=0.840896"],
+        encoderArgs: {
+            "-af": ["rubberband=pitch=0.840896"],
+        },
     }),
     [SpecialType.HIGH_PITCH]: (seek: number) => ({
         // 4 semitones higher
         inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "rubberband=pitch=1.25992"],
+        encoderArgs: {
+            "-af": ["rubberband=pitch=1.25992"],
+        },
     }),
     [SpecialType.NIGHTCORE]: (seek: number) => ({
         inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "rubberband=pitch=1.25992:tempo=1.25"],
+        encoderArgs: {
+            "-af": ["rubberband=pitch=1.25992:tempo=1.25"],
+        },
     }),
 };
 
