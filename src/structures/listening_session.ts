@@ -1,4 +1,4 @@
-import { BOOKMARK_BUTTON_PREFIX } from "../constants";
+import { BOOKMARK_BUTTON_PREFIX, SKIP_BUTTON_PREFIX } from "../constants";
 import { IPCLogger } from "../logger";
 import { chooseRandom } from "../helpers/utils";
 import {
@@ -151,7 +151,6 @@ export default class ListeningSession extends Session {
 
         if (!this.round) return false;
         if (
-            !interaction.data.custom_id.startsWith(BOOKMARK_BUTTON_PREFIX) &&
             !(await this.handleInSessionInteractionFailures(
                 interaction,
                 messageContext,
@@ -165,7 +164,7 @@ export default class ListeningSession extends Session {
         if (interaction.data.custom_id.startsWith(BOOKMARK_BUTTON_PREFIX)) {
             await this.handleBookmarkInteraction(interaction);
             return true;
-        } else if (interaction.data.custom_id === round.interactionSkipUUID) {
+        } else if (interaction.data.custom_id.startsWith(SKIP_BUTTON_PREFIX)) {
             round.userSkipped(interaction.member!.id);
             if (SkipCommand.isSkipMajority(guildID, this)) {
                 await round.interactionSuccessfulSkip();
