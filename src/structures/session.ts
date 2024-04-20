@@ -926,7 +926,7 @@ export default abstract class Session {
     ): Eris.InteractionButton {
         return {
             type: Eris.Constants.ComponentTypes.BUTTON,
-            style: Eris.Constants.ButtonStyles.PRIMARY,
+            style: Eris.Constants.ButtonStyles.SECONDARY,
             label: i18n.translate(locale, "misc.bookmark"),
             custom_id: `${BOOKMARK_BUTTON_PREFIX}:${round.song.youtubeLink}`,
             emoji: {
@@ -948,7 +948,7 @@ export default abstract class Session {
     ): Eris.InteractionButton {
         return {
             type: Eris.Constants.ComponentTypes.BUTTON,
-            style: Eris.Constants.ButtonStyles.PRIMARY,
+            style: Eris.Constants.ButtonStyles.SECONDARY,
             custom_id: `${SKIP_BUTTON_PREFIX}:${round.song.youtubeLink}`,
             label: i18n.translate(locale, "misc.skip"),
             emoji: {
