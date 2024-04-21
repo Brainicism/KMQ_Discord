@@ -833,6 +833,12 @@ export default abstract class Session {
                         // Give some time to guess the song after the last replay has happened
                         // In addition to the time to receive this "end" event defined by CLIP_VC_END_TIMEOUT_MS
                         await delay(CLIP_LAST_REPLAY_DELAY_MS);
+                        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                        if (round.finished) {
+                            // The round was ended by a guess while we were waiting, so don't try to end the round, as
+                            // the next round will be started by the guess
+                            return;
+                        }
                     }
                 }
             }
