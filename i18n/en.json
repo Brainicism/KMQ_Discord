@@ -897,8 +897,8 @@
                 },
                 "interaction": {
                     "clipDuration": "Choose how long each clip will play for",
-                    "newClip": "Choose whether a new clip is played each time, instead of repeating the same clip",
-                    "lives": "Choose how many lives each player starts with"
+                    "lives": "Choose how many lives each player starts with",
+                    "newClip": "Choose whether a new clip is played each time, instead of repeating the same clip"
                 },
                 "name": "play",
                 "usage": {

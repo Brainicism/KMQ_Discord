@@ -897,7 +897,8 @@
                 },
                 "interaction": {
                     "clipDuration": "Kies hoe lang elke clip zal afspelen",
-                    "lives": "Kies met hoeveel levens elke speler begint"
+                    "lives": "Kies met hoeveel levens elke speler begint",
+                    "newClip": "Kies of er elke keer een nieuwe clip wordt afgespeeld, in plaats van dezelfde clip te herhalen"
                 },
                 "name": "spelen",
                 "usage": {

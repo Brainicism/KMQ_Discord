@@ -897,7 +897,8 @@
                 },
                 "interaction": {
                     "clipDuration": "Escolha por quanto tempo cada clipe será reproduzido",
-                    "lives": "Escolha com quantas vidas cada jogador começa"
+                    "lives": "Escolha com quantas vidas cada jogador começa",
+                    "newClip": "Escolha se um novo clipe é tocado cada vez, em vez de repetir o mesmo clipe"
                 },
                 "name": "play",
                 "usage": {
