@@ -897,7 +897,8 @@
                 },
                 "interaction": {
                     "clipDuration": "Choisissez la durée de lecture de chaque clip",
-                    "lives": "Choisissez le nombre de vies avec lequel chaque joueur commence"
+                    "lives": "Choisissez le nombre de vies avec lequel chaque joueur commence",
+                    "newClip": "Choisissez si un nouveau clip est joué à chaque fois, au lieu de répéter le même clip"
                 },
                 "name": "jouer",
                 "usage": {

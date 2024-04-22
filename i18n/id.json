@@ -897,7 +897,8 @@
                 },
                 "interaction": {
                     "clipDuration": "Pilih berapa lama setiap klip akan diputar",
-                    "lives": "Pilih berapa banyak nyawa yang dimiliki setiap pemain di awal"
+                    "lives": "Pilih berapa banyak nyawa yang dimiliki setiap pemain di awal",
+                    "newClip": "Pilih apakah klip baru diputar setiap kali, alih-alih mengulangi klip yang sama"
                 },
                 "name": "putar",
                 "usage": {
