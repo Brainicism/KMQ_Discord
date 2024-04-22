@@ -76,7 +76,7 @@ export default class PlayCommand implements BaseCommand {
 
     validations = {
         minArgCount: 0,
-        maxArgCount: 2,
+        maxArgCount: 3,
         arguments: [
             {
                 name: "gameType",
@@ -86,6 +86,10 @@ export default class PlayCommand implements BaseCommand {
             {
                 name: "gameArg",
                 type: "float" as const,
+            },
+            {
+                name: "newClip",
+                type: "boolean" as const,
             },
         ],
     };
@@ -464,6 +468,27 @@ export default class PlayCommand implements BaseCommand {
                             min_value: CLIP_MIN_DURATION_SEC,
                             max_value: CLIP_MAX_DURATION_SEC,
                         },
+                        {
+                            name: "new_clip",
+                            description: i18n.translate(
+                                LocaleType.EN,
+                                "command.play.help.interaction.newClip",
+                            ),
+                            description_localizations: Object.values(LocaleType)
+                                .filter((x) => x !== LocaleType.EN)
+                                .reduce(
+                                    (acc, locale) => ({
+                                        ...acc,
+                                        [locale]: i18n.translate(
+                                            locale,
+                                            "command.play.help.interaction.newClip",
+                                        ),
+                                    }),
+                                    {},
+                                ),
+                            type: Eris.Constants.ApplicationCommandOptionTypes
+                                .BOOLEAN,
+                        },
                     ],
                 },
             ],
@@ -501,11 +526,14 @@ export default class PlayCommand implements BaseCommand {
             const livesOrClipDuration =
                 interactionOptions["lives"] || interactionOptions["duration"];
 
+            const playNewClip = interactionOptions["new_clip"];
+
             await PlayCommand.startGame(
                 messageContext,
                 gameType,
                 livesOrClipDuration,
                 interactionKey === AnswerType.HIDDEN,
+                playNewClip,
                 interaction,
             );
         }
@@ -528,11 +556,16 @@ export default class PlayCommand implements BaseCommand {
                 ? null
                 : parsedMessage.components[1]!;
 
+        const playNewClip =
+            parsedMessage.components.length === 3 &&
+            parsedMessage.components[2]?.toLowerCase() === "true";
+
         await PlayCommand.startGame(
             MessageContext.fromMessage(message),
             gameType,
             livesOrClipDuration,
             gameTypeRaw === AnswerType.HIDDEN,
+            playNewClip,
         );
     };
 
@@ -964,6 +997,7 @@ export default class PlayCommand implements BaseCommand {
         gameType: GameType,
         livesOrClipDurationArg: string | null,
         hiddenMode: boolean,
+        newClip: boolean,
         interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const guildID = messageContext.guildID;
@@ -1224,6 +1258,7 @@ export default class PlayCommand implements BaseCommand {
             }
 
             let clipDuration: number | undefined;
+            let playNewClip = false;
             if (gameType === GameType.CLIP) {
                 if (livesOrClipDurationArg == null) {
                     clipDuration = CLIP_DEFAULT_DURATION_SEC;
@@ -1236,6 +1271,10 @@ export default class PlayCommand implements BaseCommand {
                         clipDuration = CLIP_MAX_DURATION_SEC;
                     }
                 }
+
+                if (newClip) {
+                    playNewClip = true;
+                }
             }
 
             gameSession = new GameSession(
@@ -1247,6 +1286,7 @@ export default class PlayCommand implements BaseCommand {
                 gameType,
                 lives,
                 clipDuration,
+                playNewClip,
             );
         }
 

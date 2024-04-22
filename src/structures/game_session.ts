@@ -102,6 +102,8 @@ export default class GameSession extends Session {
     /** How long a clip should be played for in the clip game mode, in seconds */
     public readonly clipDurationLength: number | null;
 
+    public readonly clipPlayNewClip: boolean | null;
+
     /** The current GameRound */
     public round: GameRound | null;
 
@@ -138,6 +140,7 @@ export default class GameSession extends Session {
         gameType: GameType,
         eliminationLives?: number,
         clipDurationLength?: number,
+        clipPlayNewClip?: boolean,
     ) {
         super(
             guildPreference,
@@ -156,6 +159,7 @@ export default class GameSession extends Session {
         this.lastGuesser = null;
         this.hiddenUpdateTimer = null;
         this.clipDurationLength = clipDurationLength || null;
+        this.clipPlayNewClip = clipPlayNewClip || null;
 
         switch (this.gameType) {
             case GameType.TEAMS:

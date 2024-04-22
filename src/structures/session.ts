@@ -59,19 +59,19 @@ import type Round from "./round";
 const logger = new IPCLogger("session");
 
 export default abstract class Session {
-    /** The ID of text channel in which the GameSession was started in, and will be active in */
+    /** The ID of text channel in which the Session was started in, and will be active in */
     public readonly textChannelID: string;
 
     /** The Discord Guild ID */
     public readonly guildID: string;
 
-    /** The time the GameSession was started in epoch milliseconds */
+    /** The time the ession was started in epoch milliseconds */
     public readonly startedAt: number;
 
-    /** The ID of the voice channel in which the GameSession was started in, and will be active in */
+    /** The ID of the voice channel in which the Session was started in, and will be active in */
     public voiceChannelID: string;
 
-    /** Initially the user who started the GameSession, transferred to current VC member */
+    /** Initially the user who started the Session, transferred to current VC member */
     public owner: KmqMember;
 
     /** The current active Eris.VoiceConnection */
@@ -83,10 +83,10 @@ export default abstract class Session {
     /** The current Round */
     public round: Round | null;
 
-    /** Whether the GameSession has ended or not */
+    /** Whether the Session has ended or not */
     public finished: boolean;
 
-    /** Whether the GameSession is active yet */
+    /** Whether the Session is active yet */
     public sessionInitialized: boolean;
 
     /** The guild preference */
@@ -108,13 +108,13 @@ export default abstract class Session {
         textChannelID: string,
         voiceChannelID: string,
         guildID: string,
-        gameSessionCreator: KmqMember,
+        sessionCreator: KmqMember,
     ) {
         this.guildPreference = guildPreference;
         this.textChannelID = textChannelID;
         this.voiceChannelID = voiceChannelID;
         this.guildID = guildID;
-        this.owner = gameSessionCreator;
+        this.owner = sessionCreator;
         this.lastActive = Date.now();
         this.startedAt = Date.now();
         this.finished = false;
@@ -132,7 +132,7 @@ export default abstract class Session {
     }
 
     /**
-     * Deletes the GameSession corresponding to a given guild ID
+     * Deletes the Session corresponding to a given guild ID
      * @param guildID - The guild ID
      */
     static deleteSession(guildID: string): void {
@@ -487,7 +487,7 @@ export default abstract class Session {
     }
 
     /**
-     * Updates the GameSession's lastActive timestamp and it's value in the data store
+     * Updates the Session's lastActive timestamp and it's value in the data store
      */
     async lastActiveNow(): Promise<void> {
         this.lastActive = Date.now();
@@ -687,7 +687,7 @@ export default abstract class Session {
         const isClipMode = this.isGameSession() && this.isClipMode();
         if (isClipMode) {
             const clipGameRound = round as ClipGameRound;
-            if (clipAction) {
+            if (clipAction && clipAction !== ClipAction.NEW_CLIP) {
                 // Set to the previous play's seek location if replaying
                 seekLocation = clipGameRound.seekLocation!;
             } else {
@@ -826,7 +826,9 @@ export default abstract class Session {
                         await this.playSong(
                             messageContext,
                             round,
-                            ClipAction.REPLAY,
+                            this.clipPlayNewClip
+                                ? ClipAction.NEW_CLIP
+                                : ClipAction.REPLAY,
                         );
                         return;
                     } else {
