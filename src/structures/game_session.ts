@@ -102,6 +102,7 @@ export default class GameSession extends Session {
     /** How long a clip should be played for in the clip game mode, in seconds */
     public readonly clipDurationLength: number | null;
 
+    /** Whether to play a new clip instead of repeating the same one in clip mode */
     public readonly clipPlayNewClip: boolean | null;
 
     /** The current GameRound */
