@@ -526,14 +526,12 @@ export default class PlayCommand implements BaseCommand {
             const livesOrClipDuration =
                 interactionOptions["lives"] || interactionOptions["duration"];
 
-            const playNewClip = interactionOptions["new_clip"];
-
             await PlayCommand.startGame(
                 messageContext,
                 gameType,
                 livesOrClipDuration,
                 interactionKey === AnswerType.HIDDEN,
-                playNewClip,
+                interactionOptions["new_clip"],
                 interaction,
             );
         }
@@ -1258,7 +1256,6 @@ export default class PlayCommand implements BaseCommand {
             }
 
             let clipDuration: number | undefined;
-            let playNewClip = false;
             if (gameType === GameType.CLIP) {
                 if (livesOrClipDurationArg == null) {
                     clipDuration = CLIP_DEFAULT_DURATION_SEC;
@@ -1271,10 +1268,6 @@ export default class PlayCommand implements BaseCommand {
                         clipDuration = CLIP_MAX_DURATION_SEC;
                     }
                 }
-
-                if (newClip) {
-                    playNewClip = true;
-                }
             }
 
             gameSession = new GameSession(
@@ -1286,7 +1279,7 @@ export default class PlayCommand implements BaseCommand {
                 gameType,
                 lives,
                 clipDuration,
-                playNewClip,
+                gameType === GameType.CLIP ? newClip : undefined,
             );
         }
 
