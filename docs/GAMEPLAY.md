@@ -231,7 +231,7 @@ Use `/help action:[command_name]` for more details about the following commands:
 -   `/upcomingreleases`: See a list of confirmed songs, albums, and EPs planned for release in the future
 -   `/guess`: Guess the name of the current song or artist when using `/play hidden`
 -   `/news`: Get a summary of the latest K-pop news from the internet!
--   `/bookmark`: View your previously bookmarked songs
+-   `/bookmarks`: View your previously bookmarked songs
 
 ## Game Option Commands
 

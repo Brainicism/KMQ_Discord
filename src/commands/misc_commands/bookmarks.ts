@@ -33,7 +33,7 @@ import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import type MatchedArtist from "src/interfaces/matched_artist";
 
-const COMMAND_NAME = "bookmark";
+const COMMAND_NAME = "bookmarks";
 const logger = new IPCLogger(COMMAND_NAME);
 
 // eslint-disable-next-line import/no-unused-modules
@@ -46,7 +46,7 @@ export default class BookmarksCommand implements BaseCommand {
         name: COMMAND_NAME,
         description: i18n.translate(
             guildID,
-            "command.bookmark.help.description",
+            "command.bookmarks.help.description",
         ),
         examples: [
             {
@@ -56,7 +56,7 @@ export default class BookmarksCommand implements BaseCommand {
                 )} ${BookmarksCommand.SONG_NAME}:pitapat`,
                 explanation: i18n.translate(
                     guildID,
-                    "command.bookmark.help.example.song",
+                    "command.bookmarks.help.example.song",
                     { song: "pitapat" },
                 ),
             },
@@ -67,7 +67,7 @@ export default class BookmarksCommand implements BaseCommand {
                 )} ${BookmarksCommand.ARTIST_NAME}:ILLIT`,
                 explanation: i18n.translate(
                     guildID,
-                    "command.bookmark.help.example.artist",
+                    "command.bookmarks.help.example.artist",
                     { artist: "ILLIT" },
                 ),
             },
@@ -85,7 +85,7 @@ export default class BookmarksCommand implements BaseCommand {
                     name: BookmarksCommand.SONG_NAME,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.bookmark.help.songName",
+                        "command.bookmarks.help.songName",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -94,7 +94,7 @@ export default class BookmarksCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.bookmark.help.songName",
+                                    "command.bookmarks.help.songName",
                                 ),
                             }),
                             {},
@@ -107,7 +107,7 @@ export default class BookmarksCommand implements BaseCommand {
                     name: BookmarksCommand.ARTIST_NAME,
                     description: i18n.translate(
                         LocaleType.EN,
-                        "command.bookmark.help.artistName",
+                        "command.bookmarks.help.artistName",
                     ),
                     description_localizations: Object.values(LocaleType)
                         .filter((x) => x !== LocaleType.EN)
@@ -116,7 +116,7 @@ export default class BookmarksCommand implements BaseCommand {
                                 ...acc,
                                 [locale]: i18n.translate(
                                     locale,
-                                    "command.bookmark.help.artistName",
+                                    "command.bookmarks.help.artistName",
                                 ),
                             }),
                             {},
@@ -188,10 +188,10 @@ export default class BookmarksCommand implements BaseCommand {
         if (bookmarkedSongs.length === 0) {
             await tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                i18n.translate(guildID, "command.bookmark.results.title"),
+                i18n.translate(guildID, "command.bookmarks.results.title"),
                 i18n.translate(
                     guildID,
-                    "command.bookmark.results.notFoundDescription",
+                    "command.bookmarks.results.notFoundDescription",
                 ),
             );
 
@@ -217,11 +217,11 @@ export default class BookmarksCommand implements BaseCommand {
             (embedFieldsSubset) => ({
                 title: i18n.translate(
                     guildID,
-                    "command.bookmark.results.title",
+                    "command.bookmarks.results.title",
                 ),
                 description: i18n.translate(
                     guildID,
-                    "command.bookmark.results.successDescription",
+                    "command.bookmarks.results.successDescription",
                 ),
                 fields: embedFieldsSubset,
             }),
