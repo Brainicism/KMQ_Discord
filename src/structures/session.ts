@@ -65,7 +65,7 @@ export default abstract class Session {
     /** The Discord Guild ID */
     public readonly guildID: string;
 
-    /** The time the ession was started in epoch milliseconds */
+    /** The time the Session was started in epoch milliseconds */
     public readonly startedAt: number;
 
     /** The ID of the voice channel in which the Session was started in, and will be active in */
