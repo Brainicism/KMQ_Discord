@@ -99,7 +99,7 @@
                 "title": "Begin Ignored"
             }
         },
-        "bookmark": {
+        "bookmarks": {
             "help": {
                 "artistName": "Filter bookmarks by the name of the artist.",
                 "description": "Fetch your bookmarked songs.",
@@ -107,7 +107,7 @@
                     "artist": "Filter down to bookmarks by `{{artist}}`",
                     "song": "Filter down to bookmarks that match `{{song}}`"
                 },
-                "name": "bookmark",
+                "name": "bookmarks",
                 "songName": "Filter bookmarks by the name of the song."
             },
             "results": {

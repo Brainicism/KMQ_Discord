@@ -99,21 +99,21 @@
                 "title": "Negeren begonnen"
             }
         },
-        "bookmark": {
+        "bookmarks": {
             "help": {
-                "artistName": "Filter bladwijzers op de naam van de artiest.",
-                "description": "Haal je gebladwijzerde nummers op.",
+                "artistName": "Filter bladwijzers op naam van de artiest.",
+                "description": "Haal je gebladwijzerde liedjes op.",
                 "example": {
-                    "artist": "Filter bladwijzers op `{{artist}}`",
-                    "song": "Filter bladwijzers op `{{song}}`"
+                    "artist": "Filter tot bladwijzers door `{{artist}}`",
+                    "song": "Filter tot bladwijzers die overeenkomen met `{{song}}`"
                 },
-                "name": "bladwijzer",
-                "songName": "Filter bladwijzers op de naam van het nummer."
+                "name": "bladwijzers",
+                "songName": "Filter bladwijzers op naam van het liedje."
             },
             "results": {
-                "notFoundDescription": "Geen bladwijzers gevonden.",
-                "successDescription": "Dit zijn je KMQ bladwijzers:",
-                "title": "Gebladwijzerde Nummers"
+                "notFoundDescription": "Er zijn geen bladwijzers gevonden.",
+                "successDescription": "Dit zijn je KMQ-bladwijzers:",
+                "title": "Gebladwijzerde liedjes"
             }
         },
         "botlanguage": {

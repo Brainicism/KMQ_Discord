@@ -37,7 +37,7 @@ const COMMAND_NAME = "bookmark";
 const logger = new IPCLogger(COMMAND_NAME);
 
 // eslint-disable-next-line import/no-unused-modules
-export default class BookmarkCommand implements BaseCommand {
+export default class BookmarksCommand implements BaseCommand {
     static ENTRIES_PER_PAGE = 10;
     static SONG_NAME = "song_name";
     static ARTIST_NAME = "artist_name";
@@ -52,8 +52,8 @@ export default class BookmarkCommand implements BaseCommand {
             {
                 example: `${clickableSlashCommand(
                     COMMAND_NAME,
-                    BookmarkCommand.SONG_NAME,
-                )} ${BookmarkCommand.SONG_NAME}:pitapat`,
+                    BookmarksCommand.SONG_NAME,
+                )} ${BookmarksCommand.SONG_NAME}:pitapat`,
                 explanation: i18n.translate(
                     guildID,
                     "command.bookmark.help.example.song",
@@ -63,8 +63,8 @@ export default class BookmarkCommand implements BaseCommand {
             {
                 example: `${clickableSlashCommand(
                     COMMAND_NAME,
-                    BookmarkCommand.ARTIST_NAME,
-                )} ${BookmarkCommand.ARTIST_NAME}:ILLIT`,
+                    BookmarksCommand.ARTIST_NAME,
+                )} ${BookmarksCommand.ARTIST_NAME}:ILLIT`,
                 explanation: i18n.translate(
                     guildID,
                     "command.bookmark.help.example.artist",
@@ -82,7 +82,7 @@ export default class BookmarkCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: BookmarkCommand.SONG_NAME,
+                    name: BookmarksCommand.SONG_NAME,
                     description: i18n.translate(
                         LocaleType.EN,
                         "command.bookmark.help.songName",
@@ -104,7 +104,7 @@ export default class BookmarkCommand implements BaseCommand {
                     autocomplete: true,
                 },
                 {
-                    name: BookmarkCommand.ARTIST_NAME,
+                    name: BookmarksCommand.ARTIST_NAME,
                     description: i18n.translate(
                         LocaleType.EN,
                         "command.bookmark.help.artistName",
@@ -210,7 +210,7 @@ export default class BookmarkCommand implements BaseCommand {
 
         const embedFieldSubsets = chunkArray(
             songEmbeds,
-            BookmarkCommand.ENTRIES_PER_PAGE,
+            BookmarksCommand.ENTRIES_PER_PAGE,
         );
 
         const embeds: Array<EmbedOptions> = embedFieldSubsets.map(
@@ -238,10 +238,10 @@ export default class BookmarkCommand implements BaseCommand {
     ): Promise<void> {
         const interactionData = getInteractionValue(interaction);
         const songName =
-            interactionData.interactionOptions[BookmarkCommand.SONG_NAME];
+            interactionData.interactionOptions[BookmarksCommand.SONG_NAME];
 
         const artistName =
-            interactionData.interactionOptions[BookmarkCommand.ARTIST_NAME];
+            interactionData.interactionOptions[BookmarksCommand.ARTIST_NAME];
 
         let artistID: number | undefined;
         if (artistName) {
@@ -282,9 +282,9 @@ export default class BookmarkCommand implements BaseCommand {
                 LocaleType.KO &&
                 lowercaseUserInput.length === 0);
 
-        if (focusedKey === BookmarkCommand.SONG_NAME) {
+        if (focusedKey === BookmarksCommand.SONG_NAME) {
             const artistName =
-                interactionData.interactionOptions[BookmarkCommand.ARTIST_NAME];
+                interactionData.interactionOptions[BookmarksCommand.ARTIST_NAME];
 
             let artistID: number | undefined;
             if (artistName) {
@@ -310,9 +310,9 @@ export default class BookmarkCommand implements BaseCommand {
                     showHangul,
                 ),
             );
-        } else if (focusedKey === BookmarkCommand.ARTIST_NAME) {
+        } else if (focusedKey === BookmarksCommand.ARTIST_NAME) {
             const enteredSongName =
-                interactionData.interactionOptions[BookmarkCommand.SONG_NAME];
+                interactionData.interactionOptions[BookmarksCommand.SONG_NAME];
 
             let matchingArtists: Array<MatchedArtist> = [];
             if (!enteredSongName) {

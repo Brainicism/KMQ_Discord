@@ -99,15 +99,15 @@
                 "title": "Ignorado"
             }
         },
-        "bookmark": {
+        "bookmarks": {
             "help": {
                 "artistName": "Filtrar marcadores por el nombre del artista.",
-                "description": "Obtén tus canciones marcadas.",
+                "description": "Obtener tus canciones marcadas.",
                 "example": {
-                    "artist": "Filtrar hasta los marcadores por `{{artist}}`",
-                    "song": "Filtrar hasta los marcadores que coincidan con `{{song}}`"
+                    "artist": "Filtrar los marcadores por `{{artist}}`",
+                    "song": "Filtrar los marcadores que coincidan con `{{song}}`"
                 },
-                "name": "marcar",
+                "name": "marcadores",
                 "songName": "Filtrar marcadores por el nombre de la canción."
             },
             "results": {

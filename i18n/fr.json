@@ -99,21 +99,21 @@
                 "title": "Commencer ignoré"
             }
         },
-        "bookmark": {
+        "bookmarks": {
             "help": {
                 "artistName": "Filtrer les favoris par le nom de l'artiste.",
                 "description": "Récupérez vos chansons mises en favoris.",
                 "example": {
-                    "artist": "Filtrer pour ne garder que les favoris par `{{artist}}`",
-                    "song": "Filtrer pour ne garder que les favoris qui correspondent à `{{song}}`"
+                    "artist": "Filtrer les favoris par `{{artist}}`",
+                    "song": "Filtrer les favoris qui correspondent à `{{song}}`"
                 },
-                "name": "favori",
+                "name": "favoris",
                 "songName": "Filtrer les favoris par le nom de la chanson."
             },
             "results": {
                 "notFoundDescription": "Aucun favori n'a été trouvé.",
                 "successDescription": "Voici vos favoris KMQ :",
-                "title": "Chansons Mises en Favoris"
+                "title": "Chansons mises en favoris"
             }
         },
         "botlanguage": {

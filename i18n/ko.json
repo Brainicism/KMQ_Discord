@@ -99,15 +99,15 @@
                 "title": "게임 시작 무시"
             }
         },
-        "bookmark": {
+        "bookmarks": {
             "help": {
                 "artistName": "아티스트 이름으로 북마크 필터링하기.",
-                "description": "북마크한 노래들을 가져오세요.",
+                "description": "북마크한 노래 가져오기.",
                 "example": {
-                    "artist": "`{{artist}}`의 북마크로 필터링",
-                    "song": "`{{song}}`과 일치하는 북마크로 필터링"
+                    "artist": "`{{artist}}`에 의한 북마크로 필터링하기",
+                    "song": "`{{song}}`과(와) 일치하는 북마크로 필터링하기"
                 },
-                "name": "북마크하기",
+                "name": "북마크",
                 "songName": "노래 이름으로 북마크 필터링하기."
             },
             "results": {

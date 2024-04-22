@@ -99,20 +99,20 @@
                 "title": "Mulai Diabaikan"
             }
         },
-        "bookmark": {
+        "bookmarks": {
             "help": {
-                "artistName": "Filter penanda berdasarkan nama artis.",
-                "description": "Ambil lagu-lagu yang telah kamu tandai.",
+                "artistName": "Saring penanda buku berdasarkan nama artis.",
+                "description": "Ambil lagu-lagu yang kamu tandai.",
                 "example": {
-                    "artist": "Filter hingga penanda oleh `{{artist}}`",
-                    "song": "Filter hingga penanda yang cocok dengan `{{song}}`"
+                    "artist": "Saring hingga penanda buku oleh `{{artist}}`",
+                    "song": "Saring hingga penanda buku yang cocok dengan `{{song}}`"
                 },
-                "name": "penanda",
-                "songName": "Filter penanda berdasarkan nama lagu."
+                "name": "penandabuku",
+                "songName": "Saring penanda buku berdasarkan nama lagu."
             },
             "results": {
-                "notFoundDescription": "Tidak ditemukan penanda.",
-                "successDescription": "Ini adalah penanda KMQ-mu:",
+                "notFoundDescription": "Tidak ada penanda buku yang ditemukan.",
+                "successDescription": "Ini adalah penanda buku KMQ kamu:",
                 "title": "Lagu yang Ditandai"
             }
         },
