@@ -284,7 +284,9 @@ export default class BookmarksCommand implements BaseCommand {
 
         if (focusedKey === BookmarksCommand.SONG_NAME) {
             const artistName =
-                interactionData.interactionOptions[BookmarksCommand.ARTIST_NAME];
+                interactionData.interactionOptions[
+                    BookmarksCommand.ARTIST_NAME
+                ];
 
             let artistID: number | undefined;
             if (artistName) {
