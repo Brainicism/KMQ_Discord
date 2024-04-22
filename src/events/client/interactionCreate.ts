@@ -8,6 +8,7 @@ import {
     tryCreateInteractionErrorAcknowledgement,
     tryInteractionAcknowledge,
 } from "../../helpers/discord_utils";
+import BookmarkCommand from "../../commands/misc_commands/bookmark";
 import CommandPrechecks from "../../command_prechecks";
 import Eris, { CommandInteraction } from "eris";
 import ExcludeCommand from "../../commands/game_options/exclude";
@@ -41,6 +42,7 @@ const AUTO_COMPLETE_COMMAND_INTERACTION_HANDLERS: {
     preset: PresetCommand.processAutocompleteInteraction,
     help: HelpCommand.processAutocompleteInteraction,
     play: PlayCommand.processAutocompleteInteraction,
+    bookmark: BookmarkCommand.processAutocompleteInteraction,
 };
 
 const MODAL_SUBMIT_INTERACTION_HANDLERS: {

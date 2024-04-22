@@ -99,6 +99,23 @@
                 "title": "Begin Ignored"
             }
         },
+        "bookmark": {
+            "help": {
+                "artistName": "Filter bookmarks by the name of the artist.",
+                "description": "Fetch your bookmarked songs.",
+                "example": {
+                    "artist": "Filter down to bookmarks by `{{artist}}`",
+                    "song": "Filter down to bookmarks that match `{{song}}`"
+                },
+                "name": "bookmark",
+                "songName": "Filter bookmarks by the name of the song."
+            },
+            "results": {
+                "notFoundDescription": "No bookmarks were found.",
+                "successDescription": "These are your KMQ bookmarks:",
+                "title": "Bookmarked Songs"
+            }
+        },
         "botlanguage": {
             "help": {
                 "name": "botlanguage"
