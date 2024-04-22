@@ -204,10 +204,10 @@
   resolved "https://registry.yarnpkg.com/@google/generative-ai/-/generative-ai-0.2.0.tgz#423a1b20eb7942ec6932634138a94bdea1c3f045"
   integrity sha512-ivlJS7H/9YY1CMrGmcSXm7CRGDept5uvamIEZwHrInX0lA4K55U2YEjQyhRV+M0wgYix6EezEVCJzSdvxeZEkA==
 
-"@google/generative-ai@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@google/generative-ai/-/generative-ai-0.3.0.tgz#8b62dd87dfb337113700c5d55967620c76494903"
-  integrity sha512-6xbaA/JPpwCoe+lfxE2RavVB8JI8F3P6mCse1Sbm586HhJkyuSevK7Opt4l2dbQZFej+M8ALhMMpfBiRW05Fag==
+"@google/generative-ai@^0.7.0":
+  version "0.7.1"
+  resolved "https://registry.yarnpkg.com/@google/generative-ai/-/generative-ai-0.7.1.tgz#eb187c75080c0706245699dbc06816c830d8c6a7"
+  integrity sha512-WTjMLLYL/xfA5BW6xAycRPiAX7FNHKAxrid/ayqC1QMam0KAK0NbMeS9Lubw80gVg5xFMLE+H7pw4wdNzTOlxw==
 
 "@humanwhocodes/config-array@^0.11.13":
   version "0.11.13"
@@ -2528,12 +2528,12 @@ humanize-ms@^1.2.1:
   dependencies:
     ms "^2.0.0"
 
-i18n-ai-translate@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/i18n-ai-translate/-/i18n-ai-translate-2.0.2.tgz#7796e440cf81af1a97cf7ff461d260e420b3bedd"
-  integrity sha512-NjiIhiGVTFOLftAj14amUby7l+tN21K4ZGi0go5K2pVVoM9STSD2pEcGw0GQEiK8n4PepAWS8nVjWFyDu1knjA==
+i18n-ai-translate@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/i18n-ai-translate/-/i18n-ai-translate-2.0.3.tgz#0b8f4d5b92f9cc192197870a48fb508f434c3def"
+  integrity sha512-eaVi5a13khC+Ib3TAt6ra/elz7lRPrBoLSS2LRkw/O+0vdj6bmMUntYJgBt0tIzyoaf1vt2gNWUzeAN8+/iiYw==
   dependencies:
-    "@google/generative-ai" "^0.3.0"
+    "@google/generative-ai" "^0.7.0"
     "@types/flat" "^5.0.5"
     "@types/node" "^20.11.16"
     commander "^12.0.0"

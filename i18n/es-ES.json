@@ -99,6 +99,23 @@
                 "title": "Ignorado"
             }
         },
+        "bookmark": {
+            "help": {
+                "artistName": "Filtrar marcadores por el nombre del artista.",
+                "description": "Obtén tus canciones marcadas.",
+                "example": {
+                    "artist": "Filtrar hasta los marcadores por `{{artist}}`",
+                    "song": "Filtrar hasta los marcadores que coincidan con `{{song}}`"
+                },
+                "name": "marcar",
+                "songName": "Filtrar marcadores por el nombre de la canción."
+            },
+            "results": {
+                "notFoundDescription": "No se encontraron marcadores.",
+                "successDescription": "Estos son tus marcadores de KMQ:",
+                "title": "Canciones Marcadas"
+            }
+        },
         "botlanguage": {
             "help": {
                 "name": "botlanguage"

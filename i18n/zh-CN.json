@@ -99,6 +99,23 @@
                 "title": "开始被忽略"
             }
         },
+        "bookmark": {
+            "help": {
+                "artistName": "按艺术家的名字过滤书签。",
+                "description": "获取你标记的歌曲。",
+                "example": {
+                    "artist": "按 `{{artist}}` 过滤书签",
+                    "song": "过滤出与 `{{song}}` 匹配的书签"
+                },
+                "name": "书签",
+                "songName": "按歌曲的名字过滤书签。"
+            },
+            "results": {
+                "notFoundDescription": "未找到书签。",
+                "successDescription": "这些是你的KMQ书签：",
+                "title": "已标记的歌曲"
+            }
+        },
         "botlanguage": {
             "help": {
                 "name": "机器人语言"

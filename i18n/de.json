@@ -99,6 +99,23 @@
                 "title": "Beginn ignoriert"
             }
         },
+        "bookmark": {
+            "help": {
+                "artistName": "Filtere Lesezeichen nach dem Namen des Künstlers.",
+                "description": "Hole deine markierten Lieder.",
+                "example": {
+                    "artist": "Filtere auf Lesezeichen von `{{artist}}` herunter",
+                    "song": "Filtere auf Lesezeichen, die `{{song}}` entsprechen"
+                },
+                "name": "Lesezeichen",
+                "songName": "Filtere Lesezeichen nach dem Namen des Liedes."
+            },
+            "results": {
+                "notFoundDescription": "Es wurden keine Lesezeichen gefunden.",
+                "successDescription": "Dies sind deine KMQ Lesezeichen:",
+                "title": "Markierte Lieder"
+            }
+        },
         "botlanguage": {
             "help": {
                 "name": "botsprache"

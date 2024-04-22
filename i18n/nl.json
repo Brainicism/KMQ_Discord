@@ -99,6 +99,23 @@
                 "title": "Negeren begonnen"
             }
         },
+        "bookmark": {
+            "help": {
+                "artistName": "Filter bladwijzers op de naam van de artiest.",
+                "description": "Haal je gebladwijzerde nummers op.",
+                "example": {
+                    "artist": "Filter bladwijzers op `{{artist}}`",
+                    "song": "Filter bladwijzers op `{{song}}`"
+                },
+                "name": "bladwijzer",
+                "songName": "Filter bladwijzers op de naam van het nummer."
+            },
+            "results": {
+                "notFoundDescription": "Geen bladwijzers gevonden.",
+                "successDescription": "Dit zijn je KMQ bladwijzers:",
+                "title": "Gebladwijzerde Nummers"
+            }
+        },
         "botlanguage": {
             "help": {
                 "name": "bot-taal"
