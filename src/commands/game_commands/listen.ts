@@ -2,6 +2,7 @@ import { EMBED_SUCCESS_BONUS_COLOR, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     clickableSlashCommand,
+    fetchChannel,
     generateOptionsMessage,
     getDebugLogHeader,
     getGameInfoMessage,
@@ -80,9 +81,9 @@ export default class ListenCommand implements BaseCommand {
             messageContext.guildID,
         );
 
-        const textChannel = State.client.getChannel(
+        const textChannel = (await fetchChannel(
             messageContext.textChannelID,
-        ) as Eris.TextChannel;
+        )) as Eris.TextChannel;
 
         const gameOwner = new KmqMember(messageContext.author.id);
         const voiceChannel = getUserVoiceChannel(messageContext);

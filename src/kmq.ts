@@ -153,8 +153,8 @@ function registerProcessEvents(fleet: Fleet): void {
 
     if (cluster.isPrimary) {
         fleet.on("log", (m) => logger.info(m));
-        fleet.on("debug", (m) => logger.debug(m));
-        fleet.eris.on("debug", (m) => logger.debug(m));
+        fleet.on("debug", (m) => logger.info(m));
+        fleet.eris.on("debug", (m) => logger.info(m));
         fleet.on("warn", (m) => {
             if (
                 IGNORED_WARNING_SUBSTRINGS.some((warningSubstring) => {

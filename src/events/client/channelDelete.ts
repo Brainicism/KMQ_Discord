@@ -8,5 +8,5 @@ const logger = new IPCLogger("channelDelete");
  * @param channel - the channel object
  */
 export default function channelDeleteHandler(channel: Eris.Channel): void {
-    logger.debug(`Channel deleted. id = ${channel.id}`);
+    logger.info(`Channel deleted. id = ${channel.id}`);
 }
