@@ -1,6 +1,7 @@
 import * as uuid from "uuid";
 import { BOOKMARK_BUTTON_PREFIX, PROFILE_COMMAND_NAME } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { extractErrorString } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -305,9 +306,7 @@ export default async function interactionCreateHandler(
         logger.error(
             `${getDebugLogHeader(
                 messageContext,
-            )} | Error while invoking command (${interactionName}) | ${debugId} |  Data: ${JSON.stringify(interaction.data)} | Exception Name: ${err.name}. Reason: ${
-                err.message
-            }. Trace: ${err.stack}}.`,
+            )} | Error while invoking command (${interactionName}) | ${debugId} |  Data: ${JSON.stringify(interaction.data)} | ${extractErrorString(err)}.`,
         );
 
         if (interaction instanceof CommandInteraction) {

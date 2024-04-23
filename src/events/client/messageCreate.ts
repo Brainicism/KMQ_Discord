@@ -1,5 +1,6 @@
 import * as uuid from "uuid";
 import { IPCLogger } from "../../logger";
+import { extractErrorString } from "../../helpers/utils";
 import {
     getAllClickableSlashCommands,
     getDebugLogHeader,
@@ -217,9 +218,7 @@ export default async function messageCreateHandler(
                             messageContext,
                         )} | Error while invoking command (${
                             parsedMessage.action
-                        }) | ${debugId} | Data: "${parsedMessage.argument}" | Exception Name: ${err.name}. Reason: ${
-                            err.message
-                        }. Trace: ${err.stack}}`,
+                        }) | ${debugId} | Data: "${parsedMessage.argument}" | ${extractErrorString(err)}`,
                     );
                 } else {
                     logger.error(

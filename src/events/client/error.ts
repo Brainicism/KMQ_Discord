@@ -1,4 +1,5 @@
 import { IPCLogger } from "../../logger";
+import { extractErrorString } from "../../helpers/utils";
 
 const logger = new IPCLogger("error");
 
@@ -17,7 +18,7 @@ export default function errorHandler(err: Error, shardID: number): void {
         message = "CloudFlare WebSocket proxy restarting";
         error = false;
     } else {
-        message = `Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}}`;
+        message = extractErrorString(err);
     }
 
     if (error) {
