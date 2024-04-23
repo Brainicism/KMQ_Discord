@@ -9,6 +9,7 @@ import {
     QUICK_GUESS_EMOJI,
     QUICK_GUESS_MS,
     ROUND_MAX_RUNNERS_UP,
+    SKIP_BUTTON_PREFIX,
 } from "../constants";
 import { IPCLogger } from "../logger";
 import {
@@ -16,7 +17,6 @@ import {
     friendlyFormattedNumber,
     getMention,
 } from "../helpers/utils";
-import ClipAction from "../enums/clip_action";
 import Eris from "eris";
 import ExpBonusModifier from "../enums/exp_bonus_modifier";
 import GuessModeType from "../enums/option_types/guess_mode_type";
@@ -381,13 +381,13 @@ export default class GameRound extends Round {
                 type: Eris.Constants.ComponentTypes.ACTION_ROW,
                 components: actionRow.components.map(
                     (button: Eris.InteractionButton) => {
-                        if (
-                            Object.values(ClipAction).includes(
-                                button.custom_id as ClipAction,
-                            )
-                        ) {
+                        if (button.custom_id.startsWith(SKIP_BUTTON_PREFIX)) {
                             return {
                                 ...button,
+                                label:
+                                    this.getSkipCount() > 0
+                                        ? `${button.label} (${this.getSkipCount()})`
+                                        : button.label,
                                 disabled: true,
                             };
                         }
@@ -460,14 +460,16 @@ export default class GameRound extends Round {
     }
 
     /**
-     * @param interactionUUID - the UUID of an interaction
-     * @returns true if the given UUID is one of the interactions (i.e. guesses) of the current game round
+     * @param interactionID - the ID of an interaction
+     * @returns true if the given ID is one of the interactions (i.e. guesses) of the current game round, or a skip
      */
-    isValidInteraction(interactionUUID: string): boolean {
+    isValidInteraction(interactionID: string): boolean {
         return (
-            interactionUUID === this.interactionCorrectAnswerUUID ||
+            (interactionID.startsWith(SKIP_BUTTON_PREFIX) &&
+                interactionID.includes(this.song.youtubeLink)) ||
+            interactionID === this.interactionCorrectAnswerUUID ||
             Object.keys(this.interactionIncorrectAnswerUUIDs).includes(
-                interactionUUID,
+                interactionID,
             )
         );
     }

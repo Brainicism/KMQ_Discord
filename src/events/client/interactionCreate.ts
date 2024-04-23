@@ -18,7 +18,7 @@ import HelpCommand from "../../commands/game_commands/help";
 import IncludeCommand from "../../commands/game_options/include";
 import KmqMember from "../../structures/kmq_member";
 import LocaleType from "../../enums/locale_type";
-import LookupCommand from "../../commands/game_commands/lookup";
+import LookupCommand from "../../commands/misc_commands/lookup";
 import MessageContext from "../../structures/message_context";
 import PlayCommand from "../../commands/game_commands/play";
 import PresetCommand from "../../commands/game_commands/preset";

@@ -1,12 +1,16 @@
+import { IPCLogger } from "../logger";
+import { SKIP_BUTTON_PREFIX } from "../constants";
 import { codeLine, friendlyFormattedNumber } from "../helpers/utils";
+import Eris from "eris";
 import State from "../state";
 import i18n from "../helpers/localization_manager";
 import type { ButtonActionRow } from "../types";
-import type Eris from "eris";
 import type MessageContext from "./message_context";
 import type PlayerRoundResult from "../interfaces/player_round_result";
 import type QueriedSong from "./queried_song";
 import type UniqueSongCounter from "../interfaces/unique_song_counter";
+
+const logger = new IPCLogger("round");
 
 export default abstract class Round {
     /** The song associated with the round */
@@ -83,7 +87,7 @@ export default abstract class Round {
         userBonusActive: boolean,
     ): number | null;
 
-    abstract isValidInteraction(interactionUUID: string): boolean;
+    abstract isValidInteraction(interactionID: string): boolean;
 
     /**
      * Adds a skip vote for the specified user
@@ -99,6 +103,31 @@ export default abstract class Round {
      */
     getSkipCount(): number {
         return this.skippers.size;
+    }
+
+    async interactionSuccessfulSkip(): Promise<void> {
+        if (!this.interactionMessage) return;
+        this.interactionComponents = this.interactionComponents.map((x) => ({
+            type: Eris.Constants.ComponentTypes.ACTION_ROW,
+            components: x.components.map((y: Eris.InteractionButton) => ({
+                ...y,
+                style: y.custom_id.startsWith(SKIP_BUTTON_PREFIX)
+                    ? Eris.Constants.ButtonStyles.SUCCESS
+                    : y.style,
+                disabled: y.custom_id.startsWith(SKIP_BUTTON_PREFIX),
+            })),
+        }));
+
+        try {
+            await this.interactionMessage.edit({
+                embeds: this.interactionMessage.embeds,
+                components: this.interactionComponents,
+            });
+        } catch (e) {
+            logger.warn(
+                `Error editing interactionSuccessfulSkip interaction. gid = ${this.interactionMessage.guildID}. e = ${e}}`,
+            );
+        }
     }
 
     protected getUniqueSongCounterMessage(

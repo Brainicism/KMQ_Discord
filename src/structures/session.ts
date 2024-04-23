@@ -1,4 +1,3 @@
-import * as uuid from "uuid";
 import {
     BOOKMARK_BUTTON_PREFIX,
     CLIP_LAST_REPLAY_DELAY_MS,
@@ -6,6 +5,7 @@ import {
     CLIP_PADDING_BEGINNING_MS,
     CLIP_VC_END_TIMEOUT_MS,
     KmqImages,
+    SKIP_BUTTON_PREFIX,
     specialFfmpegArgs,
 } from "../constants";
 import { IPCLogger } from "../logger";
@@ -59,19 +59,19 @@ import type Round from "./round";
 const logger = new IPCLogger("session");
 
 export default abstract class Session {
-    /** The ID of text channel in which the GameSession was started in, and will be active in */
+    /** The ID of text channel in which the Session was started in, and will be active in */
     public readonly textChannelID: string;
 
     /** The Discord Guild ID */
     public readonly guildID: string;
 
-    /** The time the GameSession was started in epoch milliseconds */
+    /** The time the Session was started in epoch milliseconds */
     public readonly startedAt: number;
 
-    /** The ID of the voice channel in which the GameSession was started in, and will be active in */
+    /** The ID of the voice channel in which the Session was started in, and will be active in */
     public voiceChannelID: string;
 
-    /** Initially the user who started the GameSession, transferred to current VC member */
+    /** Initially the user who started the Session, transferred to current VC member */
     public owner: KmqMember;
 
     /** The current active Eris.VoiceConnection */
@@ -83,10 +83,10 @@ export default abstract class Session {
     /** The current Round */
     public round: Round | null;
 
-    /** Whether the GameSession has ended or not */
+    /** Whether the Session has ended or not */
     public finished: boolean;
 
-    /** Whether the GameSession is active yet */
+    /** Whether the Session is active yet */
     public sessionInitialized: boolean;
 
     /** The guild preference */
@@ -108,13 +108,13 @@ export default abstract class Session {
         textChannelID: string,
         voiceChannelID: string,
         guildID: string,
-        gameSessionCreator: KmqMember,
+        sessionCreator: KmqMember,
     ) {
         this.guildPreference = guildPreference;
         this.textChannelID = textChannelID;
         this.voiceChannelID = voiceChannelID;
         this.guildID = guildID;
-        this.owner = gameSessionCreator;
+        this.owner = sessionCreator;
         this.lastActive = Date.now();
         this.startedAt = Date.now();
         this.finished = false;
@@ -132,7 +132,7 @@ export default abstract class Session {
     }
 
     /**
-     * Deletes the GameSession corresponding to a given guild ID
+     * Deletes the Session corresponding to a given guild ID
      * @param guildID - The guild ID
      */
     static deleteSession(guildID: string): void {
@@ -487,7 +487,7 @@ export default abstract class Session {
     }
 
     /**
-     * Updates the GameSession's lastActive timestamp and it's value in the data store
+     * Updates the Session's lastActive timestamp and it's value in the data store
      */
     async lastActiveNow(): Promise<void> {
         this.lastActive = Date.now();
@@ -591,13 +591,18 @@ export default abstract class Session {
 
     /**
      * @param interaction - The interaction
-     * @param _messageContext - The message context
+     * @param _messageContext - Unused
      * @returns whether the interaction has been handled
      */
     async handleComponentInteraction(
         interaction: Eris.ComponentInteraction,
         _messageContext: MessageContext,
     ): Promise<boolean> {
+        const round = this.round;
+        if (!round) {
+            return false;
+        }
+
         if (interaction.data.custom_id.startsWith(BOOKMARK_BUTTON_PREFIX)) {
             await this.handleBookmarkInteraction(interaction);
             return true;
@@ -682,7 +687,7 @@ export default abstract class Session {
         const isClipMode = this.isGameSession() && this.isClipMode();
         if (isClipMode) {
             const clipGameRound = round as ClipGameRound;
-            if (clipAction) {
+            if (clipAction && clipAction !== ClipAction.NEW_CLIP) {
                 // Set to the previous play's seek location if replaying
                 seekLocation = clipGameRound.seekLocation!;
             } else {
@@ -726,7 +731,7 @@ export default abstract class Session {
 
         try {
             let inputArgs = ["-ss", seekLocation.toString()];
-            let encoderArgs: Array<string> = [];
+            let encoderArgs: { [arg: string]: Array<string> } = {};
             const specialType = this.guildPreference.gameOptions.specialType;
             if (specialType) {
                 const ffmpegArgs = specialFfmpegArgs[specialType](
@@ -740,24 +745,29 @@ export default abstract class Session {
 
             if (isClipMode) {
                 if (clipAction === ClipAction.END_ROUND) {
-                    encoderArgs.push(
-                        "-t",
+                    encoderArgs["-t"] = [
                         (
                             this.guildPreference.getSongStartDelay() +
                             this.clipDurationLength!
                         ).toString(),
-                    );
+                    ];
                 } else {
-                    encoderArgs.push(
-                        "-af",
-                        `adelay=delays=${CLIP_PADDING_BEGINNING_MS}ms:all=1`,
-
-                        "-t",
+                    encoderArgs["-t"] = [
                         (
                             this.clipDurationLength! +
                             CLIP_PADDING_BEGINNING_MS / 1000
                         ).toString(),
-                    );
+                    ];
+
+                    if (encoderArgs["-af"]) {
+                        encoderArgs["-af"].push(
+                            `adelay=delays=${CLIP_PADDING_BEGINNING_MS}ms:all=1`,
+                        );
+                    } else {
+                        encoderArgs["-af"] = [
+                            `adelay=delays=${CLIP_PADDING_BEGINNING_MS}ms:all=1`,
+                        ];
+                    }
                 }
             }
 
@@ -768,7 +778,10 @@ export default abstract class Session {
 
             this.connection.play(stream, {
                 inputArgs,
-                encoderArgs,
+                encoderArgs: Object.entries(encoderArgs).flatMap((x) => [
+                    x[0],
+                    x[1].join(","),
+                ]),
                 opusPassthrough: specialType === null && !isClipMode,
                 voiceDataTimeout: isClipMode
                     ? CLIP_VC_END_TIMEOUT_MS
@@ -813,13 +826,21 @@ export default abstract class Session {
                         await this.playSong(
                             messageContext,
                             round,
-                            ClipAction.REPLAY,
+                            this.clipPlayNewClip
+                                ? ClipAction.NEW_CLIP
+                                : ClipAction.REPLAY,
                         );
                         return;
                     } else {
                         // Give some time to guess the song after the last replay has happened
                         // In addition to the time to receive this "end" event defined by CLIP_VC_END_TIMEOUT_MS
                         await delay(CLIP_LAST_REPLAY_DELAY_MS);
+                        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                        if (round.finished) {
+                            // The round was ended by a guess while we were waiting, so don't try to end the round, as
+                            // the next round will be started by the guess
+                            return;
+                        }
                     }
                 }
             }
@@ -879,11 +900,12 @@ export default abstract class Session {
         interaction: Eris.ComponentInteraction,
         _messageContext: MessageContext,
     ): Promise<boolean> {
-        if (!this.round) {
+        const round = this.round;
+
+        if (!round) {
             return false;
         }
 
-        const round = this.round;
         if (
             !getCurrentVoiceMembers(this.voiceChannelID)
                 .map((x) => x.id)
@@ -914,18 +936,40 @@ export default abstract class Session {
      * @param locale - The locale
      * @returns the button
      */
-    protected generateBookmarkButton(
+    protected static generateBookmarkButton(
         round: Round,
         locale: LocaleType,
     ): Eris.InteractionButton {
         return {
             type: Eris.Constants.ComponentTypes.BUTTON,
-            style: Eris.Constants.ButtonStyles.PRIMARY,
+            style: Eris.Constants.ButtonStyles.SECONDARY,
             label: i18n.translate(locale, "misc.bookmark"),
             custom_id: `${BOOKMARK_BUTTON_PREFIX}:${round.song.youtubeLink}`,
             emoji: {
                 id: null,
                 name: "🔖",
+            },
+        };
+    }
+
+    /**
+     * Generates a skip button
+     * @param round - The round
+     * @param locale - The locale
+     * @returns the button
+     */
+    protected static generateSkipButton(
+        round: Round,
+        locale: LocaleType,
+    ): Eris.InteractionButton {
+        return {
+            type: Eris.Constants.ComponentTypes.BUTTON,
+            style: Eris.Constants.ButtonStyles.SECONDARY,
+            custom_id: `${SKIP_BUTTON_PREFIX}:${round.song.youtubeLink}`,
+            label: i18n.translate(locale, "misc.skip"),
+            emoji: {
+                id: null,
+                name: "⏩",
             },
         };
     }
@@ -1007,7 +1051,7 @@ export default abstract class Session {
         const buttons: Array<Eris.InteractionButton> = [];
 
         // add bookmark button
-        buttons.push(this.generateBookmarkButton(round, locale));
+        buttons.push(Session.generateBookmarkButton(round, locale));
 
         if (round instanceof GameRound) {
             if (round.warnTypoReceived) {
@@ -1033,17 +1077,7 @@ export default abstract class Session {
                 return round.interactionMessage;
             }
         } else if (round instanceof ListeningRound) {
-            round.interactionSkipUUID = uuid.v4() as string;
-            buttons.push({
-                type: Eris.Constants.ComponentTypes.BUTTON,
-                style: Eris.Constants.ButtonStyles.PRIMARY,
-                custom_id: round.interactionSkipUUID,
-                label: i18n.translate(locale, "misc.skip"),
-                emoji: {
-                    id: null,
-                    name: "⏩",
-                },
-            });
+            buttons.push(Session.generateSkipButton(round, locale));
         }
 
         round.interactionComponents = [

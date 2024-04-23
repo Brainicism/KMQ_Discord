@@ -49,10 +49,11 @@ const logger = new IPCLogger(COMMAND_NAME);
 export default class LookupCommand implements BaseCommand {
     static ENTRIES_PER_PAGE = 10;
 
+    static NAME = "name";
+    static LINK = "link";
     static SONG_NAME = "song_name";
-    static SONG_LINK = "song_link";
     static ARTIST_NAME = "artist_name";
-    aliases = ["songinfo", "songlookup"];
+    aliases = ["songinfo", "songlookup", "song", "artist"];
     validations = {
         minArgCount: 1,
         arguments: [],
@@ -65,7 +66,7 @@ export default class LookupCommand implements BaseCommand {
             {
                 example: `${clickableSlashCommand(
                     COMMAND_NAME,
-                    LookupCommand.SONG_NAME,
+                    LookupCommand.NAME,
                 )} ${LookupCommand.SONG_NAME}:love dive`,
                 explanation: i18n.translate(
                     guildID,
@@ -76,8 +77,8 @@ export default class LookupCommand implements BaseCommand {
             {
                 example: `${clickableSlashCommand(
                     COMMAND_NAME,
-                    LookupCommand.SONG_LINK,
-                )} ${LookupCommand.SONG_LINK}:https://www.youtube.com/watch?v=4TWR90KJl84`,
+                    LookupCommand.LINK,
+                )} ${LookupCommand.LINK}:https://www.youtube.com/watch?v=4TWR90KJl84`,
                 explanation: i18n.translate(
                     guildID,
                     "command.lookup.help.example.song",
@@ -95,7 +96,7 @@ export default class LookupCommand implements BaseCommand {
             type: Eris.Constants.ApplicationCommandTypes.CHAT_INPUT,
             options: [
                 {
-                    name: LookupCommand.SONG_NAME,
+                    name: LookupCommand.NAME,
                     description: i18n.translate(
                         LocaleType.EN,
                         "command.lookup.help.interaction.byName.description",
@@ -165,7 +166,7 @@ export default class LookupCommand implements BaseCommand {
                     ],
                 },
                 {
-                    name: LookupCommand.SONG_LINK,
+                    name: LookupCommand.LINK,
                     description: i18n.translate(
                         LocaleType.EN,
                         "command.lookup.help.interaction.byLink.description",
@@ -187,7 +188,7 @@ export default class LookupCommand implements BaseCommand {
                         .SUB_COMMAND,
                     options: [
                         {
-                            name: LookupCommand.SONG_LINK,
+                            name: LookupCommand.LINK,
                             description: i18n.translate(
                                 LocaleType.EN,
                                 "command.lookup.help.interaction.byLink.field",
@@ -347,14 +348,12 @@ export default class LookupCommand implements BaseCommand {
         _messageContext: MessageContext,
     ): Promise<void> {
         const interactionData = getInteractionValue(interaction);
-        if (interactionData.interactionName === LookupCommand.SONG_LINK) {
+        if (interactionData.interactionName === LookupCommand.LINK) {
             await this.lookupSong(
                 interaction,
-                interactionData.interactionOptions[LookupCommand.SONG_LINK],
+                interactionData.interactionOptions[LookupCommand.LINK],
             );
-        } else if (
-            interactionData.interactionName === LookupCommand.SONG_NAME
-        ) {
+        } else if (interactionData.interactionName === LookupCommand.NAME) {
             const songName =
                 interactionData.interactionOptions[LookupCommand.SONG_NAME];
 

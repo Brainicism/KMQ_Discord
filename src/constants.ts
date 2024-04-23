@@ -66,33 +66,47 @@ export const KMQ_USER_AGENT = "KMQ (K-pop Music Quiz)";
 export const specialFfmpegArgs = {
     [SpecialType.REVERSE]: (seek: number, duration: number) => ({
         inputArgs: [],
-        encoderArgs: ["-af", `atrim=end=${duration - seek},areverse`],
+        encoderArgs: {
+            "-af": [`atrim=end=${duration - seek}`, "areverse"],
+        },
     }),
     [SpecialType.SLOW]: (seek: number) => ({
         inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "rubberband=tempo=0.5"],
+        encoderArgs: {
+            "-af": ["rubberband=tempo=0.5"],
+        },
     }),
     [SpecialType.FAST]: (seek: number) => ({
         inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "rubberband=tempo=1.5"],
+        encoderArgs: {
+            "-af": ["rubberband=tempo=1.5"],
+        },
     }),
     [SpecialType.FASTER]: (seek: number) => ({
         inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "rubberband=tempo=2"],
+        encoderArgs: {
+            "-af": ["rubberband=tempo=2"],
+        },
     }),
     [SpecialType.LOW_PITCH]: (seek: number) => ({
         // 3 semitones lower
         inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "rubberband=pitch=0.840896"],
+        encoderArgs: {
+            "-af": ["rubberband=pitch=0.840896"],
+        },
     }),
     [SpecialType.HIGH_PITCH]: (seek: number) => ({
         // 4 semitones higher
         inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "rubberband=pitch=1.25992"],
+        encoderArgs: {
+            "-af": ["rubberband=pitch=1.25992"],
+        },
     }),
     [SpecialType.NIGHTCORE]: (seek: number) => ({
         inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "rubberband=pitch=1.25992:tempo=1.25"],
+        encoderArgs: {
+            "-af": ["rubberband=pitch=1.25992:tempo=1.25"],
+        },
     }),
 };
 
@@ -151,6 +165,7 @@ export const LEADERBOARD_ENTRIES_PER_PAGE = 10;
 export const PROFILE_COMMAND_NAME = "Profile";
 
 export const BOOKMARK_BUTTON_PREFIX = "bookmark";
+export const SKIP_BUTTON_PREFIX = "skip";
 
 export const EMBED_ERROR_COLOR = 0xed4245; // Red
 export const EMBED_SUCCESS_COLOR = 0x57f287; // Green
@@ -273,7 +288,7 @@ export const DataFiles = {
     CACHED_APP_CMD_IDS: path.join(__dirname, "../data/cached_app_cmd_ids.json"),
 };
 
-// ephermeral to the docker container, not mounted from host
+// ephemeral to the docker container, not mounted from host
 export const STANDBY_COOKIE = path.join(__dirname, "../standby");
 export const PROMOTED_COOKIE = path.join(__dirname, "../promoted");
 export const STATUS_COOKIE = path.join(__dirname, "../status");
