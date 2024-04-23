@@ -1,12 +1,12 @@
 #!/bin/bash
 
 source .env
-PORT_NUMBER=${PORT_NUMBER:-5858}
-echo "Preparing restart of $APP_NAME..."
-result=$(curl -s 127.0.0.1:$PORT_NUMBER/session-count)
+WEB_SERVER_PORT=${WEB_SERVER_PORT:-5858}
+echo "Preparing restart of $APP_NAME at port $WEB_SERVER_PORT..."
+result=$(curl -s 127.0.0.1:$WEB_SERVER_PORT/session-count)
 echo "$result session(s) are still active, waiting 10s..."
 while true; do
-    result=$(curl -s 127.0.0.1:$PORT_NUMBER/session-count)
+    result=$(curl -s 127.0.0.1:$WEB_SERVER_PORT/session-count)
 
     if [ "$result" -eq 0 ]; then
         docker rm -f $APP_NAME
