@@ -1,11 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import { IPCLogger } from "../logger";
 import {
-    getDebugLogHeader,
-    sendErrorMessage,
-    sendInfoMessage,
-} from "./discord_utils";
-import {
+    extractErrorString,
     parseKmqPlaylistIdentifier,
     pathExists,
     retryJob,
@@ -13,6 +9,11 @@ import {
     standardDateFormat,
     visualProgressBar,
 } from "./utils";
+import {
+    getDebugLogHeader,
+    sendErrorMessage,
+    sendInfoMessage,
+} from "./discord_utils";
 import { youtube_v3 } from "googleapis";
 import Axios from "axios";
 import EnvVariableManager from "../env_variable_manager";
@@ -1181,7 +1182,7 @@ export default class PlaylistManager {
             const playlistName = response.name;
             const playlistChangeHash = response.snapshot_id;
             let thumbnailUrl: string | null = null;
-            if (response.images.length > 0) {
+            if (response.images?.length > 0) {
                 thumbnailUrl = response.images[0].url;
             }
 
@@ -1198,19 +1199,17 @@ export default class PlaylistManager {
                 matchedSongsLength: 0,
             };
         } catch (err) {
-            if (err.response?.status === 404) {
-                logger.warn(
-                    `Spotify playlist doesn't exist or is private. err = ${err}`,
-                );
-            } else {
-                logger.error(
-                    `Failed fetching Spotify playlist metadata. err = ${err}`,
-                );
-            }
-
-            if (err.response) {
-                logger.info(err.response.data);
-                logger.info(err.response.status);
+            if (Axios.isAxiosError(err)) {
+                const statusCode = err.response?.status!;
+                if ([404, 400].includes(statusCode)) {
+                    logger.warn(
+                        `Spotify playlist doesn't exist or is private. playlist = ${playlistId}. status_code = ${statusCode}`,
+                    );
+                } else {
+                    logger.error(
+                        `Failed fetching Spotify playlist metadata, unexpected status code = ${statusCode}. playlist = ${playlistId}. err = ${extractErrorString(err)}`,
+                    );
+                }
             }
 
             return null;

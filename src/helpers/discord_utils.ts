@@ -26,6 +26,7 @@ import {
     chunkArray,
     containsHangul,
     delay,
+    extractErrorString,
     friendlyFormattedNumber,
     getOrdinalNum,
     italicize,
@@ -1859,7 +1860,7 @@ function interactionRejectionHandler(
         logger.error(
             `${getDebugLogHeader(
                 interaction,
-            )} | Unknown Discord error acknowledging interaction. code = ${err.code}. name = ${err.name} message = ${err.message}. stack = ${err.stack}`,
+            )} | Unknown Discord error acknowledging interaction. code = ${err.code}. ${extractErrorString(err)}`,
         );
     } else if (err instanceof Error) {
         if (
@@ -1870,7 +1871,7 @@ function interactionRejectionHandler(
             logger.warn(
                 `${getDebugLogHeader(
                     interaction,
-                )} | Request timeout while acknowledging interaction. name: ${err.name}. message: ${err.message}. stack: ${err.stack}`,
+                )} | Request timeout while acknowledging interaction. ${extractErrorString(err)}`,
             );
             return;
         }
@@ -1878,7 +1879,7 @@ function interactionRejectionHandler(
         logger.error(
             `${getDebugLogHeader(
                 interaction,
-            )} | Unknown generic error acknowledging interaction. name: ${err.name}. message: ${err.message}. stack: ${err.stack}`,
+            )} | Unknown generic error acknowledging interaction. ${extractErrorString(err)}`,
         );
     } else {
         let details = "";

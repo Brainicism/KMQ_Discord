@@ -9,7 +9,12 @@ import {
 import { Fleet } from "eris-fleet";
 import { clearRestartNotification } from "./helpers/management_utils";
 import { config } from "dotenv";
-import { delay, isPrimaryInstance, pathExists } from "./helpers/utils";
+import {
+    delay,
+    extractErrorString,
+    isPrimaryInstance,
+    pathExists,
+} from "./helpers/utils";
 import { getInternalLogger } from "./logger";
 import EnvType from "./enums/env_type";
 import Eris from "eris";
@@ -123,14 +128,12 @@ function registerGlobalIntervals(fleet: Fleet): void {
 function registerProcessEvents(fleet: Fleet): void {
     process.on("unhandledRejection", (err: Error) => {
         logger.error(
-            `Admiral Unhandled Rejection | Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}`,
+            `Admiral Unhandled Rejection | ${extractErrorString(err)}}`,
         );
     });
 
     process.on("uncaughtException", (err: Error) => {
-        logger.error(
-            `Admiral Uncaught Exception | Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}`,
-        );
+        logger.error(`Admiral Uncaught Exception | ${extractErrorString(err)}`);
     });
 
     process.on("SIGINT", () => {

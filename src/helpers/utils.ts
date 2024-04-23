@@ -708,3 +708,11 @@ export function shufflePartitionedArray<T>(
 
     return shuffledArray;
 }
+
+/**
+ * @param err - The error
+ * @returns the error details stringified
+ */
+export function extractErrorString(err: Error): string {
+    return `Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}}`;
+}

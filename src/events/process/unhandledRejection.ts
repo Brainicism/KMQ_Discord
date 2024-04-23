@@ -1,4 +1,5 @@
 import { IPCLogger } from "../../logger";
+import { extractErrorString } from "../../helpers/utils";
 import EnvType from "../../enums/env_type";
 import State from "../../state";
 
@@ -13,7 +14,7 @@ export default function unhandledRejectionHandler(err: Object): void {
     if (typeof err === "string") {
         message = err;
     } else if (err instanceof Error) {
-        message = `Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}}`;
+        message = extractErrorString(err);
     } else {
         logger.warn(
             `Unexpected parameter passed into unhandledRejectionHandler: ${err.constructor.name}}`,
