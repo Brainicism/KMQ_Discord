@@ -139,7 +139,7 @@ export default abstract class Session {
         const isGameSession = guildID in State.gameSessions;
         const isListeningSession = guildID in State.listeningSessions;
         if (!isGameSession && !isListeningSession) {
-            logger.debug(`gid: ${guildID} | Session already ended`);
+            logger.info(`gid: ${guildID} | Session already ended`);
             return;
         }
 

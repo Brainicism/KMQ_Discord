@@ -704,9 +704,9 @@ export default class PlayCommand implements BaseCommand {
                 .getPlayers()
                 .map((player) => player.id);
 
-            const channel = State.client.getChannel(
+            const channel = (await fetchChannel(
                 messageContext.textChannelID,
-            ) as Eris.TextChannel;
+            )) as Eris.TextChannel;
 
             const voiceChannel = getUserVoiceChannel(messageContext);
 
