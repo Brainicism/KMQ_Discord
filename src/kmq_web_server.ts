@@ -178,6 +178,36 @@ export default class KmqWebServer {
             }
         });
 
+        httpServer.get("/session-count", async (request, reply) => {
+            if (request.ip !== "127.0.0.1") {
+                logger.error("session-count attempted by non-allowed IP");
+                await reply.code(401).send();
+                return;
+            }
+
+            try {
+                const gameplayStats = (await fleet.ipc.allClustersCommand(
+                    "game_session_stats",
+                    true,
+                )) as Map<number, any>;
+
+                const totalSessionCount = Array.from(
+                    gameplayStats.values(),
+                ).reduce(
+                    (partialSum, a) =>
+                        partialSum +
+                        a.activeListeningSessions +
+                        a.activeGameSessions,
+                    0,
+                );
+
+                await reply.code(200).send(totalSessionCount);
+            } catch (e) {
+                logger.error(`Session count failed with error: ${e}`);
+                await reply.code(500).send(e);
+            }
+        });
+
         httpServer.post("/reload_autocomplete", async (request, reply) => {
             if (request.ip !== "127.0.0.1") {
                 logger.error("Reload autocomplete attempted by non-allowed IP");

@@ -120,7 +120,7 @@ function serverShutdown(
             console.log("Provisioning standby container with new image...");
 
             cp.execSync(
-                `APP_NAME=${appName} IMAGE_NAME=${dockerImage} IS_STANDBY=true npm run docker-run`,
+                `APP_NAME=${appName} IMAGE_NAME=${dockerImage} IS_STANDBY=true npm run docker-run-internal`,
             );
 
             let standbyProvisioning = true;
