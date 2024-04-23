@@ -2,6 +2,7 @@ import * as uuid from "uuid";
 import { IPCLogger } from "../../logger";
 import { extractErrorString } from "../../helpers/utils";
 import {
+    fetchChannel,
     getAllClickableSlashCommands,
     getDebugLogHeader,
     sendErrorMessage,
@@ -10,6 +11,7 @@ import {
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
+import KmqConfiguration from "../../kmq_configuration";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
@@ -64,7 +66,27 @@ export default async function messageCreateHandler(
         return;
     }
 
-    if (!isGuildMessage(message)) return;
+    if (!isGuildMessage(message)) {
+        // if channel is unexpectedly partial
+        if ((message.channel.type as number | undefined) === undefined) {
+            logger.warn(
+                `Unexpectedly received partial channel: ${message.channel.id}`,
+            );
+
+            if (KmqConfiguration.Instance.partialChannelFetchingEnabled()) {
+                // fetch channel for next time
+                const fetchedChannel = await fetchChannel(message.channel.id);
+                if (!fetchedChannel) {
+                    logger.warn(
+                        `Failed to fetch partial channel: ${message.channel.id}`,
+                    );
+                }
+            }
+        }
+
+        return;
+    }
+
     if (State.client.unavailableGuilds.has(message.guildID)) {
         logger.warn(`Server was unavailable. id = ${message.guildID}`);
         return;
