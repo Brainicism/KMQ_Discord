@@ -160,7 +160,7 @@ export async function fetchUser(
     if (!user) {
         user = await ipc.fetchUser(userID);
         if (user) {
-            logger.debug(`User not in cache, fetched via IPC: ${userID}`);
+            logger.info(`User not in cache, fetched via IPC: ${userID}`);
         }
     }
 
@@ -168,7 +168,7 @@ export async function fetchUser(
     if (!user) {
         try {
             user = await client.getRESTUser(userID);
-            logger.debug(`User not in cache, fetched via REST: ${userID}`);
+            logger.info(`User not in cache, fetched via REST: ${userID}`);
         } catch (err) {
             if (!silentErrors)
                 logger.warn(
@@ -199,7 +199,7 @@ export async function fetchChannel(
 
     // fetch via IPC from other clusters
     if (!channel) {
-        logger.debug(
+        logger.info(
             `Text channel not in cache, attempting to fetch via IPC: ${textChannelID}`,
         );
         channel = await ipc.fetchChannel(textChannelID);
@@ -212,7 +212,7 @@ export async function fetchChannel(
                 textChannelID,
             )) as Eris.TextChannel;
 
-            logger.debug(
+            logger.info(
                 `Text channel not in cache, fetched via REST: ${textChannelID}`,
             );
         } catch (err) {

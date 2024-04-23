@@ -29,7 +29,7 @@ export function getInternalLogger(): winston.Logger {
     );
 
     return winston.createLogger({
-        level: process.env.DEBUG_LOGGING ? "debug" : "info",
+        level: "info",
         format: format.combine(format.timestamp(), logFormat),
         transports: [
             new winston.transports.Console({
@@ -90,9 +90,9 @@ export class IPCLogger {
 
     debug(msg: LoggerArg): void {
         if (!isMaster) {
-            console.debug(this.getCategorizedMessage(msg));
+            console.info(this.getCategorizedMessage(msg));
         } else {
-            this.logger.debug(this.getCategorizedMessage(msg));
+            this.logger.info(this.getCategorizedMessage(msg));
         }
     }
 
