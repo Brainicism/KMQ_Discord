@@ -291,6 +291,9 @@ export default class GameSession extends Session {
 
         const correctGuessers = round.getCorrectGuessers(this.isHiddenMode());
         const isCorrectGuess = correctGuessers.length > 0;
+        if (isCorrectGuess) {
+            this.correctGuesses++;
+        }
 
         await this.stopHiddenUpdateTimer();
 
@@ -612,7 +615,6 @@ export default class GameSession extends Session {
             }
 
             this.stopGuessTimeout();
-            this.correctGuesses++;
             // mark round as complete, so no more guesses can go through
             await this.endRound(false, messageContext, round);
 
