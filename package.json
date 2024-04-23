@@ -78,7 +78,7 @@
         "lodash": "^4.17.21",
         "mocha": "^10.2.0",
         "moment-timezone": "^0.5.44",
-        "mysql2": "^3.9.4",
+        "mysql2": "^3.9.7",
         "node-schedule": "^2.1.1",
         "sinon": "^17.0.1",
         "snoowrap": "^1.23.0",
