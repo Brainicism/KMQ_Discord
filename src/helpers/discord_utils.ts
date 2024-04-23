@@ -1663,10 +1663,7 @@ export function checkBotIsAlone(guildID: string): boolean {
 
 /** @returns the debug TextChannel */
 export function getDebugChannel(): Promise<Eris.TextChannel | null> {
-    if (!process.env.DEBUG_SERVER_ID || !process.env.DEBUG_TEXT_CHANNEL_ID)
-        return Promise.resolve(null);
-    const debugGuild = State.client.guilds.get(process.env.DEBUG_SERVER_ID);
-    if (!debugGuild) return Promise.resolve(null);
+    if (!process.env.DEBUG_TEXT_CHANNEL_ID) return Promise.resolve(null);
     return fetchChannel(process.env.DEBUG_TEXT_CHANNEL_ID);
 }
 
