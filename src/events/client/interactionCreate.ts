@@ -173,6 +173,10 @@ export default async function interactionCreateHandler(
             }
 
             interactionName = `Component interaction for '${interaction.data.custom_id}'`;
+            logger.info(
+                `${getDebugLogHeader(messageContext)} | Invoked component interaction '${interactionName} (${interaction.id})'.`,
+            );
+
             await session.handleComponentInteraction(
                 interaction,
                 messageContext,
@@ -219,6 +223,10 @@ export default async function interactionCreateHandler(
                     }
 
                     interactionName = `CHAT_INPUT CommandInteraction interaction for '${interaction.data.name}'`;
+                    logger.info(
+                        `${getDebugLogHeader(messageContext)} | Invoked chat input interaction '${interactionName} (${interaction.id})'.`,
+                    );
+
                     await commandInteractionHandler.processChatInputInteraction(
                         interaction,
                         messageContext,
@@ -237,6 +245,10 @@ export default async function interactionCreateHandler(
                             Eris.Constants.ApplicationCommandTypes.USER
                         ) {
                             interactionName = `USER Application Command for '${interaction.data.name}'`;
+                            logger.info(
+                                `${getDebugLogHeader(messageContext)} | Invoked user application command interaction '${interactionName} (${interaction.id})'.`,
+                            );
+
                             await ProfileCommand.handleProfileInteraction(
                                 interaction as Eris.CommandInteraction,
                                 interaction.data.target_id as string,
@@ -254,6 +266,9 @@ export default async function interactionCreateHandler(
                             )!.author.id;
 
                             interactionName = `MESSAGE Application Command for '${interaction.data.name}'`;
+                            logger.info(
+                                `${getDebugLogHeader(messageContext)} | Invoked message application command interaction '${interactionName} (${interaction.id})'.`,
+                            );
 
                             await ProfileCommand.handleProfileInteraction(
                                 interaction,
@@ -280,7 +295,7 @@ export default async function interactionCreateHandler(
 
             const parsedInteraction = getInteractionValue(interaction);
             if (autocompleteInteractionHandler) {
-                interactionName = `Autocomplete interaction for '${interaction.data.name}' for value '${parsedInteraction.focusedKey}'`;
+                interactionName = `Autocomplete interaction for '${interaction.data.name}' (${interaction.id}) for value '${parsedInteraction.focusedKey}'`;
                 await autocompleteInteractionHandler(interaction);
             } else {
                 logger.error(
@@ -288,7 +303,7 @@ export default async function interactionCreateHandler(
                 );
             }
         } else if (interaction instanceof Eris.ModalSubmitInteraction) {
-            interactionName = `ModalSubmit interaction for ${interaction.data.custom_id}`;
+            interactionName = `ModalSubmit interaction for ${interaction.data.custom_id} (${interaction.id})`;
             const modalSubmitInteractionHandler =
                 MODAL_SUBMIT_INTERACTION_HANDLERS[interaction.data.custom_id];
 
@@ -306,7 +321,7 @@ export default async function interactionCreateHandler(
         logger.error(
             `${getDebugLogHeader(
                 messageContext,
-            )} | Error while invoking command (${interactionName}) | ${debugId} |  Data: ${JSON.stringify(interaction.data)} | ${extractErrorString(err)}.`,
+            )} | Error while invoking command (${interactionName})| id = ${interaction.id} | ${debugId} |  Data: ${JSON.stringify(interaction.data)} | ${extractErrorString(err)}.`,
         );
 
         if (interaction instanceof CommandInteraction) {
@@ -329,6 +344,8 @@ export default async function interactionCreateHandler(
     } finally {
         const hrend = process.hrtime(hrstart);
         const executionTime = hrend[0] * 1000 + hrend[1] / 1000000;
-        logger.info(`${interactionName} took ${executionTime}ms`);
+        logger.info(
+            `${interactionName} (${interaction.id}) took ${executionTime}ms`,
+        );
     }
 }
