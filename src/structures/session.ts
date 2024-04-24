@@ -23,6 +23,7 @@ import {
 } from "../helpers/discord_utils";
 import {
     delay,
+    extractErrorString,
     friendlyFormattedNumber,
     getMention,
     truncatedString,
@@ -788,7 +789,22 @@ export default abstract class Session {
                     : undefined,
             });
         } catch (e) {
-            logger.error(`Erroring playing on voice connection. err = ${e}`);
+            if (e instanceof Error) {
+                if (e.message.includes("Not ready yet")) {
+                    logger.warn(
+                        `Erroring playing on voice connection due to non-ready connection. err = ${e.message}`,
+                    );
+                } else {
+                    logger.error(
+                        `Erroring playing on voice connection. err = ${extractErrorString(e)}`,
+                    );
+                }
+            } else {
+                logger.error(
+                    `Erroring playing on voice connection (unknown error type). err = ${e}`,
+                );
+            }
+
             await this.errorRestartRound();
             return false;
         }
