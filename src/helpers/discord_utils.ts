@@ -26,6 +26,7 @@ import {
     chunkArray,
     containsHangul,
     delay,
+    extractErrorString,
     friendlyFormattedNumber,
     getOrdinalNum,
     italicize,
@@ -159,7 +160,7 @@ export async function fetchUser(
     if (!user) {
         user = await ipc.fetchUser(userID);
         if (user) {
-            logger.debug(`User not in cache, fetched via IPC: ${userID}`);
+            logger.info(`User not in cache, fetched via IPC: ${userID}`);
         }
     }
 
@@ -167,7 +168,7 @@ export async function fetchUser(
     if (!user) {
         try {
             user = await client.getRESTUser(userID);
-            logger.debug(`User not in cache, fetched via REST: ${userID}`);
+            logger.info(`User not in cache, fetched via REST: ${userID}`);
         } catch (err) {
             if (!silentErrors)
                 logger.warn(
@@ -198,7 +199,7 @@ export async function fetchChannel(
 
     // fetch via IPC from other clusters
     if (!channel) {
-        logger.debug(
+        logger.info(
             `Text channel not in cache, attempting to fetch via IPC: ${textChannelID}`,
         );
         channel = await ipc.fetchChannel(textChannelID);
@@ -211,7 +212,7 @@ export async function fetchChannel(
                 textChannelID,
             )) as Eris.TextChannel;
 
-            logger.debug(
+            logger.info(
                 `Text channel not in cache, fetched via REST: ${textChannelID}`,
             );
         } catch (err) {
@@ -1662,10 +1663,7 @@ export function checkBotIsAlone(guildID: string): boolean {
 
 /** @returns the debug TextChannel */
 export function getDebugChannel(): Promise<Eris.TextChannel | null> {
-    if (!process.env.DEBUG_SERVER_ID || !process.env.DEBUG_TEXT_CHANNEL_ID)
-        return Promise.resolve(null);
-    const debugGuild = State.client.guilds.get(process.env.DEBUG_SERVER_ID);
-    if (!debugGuild) return Promise.resolve(null);
+    if (!process.env.DEBUG_TEXT_CHANNEL_ID) return Promise.resolve(null);
     return fetchChannel(process.env.DEBUG_TEXT_CHANNEL_ID);
 }
 
@@ -1859,7 +1857,7 @@ function interactionRejectionHandler(
         logger.error(
             `${getDebugLogHeader(
                 interaction,
-            )} | Unknown Discord error acknowledging interaction. code = ${err.code}. name = ${err.name} message = ${err.message}. stack = ${err.stack}`,
+            )} | Unknown Discord error acknowledging interaction. code = ${err.code}. ${extractErrorString(err)}`,
         );
     } else if (err instanceof Error) {
         if (
@@ -1870,7 +1868,7 @@ function interactionRejectionHandler(
             logger.warn(
                 `${getDebugLogHeader(
                     interaction,
-                )} | Request timeout while acknowledging interaction. name: ${err.name}. message: ${err.message}. stack: ${err.stack}`,
+                )} | Request timeout while acknowledging interaction. ${extractErrorString(err)}`,
             );
             return;
         }
@@ -1878,7 +1876,7 @@ function interactionRejectionHandler(
         logger.error(
             `${getDebugLogHeader(
                 interaction,
-            )} | Unknown generic error acknowledging interaction. name: ${err.name}. message: ${err.message}. stack: ${err.stack}`,
+            )} | Unknown generic error acknowledging interaction. ${extractErrorString(err)}`,
         );
     } else {
         let details = "";

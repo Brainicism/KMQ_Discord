@@ -235,7 +235,7 @@ export default class BotWorker extends BaseClusterWorker {
 
     // eslint-disable-next-line class-methods-use-this
     shutdown = async (done: () => void): Promise<void> => {
-        logger.debug(`${this.logHeader()} | SHUTDOWN received, cleaning up...`);
+        logger.info(`${this.logHeader()} | SHUTDOWN received, cleaning up...`);
 
         const endSessionPromises = Object.keys(State.gameSessions).map(
             async (guildID) => {
@@ -244,7 +244,7 @@ export default class BotWorker extends BaseClusterWorker {
                     return;
                 }
 
-                logger.debug(
+                logger.info(
                     `${this.logHeader()} |  gid: ${guildID} | Forcing session end`,
                 );
                 await session.endSession("KMQ shutting down", true);

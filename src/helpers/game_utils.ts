@@ -1,5 +1,5 @@
 import { IPCLogger } from "../logger";
-import { containsHangul, md5Hash } from "./utils";
+import { containsHangul, extractErrorString, md5Hash } from "./utils";
 import { sql } from "kysely";
 import AnswerType from "../enums/option_types/answer_type";
 import GameRound from "../structures/game_round";
@@ -41,7 +41,7 @@ export async function ensureVoiceConnection(
 
     connection.on("error", (err) => {
         logger.warn(
-            `Error receiving from voice connection WS. name = ${err.name} msg = ${err.message}. stack = ${err.stack}`,
+            `Error receiving from voice connection WS. ${extractErrorString(err)}`,
         );
     });
 

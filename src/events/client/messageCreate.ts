@@ -1,6 +1,8 @@
 import * as uuid from "uuid";
 import { IPCLogger } from "../../logger";
+import { extractErrorString } from "../../helpers/utils";
 import {
+    fetchChannel,
     getAllClickableSlashCommands,
     getDebugLogHeader,
     sendErrorMessage,
@@ -9,6 +11,7 @@ import {
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
+import KmqConfiguration from "../../kmq_configuration";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
@@ -63,7 +66,27 @@ export default async function messageCreateHandler(
         return;
     }
 
-    if (!isGuildMessage(message)) return;
+    if (!isGuildMessage(message)) {
+        // if channel is unexpectedly partial
+        if ((message.channel.type as number | undefined) === undefined) {
+            logger.warn(
+                `Unexpectedly received partial channel: ${message.channel.id}`,
+            );
+
+            if (KmqConfiguration.Instance.partialChannelFetchingEnabled()) {
+                // fetch channel for next time
+                const fetchedChannel = await fetchChannel(message.channel.id);
+                if (!fetchedChannel) {
+                    logger.warn(
+                        `Failed to fetch partial channel: ${message.channel.id}`,
+                    );
+                }
+            }
+        }
+
+        return;
+    }
+
     if (State.client.unavailableGuilds.has(message.guildID)) {
         logger.warn(`Server was unavailable. id = ${message.guildID}`);
         return;
@@ -140,6 +163,12 @@ export default async function messageCreateHandler(
             return;
         }
 
+        logger.info(
+            `${getDebugLogHeader(message)} | Invoked command '${
+                parsedMessage.action
+            }' (${message.id}).`,
+        );
+
         if (
             message.author.id !== process.env.END_TO_END_TEST_BOT_CLIENT &&
             !State.rateLimiter.check(message.author.id)
@@ -196,12 +225,6 @@ export default async function messageCreateHandler(
                 }
             }
 
-            logger.info(
-                `${getDebugLogHeader(message)} | Invoked command '${
-                    parsedMessage.action
-                }'.`,
-            );
-
             try {
                 await invokedCommand.call({
                     channel: textChannel,
@@ -217,9 +240,7 @@ export default async function messageCreateHandler(
                             messageContext,
                         )} | Error while invoking command (${
                             parsedMessage.action
-                        }) | ${debugId} | Data: "${parsedMessage.argument}" | Exception Name: ${err.name}. Reason: ${
-                            err.message
-                        }. Trace: ${err.stack}}`,
+                        }) | id: ${message.id} | ${debugId} | Data: "${parsedMessage.argument}" | ${extractErrorString(err)}`,
                     );
                 } else {
                     logger.error(
@@ -227,7 +248,7 @@ export default async function messageCreateHandler(
                             messageContext,
                         )} | Error while invoking command (${
                             parsedMessage.action
-                        }) | ${debugId} | Data: "${parsedMessage.argument}" | err = ${err}`,
+                        }) | id: ${message.id} | ${debugId} | Data: "${parsedMessage.argument}" | err = ${err}`,
                     );
                 }
 
@@ -255,7 +276,9 @@ export default async function messageCreateHandler(
 
         const hrend = process.hrtime(hrstart);
         const executionTime = hrend[0] * 1000 + hrend[1] / 1000000;
-        logger.info(`${parsedMessage.action} took ${executionTime}ms`);
+        logger.info(
+            `${parsedMessage.action} (${message.id}) took ${executionTime}ms`,
+        );
     } else if (
         session?.isGameSession() &&
         !session.isHiddenMode() &&

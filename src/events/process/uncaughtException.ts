@@ -1,4 +1,5 @@
 import { IPCLogger } from "../../logger";
+import { extractErrorString } from "../../helpers/utils";
 import EnvType from "../../enums/env_type";
 import State from "../../state";
 
@@ -9,9 +10,7 @@ const logger = new IPCLogger("uncaughtException");
  * @param err - Error object
  */
 export default function uncaughtExceptionHandler(err: Error): void {
-    logger.error(
-        `Cluster Uncaught Exception | Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}}`,
-    );
+    logger.error(`Cluster Uncaught Exception | ${extractErrorString(err)}`);
     if (process.env.NODE_ENV === EnvType.CI) {
         State.ipc.sendToAdmiral("abort");
     }
