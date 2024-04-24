@@ -163,6 +163,12 @@ export default async function messageCreateHandler(
             return;
         }
 
+        logger.info(
+            `${getDebugLogHeader(message)} | Invoked command '${
+                parsedMessage.action
+            }' (${message.id}).`,
+        );
+
         if (
             message.author.id !== process.env.END_TO_END_TEST_BOT_CLIENT &&
             !State.rateLimiter.check(message.author.id)
@@ -219,12 +225,6 @@ export default async function messageCreateHandler(
                 }
             }
 
-            logger.info(
-                `${getDebugLogHeader(message)} | Invoked command '${
-                    parsedMessage.action
-                }'.`,
-            );
-
             try {
                 await invokedCommand.call({
                     channel: textChannel,
@@ -240,7 +240,7 @@ export default async function messageCreateHandler(
                             messageContext,
                         )} | Error while invoking command (${
                             parsedMessage.action
-                        }) | ${debugId} | Data: "${parsedMessage.argument}" | ${extractErrorString(err)}`,
+                        }) | id: ${message.id} | ${debugId} | Data: "${parsedMessage.argument}" | ${extractErrorString(err)}`,
                     );
                 } else {
                     logger.error(
@@ -248,7 +248,7 @@ export default async function messageCreateHandler(
                             messageContext,
                         )} | Error while invoking command (${
                             parsedMessage.action
-                        }) | ${debugId} | Data: "${parsedMessage.argument}" | err = ${err}`,
+                        }) | id: ${message.id} | ${debugId} | Data: "${parsedMessage.argument}" | err = ${err}`,
                     );
                 }
 
@@ -276,7 +276,9 @@ export default async function messageCreateHandler(
 
         const hrend = process.hrtime(hrstart);
         const executionTime = hrend[0] * 1000 + hrend[1] / 1000000;
-        logger.info(`${parsedMessage.action} took ${executionTime}ms`);
+        logger.info(
+            `${parsedMessage.action} (${message.id}) took ${executionTime}ms`,
+        );
     } else if (
         session?.isGameSession() &&
         !session.isHiddenMode() &&
