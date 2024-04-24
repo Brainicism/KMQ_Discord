@@ -99,6 +99,23 @@
                 "title": "Ignorado Iniciado"
             }
         },
+        "bookmarks": {
+            "help": {
+                "artistName": "Filtre os favoritos pelo nome do artista.",
+                "description": "Busque suas músicas favoritadas.",
+                "example": {
+                    "artist": "Filtre os favoritos por `{{artist}}`",
+                    "song": "Filtre os favoritos que correspondem a `{{song}}`"
+                },
+                "name": "favoritos",
+                "songName": "Filtre os favoritos pelo nome da música."
+            },
+            "results": {
+                "notFoundDescription": "Nenhum favorito foi encontrado.",
+                "successDescription": "Estes são seus favoritos do KMQ:",
+                "title": "Músicas Favoritadas"
+            }
+        },
         "botlanguage": {
             "help": {
                 "name": "idioma do bot"
