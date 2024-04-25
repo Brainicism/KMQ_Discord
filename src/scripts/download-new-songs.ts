@@ -1,11 +1,11 @@
 /* eslint-disable no-await-in-loop */
 import { IPCLogger } from "../logger";
-import { exec } from "child_process";
 import {
     getAudioDurationInSeconds,
     pathExists,
     retryJob,
 } from "../helpers/utils";
+import { getAverageVolume } from "../helpers/discord_utils";
 import { getNewConnection } from "../database_context";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
@@ -55,25 +55,6 @@ async function clearPartiallyCachedSongs(): Promise<void> {
     }
 }
 
-function getAverageVolume(mp3File: string): Promise<number> {
-    return new Promise((resolve, reject) => {
-        exec(
-            `ffmpeg -i "${mp3File}" -af 'volumedetect' -f null /dev/null 2>&1 | grep mean_volume | awk -F': ' '{print $2}' | cut -d' ' -f1;`,
-            (err, stdout, stderr) => {
-                if (!stdout || stderr) {
-                    logger.error(
-                        `Error getting average volume: path = ${mp3File}, err = ${stderr}`,
-                    );
-                    reject();
-                    return;
-                }
-
-                resolve(parseFloat(stdout));
-            },
-        );
-    });
-}
-
 async function ffmpegOpusJob(id: string): Promise<void> {
     const mp3File = path.join(
         process.env.SONG_DOWNLOAD_DIR as string,
@@ -89,7 +70,7 @@ async function ffmpegOpusJob(id: string): Promise<void> {
         const oggPartWithPath = `${oggFileWithPath}.part`;
         const oggFfmpegOutputStream = fs.createWriteStream(oggPartWithPath);
 
-        const currentAverageVolume = await getAverageVolume(mp3File);
+        const currentAverageVolume = await getAverageVolume(mp3File, [], []);
         const volumeDifferential = TARGET_AVERAGE_VOLUME - currentAverageVolume;
         ffmpeg(mp3File)
             .renice(20)

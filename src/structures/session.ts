@@ -12,6 +12,7 @@ import { IPCLogger } from "../logger";
 import {
     clickableSlashCommand,
     generateEmbed,
+    getAverageVolume,
     getCurrentVoiceMembers,
     getDebugLogHeader,
     sendBookmarkedSongs,
@@ -731,6 +732,7 @@ export default abstract class Session {
         this.connection.stopPlaying();
 
         try {
+            seekLocation = 0;
             let inputArgs = ["-ss", seekLocation.toString()];
             let encoderArgs: { [arg: string]: Array<string> } = {};
             const specialType = this.guildPreference.gameOptions.specialType;
@@ -745,6 +747,16 @@ export default abstract class Session {
             }
 
             if (isClipMode) {
+                const averageVoume = await getAverageVolume(
+                    songLocation,
+                    inputArgs,
+                    Object.entries(encoderArgs).flatMap((x) => [
+                        x[0],
+                        x[1].join(","),
+                    ]),
+                );
+
+                logger.warn(`Average volume is ${averageVoume}`);
                 if (clipAction === ClipAction.END_ROUND) {
                     encoderArgs["-t"] = [
                         (
