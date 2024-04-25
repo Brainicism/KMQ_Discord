@@ -99,6 +99,23 @@
                 "title": "Mulai Diabaikan"
             }
         },
+        "bookmarks": {
+            "help": {
+                "artistName": "Saring penanda buku berdasarkan nama artis.",
+                "description": "Ambil lagu-lagu yang kamu tandai.",
+                "example": {
+                    "artist": "Saring hingga penanda buku oleh `{{artist}}`",
+                    "song": "Saring hingga penanda buku yang cocok dengan `{{song}}`"
+                },
+                "name": "penandabuku",
+                "songName": "Saring penanda buku berdasarkan nama lagu."
+            },
+            "results": {
+                "notFoundDescription": "Tidak ada penanda buku yang ditemukan.",
+                "successDescription": "Ini adalah penanda buku KMQ kamu:",
+                "title": "Lagu yang Ditandai"
+            }
+        },
         "botlanguage": {
             "help": {
                 "name": "bahasa bot"

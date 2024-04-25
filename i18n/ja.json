@@ -99,6 +99,23 @@
                 "title": "無視された開始"
             }
         },
+        "bookmarks": {
+            "help": {
+                "artistName": "アーティスト名によってブックマークをフィルターする。",
+                "description": "ブックマークされた曲を取得する。",
+                "example": {
+                    "artist": "`{{artist}}`によるブックマークに絞り込む",
+                    "song": "`{{song}}`にマッチするブックマークに絞り込む"
+                },
+                "name": "ブックマーク",
+                "songName": "曲名によってブックマークをフィルターする。"
+            },
+            "results": {
+                "notFoundDescription": "ブックマークが見つかりませんでした。",
+                "successDescription": "これらはあなたのKMQブックマークです：",
+                "title": "ブックマークされた曲"
+            }
+        },
         "botlanguage": {
             "help": {
                 "name": "ボット言語"

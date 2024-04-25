@@ -99,6 +99,23 @@
                 "title": "게임 시작 무시"
             }
         },
+        "bookmarks": {
+            "help": {
+                "artistName": "아티스트 이름으로 북마크 필터링하기.",
+                "description": "북마크한 노래 가져오기.",
+                "example": {
+                    "artist": "`{{artist}}`에 의한 북마크로 필터링하기",
+                    "song": "`{{song}}`과(와) 일치하는 북마크로 필터링하기"
+                },
+                "name": "북마크",
+                "songName": "노래 이름으로 북마크 필터링하기."
+            },
+            "results": {
+                "notFoundDescription": "북마크를 찾을 수 없습니다.",
+                "successDescription": "여기 당신의 KMQ 북마크입니다:",
+                "title": "북마크한 노래들"
+            }
+        },
         "botlanguage": {
             "help": {
                 "name": "봇 언어"
