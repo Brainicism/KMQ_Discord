@@ -29,7 +29,6 @@ import {
     truncatedString,
     underline,
 } from "../helpers/utils";
-import { ensureVoiceConnection } from "../helpers/game_utils";
 import { sql } from "kysely";
 import ClipAction from "../enums/clip_action";
 import EnvVariableManager from "../env_variable_manager";
@@ -52,6 +51,7 @@ import type ClipGameRound from "./clip_game_round";
 import type EmbedPayload from "../interfaces/embed_payload";
 import type GameSession from "./game_session";
 import type GuildPreference from "./guild_preference";
+import type KmqClient from "../kmq_client";
 import type KmqMember from "./kmq_member";
 import type ListeningSession from "./listening_session";
 import type QueriedSong from "./queried_song";
@@ -272,7 +272,7 @@ export default abstract class Session {
 
         // join voice channel and start round
         try {
-            await ensureVoiceConnection(State.client, this);
+            await this.ensureVoiceConnection(State.client);
         } catch (err) {
             await this.endSession("Unable to obtain voice connection", true);
             logger.error(
@@ -727,7 +727,7 @@ export default abstract class Session {
                 this.guildPreference.gameOptions.guessModeType
             }. clip mode = ${isClipMode}. clip action = ${clipAction}.`,
         );
-        this.connection.removeAllListeners();
+        this.connection.removeAllListeners("end");
         this.connection.stopPlaying();
 
         try {
@@ -1206,5 +1206,25 @@ export default abstract class Session {
         const aliasesText = i18n.translate(locale, "misc.inGame.aliases");
 
         return `${aliasesText}: ${aliases.join(", ")}`;
+    }
+
+    /**
+     * Joins the VoiceChannel specified by GameSession, and stores the VoiceConnection
+     * @param client - The bot instance
+     */
+    private async ensureVoiceConnection(client: KmqClient): Promise<void> {
+        if (this.connection && this.connection.ready) return;
+        const connection = await client.joinVoiceChannel(this.voiceChannelID, {
+            opusOnly: true,
+            selfDeaf: true,
+        });
+
+        connection.on("error", (err) => {
+            logger.warn(
+                `Error receiving from voice connection WS. ${extractErrorString(err)}`,
+            );
+        });
+
+        this.connection = connection;
     }
 }

@@ -1,5 +1,5 @@
 import { IPCLogger } from "../logger";
-import { containsHangul, extractErrorString, md5Hash } from "./utils";
+import { containsHangul, md5Hash } from "./utils";
 import { sql } from "kysely";
 import AnswerType from "../enums/option_types/answer_type";
 import GameRound from "../structures/game_round";
@@ -9,11 +9,9 @@ import _ from "lodash";
 import dbContext from "../database_context";
 import type { AvailableGenders } from "../enums/option_types/gender";
 import type GameSession from "../structures/game_session";
-import type KmqClient from "../kmq_client";
 import type ListeningSession from "../structures/listening_session";
 import type MatchedArtist from "../interfaces/matched_artist";
 import type QueriedSong from "../structures/queried_song";
-import type Session from "../structures/session";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 10;
 const logger = new IPCLogger("game_utils");
@@ -21,30 +19,6 @@ const logger = new IPCLogger("game_utils");
 interface GroupMatchResults {
     unmatchedGroups: Array<string>;
     matchedGroups: Array<MatchedArtist>;
-}
-
-/**
- * Joins the VoiceChannel specified by GameSession, and stores the VoiceConnection
- * @param client - The bot instance
- * @param session - The active Session
- */
-export async function ensureVoiceConnection(
-    client: KmqClient,
-    session: Session,
-): Promise<void> {
-    if (session.connection && session.connection.ready) return;
-    const connection = await client.joinVoiceChannel(session.voiceChannelID, {
-        opusOnly: true,
-        selfDeaf: true,
-    });
-
-    connection.on("error", (err) => {
-        logger.warn(
-            `Error receiving from voice connection WS. ${extractErrorString(err)}`,
-        );
-    });
-
-    session.connection = connection;
 }
 
 /** Cleans up inactive GameSessions
