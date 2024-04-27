@@ -1010,6 +1010,51 @@ export default class GuildPreference {
         }
     }
 
+    /**
+     * @returns an object containing the total number of available songs before and after limit based on the GameOptions
+     */
+    async getAvailableSongCount(): Promise<{
+        count: number | undefined;
+        countBeforeLimit: number | undefined;
+        ineligibleDueToCommonAlias: number | undefined;
+    }> {
+        try {
+            const songSelector = this.songSelector;
+
+            // only reload if song selector has never loaded yet, otherwise used cached count
+            if (songSelector.getSongs().songs.size === 0) {
+                await songSelector.reloadSongs();
+            }
+
+            const songSelectorResults = songSelector.getSongs();
+
+            if (this.isPlaylist()) {
+                return {
+                    count: songSelectorResults.songs.size,
+                    countBeforeLimit: songSelectorResults.songs.size,
+                    ineligibleDueToCommonAlias:
+                        songSelectorResults.ineligibleDueToCommonAlias,
+                };
+            }
+
+            return {
+                count: songSelectorResults.songs.size,
+                countBeforeLimit: songSelectorResults.countBeforeLimit,
+                ineligibleDueToCommonAlias:
+                    songSelectorResults.ineligibleDueToCommonAlias,
+            };
+        } catch (e) {
+            logger.error(
+                `gid: ${this.guildID} | Error retrieving song count ${e.stack}`,
+            );
+            return {
+                count: undefined,
+                countBeforeLimit: undefined,
+                ineligibleDueToCommonAlias: undefined,
+            };
+        }
+    }
+
     /** Resets all options to the default value */
     async resetToDefault(): Promise<Array<GameOption>> {
         const oldOptions = this.gameOptions;

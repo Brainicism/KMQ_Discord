@@ -1,7 +1,6 @@
 import * as discordUtils from "../../../helpers/discord_utils";
 import {
     cleanupInactiveGameSessions,
-    getAvailableSongCount,
     getMatchingGroupNames,
     getSimilarGroupNames,
 } from "../../../helpers/game_utils";
@@ -455,7 +454,7 @@ describe("game utils", () => {
             it("should return the expected song count", async () => {
                 const limit = 50;
                 await guildPreference.setLimit(0, limit);
-                const songCount = await getAvailableSongCount(guildPreference);
+                const songCount = await guildPreference.getAvailableSongCount();
 
                 assert(songCount.count);
                 assert(songCount.countBeforeLimit);
