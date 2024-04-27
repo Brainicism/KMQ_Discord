@@ -12,6 +12,7 @@ import { IPCLogger } from "../logger";
 import {
     clickableSlashCommand,
     generateEmbed,
+    getAverageVolume,
     getCurrentVoiceMembers,
     getDebugLogHeader,
     sendBookmarkedSongs,
@@ -646,7 +647,6 @@ export default abstract class Session {
         }
 
         let songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${round.song.youtubeLink}.ogg`;
-        let seekLocation = 0;
 
         const seekType = this.isListeningSession()
             ? SeekType.BEGINNING
@@ -670,35 +670,13 @@ export default abstract class Session {
             songDuration = 60;
         }
 
-        switch (seekType) {
-            case SeekType.BEGINNING:
-                seekLocation = 0;
-                break;
-            case SeekType.MIDDLE:
-                // Play from [0.4, 0.6]
-                seekLocation = songDuration * (0.4 + 0.2 * Math.random());
-                break;
-            case SeekType.RANDOM:
-            default:
-                // Play from [0, 0.6]
-                seekLocation = songDuration * (0.6 * Math.random());
-                break;
-        }
-
         const isClipMode = this.isGameSession() && this.isClipMode();
-        if (isClipMode) {
-            const clipGameRound = round as ClipGameRound;
-            if (clipAction && clipAction !== ClipAction.NEW_CLIP) {
-                // Set to the previous play's seek location if replaying
-                seekLocation = clipGameRound.seekLocation!;
-            } else {
-                // We enter here when the round is first started in clip mode
-                // Ignore seek above and play from [0.2, 0.8]
-                seekLocation = songDuration * (0.2 + 0.6 * Math.random());
-            }
-
-            clipGameRound.seekLocation = seekLocation;
-        }
+        let seekLocation = round.prepareSeekLocation(
+            seekType,
+            songDuration,
+            isGodMode,
+            clipAction,
+        );
 
         if (isGodMode) {
             /*
@@ -715,7 +693,6 @@ export default abstract class Session {
             */
             songLocation = `${process.env.SONG_DOWNLOAD_DIR}/9bZkp7q19f0.ogg`;
             songDuration = 252;
-            seekLocation = 70;
         }
 
         const stream = fs.createReadStream(songLocation);
@@ -752,7 +729,7 @@ export default abstract class Session {
                             this.clipDurationLength!
                         ).toString(),
                     ];
-                } else {
+                } else if (clipAction === ClipAction.REPLAY) {
                     encoderArgs["-t"] = [
                         (
                             this.clipDurationLength! +
@@ -760,14 +737,56 @@ export default abstract class Session {
                         ).toString(),
                     ];
 
-                    if (encoderArgs["-af"]) {
-                        encoderArgs["-af"].push(
-                            `adelay=delays=${CLIP_PADDING_BEGINNING_MS}ms:all=1`,
+                    encoderArgs["-af"] = (encoderArgs["-af"] || []).concat([
+                        `adelay=delays=${CLIP_PADDING_BEGINNING_MS}ms:all=1`,
+                    ]);
+                } else {
+                    encoderArgs["-af"] = (encoderArgs["-af"] || []).concat([
+                        `adelay=delays=${CLIP_PADDING_BEGINNING_MS}ms:all=1`,
+                    ]);
+
+                    for (let i = 0; i < 10; i++) {
+                        seekLocation = round.prepareSeekLocation(
+                            seekType,
+                            songDuration,
+                            isGodMode,
+                            clipAction,
                         );
-                    } else {
-                        encoderArgs["-af"] = [
-                            `adelay=delays=${CLIP_PADDING_BEGINNING_MS}ms:all=1`,
+                        inputArgs = ["-ss", seekLocation.toString()];
+                        if (specialType) {
+                            const ffmpegArgs = specialFfmpegArgs[specialType](
+                                seekLocation,
+                                songDuration,
+                            );
+
+                            inputArgs = ffmpegArgs.inputArgs;
+                            encoderArgs = ffmpegArgs.encoderArgs;
+                        }
+
+                        encoderArgs["-t"] = [
+                            (
+                                this.clipDurationLength! +
+                                CLIP_PADDING_BEGINNING_MS / 1000
+                            ).toString(),
                         ];
+
+                        // eslint-disable-next-line no-await-in-loop
+                        const averageVolume = await getAverageVolume(
+                            songLocation,
+                            inputArgs,
+                            Object.entries(encoderArgs).flatMap((x) => [
+                                x[0],
+                                x[1].join(","),
+                            ]),
+                        );
+
+                        if (averageVolume > -50) {
+                            break;
+                        } else {
+                            logger.info(
+                                `${getDebugLogHeader(messageContext)} | ${this.getDebugSongDetails(round)} | Average volume was ${averageVolume}, i = ${i}, retrying...`,
+                            );
+                        }
                     }
                 }
             }

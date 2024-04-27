@@ -37,6 +37,7 @@ import {
     truncatedString,
     underline,
 } from "./utils";
+import { exec } from "child_process";
 import { userBonusIsActive } from "./game_utils";
 import AppCommandsAction from "../enums/app_command_action";
 import EmbedPaginator from "eris-pagination";
@@ -2624,4 +2625,34 @@ export function clickableSlashCommand(
     }
 
     return `</${commandAndSubcommand}:${State.commandToID[commandName]}>`;
+}
+
+/**
+ * Gets the clip's average volume
+ * @param audioFile - the audio file's location
+ * @param inputArgs - the input args
+ * @param encoderArgs - the encoder args
+ * @returns the average volume
+ */
+export function getAverageVolume(
+    audioFile: string,
+    inputArgs: string[],
+    encoderArgs: string[],
+): Promise<number> {
+    return new Promise((resolve, reject) => {
+        exec(
+            `ffmpeg -i "${audioFile}" ${inputArgs.join(" ")} ${encoderArgs.join(" ")} -af 'volumedetect' -f null /dev/null 2>&1 | grep mean_volume | awk -F': ' '{print $2}' | cut -d' ' -f1;`,
+            (err, stdout, stderr) => {
+                if (!stdout || stderr) {
+                    logger.error(
+                        `Error getting average volume: path = ${audioFile}, err = ${stderr}`,
+                    );
+                    reject();
+                    return;
+                }
+
+                resolve(parseFloat(stdout));
+            },
+        );
+    });
 }
