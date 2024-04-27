@@ -43,7 +43,7 @@ describe("exp command", () => {
             describe("insufficient song count", () => {
                 beforeEach(() => {
                     sandbox
-                        .stub(game_utils, "getAvailableSongCount")
+                        .stub(guildPreference, "getAvailableSongCount")
                         .callsFake(() =>
                             Promise.resolve({
                                 count: 1,
@@ -77,7 +77,7 @@ describe("exp command", () => {
                 beforeEach(() => {
                     // above song threshold
                     sandbox
-                        .stub(game_utils, "getAvailableSongCount")
+                        .stub(guildPreference, "getAvailableSongCount")
                         .callsFake(() =>
                             Promise.resolve({
                                 count: 200,
@@ -312,7 +312,7 @@ describe("exp command", () => {
         describe("powerhour", () => {
             beforeEach(() => {
                 sandbox
-                    .stub(game_utils, "getAvailableSongCount")
+                    .stub(guildPreference, "getAvailableSongCount")
                     .callsFake(() =>
                         Promise.resolve({
                             count: 200,
@@ -397,7 +397,7 @@ describe("exp command", () => {
                 sandbox.stub(game_utils, "isPowerHour").callsFake(() => true);
                 sandbox.stub(utils, "isWeekend").callsFake(() => true);
                 sandbox
-                    .stub(game_utils, "getAvailableSongCount")
+                    .stub(guildPreference, "getAvailableSongCount")
                     .callsFake(() =>
                         Promise.resolve({
                             count: 1,

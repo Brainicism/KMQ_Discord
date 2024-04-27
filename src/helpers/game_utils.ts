@@ -9,7 +9,6 @@ import _ from "lodash";
 import dbContext from "../database_context";
 import type { AvailableGenders } from "../enums/option_types/gender";
 import type GameSession from "../structures/game_session";
-import type GuildPreference from "../structures/guild_preference";
 import type KmqClient from "../kmq_client";
 import type ListeningSession from "../structures/listening_session";
 import type MatchedArtist from "../interfaces/matched_artist";
@@ -46,54 +45,6 @@ export async function ensureVoiceConnection(
     });
 
     session.connection = connection;
-}
-
-/**
- * @param guildPreference - The GuildPreference
- * @returns an object containing the total number of available songs before and after limit based on the GameOptions
- */
-export async function getAvailableSongCount(
-    guildPreference: GuildPreference,
-): Promise<{
-    count: number | undefined;
-    countBeforeLimit: number | undefined;
-    ineligibleDueToCommonAlias: number | undefined;
-}> {
-    try {
-        const songSelector = guildPreference.songSelector;
-
-        // only reload if song selector has never loaded yet, otherwise used cached count
-        if (songSelector.getSongs().songs.size === 0) {
-            await songSelector.reloadSongs();
-        }
-
-        const songSelectorResults = songSelector.getSongs();
-
-        if (guildPreference.isPlaylist()) {
-            return {
-                count: songSelectorResults.songs.size,
-                countBeforeLimit: songSelectorResults.songs.size,
-                ineligibleDueToCommonAlias:
-                    songSelectorResults.ineligibleDueToCommonAlias,
-            };
-        }
-
-        return {
-            count: songSelectorResults.songs.size,
-            countBeforeLimit: songSelectorResults.countBeforeLimit,
-            ineligibleDueToCommonAlias:
-                songSelectorResults.ineligibleDueToCommonAlias,
-        };
-    } catch (e) {
-        logger.error(
-            `gid: ${guildPreference.guildID} | Error retrieving song count ${e.stack}`,
-        );
-        return {
-            count: undefined,
-            countBeforeLimit: undefined,
-            ineligibleDueToCommonAlias: undefined,
-        };
-    }
 }
 
 /** Cleans up inactive GameSessions
